@@ -858,6 +858,7 @@ function OrdenesTrabajoPage() {
       </Dialog>
     </div>
   );
+  </AuthenticatedLayout>
 }
 
 export default function OrdenesTrabajoPageWithErrorBoundary() {

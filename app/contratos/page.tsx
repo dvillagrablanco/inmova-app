@@ -197,47 +197,7 @@ function ContratosPageContent() {
     setSearchTerm('');
   };
 
-  if (status === 'loading' || isLoading) {
-    return (
-      <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto space-y-6">
-              {/* Skeleton for breadcrumbs */}
-              <div className="flex items-center gap-4">
-                <Skeleton className="h-10 w-40" />
-                <Skeleton className="h-6 w-48" />
-              </div>
-
-              {/* Skeleton for header */}
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <Skeleton className="h-8 w-48" />
-                  <Skeleton className="h-4 w-64" />
-                </div>
-                <Skeleton className="h-10 w-40" />
-              </div>
-
-              {/* Skeleton for search bar */}
-              <SkeletonCard showHeader={false} />
-
-              {/* Skeleton for stats */}
-              <div className="grid gap-4 md:grid-cols-3">
-                <SkeletonCard showHeader={true} lines={1} />
-                <SkeletonCard showHeader={true} lines={1} />
-                <SkeletonCard showHeader={true} lines={1} />
-              </div>
-
-              {/* Skeleton for contracts list */}
-              <SkeletonList items={3} />
-
-              {/* Loading message */}
-              <LoadingState message="Cargando contratos..." size="sm" />
-            </div>
-          </AuthenticatedLayout>
-    );
-  }
-
-  if (!session) return null;
-
+  // Funciones auxiliares y cálculos
   const getEstadoBadge = (estado: string) => {
     const badges: Record<string, { variant: any; label: string; icon: any }> = {
       activo: { variant: 'default', label: 'Activo', icon: Clock },
@@ -271,11 +231,52 @@ function ContratosPageContent() {
     return diffDays;
   };
 
+  if (status === 'loading' || isLoading) {
+    return (
+      <AuthenticatedLayout>
+          <div className="max-w-7xl mx-auto space-y-6">
+              {/* Skeleton for breadcrumbs */}
+          <div className="flex items-center gap-4">
+                <Skeleton className="h-10 w-40" />
+                <Skeleton className="h-6 w-48" />
+              </div>
+
+              {/* Skeleton for header */}
+          <div className="flex items-center justify-between">
+          <div className="space-y-2">
+                  <Skeleton className="h-8 w-48" />
+                  <Skeleton className="h-4 w-64" />
+                </div>
+                <Skeleton className="h-10 w-40" />
+              </div>
+
+              {/* Skeleton for search bar */}
+              <SkeletonCard showHeader={false} />
+
+              {/* Skeleton for stats */}
+          <div className="grid gap-4 md:grid-cols-3">
+                <SkeletonCard showHeader={true} lines={1} />
+                <SkeletonCard showHeader={true} lines={1} />
+                <SkeletonCard showHeader={true} lines={1} />
+              </div>
+
+              {/* Skeleton for contracts list */}
+              <SkeletonList items={3} />
+
+              {/* Loading message */}
+              <LoadingState message="Cargando contratos..." size="sm" />
+            </div>
+          </AuthenticatedLayout>
+    );
+  }
+
+  if (!session) return null;
+
   return (
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4">
               <Button
                 variant="outline"
                 size="sm"
@@ -301,9 +302,9 @@ function ContratosPageContent() {
             </div>
 
             {/* Header Section */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3 min-w-0">
-                <div>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3 min-w-0">
+          <div>
                   <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Contratos</h1>
                   <p className="text-sm sm:text-base text-muted-foreground">
                     Gestiona los contratos de arrendamiento
@@ -341,7 +342,7 @@ function ContratosPageContent() {
             {error && (
               <Card className="border-destructive">
                 <CardContent className="pt-6">
-                  <div className="flex items-center gap-2 text-destructive">
+          <div className="flex items-center gap-2 text-destructive">
                     <AlertTriangle className="h-5 w-5" />
                     <p className="font-medium">{error}</p>
                   </div>
@@ -369,14 +370,14 @@ function ContratosPageContent() {
             />
 
             {/* Stats Summary */}
-            <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-3">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Contratos Activos</CardTitle>
                   <FileText className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{activosCount}</div>
+          <div className="text-2xl font-bold text-green-600">{activosCount}</div>
                   <p className="text-xs text-muted-foreground">
                     {contracts.length > 0 ? Math.round((activosCount / contracts.length) * 100) : 0}
                     % del total
@@ -389,7 +390,7 @@ function ContratosPageContent() {
                   <Euro className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">€{totalIngresos.toLocaleString()}</div>
+          <div className="text-2xl font-bold">€{totalIngresos.toLocaleString()}</div>
                   <p className="text-xs text-muted-foreground">De contratos activos</p>
                 </CardContent>
               </Card>
@@ -399,14 +400,14 @@ function ContratosPageContent() {
                   <FileText className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{finalizadosCount}</div>
+          <div className="text-2xl font-bold">{finalizadosCount}</div>
                   <p className="text-xs text-muted-foreground">Historial</p>
                 </CardContent>
               </Card>
             </div>
 
             {/* Contracts List */}
-            <div className="grid gap-4">
+          <div className="grid gap-4">
               {filteredContracts.map((contract) => {
                 const estadoBadge = getEstadoBadge(contract.estado);
                 const tipoBadge = getTipoBadge(contract.tipo);
@@ -417,12 +418,12 @@ function ContratosPageContent() {
                 return (
                   <Card key={contract.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="pt-6">
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                        <div className="flex-1 space-y-4 min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div className="flex-1 space-y-4 min-w-0">
                           {/* Header */}
-                          <div className="flex items-start justify-between">
-                            <div className="space-y-2 min-w-0 flex-1">
-                              <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-start justify-between">
+          <div className="space-y-2 min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
                                 <h3 className="text-base sm:text-lg font-semibold break-words">
                                   {contract.tenant.nombreCompleto}
                                 </h3>
@@ -435,7 +436,7 @@ function ContratosPageContent() {
                                 </Badge>
                                 <Badge variant={tipoBadge.variant}>{tipoBadge.label}</Badge>
                               </div>
-                              <div className="flex items-start gap-2 text-sm bg-muted/50 p-2 rounded-md">
+          <div className="flex items-start gap-2 text-sm bg-muted/50 p-2 rounded-md">
                                 <Home className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
                                 <span className="break-words">
                                   {contract.unit.building.nombre} - Unidad {contract.unit.numero}
@@ -445,8 +446,8 @@ function ContratosPageContent() {
                           </div>
 
                           {/* Detalles */}
-                          <div className="grid gap-4 sm:grid-cols-3">
-                            <div className="space-y-1">
+          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="space-y-1">
                               <p className="text-xs text-muted-foreground">Fecha Inicio</p>
                               <p className="text-sm font-medium">
                                 {format(new Date(contract.fechaInicio), 'dd MMM yyyy', {
@@ -454,9 +455,9 @@ function ContratosPageContent() {
                                 })}
                               </p>
                             </div>
-                            <div className="space-y-1">
+          <div className="space-y-1">
                               <p className="text-xs text-muted-foreground">Fecha Fin</p>
-                              <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
                                 <p className="text-sm font-medium">
                                   {format(new Date(contract.fechaFin), 'dd MMM yyyy', {
                                     locale: es,
@@ -469,7 +470,7 @@ function ContratosPageContent() {
                                 )}
                               </div>
                             </div>
-                            <div className="space-y-1">
+          <div className="space-y-1">
                               <p className="text-xs text-muted-foreground">Monto Mensual</p>
                               <p className="text-base sm:text-lg font-bold text-green-600">
                                 €{contract.rentaMensual.toLocaleString()}
@@ -479,7 +480,7 @@ function ContratosPageContent() {
 
                           {/* Alertas */}
                           {isExpiringSoon && contract.estado.toLowerCase() === 'activo' && (
-                            <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
                               <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
                               <p className="text-xs sm:text-sm text-red-600 font-medium">
                                 Vence en {daysUntilExpiry} días - Renovar pronto
@@ -577,6 +578,7 @@ function ContratosPageContent() {
         }
       />
     </div>
+  </AuthenticatedLayout>
   );
 }
 

@@ -409,6 +409,12 @@ function MantenimientoPage() {
       costoEstimado: '',
       notas: '',
     });
+                      const daysUntil = getDaysUntil(schedule.proximaFecha);
+                      const priorityColor = getPriorityColor(daysUntil);
+                      const location = schedule.unit
+                        ? `${schedule.unit.building?.nombre || ''} - ${schedule.unit.numero}`
+                        : schedule.building?.nombre || 'General';
+
     setEditingId(null);
   };
 
@@ -441,7 +447,7 @@ function MantenimientoPage() {
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4">
               <Button
                 variant="outline"
                 size="sm"
@@ -467,7 +473,7 @@ function MantenimientoPage() {
             </div>
 
             {/* Header Section */}
-            <div>
+          <div>
               <h1 className="text-3xl font-bold tracking-tight">Mantenimiento</h1>
               <p className="text-muted-foreground">
                 Gestiona solicitudes correctivas, mantenimiento preventivo y calendario unificado
@@ -494,7 +500,7 @@ function MantenimientoPage() {
               {/* TAB 1: SOLICITUDES */}
               <TabsContent value="solicitudes" className="space-y-6 mt-6">
                 {/* Estadísticas */}
-                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                       <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -503,7 +509,7 @@ function MantenimientoPage() {
                       <Wrench className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{statsRequests.total}</div>
+          <div className="text-2xl font-bold">{statsRequests.total}</div>
                     </CardContent>
                   </Card>
 
@@ -515,7 +521,7 @@ function MantenimientoPage() {
                       <Clock className="h-4 w-4 text-gray-500" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{statsRequests.pendientes}</div>
+          <div className="text-2xl font-bold">{statsRequests.pendientes}</div>
                     </CardContent>
                   </Card>
 
@@ -527,7 +533,7 @@ function MantenimientoPage() {
                       <Hammer className="h-4 w-4 text-blue-500" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{statsRequests.enProgreso}</div>
+          <div className="text-2xl font-bold">{statsRequests.enProgreso}</div>
                     </CardContent>
                   </Card>
 
@@ -539,7 +545,7 @@ function MantenimientoPage() {
                       <CheckCircle className="h-4 w-4 text-green-500" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{statsRequests.completados}</div>
+          <div className="text-2xl font-bold">{statsRequests.completados}</div>
                     </CardContent>
                   </Card>
 
@@ -551,7 +557,7 @@ function MantenimientoPage() {
                       <AlertTriangle className="h-4 w-4 text-red-500" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{statsRequests.alta}</div>
+          <div className="text-2xl font-bold">{statsRequests.alta}</div>
                     </CardContent>
                   </Card>
                 </div>
@@ -568,8 +574,8 @@ function MantenimientoPage() {
                     )}
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <div className="relative flex-1">
+          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                           placeholder="Buscar por título, descripción, edificio o unidad..."
@@ -649,7 +655,7 @@ function MantenimientoPage() {
                 </Card>
 
                 {/* Lista de Solicitudes */}
-                <div className="space-y-4">
+          <div className="space-y-4">
                   {filteredRequests.length === 0 ? (
                     <EmptyState
                       icon={<Wrench className="h-12 w-12" />}
@@ -683,10 +689,10 @@ function MantenimientoPage() {
                         className="hover:shadow-lg transition-all duration-200 cursor-pointer"
                       >
                         <CardContent className="p-4 sm:p-6">
-                          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
                             {/* Icono de Prioridad */}
-                            <div className="flex-shrink-0">
-                              <div
+          <div className="flex-shrink-0">
+          <div
                                 className={`p-3 rounded-lg ${
                                   request.prioridad === 'alta'
                                     ? 'bg-red-100'
@@ -704,13 +710,13 @@ function MantenimientoPage() {
                             </div>
 
                             {/* Información Principal */}
-                            <div className="flex-1 space-y-3">
+          <div className="flex-1 space-y-3">
                               {/* Título y Badges */}
-                              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                                 <h3 className="text-lg font-semibold break-words flex-1">
                                   {request.titulo}
                                 </h3>
-                                <div className="flex gap-2">
+          <div className="flex gap-2">
                                   <Badge className={getPrioridadBadgeVariant(request.prioridad)}>
                                     {getPrioridadLabel(request.prioridad)}
                                   </Badge>
@@ -726,8 +732,8 @@ function MantenimientoPage() {
                               </p>
 
                               {/* Unidad */}
-                              <div className="bg-muted/50 rounded-lg p-3">
-                                <div className="flex items-center gap-2 text-sm">
+          <div className="bg-muted/50 rounded-lg p-3">
+          <div className="flex items-center gap-2 text-sm">
                                   <Home className="h-4 w-4 flex-shrink-0 text-primary" />
                                   <span className="font-medium">
                                     {request.unit.building.nombre} - Unidad {request.unit.numero}
@@ -736,22 +742,22 @@ function MantenimientoPage() {
                               </div>
 
                               {/* Información Adicional */}
-                              <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="grid grid-cols-2 gap-3 text-sm">
                                 {request.proveedorAsignado && (
-                                  <div className="space-y-1">
-                                    <div className="text-muted-foreground">Proveedor</div>
-                                    <div className="font-medium truncate">
+          <div className="space-y-1">
+          <div className="text-muted-foreground">Proveedor</div>
+          <div className="font-medium truncate">
                                       {request.proveedorAsignado}
                                     </div>
                                   </div>
                                 )}
                                 {request.costoEstimado && (
-                                  <div className="space-y-1">
-                                    <div className="text-muted-foreground flex items-center gap-1">
+          <div className="space-y-1">
+          <div className="text-muted-foreground flex items-center gap-1">
                                       <Euro className="h-3 w-3" />
                                       Costo Estimado
                                     </div>
-                                    <div className="font-bold text-lg">
+          <div className="font-bold text-lg">
                                       €{request.costoEstimado.toLocaleString('es-ES')}
                                     </div>
                                   </div>
@@ -760,7 +766,7 @@ function MantenimientoPage() {
                             </div>
 
                             {/* Acciones */}
-                            <div className="flex sm:flex-col items-center gap-2 self-start">
+          <div className="flex sm:flex-col items-center gap-2 self-start">
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -797,7 +803,7 @@ function MantenimientoPage() {
               {/* TAB 2: PREVENTIVO */}
               <TabsContent value="preventivo" className="space-y-6 mt-6">
                 {/* Estadísticas Preventivo */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                       <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -806,7 +812,7 @@ function MantenimientoPage() {
                       <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{statsSchedules.total}</div>
+          <div className="text-2xl font-bold">{statsSchedules.total}</div>
                     </CardContent>
                   </Card>
 
@@ -818,7 +824,7 @@ function MantenimientoPage() {
                       <CheckCircle className="h-4 w-4 text-green-500" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{statsSchedules.activos}</div>
+          <div className="text-2xl font-bold">{statsSchedules.activos}</div>
                     </CardContent>
                   </Card>
 
@@ -830,7 +836,7 @@ function MantenimientoPage() {
                       <Clock className="h-4 w-4 text-yellow-500" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{statsSchedules.proximos30}</div>
+          <div className="text-2xl font-bold">{statsSchedules.proximos30}</div>
                     </CardContent>
                   </Card>
 
@@ -842,7 +848,7 @@ function MantenimientoPage() {
                       <AlertCircle className="h-4 w-4 text-red-500" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{statsSchedules.vencidos}</div>
+          <div className="text-2xl font-bold">{statsSchedules.vencidos}</div>
                     </CardContent>
                   </Card>
                 </div>
@@ -865,7 +871,7 @@ function MantenimientoPage() {
                     )}
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
                       <Select value={filterActivo} onValueChange={setFilterActivo}>
                         <SelectTrigger className="w-full sm:w-[180px]">
                           <SelectValue placeholder="Estado" />
@@ -890,7 +896,7 @@ function MantenimientoPage() {
                 </Card>
 
                 {/* Lista de Programaciones */}
-                <div className="space-y-4">
+          <div className="space-y-4">
                   {filteredSchedules.length === 0 ? (
                     <EmptyState
                       icon={<CalendarIcon className="h-12 w-12" />}
@@ -911,12 +917,6 @@ function MantenimientoPage() {
                     />
                   ) : (
                     filteredSchedules.map((schedule) => {
-                      const daysUntil = getDaysUntil(schedule.proximaFecha);
-                      const priorityColor = getPriorityColor(daysUntil);
-                      const location = schedule.unit
-                        ? `${schedule.unit.building?.nombre || ''} - ${schedule.unit.numero}`
-                        : schedule.building?.nombre || 'General';
-
                       return (
                         <Card
                           key={schedule.id}
@@ -925,9 +925,9 @@ function MantenimientoPage() {
                           }`}
                         >
                           <CardContent className="p-6">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-start justify-between">
+          <div className="flex-1">
+          <div className="flex items-center gap-3 mb-2">
                                   <h3 className="text-lg font-bold text-gray-900">
                                     {schedule.titulo}
                                   </h3>
@@ -949,31 +949,31 @@ function MantenimientoPage() {
 
                                 <p className="text-gray-600 mb-3">{schedule.descripcion}</p>
 
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                  <div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div>
                                     <span className="text-gray-500">Ubicación:</span>
                                     <p className="font-medium text-gray-900">{location}</p>
                                   </div>
-                                  <div>
+          <div>
                                     <span className="text-gray-500">Tipo:</span>
                                     <p className="font-medium text-gray-900 capitalize">
                                       {schedule.tipo}
                                     </p>
                                   </div>
-                                  <div>
+          <div>
                                     <span className="text-gray-500">Frecuencia:</span>
                                     <p className="font-medium text-gray-900 capitalize">
                                       {schedule.frecuencia}
                                     </p>
                                   </div>
-                                  <div>
+          <div>
                                     <span className="text-gray-500">Próxima Fecha:</span>
                                     <p className="font-medium text-gray-900">
                                       {new Date(schedule.proximaFecha).toLocaleDateString('es-ES')}
                                     </p>
                                   </div>
                                   {schedule.ultimaFecha && (
-                                    <div>
+          <div>
                                       <span className="text-gray-500">Última Ejecución:</span>
                                       <p className="font-medium text-gray-900">
                                         {new Date(schedule.ultimaFecha).toLocaleDateString('es-ES')}
@@ -981,7 +981,7 @@ function MantenimientoPage() {
                                     </div>
                                   )}
                                   {schedule.provider && (
-                                    <div>
+          <div>
                                       <span className="text-gray-500">Proveedor:</span>
                                       <p className="font-medium text-gray-900">
                                         {schedule.provider.nombre}
@@ -989,7 +989,7 @@ function MantenimientoPage() {
                                     </div>
                                   )}
                                   {schedule.costoEstimado && (
-                                    <div>
+          <div>
                                       <span className="text-gray-500">Costo Estimado:</span>
                                       <p className="font-medium text-gray-900">
                                         €{schedule.costoEstimado.toLocaleString('es-ES')}
@@ -999,7 +999,7 @@ function MantenimientoPage() {
                                 </div>
                               </div>
 
-                              <div className="flex gap-2 ml-4">
+          <div className="flex gap-2 ml-4">
                                 <Button
                                   onClick={() => handleComplete(schedule.id)}
                                   variant="ghost"
@@ -1060,7 +1060,7 @@ function MantenimientoPage() {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
-            <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
                 {editingId ? 'Editar Mantenimiento' : 'Nuevo Mantenimiento Preventivo'}
               </h2>
@@ -1076,7 +1076,7 @@ function MantenimientoPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
+          <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
                 <input
                   type="text"
@@ -1087,7 +1087,7 @@ function MantenimientoPage() {
                 />
               </div>
 
-              <div>
+          <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Descripción *
                 </label>
@@ -1100,8 +1100,8 @@ function MantenimientoPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
+          <div className="grid grid-cols-2 gap-4">
+          <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
                   <select
                     value={formData.tipo}
@@ -1118,7 +1118,7 @@ function MantenimientoPage() {
                   </select>
                 </div>
 
-                <div>
+          <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Frecuencia *
                   </label>
@@ -1136,8 +1136,8 @@ function MantenimientoPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
+          <div className="grid grid-cols-2 gap-4">
+          <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Edificio</label>
                   <select
                     value={formData.buildingId}
@@ -1155,7 +1155,7 @@ function MantenimientoPage() {
                   </select>
                 </div>
 
-                <div>
+          <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Unidad (Opcional)
                   </label>
@@ -1169,8 +1169,8 @@ function MantenimientoPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
+          <div className="grid grid-cols-2 gap-4">
+          <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Próxima Fecha *
                   </label>
@@ -1183,7 +1183,7 @@ function MantenimientoPage() {
                   />
                 </div>
 
-                <div>
+          <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Días de Anticipación
                   </label>
@@ -1198,8 +1198,8 @@ function MantenimientoPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
+          <div className="grid grid-cols-2 gap-4">
+          <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
                   <select
                     value={formData.providerId}
@@ -1215,7 +1215,7 @@ function MantenimientoPage() {
                   </select>
                 </div>
 
-                <div>
+          <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Costo Estimado (€)
                   </label>
@@ -1229,7 +1229,7 @@ function MantenimientoPage() {
                 </div>
               </div>
 
-              <div>
+          <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Notas</label>
                 <textarea
                   value={formData.notas}
@@ -1239,7 +1239,7 @@ function MantenimientoPage() {
                 />
               </div>
 
-              <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
                   className="flex-1 px-6 py-3 gradient-primary text-white rounded-lg hover:opacity-90 transition-all shadow-primary font-medium"
@@ -1263,6 +1263,7 @@ function MantenimientoPage() {
       )}
     </div>
   );
+  </AuthenticatedLayout>
 }
 
 export default function MantenimientoPageWithErrorBoundary() {

@@ -233,13 +233,14 @@ export default function SegurosPage() {
           <p className="mt-4 text-muted-foreground">Cargando...</p>
         </div>
       </div>
+    </AuthenticatedLayout>
     );
   }
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div className="flex items-center justify-between">
+        <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
@@ -258,18 +259,18 @@ export default function SegurosPage() {
                 Volver
               </Button>
             </div>
-            <div>
+        <div>
               <h1 className="text-3xl font-bold">Gestión de Seguros</h1>
               <p className="text-muted-foreground">Controla pólizas y coberturas</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total</CardTitle>
                   <Shield className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{totalSeguros}</div>
+        <div className="text-2xl font-bold">{totalSeguros}</div>
                   <p className="text-xs text-muted-foreground">Pólizas registradas</p>
                 </CardContent>
               </Card>
@@ -279,7 +280,7 @@ export default function SegurosPage() {
                   <CheckCircle className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{activos}</div>
+        <div className="text-2xl font-bold">{activos}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -288,7 +289,7 @@ export default function SegurosPage() {
                   <AlertTriangle className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-orange-600">{porVencer}</div>
+        <div className="text-2xl font-bold text-orange-600">{porVencer}</div>
                   <p className="text-xs text-muted-foreground">Próximos 30 días</p>
                 </CardContent>
               </Card>
@@ -298,7 +299,7 @@ export default function SegurosPage() {
                   <Euro className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+        <div className="text-2xl font-bold">
                     €
                     {(seguros.reduce((acc, s) => acc + (s.sumaAsegurada || 0), 0) / 1000).toFixed(
                       0
@@ -308,8 +309,8 @@ export default function SegurosPage() {
                 </CardContent>
               </Card>
             </div>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 relative">
+        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   placeholder="Buscar..."
@@ -323,12 +324,12 @@ export default function SegurosPage() {
                 Nuevo Seguro
               </Button>
             </div>
-            <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-4">
               {filteredSeguros.map((seguro) => (
                 <Card key={seguro.id}>
                   <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
+        <div className="flex items-start justify-between">
+        <div>
                         <CardTitle className="text-lg">{seguro.aseguradora}</CardTitle>
                         <CardDescription>Póliza: {seguro.numeroPoliza}</CardDescription>
                       </div>
@@ -338,19 +339,19 @@ export default function SegurosPage() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
                         <p className="text-xs text-muted-foreground">Tipo</p>
                         <p className="text-sm font-medium">{seguro.tipo.replace('_', ' ')}</p>
                       </div>
-                      <div>
+        <div>
                         <p className="text-xs text-muted-foreground">Vencimiento</p>
                         <p className="text-sm font-medium">
                           {format(new Date(seguro.fechaVencimiento), 'dd/MM/yyyy', { locale: es })}
                         </p>
                       </div>
                       {seguro.sumaAsegurada && (
-                        <div>
+        <div>
                           <p className="text-xs text-muted-foreground">Suma Asegurada</p>
                           <p className="text-sm font-medium">
                             €{seguro.sumaAsegurada.toLocaleString()}
@@ -358,7 +359,7 @@ export default function SegurosPage() {
                         </div>
                       )}
                       {seguro.primaAnual && (
-                        <div>
+        <div>
                           <p className="text-xs text-muted-foreground">Prima Anual</p>
                           <p className="text-sm font-medium">
                             €{seguro.primaAnual.toLocaleString()}
@@ -367,12 +368,12 @@ export default function SegurosPage() {
                       )}
                     </div>
                     {(seguro.building || seguro.unit) && (
-                      <div className="mt-3 p-2 bg-muted rounded-md text-sm">
+        <div className="mt-3 p-2 bg-muted rounded-md text-sm">
                         {seguro.building && <span>{seguro.building.nombre}</span>}
                         {seguro.unit && <span> - Unidad {seguro.unit.numero}</span>}
                       </div>
                     )}
-                    <div className="mt-3 flex items-center gap-2">
+        <div className="mt-3 flex items-center gap-2">
                       <Button
                         size="sm"
                         variant="outline"
@@ -398,16 +399,16 @@ export default function SegurosPage() {
             <DialogTitle>Nuevo Seguro</DialogTitle>
             <DialogDescription>Registra una nueva póliza de seguro</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+        <div className="grid gap-4">
+        <div className="grid grid-cols-2 gap-4">
+        <div>
                 <Label>Número Póliza *</Label>
                 <Input
                   value={newSeguro.numeroPoliza}
                   onChange={(e) => setNewSeguro({ ...newSeguro, numeroPoliza: e.target.value })}
                 />
               </div>
-              <div>
+        <div>
                 <Label>Tipo *</Label>
                 <Select
                   value={newSeguro.tipo}
@@ -429,22 +430,22 @@ export default function SegurosPage() {
                 </Select>
               </div>
             </div>
-            <div>
+        <div>
               <Label>Aseguradora *</Label>
               <Input
                 value={newSeguro.aseguradora}
                 onChange={(e) => setNewSeguro({ ...newSeguro, aseguradora: e.target.value })}
               />
             </div>
-            <div>
+        <div>
               <Label>Nombre Asegurado *</Label>
               <Input
                 value={newSeguro.nombreAsegurado}
                 onChange={(e) => setNewSeguro({ ...newSeguro, nombreAsegurado: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+        <div className="grid grid-cols-2 gap-4">
+        <div>
                 <Label>Fecha Inicio *</Label>
                 <Input
                   type="date"
@@ -452,7 +453,7 @@ export default function SegurosPage() {
                   onChange={(e) => setNewSeguro({ ...newSeguro, fechaInicio: e.target.value })}
                 />
               </div>
-              <div>
+        <div>
                 <Label>Fecha Vencimiento *</Label>
                 <Input
                   type="date"
@@ -461,8 +462,8 @@ export default function SegurosPage() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+        <div className="grid grid-cols-2 gap-4">
+        <div>
                 <Label>Prima Anual (€)</Label>
                 <Input
                   type="number"
@@ -471,7 +472,7 @@ export default function SegurosPage() {
                   onChange={(e) => setNewSeguro({ ...newSeguro, primaAnual: e.target.value })}
                 />
               </div>
-              <div>
+        <div>
                 <Label>Suma Asegurada (€)</Label>
                 <Input
                   type="number"
@@ -512,11 +513,11 @@ export default function SegurosPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+        <div className="space-y-4">
             {/* Upload section */}
-            <div className="border-2 border-dashed rounded-lg p-4">
+        <div className="border-2 border-dashed rounded-lg p-4">
               <Label htmlFor="file-upload" className="cursor-pointer block">
-                <div className="flex flex-col items-center justify-center text-center">
+        <div className="flex flex-col items-center justify-center text-center">
                   {uploading ? (
                     <>
                       <Loader2 className="h-10 w-10 animate-spin text-primary mb-2" />
@@ -544,19 +545,19 @@ export default function SegurosPage() {
             </div>
 
             {/* Documents list */}
-            <div>
+        <div>
               <h4 className="text-sm font-medium mb-3">Documentos Adjuntos</h4>
               {(selectedSeguro?.documentosAdjuntos as any)?.length > 0 ? (
-                <div className="space-y-2">
+        <div className="space-y-2">
                   {((selectedSeguro?.documentosAdjuntos as any) || []).map(
                     (doc: any, index: number) => (
-                      <div
+        <div
                         key={index}
                         className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
                       >
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
                           <FileText className="h-5 w-5 text-primary flex-shrink-0" />
-                          <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1">
                             <p className="text-sm font-medium truncate">{doc.filename}</p>
                             <p className="text-xs text-muted-foreground">
                               {new Date(doc.uploadedAt).toLocaleDateString('es-ES', {
@@ -570,7 +571,7 @@ export default function SegurosPage() {
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
                           <Button
                             size="sm"
                             variant="ghost"
@@ -591,7 +592,7 @@ export default function SegurosPage() {
                   )}
                 </div>
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
+        <div className="text-center py-8 text-muted-foreground">
                   <FileText className="h-12 w-12 mx-auto mb-2 opacity-20" />
                   <p className="text-sm">No hay documentos adjuntos</p>
                 </div>

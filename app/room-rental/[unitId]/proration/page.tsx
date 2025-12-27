@@ -187,7 +187,7 @@ export default function ProrationPage() {
   if (loading) {
     return (
       <AuthenticatedLayout>
-            <div className="text-center py-12">Cargando...</div>
+          <div className="text-center py-12">Cargando...</div>
           </main>
         </div>
       </div>
@@ -203,7 +203,7 @@ export default function ProrationPage() {
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="mb-6">
+          <div className="mb-6">
               <Button variant="ghost" onClick={() => router.back()} className="mb-2">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Volver
@@ -218,9 +218,9 @@ export default function ProrationPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Formulario */}
-              <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>1. Ingresa los Montos de Suministros</CardTitle>
@@ -229,8 +229,8 @@ export default function ProrationPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
+          <div className="grid grid-cols-2 gap-4">
+          <div>
                         <Label htmlFor="electricity" className="flex items-center">
                           <Zap className="mr-2 h-4 w-4 text-yellow-600" />
                           Electricidad (€)
@@ -247,7 +247,7 @@ export default function ProrationPage() {
                         />
                       </div>
 
-                      <div>
+          <div>
                         <Label htmlFor="water" className="flex items-center">
                           <Droplet className="mr-2 h-4 w-4 text-blue-600" />
                           Agua (€)
@@ -262,7 +262,7 @@ export default function ProrationPage() {
                         />
                       </div>
 
-                      <div>
+          <div>
                         <Label htmlFor="gas" className="flex items-center">
                           <Flame className="mr-2 h-4 w-4 text-orange-600" />
                           Gas (€)
@@ -277,7 +277,7 @@ export default function ProrationPage() {
                         />
                       </div>
 
-                      <div>
+          <div>
                         <Label htmlFor="internet" className="flex items-center">
                           <Wifi className="mr-2 h-4 w-4 text-purple-600" />
                           Internet (€)
@@ -292,7 +292,7 @@ export default function ProrationPage() {
                         />
                       </div>
 
-                      <div className="col-span-2">
+          <div className="col-span-2">
                         <Label htmlFor="cleaning" className="flex items-center">
                           <Sparkles className="mr-2 h-4 w-4 text-green-600" />
                           Limpieza (€)
@@ -338,7 +338,7 @@ export default function ProrationPage() {
                       </SelectContent>
                     </Select>
 
-                    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
                       <p className="text-sm text-blue-900">
                         <strong>Método seleccionado:</strong>{' '}
                         {prorationMethod === 'equal' &&
@@ -354,7 +354,7 @@ export default function ProrationPage() {
                   </CardContent>
                 </Card>
 
-                <div className="flex space-x-3">
+          <div className="flex space-x-3">
                   <Button
                     onClick={handlePreview}
                     disabled={calculating || rooms.length === 0}
@@ -377,24 +377,24 @@ export default function ProrationPage() {
               </div>
 
               {/* Sidebar - Resumen */}
-              <div className="space-y-6">
+          <div className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Resumen</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">Total Suministros:</span>
                       <span className="text-2xl font-bold text-blue-600">
                         €{totalUtilities.toFixed(2)}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">Habitaciones Ocupadas:</span>
                       <span className="text-lg font-semibold">{rooms.length}</span>
                     </div>
                     {totalUtilities > 0 && rooms.length > 0 && (
-                      <div className="flex justify-between items-center pt-3 border-t">
+          <div className="flex justify-between items-center pt-3 border-t">
                         <span className="text-sm text-gray-600">Promedio por Habitación:</span>
                         <span className="text-lg font-semibold text-green-600">
                           €{(totalUtilities / rooms.length).toFixed(2)}
@@ -407,7 +407,7 @@ export default function ProrationPage() {
                 {rooms.length === 0 && (
                   <Card>
                     <CardContent className="pt-6">
-                      <div className="text-center py-4">
+          <div className="text-center py-4">
                         <AlertCircle className="h-12 w-12 text-yellow-600 mx-auto mb-2" />
                         <p className="text-sm text-gray-600">
                           No hay habitaciones ocupadas. El prorrateo solo se aplica a habitaciones
@@ -425,7 +425,7 @@ export default function ProrationPage() {
                       <CardTitle className="text-lg">Vista Previa del Prorrateo</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-3">
+          <div className="space-y-3">
                         {rooms.map((room: any, index: number) => {
                           const roomTotal = Object.keys(preview).reduce(
                             (sum: number, utilityKey: string) => {
@@ -438,13 +438,15 @@ export default function ProrationPage() {
                           );
 
                           return (
-                            <div key={room.id} className="p-3 bg-gray-50 rounded-lg">
+          <div key={room.id} className="p-3 bg-gray-50 rounded-lg">
                               <p className="font-medium mb-1">Habitación {room.numero}</p>
                               <p className="text-sm text-gray-600 mb-2">{room.superficie}m²</p>
                               <p className="text-lg font-bold text-green-600">
                                 €{roomTotal.toFixed(2)}
                               </p>
                             </div>
+                        </AuthenticatedLayout>
+                        </AuthenticatedLayout>
                           );
                         })}
                       </div>

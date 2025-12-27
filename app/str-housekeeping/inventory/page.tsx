@@ -305,6 +305,7 @@ export default function InventoryPage() {
                             Salida
                           </Button>
                         </div>
+                </AuthenticatedLayout>
                       </CardContent>
                     </Card>
                   );

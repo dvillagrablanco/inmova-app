@@ -309,7 +309,7 @@ export default function CuponesPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
+        <div className="max-w-7xl mx-auto space-y-6">
             {/* Breadcrumb */}
             <Breadcrumb>
               <BreadcrumbList>
@@ -326,12 +326,12 @@ export default function CuponesPage() {
             </Breadcrumb>
 
             {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl shadow-lg">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex items-center gap-3">
+        <div className="p-3 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl shadow-lg">
                   <Tag className="h-6 w-6 text-white" />
                 </div>
-                <div>
+        <div>
                   <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                     Cupones de Descuento
                   </h1>
@@ -345,6 +345,7 @@ export default function CuponesPage() {
                   open={openDialog}
                   onOpenChange={(open) => {
                     setOpenDialog(open);
+                    </AuthenticatedLayout>
                     if (!open) resetForm();
                   }}
                 >
@@ -361,8 +362,8 @@ export default function CuponesPage() {
                       </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
                           <Label htmlFor="codigo">Código *</Label>
                           <Input
                             id="codigo"
@@ -375,7 +376,7 @@ export default function CuponesPage() {
                             maxLength={50}
                           />
                         </div>
-                        <div>
+        <div>
                           <Label htmlFor="tipo">Tipo de Descuento *</Label>
                           <Select
                             value={formData.tipo}
@@ -394,10 +395,10 @@ export default function CuponesPage() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
                           <Label htmlFor="valor">Valor del Descuento *</Label>
-                          <div className="relative">
+        <div className="relative">
                             <Input
                               id="valor"
                               type="number"
@@ -414,9 +415,9 @@ export default function CuponesPage() {
                             </span>
                           </div>
                         </div>
-                        <div>
+        <div>
                           <Label htmlFor="montoMinimo">Monto Mínimo de Compra</Label>
-                          <div className="relative">
+        <div className="relative">
                             <Input
                               id="montoMinimo"
                               type="number"
@@ -436,7 +437,7 @@ export default function CuponesPage() {
                         </div>
                       </div>
 
-                      <div>
+        <div>
                         <Label htmlFor="descripcion">Descripción</Label>
                         <Input
                           id="descripcion"
@@ -448,8 +449,8 @@ export default function CuponesPage() {
                         />
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
                           <Label htmlFor="usosMaximos">Usos Máximos Totales</Label>
                           <Input
                             id="usosMaximos"
@@ -462,7 +463,7 @@ export default function CuponesPage() {
                             placeholder="Ilimitado"
                           />
                         </div>
-                        <div>
+        <div>
                           <Label htmlFor="usosPorUsuario">Usos por Usuario</Label>
                           <Input
                             id="usosPorUsuario"
@@ -477,8 +478,8 @@ export default function CuponesPage() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
                           <Label htmlFor="fechaInicio">Fecha de Inicio *</Label>
                           <Input
                             id="fechaInicio"
@@ -490,7 +491,7 @@ export default function CuponesPage() {
                             required
                           />
                         </div>
-                        <div>
+        <div>
                           <Label htmlFor="fechaExpiracion">Fecha de Expiración *</Label>
                           <Input
                             id="fechaExpiracion"
@@ -504,7 +505,7 @@ export default function CuponesPage() {
                         </div>
                       </div>
 
-                      <div className="flex justify-end gap-2 pt-4 border-t">
+        <div className="flex justify-end gap-2 pt-4 border-t">
                         <Button
                           type="button"
                           variant="outline"
@@ -523,13 +524,13 @@ export default function CuponesPage() {
             </div>
 
             {/* KPIs */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-gray-600">Total Cupones</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
+        <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -537,7 +538,7 @@ export default function CuponesPage() {
                   <CardTitle className="text-sm font-medium text-gray-600">Activos</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{stats.activos}</div>
+        <div className="text-2xl font-bold text-green-600">{stats.activos}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -545,7 +546,7 @@ export default function CuponesPage() {
                   <CardTitle className="text-sm font-medium text-gray-600">Expirados</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-gray-400">{stats.expirados}</div>
+        <div className="text-2xl font-bold text-gray-400">{stats.expirados}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -553,7 +554,7 @@ export default function CuponesPage() {
                   <CardTitle className="text-sm font-medium text-gray-600">Agotados</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-orange-600">{stats.agotados}</div>
+        <div className="text-2xl font-bold text-orange-600">{stats.agotados}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -561,7 +562,7 @@ export default function CuponesPage() {
                   <CardTitle className="text-sm font-medium text-gray-600">Total Usos</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-indigo-600">{stats.totalUsos}</div>
+        <div className="text-2xl font-bold text-indigo-600">{stats.totalUsos}</div>
                 </CardContent>
               </Card>
             </div>
@@ -569,8 +570,8 @@ export default function CuponesPage() {
             {/* Filters */}
             <Card>
               <CardContent className="p-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex-1 relative">
+        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1 relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
                       placeholder="Buscar por código o descripción..."
@@ -630,13 +631,13 @@ export default function CuponesPage() {
                 }}
               />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredCoupons.map((coupon) => (
                   <Card key={coupon.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader className="p-4 sm:p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-start justify-between">
+        <div className="flex-1">
+        <div className="flex items-center gap-2 mb-2">
                             <code className="text-lg font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded">
                               {coupon.codigo}
                             </code>
@@ -651,7 +652,7 @@ export default function CuponesPage() {
                           {coupon.descripcion && (
                             <p className="text-sm text-gray-600 mb-2">{coupon.descripcion}</p>
                           )}
-                          <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
                             <Badge variant={coupon.activo ? 'default' : 'secondary'}>
                               {coupon.estado}
                             </Badge>
@@ -710,8 +711,8 @@ export default function CuponesPage() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-3 text-sm">
-                        <div className="flex items-center justify-between">
+        <div className="space-y-3 text-sm">
+        <div className="flex items-center justify-between">
                           <span className="text-gray-600">Usos:</span>
                           <span className="font-medium">
                             {coupon.usosActuales}{' '}
@@ -719,18 +720,18 @@ export default function CuponesPage() {
                           </span>
                         </div>
                         {coupon.montoMinimo && (
-                          <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between">
                             <span className="text-gray-600">Compra mínima:</span>
                             <span className="font-medium">{coupon.montoMinimo}€</span>
                           </div>
                         )}
-                        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between">
                           <span className="text-gray-600">Vigencia:</span>
-                          <div className="text-right">
-                            <div className="font-medium">
+        <div className="text-right">
+        <div className="font-medium">
                               {format(new Date(coupon.fechaInicio), 'dd MMM', { locale: es })}
                             </div>
-                            <div className="text-xs text-gray-500">
+        <div className="text-xs text-gray-500">
                               hasta{' '}
                               {format(new Date(coupon.fechaExpiracion), 'dd MMM yyyy', {
                                 locale: es,
@@ -739,8 +740,8 @@ export default function CuponesPage() {
                           </div>
                         </div>
                         {coupon._count.usos > 0 && (
-                          <div className="pt-3 border-t">
-                            <div className="flex items-center gap-1 text-indigo-600">
+        <div className="pt-3 border-t">
+        <div className="flex items-center gap-1 text-indigo-600">
                               <TrendingUp className="h-4 w-4" />
                               <span className="font-medium">
                                 {coupon._count.usos} usos registrados
@@ -758,5 +759,6 @@ export default function CuponesPage() {
         </main>
       </div>
     </div>
+  </AuthenticatedLayout>
   );
 }

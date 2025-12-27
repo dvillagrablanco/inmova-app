@@ -290,13 +290,14 @@ export default function ReservasPage() {
           <p className="mt-4 text-muted-foreground">Cargando...</p>
         </div>
       </div>
+    </AuthenticatedLayout>
     );
   }
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div className="flex items-center justify-between">
+        <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
@@ -315,18 +316,18 @@ export default function ReservasPage() {
                 Volver
               </Button>
             </div>
-            <div>
+        <div>
               <h1 className="text-3xl font-bold">Reservas de Espacios Comunes</h1>
               <p className="text-muted-foreground">Gestiona espacios y reservas</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Espacios</CardTitle>
                   <Building2 className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{totalEspacios}</div>
+        <div className="text-2xl font-bold">{totalEspacios}</div>
                   <p className="text-xs text-muted-foreground">{espaciosActivos} activos</p>
                 </CardContent>
               </Card>
@@ -336,7 +337,7 @@ export default function ReservasPage() {
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{totalReservas}</div>
+        <div className="text-2xl font-bold">{totalReservas}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -345,7 +346,7 @@ export default function ReservasPage() {
                   <Clock className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{reservasPendientes}</div>
+        <div className="text-2xl font-bold">{reservasPendientes}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -354,7 +355,7 @@ export default function ReservasPage() {
                   <CheckCircle className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+        <div className="text-2xl font-bold">
                     {totalReservas > 0 ? Math.round((reservasPendientes / totalReservas) * 100) : 0}
                     %
                   </div>
@@ -367,8 +368,8 @@ export default function ReservasPage() {
                 <TabsTrigger value="espacios">Espacios</TabsTrigger>
               </TabsList>
               <TabsContent value="reservas" className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex-1 relative">
+        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1 relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                     <Input
                       placeholder="Buscar..."
@@ -394,7 +395,7 @@ export default function ReservasPage() {
                     Nueva
                   </Button>
                 </div>
-                <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-4">
                   {filteredReservas.length === 0 ? (
                     <Card>
                       <CardContent className="flex flex-col items-center justify-center py-12">
@@ -406,11 +407,11 @@ export default function ReservasPage() {
                     filteredReservas.map((reserva) => (
                       <Card key={reserva.id}>
                         <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div>
+        <div className="flex items-start justify-between">
+        <div>
                               <CardTitle className="text-lg">{reserva.space?.nombre}</CardTitle>
                               <CardDescription>
-                                <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 text-sm">
                                   <Building2 className="h-3 w-3" />
                                   {reserva.space?.building?.nombre}
                                 </div>
@@ -432,10 +433,10 @@ export default function ReservasPage() {
                           </div>
                         </CardHeader>
                         <CardContent>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div className="flex items-center gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4 text-muted-foreground" />
-                              <div>
+        <div>
                                 <p className="text-xs text-muted-foreground">Fecha</p>
                                 <p className="text-sm font-medium">
                                   {format(new Date(reserva.fechaReserva), 'dd/MM/yyyy', {
@@ -444,18 +445,18 @@ export default function ReservasPage() {
                                 </p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
                               <Clock className="h-4 w-4 text-muted-foreground" />
-                              <div>
+        <div>
                                 <p className="text-xs text-muted-foreground">Horario</p>
                                 <p className="text-sm font-medium">
                                   {reserva.horaInicio} - {reserva.horaFin}
                                 </p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
                               <User className="h-4 w-4 text-muted-foreground" />
-                              <div>
+        <div>
                                 <p className="text-xs text-muted-foreground">Inquilino</p>
                                 <p className="text-sm font-medium">
                                   {reserva.tenant?.nombreCompleto}
@@ -463,9 +464,9 @@ export default function ReservasPage() {
                               </div>
                             </div>
                             {reserva.monto && reserva.monto > 0 && (
-                              <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
                                 <Euro className="h-4 w-4 text-muted-foreground" />
-                                <div>
+        <div>
                                   <p className="text-xs text-muted-foreground">Monto</p>
                                   <p className="text-sm font-medium">
                                     €{reserva.monto.toFixed(2)}
@@ -480,7 +481,7 @@ export default function ReservasPage() {
                             )}
                           </div>
                           {reserva.estado !== 'cancelada' && reserva.estado !== 'completada' && (
-                            <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex gap-2">
                               <Button
                                 variant="destructive"
                                 size="sm"
@@ -498,21 +499,21 @@ export default function ReservasPage() {
                 </div>
               </TabsContent>
               <TabsContent value="espacios" className="space-y-4">
-                <div className="flex justify-end">
+        <div className="flex justify-end">
                   <Button onClick={() => setOpenNewSpace(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Nuevo
                   </Button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {espacios.map((espacio) => (
                     <Card key={espacio.id}>
                       <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div>
+        <div className="flex items-start justify-between">
+        <div>
                             <CardTitle>{espacio.nombre}</CardTitle>
                             <CardDescription>
-                              <div className="flex items-center gap-2 mt-1">
+        <div className="flex items-center gap-2 mt-1">
                                 <MapPin className="h-3 w-3" />
                                 {espacio.building?.nombre}
                               </div>
@@ -524,11 +525,11 @@ export default function ReservasPage() {
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2 text-sm">
+        <div className="space-y-3">
+        <div className="flex items-center gap-2 text-sm">
                             <Badge variant="outline">{espacio.tipo.replace('_', ' ')}</Badge>
                             {espacio.capacidadMaxima && (
-                              <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1">
                                 <Users className="h-3 w-3 text-muted-foreground" />
                                 <span className="text-muted-foreground">
                                   {espacio.capacidadMaxima} pers.
@@ -537,7 +538,7 @@ export default function ReservasPage() {
                             )}
                           </div>
                           {espacio.horaApertura && espacio.horaCierre && (
-                            <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 text-sm">
                               <Clock className="h-4 w-4 text-muted-foreground" />
                               <span>
                                 {espacio.horaApertura} - {espacio.horaCierre}
@@ -545,7 +546,7 @@ export default function ReservasPage() {
                             </div>
                           )}
                           {espacio.requierePago && espacio.costoPorHora && (
-                            <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 text-sm">
                               <Euro className="h-4 w-4 text-muted-foreground" />
                               <span>€{espacio.costoPorHora}/hora</span>
                             </div>
@@ -566,9 +567,9 @@ export default function ReservasPage() {
             <DialogTitle>Nuevo Espacio</DialogTitle>
             <DialogDescription>Crea un espacio común</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+        <div className="grid gap-4">
+        <div className="grid grid-cols-2 gap-4">
+        <div>
                 <Label>Edificio</Label>
                 <Select
                   value={newSpace.buildingId}
@@ -586,7 +587,7 @@ export default function ReservasPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
+        <div>
                 <Label>Tipo</Label>
                 <Select
                   value={newSpace.tipo}
@@ -609,14 +610,14 @@ export default function ReservasPage() {
                 </Select>
               </div>
             </div>
-            <div>
+        <div>
               <Label>Nombre</Label>
               <Input
                 value={newSpace.nombre}
                 onChange={(e) => setNewSpace({ ...newSpace, nombre: e.target.value })}
               />
             </div>
-            <div>
+        <div>
               <Label>Descripción</Label>
               <Textarea
                 value={newSpace.descripcion}
@@ -624,8 +625,8 @@ export default function ReservasPage() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
+        <div className="grid grid-cols-3 gap-4">
+        <div>
                 <Label>Capacidad</Label>
                 <Input
                   type="number"
@@ -633,7 +634,7 @@ export default function ReservasPage() {
                   onChange={(e) => setNewSpace({ ...newSpace, capacidadMaxima: e.target.value })}
                 />
               </div>
-              <div>
+        <div>
                 <Label>Duración Máx. (h)</Label>
                 <Input
                   type="number"
@@ -643,7 +644,7 @@ export default function ReservasPage() {
                   }
                 />
               </div>
-              <div>
+        <div>
                 <Label>Anticipación (días)</Label>
                 <Input
                   type="number"
@@ -652,8 +653,8 @@ export default function ReservasPage() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+        <div className="grid grid-cols-2 gap-4">
+        <div>
                 <Label>Apertura</Label>
                 <Input
                   type="time"
@@ -661,7 +662,7 @@ export default function ReservasPage() {
                   onChange={(e) => setNewSpace({ ...newSpace, horaApertura: e.target.value })}
                 />
               </div>
-              <div>
+        <div>
                 <Label>Cierre</Label>
                 <Input
                   type="time"
@@ -670,7 +671,7 @@ export default function ReservasPage() {
                 />
               </div>
             </div>
-            <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 id="req-pago"
@@ -682,7 +683,7 @@ export default function ReservasPage() {
               </Label>
             </div>
             {newSpace.requierePago && (
-              <div>
+        <div>
                 <Label>Costo/Hora (€)</Label>
                 <Input
                   type="number"
@@ -709,8 +710,8 @@ export default function ReservasPage() {
             <DialogTitle>Nueva Reserva</DialogTitle>
             <DialogDescription>Crea una reserva</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4">
-            <div>
+        <div className="grid gap-4">
+        <div>
               <Label>Espacio</Label>
               <Select
                 value={newReservation.spaceId}
@@ -730,7 +731,7 @@ export default function ReservasPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div>
+        <div>
               <Label>Inquilino</Label>
               <Select
                 value={newReservation.tenantId}
@@ -748,7 +749,7 @@ export default function ReservasPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div>
+        <div>
               <Label>Fecha</Label>
               <Input
                 type="date"
@@ -758,8 +759,8 @@ export default function ReservasPage() {
                 }
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+        <div className="grid grid-cols-2 gap-4">
+        <div>
                 <Label>Hora Inicio</Label>
                 <Input
                   type="time"
@@ -769,7 +770,7 @@ export default function ReservasPage() {
                   }
                 />
               </div>
-              <div>
+        <div>
                 <Label>Hora Fin</Label>
                 <Input
                   type="time"
@@ -780,7 +781,7 @@ export default function ReservasPage() {
                 />
               </div>
             </div>
-            <div>
+        <div>
               <Label>Personas</Label>
               <Input
                 type="number"
@@ -790,7 +791,7 @@ export default function ReservasPage() {
                 }
               />
             </div>
-            <div>
+        <div>
               <Label>Propósito</Label>
               <Input
                 value={newReservation.proposito}

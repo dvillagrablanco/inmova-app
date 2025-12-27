@@ -73,15 +73,15 @@ export default function OnboardingPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
             {/* Hero Section */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               className="mb-8"
             >
-              <div className="flex items-center justify-between">
-                <div>
+        <div className="flex items-center justify-between">
+        <div>
                   <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                     <Rocket className="h-8 w-8 text-primary" />
                     Configuración Inicial
@@ -104,9 +104,9 @@ export default function OnboardingPage() {
               </div>
             </motion.div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Columna principal: Tracker de progreso */}
-              <div className="lg:col-span-2">
+        <div className="lg:col-span-2">
                 <OnboardingProgressTracker
                   userId={session.user.id}
                   onTaskComplete={handleTaskComplete}
@@ -115,7 +115,7 @@ export default function OnboardingPage() {
               </div>
 
               {/* Columna lateral: Recursos y ayuda */}
-              <div className="space-y-6">
+        <div className="space-y-6">
                 {/* Beneficios de completar */}
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
@@ -130,9 +130,9 @@ export default function OnboardingPage() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                      <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3">
                         <span className="text-2xl">🚀</span>
-                        <div>
+        <div>
                           <h4 className="font-semibold text-sm">Acceso completo</h4>
                           <p className="text-xs text-muted-foreground">
                             Desbloquea los 88 módulos de INMOVA
@@ -140,9 +140,9 @@ export default function OnboardingPage() {
                         </div>
                       </div>
                       
-                      <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3">
                         <span className="text-2xl">⏱️</span>
-                        <div>
+        <div>
                           <h4 className="font-semibold text-sm">Ahorra tiempo</h4>
                           <p className="text-xs text-muted-foreground">
                             Automatiza procesos desde el día 1
@@ -150,9 +150,9 @@ export default function OnboardingPage() {
                         </div>
                       </div>
                       
-                      <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3">
                         <span className="text-2xl">🎯</span>
-                        <div>
+        <div>
                           <h4 className="font-semibold text-sm">Configuración personalizada</h4>
                           <p className="text-xs text-muted-foreground">
                             Adaptado a tu modelo de negocio
@@ -253,5 +253,6 @@ export default function OnboardingPage() {
       {/* Chatbot flotante */}
       <OnboardingChatbot />
     </div>
+  </AuthenticatedLayout>
   );
 }

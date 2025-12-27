@@ -212,7 +212,7 @@ export default function RoomDetailPage() {
   if (loading) {
     return (
       <AuthenticatedLayout>
-            <div className="text-center py-12">Cargando...</div>
+          <div className="text-center py-12">Cargando...</div>
           </main>
         </div>
       </div>
@@ -222,7 +222,7 @@ export default function RoomDetailPage() {
   if (!room) {
     return (
       <AuthenticatedLayout>
-            <div className="text-center py-12">
+          <div className="text-center py-12">
               <p className="text-red-600">Habitación no encontrada</p>
             </div>
           </main>
@@ -231,14 +231,17 @@ export default function RoomDetailPage() {
     );
   }
 
+  </AuthenticatedLayout>
+  </AuthenticatedLayout>
+  </AuthenticatedLayout>
   const activeContract = room.contracts?.find((c: any) => c.estado === 'activo');
 
   return (
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="mb-6 flex items-center justify-between">
-              <div>
+          <div className="mb-6 flex items-center justify-between">
+          <div>
                 <Button variant="ghost" onClick={() => router.back()} className="mb-2">
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Volver
@@ -254,7 +257,7 @@ export default function RoomDetailPage() {
                   {room.unit?.building?.nombre} - Unidad {room.unit?.numero}
                 </p>
               </div>
-              <div className="space-x-2">
+          <div className="space-x-2">
                 <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
                   <DialogTrigger asChild>
                     <Button variant="outline">
@@ -271,8 +274,8 @@ export default function RoomDetailPage() {
                         </DialogDescription>
                       </DialogHeader>
 
-                      <div className="grid grid-cols-2 gap-4 py-4">
-                        <div>
+          <div className="grid grid-cols-2 gap-4 py-4">
+          <div>
                           <Label htmlFor="nombre">Nombre</Label>
                           <Input
                             id="nombre"
@@ -281,7 +284,7 @@ export default function RoomDetailPage() {
                             placeholder="Habitación Azul"
                           />
                         </div>
-                        <div>
+          <div>
                           <Label htmlFor="superficie">Superficie (m²)</Label>
                           <Input
                             id="superficie"
@@ -293,7 +296,7 @@ export default function RoomDetailPage() {
                             }
                           />
                         </div>
-                        <div>
+          <div>
                           <Label htmlFor="rentaMensual">Precio/Mes (€)</Label>
                           <Input
                             id="rentaMensual"
@@ -305,7 +308,7 @@ export default function RoomDetailPage() {
                             }
                           />
                         </div>
-                        <div>
+          <div>
                           <Label htmlFor="precioPorSemana">Precio/Semana (€)</Label>
                           <Input
                             id="precioPorSemana"
@@ -318,7 +321,7 @@ export default function RoomDetailPage() {
                             placeholder="Opcional"
                           />
                         </div>
-                        <div className="col-span-2">
+          <div className="col-span-2">
                           <Label htmlFor="descripcion">Descripción</Label>
                           <Input
                             id="descripcion"
@@ -330,9 +333,9 @@ export default function RoomDetailPage() {
                           />
                         </div>
 
-                        <div className="col-span-2 border-t pt-4">
+          <div className="col-span-2 border-t pt-4">
                           <h3 className="font-semibold mb-3">Características</h3>
-                          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-3">
                             {[
                               { key: 'banoPrivado', label: 'Baño Privado' },
                               { key: 'tieneBalcon', label: 'Balcón' },
@@ -345,7 +348,7 @@ export default function RoomDetailPage() {
                               { key: 'estanteria', label: 'Estantería' },
                               { key: 'silla', label: 'Silla' },
                             ].map((feature) => (
-                              <div key={feature.key} className="flex items-center space-x-2">
+          <div key={feature.key} className="flex items-center space-x-2">
                                 <input
                                   type="checkbox"
                                   id={feature.key}
@@ -385,49 +388,49 @@ export default function RoomDetailPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Información Principal */}
-              <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Información General</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
+          <div className="grid grid-cols-2 gap-4">
+          <div>
                         <p className="text-sm text-gray-600">Tipo de Habitación</p>
                         <p className="font-medium capitalize">{room.tipoHabitacion}</p>
                       </div>
-                      <div>
+          <div>
                         <p className="text-sm text-gray-600">Superficie</p>
                         <p className="font-medium">{room.superficie}m²</p>
                       </div>
-                      <div>
+          <div>
                         <p className="text-sm text-gray-600">Precio Mensual</p>
                         <p className="font-medium text-green-600">€{room.rentaMensual}/mes</p>
                       </div>
                       {room.precioPorSemana && (
-                        <div>
+          <div>
                           <p className="text-sm text-gray-600">Precio Semanal</p>
                           <p className="font-medium text-green-600">
                             €{room.precioPorSemana}/semana
                           </p>
                         </div>
                       )}
-                      <div>
+          <div>
                         <p className="text-sm text-gray-600">Estado</p>
                         <Badge variant={room.estado === 'disponible' ? 'default' : 'secondary'}>
                           {room.estado}
                         </Badge>
                       </div>
-                      <div>
+          <div>
                         <p className="text-sm text-gray-600">Amueblada</p>
                         <p className="font-medium">{room.amueblada ? 'Sí' : 'No'}</p>
                       </div>
                     </div>
 
                     {room.descripcion && (
-                      <div className="mt-4 pt-4 border-t">
+          <div className="mt-4 pt-4 border-t">
                         <p className="text-sm text-gray-600 mb-1">Descripción</p>
                         <p className="text-gray-800">{room.descripcion}</p>
                       </div>
@@ -440,7 +443,7 @@ export default function RoomDetailPage() {
                     <CardTitle>Características y Equipamiento</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       {[
                         { icon: Bath, label: 'Baño Privado', value: room.banoPrivado },
                         { icon: Sun, label: 'Balcón', value: room.tieneBalcon },
@@ -458,7 +461,7 @@ export default function RoomDetailPage() {
                         { icon: DoorOpen, label: 'Estantería', value: room.estanteria },
                         { icon: Armchair, label: 'Silla', value: room.silla },
                       ].map((item, index) => (
-                        <div key={index} className="flex items-center space-x-2">
+          <div key={index} className="flex items-center space-x-2">
                           <item.icon
                             className={`h-5 w-5 ${item.value ? 'text-green-600' : 'text-gray-400'}`}
                           />
@@ -479,7 +482,7 @@ export default function RoomDetailPage() {
                 {/* Contratos */}
                 <Card>
                   <CardHeader>
-                    <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
                       <CardTitle>Contratos</CardTitle>
                       {room.estado === 'disponible' && (
                         <Dialog open={showContractDialog} onOpenChange={setShowContractDialog}>
@@ -498,8 +501,8 @@ export default function RoomDetailPage() {
                                 </DialogDescription>
                               </DialogHeader>
 
-                              <div className="grid grid-cols-2 gap-4 py-4">
-                                <div className="col-span-2">
+          <div className="grid grid-cols-2 gap-4 py-4">
+          <div className="col-span-2">
                                   <Label htmlFor="tenantId">Inquilino *</Label>
                                   <Select
                                     value={contractData.tenantId}
@@ -519,7 +522,7 @@ export default function RoomDetailPage() {
                                     </SelectContent>
                                   </Select>
                                 </div>
-                                <div>
+          <div>
                                   <Label htmlFor="fechaInicio">Fecha Inicio *</Label>
                                   <Input
                                     id="fechaInicio"
@@ -534,7 +537,7 @@ export default function RoomDetailPage() {
                                     required
                                   />
                                 </div>
-                                <div>
+          <div>
                                   <Label htmlFor="fechaFin">Fecha Fin *</Label>
                                   <Input
                                     id="fechaFin"
@@ -546,7 +549,7 @@ export default function RoomDetailPage() {
                                     required
                                   />
                                 </div>
-                                <div>
+          <div>
                                   <Label htmlFor="rentaMensual">Renta Mensual (€) *</Label>
                                   <Input
                                     id="rentaMensual"
@@ -562,7 +565,7 @@ export default function RoomDetailPage() {
                                     required
                                   />
                                 </div>
-                                <div>
+          <div>
                                   <Label htmlFor="diaPago">Día de Pago</Label>
                                   <Input
                                     id="diaPago"
@@ -575,7 +578,7 @@ export default function RoomDetailPage() {
                                     }
                                   />
                                 </div>
-                                <div className="col-span-2">
+          <div className="col-span-2">
                                   <Label htmlFor="deposito">Depósito (€)</Label>
                                   <Input
                                     id="deposito"
@@ -608,11 +611,11 @@ export default function RoomDetailPage() {
                   </CardHeader>
                   <CardContent>
                     {room.contracts && room.contracts.length > 0 ? (
-                      <div className="space-y-4">
+          <div className="space-y-4">
                         {room.contracts.map((contract: any) => (
-                          <div key={contract.id} className="border rounded-lg p-4">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center space-x-2">
+          <div key={contract.id} className="border rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center space-x-2">
                                 <Users className="h-5 w-5 text-gray-500" />
                                 <span className="font-medium">
                                   {contract.tenant?.nombreCompleto}
@@ -624,8 +627,8 @@ export default function RoomDetailPage() {
                                 {contract.estado}
                               </Badge>
                             </div>
-                            <div className="grid grid-cols-2 gap-2 text-sm">
-                              <div>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+          <div>
                                 <span className="text-gray-600">Periodo:</span>
                                 <p className="font-medium">
                                   {format(new Date(contract.fechaInicio), 'dd/MM/yyyy', {
@@ -637,7 +640,7 @@ export default function RoomDetailPage() {
                                   })}
                                 </p>
                               </div>
-                              <div>
+          <div>
                                 <span className="text-gray-600">Renta:</span>
                                 <p className="font-medium text-green-600">
                                   €{contract.rentaMensual}/mes
@@ -657,27 +660,27 @@ export default function RoomDetailPage() {
               </div>
 
               {/* Sidebar */}
-              <div className="space-y-6">
+          <div className="space-y-6">
                 {activeContract && (
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-lg">Inquilino Actual</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2">
+          <div className="space-y-3">
+          <div className="flex items-center space-x-2">
                           <Users className="h-5 w-5 text-gray-500" />
                           <span className="font-medium">
                             {activeContract.tenant?.nombreCompleto}
                           </span>
                         </div>
-                        <div className="text-sm space-y-1">
+          <div className="text-sm space-y-1">
                           <p className="text-gray-600">Email: {activeContract.tenant?.email}</p>
                           <p className="text-gray-600">
                             Teléfono: {activeContract.tenant?.telefono}
                           </p>
                         </div>
-                        <div className="pt-3 border-t">
+          <div className="pt-3 border-t">
                           <p className="text-sm text-gray-600">Contrato hasta:</p>
                           <p className="font-medium">
                             {format(new Date(activeContract.fechaFin), 'dd MMMM yyyy', {

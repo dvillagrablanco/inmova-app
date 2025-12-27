@@ -279,6 +279,7 @@ export default function RedesSocialesPage() {
                                     <Icon className="h-4 w-4" />
                                     {account.accountName}
                                   </div>
+                            </AuthenticatedLayout>
                                 </SelectItem>
                               );
                             })}

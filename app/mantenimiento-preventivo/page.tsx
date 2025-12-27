@@ -449,6 +449,7 @@ export default function MantenimientoPreventivoPage() {
                       </div>
                     </div>
                   </div>
+              </AuthenticatedLayout>
                 );
               })}
 

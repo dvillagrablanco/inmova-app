@@ -172,12 +172,22 @@ function EdificiosPageContent() {
     }
   };
 
+  const getTipoBadge = (tipo: string) => {
+    const badges: Record<string, { variant: any; label: string }> = {
+      residencial: { variant: 'default', label: 'Residencial' },
+      comercial: { variant: 'secondary', label: 'Comercial' },
+      mixto: { variant: 'outline', label: 'Mixto' },
+      industrial: { variant: 'destructive', label: 'Industrial' },
+    };
+    return badges[tipo.toLowerCase()] || { variant: 'default', label: tipo };
+  };
+
   if (status === 'loading' || isLoading) {
     return (
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto">
+          <div className="max-w-7xl mx-auto">
               <Skeleton className="h-8 w-48 mb-6" />
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <SkeletonCard key={i} />
                 ))}
@@ -189,21 +199,11 @@ function EdificiosPageContent() {
 
   if (!session) return null;
 
-  const getTipoBadge = (tipo: string) => {
-    const badges: Record<string, { variant: any; label: string }> = {
-      residencial: { variant: 'default', label: 'Residencial' },
-      comercial: { variant: 'secondary', label: 'Comercial' },
-      mixto: { variant: 'outline', label: 'Mixto' },
-      industrial: { variant: 'destructive', label: 'Industrial' },
-    };
-    return badges[tipo.toLowerCase()] || { variant: 'default', label: tipo };
-  };
-
   return (
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4">
               <Button
                 variant="outline"
                 size="sm"
@@ -229,9 +229,9 @@ function EdificiosPageContent() {
             </div>
 
             {/* Header Section */}
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-start gap-3">
-                <div>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-3">
+          <div>
                   <h1 className="text-3xl font-bold tracking-tight">Edificios</h1>
                   <p className="text-muted-foreground">
                     Gestiona los edificios de tu cartera inmobiliaria
@@ -266,7 +266,7 @@ function EdificiosPageContent() {
             {error && (
               <Card className="border-destructive">
                 <CardContent className="pt-6">
-                  <div className="flex items-center gap-2 text-destructive">
+          <div className="flex items-center gap-2 text-destructive">
                     <Building2 className="h-5 w-5" />
                     <p className="font-medium">{error}</p>
                   </div>
@@ -277,7 +277,7 @@ function EdificiosPageContent() {
             {/* Search Bar and View Mode */}
             <Card>
               <CardContent className="pt-6">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <SearchInput
                     value={searchTerm}
                     onChange={setSearchTerm}
@@ -293,14 +293,14 @@ function EdificiosPageContent() {
             </Card>
 
             {/* Stats Summary */}
-            <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-3">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Edificios</CardTitle>
                   <Building2 className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{buildings.length}</div>
+          <div className="text-2xl font-bold">{buildings.length}</div>
                   <p className="text-xs text-muted-foreground">En cartera</p>
                 </CardContent>
               </Card>
@@ -310,7 +310,7 @@ function EdificiosPageContent() {
                   <Home className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+          <div className="text-2xl font-bold">
                     {buildings.reduce((acc, b) => acc + (b.metrics?.totalUnits || 0), 0)}
                   </div>
                   <p className="text-xs text-muted-foreground">Sumando todos los edificios</p>
@@ -322,7 +322,7 @@ function EdificiosPageContent() {
                   <TrendingUp className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+          <div className="text-2xl font-bold">
                     {buildings.length > 0
                       ? Math.round(
                           buildings.reduce((acc, b) => acc + (b.metrics?.ocupacionPct || 0), 0) /
@@ -338,16 +338,16 @@ function EdificiosPageContent() {
 
             {/* Buildings Display - Grid View */}
             {viewMode === 'grid' && (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {filteredBuildings.map((building) => {
                   const tipoBadge = getTipoBadge(building.tipo);
                   return (
                     <Card key={building.id} className="hover:shadow-lg transition-shadow">
                       <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="space-y-1 flex-1">
+          <div className="flex items-start justify-between">
+          <div className="space-y-1 flex-1">
                             <CardTitle className="text-lg">{building.nombre}</CardTitle>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <MapPin className="h-4 w-4" />
                               <span>{building.direccion}</span>
                             </div>
@@ -382,36 +382,36 @@ function EdificiosPageContent() {
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
+          <div className="space-y-3">
+          <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Tipo</span>
                             <Badge variant={tipoBadge.variant}>{tipoBadge.label}</Badge>
                           </div>
-                          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Año</span>
                             <span className="text-sm font-medium">{building.anoConstructor}</span>
                           </div>
-                          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Unidades</span>
                             <span className="text-sm font-medium">{building.numeroUnidades}</span>
                           </div>
                           {building.metrics && (
                             <>
-                              <div className="border-t pt-3">
-                                <div className="flex items-center justify-between">
+          <div className="border-t pt-3">
+          <div className="flex items-center justify-between">
                                   <span className="text-sm text-muted-foreground">Ocupación</span>
                                   <span className="text-sm font-bold">
                                     {building.metrics.ocupacionPct}%
                                   </span>
                                 </div>
-                                <div className="mt-2 h-2 w-full rounded-full bg-muted">
-                                  <div
+          <div className="mt-2 h-2 w-full rounded-full bg-muted">
+          <div
                                     className="h-2 rounded-full bg-primary transition-all"
                                     style={{ width: `${building.metrics.ocupacionPct}%` }}
                                   />
                                 </div>
                               </div>
-                              <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
                                 <span className="text-sm text-muted-foreground">Ingresos/mes</span>
                                 <span className="text-sm font-bold text-green-600">
                                   €{building.metrics.ingresosMensuales.toLocaleString()}
@@ -436,18 +436,18 @@ function EdificiosPageContent() {
 
             {/* Buildings Display - List View (Detailed) */}
             {viewMode === 'list' && (
-              <div className="space-y-4">
+          <div className="space-y-4">
                 {filteredBuildings.map((building) => {
                   const tipoBadge = getTipoBadge(building.tipo);
                   return (
                     <Card key={building.id} className="hover:shadow-lg transition-shadow">
                       <CardContent className="pt-6">
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                          <div className="flex-1 space-y-4">
-                            <div className="flex items-start justify-between">
-                              <div>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="flex-1 space-y-4">
+          <div className="flex items-start justify-between">
+          <div>
                                 <h3 className="text-xl font-bold">{building.nombre}</h3>
-                                <div className="flex items-center gap-2 text-muted-foreground mt-1">
+          <div className="flex items-center gap-2 text-muted-foreground mt-1">
                                   <MapPin className="h-4 w-4" />
                                   <span>{building.direccion}</span>
                                 </div>
@@ -455,24 +455,24 @@ function EdificiosPageContent() {
                               <Badge variant={tipoBadge.variant}>{tipoBadge.label}</Badge>
                             </div>
 
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                              <div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
                                 <p className="text-sm text-muted-foreground">Año construcción</p>
                                 <p className="text-lg font-semibold">{building.anoConstructor}</p>
                               </div>
-                              <div>
+          <div>
                                 <p className="text-sm text-muted-foreground">Unidades</p>
                                 <p className="text-lg font-semibold">{building.numeroUnidades}</p>
                               </div>
                               {building.metrics && (
                                 <>
-                                  <div>
+          <div>
                                     <p className="text-sm text-muted-foreground">Ocupación</p>
                                     <p className="text-lg font-semibold">
                                       {building.metrics.ocupacionPct}%
                                     </p>
                                   </div>
-                                  <div>
+          <div>
                                     <p className="text-sm text-muted-foreground">Ingresos/mes</p>
                                     <p className="text-lg font-semibold text-green-600">
                                       €{building.metrics.ingresosMensuales.toLocaleString()}
@@ -483,15 +483,15 @@ function EdificiosPageContent() {
                             </div>
 
                             {building.metrics && (
-                              <div>
-                                <div className="flex items-center justify-between mb-2">
+          <div>
+          <div className="flex items-center justify-between mb-2">
                                   <span className="text-sm font-medium">Tasa de ocupación</span>
                                   <span className="text-sm font-medium">
                                     {building.metrics.ocupacionPct}%
                                   </span>
                                 </div>
-                                <div className="h-2 w-full rounded-full bg-muted">
-                                  <div
+          <div className="h-2 w-full rounded-full bg-muted">
+          <div
                                     className="h-2 rounded-full bg-primary transition-all"
                                     style={{ width: `${building.metrics.ocupacionPct}%` }}
                                   />
@@ -500,7 +500,7 @@ function EdificiosPageContent() {
                             )}
                           </div>
 
-                          <div className="flex lg:flex-col gap-2">
+          <div className="flex lg:flex-col gap-2">
                             <Button
                               onClick={() => router.push(`/edificios/${building.id}`)}
                               className="flex-1 lg:flex-none"
@@ -521,20 +521,20 @@ function EdificiosPageContent() {
             {viewMode === 'compact' && (
               <Card>
                 <CardContent className="pt-6">
-                  <div className="space-y-2">
+          <div className="space-y-2">
                     {filteredBuildings.map((building) => {
                       const tipoBadge = getTipoBadge(building.tipo);
                       return (
-                        <div
+          <div
                           key={building.id}
                           className="flex items-center justify-between p-4 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                           onClick={() => router.push(`/edificios/${building.id}`)}
                         >
-                          <div className="flex items-center gap-4 flex-1">
+          <div className="flex items-center gap-4 flex-1">
                             <Building2 className="h-8 w-8 text-muted-foreground" />
-                            <div className="flex-1">
+          <div className="flex-1">
                               <p className="font-semibold">{building.nombre}</p>
-                              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                                 <span className="flex items-center gap-1">
                                   <MapPin className="h-3 w-3" />
                                   {building.direccion}
@@ -545,18 +545,18 @@ function EdificiosPageContent() {
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-6 text-sm">
-                            <div className="text-center">
+          <div className="flex items-center gap-6 text-sm">
+          <div className="text-center">
                               <p className="text-muted-foreground">Unidades</p>
                               <p className="font-semibold">{building.numeroUnidades}</p>
                             </div>
                             {building.metrics && (
                               <>
-                                <div className="text-center">
+          <div className="text-center">
                                   <p className="text-muted-foreground">Ocupación</p>
                                   <p className="font-semibold">{building.metrics.ocupacionPct}%</p>
                                 </div>
-                                <div className="text-center">
+          <div className="text-center">
                                   <p className="text-muted-foreground">Ingresos/mes</p>
                                   <p className="font-semibold text-green-600">
                                     €{building.metrics.ingresosMensuales.toLocaleString()}
@@ -620,6 +620,7 @@ function EdificiosPageContent() {
         }
       />
     </div>
+  </AuthenticatedLayout>
   );
 }
 

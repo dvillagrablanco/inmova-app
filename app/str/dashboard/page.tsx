@@ -127,12 +127,14 @@ export default function STRDashboardPage() {
         
           
           <main className="flex-1 overflow-y-auto p-6">
-            <div className="flex items-center justify-center h-full">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          <div className="flex items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
             </div>
           </main>
         </div>
       </div>
+    </AuthenticatedLayout>
+    </AuthenticatedLayout>
     );
   }
 
@@ -144,14 +146,14 @@ export default function STRDashboardPage() {
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="flex items-center justify-between">
+          <div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
                   Dashboard STR (Alquiler Vacacional)
                 </h1>
                 <p className="text-gray-600 mt-1">Gestión y análisis de propiedades vacacionales</p>
               </div>
-              <div className="flex gap-2">
+          <div className="flex gap-2">
                 <Button onClick={loadDashboardData} variant="outline">
                   <BarChart3 className="h-4 w-4 mr-2" />
                   Actualizar
@@ -164,14 +166,14 @@ export default function STRDashboardPage() {
             </div>
 
             {/* KPIs */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Anuncios Activos</CardTitle>
                   <Hotel className="h-4 w-4 text-indigo-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{metrics?.activeListings || 0}</div>
+          <div className="text-2xl font-bold">{metrics?.activeListings || 0}</div>
                   <p className="text-xs text-gray-500">de {metrics?.totalListings || 0} totales</p>
                 </CardContent>
               </Card>
@@ -182,8 +184,8 @@ export default function STRDashboardPage() {
                   <TrendingUp className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{metrics?.occupancyRate || 0}%</div>
-                  <div className="flex items-center text-xs text-gray-500">
+          <div className="text-2xl font-bold">{metrics?.occupancyRate || 0}%</div>
+          <div className="flex items-center text-xs text-gray-500">
                     {metrics?.occupancyTrend === 'up' ? (
                       <>
                         <ArrowUp className="h-3 w-3 text-green-600 mr-1" /> Aumentando
@@ -203,10 +205,10 @@ export default function STRDashboardPage() {
                   <DollarSign className="h-4 w-4 text-yellow-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+          <div className="text-2xl font-bold">
                     €{metrics?.monthlyRevenue?.toLocaleString() || 0}
                   </div>
-                  <div className="flex items-center text-xs text-gray-500">
+          <div className="flex items-center text-xs text-gray-500">
                     {metrics?.revenueGrowth && metrics.revenueGrowth > 0 ? (
                       <>
                         <ArrowUp className="h-3 w-3 text-green-600 mr-1" /> +{metrics.revenueGrowth}
@@ -228,7 +230,7 @@ export default function STRDashboardPage() {
                   <Star className="h-4 w-4 text-yellow-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{metrics?.avgRating || 0}</div>
+          <div className="text-2xl font-bold">{metrics?.avgRating || 0}</div>
                   <p className="text-xs text-gray-500">
                     {metrics?.totalBookings || 0} reservas totales
                   </p>
@@ -305,26 +307,26 @@ export default function STRDashboardPage() {
                 </Card>
 
                 {/* Channel Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {channelPerformance.map((channel, index) => (
                     <Card key={index}>
                       <CardHeader>
                         <CardTitle className="text-base">{channel.channel}</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-2">
-                        <div className="flex justify-between">
+          <div className="flex justify-between">
                           <span className="text-sm text-gray-600">Reservas:</span>
                           <span className="font-semibold">{channel.bookings}</span>
                         </div>
-                        <div className="flex justify-between">
+          <div className="flex justify-between">
                           <span className="text-sm text-gray-600">Ingresos:</span>
                           <span className="font-semibold">€{channel.revenue.toLocaleString()}</span>
                         </div>
-                        <div className="flex justify-between">
+          <div className="flex justify-between">
                           <span className="text-sm text-gray-600">Tarifa Media:</span>
                           <span className="font-semibold">€{channel.avgRate}</span>
                         </div>
-                        <div className="flex justify-between">
+          <div className="flex justify-between">
                           <span className="text-sm text-gray-600">Comisión:</span>
                           <span className="text-sm text-red-600">-€{channel.commission}</span>
                         </div>
@@ -336,7 +338,7 @@ export default function STRDashboardPage() {
 
               {/* Performance Tab */}
               <TabsContent value="performance" className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Card>
                     <CardHeader>
                       <CardTitle>Distribución de Reservas</CardTitle>
@@ -369,38 +371,38 @@ export default function STRDashboardPage() {
                       <CardTitle>Métricas Clave</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
+          <div>
+          <div className="flex justify-between items-center mb-2">
                           <span className="text-sm text-gray-600">Tarifa Promedio Noche</span>
                           <span className="font-semibold text-lg">
                             €{metrics?.avgNightlyRate || 0}
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
+          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div
                             className="bg-indigo-600 h-2 rounded-full"
                             style={{ width: '75%' }}
                           ></div>
                         </div>
                       </div>
 
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
+          <div>
+          <div className="flex justify-between items-center mb-2">
                           <span className="text-sm text-gray-600">Ocupación Anual</span>
                           <span className="font-semibold text-lg">
                             {metrics?.occupancyRate || 0}%
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
+          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div
                             className="bg-green-600 h-2 rounded-full"
                             style={{ width: `${metrics?.occupancyRate || 0}%` }}
                           ></div>
                         </div>
                       </div>
 
-                      <div className="pt-4 border-t">
-                        <div className="flex justify-between">
+          <div className="pt-4 border-t">
+          <div className="flex justify-between">
                           <span className="text-sm text-gray-600">Ingresos Totales:</span>
                           <span className="font-bold text-green-600">
                             €{metrics?.totalRevenue?.toLocaleString() || 0}

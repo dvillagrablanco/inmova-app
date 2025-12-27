@@ -51,7 +51,7 @@ function RoomRentalPage() {
   if (loading) {
     return (
       <AuthenticatedLayout>
-            <div className="text-center py-12">Cargando...</div>
+          <div className="text-center py-12">Cargando...</div>
           </main>
         </div>
       </div>
@@ -62,7 +62,7 @@ function RoomRentalPage() {
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="mb-6">
+          <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Alquiler por Habitaciones</h1>
               <p className="text-gray-600">
                 Gestiona habitaciones, contratos y prorrateo de suministros
@@ -71,7 +71,7 @@ function RoomRentalPage() {
 
             {/* Analytics KPIs */}
             {analytics && (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium text-gray-600">
@@ -79,7 +79,7 @@ function RoomRentalPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-green-600">
+          <div className="text-2xl font-bold text-green-600">
                       {analytics.occupancyRate}%
                     </div>
                   </CardContent>
@@ -92,7 +92,7 @@ function RoomRentalPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-blue-600">
+          <div className="text-2xl font-bold text-blue-600">
                       €{analytics.totalRevenue.toLocaleString()}
                     </div>
                   </CardContent>
@@ -105,7 +105,7 @@ function RoomRentalPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-purple-600">
+          <div className="text-2xl font-bold text-purple-600">
                       €{analytics.averageRoomPrice.toFixed(0)}/mes
                     </div>
                   </CardContent>
@@ -118,7 +118,7 @@ function RoomRentalPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-orange-600">
+          <div className="text-2xl font-bold text-orange-600">
                       {analytics.averageStayDuration.toFixed(0)} días
                     </div>
                   </CardContent>
@@ -135,7 +135,7 @@ function RoomRentalPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {units.map((unit) => (
                     <Card
                       key={unit.id}
@@ -143,20 +143,20 @@ function RoomRentalPage() {
                       onClick={() => router.push(`/room-rental/${unit.id}`)}
                     >
                       <CardContent className="p-4">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
+          <div className="flex items-start justify-between mb-3">
+          <div>
                             <h3 className="font-semibold text-lg">{unit.building?.nombre}</h3>
                             <p className="text-sm text-gray-600">Unidad {unit.numero}</p>
                           </div>
                           <Building2 className="h-8 w-8 text-blue-500" />
                         </div>
 
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center justify-between">
+          <div className="space-y-2 text-sm">
+          <div className="flex items-center justify-between">
                             <span className="text-gray-600">Superficie:</span>
                             <span className="font-medium">{unit.superficie}m²</span>
                           </div>
-                          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
                             <span className="text-gray-600">Estado:</span>
                             <Badge variant={unit.estado === 'disponible' ? 'default' : 'secondary'}>
                               {unit.estado}
@@ -173,7 +173,7 @@ function RoomRentalPage() {
                   ))}
 
                   {units.length === 0 && (
-                    <div className="col-span-full text-center py-12 text-gray-500">
+          <div className="col-span-full text-center py-12 text-gray-500">
                       <DoorOpen className="mx-auto h-12 w-12 mb-4 text-gray-400" />
                       <p>No hay unidades disponibles para alquiler por habitaciones</p>
                       <Button className="mt-4" onClick={() => router.push('/unidades/nuevo')}>
@@ -190,6 +190,8 @@ function RoomRentalPage() {
       </div>
     </div>
   );
+  </AuthenticatedLayout>
+  </AuthenticatedLayout>
 }
 
 export default function RoomRentalPageWithErrorBoundary() {

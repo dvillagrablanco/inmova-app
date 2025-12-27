@@ -332,6 +332,7 @@ export default function TareasPage() {
       <AuthenticatedLayout>
             <LoadingState message="Cargando tareas..." />
           </AuthenticatedLayout>
+    </AuthenticatedLayout>
     );
   }
 
@@ -339,7 +340,7 @@ export default function TareasPage() {
     <AuthenticatedLayout>
           {/* Breadcrumbs y Header */}
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="space-y-2">
+          <div className="space-y-2">
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
@@ -353,7 +354,7 @@ export default function TareasPage() {
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
-              <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
                 <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Volver al Dashboard
@@ -377,7 +378,7 @@ export default function TareasPage() {
                 <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.total}</div>
+          <div className="text-2xl font-bold">{stats.total}</div>
               </CardContent>
             </Card>
 
@@ -387,7 +388,7 @@ export default function TareasPage() {
                 <Clock className="h-4 w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.pendientes}</div>
+          <div className="text-2xl font-bold">{stats.pendientes}</div>
               </CardContent>
             </Card>
 
@@ -397,7 +398,7 @@ export default function TareasPage() {
                 <TrendingUp className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.enProgreso}</div>
+          <div className="text-2xl font-bold">{stats.enProgreso}</div>
               </CardContent>
             </Card>
 
@@ -407,7 +408,7 @@ export default function TareasPage() {
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.completadas}</div>
+          <div className="text-2xl font-bold">{stats.completadas}</div>
               </CardContent>
             </Card>
 
@@ -417,14 +418,14 @@ export default function TareasPage() {
                 <AlertCircle className="h-4 w-4 text-red-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.urgentes}</div>
+          <div className="text-2xl font-bold">{stats.urgentes}</div>
               </CardContent>
             </Card>
           </div>
 
           {/* Filtros */}
           <div className="mb-6 space-y-4">
-            <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-3">
               <Input
                 placeholder="Buscar tareas..."
                 value={searchTerm}
@@ -529,9 +530,9 @@ export default function TareasPage() {
               filteredTasks.map((task) => (
                 <Card key={task.id} className="overflow-hidden">
                   <CardContent className="p-4">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="flex-1 space-y-2">
-                        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex-1 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
                           <h3 className="font-semibold">{task.titulo}</h3>
                           {getEstadoBadge(task.estado)}
                           {getPrioridadBadge(task.prioridad)}
@@ -539,15 +540,15 @@ export default function TareasPage() {
                         {task.descripcion && (
                           <p className="text-sm text-muted-foreground">{task.descripcion}</p>
                         )}
-                        <div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+          <div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
                           {task.asignadoUser && (
-                            <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1">
                               <User className="h-3 w-3" />
                               <span>Asignado: {task.asignadoUser.name}</span>
                             </div>
                           )}
                           {task.fechaLimite && (
-                            <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
                               <span>
                                 Límite:{' '}
@@ -557,7 +558,7 @@ export default function TareasPage() {
                           )}
                         </div>
                       </div>
-                      <div className="flex gap-2">
+          <div className="flex gap-2">
                         {task.estado !== 'completada' && canUpdate && (
                           <Button
                             size="sm"
@@ -612,7 +613,7 @@ export default function TareasPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
+          <div className="grid gap-2">
               <Label htmlFor="titulo">Título *</Label>
               <Input
                 id="titulo"
@@ -621,7 +622,7 @@ export default function TareasPage() {
                 placeholder="Título de la tarea"
               />
             </div>
-            <div className="grid gap-2">
+          <div className="grid gap-2">
               <Label htmlFor="descripcion">Descripción</Label>
               <Textarea
                 id="descripcion"
@@ -631,8 +632,8 @@ export default function TareasPage() {
                 rows={3}
               />
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="grid gap-2">
+          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-2">
                 <Label htmlFor="estado">Estado</Label>
                 <Select
                   value={formData.estado}
@@ -649,7 +650,7 @@ export default function TareasPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid gap-2">
+          <div className="grid gap-2">
                 <Label htmlFor="prioridad">Prioridad</Label>
                 <Select
                   value={formData.prioridad}
@@ -667,8 +668,8 @@ export default function TareasPage() {
                 </Select>
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="grid gap-2">
+          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-2">
                 <Label htmlFor="fechaInicio">Fecha Inicio</Label>
                 <Input
                   id="fechaInicio"
@@ -677,7 +678,7 @@ export default function TareasPage() {
                   onChange={(e) => setFormData({ ...formData, fechaInicio: e.target.value })}
                 />
               </div>
-              <div className="grid gap-2">
+          <div className="grid gap-2">
                 <Label htmlFor="fechaLimite">Fecha Límite</Label>
                 <Input
                   id="fechaLimite"
@@ -687,7 +688,7 @@ export default function TareasPage() {
                 />
               </div>
             </div>
-            <div className="grid gap-2">
+          <div className="grid gap-2">
               <Label htmlFor="asignadoA">Asignar a</Label>
               <Select
                 value={formData.asignadoA}
@@ -706,7 +707,7 @@ export default function TareasPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid gap-2">
+          <div className="grid gap-2">
               <Label htmlFor="notas">Notas</Label>
               <Textarea
                 id="notas"

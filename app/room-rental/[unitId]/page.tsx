@@ -126,10 +126,12 @@ export default function UnitRoomsPage() {
   if (loading) {
     return (
       <AuthenticatedLayout>
-            <div className="text-center py-12">Cargando...</div>
+          <div className="text-center py-12">Cargando...</div>
           </main>
         </div>
       </div>
+    </AuthenticatedLayout>
+    </AuthenticatedLayout>
     );
   }
 
@@ -137,8 +139,8 @@ export default function UnitRoomsPage() {
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="mb-6 flex items-center justify-between">
-              <div>
+          <div className="mb-6 flex items-center justify-between">
+          <div>
                 <Button variant="ghost" onClick={() => router.back()} className="mb-2">
                   ← Volver
                 </Button>
@@ -147,7 +149,7 @@ export default function UnitRoomsPage() {
                 </h1>
                 <p className="text-gray-600">Gestiona las habitaciones de esta unidad</p>
               </div>
-              <div className="space-x-2">
+          <div className="space-x-2">
                 <Button
                   variant="outline"
                   onClick={() => router.push(`/room-rental/${unitId}/proration`)}
@@ -172,8 +174,8 @@ export default function UnitRoomsPage() {
                         </DialogDescription>
                       </DialogHeader>
 
-                      <div className="grid grid-cols-2 gap-4 py-4">
-                        <div>
+          <div className="grid grid-cols-2 gap-4 py-4">
+          <div>
                           <Label htmlFor="numero">Número *</Label>
                           <Input
                             id="numero"
@@ -182,7 +184,7 @@ export default function UnitRoomsPage() {
                             required
                           />
                         </div>
-                        <div>
+          <div>
                           <Label htmlFor="nombre">Nombre</Label>
                           <Input
                             id="nombre"
@@ -191,7 +193,7 @@ export default function UnitRoomsPage() {
                             placeholder="Habitación Azul"
                           />
                         </div>
-                        <div>
+          <div>
                           <Label htmlFor="superficie">Superficie (m²) *</Label>
                           <Input
                             id="superficie"
@@ -204,7 +206,7 @@ export default function UnitRoomsPage() {
                             required
                           />
                         </div>
-                        <div>
+          <div>
                           <Label htmlFor="rentaMensual">Precio/Mes (€) *</Label>
                           <Input
                             id="rentaMensual"
@@ -217,7 +219,7 @@ export default function UnitRoomsPage() {
                             required
                           />
                         </div>
-                        <div>
+          <div>
                           <Label htmlFor="tipoHabitacion">Tipo de Habitación</Label>
                           <Select
                             value={formData.tipoHabitacion}
@@ -236,8 +238,8 @@ export default function UnitRoomsPage() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="flex items-center space-x-4">
-                          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
                             <input
                               type="checkbox"
                               id="banoPrivado"
@@ -249,7 +251,7 @@ export default function UnitRoomsPage() {
                             />
                             <Label htmlFor="banoPrivado">Baño Privado</Label>
                           </div>
-                          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
                             <input
                               type="checkbox"
                               id="amueblada"
@@ -281,12 +283,12 @@ export default function UnitRoomsPage() {
             </div>
 
             {/* Lista de Habitaciones */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {rooms.map((room) => (
                 <Card key={room.id} className="hover:shadow-md transition-shadow">
                   <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
+          <div className="flex items-start justify-between">
+          <div>
                         <CardTitle className="text-lg">
                           Habitación {room.numero}
                           {room.nombre && (
@@ -303,21 +305,21 @@ export default function UnitRoomsPage() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div>
+          <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-2 text-sm">
+          <div>
                           <span className="text-gray-600">Superficie:</span>
                           <p className="font-medium">{room.superficie}m²</p>
                         </div>
-                        <div>
+          <div>
                           <span className="text-gray-600">Precio:</span>
                           <p className="font-medium text-green-600">€{room.rentaMensual}/mes</p>
                         </div>
                       </div>
 
                       {room.contracts && room.contracts.length > 0 && (
-                        <div className="border-t pt-3">
-                          <div className="flex items-center space-x-2 text-sm">
+          <div className="border-t pt-3">
+          <div className="flex items-center space-x-2 text-sm">
                             <Users className="h-4 w-4 text-gray-500" />
                             <span className="font-medium">
                               {room.contracts[0].tenant?.nombreCompleto}
@@ -326,7 +328,7 @@ export default function UnitRoomsPage() {
                         </div>
                       )}
 
-                      <div className="flex space-x-2">
+          <div className="flex space-x-2">
                         <Button
                           size="sm"
                           className="flex-1"
@@ -341,7 +343,7 @@ export default function UnitRoomsPage() {
               ))}
 
               {rooms.length === 0 && (
-                <div className="col-span-full">
+          <div className="col-span-full">
                   <Card>
                     <CardContent className="py-12 text-center">
                       <DoorOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />

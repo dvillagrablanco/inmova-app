@@ -261,6 +261,7 @@ export default function OpenBankingPage() {
       <div className="flex h-screen items-center justify-center">
         <RefreshCw className="h-8 w-8 animate-spin" />
       </div>
+    </AuthenticatedLayout>
     );
   }
 
@@ -270,8 +271,8 @@ export default function OpenBankingPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto">
-            <div className="mb-6">
+        <div className="max-w-7xl mx-auto">
+        <div className="mb-6">
               <Button
                 variant="ghost"
                 size="sm"
@@ -294,8 +295,8 @@ export default function OpenBankingPage() {
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
-              <div className="flex items-center justify-between mt-2">
-                <div>
+        <div className="flex items-center justify-between mt-2">
+        <div>
                   <h1 className="text-2xl font-bold md:text-3xl">🏦 Open Banking</h1>
                   <p className="text-muted-foreground">
                     Gestión de conexiones bancarias y conciliación automática
@@ -309,7 +310,7 @@ export default function OpenBankingPage() {
             </div>
 
             {/* KPIs */}
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm text-muted-foreground">
@@ -317,7 +318,7 @@ export default function OpenBankingPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{conexionesActivas}</div>
+        <div className="text-2xl font-bold">{conexionesActivas}</div>
                   <p className="text-xs text-muted-foreground mt-1">
                     de {conexiones.length} totales
                   </p>
@@ -328,7 +329,7 @@ export default function OpenBankingPage() {
                   <CardTitle className="text-sm text-muted-foreground">Transacciones</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{totalTransacciones}</div>
+        <div className="text-2xl font-bold">{totalTransacciones}</div>
                   <p className="text-xs text-muted-foreground mt-1">sincronizadas</p>
                 </CardContent>
               </Card>
@@ -337,7 +338,7 @@ export default function OpenBankingPage() {
                   <CardTitle className="text-sm text-muted-foreground">Conciliadas</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{transaccionesConciliadas}</div>
+        <div className="text-2xl font-bold">{transaccionesConciliadas}</div>
                   <p className="text-xs text-muted-foreground mt-1">
                     {totalTransacciones > 0
                       ? `${Math.round((transaccionesConciliadas / totalTransacciones) * 100)}%`
@@ -397,16 +398,16 @@ export default function OpenBankingPage() {
                     </CardContent>
                   </Card>
                 ) : (
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {conexiones.map((conn) => (
                       <Card key={conn.id} className="hover:shadow-lg transition-shadow">
                         <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div className="flex gap-3">
-                              <div className="rounded-full bg-primary/10 p-2">
+        <div className="flex items-start justify-between">
+        <div className="flex gap-3">
+        <div className="rounded-full bg-primary/10 p-2">
                                 <Building2 className="h-5 w-5 text-primary" />
                               </div>
-                              <div>
+        <div>
                                 <CardTitle className="text-base">{conn.nombreBanco}</CardTitle>
                                 <CardDescription>
                                   {conn.proveedor === 'bankinter_redsys'
@@ -418,16 +419,16 @@ export default function OpenBankingPage() {
                           </div>
                         </CardHeader>
                         <CardContent>
-                          <div className="space-y-3">
+        <div className="space-y-3">
                             {conn.tipoCuenta && (
-                              <div className="flex justify-between text-sm">
+        <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">Cuenta:</span>
                                 <span className="font-medium">
                                   ****{conn.ultimosDigitos || '****'}
                                 </span>
                               </div>
                             )}
-                            <div className="flex justify-between text-sm">
+        <div className="flex justify-between text-sm">
                               <span className="text-muted-foreground">Estado:</span>
                               <Badge
                                 variant={conn.estado === 'conectado' ? 'default' : 'secondary'}
@@ -448,7 +449,7 @@ export default function OpenBankingPage() {
                               </Badge>
                             </div>
                             {conn.ultimaSync && (
-                              <div className="flex justify-between text-sm">
+        <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">Última sync:</span>
                                 <span className="font-medium">
                                   {format(new Date(conn.ultimaSync), 'dd/MM/yyyy HH:mm', {
@@ -458,7 +459,7 @@ export default function OpenBankingPage() {
                               </div>
                             )}
                             {conn.consentValidUntil && (
-                              <div className="flex justify-between text-sm">
+        <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">Válido hasta:</span>
                                 <span className="font-medium">
                                   {format(new Date(conn.consentValidUntil), 'dd/MM/yyyy', {
@@ -514,8 +515,8 @@ export default function OpenBankingPage() {
               <TabsContent value="transacciones" className="space-y-4">
                 <Card>
                   <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
+        <div className="flex items-center justify-between">
+        <div>
                         <CardTitle>Transacciones Sincronizadas</CardTitle>
                         <CardDescription>
                           {totalTransacciones} transacciones, {transaccionesConciliadas} conciliadas
@@ -534,19 +535,19 @@ export default function OpenBankingPage() {
                   </CardHeader>
                   <CardContent>
                     {transacciones.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-12">
+        <div className="flex flex-col items-center justify-center py-12">
                         <TrendingUp className="h-12 w-12 text-muted-foreground/50 mb-4" />
                         <p className="text-muted-foreground">No hay transacciones sincronizadas</p>
                       </div>
                     ) : (
-                      <div className="space-y-2 max-h-[500px] overflow-y-auto">
+        <div className="space-y-2 max-h-[500px] overflow-y-auto">
                         {transacciones.slice(0, 50).map((tx) => (
-                          <div
+        <div
                             key={tx.id}
                             className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
                           >
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
+        <div className="flex-1">
+        <div className="flex items-center gap-2">
                                 <p className="font-medium">{tx.descripcion}</p>
                                 {tx.conciliado && (
                                   <Badge variant="outline" className="text-xs">
@@ -559,7 +560,7 @@ export default function OpenBankingPage() {
                                 {format(new Date(tx.fecha), 'dd/MM/yyyy HH:mm', { locale: es })}
                               </p>
                             </div>
-                            <div className="text-right">
+        <div className="text-right">
                               <p
                                 className={`font-semibold ${tx.tipo === 'ingreso' ? 'text-green-600' : 'text-red-600'}`}
                               >
@@ -585,9 +586,9 @@ export default function OpenBankingPage() {
             {/* Info Box */}
             <Card className="mt-6 border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-900">
               <CardContent className="pt-6">
-                <div className="flex gap-3">
+        <div className="flex gap-3">
                   <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <div className="space-y-2 text-sm">
+        <div className="space-y-2 text-sm">
                     <p className="font-semibold text-blue-900 dark:text-blue-100">
                       Integración con Bankinter (Open Banking PSD2)
                     </p>
@@ -596,7 +597,7 @@ export default function OpenBankingPage() {
                       Bankinter. Las transacciones se sincronizan automáticamente y pueden
                       conciliarse con los pagos de alquiler de forma automática.
                     </p>
-                    <div className="flex gap-2 mt-3">
+        <div className="flex gap-2 mt-3">
                       <Button
                         variant="outline"
                         size="sm"
@@ -645,21 +646,21 @@ export default function OpenBankingPage() {
               Transacciones sincronizadas de esta cuenta bancaria
             </DialogDescription>
           </DialogHeader>
-          <div className="max-h-[400px] overflow-y-auto">
+        <div className="max-h-[400px] overflow-y-auto">
             {selectedConnection?.transactions && selectedConnection.transactions.length > 0 ? (
-              <div className="space-y-2">
+        <div className="space-y-2">
                 {selectedConnection.transactions.map((tx) => (
-                  <div
+        <div
                     key={tx.id}
                     className="flex items-center justify-between p-3 border rounded-lg"
                   >
-                    <div>
+        <div>
                       <p className="font-medium">{tx.descripcion}</p>
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(tx.fecha), 'dd/MM/yyyy HH:mm', { locale: es })}
                       </p>
                     </div>
-                    <div className="text-right">
+        <div className="text-right">
                       <p
                         className={`font-semibold ${tx.tipo === 'ingreso' ? 'text-green-600' : 'text-red-600'}`}
                       >
@@ -671,7 +672,7 @@ export default function OpenBankingPage() {
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-12">
+        <div className="flex flex-col items-center justify-center py-12">
                 <p className="text-muted-foreground">No hay transacciones para esta conexión</p>
               </div>
             )}

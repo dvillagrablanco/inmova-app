@@ -267,14 +267,15 @@ export default function VisitasPage() {
           <div className="mb-4 text-lg">Cargando...</div>
         </div>
       </div>
+    </AuthenticatedLayout>
     );
   }
 
   return (
     <AuthenticatedLayout>
           {/* Breadcrumbs y Header */}
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="space-y-2">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-2">
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
@@ -288,7 +289,7 @@ export default function VisitasPage() {
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
-              <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
                 <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Volver al Dashboard
@@ -305,14 +306,14 @@ export default function VisitasPage() {
           </div>
 
           {/* KPI Cards */}
-          <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Visitas</CardTitle>
                 <CalendarIcon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.total}</div>
+        <div className="text-2xl font-bold">{stats.total}</div>
               </CardContent>
             </Card>
 
@@ -322,7 +323,7 @@ export default function VisitasPage() {
                 <Clock className="h-4 w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.pendientes}</div>
+        <div className="text-2xl font-bold">{stats.pendientes}</div>
               </CardContent>
             </Card>
 
@@ -332,7 +333,7 @@ export default function VisitasPage() {
                 <CheckCircle2 className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.confirmadas}</div>
+        <div className="text-2xl font-bold">{stats.confirmadas}</div>
               </CardContent>
             </Card>
 
@@ -342,13 +343,13 @@ export default function VisitasPage() {
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.realizadas}</div>
+        <div className="text-2xl font-bold">{stats.realizadas}</div>
               </CardContent>
             </Card>
           </div>
 
           {/* Filtros */}
-          <div className="mb-6">
+        <div className="mb-6">
             <Select value={filterStatus} onValueChange={setFilterStatus}>
               <SelectTrigger className="w-full sm:w-64">
                 <SelectValue placeholder="Filtrar por estado" />
@@ -363,7 +364,7 @@ export default function VisitasPage() {
           </div>
 
           {/* Calendario y Lista */}
-          <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2">
             {/* Calendario */}
             <Card>
               <CardHeader>
@@ -412,35 +413,35 @@ export default function VisitasPage() {
                   visitsForSelectedDate.map((visit) => (
                     <Card key={visit.id} className="overflow-hidden">
                       <CardContent className="p-4">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 space-y-2">
-                            <div className="flex items-center gap-2">
+        <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 space-y-2">
+        <div className="flex items-center gap-2">
                               {getStatusBadge(visit)}
                               <span className="text-sm font-medium">
                                 {format(parseISO(visit.fechaVisita), 'HH:mm')}
                               </span>
                             </div>
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2 text-sm">
+        <div className="space-y-1">
+        <div className="flex items-center gap-2 text-sm">
                                 <User className="h-4 w-4 text-muted-foreground" />
                                 <span className="font-medium">
                                   {visit.candidate.nombreCompleto}
                                 </span>
                               </div>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <MapPin className="h-4 w-4" />
                                 <span>
                                   {visit.candidate.unit.building.nombre} - Unidad{' '}
                                   {visit.candidate.unit.numero}
                                 </span>
                               </div>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Phone className="h-4 w-4" />
                                 <span>{visit.candidate.telefono}</span>
                               </div>
                             </div>
                           </div>
-                          <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2">
                             {!visit.asistio && (
                               <>
                                 {!visit.confirmada ? (
@@ -480,7 +481,7 @@ export default function VisitasPage() {
               <CardDescription>Lista completa de visitas programadas</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+        <div className="space-y-4">
                 {filteredVisits.length === 0 ? (
                   <p className="text-center text-sm text-muted-foreground">
                     No hay visitas programadas
@@ -489,9 +490,9 @@ export default function VisitasPage() {
                   filteredVisits.map((visit) => (
                     <Card key={visit.id}>
                       <CardContent className="p-4">
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                          <div className="flex-1 space-y-2">
-                            <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex-1 space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
                               {getStatusBadge(visit)}
                               <span className="text-sm font-medium">
                                 {format(
@@ -501,20 +502,20 @@ export default function VisitasPage() {
                                 )}
                               </span>
                             </div>
-                            <div className="grid gap-2 sm:grid-cols-2">
-                              <div className="flex items-center gap-2 text-sm">
+        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="flex items-center gap-2 text-sm">
                                 <User className="h-4 w-4 text-muted-foreground" />
                                 <span>{visit.candidate.nombreCompleto}</span>
                               </div>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Mail className="h-4 w-4" />
                                 <span>{visit.candidate.email}</span>
                               </div>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Phone className="h-4 w-4" />
                                 <span>{visit.candidate.telefono}</span>
                               </div>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <MapPin className="h-4 w-4" />
                                 <span>
                                   {visit.candidate.unit.building.nombre} - Unidad{' '}
@@ -523,7 +524,7 @@ export default function VisitasPage() {
                               </div>
                             </div>
                           </div>
-                          <div className="flex gap-2 sm:flex-col">
+        <div className="flex gap-2 sm:flex-col">
                             {!visit.asistio && (
                               <>
                                 {!visit.confirmada ? (
@@ -561,8 +562,8 @@ export default function VisitasPage() {
             <DialogTitle>Programar Nueva Visita</DialogTitle>
             <DialogDescription>Programa una visita para un candidato interesado</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
+        <div className="grid gap-4 py-4">
+        <div className="grid gap-2">
               <Label htmlFor="candidate">Candidato</Label>
               <Select
                 value={formData.candidateId}
@@ -581,7 +582,7 @@ export default function VisitasPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid gap-2">
+        <div className="grid gap-2">
               <Label htmlFor="fecha">Fecha</Label>
               <Input
                 id="fecha"
@@ -590,7 +591,7 @@ export default function VisitasPage() {
                 onChange={(e) => setFormData({ ...formData, fechaVisita: e.target.value })}
               />
             </div>
-            <div className="grid gap-2">
+        <div className="grid gap-2">
               <Label htmlFor="hora">Hora</Label>
               <Input
                 id="hora"

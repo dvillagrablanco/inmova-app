@@ -174,13 +174,14 @@ export default function STRHousekeepingPage() {
   if (loading) {
     return (
       <AuthenticatedLayout>
-            <div className="flex justify-center items-center h-full">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <div className="flex justify-center items-center h-full">
+          <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
                 <p className="text-muted-foreground">Cargando...</p>
               </div>
             </div>
           </AuthenticatedLayout>
+    </AuthenticatedLayout>
     );
   }
 
@@ -188,14 +189,14 @@ export default function STRHousekeepingPage() {
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
-            <div className="flex justify-between items-center">
-              <div>
+          <div className="flex justify-between items-center">
+          <div>
                 <h1 className="text-3xl font-bold gradient-text">Gestión de Limpieza STR</h1>
                 <p className="text-muted-foreground mt-1">
                   Gestiona tareas de limpieza, personal e inventario
                 </p>
               </div>
-              <div className="flex gap-2">
+          <div className="flex gap-2">
                 <Button variant="outline" onClick={loadData}>
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Actualizar
@@ -208,7 +209,7 @@ export default function STRHousekeepingPage() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -216,7 +217,7 @@ export default function STRHousekeepingPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.pendientes}</div>
+          <div className="text-2xl font-bold">{stats.pendientes}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -226,7 +227,7 @@ export default function STRHousekeepingPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.asignadas}</div>
+          <div className="text-2xl font-bold">{stats.asignadas}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -236,7 +237,7 @@ export default function STRHousekeepingPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.enProgreso}</div>
+          <div className="text-2xl font-bold">{stats.enProgreso}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -246,7 +247,7 @@ export default function STRHousekeepingPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.completadas}</div>
+          <div className="text-2xl font-bold">{stats.completadas}</div>
                 </CardContent>
               </Card>
             </div>
@@ -275,9 +276,9 @@ export default function STRHousekeepingPage() {
                 {/* Filters */}
                 <Card>
                   <CardContent className="pt-6">
-                    <div className="flex gap-4">
-                      <div className="flex-1">
-                        <div className="relative">
+          <div className="flex gap-4">
+          <div className="flex-1">
+          <div className="relative">
                           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           <Input
                             placeholder="Buscar por propiedad o personal..."
@@ -305,7 +306,7 @@ export default function STRHousekeepingPage() {
                 </Card>
 
                 {/* Tasks List */}
-                <div className="space-y-4">
+          <div className="space-y-4">
                   {filteredTasks.length === 0 ? (
                     <Card>
                       <CardContent className="p-12 text-center">
@@ -324,9 +325,9 @@ export default function STRHousekeepingPage() {
                     filteredTasks.map((task) => (
                       <Card key={task.id} className="hover:shadow-md transition-shadow">
                         <CardContent className="p-6">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1 space-y-2">
-                              <div className="flex items-center gap-2">
+          <div className="flex items-start justify-between">
+          <div className="flex-1 space-y-2">
+          <div className="flex items-center gap-2">
                                 <h3 className="font-semibold text-lg">
                                   {task.listing?.titulo || 'Sin título'}
                                 </h3>
@@ -338,14 +339,14 @@ export default function STRHousekeepingPage() {
                                   <Badge variant="destructive">Urgente</Badge>
                                 )}
                               </div>
-                              <div className="text-sm text-muted-foreground space-y-1">
+          <div className="text-sm text-muted-foreground space-y-1">
                                 {task.listing?.unit?.building?.nombre && (
-                                  <div>
+          <div>
                                     📍 {task.listing.unit.building.nombre} -{' '}
                                     {task.listing.unit.numero}
                                   </div>
                                 )}
-                                <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4">
                                   <span className="flex items-center gap-1">
                                     <Calendar className="h-3.5 w-3.5" />
                                     {format(new Date(task.fechaTarea), 'PPP', { locale: es })}
@@ -359,13 +360,13 @@ export default function STRHousekeepingPage() {
                                   )}
                                 </div>
                                 {task.instrucciones && (
-                                  <div className="text-xs mt-2 p-2 bg-muted rounded">
+          <div className="text-xs mt-2 p-2 bg-muted rounded">
                                     {task.instrucciones}
                                   </div>
                                 )}
                               </div>
                             </div>
-                            <div className="flex gap-2">
+          <div className="flex gap-2">
                               {task.estado === 'pendiente' && (
                                 <Button
                                   size="sm"
@@ -413,7 +414,7 @@ export default function STRHousekeepingPage() {
             <DialogTitle>Nueva Tarea de Limpieza</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
+          <div>
               <Label>Propiedad</Label>
               <Select
                 value={formData.listingId}
@@ -432,8 +433,8 @@ export default function STRHousekeepingPage() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+          <div className="grid grid-cols-2 gap-4">
+          <div>
                 <Label>Tipo</Label>
                 <Select
                   value={formData.tipo}
@@ -452,7 +453,7 @@ export default function STRHousekeepingPage() {
                 </Select>
               </div>
 
-              <div>
+          <div>
                 <Label>Prioridad</Label>
                 <Select
                   value={formData.prioridad}
@@ -471,8 +472,8 @@ export default function STRHousekeepingPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+          <div className="grid grid-cols-2 gap-4">
+          <div>
                 <Label>Fecha</Label>
                 <Input
                   type="date"
@@ -481,7 +482,7 @@ export default function STRHousekeepingPage() {
                 />
               </div>
 
-              <div>
+          <div>
                 <Label>Hora estimada</Label>
                 <Input
                   type="time"
@@ -491,7 +492,7 @@ export default function STRHousekeepingPage() {
               </div>
             </div>
 
-            <div>
+          <div>
               <Label>Asignar a</Label>
               <Select
                 value={formData.asignadoA}
@@ -511,7 +512,7 @@ export default function STRHousekeepingPage() {
               </Select>
             </div>
 
-            <div>
+          <div>
               <Label>Instrucciones</Label>
               <Input
                 value={formData.instrucciones}
@@ -520,7 +521,7 @@ export default function STRHousekeepingPage() {
               />
             </div>
 
-            <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowDialog(false)}>
                 Cancelar
               </Button>

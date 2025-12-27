@@ -169,7 +169,7 @@ export default function OccupancyReportsPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
+        <div className="max-w-7xl mx-auto space-y-6">
             {/* Breadcrumb */}
             <Breadcrumb>
               <BreadcrumbList>
@@ -196,19 +196,19 @@ export default function OccupancyReportsPage() {
             </Breadcrumb>
 
             {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex items-center gap-3">
+        <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
                   <FileText className="h-6 w-6 text-white" />
                 </div>
-                <div>
+        <div>
                   <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                     Reportes de Ocupación
                   </h1>
                   <p className="text-sm text-gray-600 mt-1">{report.unit.nombre}</p>
                 </div>
               </div>
-              <div className="flex gap-2">
+        <div className="flex gap-2">
                 <Select value={selectedMonth} onValueChange={setSelectedMonth}>
                   <SelectTrigger className="w-48">
                     <SelectValue />
@@ -229,11 +229,11 @@ export default function OccupancyReportsPage() {
             </div>
 
             {/* KPIs del período */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="bg-gradient-to-br from-indigo-50 to-blue-50 border-indigo-200">
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
+        <div className="flex items-center justify-between">
+        <div>
                       <p className="text-sm text-gray-600 mb-1">Tasa de Ocupación</p>
                       <p className="text-3xl font-bold text-indigo-900">
                         {report.summary.averageOccupancyRate.toFixed(1)}%
@@ -243,7 +243,7 @@ export default function OccupancyReportsPage() {
                         días
                       </p>
                     </div>
-                    <div className="p-3 bg-indigo-600 rounded-xl">
+        <div className="p-3 bg-indigo-600 rounded-xl">
                       <PieChartIcon className="h-8 w-8 text-white" />
                     </div>
                   </div>
@@ -252,15 +252,15 @@ export default function OccupancyReportsPage() {
 
               <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
+        <div className="flex items-center justify-between">
+        <div>
                       <p className="text-sm text-gray-600 mb-1">Ingresos Totales</p>
                       <p className="text-3xl font-bold text-green-900">
                         {report.summary.totalRevenue.toFixed(0)}€
                       </p>
                       <p className="text-xs text-gray-600 mt-1">En el período seleccionado</p>
                     </div>
-                    <div className="p-3 bg-green-600 rounded-xl">
+        <div className="p-3 bg-green-600 rounded-xl">
                       <Euro className="h-8 w-8 text-white" />
                     </div>
                   </div>
@@ -269,15 +269,15 @@ export default function OccupancyReportsPage() {
 
               <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
+        <div className="flex items-center justify-between">
+        <div>
                       <p className="text-sm text-gray-600 mb-1">Ingreso por Habitación</p>
                       <p className="text-3xl font-bold text-purple-900">
                         {report.summary.avgRevPerRoom.toFixed(0)}€
                       </p>
                       <p className="text-xs text-gray-600 mt-1">Promedio del período</p>
                     </div>
-                    <div className="p-3 bg-purple-600 rounded-xl">
+        <div className="p-3 bg-purple-600 rounded-xl">
                       <TrendingUp className="h-8 w-8 text-white" />
                     </div>
                   </div>
@@ -286,15 +286,15 @@ export default function OccupancyReportsPage() {
 
               <Card className="bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200">
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
+        <div className="flex items-center justify-between">
+        <div>
                       <p className="text-sm text-gray-600 mb-1">Total Habitaciones</p>
                       <p className="text-3xl font-bold text-orange-900">
                         {report.roomsData.length}
                       </p>
                       <p className="text-xs text-gray-600 mt-1">En esta propiedad</p>
                     </div>
-                    <div className="p-3 bg-orange-600 rounded-xl">
+        <div className="p-3 bg-orange-600 rounded-xl">
                       <DoorOpen className="h-8 w-8 text-white" />
                     </div>
                   </div>
@@ -311,19 +311,19 @@ export default function OccupancyReportsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+        <div className="space-y-4">
                   {report.roomsData.map((room) => (
-                    <div
+        <div
                       key={room.roomId}
                       className="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex items-start gap-4">
-                          <div className="p-3 bg-indigo-100 rounded-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-start gap-4">
+        <div className="p-3 bg-indigo-100 rounded-lg">
                             <DoorOpen className="h-5 w-5 text-indigo-600" />
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
+        <div>
+        <div className="flex items-center gap-2 mb-1">
                               <h3 className="font-semibold text-gray-900">
                                 Habitación {room.numero}
                               </h3>
@@ -336,7 +336,7 @@ export default function OccupancyReportsPage() {
                                 {room.tenantName}
                               </p>
                             )}
-                            <div className="flex flex-wrap gap-3 text-xs text-gray-600">
+        <div className="flex flex-wrap gap-3 text-xs text-gray-600">
                               {room.checkInDate && (
                                 <span>
                                   Check-in:{' '}
@@ -356,8 +356,8 @@ export default function OccupancyReportsPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex sm:flex-col items-center sm:items-end gap-4 sm:gap-2">
-                          <div className="text-left sm:text-right">
+        <div className="flex sm:flex-col items-center sm:items-end gap-4 sm:gap-2">
+        <div className="text-left sm:text-right">
                             <p className="text-sm text-gray-600">Tasa de Ocupación</p>
                             <p className="text-2xl font-bold text-indigo-600">
                               {room.occupancyRate.toFixed(1)}%
@@ -366,7 +366,7 @@ export default function OccupancyReportsPage() {
                               {room.daysOccupied} días ocupados
                             </p>
                           </div>
-                          <div className="text-left sm:text-right">
+        <div className="text-left sm:text-right">
                             <p className="text-sm text-gray-600">Ingresos</p>
                             <p className="text-2xl font-bold text-green-600">
                               {room.revenue.toFixed(0)}€
@@ -389,19 +389,19 @@ export default function OccupancyReportsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
+        <div className="space-y-2">
                   {report.timeline.slice(0, 10).map((day) => {
                     const totalRooms = report.roomsData.length;
                     const occupancyPercent = (day.occupiedRooms / totalRooms) * 100;
 
                     return (
-                      <div key={day.date} className="flex items-center gap-3">
-                        <div className="w-24 text-sm text-gray-600">
+        <div key={day.date} className="flex items-center gap-3">
+        <div className="w-24 text-sm text-gray-600">
                           {format(new Date(day.date), 'dd MMM', { locale: es })}
                         </div>
-                        <div className="flex-1">
-                          <div className="h-8 bg-gray-100 rounded-full overflow-hidden">
-                            <div
+        <div className="flex-1">
+        <div className="h-8 bg-gray-100 rounded-full overflow-hidden">
+        <div
                               className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-end pr-3 text-white text-sm font-medium transition-all"
                               style={{ width: `${occupancyPercent}%` }}
                             >
@@ -409,14 +409,15 @@ export default function OccupancyReportsPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="w-32 text-right text-sm">
+        <div className="w-32 text-right text-sm">
                           <span className="font-semibold text-gray-900">{day.occupiedRooms}</span>
                           <span className="text-gray-500"> / {totalRooms} hab.</span>
                         </div>
-                        <div className="w-24 text-right text-sm font-semibold text-green-600">
+        <div className="w-24 text-right text-sm font-semibold text-green-600">
                           {day.revenue.toFixed(0)}€
                         </div>
                       </div>
+                  </AuthenticatedLayout>
                     );
                   })}
                 </div>

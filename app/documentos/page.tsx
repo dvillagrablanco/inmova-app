@@ -301,6 +301,14 @@ export default function DocumentosPage() {
       sinVencimiento: documents.filter((doc) => !doc.fechaVencimiento).length,
     };
   }, [documents]);
+                  const now = new Date();
+                  const vencimiento = doc.fechaVencimiento ? new Date(doc.fechaVencimiento) : null;
+                  const isVencido = vencimiento && vencimiento < now;
+                  const isPorVencer =
+                    vencimiento &&
+                    vencimiento >= now &&
+                    vencimiento < new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
 
   if (status === 'loading' || loading) {
     return (
@@ -316,7 +324,7 @@ export default function DocumentosPage() {
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4">
               <Button
                 variant="outline"
                 size="sm"
@@ -342,8 +350,8 @@ export default function DocumentosPage() {
             </div>
 
             {/* Header Section */}
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
                 <h1 className="text-3xl font-bold tracking-tight">Documentos</h1>
                 <p className="text-muted-foreground">Gestiona todos los documentos del sistema</p>
               </div>
@@ -360,7 +368,7 @@ export default function DocumentosPage() {
                       <DialogTitle>Subir Nuevo Documento</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleUpload} className="space-y-4">
-                      <div>
+          <div>
                         <Label htmlFor="file">Archivo *</Label>
                         <Input
                           id="file"
@@ -371,7 +379,7 @@ export default function DocumentosPage() {
                           }
                         />
                       </div>
-                      <div>
+          <div>
                         <Label htmlFor="nombre">Nombre del documento *</Label>
                         <Input
                           id="nombre"
@@ -381,7 +389,7 @@ export default function DocumentosPage() {
                           required
                         />
                       </div>
-                      <div>
+          <div>
                         <Label htmlFor="tipo">Tipo de documento *</Label>
                         <Select
                           value={uploadForm.tipo}
@@ -404,7 +412,7 @@ export default function DocumentosPage() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div>
+          <div>
                         <Label htmlFor="fechaVencimiento">Fecha de vencimiento (opcional)</Label>
                         <Input
                           id="fechaVencimiento"
@@ -415,7 +423,7 @@ export default function DocumentosPage() {
                           }
                         />
                       </div>
-                      <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2">
                         <Button
                           type="button"
                           variant="outline"
@@ -434,14 +442,14 @@ export default function DocumentosPage() {
             </div>
 
             {/* Estadísticas */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                   <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
                   <FileText className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.total}</div>
+          <div className="text-2xl font-bold">{stats.total}</div>
                 </CardContent>
               </Card>
 
@@ -453,7 +461,7 @@ export default function DocumentosPage() {
                   <AlertCircle className="h-4 w-4 text-red-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.vencidos}</div>
+          <div className="text-2xl font-bold">{stats.vencidos}</div>
                 </CardContent>
               </Card>
 
@@ -465,7 +473,7 @@ export default function DocumentosPage() {
                   <AlertTriangle className="h-4 w-4 text-orange-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.porVencer}</div>
+          <div className="text-2xl font-bold">{stats.porVencer}</div>
                 </CardContent>
               </Card>
 
@@ -477,7 +485,7 @@ export default function DocumentosPage() {
                   <File className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.sinVencimiento}</div>
+          <div className="text-2xl font-bold">{stats.sinVencimiento}</div>
                 </CardContent>
               </Card>
             </div>
@@ -488,8 +496,8 @@ export default function DocumentosPage() {
                 <CardTitle>Buscar Documentos</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="relative flex-1">
+          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder="Buscar por nombre, inquilino, edificio o unidad..."
@@ -526,7 +534,7 @@ export default function DocumentosPage() {
             />
 
             {/* Lista de Documentos */}
-            <div className="space-y-4">
+          <div className="space-y-4">
               {filteredDocuments.length === 0 ? (
                 searchTerm || filterTipo !== 'all' ? (
                   <EmptyState
@@ -557,28 +565,20 @@ export default function DocumentosPage() {
                 )
               ) : (
                 filteredDocuments.map((doc) => {
-                  const now = new Date();
-                  const vencimiento = doc.fechaVencimiento ? new Date(doc.fechaVencimiento) : null;
-                  const isVencido = vencimiento && vencimiento < now;
-                  const isPorVencer =
-                    vencimiento &&
-                    vencimiento >= now &&
-                    vencimiento < new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-
                   return (
                     <Card key={doc.id} className="hover:shadow-lg transition-all duration-200">
                       <CardContent className="p-4 sm:p-6">
-                        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
                           {/* Icono */}
-                          <div className="flex-shrink-0">
-                            <div className="p-3 bg-primary/10 rounded-lg">
+          <div className="flex-shrink-0">
+          <div className="p-3 bg-primary/10 rounded-lg">
                               <FileText className="h-6 w-6 text-primary" />
                             </div>
                           </div>
 
                           {/* Información Principal */}
-                          <div className="flex-1 space-y-3">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          <div className="flex-1 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                               <h3 className="text-lg font-semibold break-words flex-1">
                                 {doc.nombre}
                               </h3>
@@ -589,9 +589,9 @@ export default function DocumentosPage() {
 
                             {/* Entidad relacionada */}
                             {(doc.tenant || doc.unit || doc.building) && (
-                              <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+          <div className="bg-muted/50 rounded-lg p-3 space-y-1">
                                 {doc.tenant && (
-                                  <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 text-sm">
                                     <User className="h-4 w-4 text-primary" />
                                     <span className="font-medium">
                                       Inquilino: {doc.tenant.nombreCompleto}
@@ -599,7 +599,7 @@ export default function DocumentosPage() {
                                   </div>
                                 )}
                                 {doc.building && (
-                                  <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 text-sm">
                                     <Building2 className="h-4 w-4 text-primary" />
                                     <span className="font-medium">
                                       Edificio: {doc.building.nombre}
@@ -607,7 +607,7 @@ export default function DocumentosPage() {
                                   </div>
                                 )}
                                 {doc.unit && (
-                                  <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 text-sm">
                                     <Home className="h-4 w-4 text-primary" />
                                     <span className="font-medium">Unidad: {doc.unit.numero}</span>
                                   </div>
@@ -616,23 +616,23 @@ export default function DocumentosPage() {
                             )}
 
                             {/* Fechas */}
-                            <div className="grid grid-cols-2 gap-3 text-sm">
-                              <div className="space-y-1">
-                                <div className="text-muted-foreground flex items-center gap-1">
+          <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="space-y-1">
+          <div className="text-muted-foreground flex items-center gap-1">
                                   <CalendarIcon className="h-3 w-3" />
                                   Subido
                                 </div>
-                                <div className="font-medium">
+          <div className="font-medium">
                                   {format(new Date(doc.fechaSubida), 'dd MMM yyyy', { locale: es })}
                                 </div>
                               </div>
-                              <div className="space-y-1">
-                                <div className="text-muted-foreground flex items-center gap-1">
+          <div className="space-y-1">
+          <div className="text-muted-foreground flex items-center gap-1">
                                   <CalendarIcon className="h-3 w-3" />
                                   Vencimiento
                                 </div>
                                 {doc.fechaVencimiento ? (
-                                  <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1">
                                     {isVencido && <AlertCircle className="h-3 w-3 text-red-500" />}
                                     {isPorVencer && (
                                       <AlertTriangle className="h-3 w-3 text-orange-500" />
@@ -653,7 +653,7 @@ export default function DocumentosPage() {
                           </div>
 
                           {/* Acciones */}
-                          <div className="flex sm:flex-col items-center gap-2 self-start">
+          <div className="flex sm:flex-col items-center gap-2 self-start">
                             <Button
                               variant="outline"
                               size="sm"
@@ -703,17 +703,17 @@ export default function DocumentosPage() {
             <DialogHeader>
               <DialogTitle>Detalles del Documento</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
+          <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+          <div>
                   <Label className="text-muted-foreground">Nombre</Label>
                   <p className="font-medium mt-1">{selectedDocument.nombre}</p>
                 </div>
-                <div>
+          <div>
                   <Label className="text-muted-foreground">Tipo</Label>
                   <p className="font-medium mt-1">{selectedDocument.tipo}</p>
                 </div>
-                <div>
+          <div>
                   <Label className="text-muted-foreground">Fecha de Subida</Label>
                   <p className="font-medium mt-1">
                     {format(new Date(selectedDocument.fechaSubida), 'dd MMMM yyyy HH:mm', {
@@ -721,7 +721,7 @@ export default function DocumentosPage() {
                     })}
                   </p>
                 </div>
-                <div>
+          <div>
                   <Label className="text-muted-foreground">Fecha de Vencimiento</Label>
                   <p className="font-medium mt-1">
                     {selectedDocument.fechaVencimiento
@@ -734,11 +734,11 @@ export default function DocumentosPage() {
               </div>
 
               {(selectedDocument.tenant || selectedDocument.unit || selectedDocument.building) && (
-                <div className="border-t pt-4">
+          <div className="border-t pt-4">
                   <Label className="text-muted-foreground mb-2 block">Entidades Relacionadas</Label>
-                  <div className="space-y-2">
+          <div className="space-y-2">
                     {selectedDocument.tenant && (
-                      <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-primary" />
                         <span className="font-medium">
                           Inquilino: {selectedDocument.tenant.nombreCompleto}
@@ -746,7 +746,7 @@ export default function DocumentosPage() {
                       </div>
                     )}
                     {selectedDocument.building && (
-                      <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
                         <Building2 className="h-4 w-4 text-primary" />
                         <span className="font-medium">
                           Edificio: {selectedDocument.building.nombre}
@@ -754,7 +754,7 @@ export default function DocumentosPage() {
                       </div>
                     )}
                     {selectedDocument.unit && (
-                      <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
                         <Home className="h-4 w-4 text-primary" />
                         <span className="font-medium">Unidad: {selectedDocument.unit.numero}</span>
                       </div>
@@ -763,7 +763,7 @@ export default function DocumentosPage() {
                 </div>
               )}
 
-              <div className="border-t pt-4 flex gap-2">
+          <div className="border-t pt-4 flex gap-2">
                 <Button
                   variant="outline"
                   onClick={() => handleDownload(selectedDocument.id)}
@@ -787,5 +787,6 @@ export default function DocumentosPage() {
         </Dialog>
       )}
     </div>
+  </AuthenticatedLayout>
   );
 }

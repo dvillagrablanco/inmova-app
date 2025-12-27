@@ -124,12 +124,14 @@ export default function FlippingDashboardPage() {
         
           
           <main className="flex-1 overflow-y-auto p-6">
-            <div className="flex items-center justify-center h-full">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          <div className="flex items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
             </div>
           </main>
         </div>
       </div>
+    </AuthenticatedLayout>
+    </AuthenticatedLayout>
     );
   }
 
@@ -141,14 +143,14 @@ export default function FlippingDashboardPage() {
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="flex items-center justify-between">
+          <div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
                   Dashboard House Flipping
                 </h1>
                 <p className="text-gray-600 mt-1">Gestión y análisis de proyectos de renovación</p>
               </div>
-              <div className="flex gap-2">
+          <div className="flex gap-2">
                 <Button onClick={loadDashboardData} variant="outline">
                   <TrendingUp className="h-4 w-4 mr-2" />
                   Actualizar
@@ -164,14 +166,14 @@ export default function FlippingDashboardPage() {
             </div>
 
             {/* KPIs */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Proyectos Activos</CardTitle>
                   <TrendingUp className="h-4 w-4 text-indigo-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{metrics?.activeProjects || 0}</div>
+          <div className="text-2xl font-bold">{metrics?.activeProjects || 0}</div>
                   <p className="text-xs text-gray-500">de {metrics?.totalProjects || 0} totales</p>
                 </CardContent>
               </Card>
@@ -182,7 +184,7 @@ export default function FlippingDashboardPage() {
                   <Percent className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{metrics?.avgROI || 0}%</div>
+          <div className="text-2xl font-bold text-green-600">{metrics?.avgROI || 0}%</div>
                   <p className="text-xs text-gray-500">Retorno de inversión</p>
                 </CardContent>
               </Card>
@@ -193,7 +195,7 @@ export default function FlippingDashboardPage() {
                   <DollarSign className="h-4 w-4 text-yellow-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+          <div className="text-2xl font-bold">
                     €{metrics?.totalInvestment?.toLocaleString() || 0}
                   </div>
                   <p className="text-xs text-gray-500">En proyectos</p>
@@ -206,7 +208,7 @@ export default function FlippingDashboardPage() {
                   <Clock className="h-4 w-4 text-blue-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{metrics?.avgProjectDuration || 0}</div>
+          <div className="text-2xl font-bold">{metrics?.avgProjectDuration || 0}</div>
                   <p className="text-xs text-gray-500">días por proyecto</p>
                 </CardContent>
               </Card>
@@ -222,7 +224,7 @@ export default function FlippingDashboardPage() {
 
               {/* Overview Tab */}
               <TabsContent value="overview" className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Card>
                     <CardHeader>
                       <CardTitle>Ingresos vs Inversión</CardTitle>
@@ -284,27 +286,27 @@ export default function FlippingDashboardPage() {
                     <CardTitle>Métricas Clave</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="p-4 border rounded-lg">
-                        <div className="text-sm text-gray-600 mb-1">Proyectos Completados</div>
-                        <div className="text-2xl font-bold text-green-600">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 border rounded-lg">
+          <div className="text-sm text-gray-600 mb-1">Proyectos Completados</div>
+          <div className="text-2xl font-bold text-green-600">
                           {metrics?.completedProjects || 0}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">Finalizados con éxito</div>
+          <div className="text-xs text-gray-500 mt-1">Finalizados con éxito</div>
                       </div>
-                      <div className="p-4 border rounded-lg">
-                        <div className="text-sm text-gray-600 mb-1">Margen de Beneficio</div>
-                        <div className="text-2xl font-bold text-indigo-600">
+          <div className="p-4 border rounded-lg">
+          <div className="text-sm text-gray-600 mb-1">Margen de Beneficio</div>
+          <div className="text-2xl font-bold text-indigo-600">
                           {metrics?.profitMargin || 0}%
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">Promedio</div>
+          <div className="text-xs text-gray-500 mt-1">Promedio</div>
                       </div>
-                      <div className="p-4 border rounded-lg">
-                        <div className="text-sm text-gray-600 mb-1">Ingresos Totales</div>
-                        <div className="text-2xl font-bold text-yellow-600">
+          <div className="p-4 border rounded-lg">
+          <div className="text-sm text-gray-600 mb-1">Ingresos Totales</div>
+          <div className="text-2xl font-bold text-yellow-600">
                           €{metrics?.totalRevenue?.toLocaleString() || 0}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">Acumulado</div>
+          <div className="text-xs text-gray-500 mt-1">Acumulado</div>
                       </div>
                     </div>
                   </CardContent>
@@ -334,35 +336,35 @@ export default function FlippingDashboardPage() {
                 </Card>
 
                 {/* ROI Details */}
-                <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-4">
                   {roiData.map((project, index) => (
                     <Card key={index}>
                       <CardHeader>
                         <CardTitle className="text-base">{project.project}</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          <div>
-                            <div className="text-sm text-gray-600">Inversión</div>
-                            <div className="text-lg font-semibold text-red-600">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+          <div className="text-sm text-gray-600">Inversión</div>
+          <div className="text-lg font-semibold text-red-600">
                               €{project.investment.toLocaleString()}
                             </div>
                           </div>
-                          <div>
-                            <div className="text-sm text-gray-600">Ingresos</div>
-                            <div className="text-lg font-semibold text-green-600">
+          <div>
+          <div className="text-sm text-gray-600">Ingresos</div>
+          <div className="text-lg font-semibold text-green-600">
                               €{project.revenue.toLocaleString()}
                             </div>
                           </div>
-                          <div>
-                            <div className="text-sm text-gray-600">Beneficio</div>
-                            <div className="text-lg font-semibold text-blue-600">
+          <div>
+          <div className="text-sm text-gray-600">Beneficio</div>
+          <div className="text-lg font-semibold text-blue-600">
                               €{project.profit.toLocaleString()}
                             </div>
                           </div>
-                          <div>
-                            <div className="text-sm text-gray-600">ROI</div>
-                            <div
+          <div>
+          <div className="text-sm text-gray-600">ROI</div>
+          <div
                               className={`text-lg font-bold ${
                                 project.roi > 20
                                   ? 'text-green-600'
@@ -383,19 +385,19 @@ export default function FlippingDashboardPage() {
 
               {/* Status Tab */}
               <TabsContent value="status" className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {projectStatus.map((status, index) => (
                     <Card key={index}>
                       <CardHeader>
                         <CardTitle className="text-base">{status.status}</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
+          <div className="space-y-2">
+          <div className="flex justify-between">
                             <span className="text-sm text-gray-600">Proyectos:</span>
                             <span className="font-semibold">{status.count}</span>
                           </div>
-                          <div className="flex justify-between">
+          <div className="flex justify-between">
                             <span className="text-sm text-gray-600">Valor:</span>
                             <span className="font-semibold">€{status.value.toLocaleString()}</span>
                           </div>
@@ -410,5 +412,6 @@ export default function FlippingDashboardPage() {
         </main>
       </div>
     </div>
+  </AuthenticatedLayout>
   );
 }

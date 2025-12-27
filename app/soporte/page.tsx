@@ -173,12 +173,13 @@ export default function SoportePage() {
           <p>Cargando...</p>
         </div>
       </div>
+    </AuthenticatedLayout>
     );
   }
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto">
             <Breadcrumb className="mb-6">
               <BreadcrumbList>
                 <BreadcrumbItem>
@@ -193,7 +194,7 @@ export default function SoportePage() {
               </BreadcrumbList>
             </Breadcrumb>
 
-            <div className="mb-6">
+        <div className="mb-6">
               <h1 className="text-3xl font-bold mb-2">Centro de Soporte</h1>
               <p className="text-muted-foreground">
                 Estamos aquí para ayudarte. Nuestro sistema de IA categorizará automáticamente tu
@@ -201,7 +202,7 @@ export default function SoportePage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <Card
                 className="hover:shadow-lg transition-shadow cursor-pointer"
                 onClick={() => router.push('/knowledge-base')}
@@ -241,7 +242,7 @@ export default function SoportePage() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="space-y-2">
+        <div className="space-y-2">
                     <Label htmlFor="subject">Asunto*</Label>
                     <Input
                       id="subject"
@@ -252,7 +253,7 @@ export default function SoportePage() {
                     />
                   </div>
 
-                  <div className="space-y-2">
+        <div className="space-y-2">
                     <Label htmlFor="description">Descripción detallada*</Label>
                     <Textarea
                       id="description"
@@ -273,29 +274,29 @@ export default function SoportePage() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-3">
-                        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
                           <span className="text-sm font-medium">Categoría:</span>
                           <Badge variant="secondary">
                             {getCategoryLabel(categorization.category)}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
                           <span className="text-sm font-medium">Prioridad:</span>
                           {getPriorityBadge(categorization.priority)}
                         </div>
                         {categorization.suggestedAssignee && (
-                          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
                             <span className="text-sm font-medium">Asignado a:</span>
                             <span className="text-sm">{categorization.suggestedAssignee}</span>
                           </div>
                         )}
                         {categorization.relatedArticles &&
                           categorization.relatedArticles.length > 0 && (
-                            <div className="mt-4">
+        <div className="mt-4">
                               <p className="text-sm font-medium mb-2">
                                 Artículos relacionados que pueden ayudarte:
                               </p>
-                              <div className="space-y-2">
+        <div className="space-y-2">
                                 {categorization.relatedArticles.map((article: any, idx: number) => (
                                   <Button
                                     key={idx}
@@ -328,7 +329,7 @@ export default function SoportePage() {
                         <p className="text-sm text-gray-700 whitespace-pre-wrap">
                           {categorization.autoResponse}
                         </p>
-                        <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex gap-2">
                           <Button
                             type="button"
                             variant="outline"
@@ -355,7 +356,7 @@ export default function SoportePage() {
                     </Card>
                   )}
 
-                  <div className="flex gap-3">
+        <div className="flex gap-3">
                     {!categorization ? (
                       <Button
                         type="button"

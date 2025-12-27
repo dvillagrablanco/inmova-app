@@ -137,8 +137,8 @@ export default function PublicacionesPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div className="flex flex-col gap-4">
+        <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex flex-col gap-4">
               <Button
                 variant="ghost"
                 size="sm"
@@ -163,8 +163,8 @@ export default function PublicacionesPage() {
                 </BreadcrumbList>
               </Breadcrumb>
 
-              <div className="flex justify-between items-center">
-                <div>
+        <div className="flex justify-between items-center">
+        <div>
                   <h1 className="text-3xl font-bold">Gestor de Publicaciones</h1>
                   <p className="text-muted-foreground">Anuncios multi-plataforma optimizados</p>
                 </div>
@@ -182,8 +182,8 @@ export default function PublicacionesPage() {
                         Crea anuncios optimizados para múltiples portales
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
+        <div className="space-y-4 py-4">
+        <div className="space-y-2">
                         <Label>Unidad</Label>
                         <Select
                           value={formData.unitId}
@@ -194,6 +194,7 @@ export default function PublicacionesPage() {
                               setFormData((prev) => ({
                                 ...prev,
                                 precioAlquiler: unit.rentaMensual?.toString() || '',
+                              </AuthenticatedLayout>
                               }));
                           }}
                         >
@@ -209,7 +210,7 @@ export default function PublicacionesPage() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="space-y-2">
+        <div className="space-y-2">
                         <Label>Precio Alquiler (€/mes)</Label>
                         <Input
                           type="number"
@@ -219,7 +220,7 @@ export default function PublicacionesPage() {
                           }
                         />
                       </div>
-                      <div className="flex gap-4">
+        <div className="flex gap-4">
                         <label className="flex items-center gap-2">
                           <input
                             type="checkbox"
@@ -250,7 +251,7 @@ export default function PublicacionesPage() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-4">
               {[
                 { title: 'Total', value: publicaciones.length, icon: FileText },
                 {
@@ -275,7 +276,7 @@ export default function PublicacionesPage() {
                     <kpi.icon className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{kpi.value}</div>
+        <div className="text-2xl font-bold">{kpi.value}</div>
                   </CardContent>
                 </Card>
               ))}
@@ -286,15 +287,15 @@ export default function PublicacionesPage() {
                 <CardTitle>Publicaciones</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+        <div className="space-y-4">
                   {publicaciones.length === 0 ? (
                     <p className="text-center text-muted-foreground py-8">No hay publicaciones</p>
                   ) : (
                     publicaciones.map((pub) => (
                       <Card key={pub.id} className="p-4">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
+        <div className="flex justify-between items-start">
+        <div className="flex-1">
+        <div className="flex items-center gap-2 mb-2">
                               <h3 className="font-semibold">{pub.titulo}</h3>
                               <Badge variant={pub.estado === 'activa' ? 'default' : 'secondary'}>
                                 {pub.estado}
@@ -302,7 +303,7 @@ export default function PublicacionesPage() {
                               {pub.destacada && <Badge variant="outline">Destacada</Badge>}
                             </div>
                             <p className="text-sm text-muted-foreground">{pub.descripcionCorta}</p>
-                            <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+        <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
                               <span>
                                 <Eye className="inline h-3 w-3 mr-1" />
                                 {pub.vistas}
@@ -317,8 +318,8 @@ export default function PublicacionesPage() {
                               </span>
                             </div>
                           </div>
-                          <div className="flex flex-col gap-2">
-                            <div className="text-right">
+        <div className="flex flex-col gap-2">
+        <div className="text-right">
                               <p className="font-bold">
                                 {pub.precioAlquiler ? `${pub.precioAlquiler}€/mes` : 'N/A'}
                               </p>
@@ -346,26 +347,26 @@ export default function PublicacionesPage() {
             <DialogTitle>Anuncios Generados</DialogTitle>
             <DialogDescription>Copia el contenido y pégalo en cada portal</DialogDescription>
           </DialogHeader>
-          <div className="space-y-6">
+        <div className="space-y-6">
             {anunciosGenerados.map((anuncio, idx) => (
               <Card key={idx}>
                 <CardHeader>
                   <CardTitle className="capitalize">{anuncio.portal}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
+        <div>
                     <Label>Título</Label>
                     <p className="text-sm p-2 bg-muted rounded">{anuncio.titulo}</p>
                   </div>
-                  <div>
+        <div>
                     <Label>Descripción</Label>
                     <p className="text-sm p-2 bg-muted rounded whitespace-pre-wrap">
                       {anuncio.descripcion}
                     </p>
                   </div>
-                  <div>
+        <div>
                     <Label>Características</Label>
-                    <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1">
                       {anuncio.caracteristicas.map((c: string, i: number) => (
                         <Badge key={i} variant="secondary">
                           {c}

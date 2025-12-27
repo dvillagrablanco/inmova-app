@@ -190,44 +190,6 @@ function InquilinosPageContent() {
     }
     setActiveFilters(filters);
   }, [searchTerm]);
-
-  const clearFilter = (filterId: string) => {
-    if (filterId === 'search') {
-      setSearchTerm('');
-    }
-  };
-
-  const clearAllFilters = () => {
-    setSearchTerm('');
-  };
-
-  if (status === 'loading' || isLoading) {
-    return (
-      <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto">
-              <Skeleton className="h-8 w-48 mb-6" />
-              <Skeleton className="h-10 w-full max-w-md mb-6" />
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <SkeletonCard key={i} />
-                ))}
-              </div>
-            </div>
-          </AuthenticatedLayout>
-    );
-  }
-
-  if (!session) return null;
-
-  const getTenantEstado = (tenant: Tenant): string => {
-    // Si tiene contratos activos, está activo
-    if (tenant.contracts && tenant.contracts.some((c) => c.estado === 'activo')) {
-      return 'activo';
-    }
-    // Si no tiene contratos activos, está inactivo
-    return 'inactivo';
-  };
-
   const getEstadoBadge = (estado: string) => {
     const badges: Record<string, { variant: any; label: string }> = {
       activo: { variant: 'default', label: 'Activo' },
@@ -250,11 +212,49 @@ function InquilinosPageContent() {
   const activeTenants = tenants.filter((t) => getTenantEstado(t) === 'activo').length;
   const morosoTenants = 0; // Por ahora, sin lógica de morosidad
 
+
+  const clearFilter = (filterId: string) => {
+    if (filterId === 'search') {
+      setSearchTerm('');
+    }
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+  };
+
+  if (status === 'loading' || isLoading) {
+    return (
+      <AuthenticatedLayout>
+          <div className="max-w-7xl mx-auto">
+              <Skeleton className="h-8 w-48 mb-6" />
+              <Skeleton className="h-10 w-full max-w-md mb-6" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))}
+              </div>
+            </div>
+          </AuthenticatedLayout>
+    );
+  }
+
+  if (!session) return null;
+
+  const getTenantEstado = (tenant: Tenant): string => {
+    // Si tiene contratos activos, está activo
+    if (tenant.contracts && tenant.contracts.some((c) => c.estado === 'activo')) {
+      return 'activo';
+    }
+    // Si no tiene contratos activos, está inactivo
+    return 'inactivo';
+  };
+
   return (
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4">
               <Button
                 variant="outline"
                 size="sm"
@@ -280,9 +280,9 @@ function InquilinosPageContent() {
             </div>
 
             {/* Header Section */}
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-start gap-3">
-                <div>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-3">
+          <div>
                   <h1 className="text-3xl font-bold tracking-tight">Inquilinos</h1>
                   <p className="text-muted-foreground">
                     Gestiona los inquilinos de tus propiedades
@@ -317,7 +317,7 @@ function InquilinosPageContent() {
             {error && (
               <Card className="border-destructive">
                 <CardContent className="pt-6">
-                  <div className="flex items-center gap-2 text-destructive">
+          <div className="flex items-center gap-2 text-destructive">
                     <AlertCircle className="h-5 w-5" />
                     <p className="font-medium">{error}</p>
                   </div>
@@ -328,7 +328,7 @@ function InquilinosPageContent() {
             {/* Search Bar and View Mode */}
             <Card>
               <CardContent className="pt-6">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <SearchInput
                     value={searchTerm}
                     onChange={setSearchTerm}
@@ -351,14 +351,14 @@ function InquilinosPageContent() {
             />
 
             {/* Stats Summary */}
-            <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-3">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Inquilinos</CardTitle>
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{tenants.length}</div>
+          <div className="text-2xl font-bold">{tenants.length}</div>
                   <p className="text-xs text-muted-foreground">Registrados</p>
                 </CardContent>
               </Card>
@@ -368,7 +368,7 @@ function InquilinosPageContent() {
                   <Users className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{activeTenants}</div>
+          <div className="text-2xl font-bold text-green-600">{activeTenants}</div>
                   <p className="text-xs text-muted-foreground">
                     {tenants.length > 0 ? Math.round((activeTenants / tenants.length) * 100) : 0}%
                     del total
@@ -381,7 +381,7 @@ function InquilinosPageContent() {
                   <AlertCircle className="h-4 w-4 text-red-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-600">{morosoTenants}</div>
+          <div className="text-2xl font-bold text-red-600">{morosoTenants}</div>
                   <p className="text-xs text-muted-foreground">Requieren atención</p>
                 </CardContent>
               </Card>
@@ -389,7 +389,7 @@ function InquilinosPageContent() {
 
             {/* Tenants Display - Grid View */}
             {viewMode === 'grid' && (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {filteredTenants.map((tenant) => {
                   const estado = getTenantEstado(tenant);
                   const estadoBadge = getEstadoBadge(estado);
@@ -398,13 +398,13 @@ function InquilinosPageContent() {
                   return (
                     <Card key={tenant.id} className="hover:shadow-lg transition-shadow">
                       <CardHeader>
-                        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
                           <Avatar className="h-12 w-12">
                             <AvatarFallback className="bg-primary text-primary-foreground">
                               {getInitials(tenant.nombreCompleto)}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="flex-1">
+          <div className="flex-1">
                             <CardTitle className="text-lg">{tenant.nombreCompleto}</CardTitle>
                             <Badge variant={estadoBadge.variant} className="mt-1">
                               {estadoBadge.label}
@@ -413,18 +413,18 @@ function InquilinosPageContent() {
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2 text-sm">
+          <div className="space-y-3">
+          <div className="flex items-center gap-2 text-sm">
                             <Mail className="h-4 w-4 text-muted-foreground" />
                             <span className="truncate">{tenant.email}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 text-sm">
                             <Phone className="h-4 w-4 text-muted-foreground" />
                             <span>{tenant.telefono}</span>
                           </div>
                           {primeraUnidad && (
-                            <div className="border-t pt-3">
-                              <div className="flex items-center gap-2 text-sm">
+          <div className="border-t pt-3">
+          <div className="flex items-center gap-2 text-sm">
                                 <Home className="h-4 w-4 text-muted-foreground" />
                                 <span className="font-medium">
                                   {primeraUnidad.building.nombre} - {primeraUnidad.numero}
@@ -432,7 +432,7 @@ function InquilinosPageContent() {
                               </div>
                             </div>
                           )}
-                          <div className="flex gap-2 mt-2">
+          <div className="flex gap-2 mt-2">
                             <Button
                               onClick={() => router.push(`/inquilinos/${tenant.id}`)}
                               className="flex-1"
@@ -463,7 +463,7 @@ function InquilinosPageContent() {
 
             {/* Tenants Display - List View (Detailed) */}
             {viewMode === 'list' && (
-              <div className="space-y-4">
+          <div className="space-y-4">
                 {filteredTenants.map((tenant) => {
                   const estado = getTenantEstado(tenant);
                   const estadoBadge = getEstadoBadge(estado);
@@ -472,15 +472,15 @@ function InquilinosPageContent() {
                   return (
                     <Card key={tenant.id} className="hover:shadow-lg transition-shadow">
                       <CardContent className="pt-6">
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                          <div className="flex-1 space-y-4">
-                            <div className="flex items-center gap-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="flex-1 space-y-4">
+          <div className="flex items-center gap-4">
                               <Avatar className="h-16 w-16">
                                 <AvatarFallback className="bg-primary text-primary-foreground text-xl">
                                   {getInitials(tenant.nombreCompleto)}
                                 </AvatarFallback>
                               </Avatar>
-                              <div>
+          <div>
                                 <h3 className="text-xl font-bold">{tenant.nombreCompleto}</h3>
                                 <Badge variant={estadoBadge.variant} className="mt-1">
                                   {estadoBadge.label}
@@ -488,17 +488,17 @@ function InquilinosPageContent() {
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className="flex items-center gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex items-center gap-2">
                                 <Mail className="h-5 w-5 text-muted-foreground" />
-                                <div>
+          <div>
                                   <p className="text-sm text-muted-foreground">Email</p>
                                   <p className="font-medium">{tenant.email}</p>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
                                 <Phone className="h-5 w-5 text-muted-foreground" />
-                                <div>
+          <div>
                                   <p className="text-sm text-muted-foreground">Teléfono</p>
                                   <p className="font-medium">{tenant.telefono}</p>
                                 </div>
@@ -506,9 +506,9 @@ function InquilinosPageContent() {
                             </div>
 
                             {primeraUnidad && (
-                              <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+          <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
                                 <Home className="h-5 w-5 text-muted-foreground" />
-                                <div>
+          <div>
                                   <p className="text-sm text-muted-foreground">Unidad actual</p>
                                   <p className="font-medium">
                                     {primeraUnidad.building.nombre} - Unidad {primeraUnidad.numero}
@@ -518,7 +518,7 @@ function InquilinosPageContent() {
                             )}
                           </div>
 
-                          <div className="flex lg:flex-col gap-2">
+          <div className="flex lg:flex-col gap-2">
                             <Button
                               onClick={() => router.push(`/inquilinos/${tenant.id}`)}
                               className="flex-1 lg:flex-none"
@@ -539,27 +539,27 @@ function InquilinosPageContent() {
             {viewMode === 'compact' && (
               <Card>
                 <CardContent className="pt-6">
-                  <div className="space-y-2">
+          <div className="space-y-2">
                     {filteredTenants.map((tenant) => {
                       const estado = getTenantEstado(tenant);
                       const estadoBadge = getEstadoBadge(estado);
                       const primeraUnidad = tenant.units?.[0];
 
                       return (
-                        <div
+          <div
                           key={tenant.id}
                           className="flex items-center justify-between p-4 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                           onClick={() => router.push(`/inquilinos/${tenant.id}`)}
                         >
-                          <div className="flex items-center gap-4 flex-1">
+          <div className="flex items-center gap-4 flex-1">
                             <Avatar className="h-10 w-10">
                               <AvatarFallback className="bg-primary text-primary-foreground">
                                 {getInitials(tenant.nombreCompleto)}
                               </AvatarFallback>
                             </Avatar>
-                            <div className="flex-1">
+          <div className="flex-1">
                               <p className="font-semibold">{tenant.nombreCompleto}</p>
-                              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                                 <span className="flex items-center gap-1">
                                   <Mail className="h-3 w-3" />
                                   {tenant.email}
@@ -570,13 +570,13 @@ function InquilinosPageContent() {
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-6 text-sm">
-                            <div className="text-center max-w-[150px]">
+          <div className="flex items-center gap-6 text-sm">
+          <div className="text-center max-w-[150px]">
                               <p className="text-muted-foreground">Teléfono</p>
                               <p className="font-semibold">{tenant.telefono}</p>
                             </div>
                             {primeraUnidad && (
-                              <div className="text-center max-w-[200px]">
+          <div className="text-center max-w-[200px]">
                                 <p className="text-muted-foreground">Unidad</p>
                                 <p className="font-semibold truncate">
                                   {primeraUnidad.building.nombre} - {primeraUnidad.numero}
@@ -633,6 +633,7 @@ function InquilinosPageContent() {
       />
     </div>
   );
+  </AuthenticatedLayout>
 }
 
 // Export with Error Boundary
