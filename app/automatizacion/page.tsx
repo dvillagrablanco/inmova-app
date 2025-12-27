@@ -187,12 +187,12 @@ export default function AutomatizacionPage() {
         setShowCreateDialog(false);
         loadData();
         setFormData({
-          nombre: '',
-          descripcion: '',
-          tipo: 'recordatorio',
-          triggerType: 'fecha',
-          prioridad: 'media',
-          activa: true,
+      nombre: '',
+      descripcion: '',
+      tipo: 'recordatorio',
+      triggerType: 'fecha',
+      prioridad: 'media',
+      activa: true,
         });
       } else {
         const error = await res.json();
@@ -274,14 +274,14 @@ export default function AutomatizacionPage() {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-        Automatizaciones Inteligentes
-        </h1>
-        <p className="text-gray-600 mt-1">
-        Crea y gestiona flujos automatizados para tu negocio
-        </p>
-      </div>
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+              Automatizaciones Inteligentes
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Crea y gestiona flujos automatizados para tu negocio
+            </p>
+          </div>
       <Button onClick={() => setShowCreateDialog(true)} className="gradient-primary">
         <Plus className="h-4 w-4 mr-2" />
         Nueva Automatización

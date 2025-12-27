@@ -102,7 +102,7 @@ function ContratosPageContent() {
         setError(null);
         const response = await fetch('/api/contracts');
         if (!response.ok) {
-          throw new Error(`Error ${response.status}: No se pudieron cargar los contratos`);
+      throw new Error(`Error ${response.status}: No se pudieron cargar los contratos`);
         }
         const data = await response.json();
         setContracts(data);
@@ -111,8 +111,8 @@ function ContratosPageContent() {
         const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
         setError(errorMsg);
         logError(error instanceof Error ? error : new Error(errorMsg), {
-          context: 'fetchContracts',
-          page: 'contratos',
+      context: 'fetchContracts',
+      page: 'contratos',
         });
       } finally {
         setIsLoading(false);
@@ -162,9 +162,9 @@ function ContratosPageContent() {
     if (searchTerm) {
       const filtered = contracts.filter(
         (contract) =>
-          contract.tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          contract.unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          contract.unit.numero.toLowerCase().includes(searchTerm.toLowerCase())
+      contract.tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contract.unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contract.unit.numero.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredContracts(filtered);
     } else {
@@ -276,12 +276,12 @@ function ContratosPageContent() {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Botón Volver y Breadcrumbs */}
         <div className="flex items-center gap-4">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => router.push('/dashboard')}
-        className="gap-2"
-        >
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push('/dashboard')}
+            className="gap-2"
+          >
         <ArrowLeft className="h-4 w-4" />
         Volver al Dashboard
       </Button>

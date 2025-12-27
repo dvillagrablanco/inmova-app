@@ -101,7 +101,7 @@ function EdificiosPageContent() {
         setError(null);
         const response = await fetch('/api/buildings');
         if (!response.ok) {
-          throw new Error(`Error ${response.status}: No se pudieron cargar los edificios`);
+      throw new Error(`Error ${response.status}: No se pudieron cargar los edificios`);
         }
         const data = await response.json();
         setBuildings(data);
@@ -110,8 +110,8 @@ function EdificiosPageContent() {
         const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
         setError(errorMsg);
         logError(error instanceof Error ? error : new Error(errorMsg), {
-          context: 'fetchBuildings',
-          page: 'edificios',
+      context: 'fetchBuildings',
+      page: 'edificios',
         });
       } finally {
         setIsLoading(false);
@@ -127,9 +127,9 @@ function EdificiosPageContent() {
     if (searchTerm) {
       const filtered = buildings.filter(
         (building) =>
-          building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          building.direccion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          building.tipo.toLowerCase().includes(searchTerm.toLowerCase())
+      building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      building.direccion.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      building.tipo.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredBuildings(filtered);
     } else {
@@ -207,11 +207,11 @@ function EdificiosPageContent() {
           <Button
             variant="outline"
             size="sm"
-        onClick={() => router.push('/dashboard')}
-        className="gap-2"
-        >
-        <ArrowLeft className="h-4 w-4" />
-        Volver al Dashboard
+            onClick={() => router.push('/dashboard')}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver al Dashboard
         </Button>
         <Breadcrumb>
         <BreadcrumbList>
