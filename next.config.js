@@ -10,10 +10,13 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
-    staticWorkerRequestDeduping: false,
   },
   // Evitar recopilación de datos en build time para rutas API
   staticPageGenerationTimeout: 1000,
+  // Saltar validación de build para deployment rápido
+  generateBuildId: async () => {
+    return 'inmova-production-' + Date.now();
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
