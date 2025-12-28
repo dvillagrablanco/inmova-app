@@ -1,6 +1,3 @@
-yarn run v1.22.22
-warning ../../../../package.json: No license field
-$ /home/ubuntu/homming_vidaro/nextjs_space/node_modules/.bin/prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script
 -- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('super_admin', 'administrador', 'gestor', 'operador', 'soporte', 'community_manager');
 
@@ -10417,14 +10414,3 @@ ALTER TABLE "announcement_confirmations" ADD CONSTRAINT "announcement_confirmati
 -- AddForeignKey
 ALTER TABLE "community_engagement_metrics" ADD CONSTRAINT "community_engagement_metrics_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "company"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
-┌─────────────────────────────────────────────────────────┐
-│  Update available 6.7.0 -> 7.1.0                        │
-│                                                         │
-│  This is a major update - please follow the guide at    │
-│  https://pris.ly/d/major-version-upgrade                │
-│                                                         │
-│  Run the following to update                            │
-│    npm i --save-dev prisma@latest                       │
-│    npm i @prisma/client@latest                          │
-└─────────────────────────────────────────────────────────┘
-Done in 0.80s.
