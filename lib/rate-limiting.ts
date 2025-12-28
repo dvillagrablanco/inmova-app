@@ -118,10 +118,9 @@ export function checkRateLimit(
  * Middleware de rate limiting
  */
 export async function rateLimitMiddleware(request: NextRequest): Promise<NextResponse | null> {
-  // Desactivar completamente en desarrollo
-  if (process.env.NODE_ENV === 'development') {
-    return null;
-  }
+  // Desactivar completamente el rate limiting
+  // TODO: Activar en producción con límites apropiados si es necesario
+  return null;
 
   // Excluir rutas estáticas y de salud
   const { pathname } = request.nextUrl;
