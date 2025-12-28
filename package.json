@@ -33,6 +33,11 @@
     "cloudflare:verify": "tsx scripts/cloudflare-verify.ts",
     "cloudflare:purge": "tsx scripts/cloudflare-purge-cache.ts",
     "cloudflare:purge:all": "tsx scripts/cloudflare-purge-cache.ts all",
+    "cloudflare:get-info": "tsx scripts/cloudflare-get-zone-info.ts",
+    "cloudflare:configure-dns": "tsx scripts/configure-cloudflare-dns.ts",
+    "cloudflare:configure-ssl": "tsx scripts/configure-cloudflare-ssl.ts",
+    "domain:test": "playwright test e2e/domain-verification.spec.ts",
+    "domain:test:ui": "playwright test e2e/domain-verification.spec.ts --ui",
     "prepare": "husky"
   },
   "lint-staged": {
