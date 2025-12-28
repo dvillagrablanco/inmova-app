@@ -4,10 +4,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { UIMode } from '@prisma/client';
+import logger from '@/lib/logger';
 
 /**
  * PUT /api/user/ui-mode
- * 
+ *
  * Actualiza el modo de interfaz del usuario (simple, standard, advanced)
  */
 export async function PUT(request: NextRequest) {
@@ -15,10 +16,7 @@ export async function PUT(request: NextRequest) {
     const session = await getServerSession();
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -47,7 +45,7 @@ export async function PUT(request: NextRequest) {
       },
     });
 
-    console.log(`[UI Mode] Usuario ${session.user.id} cambió a modo: ${uiMode}`);
+    logger.info(`[UI Mode] Usuario ${session.user.id} cambió a modo: ${uiMode}`);
 
     return NextResponse.json({
       success: true,
@@ -55,7 +53,7 @@ export async function PUT(request: NextRequest) {
       message: `Modo de interfaz actualizado a: ${uiMode}`,
     });
   } catch (error: any) {
-    console.error('[UI Mode API Error]:', error);
+    logger.error('[UI Mode API Error]:', error);
     return NextResponse.json(
       { error: 'Error al actualizar modo de interfaz', details: error.message },
       { status: 500 }
@@ -65,7 +63,7 @@ export async function PUT(request: NextRequest) {
 
 /**
  * GET /api/user/ui-mode
- * 
+ *
  * Obtiene el modo de interfaz actual del usuario
  */
 export async function GET(request: NextRequest) {
@@ -73,10 +71,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession();
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -93,10 +88,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -104,7 +96,7 @@ export async function GET(request: NextRequest) {
       profile: user,
     });
   } catch (error: any) {
-    console.error('[UI Mode API Error]:', error);
+    logger.error('[UI Mode API Error]:', error);
     return NextResponse.json(
       { error: 'Error al obtener modo de interfaz', details: error.message },
       { status: 500 }

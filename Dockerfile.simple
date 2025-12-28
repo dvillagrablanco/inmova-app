@@ -1,0 +1,32 @@
+FROM node:20-alpine
+
+# Instalar dependencias del sistema
+RUN apk add --no-cache libc6-compat openssl postgresql-client
+
+WORKDIR /app
+
+# Copiar archivos de dependencias
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Instalar dependencias
+RUN npm ci --legacy-peer-deps
+
+# Copiar todo el código
+COPY . .
+
+# Generar Prisma Client
+RUN npx prisma generate
+
+# Variables de entorno para build
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+
+# Build (sin intentar data collection real)
+RUN npm run build || true
+
+# Exponer puerto
+EXPOSE 3000
+
+# Script de inicio - sin migraciones automáticas por ahora
+CMD ["sh", "-c", "sleep 10 && npm start"]

@@ -323,7 +323,7 @@ export default function ReportesProgramadosPage() {
     setShowTemplatesDialog(true);
   };
 
-  const useTemplate = (template: any) => {
+  const applyTemplate = (template: any) => {
     setFormData({
       nombre: template.nombre,
       tipo: template.tipo,
@@ -436,263 +436,260 @@ export default function ReportesProgramadosPage() {
           </div>
         </div>
 
-            {/* Estadísticas Rápidas */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total</p>
-                      <p className="text-2xl font-bold">{reports.length}</p>
-                    </div>
-                    <FileText className="h-8 w-8 text-indigo-600" />
-                  </div>
-                </CardContent>
-              </Card>
+        {/* Estadísticas Rápidas */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total</p>
+                  <p className="text-2xl font-bold">{reports.length}</p>
+                </div>
+                <FileText className="h-8 w-8 text-indigo-600" />
+              </div>
+            </CardContent>
+          </Card>
 
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Activos</p>
-                      <p className="text-2xl font-bold text-green-600">
-                        {reports.filter((r) => r.activo).length}
-                      </p>
-                    </div>
-                    <CheckCircle className="h-8 w-8 text-green-600" />
-                  </div>
-                </CardContent>
-              </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Activos</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {reports.filter((r) => r.activo).length}
+                  </p>
+                </div>
+                <CheckCircle className="h-8 w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
 
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Pausados</p>
-                      <p className="text-2xl font-bold text-amber-600">
-                        {reports.filter((r) => !r.activo).length}
-                      </p>
-                    </div>
-                    <AlertCircle className="h-8 w-8 text-amber-600" />
-                  </div>
-                </CardContent>
-              </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Pausados</p>
+                  <p className="text-2xl font-bold text-amber-600">
+                    {reports.filter((r) => !r.activo).length}
+                  </p>
+                </div>
+                <AlertCircle className="h-8 w-8 text-amber-600" />
+              </div>
+            </CardContent>
+          </Card>
 
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Próximos 7 días</p>
-                      <p className="text-2xl font-bold text-blue-600">
-                        {
-                          reports.filter((r) => {
-                            const days = Math.ceil(
-                              (new Date(r.proximoEnvio).getTime() - Date.now()) /
-                                (1000 * 60 * 60 * 24)
-                            );
-                            return days <= 7 && days >= 0;
-                          }).length
-                        }
-                      </p>
-                    </div>
-                    <Clock className="h-8 w-8 text-blue-600" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Próximos 7 días</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {
+                      reports.filter((r) => {
+                        const days = Math.ceil(
+                          (new Date(r.proximoEnvio).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                        );
+                        return days <= 7 && days >= 0;
+                      }).length
+                    }
+                  </p>
+                </div>
+                <Clock className="h-8 w-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-            {/* Información de Configuración Cron */}
-            {session?.user?.role === 'super_admin' && (
-              <Card className="border-blue-200 bg-blue-50">
-                <CardHeader>
-                  <CardTitle className="text-blue-900 flex items-center gap-2">
-                    <Clock className="h-5 w-5" />
-                    Configuración del Procesador Automático
-                  </CardTitle>
-                  <CardDescription className="text-blue-700">
-                    Para que los reportes se envíen automáticamente, configura un cron job
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="bg-white rounded-md p-4 space-y-2">
-                    <p className="text-sm font-medium text-gray-900">Endpoint del cron:</p>
-                    <code className="block bg-gray-100 p-2 rounded text-xs break-all">
-                      {typeof window !== 'undefined' ? window.location.origin : ''}
-                      /api/cron/process-scheduled-reports
-                    </code>
-                    <p className="text-sm font-medium text-gray-900 mt-3">
-                      Header de autorización:
-                    </p>
-                    <code className="block bg-gray-100 p-2 rounded text-xs">
-                      Authorization: Bearer inmova-cron-secret-2024-secure-key-xyz789
-                    </code>
-                    <p className="text-xs text-gray-600 mt-3">
-                      <strong>Recomendación:</strong> Configura el cron para ejecutarse cada hora.
-                      El sistema procesará automáticamente los reportes que estén programados para
-                      enviarse.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+        {/* Información de Configuración Cron */}
+        {session?.user?.role === 'super_admin' && (
+          <Card className="border-blue-200 bg-blue-50">
+            <CardHeader>
+              <CardTitle className="text-blue-900 flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Configuración del Procesador Automático
+              </CardTitle>
+              <CardDescription className="text-blue-700">
+                Para que los reportes se envíen automáticamente, configura un cron job
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="bg-white rounded-md p-4 space-y-2">
+                <p className="text-sm font-medium text-gray-900">Endpoint del cron:</p>
+                <code className="block bg-gray-100 p-2 rounded text-xs break-all">
+                  {typeof window !== 'undefined' ? window.location.origin : ''}
+                  /api/cron/process-scheduled-reports
+                </code>
+                <p className="text-sm font-medium text-gray-900 mt-3">Header de autorización:</p>
+                <code className="block bg-gray-100 p-2 rounded text-xs">
+                  Authorization: Bearer inmova-cron-secret-2024-secure-key-xyz789
+                </code>
+                <p className="text-xs text-gray-600 mt-3">
+                  <strong>Recomendación:</strong> Configura el cron para ejecutarse cada hora. El
+                  sistema procesará automáticamente los reportes que estén programados para
+                  enviarse.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-            {/* Lista de Reportes */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Reportes Configurados</CardTitle>
-                <CardDescription>Gestiona tus reportes automáticos</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {reports.length === 0 ? (
-                  <div className="text-center py-12">
-                    <FileText className="h-12 w-12 mx-auto text-gray-400" />
-                    <h3 className="mt-4 text-lg font-medium text-gray-900">
-                      No hay reportes programados
-                    </h3>
-                    <p className="mt-2 text-sm text-gray-500">
-                      Comienza creando tu primer reporte automático.
-                    </p>
-                    <Button onClick={openNewDialog} className="mt-4 gap-2">
-                      <Plus className="h-4 w-4" />
-                      Crear Reporte
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {reports.map((report) => (
-                      <div
-                        key={report.id}
-                        className="flex items-center justify-between p-4 rounded-lg border bg-white hover:shadow-md transition"
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3">
-                            <h3 className="font-semibold text-lg">{report.nombre}</h3>
-                            <Badge className={getTipoBadgeColor(report.tipo)}>
-                              {getTipoLabel(report.tipo)}
-                            </Badge>
-                            <Badge variant="outline">{getFrecuenciaLabel(report.frecuencia)}</Badge>
-                            {report.activo ? (
-                              <Badge className="bg-green-100 text-green-800">Activo</Badge>
-                            ) : (
-                              <Badge variant="secondary">Pausado</Badge>
-                            )}
-                          </div>
-
-                          <div className="mt-2 space-y-1 text-sm text-gray-600">
-                            <div className="flex items-center gap-2">
-                              <Mail className="h-4 w-4" />
-                              <span>
-                                {report.destinatarios.length} destinatario
-                                {report.destinatarios.length !== 1 ? 's' : ''}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <CalendarDays className="h-4 w-4" />
-                              <span>
-                                Próximo envío:{' '}
-                                {format(new Date(report.proximoEnvio), 'PPP', {
-                                  locale: es,
-                                })}{' '}
-                                (
-                                {formatDistanceToNow(new Date(report.proximoEnvio), {
-                                  addSuffix: true,
-                                  locale: es,
-                                })}
-                                )
-                              </span>
-                            </div>
-                            {report.ultimoEnvio && (
-                              <div className="flex items-center gap-2">
-                                <CheckCircle className="h-4 w-4 text-green-600" />
-                                <span>
-                                  Último envío:{' '}
-                                  {format(new Date(report.ultimoEnvio), 'PPP', {
-                                    locale: es,
-                                  })}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="mt-2 flex items-center gap-2">
-                            {report.incluirPdf && (
-                              <Badge variant="outline" className="text-xs">
-                                PDF
-                              </Badge>
-                            )}
-                            {report.incluirCsv && (
-                              <Badge variant="outline" className="text-xs">
-                                CSV
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => confirmSendNow(report)}
-                            disabled={sending === report.id}
-                          >
-                            {sending === report.id ? (
-                              <>
-                                <Clock className="h-4 w-4 mr-2 animate-spin" />
-                                Enviando...
-                              </>
-                            ) : (
-                              <>
-                                <Send className="h-4 w-4 mr-2" />
-                                Enviar ahora
-                              </>
-                            )}
-                          </Button>
-
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => openEditDialog(report)}>
-                                <Eye className="h-4 w-4 mr-2" />
-                                Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleToggleActive(report)}>
-                                {report.activo ? (
-                                  <>
-                                    <AlertCircle className="h-4 w-4 mr-2" />
-                                    Pausar
-                                  </>
-                                ) : (
-                                  <>
-                                    <CheckCircle className="h-4 w-4 mr-2" />
-                                    Activar
-                                  </>
-                                )}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleShowHistory(report.id)}>
-                                <Clock className="h-4 w-4 mr-2" />
-                                Ver historial
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => confirmDelete(report)}
-                                className="text-red-600"
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Eliminar
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
+        {/* Lista de Reportes */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Reportes Configurados</CardTitle>
+            <CardDescription>Gestiona tus reportes automáticos</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {reports.length === 0 ? (
+              <div className="text-center py-12">
+                <FileText className="h-12 w-12 mx-auto text-gray-400" />
+                <h3 className="mt-4 text-lg font-medium text-gray-900">
+                  No hay reportes programados
+                </h3>
+                <p className="mt-2 text-sm text-gray-500">
+                  Comienza creando tu primer reporte automático.
+                </p>
+                <Button onClick={openNewDialog} className="mt-4 gap-2">
+                  <Plus className="h-4 w-4" />
+                  Crear Reporte
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {reports.map((report) => (
+                  <div
+                    key={report.id}
+                    className="flex items-center justify-between p-4 rounded-lg border bg-white hover:shadow-md transition"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <h3 className="font-semibold text-lg">{report.nombre}</h3>
+                        <Badge className={getTipoBadgeColor(report.tipo)}>
+                          {getTipoLabel(report.tipo)}
+                        </Badge>
+                        <Badge variant="outline">{getFrecuenciaLabel(report.frecuencia)}</Badge>
+                        {report.activo ? (
+                          <Badge className="bg-green-100 text-green-800">Activo</Badge>
+                        ) : (
+                          <Badge variant="secondary">Pausado</Badge>
+                        )}
                       </div>
-                    ))}
+
+                      <div className="mt-2 space-y-1 text-sm text-gray-600">
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4" />
+                          <span>
+                            {report.destinatarios.length} destinatario
+                            {report.destinatarios.length !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CalendarDays className="h-4 w-4" />
+                          <span>
+                            Próximo envío:{' '}
+                            {format(new Date(report.proximoEnvio), 'PPP', {
+                              locale: es,
+                            })}{' '}
+                            (
+                            {formatDistanceToNow(new Date(report.proximoEnvio), {
+                              addSuffix: true,
+                              locale: es,
+                            })}
+                            )
+                          </span>
+                        </div>
+                        {report.ultimoEnvio && (
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <span>
+                              Último envío:{' '}
+                              {format(new Date(report.ultimoEnvio), 'PPP', {
+                                locale: es,
+                              })}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-2 flex items-center gap-2">
+                        {report.incluirPdf && (
+                          <Badge variant="outline" className="text-xs">
+                            PDF
+                          </Badge>
+                        )}
+                        {report.incluirCsv && (
+                          <Badge variant="outline" className="text-xs">
+                            CSV
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => confirmSendNow(report)}
+                        disabled={sending === report.id}
+                      >
+                        {sending === report.id ? (
+                          <>
+                            <Clock className="h-4 w-4 mr-2 animate-spin" />
+                            Enviando...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="h-4 w-4 mr-2" />
+                            Enviar ahora
+                          </>
+                        )}
+                      </Button>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => openEditDialog(report)}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleToggleActive(report)}>
+                            {report.activo ? (
+                              <>
+                                <AlertCircle className="h-4 w-4 mr-2" />
+                                Pausar
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                Activar
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleShowHistory(report.id)}>
+                            <Clock className="h-4 w-4 mr-2" />
+                            Ver historial
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => confirmDelete(report)}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Dialog Crear/Editar */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
@@ -900,7 +897,7 @@ export default function ReportesProgramadosPage() {
                 <Card
                   key={template.id}
                   className="hover:shadow-md transition cursor-pointer"
-                  onClick={() => useTemplate(template)}
+                  onClick={() => applyTemplate(template)}
                 >
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -949,7 +946,7 @@ export default function ReportesProgramadosPage() {
                       <Card
                         key={template.id}
                         className="hover:shadow-md transition cursor-pointer"
-                        onClick={() => useTemplate(template)}
+                        onClick={() => applyTemplate(template)}
                       >
                         <CardHeader>
                           <div className="flex items-center justify-between">

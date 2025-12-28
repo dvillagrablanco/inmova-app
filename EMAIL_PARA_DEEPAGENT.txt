@@ -1,0 +1,26 @@
+Asunto: Configurar SSL para inmova.app - Opción Cloudflare Proxy
+
+Hola DeepAgent,
+
+Necesito habilitar SSL/HTTPS para mi dominio inmova.app que gestionáis 
+a través de Cloudflare.
+
+Mi servidor (54.201.20.43) tiene firewall que bloquea conexiones 
+entrantes en puertos 80 y 443, por lo que no puedo obtener certificados 
+SSL de Let's Encrypt directamente.
+
+¿Podéis activar el PROXY de Cloudflare (nube naranja) para estos registros?
+
+- inmova.app (A) → 54.201.20.43 [Proxy: ACTIVADO 🟠]
+- www.inmova.app (A) → 54.201.20.43 [Proxy: ACTIVADO 🟠]
+
+Y configurar SSL/TLS como "Flexible" en el panel de Cloudflare.
+
+Esto permitirá que Cloudflare maneje el SSL automáticamente.
+
+Alternativamente, si podéis configurar un Cloudflare Tunnel para 
+este dominio, también funcionaría.
+
+Gracias,
+[Tu nombre]
+

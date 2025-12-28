@@ -12,20 +12,25 @@ COPY prisma ./prisma/
 
 # Instalar dependencias
 FROM base AS deps
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Builder
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generar Prisma Client
+# Generar Prisma Client primero
 RUN npx prisma generate
 
-# Build Next.js
+# Build Next.js con variables de entorno para evitar análisis estático
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-RUN npm run build
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public"
+ENV SKIP_ENV_VALIDATION=true
+ENV NEXTAUTH_SECRET="build-time-secret"
+ENV NEXTAUTH_URL="http://localhost:3000"
+ENV ENCRYPTION_KEY="buildt buildt buildt buildt buildt buildt"
+RUN npm run build || npm run build
 
 # Runner - imagen final de producción
 FROM node:20-alpine AS runner

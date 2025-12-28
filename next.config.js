@@ -4,12 +4,18 @@ const path = require('path');
 const nextConfig = {
   distDir: process.env.NEXT_DIST_DIR || '.next',
   output: 'standalone',
-  
+
   // Configuración para APIs dinámicas
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
     },
+  },
+  // Evitar recopilación de datos en build time para rutas API
+  staticPageGenerationTimeout: 1000,
+  // Saltar validación de build para deployment rápido
+  generateBuildId: async () => {
+    return 'inmova-production-' + Date.now();
   },
   eslint: {
     ignoreDuringBuilds: true,
@@ -18,11 +24,7 @@ const nextConfig = {
     // Mantener en true para evitar timeouts en Vercel (ver IMPORTANTE_ANTES_DE_DESPLEGAR.md)
     ignoreBuildErrors: true,
   },
-  eslint: {
-    // Ignorar errores durante el build
-    ignoreDuringBuilds: true,
-  },
-  images: { 
+  images: {
     unoptimized: true,
     domains: [
       'inmova-bucket.s3.amazonaws.com',
@@ -31,7 +33,7 @@ const nextConfig = {
       'avatars.githubusercontent.com',
     ],
   },
-  
+
   // Security Headers
   async headers() {
     return [
@@ -40,28 +42,28 @@ const nextConfig = {
         headers: [
           {
             key: 'X-DNS-Prefetch-Control',
-            value: 'on'
+            value: 'on',
           },
           {
             key: 'X-Frame-Options',
-            value: 'DENY'
+            value: 'DENY',
           },
           {
             key: 'X-Content-Type-Options',
-            value: 'nosniff'
+            value: 'nosniff',
           },
           {
             key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
+            value: 'strict-origin-when-cross-origin',
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()'
+            value: 'camera=(), microphone=(), geolocation=()',
           },
           {
             key: 'X-Deployment-Version',
-            value: process.env.VERCEL_GIT_COMMIT_SHA || 'dev'
-          }
+            value: process.env.VERCEL_GIT_COMMIT_SHA || 'dev',
+          },
         ],
       },
       {
@@ -69,20 +71,20 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'no-store, no-cache, must-revalidate, proxy-revalidate'
+            value: 'no-store, no-cache, must-revalidate, proxy-revalidate',
           },
           {
             key: 'Pragma',
-            value: 'no-cache'
+            value: 'no-cache',
           },
           {
             key: 'Expires',
-            value: '0'
+            value: '0',
           },
           {
             key: 'Surrogate-Control',
-            value: 'no-store'
-          }
+            value: 'no-store',
+          },
         ],
       },
       {
@@ -90,8 +92,8 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable'
-          }
+            value: 'public, max-age=31536000, immutable',
+          },
         ],
       },
       {
@@ -99,13 +101,13 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable'
-          }
+            value: 'public, max-age=31536000, immutable',
+          },
         ],
       },
     ];
   },
-  
+
   // Redirects
   async redirects() {
     return [
@@ -116,7 +118,7 @@ const nextConfig = {
       },
     ];
   },
-  
+
   // Rewrites for API optimization
   async rewrites() {
     return {
@@ -125,7 +127,7 @@ const nextConfig = {
       fallback: [],
     };
   },
-  
+
   // Webpack optimizations
   webpack: (config, { isServer }) => {
     // Optimizaciones de bundle
@@ -138,15 +140,15 @@ const nextConfig = {
         crypto: false,
       };
     }
-    
+
     return config;
   },
-  
+
   // Performance optimizations
   swcMinify: false,
   compress: false,
   poweredByHeader: false,
-  
+
   // Logging
   logging: {
     fetches: {

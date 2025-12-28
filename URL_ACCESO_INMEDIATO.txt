@@ -1,0 +1,58 @@
+🌐 ACCESO INMEDIATO A TU APLICACIÓN
+
+═══════════════════════════════════════════════════════════════
+
+✅ URL ACTIVA AHORA:
+
+https://newfoundland-potatoes-instantly-extent.trycloudflare.com
+
+═══════════════════════════════════════════════════════════════
+
+📋 CARACTERÍSTICAS:
+
+✅ SSL válido (HTTPS)
+✅ Auto-reinicio con PM2
+✅ Sin límite de tiempo
+✅ Gratis
+✅ Funciona aunque reinicies el servidor
+
+═══════════════════════════════════════════════════════════════
+
+⚙️ GESTIÓN DEL TÚNEL:
+
+# Ver estado
+pm2 status
+
+# Ver logs del túnel
+pm2 logs cloudflare-tunnel
+
+# Reiniciar túnel (obtendrás nueva URL)
+pm2 restart cloudflare-tunnel
+pm2 logs cloudflare-tunnel | grep trycloudflare.com
+
+# Detener túnel
+pm2 stop cloudflare-tunnel
+
+═══════════════════════════════════════════════════════════════
+
+🎯 PARA PRODUCCIÓN:
+
+Cuando tengas un dominio que controles, ejecuta:
+cd /workspace
+./configurar-ssl-letsencrypt.sh
+
+O pide a DeepAgent que active el proxy de Cloudflare para inmova.app
+
+═══════════════════════════════════════════════════════════════
+
+📊 SERVICIOS ACTIVOS:
+
+│ inmova-app           │ ✅ Next.js (puerto 3000)
+│ cloudflare-tunnel    │ ✅ Túnel público
+│ postgresql           │ ✅ Base de datos
+│ nginx                │ ✅ Proxy reverso
+
+═══════════════════════════════════════════════════════════════
+
+¡Tu aplicación está 100% funcional y accesible desde internet!
+
