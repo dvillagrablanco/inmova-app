@@ -1,0 +1,95 @@
+[
+  {
+    "url": "/edificios",
+    "status": 200,
+    "success": true,
+    "loadTime": 3260,
+    "errors": []
+  },
+  {
+    "url": "/dashboard",
+    "status": 200,
+    "success": true,
+    "loadTime": 1681,
+    "errors": []
+  },
+  {
+    "url": "/unidades",
+    "status": 200,
+    "success": true,
+    "loadTime": 2511,
+    "errors": []
+  },
+  {
+    "url": "/inquilinos",
+    "status": 500,
+    "success": false,
+    "loadTime": 6805,
+    "errors": [
+      "HTTP 500"
+    ]
+  },
+  {
+    "url": "/contratos",
+    "status": 0,
+    "success": false,
+    "loadTime": 1341,
+    "errors": [
+      "net::ERR_ABORTED at https://inmovaapp.com/contratos"
+    ]
+  },
+  {
+    "url": "/candidatos",
+    "status": 500,
+    "success": false,
+    "loadTime": 1652,
+    "errors": [
+      "HTTP 500"
+    ]
+  },
+  {
+    "url": "/reportes",
+    "status": 0,
+    "success": false,
+    "loadTime": 1729,
+    "errors": [
+      "net::ERR_ABORTED at https://inmovaapp.com/reportes"
+    ]
+  },
+  {
+    "url": "/analytics",
+    "status": 500,
+    "success": false,
+    "loadTime": 1706,
+    "errors": [
+      "HTTP 500"
+    ]
+  },
+  {
+    "url": "/facturacion",
+    "status": 0,
+    "success": false,
+    "loadTime": 1682,
+    "errors": [
+      "net::ERR_ABORTED at https://inmovaapp.com/facturacion"
+    ]
+  },
+  {
+    "url": "/configuracion",
+    "status": 500,
+    "success": false,
+    "loadTime": 1121,
+    "errors": [
+      "HTTP 500"
+    ]
+  },
+  {
+    "url": "/perfil",
+    "status": 0,
+    "success": false,
+    "loadTime": 1904,
+    "errors": [
+      "net::ERR_ABORTED at https://inmovaapp.com/perfil"
+    ]
+  }
+]

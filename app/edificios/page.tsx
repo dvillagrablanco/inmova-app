@@ -172,6 +172,17 @@ function EdificiosPageContent() {
     }
   };
 
+  // Helper function - must be before early returns
+  const getTipoBadge = (tipo: string) => {
+    const badges: Record<string, { variant: any; label: string }> = {
+      residencial: { variant: 'default', label: 'Residencial' },
+      comercial: { variant: 'secondary', label: 'Comercial' },
+      mixto: { variant: 'outline', label: 'Mixto' },
+      industrial: { variant: 'destructive', label: 'Industrial' },
+    };
+    return badges[tipo.toLowerCase()] || { variant: 'default', label: tipo };
+  };
+
   if (status === 'loading' || isLoading) {
     return (
       <AuthenticatedLayout>
@@ -188,16 +199,6 @@ function EdificiosPageContent() {
   }
 
   if (!session) return null;
-
-  const getTipoBadge = (tipo: string) => {
-    const badges: Record<string, { variant: any; label: string }> = {
-      residencial: { variant: 'default', label: 'Residencial' },
-      comercial: { variant: 'secondary', label: 'Comercial' },
-      mixto: { variant: 'outline', label: 'Mixto' },
-      industrial: { variant: 'destructive', label: 'Industrial' },
-    };
-    return badges[tipo.toLowerCase()] || { variant: 'default', label: tipo };
-  };
 
   return (
     <AuthenticatedLayout>
