@@ -10,7 +10,10 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
+    staticWorkerRequestDeduping: false,
   },
+  // Evitar recopilación de datos en build time para rutas API
+  staticPageGenerationTimeout: 1000,
   eslint: {
     ignoreDuringBuilds: true,
   },
