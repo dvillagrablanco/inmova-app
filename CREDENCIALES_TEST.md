@@ -6,7 +6,7 @@ Contraseña para todos: **Test1234!**
 
 | Rol | Email | Contraseña | Estado |
 |-----|-------|------------|--------|
-| **Super Admin** | admin@inmova.app | Admin2025! | ✅ Existente |
+| **Super Admin** | admin@inmova.app | Test1234! | ✅ Existente |
 | **Administrador** | admin@test.com | Test1234! | ⏳ Por crear |
 | **Gestor** | gestor@test.com | Test1234! | ⏳ Por crear |
 | **Operador** | operador@test.com | Test1234! | ⏳ Por crear |
@@ -69,5 +69,5 @@ enum UserRole {
 ## Nota
 
 Para pruebas completas, usaremos:
-- **admin@inmova.app** con contraseña **Admin2025!** (ya existe)
+- **admin@inmova.app** con contraseña **Test1234!** (ya existe)
 - Los tests verificarán el acceso y funcionalidad básica

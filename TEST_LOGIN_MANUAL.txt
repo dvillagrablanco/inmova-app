@@ -6,13 +6,13 @@ URL: https://inmovaapp.com/login
 
 CREDENCIALES:
    Email:    admin@inmova.app
-   Password: Admin2025!
+   Password: Test1234!
 
 PASOS:
    1. Abrir navegador
    2. Ir a https://inmovaapp.com/login
    3. Ingresar email: admin@inmova.app
-   4. Ingresar contraseña: Admin2025!
+   4. Ingresar contraseña: Test1234!
    5. Click en "Iniciar sesión"
    6. Verificar acceso al dashboard
 

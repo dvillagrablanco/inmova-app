@@ -45,7 +45,7 @@
 
 ```
 Email:    admin@inmova.app
-Password: Admin2025!
+Password: Test1234!
 URL:      https://inmovaapp.com/login
 Rol:      super_admin
 ```
@@ -129,7 +129,7 @@ npx playwright test e2e/login-all-profiles.spec.ts --grep "Super Admin"
 
 2. **Ingresar credenciales**:
    - Email: `admin@inmova.app`
-   - Password: `Admin2025!`
+   - Password: `Test1234!`
 
 3. **Click en "Iniciar sesión"**
 

@@ -12,7 +12,7 @@ const TEST_CREDENTIALS = [
   {
     role: 'Super Admin',
     email: 'admin@inmova.app',
-    password: 'Admin2025!',
+    password: 'Test1234!',
     expectedDashboard: /dashboard|inicio|admin/i,
   },
 ];
