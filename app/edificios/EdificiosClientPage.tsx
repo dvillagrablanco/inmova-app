@@ -314,12 +314,12 @@ export function EdificiosClientPage({ initialBuildings }: EdificiosClientPagePro
                             </div>
                             <div>
                               <p className="text-xs text-gray-500">Ocupación</p>
-                              <p className="text-sm font-semibold">{building.metrics.ocupacionPct}%</p>
+                              <p className="text-sm font-semibold">{Number(building.metrics.ocupacionPct || 0).toFixed(1)}%</p>
                             </div>
                             <div className="col-span-2">
                               <p className="text-xs text-gray-500">Ingresos Mensuales</p>
                               <p className="text-sm font-semibold">
-                                €{building.metrics.ingresosMensuales.toLocaleString()}
+                                €{Number(building.metrics.ingresosMensuales || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </p>
                             </div>
                           </div>
@@ -369,12 +369,12 @@ export function EdificiosClientPage({ initialBuildings }: EdificiosClientPagePro
                               </div>
                               <div className="text-center">
                                 <p className="text-xs text-gray-500">Ocupación</p>
-                                <p className="text-sm font-semibold">{building.metrics.ocupacionPct}%</p>
+                                <p className="text-sm font-semibold">{Number(building.metrics.ocupacionPct || 0).toFixed(1)}%</p>
                               </div>
                               <div className="text-center">
                                 <p className="text-xs text-gray-500">Ingresos</p>
                                 <p className="text-sm font-semibold">
-                                  €{building.metrics.ingresosMensuales.toLocaleString()}
+                                  €{Number(building.metrics.ingresosMensuales || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </p>
                               </div>
                             </>

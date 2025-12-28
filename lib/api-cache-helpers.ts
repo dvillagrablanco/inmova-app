@@ -158,15 +158,23 @@ export async function cachedBuildings(companyId: string) {
         const ocupacionPct = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
         const ingresosMensuales = building.units
           .filter((u) => u.estado === 'ocupada')
-          .reduce((sum, u) => sum + u.rentaMensual, 0);
+          .reduce((sum, u) => sum + Number(u.rentaMensual || 0), 0);
 
         return {
-          ...building,
+          id: building.id,
+          nombre: building.nombre,
+          direccion: building.direccion,
+          tipo: building.tipo,
+          anoConstructor: building.anoConstructor,
+          numeroUnidades: building.numeroUnidades,
+          companyId: building.companyId,
+          createdAt: building.createdAt,
+          updatedAt: building.updatedAt,
           metrics: {
             totalUnits,
             occupiedUnits,
-            ocupacionPct: Math.round(ocupacionPct * 10) / 10,
-            ingresosMensuales: Math.round(ingresosMensuales * 100) / 100,
+            ocupacionPct: Number((Math.round(ocupacionPct * 10) / 10).toFixed(1)),
+            ingresosMensuales: Number((Math.round(ingresosMensuales * 100) / 100).toFixed(2)),
           },
         };
       });
@@ -187,7 +195,7 @@ export async function cachedUnits(companyId: string) {
   return withCache(
     cacheKey,
     async () => {
-      return prisma.unit.findMany({
+      const units = await prisma.unit.findMany({
         where: { building: { companyId } },
         include: {
           building: {
@@ -213,6 +221,23 @@ export async function cachedUnits(companyId: string) {
         },
         orderBy: { createdAt: 'desc' },
       });
+
+      // Transformar la estructura para que sea compatible con el frontend
+      return units.map((unit) => ({
+        id: unit.id,
+        numero: unit.numero,
+        tipo: unit.tipo,
+        estado: unit.estado,
+        planta: unit.planta,
+        superficie: Number(unit.superficie || 0),
+        habitaciones: unit.habitaciones,
+        banos: unit.banos,
+        rentaMensual: Number(unit.rentaMensual || 0),
+        building: unit.building,
+        tenant: unit.contracts?.[0]?.tenant || null,
+        createdAt: unit.createdAt,
+        updatedAt: unit.updatedAt,
+      }));
     },
     TTL_UNITS
   );

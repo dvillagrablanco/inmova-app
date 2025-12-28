@@ -66,13 +66,14 @@ export async function GET(req: NextRequest) {
               building: {
                 select: selectBuildingMinimal,
               },
-              tenant: {
-                select: selectTenantMinimal,
-              },
               contracts: {
                 where: { estado: 'activo' },
                 take: 1,
-                select: selectContractMinimal,
+                include: {
+                  tenant: {
+                    select: selectTenantMinimal,
+                  },
+                },
               },
             },
             orderBy: { createdAt: 'desc' },
@@ -82,7 +83,16 @@ export async function GET(req: NextRequest) {
           prisma.unit.count({ where }),
         ]);
 
-        return NextResponse.json(buildPaginationResponse(units, total, page, limit));
+        // Transformar estructura para extraer tenant del contrato
+        const transformedUnits = units.map((unit) => ({
+          ...unit,
+          superficie: Number(unit.superficie || 0),
+          rentaMensual: Number(unit.rentaMensual || 0),
+          tenant: unit.contracts?.[0]?.tenant || null,
+          contracts: undefined, // Remover contracts del resultado
+        }));
+
+        return NextResponse.json(buildPaginationResponse(transformedUnits, total, page, limit));
       }
 
       // Sin paginación pero con filtros
@@ -102,19 +112,29 @@ export async function GET(req: NextRequest) {
           building: {
             select: selectBuildingMinimal,
           },
-          tenant: {
-            select: selectTenantMinimal,
-          },
           contracts: {
             where: { estado: 'activo' },
             take: 1,
-            select: selectContractMinimal,
+            include: {
+              tenant: {
+                select: selectTenantMinimal,
+              },
+            },
           },
         },
         orderBy: { createdAt: 'desc' },
       });
 
-      return NextResponse.json(units);
+      // Transformar estructura para extraer tenant del contrato
+      const transformedUnits = units.map((unit) => ({
+        ...unit,
+        superficie: Number(unit.superficie || 0),
+        rentaMensual: Number(unit.rentaMensual || 0),
+        tenant: unit.contracts?.[0]?.tenant || null,
+        contracts: undefined, // Remover contracts del resultado
+      }));
+
+      return NextResponse.json(transformedUnits);
     }
 
     // Sin filtros, usar caché (compatibilidad con código existente)
