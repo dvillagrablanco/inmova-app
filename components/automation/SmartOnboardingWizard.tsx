@@ -14,7 +14,7 @@ import {
   ArrowRight,
   X,
   RefreshCw,
-  Sparkles
+  Sparkles,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -56,15 +56,37 @@ export default function SmartOnboardingWizard() {
       const res = await fetch('/api/onboarding/progress');
       if (res.ok) {
         const data = await res.json();
-        setProgress(data);
-        
+
+        // Transformar formato del servicio al formato esperado por el componente
+        const transformedData: OnboardingProgress = {
+          currentStep: data.tasks?.findIndex((t: any) => t.status !== 'completed') ?? 0,
+          totalSteps: data.totalTasks ?? 0,
+          completedSteps: data.completedTasks ?? 0,
+          percentageComplete: data.percentage ?? 0,
+          steps: (data.tasks ?? []).map((task: any) => ({
+            id: task.taskId ?? task.id,
+            title: task.title ?? '',
+            description: task.description ?? '',
+            action: task.route ? `navigate:${task.route}` : 'acknowledge',
+            completed: task.status === 'completed',
+            required: task.isMandatory ?? false,
+            order: task.order ?? 0,
+            videoUrl: task.videoUrl,
+            estimatedTime: task.estimatedTime,
+          })),
+          vertical: data.vertical ?? 'General',
+        };
+
+        setProgress(transformedData);
+
         // Si ya está completado, no mostrar
-        if (data.percentageComplete === 100) {
+        if (transformedData.percentageComplete === 100) {
           setIsVisible(false);
         }
       }
     } catch (error) {
       logger.error('Error loading onboarding progress:', error);
+      setIsVisible(false); // Ocultar si hay error
     } finally {
       setLoading(false);
     }
@@ -79,7 +101,7 @@ export default function SmartOnboardingWizard() {
     if (step.action.startsWith('navigate:')) {
       const path = step.action.replace('navigate:', '');
       router.push(path);
-      
+
       // Marcar como completado después de un breve delay
       setTimeout(() => {
         completeStep(step.id);
@@ -94,17 +116,17 @@ export default function SmartOnboardingWizard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'complete_step',
-          stepId
-        })
+          stepId,
+        }),
       });
 
       if (res.ok) {
         const updated = await res.json();
         setProgress(updated);
-        
+
         if (updated.percentageComplete === 100) {
           toast.success('¡Onboarding completado! 🎉', {
-            description: 'Estás listo para usar INMOVA al 100%'
+            description: 'Estás listo para usar INMOVA al 100%',
           });
           setTimeout(() => setIsVisible(false), 3000);
         } else {
@@ -121,7 +143,7 @@ export default function SmartOnboardingWizard() {
       const res = await fetch('/api/onboarding/progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'skip' })
+        body: JSON.stringify({ action: 'skip' }),
       });
 
       if (res.ok) {
@@ -138,7 +160,7 @@ export default function SmartOnboardingWizard() {
       const res = await fetch('/api/onboarding/progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'restart' })
+        body: JSON.stringify({ action: 'restart' }),
       });
 
       if (res.ok) {
@@ -167,7 +189,15 @@ export default function SmartOnboardingWizard() {
     return null;
   }
 
-  const currentStepData = progress.steps[progress.currentStep];
+  // Validar que existan steps y que currentStep sea válido
+  if (!progress.steps || progress.steps.length === 0) {
+    logger.warn('No onboarding steps available');
+    return null;
+  }
+
+  // Asegurar que currentStep esté dentro del rango válido
+  const validCurrentStep = Math.min(progress.currentStep || 0, progress.steps.length - 1);
+  const currentStepData = progress.steps[validCurrentStep];
 
   return (
     <AnimatePresence>
@@ -187,7 +217,8 @@ export default function SmartOnboardingWizard() {
                 <div>
                   <CardTitle className="text-xl">Bienvenido a INMOVA</CardTitle>
                   <CardDescription>
-                    Configuración {progress.vertical} - {progress.completedSteps}/{progress.totalSteps} pasos completados
+                    Configuración {progress.vertical} - {progress.completedSteps}/
+                    {progress.totalSteps} pasos completados
                   </CardDescription>
                 </div>
               </div>
@@ -208,11 +239,7 @@ export default function SmartOnboardingWizard() {
                 >
                   Omitir
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsVisible(false)}
-                >
+                <Button variant="ghost" size="icon" onClick={() => setIsVisible(false)}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -225,7 +252,8 @@ export default function SmartOnboardingWizard() {
                   {progress.percentageComplete}% completado
                 </span>
                 <span className="text-sm text-muted-foreground">
-                  ~{progress.steps.reduce((acc, s) => acc + (s.estimatedTime || 0), 0)} min restantes
+                  ~{progress.steps.reduce((acc, s) => acc + (s.estimatedTime || 0), 0)} min
+                  restantes
                 </span>
               </div>
               <Progress value={progress.percentageComplete} className="h-2" />
@@ -289,9 +317,7 @@ export default function SmartOnboardingWizard() {
 
             {/* Lista de todos los pasos */}
             <div className="space-y-2">
-              <h4 className="text-sm font-semibold text-muted-foreground mb-3">
-                Todos los pasos:
-              </h4>
+              <h4 className="text-sm font-semibold text-muted-foreground mb-3">Todos los pasos:</h4>
               {progress.steps.map((step, index) => (
                 <motion.button
                   key={step.id}
@@ -302,11 +328,12 @@ export default function SmartOnboardingWizard() {
                   disabled={step.completed}
                   className={`
                     w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all
-                    ${step.completed
-                      ? 'bg-muted/50 border-muted cursor-default opacity-70'
-                      : index === progress.currentStep
-                      ? 'border-primary bg-primary/5 hover:bg-primary/10'
-                      : 'border-border hover:border-primary/50 hover:bg-accent'
+                    ${
+                      step.completed
+                        ? 'bg-muted/50 border-muted cursor-default opacity-70'
+                        : index === progress.currentStep
+                          ? 'border-primary bg-primary/5 hover:bg-primary/10'
+                          : 'border-border hover:border-primary/50 hover:bg-accent'
                     }
                   `}
                 >
@@ -314,16 +341,20 @@ export default function SmartOnboardingWizard() {
                     {step.completed ? (
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
                     ) : (
-                      <Circle className={`h-5 w-5 ${
-                        index === progress.currentStep ? 'text-primary' : 'text-muted-foreground'
-                      }`} />
+                      <Circle
+                        className={`h-5 w-5 ${
+                          index === progress.currentStep ? 'text-primary' : 'text-muted-foreground'
+                        }`}
+                      />
                     )}
                   </div>
                   <div className="flex-1 text-left">
                     <div className="flex items-center gap-2">
-                      <span className={`text-sm font-medium ${
-                        step.completed ? 'line-through text-muted-foreground' : ''
-                      }`}>
+                      <span
+                        className={`text-sm font-medium ${
+                          step.completed ? 'line-through text-muted-foreground' : ''
+                        }`}
+                      >
                         {step.title}
                       </span>
                       {step.required && !step.completed && (
@@ -332,9 +363,7 @@ export default function SmartOnboardingWizard() {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {step.description}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{step.description}</p>
                   </div>
                   {step.estimatedTime && !step.completed && (
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
