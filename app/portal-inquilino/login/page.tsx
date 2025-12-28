@@ -35,8 +35,14 @@ function LoginFormContent() {
       });
 
       if (result?.error) {
-        setError(result.error);
-        toast.error(result.error);
+        const errorMessage =
+          result.error === 'CredentialsSignin'
+            ? 'Credenciales inválidas. Revisa tu email y contraseña.'
+            : result.error === 'Configuration'
+              ? 'Error de configuración de autenticación. Contacta con soporte.'
+              : 'Error al iniciar sesión. Inténtalo de nuevo.';
+        setError(errorMessage);
+        toast.error(errorMessage);
       } else if (result?.ok) {
         toast.success('¡Bienvenido!');
         router.push(callbackUrl);
