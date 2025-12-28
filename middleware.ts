@@ -10,10 +10,12 @@ import { csrfProtectionMiddleware, addCsrfTokenToResponse } from './lib/csrf-pro
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1. Rate Limiting
-  const rateLimitResult = await rateLimitMiddleware(request);
-  if (rateLimitResult) {
-    return rateLimitResult; // Rate limit excedido
+  // 1. Rate Limiting (deshabilitado en desarrollo para testing)
+  if (process.env.NODE_ENV !== 'development') {
+    const rateLimitResult = await rateLimitMiddleware(request);
+    if (rateLimitResult) {
+      return rateLimitResult; // Rate limit excedido
+    }
   }
 
   // 2. CSRF Protection (solo para rutas API que modifican datos)
@@ -26,13 +28,13 @@ export async function middleware(request: NextRequest) {
 
   // 3. Security Headers
   const response = NextResponse.next();
-  
+
   // Agregar headers de seguridad
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  
+
   // HSTS en producción
   if (process.env.NODE_ENV === 'production') {
     response.headers.set(
@@ -40,7 +42,7 @@ export async function middleware(request: NextRequest) {
       'max-age=31536000; includeSubDomains; preload'
     );
   }
-  
+
   // CSP (Content Security Policy)
   response.headers.set(
     'Content-Security-Policy',
@@ -56,7 +58,7 @@ export async function middleware(request: NextRequest) {
       "form-action 'self'",
     ].join('; ')
   );
-  
+
   // Agregar CSRF token si es necesario
   if (!pathname.startsWith('/_next') && !pathname.startsWith('/api/')) {
     addCsrfTokenToResponse(response);

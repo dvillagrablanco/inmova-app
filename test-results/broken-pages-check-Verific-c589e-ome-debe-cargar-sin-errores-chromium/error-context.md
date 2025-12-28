@@ -1,0 +1,1760 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+    - link "Saltar al contenido principal" [ref=e2] [cursor=pointer]:
+        - /url: '#main-content'
+    - generic [ref=e3]:
+        - navigation [ref=e4]:
+            - generic [ref=e6]:
+                - generic [ref=e7]:
+                    - img [ref=e9]
+                    - generic [ref=e14]: INMOVA
+                    - generic [ref=e15]:
+                        - img [ref=e16]
+                        - text: PropTech
+                - generic [ref=e18]:
+                    - link "Características" [ref=e19] [cursor=pointer]:
+                        - /url: '#features'
+                    - link "Accesos" [ref=e20] [cursor=pointer]:
+                        - /url: '#accesos'
+                    - link "Precios" [ref=e21] [cursor=pointer]:
+                        - /url: '#pricing'
+                    - link "Integraciones" [ref=e22] [cursor=pointer]:
+                        - /url: '#integraciones'
+                    - link "Iniciar Sesión" [ref=e23] [cursor=pointer]:
+                        - /url: /login
+                        - button "Iniciar Sesión" [ref=e24]
+                    - link "Comenzar Gratis" [ref=e25] [cursor=pointer]:
+                        - /url: /register
+                        - button "Comenzar Gratis" [ref=e26]
+        - generic [ref=e34]:
+            - generic [ref=e35]:
+                - img [ref=e36]
+                - generic [ref=e38]: '#1 PropTech Multi-Vertical en España'
+                - img [ref=e39]
+            - generic [ref=e44]:
+                - img [ref=e45]
+                - generic [ref=e48]: 70% más económico que Homming • 6x más funcionalidad
+            - heading "6 Verticales + 6 Módulos. Poder Multiplicado." [level=1] [ref=e49]:
+                - generic [ref=e50]: 6 Verticales + 6 Módulos.
+                - generic [ref=e51]: Poder Multiplicado.
+            - paragraph [ref=e52]: La única plataforma que combina verticales de negocio inmobiliario con módulos transversales de IA, IoT y Blockchain. Todo en un solo lugar.
+            - generic [ref=e53]:
+                - link "Prueba Gratis 30 Días" [ref=e54] [cursor=pointer]:
+                    - /url: /register
+                    - button "Prueba Gratis 30 Días" [ref=e55]:
+                        - text: Prueba Gratis 30 Días
+                        - img [ref=e56]
+                - link "Ver Demo" [ref=e58] [cursor=pointer]:
+                    - /url: /landing/demo
+                    - button "Ver Demo" [ref=e59]:
+                        - img [ref=e60]
+                        - text: Ver Demo
+            - generic [ref=e62]:
+                - generic [ref=e63]:
+                    - img [ref=e64]
+                    - generic [ref=e68]: €850M Mercado España
+                - generic [ref=e69]:
+                    - img [ref=e70]
+                    - generic [ref=e75]: 34 Tipos de Partners
+                - generic [ref=e76]:
+                    - img [ref=e77]
+                    - generic [ref=e80]: €150M Potencial 5 Años
+            - generic [ref=e81]:
+                - generic [ref=e82]:
+                    - generic [ref=e84]:
+                        - generic [ref=e85]:
+                            - img [ref=e87]
+                            - heading "6 Verticales" [level=3] [ref=e91]
+                            - paragraph [ref=e92]: Modelos de negocio completos
+                        - generic [ref=e93]:
+                            - generic [ref=e95]: 🏢 Alquiler Tradicional
+                            - generic [ref=e97]: 🏖️ STR (Vacacional)
+                            - generic [ref=e99]: 🛏️ Coliving / Habitaciones
+                            - generic [ref=e101]: 💹 House Flipping
+                            - generic [ref=e103]: 🏗️ Construcción
+                            - generic [ref=e105]: 💼 Servicios Profesionales
+                    - generic [ref=e107]:
+                        - generic [ref=e108]:
+                            - img [ref=e110]
+                            - heading "6 Módulos" [level=3] [ref=e112]
+                            - paragraph [ref=e113]: Multiplicadores de valor
+                        - generic [ref=e114]:
+                            - generic [ref=e116]: 🌱 ESG & Sostenibilidad
+                            - generic [ref=e118]: 🛍️ Marketplace B2C
+                            - generic [ref=e120]: 💰 Pricing IA
+                            - generic [ref=e122]: 👓 Tours AR/VR
+                            - generic [ref=e124]: 🏠 IoT Inteligente
+                            - generic [ref=e126]: ⛓️ Blockchain
+                - generic [ref=e127]:
+                    - generic [ref=e129]:
+                        - img [ref=e130]
+                        - paragraph [ref=e134]: 6+6
+                        - paragraph [ref=e135]: Verticales + Módulos
+                    - generic [ref=e137]:
+                        - img [ref=e138]
+                        - paragraph [ref=e140]: €49
+                        - paragraph [ref=e141]: Desde €49/mes
+                    - generic [ref=e143]:
+                        - img [ref=e144]
+                        - paragraph [ref=e147]: 100%
+                        - paragraph [ref=e148]: Arquitectura Modular
+                    - generic [ref=e150]:
+                        - img [ref=e151]
+                        - paragraph [ref=e156]: 24/7
+                        - paragraph [ref=e157]: Soporte Premium
+        - generic [ref=e160]:
+            - generic [ref=e164]:
+                - generic [ref=e165]:
+                    - generic [ref=e166]:
+                        - img [ref=e168]
+                        - generic [ref=e170]:
+                            - generic [ref=e171]: 'Código: FLIPPING25'
+                            - heading "Adiós al Excel" [level=3] [ref=e172]
+                    - paragraph [ref=e173]: Plan Basic a solo €29/mes
+                    - paragraph [ref=e174]: Deja de perder dinero en tus reformas. Controla tu ROI en tiempo real durante 6 meses.
+                    - generic [ref=e175]:
+                        - link "Obtener descuento" [ref=e176] [cursor=pointer]:
+                            - /url: /register
+                            - button "Obtener descuento" [ref=e177]:
+                                - text: Obtener descuento
+                                - img [ref=e178]
+                        - generic [ref=e180]: ⏰ Oferta por tiempo limitado
+                - generic [ref=e183]:
+                    - generic [ref=e184]: 🎉
+                    - generic [ref=e185]: AHORRA
+            - generic [ref=e187]:
+                - button "Campaña anterior" [ref=e188] [cursor=pointer]:
+                    - img [ref=e189]
+                - generic [ref=e191]:
+                    - button "Ir a Adiós al Excel" [ref=e192] [cursor=pointer]
+                    - button "Ir a Revolución Coliving" [ref=e193] [cursor=pointer]
+                    - button "Ir a El Desafío Homming/Rentger" [ref=e194] [cursor=pointer]
+                - button "Siguiente campaña" [ref=e195] [cursor=pointer]:
+                    - img [ref=e196]
+            - generic [ref=e198]:
+                - button "Adiós al Excel FLIPPING25" [ref=e199] [cursor=pointer]:
+                    - generic [ref=e200]:
+                        - img [ref=e202]
+                        - generic [ref=e204]:
+                            - generic [ref=e205]: Adiós al Excel
+                            - generic [ref=e206]: FLIPPING25
+                - button "Revolución Coliving ROOMPRO" [ref=e207] [cursor=pointer]:
+                    - generic [ref=e208]:
+                        - img [ref=e210]
+                        - generic [ref=e213]:
+                            - generic [ref=e214]: Revolución Coliving
+                            - generic [ref=e215]: ROOMPRO
+                - button "El Desafío Homming/Rentger SWITCH2025" [ref=e216] [cursor=pointer]:
+                    - generic [ref=e217]:
+                        - img [ref=e219]
+                        - generic [ref=e222]:
+                            - generic [ref=e223]: El Desafío Homming/Rentger
+                            - generic [ref=e224]: SWITCH2025
+        - generic [ref=e228]:
+            - generic [ref=e229]:
+                - generic [ref=e230]:
+                    - img [ref=e231]
+                    - text: OFERTA Q1 2026
+                - heading "50% DE DESCUENTO Primer Mes" [level=2] [ref=e233]:
+                    - text: 50% DE DESCUENTO
+                    - text: Primer Mes
+                - paragraph [ref=e234]:
+                    - text: Únete a la campaña
+                    - strong [ref=e235]: LAUNCH2025
+                    - text: y obtén acceso completo a los 56 módulos profesionales.
+                - generic [ref=e236]:
+                    - link "Ver Oferta Completa" [ref=e237] [cursor=pointer]:
+                        - /url: /landing/campanas/launch2025
+                        - button "Ver Oferta Completa" [ref=e238]:
+                            - img [ref=e239]
+                            - text: Ver Oferta Completa
+                    - link "Calcular Mi Ahorro" [ref=e244] [cursor=pointer]:
+                        - /url: /landing/calculadora-roi
+                        - button "Calcular Mi Ahorro" [ref=e245]:
+                            - text: Calcular Mi Ahorro
+                            - img [ref=e246]
+            - generic [ref=e248]:
+                - heading "Incluye:" [level=3] [ref=e249]:
+                    - img [ref=e250]
+                    - text: 'Incluye:'
+                - generic [ref=e253]:
+                    - generic [ref=e254]:
+                        - img [ref=e255]
+                        - paragraph [ref=e258]:
+                            - text: Acceso a los
+                            - strong [ref=e259]: 56 módulos profesionales
+                    - generic [ref=e260]:
+                        - img [ref=e261]
+                        - paragraph [ref=e264]:
+                            - text: Migración asistida
+                            - strong [ref=e265]: GRATIS
+                            - text: (valor €500)
+                    - generic [ref=e266]:
+                        - img [ref=e267]
+                        - paragraph [ref=e270]: Onboarding personalizado 1-a-1
+                    - generic [ref=e271]:
+                        - img [ref=e272]
+                        - paragraph [ref=e275]: Sin permanencia - Cancela cuando quieras
+                - paragraph [ref=e277]:
+                    - img [ref=e278]
+                    - text: Válido hasta el 31 de marzo de 2026
+        - generic [ref=e283]:
+            - generic [ref=e284]:
+                - img [ref=e286]
+                - generic [ref=e290]: €850M
+                - generic [ref=e291]: Mercado España (TAM)
+            - generic [ref=e292]:
+                - img [ref=e294]
+                - generic [ref=e299]: '34'
+                - generic [ref=e300]: Tipos de Partners
+            - generic [ref=e301]:
+                - img [ref=e303]
+                - generic [ref=e306]: '-70%'
+                - generic [ref=e307]: Más Barato que Competencia
+            - generic [ref=e308]:
+                - img [ref=e310]
+                - generic [ref=e313]: €150M
+                - generic [ref=e314]: Potencial 5 Años
+        - generic [ref=e316]:
+            - generic [ref=e317]:
+                - generic [ref=e318]:
+                    - img [ref=e319]
+                    - text: Potencial de Mercado España
+                - heading "€850M de Mercado Disponible" [level=2] [ref=e323]
+                - paragraph [ref=e324]: El mercado español de PropTech está listo para ser liderado por una plataforma multi-vertical
+            - generic [ref=e325]:
+                - generic [ref=e327]:
+                    - img [ref=e329]
+                    - heading "€850M" [level=3] [ref=e332]
+                    - paragraph [ref=e333]: TAM (Total Market)
+                    - paragraph [ref=e334]: Mercado total de gestión inmobiliaria profesional en España
+                - generic [ref=e336]:
+                    - img [ref=e338]
+                    - heading "€285M" [level=3] [ref=e342]
+                    - paragraph [ref=e343]: SAM (33% del TAM)
+                    - paragraph [ref=e344]: Segmento direccionable con nuestra propuesta de valor
+                - generic [ref=e346]:
+                    - img [ref=e348]
+                    - heading "€150M" [level=3] [ref=e353]
+                    - paragraph [ref=e354]: SOM (53% del SAM en 5 años)
+                    - paragraph [ref=e355]: Objetivo alcanzable convirtiéndonos en líderes del mercado
+            - generic [ref=e357]:
+                - img [ref=e359]
+                - heading "Proyección de Crecimiento 2026-2030" [level=3] [ref=e362]
+                - generic [ref=e363]:
+                    - generic [ref=e364]:
+                        - generic [ref=e365]: Año 1
+                        - generic [ref=e366]: €8.5M
+                        - generic [ref=e367]: 3% cuota
+                    - generic [ref=e368]:
+                        - generic [ref=e369]: Año 2
+                        - generic [ref=e370]: €20M
+                        - generic [ref=e371]: 7% cuota
+                    - generic [ref=e372]:
+                        - generic [ref=e373]: Año 3
+                        - generic [ref=e374]: €45M
+                        - generic [ref=e375]: 16% cuota
+                    - generic [ref=e376]:
+                        - generic [ref=e377]: Año 4
+                        - generic [ref=e378]: €91M
+                        - generic [ref=e379]: 32% cuota
+                    - generic [ref=e380]:
+                        - generic [ref=e381]: Año 5
+                        - generic [ref=e382]: €150M
+                        - generic [ref=e383]: 53% cuota
+                        - generic [ref=e384]: 🏆 LÍDER
+                - generic [ref=e385]:
+                    - paragraph [ref=e386]: De 3% a 53% de cuota de mercado en 5 años
+                    - paragraph [ref=e387]: Crecimiento de +1,665% posicionándonos como el líder absoluto en PropTech multi-vertical en España
+            - generic [ref=e388]:
+                - generic [ref=e390]:
+                    - heading "🎯 Por qué somos diferentes" [level=4] [ref=e391]:
+                        - generic [ref=e392]: 🎯
+                        - text: Por qué somos diferentes
+                    - list [ref=e393]:
+                        - listitem [ref=e394]:
+                            - generic [ref=e395]: ✓
+                            - generic [ref=e396]:
+                                - strong [ref=e397]: 'Única multi-vertical:'
+                                - text: 6 verticales vs 1 de la competencia
+                        - listitem [ref=e398]:
+                            - generic [ref=e399]: ✓
+                            - generic [ref=e400]:
+                                - strong [ref=e401]: 'Módulos transversales:'
+                                - text: IA, IoT, Blockchain (nadie más los tiene)
+                        - listitem [ref=e402]:
+                            - generic [ref=e403]: ✓
+                            - generic [ref=e404]:
+                                - strong [ref=e405]: '70% más barato:'
+                                - text: €49 vs €120 de Homming
+                        - listitem [ref=e406]:
+                            - generic [ref=e407]: ✓
+                            - generic [ref=e408]:
+                                - strong [ref=e409]: 'Dual-channel:'
+                                - text: Directo + 34 tipos de partners
+                - generic [ref=e411]:
+                    - heading "📊 Oportunidad de mercado" [level=4] [ref=e412]:
+                        - generic [ref=e413]: 📊
+                        - text: Oportunidad de mercado
+                    - list [ref=e414]:
+                        - listitem [ref=e415]:
+                            - generic [ref=e416]: →
+                            - generic [ref=e417]:
+                                - strong [ref=e418]: '88.5% fragmentado:'
+                                - text: Sin líder dominante actual
+                        - listitem [ref=e419]:
+                            - generic [ref=e420]: →
+                            - generic [ref=e421]:
+                                - strong [ref=e422]: '1.17M propiedades:'
+                                - text: Gestionadas profesionalmente en España
+                        - listitem [ref=e423]:
+                            - generic [ref=e424]: →
+                            - generic [ref=e425]:
+                                - strong [ref=e426]: 'Competencia limitada:'
+                                - text: Solo productos mono-verticales
+                        - listitem [ref=e427]:
+                            - generic [ref=e428]: →
+                            - generic [ref=e429]:
+                                - strong [ref=e430]: 'Momento ideal:'
+                                - text: Mercado maduro para consolidación
+        - generic [ref=e432]:
+            - generic [ref=e433]:
+                - generic [ref=e434]:
+                    - img [ref=e435]
+                    - text: Modelos de Negocio
+                - heading "6 Verticales de Negocio Inmobiliario" [level=2] [ref=e439]
+                - paragraph [ref=e440]: Elige tu vertical y gestiona todo desde una sola plataforma. Puedes activar múltiples verticales según tu plan.
+            - generic [ref=e441]:
+                - generic [ref=e442]:
+                    - generic [ref=e444]:
+                        - img [ref=e446]
+                        - heading "Alquiler Tradicional" [level=3] [ref=e450]
+                        - paragraph [ref=e451]: Gestión completa de alquileres residenciales de largo plazo
+                    - generic [ref=e453]:
+                        - generic [ref=e454]:
+                            - img [ref=e455]
+                            - generic [ref=e458]: Contratos
+                        - generic [ref=e459]:
+                            - img [ref=e460]
+                            - generic [ref=e463]: Pagos recurrentes
+                        - generic [ref=e464]:
+                            - img [ref=e465]
+                            - generic [ref=e468]: Garantías
+                        - generic [ref=e469]:
+                            - img [ref=e470]
+                            - generic [ref=e473]: Portal inquilino
+                - generic [ref=e474]:
+                    - generic [ref=e476]:
+                        - img [ref=e478]
+                        - heading "STR (Vacacional)" [level=3] [ref=e481]
+                        - paragraph [ref=e482]: Gestión profesional de alquileres vacacionales y corta estancia
+                    - generic [ref=e484]:
+                        - generic [ref=e485]:
+                            - img [ref=e486]
+                            - generic [ref=e489]: Multi-canal (Airbnb, Booking)
+                        - generic [ref=e490]:
+                            - img [ref=e491]
+                            - generic [ref=e494]: Reviews centralizadas
+                        - generic [ref=e495]:
+                            - img [ref=e496]
+                            - generic [ref=e499]: Auto check-in
+                        - generic [ref=e500]:
+                            - img [ref=e501]
+                            - generic [ref=e504]: Limpieza
+                - generic [ref=e505]:
+                    - generic [ref=e507]:
+                        - img [ref=e509]
+                        - heading "Coliving / Habitaciones" [level=3] [ref=e512]
+                        - paragraph [ref=e513]: Gestión individual de habitaciones con espacios compartidos
+                    - generic [ref=e515]:
+                        - generic [ref=e516]:
+                            - img [ref=e517]
+                            - generic [ref=e520]: Por habitación
+                        - generic [ref=e521]:
+                            - img [ref=e522]
+                            - generic [ref=e525]: Espacios comunes
+                        - generic [ref=e526]:
+                            - img [ref=e527]
+                            - generic [ref=e530]: Prorrateo suministros
+                        - generic [ref=e531]:
+                            - img [ref=e532]
+                            - generic [ref=e535]: Normas convivencia
+                - generic [ref=e536]:
+                    - generic [ref=e538]:
+                        - img [ref=e540]
+                        - heading "House Flipping" [level=3] [ref=e543]
+                        - paragraph [ref=e544]: Compra-reforma-venta con control total de ROI
+                    - generic [ref=e546]:
+                        - generic [ref=e547]:
+                            - img [ref=e548]
+                            - generic [ref=e551]: Calculadora ROI/TIR
+                        - generic [ref=e552]:
+                            - img [ref=e553]
+                            - generic [ref=e556]: Timeline Gantt
+                        - generic [ref=e557]:
+                            - img [ref=e558]
+                            - generic [ref=e561]: Comparador propiedades
+                        - generic [ref=e562]:
+                            - img [ref=e563]
+                            - generic [ref=e566]: Presupuestos
+                - generic [ref=e567]:
+                    - generic [ref=e569]:
+                        - img [ref=e571]
+                        - heading "Construcción" [level=3] [ref=e575]
+                        - paragraph [ref=e576]: Gestión completa de obra nueva y promoción inmobiliaria
+                    - generic [ref=e578]:
+                        - generic [ref=e579]:
+                            - img [ref=e580]
+                            - generic [ref=e583]: Permisos y licencias
+                        - generic [ref=e584]:
+                            - img [ref=e585]
+                            - generic [ref=e588]: Fases de obra
+                        - generic [ref=e589]:
+                            - img [ref=e590]
+                            - generic [ref=e593]: Control de calidad
+                        - generic [ref=e594]:
+                            - img [ref=e595]
+                            - generic [ref=e598]: Subcontratistas
+                - generic [ref=e599]:
+                    - generic [ref=e601]:
+                        - img [ref=e603]
+                        - heading "Servicios Profesionales" [level=3] [ref=e606]
+                        - paragraph [ref=e607]: Property management B2B para gestoras y agencias
+                    - generic [ref=e609]:
+                        - generic [ref=e610]:
+                            - img [ref=e611]
+                            - generic [ref=e614]: CRM clientes
+                        - generic [ref=e615]:
+                            - img [ref=e616]
+                            - generic [ref=e619]: Facturación automática
+                        - generic [ref=e620]:
+                            - img [ref=e621]
+                            - generic [ref=e624]: Multi-cartera
+                        - generic [ref=e625]:
+                            - img [ref=e626]
+                            - generic [ref=e629]: Reporting
+            - generic [ref=e631]:
+                - generic [ref=e632]:
+                    - img [ref=e634]
+                    - generic [ref=e636]:
+                        - heading "Arquitectura Modular" [level=3] [ref=e637]
+                        - paragraph [ref=e638]: Activa solo los verticales que necesites. Añade más cuando crezcas.
+                - link "Empezar Ahora" [ref=e639] [cursor=pointer]:
+                    - /url: /register
+                    - button "Empezar Ahora" [ref=e640]:
+                        - text: Empezar Ahora
+                        - img [ref=e641]
+        - generic [ref=e644]:
+            - generic [ref=e645]:
+                - generic [ref=e646]:
+                    - img [ref=e647]
+                    - text: Multiplicadores de Valor
+                - heading "6 Módulos Transversales de Última Generación" [level=2] [ref=e649]
+                - paragraph [ref=e650]: Add-ons opcionales que amplifican el valor de tus verticales. Añade IA, IoT, Blockchain y más.
+            - generic [ref=e651]:
+                - generic [ref=e652]:
+                    - generic [ref=e655]: +€50/mes
+                    - generic [ref=e656]:
+                        - img [ref=e658]
+                        - heading "ESG & Sostenibilidad" [level=3] [ref=e661]
+                        - paragraph [ref=e662]: Compliance europeo y reporting sostenible
+                    - generic [ref=e663]:
+                        - generic [ref=e664]:
+                            - generic [ref=e665]:
+                                - img [ref=e666]
+                                - generic [ref=e669]: Huella de carbono
+                            - generic [ref=e670]:
+                                - img [ref=e671]
+                                - generic [ref=e674]: Reportes CSRD
+                            - generic [ref=e675]:
+                                - img [ref=e676]
+                                - generic [ref=e679]: Certificaciones
+                        - paragraph [ref=e681]: 'Usado por: Todos los verticales'
+                - generic [ref=e682]:
+                    - generic [ref=e685]: Comisión
+                    - generic [ref=e686]:
+                        - img [ref=e688]
+                        - heading "Marketplace B2C" [level=3] [ref=e692]
+                        - paragraph [ref=e693]: Monetiza con servicios para inquilinos
+                    - generic [ref=e694]:
+                        - generic [ref=e695]:
+                            - generic [ref=e696]:
+                                - img [ref=e697]
+                                - generic [ref=e700]: Comisión 12%
+                            - generic [ref=e701]:
+                                - img [ref=e702]
+                                - generic [ref=e705]: Proveedores verificados
+                            - generic [ref=e706]:
+                                - img [ref=e707]
+                                - generic [ref=e710]: Nuevo canal ingresos
+                        - paragraph [ref=e712]: 'Usado por: Alquiler, STR, Coliving'
+                - generic [ref=e713]:
+                    - generic [ref=e716]: +€30/mes
+                    - generic [ref=e717]:
+                        - img [ref=e719]
+                        - heading "Pricing Dinámico IA" [level=3] [ref=e721]
+                        - paragraph [ref=e722]: Optimiza tarifas con machine learning
+                    - generic [ref=e723]:
+                        - generic [ref=e724]:
+                            - generic [ref=e725]:
+                                - img [ref=e726]
+                                - generic [ref=e729]: +15-30% ingresos
+                            - generic [ref=e730]:
+                                - img [ref=e731]
+                                - generic [ref=e734]: Análisis competencia
+                            - generic [ref=e735]:
+                                - img [ref=e736]
+                                - generic [ref=e739]: Auto-ajuste
+                        - paragraph [ref=e741]: 'Usado por: STR, Coliving'
+                - generic [ref=e742]:
+                    - generic [ref=e745]: +€30/mes
+                    - generic [ref=e746]:
+                        - img [ref=e748]
+                        - heading "Tours Virtuales AR/VR" [level=3] [ref=e751]
+                        - paragraph [ref=e752]: Tours 360° y realidad virtual/aumentada
+                    - generic [ref=e753]:
+                        - generic [ref=e754]:
+                            - generic [ref=e755]:
+                                - img [ref=e756]
+                                - generic [ref=e759]: +40% conversión
+                            - generic [ref=e760]:
+                                - img [ref=e761]
+                                - generic [ref=e764]: Home staging virtual
+                            - generic [ref=e765]:
+                                - img [ref=e766]
+                                - generic [ref=e769]: Multi-plataforma
+                        - paragraph [ref=e771]: 'Usado por: Todos los verticales'
+                - generic [ref=e772]:
+                    - generic [ref=e775]: +€100/mes
+                    - generic [ref=e776]:
+                        - img [ref=e778]
+                        - heading "IoT & Smart Buildings" [level=3] [ref=e782]
+                        - paragraph [ref=e783]: Automatización con dispositivos inteligentes
+                    - generic [ref=e784]:
+                        - generic [ref=e785]:
+                            - generic [ref=e786]:
+                                - img [ref=e787]
+                                - generic [ref=e790]: Termostatos
+                            - generic [ref=e791]:
+                                - img [ref=e792]
+                                - generic [ref=e795]: Cerraduras
+                            - generic [ref=e796]:
+                                - img [ref=e797]
+                                - generic [ref=e800]: Sensores
+                            - generic [ref=e801]:
+                                - img [ref=e802]
+                                - generic [ref=e805]: '-25% costes'
+                        - paragraph [ref=e807]: 'Usado por: Alquiler, STR, Coliving'
+                - generic [ref=e808]:
+                    - generic [ref=e811]: Comisión
+                    - generic [ref=e812]:
+                        - img [ref=e814]
+                        - heading "Blockchain & Tokenización" [level=3] [ref=e817]
+                        - paragraph [ref=e818]: Inversión fraccionada y smart contracts
+                    - generic [ref=e819]:
+                        - generic [ref=e820]:
+                            - generic [ref=e821]:
+                                - img [ref=e822]
+                                - generic [ref=e825]: Tokeniza propiedades
+                            - generic [ref=e826]:
+                                - img [ref=e827]
+                                - generic [ref=e830]: Smart contracts
+                            - generic [ref=e831]:
+                                - img [ref=e832]
+                                - generic [ref=e835]: Nuevos inversores
+                        - paragraph [ref=e837]: 'Usado por: Inversión multi-vertical'
+            - generic [ref=e838]:
+                - generic [ref=e840]:
+                    - generic [ref=e841]: Ninguno
+                    - paragraph [ref=e842]: Competidor tiene estos 6 módulos
+                - generic [ref=e844]:
+                    - generic [ref=e845]: 100%
+                    - paragraph [ref=e846]: Compatible con todos los verticales
+                - generic [ref=e848]:
+                    - generic [ref=e849]: +40%
+                    - paragraph [ref=e850]: Aumento promedio de valor
+        - generic [ref=e852]:
+            - heading "La Arquitectura que Ningún Competidor Tiene" [level=3] [ref=e853]
+            - paragraph [ref=e854]: 6 verticales completos + 6 módulos transversales únicos = La plataforma PropTech más completa de España
+            - generic [ref=e855]:
+                - link "Prueba Gratis 30 Días" [ref=e856] [cursor=pointer]:
+                    - /url: /register
+                    - button "Prueba Gratis 30 Días" [ref=e857]:
+                        - text: Prueba Gratis 30 Días
+                        - img [ref=e858]
+                - link "Ver Planes y Precios" [ref=e860] [cursor=pointer]:
+                    - /url: '#pricing'
+                    - button "Ver Planes y Precios" [ref=e861]
+        - generic [ref=e866]:
+            - generic [ref=e867]:
+                - generic [ref=e868]:
+                    - img [ref=e869]
+                    - text: NOVEDADES Q4 2024
+                - heading "Las Características que Revolucionan el Sector" [level=2] [ref=e871]
+                - paragraph [ref=e872]:
+                    - text: Dos
+                    - strong [ref=e873]: killer features
+                    - text: que ningún competidor tiene y que ya están ayudando a cientos de gestoras a ahorrar tiempo y aumentar ingresos.
+            - generic [ref=e874]:
+                - generic [ref=e875]:
+                    - generic [ref=e876]: ✨ NUEVO
+                    - generic [ref=e877]:
+                        - generic [ref=e878]:
+                            - img [ref=e880]
+                            - generic [ref=e883]:
+                                - heading "Room Rental PRO" [level=3] [ref=e884]
+                                - paragraph [ref=e885]: Gestión Avanzada de Coliving
+                        - paragraph [ref=e886]:
+                            - text: El
+                            - strong [ref=e887]: primer y único sistema
+                            - text: del mercado español que automatiza completamente la gestión de alquiler por habitaciones con
+                            - strong [ref=e888]: prorrateo inteligente de suministros
+                            - text: .
+                    - generic [ref=e889]:
+                        - generic [ref=e890]:
+                            - generic [ref=e891]:
+                                - img [ref=e893]
+                                - generic [ref=e895]:
+                                    - generic [ref=e896]: Prorrateo Automático
+                                    - generic [ref=e897]: Distribuye automáticamente luz, agua y gas por habitación o persona
+                            - generic [ref=e898]:
+                                - img [ref=e900]
+                                - generic [ref=e904]:
+                                    - generic [ref=e905]: Calendario de Limpieza
+                                    - generic [ref=e906]: Programa y gestiona la limpieza de habitaciones y espacios comunes
+                            - generic [ref=e907]:
+                                - img [ref=e909]
+                                - generic [ref=e914]:
+                                    - generic [ref=e915]: Reglas de Co-living
+                                    - generic [ref=e916]: Define y aplica reglas personalizadas para cada propiedad compartida
+                            - generic [ref=e917]:
+                                - img [ref=e919]
+                                - generic [ref=e922]:
+                                    - generic [ref=e923]: Espacios Comunes
+                                    - generic [ref=e924]: Gestiona salón, cocina, baños compartidos y otros espacios
+                            - generic [ref=e925]:
+                                - img [ref=e927]
+                                - generic [ref=e929]:
+                                    - generic [ref=e930]: Dashboard Especializado
+                                    - generic [ref=e931]: Vista 360º con ocupación, ingresos y estadísticas por habitación
+                            - generic [ref=e932]:
+                                - img [ref=e934]
+                                - generic [ref=e937]:
+                                    - generic [ref=e938]: Ahorra 10h/mes
+                                    - generic [ref=e939]: Elimina cálculos manuales y gestiona hasta 100 habitaciones fácilmente
+                        - generic [ref=e940]:
+                            - generic [ref=e941]:
+                                - generic [ref=e942]: '100'
+                                - generic [ref=e943]: Habitaciones
+                            - generic [ref=e944]:
+                                - generic [ref=e945]: 10h
+                                - generic [ref=e946]: Ahorradas/mes
+                            - generic [ref=e947]:
+                                - generic [ref=e948]: 0€
+                                - generic [ref=e949]: Errores manuales
+                        - generic [ref=e950]:
+                            - link "Ver Room Rental PRO en Acción" [ref=e951] [cursor=pointer]:
+                                - /url: /room-rental
+                                - button "Ver Room Rental PRO en Acción" [ref=e952]:
+                                    - generic [ref=e953]: Ver Room Rental PRO en Acción
+                                    - img [ref=e954]
+                            - paragraph [ref=e956]:
+                                - text: Incluido en planes
+                                - strong [ref=e957]: Professional
+                                - text: 'y'
+                                - strong [ref=e958]: Business
+                - generic [ref=e959]:
+                    - generic [ref=e960]: ✨ NUEVO
+                    - generic [ref=e961]:
+                        - generic [ref=e962]:
+                            - img [ref=e964]
+                            - generic [ref=e967]:
+                                - heading "Sistema de Cupones" [level=3] [ref=e968]
+                                - paragraph [ref=e969]: Marketing Automatizado Inteligente
+                        - paragraph [ref=e970]:
+                            - text: Lanza
+                            - strong [ref=e971]: campañas de descuento profesionales
+                            - text: con tracking en tiempo real, límites de uso y estadísticas avanzadas. Integrado con tu sistema de pagos.
+                    - generic [ref=e972]:
+                        - generic [ref=e973]:
+                            - generic [ref=e974]:
+                                - img [ref=e976]
+                                - generic [ref=e979]:
+                                    - generic [ref=e980]: Cupones Flexibles
+                                    - generic [ref=e981]: Crea descuentos por porcentaje o monto fijo con total control
+                            - generic [ref=e982]:
+                                - img [ref=e984]
+                                - generic [ref=e988]:
+                                    - generic [ref=e989]: Límites Inteligentes
+                                    - generic [ref=e990]: Define usos máximos, validez temporal y restricciones por usuario
+                            - generic [ref=e991]:
+                                - img [ref=e993]
+                                - generic [ref=e995]:
+                                    - generic [ref=e996]: Validación en Tiempo Real
+                                    - generic [ref=e997]: El sistema valida automáticamente elegibilidad y condiciones
+                            - generic [ref=e998]:
+                                - img [ref=e1000]
+                                - generic [ref=e1002]:
+                                    - generic [ref=e1003]: Panel de Estadísticas
+                                    - generic [ref=e1004]: Monitorea conversión, ingresos y usuarios únicos en tiempo real
+                            - generic [ref=e1005]:
+                                - img [ref=e1007]
+                                - generic [ref=e1010]:
+                                    - generic [ref=e1011]: ROI Comprobado
+                                    - generic [ref=e1012]: 25-35% aumento en conversión de leads, €4 generados por cada €1 de descuento
+                            - generic [ref=e1013]:
+                                - img [ref=e1015]
+                                - generic [ref=e1019]:
+                                    - generic [ref=e1020]: Campañas Automatizadas
+                                    - generic [ref=e1021]: Lanza promociones estacionales y ofertas flash sin esfuerzo manual
+                        - generic [ref=e1022]:
+                            - generic [ref=e1023]:
+                                - generic [ref=e1024]: +30%
+                                - generic [ref=e1025]: Conversión leads
+                            - generic [ref=e1026]:
+                                - generic [ref=e1027]: 4x
+                                - generic [ref=e1028]: ROI promedio
+                            - generic [ref=e1029]:
+                                - generic [ref=e1030]: ∞
+                                - generic [ref=e1031]: Cupones posibles
+                        - generic [ref=e1032]:
+                            - link "Crear Tu Primera Campaña" [ref=e1033] [cursor=pointer]:
+                                - /url: /cupones
+                                - button "Crear Tu Primera Campaña" [ref=e1034]:
+                                    - generic [ref=e1035]: Crear Tu Primera Campaña
+                                    - img [ref=e1036]
+                            - paragraph [ref=e1040]:
+                                - strong [ref=e1041]: INCLUIDO GRATIS
+                                - text: en plan Business • Add-on €29/mes en Professional
+            - generic [ref=e1042]:
+                - heading "Casos de Uso Reales" [level=3] [ref=e1043]
+                - paragraph [ref=e1044]: Cómo nuestros clientes están usando estas características para transformar su negocio
+                - generic [ref=e1045]:
+                    - generic [ref=e1046]:
+                        - generic [ref=e1047]: Coliving Urbano
+                        - generic [ref=e1048]:
+                            - generic [ref=e1049]:
+                                - generic [ref=e1050]: '❌ ANTES:'
+                                - generic [ref=e1051]: Calcular facturas de luz manualmente para 15 inquilinos
+                            - generic [ref=e1052]:
+                                - generic [ref=e1053]: '✅ AHORA:'
+                                - generic [ref=e1054]: INMOVA prorratea automáticamente por habitación en 3 clics
+                            - generic [ref=e1056]: 📈 Ahorra 8h/mes
+                    - generic [ref=e1057]:
+                        - generic [ref=e1058]: Residencia Estudiantil
+                        - generic [ref=e1059]:
+                            - generic [ref=e1060]:
+                                - generic [ref=e1061]: '❌ ANTES:'
+                                - generic [ref=e1062]: Gestionar 50 habitaciones con contratos escalonados
+                            - generic [ref=e1063]:
+                                - generic [ref=e1064]: '✅ AHORA:'
+                                - generic [ref=e1065]: Dashboard unificado con ocupación, vencimientos y alertas
+                            - generic [ref=e1067]: 📈 Visibilidad total
+                    - generic [ref=e1068]:
+                        - generic [ref=e1069]: Agencia Inmobiliaria
+                        - generic [ref=e1070]:
+                            - generic [ref=e1071]:
+                                - generic [ref=e1072]: '❌ ANTES:'
+                                - generic [ref=e1073]: Lanzar campaña de descuento para inquilinos nuevos
+                            - generic [ref=e1074]:
+                                - generic [ref=e1075]: '✅ AHORA:'
+                                - generic [ref=e1076]: Sistema de cupones con límites y tracking de conversión
+                            - generic [ref=e1078]: 📈 +30% leads
+            - generic [ref=e1079]:
+                - paragraph [ref=e1080]: ¿Quieres ver estas características en acción?
+                - link "Prueba Gratis 30 Días" [ref=e1081] [cursor=pointer]:
+                    - /url: /register
+                    - button "Prueba Gratis 30 Días" [ref=e1082]:
+                        - text: Prueba Gratis 30 Días
+                        - img [ref=e1083]
+                - paragraph [ref=e1085]: Sin tarjeta de crédito • Acceso completo • Cancela cuando quieras
+        - generic [ref=e1087]:
+            - generic [ref=e1088]:
+                - generic [ref=e1089]:
+                    - img [ref=e1090]
+                    - text: Acceso por Perfil
+                - heading "Accede a Tu Portal" [level=2] [ref=e1094]
+                - paragraph [ref=e1095]: Cada perfil tiene su propio portal optimizado con funcionalidades específicas
+            - generic [ref=e1096]:
+                - generic [ref=e1097]:
+                    - generic [ref=e1099]:
+                        - img [ref=e1101]
+                        - heading "Portal de Proveedores" [level=3] [ref=e1104]
+                        - generic [ref=e1105]: Acceso para empresas de mantenimiento, limpieza y servicios
+                    - generic [ref=e1106]:
+                        - list [ref=e1107]:
+                            - listitem [ref=e1108]:
+                                - img [ref=e1109]
+                                - generic [ref=e1111]: Gestión de órdenes de trabajo
+                            - listitem [ref=e1112]:
+                                - img [ref=e1113]
+                                - generic [ref=e1115]: Facturación automática
+                            - listitem [ref=e1116]:
+                                - img [ref=e1117]
+                                - generic [ref=e1119]: Calendario de servicios
+                            - listitem [ref=e1120]:
+                                - img [ref=e1121]
+                                - generic [ref=e1123]: Comunicación directa
+                        - link "Acceder" [ref=e1124] [cursor=pointer]:
+                            - /url: /portal-proveedor/login
+                            - button "Acceder" [ref=e1125]:
+                                - text: Acceder
+                                - img [ref=e1126]
+                - generic [ref=e1128]:
+                    - generic [ref=e1130]:
+                        - img [ref=e1132]
+                        - heading "Portal de Inquilinos" [level=3] [ref=e1135]
+                        - generic [ref=e1136]: Acceso para residentes y arrendatarios
+                    - generic [ref=e1137]:
+                        - list [ref=e1138]:
+                            - listitem [ref=e1139]:
+                                - img [ref=e1140]
+                                - generic [ref=e1142]: Pago de rentas online
+                            - listitem [ref=e1143]:
+                                - img [ref=e1144]
+                                - generic [ref=e1146]: Solicitudes de mantenimiento
+                            - listitem [ref=e1147]:
+                                - img [ref=e1148]
+                                - generic [ref=e1150]: Documentos del contrato
+                            - listitem [ref=e1151]:
+                                - img [ref=e1152]
+                                - generic [ref=e1154]: Chat con administración
+                        - link "Acceder" [ref=e1155] [cursor=pointer]:
+                            - /url: /portal-inquilino/login
+                            - button "Acceder" [ref=e1156]:
+                                - text: Acceder
+                                - img [ref=e1157]
+                - generic [ref=e1159]:
+                    - generic [ref=e1161]:
+                        - img [ref=e1163]
+                        - heading "Portal de Propietarios" [level=3] [ref=e1166]
+                        - generic [ref=e1167]: Acceso para inversores y dueños de propiedades
+                    - generic [ref=e1168]:
+                        - list [ref=e1169]:
+                            - listitem [ref=e1170]:
+                                - img [ref=e1171]
+                                - generic [ref=e1173]: Informes financieros
+                            - listitem [ref=e1174]:
+                                - img [ref=e1175]
+                                - generic [ref=e1177]: Estado de propiedades
+                            - listitem [ref=e1178]:
+                                - img [ref=e1179]
+                                - generic [ref=e1181]: Análisis de rentabilidad
+                            - listitem [ref=e1182]:
+                                - img [ref=e1183]
+                                - generic [ref=e1185]: Alertas en tiempo real
+                        - link "Acceder" [ref=e1186] [cursor=pointer]:
+                            - /url: /portal-propietario/login
+                            - button "Acceder" [ref=e1187]:
+                                - text: Acceder
+                                - img [ref=e1188]
+                - generic [ref=e1190]:
+                    - generic [ref=e1192]:
+                        - img [ref=e1194]
+                        - heading "Portal Administrativo" [level=3] [ref=e1199]
+                        - generic [ref=e1200]: Acceso para gestores y administradores de fincas
+                    - generic [ref=e1201]:
+                        - list [ref=e1202]:
+                            - listitem [ref=e1203]:
+                                - img [ref=e1204]
+                                - generic [ref=e1206]: 88 módulos profesionales
+                            - listitem [ref=e1207]:
+                                - img [ref=e1208]
+                                - generic [ref=e1210]: Gestión multi-vertical
+                            - listitem [ref=e1211]:
+                                - img [ref=e1212]
+                                - generic [ref=e1214]: Informes avanzados
+                            - listitem [ref=e1215]:
+                                - img [ref=e1216]
+                                - generic [ref=e1218]: Automatizaciones IA
+                        - link "Acceder" [ref=e1219] [cursor=pointer]:
+                            - /url: /login
+                            - button "Acceder" [ref=e1220]:
+                                - text: Acceder
+                                - img [ref=e1221]
+            - paragraph [ref=e1224]:
+                - text: ¿No tienes cuenta aún?
+                - link "Regístrate gratis" [ref=e1225] [cursor=pointer]:
+                    - /url: /register
+                - text: o
+                - link "contacta con ventas" [ref=e1226] [cursor=pointer]:
+                    - /url: /landing/contacto
+        - generic [ref=e1228]:
+            - generic [ref=e1229]:
+                - generic [ref=e1230]:
+                    - img [ref=e1231]
+                    - text: Líder del Mercado
+                - heading "¿Por Qué Elegir INMOVA?" [level=2] [ref=e1233]
+                - paragraph [ref=e1234]:
+                    - text: Somos la única plataforma que combina
+                    - strong [ref=e1235]: 6 verticales + 6 módulos transversales
+                    - text: . Ningún competidor tiene esta arquitectura.
+            - generic [ref=e1236]:
+                - generic [ref=e1238]:
+                    - generic [ref=e1239]: Mejor Opción
+                    - heading "INMOVA" [level=3] [ref=e1240]
+                    - paragraph [ref=e1241]: Plan Basic
+                    - paragraph [ref=e1242]: €49/mes
+                    - paragraph [ref=e1243]: 6 verticales + 6 módulos
+                - generic [ref=e1245]:
+                    - generic [ref=e1246]: 145% más caro
+                    - heading "Homming" [level=3] [ref=e1247]
+                    - paragraph [ref=e1248]: Advanced
+                    - paragraph [ref=e1249]: €120/mes
+                    - paragraph [ref=e1250]: 1 vertical
+                    - link "Ver Comparativa" [ref=e1251] [cursor=pointer]:
+                        - /url: /comparativa/homming
+                        - button "Ver Comparativa" [ref=e1252]
+                - generic [ref=e1254]:
+                    - heading "Rentger" [level=3] [ref=e1255]
+                    - paragraph [ref=e1256]: Estándar
+                    - paragraph [ref=e1257]: €100/mes
+                    - paragraph [ref=e1258]: 1 vertical
+                - generic [ref=e1260]:
+                    - heading "Guesty" [level=3] [ref=e1261]
+                    - paragraph [ref=e1262]: Premium
+                    - paragraph [ref=e1263]: $150/mes
+                    - paragraph [ref=e1264]: 1 vertical (Solo STR)
+            - table [ref=e1269]:
+                - rowgroup [ref=e1270]:
+                    - row "Funcionalidad INMOVA Homming Competidor B Competidor C" [ref=e1271]:
+                        - columnheader "Funcionalidad" [ref=e1272]
+                        - columnheader "INMOVA" [ref=e1273]:
+                            - generic [ref=e1274]:
+                                - img [ref=e1275]
+                                - generic [ref=e1277]: INMOVA
+                        - columnheader "Homming" [ref=e1278]
+                        - columnheader "Competidor B" [ref=e1279]
+                        - columnheader "Competidor C" [ref=e1280]
+                - rowgroup [ref=e1281]:
+                    - row "🏢 Alquiler Tradicional" [ref=e1282]:
+                        - cell "🏢 Alquiler Tradicional" [ref=e1283]
+                        - cell [ref=e1284]:
+                            - img [ref=e1287]
+                        - cell [ref=e1290]:
+                            - img [ref=e1293]
+                        - cell [ref=e1296]:
+                            - img [ref=e1299]
+                        - cell [ref=e1302]:
+                            - img [ref=e1305]
+                    - row "🏖️ STR / Vacacional" [ref=e1308]:
+                        - cell "🏖️ STR / Vacacional" [ref=e1309]
+                        - cell [ref=e1310]:
+                            - img [ref=e1313]
+                        - cell [ref=e1316]:
+                            - img [ref=e1319]
+                        - cell [ref=e1322]:
+                            - img [ref=e1325]
+                        - cell [ref=e1328]:
+                            - img [ref=e1331]
+                    - row "🛏️ Coliving / Habitaciones" [ref=e1334]:
+                        - cell "🛏️ Coliving / Habitaciones" [ref=e1335]
+                        - cell [ref=e1336]:
+                            - img [ref=e1339]
+                        - cell [ref=e1342]:
+                            - img [ref=e1345]
+                        - cell [ref=e1348]:
+                            - img [ref=e1351]
+                        - cell [ref=e1354]:
+                            - img [ref=e1357]
+                    - row "💹 House Flipping" [ref=e1360]:
+                        - cell "💹 House Flipping" [ref=e1361]
+                        - cell [ref=e1362]:
+                            - img [ref=e1365]
+                        - cell [ref=e1368]:
+                            - img [ref=e1371]
+                        - cell [ref=e1374]:
+                            - img [ref=e1377]
+                        - cell [ref=e1380]:
+                            - img [ref=e1383]
+                    - row "🏗️ Construcción" [ref=e1386]:
+                        - cell "🏗️ Construcción" [ref=e1387]
+                        - cell [ref=e1388]:
+                            - img [ref=e1391]
+                        - cell [ref=e1394]:
+                            - img [ref=e1397]
+                        - cell [ref=e1400]:
+                            - img [ref=e1403]
+                        - cell [ref=e1406]:
+                            - img [ref=e1409]
+                    - row "💼 Servicios Profesionales B2B" [ref=e1412]:
+                        - cell "💼 Servicios Profesionales B2B" [ref=e1413]
+                        - cell [ref=e1414]:
+                            - img [ref=e1417]
+                        - cell [ref=e1420]:
+                            - img [ref=e1423]
+                        - cell [ref=e1426]:
+                            - img [ref=e1429]
+                        - cell [ref=e1432]:
+                            - img [ref=e1435]
+                    - row "🌱 ESG & Sostenibilidad" [ref=e1438]:
+                        - cell "🌱 ESG & Sostenibilidad" [ref=e1439]
+                        - cell [ref=e1440]:
+                            - img [ref=e1443]
+                        - cell [ref=e1446]:
+                            - img [ref=e1449]
+                        - cell [ref=e1452]:
+                            - img [ref=e1455]
+                        - cell [ref=e1458]:
+                            - img [ref=e1461]
+                    - row "🛍️ Marketplace B2C" [ref=e1464]:
+                        - cell "🛍️ Marketplace B2C" [ref=e1465]
+                        - cell [ref=e1466]:
+                            - img [ref=e1469]
+                        - cell [ref=e1472]:
+                            - img [ref=e1475]
+                        - cell [ref=e1478]:
+                            - img [ref=e1481]
+                        - cell [ref=e1484]:
+                            - img [ref=e1487]
+                    - row "💰 Pricing Dinámico IA" [ref=e1490]:
+                        - cell "💰 Pricing Dinámico IA" [ref=e1491]
+                        - cell [ref=e1492]:
+                            - img [ref=e1495]
+                        - cell [ref=e1498]:
+                            - img [ref=e1501]
+                        - cell [ref=e1504]:
+                            - img [ref=e1507]
+                        - cell [ref=e1510]:
+                            - img [ref=e1513]
+                    - row "👓 Tours Virtuales AR/VR" [ref=e1516]:
+                        - cell "👓 Tours Virtuales AR/VR" [ref=e1517]
+                        - cell [ref=e1518]:
+                            - img [ref=e1521]
+                        - cell [ref=e1524]:
+                            - img [ref=e1527]
+                        - cell [ref=e1530]:
+                            - img [ref=e1533]
+                        - cell [ref=e1536]:
+                            - img [ref=e1539]
+                    - row "🏠 IoT & Smart Buildings" [ref=e1542]:
+                        - cell "🏠 IoT & Smart Buildings" [ref=e1543]
+                        - cell [ref=e1544]:
+                            - img [ref=e1547]
+                        - cell [ref=e1550]:
+                            - img [ref=e1553]
+                        - cell [ref=e1556]:
+                            - img [ref=e1559]
+                        - cell [ref=e1562]:
+                            - img [ref=e1565]
+                    - row "⛓️ Blockchain & Tokenización" [ref=e1568]:
+                        - cell "⛓️ Blockchain & Tokenización" [ref=e1569]
+                        - cell [ref=e1570]:
+                            - img [ref=e1573]
+                        - cell [ref=e1576]:
+                            - img [ref=e1579]
+                        - cell [ref=e1582]:
+                            - img [ref=e1585]
+                        - cell [ref=e1588]:
+                            - img [ref=e1591]
+                    - row "Portal Inquilinos PWA" [ref=e1594]:
+                        - cell "Portal Inquilinos PWA" [ref=e1595]
+                        - cell [ref=e1596]:
+                            - img [ref=e1599]
+                        - cell [ref=e1602]:
+                            - img [ref=e1605]
+                        - cell [ref=e1608]:
+                            - img [ref=e1611]
+                        - cell [ref=e1614]:
+                            - img [ref=e1617]
+                    - row "Portal Propietarios PWA" [ref=e1620]:
+                        - cell "Portal Propietarios PWA" [ref=e1621]
+                        - cell [ref=e1622]:
+                            - img [ref=e1625]
+                        - cell [ref=e1628]:
+                            - img [ref=e1631]
+                        - cell [ref=e1634]:
+                            - img [ref=e1637]
+                        - cell [ref=e1640]:
+                            - img [ref=e1643]
+                    - row "Asistente IA GPT-4" [ref=e1646]:
+                        - cell "Asistente IA GPT-4" [ref=e1647]
+                        - cell [ref=e1648]:
+                            - img [ref=e1651]
+                        - cell [ref=e1654]:
+                            - img [ref=e1657]
+                        - cell [ref=e1660]:
+                            - img [ref=e1663]
+                        - cell [ref=e1666]:
+                            - img [ref=e1669]
+                    - row "Channel Manager Multi-OTA" [ref=e1672]:
+                        - cell "Channel Manager Multi-OTA" [ref=e1673]
+                        - cell [ref=e1674]:
+                            - img [ref=e1677]
+                        - cell [ref=e1680]:
+                            - img [ref=e1683]
+                        - cell [ref=e1686]:
+                            - img [ref=e1689]
+                        - cell [ref=e1692]:
+                            - img [ref=e1695]
+                    - row "Firma Digital Integrada" [ref=e1698]:
+                        - cell "Firma Digital Integrada" [ref=e1699]
+                        - cell [ref=e1700]:
+                            - img [ref=e1703]
+                        - cell [ref=e1706]:
+                            - img [ref=e1709]
+                        - cell [ref=e1712]:
+                            - img [ref=e1715]
+                        - cell [ref=e1718]:
+                            - img [ref=e1721]
+                    - row "Open Banking" [ref=e1724]:
+                        - cell "Open Banking" [ref=e1725]
+                        - cell [ref=e1726]:
+                            - img [ref=e1729]
+                        - cell [ref=e1732]:
+                            - img [ref=e1735]
+                        - cell [ref=e1738]:
+                            - img [ref=e1741]
+                        - cell [ref=e1744]:
+                            - img [ref=e1747]
+                    - row "CRM Inmobiliario" [ref=e1750]:
+                        - cell "CRM Inmobiliario" [ref=e1751]
+                        - cell [ref=e1752]:
+                            - img [ref=e1755]
+                        - cell [ref=e1758]:
+                            - img [ref=e1761]
+                        - cell [ref=e1764]:
+                            - img [ref=e1767]
+                        - cell [ref=e1770]:
+                            - img [ref=e1773]
+                    - row "Business Intelligence" [ref=e1776]:
+                        - cell "Business Intelligence" [ref=e1777]
+                        - cell [ref=e1778]:
+                            - img [ref=e1781]
+                        - cell [ref=e1784]:
+                            - img [ref=e1787]
+                        - cell [ref=e1790]:
+                            - img [ref=e1793]
+                        - cell [ref=e1796]:
+                            - img [ref=e1799]
+            - generic [ref=e1802]:
+                - generic [ref=e1804]:
+                    - generic [ref=e1805]:
+                        - heading "88 Módulos vs 15-35 de la Competencia" [level=3] [ref=e1806]:
+                            - img [ref=e1807]
+                            - text: 88 Módulos vs 15-35 de la Competencia
+                        - paragraph [ref=e1810]: Ahorra hasta un 70% consolidando múltiples herramientas en INMOVA
+                    - link "Prueba Gratis 30 Días" [ref=e1811] [cursor=pointer]:
+                        - /url: /register
+                        - button "Prueba Gratis 30 Días" [ref=e1812]
+                - generic [ref=e1813]:
+                    - paragraph [ref=e1814]:
+                        - strong [ref=e1815]: ¿Vienes de Homming?
+                        - text: Descubre por qué INMOVA ofrece 6x más funcionalidad por 58% menos precio
+                    - link "Ver Comparativa Detallada con Homming" [ref=e1816] [cursor=pointer]:
+                        - /url: /comparativa/homming
+                        - button "Ver Comparativa Detallada con Homming" [ref=e1817]
+            - paragraph [ref=e1819]: '*Comparativa basada en funcionalidades públicas de las principales plataformas PropTech del mercado español. Los datos se actualizan trimestralmente. Última actualización: Q1 2026.'
+        - generic [ref=e1821]:
+            - generic [ref=e1822]:
+                - generic [ref=e1823]:
+                    - img [ref=e1824]
+                    - text: Mejor Precio/Valor del Mercado - Ahorra hasta 70%
+                - heading "El Fin de la Fragmentación" [level=2] [ref=e1826]
+                - paragraph [ref=e1827]:
+                    - strong [ref=e1828]: Todos los 88+ módulos incluidos en todos los planes.
+                    - text: Sistema Operativo Integral del Real Estate.
+                - paragraph [ref=e1829]:
+                    - text: Reemplaza
+                    - strong [ref=e1830]: Rentger + Guesty + Presto
+                    - text: en una sola plataforma. Ahorra
+                    - strong [ref=e1831]: €240/mes
+                    - text: consolidando 5-8 herramientas.
+            - generic [ref=e1832]:
+                - generic [ref=e1833]:
+                    - generic [ref=e1834]:
+                        - heading "Basic" [level=3] [ref=e1835]
+                        - generic [ref=e1836]:
+                            - generic [ref=e1837]: €49/mes
+                            - generic [ref=e1838]: €490/año • Ahorra €98 (2 meses gratis)
+                            - generic [ref=e1839]: €2.45/propiedad
+                        - generic [ref=e1841]: 1 Vertical
+                        - generic [ref=e1842]: Hasta 20 propiedades
+                    - generic [ref=e1843]:
+                        - paragraph [ref=e1845]: Ideal para inversores particulares y flippers
+                        - list [ref=e1846]:
+                            - listitem [ref=e1847]:
+                                - img [ref=e1848]
+                                - generic [ref=e1851]: ✅ 1 Vertical de Negocio (a elegir)
+                            - listitem [ref=e1852]:
+                                - img [ref=e1853]
+                                - generic [ref=e1856]: Hasta 20 propiedades
+                            - listitem [ref=e1857]:
+                                - img [ref=e1858]
+                                - generic [ref=e1861]: 1 usuario
+                            - listitem [ref=e1862]:
+                                - img [ref=e1863]
+                                - generic [ref=e1866]: Funciones core del vertical elegido
+                            - listitem [ref=e1867]:
+                                - img [ref=e1868]
+                                - generic [ref=e1871]: Dashboard y reportes básicos
+                            - listitem [ref=e1872]:
+                                - img [ref=e1873]
+                                - generic [ref=e1876]: Integraciones básicas
+                            - listitem [ref=e1877]:
+                                - img [ref=e1878]
+                                - generic [ref=e1881]: 'Módulos Transversales: Opcionales'
+                            - listitem [ref=e1882]:
+                                - img [ref=e1883]
+                                - generic [ref=e1886]: Soporte email 48h
+                        - link "Comenzar Ahora" [ref=e1887] [cursor=pointer]:
+                            - /url: /register
+                            - button "Comenzar Ahora" [ref=e1888]
+                - generic [ref=e1889]:
+                    - generic [ref=e1890]: ⭐ Más Popular
+                    - generic [ref=e1891]:
+                        - heading "Professional" [level=3] [ref=e1892]
+                        - generic [ref=e1893]:
+                            - generic [ref=e1894]: €149/mes
+                            - generic [ref=e1895]: €1,490/año • Ahorra €298 (2 meses gratis)
+                            - generic [ref=e1896]: €1.49/propiedad (max)
+                        - generic [ref=e1897]:
+                            - generic [ref=e1898]: 2 Verticales + 1 Módulo
+                            - generic [ref=e1899]: 2 Verticales + 1 Módulo Gratis
+                        - generic [ref=e1900]: Hasta 100 propiedades
+                    - generic [ref=e1901]:
+                        - paragraph [ref=e1903]: Perfecto para agencias y gestoras profesionales
+                        - list [ref=e1904]:
+                            - listitem [ref=e1905]:
+                                - img [ref=e1906]
+                                - generic [ref=e1909]: ✅ 2 Verticales de Negocio (combina modelos)
+                            - listitem [ref=e1910]:
+                                - img [ref=e1911]
+                                - generic [ref=e1914]: Hasta 100 propiedades
+                            - listitem [ref=e1915]:
+                                - img [ref=e1916]
+                                - generic [ref=e1919]: 5 usuarios incluidos
+                            - listitem [ref=e1920]:
+                                - img [ref=e1921]
+                                - generic [ref=e1924]: ⭐ Funciones avanzadas por vertical
+                            - listitem [ref=e1925]:
+                                - img [ref=e1926]
+                                - generic [ref=e1929]: AI Assistant GPT-4 Standard
+                            - listitem [ref=e1930]:
+                                - img [ref=e1931]
+                                - generic [ref=e1934]: Dashboard avanzado + Analytics
+                            - listitem [ref=e1935]:
+                                - img [ref=e1936]
+                                - generic [ref=e1939]: Integraciones premium (OTAs, pagos)
+                            - listitem [ref=e1940]:
+                                - img [ref=e1941]
+                                - generic [ref=e1944]: ✨ 1 Módulo Transversal incluido gratis
+                            - listitem [ref=e1945]:
+                                - img [ref=e1946]
+                                - generic [ref=e1949]: 'Marca Blanca: Colores + Dominio'
+                            - listitem [ref=e1950]:
+                                - img [ref=e1951]
+                                - generic [ref=e1954]: Soporte chat prioritario
+                        - link "🚀 Comenzar Ahora" [ref=e1955] [cursor=pointer]:
+                            - /url: /register
+                            - button "🚀 Comenzar Ahora" [ref=e1956]
+                - generic [ref=e1957]:
+                    - generic [ref=e1958]: ✨ NUEVO Q4 2024
+                    - generic [ref=e1959]:
+                        - heading "Business" [level=3] [ref=e1960]
+                        - generic [ref=e1961]:
+                            - generic [ref=e1962]: €349/mes
+                            - generic [ref=e1963]: €3,490/año • Ahorra €698 (2 meses gratis)
+                            - generic [ref=e1964]: Sin límite
+                        - generic [ref=e1965]:
+                            - generic [ref=e1966]: 6 Verticales + 3 Módulos
+                            - generic [ref=e1967]: Todos los Verticales + 3 Módulos Gratis
+                        - generic [ref=e1968]: Propiedades ilimitadas
+                    - generic [ref=e1969]:
+                        - paragraph [ref=e1971]: Para promotoras y gestoras consolidadas
+                        - list [ref=e1972]:
+                            - listitem [ref=e1973]:
+                                - img [ref=e1974]
+                                - generic [ref=e1977]: ✅ TODOS los 6 Verticales incluidos
+                            - listitem [ref=e1978]:
+                                - img [ref=e1979]
+                                - generic [ref=e1982]: ✅ Propiedades ilimitadas
+                            - listitem [ref=e1983]:
+                                - img [ref=e1984]
+                                - generic [ref=e1987]: ✅ 3 Módulos Transversales incluidos
+                            - listitem [ref=e1988]:
+                                - img [ref=e1989]
+                                - generic [ref=e1992]: 💰 (Valor €180/mes gratis)
+                            - listitem [ref=e1993]:
+                                - img [ref=e1994]
+                                - generic [ref=e1997]: 15 usuarios incluidos
+                            - listitem [ref=e1998]:
+                                - img [ref=e1999]
+                                - generic [ref=e2002]: AI Assistant GPT-4 Advanced (entrenable)
+                            - listitem [ref=e2003]:
+                                - img [ref=e2004]
+                                - generic [ref=e2007]: 'Construcción: Obra Nueva completa'
+                            - listitem [ref=e2008]:
+                                - img [ref=e2009]
+                                - generic [ref=e2012]: White-label completo + App móvil
+                            - listitem [ref=e2013]:
+                                - img [ref=e2014]
+                                - generic [ref=e2017]: Migraciones de datos incluidas
+                            - listitem [ref=e2018]:
+                                - img [ref=e2019]
+                                - generic [ref=e2022]: Gestor de Cuenta Dedicado
+                            - listitem [ref=e2023]:
+                                - img [ref=e2024]
+                                - generic [ref=e2027]: Soporte prioritario 24/7
+                        - link "Comenzar Ahora" [ref=e2028] [cursor=pointer]:
+                            - /url: /register
+                            - button "Comenzar Ahora" [ref=e2029]
+                - generic [ref=e2030]:
+                    - generic [ref=e2031]:
+                        - heading "Enterprise+" [level=3] [ref=e2032]
+                        - generic [ref=e2033]:
+                            - generic [ref=e2034]: A medida
+                            - generic [ref=e2035]: Personalizado
+                        - generic [ref=e2037]: 6 Verticales + 6 Módulos + Custom
+                        - generic [ref=e2038]: Ilimitadas
+                    - generic [ref=e2039]:
+                        - paragraph [ref=e2041]: SOCIMIs y grandes corporaciones
+                        - list [ref=e2042]:
+                            - listitem [ref=e2043]:
+                                - img [ref=e2044]
+                                - generic [ref=e2047]: ✅ Todos los verticales + módulos
+                            - listitem [ref=e2048]:
+                                - img [ref=e2049]
+                                - generic [ref=e2052]: Desarrollos custom incluidos
+                            - listitem [ref=e2053]:
+                                - img [ref=e2054]
+                                - generic [ref=e2057]: Propiedades y usuarios ilimitados
+                            - listitem [ref=e2058]:
+                                - img [ref=e2059]
+                                - generic [ref=e2062]: Migración garantizada de datos
+                            - listitem [ref=e2063]:
+                                - img [ref=e2064]
+                                - generic [ref=e2067]: SLA 99.9% garantizado
+                            - listitem [ref=e2068]:
+                                - img [ref=e2069]
+                                - generic [ref=e2072]: Consultoría Tokenización Blockchain
+                            - listitem [ref=e2073]:
+                                - img [ref=e2074]
+                                - generic [ref=e2077]: Multi-región + Multi-moneda
+                            - listitem [ref=e2078]:
+                                - img [ref=e2079]
+                                - generic [ref=e2082]: Soporte 24/7 + Account Manager
+                            - listitem [ref=e2083]:
+                                - img [ref=e2084]
+                                - generic [ref=e2087]: Auditoría y cumplimiento normativo
+                        - link "Comenzar Ahora" [ref=e2088] [cursor=pointer]:
+                            - /url: /register
+                            - button "Comenzar Ahora" [ref=e2089]
+            - paragraph [ref=e2091]:
+                - text: ¿Más de 300 propiedades?
+                - link "Contáctanos" [ref=e2092] [cursor=pointer]:
+                    - /url: /contacto
+                - text: para un plan personalizado
+        - generic [ref=e2094]:
+            - generic [ref=e2095]:
+                - generic [ref=e2096]:
+                    - img [ref=e2097]
+                    - text: Testimonios Verificados
+                - heading "Lo que Dicen Nuestros Clientes" [level=2] [ref=e2099]
+                - paragraph [ref=e2100]: Historias reales de gestoras, agencias y operadores de coliving que transformaron su negocio con INMOVA
+            - generic [ref=e2101]:
+                - generic [ref=e2102]:
+                    - generic [ref=e2104]: Coliving
+                    - generic [ref=e2105]:
+                        - generic [ref=e2106]:
+                            - img [ref=e2107]
+                            - generic [ref=e2110]:
+                                - img [ref=e2111]
+                                - img [ref=e2113]
+                                - img [ref=e2115]
+                                - img [ref=e2117]
+                                - img [ref=e2119]
+                        - paragraph [ref=e2121]: '"Antes tardábamos 8 horas al mes calculando el prorrateo de luz, agua y gas para 25 habitaciones. Con Room Rental PRO de INMOVA, son literalmente 3 clics y está todo hecho. Los inquilinos reciben su factura individualizada automáticamente. Un cambio de juego total."'
+                        - generic [ref=e2122]:
+                            - generic [ref=e2123]:
+                                - generic [ref=e2124]: 8h/mes
+                                - generic [ref=e2125]: Tiempo ahorrado
+                            - generic [ref=e2126]:
+                                - generic [ref=e2127]: '25'
+                                - generic [ref=e2128]: Habitaciones
+                            - generic [ref=e2129]:
+                                - generic [ref=e2130]: 98%
+                                - generic [ref=e2131]: Satisfacción
+                        - generic [ref=e2133]:
+                            - img [ref=e2134]
+                            - text: Ahorra 8h/mes en cálculos manuales
+                        - generic [ref=e2137]:
+                            - generic [ref=e2138]: M
+                            - generic [ref=e2139]:
+                                - generic [ref=e2140]: María García
+                                - generic [ref=e2141]: Fundadora • CoLiving Barcelona
+                - generic [ref=e2142]:
+                    - generic [ref=e2144]: Residencia Estudiantil
+                    - generic [ref=e2145]:
+                        - generic [ref=e2146]:
+                            - img [ref=e2147]
+                            - generic [ref=e2150]:
+                                - img [ref=e2151]
+                                - img [ref=e2153]
+                                - img [ref=e2155]
+                                - img [ref=e2157]
+                                - img [ref=e2159]
+                        - paragraph [ref=e2161]: '"Gestionamos 3 residencias con 150 habitaciones en total. El dashboard de Room Rental PRO nos da visibilidad instantánea de ocupación, vencimientos de contratos y alertas. Hemos reducido la tasa de impagos un 35% gracias al sistema de seguimiento automatizado."'
+                        - generic [ref=e2162]:
+                            - generic [ref=e2163]:
+                                - generic [ref=e2164]: '150'
+                                - generic [ref=e2165]: Habitaciones
+                            - generic [ref=e2166]:
+                                - generic [ref=e2167]: '-35%'
+                                - generic [ref=e2168]: Impagos
+                            - generic [ref=e2169]:
+                                - generic [ref=e2170]: '3'
+                                - generic [ref=e2171]: Residencias
+                        - generic [ref=e2173]:
+                            - img [ref=e2174]
+                            - text: Redujo impagos en 35%
+                        - generic [ref=e2177]:
+                            - generic [ref=e2178]: J
+                            - generic [ref=e2179]:
+                                - generic [ref=e2180]: Javier Martínez
+                                - generic [ref=e2181]: Director de Operaciones • Student Housing Madrid
+                - generic [ref=e2182]:
+                    - generic [ref=e2184]: Agencia Inmobiliaria
+                    - generic [ref=e2185]:
+                        - generic [ref=e2186]:
+                            - img [ref=e2187]
+                            - generic [ref=e2190]:
+                                - img [ref=e2191]
+                                - img [ref=e2193]
+                                - img [ref=e2195]
+                                - img [ref=e2197]
+                                - img [ref=e2199]
+                        - paragraph [ref=e2201]: '"El Sistema de Cupones de INMOVA nos permitió lanzar una campaña "Primer mes 50% OFF" en 10 minutos. Antes, teníamos que hacerlo manualmente con Excel y llamadas. Resultado: +42% de leads convertidos y ROI de 5x en la primera campaña."'
+                        - generic [ref=e2202]:
+                            - generic [ref=e2203]:
+                                - generic [ref=e2204]: +42%
+                                - generic [ref=e2205]: Leads convertidos
+                            - generic [ref=e2206]:
+                                - generic [ref=e2207]: 5x
+                                - generic [ref=e2208]: ROI
+                            - generic [ref=e2209]:
+                                - generic [ref=e2210]: 10min
+                                - generic [ref=e2211]: Setup
+                        - generic [ref=e2213]:
+                            - img [ref=e2214]
+                            - text: +42% conversión con cupones
+                        - generic [ref=e2217]:
+                            - generic [ref=e2218]: L
+                            - generic [ref=e2219]:
+                                - generic [ref=e2220]: Laura Sánchez
+                                - generic [ref=e2221]: Directora de Marketing • Inmobiliaria del Sur
+                - generic [ref=e2222]:
+                    - generic [ref=e2224]: Coliving
+                    - generic [ref=e2225]:
+                        - generic [ref=e2226]:
+                            - img [ref=e2227]
+                            - generic [ref=e2230]:
+                                - img [ref=e2231]
+                                - img [ref=e2233]
+                                - img [ref=e2235]
+                                - img [ref=e2237]
+                                - img [ref=e2239]
+                        - paragraph [ref=e2241]: '"Las reglas de co-living personalizables son oro puro. Definimos horarios de limpieza, turnos de cocina, política de visitas... todo en el sistema. Los inquilinos lo ven en su app y las fricciones desaparecieron. La satisfacción subió de 6.5/10 a 9.2/10."'
+                        - generic [ref=e2242]:
+                            - generic [ref=e2243]:
+                                - generic [ref=e2244]: 9.2/10
+                                - generic [ref=e2245]: Satisfacción
+                            - generic [ref=e2246]:
+                                - generic [ref=e2247]: '-70%'
+                                - generic [ref=e2248]: Fricciones
+                            - generic [ref=e2249]:
+                                - generic [ref=e2250]: +25%
+                                - generic [ref=e2251]: Retention
+                        - generic [ref=e2253]:
+                            - img [ref=e2254]
+                            - text: Satisfacción de 6.5 a 9.2/10
+                        - generic [ref=e2257]:
+                            - generic [ref=e2258]: C
+                            - generic [ref=e2259]:
+                                - generic [ref=e2260]: Carlos Ruiz
+                                - generic [ref=e2261]: Gestor de Propiedades • Urban Coliving Valencia
+                - generic [ref=e2262]:
+                    - generic [ref=e2264]: Coliving
+                    - generic [ref=e2265]:
+                        - generic [ref=e2266]:
+                            - img [ref=e2267]
+                            - generic [ref=e2270]:
+                                - img [ref=e2271]
+                                - img [ref=e2273]
+                                - img [ref=e2275]
+                                - img [ref=e2277]
+                                - img [ref=e2279]
+                        - paragraph [ref=e2281]: '"Migrar desde nuestra solución anterior fue increíblemente fácil. El equipo de INMOVA nos ayudó a importar 80 habitaciones, 50 inquilinos y 2 años de historial de pagos en una tarde. Room Rental PRO nos permite escalar sin contratar más personal administrativo."'
+                        - generic [ref=e2282]:
+                            - generic [ref=e2283]:
+                                - generic [ref=e2284]: 1 tarde
+                                - generic [ref=e2285]: Migración
+                            - generic [ref=e2286]:
+                                - generic [ref=e2287]: '80'
+                                - generic [ref=e2288]: Habitaciones
+                            - generic [ref=e2289]:
+                                - generic [ref=e2290]: ∞
+                                - generic [ref=e2291]: Escalabilidad
+                        - generic [ref=e2293]:
+                            - img [ref=e2294]
+                            - text: Escala sin más personal
+                        - generic [ref=e2297]:
+                            - generic [ref=e2298]: A
+                            - generic [ref=e2299]:
+                                - generic [ref=e2300]: Ana Torres
+                                - generic [ref=e2301]: CEO • Flex Living Group
+                - generic [ref=e2302]:
+                    - generic [ref=e2304]: Promotora
+                    - generic [ref=e2305]:
+                        - generic [ref=e2306]:
+                            - img [ref=e2307]
+                            - generic [ref=e2310]:
+                                - img [ref=e2311]
+                                - img [ref=e2313]
+                                - img [ref=e2315]
+                                - img [ref=e2317]
+                                - img [ref=e2319]
+                        - paragraph [ref=e2321]: '"Usamos el módulo de Construcción y cuando terminamos la obra, activamos Room Rental PRO para comercializar habitaciones individuales. Todo en la misma plataforma. De obra a ingresos recurrentes sin cambiar de sistema. Brillante."'
+                        - generic [ref=e2322]:
+                            - generic [ref=e2323]:
+                                - generic [ref=e2324]: '4'
+                                - generic [ref=e2325]: Proyectos
+                            - generic [ref=e2326]:
+                                - generic [ref=e2327]: 95%
+                                - generic [ref=e2328]: Hab. vendidas
+                            - generic [ref=e2329]:
+                                - generic [ref=e2330]: '-40%'
+                                - generic [ref=e2331]: Time to market
+                        - generic [ref=e2333]:
+                            - img [ref=e2334]
+                            - text: De obra a ingresos en un sistema
+                        - generic [ref=e2337]:
+                            - generic [ref=e2338]: P
+                            - generic [ref=e2339]:
+                                - generic [ref=e2340]: Pedro López
+                                - generic [ref=e2341]: Fundador • Promotora Montaña
+            - generic [ref=e2342]:
+                - generic [ref=e2343]:
+                    - img [ref=e2345]
+                    - generic [ref=e2349]: 500+
+                    - generic [ref=e2350]: Empresas Confían en INMOVA
+                - generic [ref=e2351]:
+                    - img [ref=e2353]
+                    - generic [ref=e2358]: 10,000+
+                    - generic [ref=e2359]: Propiedades Gestionadas
+                - generic [ref=e2360]:
+                    - img [ref=e2362]
+                    - generic [ref=e2364]: 4.9/5
+                    - generic [ref=e2365]: Valoración Promedio
+        - generic [ref=e2367]:
+            - generic [ref=e2368]:
+                - generic [ref=e2369]:
+                    - img [ref=e2370]
+                    - text: Integraciones
+                - heading "Conecta con tus Herramientas Favoritas" [level=2] [ref=e2373]
+                - paragraph [ref=e2374]: INMOVA se integra perfectamente con las principales plataformas del sector inmobiliario y financiero
+            - generic [ref=e2375]:
+                - generic [ref=e2376]:
+                    - generic [ref=e2377]:
+                        - img [ref=e2379]
+                        - heading "Pagos y Finanzas" [level=3] [ref=e2381]
+                        - generic [ref=e2382]: Procesa pagos de forma segura
+                    - list [ref=e2384]:
+                        - listitem [ref=e2385]:
+                            - img [ref=e2386]
+                            - generic [ref=e2389]:
+                                - strong [ref=e2390]: 'Stripe:'
+                                - text: Pagos recurrentes y one-time
+                        - listitem [ref=e2391]:
+                            - img [ref=e2392]
+                            - generic [ref=e2395]:
+                                - strong [ref=e2396]: 'Open Banking:'
+                                - text: Verificación de ingresos
+                        - listitem [ref=e2397]:
+                            - img [ref=e2398]
+                            - generic [ref=e2401]:
+                                - strong [ref=e2402]: 'Zucchetti:'
+                                - text: Integración ERP/contabilidad
+                - generic [ref=e2403]:
+                    - generic [ref=e2404]:
+                        - img [ref=e2406]
+                        - heading "Portales Inmobiliarios" [level=3] [ref=e2409]
+                        - generic [ref=e2410]: Publicación automática
+                    - list [ref=e2412]:
+                        - listitem [ref=e2413]:
+                            - img [ref=e2414]
+                            - generic [ref=e2417]:
+                                - strong [ref=e2418]: 'Idealista:'
+                                - text: Sincronización automática
+                        - listitem [ref=e2419]:
+                            - img [ref=e2420]
+                            - generic [ref=e2423]:
+                                - strong [ref=e2424]: 'Fotocasa:'
+                                - text: Anuncios optimizados
+                        - listitem [ref=e2425]:
+                            - img [ref=e2426]
+                            - generic [ref=e2429]:
+                                - strong [ref=e2430]: 'Habitaclia:'
+                                - text: Multi-publicación
+                - generic [ref=e2431]:
+                    - generic [ref=e2432]:
+                        - img [ref=e2434]
+                        - heading "Short-Term Rental" [level=3] [ref=e2437]
+                        - generic [ref=e2438]: Channel Manager nativo
+                    - list [ref=e2440]:
+                        - listitem [ref=e2441]:
+                            - img [ref=e2442]
+                            - generic [ref=e2445]:
+                                - strong [ref=e2446]: 'Airbnb:'
+                                - text: Sincronización calendario
+                        - listitem [ref=e2447]:
+                            - img [ref=e2448]
+                            - generic [ref=e2451]:
+                                - strong [ref=e2452]: 'Booking.com:'
+                                - text: Gestión reservas
+                        - listitem [ref=e2453]:
+                            - img [ref=e2454]
+                            - generic [ref=e2457]:
+                                - strong [ref=e2458]: 'VRBO:'
+                                - text: Pricing dinámico
+                - generic [ref=e2459]:
+                    - generic [ref=e2460]:
+                        - img [ref=e2462]
+                        - heading "Comunicación" [level=3] [ref=e2464]
+                        - generic [ref=e2465]: Centraliza conversaciones
+                    - list [ref=e2467]:
+                        - listitem [ref=e2468]:
+                            - img [ref=e2469]
+                            - generic [ref=e2472]:
+                                - strong [ref=e2473]: 'WhatsApp:'
+                                - text: Chat integrado
+                        - listitem [ref=e2474]:
+                            - img [ref=e2475]
+                            - generic [ref=e2478]:
+                                - strong [ref=e2479]: 'Email:'
+                                - text: Notificaciones automáticas
+                        - listitem [ref=e2480]:
+                            - img [ref=e2481]
+                            - generic [ref=e2484]:
+                                - strong [ref=e2485]: 'SMS:'
+                                - text: Recordatorios y alertas
+                - generic [ref=e2486]:
+                    - generic [ref=e2487]:
+                        - img [ref=e2489]
+                        - heading "Firma Digital" [level=3] [ref=e2492]
+                        - generic [ref=e2493]: Contratos y documentos
+                    - list [ref=e2495]:
+                        - listitem [ref=e2496]:
+                            - img [ref=e2497]
+                            - generic [ref=e2500]:
+                                - strong [ref=e2501]: 'Signaturit:'
+                                - text: Firma electrónica certificada
+                        - listitem [ref=e2502]:
+                            - img [ref=e2503]
+                            - generic [ref=e2506]:
+                                - strong [ref=e2507]: 'DocuSign:'
+                                - text: Flujos de firma múltiples
+                        - listitem [ref=e2508]:
+                            - img [ref=e2509]
+                            - generic [ref=e2512]:
+                                - strong [ref=e2513]: 'Autoridad Certificadora:'
+                                - text: Sello de tiempo
+                - generic [ref=e2514]:
+                    - generic [ref=e2515]:
+                        - img [ref=e2517]
+                        - heading "Seguridad" [level=3] [ref=e2519]
+                        - generic [ref=e2520]: Protección de datos
+                    - list [ref=e2522]:
+                        - listitem [ref=e2523]:
+                            - img [ref=e2524]
+                            - generic [ref=e2527]:
+                                - strong [ref=e2528]: 'Biometría:'
+                                - text: Autenticación facial/huella
+                        - listitem [ref=e2529]:
+                            - img [ref=e2530]
+                            - generic [ref=e2533]:
+                                - strong [ref=e2534]: 'GDPR:'
+                                - text: Cumplimiento normativo
+                        - listitem [ref=e2535]:
+                            - img [ref=e2536]
+                            - generic [ref=e2539]:
+                                - strong [ref=e2540]: 'SOC2/ISO27001:'
+                                - text: Auditorías de seguridad
+        - contentinfo [ref=e2541]:
+            - generic [ref=e2542]:
+                - generic [ref=e2543]:
+                    - generic [ref=e2544]:
+                        - generic [ref=e2545]:
+                            - img [ref=e2546]
+                            - generic [ref=e2550]: INMOVA
+                        - paragraph [ref=e2551]: La plataforma PropTech multi-vertical más avanzada de España
+                        - generic [ref=e2552]:
+                            - link "Twitter" [ref=e2553] [cursor=pointer]:
+                                - /url: https://twitter.com/inmova
+                                - button "Twitter" [ref=e2554]
+                            - link "LinkedIn" [ref=e2555] [cursor=pointer]:
+                                - /url: https://linkedin.com/company/inmova
+                                - button "LinkedIn" [ref=e2556]
+                    - generic [ref=e2557]:
+                        - heading "Producto" [level=4] [ref=e2558]
+                        - list [ref=e2559]:
+                            - listitem [ref=e2560]:
+                                - link "Características" [ref=e2561] [cursor=pointer]:
+                                    - /url: '#features'
+                            - listitem [ref=e2562]:
+                                - link "Precios" [ref=e2563] [cursor=pointer]:
+                                    - /url: '#pricing'
+                            - listitem [ref=e2564]:
+                                - link "Ver Demo" [ref=e2565] [cursor=pointer]:
+                                    - /url: /landing/demo
+                            - listitem [ref=e2566]:
+                                - link "Integraciones" [ref=e2567] [cursor=pointer]:
+                                    - /url: '#integraciones'
+                            - listitem [ref=e2568]:
+                                - link "INMOVA vs Homming" [ref=e2569] [cursor=pointer]:
+                                    - /url: /comparativa/homming
+                    - generic [ref=e2570]:
+                        - heading "Empresa" [level=4] [ref=e2571]
+                        - list [ref=e2572]:
+                            - listitem [ref=e2573]:
+                                - link "Sobre Nosotros" [ref=e2574] [cursor=pointer]:
+                                    - /url: /landing/sobre-nosotros
+                            - listitem [ref=e2575]:
+                                - link "Blog" [ref=e2576] [cursor=pointer]:
+                                    - /url: /landing/blog
+                            - listitem [ref=e2577]:
+                                - link "Casos de Éxito" [ref=e2578] [cursor=pointer]:
+                                    - /url: /landing/casos-exito
+                            - listitem [ref=e2579]:
+                                - link "Contacto" [ref=e2580] [cursor=pointer]:
+                                    - /url: /landing/contacto
+                    - generic [ref=e2581]:
+                        - heading "Legal" [level=4] [ref=e2582]
+                        - list [ref=e2583]:
+                            - listitem [ref=e2584]:
+                                - link "Privacidad" [ref=e2585] [cursor=pointer]:
+                                    - /url: /landing/legal/privacidad
+                            - listitem [ref=e2586]:
+                                - link "Términos" [ref=e2587] [cursor=pointer]:
+                                    - /url: /landing/legal/terminos
+                            - listitem [ref=e2588]:
+                                - link "GDPR" [ref=e2589] [cursor=pointer]:
+                                    - /url: /landing/legal/gdpr
+                            - listitem [ref=e2590]:
+                                - link "Cookies" [ref=e2591] [cursor=pointer]:
+                                    - /url: /landing/legal/cookies
+                - generic [ref=e2592]:
+                    - paragraph [ref=e2593]: © 2026 INMOVA. Todos los derechos reservados.
+                    - paragraph [ref=e2594]: Powered by Enxames Investments SL
+        - button "Contactar por WhatsApp" [ref=e2595] [cursor=pointer]:
+            - img [ref=e2596]
+            - generic [ref=e2598]: '1'
+        - button "Abrir chat" [ref=e2599] [cursor=pointer]:
+            - img [ref=e2600]
+            - generic [ref=e2602]: '!'
+    - button "Open Next.js Dev Tools" [ref=e2608] [cursor=pointer]:
+        - img [ref=e2609]
+    - alert [ref=e2612]
+```

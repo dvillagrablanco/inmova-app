@@ -1,0 +1,569 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+    - link "Saltar al contenido principal" [ref=e2] [cursor=pointer]:
+        - /url: '#main-content'
+    - generic [ref=e3]:
+        - complementary "Navegación principal" [ref=e4]:
+            - generic [ref=e5]:
+                - generic [ref=e6]:
+                    - img "INMOVA" [ref=e8]
+                    - paragraph [ref=e9]: INMOVA
+                - generic [ref=e11]:
+                    - img [ref=e12]
+                    - textbox "Buscar página..." [ref=e15]
+                - navigation [ref=e16]:
+                    - generic [ref=e17]:
+                        - button "🏠 Inicio" [ref=e18] [cursor=pointer]:
+                            - generic [ref=e19]: 🏠 Inicio
+                            - img [ref=e20]
+                        - generic [ref=e22]:
+                            - generic [ref=e23]:
+                                - link "Dashboard" [ref=e24] [cursor=pointer]:
+                                    - /url: /dashboard
+                                    - img [ref=e25]
+                                    - generic [ref=e30]: Dashboard
+                                - button "Agregar a favoritos" [ref=e31] [cursor=pointer]:
+                                    - img [ref=e32]
+                            - generic [ref=e34]:
+                                - link "Inicio" [ref=e35] [cursor=pointer]:
+                                    - /url: /home
+                                    - img [ref=e36]
+                                    - generic [ref=e39]: Inicio
+                                - button "Agregar a favoritos" [ref=e40] [cursor=pointer]:
+                                    - img [ref=e41]
+                    - heading "📊 Verticales de Negocio" [level=3] [ref=e44]
+                    - generic [ref=e45]:
+                        - button "🏘️ Alquiler Residencial" [ref=e46] [cursor=pointer]:
+                            - generic [ref=e47]: 🏘️ Alquiler Residencial
+                            - img [ref=e48]
+                        - generic [ref=e50]:
+                            - generic [ref=e51]:
+                                - link "Edificios" [ref=e52] [cursor=pointer]:
+                                    - /url: /edificios
+                                    - img [ref=e53]
+                                    - generic [ref=e57]: Edificios
+                                - button "Agregar a favoritos" [ref=e58] [cursor=pointer]:
+                                    - img [ref=e59]
+                            - generic [ref=e61]:
+                                - link "Unidades" [ref=e62] [cursor=pointer]:
+                                    - /url: /unidades
+                                    - img [ref=e63]
+                                    - generic [ref=e66]: Unidades
+                                - button "Agregar a favoritos" [ref=e67] [cursor=pointer]:
+                                    - img [ref=e68]
+                            - generic [ref=e70]:
+                                - link "Garajes y Trasteros" [ref=e71] [cursor=pointer]:
+                                    - /url: /garajes-trasteros
+                                    - img [ref=e72]
+                                    - generic [ref=e76]: Garajes y Trasteros
+                                - button "Agregar a favoritos" [ref=e77] [cursor=pointer]:
+                                    - img [ref=e78]
+                            - generic [ref=e80]:
+                                - link "Inquilinos" [ref=e81] [cursor=pointer]:
+                                    - /url: /inquilinos
+                                    - img [ref=e82]
+                                    - generic [ref=e87]: Inquilinos
+                                - button "Agregar a favoritos" [ref=e88] [cursor=pointer]:
+                                    - img [ref=e89]
+                            - generic [ref=e91]:
+                                - link "Contratos" [ref=e92] [cursor=pointer]:
+                                    - /url: /contratos
+                                    - img [ref=e93]
+                                    - generic [ref=e96]: Contratos
+                                - button "Agregar a favoritos" [ref=e97] [cursor=pointer]:
+                                    - img [ref=e98]
+                            - generic [ref=e100]:
+                                - link "Candidatos" [ref=e101] [cursor=pointer]:
+                                    - /url: /candidatos
+                                    - img [ref=e102]
+                                    - generic [ref=e105]: Candidatos
+                                - button "Agregar a favoritos" [ref=e106] [cursor=pointer]:
+                                    - img [ref=e107]
+                            - generic [ref=e109]:
+                                - link "Screening Inquilinos" [ref=e110] [cursor=pointer]:
+                                    - /url: /screening
+                                    - img [ref=e111]
+                                    - generic [ref=e115]: Screening Inquilinos
+                                - button "Agregar a favoritos" [ref=e116] [cursor=pointer]:
+                                    - img [ref=e117]
+                            - generic [ref=e119]:
+                                - link "Valoraciones Propiedades" [ref=e120] [cursor=pointer]:
+                                    - /url: /valoraciones
+                                    - img [ref=e121]
+                                    - generic [ref=e124]: Valoraciones Propiedades
+                                - button "Agregar a favoritos" [ref=e125] [cursor=pointer]:
+                                    - img [ref=e126]
+                            - generic [ref=e128]:
+                                - link "Inspecciones" [ref=e129] [cursor=pointer]:
+                                    - /url: /inspecciones
+                                    - img [ref=e130]
+                                    - generic [ref=e133]: Inspecciones
+                                - button "Agregar a favoritos" [ref=e134] [cursor=pointer]:
+                                    - img [ref=e135]
+                            - generic [ref=e137]:
+                                - link "Certificaciones" [ref=e138] [cursor=pointer]:
+                                    - /url: /certificaciones
+                                    - img [ref=e139]
+                                    - generic [ref=e142]: Certificaciones
+                                - button "Agregar a favoritos" [ref=e143] [cursor=pointer]:
+                                    - img [ref=e144]
+                            - generic [ref=e146]:
+                                - link "Seguros" [ref=e147] [cursor=pointer]:
+                                    - /url: /seguros
+                                    - img [ref=e148]
+                                    - generic [ref=e150]: Seguros
+                                - button "Agregar a favoritos" [ref=e151] [cursor=pointer]:
+                                    - img [ref=e152]
+                    - button "🏖️ STR / Airbnb" [ref=e155] [cursor=pointer]:
+                        - generic [ref=e156]: 🏖️ STR / Airbnb
+                        - img [ref=e157]
+                    - button "🏘️ Co-Living" [ref=e160] [cursor=pointer]:
+                        - generic [ref=e161]: 🏘️ Co-Living
+                        - img [ref=e162]
+                    - button "🏗️ Build-to-Rent" [ref=e165] [cursor=pointer]:
+                        - generic [ref=e166]: 🏗️ Build-to-Rent
+                        - img [ref=e167]
+                    - button "🔨 House Flipping" [ref=e170] [cursor=pointer]:
+                        - generic [ref=e171]: 🔨 House Flipping
+                        - img [ref=e172]
+                    - button "🏢 Comercial" [ref=e175] [cursor=pointer]:
+                        - generic [ref=e176]: 🏢 Comercial
+                        - img [ref=e177]
+                    - button "🏢 Admin de Fincas" [ref=e180] [cursor=pointer]:
+                        - generic [ref=e181]: 🏢 Admin de Fincas
+                        - img [ref=e182]
+                    - heading "🛠️ Herramientas Horizontales" [level=3] [ref=e185]
+                    - generic [ref=e186]:
+                        - button "💰 Finanzas" [ref=e187] [cursor=pointer]:
+                            - generic [ref=e188]: 💰 Finanzas
+                            - img [ref=e189]
+                        - generic [ref=e191]:
+                            - generic [ref=e192]:
+                                - link "Pagos" [ref=e193] [cursor=pointer]:
+                                    - /url: /pagos
+                                    - img [ref=e194]
+                                    - generic [ref=e196]: Pagos
+                                - button "Agregar a favoritos" [ref=e197] [cursor=pointer]:
+                                    - img [ref=e198]
+                            - generic [ref=e200]:
+                                - link "Gastos" [ref=e201] [cursor=pointer]:
+                                    - /url: /gastos
+                                    - img [ref=e202]
+                                    - generic [ref=e204]: Gastos
+                                - button "Agregar a favoritos" [ref=e205] [cursor=pointer]:
+                                    - img [ref=e206]
+                            - generic [ref=e208]:
+                                - link "Facturación" [ref=e209] [cursor=pointer]:
+                                    - /url: /facturacion
+                                    - img [ref=e210]
+                                    - generic [ref=e213]: Facturación
+                                - button "Agregar a favoritos" [ref=e214] [cursor=pointer]:
+                                    - img [ref=e215]
+                            - generic [ref=e217]:
+                                - link "Contabilidad" [ref=e218] [cursor=pointer]:
+                                    - /url: /contabilidad
+                                    - img [ref=e219]
+                                    - generic [ref=e220]: Contabilidad
+                                - button "Agregar a favoritos" [ref=e221] [cursor=pointer]:
+                                    - img [ref=e222]
+                            - generic [ref=e224]:
+                                - link "Open Banking" [ref=e225] [cursor=pointer]:
+                                    - /url: /open-banking
+                                    - img [ref=e226]
+                                    - generic [ref=e228]: Open Banking
+                                - button "Agregar a favoritos" [ref=e229] [cursor=pointer]:
+                                    - img [ref=e230]
+                    - button "📊 Analytics e IA" [ref=e233] [cursor=pointer]:
+                        - generic [ref=e234]: 📊 Analytics e IA
+                        - img [ref=e235]
+                    - generic [ref=e237]:
+                        - button "⚙️ Operaciones" [ref=e238] [cursor=pointer]:
+                            - generic [ref=e239]: ⚙️ Operaciones
+                            - img [ref=e240]
+                        - generic [ref=e242]:
+                            - generic [ref=e243]:
+                                - link "Mantenimiento" [ref=e244] [cursor=pointer]:
+                                    - /url: /mantenimiento
+                                    - img [ref=e245]
+                                    - generic [ref=e247]: Mantenimiento
+                                - button "Agregar a favoritos" [ref=e248] [cursor=pointer]:
+                                    - img [ref=e249]
+                            - generic [ref=e251]:
+                                - link "Mantenimiento Preventivo" [ref=e252] [cursor=pointer]:
+                                    - /url: /mantenimiento-preventivo
+                                    - img [ref=e253]
+                                    - generic [ref=e255]: Mantenimiento Preventivo
+                                - button "Agregar a favoritos" [ref=e256] [cursor=pointer]:
+                                    - img [ref=e257]
+                            - generic [ref=e259]:
+                                - link "Tareas" [ref=e260] [cursor=pointer]:
+                                    - /url: /tareas
+                                    - img [ref=e261]
+                                    - generic [ref=e264]: Tareas
+                                - button "Agregar a favoritos" [ref=e265] [cursor=pointer]:
+                                    - img [ref=e266]
+                            - generic [ref=e268]:
+                                - link "Incidencias" [ref=e269] [cursor=pointer]:
+                                    - /url: /incidencias
+                                    - img [ref=e270]
+                                    - generic [ref=e272]: Incidencias
+                                - button "Agregar a favoritos" [ref=e273] [cursor=pointer]:
+                                    - img [ref=e274]
+                            - generic [ref=e276]:
+                                - link "Calendario" [ref=e277] [cursor=pointer]:
+                                    - /url: /calendario
+                                    - img [ref=e278]
+                                    - generic [ref=e280]: Calendario
+                                - button "Agregar a favoritos" [ref=e281] [cursor=pointer]:
+                                    - img [ref=e282]
+                            - generic [ref=e284]:
+                                - link "Visitas y Showings" [ref=e285] [cursor=pointer]:
+                                    - /url: /visitas
+                                    - img [ref=e286]
+                                    - generic [ref=e289]: Visitas y Showings
+                                - button "Agregar a favoritos" [ref=e290] [cursor=pointer]:
+                                    - img [ref=e291]
+                    - button "💬 Comunicaciones" [ref=e294] [cursor=pointer]:
+                        - generic [ref=e295]: 💬 Comunicaciones
+                        - img [ref=e296]
+                    - button "📄 Documentos y Legal" [ref=e299] [cursor=pointer]:
+                        - generic [ref=e300]: 📄 Documentos y Legal
+                        - img [ref=e301]
+                    - button "👥 CRM y Marketing" [ref=e304] [cursor=pointer]:
+                        - generic [ref=e305]: 👥 CRM y Marketing
+                        - img [ref=e306]
+                    - button "⚡ Automatización" [ref=e309] [cursor=pointer]:
+                        - generic [ref=e310]: ⚡ Automatización
+                        - img [ref=e311]
+                    - button "🚀 Innovación" [ref=e314] [cursor=pointer]:
+                        - generic [ref=e315]: 🚀 Innovación
+                        - img [ref=e316]
+                    - button "🎧 Soporte" [ref=e319] [cursor=pointer]:
+                        - generic [ref=e320]: 🎧 Soporte
+                        - img [ref=e321]
+                    - heading "⚙️ Administración" [level=3] [ref=e324]
+                    - generic [ref=e325]:
+                        - button "🏢 Configuración Empresa" [ref=e326] [cursor=pointer]:
+                            - generic [ref=e327]: 🏢 Configuración Empresa
+                            - img [ref=e328]
+                        - generic [ref=e330]:
+                            - generic [ref=e331]:
+                                - link "Configuración Empresa" [ref=e332] [cursor=pointer]:
+                                    - /url: /admin/configuracion
+                                    - img [ref=e333]
+                                    - generic [ref=e336]: Configuración Empresa
+                                - button "Agregar a favoritos" [ref=e337] [cursor=pointer]:
+                                    - img [ref=e338]
+                            - generic [ref=e340]:
+                                - link "Usuarios y Permisos" [ref=e341] [cursor=pointer]:
+                                    - /url: /admin/usuarios
+                                    - img [ref=e342]
+                                    - generic [ref=e347]: Usuarios y Permisos
+                                - button "Agregar a favoritos" [ref=e348] [cursor=pointer]:
+                                    - img [ref=e349]
+                            - generic [ref=e351]:
+                                - link "Módulos Activos" [ref=e352] [cursor=pointer]:
+                                    - /url: /admin/modulos
+                                    - img [ref=e353]
+                                    - generic [ref=e357]: Módulos Activos
+                                - button "Agregar a favoritos" [ref=e358] [cursor=pointer]:
+                                    - img [ref=e359]
+                            - generic [ref=e361]:
+                                - link "Personalización (Branding)" [ref=e362] [cursor=pointer]:
+                                    - /url: /admin/personalizacion
+                                    - img [ref=e363]
+                                    - generic [ref=e369]: Personalización (Branding)
+                                - button "Agregar a favoritos" [ref=e370] [cursor=pointer]:
+                                    - img [ref=e371]
+                            - generic [ref=e373]:
+                                - link "Aprobaciones" [ref=e374] [cursor=pointer]:
+                                    - /url: /admin/aprobaciones
+                                    - img [ref=e375]
+                                    - generic [ref=e378]: Aprobaciones
+                                - button "Agregar a favoritos" [ref=e379] [cursor=pointer]:
+                                    - img [ref=e380]
+                            - generic [ref=e382]:
+                                - link "Reportes Programados" [ref=e383] [cursor=pointer]:
+                                    - /url: /admin/reportes-programados
+                                    - img [ref=e384]
+                                    - generic [ref=e387]: Reportes Programados
+                                - button "Agregar a favoritos" [ref=e388] [cursor=pointer]:
+                                    - img [ref=e389]
+                            - generic [ref=e391]:
+                                - link "Importar Datos" [ref=e392] [cursor=pointer]:
+                                    - /url: /admin/importar
+                                    - img [ref=e393]
+                                    - generic [ref=e396]: Importar Datos
+                                - button "Agregar a favoritos" [ref=e397] [cursor=pointer]:
+                                    - img [ref=e398]
+                    - button "🔧 Super Admin" [ref=e401] [cursor=pointer]:
+                        - generic [ref=e402]: 🔧 Super Admin
+                        - img [ref=e403]
+                - generic [ref=e405]:
+                    - generic [ref=e406]:
+                        - paragraph [ref=e407]: Usuario
+                        - paragraph [ref=e408]: Administrador INMOVA
+                    - button "Cerrar Sesión" [ref=e409] [cursor=pointer]:
+                        - img [ref=e410]
+                        - generic [ref=e413]: Cerrar Sesión
+        - generic [ref=e414]:
+            - banner [ref=e415]:
+                - generic [ref=e416]:
+                    - generic [ref=e418]:
+                        - img [ref=e419]
+                        - generic [ref=e423]:
+                            - generic [ref=e424]: INMOVA Administración
+                            - generic [ref=e425]: Gestión Inmobiliaria
+                    - button "Buscar... ⌘ K" [ref=e427] [cursor=pointer]:
+                        - img [ref=e428]
+                        - generic [ref=e431]: Buscar...
+                        - generic:
+                            - generic: ⌘
+                            - text: K
+                    - generic [ref=e432]:
+                        - button "Notificaciones" [ref=e434] [cursor=pointer]:
+                            - img [ref=e435]
+                        - button [ref=e438] [cursor=pointer]:
+                            - img [ref=e439]
+                        - button "Cambiar idioma" [ref=e442] [cursor=pointer]:
+                            - img [ref=e443]
+                            - generic [ref=e446]: Cambiar idioma
+                        - 'button "Menú de usuario: Administrador INMOVA" [ref=e447] [cursor=pointer]':
+                            - img [ref=e449]
+                            - generic [ref=e452]:
+                                - generic [ref=e453]: Administrador INMOVA
+                                - generic [ref=e454]: Gestor
+            - main [ref=e455]:
+                - generic [ref=e456]:
+                    - generic [ref=e457]:
+                        - generic [ref=e458]:
+                            - heading "Dashboard" [level=1] [ref=e459]
+                            - paragraph [ref=e460]: Bienvenido, Administrador INMOVA
+                        - img [ref=e464]
+                        - generic [ref=e469]:
+                            - generic [ref=e471]:
+                                - img [ref=e473]
+                                - generic [ref=e475]:
+                                    - heading "Generar Datos de Prueba" [level=3] [ref=e476]
+                                    - generic [ref=e477]: Crea automáticamente datos de ejemplo para explorar INMOVA
+                            - generic [ref=e478]:
+                                - alert [ref=e479]:
+                                    - img [ref=e480]
+                                    - generic [ref=e482]:
+                                        - text: 'Se crearán automáticamente:'
+                                        - text: • 3 edificios de diferentes tipos
+                                        - text: • 7 unidades (apartamentos, locales, habitaciones)
+                                        - text: • 4 inquilinos con datos completos
+                                        - text: • 2 contratos activos
+                                - generic [ref=e483]:
+                                    - paragraph [ref=e484]: Esto te permitirá explorar todas las funcionalidades sin tener que ingresar datos manualmente.
+                                    - generic [ref=e485]:
+                                        - generic [ref=e486]:
+                                            - img [ref=e487]
+                                            - text: Edificios variados
+                                        - generic [ref=e491]:
+                                            - img [ref=e492]
+                                            - text: Inquilinos realistas
+                                        - generic [ref=e497]:
+                                            - img [ref=e498]
+                                            - text: Contratos activos
+                                - button "Generar Datos de Prueba" [ref=e501] [cursor=pointer]:
+                                    - img [ref=e502]
+                                    - text: Generar Datos de Prueba
+                                - paragraph [ref=e504]: Solo disponible para cuentas nuevas sin datos
+                        - generic [ref=e505]:
+                            - generic [ref=e507]:
+                                - img [ref=e509]
+                                - generic [ref=e511]:
+                                    - heading "Sugerencias Inteligentes" [level=3] [ref=e512]
+                                    - generic [ref=e513]: Recomendaciones personalizadas para optimizar tu gestión
+                                - generic [ref=e514]: 5 pendientes
+                                - button "Ocultar panel de sugerencias" [ref=e515] [cursor=pointer]:
+                                    - img [ref=e516]
+                            - generic [ref=e520]:
+                                - generic [ref=e524]:
+                                    - img [ref=e526]
+                                    - generic [ref=e528]:
+                                        - generic [ref=e529]:
+                                            - heading "Activa pagos recurrentes" [level=4] [ref=e530]
+                                            - generic [ref=e531]:
+                                                - generic [ref=e532]: Alta
+                                                - button [ref=e533] [cursor=pointer]:
+                                                    - img [ref=e534]
+                                        - paragraph [ref=e537]: Tienes 8 contratos activos sin pagos automatizados. Actívalos para reducir morosidad en un 40%.
+                                        - button "Configurar ahora" [ref=e538] [cursor=pointer]:
+                                            - text: Configurar ahora
+                                            - img [ref=e539]
+                                - generic [ref=e544]:
+                                    - img [ref=e546]
+                                    - generic [ref=e548]:
+                                        - generic [ref=e549]:
+                                            - heading "Contratos próximos a vencer" [level=4] [ref=e550]
+                                            - generic [ref=e551]:
+                                                - generic [ref=e552]: Alta
+                                                - button [ref=e553] [cursor=pointer]:
+                                                    - img [ref=e554]
+                                        - paragraph [ref=e557]: 3 contratos vencen en los próximos 30 días. Contacta a tus inquilinos para renovación.
+                                        - button "Ver contratos" [ref=e558] [cursor=pointer]:
+                                            - text: Ver contratos
+                                            - img [ref=e559]
+                                - generic [ref=e564]:
+                                    - img [ref=e566]
+                                    - generic [ref=e569]:
+                                        - generic [ref=e570]:
+                                            - heading "Completa datos de edificios" [level=4] [ref=e571]
+                                            - generic [ref=e572]:
+                                                - generic [ref=e573]: Media
+                                                - button [ref=e574] [cursor=pointer]:
+                                                    - img [ref=e575]
+                                        - paragraph [ref=e578]: 5 edificios no tienen fotos. Añade imágenes para mejorar tu presentación profesional.
+                                        - button "Añadir fotos" [ref=e579] [cursor=pointer]:
+                                            - text: Añadir fotos
+                                            - img [ref=e580]
+                                - generic [ref=e585]:
+                                    - img [ref=e587]
+                                    - generic [ref=e589]:
+                                        - generic [ref=e590]:
+                                            - heading "Programa mantenimiento preventivo" [level=4] [ref=e591]
+                                            - generic [ref=e592]:
+                                                - generic [ref=e593]: Media
+                                                - button [ref=e594] [cursor=pointer]:
+                                                    - img [ref=e595]
+                                        - paragraph [ref=e598]: Evita averías costosas. Configura revisiones automáticas de ascensores y calderas.
+                                        - button "Configurar" [ref=e599] [cursor=pointer]:
+                                            - text: Configurar
+                                            - img [ref=e600]
+                                - generic [ref=e605]:
+                                    - img [ref=e607]
+                                    - generic [ref=e610]:
+                                        - generic [ref=e611]:
+                                            - heading "Integra tu contabilidad" [level=4] [ref=e612]
+                                            - generic [ref=e613]:
+                                                - generic [ref=e614]: Baja
+                                                - button [ref=e615] [cursor=pointer]:
+                                                    - img [ref=e616]
+                                        - paragraph [ref=e619]: Sincroniza con Sage, Holded o A3 y ahorra 10h/mes en gestión contable.
+                                        - button "Ver integraciones" [ref=e620] [cursor=pointer]:
+                                            - text: Ver integraciones
+                                            - img [ref=e621]
+                        - generic [ref=e623]:
+                            - generic [ref=e625]:
+                                - generic [ref=e626]:
+                                    - paragraph [ref=e627]: Ingresos Mensuales
+                                    - heading "€0" [level=3] [ref=e629]
+                                - img [ref=e631]
+                            - generic [ref=e635]:
+                                - generic [ref=e636]:
+                                    - paragraph [ref=e637]: Total Propiedades
+                                    - heading "0" [level=3] [ref=e639]
+                                - img [ref=e641]
+                            - generic [ref=e646]:
+                                - generic [ref=e647]:
+                                    - paragraph [ref=e648]: Tasa de Ocupación
+                                    - generic [ref=e649]:
+                                        - heading "0" [level=3] [ref=e650]
+                                        - generic [ref=e651]: '%'
+                                - img [ref=e653]
+                            - generic [ref=e658]:
+                                - generic [ref=e659]:
+                                    - paragraph [ref=e660]: Tasa de Morosidad
+                                    - generic [ref=e661]:
+                                        - heading "0" [level=3] [ref=e662]
+                                        - generic [ref=e663]: '%'
+                                - img [ref=e665]
+                        - generic [ref=e667]:
+                            - generic [ref=e669]:
+                                - generic [ref=e670]:
+                                    - paragraph [ref=e671]: Ingresos Netos
+                                    - heading "€0" [level=3] [ref=e673]
+                                - img [ref=e675]
+                            - generic [ref=e678]:
+                                - generic [ref=e679]:
+                                    - paragraph [ref=e680]: Gastos Totales
+                                    - heading "€0" [level=3] [ref=e682]
+                                - img [ref=e684]
+                            - generic [ref=e688]:
+                                - generic [ref=e689]:
+                                    - paragraph [ref=e690]: Margen Neto
+                                    - generic [ref=e691]:
+                                        - heading "0" [level=3] [ref=e692]
+                                        - generic [ref=e693]: '%'
+                                - img [ref=e695]
+                        - heading "Ingresos Mensuales" [level=2] [ref=e700]
+                        - generic [ref=e702]:
+                            - generic [ref=e703]:
+                                - generic [ref=e704]:
+                                    - heading "Pagos Pendientes" [level=2] [ref=e705]:
+                                        - img [ref=e706]
+                                        - text: Pagos Pendientes
+                                    - link "Ver todos" [ref=e709] [cursor=pointer]:
+                                        - /url: /pagos
+                                - paragraph [ref=e711]: No hay pagos pendientes
+                            - generic [ref=e712]:
+                                - generic [ref=e713]:
+                                    - heading "Contratos por Vencer" [level=2] [ref=e714]:
+                                        - img [ref=e715]
+                                        - text: Contratos por Vencer
+                                    - link "Ver todos" [ref=e718] [cursor=pointer]:
+                                        - /url: /contratos
+                                - paragraph [ref=e720]: No hay contratos próximos a vencer
+                            - generic [ref=e721]:
+                                - generic [ref=e722]:
+                                    - heading "Mantenimiento Activo" [level=2] [ref=e723]:
+                                        - img [ref=e724]
+                                        - text: Mantenimiento Activo
+                                    - link "Ver todos" [ref=e726] [cursor=pointer]:
+                                        - /url: /mantenimiento
+                                - paragraph [ref=e728]: No hay solicitudes de mantenimiento
+                            - generic [ref=e729]:
+                                - generic [ref=e730]:
+                                    - heading "Unidades Disponibles" [level=2] [ref=e731]:
+                                        - img [ref=e732]
+                                        - text: Unidades Disponibles
+                                    - link "Ver todas" [ref=e735] [cursor=pointer]:
+                                        - /url: /unidades
+                                - paragraph [ref=e737]: No hay unidades disponibles
+                        - generic [ref=e738]:
+                            - heading "Analytics Avanzados" [level=2] [ref=e739]
+                            - generic [ref=e740]:
+                                - generic [ref=e741]:
+                                    - generic [ref=e743]:
+                                        - generic [ref=e744]:
+                                            - heading "Tendencia de Ingresos Netos" [level=3] [ref=e745]
+                                            - generic [ref=e746]: Últimos meses y proyecciones
+                                        - generic [ref=e747]:
+                                            - img [ref=e748]
+                                            - generic [ref=e751]: 0%
+                                    - generic [ref=e754]:
+                                        - generic [ref=e755]:
+                                            - paragraph [ref=e756]: Promedio Ingresos
+                                            - paragraph [ref=e757]: €0
+                                        - generic [ref=e758]:
+                                            - paragraph [ref=e759]: Promedio Gastos
+                                            - paragraph [ref=e760]: €0
+                                        - generic [ref=e761]:
+                                            - paragraph [ref=e762]: Promedio Neto
+                                            - paragraph [ref=e763]: €0
+                                - generic [ref=e765]:
+                                    - heading "Comparativa Ingresos vs Gastos" [level=3] [ref=e766]
+                                    - generic [ref=e767]: Análisis mensual detallado
+                                - generic [ref=e771]:
+                                    - heading "Flujo de Caja Mensual" [level=3] [ref=e772]
+                                    - generic [ref=e773]: Visualización de ingresos netos mensuales
+                    - button "Ayuda" [ref=e776] [cursor=pointer]:
+                        - img [ref=e777]
+                        - generic [ref=e780]: Ayuda
+                    - button [ref=e782] [cursor=pointer]:
+                        - img [ref=e783]
+                    - generic [ref=e785]:
+                        - button "Abrir chat de asistencia" [ref=e786] [cursor=pointer]:
+                            - img "Asistente" [ref=e788]: 🤖
+                        - generic "En línea" [ref=e789]:
+                            - generic [ref=e790]: Asistente disponible
+                        - generic: 💬 ¿Necesitas ayuda?
+    - button "Open Next.js Dev Tools" [ref=e796] [cursor=pointer]:
+        - img [ref=e797]
+    - alert [ref=e800]
+```

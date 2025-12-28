@@ -430,632 +430,633 @@ function MantenimientoPage() {
   if (status === 'loading' || isLoading) {
     return (
       <AuthenticatedLayout>
-            <LoadingState message="Cargando mantenimiento..." />
-          </AuthenticatedLayout>
+        <LoadingState message="Cargando mantenimiento..." />
+      </AuthenticatedLayout>
     );
   }
 
   if (!session) return null;
 
-  return (<div>
+  return (
+    <div>
       <AuthenticatedLayout>
         <div className="max-w-7xl mx-auto space-y-6">
-            {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/dashboard')}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Volver al Dashboard
-              </Button>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="h-4 w-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Mantenimiento</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
+          {/* Botón Volver y Breadcrumbs */}
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard')}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Volver al Dashboard
+            </Button>
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/dashboard">
+                    <Home className="h-4 w-4" />
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Mantenimiento</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
 
-            {/* Header Section */}
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Mantenimiento</h1>
-              <p className="text-muted-foreground">
-                Gestiona solicitudes correctivas, mantenimiento preventivo y calendario unificado
-              </p>
-            </div>
+          {/* Header Section */}
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Mantenimiento</h1>
+            <p className="text-muted-foreground">
+              Gestiona solicitudes correctivas, mantenimiento preventivo y calendario unificado
+            </p>
+          </div>
 
-            {/* Tabs Navigation */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="solicitudes" className="gap-2">
-                  <Wrench className="h-4 w-4" />
-                  Solicitudes
-                </TabsTrigger>
-                <TabsTrigger value="preventivo" className="gap-2">
-                  <CalendarIcon className="h-4 w-4" />
-                  Preventivo
-                </TabsTrigger>
-                <TabsTrigger value="calendario" className="gap-2">
-                  <Clock className="h-4 w-4" />
-                  Calendario
-                </TabsTrigger>
-              </TabsList>
+          {/* Tabs Navigation */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="solicitudes" className="gap-2">
+                <Wrench className="h-4 w-4" />
+                Solicitudes
+              </TabsTrigger>
+              <TabsTrigger value="preventivo" className="gap-2">
+                <CalendarIcon className="h-4 w-4" />
+                Preventivo
+              </TabsTrigger>
+              <TabsTrigger value="calendario" className="gap-2">
+                <Clock className="h-4 w-4" />
+                Calendario
+              </TabsTrigger>
+            </TabsList>
 
-              {/* TAB 1: SOLICITUDES */}
-              <TabsContent value="solicitudes" className="space-y-6 mt-6">
-                {/* Estadísticas */}
-                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Total
-                      </CardTitle>
-                      <Wrench className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{statsRequests.total}</div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Pendientes
-                      </CardTitle>
-                      <Clock className="h-4 w-4 text-gray-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{statsRequests.pendientes}</div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        En Progreso
-                      </CardTitle>
-                      <Hammer className="h-4 w-4 text-blue-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{statsRequests.enProgreso}</div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Completados
-                      </CardTitle>
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{statsRequests.completados}</div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Prioridad Alta
-                      </CardTitle>
-                      <AlertTriangle className="h-4 w-4 text-red-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{statsRequests.alta}</div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Búsqueda y Filtros */}
+            {/* TAB 1: SOLICITUDES */}
+            <TabsContent value="solicitudes" className="space-y-6 mt-6">
+              {/* Estadísticas */}
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                 <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Buscar Solicitudes</CardTitle>
-                    {canCreate && (
-                      <Button onClick={() => router.push('/mantenimiento/nuevo')} size="sm">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Nueva Solicitud
-                      </Button>
-                    )}
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Total
+                    </CardTitle>
+                    <Wrench className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Buscar por título, descripción, edificio o unidad..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-10"
-                        />
-                      </div>
-                      <Select value={estadoFilter} onValueChange={setEstadoFilter}>
-                        <SelectTrigger className="w-full sm:w-[180px]">
-                          <SelectValue placeholder="Estado" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Todos los estados</SelectItem>
-                          <SelectItem value="pendiente">Pendiente</SelectItem>
-                          <SelectItem value="programado">Programado</SelectItem>
-                          <SelectItem value="en_progreso">En Progreso</SelectItem>
-                          <SelectItem value="completado">Completado</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Select value={prioridadFilter} onValueChange={setPrioridadFilter}>
-                        <SelectTrigger className="w-full sm:w-[180px]">
-                          <SelectValue placeholder="Prioridad" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Todas las prioridades</SelectItem>
-                          <SelectItem value="alta">Alta</SelectItem>
-                          <SelectItem value="media">Media</SelectItem>
-                          <SelectItem value="baja">Baja</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Filter Chips */}
-                    <FilterChips
-                      filters={[
-                        ...(searchTerm
-                          ? [
-                              {
-                                id: 'search',
-                                label: 'Búsqueda',
-                                value: searchTerm,
-                              },
-                            ]
-                          : []),
-                        ...(estadoFilter !== 'all'
-                          ? [
-                              {
-                                id: 'estado',
-                                label: 'Estado',
-                                value: getEstadoLabel(estadoFilter),
-                              },
-                            ]
-                          : []),
-                        ...(prioridadFilter !== 'all'
-                          ? [
-                              {
-                                id: 'prioridad',
-                                label: 'Prioridad',
-                                value: getPrioridadLabel(prioridadFilter),
-                              },
-                            ]
-                          : []),
-                      ]}
-                      onRemove={(id) => {
-                        if (id === 'search') setSearchTerm('');
-                        else if (id === 'estado') setEstadoFilter('all');
-                        else if (id === 'prioridad') setPrioridadFilter('all');
-                      }}
-                      onClearAll={() => {
-                        setSearchTerm('');
-                        setEstadoFilter('all');
-                        setPrioridadFilter('all');
-                      }}
-                    />
+                  <CardContent>
+                    <div className="text-2xl font-bold">{statsRequests.total}</div>
                   </CardContent>
                 </Card>
 
-                {/* Lista de Solicitudes */}
-                <div className="space-y-4">
-                  {filteredRequests.length === 0 ? (
-                    <EmptyState
-                      icon={<Wrench className="h-12 w-12" />}
-                      title={
-                        searchTerm || estadoFilter !== 'all' || prioridadFilter !== 'all'
-                          ? 'No se encontraron solicitudes'
-                          : 'No hay solicitudes de mantenimiento'
-                      }
-                      description={
-                        searchTerm || estadoFilter !== 'all' || prioridadFilter !== 'all'
-                          ? 'No se encontraron solicitudes con los filtros aplicados. Intenta ajustar tu búsqueda.'
-                          : 'Comienza creando tu primera solicitud de mantenimiento correctivo para gestionar incidencias.'
-                      }
-                      action={
-                        canCreate &&
-                        !searchTerm &&
-                        estadoFilter === 'all' &&
-                        prioridadFilter === 'all'
-                          ? {
-                              label: 'Crear Primera Solicitud',
-                              onClick: () => router.push('/mantenimiento/nuevo'),
-                              icon: <Plus className="h-4 w-4" />,
-                            }
-                          : undefined
-                      }
-                    />
-                  ) : (
-                    filteredRequests.map((request) => (
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Pendientes
+                    </CardTitle>
+                    <Clock className="h-4 w-4 text-gray-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{statsRequests.pendientes}</div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      En Progreso
+                    </CardTitle>
+                    <Hammer className="h-4 w-4 text-blue-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{statsRequests.enProgreso}</div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Completados
+                    </CardTitle>
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{statsRequests.completados}</div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Prioridad Alta
+                    </CardTitle>
+                    <AlertTriangle className="h-4 w-4 text-red-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{statsRequests.alta}</div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Búsqueda y Filtros */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Buscar Solicitudes</CardTitle>
+                  {canCreate && (
+                    <Button onClick={() => router.push('/mantenimiento/nuevo')} size="sm">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Nueva Solicitud
+                    </Button>
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Buscar por título, descripción, edificio o unidad..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                    <Select value={estadoFilter} onValueChange={setEstadoFilter}>
+                      <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder="Estado" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos los estados</SelectItem>
+                        <SelectItem value="pendiente">Pendiente</SelectItem>
+                        <SelectItem value="programado">Programado</SelectItem>
+                        <SelectItem value="en_progreso">En Progreso</SelectItem>
+                        <SelectItem value="completado">Completado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={prioridadFilter} onValueChange={setPrioridadFilter}>
+                      <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder="Prioridad" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todas las prioridades</SelectItem>
+                        <SelectItem value="alta">Alta</SelectItem>
+                        <SelectItem value="media">Media</SelectItem>
+                        <SelectItem value="baja">Baja</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Filter Chips */}
+                  <FilterChips
+                    filters={[
+                      ...(searchTerm
+                        ? [
+                            {
+                              id: 'search',
+                              label: 'Búsqueda',
+                              value: searchTerm,
+                            },
+                          ]
+                        : []),
+                      ...(estadoFilter !== 'all'
+                        ? [
+                            {
+                              id: 'estado',
+                              label: 'Estado',
+                              value: getEstadoLabel(estadoFilter),
+                            },
+                          ]
+                        : []),
+                      ...(prioridadFilter !== 'all'
+                        ? [
+                            {
+                              id: 'prioridad',
+                              label: 'Prioridad',
+                              value: getPrioridadLabel(prioridadFilter),
+                            },
+                          ]
+                        : []),
+                    ]}
+                    onRemove={(id) => {
+                      if (id === 'search') setSearchTerm('');
+                      else if (id === 'estado') setEstadoFilter('all');
+                      else if (id === 'prioridad') setPrioridadFilter('all');
+                    }}
+                    onClearAll={() => {
+                      setSearchTerm('');
+                      setEstadoFilter('all');
+                      setPrioridadFilter('all');
+                    }}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Lista de Solicitudes */}
+              <div className="space-y-4">
+                {filteredRequests.length === 0 ? (
+                  <EmptyState
+                    icon={Wrench}
+                    title={
+                      searchTerm || estadoFilter !== 'all' || prioridadFilter !== 'all'
+                        ? 'No se encontraron solicitudes'
+                        : 'No hay solicitudes de mantenimiento'
+                    }
+                    description={
+                      searchTerm || estadoFilter !== 'all' || prioridadFilter !== 'all'
+                        ? 'No se encontraron solicitudes con los filtros aplicados. Intenta ajustar tu búsqueda.'
+                        : 'Comienza creando tu primera solicitud de mantenimiento correctivo para gestionar incidencias.'
+                    }
+                    action={
+                      canCreate &&
+                      !searchTerm &&
+                      estadoFilter === 'all' &&
+                      prioridadFilter === 'all'
+                        ? {
+                            label: 'Crear Primera Solicitud',
+                            onClick: () => router.push('/mantenimiento/nuevo'),
+                            icon: <Plus className="h-4 w-4" />,
+                          }
+                        : undefined
+                    }
+                  />
+                ) : (
+                  filteredRequests.map((request) => (
+                    <Card
+                      key={request.id}
+                      className="hover:shadow-lg transition-all duration-200 cursor-pointer"
+                    >
+                      <CardContent className="p-4 sm:p-6">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                          {/* Icono de Prioridad */}
+                          <div className="flex-shrink-0">
+                            <div
+                              className={`p-3 rounded-lg ${
+                                request.prioridad === 'alta'
+                                  ? 'bg-red-100'
+                                  : request.prioridad === 'media'
+                                    ? 'bg-yellow-100'
+                                    : 'bg-green-100'
+                              }`}
+                            >
+                              {request.prioridad === 'alta' ? (
+                                <AlertTriangle className="h-6 w-6 text-red-600" />
+                              ) : (
+                                <Wrench className="h-6 w-6 text-gray-700" />
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Información Principal */}
+                          <div className="flex-1 space-y-3">
+                            {/* Título y Badges */}
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                              <h3 className="text-lg font-semibold break-words flex-1">
+                                {request.titulo}
+                              </h3>
+                              <div className="flex gap-2">
+                                <Badge className={getPrioridadBadgeVariant(request.prioridad)}>
+                                  {getPrioridadLabel(request.prioridad)}
+                                </Badge>
+                                <Badge className={getEstadoBadgeVariant(request.estado)}>
+                                  {getEstadoLabel(request.estado)}
+                                </Badge>
+                              </div>
+                            </div>
+
+                            {/* Descripción */}
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {request.descripcion}
+                            </p>
+
+                            {/* Unidad */}
+                            <div className="bg-muted/50 rounded-lg p-3">
+                              <div className="flex items-center gap-2 text-sm">
+                                <Home className="h-4 w-4 flex-shrink-0 text-primary" />
+                                <span className="font-medium">
+                                  {request.unit.building.nombre} - Unidad {request.unit.numero}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Información Adicional */}
+                            <div className="grid grid-cols-2 gap-3 text-sm">
+                              {request.proveedorAsignado && (
+                                <div className="space-y-1">
+                                  <div className="text-muted-foreground">Proveedor</div>
+                                  <div className="font-medium truncate">
+                                    {request.proveedorAsignado}
+                                  </div>
+                                </div>
+                              )}
+                              {request.costoEstimado && (
+                                <div className="space-y-1">
+                                  <div className="text-muted-foreground flex items-center gap-1">
+                                    <Euro className="h-3 w-3" />
+                                    Costo Estimado
+                                  </div>
+                                  <div className="font-bold text-lg">
+                                    €{request.costoEstimado.toLocaleString('es-ES')}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Acciones */}
+                          <div className="flex sm:flex-col items-center gap-2 self-start">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => router.push(`/mantenimiento/${request.id}`)}
+                              className="w-full sm:w-auto"
+                            >
+                              <Eye className="h-4 w-4 sm:mr-2" />
+                              <span className="hidden sm:inline">Ver</span>
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                  onClick={() => router.push(`/mantenimiento/${request.id}`)}
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Ver Detalles
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </TabsContent>
+
+            {/* TAB 2: PREVENTIVO */}
+            <TabsContent value="preventivo" className="space-y-6 mt-6">
+              {/* Estadísticas Preventivo */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Total
+                    </CardTitle>
+                    <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{statsSchedules.total}</div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Activos
+                    </CardTitle>
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{statsSchedules.activos}</div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Próximos 30 días
+                    </CardTitle>
+                    <Clock className="h-4 w-4 text-yellow-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{statsSchedules.proximos30}</div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Vencidos
+                    </CardTitle>
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{statsSchedules.vencidos}</div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Filtros y Acciones */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Programaciones</CardTitle>
+                  {canCreate && (
+                    <Button
+                      onClick={() => {
+                        resetForm();
+                        setShowModal(true);
+                      }}
+                      size="sm"
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Nuevo Mantenimiento
+                    </Button>
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Select value={filterActivo} onValueChange={setFilterActivo}>
+                      <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder="Estado" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        <SelectItem value="true">Activos</SelectItem>
+                        <SelectItem value="false">Inactivos</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={filterUpcoming} onValueChange={setFilterUpcoming}>
+                      <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder="Filtro Temporal" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        <SelectItem value="upcoming">Próximos 30 días</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Lista de Programaciones */}
+              <div className="space-y-4">
+                {filteredSchedules.length === 0 ? (
+                  <EmptyState
+                    icon={CalendarIcon}
+                    title="No hay mantenimientos programados"
+                    description="Comienza creando tu primera programación de mantenimiento preventivo para mantener tus propiedades en óptimas condiciones."
+                    action={
+                      canCreate
+                        ? {
+                            label: 'Crear Primer Mantenimiento',
+                            onClick: () => {
+                              resetForm();
+                              setShowModal(true);
+                            },
+                            icon: <Plus className="h-4 w-4" />,
+                          }
+                        : undefined
+                    }
+                  />
+                ) : (
+                  filteredSchedules.map((schedule) => {
+                    const daysUntil = getDaysUntil(schedule.proximaFecha);
+                    const priorityColor = getPriorityColor(daysUntil);
+                    const location = schedule.unit
+                      ? `${schedule.unit.building?.nombre || ''} - ${schedule.unit.numero}`
+                      : schedule.building?.nombre || 'General';
+
+                    return (
                       <Card
-                        key={request.id}
-                        className="hover:shadow-lg transition-all duration-200 cursor-pointer"
+                        key={schedule.id}
+                        className={`transition-all ${
+                          schedule.activo ? 'border-2' : 'border-2 opacity-60'
+                        }`}
                       >
-                        <CardContent className="p-4 sm:p-6">
-                          <div className="flex flex-col sm:flex-row gap-4">
-                            {/* Icono de Prioridad */}
-                            <div className="flex-shrink-0">
-                              <div
-                                className={`p-3 rounded-lg ${
-                                  request.prioridad === 'alta'
-                                    ? 'bg-red-100'
-                                    : request.prioridad === 'media'
-                                      ? 'bg-yellow-100'
-                                      : 'bg-green-100'
-                                }`}
-                              >
-                                {request.prioridad === 'alta' ? (
-                                  <AlertTriangle className="h-6 w-6 text-red-600" />
-                                ) : (
-                                  <Wrench className="h-6 w-6 text-gray-700" />
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Información Principal */}
-                            <div className="flex-1 space-y-3">
-                              {/* Título y Badges */}
-                              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                <h3 className="text-lg font-semibold break-words flex-1">
-                                  {request.titulo}
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <h3 className="text-lg font-bold text-gray-900">
+                                  {schedule.titulo}
                                 </h3>
-                                <div className="flex gap-2">
-                                  <Badge className={getPrioridadBadgeVariant(request.prioridad)}>
-                                    {getPrioridadLabel(request.prioridad)}
-                                  </Badge>
-                                  <Badge className={getEstadoBadgeVariant(request.estado)}>
-                                    {getEstadoLabel(request.estado)}
-                                  </Badge>
-                                </div>
-                              </div>
-
-                              {/* Descripción */}
-                              <p className="text-sm text-muted-foreground line-clamp-2">
-                                {request.descripcion}
-                              </p>
-
-                              {/* Unidad */}
-                              <div className="bg-muted/50 rounded-lg p-3">
-                                <div className="flex items-center gap-2 text-sm">
-                                  <Home className="h-4 w-4 flex-shrink-0 text-primary" />
-                                  <span className="font-medium">
-                                    {request.unit.building.nombre} - Unidad {request.unit.numero}
+                                <span
+                                  className={`px-3 py-1 rounded-full text-xs font-medium ${priorityColor}`}
+                                >
+                                  {daysUntil < 0
+                                    ? `Vencido hace ${Math.abs(daysUntil)} días`
+                                    : daysUntil === 0
+                                      ? 'Hoy'
+                                      : `En ${daysUntil} días`}
+                                </span>
+                                {!schedule.activo && (
+                                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-600">
+                                    Inactivo
                                   </span>
-                                </div>
+                                )}
                               </div>
 
-                              {/* Información Adicional */}
-                              <div className="grid grid-cols-2 gap-3 text-sm">
-                                {request.proveedorAsignado && (
-                                  <div className="space-y-1">
-                                    <div className="text-muted-foreground">Proveedor</div>
-                                    <div className="font-medium truncate">
-                                      {request.proveedorAsignado}
-                                    </div>
+                              <p className="text-gray-600 mb-3">{schedule.descripcion}</p>
+
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                <div>
+                                  <span className="text-gray-500">Ubicación:</span>
+                                  <p className="font-medium text-gray-900">{location}</p>
+                                </div>
+                                <div>
+                                  <span className="text-gray-500">Tipo:</span>
+                                  <p className="font-medium text-gray-900 capitalize">
+                                    {schedule.tipo}
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className="text-gray-500">Frecuencia:</span>
+                                  <p className="font-medium text-gray-900 capitalize">
+                                    {schedule.frecuencia}
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className="text-gray-500">Próxima Fecha:</span>
+                                  <p className="font-medium text-gray-900">
+                                    {new Date(schedule.proximaFecha).toLocaleDateString('es-ES')}
+                                  </p>
+                                </div>
+                                {schedule.ultimaFecha && (
+                                  <div>
+                                    <span className="text-gray-500">Última Ejecución:</span>
+                                    <p className="font-medium text-gray-900">
+                                      {new Date(schedule.ultimaFecha).toLocaleDateString('es-ES')}
+                                    </p>
                                   </div>
                                 )}
-                                {request.costoEstimado && (
-                                  <div className="space-y-1">
-                                    <div className="text-muted-foreground flex items-center gap-1">
-                                      <Euro className="h-3 w-3" />
-                                      Costo Estimado
-                                    </div>
-                                    <div className="font-bold text-lg">
-                                      €{request.costoEstimado.toLocaleString('es-ES')}
-                                    </div>
+                                {schedule.provider && (
+                                  <div>
+                                    <span className="text-gray-500">Proveedor:</span>
+                                    <p className="font-medium text-gray-900">
+                                      {schedule.provider.nombre}
+                                    </p>
+                                  </div>
+                                )}
+                                {schedule.costoEstimado && (
+                                  <div>
+                                    <span className="text-gray-500">Costo Estimado:</span>
+                                    <p className="font-medium text-gray-900">
+                                      €{schedule.costoEstimado.toLocaleString('es-ES')}
+                                    </p>
                                   </div>
                                 )}
                               </div>
                             </div>
 
-                            {/* Acciones */}
-                            <div className="flex sm:flex-col items-center gap-2 self-start">
+                            <div className="flex gap-2 ml-4">
                               <Button
-                                variant="outline"
+                                onClick={() => handleComplete(schedule.id)}
+                                variant="ghost"
                                 size="sm"
-                                onClick={() => router.push(`/mantenimiento/${request.id}`)}
-                                className="w-full sm:w-auto"
+                                className="text-green-600 hover:bg-green-50"
+                                title="Marcar como completado"
                               >
-                                <Eye className="h-4 w-4 sm:mr-2" />
-                                <span className="hidden sm:inline">Ver</span>
+                                <Check className="h-5 w-5" />
                               </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem
-                                    onClick={() => router.push(`/mantenimiento/${request.id}`)}
-                                  >
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    Ver Detalles
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                              <Button
+                                onClick={() => handleEdit(schedule)}
+                                variant="ghost"
+                                size="sm"
+                                className="text-blue-600 hover:bg-blue-50"
+                                title="Editar"
+                              >
+                                <Edit className="h-5 w-5" />
+                              </Button>
+                              <Button
+                                onClick={() => handleDelete(schedule.id)}
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-600 hover:bg-red-50"
+                                title="Eliminar"
+                              >
+                                <Trash2 className="h-5 w-5" />
+                              </Button>
                             </div>
                           </div>
                         </CardContent>
                       </Card>
-                    ))
-                  )}
-                </div>
-              </TabsContent>
+                    );
+                  })
+                )}
+              </div>
+            </TabsContent>
 
-              {/* TAB 2: PREVENTIVO */}
-              <TabsContent value="preventivo" className="space-y-6 mt-6">
-                {/* Estadísticas Preventivo */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Total
-                      </CardTitle>
-                      <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{statsSchedules.total}</div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Activos
-                      </CardTitle>
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{statsSchedules.activos}</div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Próximos 30 días
-                      </CardTitle>
-                      <Clock className="h-4 w-4 text-yellow-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{statsSchedules.proximos30}</div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Vencidos
-                      </CardTitle>
-                      <AlertCircle className="h-4 w-4 text-red-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{statsSchedules.vencidos}</div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Filtros y Acciones */}
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Programaciones</CardTitle>
-                    {canCreate && (
-                      <Button
-                        onClick={() => {
-                          resetForm();
-                          setShowModal(true);
-                        }}
-                        size="sm"
-                      >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Nuevo Mantenimiento
-                      </Button>
-                    )}
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <Select value={filterActivo} onValueChange={setFilterActivo}>
-                        <SelectTrigger className="w-full sm:w-[180px]">
-                          <SelectValue placeholder="Estado" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Todos</SelectItem>
-                          <SelectItem value="true">Activos</SelectItem>
-                          <SelectItem value="false">Inactivos</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Select value={filterUpcoming} onValueChange={setFilterUpcoming}>
-                        <SelectTrigger className="w-full sm:w-[180px]">
-                          <SelectValue placeholder="Filtro Temporal" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Todos</SelectItem>
-                          <SelectItem value="upcoming">Próximos 30 días</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Lista de Programaciones */}
-                <div className="space-y-4">
-                  {filteredSchedules.length === 0 ? (
-                    <EmptyState
-                      icon={<CalendarIcon className="h-12 w-12" />}
-                      title="No hay mantenimientos programados"
-                      description="Comienza creando tu primera programación de mantenimiento preventivo para mantener tus propiedades en óptimas condiciones."
-                      action={
-                        canCreate
-                          ? {
-                              label: 'Crear Primer Mantenimiento',
-                              onClick: () => {
-                                resetForm();
-                                setShowModal(true);
-                              },
-                              icon: <Plus className="h-4 w-4" />,
-                            }
-                          : undefined
-                      }
-                    />
-                  ) : (
-                    filteredSchedules.map((schedule) => {
-                      const daysUntil = getDaysUntil(schedule.proximaFecha);
-                      const priorityColor = getPriorityColor(daysUntil);
-                      const location = schedule.unit
-                        ? `${schedule.unit.building?.nombre || ''} - ${schedule.unit.numero}`
-                        : schedule.building?.nombre || 'General';
-
-                      return (
-                        <Card
-                          key={schedule.id}
-                          className={`transition-all ${
-                            schedule.activo ? 'border-2' : 'border-2 opacity-60'
-                          }`}
-                        >
-                          <CardContent className="p-6">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                  <h3 className="text-lg font-bold text-gray-900">
-                                    {schedule.titulo}
-                                  </h3>
-                                  <span
-                                    className={`px-3 py-1 rounded-full text-xs font-medium ${priorityColor}`}
-                                  >
-                                    {daysUntil < 0
-                                      ? `Vencido hace ${Math.abs(daysUntil)} días`
-                                      : daysUntil === 0
-                                        ? 'Hoy'
-                                        : `En ${daysUntil} días`}
-                                  </span>
-                                  {!schedule.activo && (
-                                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-600">
-                                      Inactivo
-                                    </span>
-                                  )}
-                                </div>
-
-                                <p className="text-gray-600 mb-3">{schedule.descripcion}</p>
-
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                  <div>
-                                    <span className="text-gray-500">Ubicación:</span>
-                                    <p className="font-medium text-gray-900">{location}</p>
-                                  </div>
-                                  <div>
-                                    <span className="text-gray-500">Tipo:</span>
-                                    <p className="font-medium text-gray-900 capitalize">
-                                      {schedule.tipo}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <span className="text-gray-500">Frecuencia:</span>
-                                    <p className="font-medium text-gray-900 capitalize">
-                                      {schedule.frecuencia}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <span className="text-gray-500">Próxima Fecha:</span>
-                                    <p className="font-medium text-gray-900">
-                                      {new Date(schedule.proximaFecha).toLocaleDateString('es-ES')}
-                                    </p>
-                                  </div>
-                                  {schedule.ultimaFecha && (
-                                    <div>
-                                      <span className="text-gray-500">Última Ejecución:</span>
-                                      <p className="font-medium text-gray-900">
-                                        {new Date(schedule.ultimaFecha).toLocaleDateString('es-ES')}
-                                      </p>
-                                    </div>
-                                  )}
-                                  {schedule.provider && (
-                                    <div>
-                                      <span className="text-gray-500">Proveedor:</span>
-                                      <p className="font-medium text-gray-900">
-                                        {schedule.provider.nombre}
-                                      </p>
-                                    </div>
-                                  )}
-                                  {schedule.costoEstimado && (
-                                    <div>
-                                      <span className="text-gray-500">Costo Estimado:</span>
-                                      <p className="font-medium text-gray-900">
-                                        €{schedule.costoEstimado.toLocaleString('es-ES')}
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-
-                              <div className="flex gap-2 ml-4">
-                                <Button
-                                  onClick={() => handleComplete(schedule.id)}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-green-600 hover:bg-green-50"
-                                  title="Marcar como completado"
-                                >
-                                  <Check className="h-5 w-5" />
-                                </Button>
-                                <Button
-                                  onClick={() => handleEdit(schedule)}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-blue-600 hover:bg-blue-50"
-                                  title="Editar"
-                                >
-                                  <Edit className="h-5 w-5" />
-                                </Button>
-                                <Button
-                                  onClick={() => handleDelete(schedule.id)}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-red-600 hover:bg-red-50"
-                                  title="Eliminar"
-                                >
-                                  <Trash2 className="h-5 w-5" />
-                                </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })
-                  )}
-                </div>
-              </TabsContent>
-
-              {/* TAB 3: CALENDARIO */}
-              <TabsContent value="calendario" className="space-y-6 mt-6">
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <CalendarIcon className="h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">Vista de Calendario</h3>
-                    <p className="text-muted-foreground text-center max-w-md">
-                      Aquí se mostrará una vista de calendario unificada con todas las solicitudes
-                      de mantenimiento correctivo y preventivo. Esta funcionalidad estará disponible
-                      próximamente.
-                    </p>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+            {/* TAB 3: CALENDARIO */}
+            <TabsContent value="calendario" className="space-y-6 mt-6">
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <CalendarIcon className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Vista de Calendario</h3>
+                  <p className="text-muted-foreground text-center max-w-md">
+                    Aquí se mostrará una vista de calendario unificada con todas las solicitudes de
+                    mantenimiento correctivo y preventivo. Esta funcionalidad estará disponible
+                    próximamente.
+                  </p>
+                </CardContent>
+              </Card>
+            </TabsContent>
           </Tabs>
         </div>
-        </AuthenticatedLayout>
+      </AuthenticatedLayout>
 
-    {/* Modal para Crear/Editar Preventivo */}
+      {/* Modal para Crear/Editar Preventivo */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">

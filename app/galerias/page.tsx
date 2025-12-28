@@ -156,21 +156,21 @@ function GaleriasPage() {
   if (loading) {
     return (
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto space-y-6">
-              <SkeletonCard />
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <SkeletonCard />
-                <SkeletonCard />
-                <SkeletonCard />
-                <SkeletonCard />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <SkeletonCard />
-                <SkeletonCard />
-                <SkeletonCard />
-              </div>
-            </div>
-          </AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto space-y-6">
+          <SkeletonCard />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
@@ -180,218 +180,214 @@ function GaleriasPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto">
-            {/* Breadcrumbs */}
-            <div className="mb-6">
-              <Button variant="ghost" onClick={() => router.push('/dashboard')} className="mb-4">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Volver al Dashboard
-              </Button>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="w-4 h-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Galerías Multimedia</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
+      <div className="max-w-7xl mx-auto">
+        {/* Breadcrumbs */}
+        <div className="mb-6">
+          <Button variant="ghost" onClick={() => router.push('/dashboard')} className="mb-4">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Volver al Dashboard
+          </Button>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard">
+                  <Home className="w-4 h-4" />
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Galerías Multimedia</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
 
-            {/* Header */}
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold mb-2">Galerías Multimedia</h1>
-                <p className="text-gray-600">Fotos, videos y tours virtuales de propiedades</p>
-              </div>
-              {canCreate && (
-                <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-                  <DialogTrigger asChild>
-                    <Button className="gradient-primary hover:opacity-90 shadow-primary">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Nueva Galería
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Nueva Galería</DialogTitle>
-                      <DialogDescription>
-                        Crea una galería multimedia para una unidad
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div>
-                        <Label>Unidad *</Label>
-                        <Select
-                          value={formData.unitId}
-                          onValueChange={(value) =>
-                            setFormData((prev) => ({ ...prev, unitId: value }))
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona unidad" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {units.map((u) => (
-                              <SelectItem key={u.id} value={u.id}>
-                                {u.building.nombre} - Unidad {u.numero}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label>URL Tour Virtual</Label>
-                        <Input
-                          value={formData.urlTourVirtual}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, urlTourVirtual: e.target.value }))
-                          }
-                          placeholder="https://..."
-                        />
-                      </div>
-                      <div>
-                        <Label>Código Embed (Tour 360°)</Label>
-                        <Textarea
-                          value={formData.embedCode}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, embedCode: e.target.value }))
-                          }
-                          rows={3}
-                          placeholder='<iframe src="..." ...></iframe>'
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setOpenDialog(false)}>
-                        Cancelar
-                      </Button>
-                      <Button
-                        onClick={handleCreate}
-                        disabled={!formData.unitId}
-                        className="gradient-primary hover:opacity-90 shadow-primary"
-                      >
-                        Crear Galería
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              )}
-            </div>
-
-            {/* KPIs */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Galerías</CardTitle>
-                  <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{totalGalerias}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Fotos</CardTitle>
-                  <ImageIcon className="h-4 w-4 text-blue-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{totalFotos}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Videos</CardTitle>
-                  <Video className="h-4 w-4 text-purple-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{totalVideos}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Visitas</CardTitle>
-                  <Eye className="h-4 w-4 text-green-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{totalVisitas}</div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Lista de Galerías */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {galerias.length === 0 ? (
-                <div className="col-span-full">
-                  <EmptyState
-                    icon={<ImageIcon className="h-12 w-12" />}
-                    title="No hay galerías creadas"
-                    description="Crea galerías multimedia para tus propiedades con fotos, videos y tours virtuales"
-                    action={
-                      canCreate
-                        ? {
-                            label: 'Crear Primera Galería',
-                            onClick: () => setOpenDialog(true),
-                            icon: <Plus className="w-4 h-4" />,
-                          }
-                        : undefined
-                    }
-                  />
-                </div>
-              ) : (
-                galerias.map((galeria) => (
-                  <Card key={galeria.id} className="hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-semibold">{galeria.unit.building.nombre}</h3>
-                          <p className="text-sm text-gray-500">Unidad {galeria.unit.numero}</p>
-                        </div>
-                        <Button size="sm" variant="outline">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Fotos:</span>
-                          <Badge variant="outline">
-                            {galeria.items.filter((i) => i.tipo === 'foto').length}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Videos:</span>
-                          <Badge variant="outline">
-                            {galeria.items.filter((i) => i.tipo === 'video').length}
-                          </Badge>
-                        </div>
-                        {galeria.urlTourVirtual && (
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600">Tour Virtual:</span>
-                            <Badge variant="secondary">Sí</Badge>
-                          </div>
-                        )}
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Visitas:</span>
-                          <Badge>{galeria.visitas}</Badge>
-                        </div>
-                        <Button className="w-full mt-4" variant="outline">
-                          <Upload className="w-4 h-4 mr-2" />
-                          Agregar Contenido
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
+        {/* Header */}
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Galerías Multimedia</h1>
+            <p className="text-gray-600">Fotos, videos y tours virtuales de propiedades</p>
           </div>
-        </AuthenticatedLayout>
+          {canCreate && (
+            <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+              <DialogTrigger asChild>
+                <Button className="gradient-primary hover:opacity-90 shadow-primary">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nueva Galería
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Nueva Galería</DialogTitle>
+                  <DialogDescription>Crea una galería multimedia para una unidad</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div>
+                    <Label>Unidad *</Label>
+                    <Select
+                      value={formData.unitId}
+                      onValueChange={(value) => setFormData((prev) => ({ ...prev, unitId: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona unidad" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {units.map((u) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.building.nombre} - Unidad {u.numero}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>URL Tour Virtual</Label>
+                    <Input
+                      value={formData.urlTourVirtual}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, urlTourVirtual: e.target.value }))
+                      }
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div>
+                    <Label>Código Embed (Tour 360°)</Label>
+                    <Textarea
+                      value={formData.embedCode}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, embedCode: e.target.value }))
+                      }
+                      rows={3}
+                      placeholder='<iframe src="..." ...></iframe>'
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setOpenDialog(false)}>
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleCreate}
+                    disabled={!formData.unitId}
+                    className="gradient-primary hover:opacity-90 shadow-primary"
+                  >
+                    Crear Galería
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
+
+        {/* KPIs */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Galerías</CardTitle>
+              <ImageIcon className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalGalerias}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Fotos</CardTitle>
+              <ImageIcon className="h-4 w-4 text-blue-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalFotos}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Videos</CardTitle>
+              <Video className="h-4 w-4 text-purple-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalVideos}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Visitas</CardTitle>
+              <Eye className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalVisitas}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Lista de Galerías */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {galerias.length === 0 ? (
+            <div className="col-span-full">
+              <EmptyState
+                icon={ImageIcon}
+                title="No hay galerías creadas"
+                description="Crea galerías multimedia para tus propiedades con fotos, videos y tours virtuales"
+                action={
+                  canCreate
+                    ? {
+                        label: 'Crear Primera Galería',
+                        onClick: () => setOpenDialog(true),
+                        icon: <Plus className="w-4 h-4" />,
+                      }
+                    : undefined
+                }
+              />
+            </div>
+          ) : (
+            galerias.map((galeria) => (
+              <Card key={galeria.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold">{galeria.unit.building.nombre}</h3>
+                      <p className="text-sm text-gray-500">Unidad {galeria.unit.numero}</p>
+                    </div>
+                    <Button size="sm" variant="outline">
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Fotos:</span>
+                      <Badge variant="outline">
+                        {galeria.items.filter((i) => i.tipo === 'foto').length}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Videos:</span>
+                      <Badge variant="outline">
+                        {galeria.items.filter((i) => i.tipo === 'video').length}
+                      </Badge>
+                    </div>
+                    {galeria.urlTourVirtual && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Tour Virtual:</span>
+                        <Badge variant="secondary">Sí</Badge>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Visitas:</span>
+                      <Badge>{galeria.visitas}</Badge>
+                    </div>
+                    <Button className="w-full mt-4" variant="outline">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Agregar Contenido
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+      </div>
+    </AuthenticatedLayout>
   );
 }
 

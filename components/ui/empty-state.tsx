@@ -9,7 +9,7 @@ import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface EmptyStateProps {
-  icon?: LucideIcon;
+  icon?: LucideIcon | ReactNode;
   title: string;
   description: string;
   action?: {
@@ -27,7 +27,7 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({
-  icon: Icon,
+  icon,
   title,
   description,
   action,
@@ -36,6 +36,10 @@ export function EmptyState({
   className,
   size = 'md',
 }: EmptyStateProps) {
+  // Check if icon is a component or a ReactNode
+  const Icon = typeof icon === 'function' ? icon : null;
+  const iconNode = typeof icon !== 'function' ? icon : null;
+
   const sizeClasses = {
     sm: {
       container: 'py-8',
@@ -66,26 +70,24 @@ export function EmptyState({
     <div className={cn('flex items-center justify-center', sizes.container, className)}>
       <div className="max-w-md w-full text-center space-y-4">
         {/* Icon */}
-        {Icon && (
+        {(Icon || iconNode) && (
           <div className="flex justify-center">
-            <div className={cn(
-              sizes.iconBg,
-              'rounded-full bg-gray-100 flex items-center justify-center'
-            )}>
-              <Icon className={cn(sizes.icon, 'text-gray-400')} />
+            <div
+              className={cn(
+                sizes.iconBg,
+                'rounded-full bg-gray-100 flex items-center justify-center'
+              )}
+            >
+              {Icon ? <Icon className={cn(sizes.icon, 'text-gray-400')} /> : iconNode}
             </div>
           </div>
         )}
 
         {/* Title */}
-        <h3 className={cn('font-semibold text-gray-900', sizes.title)}>
-          {title}
-        </h3>
+        <h3 className={cn('font-semibold text-gray-900', sizes.title)}>{title}</h3>
 
         {/* Description */}
-        <p className={cn('text-gray-600', sizes.description)}>
-          {description}
-        </p>
+        <p className={cn('text-gray-600', sizes.description)}>{description}</p>
 
         {/* Custom children */}
         {children}
@@ -94,20 +96,12 @@ export function EmptyState({
         {(action || secondaryAction) && (
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center pt-2">
             {action && (
-              <Button
-                onClick={action.onClick}
-                variant={action.variant || 'default'}
-                size={size}
-              >
+              <Button onClick={action.onClick} variant={action.variant || 'default'} size={size}>
                 {action.label}
               </Button>
             )}
             {secondaryAction && (
-              <Button
-                onClick={secondaryAction.onClick}
-                variant="outline"
-                size={size}
-              >
+              <Button onClick={secondaryAction.onClick} variant="outline" size={size}>
                 {secondaryAction.label}
               </Button>
             )}
