@@ -17,22 +17,22 @@ export const RATE_LIMITS = {
   // Auth endpoints - más restrictivo
   auth: {
     interval: 60 * 1000, // 1 minuto
-    uniqueTokenPerInterval: 20, // 20 intentos por minuto (aumentado desde 5)
+    uniqueTokenPerInterval: 50, // 50 intentos por minuto
   },
   // Payment endpoints - restrictivo
   payment: {
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 30, // 30 requests por minuto (aumentado desde 10)
+    uniqueTokenPerInterval: 100, // 100 requests por minuto
   },
   // API general - moderado
   api: {
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 200, // 200 requests por minuto (aumentado desde 60)
+    uniqueTokenPerInterval: 500, // 500 requests por minuto
   },
-  // Lectura - permisivo
+  // Lectura - muy permisivo
   read: {
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 300, // 300 requests por minuto (aumentado desde 120)
+    uniqueTokenPerInterval: 1000, // 1000 requests por minuto
   },
 } as const;
 

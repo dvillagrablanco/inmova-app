@@ -10,8 +10,12 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
+
+    // Si no hay sesión, devolver módulos por defecto sin error
     if (!session?.user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      return NextResponse.json({
+        activeModules: DEMO_DATA.activeModules,
+      });
     }
 
     const companyId = (session.user as any).companyId;

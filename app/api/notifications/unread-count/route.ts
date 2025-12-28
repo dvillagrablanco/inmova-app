@@ -21,8 +21,9 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
+    // Si no hay sesión, devolver contador 0 sin error
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+      return NextResponse.json({ count: 0 });
     }
 
     const result = await withDatabaseFallback(() => getUnreadCount(session.user.id), {
