@@ -64,8 +64,14 @@ export async function GET(req: NextRequest) {
           prisma.payment.count({ where }),
         ]);
 
+        // Convertir valores Decimal a números
+        const paymentsWithNumbers = payments.map(payment => ({
+          ...payment,
+          monto: Number(payment.monto || 0),
+        }));
+
         return NextResponse.json({
-          data: payments,
+          data: paymentsWithNumbers,
           pagination: {
             page,
             limit,
@@ -94,7 +100,13 @@ export async function GET(req: NextRequest) {
         orderBy: { fechaVencimiento: 'desc' },
       });
 
-      return NextResponse.json(payments);
+      // Convertir valores Decimal a números
+      const paymentsWithNumbers = payments.map(payment => ({
+        ...payment,
+        monto: Number(payment.monto || 0),
+      }));
+
+      return NextResponse.json(paymentsWithNumbers);
     }
 
     // Sin filtros ni paginación, usar caché

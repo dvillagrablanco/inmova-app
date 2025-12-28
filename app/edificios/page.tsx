@@ -398,25 +398,25 @@ function EdificiosPageContent() {
         {building.metrics && (
         <>
         <div className="border-t pt-3">
-        <div className="flex items-center justify-between">
-        <span className="text-sm text-muted-foreground">Ocupación</span>
-        <span className="text-sm font-bold">
-        {building.metrics.ocupacionPct}%
-        </span>
+                        <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Ocupación</span>
+                        <span className="text-sm font-bold">
+                        {Number(building.metrics.ocupacionPct || 0).toFixed(1)}%
+                        </span>
+                        </div>
+                        <div className="mt-2 h-2 w-full rounded-full bg-muted">
+                        <div
+                        className="h-2 rounded-full bg-primary transition-all"
+                        style={{ width: `${Number(building.metrics.ocupacionPct || 0)}%` }}
+                        />
+                        </div>
         </div>
-        <div className="mt-2 h-2 w-full rounded-full bg-muted">
-        <div
-        className="h-2 rounded-full bg-primary transition-all"
-        style={{ width: `${building.metrics.ocupacionPct}%` }}
-        />
-        </div>
-        </div>
-        <div className="flex items-center justify-between">
-        <span className="text-sm text-muted-foreground">Ingresos/mes</span>
-        <span className="text-sm font-bold text-green-600">
-        €{building.metrics.ingresosMensuales.toLocaleString()}
-        </span>
-        </div>
+                        <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Ingresos/mes</span>
+                        <span className="text-sm font-bold text-green-600">
+                        €{Number(building.metrics.ingresosMensuales || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                        </div>
         </>
         )}
         <Button
@@ -466,35 +466,35 @@ function EdificiosPageContent() {
         </div>
         {building.metrics && (
         <>
-        <div>
-        <p className="text-sm text-muted-foreground">Ocupación</p>
-        <p className="text-lg font-semibold">
-        {building.metrics.ocupacionPct}%
-        </p>
-        </div>
-        <div>
-        <p className="text-sm text-muted-foreground">Ingresos/mes</p>
-        <p className="text-lg font-semibold text-green-600">
-        €{building.metrics.ingresosMensuales.toLocaleString()}
-        </p>
-        </div>
+                        <div>
+                        <p className="text-sm text-muted-foreground">Ocupación</p>
+                        <p className="text-lg font-semibold">
+                        {Number(building.metrics.ocupacionPct || 0).toFixed(1)}%
+                        </p>
+                        </div>
+                        <div>
+                        <p className="text-sm text-muted-foreground">Ingresos/mes</p>
+                        <p className="text-lg font-semibold text-green-600">
+                        €{Number(building.metrics.ingresosMensuales || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                        </div>
         </>
         )}
         </div>
 
         {building.metrics && (
         <div>
-        <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium">Tasa de ocupación</span>
-        <span className="text-sm font-medium">
-        {building.metrics.ocupacionPct}%
-        </span>
-        </div>
-        <div className="h-2 w-full rounded-full bg-muted">
-        <div
-        className="h-2 rounded-full bg-primary transition-all"
-        style={{ width: `${building.metrics.ocupacionPct}%` }}
-        />
+                        <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">Tasa de ocupación</span>
+                        <span className="text-sm font-medium">
+                        {Number(building.metrics.ocupacionPct || 0).toFixed(1)}%
+                        </span>
+                        </div>
+                        <div className="h-2 w-full rounded-full bg-muted">
+                        <div
+                        className="h-2 rounded-full bg-primary transition-all"
+                        style={{ width: `${Number(building.metrics.ocupacionPct || 0)}%` }}
+                        />
         </div>
         </div>
         )}
@@ -552,16 +552,16 @@ function EdificiosPageContent() {
         </div>
         {building.metrics && (
         <>
-        <div className="text-center">
-        <p className="text-muted-foreground">Ocupación</p>
-        <p className="font-semibold">{building.metrics.ocupacionPct}%</p>
-        </div>
-        <div className="text-center">
-        <p className="text-muted-foreground">Ingresos/mes</p>
-        <p className="font-semibold text-green-600">
-        €{building.metrics.ingresosMensuales.toLocaleString()}
-        </p>
-        </div>
+                        <div className="text-center">
+                        <p className="text-muted-foreground">Ocupación</p>
+                        <p className="font-semibold">{Number(building.metrics.ocupacionPct || 0).toFixed(1)}%</p>
+                        </div>
+                        <div className="text-center">
+                        <p className="text-muted-foreground">Ingresos/mes</p>
+                        <p className="font-semibold text-green-600">
+                        €{Number(building.metrics.ingresosMensuales || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                        </div>
         </>
         )}
         <Button variant="ghost" size="icon">

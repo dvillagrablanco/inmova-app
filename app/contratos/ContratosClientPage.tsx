@@ -273,7 +273,7 @@ export default function ContratosClientPage({
                   {formatCurrency(
                     initialContracts
                       .filter((c) => c.estado === 'activo')
-                      .reduce((sum, c) => sum + c.rentaMensual, 0)
+                      .reduce((sum, c) => sum + Number(c.rentaMensual || 0), 0)
                   )}
                 </div>
               </CardContent>
@@ -369,7 +369,7 @@ export default function ContratosClientPage({
                             </span>
                             <span className="flex items-center gap-1">
                               <Euro className="h-3 w-3" />
-                              {formatCurrency(contract.rentaMensual)}/mes
+                              {formatCurrency(Number(contract.rentaMensual || 0))}/mes
                             </span>
                           </div>
                         </div>
