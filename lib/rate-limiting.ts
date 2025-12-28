@@ -4,7 +4,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { LRUCache } from 'lru-cache';
 
 // Configuración de rate limits por endpoint
 interface RateLimitConfig {
@@ -12,35 +11,44 @@ interface RateLimitConfig {
   uniqueTokenPerInterval: number; // Máximo de requests permitidos
 }
 
-// Rate limits por tipo de operación
+// Rate limits por tipo de operación - MÁS PERMISIVOS para mejor UX
 export const RATE_LIMITS = {
-  // Auth endpoints - más restrictivo
+  // Auth endpoints - permitir más intentos
   auth: {
-    interval: 60 * 1000, // 1 minuto
-    uniqueTokenPerInterval: 5, // 5 intentos por minuto
+    interval: 5 * 60 * 1000, // 5 minutos
+    uniqueTokenPerInterval: 20, // 20 intentos cada 5 minutos
   },
-  // Payment endpoints - restrictivo
+  // Payment endpoints - moderado
   payment: {
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 10,
+    uniqueTokenPerInterval: 30,
   },
-  // API general - moderado
+  // API general - permisivo
   api: {
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 60, // 60 requests por minuto
+    uniqueTokenPerInterval: 150, // 150 requests por minuto
   },
-  // Lectura - permisivo
+  // Lectura - muy permisivo
   read: {
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 120, // 120 requests por minuto
+    uniqueTokenPerInterval: 300, // 300 requests por minuto
   },
 } as const;
 
-// Cache para almacenar contadores de rate limit
-const tokenCache = new LRUCache<string, number[]>({
-  max: 500, // Máximo 500 IPs únicas en cache
-  ttl: 60000, // TTL de 1 minuto
-});
+// Cache simple para almacenar contadores de rate limit (usando Map nativo)
+const tokenCache = new Map<string, { timestamps: number[]; lastCleanup: number }>();
+
+// Limpiar entradas antiguas cada 5 minutos para evitar memory leaks
+setInterval(() => {
+  const now = Date.now();
+  const maxAge = 10 * 60 * 1000; // 10 minutos
+  
+  for (const [key, value] of tokenCache.entries()) {
+    if (now - value.lastCleanup > maxAge) {
+      tokenCache.delete(key);
+    }
+  }
+}, 5 * 60 * 1000);
 
 /**
  * Obtiene el identificador único del cliente (IP o user ID)
@@ -82,10 +90,10 @@ export function checkRateLimit(
   config: RateLimitConfig
 ): { success: boolean; remaining: number; reset: number } {
   const now = Date.now();
-  const timestamps = tokenCache.get(identifier) || [];
+  const record = tokenCache.get(identifier) || { timestamps: [], lastCleanup: now };
   
   // Filtrar timestamps que están dentro de la ventana de tiempo
-  const validTimestamps = timestamps.filter(
+  const validTimestamps = record.timestamps.filter(
     (timestamp) => now - timestamp < config.interval
   );
   
@@ -103,7 +111,7 @@ export function checkRateLimit(
   
   // Agregar el nuevo timestamp
   validTimestamps.push(now);
-  tokenCache.set(identifier, validTimestamps);
+  tokenCache.set(identifier, { timestamps: validTimestamps, lastCleanup: now });
   
   return {
     success: true,
@@ -239,6 +247,6 @@ export function getRateLimitStats(): {
 } {
   return {
     cacheSize: tokenCache.size,
-    maxSize: tokenCache.max,
+    maxSize: 500, // Límite soft, se limpia automáticamente
   };
 }
