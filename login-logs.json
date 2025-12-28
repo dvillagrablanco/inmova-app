@@ -1,0 +1,49 @@
+{
+  "logs": [
+    {
+      "type": "info",
+      "text": "[SW] Service Worker registered: https://inmovaapp.com/",
+      "location": {
+        "url": "https://inmovaapp.com/_next/static/chunks/87178-bc551349e7242bdd.js?dpl=dpl_C9v5K3wt7Ys7nqaAfjzK4C2rL8Uv",
+        "lineNumber": 0,
+        "columnNumber": 1618
+      },
+      "timestamp": "2025-12-28T19:52:56.563Z"
+    },
+    {
+      "type": "info",
+      "text": "[SW] New service worker activated undefined",
+      "location": {
+        "url": "https://inmovaapp.com/_next/static/chunks/87178-bc551349e7242bdd.js?dpl=dpl_C9v5K3wt7Ys7nqaAfjzK4C2rL8Uv",
+        "lineNumber": 0,
+        "columnNumber": 1618
+      },
+      "timestamp": "2025-12-28T19:52:56.564Z"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 ()",
+      "location": {
+        "url": "https://inmovaapp.com/api/auth/callback/credentials",
+        "lineNumber": 0,
+        "columnNumber": 0
+      },
+      "timestamp": "2025-12-28T19:53:01.408Z"
+    }
+  ],
+  "errors": [],
+  "networkErrors": [
+    {
+      "url": "https://inmovaapp.com/api/auth/callback/credentials",
+      "status": 401,
+      "statusText": "",
+      "timestamp": "2025-12-28T19:53:01.408Z"
+    }
+  ],
+  "summary": {
+    "totalLogs": 3,
+    "consoleErrors": 1,
+    "networkErrors": 1,
+    "pageErrors": 0
+  }
+}
