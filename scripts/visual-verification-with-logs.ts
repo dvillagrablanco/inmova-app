@@ -17,7 +17,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 // Configuración
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+const BASE_URL = process.env.BASE_URL || 'https://inmovaapp.com';
 const OUTPUT_DIR = path.join(process.cwd(), 'visual-verification-results');
 const SCREENSHOTS_DIR = path.join(OUTPUT_DIR, 'screenshots');
 const TIMEOUT = 45000; // 45 segundos por página (más tiempo para cargas lentas)
@@ -378,9 +378,53 @@ class VisualVerifier {
     }
   }
 
+  async login() {
+    console.log('\n🔐 Intentando login automático...');
+
+    if (!this.browser) {
+      throw new Error('Browser not initialized');
+    }
+
+    const page = await this.browser.newPage();
+
+    try {
+      // Ir a la página de login
+      await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle', timeout: TIMEOUT });
+
+      // Llenar formulario de login
+      await page.fill('input[type="email"], input[name="email"]', LOGIN_EMAIL);
+      await page.fill('input[type="password"], input[name="password"]', LOGIN_PASSWORD);
+
+      // Click en botón de login
+      await page.click('button[type="submit"]');
+
+      // Esperar navegación (puede ir a dashboard o home)
+      await page.waitForNavigation({ timeout: 30000 }).catch(() => {
+        console.log('  ⚠️  No navigation after login, might be already on dashboard');
+      });
+
+      // Guardar cookies de sesión
+      const cookies = await page.context().cookies();
+      await page.context().addCookies(cookies);
+
+      console.log('  ✅ Login exitoso - Sesión guardada');
+
+      await page.close();
+      return true;
+    } catch (error: any) {
+      console.log(`  ⚠️  Login falló: ${error.message}`);
+      console.log('  ℹ️  Continuando verificación sin autenticación...');
+      await page.close();
+      return false;
+    }
+  }
+
   async verifyAll() {
-    console.log(`\n🔍 Verificando ${ROUTES_TO_CHECK.length} rutas...\n`);
+    console.log(`\n🔍 Verificando ${ROUTES_TO_CHECK.length} rutas en ${BASE_URL}...\n`);
     console.log('='.repeat(60));
+
+    // Intentar login primero
+    await this.login();
 
     for (const route of ROUTES_TO_CHECK) {
       const result = await this.verifyPage(route);
