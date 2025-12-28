@@ -427,3 +427,51 @@ Call log:
 
 
 📄 Verificando: https://inmovaapp.com/contabilidad
+  ⏱️  Tiempo de carga: 1249ms
+  📸 Screenshot guardado: _contabilidad.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/contratos
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/contratos", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/contratos/nuevo
+  ⏱️  Tiempo de carga: 1536ms
+  📸 Screenshot guardado: _contratos_nuevo.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/crm
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/crm", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/cupones
+  ⏱️  Tiempo de carga: 1667ms
+  📸 Screenshot guardado: _cupones.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/dashboard-adaptive
+  ⏱️  Tiempo de carga: 1303ms
+  📸 Screenshot guardado: _dashboard-adaptive.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/dashboard-propietarios
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/dashboard-propietarios", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/dashboard/community
+  ⏱️  Tiempo de carga: 1807ms
+  📸 Screenshot guardado: _dashboard_community.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/dashboard/crm
