@@ -4,12 +4,14 @@
  */
 
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  let prisma: PrismaClient | null = null;
+
   try {
     const { secret } = await request.json();
 
@@ -17,6 +19,10 @@ export async function POST(request: Request) {
     if (secret !== 'create-test-user-2025') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Crear nueva instancia de Prisma
+    prisma = new PrismaClient();
+    await prisma.$connect();
 
     // Verificar si ya existe el usuario
     const existingUser = await prisma.user.findUnique({
@@ -86,14 +92,25 @@ export async function POST(request: Request) {
       {
         error: 'Error creando usuario',
         details: error.message,
+        stack: error.stack,
       },
       { status: 500 }
     );
+  } finally {
+    if (prisma) {
+      await prisma.$disconnect();
+    }
   }
 }
 
 export async function GET() {
+  let prisma: PrismaClient | null = null;
+
   try {
+    // Crear nueva instancia de Prisma
+    prisma = new PrismaClient();
+    await prisma.$connect();
+
     // Contar usuarios
     const userCount = await prisma.user.count();
     const companyCount = await prisma.company.count();
@@ -118,8 +135,13 @@ export async function GET() {
       {
         error: 'Error obteniendo información',
         details: error.message,
+        stack: error.stack,
       },
       { status: 500 }
     );
+  } finally {
+    if (prisma) {
+      await prisma.$disconnect();
+    }
   }
 }
