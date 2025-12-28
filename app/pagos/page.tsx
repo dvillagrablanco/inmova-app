@@ -221,10 +221,10 @@ function PagosPage() {
   const vencidosCount = payments.filter((p) => p.estado.toLowerCase() === 'vencido').length;
   const totalCobrado = payments
     .filter((p) => p.estado.toLowerCase() === 'pagado')
-    .reduce((acc, p) => acc + p.monto, 0);
+    .reduce((acc, p) => acc + Number(p.monto || 0), 0);
   const totalPendiente = payments
     .filter((p) => p.estado.toLowerCase() === 'pendiente')
-    .reduce((acc, p) => acc + p.monto, 0);
+    .reduce((acc, p) => acc + Number(p.monto || 0), 0);
 
   // Calendar logic
   const monthStart = currentDate ? startOfMonth(currentDate) : startOfMonth(new Date());

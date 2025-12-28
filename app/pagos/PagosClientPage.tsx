@@ -213,7 +213,7 @@ export default function PagosClientPage({
   const getTotalByStatus = (status: string) => {
     return payments
       .filter((p) => p.estado === status)
-      .reduce((sum, p) => sum + p.monto, 0);
+      .reduce((sum, p) => sum + Number(p.monto || 0), 0);
   };
 
   return (
@@ -263,7 +263,7 @@ export default function PagosClientPage({
               <CardContent>
                 <div className="text-2xl font-bold">{payments.length}</div>
                 <p className="text-xs text-muted-foreground">
-                  {formatCurrency(payments.reduce((sum, p) => sum + p.monto, 0))}
+                  {formatCurrency(payments.reduce((sum, p) => sum + Number(p.monto || 0), 0))}
                 </p>
               </CardContent>
             </Card>

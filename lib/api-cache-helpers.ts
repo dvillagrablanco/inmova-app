@@ -253,7 +253,7 @@ export async function cachedPayments(companyId: string) {
   return withCache(
     cacheKey,
     async () => {
-      return prisma.payment.findMany({
+      const payments = await prisma.payment.findMany({
         where: {
           contract: {
             unit: { building: { companyId } },
@@ -287,6 +287,22 @@ export async function cachedPayments(companyId: string) {
         orderBy: { fechaVencimiento: 'desc' },
         take: 100, // Limitar a los 100 más recientes
       });
+
+      // Convertir valores Decimal a números
+      return payments.map(payment => ({
+        id: payment.id,
+        contractId: payment.contractId,
+        periodo: payment.periodo,
+        monto: Number(payment.monto || 0),
+        fechaVencimiento: payment.fechaVencimiento,
+        fechaPago: payment.fechaPago,
+        estado: payment.estado,
+        metodoPago: payment.metodoPago,
+        notasAdicionales: payment.notasAdicionales,
+        contract: payment.contract,
+        createdAt: payment.createdAt,
+        updatedAt: payment.updatedAt,
+      }));
     },
     TTL_PAYMENTS
   );
@@ -318,14 +334,33 @@ export async function cachedContracts(companyId: string) {
         orderBy: { createdAt: 'desc' },
       });
 
-      // Agregar días hasta el vencimiento
+      // Agregar días hasta el vencimiento y convertir valores Decimal
       const contractsWithExpiration = contracts.map((contract) => {
         const today = new Date();
         const fechaFin = new Date(contract.fechaFin);
         const diasHastaVencimiento = Math.ceil((fechaFin.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
         
         return {
-          ...contract,
+          id: contract.id,
+          unitId: contract.unitId,
+          tenantId: contract.tenantId,
+          fechaInicio: contract.fechaInicio,
+          fechaFin: contract.fechaFin,
+          rentaMensual: Number(contract.rentaMensual || 0),
+          deposito: Number(contract.deposito || 0),
+          estado: contract.estado,
+          tipo: contract.tipo,
+          diaPago: contract.diaPago,
+          clausulasAdicionales: contract.clausulasAdicionales,
+          renovacionAutomatica: contract.renovacionAutomatica,
+          unit: contract.unit,
+          tenant: contract.tenant,
+          payments: contract.payments.map(p => ({
+            ...p,
+            monto: Number(p.monto || 0),
+          })),
+          createdAt: contract.createdAt,
+          updatedAt: contract.updatedAt,
           diasHastaVencimiento,
         };
       });
@@ -388,7 +423,7 @@ export async function cachedExpenses(companyId: string) {
   return withCache(
     cacheKey,
     async () => {
-      return prisma.expense.findMany({
+      const expenses = await prisma.expense.findMany({
         where: {
           building: { companyId },
         },
@@ -409,6 +444,12 @@ export async function cachedExpenses(companyId: string) {
         orderBy: { fecha: 'desc' },
         take: 100, // Limitar a los 100 más recientes
       });
+
+      // Convertir valores Decimal a números
+      return expenses.map(expense => ({
+        ...expense,
+        monto: Number(expense.monto || 0),
+      }));
     },
     TTL_EXPENSES
   );

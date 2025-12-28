@@ -261,7 +261,7 @@ function ContratosPageContent() {
   const finalizadosCount = contracts.filter((c) => c.estado.toLowerCase() === 'finalizado').length;
   const totalIngresos = contracts
     .filter((c) => c.estado.toLowerCase() === 'activo')
-    .reduce((acc, c) => acc + c.rentaMensual, 0);
+    .reduce((acc, c) => acc + Number(c.rentaMensual || 0), 0);
 
   const getDaysUntilExpiry = (fechaFin: string) => {
     const today = new Date();
@@ -389,7 +389,7 @@ function ContratosPageContent() {
         <Euro className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-        <div className="text-2xl font-bold">€{totalIngresos.toLocaleString()}</div>
+        <div className="text-2xl font-bold">€{Number(totalIngresos || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
         <p className="text-xs text-muted-foreground">De contratos activos</p>
         </CardContent>
       </Card>
@@ -471,9 +471,9 @@ function ContratosPageContent() {
         </div>
         <div className="space-y-1">
         <p className="text-xs text-muted-foreground">Monto Mensual</p>
-        <p className="text-base sm:text-lg font-bold text-green-600">
-        €{contract.rentaMensual.toLocaleString()}
-        </p>
+                        <p className="text-base sm:text-lg font-bold text-green-600">
+                        €{Number(contract.rentaMensual || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
         </div>
         </div>
 
