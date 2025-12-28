@@ -9,70 +9,203 @@
 [BROWSER] [SW] New service worker activated 
 [BROWSER] [SW] New service worker activated 
 === SERVER LOGS BEFORE LOGIN ===
-   - Password length: 60
-   - Password start: $2a$10$Zka
-   - CompanyId: f8ce31b0-80c2-4e05-a8b8-a1477968ed09
-   - Company: Inmova
-🔑 [AUTH] Verificando contraseña...
-🔑 [AUTH] Hash a comparar (primeros 20): $2a$10$ZkaGyj6IbV1eG
-🔑 [AUTH] Password input (primeros 5): Test1
-🔑 [AUTH] Resultado bcrypt.compare: true
-✅ [AUTH] ¡LOGIN EXITOSO!
-==========================================
- POST /api/auth/callback/credentials 200 in 339ms
- GET /api/auth/session 200 in 131ms
- GET /api/branding 200 in 240ms
- GET /api/notifications/unread-count 200 in 308ms
-[WARN] ⚠️  REDIS_URL not configured - using in-memory cache fallback undefined
-[WARN] ⚠️  Redis not available - using in-memory cache fallback undefined
- GET /api/modules/active 200 in 474ms
- GET /api/modules/active 200 in 407ms
- GET /api/notifications/unread-count 200 in 427ms
- GET /api/admin/notifications?limit=20 200 in 488ms
- GET /api/admin/notifications?limit=20 200 in 492ms
-[INFO] Memory cache set for key: dashboard:stats:f8ce31b0-80c2-4e05-a8b8-a1477968ed09 (TTL: 300000ms) undefined
- GET /api/dashboard 200 in 542ms
-[INFO] Memory cache set for key: dashboard:stats:f8ce31b0-80c2-4e05-a8b8-a1477968ed09 (TTL: 300000ms) undefined
- GET /api/dashboard 200 in 552ms
-[Redis] No configurado - funcionando sin caché
-[INFO] [DEBUG] [Cache] MISS: analytics:monthly:f8ce31b0-80c2-4e05-a8b8-a1477968ed09
-[Redis] No configurado - funcionando sin caché
- GET /api/dashboard/analytics 200 in 170ms
-[Redis] No configurado - funcionando sin caché
-[INFO] [DEBUG] [Cache] MISS: analytics:monthly:f8ce31b0-80c2-4e05-a8b8-a1477968ed09
-[Redis] No configurado - funcionando sin caché
- GET /api/dashboard/analytics 200 in 80ms
- GET /api/onboarding/progress 200 in 188ms
- GET /api/onboarding/progress 200 in 188ms
- GET /api/modules?status=inactive 200 in 191ms
- GET /api/modules?status=inactive 200 in 193ms
- GET / 200 in 329ms
- ○ Compiling /_not-found ...
- ✓ Compiled /_not-found in 980ms (4627 modules)
- GET /css/support_parent.css 404 in 1176ms
- GET /js/twint_ch.js 404 in 42ms
- GET /login 200 in 197ms
+
+Some issues need review, and may require choosing
+a different dependency.
+
+Run `npm audit` for details.
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v6.7.0) to ./node_modules/.prisma/client in 4.35s
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+
+
+> dev
+> next dev -H 0.0.0.0
+
+ ⚠ You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env
+  ▲ Next.js 14.2.28
+  - Local:        http://localhost:3000
+  - Network:      http://0.0.0.0:3000
+  - Environments: .env
+
+ ✓ Starting...
+ ⚠ Disabling SWC Minifer will not be an option in the next major version. Please report any issues you may be experiencing to https://github.com/vercel/next.js/issues
+ ⚠ You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env
+ ✓ Ready in 2s
+ ○ Compiling /middleware ...
+ ✓ Compiled /middleware in 989ms (127 modules)
+ ○ Compiling /candidatos ...
+ ✓ Compiled /candidatos in 11.9s (3284 modules)
+ ✓ Compiled in 989ms (1598 modules)
+ GET /candidatos 200 in 116ms
+ ○ Compiling /edificios ...
+ ✓ Compiled /edificios in 2.2s (3298 modules)
+ GET /edificios 200 in 2462ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1397ms (3426 modules)
+ GET / 200 in 1754ms
+ GET / 200 in 209ms
+ ○ Compiling /login ...
+ ✓ Compiled /login in 1270ms (2260 modules)
+ GET /login 200 in 1584ms
  ○ Compiling /api/auth/[...nextauth] ...
- ✓ Compiled /api/auth/[...nextauth] in 607ms (2582 modules)
+ ✓ Compiled /api/auth/[...nextauth] in 650ms (798 modules)
 [next-auth][warn][DEBUG_ENABLED] 
 https://next-auth.js.org/warnings#debug_enabled
- GET /api/auth/csrf 200 in 523ms
- GET /api/auth/session 200 in 840ms
- GET /api/auth/session 200 in 128ms
+ GET /api/auth/session 200 in 1343ms
+ GET /api/auth/session 200 in 130ms
 
-[REQUEST FAILED] https://inmovaapp.com/dashboard?_rsc=16djb - net::ERR_ABORTED
+[BROWSER] [Fast Refresh] rebuilding
+[REQUEST FAILED] https://inmovaapp.com/dashboard?_rsc=1gtj6 - net::ERR_ABORTED
+[BROWSER] [Fast Refresh] done in 7657ms
+[BROWSER] Warning: %s: Support for defaultProps will be removed from function components in a future major release. Use JavaScript default parameters instead.%s XAxis 
+    at XAxis (webpack-internal:///(app-pages-browser)/./node_modules/recharts/es6/cartesian/XAxis.js:35:24)
+    at svg
+    at Surface (webpack-internal:///(app-pages-browser)/./node_modules/recharts/es6/container/Surface.js:66:26)
+    at div
+    at ChartLayoutContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/recharts/es6/context/chartLayoutContext.js:61:30)
+    at CategoricalChartWrapper (webpack-internal:///(app-pages-browser)/./node_modules/recharts/es6/chart/generateCategoricalChart.js:1024:13)
+    at div
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/recharts/es6/component/ResponsiveContainer.js:126:23)
+    at ClientResponsiveContainer (webpack-internal:///(app-pages-browser)/./components/ui/client-responsive-container.tsx:21:42)
+    at div
+    at div
+    at div
+    at main
+    at div
+    at div
+    at AuthenticatedLayout (webpack-internal:///(app-pages-browser)/./components/layout/authenticated-layout.tsx:18:32)
+    at DashboardPageContent (webpack-internal:///(app-pages-browser)/./app/dashboard/page.tsx:74:78)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./components/ui/error-boundary.tsx:22:9)
+    at DashboardPage
+    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at Suspense
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at O (webpack-internal:///(app-pages-browser)/./node_modules/next-themes/dist/index.mjs:27:24)
+    at z (webpack-internal:///(app-pages-browser)/./node_modules/next-themes/dist/index.mjs:21:47)
+    at ThemeProvider (webpack-internal:///(app-pages-browser)/./components/theme-provider.tsx:12:26)
+    at I18nProvider (webpack-internal:///(app-pages-browser)/./lib/i18n-context.tsx:41:25)
+    at BrandingProvider (webpack-internal:///(app-pages-browser)/./components/BrandingProvider.tsx:29:29)
+    at DesignSystemProvider (webpack-internal:///(app-pages-browser)/./components/DesignSystemProvider.tsx:13:33)
+    at QueryClientProvider (webpack-internal:///(app-pages-browser)/./node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js:24:30)
+    at QueryProvider (webpack-internal:///(app-pages-browser)/./components/QueryProvider.tsx:18:30)
+    at SessionProvider (webpack-internal:///(app-pages-browser)/./node_modules/next-auth/react/index.js:365:24)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./components/ui/error-boundary.tsx:22:9)
+    at Providers (webpack-internal:///(app-pages-browser)/./components/providers.tsx:30:22)
+    at body
+    at html
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+[BROWSER] Warning: %s: Support for defaultProps will be removed from function components in a future major release. Use JavaScript default parameters instead.%s YAxis 
+    at YAxis (webpack-internal:///(app-pages-browser)/./node_modules/recharts/es6/cartesian/YAxis.js:35:24)
+    at svg
+    at Surface (webpack-internal:///(app-pages-browser)/./node_modules/recharts/es6/container/Surface.js:66:26)
+    at div
+    at ChartLayoutContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/recharts/es6/context/chartLayoutContext.js:61:30)
+    at CategoricalChartWrapper (webpack-internal:///(app-pages-browser)/./node_modules/recharts/es6/chart/generateCategoricalChart.js:1024:13)
+    at div
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/recharts/es6/component/ResponsiveContainer.js:126:23)
+    at ClientResponsiveContainer (webpack-internal:///(app-pages-browser)/./components/ui/client-responsive-container.tsx:21:42)
+    at div
+    at div
+    at div
+    at main
+    at div
+    at div
+    at AuthenticatedLayout (webpack-internal:///(app-pages-browser)/./components/layout/authenticated-layout.tsx:18:32)
+    at DashboardPageContent (webpack-internal:///(app-pages-browser)/./app/dashboard/page.tsx:74:78)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./components/ui/error-boundary.tsx:22:9)
+    at DashboardPage
+    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at Suspense
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at O (webpack-internal:///(app-pages-browser)/./node_modules/next-themes/dist/index.mjs:27:24)
+    at z (webpack-internal:///(app-pages-browser)/./node_modules/next-themes/dist/index.mjs:21:47)
+    at ThemeProvider (webpack-internal:///(app-pages-browser)/./components/theme-provider.tsx:12:26)
+    at I18nProvider (webpack-internal:///(app-pages-browser)/./lib/i18n-context.tsx:41:25)
+    at BrandingProvider (webpack-internal:///(app-pages-browser)/./components/BrandingProvider.tsx:29:29)
+    at DesignSystemProvider (webpack-internal:///(app-pages-browser)/./components/DesignSystemProvider.tsx:13:33)
+    at QueryClientProvider (webpack-internal:///(app-pages-browser)/./node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js:24:30)
+    at QueryProvider (webpack-internal:///(app-pages-browser)/./components/QueryProvider.tsx:18:30)
+    at SessionProvider (webpack-internal:///(app-pages-browser)/./node_modules/next-auth/react/index.js:365:24)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./components/ui/error-boundary.tsx:22:9)
+    at Providers (webpack-internal:///(app-pages-browser)/./components/providers.tsx:30:22)
+    at body
+    at html
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
 === SERVER LOGS AFTER LOGIN ===
- GET /api/auth/session 200 in 840ms
- GET /api/auth/session 200 in 128ms
- GET /api/auth/providers 200 in 176ms
- GET /api/auth/csrf 200 in 121ms
-==========================================
-🔐 [AUTH] Intento de login: admin@inmova.app
-🔐 [AUTH] Password recibido (length): 9
-🔍 [AUTH] Buscando usuario en base de datos...
-📊 [AUTH] Usuario encontrado: SÍ
-👤 [AUTH] Detalles usuario:
-   - ID: 6e2c4bd2-e2a7-4ffd-af57-b130b25e9dde
    - Email: admin@inmova.app
    - Name: Admin
    - Role: super_admin
@@ -88,27 +221,38 @@ https://next-auth.js.org/warnings#debug_enabled
 🔑 [AUTH] Resultado bcrypt.compare: true
 ✅ [AUTH] ¡LOGIN EXITOSO!
 ==========================================
- POST /api/auth/callback/credentials 200 in 338ms
- GET /api/auth/session 200 in 169ms
-[INFO] Memory cache cleanup: 1 expired entries removed undefined
+ POST /api/auth/callback/credentials 200 in 421ms
+ GET /api/auth/session 200 in 133ms
  ○ Compiling /api/branding ...
- ✓ Compiled /api/branding in 739ms (2612 modules)
+ ✓ Compiled /api/branding in 5s (4878 modules)
 [next-auth][warn][DEBUG_ENABLED] 
 https://next-auth.js.org/warnings#debug_enabled
- GET /api/branding 200 in 1375ms
+ GET /api/branding 200 in 5253ms
  ○ Compiling /api/admin/notifications ...
- ✓ Compiled /api/admin/notifications in 593ms (2615 modules)
- ✓ Compiled (2703 modules)
+ ✓ Compiled /api/admin/notifications in 503ms (2627 modules)
+ ✓ Compiled (2641 modules)
 [next-auth][warn][DEBUG_ENABLED] 
 https://next-auth.js.org/warnings#debug_enabled
 [WARN] ⚠️  REDIS_URL not configured - using in-memory cache fallback undefined
 [WARN] ⚠️  Redis not available - using in-memory cache fallback undefined
- GET /api/notifications/unread-count 200 in 1196ms
- GET /api/modules/active 200 in 1203ms
- GET /api/admin/notifications?limit=20 200 in 1231ms
+ GET /api/notifications/unread-count 200 in 1028ms
+ GET /api/modules/active 200 in 1073ms
+ GET /api/admin/notifications?limit=20 200 in 1087ms
 [INFO] Memory cache set for key: dashboard:stats:f8ce31b0-80c2-4e05-a8b8-a1477968ed09 (TTL: 300000ms) undefined
- GET /api/dashboard 200 in 1275ms
- GET /api/notifications/unread-count 200 in 337ms
- GET /api/modules/active 200 in 290ms
- ○ Compiling /api/dashboard/analytics ...
- ✓ Compiled /api/dashboard/analytics in 541ms (2707 modules)
+ GET /api/dashboard 200 in 1167ms
+ GET /api/notifications/unread-count 200 in 195ms
+ GET /api/modules/active 200 in 287ms
+[INFO] Memory cache hit for key: dashboard:stats:f8ce31b0-80c2-4e05-a8b8-a1477968ed09 undefined
+ GET /api/dashboard 200 in 192ms
+ GET /api/admin/notifications?limit=20 200 in 306ms
+ ✓ Compiled /api/dashboard/analytics in 288ms (2645 modules)
+[next-auth][warn][DEBUG_ENABLED] 
+https://next-auth.js.org/warnings#debug_enabled
+[Redis] No configurado - funcionando sin caché
+[INFO] [DEBUG] [Cache] MISS: analytics:monthly:f8ce31b0-80c2-4e05-a8b8-a1477968ed09
+[Redis] No configurado - funcionando sin caché
+ GET /api/dashboard/analytics 200 in 561ms
+[Redis] No configurado - funcionando sin caché
+[INFO] [DEBUG] [Cache] MISS: analytics:monthly:f8ce31b0-80c2-4e05-a8b8-a1477968ed09
+[Redis] No configurado - funcionando sin caché
+ GET /api/dashboard/analytics 200 in 211ms

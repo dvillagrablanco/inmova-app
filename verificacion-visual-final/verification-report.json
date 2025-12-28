@@ -1,0 +1,67 @@
+{
+  "total": 12,
+  "success": 12,
+  "failed": 0,
+  "pages": [
+    {
+      "url": "/login",
+      "name": "01-login",
+      "success": true
+    },
+    {
+      "url": "/dashboard",
+      "name": "02-dashboard",
+      "success": true
+    },
+    {
+      "url": "/edificios",
+      "name": "03-edificios",
+      "success": true
+    },
+    {
+      "url": "/unidades",
+      "name": "04-unidades",
+      "success": true
+    },
+    {
+      "url": "/inquilinos",
+      "name": "05-inquilinos",
+      "success": true
+    },
+    {
+      "url": "/contratos",
+      "name": "06-contratos",
+      "success": true
+    },
+    {
+      "url": "/candidatos",
+      "name": "07-candidatos",
+      "success": true
+    },
+    {
+      "url": "/reportes",
+      "name": "08-reportes",
+      "success": true
+    },
+    {
+      "url": "/analytics",
+      "name": "09-analytics",
+      "success": true
+    },
+    {
+      "url": "/facturacion",
+      "name": "10-facturacion",
+      "success": true
+    },
+    {
+      "url": "/perfil",
+      "name": "11-perfil",
+      "success": true
+    },
+    {
+      "url": "/admin/configuracion",
+      "name": "12-configuracion",
+      "success": true
+    }
+  ]
+}

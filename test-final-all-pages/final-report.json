@@ -1,0 +1,81 @@
+[
+  {
+    "url": "/dashboard",
+    "status": 200,
+    "success": true,
+    "loadTime": 2706,
+    "errors": []
+  },
+  {
+    "url": "/edificios",
+    "status": 200,
+    "success": true,
+    "loadTime": 3194,
+    "errors": []
+  },
+  {
+    "url": "/unidades",
+    "status": 200,
+    "success": true,
+    "loadTime": 2178,
+    "errors": []
+  },
+  {
+    "url": "/inquilinos",
+    "status": 200,
+    "success": true,
+    "loadTime": 2541,
+    "errors": []
+  },
+  {
+    "url": "/contratos",
+    "status": 200,
+    "success": true,
+    "loadTime": 2589,
+    "errors": []
+  },
+  {
+    "url": "/candidatos",
+    "status": 200,
+    "success": true,
+    "loadTime": 2671,
+    "errors": []
+  },
+  {
+    "url": "/reportes",
+    "status": 200,
+    "success": true,
+    "loadTime": 2481,
+    "errors": []
+  },
+  {
+    "url": "/analytics",
+    "status": 200,
+    "success": true,
+    "loadTime": 2540,
+    "errors": []
+  },
+  {
+    "url": "/facturacion",
+    "status": 200,
+    "success": true,
+    "loadTime": 3644,
+    "errors": []
+  },
+  {
+    "url": "/perfil",
+    "status": 200,
+    "success": true,
+    "loadTime": 3065,
+    "errors": []
+  },
+  {
+    "url": "/configuracion",
+    "status": 404,
+    "success": false,
+    "loadTime": 3236,
+    "errors": [
+      "HTTP 404"
+    ]
+  }
+]
