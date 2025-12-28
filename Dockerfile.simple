@@ -28,5 +28,5 @@ RUN npm run build || true
 # Exponer puerto
 EXPOSE 3000
 
-# Script de inicio
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+# Script de inicio - sin migraciones automáticas por ahora
+CMD ["sh", "-c", "sleep 10 && npm start"]
