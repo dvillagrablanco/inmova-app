@@ -143,7 +143,6 @@ const nextConfig = {
   },
   
   // Performance optimizations
-  swcMinify: false,
   compress: false,
   poweredByHeader: false,
   

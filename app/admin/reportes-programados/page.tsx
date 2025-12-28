@@ -323,7 +323,8 @@ export default function ReportesProgramadosPage() {
     setShowTemplatesDialog(true);
   };
 
-  const useTemplate = (template: any) => {
+  // NOTE: no usar prefijo "use" aquí: ESLint lo interpreta como Hook.
+  const applyTemplate = (template: any) => {
     setFormData({
       nombre: template.nombre,
       tipo: template.tipo,
@@ -900,7 +901,7 @@ export default function ReportesProgramadosPage() {
                 <Card
                   key={template.id}
                   className="hover:shadow-md transition cursor-pointer"
-                  onClick={() => useTemplate(template)}
+                  onClick={() => applyTemplate(template)}
                 >
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -949,7 +950,7 @@ export default function ReportesProgramadosPage() {
                       <Card
                         key={template.id}
                         className="hover:shadow-md transition cursor-pointer"
-                        onClick={() => useTemplate(template)}
+                        onClick={() => applyTemplate(template)}
                       >
                         <CardHeader>
                           <div className="flex items-center justify-between">

@@ -17,7 +17,9 @@ export const RATE_LIMITS = {
   // Auth endpoints - más restrictivo
   auth: {
     interval: 60 * 1000, // 1 minuto
-    uniqueTokenPerInterval: 5, // 5 intentos por minuto
+    // NextAuth puede hacer varias llamadas por intento (csurf/session/callback),
+    // y un usuario real puede reintentar. Mantener restrictivo pero usable.
+    uniqueTokenPerInterval: 30, // 30 requests/min para endpoints de auth (principalmente POST)
   },
   // Payment endpoints - restrictivo
   payment: {
@@ -61,14 +63,21 @@ function getClientIdentifier(request: NextRequest): string {
 /**
  * Determina el tipo de rate limit basado en la ruta
  */
-function getRateLimitType(pathname: string): keyof typeof RATE_LIMITS {
+function getRateLimitType(pathname: string, method: string): keyof typeof RATE_LIMITS {
+  // NextAuth: permitir endpoints de lectura (session/csrf) con límites más altos,
+  // y aplicar el límite de auth solo a operaciones que modifican estado (POST).
+  if (pathname.startsWith('/api/auth/')) {
+    if (method === 'GET' || method === 'HEAD') return 'read';
+    return 'auth';
+  }
+
   if (pathname.includes('/auth') || pathname.includes('/login') || pathname.includes('/register')) {
     return 'auth';
   }
   if (pathname.includes('/payment') || pathname.includes('/stripe') || pathname.includes('/pagos')) {
     return 'payment';
   }
-  if (pathname.startsWith('/api/') && (request.method === 'GET' || request.method === 'HEAD')) {
+  if (pathname.startsWith('/api/') && (method === 'GET' || method === 'HEAD')) {
     return 'read';
   }
   return 'api';
@@ -129,8 +138,13 @@ export async function rateLimitMiddleware(
     return null; // No aplicar rate limiting
   }
 
+  // Aplicar rate limiting solo a rutas API (no a páginas)
+  if (!pathname.startsWith('/api/')) {
+    return null;
+  }
+
   const identifier = getClientIdentifier(request);
-  const limitType = getRateLimitType(pathname);
+  const limitType = getRateLimitType(pathname, request.method);
   const config = RATE_LIMITS[limitType];
   
   const result = checkRateLimit(identifier, config);

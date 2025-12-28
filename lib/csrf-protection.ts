@@ -138,7 +138,8 @@ export async function csrfProtectionMiddleware(
     '/api/webhook',
     '/api/stripe/webhook',
     '/api/health',
-    '/api/auth/callback', // OAuth callbacks
+    // NextAuth maneja su propio CSRF y callbacks
+    '/api/auth', // next-auth (signin, callbacks, session, csrf, etc.)
   ];
   
   if (excludedPaths.some(path => pathname.startsWith(path))) {

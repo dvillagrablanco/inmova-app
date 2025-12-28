@@ -5,14 +5,17 @@
  */
 
 import dynamic from 'next/dynamic';
-import { ComponentType } from 'react';
+import React, { type ComponentType } from 'react';
 
 // Loading component genérico
-const LoadingSpinner = () => (
-  <div className="flex items-center justify-center p-8">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-  </div>
-);
+const LoadingSpinner = () =>
+  React.createElement(
+    'div',
+    { className: 'flex items-center justify-center p-8' },
+    React.createElement('div', {
+      className: 'animate-spin rounded-full h-8 w-8 border-b-2 border-primary',
+    })
+  );
 
 // ========================================
 // WIZARDS (Componentes pesados ~600 líneas)
@@ -21,7 +24,7 @@ const LoadingSpinner = () => (
 export const STRWizardLazy = dynamic(
   () => import('@/components/wizards/STRWizard'),
   {
-    loading: () => <LoadingSpinner />,
+    loading: () => React.createElement(LoadingSpinner),
     ssr: false, // No renderizar en servidor para reducir carga inicial
   }
 );
@@ -29,7 +32,7 @@ export const STRWizardLazy = dynamic(
 export const RoomRentalWizardLazy = dynamic(
   () => import('@/components/wizards/RoomRentalWizard'),
   {
-    loading: () => <LoadingSpinner />,
+    loading: () => React.createElement(LoadingSpinner),
     ssr: false,
   }
 );
@@ -37,7 +40,7 @@ export const RoomRentalWizardLazy = dynamic(
 export const PropertyWizardLazy = dynamic(
   () => import('@/components/wizards/PropertyWizard'),
   {
-    loading: () => <LoadingSpinner />,
+    loading: () => React.createElement(LoadingSpinner),
     ssr: false,
   }
 );
@@ -45,7 +48,7 @@ export const PropertyWizardLazy = dynamic(
 export const SetupWizardLazy = dynamic(
   () => import('@/components/wizards/SetupWizard'),
   {
-    loading: () => <LoadingSpinner />,
+    loading: () => React.createElement(LoadingSpinner),
     ssr: false,
   }
 );
@@ -57,7 +60,7 @@ export const SetupWizardLazy = dynamic(
 export const IntelligentSupportChatbotLazy = dynamic(
   () => import('@/components/automation/IntelligentSupportChatbot'),
   {
-    loading: () => <LoadingSpinner />,
+    loading: () => React.createElement(LoadingSpinner),
     ssr: false,
   }
 );
@@ -65,7 +68,7 @@ export const IntelligentSupportChatbotLazy = dynamic(
 export const LandingChatbotLazy = dynamic(
   () => import('@/components/LandingChatbot'),
   {
-    loading: () => <LoadingSpinner />,
+    loading: () => React.createElement(LoadingSpinner),
     ssr: false,
   }
 );
@@ -73,7 +76,7 @@ export const LandingChatbotLazy = dynamic(
 export const IntelligentChatbotLazy = dynamic(
   () => import('@/components/chatbot/IntelligentChatbot'),
   {
-    loading: () => <LoadingSpinner />,
+    loading: () => React.createElement(LoadingSpinner),
     ssr: false,
   }
 );
@@ -85,7 +88,7 @@ export const IntelligentChatbotLazy = dynamic(
 export const MFASettingsLazy = dynamic(
   () => import('@/components/MFASettings'),
   {
-    loading: () => <LoadingSpinner />,
+    loading: () => React.createElement(LoadingSpinner),
     ssr: false,
   }
 );
@@ -93,7 +96,7 @@ export const MFASettingsLazy = dynamic(
 export const MFASetupLazy = dynamic(
   () => import('@/components/security/mfa-setup'),
   {
-    loading: () => <LoadingSpinner />,
+    loading: () => React.createElement(LoadingSpinner),
     ssr: false,
   }
 );
@@ -105,7 +108,7 @@ export const MFASetupLazy = dynamic(
 export const VerticalSpecificWidgetsLazy = dynamic(
   () => import('@/components/dashboard/VerticalSpecificWidgets'),
   {
-    loading: () => <LoadingSpinner />,
+    loading: () => React.createElement(LoadingSpinner),
     ssr: false,
   }
 );
@@ -113,7 +116,7 @@ export const VerticalSpecificWidgetsLazy = dynamic(
 export const OwnerDashboardLazy = dynamic(
   () => import('@/components/dashboard/OwnerDashboard'),
   {
-    loading: () => <LoadingSpinner />,
+    loading: () => React.createElement(LoadingSpinner),
     ssr: false,
   }
 );
@@ -125,7 +128,7 @@ export const OwnerDashboardLazy = dynamic(
 export const EnhancedGlobalSearchLazy = dynamic(
   () => import('@/components/ui/enhanced-global-search'),
   {
-    loading: () => <LoadingSpinner />,
+    loading: () => React.createElement(LoadingSpinner),
     ssr: false,
   }
 );
@@ -133,7 +136,7 @@ export const EnhancedGlobalSearchLazy = dynamic(
 export const MultiFileUploadLazy = dynamic(
   () => import('@/components/ui/multi-file-upload'),
   {
-    loading: () => <LoadingSpinner />,
+    loading: () => React.createElement(LoadingSpinner),
     ssr: false,
   }
 );
@@ -141,7 +144,7 @@ export const MultiFileUploadLazy = dynamic(
 export const AdvancedFiltersLazy = dynamic(
   () => import('@/components/ui/advanced-filters'),
   {
-    loading: () => <LoadingSpinner />,
+    loading: () => React.createElement(LoadingSpinner),
     ssr: false,
   }
 );
@@ -149,7 +152,7 @@ export const AdvancedFiltersLazy = dynamic(
 export const ResponsiveDataTableLazy = dynamic(
   () => import('@/components/ui/responsive-data-table'),
   {
-    loading: () => <LoadingSpinner />,
+    loading: () => React.createElement(LoadingSpinner),
     ssr: false,
   }
 );
@@ -161,7 +164,7 @@ export const ResponsiveDataTableLazy = dynamic(
 export const AutomatedTicketSystemLazy = dynamic(
   () => import('@/components/support/AutomatedTicketSystem'),
   {
-    loading: () => <LoadingSpinner />,
+    loading: () => React.createElement(LoadingSpinner),
     ssr: false,
   }
 );
@@ -169,7 +172,7 @@ export const AutomatedTicketSystemLazy = dynamic(
 export const AIAssistantLazy = dynamic(
   () => import('@/components/automation/AIAssistant'),
   {
-    loading: () => <LoadingSpinner />,
+    loading: () => React.createElement(LoadingSpinner),
     ssr: false,
   }
 );
@@ -191,7 +194,7 @@ export function createLazyComponent<P = {}>(
   } = {}
 ) {
   return dynamic(importFn, {
-    loading: options.loading || (() => <LoadingSpinner />),
+    loading: options.loading || (() => React.createElement(LoadingSpinner)),
     ssr: options.ssr ?? false,
   });
 }

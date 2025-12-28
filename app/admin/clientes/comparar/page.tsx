@@ -240,8 +240,8 @@ function CompareCompaniesPageContent() {
                   <ComparisonRow
                     label="Usuarios"
                     icon={<Users className="h-4 w-4" />}
-                    values={companies.map((c) => (
-                      <div>
+                    values={companies.map((c, i) => (
+                      <div key={c.id ?? i}>
                         <div className="text-xl font-bold">{c.metrics.users}</div>
                         {c.limits.maxUsuarios && (
                           <div className="text-xs text-gray-500">
@@ -255,8 +255,8 @@ function CompareCompaniesPageContent() {
                   <ComparisonRow
                     label="Edificios"
                     icon={<Building2 className="h-4 w-4" />}
-                    values={companies.map((c) => (
-                      <div>
+                    values={companies.map((c, i) => (
+                      <div key={c.id ?? i}>
                         <div className="text-xl font-bold">{c.metrics.buildings}</div>
                         {c.limits.maxEdificios && (
                           <div className="text-xs text-gray-500">
@@ -288,8 +288,8 @@ function CompareCompaniesPageContent() {
                   <ComparisonRow
                     label="Tasa de Ocupación"
                     icon={<TrendingUp className="h-4 w-4" />}
-                    values={companies.map((c) => (
-                      <div>
+                    values={companies.map((c, i) => (
+                      <div key={c.id ?? i}>
                         <div className="text-xl font-bold">
                           {c.metrics.occupancyRate.toFixed(1)}%
                         </div>
@@ -307,8 +307,8 @@ function CompareCompaniesPageContent() {
                   <ComparisonRow
                     label="Ingresos Mensuales"
                     icon={<DollarSign className="h-4 w-4" />}
-                    values={companies.map((c) => (
-                      <div className="text-xl font-bold">
+                    values={companies.map((c, i) => (
+                      <div key={c.id ?? i} className="text-xl font-bold">
                         €{c.metrics.monthlyRevenue.toLocaleString('es-ES')}
                       </div>
                     ))}

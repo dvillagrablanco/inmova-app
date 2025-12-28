@@ -1,0 +1,51 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Saltar al contenido principal" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e3]:
+    - navigation "Navegación principal" [ref=e4]:
+      - generic [ref=e6]:
+        - link "Ir a la página de inicio de INMOVA" [ref=e7] [cursor=pointer]:
+          - /url: /landing
+          - img [ref=e8]
+          - generic [ref=e12]: INMOVA
+        - link "Volver a la página de inicio" [ref=e13] [cursor=pointer]:
+          - /url: /landing
+          - button "Volver a la página de inicio" [ref=e14]:
+            - img [ref=e15]
+            - text: Volver
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - img "INMOVA - Logotipo de la plataforma integral de gestión inmobiliaria profesional" [ref=e21]
+        - heading "Bienvenido" [level=1] [ref=e22]
+        - paragraph [ref=e23]: Sistema de Gestión Inmobiliaria
+      - generic [ref=e24]:
+        - heading "Iniciar Sesión" [level=2] [ref=e25]
+        - alert [ref=e26]:
+          - img [ref=e27]
+          - generic [ref=e29]: Credenciales inválidas. Por favor, verifica tu correo y contraseña.
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - generic [ref=e33]: Correo Electrónico*
+            - textbox "Correo Electrónicorequerido" [ref=e35]:
+              - /placeholder: tu@correo.com
+              - text: admin@inmova.com
+          - generic [ref=e36]:
+            - generic [ref=e38]: Contraseña*
+            - generic [ref=e39]:
+              - textbox "Contraseñarequerido" [ref=e40]:
+                - /placeholder: ••••••••
+                - text: admin123
+              - button "Mostrar contraseña" [ref=e41] [cursor=pointer]:
+                - img [ref=e42]
+          - button "Iniciar Sesión" [ref=e45] [cursor=pointer]
+        - paragraph [ref=e47]:
+          - text: ¿No tienes cuenta?
+          - link "Regístrate aquí" [ref=e48] [cursor=pointer]:
+            - /url: /register
+  - button "Open Next.js Dev Tools" [ref=e54] [cursor=pointer]:
+    - img [ref=e55]
+  - alert [ref=e58]
+```

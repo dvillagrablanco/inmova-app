@@ -3,7 +3,7 @@
  * Helpers para prevenir errores de hidratación en SSR/SSG
  */
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 /**
  * Hook para detectar si estamos en el cliente
@@ -61,11 +61,7 @@ export function ClientOnly({
 }) {
   const isClient = useIsClient();
 
-  if (!isClient) {
-    return <>{fallback}</>;
-  }
-
-  return <>{children}</>;
+  return isClient ? children : fallback;
 }
 
 /**
@@ -195,7 +191,7 @@ export function NoSSR({ children }: { children: React.ReactNode }) {
     return null;
   }
 
-  return <>{children}</>;
+  return children;
 }
 
 /**
@@ -204,11 +200,8 @@ export function NoSSR({ children }: { children: React.ReactNode }) {
 export function withNoSSR<P extends object>(
   Component: React.ComponentType<P>
 ) {
-  const WrappedComponent = (props: P) => (
-    <NoSSR>
-      <Component {...props} />
-    </NoSSR>
-  );
+  const WrappedComponent = (props: P) =>
+    React.createElement(NoSSR, null, React.createElement(Component, props));
 
   WrappedComponent.displayName = `withNoSSR(${Component.displayName || Component.name})`;
 
