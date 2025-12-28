@@ -30,6 +30,9 @@
     "db:seed": "prisma db seed",
     "db:status": "prisma migrate status",
     "audit:deployment": "node scripts/pre-deployment-audit.js",
+    "cloudflare:verify": "tsx scripts/cloudflare-verify.ts",
+    "cloudflare:purge": "tsx scripts/cloudflare-purge-cache.ts",
+    "cloudflare:purge:all": "tsx scripts/cloudflare-purge-cache.ts all",
     "prepare": "husky"
   },
   "lint-staged": {
