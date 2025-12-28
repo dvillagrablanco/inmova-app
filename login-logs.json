@@ -4,21 +4,21 @@
       "type": "info",
       "text": "[SW] Service Worker registered: https://inmovaapp.com/",
       "location": {
-        "url": "https://inmovaapp.com/_next/static/chunks/87178-bc551349e7242bdd.js?dpl=dpl_C9v5K3wt7Ys7nqaAfjzK4C2rL8Uv",
+        "url": "https://inmovaapp.com/_next/static/chunks/87178-bc551349e7242bdd.js?dpl=dpl_SDggmcuBZExMPf29666hFgmsejni",
         "lineNumber": 0,
         "columnNumber": 1618
       },
-      "timestamp": "2025-12-28T19:52:56.563Z"
+      "timestamp": "2025-12-28T21:11:38.406Z"
     },
     {
       "type": "info",
       "text": "[SW] New service worker activated undefined",
       "location": {
-        "url": "https://inmovaapp.com/_next/static/chunks/87178-bc551349e7242bdd.js?dpl=dpl_C9v5K3wt7Ys7nqaAfjzK4C2rL8Uv",
+        "url": "https://inmovaapp.com/_next/static/chunks/87178-bc551349e7242bdd.js?dpl=dpl_SDggmcuBZExMPf29666hFgmsejni",
         "lineNumber": 0,
         "columnNumber": 1618
       },
-      "timestamp": "2025-12-28T19:52:56.564Z"
+      "timestamp": "2025-12-28T21:11:38.407Z"
     },
     {
       "type": "error",
@@ -28,7 +28,7 @@
         "lineNumber": 0,
         "columnNumber": 0
       },
-      "timestamp": "2025-12-28T19:53:01.408Z"
+      "timestamp": "2025-12-28T21:11:42.875Z"
     }
   ],
   "errors": [],
@@ -37,7 +37,7 @@
       "url": "https://inmovaapp.com/api/auth/callback/credentials",
       "status": 401,
       "statusText": "",
-      "timestamp": "2025-12-28T19:53:01.408Z"
+      "timestamp": "2025-12-28T21:11:42.875Z"
     }
   ],
   "summary": {
