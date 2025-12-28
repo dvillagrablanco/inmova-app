@@ -1,0 +1,98 @@
+# ============================================================================
+# VARIABLES DE ENTORNO PARA VERCEL
+# ============================================================================
+# 
+# Copiar y pegar estas variables en Vercel Dashboard:
+# Vercel Dashboard → Tu Proyecto → Settings → Environment Variables
+#
+# IMPORTANTE: Seleccionar "Production" environment para cada una
+# ============================================================================
+
+# ✅ 1. NEXTAUTH_URL (CRÍTICO - Debe coincidir con tu dominio exacto)
+NEXTAUTH_URL=https://www.inmovaapp.com
+
+# ✅ 2. NEXTAUTH_SECRET (CRÍTICO - Mantener este valor secreto)
+NEXTAUTH_SECRET=l7AMZ3AiGDSBNBrcXLCpEPiapxYSGZielDF7bUauXGI=
+
+# ✅ 3. DATABASE_URL (CRÍTICO - Obtener de tu proveedor PostgreSQL)
+# 
+# OPCIÓN A - Si tienes Railway PostgreSQL:
+#   1. Railway Dashboard → PostgreSQL → Connect → Copiar DATABASE_URL
+#
+# OPCIÓN B - Crear nueva DB en Neon (GRATIS):
+#   1. https://console.neon.tech/signup
+#   2. Create Project → Copiar Connection String
+#
+# OPCIÓN C - Crear nueva DB en Supabase (GRATIS):
+#   1. https://supabase.com/dashboard → New Project
+#   2. Settings → Database → Connection String (Transaction mode)
+#
+# Formato:
+DATABASE_URL=postgresql://usuario:password@host:5432/database_name
+
+# ✅ 4. ENCRYPTION_KEY (CRÍTICO - Para encriptar datos sensibles)
+ENCRYPTION_KEY=e2dd0f8a254cc6aee7b93f45329363b9
+
+# ✅ 5. NODE_ENV (CRÍTICO - Debe ser "production")
+NODE_ENV=production
+
+# ============================================================================
+# VARIABLES OPCIONALES (Agregar solo si las necesitas)
+# ============================================================================
+
+# 🔵 Rate Limiting con Upstash Redis (Opcional - Solo si quieres rate limiting avanzado)
+# UPSTASH_REDIS_REST_URL=
+# UPSTASH_REDIS_REST_TOKEN=
+
+# 🔵 Email/SMTP (Opcional - Solo si quieres enviar emails)
+# SMTP_HOST=
+# SMTP_PORT=
+# SMTP_USER=
+# SMTP_PASSWORD=
+# SMTP_FROM=
+
+# 🔵 Stripe Payments (Opcional - Solo si usas pagos)
+# STRIPE_SECRET_KEY=
+# STRIPE_PUBLISHABLE_KEY=
+# STRIPE_WEBHOOK_SECRET=
+
+# 🔵 AWS S3 (Opcional - Solo si usas almacenamiento de archivos)
+# AWS_ACCESS_KEY_ID=
+# AWS_SECRET_ACCESS_KEY=
+# AWS_REGION=
+# AWS_S3_BUCKET=
+
+# 🔵 Analytics/Monitoring (Opcional)
+# SENTRY_DSN=
+# GOOGLE_ANALYTICS_ID=
+
+# ============================================================================
+# INSTRUCCIONES RÁPIDAS
+# ============================================================================
+#
+# 1. Ve a: https://vercel.com/new
+# 2. Import: dvillagrablanco/inmova-app
+# 3. En "Environment Variables", agregar las 5 variables CRÍTICAS de arriba
+# 4. Click "Deploy"
+# 5. Esperar 3-5 minutos
+# 6. ✅ LISTO!
+#
+# ============================================================================
+
+# ⚠️  IMPORTANTE:
+# - NEXTAUTH_URL debe coincidir EXACTAMENTE con tu dominio
+# - Si despliegas a inmovaapp.vercel.app primero, usa esa URL
+# - Cuando configures dominio custom (www.inmovaapp.com), actualizar esta variable
+# - DATABASE_URL debe ser accesible públicamente (sin whitelist de IPs)
+# - NEXTAUTH_SECRET nunca debe compartirse públicamente
+
+# ============================================================================
+# VERIFICACIÓN POST-DEPLOYMENT
+# ============================================================================
+#
+# 1. Verificar sitio: curl -I https://inmovaapp.vercel.app
+# 2. Verificar auth: curl https://inmovaapp.vercel.app/api/auth/session
+# 3. Verificar health: curl https://inmovaapp.vercel.app/api/health-check
+# 4. Verificar en navegador: F12 → Console → NO debe haber errores NextAuth
+#
+# ============================================================================
