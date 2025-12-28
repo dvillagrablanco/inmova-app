@@ -29,6 +29,10 @@ nextjs_space/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.cloudflare
+.env.production
+.env.railway
+.env.coolify
 
 # Database
 *.db

@@ -205,6 +205,10 @@ export default function CandidatosPage() {
       .slice(0, 2);
   };
 
+  if (!session) {
+    return null;
+  }
+
   return (
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">

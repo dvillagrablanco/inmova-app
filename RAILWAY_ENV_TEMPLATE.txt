@@ -65,3 +65,9 @@ NEXT_PUBLIC_BASE_URL=https://${{RAILWAY_PUBLIC_DOMAIN}}
 
 # Google Analytics
 # NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+
+# Cloudflare (CDN & R2 Storage - opcional)
+# CLOUDFLARE_API_TOKEN=<tu_api_token>
+# CLOUDFLARE_ZONE_ID=<tu_zone_id>
+# CLOUDFLARE_ACCOUNT_ID=<tu_account_id>
+# NEXT_PUBLIC_CDN_URL=https://cdn.inmova.app

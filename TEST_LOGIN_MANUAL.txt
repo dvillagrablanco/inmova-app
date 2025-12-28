@@ -1,0 +1,34 @@
+╔═══════════════════════════════════════════════════════════════════╗
+║               🔐 PRUEBA MANUAL DE LOGIN                           ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+URL: https://inmovaapp.com/login
+
+CREDENCIALES:
+   Email:    admin@inmova.app
+   Password: Test1234!
+
+PASOS:
+   1. Abrir navegador
+   2. Ir a https://inmovaapp.com/login
+   3. Ingresar email: admin@inmova.app
+   4. Ingresar contraseña: Test1234!
+   5. Click en "Iniciar sesión"
+   6. Verificar acceso al dashboard
+
+RESULTADO ESPERADO:
+   ✅ Redirección a dashboard
+   ✅ Navegación visible
+   ✅ Información de usuario mostrada
+   ✅ Acceso a funcionalidades
+
+═══════════════════════════════════════════════════════════════════
+
+OTROS LOGINS DISPONIBLES:
+
+- Portal Propietario:  https://inmovaapp.com/portal-propietario/login
+- Portal Inquilino:    https://inmovaapp.com/portal-inquilino/login
+- Portal Proveedor:    https://inmovaapp.com/portal-proveedor/login
+- Partners B2B:        https://inmovaapp.com/partners/login
+
+═══════════════════════════════════════════════════════════════════
