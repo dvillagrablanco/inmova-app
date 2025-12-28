@@ -49,12 +49,35 @@ export async function GET(req: NextRequest) {
     ]);
 
     // Calcular métricas para cada edificio
-    const buildingsWithMetrics = buildings.map(building => ({
-      ...building,
-      totalUnidades: building.units.length,
-      unidadesOcupadas: building.units.filter((u: any) => u.estado === 'ocupada').length,
-      unidadesDisponibles: building.units.filter((u: any) => u.estado === 'disponible').length,
-    }));
+    const buildingsWithMetrics = buildings.map(building => {
+      const totalUnits = building.units.length;
+      const occupiedUnits = building.units.filter((u: any) => u.estado === 'ocupada').length;
+      const ocupacionPct = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
+      const ingresosMensuales = building.units
+        .filter((u: any) => u.estado === 'ocupada')
+        .reduce((sum: number, u: any) => sum + Number(u.rentaMensual || 0), 0);
+
+      return {
+        id: building.id,
+        nombre: building.nombre,
+        direccion: building.direccion,
+        tipo: building.tipo,
+        anoConstructor: building.anoConstructor,
+        numeroUnidades: building.numeroUnidades,
+        companyId: building.companyId,
+        createdAt: building.createdAt,
+        updatedAt: building.updatedAt,
+        totalUnidades: totalUnits,
+        unidadesOcupadas: occupiedUnits,
+        unidadesDisponibles: totalUnits - occupiedUnits,
+        metrics: {
+          totalUnits,
+          occupiedUnits,
+          ocupacionPct: Number((Math.round(ocupacionPct * 10) / 10).toFixed(1)),
+          ingresosMensuales: Number((Math.round(ingresosMensuales * 100) / 100).toFixed(2)),
+        },
+      };
+    });
 
     return NextResponse.json({
       data: buildingsWithMetrics,

@@ -493,7 +493,7 @@ export default function UnidadesClientPage({
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div>
                           <p className="text-muted-foreground">Superficie</p>
-                          <p className="font-medium">{unit.superficie} m²</p>
+                          <p className="font-medium">{Number(unit.superficie || 0)} m²</p>
                         </div>
                         {unit.habitaciones && (
                           <div>
@@ -510,7 +510,7 @@ export default function UnidadesClientPage({
                         <div>
                           <p className="text-muted-foreground">Renta</p>
                           <p className="font-medium">
-                            {formatCurrency(unit.rentaMensual)}
+                            {formatCurrency(Number(unit.rentaMensual || 0))}
                           </p>
                         </div>
                       </div>
@@ -518,7 +518,7 @@ export default function UnidadesClientPage({
                       {unit.tenant && (
                         <div className="pt-3 border-t">
                           <p className="text-sm text-muted-foreground">Inquilino</p>
-                          <p className="font-medium">{unit.tenant.nombreCompleto}</p>
+                                <p className="font-medium">{String(unit.tenant?.nombreCompleto || '')}</p>
                         </div>
                       )}
                     </div>
@@ -548,12 +548,12 @@ export default function UnidadesClientPage({
                             </Badge>
                           </div>
                           <p className="text-sm text-muted-foreground">
-                            {unit.building.nombre}
+                            {String(unit.building?.nombre || '')}
                           </p>
                           {unit.tenant && (
-                            <p className="text-sm text-muted-foreground">
-                              Inquilino: {unit.tenant.nombreCompleto}
-                            </p>
+                          <p className="text-sm text-muted-foreground">
+                            Inquilino: {String(unit.tenant?.nombreCompleto || '')}
+                          </p>
                           )}
                         </div>
                       </div>
@@ -561,7 +561,7 @@ export default function UnidadesClientPage({
                         <div className="text-right hidden sm:block">
                           <p className="text-sm text-muted-foreground">Renta mensual</p>
                           <p className="font-medium">
-                            {formatCurrency(unit.rentaMensual)}
+                            {formatCurrency(Number(unit.rentaMensual || 0))}
                           </p>
                         </div>
                         <DropdownMenu>

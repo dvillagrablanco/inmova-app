@@ -186,23 +186,23 @@ function DashboardPageContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <KPICard
                 title="Ingresos Mensuales"
-                value={`€${safeFormatNumber(data.kpis.ingresosTotalesMensuales)}`}
+                value={`€${safeFormatNumber(Number(data.kpis.ingresosTotalesMensuales || 0))}`}
                 icon={TrendingUp}
               />
               <KPICard
                 title="Total Propiedades"
-                value={data.kpis.numeroPropiedades ?? 0}
+                value={Number(data.kpis.numeroPropiedades || 0)}
                 icon={Building2}
               />
               <KPICard
                 title="Tasa de Ocupación"
-                value={data.kpis.tasaOcupacion ?? 0}
+                value={Number(data.kpis.tasaOcupacion || 0).toFixed(1)}
                 suffix="%"
                 icon={Percent}
               />
               <KPICard
                 title="Tasa de Morosidad"
-                value={data.kpis.tasaMorosidad ?? 0}
+                value={Number(data.kpis.tasaMorosidad || 0).toFixed(1)}
                 suffix="%"
                 icon={AlertTriangle}
               />
@@ -212,15 +212,15 @@ function DashboardPageContent() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <KPICard
                 title="Ingresos Netos"
-                value={`€${safeFormatNumber(data.kpis.ingresosNetos)}`}
+                value={`€${safeFormatNumber(Number(data.kpis.ingresosNetos || 0))}`}
                 icon={DollarSign}
               />
               <KPICard
                 title="Gastos Totales"
-                value={`€${safeFormatNumber(data.kpis.gastosTotales)}`}
+                value={`€${safeFormatNumber(Number(data.kpis.gastosTotales || 0))}`}
                 icon={TrendingDown}
               />
-              <KPICard title="Margen Neto" value={data.kpis.margenNeto ?? 0} suffix="%" icon={Percent} />
+              <KPICard title="Margen Neto" value={Number(data.kpis.margenNeto || 0).toFixed(1)} suffix="%" icon={Percent} />
             </div>
 
             {/* Monthly Income Chart - Optimizado para móvil */}
@@ -392,7 +392,7 @@ function DashboardPageContent() {
                       <div className="flex-1">
                         <p className="font-medium text-gray-900">{pago?.periodo}</p>
                         <p className="text-sm text-gray-600">
-                          €{pago?.monto?.toLocaleString('es-ES')}
+                          €{Number(pago?.monto || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                       </div>
                       <span
