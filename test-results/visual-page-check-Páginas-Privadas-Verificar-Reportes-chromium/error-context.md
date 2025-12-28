@@ -1,0 +1,377 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Saltar al contenido principal" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e3]:
+    - complementary "Navegación principal" [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - img "INMOVA" [ref=e8]
+          - paragraph [ref=e9]: INMOVA
+        - generic [ref=e11]:
+          - img [ref=e12]
+          - textbox "Buscar página..." [ref=e15]
+        - navigation [ref=e16]:
+          - generic [ref=e17]:
+            - button "🏠 Inicio" [ref=e18] [cursor=pointer]:
+              - generic [ref=e19]: 🏠 Inicio
+              - img [ref=e20]
+            - generic [ref=e22]:
+              - generic [ref=e23]:
+                - link "Dashboard" [ref=e24] [cursor=pointer]:
+                  - /url: /dashboard
+                  - img [ref=e25]
+                  - generic [ref=e30]: Dashboard
+                - button "Agregar a favoritos" [ref=e31] [cursor=pointer]:
+                  - img [ref=e32]
+              - generic [ref=e34]:
+                - link "Inicio" [ref=e35] [cursor=pointer]:
+                  - /url: /home
+                  - img [ref=e36]
+                  - generic [ref=e39]: Inicio
+                - button "Agregar a favoritos" [ref=e40] [cursor=pointer]:
+                  - img [ref=e41]
+          - heading "📊 Verticales de Negocio" [level=3] [ref=e44]
+          - generic [ref=e45]:
+            - button "🏘️ Alquiler Residencial" [ref=e46] [cursor=pointer]:
+              - generic [ref=e47]: 🏘️ Alquiler Residencial
+              - img [ref=e48]
+            - generic [ref=e50]:
+              - generic [ref=e51]:
+                - link "Edificios" [ref=e52] [cursor=pointer]:
+                  - /url: /edificios
+                  - img [ref=e53]
+                  - generic [ref=e57]: Edificios
+                - button "Agregar a favoritos" [ref=e58] [cursor=pointer]:
+                  - img [ref=e59]
+              - generic [ref=e61]:
+                - link "Unidades" [ref=e62] [cursor=pointer]:
+                  - /url: /unidades
+                  - img [ref=e63]
+                  - generic [ref=e66]: Unidades
+                - button "Agregar a favoritos" [ref=e67] [cursor=pointer]:
+                  - img [ref=e68]
+              - generic [ref=e70]:
+                - link "Garajes y Trasteros" [ref=e71] [cursor=pointer]:
+                  - /url: /garajes-trasteros
+                  - img [ref=e72]
+                  - generic [ref=e76]: Garajes y Trasteros
+                - button "Agregar a favoritos" [ref=e77] [cursor=pointer]:
+                  - img [ref=e78]
+              - generic [ref=e80]:
+                - link "Inquilinos" [ref=e81] [cursor=pointer]:
+                  - /url: /inquilinos
+                  - img [ref=e82]
+                  - generic [ref=e87]: Inquilinos
+                - button "Agregar a favoritos" [ref=e88] [cursor=pointer]:
+                  - img [ref=e89]
+              - generic [ref=e91]:
+                - link "Contratos" [ref=e92] [cursor=pointer]:
+                  - /url: /contratos
+                  - img [ref=e93]
+                  - generic [ref=e96]: Contratos
+                - button "Agregar a favoritos" [ref=e97] [cursor=pointer]:
+                  - img [ref=e98]
+              - generic [ref=e100]:
+                - link "Candidatos" [ref=e101] [cursor=pointer]:
+                  - /url: /candidatos
+                  - img [ref=e102]
+                  - generic [ref=e105]: Candidatos
+                - button "Agregar a favoritos" [ref=e106] [cursor=pointer]:
+                  - img [ref=e107]
+              - generic [ref=e109]:
+                - link "Screening Inquilinos" [ref=e110] [cursor=pointer]:
+                  - /url: /screening
+                  - img [ref=e111]
+                  - generic [ref=e115]: Screening Inquilinos
+                - button "Agregar a favoritos" [ref=e116] [cursor=pointer]:
+                  - img [ref=e117]
+              - generic [ref=e119]:
+                - link "Valoraciones Propiedades" [ref=e120] [cursor=pointer]:
+                  - /url: /valoraciones
+                  - img [ref=e121]
+                  - generic [ref=e124]: Valoraciones Propiedades
+                - button "Agregar a favoritos" [ref=e125] [cursor=pointer]:
+                  - img [ref=e126]
+              - generic [ref=e128]:
+                - link "Inspecciones" [ref=e129] [cursor=pointer]:
+                  - /url: /inspecciones
+                  - img [ref=e130]
+                  - generic [ref=e133]: Inspecciones
+                - button "Agregar a favoritos" [ref=e134] [cursor=pointer]:
+                  - img [ref=e135]
+              - generic [ref=e137]:
+                - link "Certificaciones" [ref=e138] [cursor=pointer]:
+                  - /url: /certificaciones
+                  - img [ref=e139]
+                  - generic [ref=e142]: Certificaciones
+                - button "Agregar a favoritos" [ref=e143] [cursor=pointer]:
+                  - img [ref=e144]
+              - generic [ref=e146]:
+                - link "Seguros" [ref=e147] [cursor=pointer]:
+                  - /url: /seguros
+                  - img [ref=e148]
+                  - generic [ref=e150]: Seguros
+                - button "Agregar a favoritos" [ref=e151] [cursor=pointer]:
+                  - img [ref=e152]
+          - button "🏖️ STR / Airbnb" [ref=e155] [cursor=pointer]:
+            - generic [ref=e156]: 🏖️ STR / Airbnb
+            - img [ref=e157]
+          - button "🏘️ Co-Living" [ref=e160] [cursor=pointer]:
+            - generic [ref=e161]: 🏘️ Co-Living
+            - img [ref=e162]
+          - button "🏗️ Build-to-Rent" [ref=e165] [cursor=pointer]:
+            - generic [ref=e166]: 🏗️ Build-to-Rent
+            - img [ref=e167]
+          - button "🔨 House Flipping" [ref=e170] [cursor=pointer]:
+            - generic [ref=e171]: 🔨 House Flipping
+            - img [ref=e172]
+          - button "🏢 Comercial" [ref=e175] [cursor=pointer]:
+            - generic [ref=e176]: 🏢 Comercial
+            - img [ref=e177]
+          - button "🏢 Admin de Fincas" [ref=e180] [cursor=pointer]:
+            - generic [ref=e181]: 🏢 Admin de Fincas
+            - img [ref=e182]
+          - heading "🛠️ Herramientas Horizontales" [level=3] [ref=e185]
+          - generic [ref=e186]:
+            - button "💰 Finanzas" [ref=e187] [cursor=pointer]:
+              - generic [ref=e188]: 💰 Finanzas
+              - img [ref=e189]
+            - generic [ref=e191]:
+              - generic [ref=e192]:
+                - link "Pagos" [ref=e193] [cursor=pointer]:
+                  - /url: /pagos
+                  - img [ref=e194]
+                  - generic [ref=e196]: Pagos
+                - button "Agregar a favoritos" [ref=e197] [cursor=pointer]:
+                  - img [ref=e198]
+              - generic [ref=e200]:
+                - link "Gastos" [ref=e201] [cursor=pointer]:
+                  - /url: /gastos
+                  - img [ref=e202]
+                  - generic [ref=e204]: Gastos
+                - button "Agregar a favoritos" [ref=e205] [cursor=pointer]:
+                  - img [ref=e206]
+              - generic [ref=e208]:
+                - link "Facturación" [ref=e209] [cursor=pointer]:
+                  - /url: /facturacion
+                  - img [ref=e210]
+                  - generic [ref=e213]: Facturación
+                - button "Agregar a favoritos" [ref=e214] [cursor=pointer]:
+                  - img [ref=e215]
+              - generic [ref=e217]:
+                - link "Contabilidad" [ref=e218] [cursor=pointer]:
+                  - /url: /contabilidad
+                  - img [ref=e219]
+                  - generic [ref=e220]: Contabilidad
+                - button "Agregar a favoritos" [ref=e221] [cursor=pointer]:
+                  - img [ref=e222]
+              - generic [ref=e224]:
+                - link "Open Banking" [ref=e225] [cursor=pointer]:
+                  - /url: /open-banking
+                  - img [ref=e226]
+                  - generic [ref=e228]: Open Banking
+                - button "Agregar a favoritos" [ref=e229] [cursor=pointer]:
+                  - img [ref=e230]
+          - button "📊 Analytics e IA" [ref=e233] [cursor=pointer]:
+            - generic [ref=e234]: 📊 Analytics e IA
+            - img [ref=e235]
+          - generic [ref=e237]:
+            - button "⚙️ Operaciones" [ref=e238] [cursor=pointer]:
+              - generic [ref=e239]: ⚙️ Operaciones
+              - img [ref=e240]
+            - generic [ref=e242]:
+              - generic [ref=e243]:
+                - link "Mantenimiento" [ref=e244] [cursor=pointer]:
+                  - /url: /mantenimiento
+                  - img [ref=e245]
+                  - generic [ref=e247]: Mantenimiento
+                - button "Agregar a favoritos" [ref=e248] [cursor=pointer]:
+                  - img [ref=e249]
+              - generic [ref=e251]:
+                - link "Mantenimiento Preventivo" [ref=e252] [cursor=pointer]:
+                  - /url: /mantenimiento-preventivo
+                  - img [ref=e253]
+                  - generic [ref=e255]: Mantenimiento Preventivo
+                - button "Agregar a favoritos" [ref=e256] [cursor=pointer]:
+                  - img [ref=e257]
+              - generic [ref=e259]:
+                - link "Tareas" [ref=e260] [cursor=pointer]:
+                  - /url: /tareas
+                  - img [ref=e261]
+                  - generic [ref=e264]: Tareas
+                - button "Agregar a favoritos" [ref=e265] [cursor=pointer]:
+                  - img [ref=e266]
+              - generic [ref=e268]:
+                - link "Incidencias" [ref=e269] [cursor=pointer]:
+                  - /url: /incidencias
+                  - img [ref=e270]
+                  - generic [ref=e272]: Incidencias
+                - button "Agregar a favoritos" [ref=e273] [cursor=pointer]:
+                  - img [ref=e274]
+              - generic [ref=e276]:
+                - link "Calendario" [ref=e277] [cursor=pointer]:
+                  - /url: /calendario
+                  - img [ref=e278]
+                  - generic [ref=e280]: Calendario
+                - button "Agregar a favoritos" [ref=e281] [cursor=pointer]:
+                  - img [ref=e282]
+              - generic [ref=e284]:
+                - link "Visitas y Showings" [ref=e285] [cursor=pointer]:
+                  - /url: /visitas
+                  - img [ref=e286]
+                  - generic [ref=e289]: Visitas y Showings
+                - button "Agregar a favoritos" [ref=e290] [cursor=pointer]:
+                  - img [ref=e291]
+          - button "💬 Comunicaciones" [ref=e294] [cursor=pointer]:
+            - generic [ref=e295]: 💬 Comunicaciones
+            - img [ref=e296]
+          - button "📄 Documentos y Legal" [ref=e299] [cursor=pointer]:
+            - generic [ref=e300]: 📄 Documentos y Legal
+            - img [ref=e301]
+          - button "👥 CRM y Marketing" [ref=e304] [cursor=pointer]:
+            - generic [ref=e305]: 👥 CRM y Marketing
+            - img [ref=e306]
+          - button "⚡ Automatización" [ref=e309] [cursor=pointer]:
+            - generic [ref=e310]: ⚡ Automatización
+            - img [ref=e311]
+          - button "🚀 Innovación" [ref=e314] [cursor=pointer]:
+            - generic [ref=e315]: 🚀 Innovación
+            - img [ref=e316]
+          - button "🎧 Soporte" [ref=e319] [cursor=pointer]:
+            - generic [ref=e320]: 🎧 Soporte
+            - img [ref=e321]
+          - heading "⚙️ Administración" [level=3] [ref=e324]
+          - generic [ref=e325]:
+            - button "🏢 Configuración Empresa" [ref=e326] [cursor=pointer]:
+              - generic [ref=e327]: 🏢 Configuración Empresa
+              - img [ref=e328]
+            - generic [ref=e330]:
+              - generic [ref=e331]:
+                - link "Configuración Empresa" [ref=e332] [cursor=pointer]:
+                  - /url: /admin/configuracion
+                  - img [ref=e333]
+                  - generic [ref=e336]: Configuración Empresa
+                - button "Agregar a favoritos" [ref=e337] [cursor=pointer]:
+                  - img [ref=e338]
+              - generic [ref=e340]:
+                - link "Usuarios y Permisos" [ref=e341] [cursor=pointer]:
+                  - /url: /admin/usuarios
+                  - img [ref=e342]
+                  - generic [ref=e347]: Usuarios y Permisos
+                - button "Agregar a favoritos" [ref=e348] [cursor=pointer]:
+                  - img [ref=e349]
+              - generic [ref=e351]:
+                - link "Módulos Activos" [ref=e352] [cursor=pointer]:
+                  - /url: /admin/modulos
+                  - img [ref=e353]
+                  - generic [ref=e357]: Módulos Activos
+                - button "Agregar a favoritos" [ref=e358] [cursor=pointer]:
+                  - img [ref=e359]
+              - generic [ref=e361]:
+                - link "Personalización (Branding)" [ref=e362] [cursor=pointer]:
+                  - /url: /admin/personalizacion
+                  - img [ref=e363]
+                  - generic [ref=e369]: Personalización (Branding)
+                - button "Agregar a favoritos" [ref=e370] [cursor=pointer]:
+                  - img [ref=e371]
+              - generic [ref=e373]:
+                - link "Aprobaciones" [ref=e374] [cursor=pointer]:
+                  - /url: /admin/aprobaciones
+                  - img [ref=e375]
+                  - generic [ref=e378]: Aprobaciones
+                - button "Agregar a favoritos" [ref=e379] [cursor=pointer]:
+                  - img [ref=e380]
+              - generic [ref=e382]:
+                - link "Reportes Programados" [ref=e383] [cursor=pointer]:
+                  - /url: /admin/reportes-programados
+                  - img [ref=e384]
+                  - generic [ref=e387]: Reportes Programados
+                - button "Agregar a favoritos" [ref=e388] [cursor=pointer]:
+                  - img [ref=e389]
+              - generic [ref=e391]:
+                - link "Importar Datos" [ref=e392] [cursor=pointer]:
+                  - /url: /admin/importar
+                  - img [ref=e393]
+                  - generic [ref=e396]: Importar Datos
+                - button "Agregar a favoritos" [ref=e397] [cursor=pointer]:
+                  - img [ref=e398]
+          - button "🔧 Super Admin" [ref=e401] [cursor=pointer]:
+            - generic [ref=e402]: 🔧 Super Admin
+            - img [ref=e403]
+        - generic [ref=e405]:
+          - generic [ref=e406]:
+            - paragraph [ref=e407]: Usuario
+            - paragraph [ref=e408]: Admin
+          - button "Cerrar Sesión" [ref=e409] [cursor=pointer]:
+            - img [ref=e410]
+            - generic [ref=e413]: Cerrar Sesión
+    - generic [ref=e414]:
+      - banner [ref=e415]:
+        - generic [ref=e416]:
+          - generic [ref=e418]:
+            - img [ref=e419]
+            - generic [ref=e423]:
+              - generic [ref=e424]: INMOVA Test
+              - generic [ref=e425]: Gestión Inmobiliaria
+          - button "Buscar... ⌘ K" [ref=e427] [cursor=pointer]:
+            - img [ref=e428]
+            - generic [ref=e431]: Buscar...
+            - generic:
+              - generic: ⌘
+              - text: K
+          - generic [ref=e432]:
+            - button "Notificaciones" [ref=e434] [cursor=pointer]:
+              - img [ref=e435]
+            - button [ref=e438] [cursor=pointer]:
+              - img [ref=e439]
+            - button "Cambiar idioma" [ref=e442] [cursor=pointer]:
+              - img [ref=e443]
+              - generic [ref=e446]: Cambiar idioma
+            - 'button "Menú de usuario: Admin" [ref=e447] [cursor=pointer]':
+              - img [ref=e449]
+              - generic [ref=e452]:
+                - generic [ref=e453]: Admin
+                - generic [ref=e454]: Gestor
+      - main [ref=e455]:
+        - generic [ref=e457]:
+          - generic [ref=e458]:
+            - button "Volver al Dashboard" [ref=e459] [cursor=pointer]:
+              - img [ref=e460]
+              - text: Volver al Dashboard
+            - navigation "breadcrumb" [ref=e462]:
+              - list [ref=e463]:
+                - listitem [ref=e464]:
+                  - link [ref=e465] [cursor=pointer]:
+                    - /url: /dashboard
+                    - img [ref=e466]
+                - listitem [ref=e469]:
+                  - img [ref=e470]
+                - listitem [ref=e472]:
+                  - link "Reportes" [disabled] [ref=e473]
+          - generic [ref=e474]:
+            - heading "Reportes Financieros" [level=1] [ref=e475]
+            - paragraph [ref=e476]: Análisis detallado de rentabilidad y flujo de caja
+          - generic [ref=e478]:
+            - generic [ref=e479]:
+              - generic [ref=e480]: Tipo de Reporte
+              - combobox [ref=e481]:
+                - option "Reporte Global" [selected]
+                - option "Por Propiedad"
+                - option "Flujo de Caja"
+            - generic [ref=e482]:
+              - generic [ref=e483]: Período
+              - combobox [ref=e484]:
+                - option "Últimos 3 meses"
+                - option "Últimos 6 meses"
+                - option "Últimos 12 meses" [selected]
+                - option "Últimos 24 meses"
+            - button "Exportar CSV" [ref=e486] [cursor=pointer]:
+              - img [ref=e487]
+              - text: Exportar CSV
+  - button "Open Next.js Dev Tools" [ref=e495] [cursor=pointer]:
+    - img [ref=e496]
+  - alert [ref=e499]
+```

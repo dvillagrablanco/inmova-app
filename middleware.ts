@@ -10,10 +10,12 @@ import { csrfProtectionMiddleware, addCsrfTokenToResponse } from './lib/csrf-pro
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1. Rate Limiting
-  const rateLimitResult = await rateLimitMiddleware(request);
-  if (rateLimitResult) {
-    return rateLimitResult; // Rate limit excedido
+  // 1. Rate Limiting (deshabilitado en desarrollo)
+  if (process.env.NODE_ENV === 'production') {
+    const rateLimitResult = await rateLimitMiddleware(request);
+    if (rateLimitResult) {
+      return rateLimitResult; // Rate limit excedido
+    }
   }
 
   // 2. CSRF Protection (solo para rutas API que modifican datos)
