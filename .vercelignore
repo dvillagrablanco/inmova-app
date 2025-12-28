@@ -1,59 +1,71 @@
-# dependencies
-node_modules
-.pnp
-.pnp.js
+# Vercel Ignore File
+# Archivos y carpetas que NO se deben incluir en el deployment
 
-# testing
-coverage
-__tests__
-e2e
-*.test.ts
-*.test.tsx
-*.spec.ts
-*.spec.tsx
+# Tests
+**/__tests__/**
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+e2e/**
+test-results/**
+playwright-report/**
+coverage/**
 
-# next.js
-.next/
-out/
-
-# production
-build
-dist
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# local env files
-.env*.local
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# prisma
-# prisma/migrations (comentado para permitir migraciones en Vercel)
-
-# scripts
-scripts/seed-demo-data.ts
-scripts/activate-str-modules.ts
-
-# documentation
+# Documentación
 *.md
-*.pdf
-VIDEO_SCRIPT_*.md
-MEJORAS_*.md
-MODELO_*.md
+!README.md
+DOCS/**
+docs/**
+.draft_files/**
 
-# storybook
-.storybook
-stories
+# Archivos de desarrollo
+.env.local
+.env.development
+.env.test
+*.log
+logs/**
+
+# Archivos temporales
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Backups y disabled
+.disabled_api/**
+.disabled_api_all/**
+.disabled_api_final/**
+.disabled_pages/**
+
+# Scripts de desarrollo
+scripts/test-*.ts
+scripts/dev-*.ts
+scripts/analyze-*.ts
+
+# PDFs y documentos grandes
+**/*.pdf
+!public/**/*.pdf
+
+# Archivos de ejemplo
+*.example
+*.sample
+*.template
+!.env.production.template
+
+# Node modules de cache (Vercel gestiona esto)
+.cache/**
+
+# Jupyter notebooks
+**/*.ipynb
+
+# Archivos de JMeter
+jmeter/**
+
+# Storybook
+.storybook/**
+stories/**
+
+# Husky (no necesario en prod)
+.husky/**

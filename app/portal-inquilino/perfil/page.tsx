@@ -71,14 +71,27 @@ export default function PerfilInquilinoPage() {
 
   const fetchTenantData = async () => {
     try {
-      const res = await fetch('/api/portal-inquilino/perfil');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const res = await fetch('/api/portal-inquilino/perfil', {
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
       if (!res.ok) throw new Error('Error al cargar datos');
       const data = await res.json();
       setTenantData(data);
       setFormData(data);
-    } catch (error) {
-      logger.error('Error:', error);
-      toast.error('Error al cargar el perfil');
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        logger.warn('Timeout loading tenant profile');
+        toast.error('Tiempo de espera agotado');
+      } else {
+        logger.error('Error:', error);
+        toast.error('Error al cargar el perfil');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -87,19 +100,29 @@ export default function PerfilInquilinoPage() {
   const handleUpdateProfile = async () => {
     setIsSaving(true);
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
       const res = await fetch('/api/portal-inquilino/perfil', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!res.ok) throw new Error('Error al actualizar perfil');
 
       toast.success('Perfil actualizado correctamente');
       fetchTenantData();
-    } catch (error) {
-      logger.error('Error:', error);
-      toast.error('Error al actualizar el perfil');
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        toast.error('Tiempo de espera agotado');
+      } else {
+        logger.error('Error:', error);
+        toast.error('Error al actualizar el perfil');
+      }
     } finally {
       setIsSaving(false);
     }
@@ -123,6 +146,9 @@ export default function PerfilInquilinoPage() {
 
     setIsSaving(true);
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
       const res = await fetch('/api/portal-inquilino/cambiar-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -130,7 +156,10 @@ export default function PerfilInquilinoPage() {
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword,
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!res.ok) {
         const error = await res.json();
@@ -140,8 +169,12 @@ export default function PerfilInquilinoPage() {
       toast.success('Contraseña actualizada correctamente');
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error: any) {
-      logger.error('Error:', error);
-      toast.error(error.message || 'Error al cambiar la contraseña');
+      if (error.name === 'AbortError') {
+        toast.error('Tiempo de espera agotado');
+      } else {
+        logger.error('Error:', error);
+        toast.error(error.message || 'Error al cambiar la contraseña');
+      }
     } finally {
       setIsSaving(false);
     }

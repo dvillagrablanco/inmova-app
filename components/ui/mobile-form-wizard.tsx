@@ -1,7 +1,14 @@
 'use client';
 
 import { useState, useEffect, ReactNode } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
@@ -84,7 +91,13 @@ export function MobileFormWizard({
   }
 
   // Vista de wizard para móvil
-  const step = steps[currentStep];
+  // Validar que existan steps y que currentStep sea válido
+  if (!steps || steps.length === 0) {
+    return null;
+  }
+
+  const validCurrentStep = Math.min(currentStep, steps.length - 1);
+  const step = steps[validCurrentStep];
 
   return (
     <div className="space-y-4">
@@ -109,8 +122,8 @@ export function MobileFormWizard({
               index === currentStep
                 ? 'w-8 bg-primary'
                 : index < currentStep
-                ? 'w-2 bg-primary/50'
-                : 'w-2 bg-gray-300'
+                  ? 'w-2 bg-primary/50'
+                  : 'w-2 bg-gray-300'
             }`}
             aria-label={`Ir al paso ${index + 1}`}
           />

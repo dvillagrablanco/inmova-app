@@ -1,95 +1,123 @@
 #!/bin/bash
 
-# Script mejorado para deployment en Vercel
-# Autor: INMOVA Team
-# Fecha: $(date +%Y-%m-%d)
+# Script de Deployment Completo a Vercel
+# Para inmovaapp.com
 
-set -e  # Exit on error
+set -e
 
-# Colors
-RED='\033[0;31m'
+echo "🚀 DEPLOYMENT COMPLETO A VERCEL"
+echo "================================"
+echo ""
+
+# Colores
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-echo -e "${BLUE}"
-echo "================================="
-echo "  INMOVA - Vercel Deployment"
-echo "================================="
-echo -e "${NC}"
-
-# Check if we're in the right directory
-if [ ! -f "nextjs_space/package.json" ]; then
-    echo -e "${RED}Error: Execute este script desde la raíz del proyecto${NC}"
-    exit 1
+# 1. Login a Vercel
+echo -e "${BLUE}🔐 Paso 1: Verificando login en Vercel...${NC}"
+if ! vercel whoami &> /dev/null; then
+    echo -e "${YELLOW}⚠️  Ejecutando login...${NC}"
+    vercel login
 fi
-
-# Check if vercel CLI is installed
-if ! command -v vercel &> /dev/null && ! command -v npx &> /dev/null; then
-    echo -e "${RED}Error: Ni 'vercel' ni 'npx' están disponibles${NC}"
-    echo "Instala Vercel CLI con: npm install -g vercel"
-    exit 1
-fi
-
-# Use vercel or npx vercel
-if command -v vercel &> /dev/null; then
-    VERCEL_CMD="vercel"
-else
-    VERCEL_CMD="npx vercel"
-fi
-
-echo -e "${YELLOW}Usando comando: $VERCEL_CMD${NC}"
+echo -e "${GREEN}✅ Login verificado${NC}"
 echo ""
 
-# Move to nextjs_space directory
-cd nextjs_space
+# 2. Link del proyecto (si no está linkeado)
+echo -e "${BLUE}🔗 Paso 2: Verificando link del proyecto...${NC}"
+if [ ! -f ".vercel/project.json" ]; then
+    echo -e "${YELLOW}⚠️  Proyecto no linkeado. Ejecutando link...${NC}"
+    vercel link
+fi
+echo -e "${GREEN}✅ Proyecto linkeado${NC}"
+echo ""
 
-echo -e "${GREEN}➤ Paso 1: Verificando autenticación...${NC}"
-if $VERCEL_CMD whoami &> /dev/null; then
-    USER=$($VERCEL_CMD whoami)
-    echo -e "${GREEN}✔ Autenticado como: $USER${NC}"
-else
-    echo -e "${YELLOW}⚠ No estás autenticado${NC}"
-    echo "Por favor, ejecuta: $VERCEL_CMD login"
-    echo "Email: dvillagra@vidaroinversiones.com"
+# 3. Configurar variables de entorno (si no existen)
+echo -e "${BLUE}⚙️  Paso 3: Configurando variables de entorno...${NC}"
+echo ""
+echo -e "${YELLOW}IMPORTANTE: Necesitas configurar estas variables en Vercel Dashboard:${NC}"
+echo ""
+echo "1. Ve a: https://vercel.com/tu-proyecto/settings/environment-variables"
+echo ""
+echo "2. Agrega estas variables para PRODUCTION:"
+echo ""
+echo "   DATABASE_URL=postgresql://..."
+echo "   NEXTAUTH_URL=https://inmovaapp.com"
+echo "   NEXTAUTH_SECRET=tu-secret-aqui"
+echo "   NODE_ENV=production"
+echo ""
+echo "3. Si usas Vercel Postgres, la DATABASE_URL se configura automáticamente"
+echo ""
+
+read -p "¿Ya configuraste las variables de entorno? (y/n) " -n 1 -r
+echo ""
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo -e "${YELLOW}⚠️  Por favor configura las variables primero.${NC}"
+    exit 1
+fi
+echo ""
+
+# 4. Crear/verificar base de datos
+echo -e "${BLUE}🗄️  Paso 4: Base de datos...${NC}"
+echo ""
+echo -e "${YELLOW}OPCIONES:${NC}"
+echo ""
+echo "A) Usar Vercel Postgres (recomendado para inmovaapp.com)"
+echo "   1. Ve a: https://vercel.com/tu-proyecto/storage"
+echo "   2. Click 'Create Database' → 'Postgres'"
+echo "   3. La DATABASE_URL se configurará automáticamente"
+echo ""
+echo "B) Usar base de datos externa (Supabase, Railway, Neon, etc.)"
+echo "   1. Crea la base de datos en tu proveedor"
+echo "   2. Copia la DATABASE_URL"
+echo "   3. Agrégala en variables de entorno de Vercel"
+echo ""
+
+read -p "¿Ya tienes la base de datos configurada? (y/n) " -n 1 -r
+echo ""
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo -e "${YELLOW}⚠️  Por favor configura la base de datos primero.${NC}"
+    exit 1
+fi
+echo ""
+
+# 5. Deployment a producción
+echo -e "${BLUE}🚀 Paso 5: Desplegando a producción...${NC}"
+echo ""
+echo -e "${YELLOW}Esto desplegará la app a inmovaapp.com${NC}"
+echo ""
+
+read -p "¿Continuar con el deployment? (y/n) " -n 1 -r
+echo ""
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo -e "${YELLOW}⚠️  Deployment cancelado${NC}"
     exit 1
 fi
 
 echo ""
-echo -e "${GREEN}➤ Paso 2: Vinculando proyecto (si es necesario)...${NC}"
-if [ ! -d ".vercel" ]; then
-    echo -e "${YELLOW}No se encontró vinculación con Vercel${NC}"
-    echo "Ejecutando: $VERCEL_CMD link"
-    $VERCEL_CMD link
-else
-    echo -e "${GREEN}✔ Proyecto ya vinculado${NC}"
-fi
+echo -e "${BLUE}Desplegando...${NC}"
+vercel --prod
 
 echo ""
-echo -e "${GREEN}➤ Paso 3: Desplegando a producción...${NC}"
-echo -e "${YELLOW}Esto puede tardar varios minutos...${NC}"
-
-# Deploy to production
-if $VERCEL_CMD --prod; then
-    echo ""
-    echo -e "${GREEN}=================================${NC}"
-    echo -e "${GREEN}✔ ¡Deployment exitoso!${NC}"
-    echo -e "${GREEN}=================================${NC}"
-    echo ""
-    echo "Tu aplicación está desplegada en:"
-    echo -e "${BLUE}https://inmova.app${NC}"
-    echo ""
-    echo "Panel de control de Vercel:"
-    echo -e "${BLUE}https://vercel.com/dashboard${NC}"
-    echo ""
-else
-    echo ""
-    echo -e "${RED}=================================${NC}"
-    echo -e "${RED}✖ Error en el deployment${NC}"
-    echo -e "${RED}=================================${NC}"
-    echo ""
-    echo "Por favor revisa los logs arriba para más detalles."
-    echo "También puedes revisar en: https://vercel.com/dashboard"
-    exit 1
-fi
+echo -e "${GREEN}=========================================="
+echo "✅ DEPLOYMENT COMPLETADO"
+echo "==========================================${NC}"
+echo ""
+echo -e "${BLUE}📋 Próximos pasos:${NC}"
+echo ""
+echo "1. Aplicar migraciones de Prisma:"
+echo "   npx prisma migrate deploy"
+echo ""
+echo "2. Ejecutar seed (crear usuario admin y datos iniciales):"
+echo "   npm run db:seed"
+echo ""
+echo "3. Verificar que la app funciona:"
+echo "   https://inmovaapp.com"
+echo ""
+echo "4. Login con credenciales de administrador:"
+echo "   Email: admin@inmova.app"
+echo "   Password: Admin2025!"
+echo ""
+echo -e "${GREEN}¡Deployment exitoso! 🎉${NC}"
+echo ""
