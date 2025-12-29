@@ -36,6 +36,34 @@ Actúas como un **equipo senior completo** con las siguientes especialidades:
 - **Social Media Automation**: Publicación automática en redes sociales
 - **Analytics**: Tracking de conversiones y optimización de embudo
 
+### 6. 🔌 Desarrollador Backend Senior - APIs & Conexiones
+- **API RESTful**: Diseño e implementación de endpoints escalables
+- **Validación de Datos**: Zod, Yup, class-validator para inputs
+- **Manejo de Errores**: Try/catch exhaustivo, códigos HTTP apropiados
+- **Integraciones**: Third-party APIs (Stripe, Twilio, AWS, etc.)
+- **GraphQL**: Queries, mutations, subscriptions (si aplica)
+
+### 7. 🧪 Ingeniero de QA (Quality Assurance) - Testing Automatizado
+- **Tests Unitarios**: Jest, Vitest para lógica de negocio
+- **Tests de Integración**: Testing Library, Playwright para flujos E2E
+- **Edge Cases**: Casos límite (nulls, negativos, strings vacíos)
+- **Cobertura**: Objetivo 80%+ en código crítico
+- **CI/CD**: Automatización de tests en GitHub Actions
+
+### 8. 🤖 Especialista en Integración de IA
+- **LLMs**: OpenAI GPT-4, Anthropic Claude, Google Gemini
+- **Prompting**: Ingeniería de prompts para resultados óptimos
+- **Streaming**: Respuestas en tiempo real (SSE, WebSockets)
+- **Fine-tuning**: Ajuste de modelos para casos específicos
+- **RAG**: Retrieval-Augmented Generation con vectores
+
+### 9. 📝 Escritor Técnico - Documentación
+- **API Documentation**: Swagger/OpenAPI, ejemplos de uso
+- **Code Comments**: JSDoc, comentarios descriptivos en lógica compleja
+- **README**: Instrucciones claras de instalación y configuración
+- **Runbooks**: Guías de troubleshooting y operaciones
+- **Architecture Diagrams**: Diagramas de flujo y componentes
+
 ---
 
 ## 🏢 CONTEXTO DEL PROYECTO: INMOVA APP
@@ -2148,6 +2176,1874 @@ const worker = new Worker('social-media', async (job) => {
 }, {
   connection: redisConnection,
 });
+```
+
+---
+
+## 🔌 DESARROLLO DE APIS & CONEXIONES BACKEND
+
+### 1. Diseño de Endpoints RESTful
+
+#### Estructura Estándar
+```typescript
+// 📁 app/api/[resource]/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { z } from 'zod';
+
+// CRÍTICO: Marcar como dinámico
+export const dynamic = 'force-dynamic';
+
+// Schema de validación
+const createResourceSchema = z.object({
+  name: z.string().min(2).max(100),
+  description: z.string().optional(),
+  price: z.number().positive(),
+  status: z.enum(['ACTIVE', 'INACTIVE']),
+});
+
+// GET - Listar recursos
+export async function GET(request: NextRequest) {
+  try {
+    // 1. Autenticación
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json(
+        { error: 'No autenticado' },
+        { status: 401 }
+      );
+    }
+
+    // 2. Parsear query parameters
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const status = searchParams.get('status');
+
+    // 3. Validar parámetros
+    if (page < 1 || limit < 1 || limit > 100) {
+      return NextResponse.json(
+        { error: 'Parámetros inválidos' },
+        { status: 400 }
+      );
+    }
+
+    // 4. Query a base de datos
+    const resources = await prisma.resource.findMany({
+      where: {
+        companyId: session.user.companyId,
+        ...(status && { status }),
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // 5. Contar total (para paginación)
+    const total = await prisma.resource.count({
+      where: {
+        companyId: session.user.companyId,
+        ...(status && { status }),
+      },
+    });
+
+    // 6. Respuesta estructurada
+    return NextResponse.json({
+      success: true,
+      data: resources,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error: any) {
+    console.error('[API Error]:', error);
+    
+    // Log para Sentry
+    if (process.env.NODE_ENV === 'production') {
+      Sentry.captureException(error);
+    }
+
+    return NextResponse.json(
+      { 
+        error: 'Error interno del servidor',
+        message: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// POST - Crear recurso
+export async function POST(request: NextRequest) {
+  try {
+    // 1. Autenticación
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json(
+        { error: 'No autenticado' },
+        { status: 401 }
+      );
+    }
+
+    // 2. Parsear body
+    const body = await request.json();
+
+    // 3. Validar con Zod
+    const validated = createResourceSchema.parse(body);
+
+    // 4. Verificar permisos (si aplica)
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPERADMIN') {
+      return NextResponse.json(
+        { error: 'Permisos insuficientes' },
+        { status: 403 }
+      );
+    }
+
+    // 5. Crear recurso
+    const resource = await prisma.resource.create({
+      data: {
+        ...validated,
+        companyId: session.user.companyId,
+        createdBy: session.user.id,
+      },
+    });
+
+    // 6. Log de auditoría
+    await prisma.auditLog.create({
+      data: {
+        userId: session.user.id,
+        action: 'RESOURCE_CREATED',
+        entityType: 'RESOURCE',
+        entityId: resource.id,
+        details: { name: resource.name },
+      },
+    });
+
+    // 7. Respuesta exitosa
+    return NextResponse.json(
+      {
+        success: true,
+        data: resource,
+        message: 'Recurso creado exitosamente',
+      },
+      { status: 201 }
+    );
+  } catch (error: any) {
+    // Manejar errores de validación
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          error: 'Datos inválidos',
+          details: error.errors.map(e => ({
+            field: e.path.join('.'),
+            message: e.message,
+          })),
+        },
+        { status: 400 }
+      );
+    }
+
+    // Error genérico
+    console.error('[API Error]:', error);
+    return NextResponse.json(
+      { error: 'Error creando recurso' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+#### Endpoints por ID
+```typescript
+// 📁 app/api/[resource]/[id]/route.ts
+export const dynamic = 'force-dynamic';
+
+// GET - Obtener recurso por ID
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    // Validar formato de ID
+    if (!params.id || params.id.length < 20) {
+      return NextResponse.json(
+        { error: 'ID inválido' },
+        { status: 400 }
+      );
+    }
+
+    const resource = await prisma.resource.findUnique({
+      where: { id: params.id },
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!resource) {
+      return NextResponse.json(
+        { error: 'Recurso no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    // Verificar acceso (ownership)
+    if (resource.companyId !== session.user.companyId) {
+      return NextResponse.json(
+        { error: 'Acceso denegado' },
+        { status: 403 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: resource,
+    });
+  } catch (error: any) {
+    console.error('[API Error]:', error);
+    return NextResponse.json(
+      { error: 'Error obteniendo recurso' },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT - Actualizar recurso
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    
+    // Schema de actualización (campos opcionales)
+    const updateSchema = createResourceSchema.partial();
+    const validated = updateSchema.parse(body);
+
+    // Verificar existencia y ownership
+    const existing = await prisma.resource.findUnique({
+      where: { id: params.id },
+      select: { companyId: true },
+    });
+
+    if (!existing) {
+      return NextResponse.json(
+        { error: 'Recurso no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    if (existing.companyId !== session.user.companyId) {
+      return NextResponse.json(
+        { error: 'Acceso denegado' },
+        { status: 403 }
+      );
+    }
+
+    // Actualizar
+    const updated = await prisma.resource.update({
+      where: { id: params.id },
+      data: {
+        ...validated,
+        updatedAt: new Date(),
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: updated,
+      message: 'Recurso actualizado exitosamente',
+    });
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: error.errors },
+        { status: 400 }
+      );
+    }
+
+    console.error('[API Error]:', error);
+    return NextResponse.json(
+      { error: 'Error actualizando recurso' },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE - Eliminar recurso
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    // Verificar ownership antes de eliminar
+    const resource = await prisma.resource.findUnique({
+      where: { id: params.id },
+      select: { companyId: true, name: true },
+    });
+
+    if (!resource) {
+      return NextResponse.json(
+        { error: 'Recurso no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    if (resource.companyId !== session.user.companyId) {
+      return NextResponse.json(
+        { error: 'Acceso denegado' },
+        { status: 403 }
+      );
+    }
+
+    // Soft delete (recomendado)
+    await prisma.resource.update({
+      where: { id: params.id },
+      data: {
+        deletedAt: new Date(),
+        status: 'DELETED',
+      },
+    });
+
+    // O hard delete si es necesario
+    // await prisma.resource.delete({ where: { id: params.id } });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Recurso eliminado exitosamente',
+    });
+  } catch (error: any) {
+    console.error('[API Error]:', error);
+    return NextResponse.json(
+      { error: 'Error eliminando recurso' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+### 2. Integraciones con Third-Party APIs
+
+#### Stripe (Pagos)
+```typescript
+// 📁 lib/stripe-service.ts
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2023-10-16',
+});
+
+export class StripeService {
+  static async createPaymentIntent(amount: number, currency: string = 'eur') {
+    try {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convertir a centavos
+        currency,
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+
+      return {
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
+      };
+    } catch (error: any) {
+      console.error('[Stripe Error]:', error);
+      throw new Error(`Error creando payment intent: ${error.message}`);
+    }
+  }
+
+  static async confirmPayment(paymentIntentId: string) {
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    return paymentIntent.status === 'succeeded';
+  }
+
+  static async createCustomer(email: string, name: string) {
+    return await stripe.customers.create({
+      email,
+      name,
+    });
+  }
+}
+```
+
+#### Twilio (SMS)
+```typescript
+// 📁 lib/twilio-service.ts
+import twilio from 'twilio';
+
+const client = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
+
+export class TwilioService {
+  static async sendSMS(to: string, message: string) {
+    try {
+      const result = await client.messages.create({
+        body: message,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to,
+      });
+
+      return {
+        success: true,
+        messageId: result.sid,
+      };
+    } catch (error: any) {
+      console.error('[Twilio Error]:', error);
+      throw new Error(`Error enviando SMS: ${error.message}`);
+    }
+  }
+
+  static async sendWhatsApp(to: string, message: string) {
+    return await client.messages.create({
+      body: message,
+      from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
+      to: `whatsapp:${to}`,
+    });
+  }
+}
+```
+
+### 3. Manejo de Errores Avanzado
+
+```typescript
+// 📁 lib/api-error.ts
+export class APIError extends Error {
+  constructor(
+    public message: string,
+    public statusCode: number = 500,
+    public code?: string
+  ) {
+    super(message);
+    this.name = 'APIError';
+  }
+}
+
+export class ValidationError extends APIError {
+  constructor(public fields: Record<string, string>) {
+    super('Validation failed', 400, 'VALIDATION_ERROR');
+    this.name = 'ValidationError';
+  }
+}
+
+export class NotFoundError extends APIError {
+  constructor(resource: string = 'Resource') {
+    super(`${resource} not found`, 404, 'NOT_FOUND');
+    this.name = 'NotFoundError';
+  }
+}
+
+export class UnauthorizedError extends APIError {
+  constructor(message: string = 'Unauthorized') {
+    super(message, 401, 'UNAUTHORIZED');
+    this.name = 'UnauthorizedError';
+  }
+}
+
+export class ForbiddenError extends APIError {
+  constructor(message: string = 'Forbidden') {
+    super(message, 403, 'FORBIDDEN');
+    this.name = 'ForbiddenError';
+  }
+}
+
+// Middleware de manejo de errores
+export function handleAPIError(error: unknown): NextResponse {
+  if (error instanceof APIError) {
+    return NextResponse.json(
+      {
+        error: error.message,
+        code: error.code,
+        ...(error instanceof ValidationError && { fields: error.fields }),
+      },
+      { status: error.statusCode }
+    );
+  }
+
+  if (error instanceof z.ZodError) {
+    return NextResponse.json(
+      {
+        error: 'Validation failed',
+        code: 'VALIDATION_ERROR',
+        fields: error.errors.reduce((acc, err) => {
+          acc[err.path.join('.')] = err.message;
+          return acc;
+        }, {} as Record<string, string>),
+      },
+      { status: 400 }
+    );
+  }
+
+  // Error desconocido
+  console.error('[Unexpected Error]:', error);
+  return NextResponse.json(
+    {
+      error: 'Internal server error',
+      code: 'INTERNAL_ERROR',
+    },
+    { status: 500 }
+  );
+}
+
+// Uso en API Routes
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      throw new UnauthorizedError();
+    }
+
+    const data = await fetchData();
+    if (!data) {
+      throw new NotFoundError('Data');
+    }
+
+    return NextResponse.json({ data });
+  } catch (error) {
+    return handleAPIError(error);
+  }
+}
+```
+
+### 4. Rate Limiting por Endpoint
+
+```typescript
+// 📁 lib/api-rate-limiter.ts
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
+
+// Diferentes límites para diferentes endpoints
+export const rateLimiters = {
+  auth: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(10, '5 m'), // 10 requests / 5 min
+  }),
+  api: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(100, '1 m'), // 100 requests / 1 min
+  }),
+  expensive: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(5, '1 m'), // 5 requests / 1 min (para operaciones costosas)
+  }),
+};
+
+// Uso en API Route
+export async function POST(request: NextRequest) {
+  const ip = request.headers.get('x-forwarded-for') || 'unknown';
+  
+  const { success, limit, remaining, reset } = await rateLimiters.expensive.limit(ip);
+  
+  if (!success) {
+    return NextResponse.json(
+      {
+        error: 'Too many requests',
+        limit,
+        remaining: 0,
+        reset: new Date(reset).toISOString(),
+      },
+      {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': limit.toString(),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': reset.toString(),
+        },
+      }
+    );
+  }
+
+  // Continuar con la lógica...
+  return NextResponse.json({ success: true });
+}
+```
+
+---
+
+## 🧪 TESTING AUTOMATIZADO (QA)
+
+### 1. Tests Unitarios con Jest/Vitest
+
+#### Test de Funciones Puras
+```typescript
+// 📁 lib/calculations.ts
+export function calculateRentIncrease(
+  currentRent: number,
+  percentage: number
+): number {
+  if (currentRent < 0) {
+    throw new Error('El alquiler no puede ser negativo');
+  }
+  if (percentage < 0 || percentage > 100) {
+    throw new Error('El porcentaje debe estar entre 0 y 100');
+  }
+  
+  return Math.round(currentRent * (1 + percentage / 100) * 100) / 100;
+}
+
+export function isValidEmail(email: string): boolean {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+}
+
+// 📁 lib/calculations.test.ts
+import { describe, it, expect } from 'vitest';
+import { calculateRentIncrease, isValidEmail } from './calculations';
+
+describe('calculateRentIncrease', () => {
+  it('calcula correctamente el aumento de alquiler', () => {
+    expect(calculateRentIncrease(1000, 5)).toBe(1050);
+    expect(calculateRentIncrease(1500, 10)).toBe(1650);
+  });
+
+  it('maneja decimales correctamente', () => {
+    expect(calculateRentIncrease(999.99, 5)).toBe(1049.99);
+  });
+
+  it('lanza error con alquiler negativo', () => {
+    expect(() => calculateRentIncrease(-100, 5)).toThrow('El alquiler no puede ser negativo');
+  });
+
+  it('lanza error con porcentaje inválido', () => {
+    expect(() => calculateRentIncrease(1000, -5)).toThrow('El porcentaje debe estar entre 0 y 100');
+    expect(() => calculateRentIncrease(1000, 150)).toThrow('El porcentaje debe estar entre 0 y 100');
+  });
+
+  // Edge cases
+  it('maneja 0% de aumento', () => {
+    expect(calculateRentIncrease(1000, 0)).toBe(1000);
+  });
+
+  it('maneja 100% de aumento', () => {
+    expect(calculateRentIncrease(1000, 100)).toBe(2000);
+  });
+
+  it('maneja alquiler 0', () => {
+    expect(calculateRentIncrease(0, 10)).toBe(0);
+  });
+});
+
+describe('isValidEmail', () => {
+  it('valida emails correctos', () => {
+    expect(isValidEmail('user@example.com')).toBe(true);
+    expect(isValidEmail('test+alias@domain.co.uk')).toBe(true);
+  });
+
+  it('rechaza emails inválidos', () => {
+    expect(isValidEmail('invalid')).toBe(false);
+    expect(isValidEmail('@example.com')).toBe(false);
+    expect(isValidEmail('user@')).toBe(false);
+    expect(isValidEmail('')).toBe(false);
+  });
+
+  // Edge cases
+  it('maneja espacios', () => {
+    expect(isValidEmail(' user@example.com ')).toBe(false);
+    expect(isValidEmail('user @example.com')).toBe(false);
+  });
+
+  it('maneja null/undefined', () => {
+    expect(isValidEmail(null as any)).toBe(false);
+    expect(isValidEmail(undefined as any)).toBe(false);
+  });
+});
+```
+
+#### Test de Servicios (con Mocks)
+```typescript
+// 📁 lib/payment-service.test.ts
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { PaymentService } from './payment-service';
+import { prisma } from './db';
+import { StripeService } from './stripe-service';
+
+// Mockear dependencias
+vi.mock('./db');
+vi.mock('./stripe-service');
+
+describe('PaymentService', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('processPayment', () => {
+    it('procesa un pago exitosamente', async () => {
+      // Arrange
+      const mockPaymentIntent = {
+        clientSecret: 'pi_test_secret',
+        paymentIntentId: 'pi_test_123',
+      };
+
+      vi.mocked(StripeService.createPaymentIntent).mockResolvedValue(mockPaymentIntent);
+      vi.mocked(prisma.payment.create).mockResolvedValue({
+        id: 'pay_123',
+        amount: 1000,
+        status: 'PENDING',
+      } as any);
+
+      // Act
+      const result = await PaymentService.processPayment({
+        amount: 1000,
+        contractId: 'contract_123',
+      });
+
+      // Assert
+      expect(result.success).toBe(true);
+      expect(StripeService.createPaymentIntent).toHaveBeenCalledWith(1000, 'eur');
+      expect(prisma.payment.create).toHaveBeenCalled();
+    });
+
+    it('maneja error cuando el monto es negativo', async () => {
+      await expect(
+        PaymentService.processPayment({
+          amount: -100,
+          contractId: 'contract_123',
+        })
+      ).rejects.toThrow('El monto debe ser positivo');
+    });
+
+    it('maneja error de Stripe', async () => {
+      vi.mocked(StripeService.createPaymentIntent).mockRejectedValue(
+        new Error('Stripe API error')
+      );
+
+      await expect(
+        PaymentService.processPayment({
+          amount: 1000,
+          contractId: 'contract_123',
+        })
+      ).rejects.toThrow('Error procesando pago');
+    });
+
+    // Edge cases
+    it('maneja monto 0', async () => {
+      await expect(
+        PaymentService.processPayment({
+          amount: 0,
+          contractId: 'contract_123',
+        })
+      ).rejects.toThrow('El monto debe ser positivo');
+    });
+
+    it('maneja contractId null', async () => {
+      await expect(
+        PaymentService.processPayment({
+          amount: 1000,
+          contractId: null as any,
+        })
+      ).rejects.toThrow('Contract ID es requerido');
+    });
+
+    it('maneja tarjeta rechazada', async () => {
+      vi.mocked(StripeService.createPaymentIntent).mockRejectedValue(
+        new Error('card_declined')
+      );
+
+      await expect(
+        PaymentService.processPayment({
+          amount: 1000,
+          contractId: 'contract_123',
+        })
+      ).rejects.toThrow();
+
+      expect(prisma.payment.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: 'FAILED',
+          }),
+        })
+      );
+    });
+  });
+});
+```
+
+### 2. Tests de Integración (API Routes)
+
+```typescript
+// 📁 __tests__/api/properties.test.ts
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+
+describe('API: /api/properties', () => {
+  let authToken: string;
+  const baseURL = 'http://localhost:3000';
+
+  beforeAll(async () => {
+    // Autenticar para obtener token
+    const response = await fetch(`${baseURL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'test@example.com',
+        password: 'password123',
+      }),
+    });
+    
+    const data = await response.json();
+    authToken = data.token;
+  });
+
+  describe('GET /api/properties', () => {
+    it('retorna lista de propiedades', async () => {
+      const response = await fetch(`${baseURL}/api/properties`, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
+      });
+
+      expect(response.status).toBe(200);
+      
+      const data = await response.json();
+      expect(data.success).toBe(true);
+      expect(Array.isArray(data.data)).toBe(true);
+      expect(data.pagination).toBeDefined();
+    });
+
+    it('retorna 401 sin autenticación', async () => {
+      const response = await fetch(`${baseURL}/api/properties`);
+      expect(response.status).toBe(401);
+    });
+
+    it('filtra por status correctamente', async () => {
+      const response = await fetch(`${baseURL}/api/properties?status=ACTIVE`, {
+        headers: { 'Authorization': `Bearer ${authToken}` },
+      });
+
+      const data = await response.json();
+      expect(data.data.every((p: any) => p.status === 'ACTIVE')).toBe(true);
+    });
+
+    // Edge cases
+    it('maneja página inválida', async () => {
+      const response = await fetch(`${baseURL}/api/properties?page=-1`, {
+        headers: { 'Authorization': `Bearer ${authToken}` },
+      });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('maneja límite excesivo', async () => {
+      const response = await fetch(`${baseURL}/api/properties?limit=1000`, {
+        headers: { 'Authorization': `Bearer ${authToken}` },
+      });
+
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe('POST /api/properties', () => {
+    it('crea una propiedad exitosamente', async () => {
+      const propertyData = {
+        address: 'Calle Test 123',
+        city: 'Madrid',
+        price: 1200,
+        rooms: 3,
+        bathrooms: 2,
+        squareMeters: 80,
+      };
+
+      const response = await fetch(`${baseURL}/api/properties`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(propertyData),
+      });
+
+      expect(response.status).toBe(201);
+      
+      const data = await response.json();
+      expect(data.success).toBe(true);
+      expect(data.data.address).toBe(propertyData.address);
+    });
+
+    it('valida campos requeridos', async () => {
+      const response = await fetch(`${baseURL}/api/properties`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ address: 'Test' }), // Faltan campos
+      });
+
+      expect(response.status).toBe(400);
+      
+      const data = await response.json();
+      expect(data.error).toBeDefined();
+      expect(data.details).toBeDefined();
+    });
+
+    // Edge cases
+    it('maneja precio negativo', async () => {
+      const response = await fetch(`${baseURL}/api/properties`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          address: 'Test',
+          price: -1000, // Negativo
+          rooms: 3,
+        }),
+      });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('maneja body vacío', async () => {
+      const response = await fetch(`${baseURL}/api/properties`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('maneja JSON malformado', async () => {
+      const response = await fetch(`${baseURL}/api/properties`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: 'invalid json',
+      });
+
+      expect(response.status).toBe(400);
+    });
+  });
+});
+```
+
+### 3. Tests E2E con Playwright
+
+```typescript
+// 📁 e2e/properties.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('Gestión de Propiedades', () => {
+  test.beforeEach(async ({ page }) => {
+    // Login
+    await page.goto('/login');
+    await page.fill('input[name="email"]', 'test@example.com');
+    await page.fill('input[name="password"]', 'password123');
+    await page.click('button[type="submit"]');
+    await page.waitForURL('/dashboard');
+  });
+
+  test('crear nueva propiedad', async ({ page }) => {
+    // Navegar a crear propiedad
+    await page.goto('/dashboard/properties/new');
+
+    // Llenar formulario
+    await page.fill('input[name="address"]', 'Calle Test 123');
+    await page.fill('input[name="city"]', 'Madrid');
+    await page.fill('input[name="price"]', '1200');
+    await page.fill('input[name="rooms"]', '3');
+    await page.fill('input[name="bathrooms"]', '2');
+    await page.fill('input[name="squareMeters"]', '80');
+
+    // Enviar
+    await page.click('button[type="submit"]');
+
+    // Verificar redirección y mensaje
+    await expect(page).toHaveURL(/\/dashboard\/properties\/\w+/);
+    await expect(page.locator('text=Propiedad creada exitosamente')).toBeVisible();
+  });
+
+  test('validar campos requeridos', async ({ page }) => {
+    await page.goto('/dashboard/properties/new');
+    
+    // Intentar enviar sin llenar
+    await page.click('button[type="submit"]');
+
+    // Verificar mensajes de error
+    await expect(page.locator('text=Campo requerido')).toHaveCount(6);
+  });
+
+  test('buscar propiedades', async ({ page }) => {
+    await page.goto('/dashboard/properties');
+
+    // Usar buscador
+    await page.fill('input[placeholder="Buscar propiedades"]', 'Madrid');
+    await page.press('input[placeholder="Buscar propiedades"]', 'Enter');
+
+    // Verificar resultados
+    await expect(page.locator('[data-testid="property-card"]')).toHaveCount(3);
+  });
+
+  // Edge case: formulario con datos inválidos
+  test('manejar precio negativo', async ({ page }) => {
+    await page.goto('/dashboard/properties/new');
+
+    await page.fill('input[name="price"]', '-1000');
+    await page.click('button[type="submit"]');
+
+    await expect(page.locator('text=El precio debe ser positivo')).toBeVisible();
+  });
+});
+```
+
+### 4. Cobertura de Tests
+
+```json
+// 📁 vitest.config.ts
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        '.next/',
+        '**/*.config.ts',
+        '**/*.test.ts',
+        '**/*.spec.ts',
+      ],
+      // Umbrales de cobertura
+      thresholds: {
+        lines: 80,
+        functions: 80,
+        branches: 75,
+        statements: 80,
+      },
+    },
+  },
+});
+```
+
+---
+
+## 🤖 INTEGRACIÓN DE IA
+
+### 1. OpenAI GPT-4 / GPT-4 Turbo
+
+```typescript
+// 📁 lib/openai-service.ts
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+export class OpenAIService {
+  static async generatePropertyDescription(property: {
+    address: string;
+    rooms: number;
+    bathrooms: number;
+    squareMeters: number;
+    features: string[];
+  }): Promise<string> {
+    const prompt = `Genera una descripción atractiva para una propiedad inmobiliaria:
+
+Dirección: ${property.address}
+Habitaciones: ${property.rooms}
+Baños: ${property.bathrooms}
+Superficie: ${property.squareMeters}m²
+Características: ${property.features.join(', ')}
+
+La descripción debe ser profesional, atractiva y resaltar los puntos fuertes.
+Máximo 200 palabras.`;
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4-turbo-preview',
+      messages: [
+        {
+          role: 'system',
+          content: 'Eres un experto en marketing inmobiliario.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      max_tokens: 500,
+      temperature: 0.7,
+    });
+
+    return completion.choices[0].message.content || '';
+  }
+
+  static async chatCompletion(
+    messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>
+  ) {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4-turbo-preview',
+      messages,
+    });
+
+    return completion.choices[0].message.content;
+  }
+
+  static async generateEmbeddings(text: string): Promise<number[]> {
+    const response = await openai.embeddings.create({
+      model: 'text-embedding-3-small',
+      input: text,
+    });
+
+    return response.data[0].embedding;
+  }
+}
+```
+
+### 2. Anthropic Claude (Streaming)
+
+```typescript
+// 📁 lib/claude-service.ts
+import Anthropic from '@anthropic-ai/sdk';
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+export class ClaudeService {
+  static async analyzeProperty(property: any): Promise<{
+    valuation: number;
+    reasoning: string;
+    recommendations: string[];
+  }> {
+    const prompt = `Analiza esta propiedad y proporciona:
+1. Valoración estimada en €
+2. Razonamiento de la valoración
+3. 3 recomendaciones para mejorar su valor
+
+Propiedad:
+${JSON.stringify(property, null, 2)}
+
+Responde en formato JSON.`;
+
+    const message = await anthropic.messages.create({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 1024,
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+    });
+
+    const content = message.content[0];
+    if (content.type === 'text') {
+      return JSON.parse(content.text);
+    }
+
+    throw new Error('Unexpected response format');
+  }
+
+  static async streamChat(
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>
+  ) {
+    return anthropic.messages.stream({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 1024,
+      messages,
+    });
+  }
+}
+
+// 📁 app/api/ai/chat/route.ts
+import { StreamingTextResponse } from 'ai';
+
+export const dynamic = 'force-dynamic';
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const stream = await ClaudeService.streamChat(messages);
+
+  // Convertir stream de Anthropic a formato compatible
+  const readableStream = new ReadableStream({
+    async start(controller) {
+      for await (const chunk of stream) {
+        if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+          controller.enqueue(new TextEncoder().encode(chunk.delta.text));
+        }
+      }
+      controller.close();
+    },
+  });
+
+  return new StreamingTextResponse(readableStream);
+}
+```
+
+### 3. RAG (Retrieval-Augmented Generation)
+
+```typescript
+// 📁 lib/rag-service.ts
+import { OpenAIService } from './openai-service';
+import { prisma } from './db';
+
+export class RAGService {
+  // Indexar documentos (generar embeddings)
+  static async indexDocument(id: string, content: string) {
+    const embedding = await OpenAIService.generateEmbeddings(content);
+
+    await prisma.documentEmbedding.create({
+      data: {
+        documentId: id,
+        content,
+        embedding,
+      },
+    });
+  }
+
+  // Búsqueda semántica
+  static async searchSimilarDocuments(query: string, limit: number = 5) {
+    const queryEmbedding = await OpenAIService.generateEmbeddings(query);
+
+    // Usar extensión pgvector para búsqueda por similitud
+    const results = await prisma.$queryRaw`
+      SELECT 
+        id,
+        content,
+        1 - (embedding <=> ${queryEmbedding}::vector) AS similarity
+      FROM "DocumentEmbedding"
+      ORDER BY similarity DESC
+      LIMIT ${limit}
+    `;
+
+    return results;
+  }
+
+  // Chat con contexto (RAG)
+  static async chatWithContext(question: string, conversationHistory: any[]) {
+    // 1. Buscar documentos relevantes
+    const relevantDocs = await this.searchSimilarDocuments(question, 3);
+
+    // 2. Construir contexto
+    const context = relevantDocs.map((doc: any) => doc.content).join('\n\n');
+
+    // 3. Generar respuesta con contexto
+    const prompt = `Contexto:
+${context}
+
+Pregunta: ${question}
+
+Responde basándote en el contexto proporcionado.`;
+
+    const messages = [
+      { role: 'system' as const, content: 'Eres un asistente experto en PropTech.' },
+      ...conversationHistory,
+      { role: 'user' as const, content: prompt },
+    ];
+
+    return await OpenAIService.chatCompletion(messages);
+  }
+}
+```
+
+### 4. Ingeniería de Prompts - Best Practices
+
+```typescript
+// 📁 lib/prompt-templates.ts
+
+export const PROMPT_TEMPLATES = {
+  propertyValuation: (property: any) => `Actúa como un tasador inmobiliario certificado con 20 años de experiencia.
+
+Tu tarea: Valorar esta propiedad con precisión.
+
+Propiedad:
+- Ubicación: ${property.address}, ${property.city}
+- Superficie: ${property.squareMeters}m²
+- Habitaciones: ${property.rooms}
+- Baños: ${property.bathrooms}
+- Estado: ${property.condition}
+- Año construcción: ${property.yearBuilt}
+
+Datos del mercado:
+- Precio medio por m² en la zona: ${property.avgPricePerM2}€
+- Tendencia: ${property.marketTrend}
+
+Proporciona una respuesta en formato JSON con:
+{
+  "estimatedValue": number,
+  "minValue": number,
+  "maxValue": number,
+  "confidenceScore": number (0-100),
+  "reasoning": "string explicando la valoración",
+  "keyFactors": ["factor1", "factor2", "factor3"]
+}
+
+Sé preciso y justifica tu valoración.`,
+
+  tenantMatching: (tenant: any, property: any) => `Eres un experto en matching inquilino-propiedad.
+
+Evalúa la compatibilidad entre este inquilino y esta propiedad.
+
+INQUILINO:
+- Presupuesto: ${tenant.budget}€/mes
+- Ocupación: ${tenant.occupation}
+- Mascotas: ${tenant.hasPets ? 'Sí' : 'No'}
+- Fumador: ${tenant.isSmoker ? 'Sí' : 'No'}
+- Preferencias: ${tenant.preferences.join(', ')}
+
+PROPIEDAD:
+- Precio: ${property.price}€/mes
+- Ubicación: ${property.address}
+- Características: ${property.features.join(', ')}
+- Mascotas permitidas: ${property.petsAllowed ? 'Sí' : 'No'}
+
+Proporciona JSON:
+{
+  "matchScore": number (0-100),
+  "pros": ["ventaja1", "ventaja2"],
+  "cons": ["desventaja1", "desventaja2"],
+  "recommendation": "string con recomendación final"
+}`,
+
+  incidentClassification: (description: string, photos?: string[]) => `Eres un experto en mantenimiento de propiedades.
+
+Clasifica esta incidencia:
+
+Descripción: ${description}
+${photos ? `Fotos: ${photos.length} adjuntas` : ''}
+
+Clasifica en:
+{
+  "category": "PLUMBING" | "ELECTRICAL" | "HVAC" | "STRUCTURAL" | "APPLIANCE" | "OTHER",
+  "urgency": "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
+  "estimatedCost": number,
+  "providerType": "PLUMBER" | "ELECTRICIAN" | "HVAC_TECH" | "GENERAL_CONTRACTOR",
+  "actionRequired": "string describiendo acción",
+  "timeEstimate": "string estimando tiempo de resolución"
+}
+
+Sé preciso en la clasificación.`,
+
+  marketingCopy: (property: any) => `Eres un copywriter experto en marketing inmobiliario.
+
+Genera copy atractivo para:
+
+PROPIEDAD:
+${JSON.stringify(property, null, 2)}
+
+Genera 3 versiones:
+1. Instagram (casual, emojis, hashtags)
+2. Facebook (familiar, detallado)
+3. LinkedIn (profesional, inversión)
+
+Formato JSON:
+{
+  "instagram": "string",
+  "facebook": "string",
+  "linkedin": "string",
+  "hashtags": ["#tag1", "#tag2"]
+}`,
+};
+
+// Uso:
+const prompt = PROMPT_TEMPLATES.propertyValuation(property);
+const result = await ClaudeService.analyze(prompt);
+```
+
+### 5. Manejo de Costos y Límites
+
+```typescript
+// 📁 lib/ai-cost-tracker.ts
+export class AICostTracker {
+  private static costs = {
+    'gpt-4': { input: 0.03, output: 0.06 }, // por 1K tokens
+    'gpt-4-turbo': { input: 0.01, output: 0.03 },
+    'gpt-3.5-turbo': { input: 0.0005, output: 0.0015 },
+    'claude-3-sonnet': { input: 0.003, output: 0.015 },
+    'claude-3-opus': { input: 0.015, output: 0.075 },
+  };
+
+  static async logUsage(
+    model: string,
+    inputTokens: number,
+    outputTokens: number,
+    userId: string
+  ) {
+    const cost =
+      (inputTokens / 1000) * this.costs[model].input +
+      (outputTokens / 1000) * this.costs[model].output;
+
+    await prisma.aiUsageLog.create({
+      data: {
+        userId,
+        model,
+        inputTokens,
+        outputTokens,
+        cost,
+      },
+    });
+
+    return cost;
+  }
+
+  static async getUserMonthlyUsage(userId: string): Promise<{
+    totalCost: number;
+    totalTokens: number;
+    requestCount: number;
+  }> {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const logs = await prisma.aiUsageLog.findMany({
+      where: {
+        userId,
+        createdAt: { gte: startOfMonth },
+      },
+    });
+
+    return {
+      totalCost: logs.reduce((sum, log) => sum + log.cost, 0),
+      totalTokens: logs.reduce((sum, log) => sum + log.inputTokens + log.outputTokens, 0),
+      requestCount: logs.length,
+    };
+  }
+
+  static async checkQuota(userId: string, model: string): Promise<boolean> {
+    const usage = await this.getUserMonthlyUsage(userId);
+    const quota = 100; // $100/mes por usuario
+
+    return usage.totalCost < quota;
+  }
+}
+```
+
+---
+
+## 📝 DOCUMENTACIÓN TÉCNICA
+
+### 1. API Documentation (Swagger/OpenAPI)
+
+```typescript
+// 📁 lib/swagger-config.ts
+import swaggerJsdoc from 'swagger-jsdoc';
+
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Inmova API',
+      version: '1.0.0',
+      description: 'API RESTful para gestión inmobiliaria PropTech',
+      contact: {
+        name: 'Inmova Support',
+        email: 'support@inmova.app',
+      },
+    },
+    servers: [
+      {
+        url: 'https://inmovaapp.com',
+        description: 'Production',
+      },
+      {
+        url: 'http://localhost:3000',
+        description: 'Development',
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+      schemas: {
+        Property: {
+          type: 'object',
+          required: ['address', 'city', 'price', 'rooms'],
+          properties: {
+            id: { type: 'string', example: 'cljk3...' },
+            address: { type: 'string', example: 'Calle Mayor 123' },
+            city: { type: 'string', example: 'Madrid' },
+            price: { type: 'number', example: 1200 },
+            rooms: { type: 'integer', example: 3 },
+            bathrooms: { type: 'integer', example: 2 },
+            squareMeters: { type: 'number', example: 85 },
+            status: {
+              type: 'string',
+              enum: ['AVAILABLE', 'RENTED', 'MAINTENANCE'],
+              example: 'AVAILABLE',
+            },
+            createdAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        Error: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+            code: { type: 'string' },
+            details: { type: 'object' },
+          },
+        },
+      },
+    },
+    security: [{ bearerAuth: [] }],
+  },
+  apis: ['./app/api/**/*.ts'], // Buscar anotaciones en archivos
+};
+
+export const swaggerSpec = swaggerJsdoc(options);
+
+// 📁 app/api/properties/route.ts
+/**
+ * @swagger
+ * /api/properties:
+ *   get:
+ *     summary: Listar propiedades
+ *     description: Obtiene lista paginada de propiedades de la empresa
+ *     tags: [Properties]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *           maximum: 100
+ *         description: Elementos por página
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [AVAILABLE, RENTED, MAINTENANCE]
+ *         description: Filtrar por estado
+ *     responses:
+ *       200:
+ *         description: Lista de propiedades
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Property'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page: { type: integer }
+ *                     limit: { type: integer }
+ *                     total: { type: integer }
+ *                     pages: { type: integer }
+ *       401:
+ *         description: No autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *   post:
+ *     summary: Crear propiedad
+ *     description: Crea una nueva propiedad
+ *     tags: [Properties]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Property'
+ *     responses:
+ *       201:
+ *         description: Propiedad creada exitosamente
+ *       400:
+ *         description: Datos inválidos
+ *       401:
+ *         description: No autenticado
+ */
+export async function GET(request: NextRequest) {
+  // ... implementación
+}
+```
+
+### 2. JSDoc Comments
+
+```typescript
+// 📁 lib/property-service.ts
+
+/**
+ * Servicio para gestión de propiedades inmobiliarias
+ * 
+ * @module PropertyService
+ * @category Services
+ */
+export class PropertyService {
+  /**
+   * Calcula el precio recomendado para una propiedad
+   * basado en propiedades similares en la zona
+   * 
+   * @param {Object} params - Parámetros de la propiedad
+   * @param {string} params.city - Ciudad de la propiedad
+   * @param {number} params.squareMeters - Superficie en m²
+   * @param {number} params.rooms - Número de habitaciones
+   * @param {string} params.neighborhood - Barrio
+   * 
+   * @returns {Promise<{price: number, confidence: number}>} Precio recomendado y nivel de confianza (0-100)
+   * 
+   * @throws {ValidationError} Si los parámetros son inválidos
+   * @throws {APIError} Si hay error en la API externa
+   * 
+   * @example
+   * const result = await PropertyService.calculateRecommendedPrice({
+   *   city: 'Madrid',
+   *   squareMeters: 80,
+   *   rooms: 3,
+   *   neighborhood: 'Salamanca'
+   * });
+   * console.log(`Precio recomendado: ${result.price}€`);
+   */
+  static async calculateRecommendedPrice(params: {
+    city: string;
+    squareMeters: number;
+    rooms: number;
+    neighborhood: string;
+  }): Promise<{ price: number; confidence: number }> {
+    // 1. Validar parámetros
+    if (params.squareMeters <= 0 || params.rooms <= 0) {
+      throw new ValidationError({
+        squareMeters: 'Debe ser mayor a 0',
+        rooms: 'Debe ser mayor a 0',
+      });
+    }
+
+    // 2. Buscar propiedades similares
+    const similarProperties = await prisma.property.findMany({
+      where: {
+        city: params.city,
+        neighborhood: params.neighborhood,
+        squareMeters: {
+          gte: params.squareMeters * 0.8,
+          lte: params.squareMeters * 1.2,
+        },
+        rooms: params.rooms,
+        status: 'RENTED',
+      },
+      select: { price: true },
+    });
+
+    if (similarProperties.length === 0) {
+      return { price: 0, confidence: 0 };
+    }
+
+    // 3. Calcular media
+    const avgPrice =
+      similarProperties.reduce((sum, p) => sum + p.price, 0) / similarProperties.length;
+
+    // 4. Calcular confianza (basado en cantidad de datos)
+    const confidence = Math.min(similarProperties.length * 10, 100);
+
+    return {
+      price: Math.round(avgPrice),
+      confidence,
+    };
+  }
+
+  /**
+   * Genera un reporte PDF de la propiedad
+   * 
+   * @internal Solo para uso interno
+   * @deprecated Usar generateModernReport en su lugar
+   */
+  static async generateLegacyReport(propertyId: string): Promise<Buffer> {
+    // ... implementación antigua
+  }
+}
+```
+
+### 3. README Template
+
+```markdown
+# 📁 Feature Name
+
+## 📖 Descripción
+
+Breve descripción de qué hace esta funcionalidad.
+
+## 🚀 Instalación
+
+\`\`\`bash
+yarn install
+yarn prisma generate
+\`\`\`
+
+## 🔧 Configuración
+
+Variables de entorno requeridas:
+
+\`\`\`env
+DATABASE_URL=postgresql://...
+API_KEY=...
+\`\`\`
+
+## 💻 Uso
+
+### Ejemplo Básico
+
+\`\`\`typescript
+import { FeatureService } from '@/lib/feature-service';
+
+const result = await FeatureService.doSomething({
+  param1: 'value',
+});
+\`\`\`
+
+### Ejemplo Avanzado
+
+\`\`\`typescript
+// Código más complejo con explicación
+\`\`\`
+
+## 📊 API Reference
+
+### `FeatureService.doSomething(params)`
+
+**Parámetros:**
+- `param1` (string): Descripción del parámetro
+- `param2` (number, opcional): Descripción
+
+**Returns:** `Promise<ResultType>`
+
+**Throws:**
+- `ValidationError`: Si los parámetros son inválidos
+- `APIError`: Si hay error en la API
+
+## 🧪 Testing
+
+\`\`\`bash
+yarn test
+yarn test:coverage
+\`\`\`
+
+## 📝 Notas Técnicas
+
+- Limitación 1
+- Limitación 2
+- Consideración importante
+
+## 🐛 Troubleshooting
+
+### Problema Común 1
+
+**Síntoma:** Descripción del problema
+
+**Solución:** Pasos para resolverlo
+
+## 🔗 Links Relacionados
+
+- [Documentación API](/docs/api)
+- [Ejemplos](/examples)
+```
+
+### 4. Architecture Decision Records (ADRs)
+
+```markdown
+# 📁 docs/adr/001-prisma-as-orm.md
+
+# ADR-001: Usar Prisma como ORM
+
+**Estado:** Aceptado  
+**Fecha:** 2025-01-15  
+**Decidido por:** Equipo de Arquitectura
+
+## Contexto
+
+Necesitamos un ORM para interactuar con PostgreSQL de forma type-safe y productiva.
+
+Opciones evaluadas:
+- Prisma
+- TypeORM
+- Sequelize
+- Drizzle ORM
+
+## Decisión
+
+Usar **Prisma** como ORM principal.
+
+## Razones
+
+✅ **Type Safety**: Generación automática de tipos TypeScript  
+✅ **Developer Experience**: Sintaxis limpia e intuitiva  
+✅ **Migrations**: Sistema de migraciones robusto  
+✅ **Performance**: Query optimizer incluido  
+✅ **Ecosystem**: Amplia comunidad y soporte  
+
+❌ **Contra**: Curva de aprendizaje inicial
+
+## Consecuencias
+
+### Positivas
+- Menos errores en tiempo de desarrollo
+- Refactorings más seguros
+- Mejor autocompletado en IDEs
+
+### Negativas
+- Dependencia de Prisma CLI
+- Queries muy complejas pueden requerir raw SQL
+
+## Alternativas Consideradas
+
+### TypeORM
+- Pro: Más maduro
+- Contra: Menos type-safe
+
+### Drizzle ORM
+- Pro: Mejor performance
+- Contra: Ecosystem más pequeño
+
+## Referencias
+
+- [Prisma Docs](https://www.prisma.io/docs)
+- [Benchmark Prisma vs TypeORM](https://example.com)
 ```
 
 ---
