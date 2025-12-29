@@ -16,7 +16,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Configurar para que Vercel pueda hacer build correctamente
   outputFileTracingExcludes: {
     '*': [
       'node_modules/@swc/core-linux-x64-gnu',
@@ -24,7 +23,7 @@ const nextConfig = {
       'node_modules/@esbuild/linux-x64',
     ],
   },
-  webpack: (config, { isServer, webpack }) => {
+  webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -35,7 +34,6 @@ const nextConfig = {
       };
     }
 
-    // Ignorar warnings de Prisma durante el build
     config.infrastructureLogging = {
       level: 'error',
     };

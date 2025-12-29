@@ -1,15 +1,15 @@
 {
-  "buildCommand": "yarn build",
   "framework": "nextjs",
+  "buildCommand": "prisma generate && next build",
+  "installCommand": "yarn install",
   "functions": {
     "app/api/**/*.ts": {
-      "maxDuration": 10,
-      "memory": 1024
-    },
-    "app/api/auth/**/*.ts": {
-      "maxDuration": 10,
-      "memory": 512
+      "maxDuration": 60,
+      "memory": 3008
     }
+  },
+  "env": {
+    "SKIP_ENV_VALIDATION": "1"
   },
   "headers": [
     {
@@ -38,11 +38,9 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
+          "value": "no-cache, no-store, must-revalidate"
         }
       ]
     }
-  ],
-  "rewrites": [],
-  "redirects": []
+  ]
 }

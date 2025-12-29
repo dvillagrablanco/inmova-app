@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && SKIP_API_ANALYSIS=1 next build",
+    "build:vercel": "prisma generate && SKIP_API_ANALYSIS=1 next build --no-lint",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
