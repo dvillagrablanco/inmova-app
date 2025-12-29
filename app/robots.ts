@@ -1,11 +1,7 @@
-/**
- * Robots.txt dinámico para SEO
- */
-
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://inmova.app';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://inmovaapp.com';
 
   return {
     rules: [
@@ -15,40 +11,19 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           '/api/',
           '/dashboard/',
+          '/(auth)/',
           '/admin/',
-          '/unidades/*/editar',
-          '/edificios/*/editar',
-          '/inquilinos/*/editar',
-          '/contratos/*/editar',
+          '/private/',
           '/_next/',
           '/static/',
         ],
       },
       {
         userAgent: 'GPTBot',
-        disallow: '/',
-      },
-      {
-        userAgent: 'CCBot',
-        disallow: '/',
-      },
-      {
-        userAgent: 'ChatGPT-User',
-        disallow: '/',
-      },
-      {
-        userAgent: 'Google-Extended',
-        disallow: '/',
-      },
-      {
-        userAgent: 'anthropic-ai',
-        disallow: '/',
-      },
-      {
-        userAgent: 'ClaudeBot',
-        disallow: '/',
+        disallow: ['/'], // Bloquear crawlers de IA si lo deseas
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
+    host: baseUrl,
   };
 }

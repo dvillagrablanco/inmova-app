@@ -1,42 +1,92 @@
-import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { Metadata } from 'next';
+import { Providers } from './providers';
+import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
-import '@/styles/mobile-first.css';
-import '@/styles/sidebar-mobile.css';
-import '@/styles/onboarding-mobile.css';
-// import 'react-big-calendar/lib/css/react-big-calendar.css'; // Desactivado temporalmente - requiere paquete react-big-calendar
-import { Providers } from '@/components/providers';
-import { SkipLink } from '@/components/ui/skip-link';
-import { BottomNavigation } from '@/components/mobile/BottomNavigation';
-// import { WebVitalsInit } from '@/components/WebVitalsInit'; // Desactivado temporalmente - requiere paquete web-vitals
-import { defaultMetadata } from '@/lib/seo-config';
+import Script from 'next/script';
+import { GA_MEASUREMENT_ID } from '@/lib/analytics';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  ...defaultMetadata,
-  icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon.svg',
+  title: {
+    default: 'Inmova App - Gestión Inmobiliaria Inteligente',
+    template: '%s | Inmova App',
   },
-  manifest: '/manifest.json',
-  // Versión dinámica basada en variables de entorno
-  other: {
-    'build-time': process.env.NEXT_PUBLIC_BUILD_TIME || new Date().toISOString(),
-    'vercel-deployment-id': process.env.VERCEL_DEPLOYMENT_ID || 'local',
-    'git-commit': process.env.VERCEL_GIT_COMMIT_SHA || 'unknown',
+  description:
+    'Plataforma PropTech B2B/B2C para gestión inmobiliaria integral. CRM, gestión de propiedades, inquilinos, contratos y más.',
+  keywords: [
+    'gestión inmobiliaria',
+    'proptech',
+    'CRM inmobiliario',
+    'gestión de propiedades',
+    'alquiler',
+    'contratos',
+  ],
+  authors: [{ name: 'Inmova' }],
+  creator: 'Inmova',
+  publisher: 'Inmova',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://inmovaapp.com'),
+  openGraph: {
+    type: 'website',
+    locale: 'es_ES',
+    url: process.env.NEXT_PUBLIC_BASE_URL || 'https://inmovaapp.com',
+    title: 'Inmova App - Gestión Inmobiliaria Inteligente',
+    description:
+      'Plataforma PropTech B2B/B2C para gestión inmobiliaria integral. CRM, gestión de propiedades, inquilinos, contratos y más.',
+    siteName: 'Inmova App',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Inmova App - Gestión Inmobiliaria Inteligente',
+    description: 'Plataforma PropTech B2B/B2C para gestión inmobiliaria integral.',
+    creator: '@inmovaapp',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
-        <SkipLink />
+      <head>
+        {/* Google Analytics */}
+        {GA_MEASUREMENT_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA_MEASUREMENT_ID}', {
+                  page_path: window.location.pathname,
+                  anonymize_ip: true,
+                });
+              `}
+            </Script>
+          </>
+        )}
+      </head>
+      <body className={inter.className}>
         <Providers>
           {children}
-          <BottomNavigation />
-          {/* <WebVitalsInit /> */}
+          <Toaster />
         </Providers>
       </body>
     </html>
