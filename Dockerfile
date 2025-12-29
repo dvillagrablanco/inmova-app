@@ -52,13 +52,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Verificar y ejecutar server.js
-CMD if [ -f "server.js" ]; then \
-      node server.js; \
-    else \
-      echo "Error: server.js not found. Contents of /app:"; \
-      ls -la /app; \
-      echo "\nContents of .next:"; \
-      ls -la .next 2>/dev/null || echo ".next not found"; \
-      exit 1; \
-    fi
+# Ejecutar Next.js en modo standalone
+CMD ["sh", "-c", "cd /app && [ -f server.js ] && exec node server.js || (ls -la /app && ls -la .next && sleep infinity)"]
