@@ -89,8 +89,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         nombre,
         direccion,
         tipo,
-        anoConstructor: anoConstructor ? parseInt(anoConstructor) : undefined,
-        numeroUnidades: numeroUnidades ? parseInt(numeroUnidades) : undefined,
+        anoConstructor,
+        numeroUnidades,
       },
     });
 
