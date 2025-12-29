@@ -3,9 +3,52 @@ import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
-import { invalidateUnitsCache, invalidateBuildingsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
+import {
+  invalidateUnitsCache,
+  invalidateBuildingsCache,
+  invalidateDashboardCache,
+} from '@/lib/api-cache-helpers';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+// Schema de validación para actualizar unidad
+const unitUpdateSchema = z.object({
+  numero: z.string().min(1, { message: 'El número de unidad es requerido' }).optional(),
+  tipo: z.enum(['vivienda', 'local', 'oficina', 'garaje', 'trastero', 'otro']).optional(),
+  estado: z.enum(['disponible', 'ocupada', 'mantenimiento', 'reservada']).optional(),
+  superficie: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((val) => (typeof val === 'string' ? parseFloat(val) : val))
+    .refine((val) => val === undefined || val > 0, {
+      message: 'La superficie debe ser positiva',
+    }),
+  habitaciones: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((val) => (typeof val === 'string' ? parseInt(val) : val))
+    .refine((val) => val === undefined || val >= 0, {
+      message: 'El número de habitaciones debe ser positivo',
+    })
+    .nullable(),
+  banos: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((val) => (typeof val === 'string' ? parseInt(val) : val))
+    .refine((val) => val === undefined || val >= 0, {
+      message: 'El número de baños debe ser positivo',
+    })
+    .nullable(),
+  rentaMensual: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((val) => (typeof val === 'string' ? parseFloat(val) : val))
+    .refine((val) => val === undefined || val >= 0, {
+      message: 'La renta mensual no puede ser negativa',
+    }),
+  tenantId: z.string().uuid().optional().nullable(),
+});
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -52,7 +95,21 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     const companyId = session.user?.companyId;
     const body = await req.json();
-    const { numero, tipo, estado, superficie, habitaciones, banos, rentaMensual, tenantId } = body;
+
+    // Validación con Zod
+    const validationResult = unitUpdateSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map((err) => ({
+        field: err.path.join('.'),
+        message: err.message,
+      }));
+      logger.warn('Validation error updating unit:', { errors, unitId: params.id });
+      return NextResponse.json({ error: 'Datos inválidos', details: errors }, { status: 400 });
+    }
+
+    const { numero, tipo, estado, superficie, habitaciones, banos, rentaMensual, tenantId } =
+      validationResult.data;
 
     const unit = await prisma.unit.update({
       where: { id: params.id },
