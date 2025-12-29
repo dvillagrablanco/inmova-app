@@ -48,34 +48,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       },
     ];
 
-    // Propiedades públicas (si hay rutas públicas de propiedades)
+    // Buildings y Units públicos (si hay rutas públicas)
     let propertyPages: MetadataRoute.Sitemap = [];
 
     try {
-      const properties = await prisma.property.findMany({
-        where: {
-          // Solo propiedades públicas/disponibles
-          status: 'AVAILABLE',
-        },
+      // Intentar obtener buildings
+      const buildings = await prisma.building.findMany({
         select: {
           id: true,
           updatedAt: true,
         },
-        take: 1000, // Limitar para evitar sitemaps gigantes
+        take: 500, // Limitar para evitar sitemaps gigantes
         orderBy: {
           updatedAt: 'desc',
         },
       });
 
-      propertyPages = properties.map((property) => ({
-        url: `${baseUrl}/properties/${property.id}`,
-        lastModified: property.updatedAt,
+      propertyPages = buildings.map((building) => ({
+        url: `${baseUrl}/edificios/${building.id}`,
+        lastModified: building.updatedAt,
         changeFrequency: 'weekly' as const,
-        priority: 0.8,
+        priority: 0.7,
       }));
     } catch (error) {
-      console.error('[Sitemap] Error fetching properties:', error);
-      // Continuar sin propiedades si hay error
+      console.error('[Sitemap] Error fetching buildings:', error);
+      // Continuar sin buildings si hay error
     }
 
     // Blog posts (si existen)
