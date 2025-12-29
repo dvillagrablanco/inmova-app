@@ -1,13 +1,13 @@
 /**
  * 🔍 LinkedIn Scraper - Extracción Inteligente de Leads
- * 
+ *
  * ⚠️ IMPORTANTE - Consideraciones Legales:
  * - LinkedIn ToS prohíbe scraping automatizado
  * - Esta implementación es SOLO para fines educativos
  * - Producción: Usar LinkedIn Sales Navigator API (oficial)
  * - Alternativa: Importación manual de datos públicos
  * - GDPR: Requiere consentimiento explícito
- * 
+ *
  * Funcionalidades:
  * - Búsqueda avanzada por cargo, ubicación, industria
  * - Extracción de datos de perfil público
@@ -16,11 +16,9 @@
  * - Almacenamiento en CRM
  */
 
-import { PrismaClient } from '@prisma/client';
 import type { CompanySize, CRMLeadSource } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import puppeteer, { type Browser, type Page } from 'puppeteer';
-
-const prisma = new PrismaClient();
 
 // ============================================================================
 // CONFIGURACIÓN
@@ -31,14 +29,14 @@ const CONFIG = {
   MIN_DELAY: 3000, // 3 segundos entre requests
   MAX_DELAY: 8000, // 8 segundos
   MAX_PROFILES_PER_SESSION: 50, // Límite por sesión
-  
+
   // User agent rotation
   USER_AGENTS: [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
   ],
-  
+
   // Timeouts
   PAGE_LOAD_TIMEOUT: 30000,
   NAVIGATION_TIMEOUT: 60000,
@@ -49,9 +47,9 @@ const CONFIG = {
 // ============================================================================
 
 export interface LinkedInSearchQuery {
-  keywords?: string;        // "Property Manager" OR "Gestor Inmobiliario"
-  location?: string;        // "Madrid, España"
-  title?: string[];         // ["Property Manager", "Gestor de Propiedades"]
+  keywords?: string; // "Property Manager" OR "Gestor Inmobiliario"
+  location?: string; // "Madrid, España"
+  title?: string[]; // ["Property Manager", "Gestor de Propiedades"]
   company?: string;
   industry?: string[];
   companySize?: CompanySize[];
@@ -62,10 +60,10 @@ export interface LinkedInSearchQuery {
 export interface LinkedInProfile {
   firstName: string;
   lastName: string;
-  headline?: string;        // Job title
+  headline?: string; // Job title
   location?: string;
   profileUrl: string;
-  
+
   // Datos adicionales
   companyName?: string;
   companyIndustry?: string;
@@ -83,7 +81,7 @@ export interface LinkedInProfile {
   }>;
   skills?: string[];
   connectionCount?: number;
-  
+
   // Contact info (raramente disponible públicamente)
   email?: string;
   phone?: string;
@@ -127,11 +125,11 @@ export class LinkedInScraper {
     });
 
     this.page = await this.browser.newPage();
-    
+
     // Configurar timeouts
     await this.page.setDefaultNavigationTimeout(CONFIG.NAVIGATION_TIMEOUT);
     await this.page.setDefaultTimeout(CONFIG.PAGE_LOAD_TIMEOUT);
-    
+
     // Interceptar requests para bloquear imágenes/videos (más rápido)
     await this.page.setRequestInterception(true);
     this.page.on('request', (request) => {
@@ -159,23 +157,20 @@ export class LinkedInScraper {
    * User agent aleatorio
    */
   private getRandomUserAgent(): string {
-    return CONFIG.USER_AGENTS[
-      Math.floor(Math.random() * CONFIG.USER_AGENTS.length)
-    ];
+    return CONFIG.USER_AGENTS[Math.floor(Math.random() * CONFIG.USER_AGENTS.length)];
   }
 
   /**
    * Delay aleatorio (anti-detección)
    */
   private async randomDelay() {
-    const delay =
-      Math.random() * (CONFIG.MAX_DELAY - CONFIG.MIN_DELAY) + CONFIG.MIN_DELAY;
+    const delay = Math.random() * (CONFIG.MAX_DELAY - CONFIG.MIN_DELAY) + CONFIG.MIN_DELAY;
     await new Promise((resolve) => setTimeout(resolve, delay));
   }
 
   /**
    * ⚠️ Autenticación en LinkedIn
-   * 
+   *
    * NOTA: Requiere credenciales válidas
    * Alternativa: Usar LinkedIn OAuth para login oficial
    */
@@ -225,31 +220,30 @@ export class LinkedInScraper {
       await this.randomDelay();
 
       // Esperar resultados
-      await this.page.waitForSelector('.search-results-container', {
-        timeout: 10000,
-      }).catch(() => {
-        console.log('No search results container found');
-      });
+      await this.page
+        .waitForSelector('.search-results-container', {
+          timeout: 10000,
+        })
+        .catch(() => {
+          console.log('No search results container found');
+        });
 
       // Scroll para cargar más resultados
       await this.scrollPage();
 
       // Extraer URLs de perfiles
-      const profileUrls = await this.page.$$eval(
-        'a.app-aware-link[href*="/in/"]',
-        (links) => {
-          const urls = new Set<string>();
-          links.forEach((link) => {
-            const href = link.getAttribute('href');
-            if (href?.includes('/in/')) {
-              // Limpiar URL
-              const url = href.split('?')[0];
-              urls.add(url);
-            }
-          });
-          return Array.from(urls);
-        }
-      );
+      const profileUrls = await this.page.$$eval('a.app-aware-link[href*="/in/"]', (links) => {
+        const urls = new Set<string>();
+        links.forEach((link) => {
+          const href = link.getAttribute('href');
+          if (href?.includes('/in/')) {
+            // Limpiar URL
+            const url = href.split('?')[0];
+            urls.add(url);
+          }
+        });
+        return Array.from(urls);
+      });
 
       console.log(`Found ${profileUrls.length} profile URLs`);
 
@@ -416,11 +410,7 @@ export class LinkedInScrapingJobManager {
   /**
    * Crear nuevo job de scraping
    */
-  static async createJob(
-    companyId: string,
-    searchQuery: LinkedInSearchQuery,
-    targetCount = 100
-  ) {
+  static async createJob(companyId: string, searchQuery: LinkedInSearchQuery, targetCount = 100) {
     return await prisma.linkedInScrapingJob.create({
       data: {
         companyId,
@@ -467,10 +457,7 @@ export class LinkedInScrapingJobManager {
       await scraper.initialize();
 
       // Autenticar
-      const authenticated = await scraper.authenticate(
-        linkedInEmail,
-        linkedInPassword
-      );
+      const authenticated = await scraper.authenticate(linkedInEmail, linkedInPassword);
 
       if (!authenticated) {
         throw new Error('LinkedIn authentication failed');
@@ -548,13 +535,13 @@ export class LinkedInScrapingJobManager {
 
 /**
  * ✅ Alternativa Legal: Importación Manual
- * 
+ *
  * En lugar de scraping, permitir que el usuario:
  * 1. Exporte sus conexiones de LinkedIn manualmente (CSV)
  * 2. Suba el CSV a INMOVA
  * 3. Mapee los campos automáticamente
  * 4. Importe los leads al CRM
- * 
+ *
  * Esto cumple con LinkedIn ToS y GDPR
  */
 export interface CSVImportField {
@@ -569,7 +556,7 @@ export class ManualLinkedInImporter {
   static parseLinkedInCSV(csvContent: string): any[] {
     // Implementar parser CSV
     // LinkedIn export format: First Name, Last Name, Email Address, Company, Position, etc.
-    
+
     const lines = csvContent.split('\n');
     const headers = lines[0].split(',');
     const data: any[] = [];
@@ -577,11 +564,11 @@ export class ManualLinkedInImporter {
     for (let i = 1; i < lines.length; i++) {
       const values = lines[i].split(',');
       const row: any = {};
-      
+
       headers.forEach((header, index) => {
         row[header.trim()] = values[index]?.trim();
       });
-      
+
       data.push(row);
     }
 
@@ -594,11 +581,11 @@ export class ManualLinkedInImporter {
   static mapCSVToCRM(csvData: any[], mapping: CSVImportField[]): any[] {
     return csvData.map((row) => {
       const lead: any = {};
-      
+
       mapping.forEach((map) => {
         lead[map.crmField] = row[map.csvColumn];
       });
-      
+
       return lead;
     });
   }
