@@ -14,6 +14,9 @@ import { FAQSection } from './_components/FAQSection';
 import { Footer } from './_components/Footer';
 import { useLandingTracking } from '@/hooks/useLandingTracking';
 
+// Deshabilitareneración estática para evitar errores de prerender
+export const dynamic = 'force-dynamic';
+
 export default function LandingPage() {
   // Initialize tracking
   useLandingTracking();
