@@ -2,20 +2,38 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
-import { prisma } from './db';
 import bcrypt from 'bcryptjs';
 
-// Crear adapter con manejo de errores
-let adapter;
-try {
-  adapter = PrismaAdapter(prisma);
-} catch (error) {
-  console.error('[NextAuth] Failed to create Prisma adapter:', error);
-  adapter = undefined; // Continuar sin adapter si falla
+// Lazy load de Prisma para evitar problemas en build
+function getPrismaClient() {
+  if (process.env.SKIP_PRISMA === 'true' || process.env.SKIP_API_ANALYSIS === '1') {
+    return null;
+  }
+  try {
+    const { prisma } = require('./db');
+    return prisma;
+  } catch (error) {
+    console.error('[NextAuth] Failed to load Prisma:', error);
+    return null;
+  }
+}
+
+// Crear adapter solo si Prisma está disponible
+function getAdapter() {
+  const prisma = getPrismaClient();
+  if (!prisma) {
+    return undefined;
+  }
+  try {
+    return PrismaAdapter(prisma);
+  } catch (error) {
+    console.error('[NextAuth] Failed to create Prisma adapter:', error);
+    return undefined;
+  }
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: adapter as any,
+  adapter: getAdapter() as any,
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -44,6 +62,11 @@ export const authOptions: NextAuthOptions = {
           }
 
           // Intentar autenticar como usuario normal
+          const prisma = getPrismaClient();
+          if (!prisma) {
+            throw new Error('Database not available');
+          }
+
           const user = await prisma.user.findUnique({
             where: { email: credentials.email },
             include: { company: true },
@@ -81,7 +104,7 @@ export const authOptions: NextAuthOptions = {
           }
 
           // Si no es usuario, intentar autenticar como comercial
-          const salesRep = await prisma.salesRepresentative.findUnique({
+          const salesRep = await prisma!.salesRepresentative.findUnique({
             where: { email: credentials.email },
           });
 
