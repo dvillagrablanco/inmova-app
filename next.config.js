@@ -42,7 +42,7 @@ const nextConfig = {
   },
 
   // Deployment optimizations para Vercel
-  output: 'standalone',
+  // output: 'standalone', // Commented out - using npm start instead
 
   // Image optimization - CRÍTICO: NO desactivar en producción
   images: {

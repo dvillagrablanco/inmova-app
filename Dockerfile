@@ -37,25 +37,14 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Next.js standalone output structure:
-# .next/standalone/ contains:
-# - server.js (main entry point)
-# - .next/ (standalone runtime)
-# - node_modules/ (minimal deps)
-# We need to copy everything from standalone and then override with static files
-
-# Copy standalone output (includes server.js, .next/, minimal node_modules/)
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-
-# Copy static files to override the standalone .next/static
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Copy public files
+# Copy built files
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 # Copy Prisma files
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 
 # Cambiar a usuario no-root
 USER nextjs
@@ -65,5 +54,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Start Next.js server
-CMD ["node", "server.js"]
+# Start Next.js using npm start (no standalone mode)
+CMD ["npm", "start"]
