@@ -1,9 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Deshabilitar la recolección estática de datos de API routes durante build
-  // Esto previene que Next.js intente ejecutar las APIs en build time
-  experimental: {
-    isrMemoryCacheSize: 0,
+  // Proporcionar DATABASE_URL dummy para el build si no existe
+  env: {
+    DATABASE_URL: process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/db',
   },
   reactStrictMode: true,
   output: 'standalone',
