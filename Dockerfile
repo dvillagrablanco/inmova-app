@@ -37,12 +37,12 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copiar archivos necesarios
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+# Copiar archivos necesarios del build
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 
 # Cambiar a usuario no-root
 USER nextjs
@@ -52,5 +52,13 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Script de inicio con migraciones
-CMD ["node", "server.js"]
+# Verificar y ejecutar server.js
+CMD if [ -f "server.js" ]; then \
+      node server.js; \
+    else \
+      echo "Error: server.js not found. Contents of /app:"; \
+      ls -la /app; \
+      echo "\nContents of .next:"; \
+      ls -la .next 2>/dev/null || echo ".next not found"; \
+      exit 1; \
+    fi
