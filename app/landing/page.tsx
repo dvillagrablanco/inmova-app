@@ -15,7 +15,9 @@ import { seoMetadata } from '@/lib/data/landing-data';
 export const metadata: Metadata = {
   title: seoMetadata.title,
   description: seoMetadata.description,
-  keywords: seoMetadata.keywords?.join(', '),
+  keywords: Array.isArray(seoMetadata.keywords)
+    ? seoMetadata.keywords.join(', ')
+    : seoMetadata.keywords,
   authors: [{ name: 'Inmova Team' }],
   openGraph: {
     title: seoMetadata.openGraph?.title || seoMetadata.title,
