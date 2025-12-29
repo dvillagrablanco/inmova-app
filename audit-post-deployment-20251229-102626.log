@@ -1,0 +1,312 @@
+🚀 Iniciando auditoría visual de páginas admin...
+
+🌐 URL base: https://www.inmovaapp.com
+
+🔐 Intentando login como superadmin...
+⚠️  Credenciales no proporcionadas. Usa:
+   SUPER_ADMIN_EMAIL=tu@email.com SUPER_ADMIN_PASSWORD=tupassword
+⚠️  Continuando sin login - solo se detectarán errores en páginas públicas
+
+⚠️  Auditando sin autenticación - se capturarán errores de JavaScript y red
+   (Las páginas protegidas redirigirán a /login, pero aún se detectarán errores)
+
+
+📄 Auditando: Dashboard (/admin/dashboard)
+  📸 Screenshot guardado: /workspace/audit-screenshots/dashboard.png
+  ❌ Errores de consola: 2
+     1. [error] Failed to load resource: the server responded with a status of 401 ()
+     2. [error] Failed to load resource: the server responded with a status of 401 ()
+  ❌ Errores de red: 2
+     1. [401] https://www.inmovaapp.com/api/modules/active
+     2. [401] https://www.inmovaapp.com/api/notifications/unread-count
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Usuarios (/admin/usuarios)
+  ✅ Sin errores detectados
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Clientes (/admin/clientes)
+  📸 Screenshot guardado: /workspace/audit-screenshots/clientes.png
+  ❌ Errores de consola: 4
+     1. [error] Failed to load resource: the server responded with a status of 401 ()
+     2. [error] Error al cargar planes {stack: Error: Error al cargar planes
+    at o (https://ww….js?dpl=dpl_4MY5hX
+     3. [error] Failed to load resource: the server responded with a status of 401 ()
+     4. [error] Error al cargar clientes {stack: Error: Error al cargar clientes
+    at l (https://….js?dpl=dpl_4MY5
+  ❌ Errores de red: 2
+     1. [401] https://www.inmovaapp.com/api/admin/subscription-plans
+     2. [401] https://www.inmovaapp.com/api/admin/companies
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Comparar Clientes (/admin/clientes/comparar)
+  ✅ Sin errores detectados
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Activity (/admin/activity)
+  ✅ Sin errores detectados
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Alertas (/admin/alertas)
+  📸 Screenshot guardado: /workspace/audit-screenshots/alertas.png
+  ❌ Errores de consola: 3
+     1. [error] Failed to load resource: the server responded with a status of 429 ()
+     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
+https://next-auth.js.org/errors#client_fetch_error Rate limi
+     3. [error] Failed to load resource: the server responded with a status of 429 ()
+  ❌ Errores de red: 2
+     1. [429] https://www.inmovaapp.com/api/auth/session
+     2. [429] https://www.inmovaapp.com/api/auth/_log
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Aprobaciones (/admin/aprobaciones)
+  📸 Screenshot guardado: /workspace/audit-screenshots/aprobaciones.png
+  ❌ Errores de consola: 1
+     1. [error] Failed to load resource: the server responded with a status of 429 ()
+  ❌ Errores de red: 1
+     1. [429] https://www.inmovaapp.com/register?_rsc=asqg6
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Backup & Restore (/admin/backup-restore)
+  📸 Screenshot guardado: /workspace/audit-screenshots/backup-&-restore.png
+  ❌ Errores de consola: 1
+     1. [error] Failed to load resource: the server responded with a status of 429 ()
+  ❌ Errores de red: 1
+     1. [429] https://www.inmovaapp.com/register?_rsc=asqg6
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Configuración (/admin/configuracion)
+  📸 Screenshot guardado: /workspace/audit-screenshots/configuración.png
+  ❌ Errores de consola: 5
+     1. [error] Failed to load resource: the server responded with a status of 429 ()
+     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
+https://next-auth.js.org/errors#client_fetch_error Rate limi
+     3. [error] Failed to load resource: the server responded with a status of 429 ()
+     4. [error] Failed to load resource: the server responded with a status of 429 ()
+     5. [error] Failed to load resource: the server responded with a status of 429 ()
+  ❌ Errores de red: 4
+     1. [429] https://www.inmovaapp.com/api/auth/session
+     2. [429] https://www.inmovaapp.com/api/auth/_log
+     3. [429] https://www.inmovaapp.com/login?_rsc=gyof8
+     4. [429] https://www.inmovaapp.com/login
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Facturación B2B (/admin/facturacion-b2b)
+  📸 Screenshot guardado: /workspace/audit-screenshots/facturación-b2b.png
+  ❌ Errores de consola: 5
+     1. [error] Failed to load resource: the server responded with a status of 429 ()
+     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
+https://next-auth.js.org/errors#client_fetch_error Rate limi
+     3. [error] Failed to load resource: the server responded with a status of 429 ()
+     4. [error] Failed to load resource: the server responded with a status of 429 ()
+     5. [error] Failed to load resource: the server responded with a status of 429 ()
+  ❌ Errores de red: 4
+     1. [429] https://www.inmovaapp.com/api/auth/session
+     2. [429] https://www.inmovaapp.com/api/auth/_log
+     3. [429] https://www.inmovaapp.com/login?_rsc=v0his
+     4. [429] https://www.inmovaapp.com/login
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Firma Digital (/admin/firma-digital)
+  📸 Screenshot guardado: /workspace/audit-screenshots/firma-digital.png
+  ❌ Errores de consola: 6
+     1. [error] Failed to load resource: the server responded with a status of 429 ()
+     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
+https://next-auth.js.org/errors#client_fetch_error Rate limi
+     3. [error] Failed to load resource: the server responded with a status of 401 ()
+     4. [error] Failed to load resource: the server responded with a status of 401 ()
+     5. [error] Error al cargar documentos undefined
+     6. [error] Failed to load resource: the server responded with a status of 401 ()
+  ❌ Errores de red: 4
+     1. [429] https://www.inmovaapp.com/api/auth/session
+     2. [401] https://www.inmovaapp.com/api/notifications/unread-count
+     3. [401] https://www.inmovaapp.com/api/admin/firma-digital/documentos
+     4. [401] https://www.inmovaapp.com/api/modules/active
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Importar (/admin/importar)
+  ✅ Sin errores detectados
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Integraciones Contables (/admin/integraciones-contables)
+  📸 Screenshot guardado: /workspace/audit-screenshots/integraciones-contables.png
+  ❌ Errores de consola: 2
+     1. [error] Failed to load resource: the server responded with a status of 401 ()
+     2. [error] Failed to load resource: the server responded with a status of 401 ()
+  ❌ Errores de red: 2
+     1. [401] https://www.inmovaapp.com/api/notifications/unread-count
+     2. [401] https://www.inmovaapp.com/api/modules/active
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Legal (/admin/legal)
+  📸 Screenshot guardado: /workspace/audit-screenshots/legal.png
+  ❌ Errores de consola: 7
+     1. [error] Failed to load resource: the server responded with a status of 429 ()
+     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
+https://next-auth.js.org/errors#client_fetch_error Rate limi
+     3. [error] Failed to load resource: the server responded with a status of 429 ()
+     4. [error] Failed to load resource: the server responded with a status of 401 ()
+     5. [error] Failed to load resource: the server responded with a status of 401 ()
+     6. [error] Failed to load resource: the server responded with a status of 401 ()
+     7. [error] Error al cargar plantillas undefined
+  ❌ Errores de red: 5
+     1. [429] https://www.inmovaapp.com/api/auth/session
+     2. [429] https://www.inmovaapp.com/api/auth/_log
+     3. [401] https://www.inmovaapp.com/api/modules/active
+     4. [401] https://www.inmovaapp.com/api/notifications/unread-count
+     5. [401] https://www.inmovaapp.com/api/admin/legal/templates
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Marketplace (/admin/marketplace)
+  📸 Screenshot guardado: /workspace/audit-screenshots/marketplace.png
+  ❌ Errores de consola: 7
+     1. [error] Failed to load resource: the server responded with a status of 429 ()
+     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
+https://next-auth.js.org/errors#client_fetch_error Rate limi
+     3. [error] Failed to load resource: the server responded with a status of 429 ()
+     4. [error] Failed to load resource: the server responded with a status of 401 ()
+     5. [error] Failed to load resource: the server responded with a status of 401 ()
+     6. [error] Failed to load resource: the server responded with a status of 401 ()
+     7. [error] Error al cargar servicios undefined
+  ❌ Errores de red: 5
+     1. [429] https://www.inmovaapp.com/api/auth/session
+     2. [429] https://www.inmovaapp.com/api/auth/_log
+     3. [401] https://www.inmovaapp.com/api/modules/active
+     4. [401] https://www.inmovaapp.com/api/notifications/unread-count
+     5. [401] https://www.inmovaapp.com/api/admin/marketplace/services
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Métricas de Uso (/admin/metricas-uso)
+  📸 Screenshot guardado: /workspace/audit-screenshots/métricas-de-uso.png
+  ❌ Errores de consola: 4
+     1. [error] Failed to load resource: the server responded with a status of 429 ()
+     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
+https://next-auth.js.org/errors#client_fetch_error Rate limi
+     3. [error] Failed to load resource: the server responded with a status of 429 ()
+     4. [error] Failed to load resource: the server responded with a status of 429 ()
+  ❌ Errores de red: 3
+     1. [429] https://www.inmovaapp.com/api/auth/session
+     2. [429] https://www.inmovaapp.com/api/auth/_log
+     3. [429] https://www.inmovaapp.com/register?_rsc=asqg6
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Módulos (/admin/modulos)
+  📸 Screenshot guardado: /workspace/audit-screenshots/módulos.png
+  ❌ Errores de consola: 2
+     1. [error] Failed to load resource: the server responded with a status of 401 ()
+     2. [error] Failed to load resource: the server responded with a status of 401 ()
+  ❌ Errores de red: 2
+     1. [401] https://www.inmovaapp.com/api/modules/active
+     2. [401] https://www.inmovaapp.com/api/notifications/unread-count
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: OCR Import (/admin/ocr-import)
+  ✅ Sin errores detectados
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Personalización (/admin/personalizacion)
+  📸 Screenshot guardado: /workspace/audit-screenshots/personalización.png
+  ❌ Errores de consola: 1
+     1. [error] Failed to load resource: the server responded with a status of 429 ()
+  ❌ Errores de red: 1
+     1. [429] https://www.inmovaapp.com/register?_rsc=asqg6
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Planes (/admin/planes)
+  📸 Screenshot guardado: /workspace/audit-screenshots/planes.png
+  ❌ Errores de consola: 5
+     1. [error] Failed to load resource: the server responded with a status of 429 ()
+     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
+https://next-auth.js.org/errors#client_fetch_error Rate limi
+     3. [error] Failed to load resource: the server responded with a status of 429 ()
+     4. [error] Failed to load resource: the server responded with a status of 429 ()
+     5. [error] Failed to load resource: the server responded with a status of 429 ()
+  ❌ Errores de red: 4
+     1. [429] https://www.inmovaapp.com/api/auth/session
+     2. [429] https://www.inmovaapp.com/api/auth/_log
+     3. [429] https://www.inmovaapp.com/login?_rsc=jgpn6
+     4. [429] https://www.inmovaapp.com/login
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Plantillas SMS (/admin/plantillas-sms)
+  📸 Screenshot guardado: /workspace/audit-screenshots/plantillas-sms.png
+  ❌ Errores de consola: 5
+     1. [error] Failed to load resource: the server responded with a status of 429 ()
+     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
+https://next-auth.js.org/errors#client_fetch_error Rate limi
+     3. [error] Failed to load resource: the server responded with a status of 429 ()
+     4. [error] Failed to load resource: the server responded with a status of 429 ()
+     5. [error] Failed to load resource: the server responded with a status of 429 ()
+  ❌ Errores de red: 4
+     1. [429] https://www.inmovaapp.com/api/auth/session
+     2. [429] https://www.inmovaapp.com/api/auth/_log
+     3. [429] https://www.inmovaapp.com/login?_rsc=1rx0z
+     4. [429] https://www.inmovaapp.com/login
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Portales Externos (/admin/portales-externos)
+  📸 Screenshot guardado: /workspace/audit-screenshots/portales-externos.png
+  ❌ Errores de consola: 4
+     1. [error] Failed to load resource: the server responded with a status of 429 ()
+     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
+https://next-auth.js.org/errors#client_fetch_error Rate limi
+     3. [error] Failed to load resource: the server responded with a status of 429 ()
+     4. [error] Failed to load resource: the server responded with a status of 429 ()
+  ❌ Errores de red: 3
+     1. [429] https://www.inmovaapp.com/api/auth/session
+     2. [429] https://www.inmovaapp.com/login?_rsc=1rna8
+     3. [429] https://www.inmovaapp.com/login
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Recuperar Contraseña (/admin/recuperar-contrasena)
+  ✅ Sin errores detectados
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Reportes Programados (/admin/reportes-programados)
+  📸 Screenshot guardado: /workspace/audit-screenshots/reportes-programados.png
+  ❌ Errores de consola: 1
+     1. [error] Failed to load resource: the server responded with a status of 429 ()
+  ❌ Errores de red: 1
+     1. [429] https://www.inmovaapp.com/register?_rsc=asqg6
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Salud del Sistema (/admin/salud-sistema)
+  📸 Screenshot guardado: /workspace/audit-screenshots/salud-del-sistema.png
+  ❌ Errores de consola: 2
+     1. [error] Failed to load resource: the server responded with a status of 429 ()
+     2. [error] Failed to load resource: the server responded with a status of 429 ()
+  ❌ Errores de red: 2
+     1. [429] https://www.inmovaapp.com/login?_rsc=1x6re
+     2. [429] https://www.inmovaapp.com/login
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Seguridad (/admin/seguridad)
+  📸 Screenshot guardado: /workspace/audit-screenshots/seguridad.png
+  ❌ Errores de consola: 4
+     1. [error] Failed to load resource: the server responded with a status of 429 ()
+     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
+https://next-auth.js.org/errors#client_fetch_error Rate limi
+     3. [error] Failed to load resource: the server responded with a status of 429 ()
+     4. [error] Failed to load resource: the server responded with a status of 429 ()
+  ❌ Errores de red: 3
+     1. [429] https://www.inmovaapp.com/api/auth/session
+     2. [429] https://www.inmovaapp.com/api/auth/_log
+     3. [429] https://www.inmovaapp.com/register?_rsc=asqg6
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Sugerencias (/admin/sugerencias)
+  📸 Screenshot guardado: /workspace/audit-screenshots/sugerencias.png
+  ❌ Errores de consola: 1
+     1. [error] Failed to load resource: the server responded with a status of 429 ()
+  ❌ Errores de red: 1
+     1. [429] https://www.inmovaapp.com/register?_rsc=asqg6
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Reporte generado: /workspace/AUDITORIA_VISUAL_ADMIN.md
+
+✅ Auditoría completada exitosamente
+
+📊 RESUMEN:
+   - Páginas auditadas: 27
+   - Páginas con errores: 27
+   - Total de errores: 1888
