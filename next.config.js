@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Deshabilitar la recolección estática de datos de API routes durante build
+  // Esto previene que Next.js intente ejecutar las APIs en build time
+  experimental: {
+    isrMemoryCacheSize: 0,
+  },
   reactStrictMode: true,
   output: 'standalone',
   experimental: {
