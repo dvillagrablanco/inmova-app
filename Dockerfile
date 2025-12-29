@@ -12,7 +12,7 @@ COPY prisma ./prisma/
 
 # Instalar dependencias
 FROM base AS deps
-RUN npm ci --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 
 # Builder
 FROM base AS builder
