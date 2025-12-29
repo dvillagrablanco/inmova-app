@@ -16,7 +16,7 @@ export const RATE_LIMITS = {
   // Auth endpoints - permitir más intentos
   auth: {
     interval: 5 * 60 * 1000, // 5 minutos
-    uniqueTokenPerInterval: 20, // 20 intentos cada 5 minutos
+    uniqueTokenPerInterval: 30, // 30 intentos cada 5 minutos (aumentado de 20)
   },
   // Payment endpoints - moderado
   payment: {
@@ -26,12 +26,17 @@ export const RATE_LIMITS = {
   // API general - permisivo
   api: {
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 150, // 150 requests por minuto
+    uniqueTokenPerInterval: 200, // 200 requests por minuto (aumentado de 150)
   },
   // Lectura - muy permisivo
   read: {
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 300, // 300 requests por minuto
+    uniqueTokenPerInterval: 500, // 500 requests por minuto (aumentado de 300)
+  },
+  // Admin - MUY permisivo para superadmins
+  admin: {
+    interval: 60 * 1000,
+    uniqueTokenPerInterval: 1000, // 1000 requests por minuto para admin
   },
 } as const;
 
@@ -73,6 +78,10 @@ function getClientIdentifier(request: NextRequest): string {
  * Determina el tipo de rate limit basado en la ruta
  */
 function getRateLimitType(pathname: string, method?: string): keyof typeof RATE_LIMITS {
+  // Admin endpoints - más permisivo
+  if (pathname.startsWith('/admin/') || pathname.startsWith('/api/admin/')) {
+    return 'admin';
+  }
   if (pathname.includes('/auth') || pathname.includes('/login') || pathname.includes('/register')) {
     return 'auth';
   }
