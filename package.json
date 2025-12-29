@@ -18,6 +18,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
     "test:visual": "tsx scripts/visual-test-playwright.ts",
+    "audit:app": "tsx scripts/audit-full-app.ts",
     "test:all": "yarn test:ci && yarn test:e2e",
     "postinstall": "prisma generate",
     "analyze": "ANALYZE=true yarn build",
