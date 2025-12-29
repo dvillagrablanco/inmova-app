@@ -1,0 +1,25 @@
+FROM node:20-alpine
+
+# Instalar dependencias del sistema
+RUN apk add --no-cache libc6-compat openssl git
+
+WORKDIR /app
+
+# Copiar todo el proyecto
+COPY . .
+
+# Instalar dependencias con yarn (ignorando peer deps conflicts)
+RUN yarn install --network-timeout 1000000
+
+# Generar Prisma Client
+RUN yarn prisma generate
+
+# Puerto
+EXPOSE 3000
+
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Ejecutar en modo start (que es más estable)
+CMD ["yarn", "start"]

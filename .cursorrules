@@ -4686,6 +4686,248 @@ docker-compose logs nginx | grep error
 
 ---
 
+## 🤖 DEPLOYMENT AUTOMATIZADO CON SSH (PARAMIKO)
+
+### 📋 Context
+
+En entornos de Cursor Agent Cloud, las herramientas tradicionales de SSH (`ssh`, `sshpass`, `expect`) pueden no estar disponibles. Sin embargo, **`paramiko`** (librería Python SSH) está disponible y permite automatización completa de deployments.
+
+### ✅ Capacidades Comprobadas
+
+```python
+# Paramiko está disponible y funcional en Cursor Agent
+import sys
+sys.path.insert(0, '/home/ubuntu/.local/lib/python3.12/site-packages')
+import paramiko
+
+client = paramiko.SSHClient()
+client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+client.connect('IP', username='user', password='pass', timeout=10)
+
+stdin, stdout, stderr = client.exec_command('comando')
+output = stdout.read().decode()
+```
+
+### 🚀 Script de Deployment Tipo
+
+```python
+#!/usr/bin/env python3
+"""Deployment automatizado con Paramiko"""
+import sys
+sys.path.insert(0, '/home/ubuntu/.local/lib/python3.12/site-packages')
+import paramiko
+import time
+
+def deploy_app(server_ip, username, password):
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(server_ip, username=username, password=password, timeout=10)
+    
+    try:
+        # 1. Update repo
+        stdin, stdout, stderr = client.exec_command(
+            "cd /home/deploy/app && git pull origin main"
+        )
+        stdout.channel.recv_exit_status()
+        
+        # 2. Rebuild containers
+        stdin, stdout, stderr = client.exec_command(
+            "cd /home/deploy/app && docker-compose up -d --build",
+            timeout=900
+        )
+        stdout.channel.recv_exit_status()
+        
+        # 3. Health check
+        for i in range(60):
+            stdin, stdout, stderr = client.exec_command(
+                "curl -f http://localhost:3000/api/health"
+            )
+            if stdout.channel.recv_exit_status() == 0:
+                print("✅ Deployment exitoso!")
+                return True
+            time.sleep(2)
+        
+        return False
+    finally:
+        client.close()
+```
+
+### ⚠️ Limitaciones Identificadas
+
+#### Next.js 15 + Prisma Build Issues
+
+**Problema**: Next.js 15 hace análisis estático de rutas API durante `next build`, causando errores con Prisma Client:
+
+```
+Error: @prisma/client did not initialize yet.
+```
+
+**Causa Raíz**: Archivos API importando Prisma directamente en top-level scope:
+
+```typescript
+// ❌ CAUSA PROBLEMAS durante next build
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient(); // ← Ejecuta en build-time
+
+export async function GET() {
+  const data = await prisma.user.findMany();
+  return NextResponse.json(data);
+}
+```
+
+**Solución Correcta**:
+
+```typescript
+// ✅ Usar wrapper con lazy-loading
+import { getPrismaClient } from '@/lib/db';
+
+export async function GET() {
+  const prisma = getPrismaClient(); // ← Solo ejecuta en runtime
+  const data = await prisma.user.findMany();
+  return NextResponse.json(data);
+}
+```
+
+**Archivos Críticos a Revisar**:
+- Todos los `/app/api/**/route.ts`
+- Verificar que usen `getPrismaClient()` en lugar de import directo
+- No ejecutar código de DB en module scope
+
+### 🔧 Estrategias de Deployment Alternativas
+
+#### Opción 1: Docker (RECOMENDADO cuando el build funciona)
+
+```dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copiar archivos
+COPY package.json yarn.lock ./
+COPY prisma ./prisma/
+RUN yarn install
+
+# Build (SOLO si no hay problemas de Prisma)
+COPY . .
+RUN yarn prisma generate
+RUN yarn build
+
+EXPOSE 3000
+CMD ["yarn", "start"]
+```
+
+#### Opción 2: PM2 (Para cuando build falla)
+
+```bash
+# Instalar PM2
+npm install -g pm2
+
+# ecosystem.config.js
+module.exports = {
+  apps: [{
+    name: 'inmova-app',
+    script: 'yarn',
+    args: 'dev', # O 'start' si el build funciona
+    env: {
+      NODE_ENV: 'production',
+      PORT: 3000
+    }
+  }]
+}
+
+# Iniciar
+pm2 start ecosystem.config.js
+pm2 save
+pm2 startup # Auto-start en reboot
+```
+
+#### Opción 3: Build Local, Deploy Binario
+
+```bash
+# En LOCAL
+yarn build
+tar -czf build.tar.gz .next node_modules package.json
+
+# En SERVIDOR
+tar -xzf build.tar.gz
+yarn start
+```
+
+### 🎯 Checklist Pre-Deployment
+
+#### Código
+- [ ] Todos los API routes usan `getPrismaClient()` lazy-loading
+- [ ] No hay imports de Prisma en module top-level
+- [ ] `lib/db.ts` tiene lógica de build-time detection
+- [ ] Variables de entorno configuradas en `.env.production`
+- [ ] `next.config.js` optimizado para producción
+
+#### Infraestructura
+- [ ] Servidor con Ubuntu 22.04+ o similar
+- [ ] Docker y Docker Compose instalados (si aplica)
+- [ ] Node.js 18+ instalado (para PM2)
+- [ ] PostgreSQL configurado (Docker o nativo)
+- [ ] Nginx configurado como reverse proxy
+- [ ] UFW/Firewall configurado (22, 80, 443)
+- [ ] SSL/Certbot configurado para HTTPS
+
+#### Seguridad
+- [ ] Password de servidor cambiado del default
+- [ ] Usuario `deploy` creado (sin root)
+- [ ] SSH keys configurados (no password)
+- [ ] Secrets en `.env` NO commiteados a Git
+- [ ] Rate limiting activado
+- [ ] Fail2Ban configurado
+
+### 📊 Debugging Deployment Issues
+
+```bash
+# Ver logs de Docker
+docker-compose logs -f app
+
+# Ver logs de Nginx
+tail -f /var/log/nginx/error.log
+
+# Ver logs de PM2
+pm2 logs inmova-app
+
+# Test health check
+curl -v http://localhost:3000/api/health
+
+# Ver procesos
+ps aux | grep node
+
+# Ver puertos
+netstat -tlnp | grep :3000
+```
+
+### 🔥 Rollback Rápido
+
+```bash
+# Docker
+docker-compose down
+git checkout <commit-anterior>
+docker-compose up -d
+
+# PM2
+pm2 stop inmova-app
+git checkout <commit-anterior>
+pm2 restart inmova-app
+```
+
+### 💡 Mejores Prácticas Aprendidas
+
+1. **NUNCA** asumir que Vercel funcionará para apps complejas
+2. **SIEMPRE** testear `yarn build` localmente antes de deployment
+3. **USAR** lazy-loading para ORMs (Prisma, TypeORM, etc.)
+4. **SEPARAR** concerns: build != runtime
+5. **AUTOMATIZAR** con scripts Python/Bash, NO manualmente
+6. **MONITOREAR** con health checks continuos
+7. **DOCUMENTAR** cada paso del deployment
+8. **BACKUP** de DB antes de cada deployment
+
+---
+
 **Última actualización**: 29 de diciembre de 2025
-**Versión**: 2.0.0 (Docker + Servidor Propio)
+**Versión**: 2.1.0 (añadido deployment automatizado con Paramiko + lecciones aprendidas)
 **Mantenido por**: Equipo Inmova
