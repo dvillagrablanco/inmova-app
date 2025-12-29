@@ -129,7 +129,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       where: { id: params.id },
       data: {
         periodo,
-        monto: monto ? parseFloat(monto) : undefined,
+        monto,
         fechaVencimiento: fechaVencimiento ? new Date(fechaVencimiento) : undefined,
         fechaPago: fechaPago
           ? new Date(fechaPago)

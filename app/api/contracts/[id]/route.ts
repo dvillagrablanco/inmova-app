@@ -105,8 +105,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       data: {
         fechaInicio: fechaInicio ? new Date(fechaInicio) : undefined,
         fechaFin: fechaFin ? new Date(fechaFin) : undefined,
-        rentaMensual: rentaMensual ? parseFloat(rentaMensual) : undefined,
-        deposito: deposito ? parseFloat(deposito) : undefined,
+        rentaMensual,
+        deposito,
         estado,
         tipo,
       },
