@@ -8,8 +8,35 @@ import { sendEmail } from '@/lib/email-config';
 import { uploadFile } from '@/lib/s3';
 import logger, { logError } from '@/lib/logger';
 import { invalidatePaymentsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+// Schema de validación para actualización de pago
+const paymentUpdateSchema = z.object({
+  periodo: z.string().optional(),
+  monto: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((val) => (typeof val === 'string' ? parseFloat(val) : val))
+    .refine((val) => val === undefined || val > 0, {
+      message: 'El monto debe ser positivo',
+    }),
+  fechaVencimiento: z
+    .string()
+    .datetime()
+    .or(z.string().regex(/^\d{4}-\d{2}-\d{2}/))
+    .optional(),
+  fechaPago: z
+    .string()
+    .datetime()
+    .or(z.string().regex(/^\d{4}-\d{2}-\d{2}/))
+    .optional()
+    .nullable(),
+  estado: z.enum(['pendiente', 'pagado', 'atrasado', 'cancelado']).optional(),
+  metodoPago: z.string().optional().nullable(),
+  nivelRiesgo: z.string().optional().nullable(),
+});
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -53,7 +80,21 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
     const body = await req.json();
-    const { periodo, monto, fechaVencimiento, fechaPago, estado, metodoPago, nivelRiesgo } = body;
+
+    // Validación con Zod
+    const validationResult = paymentUpdateSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map((err) => ({
+        field: err.path.join('.'),
+        message: err.message,
+      }));
+      logger.warn('Validation error updating payment:', { errors, paymentId: params.id });
+      return NextResponse.json({ error: 'Datos inválidos', details: errors }, { status: 400 });
+    }
+
+    const { periodo, monto, fechaVencimiento, fechaPago, estado, metodoPago, nivelRiesgo } =
+      validationResult.data;
 
     // Obtener el pago actual antes de actualizar
     const currentPayment = await prisma.payment.findUnique({
@@ -90,7 +131,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         periodo,
         monto: monto ? parseFloat(monto) : undefined,
         fechaVencimiento: fechaVencimiento ? new Date(fechaVencimiento) : undefined,
-        fechaPago: fechaPago ? new Date(fechaPago) : (estado === 'pagado' && !currentPayment.fechaPago) ? new Date() : null,
+        fechaPago: fechaPago
+          ? new Date(fechaPago)
+          : estado === 'pagado' && !currentPayment.fechaPago
+            ? new Date()
+            : null,
         estado,
         metodoPago,
         nivelRiesgo,

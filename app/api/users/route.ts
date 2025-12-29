@@ -1,10 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { requireAuth, requirePermission, forbiddenResponse, badRequestResponse } from '@/lib/permissions';
+import {
+  requireAuth,
+  requirePermission,
+  forbiddenResponse,
+  badRequestResponse,
+} from '@/lib/permissions';
 import bcrypt from 'bcryptjs';
 import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+// Schema de validación para crear usuario
+const createUserSchema = z.object({
+  email: z.string().email({ message: 'Email inválido' }),
+  name: z.string().min(2, { message: 'El nombre debe tener al menos 2 caracteres' }),
+  password: z.string().min(8, { message: 'La contraseña debe tener al menos 8 caracteres' }),
+  role: z.enum(['administrador', 'gestor', 'operador', 'super_admin'], {
+    message: 'Rol inválido',
+  }),
+  companyId: z.string().uuid().optional(),
+});
 
 export async function GET() {
   try {
@@ -55,16 +72,20 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { email, name, password, role, companyId } = body;
 
-    if (!email || !name || !password || !role) {
-      return badRequestResponse('Faltan campos requeridos');
+    // Validación con Zod
+    const validationResult = createUserSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map((err) => ({
+        field: err.path.join('.'),
+        message: err.message,
+      }));
+      logger.warn('Validation error creating user:', { errors });
+      return NextResponse.json({ error: 'Datos inválidos', details: errors }, { status: 400 });
     }
 
-    // Validar rol
-    if (!['administrador', 'gestor', 'operador', 'super_admin'].includes(role)) {
-      return badRequestResponse('Rol inválido');
-    }
+    const { email, name, password, role, companyId } = validationResult.data;
 
     // Super_admin solo puede ser creado por otro super_admin
     if (role === 'super_admin' && user.role !== 'super_admin') {
