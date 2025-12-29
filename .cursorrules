@@ -4166,7 +4166,7 @@ yarn analyze          # Bundle size
 ## 💡 FILOSOFÍA DE DESARROLLO
 
 1. **Simplicidad sobre complejidad**: Código claro > Código "inteligente"
-2. **Serverless First**: Diseñar para funciones efímeras y stateless
+2. **Deployment Flexible**: Serverless (Vercel) O Servidor Propio (Docker) según necesidades
 3. **Type Safety**: TypeScript + Zod para prevenir errores en runtime
 4. **Performance**: Lazy loading, caching, optimización de queries
 5. **DX (Developer Experience)**: Código auto-documentado y fácil de mantener
@@ -4175,6 +4175,517 @@ yarn analyze          # Bundle size
 
 ---
 
+## 🐳 DEPLOYMENT EN SERVIDOR PROPIO (DOCKER)
+
+### 🎯 Cuándo Usar Servidor Propio vs Vercel
+
+**Usar Servidor Propio** si:
+- ✅ Tienes >100 API routes complejas
+- ✅ Necesitas funciones que excedan 60 segundos
+- ✅ Background jobs (BullMQ, cron jobs complejos)
+- ✅ Prisma con queries complejas
+- ✅ Costos predecibles a largo plazo
+- ✅ Control total sobre infraestructura
+
+**Usar Vercel** si:
+- ✅ Aplicación simple/mediana (<50 API routes)
+- ✅ No necesitas background jobs persistentes
+- ✅ Prefieres zero-maintenance
+- ✅ Auto-scaling es prioritario
+
+### 📦 Arquitectura Docker para Producción
+
+#### Dockerfile Multi-Stage (Ya Implementado)
+
+```dockerfile
+# Dockerfile.production
+FROM node:20-alpine AS base
+
+# Deps stage
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+COPY package.json yarn.lock* ./
+RUN yarn install --frozen-lockfile
+
+# Builder stage
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+COPY prisma ./prisma
+
+# Generate Prisma Client
+RUN yarn prisma generate
+
+# Build Next.js
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN yarn build
+
+# Runner stage (imagen final)
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copy necessary files
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "server.js"]
+```
+
+#### Docker Compose Stack Completo
+
+```yaml
+# docker-compose.production.yml
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=inmova
+      - POSTGRES_USER=inmova_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+```
+
+### 🚀 Setup de Servidor VPS
+
+#### Script de Instalación Automatizado
+
+```bash
+#!/bin/bash
+# setup-server.sh
+
+set -e
+
+echo "🚀 Instalando Inmova App en servidor..."
+
+# Actualizar sistema
+apt update && apt upgrade -y
+
+# Instalar Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh
+apt install docker-compose -y
+
+# Instalar Nginx y Certbot
+apt install nginx certbot python3-certbot-nginx -y
+
+# Configurar Firewall
+ufw allow 22/tcp
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw --force enable
+
+# Crear usuario deployment
+adduser --disabled-password --gecos "" deploy
+usermod -aG docker deploy
+usermod -aG sudo deploy
+
+# Crear directorio de aplicación
+mkdir -p /home/deploy/inmova-app
+chown -R deploy:deploy /home/deploy/inmova-app
+
+echo "✅ Servidor configurado exitosamente"
+echo "📝 Siguiente paso: git clone del repositorio"
+```
+
+#### Deployment Manual
+
+```bash
+# En el servidor (como usuario deploy)
+cd /home/deploy/inmova-app
+git clone https://github.com/tu-usuario/inmova-app.git .
+
+# Crear .env.production
+cat > .env.production << EOF
+NODE_ENV=production
+DATABASE_URL=postgresql://inmova_user:password@postgres:5432/inmova
+NEXTAUTH_SECRET=tu-secret-aqui
+NEXTAUTH_URL=https://inmovaapp.com
+# ... resto de variables
+EOF
+
+# Deploy inicial
+docker-compose -f docker-compose.production.yml up -d --build
+
+# Ver logs
+docker-compose -f docker-compose.production.yml logs -f app
+
+# Ejecutar migraciones
+docker-compose -f docker-compose.production.yml exec app npx prisma migrate deploy
+```
+
+### 🔄 CI/CD con GitHub Actions
+
+```yaml
+# .github/workflows/deploy-server.yml
+name: Deploy to Production Server
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: deploy
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/deploy/inmova-app
+            git pull origin main
+            docker-compose -f docker-compose.production.yml down
+            docker-compose -f docker-compose.production.yml up -d --build
+            docker-compose -f docker-compose.production.yml exec -T app npx prisma migrate deploy
+            
+      - name: Health Check
+        run: |
+          sleep 30
+          curl --fail https://inmovaapp.com/api/health || exit 1
+```
+
+### 🌐 Nginx Configuration
+
+```nginx
+# nginx.conf
+upstream nextjs_app {
+    server app:3000;
+    keepalive 32;
+}
+
+# HTTP to HTTPS redirect
+server {
+    listen 80;
+    server_name inmovaapp.com www.inmovaapp.com;
+    return 301 https://$server_name$request_uri;
+}
+
+# HTTPS Server
+server {
+    listen 443 ssl http2;
+    server_name inmovaapp.com www.inmovaapp.com;
+    
+    # SSL Configuration
+    ssl_certificate /etc/letsencrypt/live/inmovaapp.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/inmovaapp.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    
+    # Security Headers
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    
+    # Compression
+    gzip on;
+    gzip_vary on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+    
+    # Client settings
+    client_max_body_size 50M;
+    client_body_timeout 60s;
+    
+    # Proxy configuration
+    location / {
+        proxy_pass http://nextjs_app;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        
+        # Timeouts (sin límite para funciones largas)
+        proxy_connect_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
+    }
+    
+    # Cache static assets
+    location /_next/static {
+        proxy_pass http://nextjs_app;
+        proxy_cache_valid 200 365d;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+    
+    # Cache images
+    location ~* \.(jpg|jpeg|png|gif|ico|svg|webp)$ {
+        proxy_pass http://nextjs_app;
+        proxy_cache_valid 200 30d;
+        add_header Cache-Control "public, max-age=2592000";
+    }
+}
+```
+
+### 🔐 SSL con Let's Encrypt
+
+```bash
+# Generar certificado SSL
+certbot --nginx -d inmovaapp.com -d www.inmovaapp.com
+
+# Auto-renovación (ya está configurada)
+certbot renew --dry-run
+
+# Renovación automática cada 12 horas (ya configurado por defecto)
+```
+
+### 📊 Monitoreo y Logs
+
+#### Ver Logs en Tiempo Real
+```bash
+# Logs de la aplicación
+docker-compose logs -f app
+
+# Logs de Nginx
+docker-compose logs -f nginx
+
+# Logs de PostgreSQL
+docker-compose logs -f postgres
+
+# Logs con filtro
+docker-compose logs app | grep ERROR
+```
+
+#### Health Checks
+```bash
+# Verificar estado de containers
+docker-compose ps
+
+# Health check manual
+curl https://inmovaapp.com/api/health
+
+# Verificar recursos
+docker stats
+```
+
+### 💾 Backups Automatizados
+
+```bash
+# backup-db.sh
+#!/bin/bash
+BACKUP_DIR="/home/deploy/backups"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+mkdir -p $BACKUP_DIR
+
+# Backup PostgreSQL
+docker-compose exec -T postgres pg_dump -U inmova_user inmova > "$BACKUP_DIR/db_$TIMESTAMP.sql"
+
+# Backup .env
+cp .env.production "$BACKUP_DIR/env_$TIMESTAMP.backup"
+
+# Comprimir backups antiguos
+find $BACKUP_DIR -name "*.sql" -mtime +7 -exec gzip {} \;
+
+# Eliminar backups > 30 días
+find $BACKUP_DIR -name "*.gz" -mtime +30 -delete
+
+echo "✅ Backup completado: db_$TIMESTAMP.sql"
+```
+
+#### Cron Job para Backups
+```bash
+# Añadir a crontab del usuario deploy
+crontab -e
+
+# Backup diario a las 2 AM
+0 2 * * * /home/deploy/inmova-app/backup-db.sh >> /home/deploy/backups/backup.log 2>&1
+```
+
+### 🔄 Rollback
+
+```bash
+# Ver commits recientes
+git log --oneline -10
+
+# Rollback a versión anterior
+git checkout <commit-hash>
+docker-compose -f docker-compose.production.yml up -d --build
+
+# O volver a main
+git checkout main
+docker-compose -f docker-compose.production.yml up -d --build
+```
+
+### 📈 Scaling Horizontal
+
+```yaml
+# docker-compose.production.yml (con scaling)
+services:
+  app:
+    # ... configuración anterior
+    deploy:
+      replicas: 3  # 3 instancias de la app
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+  nginx:
+    # Load balancer automático entre replicas
+```
+
+### 🎯 Comandos Rápidos de Deployment
+
+```bash
+# Deploy completo
+./deploy.sh
+
+# Rebuild sin cache
+docker-compose -f docker-compose.production.yml build --no-cache
+
+# Restart solo la app
+docker-compose -f docker-compose.production.yml restart app
+
+# Ver estadísticas de recursos
+docker stats
+
+# Limpiar imágenes antiguas
+docker system prune -a --volumes -f
+```
+
+### ⚠️ Troubleshooting Común
+
+#### App no inicia
+```bash
+# Ver logs detallados
+docker-compose logs -f app
+
+# Verificar variables de entorno
+docker-compose exec app env | grep -i "database\|nextauth"
+
+# Verificar conectividad a DB
+docker-compose exec app npx prisma db push
+```
+
+#### Error de Prisma
+```bash
+# Regenerar Prisma Client
+docker-compose exec app npx prisma generate
+
+# Aplicar migraciones pendientes
+docker-compose exec app npx prisma migrate deploy
+
+# Reset completo (⚠️ PELIGRO en producción)
+docker-compose exec app npx prisma migrate reset
+```
+
+#### Nginx no sirve requests
+```bash
+# Verificar configuración
+nginx -t
+
+# Reload nginx
+docker-compose restart nginx
+
+# Ver logs de error
+docker-compose logs nginx | grep error
+```
+
+---
+
+## 📋 CHECKLIST DEPLOYMENT EN SERVIDOR
+
+### Pre-Deployment
+- [ ] VPS contratado (recomendado: Hetzner €20/mes, 4 vCPUs, 8GB RAM)
+- [ ] Ubuntu 22.04 LTS instalado
+- [ ] Docker + Docker Compose instalados
+- [ ] Usuario `deploy` creado con permisos sudo
+- [ ] Firewall configurado (UFW)
+- [ ] DNS apuntando a IP del servidor
+- [ ] SSL configurado con Let's Encrypt
+
+### Durante Deployment
+- [ ] Repositorio clonado en `/home/deploy/inmova-app`
+- [ ] `.env.production` creado con todas las variables
+- [ ] `docker-compose.production.yml` verificado
+- [ ] Build exitoso sin errores
+- [ ] Migraciones de Prisma ejecutadas
+- [ ] Health check responde correctamente
+
+### Post-Deployment
+- [ ] Aplicación accesible en HTTPS
+- [ ] Login funciona
+- [ ] Dashboard carga correctamente
+- [ ] API endpoints responden
+- [ ] Backups automatizados configurados
+- [ ] Monitoreo configurado (Uptime Kuma / UptimeRobot)
+- [ ] GitHub Actions para auto-deploy configurado
+
+---
+
 **Última actualización**: 29 de diciembre de 2025
-**Versión**: 1.0.0
+**Versión**: 2.0.0 (Docker + Servidor Propio)
 **Mantenido por**: Equipo Inmova
