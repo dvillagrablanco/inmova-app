@@ -9,13 +9,14 @@ import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface EmptyStateProps {
-  icon?: LucideIcon;
+  icon?: LucideIcon | ReactNode;
   title: string;
   description: string;
   action?: {
     label: string;
     onClick: () => void;
     variant?: 'default' | 'outline' | 'secondary';
+    icon?: ReactNode;
   };
   secondaryAction?: {
     label: string;
@@ -68,24 +69,26 @@ export function EmptyState({
         {/* Icon */}
         {Icon && (
           <div className="flex justify-center">
-            <div className={cn(
-              sizes.iconBg,
-              'rounded-full bg-gray-100 flex items-center justify-center'
-            )}>
-              <Icon className={cn(sizes.icon, 'text-gray-400')} />
+            <div
+              className={cn(
+                sizes.iconBg,
+                'rounded-full bg-gray-100 flex items-center justify-center'
+              )}
+            >
+              {typeof Icon === 'function' ? (
+                <Icon className={cn(sizes.icon, 'text-gray-400')} />
+              ) : (
+                <div className={cn(sizes.icon, 'text-gray-400')}>{Icon}</div>
+              )}
             </div>
           </div>
         )}
 
         {/* Title */}
-        <h3 className={cn('font-semibold text-gray-900', sizes.title)}>
-          {title}
-        </h3>
+        <h3 className={cn('font-semibold text-gray-900', sizes.title)}>{title}</h3>
 
         {/* Description */}
-        <p className={cn('text-gray-600', sizes.description)}>
-          {description}
-        </p>
+        <p className={cn('text-gray-600', sizes.description)}>{description}</p>
 
         {/* Custom children */}
         {children}
@@ -97,8 +100,10 @@ export function EmptyState({
               <Button
                 onClick={action.onClick}
                 variant={action.variant || 'default'}
-                size={size}
+                size={size === 'lg' || size === 'md' ? 'default' : 'sm'}
+                className="gap-2"
               >
+                {action.icon}
                 {action.label}
               </Button>
             )}
@@ -106,7 +111,7 @@ export function EmptyState({
               <Button
                 onClick={secondaryAction.onClick}
                 variant="outline"
-                size={size}
+                size={size === 'lg' || size === 'md' ? 'default' : 'sm'}
               >
                 {secondaryAction.label}
               </Button>

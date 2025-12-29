@@ -1,6 +1,6 @@
 import { Inter } from 'next/font/google';
 import { Metadata } from 'next';
-import { Providers } from './providers';
+import { Providers } from '@/components/providers';
 import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 import Script from 'next/script';
