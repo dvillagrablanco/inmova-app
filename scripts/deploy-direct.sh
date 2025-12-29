@@ -86,6 +86,7 @@ echo -e "${YELLOW}6️⃣  Construyendo nueva imagen...${NC}"
 echo -e "${BLUE}   Esto puede tardar varios minutos...${NC}"
 
 docker build \
+    --no-cache \
     --build-arg NODE_ENV=production \
     --tag $IMAGE_NAME \
     --file Dockerfile \
