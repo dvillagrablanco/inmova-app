@@ -71,10 +71,7 @@ export function ClientOnly({
 /**
  * Hook para localStorage que previene hydration errors
  */
-export function useLocalStorage<T>(
-  key: string,
-  initialValue: T
-): [T, (value: T) => void] {
+export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => void] {
   // Estado que se inicializa con el valor inicial
   const [storedValue, setStoredValue] = useState<T>(initialValue);
 
@@ -201,9 +198,7 @@ export function NoSSR({ children }: { children: React.ReactNode }) {
 /**
  * HOC para prevenir SSR en componentes específicos
  */
-export function withNoSSR<P extends object>(
-  Component: React.ComponentType<P>
-) {
+export function withNoSSR<P extends object>(Component: React.ComponentType<P>) {
   const WrappedComponent = (props: P) => (
     <NoSSR>
       <Component {...props} />
@@ -223,10 +218,7 @@ export function suppressHydrationWarning() {
   if (typeof window !== 'undefined') {
     const originalError = console.error;
     console.error = (...args) => {
-      if (
-        typeof args[0] === 'string' &&
-        args[0].includes('Hydration')
-      ) {
+      if (typeof args[0] === 'string' && args[0].includes('Hydration')) {
         return;
       }
       originalError.call(console, ...args);
