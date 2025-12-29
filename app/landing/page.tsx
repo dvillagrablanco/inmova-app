@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { LandingPageContent } from '@/components/landing/LandingPageContent';
-import { landingMetadata } from '@/lib/data/landing-data';
+import { seoMetadata } from '@/lib/data/landing-data';
 
 /**
  * Landing Page Principal - Inmova PropTech Platform
@@ -13,25 +13,32 @@ import { landingMetadata } from '@/lib/data/landing-data';
  */
 
 export const metadata: Metadata = {
-  title: landingMetadata.title,
-  description: landingMetadata.description,
-  keywords: landingMetadata.keywords,
+  title: seoMetadata.title,
+  description: seoMetadata.description,
+  keywords: seoMetadata.keywords?.join(', '),
   authors: [{ name: 'Inmova Team' }],
   openGraph: {
-    title: landingMetadata.openGraph.title,
-    description: landingMetadata.openGraph.description,
-    url: landingMetadata.openGraph.url,
-    siteName: landingMetadata.openGraph.siteName,
-    images: landingMetadata.openGraph.images,
-    locale: landingMetadata.openGraph.locale,
+    title: seoMetadata.openGraph?.title || seoMetadata.title,
+    description: seoMetadata.openGraph?.description || seoMetadata.description,
+    url: seoMetadata.openGraph?.url || 'https://inmovaapp.com',
+    siteName: 'Inmova',
+    images: [
+      {
+        url: seoMetadata.openGraph?.image || 'https://inmovaapp.com/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Inmova - Plataforma PropTech',
+      },
+    ],
+    locale: 'es_ES',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: landingMetadata.twitter.title,
-    description: landingMetadata.twitter.description,
-    images: landingMetadata.twitter.images,
-    creator: landingMetadata.twitter.creator,
+    title: seoMetadata.title,
+    description: seoMetadata.description,
+    images: [seoMetadata.openGraph?.image || 'https://inmovaapp.com/og-image.jpg'],
+    creator: seoMetadata.twitter?.creator || '@inmovaapp',
   },
   robots: {
     index: true,
