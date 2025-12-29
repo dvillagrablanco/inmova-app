@@ -2,6 +2,15 @@ import { PrismaClient } from '@prisma/client';
 import logger from './logger';
 
 /**
+ * Detectar si estamos en build-time
+ * Durante el build de Next.js, evitamos inicializar Prisma
+ */
+const isBuildTime =
+  process.env.NEXT_PHASE === 'phase-production-build' ||
+  process.env.NODE_ENV === 'test' ||
+  typeof window !== 'undefined';
+
+/**
  * Configuración del cliente Prisma
  * Documentación: https://pris.ly/d/prisma-schema
  */
@@ -39,22 +48,14 @@ const globalForPrisma = global as typeof globalThis & {
 };
 
 /**
- * Variable para almacenar la instancia lazy de Prisma
+ * Crear o retornar instancia singleton de Prisma
+ * Patrón estándar para Next.js con protección para build-time
  */
-let _lazyPrismaClient: PrismaClient | null = null;
-
-/**
- * Crea o retorna la instancia singleton del cliente Prisma
- * Esta función se ejecuta SOLO cuando se accede realmente a Prisma
- */
-function initPrismaClient(): PrismaClient {
-  if (_lazyPrismaClient) {
-    return _lazyPrismaClient;
-  }
-
-  if (globalForPrisma.prisma) {
-    _lazyPrismaClient = globalForPrisma.prisma;
-    return _lazyPrismaClient;
+function createPrismaClient(): PrismaClient {
+  // Durante el build, retornar un mock que no hace nada
+  if (isBuildTime) {
+    console.log('[Prisma] Build-time detected, skipping Prisma initialization');
+    return {} as PrismaClient;
   }
 
   console.log('[Prisma] Inicializando cliente Prisma...');
@@ -88,36 +89,15 @@ function initPrismaClient(): PrismaClient {
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
   }
 
-  _lazyPrismaClient = client;
-
-  // Guardar en global para evitar múltiples instancias
-  if (process.env.NODE_ENV !== 'production') {
-    globalForPrisma.prisma = client;
-  }
-
   return client;
 }
 
-/**
- * Proxy que lazy-load Prisma Client
- * Solo se inicializa cuando se accede a alguna propiedad
- */
-export const prisma = new Proxy({} as PrismaClient, {
-  get: (target, prop: string | symbol) => {
-    // Inicializar el cliente real si no existe
-    const realClient = initPrismaClient();
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
-    // Retornar la propiedad del cliente real
-    const value = (realClient as any)[prop];
-
-    // Si es una función, bindearla al cliente real
-    if (typeof value === 'function') {
-      return value.bind(realClient);
-    }
-
-    return value;
-  },
-});
+// Guardar en global para desarrollo (evitar múltiples instancias en hot reload)
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
+}
 
 export const db = prisma; // Alias para compatibilidad
 export default prisma; // Default export para compatibilidad
@@ -126,9 +106,8 @@ export default prisma; // Default export para compatibilidad
  * Función helper para testing
  */
 export async function disconnectDb() {
-  if (_lazyPrismaClient) {
-    await _lazyPrismaClient.$disconnect();
-    _lazyPrismaClient = null;
+  if (globalForPrisma.prisma) {
+    await globalForPrisma.prisma.$disconnect();
     globalForPrisma.prisma = undefined;
   }
 }

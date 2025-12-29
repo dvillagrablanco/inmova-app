@@ -1,10 +1,10 @@
 {
-  "buildCommand": "bash -c 'export DATABASE_URL=\"${DATABASE_URL:-postgresql://build:build@build-host:5432/build_db}\" && yarn prisma generate && yarn next build'",
+  "buildCommand": "yarn build:vercel",
   "framework": "nextjs",
   "installCommand": "yarn install",
   "functions": {
     "app/api/**": {
-      "maxDuration": 30,
+      "maxDuration": 60,
       "memory": 1024
     }
   },
