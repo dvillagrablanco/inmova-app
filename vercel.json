@@ -1,48 +1,11 @@
 {
-  "buildCommand": "yarn build",
-  "framework": "nextjs",
+  "buildCommand": "yarn build:vercel",
+  "framework": null,
+  "installCommand": "yarn install",
   "functions": {
     "app/api/**/*.ts": {
-      "maxDuration": 10,
+      "maxDuration": 30,
       "memory": 1024
-    },
-    "app/api/auth/**/*.ts": {
-      "maxDuration": 10,
-      "memory": 512
     }
-  },
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        }
-      ]
-    },
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        }
-      ]
-    }
-  ],
-  "rewrites": [],
-  "redirects": []
+  }
 }
