@@ -62,6 +62,8 @@ deploy-with-credentials.sh
 server-credentials.txt
 .server-password
 local-deploy.sh
+quick-deploy.sh
+SERVER_INFO.md
 
 # Docker
 docker-compose.override.yml
