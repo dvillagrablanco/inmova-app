@@ -67,3 +67,6 @@ SERVER_INFO.md
 
 # Docker
 docker-compose.override.yml
+
+# Server credentials (NEVER commit)
+.server_credentials
