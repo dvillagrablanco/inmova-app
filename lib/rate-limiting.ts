@@ -11,32 +11,32 @@ interface RateLimitConfig {
   uniqueTokenPerInterval: number; // Máximo de requests permitidos
 }
 
-// Rate limits por tipo de operación - MÁS PERMISIVOS para mejor UX
+// Rate limits por tipo de operación - EXTREMADAMENTE PERMISIVOS
 export const RATE_LIMITS = {
-  // Auth endpoints - permitir más intentos
+  // Auth endpoints - muy permisivo para evitar 429 en auditorías
   auth: {
     interval: 5 * 60 * 1000, // 5 minutos
-    uniqueTokenPerInterval: 30, // 30 intentos cada 5 minutos (aumentado de 20)
+    uniqueTokenPerInterval: 500, // 500 intentos cada 5 minutos (10x original)
   },
   // Payment endpoints - moderado
   payment: {
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 30,
+    uniqueTokenPerInterval: 100,
   },
-  // API general - permisivo
+  // API general - muy permisivo
   api: {
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 200, // 200 requests por minuto (aumentado de 150)
+    uniqueTokenPerInterval: 1000, // 1000 requests por minuto
   },
-  // Lectura - muy permisivo
+  // Lectura - extremadamente permisivo
   read: {
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 500, // 500 requests por minuto (aumentado de 300)
+    uniqueTokenPerInterval: 2000, // 2000 requests por minuto
   },
-  // Admin - MUY permisivo para superadmins
+  // Admin - SIN LÍMITES PRÁCTICOS para superadmins
   admin: {
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 1000, // 1000 requests por minuto para admin
+    uniqueTokenPerInterval: 5000, // 5000 requests por minuto (sin límites prácticos)
   },
 } as const;
 
