@@ -4,19 +4,21 @@
  */
 
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
-  let prisma: PrismaClient | null = null;
+// Verificar que tenemos DATABASE_URL
+if (!process.env.DATABASE_URL) {
+  throw new Error('[INIT-ADMIN] DATABASE_URL no configurada');
+}
 
+export async function GET() {
   try {
     console.log('[InitAdmin] Iniciando creación de usuario administrador...');
 
-    // Crear nueva instancia de Prisma
-    prisma = new PrismaClient();
+    // Usar instancia global de Prisma
     await prisma.$connect();
     console.log('[InitAdmin] Conectado a la base de datos');
 
@@ -107,10 +109,5 @@ export async function GET() {
       },
       { status: 500 }
     );
-  } finally {
-    if (prisma) {
-      await prisma.$disconnect();
-      console.log('[InitAdmin] Desconectado de la base de datos');
-    }
   }
 }

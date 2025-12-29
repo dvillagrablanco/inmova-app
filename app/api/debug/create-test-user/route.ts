@@ -4,14 +4,17 @@
  */
 
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: Request) {
-  let prisma: PrismaClient | null = null;
+// Verificar que tenemos DATABASE_URL
+if (!process.env.DATABASE_URL) {
+  throw new Error('[DEBUG] DATABASE_URL no configurada');
+}
 
+export async function POST(request: Request) {
   try {
     const { secret } = await request.json();
 
@@ -20,8 +23,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Crear nueva instancia de Prisma
-    prisma = new PrismaClient();
+    // Usar instancia global de Prisma
     await prisma.$connect();
 
     // Verificar si ya existe el usuario
@@ -96,19 +98,12 @@ export async function POST(request: Request) {
       },
       { status: 500 }
     );
-  } finally {
-    if (prisma) {
-      await prisma.$disconnect();
-    }
   }
 }
 
 export async function GET() {
-  let prisma: PrismaClient | null = null;
-
   try {
-    // Crear nueva instancia de Prisma
-    prisma = new PrismaClient();
+    // Usar instancia global de Prisma
     await prisma.$connect();
 
     // Contar usuarios
@@ -139,9 +134,5 @@ export async function GET() {
       },
       { status: 500 }
     );
-  } finally {
-    if (prisma) {
-      await prisma.$disconnect();
-    }
   }
 }

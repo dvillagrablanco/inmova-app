@@ -11,7 +11,12 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { CRMService } from '@/lib/crm-service';
-import type { CRMLeadStatus, CRMLeadSource, CRMLeadPriority, CompanySize } from '@prisma/client';
+import type {
+  CRMLeadStatus,
+  CRMLeadSource,
+  CRMLeadPriority,
+  CompanySize,
+} from '@/types/prisma-types';
 
 export async function GET(request: Request) {
   try {

@@ -37,16 +37,12 @@ const prismaClientOptions = {
  * Crea o retorna la instancia singleton del cliente Prisma
  */
 function getPrismaClient(): PrismaClient {
-  // Durante build time de Next.js, retornar un mock
-  if (!process.env.DATABASE_URL || process.env.NEXT_PHASE === 'phase-production-build') {
-    console.log('[Prisma] Returning mock client for build time');
-    return {} as PrismaClient;
-  }
-
   if (globalForPrisma.prisma) {
     return globalForPrisma.prisma;
   }
 
+  // Durante build, Prisma se puede inicializar con DATABASE_URL dummy
+  // pero no se conectará a la base de datos hasta runtime
   const client = new PrismaClient(prismaClientOptions);
 
   // Agregar middleware de optimización de queries (Semana 2, Tarea 2.4)
@@ -82,8 +78,8 @@ function getPrismaClient(): PrismaClient {
 export const prisma = globalForPrisma.prisma ?? getPrismaClient();
 export const db = prisma; // Alias para compatibilidad
 
-// Guardar en global solo en desarrollo para evitar múltiples instancias
-if (process.env.NODE_ENV !== 'production' && process.env.DATABASE_URL) {
+// Guardar en global para evitar múltiples instancias
+if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
 }
 
