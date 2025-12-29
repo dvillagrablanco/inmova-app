@@ -118,17 +118,18 @@ fi
 print_step "Repositorio clonado/actualizado"
 
 print_info "[9/10] Configurando .env.production..."
+NEXTAUTH_SECRET=$(openssl rand -base64 32)
 run_remote "cat > /home/deploy/inmova-app/.env.production << 'ENVEOF'
 NODE_ENV=production
 PORT=3000
-NEXT_PUBLIC_BASE_URL=http://157.180.119.236:3000
+NEXT_PUBLIC_BASE_URL=https://inmovaapp.com
 
 # Database
 DATABASE_URL=postgresql://inmova_user:inmova_secure_2024@postgres:5432/inmova
 
 # NextAuth
-NEXTAUTH_SECRET=$(openssl rand -base64 32)
-NEXTAUTH_URL=http://157.180.119.236:3000
+NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+NEXTAUTH_URL=https://inmovaapp.com
 
 # PostgreSQL
 POSTGRES_PASSWORD=inmova_secure_2024
