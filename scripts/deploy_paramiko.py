@@ -15,7 +15,7 @@ from paramiko import SSHClient, AutoAddPolicy
 SSH_HOST = "157.180.119.236"
 SSH_PORT = 22
 SSH_USER = "root"
-SSH_PASS = "XVcL9qHxqA7f"
+SSH_PASS = "rCkrMFdswdmn"
 REMOTE_PATH = "/opt/inmova-app"
 GIT_REPO = "https://github.com/dvillagrablanco/inmova-app.git"
 GIT_BRANCH = "main"
@@ -156,16 +156,22 @@ def main():
         else:
             # Existe, actualizar
             print_info("Actualizando código...")
+            
+            # Guardar cambios locales (stash)
+            print_info("Guardando cambios locales (git stash)...")
+            execute_command(ssh, f"cd {REMOTE_PATH} && git stash", print_output=False)
+            
             commands = [
                 f"cd {REMOTE_PATH}",
                 "git fetch origin",
                 f"git checkout {GIT_BRANCH}",
+                f"git reset --hard origin/{GIT_BRANCH}",  # Force update
                 f"git pull origin {GIT_BRANCH}"
             ]
             cmd = " && ".join(commands)
             exit_code, output, error = execute_command(ssh, cmd)
             if exit_code == 0:
-                print_success("Código actualizado")
+                print_success("Código actualizado (forzado)")
             else:
                 print_error("Error actualizando código")
                 sys.exit(1)
