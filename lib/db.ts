@@ -1,48 +1,64 @@
-/**
- * Cliente de Prisma con configuración optimizada de connection pooling
- *
- * Configuración de Connection Pool:
- * - connection_limit: Número máximo de conexiones en el pool
- * - pool_timeout: Tiempo máximo de espera para obtener una conexión
- * - Prisma usa PgBouncer internamente para pooling eficiente
- *
- * Para usar con PgBouncer externo:
- * 1. Configurar DATABASE_URL con connection_limit pequeño (ej: 5-10)
- * 2. Usar pgbouncer=true en la URL si se usa en modo transaction
- * 3. Configurar DIRECT_URL para migraciones (sin PgBouncer)
- */
-
-import 'server-only';
 import { PrismaClient } from '@prisma/client';
 import logger from './logger';
-import { prismaQueryMiddleware } from './prisma-query-optimizer';
 
-const globalForPrisma = globalThis as unknown as {
+/**
+ * Configuración del cliente Prisma
+ * Documentación: https://pris.ly/d/prisma-schema
+ */
+const prismaClientOptions = {
+  log: [
+    { emit: 'event', level: 'query' },
+    { emit: 'event', level: 'error' },
+    { emit: 'event', level: 'warn' },
+  ],
+  // errorFormat: 'minimal', // Cambiado de 'colorless' a 'minimal'
+} as any;
+
+/**
+ * Middleware de optimización de queries (Semana 2, Tarea 2.4)
+ */
+const prismaQueryMiddleware = async (params: any, next: any) => {
+  const before = Date.now();
+  const result = await next(params);
+  const after = Date.now();
+  const queryTime = after - before;
+
+  if (queryTime > 1000) {
+    logger.warn(`⚠️  Query lenta detectada: ${params.model}.${params.action} (${queryTime}ms)`);
+  }
+
+  return result;
+};
+
+declare global {
+  var prisma: PrismaClient | undefined;
+}
+
+const globalForPrisma = global as typeof globalThis & {
   prisma: PrismaClient | undefined;
 };
 
 /**
- * Configuración optimizada del cliente Prisma
+ * Variable para almacenar la instancia lazy de Prisma
  */
-const prismaClientOptions = {
-  log: [
-    { level: 'warn' as const, emit: 'event' as const },
-    { level: 'error' as const, emit: 'event' as const },
-  ],
-  // Estas opciones se pueden configurar vía DATABASE_URL
-  // Ejemplo: postgresql://user:pass@host:5432/db?connection_limit=10&pool_timeout=20
-};
+let _lazyPrismaClient: PrismaClient | null = null;
 
 /**
  * Crea o retorna la instancia singleton del cliente Prisma
+ * Esta función se ejecuta SOLO cuando se accede realmente a Prisma
  */
-function getPrismaClient(): PrismaClient {
-  if (globalForPrisma.prisma) {
-    return globalForPrisma.prisma;
+function initPrismaClient(): PrismaClient {
+  if (_lazyPrismaClient) {
+    return _lazyPrismaClient;
   }
 
-  // Durante build, Prisma se puede inicializar con DATABASE_URL dummy
-  // pero no se conectará a la base de datos hasta runtime
+  if (globalForPrisma.prisma) {
+    _lazyPrismaClient = globalForPrisma.prisma;
+    return _lazyPrismaClient;
+  }
+
+  console.log('[Prisma] Inicializando cliente Prisma...');
+
   const client = new PrismaClient(prismaClientOptions);
 
   // Agregar middleware de optimización de queries (Semana 2, Tarea 2.4)
@@ -72,82 +88,60 @@ function getPrismaClient(): PrismaClient {
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
   }
 
+  _lazyPrismaClient = client;
+
+  // Guardar en global para evitar múltiples instancias
+  if (process.env.NODE_ENV !== 'production') {
+    globalForPrisma.prisma = client;
+  }
+
   return client;
 }
 
-export const prisma = globalForPrisma.prisma ?? getPrismaClient();
-export const db = prisma; // Alias para compatibilidad
-
-// Guardar en global para evitar múltiples instancias
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma;
-}
-
 /**
- * Extensiones de Prisma para optimizaciones adicionales
+ * Proxy que lazy-load Prisma Client
+ * Solo se inicializa cuando se accede a alguna propiedad
  */
+export const prisma = new Proxy({} as PrismaClient, {
+  get: (target, prop: string | symbol) => {
+    // Inicializar el cliente real si no existe
+    const realClient = initPrismaClient();
 
-/**
- * Helper para ejecutar queries con retry automático
- * Útil para manejar errores transitorios de conexión
- */
-export async function withRetry<T>(
-  operation: () => Promise<T>,
-  maxRetries: number = 3,
-  delayMs: number = 1000
-): Promise<T> {
-  let lastError: Error | undefined;
+    // Retornar la propiedad del cliente real
+    const value = (realClient as any)[prop];
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      return await operation();
-    } catch (error: any) {
-      lastError = error;
-
-      // Solo reintentar en errores de conexión
-      const isConnectionError =
-        error.code === 'P1001' || // Can't reach database server
-        error.code === 'P1002' || // Database server timeout
-        error.code === 'P1008' || // Operations timed out
-        error.code === 'P1017'; // Server has closed the connection
-
-      if (!isConnectionError || attempt === maxRetries) {
-        throw error;
-      }
-
-      logger.warn(`Database operation failed (attempt ${attempt}/${maxRetries}), retrying...`, {
-        error: error.message,
-        code: error.code,
-      });
-
-      // Esperar antes de reintentar (con backoff exponencial)
-      await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
+    // Si es una función, bindearla al cliente real
+    if (typeof value === 'function') {
+      return value.bind(realClient);
     }
-  }
 
-  throw lastError;
+    return value;
+  },
+});
+
+export const db = prisma; // Alias para compatibilidad
+export default prisma; // Default export para compatibilidad
+
+/**
+ * Función helper para testing
+ */
+export async function disconnectDb() {
+  if (_lazyPrismaClient) {
+    await _lazyPrismaClient.$disconnect();
+    _lazyPrismaClient = null;
+    globalForPrisma.prisma = undefined;
+  }
 }
 
 /**
- * Obtiene estadísticas de conexiones del pool
+ * Función helper para verificar conexión
  */
-export async function getConnectionPoolStats(): Promise<any> {
+export async function checkDbConnection(): Promise<boolean> {
   try {
-    // Ejecutar query raw para obtener información de conexiones
-    const result = await prisma.$queryRaw`
-      SELECT 
-        count(*) as total_connections,
-        count(*) FILTER (WHERE state = 'active') as active_connections,
-        count(*) FILTER (WHERE state = 'idle') as idle_connections
-      FROM pg_stat_activity
-      WHERE datname = current_database()
-    `;
-
-    return result;
+    await prisma.$queryRaw`SELECT 1`;
+    return true;
   } catch (error) {
-    logger.error('Failed to get connection pool stats:', error);
-    return null;
+    logger.error('Database connection check failed:', error);
+    return false;
   }
 }
-
-export default prisma;
