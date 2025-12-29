@@ -53,13 +53,15 @@ export function useCompanies() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/companies');
-      if (!res.ok) throw new Error('Error al cargar clientes');
+      if (!res.ok) {
+        throw new Error(`Error ${res.status}: ${res.statusText || 'al cargar clientes'}`);
+      }
       const data = await res.json();
       setCompanies(data.companies || []);
       logger.info('Clientes cargados exitosamente', { count: data.companies?.length || 0 });
     } catch (error) {
       logError(error as Error, { context: 'useCompanies.fetchCompanies' });
-      toast.error('Error al cargar clientes');
+      toast.error((error as Error).message || 'Error al cargar clientes');
       setCompanies([]);
     } finally {
       setLoading(false);
@@ -70,12 +72,14 @@ export function useCompanies() {
   const fetchPlans = async () => {
     try {
       const res = await fetch('/api/admin/subscription-plans');
-      if (!res.ok) throw new Error('Error al cargar planes');
+      if (!res.ok) {
+        throw new Error(`Error ${res.status}: ${res.statusText || 'al cargar planes'}`);
+      }
       const data = await res.json();
       setPlans(data.plans || []);
     } catch (error) {
       logError(error as Error, { context: 'useCompanies.fetchPlans' });
-      toast.error('Error al cargar planes de suscripción');
+      toast.error((error as Error).message || 'Error al cargar planes de suscripción');
     }
   };
 
@@ -87,12 +91,12 @@ export function useCompanies() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(companyData),
       });
-      
+
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.error || 'Error al crear empresa');
       }
-      
+
       const data = await res.json();
       toast.success(`Empresa "${data.company.nombre}" creada exitosamente`);
       await fetchCompanies();
@@ -110,12 +114,12 @@ export function useCompanies() {
       const res = await fetch(`/api/admin/companies/${companyId}`, {
         method: 'DELETE',
       });
-      
+
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.error || 'Error al eliminar empresa');
       }
-      
+
       toast.success('Empresa eliminada exitosamente');
       await fetchCompanies();
       return true;
@@ -134,9 +138,9 @@ export function useCompanies() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ category: newCategory }),
       });
-      
+
       if (!res.ok) throw new Error('Error al actualizar categoría');
-      
+
       toast.success('Categoría actualizada');
       await fetchCompanies();
       return true;
@@ -155,9 +159,9 @@ export function useCompanies() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ companyIds, activate }),
       });
-      
+
       if (!res.ok) throw new Error('Error en operación masiva');
-      
+
       const data = await res.json();
       toast.success(data.message);
       await fetchCompanies();
