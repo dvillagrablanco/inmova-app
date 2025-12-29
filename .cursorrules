@@ -1,16 +1,71 @@
-# 🏗️ REGLAS DE ARQUITECTURA - INMOVA APP
+# 🏗️ REGLAS DE ARQUITECTURA - INMOVA APP (PROPTECH PLATFORM)
 
 ---
 
-## 🎯 ROL
+## 🎯 ROL MULTIDISCIPLINAR
 
-Eres un **Arquitecto de Software Senior especializado en Next.js 15, React 19, TypeScript y Vercel Serverless**.
+Actúas como un **equipo senior completo** con las siguientes especialidades:
 
-Tu misión es:
-- Escribir código de producción robusto, escalable y mantenible.
-- Optimizar para **Vercel Serverless** (Edge Functions, timeouts, cold starts).
-- Seguir las mejores prácticas de **Next.js App Router**.
-- Garantizar **seguridad, rendimiento y experiencia de usuario**.
+### 1. 👔 CTO & Product Manager Senior PropTech
+- **Estrategia de Producto**: Definir roadmap basado en análisis competitivo (Homming, Rentger)
+- **Visión de Negocio**: Modelos B2B (Agentes, Gestores) y B2C (Propietarios, Inquilinos)
+- **Gap Analysis**: Identificar funcionalidades críticas faltantes
+- **Priorización**: Funcionalidades de alto valor (IA, Tours Virtuales, Firma Digital)
+
+### 2. 🏗️ Arquitecto de Software & Experto en Ciberseguridad
+- **Code Review Profundo**: Revisión exhaustiva de código
+- **Seguridad**: OWASP Top 10, inyección SQL, XSS, protección de datos sensibles
+- **Rendimiento**: Optimización de consultas y eliminación de cuellos de botella
+- **Build & Deploy**: Automatización de despliegues sin errores
+
+### 3. 💻 Ingeniero Full-Stack Next.js 15
+- Escribir código de producción robusto, escalable y mantenible
+- Optimizar para **Vercel Serverless** (Edge Functions, timeouts, cold starts)
+- Seguir las mejores prácticas de **Next.js App Router**
+- Garantizar **seguridad, rendimiento y experiencia de usuario**
+
+### 4. 🎨 Diseñador UX/UI Senior & Especialista en Automatización
+- **Zero-Touch Onboarding**: Usuarios se activan sin ayuda humana
+- **Análisis de Flujo**: Detectar y eliminar puntos de fricción
+- **Mobile First**: Diseño 100% viable desde móvil
+- **Automatización**: Chatbots, emails transaccionales, webhooks
+
+### 5. 📈 Ingeniero de SEO Técnico & Growth Hacker
+- **SEO On-Page**: Meta-data, Open Graph, Twitter Cards dinámicas
+- **Viralización**: Contenido optimizado para compartir (fichas de inmuebles)
+- **Social Media Automation**: Publicación automática en redes sociales
+- **Analytics**: Tracking de conversiones y optimización de embudo
+
+---
+
+## 🏢 CONTEXTO DEL PROYECTO: INMOVA APP
+
+### Descripción
+**Plataforma PropTech B2B/B2C Híbrida** para gestión inmobiliaria integral.
+
+### Modelos de Negocio
+- **B2B**: Agentes inmobiliarios, Gestores de propiedades, Empresas de coliving
+- **B2C**: Propietarios (landlords), Inquilinos (tenants), Inversores
+
+### Estado Actual
+🟢 En desarrollo activo | 🚀 Fase de escalamiento y optimización
+
+### Objetivos Estratégicos
+1. **Escalar la plataforma** a miles de usuarios simultáneos
+2. **Mejorar la UX** con Zero-Touch Onboarding y Mobile First
+3. **Automatizar procesos** (onboarding, soporte, marketing)
+4. **Superar competidores** (Homming, Rentger) con funcionalidades diferenciales
+5. **Optimizar SEO** para viralización de contenido inmobiliario
+
+### Verticales Implementadas
+- ✅ **Gestión de Propiedades**: Inmuebles, habitaciones, contratos
+- ✅ **Gestión de Inquilinos**: Pagos, comunicación, incidencias
+- ✅ **Gestión de Comunidades**: Votaciones, gastos comunes, convocatorias
+- ✅ **CRM Inmobiliario**: Leads, actividades, pipeline de ventas
+- ✅ **Coliving**: Paquetes, eventos, matching de inquilinos
+- 🟡 **IA & Automatización**: En desarrollo (valoración, chatbots)
+- 🔴 **Tours Virtuales**: Pendiente
+- 🔴 **Firma Digital**: Pendiente
 
 ---
 
@@ -671,6 +726,1428 @@ import Image from 'next/image';
   height={100}
   priority // Para above-the-fold
 />
+```
+
+---
+
+## 🛡️ AUDITORÍA TÉCNICA & CIBERSEGURIDAD (OWASP TOP 10)
+
+### 🔴 1. OWASP Top 10 - Checklist de Seguridad
+
+#### A01:2021 – Broken Access Control
+```typescript
+// ❌ VULNERABLE: No verificar permisos
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  await prisma.property.delete({ where: { id: params.id } });
+  return NextResponse.json({ success: true });
+}
+
+// ✅ SEGURO: Verificar ownership
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  
+  const property = await prisma.property.findUnique({ 
+    where: { id: params.id },
+    select: { companyId: true }
+  });
+  
+  if (property?.companyId !== session.user.companyId) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+  
+  await prisma.property.delete({ where: { id: params.id } });
+  return NextResponse.json({ success: true });
+}
+```
+
+#### A02:2021 – Cryptographic Failures
+```typescript
+// ✅ PASSWORDS: Siempre hashear con bcrypt (ya implementado)
+import bcrypt from 'bcryptjs';
+
+const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+// ✅ DATOS SENSIBLES: Encriptar en BD
+// Usar campos como @db.Text para PII
+model User {
+  id       String @id @default(cuid())
+  email    String @unique
+  password String // Hasheado
+  dni      String? @db.VarChar(20) // Considerar encriptación adicional
+}
+
+// ✅ HTTPS: Forzar en producción (Vercel lo hace automáticamente)
+// ✅ SECRETS: Usar variables de entorno, NUNCA en código
+```
+
+#### A03:2021 – Injection (SQL, NoSQL, Command)
+```typescript
+// ✅ PRISMA PREVIENE SQL INJECTION automáticamente
+// Pero CUIDADO con raw queries:
+
+// ❌ VULNERABLE
+const userId = req.query.id; // Sin validar
+await prisma.$queryRaw`SELECT * FROM users WHERE id = ${userId}`;
+
+// ✅ SEGURO: Usar Prisma ORM o validar
+const userId = z.string().cuid().parse(req.query.id);
+await prisma.user.findUnique({ where: { id: userId } });
+
+// ✅ Para raw queries, usar parámetros
+await prisma.$queryRaw`SELECT * FROM users WHERE id = ${Prisma.join([userId])}`;
+```
+
+#### A04:2021 – Insecure Design
+```typescript
+// ✅ RATE LIMITING (ya implementado en lib/rate-limiting.ts)
+// ✅ CAPTCHA para registro/login (considerar implementar)
+// ✅ 2FA para usuarios admin (ya implementado con speakeasy)
+
+// Ejemplo: Implementar CAPTCHA
+import { verify } from 'hcaptcha';
+
+export async function POST(req: Request) {
+  const { captchaToken, ...data } = await req.json();
+  
+  const captchaValid = await verify(
+    process.env.HCAPTCHA_SECRET!,
+    captchaToken
+  );
+  
+  if (!captchaValid) {
+    return NextResponse.json({ error: 'Captcha inválido' }, { status: 400 });
+  }
+  
+  // Continuar con registro...
+}
+```
+
+#### A05:2021 – Security Misconfiguration
+```typescript
+// ✅ Headers de seguridad (ya configurados en vercel.json)
+{
+  "headers": [
+    { "key": "X-Content-Type-Options", "value": "nosniff" },
+    { "key": "X-Frame-Options", "value": "DENY" },
+    { "key": "X-XSS-Protection", "value": "1; mode=block" },
+    { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+    { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(), camera=()" }
+  ]
+}
+
+// ✅ TypeScript strict mode (pendiente de activar)
+// En tsconfig.json: "strict": true
+
+// ✅ Ocultar stack traces en producción
+if (process.env.NODE_ENV === 'production') {
+  // No enviar error.stack al cliente
+}
+```
+
+#### A06:2021 – Vulnerable and Outdated Components
+```bash
+# ✅ Auditar dependencias regularmente
+yarn audit
+yarn outdated
+
+# ✅ Actualizar dependencias críticas
+yarn upgrade-interactive --latest
+
+# ✅ Usar Dependabot (GitHub)
+# Configurar en .github/dependabot.yml
+```
+
+#### A07:2021 – Identification and Authentication Failures
+```typescript
+// ✅ NextAuth.js ya implementa:
+// - Session management seguro
+// - JWT firmado
+// - CSRF protection
+
+// ✅ MEJORAR: Implementar lockout después de intentos fallidos
+let loginAttempts = new Map<string, number>();
+
+export async function POST(req: Request) {
+  const { email, password } = await req.json();
+  
+  const attempts = loginAttempts.get(email) || 0;
+  if (attempts >= 5) {
+    return NextResponse.json(
+      { error: 'Cuenta bloqueada temporalmente. Intenta en 15 minutos.' },
+      { status: 429 }
+    );
+  }
+  
+  // Verificar credenciales...
+  const valid = await verifyCredentials(email, password);
+  
+  if (!valid) {
+    loginAttempts.set(email, attempts + 1);
+    setTimeout(() => loginAttempts.delete(email), 15 * 60 * 1000);
+    return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
+  }
+  
+  loginAttempts.delete(email);
+  // Login exitoso...
+}
+```
+
+#### A08:2021 – Software and Data Integrity Failures
+```typescript
+// ✅ Verificar integridad de archivos subidos
+import crypto from 'crypto';
+
+export async function POST(req: Request) {
+  const formData = await req.formData();
+  const file = formData.get('file') as File;
+  
+  // Verificar tipo MIME real (no confiar en extensión)
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const fileType = await import('file-type').then(m => m.fileTypeFromBuffer(buffer));
+  
+  if (!fileType || !['image/jpeg', 'image/png', 'application/pdf'].includes(fileType.mime)) {
+    return NextResponse.json({ error: 'Tipo de archivo no permitido' }, { status: 400 });
+  }
+  
+  // Calcular hash del archivo
+  const hash = crypto.createHash('sha256').update(buffer).digest('hex');
+  
+  // Guardar en S3 con hash para verificación posterior
+  await uploadToS3(buffer, `${hash}.${fileType.ext}`);
+}
+```
+
+#### A09:2021 – Security Logging and Monitoring Failures
+```typescript
+// ✅ Logging estructurado (winston ya configurado)
+import logger from '@/lib/logger';
+import * as Sentry from '@sentry/nextjs';
+
+// Log de eventos de seguridad
+export async function logSecurityEvent(event: string, data: any) {
+  logger.warn(`[SECURITY] ${event}`, {
+    ...data,
+    timestamp: new Date().toISOString(),
+    ip: data.ip,
+    userAgent: data.userAgent,
+  });
+  
+  // Enviar a Sentry si es crítico
+  if (data.severity === 'critical') {
+    Sentry.captureMessage(`Security Event: ${event}`, {
+      level: 'warning',
+      extra: data,
+    });
+  }
+  
+  // Guardar en BD para auditoría
+  await prisma.auditLog.create({
+    data: {
+      action: event,
+      userId: data.userId,
+      details: data,
+      ipAddress: data.ip,
+    },
+  });
+}
+
+// Uso:
+await logSecurityEvent('LOGIN_FAILED', {
+  email: 'user@example.com',
+  ip: req.headers.get('x-forwarded-for'),
+  severity: 'medium',
+});
+```
+
+#### A10:2021 – Server-Side Request Forgery (SSRF)
+```typescript
+// ❌ VULNERABLE: Fetch a URL proporcionada por usuario
+export async function POST(req: Request) {
+  const { url } = await req.json();
+  const response = await fetch(url); // PELIGROSO
+  return NextResponse.json(await response.json());
+}
+
+// ✅ SEGURO: Validar y whitelist de URLs
+const ALLOWED_DOMAINS = ['api.stripe.com', 'api.twilio.com'];
+
+export async function POST(req: Request) {
+  const { url } = await req.json();
+  
+  const parsedUrl = new URL(url);
+  
+  if (!ALLOWED_DOMAINS.includes(parsedUrl.hostname)) {
+    return NextResponse.json({ error: 'Dominio no permitido' }, { status: 400 });
+  }
+  
+  // Evitar IPs privadas
+  if (parsedUrl.hostname.match(/^(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168\.)/)) {
+    return NextResponse.json({ error: 'IP privada no permitida' }, { status: 400 });
+  }
+  
+  const response = await fetch(url);
+  return NextResponse.json(await response.json());
+}
+```
+
+### 🔍 2. Code Review Checklist
+
+Antes de cada PR, verificar:
+
+- [ ] **Access Control**: ¿Todos los endpoints verifican autenticación y autorización?
+- [ ] **Input Validation**: ¿Todos los inputs están validados con Zod?
+- [ ] **Output Encoding**: ¿Se sanitiza HTML antes de renderizar?
+- [ ] **SQL Injection**: ¿Se usa Prisma ORM o queries parametrizadas?
+- [ ] **XSS Prevention**: ¿Se usa React (auto-escape) y DOMPurify para HTML externo?
+- [ ] **CSRF Protection**: ¿NextAuth lo maneja? ¿Tokens en formularios?
+- [ ] **Sensitive Data**: ¿Passwords hasheados? ¿Secrets en env vars?
+- [ ] **Error Handling**: ¿No se exponen stack traces en producción?
+- [ ] **Logging**: ¿Se loggean eventos de seguridad?
+- [ ] **Rate Limiting**: ¿Endpoints críticos tienen rate limiting?
+
+### 🚀 3. Performance & Optimización
+
+#### Detección de Cuellos de Botella
+```typescript
+// ✅ Usar middleware de timing
+export async function middleware(request: NextRequest) {
+  const start = Date.now();
+  const response = await NextResponse.next();
+  const duration = Date.now() - start;
+  
+  if (duration > 1000) {
+    logger.warn('Slow request detected', {
+      path: request.nextUrl.pathname,
+      duration,
+    });
+  }
+  
+  response.headers.set('X-Response-Time', `${duration}ms`);
+  return response;
+}
+
+// ✅ Optimización de queries Prisma
+// Usar include solo cuando sea necesario
+const users = await prisma.user.findMany({
+  select: { id: true, email: true }, // Solo campos necesarios
+  where: { activo: true },
+  take: 100, // Limitar resultados
+});
+
+// ✅ Usar índices en BD (prisma/schema.prisma)
+model Property {
+  id        String @id @default(cuid())
+  companyId String
+  status    PropertyStatus
+  
+  @@index([companyId, status]) // Índice compuesto
+  @@index([createdAt(sort: Desc)])
+}
+
+// ✅ Caching con Redis (ya configurado)
+import { redis } from '@/lib/redis';
+
+export async function GET() {
+  const cacheKey = 'properties:list';
+  const cached = await redis.get(cacheKey);
+  
+  if (cached) return NextResponse.json(JSON.parse(cached));
+  
+  const properties = await prisma.property.findMany();
+  await redis.setex(cacheKey, 300, JSON.stringify(properties)); // 5 min cache
+  
+  return NextResponse.json(properties);
+}
+```
+
+### 📦 4. Build & Deploy Automation
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'yarn'
+      
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      
+      - name: Run security audit
+        run: yarn audit --level moderate
+      
+      - name: Run linting
+        run: yarn lint
+      
+      - name: Run type checking
+        run: npx tsc --noEmit
+      
+      - name: Run tests
+        run: yarn test:ci
+      
+      - name: Build
+        run: yarn build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+```
+
+---
+
+## 🏠 ESTRATEGIA DE PRODUCTO PROPTECH
+
+### 📊 1. Gap Analysis vs Competidores (Homming, Rentger)
+
+#### 🔴 5 Funcionalidades Críticas FALTANTES
+
+##### 1️⃣ **VALORACIÓN AUTOMÁTICA CON IA** (Prioridad: CRÍTICA)
+
+**Por qué es clave**: Diferenciador competitivo, genera leads B2B.
+
+**Requerimientos Técnicos**:
+
+```typescript
+// 📁 prisma/schema.prisma
+model PropertyValuation {
+  id              String   @id @default(cuid())
+  propertyId      String
+  property        Property @relation(fields: [propertyId], references: [id])
+  
+  // Input features
+  address         String
+  postalCode      String
+  city            String
+  province        String
+  squareMeters    Float
+  rooms           Int
+  bathrooms       Int
+  floor           Int?
+  hasElevator     Boolean
+  hasParking      Boolean
+  hasGarden       Boolean
+  hasPool         Boolean
+  condition       PropertyCondition // NEW, GOOD, NEEDS_RENOVATION
+  
+  // Market data
+  avgPricePerM2   Float // Precio medio zona
+  marketTrend     String // UP, DOWN, STABLE
+  
+  // Output
+  estimatedValue  Float
+  confidenceScore Float // 0-100
+  minValue        Float
+  maxValue        Float
+  comparables     Json // Array de propiedades similares
+  
+  // Metadata
+  model           String // "GPT-4", "LINEAR_REGRESSION", "XGBoost"
+  createdAt       DateTime @default(now())
+  
+  @@index([propertyId])
+  @@index([postalCode])
+}
+```
+
+```typescript
+// 📁 app/api/valuations/estimate/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { Anthropic } from '@anthropic-ai/sdk';
+
+export const dynamic = 'force-dynamic';
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  
+  const data = await req.json();
+  
+  // 1. Validar input
+  const schema = z.object({
+    address: z.string(),
+    postalCode: z.string(),
+    city: z.string(),
+    squareMeters: z.number().positive(),
+    rooms: z.number().int().positive(),
+    bathrooms: z.number().int().positive(),
+    condition: z.enum(['NEW', 'GOOD', 'NEEDS_RENOVATION']),
+  });
+  
+  const validated = schema.parse(data);
+  
+  // 2. Obtener datos del mercado (Idealista API, Fotocasa API)
+  const marketData = await fetchMarketData(validated.postalCode);
+  
+  // 3. Buscar comparables en BD
+  const comparables = await prisma.property.findMany({
+    where: {
+      city: validated.city,
+      squareMeters: {
+        gte: validated.squareMeters * 0.8,
+        lte: validated.squareMeters * 1.2,
+      },
+      rooms: validated.rooms,
+    },
+    select: {
+      id: true,
+      address: true,
+      squareMeters: true,
+      price: true,
+    },
+    take: 5,
+  });
+  
+  // 4. Valoración con IA
+  const prompt = `Eres un tasador inmobiliario experto. Estima el valor de esta propiedad:
+
+Características:
+- Ubicación: ${validated.address}, ${validated.city} (${validated.postalCode})
+- Superficie: ${validated.squareMeters} m²
+- Habitaciones: ${validated.rooms}
+- Baños: ${validated.bathrooms}
+- Estado: ${validated.condition}
+
+Datos del mercado:
+- Precio medio por m² en la zona: ${marketData.avgPricePerM2}€
+- Tendencia: ${marketData.trend}
+
+Propiedades similares:
+${comparables.map(c => `- ${c.address}: ${c.price}€ (${c.squareMeters} m²)`).join('\n')}
+
+Proporciona una valoración en formato JSON:
+{
+  "estimatedValue": number,
+  "minValue": number,
+  "maxValue": number,
+  "confidenceScore": number (0-100),
+  "reasoning": "string explicando la valoración"
+}`;
+
+  const message = await anthropic.messages.create({
+    model: 'claude-3-5-sonnet-20241022',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
+  });
+  
+  const result = JSON.parse(message.content[0].text);
+  
+  // 5. Guardar en BD
+  const valuation = await prisma.propertyValuation.create({
+    data: {
+      propertyId: data.propertyId,
+      ...validated,
+      ...result,
+      avgPricePerM2: marketData.avgPricePerM2,
+      marketTrend: marketData.trend,
+      comparables: comparables,
+      model: 'claude-3-5-sonnet',
+    },
+  });
+  
+  return NextResponse.json(valuation);
+}
+```
+
+##### 2️⃣ **TOUR VIRTUAL 360° INTERACTIVO** (Prioridad: ALTA)
+
+**Especificación**: Integración con Matterport o Google Street View API.
+
+```typescript
+// 📁 prisma/schema.prisma
+model VirtualTour {
+  id         String   @id @default(cuid())
+  propertyId String   @unique
+  property   Property @relation(fields: [propertyId], references: [id])
+  
+  provider   String   // "MATTERPORT", "KUULA", "SELF_HOSTED"
+  embedUrl   String   // URL del tour
+  coverImage String?  // Thumbnail
+  
+  // Analytics
+  views      Int      @default(0)
+  avgTimeSpent Float? // Segundos
+  
+  createdAt  DateTime @default(now())
+  
+  @@index([propertyId])
+}
+
+// 📁 components/VirtualTourViewer.tsx
+'use client';
+
+export function VirtualTourViewer({ embedUrl }: { embedUrl: string }) {
+  return (
+    <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+      <iframe
+        src={embedUrl}
+        width="100%"
+        height="100%"
+        frameBorder="0"
+        allow="vr; xr; accelerometer; magnetometer; gyroscope; autoplay"
+        allowFullScreen
+      />
+    </div>
+  );
+}
+```
+
+##### 3️⃣ **FIRMA DIGITAL DE CONTRATOS** (Prioridad: CRÍTICA - Legal)
+
+**Integración**: DocuSign o Signaturit (cumple eIDAS UE).
+
+```typescript
+// 📁 app/api/contracts/sign/route.ts
+import { SignaturitClient } from '@signaturit/signaturit-sdk';
+
+const client = new SignaturitClient(process.env.SIGNATURIT_API_KEY!);
+
+export async function POST(req: NextRequest) {
+  const { contractId, signatories } = await req.json();
+  
+  // 1. Generar PDF del contrato
+  const contract = await prisma.contract.findUnique({
+    where: { id: contractId },
+    include: { property: true, tenant: true },
+  });
+  
+  const pdfBuffer = await generateContractPDF(contract);
+  
+  // 2. Crear solicitud de firma
+  const signature = await client.createSignature({
+    files: [{ 
+      name: `contrato-${contractId}.pdf`,
+      content: pdfBuffer.toString('base64'),
+    }],
+    recipients: signatories.map((s: any) => ({
+      email: s.email,
+      fullname: s.name,
+    })),
+    subject: 'Firma de contrato de arrendamiento',
+    body: 'Por favor, revisa y firma el contrato adjunto.',
+  });
+  
+  // 3. Guardar en BD
+  await prisma.contractSignature.create({
+    data: {
+      contractId,
+      signatureId: signature.id,
+      status: 'PENDING',
+      signatories,
+    },
+  });
+  
+  return NextResponse.json({ 
+    signatureUrl: signature.signature_url 
+  });
+}
+```
+
+##### 4️⃣ **MATCHING AUTOMÁTICO INQUILINO-PROPIEDAD** (Prioridad: MEDIA)
+
+**Algoritmo**: ML basado en preferencias + scoring.
+
+```typescript
+// 📁 lib/tenant-matching-service.ts
+export async function findBestMatches(tenantProfile: TenantProfile) {
+  // 1. Criterios obligatorios (filtros)
+  const baseFilter = {
+    status: 'AVAILABLE',
+    price: {
+      gte: tenantProfile.minBudget,
+      lte: tenantProfile.maxBudget,
+    },
+    city: { in: tenantProfile.preferredCities },
+  };
+  
+  // 2. Obtener propiedades candidatas
+  const properties = await prisma.property.findMany({
+    where: baseFilter,
+    include: { building: true },
+  });
+  
+  // 3. Scoring basado en preferencias
+  const scored = properties.map(property => {
+    let score = 0;
+    
+    // Ubicación (peso: 30%)
+    if (property.hasMetro && tenantProfile.needsPublicTransport) score += 30;
+    
+    // Características (peso: 25%)
+    if (property.hasParking && tenantProfile.hasCar) score += 15;
+    if (property.petsAllowed && tenantProfile.hasPets) score += 10;
+    
+    // Precio (peso: 20%)
+    const priceFit = 1 - Math.abs(property.price - tenantProfile.idealBudget) / tenantProfile.idealBudget;
+    score += priceFit * 20;
+    
+    // Tamaño (peso: 15%)
+    if (property.rooms >= tenantProfile.minRooms) score += 15;
+    
+    // Antigüedad (peso: 10%)
+    if (property.yearBuilt >= 2010 && tenantProfile.prefersModern) score += 10;
+    
+    return { property, score };
+  });
+  
+  // 4. Ordenar por score y retornar top 10
+  return scored
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10)
+    .map(({ property, score }) => ({
+      ...property,
+      matchScore: Math.round(score),
+    }));
+}
+```
+
+##### 5️⃣ **GESTIÓN DE INCIDENCIAS CON IA** (Prioridad: MEDIA)
+
+**Features**: 
+- Clasificación automática de incidencias
+- Sugerencia de proveedor
+- Estimación de coste
+
+```typescript
+// 📁 app/api/maintenance/classify/route.ts
+export async function POST(req: NextRequest) {
+  const { description, photos } = await req.json();
+  
+  // 1. Clasificar con IA
+  const classification = await anthropic.messages.create({
+    model: 'claude-3-5-sonnet-20241022',
+    max_tokens: 512,
+    messages: [{
+      role: 'user',
+      content: `Clasifica esta incidencia de mantenimiento:
+
+Descripción: ${description}
+
+Clasifica en:
+- Categoría: PLUMBING, ELECTRICAL, HVAC, STRUCTURAL, OTHER
+- Urgencia: LOW, MEDIUM, HIGH, CRITICAL
+- Proveedor recomendado: PLUMBER, ELECTRICIAN, HVAC_TECH, GENERAL_CONTRACTOR
+- Coste estimado: number (€)
+
+Responde en JSON.`,
+    }],
+  });
+  
+  const result = JSON.parse(classification.content[0].text);
+  
+  // 2. Buscar proveedor disponible
+  const provider = await prisma.serviceProvider.findFirst({
+    where: {
+      type: result.providerType,
+      available: true,
+      city: data.propertyCity,
+    },
+    orderBy: { rating: 'desc' },
+  });
+  
+  return NextResponse.json({
+    ...result,
+    suggestedProvider: provider,
+  });
+}
+```
+
+### 💰 2. Modelos de Monetización
+
+#### B2B (Agentes & Gestores)
+```typescript
+// Planes SaaS
+const B2B_PLANS = {
+  STARTER: {
+    price: 49, // €/mes
+    properties: 50,
+    users: 2,
+    features: ['CRM básico', 'Gestión de contratos'],
+  },
+  PROFESSIONAL: {
+    price: 149,
+    properties: 200,
+    users: 10,
+    features: ['CRM avanzado', 'Firma digital', 'API access'],
+  },
+  ENTERPRISE: {
+    price: 499,
+    properties: 'unlimited',
+    users: 'unlimited',
+    features: ['Todo incluido', 'Valoraciones IA', 'White-label'],
+  },
+};
+
+// Commission-based (Marketplace)
+const COMMISSION_RATES = {
+  RENTAL_LEAD: 0.5, // 50% del primer mes de alquiler
+  SALE_LEAD: 0.01, // 1% del precio de venta
+  VALUATION: 29, // €/valoración
+};
+```
+
+#### B2C (Propietarios & Inquilinos)
+```typescript
+const B2C_PLANS = {
+  OWNER_BASIC: {
+    price: 0, // Freemium
+    properties: 1,
+    features: ['Publicar 1 propiedad', 'Gestión básica'],
+  },
+  OWNER_PREMIUM: {
+    price: 19,
+    properties: 10,
+    features: ['Tour virtual', 'Informes avanzados', 'Sin comisiones'],
+  },
+  TENANT: {
+    price: 0, // Gratis para inquilinos
+    features: ['Búsqueda avanzada', 'Alertas', 'Chat con propietarios'],
+  },
+};
+```
+
+---
+
+## 🎨 UX/UI & ZERO-TOUCH ONBOARDING
+
+### 🚀 1. Zero-Touch Onboarding Flow
+
+**Objetivo**: Usuario activo en < 3 minutos sin ayuda humana.
+
+#### Flujo Actual (Análisis de Fricción)
+```
+1. Registro → ❌ FRICCIÓN: Demasiados campos (13)
+2. Verificación email → ⚠️ Puede perderse en spam
+3. Completar perfil → ❌ FRICCIÓN: No es obvio qué hacer
+4. Crear primera propiedad → ❌ FRICCIÓN: Formulario complejo
+5. Invitar inquilino → ⚠️ Paso opcional, se salta
+```
+
+#### Flujo Mejorado (Zero-Touch)
+```typescript
+// 📁 app/(auth)/onboarding/route.ts
+export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  const { userType, quickStart } = await req.json();
+  
+  // 1. Crear cuenta pre-configurada según tipo
+  const templates = {
+    PROPERTY_OWNER: {
+      modules: ['PROPERTIES', 'TENANTS', 'CONTRACTS'],
+      sampleData: {
+        properties: 1, // Crear 1 propiedad demo
+        tenants: 0,
+      },
+    },
+    PROPERTY_MANAGER: {
+      modules: ['PROPERTIES', 'TENANTS', 'MAINTENANCE', 'CRM'],
+      sampleData: {
+        properties: 3,
+        tenants: 2,
+        maintenanceRequests: 1,
+      },
+    },
+    TENANT: {
+      modules: ['PAYMENTS', 'REQUESTS', 'DOCUMENTS'],
+      sampleData: {},
+    },
+  };
+  
+  const template = templates[userType];
+  
+  // 2. Auto-crear datos de ejemplo si quickStart = true
+  if (quickStart) {
+    await createSampleData(session.user.id, template.sampleData);
+  }
+  
+  // 3. Activar módulos relevantes
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: {
+      preferredModules: template.modules,
+      onboardingCompleted: true,
+      onboardingCompletedAt: new Date(),
+    },
+  });
+  
+  // 4. Enviar emails de bienvenida (BullMQ)
+  await queue.add('send-welcome-email', {
+    userId: session.user.id,
+    userType,
+  });
+  
+  // 5. Agendar tareas de onboarding
+  await scheduleOnboardingTasks(session.user.id, userType);
+  
+  return NextResponse.json({ success: true });
+}
+```
+
+### 🤖 2. Automatización de Soporte
+
+```typescript
+// 📁 components/automation/SmartOnboardingChatbot.tsx
+'use client';
+
+import { useState } from 'react';
+import { useChat } from 'ai/react';
+
+export function SmartOnboardingChatbot() {
+  const { messages, input, handleInputChange, handleSubmit } = useChat({
+    api: '/api/ai/onboarding-assistant',
+    initialMessages: [{
+      id: 'welcome',
+      role: 'assistant',
+      content: '¡Hola! Soy tu asistente de bienvenida. ¿En qué puedo ayudarte hoy?',
+    }],
+  });
+  
+  return (
+    <div className="fixed bottom-4 right-4 w-96 h-[500px] bg-white rounded-lg shadow-xl">
+      {/* Chat UI */}
+    </div>
+  );
+}
+
+// 📁 app/api/ai/onboarding-assistant/route.ts
+import { StreamingTextResponse, Message } from 'ai';
+import { Anthropic } from '@anthropic-ai/sdk';
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+  
+  const systemPrompt = `Eres un asistente de onboarding para Inmova App, una plataforma PropTech.
+
+Tu objetivo es ayudar al usuario a:
+1. Completar su perfil
+2. Crear su primera propiedad
+3. Invitar a su primer inquilino
+4. Entender las funcionalidades clave
+
+Si detectas una pregunta técnica compleja, ofrece crear un ticket de soporte.
+
+Sé conciso, amable y usa emojis ocasionalmente.`;
+
+  const stream = await anthropic.messages.stream({
+    model: 'claude-3-5-sonnet-20241022',
+    max_tokens: 1024,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      ...messages.map((m: Message) => ({
+        role: m.role,
+        content: m.content,
+      })),
+    ],
+  });
+  
+  return new StreamingTextResponse(stream.toReadableStream());
+}
+```
+
+### 📧 3. Emails Transaccionales Automatizados
+
+```typescript
+// 📁 lib/email-automation-service.ts
+import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+// Plantillas de email
+const EMAIL_TEMPLATES = {
+  WELCOME: {
+    subject: '¡Bienvenido a Inmova! 🏠',
+    template: (userName: string) => `
+      <h1>¡Hola ${userName}!</h1>
+      <p>Estamos encantados de tenerte en Inmova.</p>
+      <h2>Próximos pasos:</h2>
+      <ol>
+        <li>Completa tu perfil</li>
+        <li>Crea tu primera propiedad</li>
+        <li>Explora el dashboard</li>
+      </ol>
+      <a href="https://inmovaapp.com/dashboard">Ir al Dashboard</a>
+    `,
+  },
+  PROPERTY_CREATED: {
+    subject: '✅ Propiedad creada exitosamente',
+    template: (propertyName: string) => `
+      <p>Tu propiedad <strong>${propertyName}</strong> ha sido creada.</p>
+      <p>Ahora puedes:</p>
+      <ul>
+        <li>Publicarla para buscar inquilinos</li>
+        <li>Crear un contrato</li>
+        <li>Subir documentos</li>
+      </ul>
+    `,
+  },
+  // ... más plantillas
+};
+
+// Worker de emails (BullMQ)
+export async function processEmailJob(job: Job) {
+  const { type, userId, data } = job.data;
+  
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const template = EMAIL_TEMPLATES[type];
+  
+  await transporter.sendMail({
+    from: '"Inmova App" <noreply@inmovaapp.com>',
+    to: user.email,
+    subject: template.subject,
+    html: template.template(user.name, ...data),
+  });
+}
+```
+
+### 📱 4. Mobile First CSS Rules
+
+```css
+/* 📁 styles/mobile-first.css */
+
+/* REGLA #1: Base styles para móvil (< 640px) */
+.container {
+  padding: 1rem;
+  max-width: 100%;
+}
+
+.button {
+  width: 100%;
+  min-height: 44px; /* Mínimo para tocar con dedo */
+  font-size: 16px; /* Evitar zoom en iOS */
+}
+
+/* REGLA #2: Touch targets mínimo 44x44px */
+.clickable {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 12px;
+}
+
+/* REGLA #3: Formularios optimizados para móvil */
+input, select, textarea {
+  font-size: 16px; /* Evitar zoom automático en iOS */
+  width: 100%;
+  padding: 12px;
+}
+
+/* REGLA #4: Navegación bottom para móvil */
+.mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 50;
+}
+
+/* REGLA #5: Ocultar sidebar en móvil */
+.desktop-sidebar {
+  display: none;
+}
+
+/* REGLA #6: Tablet (sm: 640px+) */
+@media (min-width: 640px) {
+  .container {
+    padding: 1.5rem;
+  }
+  
+  .button {
+    width: auto;
+  }
+}
+
+/* REGLA #7: Desktop (lg: 1024px+) */
+@media (min-width: 1024px) {
+  .mobile-nav {
+    display: none;
+  }
+  
+  .desktop-sidebar {
+    display: block;
+  }
+  
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+}
+
+/* REGLA #8: Gestos táctiles */
+.swipeable {
+  touch-action: pan-y; /* Permitir scroll vertical, bloquear horizontal */
+  -webkit-overflow-scrolling: touch; /* Smooth scroll en iOS */
+}
+
+/* REGLA #9: Safe areas para móviles con notch */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* REGLA #10: Optimizar rendimiento */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+```
+
+```typescript
+// 📁 components/layout/responsive-layout.tsx
+'use client';
+
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+
+export function ResponsiveLayout({ children }: { children: React.ReactNode }) {
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  
+  return isMobile ? (
+    <MobileLayout>{children}</MobileLayout>
+  ) : (
+    <DesktopLayout>{children}</DesktopLayout>
+  );
+}
+```
+
+---
+
+## 📈 MARKETING DIGITAL & SEO TÉCNICO
+
+### 🔍 1. SEO On-Page: Meta-Data Dinámica
+
+```typescript
+// 📁 app/properties/[id]/page.tsx
+import { Metadata } from 'next';
+
+export async function generateMetadata({ 
+  params 
+}: { 
+  params: { id: string } 
+}): Promise<Metadata> {
+  const property = await prisma.property.findUnique({
+    where: { id: params.id },
+    include: { building: true, photos: true },
+  });
+  
+  if (!property) return {};
+  
+  const title = `${property.type} en ${property.address}, ${property.city} - ${property.price}€`;
+  const description = `${property.rooms} habitaciones, ${property.bathrooms} baños, ${property.squareMeters}m². ${property.description?.substring(0, 120)}...`;
+  const imageUrl = property.photos[0]?.url || '/default-property.jpg';
+  
+  return {
+    title,
+    description,
+    keywords: [
+      `${property.type} ${property.city}`,
+      `alquiler ${property.city}`,
+      `${property.rooms} habitaciones ${property.city}`,
+      property.neighborhood,
+    ],
+    authors: [{ name: 'Inmova App' }],
+    
+    // Open Graph (Facebook, LinkedIn)
+    openGraph: {
+      title,
+      description,
+      url: `https://inmovaapp.com/properties/${property.id}`,
+      siteName: 'Inmova App',
+      images: [{
+        url: imageUrl,
+        width: 1200,
+        height: 630,
+        alt: title,
+      }],
+      locale: 'es_ES',
+      type: 'website',
+    },
+    
+    // Twitter Cards
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [imageUrl],
+      creator: '@inmovaapp',
+    },
+    
+    // Schema.org (JSON-LD)
+    other: {
+      'application-name': 'Inmova App',
+    },
+  };
+}
+
+export default async function PropertyPage({ params }: { params: { id: string } }) {
+  const property = await prisma.property.findUnique({ where: { id: params.id } });
+  
+  // JSON-LD structured data
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateListing',
+    name: property.address,
+    description: property.description,
+    url: `https://inmovaapp.com/properties/${property.id}`,
+    image: property.photos.map((p: any) => p.url),
+    offers: {
+      '@type': 'Offer',
+      price: property.price,
+      priceCurrency: 'EUR',
+      availability: property.status === 'AVAILABLE' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    },
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: property.address,
+      addressLocality: property.city,
+      postalCode: property.postalCode,
+      addressCountry: 'ES',
+    },
+    geo: property.latitude && property.longitude ? {
+      '@type': 'GeoCoordinates',
+      latitude: property.latitude,
+      longitude: property.longitude,
+    } : undefined,
+  };
+  
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <PropertyDetails property={property} />
+    </>
+  );
+}
+```
+
+### 📱 2. Automatización de Social Media
+
+```typescript
+// 📁 lib/social-media-automation-service.ts
+import { InstagramClient } from 'instagram-private-api';
+import { FacebookClient } from 'facebook-nodejs-business-sdk';
+import { LinkedInClient } from 'linkedin-api-node';
+
+export class SocialMediaAutomation {
+  private instagram: InstagramClient;
+  private facebook: FacebookClient;
+  private linkedin: LinkedInClient;
+  
+  constructor() {
+    this.instagram = new InstagramClient();
+    this.facebook = new FacebookClient(process.env.FACEBOOK_ACCESS_TOKEN!);
+    this.linkedin = new LinkedInClient(process.env.LINKEDIN_ACCESS_TOKEN!);
+  }
+  
+  async publishProperty(property: Property) {
+    // 1. Generar imagen de marketing
+    const marketingImage = await this.generateMarketingImage(property);
+    
+    // 2. Generar copy para cada red
+    const copies = this.generateCopies(property);
+    
+    // 3. Publicar en paralelo
+    const results = await Promise.allSettled([
+      this.publishToInstagram(marketingImage, copies.instagram),
+      this.publishToFacebook(marketingImage, copies.facebook),
+      this.publishToLinkedIn(marketingImage, copies.linkedin),
+    ]);
+    
+    return results;
+  }
+  
+  private generateCopies(property: Property) {
+    const base = `🏠 Nueva propiedad disponible en ${property.city}
+    
+📍 ${property.address}
+🛏️ ${property.rooms} habitaciones
+🚿 ${property.bathrooms} baños
+📐 ${property.squareMeters}m²
+💰 ${property.price}€/mes`;
+
+    return {
+      instagram: `${base}
+
+#inmobiliaria #alquiler #${property.city.toLowerCase()} #propiedades #vivienda #hogar #realtor #realestate`,
+      
+      facebook: `${base}
+
+¿Interesado? Contáctanos o visita nuestra web:
+👉 https://inmovaapp.com/properties/${property.id}`,
+      
+      linkedin: `Nueva oportunidad de inversión en ${property.city}
+
+${base}
+
+ROI estimado: ${property.estimatedROI}%
+Zona en crecimiento con alta demanda.
+
+Más información: https://inmovaapp.com/properties/${property.id}
+
+#PropTech #InversionInmobiliaria #RealEstate`,
+    };
+  }
+  
+  private async generateMarketingImage(property: Property) {
+    // Usar Canvas o servicio como Cloudinary
+    const { createCanvas, loadImage } = await import('canvas');
+    const canvas = createCanvas(1080, 1080);
+    const ctx = canvas.getContext('2d');
+    
+    // 1. Background con foto de propiedad
+    const propertyImage = await loadImage(property.photos[0].url);
+    ctx.drawImage(propertyImage, 0, 0, 1080, 1080);
+    
+    // 2. Overlay con gradiente
+    const gradient = ctx.createLinearGradient(0, 700, 0, 1080);
+    gradient.addColorStop(0, 'rgba(0,0,0,0)');
+    gradient.addColorStop(1, 'rgba(0,0,0,0.8)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 700, 1080, 380);
+    
+    // 3. Texto
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 48px Arial';
+    ctx.fillText(`${property.rooms} HAB | ${property.price}€/mes`, 50, 950);
+    
+    ctx.font = '32px Arial';
+    ctx.fillText(property.city.toUpperCase(), 50, 1000);
+    
+    // 4. Logo
+    const logo = await loadImage('/logo.png');
+    ctx.drawImage(logo, 900, 950, 150, 50);
+    
+    return canvas.toBuffer();
+  }
+  
+  private async publishToInstagram(image: Buffer, caption: string) {
+    await this.instagram.login(
+      process.env.INSTAGRAM_USERNAME!,
+      process.env.INSTAGRAM_PASSWORD!
+    );
+    
+    return await this.instagram.publish.photo({
+      file: image,
+      caption,
+    });
+  }
+  
+  private async publishToFacebook(image: Buffer, message: string) {
+    // Subir imagen
+    const uploadedPhoto = await this.facebook.createPhoto({
+      url: await this.uploadToS3(image),
+      published: false,
+    });
+    
+    // Publicar post
+    return await this.facebook.createPost({
+      message,
+      attached_media: [{ media_fbid: uploadedPhoto.id }],
+    });
+  }
+  
+  private async publishToLinkedIn(image: Buffer, text: string) {
+    // 1. Registrar imagen
+    const imageUrn = await this.linkedin.registerImage(image);
+    
+    // 2. Crear post
+    return await this.linkedin.createShare({
+      author: `urn:li:person:${process.env.LINKEDIN_PERSON_ID}`,
+      lifecycleState: 'PUBLISHED',
+      specificContent: {
+        'com.linkedin.ugc.ShareContent': {
+          shareCommentary: { text },
+          shareMediaCategory: 'IMAGE',
+          media: [{
+            status: 'READY',
+            media: imageUrn,
+          }],
+        },
+      },
+      visibility: { 'com.linkedin.ugc.MemberNetworkVisibility': 'PUBLIC' },
+    });
+  }
+}
+
+// 📁 app/api/webhooks/property-created/route.ts
+export async function POST(req: NextRequest) {
+  const { propertyId } = await req.json();
+  
+  // Trigger automático al crear propiedad
+  await queue.add('publish-to-social-media', {
+    propertyId,
+  });
+  
+  return NextResponse.json({ queued: true });
+}
+
+// 📁 lib/queues/workers/social-media-worker.ts
+import { Worker } from 'bullmq';
+
+const worker = new Worker('social-media', async (job) => {
+  const { propertyId } = job.data;
+  
+  const property = await prisma.property.findUnique({
+    where: { id: propertyId },
+    include: { photos: true },
+  });
+  
+  const automation = new SocialMediaAutomation();
+  const results = await automation.publishProperty(property);
+  
+  // Guardar métricas
+  await prisma.socialMediaPost.createMany({
+    data: results.map((r, i) => ({
+      propertyId,
+      platform: ['INSTAGRAM', 'FACEBOOK', 'LINKEDIN'][i],
+      status: r.status === 'fulfilled' ? 'PUBLISHED' : 'FAILED',
+      postUrl: r.status === 'fulfilled' ? r.value.url : null,
+    })),
+  });
+  
+  return results;
+}, {
+  connection: redisConnection,
+});
 ```
 
 ---
