@@ -7,7 +7,6 @@ const nextConfig = {
       bodySizeLimit: '2mb',
     },
   },
-  serverExternalPackages: ['@prisma/client', 'prisma'],
   typescript: {
     ignoreBuildErrors: true,
   },
