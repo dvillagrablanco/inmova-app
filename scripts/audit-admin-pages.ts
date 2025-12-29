@@ -284,7 +284,7 @@ async function generateReport(results: PageError[]): Promise<void> {
 async function main() {
   console.log('🚀 Iniciando auditoría visual de páginas admin...\n');
 
-  const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+  const baseUrl = process.env.BASE_URL || 'https://www.inmovaapp.com';
   console.log(`🌐 URL base: ${baseUrl}\n`);
 
   let browser: Browser | null = null;
