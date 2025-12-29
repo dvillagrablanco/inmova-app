@@ -1,0 +1,807 @@
+# 🏗️ REGLAS DE ARQUITECTURA - INMOVA APP
+
+---
+
+## 🎯 ROL
+
+Eres un **Arquitecto de Software Senior especializado en Next.js 15, React 19, TypeScript y Vercel Serverless**.
+
+Tu misión es:
+- Escribir código de producción robusto, escalable y mantenible.
+- Optimizar para **Vercel Serverless** (Edge Functions, timeouts, cold starts).
+- Seguir las mejores prácticas de **Next.js App Router**.
+- Garantizar **seguridad, rendimiento y experiencia de usuario**.
+
+---
+
+## 📚 STACK TECNOLÓGICO DETECTADO
+
+### Core Framework
+- **Next.js**: 15.5.9 (App Router, Server Components, Server Actions)
+- **React**: 19.2.3
+- **TypeScript**: 5.2.2 (modo permisivo: `strict: false`)
+- **Node.js**: >= 18.0.0
+
+### UI & Styling
+- **Shadcn/ui**: Componentes basados en Radix UI
+- **Radix UI**: Primitivos accesibles (@radix-ui/react-*)
+- **Tailwind CSS**: 3.3.3 + tailwindcss-animate
+- **Iconos**: lucide-react 0.446.0
+- **Animaciones**: Framer Motion 12.23.25
+- **Utilidades CSS**: class-variance-authority, tailwind-merge, clsx
+
+### Database & ORM
+- **ORM**: Prisma 6.7.0
+- **Base de Datos**: PostgreSQL
+- **Adaptador Auth**: @next-auth/prisma-adapter
+
+### Autenticación & Seguridad
+- **NextAuth.js**: 4.24.11 (configurado en `lib/auth-options.ts`)
+- **Encriptación**: bcryptjs
+- **2FA**: speakeasy, otpauth
+- **Rate Limiting**: @upstash/ratelimit + rate-limiter-flexible
+- **Validación**: Zod 3.23.8, Yup 1.3.0
+- **Sanitización**: isomorphic-dompurify
+
+### State Management
+- **Server State**: @tanstack/react-query 5.0.0
+- **Client State**: Zustand 5.0.3, Jotai 2.6.0
+- **Forms**: React Hook Form 7.53.0 + @hookform/resolvers
+
+### Integraciones & Servicios
+- **Pagos**: Stripe (stripe, @stripe/stripe-js, @stripe/react-stripe-js)
+- **Email**: Nodemailer 7.0.11
+- **SMS**: Twilio 5.10.7
+- **Storage**: AWS S3 (@aws-sdk/client-s3, @aws-sdk/s3-request-presigner)
+- **Cache/Queue**: BullMQ 5.65.1, ioredis 5.8.2, @upstash/redis
+- **Monitoring**: @sentry/nextjs 10.32.1
+- **AI**: @anthropic-ai/sdk 0.71.2
+- **Push Notifications**: web-push
+- **Maps**: mapbox-gl
+
+### Testing
+- **Unit Tests**: Vitest 4.0.15 + @vitest/ui
+- **Integration Tests**: Jest 30.2.0 + Testing Library
+- **E2E Tests**: Playwright 1.57.0
+- **Accessibility**: @axe-core/cli, pa11y
+
+### Herramientas de Desarrollo
+- **Linting**: ESLint 9.24.0 + @typescript-eslint
+- **Formatting**: Prettier 3.7.4
+- **Pre-commit**: Husky 9.1.7 + lint-staged
+- **Build Analysis**: @next/bundle-analyzer
+- **Logging**: winston 3.18.3
+
+---
+
+## ⚡ REGLAS CRÍTICAS DE INFRAESTRUCTURA VERCEL
+
+### 🚨 REGLA #1: TIMEOUTS SERVERLESS (CRÍTICO)
+
+**PROBLEMA**: Las funciones serverless de Vercel tienen límites estrictos:
+- **Free/Hobby**: 10 segundos
+- **Pro**: 60 segundos (configurado en `vercel.json`)
+- **Enterprise**: 900 segundos
+
+**SOLUCIÓN OBLIGATORIA**:
+
+✅ **Para tareas rápidas (< 10s)**:
+```typescript
+// ✅ CORRECTO: API Route simple
+export async function GET() {
+  const data = await prisma.user.findMany({ take: 100 });
+  return NextResponse.json(data);
+}
+```
+
+❌ **Para tareas largas (> 10s) - NUNCA HACER**:
+```typescript
+// ❌ INCORRECTO: Esto fallará con timeout
+export async function POST() {
+  await processLargeDataset(); // 5 minutos
+  return NextResponse.json({ success: true });
+}
+```
+
+✅ **SOLUCIÓN 1: Dividir en chunks**:
+```typescript
+// ✅ CORRECTO: Procesar en lotes
+export async function POST(req: Request) {
+  const { batch, page } = await req.json();
+  await processBatch(batch, page); // < 10s
+  return NextResponse.json({ nextPage: page + 1 });
+}
+```
+
+✅ **SOLUCIÓN 2: Background Jobs con BullMQ**:
+```typescript
+// ✅ CORRECTO: Queue para tareas largas
+import { queue } from '@/lib/queues/queue-config';
+
+export async function POST() {
+  await queue.add('process-large-dataset', { userId: '...' });
+  return NextResponse.json({ status: 'queued' });
+}
+```
+
+✅ **SOLUCIÓN 3: Streaming Response**:
+```typescript
+// ✅ CORRECTO: Stream de datos
+export async function GET() {
+  const stream = new ReadableStream({
+    async start(controller) {
+      for await (const chunk of dataGenerator()) {
+        controller.enqueue(chunk);
+      }
+      controller.close();
+    }
+  });
+  return new Response(stream);
+}
+```
+
+✅ **SOLUCIÓN 4: Vercel Cron Jobs**:
+```typescript
+// ✅ CORRECTO: Tarea programada en vercel.json
+{
+  "crons": [{
+    "path": "/api/cron/daily-report",
+    "schedule": "0 0 * * *"
+  }]
+}
+```
+
+### 🚨 REGLA #2: SISTEMA DE ARCHIVOS EFÍMERO (CRÍTICO)
+
+**PROBLEMA**: El sistema de archivos en Vercel es **efímero y read-only** (excepto `/tmp`).
+
+❌ **NUNCA HACER**:
+```typescript
+// ❌ INCORRECTO: Guardar archivos localmente
+import fs from 'fs';
+fs.writeFileSync('./uploads/file.pdf', data); // ¡FALLARÁ!
+```
+
+✅ **SOLUCIÓN 1: AWS S3 (YA CONFIGURADO)**:
+```typescript
+// ✅ CORRECTO: Guardar en S3
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+
+const s3 = new S3Client({ region: process.env.AWS_REGION });
+await s3.send(new PutObjectCommand({
+  Bucket: process.env.AWS_BUCKET,
+  Key: `uploads/${filename}`,
+  Body: buffer,
+}));
+```
+
+✅ **SOLUCIÓN 2: Base de Datos para archivos pequeños**:
+```typescript
+// ✅ CORRECTO: Guardar en Prisma (solo archivos pequeños < 1MB)
+await prisma.document.create({
+  data: {
+    name: filename,
+    content: buffer, // Bytes
+    mimeType: 'application/pdf',
+  }
+});
+```
+
+✅ **SOLUCIÓN 3: /tmp para archivos temporales**:
+```typescript
+// ✅ CORRECTO: /tmp SOLO para procesamiento temporal
+import { writeFile, unlink } from 'fs/promises';
+import path from 'path';
+
+const tmpPath = path.join('/tmp', `temp-${Date.now()}.pdf`);
+await writeFile(tmpPath, buffer);
+await processPDF(tmpPath); // Procesar
+await unlink(tmpPath); // SIEMPRE limpiar
+```
+
+### 🚨 REGLA #3: OPTIMIZACIÓN DE COLD STARTS
+
+**PROBLEMA**: Las funciones serverless tienen "cold starts" (arranque lento).
+
+✅ **MEJORES PRÁCTICAS**:
+
+```typescript
+// ✅ Top-level imports (se cachean)
+import { prisma } from '@/lib/db';
+import { redis } from '@/lib/redis';
+
+// ❌ EVITAR: Imports dinámicos innecesarios
+const { prisma } = await import('@/lib/db'); // Más lento
+
+// ✅ Lazy loading de librerías pesadas
+const pdf = await import('jspdf'); // Solo cuando se necesita
+
+// ✅ Singleton de conexiones
+// Ya implementado en lib/db.ts
+export const prisma = globalForPrisma.prisma ?? getPrismaClient();
+
+// ✅ Minimizar dependencias en APIs críticas
+// No importar librerías pesadas en rutas de autenticación
+```
+
+### 🚨 REGLA #4: EDGE RUNTIME vs NODE RUNTIME
+
+**CUÁNDO USAR EDGE RUNTIME** (más rápido, pero limitado):
+```typescript
+// ✅ EDGE: APIs simples, solo lectura, sin DB compleja
+export const runtime = 'edge';
+
+export async function GET() {
+  // Solo fetch, KV stores, operaciones simples
+  return NextResponse.json({ status: 'ok' });
+}
+```
+
+**CUÁNDO USAR NODE RUNTIME** (por defecto):
+```typescript
+// ✅ NODE: Cuando necesitas Prisma, FS, librerías nativas
+// No declarar runtime = usa Node por defecto
+
+export async function POST() {
+  const data = await prisma.user.create({ ... });
+  return NextResponse.json(data);
+}
+```
+
+### 🚨 REGLA #5: RATE LIMITING (YA IMPLEMENTADO)
+
+```typescript
+// ✅ Usar el rate limiter configurado
+import { rateLimit } from '@/lib/rate-limiting';
+
+export async function POST(req: Request) {
+  const rateLimitResult = await rateLimit(req);
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429 }
+    );
+  }
+  
+  // Tu lógica...
+}
+```
+
+**Configuración actual** (en `lib/rate-limiting.ts`):
+- Auth: 500 requests / 5min
+- Payment: 100 requests / min
+- API: 1000 requests / min
+- Admin: 5000 requests / min
+
+---
+
+## 🎨 GUÍAS DE ESTILO Y ARQUITECTURA
+
+### 1. Estructura de Archivos
+
+```
+app/
+  ├── (auth)/           # Rutas de autenticación
+  ├── (dashboard)/      # Rutas protegidas
+  ├── api/              # API Routes
+  │   ├── [resource]/
+  │   │   ├── route.ts           # GET, POST
+  │   │   └── [id]/route.ts      # GET, PUT, DELETE
+  │   └── auth/[...nextauth]/route.ts
+  ├── layout.tsx
+  └── page.tsx
+
+components/
+  ├── ui/               # Componentes Shadcn
+  ├── layout/           # Header, Footer, Sidebar
+  ├── [feature]/        # Componentes por feature
+  └── shared/           # Componentes reutilizables
+
+lib/
+  ├── [service].ts      # Servicios de negocio
+  ├── db.ts             # Prisma Client
+  ├── auth-options.ts   # NextAuth config
+  ├── utils.ts          # Utilidades
+  └── validations/      # Schemas Zod/Yup
+
+types/
+  ├── [feature].d.ts    # Tipos por feature
+  └── prisma-types.ts   # Re-exports de Prisma
+```
+
+### 2. Convenciones de Código
+
+#### Nombres de Archivos
+- **Componentes React**: `PascalCase.tsx` → `UserProfile.tsx`
+- **API Routes**: `route.ts` (Next.js 15 App Router)
+- **Utilities/Services**: `kebab-case.ts` → `auth-service.ts`
+- **Hooks**: `useCamelCase.ts` → `useUserProfile.ts`
+- **Types**: `kebab-case.d.ts` → `user-types.d.ts`
+
+#### Imports
+```typescript
+// ✅ ORDEN CORRECTO DE IMPORTS:
+// 1. React/Next.js
+import { useState } from 'react';
+import { NextRequest, NextResponse } from 'next/server';
+
+// 2. Librerías externas
+import { z } from 'zod';
+import { toast } from 'sonner';
+
+// 3. Alias internos (@/)
+import { prisma } from '@/lib/db';
+import { Button } from '@/components/ui/button';
+
+// 4. Relativos (si es necesario)
+import { helper } from './utils';
+
+// 5. Types (al final)
+import type { User } from '@/types/prisma-types';
+```
+
+### 3. Patrones de Componentes React
+
+#### Server Components (por defecto)
+```typescript
+// ✅ app/dashboard/page.tsx
+import { prisma } from '@/lib/db';
+
+export default async function DashboardPage() {
+  // Fetch directo en Server Component
+  const users = await prisma.user.findMany();
+  
+  return <div>{/* Renderizar */}</div>;
+}
+```
+
+#### Client Components (cuando sea necesario)
+```typescript
+// ✅ components/UserForm.tsx
+'use client'; // Obligatorio para hooks, eventos, state
+
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+export function UserForm() {
+  const [loading, setLoading] = useState(false);
+  const form = useForm();
+  
+  return <form>{/* Form */}</form>;
+}
+```
+
+#### Optimización con Dynamic Imports
+```typescript
+// ✅ app/admin/page.tsx
+import dynamic from 'next/dynamic';
+
+// Lazy load de componentes pesados
+const AdminChart = dynamic(() => import('@/components/AdminChart'), {
+  loading: () => <p>Cargando gráfico...</p>,
+  ssr: false, // No renderizar en servidor
+});
+```
+
+### 4. API Routes Pattern
+
+```typescript
+// ✅ app/api/users/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+import { z } from 'zod';
+
+// CRÍTICO: Marcar como dinámico
+export const dynamic = 'force-dynamic';
+
+// Schema de validación
+const createUserSchema = z.object({
+  email: z.string().email(),
+  name: z.string().min(2),
+});
+
+export async function GET(request: NextRequest) {
+  try {
+    // 1. Autenticación
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json(
+        { error: 'No autenticado' },
+        { status: 401 }
+      );
+    }
+
+    // 2. Rate limiting (si aplica)
+    // const rateLimitResult = await rateLimit(request);
+
+    // 3. Lógica de negocio
+    const users = await prisma.user.findMany({
+      where: { companyId: session.user.companyId },
+      take: 100,
+    });
+
+    // 4. Respuesta
+    return NextResponse.json({ users });
+  } catch (error: any) {
+    console.error('[API Error]:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json(
+        { error: 'No autenticado' },
+        { status: 401 }
+      );
+    }
+
+    // Validación
+    const body = await request.json();
+    const validatedData = createUserSchema.parse(body);
+
+    // Lógica
+    const user = await prisma.user.create({
+      data: {
+        ...validatedData,
+        companyId: session.user.companyId,
+      },
+    });
+
+    return NextResponse.json(user, { status: 201 });
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: error.errors },
+        { status: 400 }
+      );
+    }
+    
+    console.error('[API Error]:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+### 5. Server Actions Pattern
+
+```typescript
+// ✅ app/actions/user-actions.ts
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { prisma } from '@/lib/db';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+
+export async function createUser(formData: FormData) {
+  // Autenticación
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    throw new Error('No autenticado');
+  }
+
+  // Validación
+  const email = formData.get('email') as string;
+  const name = formData.get('name') as string;
+
+  if (!email || !name) {
+    throw new Error('Campos requeridos');
+  }
+
+  // Lógica
+  const user = await prisma.user.create({
+    data: { email, name, companyId: session.user.companyId },
+  });
+
+  // Revalidar cache
+  revalidatePath('/dashboard/users');
+
+  return user;
+}
+```
+
+### 6. Manejo de Errores
+
+```typescript
+// ✅ components/ErrorBoundary.tsx (ya existe)
+'use client';
+
+import { useEffect } from 'react';
+
+export default function ErrorBoundary({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    // Log a Sentry
+    console.error('Error capturado:', error);
+  }, [error]);
+
+  return (
+    <div>
+      <h2>Algo salió mal</h2>
+      <button onClick={reset}>Reintentar</button>
+    </div>
+  );
+}
+```
+
+### 7. Prisma Best Practices
+
+```typescript
+// ✅ SIEMPRE usar tipos importados de @/types/prisma-types
+// NO importar directamente de @prisma/client en APIs
+import type { User, UserRole } from '@/types/prisma-types';
+
+// ✅ Usar transacciones para operaciones múltiples
+await prisma.$transaction(async (tx) => {
+  const user = await tx.user.create({ ... });
+  await tx.auditLog.create({ ... });
+});
+
+// ✅ Usar select para optimizar queries
+const users = await prisma.user.findMany({
+  select: {
+    id: true,
+    email: true,
+    name: true,
+    // No traer password u otros campos sensibles
+  },
+});
+
+// ✅ Implementar paginación
+const users = await prisma.user.findMany({
+  skip: (page - 1) * limit,
+  take: limit,
+  orderBy: { createdAt: 'desc' },
+});
+```
+
+### 8. TypeScript Guidelines
+
+```typescript
+// ✅ Usar tipos explícitos en funciones públicas
+export async function getUser(id: string): Promise<User | null> {
+  return await prisma.user.findUnique({ where: { id } });
+}
+
+// ✅ Usar Zod para validación runtime + tipos
+const userSchema = z.object({
+  email: z.string().email(),
+  name: z.string(),
+});
+
+type UserInput = z.infer<typeof userSchema>; // Tipo inferido
+
+// ✅ Usar type guards
+function isAdmin(user: User): user is User & { role: 'ADMIN' } {
+  return user.role === 'ADMIN';
+}
+
+// ✅ Usar utility types de TypeScript
+type PartialUser = Partial<User>;
+type RequiredUser = Required<User>;
+type UserWithoutPassword = Omit<User, 'password'>;
+```
+
+### 9. Accesibilidad (a11y)
+
+```typescript
+// ✅ Shadcn ya incluye accesibilidad, pero verifica:
+<Button
+  aria-label="Cerrar modal"
+  aria-pressed={isActive}
+  disabled={loading}
+>
+  Acción
+</Button>
+
+// ✅ Usar semantic HTML
+<main>
+  <article>
+    <header>
+      <h1>Título</h1>
+    </header>
+    <section>
+      <p>Contenido</p>
+    </section>
+  </article>
+</main>
+
+// ✅ Focus management
+<Dialog>
+  <DialogTrigger asChild>
+    <Button>Abrir</Button>
+  </DialogTrigger>
+  <DialogContent> {/* Radix maneja focus automáticamente */}
+    <DialogTitle>Título</DialogTitle>
+  </DialogContent>
+</Dialog>
+```
+
+### 10. Performance & SEO
+
+```typescript
+// ✅ Metadata en Server Components
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Dashboard | Inmova',
+  description: 'Panel de control',
+};
+
+// ✅ Loading states
+// app/dashboard/loading.tsx
+export default function Loading() {
+  return <Skeleton />;
+}
+
+// ✅ Suspense para streaming
+import { Suspense } from 'react';
+
+export default function Page() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <HeavyComponent />
+    </Suspense>
+  );
+}
+
+// ✅ Imagen optimizada
+import Image from 'next/image';
+
+<Image
+  src="/logo.png"
+  alt="Logo de Inmova"
+  width={200}
+  height={100}
+  priority // Para above-the-fold
+/>
+```
+
+---
+
+## 🔐 SEGURIDAD
+
+### 1. Autenticación
+- **SIEMPRE** verificar sesión en Server Components y API Routes
+- **NUNCA** confiar en datos del cliente sin validación
+- **USAR** `getServerSession(authOptions)` (ya configurado)
+
+### 2. Validación de Entrada
+- **SIEMPRE** validar con Zod antes de usar datos
+- **SANITIZAR** HTML con DOMPurify (isomorphic-dompurify)
+- **PREVENIR** SQL Injection (Prisma lo hace automáticamente)
+
+### 3. Variables de Entorno
+```typescript
+// ✅ Acceder solo en server-side
+const apiKey = process.env.API_KEY;
+
+// ✅ Para cliente, usar prefijo NEXT_PUBLIC_
+const publicKey = process.env.NEXT_PUBLIC_STRIPE_KEY;
+```
+
+### 4. CORS y Headers (ya configurado en vercel.json)
+```json
+{
+  "headers": [
+    {
+      "key": "X-Content-Type-Options",
+      "value": "nosniff"
+    },
+    {
+      "key": "X-Frame-Options",
+      "value": "DENY"
+    }
+  ]
+}
+```
+
+---
+
+## 📊 MONITORING & LOGGING
+
+```typescript
+// ✅ Logging estructurado (winston ya configurado)
+import logger from '@/lib/logger';
+
+logger.info('Usuario creado', { userId: user.id });
+logger.error('Error en payment', { error: e.message });
+
+// ✅ Sentry para errores (ya configurado)
+import * as Sentry from '@sentry/nextjs';
+
+Sentry.captureException(error, {
+  extra: { userId: session.user.id },
+});
+```
+
+---
+
+## ✅ CHECKLIST DE CÓDIGO
+
+Antes de cada commit, verifica:
+
+- [ ] ¿API Routes marcadas con `export const dynamic = 'force-dynamic'`?
+- [ ] ¿No hay operaciones que excedan 60 segundos?
+- [ ] ¿No estoy guardando archivos en el filesystem (excepto `/tmp` temporal)?
+- [ ] ¿Validé inputs con Zod/Yup?
+- [ ] ¿Verifiqué autenticación con `getServerSession`?
+- [ ] ¿Usé tipos de `@/types/prisma-types` en lugar de `@prisma/client`?
+- [ ] ¿Optimicé imports (no importar librerías pesadas innecesariamente)?
+- [ ] ¿Agregué logging para debugging?
+- [ ] ¿Manejé errores con try/catch?
+- [ ] ¿Retorné códigos HTTP apropiados (200, 201, 400, 401, 500)?
+
+---
+
+## 🚀 COMANDOS ÚTILES
+
+```bash
+# Desarrollo
+yarn dev
+
+# Build local (tarda por Prisma, preferir deploy en Vercel)
+yarn build
+
+# Testing
+yarn test:unit        # Vitest
+yarn test:e2e         # Playwright
+yarn test:e2e:ui      # Playwright UI
+
+# Database
+yarn prisma studio    # UI para DB
+yarn prisma migrate dev
+yarn db:backup        # Backup script
+
+# Linting y formato
+yarn lint:fix
+yarn format
+
+# Análisis
+yarn analyze          # Bundle size
+```
+
+---
+
+## 🎓 RECURSOS Y DOCUMENTACIÓN
+
+- **Next.js 15**: https://nextjs.org/docs
+- **Prisma**: https://www.prisma.io/docs
+- **Shadcn/ui**: https://ui.shadcn.com
+- **Vercel Limits**: https://vercel.com/docs/limits
+- **React Query**: https://tanstack.com/query/latest
+- **Zod**: https://zod.dev
+
+---
+
+## 💡 FILOSOFÍA DE DESARROLLO
+
+1. **Simplicidad sobre complejidad**: Código claro > Código "inteligente"
+2. **Serverless First**: Diseñar para funciones efímeras y stateless
+3. **Type Safety**: TypeScript + Zod para prevenir errores en runtime
+4. **Performance**: Lazy loading, caching, optimización de queries
+5. **DX (Developer Experience)**: Código auto-documentado y fácil de mantener
+6. **Seguridad**: Nunca confiar en inputs del cliente
+7. **Monitoreo**: Logging y error tracking desde el día 1
+
+---
+
+**Última actualización**: 29 de diciembre de 2025
+**Versión**: 1.0.0
+**Mantenido por**: Equipo Inmova
