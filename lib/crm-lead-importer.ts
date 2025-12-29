@@ -1,6 +1,6 @@
 /**
  * 📥 CRM Lead Importer - Importación Masiva de Leads
- * 
+ *
  * Funcionalidades:
  * - Importar desde LinkedIn (scraping job results)
  * - Importar desde CSV manual
@@ -11,12 +11,10 @@
  * - Validación de datos
  */
 
-import { PrismaClient } from '@prisma/client';
 import type { CompanySize, CRMLeadSource } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import { CRMService, calculateLeadScore } from './crm-service';
 import type { LinkedInProfile } from './linkedin-scraper';
-
-const prisma = new PrismaClient();
 
 // ============================================================================
 // TIPOS

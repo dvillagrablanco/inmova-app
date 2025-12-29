@@ -10,7 +10,6 @@
  * - Email templates
  */
 
-import { PrismaClient } from '@prisma/client';
 import type {
   CRMLeadStatus,
   CRMLeadSource,
@@ -18,8 +17,7 @@ import type {
   DealStage,
   CompanySize,
 } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/db';
 
 // ============================================================================
 // TIPOS
