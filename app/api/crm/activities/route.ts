@@ -3,8 +3,27 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+// Schema de validación para actividad CRM
+const createCRMActivitySchema = z.object({
+  leadId: z.string().uuid({ message: 'ID de lead inválido' }),
+  tipo: z.enum(['llamada', 'email', 'reunion', 'visita', 'tarea', 'nota'], {
+    message: 'Tipo de actividad inválido',
+  }),
+  asunto: z.string().min(1, { message: 'El asunto es requerido' }),
+  descripcion: z.string().optional(),
+  fecha: z
+    .string()
+    .datetime()
+    .or(z.string().regex(/^\d{4}-\d{2}-\d{2}/)),
+  duracion: z.number().int().positive().optional(),
+  resultado: z.string().optional(),
+  proximaAccion: z.string().optional(),
+  completada: z.boolean().optional(),
+});
 
 /**
  * GET /api/crm/activities
@@ -45,10 +64,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(activities);
   } catch (error) {
     logger.error('Error al obtener actividades CRM:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener actividades' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener actividades' }, { status: 500 });
   }
 }
 
@@ -65,14 +81,30 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { leadId, tipo, asunto, descripcion, fecha, duracion, resultado, proximaAccion, completada } = body;
 
-    if (!leadId || !tipo || !asunto || !fecha) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+    // Validación con Zod
+    const validationResult = createCRMActivitySchema.safeParse(body);
+
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map((err) => ({
+        field: err.path.join('.'),
+        message: err.message,
+      }));
+      logger.warn('Validation error creating CRM activity:', { errors });
+      return NextResponse.json({ error: 'Datos inválidos', details: errors }, { status: 400 });
     }
+
+    const {
+      leadId,
+      tipo,
+      asunto,
+      descripcion,
+      fecha,
+      duracion,
+      resultado,
+      proximaAccion,
+      completada,
+    } = validationResult.data;
 
     // Verificar que el lead existe
     const lead = await prisma.crmLead.findUnique({
@@ -82,10 +114,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!lead) {
-      return NextResponse.json(
-        { error: 'Lead no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Lead no encontrado' }, { status: 404 });
     }
 
     const activity = await prisma.crmActivity.create({
@@ -114,9 +143,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(activity, { status: 201 });
   } catch (error) {
     logger.error('Error al crear actividad CRM:', error);
-    return NextResponse.json(
-      { error: 'Error al crear actividad' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear actividad' }, { status: 500 });
   }
 }
