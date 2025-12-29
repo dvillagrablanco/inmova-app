@@ -1,129 +1,54 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
-// Rate limiting store (en producción usar Redis)
-const rateLimitStore = new Map<string, { count: number; reset: number }>();
-
-// Limpiar store cada 10 minutos
-if (typeof setInterval !== 'undefined') {
-  setInterval(
-    () => {
-      const now = Date.now();
-      for (const [key, value] of rateLimitStore.entries()) {
-        if (value.reset < now) {
-          rateLimitStore.delete(key);
-        }
-      }
-    },
-    10 * 60 * 1000
-  );
-}
-
-// Configuración de rate limiting por ruta
-const RATE_LIMITS = {
-  '/api/auth': { requests: 5, window: 60 * 1000 }, // 5 req/min
-  '/api/payment': { requests: 10, window: 60 * 1000 }, // 10 req/min
-  '/api': { requests: 100, window: 60 * 1000 }, // 100 req/min default
-};
-
-function getRateLimit(pathname: string) {
-  // Buscar la configuración más específica
-  for (const [path, limit] of Object.entries(RATE_LIMITS)) {
-    if (pathname.startsWith(path)) {
-      return limit;
-    }
-  }
-  return RATE_LIMITS['/api']; // Default
-}
-
-function checkRateLimit(ip: string, pathname: string) {
-  const config = getRateLimit(pathname);
-  const key = `${ip}:${pathname}`;
-  const now = Date.now();
-
-  const record = rateLimitStore.get(key);
-
-  if (!record || record.reset < now) {
-    // Nueva ventana
-    rateLimitStore.set(key, {
-      count: 1,
-      reset: now + config.window,
-    });
-    return {
-      allowed: true,
-      remaining: config.requests - 1,
-      reset: now + config.window,
-      limit: config.requests,
-    };
-  }
-
-  if (record.count >= config.requests) {
-    // Rate limit excedido
-    return {
-      allowed: false,
-      remaining: 0,
-      reset: record.reset,
-      limit: config.requests,
-    };
-  }
-
-  // Incrementar contador
-  record.count++;
-  rateLimitStore.set(key, record);
-
-  return {
-    allowed: true,
-    remaining: config.requests - record.count,
-    reset: record.reset,
-    limit: config.requests,
-  };
-}
-
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Solo aplicar rate limiting a rutas API
-  if (pathname.startsWith('/api/')) {
-    const ip =
-      request.ip ||
-      request.headers.get('x-forwarded-for') ||
-      request.headers.get('x-real-ip') ||
-      '127.0.0.1';
+  // Get auth token
+  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
 
-    const rateLimit = checkRateLimit(ip, pathname);
+  // Public paths that don't require authentication
+  const publicPaths = [
+    '/',
+    '/login',
+    '/register',
+    '/signup',
+    '/forgot-password',
+    '/reset-password',
+    '/api/auth',
+    '/api/webhooks',
+    '/_next',
+    '/favicon.ico',
+    '/images',
+    '/public',
+  ];
 
-    const response = rateLimit.allowed
-      ? NextResponse.next()
-      : NextResponse.json(
-          {
-            error: 'Too Many Requests',
-            message: 'Rate limit exceeded. Please try again later.',
-          },
-          { status: 429 }
-        );
+  const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
 
-    // Agregar headers de rate limiting
-    response.headers.set('X-RateLimit-Limit', rateLimit.limit.toString());
-    response.headers.set('X-RateLimit-Remaining', rateLimit.remaining.toString());
-    response.headers.set('X-RateLimit-Reset', new Date(rateLimit.reset).toISOString());
+  // If user is authenticated and trying to access landing, allow it
+  // (they might want to see the landing while logged in)
+  if (pathname === '/' && token) {
+    // Optional: redirect authenticated users to dashboard
+    // return NextResponse.redirect(new URL('/dashboard', request.url));
 
-    // Agregar headers de seguridad adicionales
-    response.headers.set('X-Content-Type-Options', 'nosniff');
-    response.headers.set('X-Frame-Options', 'DENY');
-    response.headers.set('X-XSS-Protection', '1; mode=block');
-    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-
-    return response;
+    // Or allow them to see the landing
+    return NextResponse.next();
   }
 
-  // Para rutas no-API, solo agregar headers de seguridad
-  const response = NextResponse.next();
-  response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('X-Frame-Options', 'DENY');
-  response.headers.set('X-XSS-Protection', '1; mode=block');
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  // If user is not authenticated and trying to access protected routes
+  if (!token && !isPublicPath) {
+    const url = new URL('/login', request.url);
+    url.searchParams.set('callbackUrl', pathname);
+    return NextResponse.redirect(url);
+  }
 
-  return response;
+  // If user is authenticated and trying to access auth pages
+  if (token && (pathname === '/login' || pathname === '/register' || pathname === '/signup')) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
@@ -133,8 +58,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public files (public directory)
+     * - public folder
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
