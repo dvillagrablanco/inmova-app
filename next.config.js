@@ -21,17 +21,12 @@ const nextConfig = {
         : false,
   },
 
-  // Experimental features
+  // Experimental features (ajustado para Next.js 14)
   experimental: {
-    serverActions: {
-      bodySizeLimit: '2mb',
-    },
+    // serverActions ya está habilitado por defecto en Next.js 14
     optimizeCss: true,
     optimizePackageImports: ['lucide-react', 'recharts', 'date-fns'],
   },
-
-  // Output file tracing (movido de experimental)
-  outputFileTracingRoot: path.join(__dirname, '../'),
 
   // Build configuration
   typescript: {
@@ -105,17 +100,6 @@ const nextConfig = {
 
   // Compression
   compress: true,
-
-  // Optimización de output file tracing
-  outputFileTracingExcludes: {
-    '*': [
-      'node_modules/@swc/core-linux-x64-gnu',
-      'node_modules/@swc/core-linux-x64-musl',
-      'node_modules/@esbuild/linux-x64',
-      '.git/**',
-      'node_modules/@prisma/engines/**',
-    ],
-  },
 
   // Webpack optimizations
   webpack: (config, { isServer, webpack }) => {
