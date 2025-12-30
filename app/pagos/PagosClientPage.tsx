@@ -72,10 +72,7 @@ interface PagosClientPageProps {
   session: any;
 }
 
-export default function PagosClientPage({
-  initialPayments,
-  session,
-}: PagosClientPageProps) {
+export default function PagosClientPage({ initialPayments, session }: PagosClientPageProps) {
   const router = useRouter();
   const { canCreate, canUpdate, canDelete } = usePermissions();
   const [filteredPayments, setFilteredPayments] = useState<Payment[]>(initialPayments);
@@ -84,7 +81,7 @@ export default function PagosClientPage({
   const [activeFilters, setActiveFilters] = useState<
     Array<{ id: string; label: string; value: string }>
   >([]);
-  
+
   // Delete confirmation dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [paymentToDelete, setPaymentToDelete] = useState<Payment | null>(null);
@@ -226,7 +223,7 @@ export default function PagosClientPage({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/home">
+                <BreadcrumbLink href="/dashboard">
                   <Home className="h-4 w-4" />
                 </BreadcrumbLink>
               </BreadcrumbItem>
@@ -241,9 +238,7 @@ export default function PagosClientPage({
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Pagos</h1>
-              <p className="text-muted-foreground mt-2">
-                Gestiona todos los pagos de alquiler
-              </p>
+              <p className="text-muted-foreground mt-2">Gestiona todos los pagos de alquiler</p>
             </div>
             {canCreate && (
               <Button onClick={() => router.push('/pagos/nuevo')}>
@@ -350,14 +345,14 @@ export default function PagosClientPage({
                       },
                     ]
                   : canCreate
-                  ? [
-                      {
-                        label: 'Registrar Pago',
-                        onClick: () => router.push('/pagos/nuevo'),
-                        variant: 'default' as const,
-                      },
-                    ]
-                  : undefined
+                    ? [
+                        {
+                          label: 'Registrar Pago',
+                          onClick: () => router.push('/pagos/nuevo'),
+                          variant: 'default' as const,
+                        },
+                      ]
+                    : undefined
               }
             />
           ) : (
@@ -369,7 +364,7 @@ export default function PagosClientPage({
                       key={payment.id}
                       className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
                     >
-                      <div 
+                      <div
                         className="flex items-center gap-4 flex-1 cursor-pointer"
                         onClick={() => router.push(`/pagos/${payment.id}`)}
                       >
@@ -378,9 +373,7 @@ export default function PagosClientPage({
                         </div>
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <p className="font-medium">
-                              {payment.contract.tenant.nombreCompleto}
-                            </p>
+                            <p className="font-medium">{payment.contract.tenant.nombreCompleto}</p>
                             <Badge variant={getEstadoBadgeVariant(payment.estado)}>
                               {payment.estado}
                             </Badge>
@@ -406,20 +399,16 @@ export default function PagosClientPage({
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <p className="text-lg font-semibold">
-                            {formatCurrency(payment.monto)}
-                          </p>
+                          <p className="text-lg font-semibold">{formatCurrency(payment.monto)}</p>
                           {payment.metodoPago && (
-                            <p className="text-xs text-muted-foreground">
-                              {payment.metodoPago}
-                            </p>
+                            <p className="text-xs text-muted-foreground">{payment.metodoPago}</p>
                           )}
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               className="h-8 w-8 p-0"
                               onClick={(e) => e.stopPropagation()}
                             >
@@ -428,7 +417,9 @@ export default function PagosClientPage({
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             {canUpdate && (
-                              <DropdownMenuItem onClick={() => router.push(`/pagos/${payment.id}/editar`)}>
+                              <DropdownMenuItem
+                                onClick={() => router.push(`/pagos/${payment.id}/editar`)}
+                              >
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Editar
                               </DropdownMenuItem>
@@ -456,7 +447,7 @@ export default function PagosClientPage({
           )}
         </main>
       </div>
-      
+
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog
         open={deleteDialogOpen}

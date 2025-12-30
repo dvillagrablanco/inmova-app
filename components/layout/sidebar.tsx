@@ -77,7 +77,6 @@ import { toggleMobileMenu, closeMobileMenu } from '@/lib/mobile-menu';
 const ROUTE_TO_MODULE: Record<string, string> = {
   '/': 'dashboard',
   '/dashboard': 'dashboard',
-  '/home': 'dashboard',
   '/edificios': 'edificios',
   '/unidades': 'unidades',
   '/garajes-trasteros': 'unidades',
@@ -1200,7 +1199,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
 
   // Filtrar items por rol y módulos activos
   const filteredDashboardItems = filterItems(dashboardNavItems);
-  
+
   // Verticales de Negocio
   const filteredAlquilerResidencialItems = filterItems(alquilerResidencialItems);
   const filteredStrItems = filterItems(strNavItems);
@@ -1209,7 +1208,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const filteredFlippingItems = filterItems(flippingNavItems);
   const filteredComercialItems = filterItems(comercialNavItems);
   const filteredAdminFincasItems = filterItems(adminFincasItems);
-  
+
   // Herramientas Horizontales
   const filteredFinanzasItems = filterItems(finanzasNavItems);
   const filteredAnalyticsItems = filterItems(analyticsNavItems);
@@ -1220,10 +1219,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const filteredAutomatizacionItems = filterItems(automatizacionNavItems);
   const filteredInnovacionItems = filterItems(innovacionNavItems);
   const filteredSoporteItems = filterItems(soporteNavItems);
-  
+
   // Roles Específicos
   const filteredOperadorItems = filterItems(operadorNavItems);
-  
+
   // Administración
   const filteredAdministradorEmpresaItems = filterItems(administradorEmpresaItems);
   const filteredSuperAdminPlatformItems = filterItems(superAdminPlatformItems);
@@ -1257,16 +1256,19 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   ];
 
   // Validación: Filtrar favoritos de forma segura
-  const favoriteItems = favorites.length > 0 && allItems.length > 0
-    ? allItems.filter((item) => {
-        try {
-          return item && item.href && favorites.includes(item.href) && filterItems([item]).length > 0;
-        } catch (error) {
-          logger.error('Error filtering favorite item:', error);
-          return false;
-        }
-      })
-    : [];
+  const favoriteItems =
+    favorites.length > 0 && allItems.length > 0
+      ? allItems.filter((item) => {
+          try {
+            return (
+              item && item.href && favorites.includes(item.href) && filterItems([item]).length > 0
+            );
+          } catch (error) {
+            logger.error('Error filtering favorite item:', error);
+            return false;
+          }
+        })
+      : [];
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => {
@@ -1458,7 +1460,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
                   <span>🏠 Inicio</span>
-                  {expandedSections.dashboard ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {expandedSections.dashboard ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
                 </button>
                 {expandedSections.dashboard && (
                   <div className="space-y-1 mt-1">
@@ -1471,8 +1477,8 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             )}
 
             {/* VERTICALES DE NEGOCIO - Separador visual */}
-            {(filteredAlquilerResidencialItems.length > 0 || 
-              filteredStrItems.length > 0 || 
+            {(filteredAlquilerResidencialItems.length > 0 ||
+              filteredStrItems.length > 0 ||
               filteredCoLivingItems.length > 0 ||
               filteredBuildToRentItems.length > 0 ||
               filteredFlippingItems.length > 0 ||
@@ -1537,7 +1543,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
                   <span>🏘️ Co-Living</span>
-                  {expandedSections.coLiving ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {expandedSections.coLiving ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
                 </button>
                 {expandedSections.coLiving && (
                   <div className="space-y-1 mt-1">
@@ -1581,7 +1591,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
                   <span>🔨 House Flipping</span>
-                  {expandedSections.flipping ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {expandedSections.flipping ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
                 </button>
                 {expandedSections.flipping && (
                   <div className="space-y-1 mt-1">
@@ -1601,7 +1615,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
                   <span>🏢 Comercial</span>
-                  {expandedSections.comercial ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {expandedSections.comercial ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
                 </button>
                 {expandedSections.comercial && (
                   <div className="space-y-1 mt-1">
@@ -1638,8 +1656,8 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             )}
 
             {/* HERRAMIENTAS HORIZONTALES - Separador visual */}
-            {(filteredFinanzasItems.length > 0 || 
-              filteredAnalyticsItems.length > 0 || 
+            {(filteredFinanzasItems.length > 0 ||
+              filteredAnalyticsItems.length > 0 ||
               filteredOperacionesItems.length > 0 ||
               filteredComunicacionesItems.length > 0) && (
               <div className="px-2 py-3 mb-2 border-t border-gray-800">
@@ -1657,7 +1675,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
                   <span>💰 Finanzas</span>
-                  {expandedSections.finanzas ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {expandedSections.finanzas ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
                 </button>
                 {expandedSections.finanzas && (
                   <div className="space-y-1 mt-1">
@@ -1677,7 +1699,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
                   <span>📊 Analytics e IA</span>
-                  {expandedSections.analytics ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {expandedSections.analytics ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
                 </button>
                 {expandedSections.analytics && (
                   <div className="space-y-1 mt-1">
@@ -1841,7 +1867,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
                   <span>🎧 Soporte</span>
-                  {expandedSections.soporte ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {expandedSections.soporte ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
                 </button>
                 {expandedSections.soporte && (
                   <div className="space-y-1 mt-1">
@@ -1883,7 +1913,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             )}
 
             {/* ADMINISTRACIÓN Y CONFIGURACIÓN - Separador visual */}
-            {(filteredAdministradorEmpresaItems.length > 0 || 
+            {(filteredAdministradorEmpresaItems.length > 0 ||
               filteredSuperAdminPlatformItems.length > 0) && (
               <div className="px-2 py-3 mb-2 border-t border-gray-800">
                 <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
@@ -1983,9 +2013,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                           className="rounded-full"
                         />
                       ) : (
-                        (session.user.name || session.user.email || 'U')
-                          .charAt(0)
-                          .toUpperCase()
+                        (session.user.name || session.user.email || 'U').charAt(0).toUpperCase()
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -1993,13 +2021,13 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                         {session.user.name || 'Usuario'}
                       </p>
                       {session.user.email && (
-                        <p className="text-xs text-gray-400 truncate">
-                          {session.user.email}
-                        </p>
+                        <p className="text-xs text-gray-400 truncate">{session.user.email}</p>
                       )}
                       {session.user.role && (
                         <p className="text-[10px] text-indigo-400 uppercase mt-0.5 font-semibold">
-                          {session.user.role.replace('_', ' ').replace('super admin', 'Super Admin')}
+                          {session.user.role
+                            .replace('_', ' ')
+                            .replace('super admin', 'Super Admin')}
                         </p>
                       )}
                     </div>
@@ -2027,9 +2055,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             ) : sessionStatus === 'unauthenticated' ? (
               /* Redirect to login if not authenticated */
               <div className="px-4 py-3 bg-gray-800 rounded-lg">
-                <p className="text-xs text-gray-400 text-center">
-                  No autenticado
-                </p>
+                <p className="text-xs text-gray-400 text-center">No autenticado</p>
                 <Button
                   onClick={() => router.push('/login')}
                   variant="outline"
@@ -2044,9 +2070,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               <div className="px-4 py-3 bg-gray-800 rounded-lg">
                 <div className="flex items-center justify-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-                  <p className="text-xs text-gray-400">
-                    Cargando...
-                  </p>
+                  <p className="text-xs text-gray-400">Cargando...</p>
                 </div>
               </div>
             )}
