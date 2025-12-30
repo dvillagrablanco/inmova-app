@@ -61,6 +61,8 @@ import {
   BookOpen,
   Scan,
   Share2,
+  User,
+  Loader2,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -1004,7 +1006,7 @@ interface SidebarProps {
 export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session } = useSession() || {};
+  const { data: session, status: sessionStatus } = useSession();
   const { role } = usePermissions();
   const { appName, logo } = useBranding();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -1162,9 +1164,16 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
 
   // Filtrar items según rol y módulos activos
   const filterItems = (items: any[]) => {
+    // Validación: Si no hay rol o módulos aún no cargados, retornar vacío
     if (!role || !modulesLoaded) return [];
 
+    // Validación: Si items no es un array válido
+    if (!Array.isArray(items) || items.length === 0) return [];
+
     let filtered = items.filter((item) => {
+      // Validación: item debe tener roles
+      if (!item || !Array.isArray(item.roles)) return false;
+
       // Verificar permisos de rol
       if (!item.roles.includes(role)) return false;
 
@@ -1181,7 +1190,9 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     // Aplicar búsqueda
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((item) => item.name.toLowerCase().includes(query));
+      filtered = filtered.filter((item) => {
+        return item && item.name && item.name.toLowerCase().includes(query);
+      });
     }
 
     return filtered;
@@ -1244,9 +1255,18 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     ...administradorEmpresaItems,
     ...superAdminPlatformItems,
   ];
-  const favoriteItems = allItems.filter(
-    (item) => favorites.includes(item.href) && filterItems([item]).length > 0 // Solo mostrar si el item es accesible
-  );
+
+  // Validación: Filtrar favoritos de forma segura
+  const favoriteItems = favorites.length > 0 && allItems.length > 0
+    ? allItems.filter((item) => {
+        try {
+          return item && item.href && favorites.includes(item.href) && filterItems([item]).length > 0;
+        } catch (error) {
+          logger.error('Error filtering favorite item:', error);
+          return false;
+        }
+      })
+    : [];
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => {
@@ -1930,19 +1950,106 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             )}
           </nav>
 
-          {/* User Info & Logout */}
+          {/* User Info & Logout - Mejorado con validaciones */}
           <div className="p-4 border-t border-gray-800 space-y-2">
-            <div className="px-4 py-2 bg-gray-800 rounded-lg">
-              <p className="text-xs text-gray-400">Usuario</p>
-              <p className="text-sm font-medium truncate">{session?.user?.name || 'Usuario'}</p>
-            </div>
-            <button
-              onClick={handleSignOut}
-              className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-all duration-200"
-            >
-              <LogOut size={20} />
-              <span>Cerrar Sesión</span>
-            </button>
+            {sessionStatus === 'loading' ? (
+              /* Loading skeleton */
+              <div className="px-4 py-3 bg-gray-800 rounded-lg animate-pulse">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gray-700"></div>
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-700 rounded w-24 mb-2"></div>
+                    <div className="h-3 bg-gray-700 rounded w-32"></div>
+                  </div>
+                </div>
+              </div>
+            ) : session?.user ? (
+              <>
+                {/* User Profile Card */}
+                <Link
+                  href="/perfil"
+                  className="block px-4 py-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors group"
+                  data-testid="user-menu"
+                >
+                  <div className="flex items-center gap-3">
+                    {/* Avatar */}
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0 group-hover:scale-105 transition-transform">
+                      {session.user.image ? (
+                        <Image
+                          src={session.user.image}
+                          alt={session.user.name || 'Usuario'}
+                          width={40}
+                          height={40}
+                          className="rounded-full"
+                        />
+                      ) : (
+                        (session.user.name || session.user.email || 'U')
+                          .charAt(0)
+                          .toUpperCase()
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white truncate">
+                        {session.user.name || 'Usuario'}
+                      </p>
+                      {session.user.email && (
+                        <p className="text-xs text-gray-400 truncate">
+                          {session.user.email}
+                        </p>
+                      )}
+                      {session.user.role && (
+                        <p className="text-[10px] text-indigo-400 uppercase mt-0.5 font-semibold">
+                          {session.user.role.replace('_', ' ').replace('super admin', 'Super Admin')}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+
+                {/* Settings Link */}
+                <Link
+                  href="/configuracion"
+                  className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-all duration-200"
+                >
+                  <Settings size={18} />
+                  <span className="text-sm">Configuración</span>
+                </Link>
+
+                {/* Logout Button */}
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-gray-300 hover:bg-red-900/50 hover:text-red-300 transition-all duration-200"
+                >
+                  <LogOut size={18} />
+                  <span className="text-sm">Cerrar Sesión</span>
+                </button>
+              </>
+            ) : sessionStatus === 'unauthenticated' ? (
+              /* Redirect to login if not authenticated */
+              <div className="px-4 py-3 bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-400 text-center">
+                  No autenticado
+                </p>
+                <Button
+                  onClick={() => router.push('/login')}
+                  variant="outline"
+                  size="sm"
+                  className="w-full mt-2"
+                >
+                  Iniciar Sesión
+                </Button>
+              </div>
+            ) : (
+              /* Fallback genérico */
+              <div className="px-4 py-3 bg-gray-800 rounded-lg">
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                  <p className="text-xs text-gray-400">
+                    Cargando...
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </aside>
