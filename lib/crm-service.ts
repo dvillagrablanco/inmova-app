@@ -823,44 +823,45 @@ export class CRMService {
    * Obtener estadísticas del CRM
    */
   static async getStats(companyId: string, userId?: string) {
-    const where: any = { companyId };
-    if (userId) {
-      where.ownerId = userId;
-    }
+    try {
+      const where: any = { companyId };
+      if (userId) {
+        where.ownerId = userId;
+      }
 
-    const [
-      totalLeads,
-      newLeads,
-      qualifiedLeads,
-      wonLeads,
-      totalDeals,
-      openDeals,
-      wonDeals,
-      totalDealValue,
-      wonDealValue,
-      activitiesThisMonth,
-      tasksOverdue,
-    ] = await Promise.all([
-      prisma.cRMLead.count({ where }),
-      prisma.cRMLead.count({ where: { ...where, status: 'new' } }),
-      prisma.cRMLead.count({ where: { ...where, status: 'qualified' } }),
-      prisma.cRMLead.count({ where: { ...where, status: 'won' } }),
-      prisma.deal.count({ where }),
+      const [
+        totalLeads,
+        newLeads,
+        qualifiedLeads,
+        wonLeads,
+        totalDeals,
+        openDeals,
+        wonDeals,
+        totalDealValue,
+        wonDealValue,
+        activitiesThisMonth,
+        tasksOverdue,
+      ] = await Promise.all([
+        prisma.cRMLead.count({ where }).catch(() => 0),
+        prisma.cRMLead.count({ where: { ...where, status: 'new' } }).catch(() => 0),
+      prisma.cRMLead.count({ where: { ...where, status: 'qualified' } }).catch(() => 0),
+      prisma.cRMLead.count({ where: { ...where, status: 'won' } }).catch(() => 0),
+      prisma.deal.count({ where }).catch(() => 0),
       prisma.deal.count({
         where: {
           ...where,
           stage: { notIn: ['closed_won', 'closed_lost'] },
         },
-      }),
-      prisma.deal.count({ where: { ...where, stage: 'closed_won' } }),
+      }).catch(() => 0),
+      prisma.deal.count({ where: { ...where, stage: 'closed_won' } }).catch(() => 0),
       prisma.deal.aggregate({
         where,
         _sum: { value: true },
-      }),
+      }).catch(() => ({ _sum: { value: 0 } })),
       prisma.deal.aggregate({
         where: { ...where, stage: 'closed_won' },
         _sum: { value: true },
-      }),
+      }).catch(() => ({ _sum: { value: 0 } })),
       prisma.cRMActivity.count({
         where: {
           companyId,
@@ -868,7 +869,7 @@ export class CRMService {
             gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
           },
         },
-      }),
+      }).catch(() => 0),
       prisma.cRMTask.count({
         where: {
           companyId,

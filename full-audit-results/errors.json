@@ -1,0 +1,2746 @@
+[
+  {
+    "page": "/",
+    "type": "console",
+    "message": "Error fetching dashboard data: {message: Failed to fetch, name: TypeError, stack: TypeError: Failed to fetch\n    at e (https://inmov…p.com/_next/static/chunks/app/dashboard/page-76c1}",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:33:47.224Z"
+  },
+  {
+    "page": "/",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.405Z"
+  },
+  {
+    "page": "/admin/activity",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/alertas",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/aprobaciones",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/backup-restore",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/clientes",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/clientes/comparar",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/configuracion",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/dashboard",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/facturacion-b2b",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/firma-digital",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/importar",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/integraciones-contables",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/legal",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/marketplace",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/metricas-uso",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/modulos",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/ocr-import",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/personalizacion",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/planes",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/plantillas-sms",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/portales-externos",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/reportes-programados",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/salud-sistema",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/seguridad",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/sugerencias",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/admin/usuarios",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/alquiler-tradicional/warranties",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/analytics",
+    "type": "console",
+    "message": "TypeError: b.map is not a function\n    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)\n    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)\n    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)\n    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)\n    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)\n    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484\n    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)\n    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)\n    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)\n    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:23.406Z"
+  },
+  {
+    "page": "/",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.976Z"
+  },
+  {
+    "page": "/admin/activity",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.976Z"
+  },
+  {
+    "page": "/admin/alertas",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.976Z"
+  },
+  {
+    "page": "/admin/aprobaciones",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.976Z"
+  },
+  {
+    "page": "/admin/backup-restore",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.976Z"
+  },
+  {
+    "page": "/admin/clientes",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.976Z"
+  },
+  {
+    "page": "/admin/clientes/comparar",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.977Z"
+  },
+  {
+    "page": "/admin/configuracion",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.977Z"
+  },
+  {
+    "page": "/admin/dashboard",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.977Z"
+  },
+  {
+    "page": "/admin/facturacion-b2b",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.977Z"
+  },
+  {
+    "page": "/admin/firma-digital",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.977Z"
+  },
+  {
+    "page": "/admin/importar",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.977Z"
+  },
+  {
+    "page": "/admin/integraciones-contables",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.977Z"
+  },
+  {
+    "page": "/admin/legal",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.977Z"
+  },
+  {
+    "page": "/admin/marketplace",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/admin/metricas-uso",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/admin/modulos",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/admin/ocr-import",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/admin/personalizacion",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/admin/planes",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/admin/plantillas-sms",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/admin/portales-externos",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/admin/reportes-programados",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/admin/salud-sistema",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/admin/seguridad",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/admin/sugerencias",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/admin/usuarios",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/alquiler-tradicional/warranties",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/analytics",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/anuncios",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/api-docs",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/asistente-ia",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/auditoria",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/automatizacion",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/automatizacion/resumen",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/bi",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/blockchain",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/calendario",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/candidatos",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/candidatos/nuevo",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/certificaciones",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/chat",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/coliving/comunidad",
+    "type": "console",
+    "message": "Error loading notifications: TypeError: Failed to fetch",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:34:39.978Z"
+  },
+  {
+    "page": "/",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/activity",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/alertas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/aprobaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/backup-restore",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/clientes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/clientes/comparar",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/configuracion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/dashboard",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/facturacion-b2b",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/firma-digital",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/importar",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/integraciones-contables",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/legal",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/marketplace",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/metricas-uso",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/modulos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/ocr-import",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/personalizacion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/planes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/plantillas-sms",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/portales-externos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/reportes-programados",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/salud-sistema",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/seguridad",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/sugerencias",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/admin/usuarios",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/alquiler-tradicional/warranties",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/analytics",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/anuncios",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/api-docs",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/asistente-ia",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/auditoria",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/automatizacion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/automatizacion/resumen",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/bi",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/blockchain",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/calendario",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/candidatos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/candidatos/nuevo",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/certificaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/chat",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/coliving/comunidad",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/coliving/emparejamiento",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/coliving/eventos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/coliving/paquetes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/comunidad-social",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/comunidades",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/comunidades/actas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/comunidades/cumplimiento",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/comunidades/cuotas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/comunidades/finanzas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/comunidades/fondos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/comunidades/presidente",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/comunidades/renovaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/comunidades/votaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/configuracion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/configuracion/integraciones/stripe",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/configuracion/notificaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/user/notification-preferences",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:00.513Z"
+  },
+  {
+    "page": "/",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/activity",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/alertas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/aprobaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/backup-restore",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/clientes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/clientes/comparar",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/configuracion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/dashboard",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/facturacion-b2b",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/firma-digital",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/importar",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/integraciones-contables",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/legal",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/marketplace",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/metricas-uso",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/modulos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/ocr-import",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/personalizacion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/planes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/plantillas-sms",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/portales-externos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/reportes-programados",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/salud-sistema",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/seguridad",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/sugerencias",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/admin/usuarios",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/alquiler-tradicional/warranties",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/analytics",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/anuncios",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/api-docs",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/asistente-ia",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.871Z"
+  },
+  {
+    "page": "/auditoria",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/automatizacion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/automatizacion/resumen",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/bi",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/blockchain",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/calendario",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/candidatos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/candidatos/nuevo",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/certificaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/chat",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/coliving/comunidad",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/coliving/emparejamiento",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/coliving/eventos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/coliving/paquetes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/comunidad-social",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/comunidades",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/comunidades/actas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/comunidades/cumplimiento",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/comunidades/cuotas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/comunidades/finanzas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/comunidades/fondos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/comunidades/presidente",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/comunidades/renovaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/comunidades/votaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/configuracion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/configuracion/integraciones/stripe",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/configuracion/notificaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/configuracion/ui-mode",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/contabilidad",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/contratos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/contratos/nuevo",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/crm",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/leads",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.872Z"
+  },
+  {
+    "page": "/",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/activity",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/alertas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/aprobaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/backup-restore",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/clientes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/clientes/comparar",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/configuracion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/dashboard",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/facturacion-b2b",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/firma-digital",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/importar",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/integraciones-contables",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/legal",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/marketplace",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/metricas-uso",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/modulos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/ocr-import",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/personalizacion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/planes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/plantillas-sms",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/portales-externos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/reportes-programados",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/salud-sistema",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/seguridad",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/sugerencias",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/admin/usuarios",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/alquiler-tradicional/warranties",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/analytics",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/anuncios",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/api-docs",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/asistente-ia",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/auditoria",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/automatizacion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/automatizacion/resumen",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/bi",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/blockchain",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/calendario",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/candidatos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/candidatos/nuevo",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/certificaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/chat",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/coliving/comunidad",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/coliving/emparejamiento",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/coliving/eventos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/coliving/paquetes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/comunidad-social",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/comunidades",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/comunidades/actas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/comunidades/cumplimiento",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/comunidades/cuotas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/comunidades/finanzas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/comunidades/fondos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/comunidades/presidente",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/comunidades/renovaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/comunidades/votaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/configuracion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/configuracion/integraciones/stripe",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/configuracion/notificaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/configuracion/ui-mode",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/contabilidad",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/contratos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/contratos/nuevo",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/crm",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/crm/stats",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:35:06.880Z"
+  },
+  {
+    "page": "/",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/activity",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/alertas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/aprobaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/backup-restore",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/clientes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/clientes/comparar",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/configuracion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/dashboard",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/facturacion-b2b",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/firma-digital",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/importar",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/integraciones-contables",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/legal",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/marketplace",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/metricas-uso",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/modulos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/ocr-import",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/personalizacion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/planes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/plantillas-sms",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/portales-externos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/reportes-programados",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/salud-sistema",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/seguridad",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/sugerencias",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/admin/usuarios",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/alquiler-tradicional/warranties",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/analytics",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/anuncios",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/api-docs",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/asistente-ia",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/auditoria",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/automatizacion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/automatizacion/resumen",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/bi",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/blockchain",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/calendario",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/candidatos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/candidatos/nuevo",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/certificaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/chat",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/coliving/comunidad",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/coliving/emparejamiento",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/coliving/eventos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/coliving/paquetes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/comunidad-social",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/comunidades",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/comunidades/actas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/comunidades/cumplimiento",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/comunidades/cuotas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/comunidades/finanzas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/comunidades/fondos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/comunidades/presidente",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/comunidades/renovaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/comunidades/votaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/configuracion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/configuracion/integraciones/stripe",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/configuracion/notificaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/configuracion/ui-mode",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/contabilidad",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/contratos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/contratos/nuevo",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/crm",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/cupones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/dashboard",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/dashboard/adaptive",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/dashboard/community",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/documentos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/economia-circular",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/edificios",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/edificios/nuevo",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/ejemplo-ux",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/energia-solar",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/espacios-coworking",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/estadisticas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/finanzas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/firma-digital",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/garajes-trasteros",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/gestion-incidencias",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/guardias",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/hospitality",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/huerto-urbano",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/impuestos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/informes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/inquilinos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/inquilinos/nuevo",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/inspeccion-digital",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/instalaciones-deportivas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/integraciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/landing",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/legal",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/licitaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/login",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/mantenimiento",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/marketplace",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/marketplace/proveedores",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/marketplace/servicios",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/microtransacciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/notificaciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/obras",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/pagos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/pagos/planes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/partners",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/partners/comisiones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/partners/registro",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/partners/recursos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/partners/analiticas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/partners/soporte",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/partners/capacitacion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/partners/integraciones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/partners/marketing",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/permisos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/planes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/portal-inquilino",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/portal-inquilino/comunicacion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/portal-inquilino/contrato",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/portal-inquilino/dashboard",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/portal-inquilino/documentos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/portal-inquilino/incidencias",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/portal-inquilino/pagos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/presupuestos",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/proyectos-renovacion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/puntos-carga",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/red-agentes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/red-agentes/agentes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/red-agentes/comisiones",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/red-agentes/dashboard",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/red-agentes/formacion",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/red-agentes/registro",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/red-agentes/zonas",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  },
+  {
+    "page": "/reportes",
+    "type": "network",
+    "message": "500 https://inmovaapp.com/api/reports?tipo=global&periodo=12",
+    "severity": "critical",
+    "timestamp": "2025-12-30T22:36:32.330Z"
+  }
+]
