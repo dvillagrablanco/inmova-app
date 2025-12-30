@@ -1178,7 +1178,7 @@ export const seoMetadata = {
   openGraph: {
     title: 'INMOVA - Gestiona tus Propiedades en Piloto Automático',
     description: '88 módulos todo-en-uno | ROI en 60 días | Desde €149/mes | 500+ clientes confían',
-    image: 'https://inmovaapp.com/og-image.jpg',
+    image: 'https://inmovaapp.com/og-image-template.svg',
     type: 'website',
     url: 'https://inmovaapp.com',
   },
