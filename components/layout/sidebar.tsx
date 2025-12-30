@@ -1365,11 +1365,17 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
         />
       )}
 
-      {/* Sidebar - Optimizado para móviles */}
+      {/* Sidebar - Visible en desktop, toggle en mobile */}
       <aside
-        className="fixed top-0 left-0 z-[90] h-screen w-[85vw] max-w-[320px] sm:w-64 lg:w-64 bg-black text-white overflow-hidden transition-transform duration-300 ease-in-out lg:translate-x-0"
+        className={cn(
+          "fixed top-0 left-0 z-[90] h-screen w-[85vw] max-w-[320px] sm:w-64 lg:w-64",
+          "bg-black text-white overflow-hidden transition-transform duration-300 ease-in-out",
+          // Desktop: siempre visible
+          "lg:translate-x-0",
+          // Mobile: toggle con menu
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        )}
         style={{
-          transform: isMobileMenuOpen ? 'translateX(0)' : 'translateX(-100%)',
           maxHeight: '100vh',
           touchAction: 'pan-y',
           WebkitOverflowScrolling: 'touch',
