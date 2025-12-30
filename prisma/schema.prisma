@@ -13081,3 +13081,164 @@ model SignatureWebhook {
   @@index([processed])
   @@map("signature_webhooks")
 }
+
+// ============================================================================
+// MATCHING AUTOMÁTICO INQUILINO-PROPIEDAD
+// ============================================================================
+
+model TenantPropertyMatch {
+  id         String   @id @default(cuid())
+  companyId  String
+  tenantId   String
+  unitId     String
+  
+  // Scoring (0-100)
+  matchScore        Int      // Score total
+  locationScore     Int      // Proximidad a transporte, servicios
+  priceScore        Int      // Ajuste precio/presupuesto
+  featuresScore     Int      // Características deseadas vs disponibles
+  sizeScore         Int      // Tamaño adecuado
+  availabilityScore Int      // Disponibilidad de fecha
+  
+  // Análisis IA
+  aiRecommendation  String?  @db.Text // Recomendación de Claude
+  pros              String[] @default([]) // Ventajas del match
+  cons              String[] @default([]) // Desventajas del match
+  
+  // Estado
+  status            String   @default("SUGGESTED") // SUGGESTED, VIEWED, CONTACTED, RENTED, REJECTED
+  viewedAt          DateTime?
+  contactedAt       DateTime?
+  
+  // Metadata
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  // Relations
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  unit              Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  
+  @@unique([tenantId, unitId])
+  @@index([companyId])
+  @@index([tenantId])
+  @@index([unitId])
+  @@index([matchScore])
+  @@index([status])
+  @@map("tenant_property_matches")
+}
+
+model TenantPreferences {
+  id                String   @id @default(cuid())
+  tenantId          String   @unique
+  
+  // Presupuesto
+  minBudget         Float?
+  maxBudget         Float?
+  idealBudget       Float?   // Precio ideal
+  
+  // Ubicación
+  preferredCities   String[] @default([])
+  preferredZones    String[] @default([]) // Barrios específicos
+  maxDistanceToWork Float?   // km
+  workAddress       String?
+  
+  // Transporte
+  needsPublicTransport Boolean @default(true)
+  needsParking         Boolean @default(false)
+  hasCar               Boolean @default(false)
+  
+  // Características
+  minRooms          Int?
+  minBathrooms      Int?
+  minSquareMeters   Float?
+  needsFurnished    Boolean  @default(false)
+  prefersModern     Boolean  @default(true)
+  
+  // Extras
+  hasPets           Boolean  @default(false)
+  needsPetFriendly  Boolean  @default(false)
+  needsElevator     Boolean  @default(false)
+  needsAccessibility Boolean @default(false)
+  
+  // Lifestyle
+  prefersQuiet      Boolean  @default(true)
+  workFromHome      Boolean  @default(false)
+  hasChildren       Boolean  @default(false)
+  
+  // Disponibilidad
+  moveInDate        DateTime?
+  leaseDuration     Int?     // meses
+  
+  // Prioridades (peso de cada factor, 0-10)
+  priorityLocation  Int      @default(8)
+  priorityPrice     Int      @default(9)
+  prioritySize      Int      @default(7)
+  priorityFeatures  Int      @default(6)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@index([tenantId])
+  @@map("tenant_preferences")
+}
+
+// ============================================================================
+// GESTIÓN DE INCIDENCIAS CON CLASIFICACIÓN IA
+// ============================================================================
+
+enum IncidentCategory {
+  PLUMBING           // Fontanería
+  ELECTRICAL         // Eléctrica
+  HVAC              // Climatización
+  STRUCTURAL        // Estructural
+  APPLIANCE         // Electrodomésticos
+  CARPENTRY         // Carpintería
+  LOCKSMITH         // Cerrajería
+  CLEANING          // Limpieza
+  PEST_CONTROL      // Control de plagas
+  OTHER             // Otro
+}
+
+enum IncidentUrgency {
+  LOW               // Baja - puede esperar semanas
+  MEDIUM            // Media - días
+  HIGH              // Alta - 24-48h
+  CRITICAL          // Crítica - inmediata
+}
+
+model IncidentClassification {
+  id                String   @id @default(cuid())
+  incidentId        String   @unique
+  
+  // Clasificación IA
+  category          IncidentCategory
+  urgency           IncidentUrgency
+  estimatedCost     Float?   // Coste estimado en €
+  estimatedDuration Int?     // Duración estimada en horas
+  
+  // Proveedor recomendado
+  providerType      String?  // PLUMBER, ELECTRICIAN, etc.
+  suggestedProvider String?  // ID del proveedor
+  
+  // Análisis IA
+  aiAnalysis        String?  @db.Text // Análisis detallado
+  keywords          String[] @default([]) // Palabras clave detectadas
+  confidence        Float    @default(0) // 0-100
+  
+  // Acciones recomendadas
+  immediateActions  String[] @default([])
+  preventiveMeasures String[] @default([])
+  
+  // Modelo utilizado
+  model             String   // "claude-3-5-sonnet", etc.
+  
+  createdAt         DateTime @default(now())
+  
+  @@index([incidentId])
+  @@index([category])
+  @@index([urgency])
+  @@map("incident_classifications")
+}
