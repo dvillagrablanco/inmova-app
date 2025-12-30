@@ -50,9 +50,37 @@
 
   /* Bottom navigation: limitar ancho de items */
   .mobile-nav button,
-  nav[class*="bottom"] button {
-    max-width: 80px;
+  nav[class*="bottom"] button,
+  .bottom-nav button,
+  .bottom-nav a,
+  .bottom-nav-item {
+    max-width: 80px !important;
     font-size: 0.75rem;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  /* Botones inline-flex con muchas clases: forzar límites */
+  button[class*="inline-flex"][class*="items-center"][class*="justify-center"],
+  button[class*="whitespace-nowrap"] {
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Contenedores flex con gap: prevenir overflow */
+  .flex[class*="gap-"] {
+    gap: 0.5rem !important;
+    flex-wrap: wrap;
+  }
+
+  /* Fix para toaster (notificaciones) */
+  .toaster,
+  [class*="toaster"] {
+    max-width: calc(100vw - 2rem) !important;
+    left: 1rem !important;
+    right: 1rem !important;
   }
 
   /* Tablas responsive automáticas */

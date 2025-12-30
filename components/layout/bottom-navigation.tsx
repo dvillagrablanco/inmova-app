@@ -72,7 +72,7 @@ export function BottomNavigation() {
                 key={item.href}
                 onClick={() => router.push(item.href)}
                 className={cn(
-                  'flex flex-1 flex-col items-center justify-center gap-1 rounded-lg px-3 py-2 transition-colors',
+                  'flex flex-1 flex-col items-center justify-center gap-1 rounded-lg px-2 py-2 transition-colors max-w-[80px]',
                   'active:scale-95 active:bg-muted',
                   isActive
                     ? 'text-primary'
@@ -108,7 +108,7 @@ export function BottomNavigation() {
           <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <SheetTrigger asChild>
               <button
-                className="flex flex-1 flex-col items-center justify-center gap-1 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-foreground active:scale-95 active:bg-muted"
+                className="flex flex-1 flex-col items-center justify-center gap-1 rounded-lg px-2 py-2 text-muted-foreground transition-colors hover:text-foreground active:scale-95 active:bg-muted max-w-[80px]"
                 aria-label="Abrir menú completo"
               >
                 <Menu className="h-5 w-5" />

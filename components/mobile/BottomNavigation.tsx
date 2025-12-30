@@ -67,10 +67,10 @@ export function BottomNavigation() {
           <Link
             key={item.id}
             href={item.href}
-            className={cn('bottom-nav-item', isActive && 'active')}
+            className={cn('bottom-nav-item max-w-[80px] overflow-hidden', isActive && 'active')}
           >
             {item.icon}
-            <span>{item.label}</span>
+            <span className="text-xs truncate">{item.label}</span>
           </Link>
         );
       })}
