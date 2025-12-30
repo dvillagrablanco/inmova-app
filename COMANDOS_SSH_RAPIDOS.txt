@@ -1,0 +1,285 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║  🚀 COMANDOS SSH PARA DEPLOYMENT EN SERVIDOR                             ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+📋 INFORMACIÓN NECESARIA:
+───────────────────────────────────────────────────────────────────────────
+   • IP del servidor: ________________________________________
+   • Usuario SSH: ____________________________________________
+   • Path de la app: _________________________________________
+   • Sistema de deployment: [ ] Docker  [ ] PM2  [ ] Systemd
+
+═══════════════════════════════════════════════════════════════════════════
+
+🔌 PASO 1: CONECTAR AL SERVIDOR
+───────────────────────────────────────────────────────────────────────────
+
+   Desde TU TERMINAL LOCAL:
+
+   $ ssh usuario@IP_SERVIDOR
+
+   Ejemplos:
+   $ ssh root@157.180.119.236
+   $ ssh deploy@inmovaapp.com
+
+═══════════════════════════════════════════════════════════════════════════
+
+📂 PASO 2: NAVEGAR AL DIRECTORIO DE LA APP
+───────────────────────────────────────────────────────────────────────────
+
+   En EL SERVIDOR:
+
+   $ cd /opt/inmova-app
+
+   O donde esté tu app:
+   $ cd /home/deploy/inmova-app
+   $ cd /var/www/inmova-app
+
+═══════════════════════════════════════════════════════════════════════════
+
+🔍 PASO 3: VERIFICAR ESTADO ACTUAL
+───────────────────────────────────────────────────────────────────────────
+
+   $ git status
+   $ git branch
+   $ git log --oneline -5
+
+═══════════════════════════════════════════════════════════════════════════
+
+🔽 PASO 4: PULL DE CAMBIOS
+───────────────────────────────────────────────────────────────────────────
+
+   Opción A - Merge desde branch de correcciones:
+
+   $ git fetch origin
+   $ git checkout main
+   $ git merge origin/cursor/frontend-audit-inmovaapp-com-6336
+   $ git push origin main
+
+   Opción B - Pull directo del branch:
+
+   $ git pull origin cursor/frontend-audit-inmovaapp-com-6336
+
+═══════════════════════════════════════════════════════════════════════════
+
+🐳 PASO 5A: DEPLOYMENT CON DOCKER
+───────────────────────────────────────────────────────────────────────────
+
+   $ docker-compose down
+   $ docker-compose up -d --build
+
+   Esperar 10-15 segundos para warm-up:
+   $ sleep 10
+
+   Verificar logs:
+   $ docker-compose logs -f app
+
+   Health check:
+   $ curl http://localhost:3000/api/health
+
+═══════════════════════════════════════════════════════════════════════════
+
+🔄 PASO 5B: DEPLOYMENT CON PM2
+───────────────────────────────────────────────────────────────────────────
+
+   $ npm install
+   $ npm run build
+
+   Zero-downtime reload:
+   $ pm2 reload inmova-app
+
+   O restart normal:
+   $ pm2 restart inmova-app
+
+   Verificar:
+   $ pm2 status inmova-app
+   $ pm2 logs inmova-app --lines 50
+
+   Health check:
+   $ curl http://localhost:3000/api/health
+
+═══════════════════════════════════════════════════════════════════════════
+
+⚙️ PASO 5C: DEPLOYMENT CON SYSTEMD
+───────────────────────────────────────────────────────────────────────────
+
+   $ npm install
+   $ npm run build
+   $ systemctl restart inmova-app
+
+   Verificar:
+   $ systemctl status inmova-app
+   $ journalctl -u inmova-app -f --lines 50
+
+   Health check:
+   $ curl http://localhost:3000/api/health
+
+═══════════════════════════════════════════════════════════════════════════
+
+🔧 PASO 5D: DEPLOYMENT MANUAL (npm start)
+───────────────────────────────────────────────────────────────────────────
+
+   $ npm install
+   $ npm run build
+
+   Matar proceso viejo:
+   $ fuser -k 3000/tcp
+
+   O buscar y matar manualmente:
+   $ ps aux | grep node
+   $ kill -9 PID_DEL_PROCESO
+
+   Iniciar nueva instancia:
+   $ nohup npm start > /tmp/inmova.log 2>&1 &
+
+   Verificar:
+   $ tail -f /tmp/inmova.log
+   $ curl http://localhost:3000/api/health
+
+═══════════════════════════════════════════════════════════════════════════
+
+✅ PASO 6: VERIFICACIÓN POST-DEPLOYMENT
+───────────────────────────────────────────────────────────────────────────
+
+   1. Health Check en el servidor:
+      $ curl http://localhost:3000/api/health
+      → Debe retornar: {"status":"ok"}
+
+   2. Test de landing:
+      $ curl http://localhost:3000/landing | head -50
+
+   3. Verificar headers de seguridad:
+      $ curl -I http://localhost:3000 | grep -i "x-frame\|x-content\|strict"
+
+   4. Desde TU MÁQUINA (fuera del servidor):
+      $ curl https://inmovaapp.com/api/health
+      $ curl -I https://inmovaapp.com
+
+   5. Navegador:
+      • Abre https://inmovaapp.com/landing
+      • Verifica que carga sin errores
+      • F12 → Console → NO debe haber errores
+
+═══════════════════════════════════════════════════════════════════════════
+
+📊 VERIFICAR CORRECCIONES APLICADAS
+───────────────────────────────────────────────────────────────────────────
+
+   1. Contraste de colores:
+      • Ve a https://inmovaapp.com/landing
+      • Scroll a sección de promociones
+      • Códigos (FLIPPING25, ROOMPRO) deben verse más oscuros
+
+   2. Headers de seguridad:
+      $ curl -I https://inmovaapp.com | grep -E "x-frame|x-content|strict-transport"
+      → Debe mostrar:
+        x-frame-options: DENY
+        x-content-type-options: nosniff
+        strict-transport-security: max-age=31536000
+
+   3. Autocomplete en formularios:
+      • Ve a https://inmovaapp.com/login
+      • F12 → Elements → Inspecciona input de email
+      • Debe tener: autocomplete="email"
+      • Inspecciona input de password
+      • Debe tener: autocomplete="current-password"
+
+   4. Responsive móvil:
+      • F12 → Toggle device toolbar (Ctrl+Shift+M)
+      • Selecciona iPhone 12 Pro (375px)
+      • Navega por landing
+      • NO debe haber scroll horizontal
+      • Botones deben ser fáciles de tocar
+
+   5. Open Graph image:
+      • Visita https://inmovaapp.com/og-image-template.svg
+      • Debe cargar imagen SVG con logo Inmova
+
+═══════════════════════════════════════════════════════════════════════════
+
+🐛 TROUBLESHOOTING COMÚN
+───────────────────────────────────────────────────────────────────────────
+
+   Problema: "Port 3000 already in use"
+   Solución:
+   $ fuser -k 3000/tcp
+   $ pm2 delete all  # Si usas PM2
+
+   Problema: Build falla con error de memoria
+   Solución:
+   $ export NODE_OPTIONS="--max-old-space-size=4096"
+   $ npm run build
+
+   Problema: Prisma error "Client not initialized"
+   Solución:
+   $ npx prisma generate
+   $ npm run build
+
+   Problema: Headers de seguridad no aparecen
+   Solución:
+   • Espera 10 minutos (propagación de cache)
+   • Si usas Nginx, verifica config y reload:
+     $ nginx -t
+     $ systemctl reload nginx
+   • Si usas Cloudflare, purga cache en dashboard
+
+   Problema: Cambios no se ven
+   Solución:
+   $ rm -rf .next
+   $ npm run build
+   $ pm2 restart inmova-app  # O tu método de restart
+
+═══════════════════════════════════════════════════════════════════════════
+
+📋 CHECKLIST FINAL
+───────────────────────────────────────────────────────────────────────────
+
+   [ ] Conectado al servidor vía SSH
+   [ ] Navegado al directorio de la app
+   [ ] Git pull exitoso
+   [ ] npm install completado
+   [ ] npm run build sin errores
+   [ ] Aplicación reiniciada (Docker/PM2/Systemd)
+   [ ] Health check OK: curl http://localhost:3000/api/health
+   [ ] Landing page carga: curl http://localhost:3000/landing
+   [ ] Desde fuera: curl https://inmovaapp.com/api/health
+   [ ] Headers presentes: curl -I https://inmovaapp.com
+   [ ] Test visual en navegador
+   [ ] Contraste de colores mejorado (visual)
+   [ ] Autocomplete presente (F12 Elements)
+   [ ] Responsive sin overflow (F12 mobile view)
+
+═══════════════════════════════════════════════════════════════════════════
+
+🎯 SIGUIENTE PASO DESPUÉS DEL DEPLOYMENT
+───────────────────────────────────────────────────────────────────────────
+
+   Desde TU MÁQUINA (no el servidor), ejecuta los tests:
+
+   $ cd /workspace
+   $ npx playwright test e2e/frontend-audit-intensive.spec.ts
+
+   Resultado esperado:
+   • Antes: 13 fallidos / 26 pasados
+   • Después: 2-4 fallidos / 35-37 pasados
+
+═══════════════════════════════════════════════════════════════════════════
+
+📞 NECESITAS AYUDA?
+───────────────────────────────────────────────────────────────────────────
+
+   1. Pega los LOGS de error completos
+   2. Indica en qué paso estás
+   3. Output de:
+      $ git status
+      $ docker-compose ps  # O pm2 status
+      $ curl http://localhost:3000/api/health
+
+═══════════════════════════════════════════════════════════════════════════
+
+✅ ¡TODO LISTO! Sigue los pasos en orden y tendrás las correcciones en
+   producción en 10-15 minutos.
+
+═══════════════════════════════════════════════════════════════════════════
