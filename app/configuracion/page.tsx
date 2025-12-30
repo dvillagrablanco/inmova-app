@@ -2,6 +2,9 @@ import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+// Force dynamic rendering para evitar errores en RSC requests
+export const dynamic = 'force-dynamic';
+
 /**
  * Ruta /configuracion - Redirect inteligente según rol
  *
