@@ -72,7 +72,7 @@ async function investigateLanding(url: string): Promise<InvestigationResult> {
       url: response.url(),
       method: response.request().method(),
       status: response.status(),
-      cached: response.fromCache(),
+      cached: response.headers()['cf-cache-status'] === 'HIT' || response.headers()['x-cache'] === 'HIT',
     });
   });
   
@@ -228,9 +228,9 @@ async function main() {
   console.log('Basado en .cursorrules: Debugging con Playwright\n');
   
   const urls = [
-    'https://inmova.app',
-    'https://www.inmova.app',
-    'http://inmova.app',
+    'https://inmovaapp.com',
+    'https://www.inmovaapp.com',
+    'http://157.180.119.236:3000',
   ];
   
   const results: InvestigationResult[] = [];
