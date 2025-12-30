@@ -379,7 +379,14 @@ function AnalyticsPageContent() {
                     {revenuePredictions.length > 0 ? (
                       <div className="space-y-4">
                         {revenuePredictions.map((pred, idx) => {
-                          const factores = JSON.parse(pred.factores || '[]');
+                          let factores: string[] = [];
+                          try {
+                            const parsed = JSON.parse(pred.factores || '[]');
+                            factores = Array.isArray(parsed) ? parsed : [];
+                          } catch (e) {
+                            logger.error('Error parsing factores:', e);
+                            factores = [];
+                          }
                           return (
                             <div key={idx} className="border-l-4 border-primary pl-4">
                               <div className="flex items-center justify-between mb-2">
@@ -421,7 +428,14 @@ function AnalyticsPageContent() {
                     {occupancyPredictions.length > 0 ? (
                       <div className="space-y-4">
                         {occupancyPredictions.map((pred, idx) => {
-                          const factores = JSON.parse(pred.factores || '[]');
+                          let factores: string[] = [];
+                          try {
+                            const parsed = JSON.parse(pred.factores || '[]');
+                            factores = Array.isArray(parsed) ? parsed : [];
+                          } catch (e) {
+                            logger.error('Error parsing factores:', e);
+                            factores = [];
+                          }
                           return (
                             <div key={idx} className="border-l-4 border-primary pl-4">
                               <div className="flex items-center justify-between mb-2">
