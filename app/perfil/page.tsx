@@ -134,192 +134,190 @@ export default function PerfilPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-4xl mx-auto space-y-6">
-            {/* Breadcrumb */}
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/home">
-                    <Home className="h-4 w-4" />
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Mi Perfil</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Breadcrumb */}
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard">
+                <Home className="h-4 w-4" />
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Mi Perfil</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-foreground">Mi Perfil</h1>
-                <p className="text-muted-foreground mt-1">
-                  Gestiona tu información personal y configuración de cuenta
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => router.back()}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Volver
-              </Button>
-            </div>
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Mi Perfil</h1>
+            <p className="text-muted-foreground mt-1">
+              Gestiona tu información personal y configuración de cuenta
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => router.back()}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver
+          </Button>
+        </div>
 
-            {/* Información de Usuario */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Información de Usuario
-                </CardTitle>
-                <CardDescription>Tu información de cuenta y rol en el sistema</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground">
-                      Correo Electrónico
-                    </Label>
-                    <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">{user?.email}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground">Rol</Label>
-                    <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                      <Shield className="h-4 w-4 text-muted-foreground" />
-                      <Badge variant={roleBadge.variant}>{roleBadge.label}</Badge>
-                    </div>
-                  </div>
-                  {user?.companyName && (
-                    <div className="space-y-2 md:col-span-2">
-                      <Label className="text-sm font-medium text-muted-foreground">Empresa</Label>
-                      <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                        <Building2 className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium">{user.companyName}</span>
-                      </div>
-                    </div>
-                  )}
+        {/* Información de Usuario */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Información de Usuario
+            </CardTitle>
+            <CardDescription>Tu información de cuenta y rol en el sistema</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">
+                  Correo Electrónico
+                </Label>
+                <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">{user?.email}</span>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">Rol</Label>
+                <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                  <Badge variant={roleBadge.variant}>{roleBadge.label}</Badge>
+                </div>
+              </div>
+              {user?.companyName && (
+                <div className="space-y-2 md:col-span-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Empresa</Label>
+                  <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">{user.companyName}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-            {/* Editar Perfil */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Editar Perfil</CardTitle>
-                <CardDescription>Actualiza tu nombre y configuración de la cuenta</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleUpdateProfile} className="space-y-4">
+        {/* Editar Perfil */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Editar Perfil</CardTitle>
+            <CardDescription>Actualiza tu nombre y configuración de la cuenta</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleUpdateProfile} className="space-y-4">
+              <div>
+                <Label htmlFor="name">Nombre Completo *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Tu nombre completo"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="email" className="text-muted-foreground">
+                  Email (no editable)
+                </Label>
+                <Input id="email" value={formData.email} disabled className="bg-muted" />
+              </div>
+
+              <div className="pt-4 border-t">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Lock className="h-5 w-5" />
+                  Cambiar Contraseña
+                </h3>
+                <div className="space-y-4">
                   <div>
-                    <Label htmlFor="name">Nombre Completo *</Label>
+                    <Label htmlFor="currentPassword">Contraseña Actual</Label>
                     <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Tu nombre completo"
-                      required
+                      id="currentPassword"
+                      type="password"
+                      value={formData.currentPassword}
+                      onChange={(e) =>
+                        setFormData({ ...formData, currentPassword: e.target.value })
+                      }
+                      placeholder="Ingresa tu contraseña actual"
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="email" className="text-muted-foreground">
-                      Email (no editable)
-                    </Label>
-                    <Input id="email" value={formData.email} disabled className="bg-muted" />
-                  </div>
-
-                  <div className="pt-4 border-t">
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                      <Lock className="h-5 w-5" />
-                      Cambiar Contraseña
-                    </h3>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="currentPassword">Contraseña Actual</Label>
-                        <Input
-                          id="currentPassword"
-                          type="password"
-                          value={formData.currentPassword}
-                          onChange={(e) =>
-                            setFormData({ ...formData, currentPassword: e.target.value })
-                          }
-                          placeholder="Ingresa tu contraseña actual"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="newPassword">Nueva Contraseña</Label>
-                          <Input
-                            id="newPassword"
-                            type="password"
-                            value={formData.newPassword}
-                            onChange={(e) =>
-                              setFormData({ ...formData, newPassword: e.target.value })
-                            }
-                            placeholder="Mínimo 6 caracteres"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
-                          <Input
-                            id="confirmPassword"
-                            type="password"
-                            value={formData.confirmPassword}
-                            onChange={(e) =>
-                              setFormData({ ...formData, confirmPassword: e.target.value })
-                            }
-                            placeholder="Repite la nueva contraseña"
-                          />
-                        </div>
-                      </div>
-
-                      {formData.newPassword && formData.confirmPassword && (
-                        <div className="text-sm">
-                          {formData.newPassword === formData.confirmPassword ? (
-                            <p className="text-green-600">✓ Las contraseñas coinciden</p>
-                          ) : (
-                            <p className="text-red-600">✗ Las contraseñas no coinciden</p>
-                          )}
-                        </div>
-                      )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="newPassword">Nueva Contraseña</Label>
+                      <Input
+                        id="newPassword"
+                        type="password"
+                        value={formData.newPassword}
+                        onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
+                        placeholder="Mínimo 6 caracteres"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={formData.confirmPassword}
+                        onChange={(e) =>
+                          setFormData({ ...formData, confirmPassword: e.target.value })
+                        }
+                        placeholder="Repite la nueva contraseña"
+                      />
                     </div>
                   </div>
 
-                  {/* Sección de MFA */}
-                  <div className="pt-6 mt-6 border-t">
-                    <MFASetup />
-                  </div>
-
-                  <div className="flex justify-end gap-3 pt-4">
-                    <Button type="button" variant="outline" onClick={() => router.back()}>
-                      Cancelar
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={loading}
-                      className="gradient-primary shadow-primary"
-                    >
-                      {loading ? (
-                        <>Guardando...</>
+                  {formData.newPassword && formData.confirmPassword && (
+                    <div className="text-sm">
+                      {formData.newPassword === formData.confirmPassword ? (
+                        <p className="text-green-600">✓ Las contraseñas coinciden</p>
                       ) : (
-                        <>
-                          <Save className="h-4 w-4 mr-2" />
-                          Guardar Cambios
-                        </>
+                        <p className="text-red-600">✗ Las contraseñas no coinciden</p>
                       )}
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        </AuthenticatedLayout>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Sección de MFA */}
+              <div className="pt-6 mt-6 border-t">
+                <MFASetup />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => router.back()}>
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="gradient-primary shadow-primary"
+                >
+                  {loading ? (
+                    <>Guardando...</>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Guardar Cambios
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </AuthenticatedLayout>
   );
 }

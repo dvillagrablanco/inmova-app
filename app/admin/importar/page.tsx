@@ -764,39 +764,37 @@ export default function ImportarPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto">
-            <Breadcrumb className="mb-6">
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/home">
-                    <Home className="h-4 w-4" />
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Importar Datos</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+      <div className="max-w-7xl mx-auto">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard">
+                <Home className="h-4 w-4" />
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Importar Datos</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold gradient-text mb-2">
-                Migración desde Otros Sistemas
-              </h1>
-              <p className="text-muted-foreground">
-                Importa tus datos desde Homming, Rentger, Nester, Buildium, AppFolio y otros
-                sistemas de gestión
-              </p>
-            </div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold gradient-text mb-2">Migración desde Otros Sistemas</h1>
+          <p className="text-muted-foreground">
+            Importa tus datos desde Homming, Rentger, Nester, Buildium, AppFolio y otros sistemas de
+            gestión
+          </p>
+        </div>
 
-            {renderStepIndicator()}
+        {renderStepIndicator()}
 
-            {currentStep === 'select' && renderSelectStep()}
-            {currentStep === 'validate' && renderValidateStep()}
-            {currentStep === 'preview' && renderPreviewStep()}
-            {currentStep === 'import' && renderImportStep()}
-            {currentStep === 'results' && renderResultsStep()}
-          </div>
-        </AuthenticatedLayout>
+        {currentStep === 'select' && renderSelectStep()}
+        {currentStep === 'validate' && renderValidateStep()}
+        {currentStep === 'preview' && renderPreviewStep()}
+        {currentStep === 'import' && renderImportStep()}
+        {currentStep === 'results' && renderResultsStep()}
+      </div>
+    </AuthenticatedLayout>
   );
 }
