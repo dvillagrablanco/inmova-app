@@ -100,8 +100,12 @@ function DashboardPageContent() {
           }
           setData(dashboardData);
         }
-      } catch (error) {
-        logger.error('Error fetching dashboard data:', error);
+      } catch (error: any) {
+        logger.error('Error fetching dashboard data:', {
+          message: error?.message || 'Unknown error',
+          name: error?.name,
+          stack: error?.stack?.substring(0, 200),
+        });
       } finally {
         setIsLoading(false);
       }
