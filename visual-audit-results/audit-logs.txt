@@ -1,0 +1,623 @@
+
+================================================================================
+👁️  AUDIT LOGS - INSPECCIÓN VISUAL AUTOMÁTICA
+================================================================================
+Timestamp: 2025-12-30T17:20:57.482Z
+Base URL: https://inmovaapp.com
+================================================================================
+
+
+[2025-12-30T17:21:07.948Z] CRITICAL - js-error
+  Ruta: /
+  Viewport: desktop
+  Mensaje: Invalid or unexpected token
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:21:14.986Z] CRITICAL - js-error
+  Ruta: /
+  Viewport: mobile
+  Mensaje: Invalid or unexpected token
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:21:18.052Z] MEDIUM - overflow
+  Ruta: /
+  Viewport: mobile
+  Mensaje: Detectados 10 elementos desbordados
+  Detalles: div.absolute.bottom-20.left-1/2.w-72.h-72.bg-pink-400.rounded-full.mix-blend-multiply.filter.blur-3xl.opacity-20.animate-blob.animation-delay-4000, table.w-full, thead.bg-gradient-to-r.from-indigo-600.to-violet-600.text-white, tr, th.p-4.font-semibold.text-center.min-w-[120px], th.p-4.font-semibold.text-center.min-w-[120px], tbody, tr.border-b.bg-white.hover:bg-indigo-50/50.transition-colors, td.p-4.text-center, div.flex.justify-center
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:21:19.405Z] CRITICAL - js-error
+  Ruta: /login
+  Viewport: desktop
+  Mensaje: Invalid or unexpected token
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:21:22.977Z] CRITICAL - js-error
+  Ruta: /login
+  Viewport: mobile
+  Mensaje: Invalid or unexpected token
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:21:26.270Z] CRITICAL - js-error
+  Ruta: /dashboard
+  Viewport: desktop
+  Mensaje: Invalid or unexpected token
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:21:26.963Z] HIGH - network-error
+  Ruta: /dashboard
+  Viewport: desktop
+  Mensaje: https://inmovaapp.com/configuracion?_rsc=skepm - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:21:26.963Z] HIGH - console-error
+  Ruta: /dashboard
+  Viewport: desktop
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:21:27.141Z] HIGH - network-error
+  Ruta: /dashboard
+  Viewport: desktop
+  Mensaje: https://inmovaapp.com/home?_rsc=1h1b5 - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:21:27.141Z] HIGH - console-error
+  Ruta: /dashboard
+  Viewport: desktop
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:21:56.019Z] CRITICAL - timeout
+  Ruta: /dashboard
+  Viewport: desktop
+  Mensaje: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/dashboard", waiting until "networkidle"
+
+  Detalles: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/dashboard", waiting until "networkidle"
+
+    at VisualInspector.captureViewport (/workspace/scripts/visual-audit.ts:350:35)
+    at async VisualInspector.captureRoute (/workspace/scripts/visual-audit.ts:321:5)
+    at async VisualInspector.runFullAudit (/workspace/scripts/visual-audit.ts:535:7)
+    at async main (/workspace/scripts/visual-audit.ts:575:5)
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:21:56.288Z] CRITICAL - js-error
+  Ruta: /dashboard
+  Viewport: mobile
+  Mensaje: Invalid or unexpected token
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:21:57.193Z] HIGH - network-error
+  Ruta: /dashboard
+  Viewport: mobile
+  Mensaje: https://inmovaapp.com/configuracion?_rsc=skepm - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:21:57.193Z] HIGH - console-error
+  Ruta: /dashboard
+  Viewport: mobile
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:21:57.210Z] HIGH - network-error
+  Ruta: /dashboard
+  Viewport: mobile
+  Mensaje: https://inmovaapp.com/home?_rsc=1h1b5 - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:21:57.210Z] HIGH - console-error
+  Ruta: /dashboard
+  Viewport: mobile
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:22:26.052Z] CRITICAL - timeout
+  Ruta: /dashboard
+  Viewport: mobile
+  Mensaje: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/dashboard", waiting until "networkidle"
+
+  Detalles: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/dashboard", waiting until "networkidle"
+
+    at VisualInspector.captureViewport (/workspace/scripts/visual-audit.ts:350:35)
+    at async VisualInspector.captureRoute (/workspace/scripts/visual-audit.ts:324:5)
+    at async VisualInspector.runFullAudit (/workspace/scripts/visual-audit.ts:535:7)
+    at async main (/workspace/scripts/visual-audit.ts:575:5)
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:22:26.294Z] HIGH - network-error
+  Ruta: /home
+  Viewport: desktop
+  Mensaje: https://inmovaapp.com/home - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:22:26.295Z] HIGH - console-error
+  Ruta: /home
+  Viewport: desktop
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:22:26.318Z] CRITICAL - js-error
+  Ruta: /home
+  Viewport: desktop
+  Mensaje: Invalid or unexpected token
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:22:27.458Z] HIGH - network-error
+  Ruta: /home
+  Viewport: desktop
+  Mensaje: HTTP 404 error
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:22:29.785Z] HIGH - network-error
+  Ruta: /home
+  Viewport: mobile
+  Mensaje: https://inmovaapp.com/home - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:22:29.788Z] HIGH - console-error
+  Ruta: /home
+  Viewport: mobile
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:22:29.812Z] CRITICAL - js-error
+  Ruta: /home
+  Viewport: mobile
+  Mensaje: Invalid or unexpected token
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:22:30.939Z] HIGH - network-error
+  Ruta: /home
+  Viewport: mobile
+  Mensaje: HTTP 404 error
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:22:33.255Z] CRITICAL - js-error
+  Ruta: /edificios
+  Viewport: desktop
+  Mensaje: Invalid or unexpected token
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:22:33.945Z] HIGH - network-error
+  Ruta: /edificios
+  Viewport: desktop
+  Mensaje: https://inmovaapp.com/configuracion?_rsc=975f8 - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:22:33.945Z] HIGH - console-error
+  Ruta: /edificios
+  Viewport: desktop
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:22:34.102Z] HIGH - network-error
+  Ruta: /edificios
+  Viewport: desktop
+  Mensaje: https://inmovaapp.com/home?_rsc=xo1ve - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:22:34.102Z] HIGH - console-error
+  Ruta: /edificios
+  Viewport: desktop
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:23:03.007Z] CRITICAL - timeout
+  Ruta: /edificios
+  Viewport: desktop
+  Mensaje: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/edificios", waiting until "networkidle"
+
+  Detalles: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/edificios", waiting until "networkidle"
+
+    at VisualInspector.captureViewport (/workspace/scripts/visual-audit.ts:350:35)
+    at async VisualInspector.captureRoute (/workspace/scripts/visual-audit.ts:321:5)
+    at async VisualInspector.runFullAudit (/workspace/scripts/visual-audit.ts:535:7)
+    at async main (/workspace/scripts/visual-audit.ts:575:5)
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:23:03.287Z] CRITICAL - js-error
+  Ruta: /edificios
+  Viewport: mobile
+  Mensaje: Invalid or unexpected token
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:23:04.001Z] HIGH - network-error
+  Ruta: /edificios
+  Viewport: mobile
+  Mensaje: https://inmovaapp.com/configuracion?_rsc=975f8 - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:23:04.001Z] HIGH - console-error
+  Ruta: /edificios
+  Viewport: mobile
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:23:04.170Z] HIGH - network-error
+  Ruta: /edificios
+  Viewport: mobile
+  Mensaje: https://inmovaapp.com/home?_rsc=xo1ve - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:23:04.170Z] HIGH - console-error
+  Ruta: /edificios
+  Viewport: mobile
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:23:33.038Z] CRITICAL - timeout
+  Ruta: /edificios
+  Viewport: mobile
+  Mensaje: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/edificios", waiting until "networkidle"
+
+  Detalles: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/edificios", waiting until "networkidle"
+
+    at VisualInspector.captureViewport (/workspace/scripts/visual-audit.ts:350:35)
+    at async VisualInspector.captureRoute (/workspace/scripts/visual-audit.ts:324:5)
+    at async VisualInspector.runFullAudit (/workspace/scripts/visual-audit.ts:535:7)
+    at async main (/workspace/scripts/visual-audit.ts:575:5)
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:23:33.310Z] CRITICAL - js-error
+  Ruta: /unidades
+  Viewport: desktop
+  Mensaje: Invalid or unexpected token
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:23:34.042Z] HIGH - network-error
+  Ruta: /unidades
+  Viewport: desktop
+  Mensaje: https://inmovaapp.com/configuracion?_rsc=ql6ts - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:23:34.043Z] HIGH - console-error
+  Ruta: /unidades
+  Viewport: desktop
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:23:34.053Z] HIGH - network-error
+  Ruta: /unidades
+  Viewport: desktop
+  Mensaje: https://inmovaapp.com/home?_rsc=1hcqc - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:23:34.054Z] HIGH - console-error
+  Ruta: /unidades
+  Viewport: desktop
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:03.069Z] CRITICAL - timeout
+  Ruta: /unidades
+  Viewport: desktop
+  Mensaje: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/unidades", waiting until "networkidle"
+
+  Detalles: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/unidades", waiting until "networkidle"
+
+    at VisualInspector.captureViewport (/workspace/scripts/visual-audit.ts:350:35)
+    at async VisualInspector.captureRoute (/workspace/scripts/visual-audit.ts:321:5)
+    at async VisualInspector.runFullAudit (/workspace/scripts/visual-audit.ts:535:7)
+    at async main (/workspace/scripts/visual-audit.ts:575:5)
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:03.352Z] CRITICAL - js-error
+  Ruta: /unidades
+  Viewport: mobile
+  Mensaje: Invalid or unexpected token
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:04.032Z] HIGH - network-error
+  Ruta: /unidades
+  Viewport: mobile
+  Mensaje: https://inmovaapp.com/configuracion?_rsc=ql6ts - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:04.033Z] HIGH - console-error
+  Ruta: /unidades
+  Viewport: mobile
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:04.209Z] HIGH - network-error
+  Ruta: /unidades
+  Viewport: mobile
+  Mensaje: https://inmovaapp.com/home?_rsc=1hcqc - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:04.209Z] HIGH - console-error
+  Ruta: /unidades
+  Viewport: mobile
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:33.103Z] CRITICAL - timeout
+  Ruta: /unidades
+  Viewport: mobile
+  Mensaje: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/unidades", waiting until "networkidle"
+
+  Detalles: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/unidades", waiting until "networkidle"
+
+    at VisualInspector.captureViewport (/workspace/scripts/visual-audit.ts:350:35)
+    at async VisualInspector.captureRoute (/workspace/scripts/visual-audit.ts:324:5)
+    at async VisualInspector.runFullAudit (/workspace/scripts/visual-audit.ts:535:7)
+    at async main (/workspace/scripts/visual-audit.ts:575:5)
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:33.361Z] HIGH - network-error
+  Ruta: /propiedades
+  Viewport: desktop
+  Mensaje: https://inmovaapp.com/propiedades - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:33.362Z] HIGH - console-error
+  Ruta: /propiedades
+  Viewport: desktop
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:33.385Z] CRITICAL - js-error
+  Ruta: /propiedades
+  Viewport: desktop
+  Mensaje: Invalid or unexpected token
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:34.504Z] HIGH - network-error
+  Ruta: /propiedades
+  Viewport: desktop
+  Mensaje: HTTP 404 error
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:36.845Z] HIGH - network-error
+  Ruta: /propiedades
+  Viewport: mobile
+  Mensaje: https://inmovaapp.com/propiedades - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:36.847Z] HIGH - console-error
+  Ruta: /propiedades
+  Viewport: mobile
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:36.866Z] CRITICAL - js-error
+  Ruta: /propiedades
+  Viewport: mobile
+  Mensaje: Invalid or unexpected token
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:37.984Z] HIGH - network-error
+  Ruta: /propiedades
+  Viewport: mobile
+  Mensaje: HTTP 404 error
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:40.316Z] CRITICAL - js-error
+  Ruta: /inquilinos
+  Viewport: desktop
+  Mensaje: Invalid or unexpected token
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:40.995Z] HIGH - network-error
+  Ruta: /inquilinos
+  Viewport: desktop
+  Mensaje: https://inmovaapp.com/configuracion?_rsc=3181h - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:40.995Z] HIGH - console-error
+  Ruta: /inquilinos
+  Viewport: desktop
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:41.159Z] HIGH - network-error
+  Ruta: /inquilinos
+  Viewport: desktop
+  Mensaje: https://inmovaapp.com/home?_rsc=dpko4 - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:24:41.159Z] HIGH - console-error
+  Ruta: /inquilinos
+  Viewport: desktop
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:25:10.051Z] CRITICAL - timeout
+  Ruta: /inquilinos
+  Viewport: desktop
+  Mensaje: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/inquilinos", waiting until "networkidle"
+
+  Detalles: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/inquilinos", waiting until "networkidle"
+
+    at VisualInspector.captureViewport (/workspace/scripts/visual-audit.ts:350:35)
+    at async VisualInspector.captureRoute (/workspace/scripts/visual-audit.ts:321:5)
+    at async VisualInspector.runFullAudit (/workspace/scripts/visual-audit.ts:535:7)
+    at async main (/workspace/scripts/visual-audit.ts:575:5)
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:25:10.321Z] CRITICAL - js-error
+  Ruta: /inquilinos
+  Viewport: mobile
+  Mensaje: Invalid or unexpected token
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:25:11.029Z] HIGH - network-error
+  Ruta: /inquilinos
+  Viewport: mobile
+  Mensaje: https://inmovaapp.com/configuracion?_rsc=3181h - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:25:11.030Z] HIGH - console-error
+  Ruta: /inquilinos
+  Viewport: mobile
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:25:11.224Z] HIGH - network-error
+  Ruta: /inquilinos
+  Viewport: mobile
+  Mensaje: https://inmovaapp.com/home?_rsc=dpko4 - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:25:11.224Z] HIGH - console-error
+  Ruta: /inquilinos
+  Viewport: mobile
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:25:40.086Z] CRITICAL - timeout
+  Ruta: /inquilinos
+  Viewport: mobile
+  Mensaje: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/inquilinos", waiting until "networkidle"
+
+  Detalles: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/inquilinos", waiting until "networkidle"
+
+    at VisualInspector.captureViewport (/workspace/scripts/visual-audit.ts:350:35)
+    at async VisualInspector.captureRoute (/workspace/scripts/visual-audit.ts:324:5)
+    at async VisualInspector.runFullAudit (/workspace/scripts/visual-audit.ts:535:7)
+    at async main (/workspace/scripts/visual-audit.ts:575:5)
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:25:40.356Z] CRITICAL - js-error
+  Ruta: /contratos
+  Viewport: desktop
+  Mensaje: Invalid or unexpected token
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:25:41.056Z] HIGH - network-error
+  Ruta: /contratos
+  Viewport: desktop
+  Mensaje: https://inmovaapp.com/configuracion?_rsc=1f5hu - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:25:41.056Z] HIGH - console-error
+  Ruta: /contratos
+  Viewport: desktop
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:25:41.073Z] HIGH - network-error
+  Ruta: /contratos
+  Viewport: desktop
+  Mensaje: https://inmovaapp.com/home?_rsc=4la87 - HTTP 404
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:25:41.073Z] HIGH - console-error
+  Ruta: /contratos
+  Viewport: desktop
+  Mensaje: Failed to load resource: the server responded with a status of 404 ()
+  
+────────────────────────────────────────────────────────────────────────────────
+
+[2025-12-30T17:25:56.502Z] CRITICAL - js-error
+  Ruta: /contratos
+  Viewport: desktop
+  Mensaje: page.goto: Target page, context or browser has been closed
+Call log:
+  - navigating to "https://inmovaapp.com/contratos", waiting until "networkidle"
+
+  Detalles: page.goto: Target page, context or browser has been closed
+Call log:
+  - navigating to "https://inmovaapp.com/contratos", waiting until "networkidle"
+
+    at VisualInspector.captureViewport (/workspace/scripts/visual-audit.ts:350:35)
+    at async VisualInspector.captureRoute (/workspace/scripts/visual-audit.ts:321:5)
+    at async VisualInspector.runFullAudit (/workspace/scripts/visual-audit.ts:535:7)
+    at async main (/workspace/scripts/visual-audit.ts:575:5)
+────────────────────────────────────────────────────────────────────────────────
