@@ -83,6 +83,11 @@ export default function TenantPaymentsPage() {
   };
 
   const handlePayNow = async (payment: Payment) => {
+    if (!stripePromise) {
+      toast.error('Stripe no está configurado. Contacte con el administrador.');
+      return;
+    }
+    
     setProcessingPayment(true);
     try {
       const response = await fetch('/api/stripe/create-payment-intent', {
