@@ -266,8 +266,14 @@ export function TenantOnboarding({ tenantId, tenantName }: TenantOnboardingProps
     }
   };
 
-  const progress = ((currentStep + 1) / steps.length) * 100;
-  const currentStepData = steps[currentStep];
+  // Validación: asegurar que currentStep esté en rango
+  if (!steps || steps.length === 0) {
+    return null;
+  }
+
+  const safeCurrentStep = Math.min(Math.max(0, currentStep), steps.length - 1);
+  const progress = ((safeCurrentStep + 1) / steps.length) * 100;
+  const currentStepData = steps[safeCurrentStep];
 
   if (loading) return null;
 

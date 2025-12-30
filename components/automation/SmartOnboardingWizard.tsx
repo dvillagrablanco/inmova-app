@@ -167,7 +167,19 @@ export default function SmartOnboardingWizard() {
     return null;
   }
 
-  const currentStepData = progress.steps[progress.currentStep];
+  // Validación: Si no hay steps o currentStep está fuera de rango
+  if (!progress.steps || progress.steps.length === 0) {
+    console.warn('SmartOnboardingWizard: No hay steps disponibles');
+    return null;
+  }
+
+  // Asegurar que currentStep esté en rango válido
+  const safeCurrentStep = Math.min(
+    Math.max(0, progress.currentStep || 0),
+    progress.steps.length - 1
+  );
+
+  const currentStepData = progress.steps[safeCurrentStep];
 
   return (
     <AnimatePresence>
@@ -304,7 +316,7 @@ export default function SmartOnboardingWizard() {
                     w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all
                     ${step.completed
                       ? 'bg-muted/50 border-muted cursor-default opacity-70'
-                      : index === progress.currentStep
+                      : index === safeCurrentStep
                       ? 'border-primary bg-primary/5 hover:bg-primary/10'
                       : 'border-border hover:border-primary/50 hover:bg-accent'
                     }
@@ -315,7 +327,7 @@ export default function SmartOnboardingWizard() {
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
                     ) : (
                       <Circle className={`h-5 w-5 ${
-                        index === progress.currentStep ? 'text-primary' : 'text-muted-foreground'
+                        index === safeCurrentStep ? 'text-primary' : 'text-muted-foreground'
                       }`} />
                     )}
                   </div>
