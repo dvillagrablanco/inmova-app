@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 /* ============================
+   SIDEBAR MOBILE CSS
+   ============================ */
+@import '../styles/sidebar-mobile.css';
+
+/* ============================
    UTILITY CLASSES PARA BOTONES
    ============================ */
 @layer components {
