@@ -1,0 +1,40 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradiente de fondo -->
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4338ca;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Fondo -->
+  <rect width="1200" height="630" fill="url(#grad1)"/>
+  
+  <!-- Logo / Título -->
+  <text x="600" y="180" font-family="Arial, sans-serif" font-size="120" font-weight="bold" fill="white" text-anchor="middle">
+    INMOVA
+  </text>
+  
+  <!-- Subtítulo -->
+  <text x="600" y="260" font-family="Arial, sans-serif" font-size="48" fill="#e0e7ff" text-anchor="middle">
+    Plataforma PropTech #1
+  </text>
+  
+  <!-- Features -->
+  <text x="600" y="350" font-family="Arial, sans-serif" font-size="36" fill="white" text-anchor="middle">
+    88 Módulos | ROI en 60 días
+  </text>
+  
+  <text x="600" y="400" font-family="Arial, sans-serif" font-size="36" fill="white" text-anchor="middle">
+    Desde €149/mes
+  </text>
+  
+  <!-- Social Proof -->
+  <text x="600" y="520" font-family="Arial, sans-serif" font-size="28" fill="#fbbf24" text-anchor="middle">
+    5 stars rating
+  </text>
+  
+  <text x="600" y="570" font-family="Arial, sans-serif" font-size="24" fill="#e0e7ff" text-anchor="middle">
+    500+ clientes activos · 4.8/5 estrellas
+  </text>
+</svg>
