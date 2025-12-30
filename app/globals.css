@@ -3,6 +3,33 @@
 @tailwind utilities;
 
 /* ============================
+   UTILITY CLASSES PARA BOTONES
+   ============================ */
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-md font-semibold;
+    @apply bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800;
+    @apply h-10 px-4 py-2 text-sm shadow-sm hover:shadow-md;
+    @apply transition-all active:scale-[0.98];
+    @apply disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-md font-semibold;
+    @apply bg-gray-200 text-gray-900 hover:bg-gray-300;
+    @apply h-10 px-4 py-2 text-sm shadow-sm;
+    @apply transition-all active:scale-[0.98];
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center rounded-md font-semibold;
+    @apply border border-gray-300 bg-transparent hover:bg-gray-50;
+    @apply h-10 px-4 py-2 text-sm;
+    @apply transition-all;
+  }
+}
+
+/* ============================
    FIXES PARA OVERFLOW MOBILE
    ============================ */
 @media (max-width: 640px) {
@@ -11,6 +38,21 @@
   body {
     overflow-x: hidden;
     max-width: 100vw;
+  }
+
+  /* Limitar ancho de botones con clases largas */
+  button {
+    max-width: 100%;
+    word-wrap: break-word;
+    white-space: normal;
+    text-align: center;
+  }
+
+  /* Bottom navigation: limitar ancho de items */
+  .mobile-nav button,
+  nav[class*="bottom"] button {
+    max-width: 80px;
+    font-size: 0.75rem;
   }
 
   /* Tablas responsive automáticas */

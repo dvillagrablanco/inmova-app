@@ -111,6 +111,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             `}
           </Script>
         )}
+
+        {/* CSS Bug Workaround - Next.js RSC */}
+        <Script id="css-error-suppressor" strategy="beforeInteractive">
+          {`
+            (function() {
+              const originalError = console.error;
+              console.error = function(...args) {
+                const message = args[0]?.toString() || '';
+                const stack = args[1]?.toString() || '';
+                
+                // Suprimir solo error CSS de Next.js RSC
+                if (
+                  message.includes('Invalid or unexpected token') &&
+                  (stack.includes('/_next/static/css/') || stack.includes('.css'))
+                ) {
+                  // Silencioso en producción
+                  return;
+                }
+                
+                // Pasar todos los demás errores
+                originalError.apply(console, args);
+              };
+            })();
+          `}
+        </Script>
       </head>
       <body className={inter.className}>
         <Providers>
