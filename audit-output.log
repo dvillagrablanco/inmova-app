@@ -1,336 +1,1101 @@
-🚀 Iniciando auditoría visual de páginas admin...
 
-🌐 URL base: https://www.inmovaapp.com
+Running 39 tests using 1 worker
 
-🔐 Intentando login como superadmin...
-⚠️  Credenciales no proporcionadas. Usa:
-   SUPER_ADMIN_EMAIL=tu@email.com SUPER_ADMIN_PASSWORD=tupassword
-⚠️  Continuando sin login - solo se detectarán errores en páginas públicas
-
-⚠️  Auditando sin autenticación - se capturarán errores de JavaScript y red
-   (Las páginas protegidas redirigirán a /login, pero aún se detectarán errores)
+[1A[2K(node:2578) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
 
 
-📄 Auditando: Dashboard (/admin/dashboard)
-  📸 Screenshot guardado: /workspace/audit-screenshots/dashboard.png
-  ❌ Errores de consola: 2
-     1. [error] Failed to load resource: the server responded with a status of 401 ()
-     2. [error] Failed to load resource: the server responded with a status of 401 ()
-  ❌ Errores de red: 2
-     1. [401] https://www.inmovaapp.com/api/modules/active
-     2. [401] https://www.inmovaapp.com/api/notifications/unread-count
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+[1A[2K(node:2578) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
 
-📄 Auditando: Usuarios (/admin/usuarios)
-  ✅ Sin errores detectados
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
 
-📄 Auditando: Clientes (/admin/clientes)
-  📸 Screenshot guardado: /workspace/audit-screenshots/clientes.png
-  ❌ Errores de consola: 4
-     1. [error] Failed to load resource: the server responded with a status of 401 ()
-     2. [error] Error al cargar clientes {stack: Error: Error al cargar clientes
-    at l (https://….js?dpl=dpl_4MY5
-     3. [error] Failed to load resource: the server responded with a status of 401 ()
-     4. [error] Error al cargar planes {stack: Error: Error al cargar planes
-    at o (https://ww….js?dpl=dpl_4MY5hX
-  ❌ Errores de red: 2
-     1. [401] https://www.inmovaapp.com/api/admin/companies
-     2. [401] https://www.inmovaapp.com/api/admin/subscription-plans
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+[1A[2K[1/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:60:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › ♿ Accesibilidad (WCAG 2.1 Level AA) › Landing page debe cumplir con WCAG 2.1 AA
+[1A[2K  1) [chromium] › e2e/frontend-audit-intensive.spec.ts:60:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › ♿ Accesibilidad (WCAG 2.1 Level AA) › Landing page debe cumplir con WCAG 2.1 AA 
 
-📄 Auditando: Comparar Clientes (/admin/clientes/comparar)
-  ✅ Sin errores detectados
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
 
-📄 Auditando: Activity (/admin/activity)
-  ✅ Sin errores detectados
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+    [32m- Expected  -   1[39m
+    [31m+ Received  + 513[39m
 
-📄 Auditando: Alertas (/admin/alertas)
-  📸 Screenshot guardado: /workspace/audit-screenshots/alertas.png
-  ❌ Errores de consola: 4
-     1. [error] Failed to load resource: the server responded with a status of 429 ()
-     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
-https://next-auth.js.org/errors#client_fetch_error Rate limi
-     3. [error] Failed to load resource: the server responded with a status of 429 ()
-     4. [error] Failed to load resource: the server responded with a status of 429 ()
-  ❌ Errores de red: 3
-     1. [429] https://www.inmovaapp.com/api/auth/session
-     2. [429] https://www.inmovaapp.com/login?_rsc=vp657
-     3. [429] https://www.inmovaapp.com/register?_rsc=asqg6
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+    [32m- Array [][39m
+    [31m+ Array [[39m
+    [31m+   Object {[39m
+    [31m+     "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",[39m
+    [31m+     "help": "Elements must meet minimum color contrast ratio thresholds",[39m
+    [31m+     "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",[39m
+    [31m+     "id": "color-contrast",[39m
+    [31m+     "impact": "serious",[39m
+    [31m+     "nodes": Array [[39m
+    [31m+       Object {[39m
+    [31m+         "all": Array [],[39m
+    [31m+         "any": Array [[39m
+    [31m+           Object {[39m
+    [31m+             "data": Object {[39m
+    [31m+               "bgColor": "#4338ca",[39m
+    [31m+               "contrastRatio": 2.24,[39m
+    [31m+               "expectedContrastRatio": "4.5:1",[39m
+    [31m+               "fgColor": "#111827",[39m
+    [31m+               "fontSize": "10.5pt (14px)",[39m
+    [31m+               "fontWeight": "bold",[39m
+    [31m+               "messageKey": null,[39m
+    [31m+             },[39m
+    [31m+             "id": "color-contrast",[39m
+    [31m+             "impact": "serious",[39m
+    [31m+             "message": "Element has insufficient color contrast of 2.24 (foreground color: #111827, background color: #4338ca, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1",[39m
+    [31m+             "relatedNodes": Array [[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<button class=\"group p-4 rounded-xl border-2 transition-all border-indigo-500 bg-indigo-50 shadow-lg disabled:cursor-not-allowed\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   ".border-indigo-500.bg-indigo-50.disabled\\:cursor-not-allowed",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+             ],[39m
+    [31m+           },[39m
+    [31m+         ],[39m
+    [31m+         "failureSummary": "Fix any of the following:[39m
+    [31m+   Element has insufficient color contrast of 2.24 (foreground color: #111827, background color: #4338ca, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1",[39m
+    [31m+         "html": "<div class=\"text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition-colors\">Adiós al Excel</div>",[39m
+    [31m+         "impact": "serious",[39m
+    [31m+         "none": Array [],[39m
+    [31m+         "target": Array [[39m
+    [31m+           ".border-indigo-500.bg-indigo-50.disabled\\:cursor-not-allowed > .gap-3.items-center.flex > .text-left.flex-1 > .group-hover\\:text-indigo-600.text-gray-900.font-bold",[39m
+    [31m+         ],[39m
+    [31m+       },[39m
+    [31m+       Object {[39m
+    [31m+         "all": Array [],[39m
+    [31m+         "any": Array [[39m
+    [31m+           Object {[39m
+    [31m+             "data": Object {[39m
+    [31m+               "bgColor": "#4338ca",[39m
+    [31m+               "contrastRatio": 1.63,[39m
+    [31m+               "expectedContrastRatio": "4.5:1",[39m
+    [31m+               "fgColor": "#6b7280",[39m
+    [31m+               "fontSize": "9.0pt (12px)",[39m
+    [31m+               "fontWeight": "normal",[39m
+    [31m+               "messageKey": null,[39m
+    [31m+             },[39m
+    [31m+             "id": "color-contrast",[39m
+    [31m+             "impact": "serious",[39m
+    [31m+             "message": "Element has insufficient color contrast of 1.63 (foreground color: #6b7280, background color: #4338ca, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+             "relatedNodes": Array [[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<button class=\"group p-4 rounded-xl border-2 transition-all border-indigo-500 bg-indigo-50 shadow-lg disabled:cursor-not-allowed\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   ".border-indigo-500.bg-indigo-50.disabled\\:cursor-not-allowed",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+             ],[39m
+    [31m+           },[39m
+    [31m+         ],[39m
+    [31m+         "failureSummary": "Fix any of the following:[39m
+    [31m+   Element has insufficient color contrast of 1.63 (foreground color: #6b7280, background color: #4338ca, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+         "html": "<div class=\"text-xs text-gray-500 font-semibold\">FLIPPING25</div>",[39m
+    [31m+         "impact": "serious",[39m
+    [31m+         "none": Array [],[39m
+    [31m+         "target": Array [[39m
+    [31m+           ".border-indigo-500.bg-indigo-50.disabled\\:cursor-not-allowed > .gap-3.items-center.flex > .text-left.flex-1 > .text-gray-500.text-xs.font-semibold",[39m
+    [31m+         ],[39m
+    [31m+       },[39m
+    [31m+       Object {[39m
+    [31m+         "all": Array [],[39m
+    [31m+         "any": Array [[39m
+    [31m+           Object {[39m
+    [31m+             "data": Object {[39m
+    [31m+               "bgColor": "#e5e7eb",[39m
+    [31m+               "contrastRatio": 3.9,[39m
+    [31m+               "expectedContrastRatio": "4.5:1",[39m
+    [31m+               "fgColor": "#6b7280",[39m
+    [31m+               "fontSize": "9.0pt (12px)",[39m
+    [31m+               "fontWeight": "normal",[39m
+    [31m+               "messageKey": null,[39m
+    [31m+             },[39m
+    [31m+             "id": "color-contrast",[39m
+    [31m+             "impact": "serious",[39m
+    [31m+             "message": "Element has insufficient color contrast of 3.9 (foreground color: #6b7280, background color: #e5e7eb, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+             "relatedNodes": Array [[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<button class=\"group p-4 rounded-xl border-2 transition-all border-gray-200 bg-white hover:border-indigo-300 hover:shadow-md disabled:cursor-not-allowed\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   ".disabled\\:cursor-not-allowed.hover\\:border-indigo-300.hover\\:shadow-md:nth-child(2)",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+             ],[39m
+    [31m+           },[39m
+    [31m+         ],[39m
+    [31m+         "failureSummary": "Fix any of the following:[39m
+    [31m+   Element has insufficient color contrast of 3.9 (foreground color: #6b7280, background color: #e5e7eb, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+         "html": "<div class=\"text-xs text-gray-500 font-semibold\">ROOMPRO</div>",[39m
+    [31m+         "impact": "serious",[39m
+    [31m+         "none": Array [],[39m
+    [31m+         "target": Array [[39m
+    [31m+           ".disabled\\:cursor-not-allowed.hover\\:border-indigo-300.hover\\:shadow-md:nth-child(2) > .gap-3.items-center.flex > .text-left.flex-1 > .text-gray-500.text-xs.font-semibold",[39m
+    [31m+         ],[39m
+    [31m+       },[39m
+    [31m+       Object {[39m
+    [31m+         "all": Array [],[39m
+    [31m+         "any": Array [[39m
+    [31m+           Object {[39m
+    [31m+             "data": Object {[39m
+    [31m+               "bgColor": "#e5e7eb",[39m
+    [31m+               "contrastRatio": 3.9,[39m
+    [31m+               "expectedContrastRatio": "4.5:1",[39m
+    [31m+               "fgColor": "#6b7280",[39m
+    [31m+               "fontSize": "9.0pt (12px)",[39m
+    [31m+               "fontWeight": "normal",[39m
+    [31m+               "messageKey": null,[39m
+    [31m+             },[39m
+    [31m+             "id": "color-contrast",[39m
+    [31m+             "impact": "serious",[39m
+    [31m+             "message": "Element has insufficient color contrast of 3.9 (foreground color: #6b7280, background color: #e5e7eb, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+             "relatedNodes": Array [[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<button class=\"group p-4 rounded-xl border-2 transition-all border-gray-200 bg-white hover:border-indigo-300 hover:shadow-md disabled:cursor-not-allowed\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   ".disabled\\:cursor-not-allowed.hover\\:border-indigo-300.hover\\:shadow-md:nth-child(3)",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+             ],[39m
+    [31m+           },[39m
+    [31m+         ],[39m
+    [31m+         "failureSummary": "Fix any of the following:[39m
+    [31m+   Element has insufficient color contrast of 3.9 (foreground color: #6b7280, background color: #e5e7eb, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+         "html": "<div class=\"text-xs text-gray-500 font-semibold\">SWITCH2025</div>",[39m
+    [31m+         "impact": "serious",[39m
+    [31m+         "none": Array [],[39m
+    [31m+         "target": Array [[39m
+    [31m+           ".disabled\\:cursor-not-allowed.hover\\:border-indigo-300.hover\\:shadow-md:nth-child(3) > .gap-3.items-center.flex > .text-left.flex-1 > .text-gray-500.text-xs.font-semibold",[39m
+    [31m+         ],[39m
+    [31m+       },[39m
+    [31m+       Object {[39m
+    [31m+         "all": Array [],[39m
+    [31m+         "any": Array [[39m
+    [31m+           Object {[39m
+    [31m+             "data": Object {[39m
+    [31m+               "bgColor": "#ffffff",[39m
+    [31m+               "contrastRatio": 3.29,[39m
+    [31m+               "expectedContrastRatio": "4.5:1",[39m
+    [31m+               "fgColor": "#16a34a",[39m
+    [31m+               "fontSize": "10.5pt (14px)",[39m
+    [31m+               "fontWeight": "normal",[39m
+    [31m+               "messageKey": null,[39m
+    [31m+             },[39m
+    [31m+             "id": "color-contrast",[39m
+    [31m+             "impact": "serious",[39m
+    [31m+             "message": "Element has insufficient color contrast of 3.29 (foreground color: #16a34a, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+             "relatedNodes": Array [[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<div class=\"rounded-lg bg-card text-card-foreground shadow-sm hover:shadow-2xl transition-all border-2 border-green-200\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   ".mb-12.md\\:grid-cols-3.gap-6 > .border-green-200.hover\\:shadow-2xl.bg-card",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+             ],[39m
+    [31m+           },[39m
+    [31m+         ],[39m
+    [31m+         "failureSummary": "Fix any of the following:[39m
+    [31m+   Element has insufficient color contrast of 3.29 (foreground color: #16a34a, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+         "html": "<p class=\"text-sm font-semibold text-green-600 mb-3\">SOM (53% del SAM en 5 años)</p>",[39m
+    [31m+         "impact": "serious",[39m
+    [31m+         "none": Array [],[39m
+    [31m+         "target": Array [[39m
+    [31m+           ".border-green-200.hover\\:shadow-2xl.bg-card > .p-8.text-center > .mb-3",[39m
+    [31m+         ],[39m
+    [31m+       },[39m
+    [31m+       Object {[39m
+    [31m+         "all": Array [],[39m
+    [31m+         "any": Array [[39m
+    [31m+           Object {[39m
+    [31m+             "data": Object {[39m
+    [31m+               "bgColor": "#ffffff",[39m
+    [31m+               "contrastRatio": 3.29,[39m
+    [31m+               "expectedContrastRatio": "4.5:1",[39m
+    [31m+               "fgColor": "#16a34a",[39m
+    [31m+               "fontSize": "10.5pt (14px)",[39m
+    [31m+               "fontWeight": "bold",[39m
+    [31m+               "messageKey": null,[39m
+    [31m+             },[39m
+    [31m+             "id": "color-contrast",[39m
+    [31m+             "impact": "serious",[39m
+    [31m+             "message": "Element has insufficient color contrast of 3.29 (foreground color: #16a34a, background color: #ffffff, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1",[39m
+    [31m+             "relatedNodes": Array [[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<div class=\"rounded-lg text-card-foreground shadow-sm group hover:shadow-2xl transition-all duration-300 border-2 border-green-200 hover:border-green-400 bg-white relative overflow-hidden\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   ".hover\\:border-green-400",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+             ],[39m
+    [31m+           },[39m
+    [31m+         ],[39m
+    [31m+         "failureSummary": "Fix any of the following:[39m
+    [31m+   Element has insufficient color contrast of 3.29 (foreground color: #16a34a, background color: #ffffff, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1",[39m
+    [31m+         "html": "<p class=\"text-sm text-green-600 font-bold\">Gestión Avanzada de Coliving</p>",[39m
+    [31m+         "impact": "serious",[39m
+    [31m+         "none": Array [],[39m
+    [31m+         "target": Array [[39m
+    [31m+           ".hover\\:border-green-400 > .pb-6.pt-8.space-y-1\\.5 > .gap-4.mb-4.items-center > div:nth-child(2) > p",[39m
+    [31m+         ],[39m
+    [31m+       },[39m
+    [31m+       Object {[39m
+    [31m+         "all": Array [],[39m
+    [31m+         "any": Array [[39m
+    [31m+           Object {[39m
+    [31m+             "data": Object {[39m
+    [31m+               "bgColor": "#ffffff",[39m
+    [31m+               "contrastRatio": 3.29,[39m
+    [31m+               "expectedContrastRatio": "4.5:1",[39m
+    [31m+               "fgColor": "#16a34a",[39m
+    [31m+               "fontSize": "9.0pt (12px)",[39m
+    [31m+               "fontWeight": "bold",[39m
+    [31m+               "messageKey": null,[39m
+    [31m+             },[39m
+    [31m+             "id": "color-contrast",[39m
+    [31m+             "impact": "serious",[39m
+    [31m+             "message": "Element has insufficient color contrast of 3.29 (foreground color: #16a34a, background color: #ffffff, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1",[39m
+    [31m+             "relatedNodes": Array [[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<div class=\"bg-white rounded-2xl shadow-xl p-8 md:p-12\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   ".shadow-xl.md\\:p-12.rounded-2xl",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+             ],[39m
+    [31m+           },[39m
+    [31m+         ],[39m
+    [31m+         "failureSummary": "Fix any of the following:[39m
+    [31m+   Element has insufficient color contrast of 3.29 (foreground color: #16a34a, background color: #ffffff, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1",[39m
+    [31m+         "html": "<div class=\"text-xs font-bold text-green-600 mb-1\">✅ AHORA:</div>",[39m
+    [31m+         "impact": "serious",[39m
+    [31m+         "none": Array [],[39m
+    [31m+         "target": Array [[39m
+    [31m+           ".hover\\:shadow-lg.hover\\:border-indigo-300.border-gray-200:nth-child(1) > .space-y-3 > div:nth-child(2) > .mb-1.text-green-600.font-bold",[39m
+    [31m+         ],[39m
+    [31m+       },[39m
+    [31m+       Object {[39m
+    [31m+         "all": Array [],[39m
+    [31m+         "any": Array [[39m
+    [31m+           Object {[39m
+    [31m+             "data": Object {[39m
+    [31m+               "bgColor": "#ffffff",[39m
+    [31m+               "contrastRatio": 3.29,[39m
+    [31m+               "expectedContrastRatio": "4.5:1",[39m
+    [31m+               "fgColor": "#16a34a",[39m
+    [31m+               "fontSize": "9.0pt (12px)",[39m
+    [31m+               "fontWeight": "bold",[39m
+    [31m+               "messageKey": null,[39m
+    [31m+             },[39m
+    [31m+             "id": "color-contrast",[39m
+    [31m+             "impact": "serious",[39m
+    [31m+             "message": "Element has insufficient color contrast of 3.29 (foreground color: #16a34a, background color: #ffffff, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1",[39m
+    [31m+             "relatedNodes": Array [[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<div class=\"bg-white rounded-2xl shadow-xl p-8 md:p-12\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   ".shadow-xl.md\\:p-12.rounded-2xl",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+             ],[39m
+    [31m+           },[39m
+    [31m+         ],[39m
+    [31m+         "failureSummary": "Fix any of the following:[39m
+    [31m+   Element has insufficient color contrast of 3.29 (foreground color: #16a34a, background color: #ffffff, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1",[39m
+    [31m+         "html": "<div class=\"text-xs font-bold text-green-600 mb-1\">✅ AHORA:</div>",[39m
+    [31m+         "impact": "serious",[39m
+    [31m+         "none": Array [],[39m
+    [31m+         "target": Array [[39m
+    [31m+           ".hover\\:shadow-lg.hover\\:border-indigo-300.border-gray-200:nth-child(2) > .space-y-3 > div:nth-child(2) > .mb-1.text-green-600.font-bold",[39m
+    [31m+         ],[39m
+    [31m+       },[39m
+    [31m+       Object {[39m
+    [31m+         "all": Array [],[39m
+    [31m+         "any": Array [[39m
+    [31m+           Object {[39m
+    [31m+             "data": Object {[39m
+    [31m+               "bgColor": "#ffffff",[39m
+    [31m+               "contrastRatio": 3.29,[39m
+    [31m+               "expectedContrastRatio": "4.5:1",[39m
+    [31m+               "fgColor": "#16a34a",[39m
+    [31m+               "fontSize": "9.0pt (12px)",[39m
+    [31m+               "fontWeight": "bold",[39m
+    [31m+               "messageKey": null,[39m
+    [31m+             },[39m
+    [31m+             "id": "color-contrast",[39m
+    [31m+             "impact": "serious",[39m
+    [31m+             "message": "Element has insufficient color contrast of 3.29 (foreground color: #16a34a, background color: #ffffff, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1",[39m
+    [31m+             "relatedNodes": Array [[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<div class=\"bg-white rounded-2xl shadow-xl p-8 md:p-12\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   ".shadow-xl.md\\:p-12.rounded-2xl",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+             ],[39m
+    [31m+           },[39m
+    [31m+         ],[39m
+    [31m+         "failureSummary": "Fix any of the following:[39m
+    [31m+   Element has insufficient color contrast of 3.29 (foreground color: #16a34a, background color: #ffffff, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1",[39m
+    [31m+         "html": "<div class=\"text-xs font-bold text-green-600 mb-1\">✅ AHORA:</div>",[39m
+    [31m+         "impact": "serious",[39m
+    [31m+         "none": Array [],[39m
+    [31m+         "target": Array [[39m
+    [31m+           ".hover\\:shadow-lg.hover\\:border-indigo-300.border-gray-200:nth-child(3) > .space-y-3 > div:nth-child(2) > .mb-1.text-green-600.font-bold",[39m
+    [31m+         ],[39m
+    [31m+       },[39m
+    [31m+       Object {[39m
+    [31m+         "all": Array [],[39m
+    [31m+         "any": Array [[39m
+    [31m+           Object {[39m
+    [31m+             "data": Object {[39m
+    [31m+               "bgColor": "#ffffff",[39m
+    [31m+               "contrastRatio": 3.29,[39m
+    [31m+               "expectedContrastRatio": "4.5:1",[39m
+    [31m+               "fgColor": "#16a34a",[39m
+    [31m+               "fontSize": "9.0pt (12px)",[39m
+    [31m+               "fontWeight": "normal",[39m
+    [31m+               "messageKey": null,[39m
+    [31m+             },[39m
+    [31m+             "id": "color-contrast",[39m
+    [31m+             "impact": "serious",[39m
+    [31m+             "message": "Element has insufficient color contrast of 3.29 (foreground color: #16a34a, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+             "relatedNodes": Array [[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<div class=\"rounded-lg bg-card text-card-foreground shadow-sm group hover:shadow-2xl transition-all hover:border-indigo-300 border-2\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   ".md\\:grid-cols-4.max-w-7xl.gap-6 > .hover\\:border-indigo-300.hover\\:shadow-2xl.group:nth-child(1)",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+             ],[39m
+    [31m+           },[39m
+    [31m+         ],[39m
+    [31m+         "failureSummary": "Fix any of the following:[39m
+    [31m+   Element has insufficient color contrast of 3.29 (foreground color: #16a34a, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+         "html": "<div class=\"text-xs text-green-600 font-semibold\">€490/año • Ahorra €98 (2 meses gratis)</div>",[39m
+    [31m+         "impact": "serious",[39m
+    [31m+         "none": Array [],[39m
+    [31m+         "target": Array [[39m
+    [31m+           ".hover\\:border-indigo-300.hover\\:shadow-2xl.group:nth-child(1) > .pb-4.space-y-1\\.5.flex-col > .space-y-1 > .text-green-600.text-xs.font-semibold",[39m
+    [31m+         ],[39m
+    [31m+       },[39m
+    [31m+       Object {[39m
+    [31m+         "all": Array [],[39m
+    [31m+         "any": Array [[39m
+    [31m+           Object {[39m
+    [31m+             "data": Object {[39m
+    [31m+               "bgColor": "#ffffff",[39m
+    [31m+               "contrastRatio": 3.29,[39m
+    [31m+               "expectedContrastRatio": "4.5:1",[39m
+    [31m+               "fgColor": "#16a34a",[39m
+    [31m+               "fontSize": "9.0pt (12px)",[39m
+    [31m+               "fontWeight": "normal",[39m
+    [31m+               "messageKey": null,[39m
+    [31m+             },[39m
+    [31m+             "id": "color-contrast",[39m
+    [31m+             "impact": "serious",[39m
+    [31m+             "message": "Element has insufficient color contrast of 3.29 (foreground color: #16a34a, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+             "relatedNodes": Array [[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<div class=\"rounded-lg bg-card text-card-foreground group hover:shadow-2xl transition-all border-indigo-500 border-2 shadow-xl relative\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   ".border-indigo-500.shadow-xl.hover\\:shadow-2xl",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+             ],[39m
+    [31m+           },[39m
+    [31m+         ],[39m
+    [31m+         "failureSummary": "Fix any of the following:[39m
+    [31m+   Element has insufficient color contrast of 3.29 (foreground color: #16a34a, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+         "html": "<div class=\"text-xs text-green-600 font-semibold\">€1,490/año • Ahorra €298 (2 meses gratis)</div>",[39m
+    [31m+         "impact": "serious",[39m
+    [31m+         "none": Array [],[39m
+    [31m+         "target": Array [[39m
+    [31m+           ".border-indigo-500.shadow-xl.hover\\:shadow-2xl > .pb-4.space-y-1\\.5.flex-col > .space-y-1 > .text-green-600.text-xs.font-semibold",[39m
+    [31m+         ],[39m
+    [31m+       },[39m
+    [31m+       Object {[39m
+    [31m+         "all": Array [],[39m
+    [31m+         "any": Array [[39m
+    [31m+           Object {[39m
+    [31m+             "data": Object {[39m
+    [31m+               "bgColor": "#ffffff",[39m
+    [31m+               "contrastRatio": 3.29,[39m
+    [31m+               "expectedContrastRatio": "4.5:1",[39m
+    [31m+               "fgColor": "#16a34a",[39m
+    [31m+               "fontSize": "9.0pt (12px)",[39m
+    [31m+               "fontWeight": "normal",[39m
+    [31m+               "messageKey": null,[39m
+    [31m+             },[39m
+    [31m+             "id": "color-contrast",[39m
+    [31m+             "impact": "serious",[39m
+    [31m+             "message": "Element has insufficient color contrast of 3.29 (foreground color: #16a34a, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+             "relatedNodes": Array [[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<div class=\"rounded-lg bg-card text-card-foreground shadow-sm group hover:shadow-2xl transition-all hover:border-indigo-300 border-2\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   ".md\\:grid-cols-4.max-w-7xl.gap-6 > .hover\\:border-indigo-300.hover\\:shadow-2xl.group:nth-child(3)",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+             ],[39m
+    [31m+           },[39m
+    [31m+         ],[39m
+    [31m+         "failureSummary": "Fix any of the following:[39m
+    [31m+   Element has insufficient color contrast of 3.29 (foreground color: #16a34a, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+         "html": "<div class=\"text-xs text-green-600 font-semibold\">€3,490/año • Ahorra €698 (2 meses gratis)</div>",[39m
+    [31m+         "impact": "serious",[39m
+    [31m+         "none": Array [],[39m
+    [31m+         "target": Array [[39m
+    [31m+           ".hover\\:border-indigo-300.hover\\:shadow-2xl.group:nth-child(3) > .pb-4.space-y-1\\.5.flex-col > .space-y-1 > .text-green-600.text-xs.font-semibold",[39m
+    [31m+         ],[39m
+    [31m+       },[39m
+    [31m+       Object {[39m
+    [31m+         "all": Array [],[39m
+    [31m+         "any": Array [[39m
+    [31m+           Object {[39m
+    [31m+             "data": Object {[39m
+    [31m+               "bgColor": "#111827",[39m
+    [31m+               "contrastRatio": 2.24,[39m
+    [31m+               "expectedContrastRatio": "4.5:1",[39m
+    [31m+               "fgColor": "#4338ca",[39m
+    [31m+               "fontSize": "9.0pt (12px)",[39m
+    [31m+               "fontWeight": "normal",[39m
+    [31m+               "messageKey": null,[39m
+    [31m+             },[39m
+    [31m+             "id": "color-contrast",[39m
+    [31m+             "impact": "serious",[39m
+    [31m+             "message": "Element has insufficient color contrast of 2.24 (foreground color: #4338ca, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+             "relatedNodes": Array [[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<footer class=\"bg-gray-900 text-white py-12 px-4\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   "footer",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+             ],[39m
+    [31m+           },[39m
+    [31m+         ],[39m
+    [31m+         "failureSummary": "Fix any of the following:[39m
+    [31m+   Element has insufficient color contrast of 2.24 (foreground color: #4338ca, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+         "html": "<button class=\"inline-flex items-ce...\">",[39m
+    [31m+         "impact": "serious",[39m
+    [31m+         "none": Array [],[39m
+    [31m+         "target": Array [[39m
+    [31m+           "a[href$=\"inmova\"]:nth-child(1) > .hover\\:bg-indigo-100.hover\\:text-indigo-400.active\\:bg-indigo-200",[39m
+    [31m+         ],[39m
+    [31m+       },[39m
+    [31m+       Object {[39m
+    [31m+         "all": Array [],[39m
+    [31m+         "any": Array [[39m
+    [31m+           Object {[39m
+    [31m+             "data": Object {[39m
+    [31m+               "bgColor": "#111827",[39m
+    [31m+               "contrastRatio": 2.24,[39m
+    [31m+               "expectedContrastRatio": "4.5:1",[39m
+    [31m+               "fgColor": "#4338ca",[39m
+    [31m+               "fontSize": "9.0pt (12px)",[39m
+    [31m+               "fontWeight": "normal",[39m
+    [31m+               "messageKey": null,[39m
+    [31m+             },[39m
+    [31m+             "id": "color-contrast",[39m
+    [31m+             "impact": "serious",[39m
+    [31m+             "message": "Element has insufficient color contrast of 2.24 (foreground color: #4338ca, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+             "relatedNodes": Array [[39m
+    [31m+               Object {[39m
+    [31m+                 "html": "<footer class=\"bg-gray-900 text-white py-12 px-4\">",[39m
+    [31m+                 "target": Array [[39m
+    [31m+                   "footer",[39m
+    [31m+                 ],[39m
+    [31m+               },[39m
+    [31m+             ],[39m
+    [31m+           },[39m
+    [31m+         ],[39m
+    [31m+         "failureSummary": "Fix any of the following:[39m
+    [31m+   Element has insufficient color contrast of 2.24 (foreground color: #4338ca, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",[39m
+    [31m+         "html": "<button class=\"inline-flex items-ce...\">",[39m
+    [31m+         "impact": "serious",[39m
+    [31m+         "none": Array [],[39m
+    [31m+         "target": Array [[39m
+    [31m+           "a[target=\"_blank\"][rel=\"noopener noreferrer\"]:nth-child(2) > .hover\\:bg-indigo-100.hover\\:text-indigo-400.active\\:bg-indigo-200",[39m
+    [31m+         ],[39m
+    [31m+       },[39m
+    [31m+     ],[39m
+    [31m+     "tags": Array [[39m
+    [31m+       "cat.color",[39m
+    [31m+       "wcag2aa",[39m
+    [31m+       "wcag143",[39m
+    [31m+       "TTv5",[39m
+    [31m+       "TT13.c",[39m
+    [31m+       "EN-301-549",[39m
+    [31m+       "EN-9.1.4.3",[39m
+    [31m+       "ACT",[39m
+    [31m+       "RGAAv4",[39m
+    [31m+       "RGAA-3.2.1",[39m
+    [31m+     ],[39m
+    [31m+   },[39m
+    [31m+ ][39m
 
-📄 Auditando: Aprobaciones (/admin/aprobaciones)
-  ✅ Sin errores detectados
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+      66 |         .analyze();
+      67 |
+    > 68 |       expect(accessibilityScanResults.violations).toEqual([]);
+         |                                                   ^
+      69 |
+      70 |       // Guardar reporte
+      71 |       if (accessibilityScanResults.violations.length > 0) {
+        at /workspace/e2e/frontend-audit-intensive.spec.ts:68:51
 
-📄 Auditando: Backup & Restore (/admin/backup-restore)
-  📸 Screenshot guardado: /workspace/audit-screenshots/backup-&-restore.png
-  ❌ Errores de consola: 1
-     1. [error] Failed to load resource: the server responded with a status of 429 ()
-  ❌ Errores de red: 1
-     1. [429] https://www.inmovaapp.com/register?_rsc=asqg6
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/frontend-audit-intensive-�-d1339-ebe-cumplir-con-WCAG-2-1-AA-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
 
-📄 Auditando: Configuración (/admin/configuracion)
-  📸 Screenshot guardado: /workspace/audit-screenshots/configuración.png
-  ❌ Errores de consola: 5
-     1. [error] Failed to load resource: the server responded with a status of 429 ()
-     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
-https://next-auth.js.org/errors#client_fetch_error Rate limi
-     3. [error] Failed to load resource: the server responded with a status of 429 ()
-     4. [error] Failed to load resource: the server responded with a status of 429 ()
-     5. [error] Failed to load resource: the server responded with a status of 429 ()
-  ❌ Errores de red: 4
-     1. [429] https://www.inmovaapp.com/api/auth/session
-     2. [429] https://www.inmovaapp.com/login?_rsc=gyof8
-     3. [429] https://www.inmovaapp.com/api/auth/_log
-     4. [429] https://www.inmovaapp.com/login
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+    Error Context: test-results/frontend-audit-intensive-�-d1339-ebe-cumplir-con-WCAG-2-1-AA-chromium/error-context.md
 
-📄 Auditando: Facturación B2B (/admin/facturacion-b2b)
-  📸 Screenshot guardado: /workspace/audit-screenshots/facturación-b2b.png
-  ❌ Errores de consola: 5
-     1. [error] Failed to load resource: the server responded with a status of 429 ()
-     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
-https://next-auth.js.org/errors#client_fetch_error Rate limi
-     3. [error] Failed to load resource: the server responded with a status of 429 ()
-     4. [error] Failed to load resource: the server responded with a status of 429 ()
-     5. [error] Failed to load resource: the server responded with a status of 429 ()
-  ❌ Errores de red: 4
-     1. [429] https://www.inmovaapp.com/api/auth/session
-     2. [429] https://www.inmovaapp.com/api/auth/_log
-     3. [429] https://www.inmovaapp.com/login?_rsc=v0his
-     4. [429] https://www.inmovaapp.com/login
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
 
-📄 Auditando: Firma Digital (/admin/firma-digital)
-  📸 Screenshot guardado: /workspace/audit-screenshots/firma-digital.png
-  ❌ Errores de consola: 7
-     1. [error] Failed to load resource: the server responded with a status of 429 ()
-     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
-https://next-auth.js.org/errors#client_fetch_error Rate limi
-     3. [error] Failed to load resource: the server responded with a status of 429 ()
-     4. [error] Failed to load resource: the server responded with a status of 401 ()
-     5. [error] Error al cargar documentos undefined
-     6. [error] Failed to load resource: the server responded with a status of 401 ()
-     7. [error] Failed to load resource: the server responded with a status of 401 ()
-  ❌ Errores de red: 5
-     1. [429] https://www.inmovaapp.com/api/auth/session
-     2. [429] https://www.inmovaapp.com/api/auth/_log
-     3. [401] https://www.inmovaapp.com/api/admin/firma-digital/documentos
-     4. [401] https://www.inmovaapp.com/api/notifications/unread-count
-     5. [401] https://www.inmovaapp.com/api/modules/active
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+[1A[2K(node:2671) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
 
-📄 Auditando: Importar (/admin/importar)
-  📸 Screenshot guardado: /workspace/audit-screenshots/importar.png
-  ❌ Errores de consola: 5
-     1. [error] Failed to load resource: the server responded with a status of 429 ()
-     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
-https://next-auth.js.org/errors#client_fetch_error Rate limi
-     3. [error] Failed to load resource: the server responded with a status of 429 ()
-     4. [error] Failed to load resource: the server responded with a status of 429 ()
-     5. [error] Failed to load resource: the server responded with a status of 429 ()
-  ❌ Errores de red: 4
-     1. [429] https://www.inmovaapp.com/api/auth/session
-     2. [429] https://www.inmovaapp.com/api/auth/_log
-     3. [429] https://www.inmovaapp.com/login?_rsc=hq9qt
-     4. [429] https://www.inmovaapp.com/login
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
 
-📄 Auditando: Integraciones Contables (/admin/integraciones-contables)
-  📸 Screenshot guardado: /workspace/audit-screenshots/integraciones-contables.png
-  ❌ Errores de consola: 7
-     1. [error] Failed to load resource: the server responded with a status of 429 ()
-     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
-https://next-auth.js.org/errors#client_fetch_error Rate limi
-     3. [error] Failed to load resource: the server responded with a status of 401 ()
-     4. [error] Failed to load resource: the server responded with a status of 429 ()
-     5. [error] Failed to load resource: the server responded with a status of 401 ()
-     6. [error] Failed to load resource: the server responded with a status of 429 ()
-     7. [error] Failed to load resource: the server responded with a status of 429 ()
-  ❌ Errores de red: 6
-     1. [429] https://www.inmovaapp.com/api/auth/session
-     2. [401] https://www.inmovaapp.com/api/notifications/unread-count
-     3. [429] https://www.inmovaapp.com/api/auth/_log
-     4. [401] https://www.inmovaapp.com/api/modules/active
-     5. [429] https://www.inmovaapp.com/login?_rsc=z0d93
-     6. [429] https://www.inmovaapp.com/login
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+[1A[2K(node:2671) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
 
-📄 Auditando: Legal (/admin/legal)
-  📸 Screenshot guardado: /workspace/audit-screenshots/legal.png
-  ❌ Errores de consola: 4
-     1. [error] Failed to load resource: the server responded with a status of 401 ()
-     2. [error] Failed to load resource: the server responded with a status of 401 ()
-     3. [error] Failed to load resource: the server responded with a status of 401 ()
-     4. [error] Error al cargar plantillas undefined
-  ❌ Errores de red: 3
-     1. [401] https://www.inmovaapp.com/api/notifications/unread-count
-     2. [401] https://www.inmovaapp.com/api/modules/active
-     3. [401] https://www.inmovaapp.com/api/admin/legal/templates
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
 
-📄 Auditando: Marketplace (/admin/marketplace)
-  📸 Screenshot guardado: /workspace/audit-screenshots/marketplace.png
-  ❌ Errores de consola: 6
-     1. [error] Failed to load resource: the server responded with a status of 429 ()
-     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
-https://next-auth.js.org/errors#client_fetch_error Rate limi
-     3. [error] Failed to load resource: the server responded with a status of 401 ()
-     4. [error] Failed to load resource: the server responded with a status of 401 ()
-     5. [error] Error al cargar servicios undefined
-     6. [error] Failed to load resource: the server responded with a status of 401 ()
-  ❌ Errores de red: 4
-     1. [429] https://www.inmovaapp.com/api/auth/session
-     2. [401] https://www.inmovaapp.com/api/modules/active
-     3. [401] https://www.inmovaapp.com/api/admin/marketplace/services
-     4. [401] https://www.inmovaapp.com/api/notifications/unread-count
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+[1A[2K[2/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:81:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › ♿ Accesibilidad (WCAG 2.1 Level AA) › Login page debe ser accesible
+[1A[2K[3/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:92:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › ♿ Accesibilidad (WCAG 2.1 Level AA) › Dashboard debe ser accesible después de login
+[1A[2K[4/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:108:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › ♿ Accesibilidad (WCAG 2.1 Level AA) › Verificar navegación por teclado
+[1A[2K[5/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:126:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › ♿ Accesibilidad (WCAG 2.1 Level AA) › Verificar contraste de colores
+[1A[2K[6/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:141:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › ⚡ Performance y Core Web Vitals › Landing page debe cargar en menos de 3 segundos
+[1A[2K[chromium] › e2e/frontend-audit-intensive.spec.ts:141:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › ⚡ Performance y Core Web Vitals › Landing page debe cargar en menos de 3 segundos
+⏱️ Tiempo de carga de Landing: 1429ms
 
-📄 Auditando: Métricas de Uso (/admin/metricas-uso)
-  ✅ Sin errores detectados
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+[1A[2K[7/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:151:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › ⚡ Performance y Core Web Vitals › Verificar Core Web Vitals
+[1A[2K[chromium] › e2e/frontend-audit-intensive.spec.ts:151:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › ⚡ Performance y Core Web Vitals › Verificar Core Web Vitals
+📊 Core Web Vitals: { fid: [33m0[39m }
 
-📄 Auditando: Módulos (/admin/modulos)
-  📸 Screenshot guardado: /workspace/audit-screenshots/módulos.png
-  ❌ Errores de consola: 2
-     1. [error] Failed to load resource: the server responded with a status of 401 ()
-     2. [error] Failed to load resource: the server responded with a status of 401 ()
-  ❌ Errores de red: 2
-     1. [401] https://www.inmovaapp.com/api/notifications/unread-count
-     2. [401] https://www.inmovaapp.com/api/modules/active
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+[1A[2K  2) [chromium] › e2e/frontend-audit-intensive.spec.ts:151:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › ⚡ Performance y Core Web Vitals › Verificar Core Web Vitals 
 
-📄 Auditando: OCR Import (/admin/ocr-import)
-  ✅ Sin errores detectados
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
 
-📄 Auditando: Personalización (/admin/personalizacion)
-  ✅ Sin errores detectados
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+    [1mMatcher error[22m: [31mreceived[39m value must be a number or bigint
 
-📄 Auditando: Planes (/admin/planes)
-  📸 Screenshot guardado: /workspace/audit-screenshots/planes.png
-  ❌ Errores de consola: 4
-     1. [error] Failed to load resource: the server responded with a status of 429 ()
-     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
-https://next-auth.js.org/errors#client_fetch_error Rate limi
-     3. [error] Failed to load resource: the server responded with a status of 429 ()
-     4. [error] Failed to load resource: the server responded with a status of 429 ()
-  ❌ Errores de red: 3
-     1. [429] https://www.inmovaapp.com/api/auth/session
-     2. [429] https://www.inmovaapp.com/login?_rsc=jgpn6
-     3. [429] https://www.inmovaapp.com/login
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+    Received has value: [31mundefined[39m
 
-📄 Auditando: Plantillas SMS (/admin/plantillas-sms)
-  📸 Screenshot guardado: /workspace/audit-screenshots/plantillas-sms.png
-  ❌ Errores de consola: 6
-     1. [error] Failed to load resource: the server responded with a status of 429 ()
-     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
-https://next-auth.js.org/errors#client_fetch_error Rate limi
-     3. [error] Failed to load resource: the server responded with a status of 429 ()
-     4. [error] Failed to load resource: the server responded with a status of 401 ()
-     5. [error] Failed to load resource: the server responded with a status of 429 ()
-     6. [error] Failed to load resource: the server responded with a status of 401 ()
-  ❌ Errores de red: 5
-     1. [429] https://www.inmovaapp.com/api/auth/session
-     2. [429] https://www.inmovaapp.com/api/auth/_log
-     3. [401] https://www.inmovaapp.com/api/modules/active
-     4. [429] https://www.inmovaapp.com/register?_rsc=asqg6
-     5. [401] https://www.inmovaapp.com/api/notifications/unread-count
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+      184 |
+      185 |       // Umbrales recomendados
+    > 186 |       expect((webVitals as any).lcp).toBeLessThan(2500); // LCP < 2.5s
+          |                                      ^
+      187 |       expect((webVitals as any).cls).toBeLessThan(0.1); // CLS < 0.1
+      188 |     });
+      189 |
+        at /workspace/e2e/frontend-audit-intensive.spec.ts:186:38
 
-📄 Auditando: Portales Externos (/admin/portales-externos)
-  📸 Screenshot guardado: /workspace/audit-screenshots/portales-externos.png
-  ❌ Errores de consola: 6
-     1. [error] Failed to load resource: the server responded with a status of 429 ()
-     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
-https://next-auth.js.org/errors#client_fetch_error Rate limi
-     3. [error] Failed to load resource: the server responded with a status of 429 ()
-     4. [error] Failed to load resource: the server responded with a status of 429 ()
-     5. [error] Failed to load resource: the server responded with a status of 401 ()
-     6. [error] Failed to load resource: the server responded with a status of 401 ()
-  ❌ Errores de red: 5
-     1. [429] https://www.inmovaapp.com/api/auth/session
-     2. [429] https://www.inmovaapp.com/api/auth/_log
-     3. [429] https://www.inmovaapp.com/register?_rsc=asqg6
-     4. [401] https://www.inmovaapp.com/api/notifications/unread-count
-     5. [401] https://www.inmovaapp.com/api/modules/active
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/frontend-audit-intensive-�-2d66d-s-Verificar-Core-Web-Vitals-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
 
-📄 Auditando: Recuperar Contraseña (/admin/recuperar-contrasena)
-  📸 Screenshot guardado: /workspace/audit-screenshots/recuperar-contraseña.png
-  ❌ Errores de consola: 3
-     1. [error] Failed to load resource: the server responded with a status of 429 ()
-     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
-https://next-auth.js.org/errors#client_fetch_error Rate limi
-     3. [error] Failed to load resource: the server responded with a status of 429 ()
-  ❌ Errores de red: 2
-     1. [429] https://www.inmovaapp.com/api/auth/session
-     2. [429] https://www.inmovaapp.com/api/auth/_log
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+    Error Context: test-results/frontend-audit-intensive-�-2d66d-s-Verificar-Core-Web-Vitals-chromium/error-context.md
 
-📄 Auditando: Reportes Programados (/admin/reportes-programados)
-  ✅ Sin errores detectados
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
 
-📄 Auditando: Salud del Sistema (/admin/salud-sistema)
-  📸 Screenshot guardado: /workspace/audit-screenshots/salud-del-sistema.png
-  ❌ Errores de consola: 5
-     1. [error] Failed to load resource: the server responded with a status of 429 ()
-     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
-https://next-auth.js.org/errors#client_fetch_error Rate limi
-     3. [error] Failed to load resource: the server responded with a status of 429 ()
-     4. [error] Failed to load resource: the server responded with a status of 429 ()
-     5. [error] Failed to load resource: the server responded with a status of 429 ()
-  ❌ Errores de red: 4
-     1. [429] https://www.inmovaapp.com/api/auth/session
-     2. [429] https://www.inmovaapp.com/api/auth/_log
-     3. [429] https://www.inmovaapp.com/login?_rsc=1x6re
-     4. [429] https://www.inmovaapp.com/login
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+[1A[2K(node:2856) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
 
-📄 Auditando: Seguridad (/admin/seguridad)
-  📸 Screenshot guardado: /workspace/audit-screenshots/seguridad.png
-  ❌ Errores de consola: 5
-     1. [error] Failed to load resource: the server responded with a status of 429 ()
-     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
-https://next-auth.js.org/errors#client_fetch_error Rate limi
-     3. [error] Failed to load resource: the server responded with a status of 429 ()
-     4. [error] Failed to load resource: the server responded with a status of 429 ()
-     5. [error] Failed to load resource: the server responded with a status of 429 ()
-  ❌ Errores de red: 4
-     1. [429] https://www.inmovaapp.com/api/auth/session
-     2. [429] https://www.inmovaapp.com/api/auth/_log
-     3. [429] https://www.inmovaapp.com/login?_rsc=lsr9b
-     4. [429] https://www.inmovaapp.com/login
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
 
-📄 Auditando: Sugerencias (/admin/sugerencias)
-  📸 Screenshot guardado: /workspace/audit-screenshots/sugerencias.png
-  ❌ Errores de consola: 5
-     1. [error] Failed to load resource: the server responded with a status of 429 ()
-     2. [error] [next-auth][error][CLIENT_FETCH_ERROR] 
-https://next-auth.js.org/errors#client_fetch_error Rate limi
-     3. [error] Failed to load resource: the server responded with a status of 429 ()
-     4. [error] Failed to load resource: the server responded with a status of 429 ()
-     5. [error] Failed to load resource: the server responded with a status of 429 ()
-  ❌ Errores de red: 4
-     1. [429] https://www.inmovaapp.com/api/auth/session
-     2. [429] https://www.inmovaapp.com/api/auth/_log
-     3. [429] https://www.inmovaapp.com/login?_rsc=jtkg7
-     4. [429] https://www.inmovaapp.com/login
-   ⏱️  Esperando 3 segundos para evitar rate limiting...
+[1A[2K(node:2856) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
 
-📄 Reporte generado: /workspace/AUDITORIA_VISUAL_ADMIN.md
 
-✅ Auditoría completada exitosamente
+[1A[2K[8/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:190:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › ⚡ Performance y Core Web Vitals › Verificar tamaño de bundle JavaScript
+[1A[2K[chromium] › e2e/frontend-audit-intensive.spec.ts:190:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › ⚡ Performance y Core Web Vitals › Verificar tamaño de bundle JavaScript
+📦 Tamaño total de JS: 1366.28 KB
 
-📊 RESUMEN:
-   - Páginas auditadas: 27
-   - Páginas con errores: 27
-   - Total de errores: 2406
+[1A[2K⚠️ Bundle de JS es mayor a 500KB
+
+[1A[2K[9/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:209:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › ⚡ Performance y Core Web Vitals › Verificar lazy loading de imágenes
+[1A[2K[chromium] › e2e/frontend-audit-intensive.spec.ts:209:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › ⚡ Performance y Core Web Vitals › Verificar lazy loading de imágenes
+🖼️ Imágenes con lazy loading: 0/0
+
+[1A[2K[10/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:244:11 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📱 Responsive Design › Landing debe funcionar en Mobile Portrait (375x667)
+[1A[2K  3) [chromium] › e2e/frontend-audit-intensive.spec.ts:244:11 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📱 Responsive Design › Landing debe funcionar en Mobile Portrait (375x667) 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mfalse[39m
+    Received: [31mtrue[39m
+
+      257 |         });
+      258 |
+    > 259 |         expect(hasHorizontalScroll).toBe(false);
+          |                                     ^
+      260 |
+      261 |         // Verificar que elementos clave son visibles
+      262 |         const ctaButton = page.locator('button, a').filter({ hasText: /comenzar|empezar|registr/i }).first();
+        at /workspace/e2e/frontend-audit-intensive.spec.ts:259:37
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/frontend-audit-intensive-�-a3bfe-en-Mobile-Portrait-375x667--chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/frontend-audit-intensive-�-a3bfe-en-Mobile-Portrait-375x667--chromium/error-context.md
+
+
+[1A[2K(node:2962) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:2962) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[11/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:244:11 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📱 Responsive Design › Landing debe funcionar en Mobile Landscape (667x375)
+[1A[2K  4) [chromium] › e2e/frontend-audit-intensive.spec.ts:244:11 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📱 Responsive Design › Landing debe funcionar en Mobile Landscape (667x375) 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator:  locator('button, a').filter({ hasText: /comenzar|empezar|registr/i }).first()
+    Expected: visible
+    Received: hidden
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('button, a').filter({ hasText: /comenzar|empezar|registr/i }).first()[22m
+    [2m    9 × locator resolved to <a href="/register">…</a>[22m
+    [2m      - unexpected value "hidden"[22m
+
+
+      261 |         // Verificar que elementos clave son visibles
+      262 |         const ctaButton = page.locator('button, a').filter({ hasText: /comenzar|empezar|registr/i }).first();
+    > 263 |         await expect(ctaButton).toBeVisible();
+          |                                 ^
+      264 |       });
+      265 |     }
+      266 |
+        at /workspace/e2e/frontend-audit-intensive.spec.ts:263:33
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/frontend-audit-intensive-�-97b4f-n-Mobile-Landscape-667x375--chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/frontend-audit-intensive-�-97b4f-n-Mobile-Landscape-667x375--chromium/error-context.md
+
+
+[1A[2K(node:3045) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:3045) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[12/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:244:11 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📱 Responsive Design › Landing debe funcionar en Tablet Portrait (768x1024)
+[1A[2K[13/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:244:11 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📱 Responsive Design › Landing debe funcionar en Tablet Landscape (1024x768)
+[1A[2K[14/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:244:11 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📱 Responsive Design › Landing debe funcionar en Desktop (1920x1080)
+[1A[2K[15/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:267:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📱 Responsive Design › Touch targets deben tener tamaño mínimo en móvil
+[1A[2K[chromium] › e2e/frontend-audit-intensive.spec.ts:267:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📱 Responsive Design › Touch targets deben tener tamaño mínimo en móvil
+⚠️ Botones con tamaño menor a 44x44px: [
+  { text: [32m''[39m, width: [33m40[39m, height: [33m40[39m },
+  { text: [32m''[39m, width: [33m36[39m, height: [33m36[39m },
+  { text: [32m''[39m, width: [33m48[39m, height: [33m12[39m },
+  { text: [32m''[39m, width: [33m12[39m, height: [33m12[39m },
+  { text: [32m''[39m, width: [33m12[39m, height: [33m12[39m },
+  { text: [32m''[39m, width: [33m36[39m, height: [33m36[39m },
+  { text: [32m'Acceder'[39m, width: [33m291[39m, height: [33m40[39m },
+  { text: [32m'Acceder'[39m, width: [33m291[39m, height: [33m40[39m },
+  { text: [32m'Acceder'[39m, width: [33m291[39m, height: [33m40[39m },
+  { text: [32m'Acceder'[39m, width: [33m291[39m, height: [33m40[39m },
+  { text: [32m'Ver Comparativa'[39m, width: [33m132.5[39m, height: [33m32[39m },
+  {
+    text: [32m'Ver Comparativa Detallada con Homming'[39m,
+    width: [33m339.953125[39m,
+    height: [33m40[39m
+  },
+  { text: [32m'Comenzar Ahora'[39m, width: [33m291[39m, height: [33m40[39m },
+  { text: [32m'🚀 Comenzar Ahora'[39m, width: [33m291[39m, height: [33m40[39m },
+  { text: [32m'Comenzar Ahora'[39m, width: [33m291[39m, height: [33m40[39m },
+  { text: [32m'Comenzar Ahora'[39m, width: [33m291[39m, height: [33m40[39m },
+  { text: [32m'Twitter'[39m, width: [33m72.109375[39m, height: [33m32[39m },
+  { text: [32m'LinkedIn'[39m, width: [33m80.40625[39m, height: [33m32[39m }
+]
+
+[1A[2K  5) [chromium] › e2e/frontend-audit-intensive.spec.ts:267:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📱 Responsive Design › Touch targets deben tener tamaño mínimo en móvil 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: < [32m5[39m
+    Received:   [31m18[39m
+
+      285 |
+      286 |       // Advertencia en lugar de error
+    > 287 |       expect(smallButtons.length).toBeLessThan(5);
+          |                                   ^
+      288 |     });
+      289 |   });
+      290 |
+        at /workspace/e2e/frontend-audit-intensive.spec.ts:287:35
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/frontend-audit-intensive-�-d6d9b-ener-tamaño-mínimo-en-móvil-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/frontend-audit-intensive-�-d6d9b-ener-tamaño-mínimo-en-móvil-chromium/error-context.md
+
+
+[1A[2K(node:3177) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:3177) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[16/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:295:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📝 Formularios y Validación › Login form debe validar campos vacíos
+[1A[2K[17/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:306:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📝 Formularios y Validación › Login form debe validar email inválido
+[1A[2K  6) [chromium] › e2e/frontend-audit-intensive.spec.ts:306:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📝 Formularios y Validación › Login form debe validar email inválido 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      313 |       // Verificar error de email
+      314 |       const emailError = await page.locator('text=/email.*válid|invalid.*email/i').count();
+    > 315 |       expect(emailError).toBeGreaterThan(0);
+          |                          ^
+      316 |     });
+      317 |
+      318 |     test('Inputs deben tener labels asociados', async ({ page }) => {
+        at /workspace/e2e/frontend-audit-intensive.spec.ts:315:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/frontend-audit-intensive-�-96f3c-debe-validar-email-inválido-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/frontend-audit-intensive-�-96f3c-debe-validar-email-inválido-chromium/error-context.md
+
+
+[1A[2K(node:3275) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:3275) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[18/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:318:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📝 Formularios y Validación › Inputs deben tener labels asociados
+[1A[2K[19/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:337:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📝 Formularios y Validación › Formularios deben tener autocomplete apropiado
+[1A[2K  7) [chromium] › e2e/frontend-audit-intensive.spec.ts:337:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📝 Formularios y Validación › Formularios deben tener autocomplete apropiado 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mnull[39m
+
+      344 |       const passwordAutocomplete = await passwordInput.getAttribute('autocomplete');
+      345 |
+    > 346 |       expect(emailAutocomplete).toBeTruthy();
+          |                                 ^
+      347 |       expect(passwordAutocomplete).toBeTruthy();
+      348 |     });
+      349 |   });
+        at /workspace/e2e/frontend-audit-intensive.spec.ts:346:33
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/frontend-audit-intensive-�-24b38-ener-autocomplete-apropiado-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/frontend-audit-intensive-�-24b38-ener-autocomplete-apropiado-chromium/error-context.md
+
+
+[1A[2K(node:3382) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:3382) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[20/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:355:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🧭 Navegación y Rutas › Todas las rutas públicas deben ser accesibles
+[1A[2K[chromium] › e2e/frontend-audit-intensive.spec.ts:355:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🧭 Navegación y Rutas › Todas las rutas públicas deben ser accesibles
+✅ /landing: 200
+
+[1A[2K✅ /login: 200
+
+[1A[2K✅ /api/health: 200
+
+[1A[2K[21/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:369:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🧭 Navegación y Rutas › Navegación debe ser consistente
+[1A[2K[22/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:381:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🧭 Navegación y Rutas › 404 page debe existir para rutas inválidas
+[1A[2K[chromium] › e2e/frontend-audit-intensive.spec.ts:381:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🧭 Navegación y Rutas › 404 page debe existir para rutas inválidas
+⚠️ Errores de consola encontrados: [
+  {
+    type: [32m'error'[39m,
+    text: [32m'Failed to load resource: the server responded with a status of 404 ()'[39m
+  }
+]
+
+[1A[2K⚠️ Errores de red encontrados: [
+  {
+    url: [32m'https://inmovaapp.com/ruta-que-no-existe-1767111512942'[39m,
+    status: [33m404[39m
+  }
+]
+
+[1A[2K[23/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:388:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🧭 Navegación y Rutas › Breadcrumbs deben existir en páginas internas
+[1A[2K[chromium] › e2e/frontend-audit-intensive.spec.ts:388:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🧭 Navegación y Rutas › Breadcrumbs deben existir en páginas internas
+⚠️ Errores de consola encontrados: [
+  {
+    type: [32m'error'[39m,
+    text: [32m'Failed to load resource: the server responded with a status of 404 ()'[39m
+  }
+]
+
+[1A[2K⚠️ Errores de red encontrados: [ { url: [32m'https://inmovaapp.com/dashboard/properties'[39m, status: [33m404[39m } ]
+
+[1A[2K[24/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:409:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🐛 Errores y Logs › Landing no debe tener errores de consola críticos
+[1A[2K[25/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:429:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🐛 Errores y Logs › Login no debe tener errores de red
+[1A[2K[26/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:449:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🐛 Errores y Logs › Dashboard no debe tener memory leaks
+[1A[2K[chromium] › e2e/frontend-audit-intensive.spec.ts:449:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🐛 Errores y Logs › Dashboard no debe tener memory leaks
+⚠️ Errores de consola encontrados: [
+  {
+    type: [32m'error'[39m,
+    text: [32m'Failed to load resource: the server responded with a status of 404 ()'[39m
+  },
+  {
+    type: [32m'error'[39m,
+    text: [32m'Failed to load resource: the server responded with a status of 404 ()'[39m
+  }
+]
+
+[1A[2K⚠️ Errores de red encontrados: [
+  {
+    url: [32m'https://inmovaapp.com/configuracion?_rsc=skepm'[39m,
+    status: [33m404[39m
+  },
+  { url: [32m'https://inmovaapp.com/home?_rsc=1h1b5'[39m, status: [33m404[39m }
+]
+
+[1A[2K  8) [chromium] › e2e/frontend-audit-intensive.spec.ts:449:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🐛 Errores y Logs › Dashboard no debe tener memory leaks 
+
+    TimeoutError: page.waitForLoadState: Timeout 30000ms exceeded.
+
+      462 |       for (let i = 0; i < 5; i++) {
+      463 |         await page.goto(`${PROD_URL}/dashboard`);
+    > 464 |         await page.waitForLoadState('networkidle');
+          |                    ^
+      465 |         await page.goto(`${PROD_URL}/dashboard/properties`);
+      466 |         await page.waitForLoadState('networkidle');
+      467 |       }
+        at /workspace/e2e/frontend-audit-intensive.spec.ts:464:20
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/frontend-audit-intensive-�-b2003--no-debe-tener-memory-leaks-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/frontend-audit-intensive-�-b2003--no-debe-tener-memory-leaks-chromium/error-context.md
+
+
+[1A[2K(node:3577) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:3577) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[27/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:488:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🔍 SEO y Metadatos › Landing debe tener metadatos completos
+[1A[2K  9) [chromium] › e2e/frontend-audit-intensive.spec.ts:488:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🔍 SEO y Metadatos › Landing debe tener metadatos completos 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: < [32m60[39m
+    Received:   [31m79[39m
+
+      493 |       expect(title).toBeTruthy();
+      494 |       expect(title.length).toBeGreaterThan(10);
+    > 495 |       expect(title.length).toBeLessThan(60);
+          |                            ^
+      496 |
+      497 |       // Meta description
+      498 |       const description = await page.getAttribute('meta[name="description"]', 'content');
+        at /workspace/e2e/frontend-audit-intensive.spec.ts:495:28
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/frontend-audit-intensive-�-96a3e-e-tener-metadatos-completos-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/frontend-audit-intensive-�-96a3e-e-tener-metadatos-completos-chromium/error-context.md
+
+
+[1A[2K(node:3654) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:3654) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[28/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:519:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🔍 SEO y Metadatos › Páginas deben tener estructura de headings correcta
+[1A[2K[chromium] › e2e/frontend-audit-intensive.spec.ts:519:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🔍 SEO y Metadatos › Páginas deben tener estructura de headings correcta
+📌 H1: 6 Verticales + 6 Módulos.Poder Multiplicado.
+
+[1A[2K[29/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:534:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🔍 SEO y Metadatos › Links deben tener texto descriptivo
+[1A[2K[30/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:562:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🔒 Seguridad › Headers de seguridad deben estar presentes
+[1A[2K[chromium] › e2e/frontend-audit-intensive.spec.ts:562:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🔒 Seguridad › Headers de seguridad deben estar presentes
+🛡️ Security Headers:
+
+[1A[2K⚠️ CSP header no encontrado
+
+[1A[2K  10) [chromium] › e2e/frontend-audit-intensive.spec.ts:562:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🔒 Seguridad › Headers de seguridad deben estar presentes 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mundefined[39m
+
+      575 |
+      576 |       // X-Content-Type-Options
+    > 577 |       expect(headers?.['x-content-type-options']).toBeTruthy();
+          |                                                   ^
+      578 |       console.log(`- X-Content-Type-Options: ${headers?.['x-content-type-options']}`);
+      579 |
+      580 |       // X-Frame-Options
+        at /workspace/e2e/frontend-audit-intensive.spec.ts:577:51
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/frontend-audit-intensive-�-55d2d-ridad-deben-estar-presentes-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/frontend-audit-intensive-�-55d2d-ridad-deben-estar-presentes-chromium/error-context.md
+
+
+[1A[2K(node:3757) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:3757) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[31/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:593:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🔒 Seguridad › Formularios deben tener protección CSRF
+[1A[2K  11) [chromium] › e2e/frontend-audit-intensive.spec.ts:593:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🔒 Seguridad › Formularios deben tener protección CSRF 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mundefined[39m
+
+      599 |       const csrfToken = cookies.find((c) => c.name.includes('csrf') || c.name.includes('next-auth'));
+      600 |
+    > 601 |       expect(csrfToken).toBeTruthy();
+          |                         ^
+      602 |     });
+      603 |
+      604 |     test('Inputs sensibles deben tener autocomplete deshabilitado', async ({ page }) => {
+        at /workspace/e2e/frontend-audit-intensive.spec.ts:601:25
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/frontend-audit-intensive-�-adbfc-deben-tener-protección-CSRF-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/frontend-audit-intensive-�-adbfc-deben-tener-protección-CSRF-chromium/error-context.md
+
+
+[1A[2K(node:3837) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:3837) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[32/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:604:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🔒 Seguridad › Inputs sensibles deben tener autocomplete deshabilitado
+[1A[2K  12) [chromium] › e2e/frontend-audit-intensive.spec.ts:604:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🔒 Seguridad › Inputs sensibles deben tener autocomplete deshabilitado 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mnull[39m
+
+      609 |
+      610 |       // Debe tener autocomplete="current-password" o "new-password"
+    > 611 |       expect(autocomplete).toBeTruthy();
+          |                            ^
+      612 |     });
+      613 |   });
+      614 |
+        at /workspace/e2e/frontend-audit-intensive.spec.ts:611:28
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/frontend-audit-intensive-�-2933c--autocomplete-deshabilitado-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/frontend-audit-intensive-�-2933c--autocomplete-deshabilitado-chromium/error-context.md
+
+
+[1A[2K(node:3916) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:3916) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[33/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:619:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 👤 Experiencia de Usuario (UX) › Loading states deben ser visibles
+[1A[2K[34/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:640:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 👤 Experiencia de Usuario (UX) › Toast notifications deben funcionar
+[1A[2K[35/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:659:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 👤 Experiencia de Usuario (UX) › Modales deben tener close button
+[1A[2K  13) [chromium] › e2e/frontend-audit-intensive.spec.ts:659:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 👤 Experiencia de Usuario (UX) › Modales deben tener close button 
+
+    TimeoutError: elementHandle.click: Timeout 30000ms exceeded.
+    Call log:
+    [2m  - attempting click action[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is not visible[22m
+    [2m    - retrying click action[22m
+    [2m    - waiting 20ms[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is not visible[22m
+    [2m    - retrying click action[22m
+    [2m      - waiting 100ms[22m
+    [2m    56 × waiting for element to be visible, enabled and stable[22m
+    [2m       - element is not visible[22m
+    [2m     - retrying click action[22m
+    [2m       - waiting 500ms[22m
+
+
+      664 |
+      665 |       for (const trigger of modalTriggers.slice(0, 3)) {
+    > 666 |         await trigger.click();
+          |                       ^
+      667 |         await page.waitForTimeout(500);
+      668 |
+      669 |         // Verificar que el modal tiene botón de cerrar
+        at /workspace/e2e/frontend-audit-intensive.spec.ts:666:23
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/frontend-audit-intensive-�-3ace2-es-deben-tener-close-button-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/frontend-audit-intensive-�-3ace2-es-deben-tener-close-button-chromium/error-context.md
+
+
+[1A[2K(node:4036) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:4036) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[36/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:682:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 👤 Experiencia de Usuario (UX) › Focus trap debe funcionar en modales
+[1A[2K[chromium] › e2e/frontend-audit-intensive.spec.ts:682:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 👤 Experiencia de Usuario (UX) › Focus trap debe funcionar en modales
+ℹ️ No se encontraron modales para testear focus trap
+
+[1A[2K[37/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:713:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📄 Contenido y Copy › Landing debe tener CTA claro
+[1A[2K[38/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:723:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📄 Contenido y Copy › Textos no deben tener typos comunes
+[1A[2K[39/39] [chromium] › e2e/frontend-audit-intensive.spec.ts:747:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📄 Contenido y Copy › Imágenes deben tener alt text
+[1A[2K  13 failed
+    [chromium] › e2e/frontend-audit-intensive.spec.ts:60:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › ♿ Accesibilidad (WCAG 2.1 Level AA) › Landing page debe cumplir con WCAG 2.1 AA 
+    [chromium] › e2e/frontend-audit-intensive.spec.ts:151:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › ⚡ Performance y Core Web Vitals › Verificar Core Web Vitals 
+    [chromium] › e2e/frontend-audit-intensive.spec.ts:244:11 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📱 Responsive Design › Landing debe funcionar en Mobile Portrait (375x667) 
+    [chromium] › e2e/frontend-audit-intensive.spec.ts:244:11 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📱 Responsive Design › Landing debe funcionar en Mobile Landscape (667x375) 
+    [chromium] › e2e/frontend-audit-intensive.spec.ts:267:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📱 Responsive Design › Touch targets deben tener tamaño mínimo en móvil 
+    [chromium] › e2e/frontend-audit-intensive.spec.ts:306:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📝 Formularios y Validación › Login form debe validar email inválido 
+    [chromium] › e2e/frontend-audit-intensive.spec.ts:337:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 📝 Formularios y Validación › Formularios deben tener autocomplete apropiado 
+    [chromium] › e2e/frontend-audit-intensive.spec.ts:449:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🐛 Errores y Logs › Dashboard no debe tener memory leaks 
+    [chromium] › e2e/frontend-audit-intensive.spec.ts:488:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🔍 SEO y Metadatos › Landing debe tener metadatos completos 
+    [chromium] › e2e/frontend-audit-intensive.spec.ts:562:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🔒 Seguridad › Headers de seguridad deben estar presentes 
+    [chromium] › e2e/frontend-audit-intensive.spec.ts:593:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🔒 Seguridad › Formularios deben tener protección CSRF 
+    [chromium] › e2e/frontend-audit-intensive.spec.ts:604:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 🔒 Seguridad › Inputs sensibles deben tener autocomplete deshabilitado 
+    [chromium] › e2e/frontend-audit-intensive.spec.ts:659:9 › 🔍 Auditoría Intensiva Frontend - Inmovaapp.com › 👤 Experiencia de Usuario (UX) › Modales deben tener close button 
+  26 passed (2.4m)

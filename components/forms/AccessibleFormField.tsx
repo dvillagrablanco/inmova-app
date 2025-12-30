@@ -33,6 +33,7 @@ interface InputFieldProps extends BaseFieldProps {
   min?: number;
   max?: number;
   step?: number;
+  autoComplete?: string;
 }
 
 interface TextareaFieldProps extends BaseFieldProps {
@@ -69,12 +70,23 @@ export function AccessibleInputField({
   min,
   max,
   step,
+  autoComplete,
 }: InputFieldProps) {
   const hasError = !!error;
   const describedBy = `${id}-error ${id}-help`.trim();
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordField = type === 'password';
   const inputType = isPasswordField && showPassword ? 'text' : type;
+  
+  // Auto-detect autocomplete if not provided
+  const getAutoComplete = () => {
+    if (autoComplete) return autoComplete;
+    if (type === 'email') return 'email';
+    if (type === 'password' && name.includes('current')) return 'current-password';
+    if (type === 'password') return 'current-password';
+    if (type === 'tel') return 'tel';
+    return undefined;
+  };
 
   return (
     <div className={cn('space-y-2', className)}>
@@ -106,6 +118,7 @@ export function AccessibleInputField({
           min={min}
           max={max}
           step={step}
+          autoComplete={getAutoComplete()}
           className={cn(
             hasError && 'border-red-500 focus-visible:ring-red-500',
             isPasswordField && 'pr-12',

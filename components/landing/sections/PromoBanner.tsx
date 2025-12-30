@@ -215,10 +215,10 @@ export function PromoBanner() {
                     {campaign.icon}
                   </div>
                   <div className="text-left flex-1">
-                    <div className="text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                    <div className="text-sm font-bold text-gray-900 group-hover:text-indigo-700 transition-colors">
                       {campaign.title}
                     </div>
-                    <div className="text-xs text-gray-500 font-semibold">
+                    <div className="text-xs text-gray-700 font-semibold">
                       {campaign.code}
                     </div>
                   </div>

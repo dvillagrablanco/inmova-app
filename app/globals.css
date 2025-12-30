@@ -946,3 +946,239 @@ select[aria-invalid="true"]:focus {
 .animation-delay-4000 {
   animation-delay: 4s;
 }
+
+/* ========================================
+   FIX: OVERFLOW HORIZONTAL EN MÓVIL
+   Detectado en auditoría 2025-12-30
+   ======================================== */
+
+/* Prevenir overflow horizontal en TODA la aplicación */
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Asegurar que todos los contenedores respeten el viewport */
+* {
+  box-sizing: border-box;
+}
+
+/* Contenedores principales sin overflow */
+.container,
+[class*="container"],
+main,
+section,
+article,
+div[class*="grid"],
+div[class*="flex"] {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Imágenes responsivas (prevenir overflow) */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Videos y iframes responsivos */
+video,
+iframe {
+  max-width: 100%;
+}
+
+/* Tablas responsivas (scroll horizontal solo en tabla) */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  min-width: 100%;
+}
+
+/* Pre y code blocks (sin overflow) */
+pre,
+code {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* ========================================
+   TOUCH TARGETS AUMENTADOS EN MÓVIL
+   Detectado en auditoría 2025-12-30
+   ======================================== */
+
+/* Asegurar touch targets mínimos (44x44px) en TODOS los dispositivos móviles */
+@media (max-width: 768px) {
+  /* Botones */
+  button,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  .btn {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+
+  /* Links (especialmente en nav) */
+  a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 12px;
+  }
+
+  /* Inputs de formulario */
+  input,
+  select,
+  textarea {
+    min-height: 48px;
+    padding: 12px 16px;
+    font-size: 16px; /* Prevenir zoom automático en iOS */
+  }
+
+  /* Checkboxes y radios */
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-width: 24px;
+    min-height: 24px;
+    margin: 10px;
+  }
+
+  /* Labels clickeables */
+  label[for] {
+    cursor: pointer;
+    padding: 8px;
+    display: inline-block;
+  }
+
+  /* Iconos clickeables */
+  button svg,
+  [role="button"] svg,
+  a svg {
+    pointer-events: none; /* Click pasa al padre */
+  }
+
+  /* Navegación móvil */
+  nav button,
+  nav a {
+    min-height: 52px;
+    min-width: 52px;
+  }
+
+  /* Tabs y pills */
+  [role="tab"],
+  [role="tabpanel"] button {
+    min-height: 48px;
+    padding: 12px 24px;
+  }
+
+  /* Cards clickeables */
+  .card[role="button"],
+  .card-hover {
+    padding: 20px;
+  }
+
+  /* FABs (Floating Action Buttons) */
+  .fab,
+  [class*="floating"] button {
+    min-height: 56px;
+    min-width: 56px;
+  }
+}
+
+/* Touch targets en tablet (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  button,
+  [role="button"],
+  a {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 10px 16px;
+  }
+}
+
+/* ========================================
+   ESPACIADO ENTRE ELEMENTOS INTERACTIVOS
+   ======================================== */
+@media (max-width: 768px) {
+  /* Espaciado mínimo entre botones */
+  button + button,
+  [role="button"] + [role="button"],
+  a + a {
+    margin-left: 12px;
+  }
+
+  /* Espaciado vertical en stacks */
+  .space-y-2 > * + * {
+    margin-top: 12px;
+  }
+
+  /* Botones en grupos */
+  .button-group button,
+  .button-group [role="button"] {
+    margin: 6px;
+  }
+}
+
+/* ========================================
+   MEJORAS DE CONTRASTE EN HOVER/FOCUS
+   ======================================== */
+@media (max-width: 768px) {
+  /* Feedback visual claro en touch */
+  button:active,
+  [role="button"]:active,
+  a:active {
+    transform: scale(0.95);
+    opacity: 0.8;
+    transition: all 0.1s ease;
+  }
+
+  /* Focus visible más prominente */
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 4px solid #4f46e5;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 8px rgba(79, 70, 229, 0.1);
+  }
+}
+
+/* ========================================
+   PREVENIR ZOOM EN INPUTS (IOS SAFARI)
+   ======================================== */
+@supports (-webkit-touch-callout: none) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important; /* iOS no hace zoom si font >= 16px */
+  }
+}
+
+/* ========================================
+   SAFE AREAS PARA NOTCH/DYNAMIC ISLAND
+   ======================================== */
+@supports (padding: env(safe-area-inset-top)) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .fixed-header {
+    top: env(safe-area-inset-top);
+  }
+
+  .fixed-footer {
+    bottom: env(safe-area-inset-bottom);
+  }
+}

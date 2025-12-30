@@ -49,6 +49,7 @@
   },
   "devDependencies": {
     "@axe-core/cli": "^4.11.0",
+    "@axe-core/playwright": "^4.11.0",
     "@next/bundle-analyzer": "^16.0.7",
     "@next/swc-wasm-nodejs": "13.5.1",
     "@playwright/test": "^1.57.0",

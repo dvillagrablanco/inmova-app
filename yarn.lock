@@ -781,6 +781,13 @@
     dotenv "^17.2.2"
     selenium-webdriver "~4.35.0"
 
+"@axe-core/playwright@^4.11.0":
+  version "4.11.0"
+  resolved "https://registry.npmjs.org/@axe-core/playwright/-/playwright-4.11.0.tgz"
+  integrity sha512-70vBT/Ylqpm65RQz2iCG2o0JJCEG/WCNyefTr2xcOcr1CoSee60gNQYUMZZ7YukoKkFLv26I/jjlsvwwp532oQ==
+  dependencies:
+    axe-core "~4.11.0"
+
 "@axe-core/webdriverjs@^4.11.0":
   version "4.11.0"
   resolved "https://registry.npmjs.org/@axe-core/webdriverjs/-/webdriverjs-4.11.0.tgz"
