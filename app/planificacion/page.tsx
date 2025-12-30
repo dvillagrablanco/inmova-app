@@ -1,10 +1,10 @@
 import { ComingSoonPage } from "@/components/shared/ComingSoonPage";
 
-export default function ReseñasPage() {
+export default function PlanificaciónPage() {
   return (
     <ComingSoonPage
-      title="Reseñas"
-      description="Valoraciones y reseñas de clientes"
+      title="Planificación"
+      description="Sistema de planificación y scheduling"
       expectedFeatures={[
         "Funcionalidad en desarrollo",
         "Próximamente disponible",
