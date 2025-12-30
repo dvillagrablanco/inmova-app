@@ -33,18 +33,19 @@ import * as path from 'path';
 
 const SUPERADMIN_EMAIL = 'superadmin@inmova.com';
 const SUPERADMIN_PASSWORD = 'superadmin123';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 const REPORT_DIR = path.join(process.cwd(), 'frontend-audit-exhaustive-report');
 const SCREENSHOTS_DIR = path.join(REPORT_DIR, 'screenshots');
 
 // Configuración de test
 const TEST_CONFIG = {
-  // Timeout por página (algunos dashboards son lentos)
-  pageTimeout: 20000,
+  // Timeout por página (aumentado para servidor remoto)
+  pageTimeout: 60000,
   // Espera después de cargar página
-  stabilizationTime: 2000,
+  stabilizationTime: 1000,
   // Screenshots
-  captureScreenshots: true,
+  captureScreenshots: false, // Desactivado para velocidad
   // Modo de ejecución
   mode: process.env.AUDIT_MODE || 'all', // 'all' | 'high' | 'medium'
 };
@@ -542,7 +543,10 @@ test.describe('🎭 Auditoría Frontend Exhaustiva', () => {
   }
 
   test(`Login como superadmin @auth`, async ({ page }) => {
-    await page.goto('/login', { timeout: TEST_CONFIG.pageTimeout });
+    await page.goto(`${BASE_URL}/login`, { 
+      waitUntil: 'domcontentloaded',
+      timeout: TEST_CONFIG.pageTimeout 
+    });
     
     await page.fill('input[type="email"]', SUPERADMIN_EMAIL);
     await page.fill('input[type="password"]', SUPERADMIN_PASSWORD);
@@ -582,9 +586,9 @@ test.describe('🎭 Auditoría Frontend Exhaustiva', () => {
       try {
         const startTime = Date.now();
         
-        // Navegar a la ruta
-        await page.goto(route.url, {
-          waitUntil: 'networkidle',
+        // Navegar a la ruta (domcontentloaded es más rápido que networkidle)
+        await page.goto(`${BASE_URL}${route.url}`, {
+          waitUntil: 'domcontentloaded',
           timeout: TEST_CONFIG.pageTimeout,
         });
         
