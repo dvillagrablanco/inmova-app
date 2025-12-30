@@ -876,7 +876,7 @@ export class CRMService {
           completed: false,
           dueDate: { lt: new Date() },
         },
-      }),
+      }).catch(() => 0),
     ]);
 
     const winRate = wonLeads + (totalLeads - wonLeads) > 0 ? (wonLeads / totalLeads) * 100 : 0;
@@ -903,6 +903,15 @@ export class CRMService {
         overdue: tasksOverdue,
       },
     };
+    } catch (error: any) {
+      console.error('Error getting CRM stats:', error);
+      return {
+        leads: { total: 0, new: 0, qualified: 0, won: 0, winRate: 0 },
+        deals: { total: 0, open: 0, won: 0, totalValue: 0, wonValue: 0 },
+        activities: { thisMonth: 0 },
+        tasks: { overdue: 0 },
+      };
+    }
   }
 }
 
