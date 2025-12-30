@@ -4,7 +4,22 @@
  */
 
 import { MetadataRoute } from 'next';
-import { prisma } from '@/lib/db';
+
+// Lazy import de prisma para evitar errores en build-time
+let prisma: any = null;
+
+async function getPrisma() {
+  if (!prisma) {
+    try {
+      const { prisma: prismaClient } = await import('@/lib/db');
+      prisma = prismaClient;
+    } catch (error) {
+      console.warn('Prisma not available during build, using static routes only');
+      return null;
+    }
+  }
+  return prisma;
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://inmova.app';
@@ -92,9 +107,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
+    const prismaClient = await getPrisma();
+    
+    // Si Prisma no está disponible (build-time), retornar solo rutas estáticas
+    if (!prismaClient) {
+      console.log('Sitemap: Using static routes only (Prisma not available)');
+      return staticRoutes;
+    }
+
     // URLs dinámicas de propiedades (solo disponibles y activas)
     // Solo incluir propiedades de la primera compañía para el sitemap público
-    const units = await prisma.unit.findMany({
+    const units = await prismaClient.unit.findMany({
       where: {
         estado: 'disponible',
       },
@@ -116,7 +139,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
     // URLs dinámicas de edificios (solo activos)
-    const buildings = await prisma.building.findMany({
+    const buildings = await prismaClient.building.findMany({
       where: {},
       select: {
         id: true,
