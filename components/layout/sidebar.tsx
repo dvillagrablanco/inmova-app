@@ -255,7 +255,7 @@ const dashboardNavItems = [
   },
   {
     name: 'Inicio',
-    href: '/home',
+    href: '/dashboard',
     icon: Home,
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
   },

@@ -2,6 +2,83 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================
+   FIXES PARA OVERFLOW MOBILE
+   ============================ */
+@media (max-width: 640px) {
+  /* Prevenir scroll horizontal global */
+  html,
+  body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* Tablas responsive automáticas */
+  table {
+    display: block;
+    width: 100% !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Contenedores administrativos */
+  .admin-content,
+  .dashboard-container,
+  [class*='max-w-7xl'],
+  [class*='max-w-6xl'] {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  /* Cards y componentes que pueden desbordar */
+  .card,
+  [class*='Card'],
+  [class*='card-'] {
+    min-width: unset !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Elementos con ancho fijo que causan problemas */
+  [style*='width: 1200px'],
+  [style*='width: 1000px'],
+  [style*='min-width: 1200px'],
+  [style*='min-width: 1000px'] {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+
+  /* Flex y Grid adaptativos */
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Pre y Code blocks */
+  pre,
+  code {
+    max-width: 100%;
+    overflow-x: auto;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+
+  /* Botones y formularios */
+  button,
+  input,
+  select,
+  textarea {
+    max-width: 100%;
+  }
+
+  /* Blobs y elementos decorativos animados */
+  [class*='blob'],
+  [class*='animate-'] {
+    max-width: 100vw !important;
+  }
+}
+
 /* Screen reader only utility */
 .sr-only {
   position: absolute;
@@ -146,7 +223,8 @@ a {
 
 /* Custom animations */
 @keyframes gradient {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 0% 50%;
   }
   50% {
@@ -173,7 +251,7 @@ label[for] {
   @apply text-sm font-medium text-gray-700 dark:text-gray-300;
 }
 
-input[required]:not([type="checkbox"]):not([type="radio"]),
+input[required]:not([type='checkbox']):not([type='radio']),
 textarea[required],
 select[required] {
   @apply border-l-4 border-l-indigo-300;
@@ -188,7 +266,7 @@ select:focus {
 /* Better form validation styles */
 input:invalid:not(:placeholder-shown),
 textarea:invalid:not(:placeholder-shown),
-select:invalid:not(:has(option[value=""])) {
+select:invalid:not(:has(option[value=''])) {
   @apply border-red-300 ring-red-500/20;
 }
 
@@ -202,29 +280,29 @@ textarea:valid:not(:placeholder-shown) {
    ============================================== */
 
 /* Asegurar contraste mínimo WCAG AA (4.5:1) en todos los botones */
-button, 
-[role="button"],
+button,
+[role='button'],
 .btn,
-input[type="submit"],
-input[type="button"],
-input[type="reset"] {
+input[type='submit'],
+input[type='button'],
+input[type='reset'] {
   /* Mejorar la tipografía para legibilidad */
   font-weight: 600;
   letter-spacing: 0.025em;
-  
+
   /* Asegurar que el texto no sea transparente */
   color: inherit;
-  
+
   /* Cursor pointer para indicar interactividad */
   cursor: pointer;
-  
+
   /* Transiciones suaves */
   transition: all 0.2s ease-in-out;
 }
 
 /* Mejorar visibilidad en estado hover */
-button:hover:not(:disabled), 
-[role="button"]:hover:not(:disabled),
+button:hover:not(:disabled),
+[role='button']:hover:not(:disabled),
 .btn:hover:not(:disabled) {
   /* Aumentar contraste en hover */
   filter: brightness(0.95) contrast(1.1);
@@ -232,18 +310,18 @@ button:hover:not(:disabled),
 }
 
 /* Estado activo/pressed */
-button:active:not(:disabled), 
-[role="button"]:active:not(:disabled),
+button:active:not(:disabled),
+[role='button']:active:not(:disabled),
 .btn:active:not(:disabled) {
   transform: translateY(0) scale(0.98);
 }
 
 /* Botones deshabilitados con mejor contraste */
 button:disabled,
-[role="button"]:disabled,
+[role='button']:disabled,
 .btn:disabled,
 button[disabled],
-[role="button"][disabled] {
+[role='button'][disabled] {
   opacity: 0.6 !important;
   cursor: not-allowed !important;
   background-color: #9ca3af !important;
@@ -253,7 +331,7 @@ button[disabled],
 
 /* Foco visible para accesibilidad de teclado */
 button:focus-visible,
-[role="button"]:focus-visible,
+[role='button']:focus-visible,
 .btn:focus-visible {
   outline: 3px solid #4f46e5 !important;
   outline-offset: 2px !important;
@@ -261,21 +339,21 @@ button:focus-visible,
 }
 
 /* Modo oscuro - asegurar contraste alto */
-.dark button:not([class*="bg-"]),
-.dark [role="button"]:not([class*="bg-"]) {
+.dark button:not([class*='bg-']),
+.dark [role='button']:not([class*='bg-']) {
   background-color: #4f46e5;
   color: #ffffff;
 }
 
 .dark button:disabled,
-.dark [role="button"]:disabled {
+.dark [role='button']:disabled {
   background-color: #374151 !important;
   color: #9ca3af !important;
 }
 
 /* Botones con iconos - mejorar alineación visual */
 button svg,
-[role="button"] svg,
+[role='button'] svg,
 .btn svg {
   flex-shrink: 0;
 }
@@ -283,7 +361,7 @@ button svg,
 /* Asegurar que botones pequeños sean accesibles (mínimo 44x44px táctil) */
 @media (pointer: coarse) {
   button,
-  [role="button"],
+  [role='button'],
   .btn {
     min-height: 44px;
     min-width: 44px;
@@ -292,104 +370,104 @@ button svg,
 }
 
 /* Botones de acción primaria - máximo contraste */
-button[class*="primary"],
-button[class*="indigo"],
+button[class*='primary'],
+button[class*='indigo'],
 .btn-primary {
   background-color: #4338ca !important;
   color: #ffffff !important;
   border: 2px solid transparent;
 }
 
-button[class*="primary"]:hover,
-button[class*="indigo"]:hover,
+button[class*='primary']:hover,
+button[class*='indigo']:hover,
 .btn-primary:hover {
   background-color: #3730a3 !important;
   border-color: #312e81;
 }
 
 /* Botones de acción secundaria */
-button[class*="secondary"],
-button[class*="gray"],
+button[class*='secondary'],
+button[class*='gray'],
 .btn-secondary {
   background-color: #e5e7eb !important;
   color: #1f2937 !important;
   border: 2px solid #d1d5db;
 }
 
-button[class*="secondary"]:hover,
-button[class*="gray"]:hover,
+button[class*='secondary']:hover,
+button[class*='gray']:hover,
 .btn-secondary:hover {
   background-color: #d1d5db !important;
   color: #111827 !important;
 }
 
 /* Botones destructivos */
-button[class*="destructive"],
-button[class*="danger"],
-button[class*="red"],
+button[class*='destructive'],
+button[class*='danger'],
+button[class*='red'],
 .btn-danger,
 .btn-destructive {
   background-color: #dc2626 !important;
   color: #ffffff !important;
 }
 
-button[class*="destructive"]:hover,
-button[class*="danger"]:hover,
-button[class*="red"]:hover,
+button[class*='destructive']:hover,
+button[class*='danger']:hover,
+button[class*='red']:hover,
 .btn-danger:hover,
 .btn-destructive:hover {
   background-color: #b91c1c !important;
 }
 
 /* Botones de éxito */
-button[class*="success"],
-button[class*="green"],
+button[class*='success'],
+button[class*='green'],
 .btn-success {
   background-color: #16a34a !important;
   color: #ffffff !important;
 }
 
-button[class*="success"]:hover,
-button[class*="green"]:hover,
+button[class*='success']:hover,
+button[class*='green']:hover,
 .btn-success:hover {
   background-color: #15803d !important;
 }
 
 /* Botones ghost/transparentes - asegurar visibilidad */
-button[class*="ghost"],
+button[class*='ghost'],
 .btn-ghost {
   background-color: transparent !important;
   color: #4338ca !important;
   border: 1px solid transparent;
 }
 
-button[class*="ghost"]:hover,
+button[class*='ghost']:hover,
 .btn-ghost:hover {
   background-color: #eef2ff !important;
   color: #3730a3 !important;
   border-color: #c7d2fe;
 }
 
-.dark button[class*="ghost"],
+.dark button[class*='ghost'],
 .dark .btn-ghost {
   color: #a5b4fc !important;
 }
 
-.dark button[class*="ghost"]:hover,
+.dark button[class*='ghost']:hover,
 .dark .btn-ghost:hover {
   background-color: rgba(79, 70, 229, 0.1) !important;
   color: #c7d2fe !important;
 }
 
 /* Botones outline - mejor contraste */
-button[class*="outline"],
+button[class*='outline'],
 .btn-outline {
   background-color: transparent !important;
   color: #4338ca !important;
   border: 2px solid #4338ca !important;
 }
 
-button[class*="outline"]:hover,
+button[class*='outline']:hover,
 .btn-outline:hover {
   background-color: #eef2ff !important;
   color: #3730a3 !important;
@@ -397,8 +475,8 @@ button[class*="outline"]:hover,
 }
 
 /* Asegurar que los botones en formularios sean visibles */
-form button[type="submit"],
-form input[type="submit"] {
+form button[type='submit'],
+form input[type='submit'] {
   background-color: #4338ca !important;
   color: #ffffff !important;
   font-weight: 600 !important;
@@ -406,20 +484,22 @@ form input[type="submit"] {
   padding: 0.75rem 2rem;
 }
 
-form button[type="submit"]:hover,
-form input[type="submit"]:hover {
+form button[type='submit']:hover,
+form input[type='submit']:hover {
   background-color: #3730a3 !important;
 }
 
 /* Botones en cards y modals - asegurar visibilidad */
-[class*="card"] button,
-[class*="modal"] button,
-[class*="dialog"] button {
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+[class*='card'] button,
+[class*='modal'] button,
+[class*='dialog'] button {
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
 /* Links que funcionan como botones */
-a[role="button"] {
+a[role='button'] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -558,9 +638,9 @@ a:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
-[role="button"]:focus-visible,
-[role="link"]:focus-visible,
-[tabindex]:not([tabindex="-1"]):focus-visible {
+[role='button']:focus-visible,
+[role='link']:focus-visible,
+[tabindex]:not([tabindex='-1']):focus-visible {
   @apply ring-4 ring-indigo-600 ring-offset-4 ring-offset-background outline-none;
 }
 
@@ -586,9 +666,9 @@ select:focus {
 }
 
 /* Error focus state - higher priority */
-input[aria-invalid="true"]:focus,
-textarea[aria-invalid="true"]:focus,
-select[aria-invalid="true"]:focus {
+input[aria-invalid='true']:focus,
+textarea[aria-invalid='true']:focus,
+select[aria-invalid='true']:focus {
   @apply border-red-500 ring-2 ring-red-500/20;
 }
 
@@ -597,7 +677,7 @@ select[aria-invalid="true"]:focus {
   .no-print {
     display: none !important;
   }
-  
+
   body {
     @apply text-black bg-white;
   }
@@ -689,7 +769,6 @@ select[aria-invalid="true"]:focus {
   @apply not-sr-only fixed top-4 left-4 z-50 bg-primary text-primary-foreground px-4 py-2 rounded-md;
 }
 
-
 /* ========================================
    MOBILE-FIRST OPTIMIZATIONS
    Fase 3: Mobile-First UI Implementation
@@ -706,7 +785,9 @@ select[aria-invalid="true"]:focus {
 /* Optimizaciones para pantallas t\u00e1ctiles */
 @media (hover: none) and (pointer: coarse) {
   /* Aumentar \u00e1reas de click en m\u00f3vil */
-  button, a, [role="button"] {
+  button,
+  a,
+  [role='button'] {
     padding: 0.75rem;
   }
 
@@ -735,11 +816,11 @@ select[aria-invalid="true"]:focus {
   }
 
   /* Prevenir zoom en inputs en iOS */
-  input[type="text"],
-  input[type="email"],
-  input[type="tel"],
-  input[type="number"],
-  input[type="password"],
+  input[type='text'],
+  input[type='email'],
+  input[type='tel'],
+  input[type='number'],
+  input[type='password'],
   select,
   textarea {
     font-size: 16px;
@@ -813,7 +894,7 @@ select[aria-invalid="true"]:focus {
   /* Asegurar contraste suficiente */
   button:focus-visible,
   a:focus-visible,
-  [role="button"]:focus-visible {
+  [role='button']:focus-visible {
     outline: 3px solid hsl(var(--ring));
     outline-offset: 2px;
   }
@@ -821,7 +902,7 @@ select[aria-invalid="true"]:focus {
   /* Espaciado generoso entre elementos interactivos */
   button + button,
   a + a,
-  [role="button"] + [role="button"] {
+  [role='button'] + [role='button'] {
     margin-left: 0.5rem;
   }
 }

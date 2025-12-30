@@ -17,40 +17,44 @@ const NAV_ITEMS: NavItem[] = [
   {
     id: 'home',
     label: 'Inicio',
-    href: '/home',
-    icon: <Home className="h-5 w-5" />
+    href: '/dashboard',
+    icon: <Home className="h-5 w-5" />,
   },
   {
     id: 'buildings',
     label: 'Edificios',
     href: '/edificios',
-    icon: <Building2 className="h-5 w-5" />
+    icon: <Building2 className="h-5 w-5" />,
   },
   {
     id: 'contracts',
     label: 'Contratos',
     href: '/contratos',
-    icon: <FileText className="h-5 w-5" />
+    icon: <FileText className="h-5 w-5" />,
   },
   {
     id: 'analytics',
     label: 'Reportes',
     href: '/analytics',
-    icon: <BarChart3 className="h-5 w-5" />
+    icon: <BarChart3 className="h-5 w-5" />,
   },
   {
     id: 'settings',
     label: 'Más',
     href: '/configuracion',
-    icon: <Settings className="h-5 w-5" />
-  }
+    icon: <Settings className="h-5 w-5" />,
+  },
 ];
 
 export function BottomNavigation() {
   const pathname = usePathname();
 
   // No mostrar en páginas de autenticación
-  if (pathname?.startsWith('/login') || pathname?.startsWith('/signup') || pathname?.startsWith('/api/')) {
+  if (
+    pathname?.startsWith('/login') ||
+    pathname?.startsWith('/signup') ||
+    pathname?.startsWith('/api/')
+  ) {
     return null;
   }
 
@@ -58,15 +62,12 @@ export function BottomNavigation() {
     <nav className="bottom-nav lg:hidden">
       {NAV_ITEMS.map((item) => {
         const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
-        
+
         return (
           <Link
             key={item.id}
             href={item.href}
-            className={cn(
-              'bottom-nav-item',
-              isActive && 'active'
-            )}
+            className={cn('bottom-nav-item', isActive && 'active')}
           >
             {item.icon}
             <span>{item.label}</span>
