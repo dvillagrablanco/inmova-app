@@ -26,7 +26,7 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
-    optimizeCss: true,
+    // optimizeCss: true, // DISABLED: Causaba bug donde CSS se carga como <script> en Next.js 15
     optimizePackageImports: ['lucide-react', 'recharts', 'date-fns'],
   },
 
