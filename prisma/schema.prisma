@@ -2931,13 +2931,7 @@ model MorosidadHistorial {
 // ALTA PRIORIDAD 3: FIRMA DIGITAL (SIGNATURIT)
 // ============================================
 
-enum SignatureStatus {
-  pendiente // Enviado pero no firmado
-  firmado // Firmado por todas las partes
-  rechazado // Rechazado por algún firmante
-  cancelado // Cancelado por el administrador
-  expirado // Expiró el plazo
-}
+// Nota: SignatureStatus se define más adelante en el schema (línea 12990)
 
 enum SignerStatus {
   pendiente
@@ -2962,7 +2956,7 @@ model DocumentoFirma {
 
   // Signaturit Integration
   signaturitId String?         @unique // ID del documento en Signaturit
-  estado       SignatureStatus @default(pendiente)
+  estado       SignatureStatus @default(PENDING)
   urlDocumento String?         @db.Text // URL del documento original
   urlFirmado   String?         @db.Text // URL del documento firmado
 
@@ -3037,22 +3031,7 @@ model Firmante {
   @@map("firmantes")
 }
 
-model SignatureWebhook {
-  id           String    @id @default(cuid())
-  signaturitId String // ID del evento en Signaturit
-  tipo         String // "document_completed", "signature_completed", etc.
-  documentoId  String?
-  payload      Json // Payload completo del webhook
-  procesado    Boolean   @default(false)
-  errorProceso String?   @db.Text
-  createdAt    DateTime  @default(now())
-  procesadoEn  DateTime?
-
-  @@index([signaturitId])
-  @@index([tipo])
-  @@index([procesado])
-  @@map("signature_webhooks")
-}
+// Nota: SignatureWebhook se define más adelante en el schema (línea ~13053)
 
 // ============================================
 // ALTA PRIORIDAD 4: OPEN BANKING

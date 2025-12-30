@@ -1,0 +1,2092 @@
+{
+  "routes": [
+    {
+      "route": "Admin - Activity",
+      "url": "/admin/activity",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/activity\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Alertas",
+      "url": "/admin/alertas",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/alertas\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Aprobaciones",
+      "url": "/admin/aprobaciones",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/aprobaciones\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Backup Restore",
+      "url": "/admin/backup-restore",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/backup-restore\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Clientes - Comparar",
+      "url": "/admin/clientes/comparar",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/clientes/comparar\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Clientes",
+      "url": "/admin/clientes",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/clientes\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Configuracion",
+      "url": "/admin/configuracion",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/configuracion\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Dashboard",
+      "url": "/admin/dashboard",
+      "category": "admin",
+      "priority": "high",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/dashboard\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Facturacion B2b",
+      "url": "/admin/facturacion-b2b",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/facturacion-b2b\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Firma Digital",
+      "url": "/admin/firma-digital",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/firma-digital\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Importar",
+      "url": "/admin/importar",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/importar\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Integraciones Contables",
+      "url": "/admin/integraciones-contables",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/integraciones-contables\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Legal",
+      "url": "/admin/legal",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/legal\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Marketplace",
+      "url": "/admin/marketplace",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/marketplace\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Metricas Uso",
+      "url": "/admin/metricas-uso",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/metricas-uso\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Modulos",
+      "url": "/admin/modulos",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/modulos\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Ocr Import",
+      "url": "/admin/ocr-import",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/ocr-import\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Personalizacion",
+      "url": "/admin/personalizacion",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/personalizacion\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Planes",
+      "url": "/admin/planes",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/planes\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Plantillas Sms",
+      "url": "/admin/plantillas-sms",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/plantillas-sms\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Portales Externos",
+      "url": "/admin/portales-externos",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/portales-externos\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Recuperar Contrasena",
+      "url": "/admin/recuperar-contrasena",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/recuperar-contrasena\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Reportes Programados",
+      "url": "/admin/reportes-programados",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/reportes-programados\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Salud Sistema",
+      "url": "/admin/salud-sistema",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/salud-sistema\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Seguridad",
+      "url": "/admin/seguridad",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/seguridad\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Sugerencias",
+      "url": "/admin/sugerencias",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/sugerencias\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin - Usuarios",
+      "url": "/admin/usuarios",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin/usuarios\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Alquiler Tradicional - Warranties",
+      "url": "/alquiler-tradicional/warranties",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/alquiler-tradicional/warranties\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Analytics",
+      "url": "/analytics",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/analytics\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Anuncios",
+      "url": "/anuncios",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/anuncios\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Api Docs.disabled",
+      "url": "/api-docs.disabled",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/api-docs.disabled\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Asistente Ia",
+      "url": "/asistente-ia",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/asistente-ia\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Auditoria",
+      "url": "/auditoria",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/auditoria\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Automatizacion",
+      "url": "/automatizacion",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/automatizacion\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Automatizacion Resumen",
+      "url": "/automatizacion-resumen",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/automatizacion-resumen\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Bi",
+      "url": "/bi",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/bi\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Blockchain",
+      "url": "/blockchain",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/blockchain\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Calendario",
+      "url": "/calendario",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/calendario\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Candidatos - Nuevo",
+      "url": "/candidatos/nuevo",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/candidatos/nuevo\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Candidatos",
+      "url": "/candidatos",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/candidatos\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Certificaciones",
+      "url": "/certificaciones",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/certificaciones\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Chat",
+      "url": "/chat",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/chat\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Comparativa - Homming",
+      "url": "/comparativa/homming",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/comparativa/homming\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Comunidades - Actas",
+      "url": "/comunidades/actas",
+      "category": "comunidades",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/comunidades/actas\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Comunidades - Cumplimiento",
+      "url": "/comunidades/cumplimiento",
+      "category": "comunidades",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/comunidades/cumplimiento\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Comunidades - Cuotas",
+      "url": "/comunidades/cuotas",
+      "category": "comunidades",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/comunidades/cuotas\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Comunidades - Finanzas",
+      "url": "/comunidades/finanzas",
+      "category": "comunidades",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/comunidades/finanzas\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Comunidades - Fondos",
+      "url": "/comunidades/fondos",
+      "category": "comunidades",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/comunidades/fondos\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Comunidades",
+      "url": "/comunidades",
+      "category": "comunidades",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/comunidades\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Comunidades - Presidente",
+      "url": "/comunidades/presidente",
+      "category": "comunidades",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/comunidades/presidente\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Comunidades - Renovaciones",
+      "url": "/comunidades/renovaciones",
+      "category": "comunidades",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/comunidades/renovaciones\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Comunidades - Votaciones",
+      "url": "/comunidades/votaciones",
+      "category": "comunidades",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/comunidades/votaciones\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Comunidad Social",
+      "url": "/comunidad-social",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/comunidad-social\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Configuracion - Integraciones - Stripe",
+      "url": "/configuracion/integraciones/stripe",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/configuracion/integraciones/stripe\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Configuracion - Notificaciones",
+      "url": "/configuracion/notificaciones",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/configuracion/notificaciones\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Configuracion - Ui Mode",
+      "url": "/configuracion/ui-mode",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/configuracion/ui-mode\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Construction - Gantt",
+      "url": "/construction/gantt",
+      "category": "construction",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/construction/gantt\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Construction",
+      "url": "/construction",
+      "category": "construction",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/construction\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Construction - Projects",
+      "url": "/construction/projects",
+      "category": "construction",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/construction/projects\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Construction - Quality Control",
+      "url": "/construction/quality-control",
+      "category": "construction",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/construction/quality-control\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Contabilidad",
+      "url": "/contabilidad",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/contabilidad\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Contratos - Nuevo",
+      "url": "/contratos/nuevo",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/contratos/nuevo\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Contratos",
+      "url": "/contratos",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/contratos\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Crm",
+      "url": "/crm",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/crm\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Cupones",
+      "url": "/cupones",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/cupones\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Dashboard Adaptive",
+      "url": "/dashboard-adaptive",
+      "category": "dashboard",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/dashboard-adaptive\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin Fincas - Comunidades",
+      "url": "/admin-fincas/comunidades",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin-fincas/comunidades\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin Fincas - Facturas",
+      "url": "/admin-fincas/facturas",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin-fincas/facturas\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin Fincas - Informes",
+      "url": "/admin-fincas/informes",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin-fincas/informes\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin Fincas - Libro Caja",
+      "url": "/admin-fincas/libro-caja",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin-fincas/libro-caja\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Admin Fincas",
+      "url": "/admin-fincas",
+      "category": "admin",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/admin-fincas\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Coliving",
+      "url": "/coliving",
+      "category": "coliving",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/coliving\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Dashboard - Community",
+      "url": "/dashboard/community",
+      "category": "dashboard",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/dashboard/community\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Dashboard Propietarios",
+      "url": "/dashboard-propietarios",
+      "category": "dashboard",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/dashboard-propietarios\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Documentos - Buscar",
+      "url": "/documentos/buscar",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/documentos/buscar\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Mensajes",
+      "url": "/mensajes",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/mensajes\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Dashboard",
+      "url": "/dashboard",
+      "category": "dashboard",
+      "priority": "high",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/dashboard\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Reportes - Programados",
+      "url": "/reportes/programados",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/reportes/programados\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Traditional Rental - Communities",
+      "url": "/traditional-rental/communities",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/traditional-rental/communities\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Traditional Rental - Compliance",
+      "url": "/traditional-rental/compliance",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/traditional-rental/compliance\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Traditional Rental",
+      "url": "/traditional-rental",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/traditional-rental\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Traditional Rental - Renewals",
+      "url": "/traditional-rental/renewals",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/traditional-rental/renewals\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Traditional Rental - Treasury",
+      "url": "/traditional-rental/treasury",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/traditional-rental/treasury\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Documentos",
+      "url": "/documentos",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/documentos\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Economia Circular",
+      "url": "/economia-circular",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/economia-circular\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Edificios - Nuevo",
+      "url": "/edificios/nuevo",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/edificios/nuevo\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Edificios - Nuevo Wizard",
+      "url": "/edificios/nuevo-wizard",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/edificios/nuevo-wizard\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Edificios",
+      "url": "/edificios",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/edificios\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Ejemplo Ux",
+      "url": "/ejemplo-ux",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/ejemplo-ux\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Energia",
+      "url": "/energia",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/energia\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Esg",
+      "url": "/esg",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/esg\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Ewoorker - Admin Socio",
+      "url": "/ewoorker/admin-socio",
+      "category": "ewoorker",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/ewoorker/admin-socio\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Ewoorker - Compliance",
+      "url": "/ewoorker/compliance",
+      "category": "ewoorker",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/ewoorker/compliance\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Ewoorker - Dashboard",
+      "url": "/ewoorker/dashboard",
+      "category": "ewoorker",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/ewoorker/dashboard\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Ewoorker - Obras",
+      "url": "/ewoorker/obras",
+      "category": "ewoorker",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/ewoorker/obras\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Ewoorker - Pagos",
+      "url": "/ewoorker/pagos",
+      "category": "ewoorker",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/ewoorker/pagos\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Facturacion",
+      "url": "/facturacion",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/facturacion\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Firma Digital",
+      "url": "/firma-digital",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/firma-digital\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Firma Digital - Templates",
+      "url": "/firma-digital/templates",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/firma-digital/templates\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Flipping - Calculator",
+      "url": "/flipping/calculator",
+      "category": "flipping",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/flipping/calculator\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Flipping - Comparator",
+      "url": "/flipping/comparator",
+      "category": "flipping",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/flipping/comparator\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Flipping - Dashboard",
+      "url": "/flipping/dashboard",
+      "category": "flipping",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/flipping/dashboard\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Flipping",
+      "url": "/flipping",
+      "category": "flipping",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/flipping\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Flipping - Projects",
+      "url": "/flipping/projects",
+      "category": "flipping",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/flipping/projects\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Flipping - Timeline",
+      "url": "/flipping/timeline",
+      "category": "flipping",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/flipping/timeline\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Galerias",
+      "url": "/galerias",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/galerias\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Garajes Trasteros - Nuevo",
+      "url": "/garajes-trasteros/nuevo",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/garajes-trasteros/nuevo\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Garajes Trasteros",
+      "url": "/garajes-trasteros",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/garajes-trasteros\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Gastos",
+      "url": "/gastos",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/gastos\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Guia Ux",
+      "url": "/guia-ux",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/guia-ux\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Home Mobile",
+      "url": "/home-mobile",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/home-mobile\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Incidencias",
+      "url": "/incidencias",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/incidencias\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Inquilinos - Nuevo",
+      "url": "/inquilinos/nuevo",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/inquilinos/nuevo\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Inquilinos",
+      "url": "/inquilinos",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/inquilinos\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Inspecciones",
+      "url": "/inspecciones",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/inspecciones\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    },
+    {
+      "route": "Iot",
+      "url": "/iot",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "error",
+          "message": "Error navegando a la ruta: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://157.180.119.236:3000/iot\", waiting until \"networkidle\"\u001b[22m\n"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error"
+    }
+  ]
+}
