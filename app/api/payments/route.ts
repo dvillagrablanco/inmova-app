@@ -5,10 +5,12 @@ import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
 import { paymentCreateSchema } from '@/lib/validations';
 import { cachedPayments, invalidatePaymentsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
+import { withPaymentRateLimit } from '@/lib/rate-limiting';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
+  return withPaymentRateLimit(req, async () => {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -116,9 +118,11 @@ export async function GET(req: NextRequest) {
     logger.error('Error fetching payments:', error);
     return NextResponse.json({ error: 'Error al obtener pagos' }, { status: 500 });
   }
+  });
 }
 
 export async function POST(req: NextRequest) {
+  return withPaymentRateLimit(req, async () => {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -175,4 +179,5 @@ export async function POST(req: NextRequest) {
     logError(error, { context: 'Error creating payment' });
     return NextResponse.json({ error: 'Error al crear pago' }, { status: 500 });
   }
+  });
 }

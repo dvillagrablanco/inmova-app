@@ -12892,3 +12892,192 @@ model PomelliSocialPost {
   @@map("pomelli_social_posts")
 }
 
+
+// ============================================================================
+// VALORACIÓN AUTOMÁTICA DE PROPIEDADES CON IA
+// ============================================================================
+
+enum PropertyCondition {
+  NEW
+  EXCELLENT
+  GOOD
+  FAIR
+  NEEDS_RENOVATION
+  POOR
+}
+
+enum MarketTrend {
+  UP
+  STABLE
+  DOWN
+}
+
+model PropertyValuation {
+  id         String   @id @default(cuid())
+  companyId  String
+  unitId     String?  // Opcional: puede ser valoración de propiedad no ingresada
+  
+  // Input features - Características de la propiedad
+  address         String
+  postalCode      String
+  city            String
+  province        String?
+  neighborhood    String?
+  squareMeters    Float
+  rooms           Int
+  bathrooms       Int
+  floor           Int?
+  hasElevator     Boolean   @default(false)
+  hasParking      Boolean   @default(false)
+  hasGarden       Boolean   @default(false)
+  hasPool         Boolean   @default(false)
+  hasTerrace      Boolean   @default(false)
+  hasGarage       Boolean   @default(false)
+  condition       PropertyCondition @default(GOOD)
+  yearBuilt       Int?
+  
+  // Market data - Datos del mercado
+  avgPricePerM2   Float?
+  marketTrend     MarketTrend?
+  comparables     Json?     // Array de propiedades similares
+  
+  // Output - Resultado de la valoración
+  estimatedValue  Float     // Precio estimado
+  confidenceScore Float     // 0-100
+  minValue        Float     // Rango mínimo
+  maxValue        Float     // Rango máximo
+  pricePerM2      Float?    // Precio por m² calculado
+  
+  // IA Details
+  model           String    // "claude-3-5-sonnet", "gpt-4", etc.
+  reasoning       String?   @db.Text  // Explicación de la valoración
+  keyFactors      String[]  @default([])  // Factores clave que influyeron
+  
+  // ROI & Investment
+  estimatedRent   Float?    // Renta mensual estimada
+  estimatedROI    Float?    // ROI anual estimado (%)
+  capRate         Float?    // Capitalization rate
+  
+  // Recommendations
+  recommendations String[]  @default([])  // Recomendaciones para mejorar valor
+  
+  // Metadata
+  requestedBy     String    // User ID
+  ipAddress       String?
+  userAgent       String?   @db.Text
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  unit            Unit?    @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  user            User     @relation(fields: [requestedBy], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([unitId])
+  @@index([requestedBy])
+  @@index([city])
+  @@index([postalCode])
+  @@index([createdAt])
+  @@map("property_valuations")
+}
+
+// ============================================================================
+// FIRMA DIGITAL DE CONTRATOS
+// ============================================================================
+
+enum SignatureStatus {
+  PENDING
+  SIGNED
+  DECLINED
+  EXPIRED
+  CANCELLED
+}
+
+enum SignatureProvider {
+  DOCUSIGN
+  SIGNATURIT
+  SELF_HOSTED
+}
+
+model ContractSignature {
+  id         String   @id @default(cuid())
+  companyId  String
+  contractId String   // ID del contrato a firmar
+  
+  // Proveedor de firma
+  provider          SignatureProvider @default(SIGNATURIT)
+  externalId        String?          // ID en sistema externo (DocuSign/Signaturit)
+  
+  // Documento
+  documentUrl       String           // URL del PDF del contrato
+  documentName      String
+  documentHash      String?          // SHA-256 hash para verificación
+  
+  // Firmantes (signatories)
+  signatories       Json             // Array de firmantes: [{ name, email, role, status, signedAt }]
+  
+  // Estado
+  status            SignatureStatus  @default(PENDING)
+  
+  // URLs
+  signingUrl        String?          @db.Text  // URL para firmar (DocuSign/Signaturit)
+  completedUrl      String?          @db.Text  // URL del documento firmado
+  
+  // Notificaciones
+  emailSubject      String?
+  emailMessage      String?          @db.Text
+  remindersSent     Int              @default(0)
+  
+  // Fechas
+  sentAt            DateTime?
+  expiresAt         DateTime?
+  completedAt       DateTime?
+  
+  // Metadata
+  ipAddress         String?
+  userAgent         String?          @db.Text
+  requestedBy       String           // User ID
+  
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  // Relations
+  company           Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contract          Contract         @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  user              User             @relation(fields: [requestedBy], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([contractId])
+  @@index([status])
+  @@index([provider])
+  @@index([expiresAt])
+  @@map("contract_signatures")
+}
+
+model SignatureWebhook {
+  id               String   @id @default(cuid())
+  signatureId      String
+  provider         SignatureProvider
+  
+  // Evento
+  event            String   // 'signature_completed', 'signature_declined', 'reminder_sent', etc.
+  externalEventId  String?
+  
+  // Payload
+  rawPayload       Json
+  
+  // Procesamiento
+  processed        Boolean  @default(false)
+  processedAt      DateTime?
+  errorMessage     String?  @db.Text
+  
+  createdAt        DateTime @default(now())
+  
+  @@index([signatureId])
+  @@index([provider])
+  @@index([event])
+  @@index([processed])
+  @@map("signature_webhooks")
+}
