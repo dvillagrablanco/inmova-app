@@ -1,7 +1,6 @@
 generator client {
     provider = "prisma-client-js"
     binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
-    output = "/home/ubuntu/homming_vidaro/nextjs_space/node_modules/.prisma/client"
 }
 
 datasource db {
@@ -351,6 +350,10 @@ model User {
   // assignedCRMTasks      CRMTask[]       @relation("TaskAssignee")
   pomelliPosts          PomelliSocialPost[]
 
+  // Nuevas funcionalidades IA (Valoración, Firma Digital)
+  propertyValuations PropertyValuation[] @relation("UserPropertyValuations")
+  contractSignatures ContractSignature[] @relation("UserContractSignatures")
+
   @@index([email])
   @@index([companyId])
   @@index([role, companyId])
@@ -542,6 +545,10 @@ model Tenant {
   serviceRatings      ServiceRating[]
   onboarding          TenantOnboarding?
 
+  // Nuevas funcionalidades IA (Matching, Preferencias)
+  tenantPropertyMatches TenantPropertyMatch[] @relation("TenantMatches")
+  tenantPreferences     TenantPreferences?    @relation("TenantPreferences")
+
   // Coliving
   colivingProfile         ColivingProfile?
   colivingServiceBookings ColivingServiceBooking[]
@@ -652,6 +659,10 @@ model Unit {
   colivingCheckInOuts ColivingCheckInOut[]
   smartLocks          SmartLock[]
 
+  // Nuevas funcionalidades IA (Valoración, Matching)
+  propertyValuations    PropertyValuation[]   @relation("UnitPropertyValuations")
+  tenantPropertyMatches TenantPropertyMatch[] @relation("UnitTenantMatches")
+
   @@unique([buildingId, numero])
   // Índices optimizados para consultas frecuentes
   @@index([buildingId, estado])
@@ -701,6 +712,9 @@ model Contract {
 
   // Gestión de Comunidades
   depositManagement DepositManagement?
+
+  // Nuevas funcionalidades IA (Firma Digital)
+  contractSignatures ContractSignature[] @relation("ContractSignatures")
 
   // Índices optimizados para consultas frecuentes
   @@index([tenantId, estado])
@@ -1282,6 +1296,11 @@ model Company {
   providerAvailability      ProviderAvailability[]
   providerInvoices          ProviderInvoice[]
   providerInvoicePayments   ProviderInvoicePayment[]
+
+  // Nuevas funcionalidades IA (Valoración, Firma Digital, Matching)
+  propertyValuations    PropertyValuation[]   @relation("CompanyPropertyValuations")
+  contractSignatures    ContractSignature[]   @relation("CompanyContractSignatures")
+  tenantPropertyMatches TenantPropertyMatch[] @relation("CompanyTenantMatches")
   providerQuotes            ProviderQuote[]
   providerReviews           ProviderReview[]
   providerChatConversations ProviderChatConversation[]
@@ -12949,9 +12968,9 @@ model PropertyValuation {
   updatedAt       DateTime  @updatedAt
   
   // Relations
-  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  unit            Unit?    @relation(fields: [unitId], references: [id], onDelete: SetNull)
-  user            User     @relation(fields: [requestedBy], references: [id], onDelete: Cascade)
+  company         Company  @relation("CompanyPropertyValuations", fields: [companyId], references: [id], onDelete: Cascade)
+  unit            Unit?    @relation("UnitPropertyValuations", fields: [unitId], references: [id], onDelete: SetNull)
+  user            User     @relation("UserPropertyValuations", fields: [requestedBy], references: [id], onDelete: Cascade)
   
   @@index([companyId])
   @@index([unitId])
@@ -13023,9 +13042,9 @@ model ContractSignature {
   updatedAt         DateTime         @updatedAt
   
   // Relations
-  company           Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  contract          Contract         @relation(fields: [contractId], references: [id], onDelete: Cascade)
-  user              User             @relation(fields: [requestedBy], references: [id], onDelete: Cascade)
+  company           Company          @relation("CompanyContractSignatures", fields: [companyId], references: [id], onDelete: Cascade)
+  contract          Contract         @relation("ContractSignatures", fields: [contractId], references: [id], onDelete: Cascade)
+  user              User             @relation("UserContractSignatures", fields: [requestedBy], references: [id], onDelete: Cascade)
   
   @@index([companyId])
   @@index([contractId])
@@ -13094,9 +13113,9 @@ model TenantPropertyMatch {
   updatedAt         DateTime @updatedAt
   
   // Relations
-  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  unit              Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  company           Company  @relation("CompanyTenantMatches", fields: [companyId], references: [id], onDelete: Cascade)
+  tenant            Tenant   @relation("TenantMatches", fields: [tenantId], references: [id], onDelete: Cascade)
+  unit              Unit     @relation("UnitTenantMatches", fields: [unitId], references: [id], onDelete: Cascade)
   
   @@unique([tenantId, unitId])
   @@index([companyId])
@@ -13158,7 +13177,7 @@ model TenantPreferences {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   
-  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant            Tenant   @relation("TenantPreferences", fields: [tenantId], references: [id], onDelete: Cascade)
   
   @@index([tenantId])
   @@map("tenant_preferences")
