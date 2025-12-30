@@ -396,94 +396,151 @@ async function performLogin(
 
   const loginUrl = `${CONFIG.baseURL}/login`;
   
-  // Navigate to login
-  const { success: navSuccess } = await navigateWithTimeout(page, loginUrl, errorCollector);
-  
-  if (!navSuccess) {
-    console.error('❌ Failed to load login page');
-    return false;
-  }
-
-  // Wait for form
   try {
-    await page.waitForSelector('input[name="email"]', { timeout: 5000 });
-  } catch {
-    errorCollector.add({
-      type: 'exception',
-      severity: 'critical',
-      url: loginUrl,
-      message: 'Login form not found',
-    });
-    return false;
-  }
-
-  // Fill credentials
-  await page.fill('input[name="email"]', CONFIG.testUser);
-  await page.fill('input[name="password"]', CONFIG.testPassword);
-
-  // Setup response interceptor for login
-  const loginPromise = page.waitForResponse(
-    response => response.url().includes('/api/auth/') && response.request().method() === 'POST',
-    { timeout: 10000 }
-  ).catch(() => null);
-
-  // Submit
-  await page.click('button[type="submit"]');
-
-  // Wait for response
-  const loginResponse = await loginPromise;
-
-  if (loginResponse) {
-    const status = loginResponse.status();
-
-    if (status === 401 || status === 403) {
-      let body = 'N/A';
-      try {
-        body = await loginResponse.text();
-      } catch {}
-
-      errorCollector.add({
-        type: 'http',
-        severity: 'critical',
-        url: loginUrl,
-        message: `Login failed with status ${status}`,
-        details: {
-          status,
-          body: body.substring(0, 500),
-        },
-      });
-
-      console.error(`❌ Login failed: ${status}`);
-      console.error(`   Message: ${body.substring(0, 200)}`);
+    // Step 1: Navigate to login page to get cookies/tokens
+    console.log('   → Loading login page...');
+    const { success: navSuccess } = await navigateWithTimeout(page, loginUrl, errorCollector);
+    
+    if (!navSuccess) {
+      console.error('❌ Failed to load login page');
       return false;
     }
-  }
 
-  // Wait for redirect or dashboard
-  try {
-    await page.waitForURL(url => url.includes('/dashboard') || url.includes('/admin'), {
-      timeout: 10000,
-    });
+    // Wait for form and page to be fully ready
+    await page.waitForSelector('input[name="email"]', { timeout: 5000 });
+    await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     
-    console.log('✅ Login successful');
-    return true;
-  } catch {
-    // Check if we're still on login page
+    console.log('   → Form detected, filling credentials...');
+    
+    // Step 2: Fill credentials
+    await page.fill('input[name="email"]', CONFIG.testUser);
+    await page.fill('input[name="password"]', CONFIG.testPassword);
+    
+    // Step 3: Setup response interceptors
+    const authResponsePromise = page.waitForResponse(
+      response => {
+        const url = response.url();
+        return (url.includes('/api/auth/callback') || url.includes('/api/auth/signin')) 
+          && response.request().method() === 'POST';
+      },
+      { timeout: 15000 }
+    ).catch(() => null);
+
+    const navigationPromise = page.waitForURL(
+      url => url.includes('/dashboard') || url.includes('/admin') || url.includes('/portal'),
+      { timeout: 15000 }
+    ).catch(() => null);
+
+    console.log('   → Submitting form...');
+    
+    // Step 4: Submit form
+    await page.click('button[type="submit"]');
+    
+    // Step 5: Wait for auth response
+    const authResponse = await authResponsePromise;
+    
+    if (authResponse) {
+      const status = authResponse.status();
+      console.log(`   → Auth response: ${status}`);
+
+      // Check for auth errors
+      if (status === 401 || status === 403) {
+        let body = 'N/A';
+        try {
+          const text = await authResponse.text();
+          body = text;
+          
+          // Try to parse JSON error
+          try {
+            const json = JSON.parse(text);
+            if (json.error) body = json.error;
+          } catch {}
+        } catch {}
+
+        errorCollector.add({
+          type: 'http',
+          severity: 'critical',
+          url: loginUrl,
+          message: `Login failed with status ${status}`,
+          details: {
+            status,
+            body: body.substring(0, 500),
+          },
+        });
+
+        console.error(`❌ Login failed: ${status}`);
+        console.error(`   Message: ${body.substring(0, 200)}`);
+        return false;
+      }
+      
+      // For 200/302 responses, check if it's an error response
+      if (status === 200) {
+        try {
+          const json = await authResponse.json();
+          // NextAuth returns {url: "signin?error=..."} on error
+          if (json.url && json.url.includes('error=')) {
+            console.error('❌ Login failed - auth returned error URL');
+            errorCollector.add({
+              type: 'http',
+              severity: 'critical',
+              url: loginUrl,
+              message: 'Login failed - error in response',
+              details: { response: json },
+            });
+            return false;
+          }
+        } catch {}
+      }
+    }
+    
+    // Step 6: Wait for navigation or check current page
+    await navigationPromise;
+    await page.waitForTimeout(2000); // Give time for any final redirects
+    
     const currentUrl = page.url();
-    if (currentUrl.includes('/login')) {
+    console.log(`   → Current URL: ${currentUrl}`);
+    
+    // Step 7: Determine if login was successful
+    if (currentUrl.includes('/dashboard') || currentUrl.includes('/admin') || currentUrl.includes('/portal')) {
+      console.log('✅ Login successful - redirected to authenticated area');
+      return true;
+    } else if (currentUrl.includes('/login') || currentUrl.includes('/signin')) {
+      // Still on login/signin page = failed
       errorCollector.add({
         type: 'exception',
         severity: 'critical',
         url: loginUrl,
-        message: 'Login failed - still on login page',
+        message: 'Login failed - still on login page after submit',
       });
       console.error('❌ Login failed - redirected back to login');
       return false;
+    } else {
+      // Somewhere else - might be logged in
+      console.log('⚠️  Login completed - unusual redirect (checking...)');
+      
+      // Try to verify by checking for auth-only elements
+      const hasAuthElement = await page.locator('[data-auth="true"]').count().catch(() => 0);
+      const hasLogoutButton = await page.locator('text=/logout|cerrar sesión/i').count().catch(() => 0);
+      
+      if (hasAuthElement > 0 || hasLogoutButton > 0) {
+        console.log('✅ Login successful - auth elements detected');
+        return true;
+      } else {
+        console.log('⚠️  Login status unclear - assuming success');
+        return true;
+      }
     }
-
-    // We might be logged in but no redirect happened
-    console.log('⚠️  Login completed but no redirect detected');
-    return true;
+    
+  } catch (error: any) {
+    errorCollector.add({
+      type: 'exception',
+      severity: 'critical',
+      url: loginUrl,
+      message: `Login error: ${error.message}`,
+      details: { error: error.message, stack: error.stack },
+    });
+    console.error(`❌ Login exception: ${error.message}`);
+    return false;
   }
 }
 
