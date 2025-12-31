@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPrismaClient } from '@/lib/db';
+import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { nanoid } from 'nanoid';
 
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     // Validar datos
     const validated = registerSchema.parse(body);
 
-    const prisma = getPrismaClient();
+    // Using global prisma instance
 
     // Verificar si el email ya existe
     const existingPartner = await prisma.partner.findUnique({

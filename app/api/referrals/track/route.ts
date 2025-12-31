@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPrismaClient } from '@/lib/db';
+import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = trackSchema.parse(body);
 
-    const prisma = getPrismaClient();
+    // Using global prisma instance
 
     // Buscar partner por código
     const partner = await prisma.partner.findUnique({
@@ -96,7 +96,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'trackingId y companyId requeridos' }, { status: 400 });
     }
 
-    const prisma = getPrismaClient();
+    // Using global prisma instance
 
     // Actualizar referral con company real
     const referral = await prisma.referral.update({
