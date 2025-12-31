@@ -78,8 +78,30 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // TODO: Enviar email de bienvenida
-    // TODO: Notificar al admin para aprobar
+    // Send welcome email and admin notification
+    try {
+      const { sendPartnerWelcomeEmail, sendAdminNewPartnerNotification } =
+        await import('@/lib/emails/partner-emails');
+
+      await sendPartnerWelcomeEmail({
+        name: partner.name,
+        email: partner.email,
+        type: partner.type,
+        referralCode: partner.referralCode,
+      });
+
+      await sendAdminNewPartnerNotification({
+        name: partner.name,
+        email: partner.email,
+        type: partner.type,
+        company: partner.company || undefined,
+      });
+
+      // Emails sent successfully
+    } catch (emailError) {
+      console.error('[Partner Registration Email Error]:', emailError);
+      // Continue even if email fails
+    }
 
     return NextResponse.json(
       {
