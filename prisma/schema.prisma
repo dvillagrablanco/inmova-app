@@ -13666,3 +13666,66 @@ model IntegrationTemplate {
   @@map("integration_templates")
 }
 
+// ============================================
+// 🚀 AUTO-GROWTH ENGINE: Social Media Automation
+// ============================================
+
+enum SocialPlatform {
+  LINKEDIN
+  X
+  INSTAGRAM
+  FACEBOOK
+}
+
+enum SocialPostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  FAILED
+}
+
+enum SocialPostTopic {
+  FIRMA_DIGITAL
+  AUTOMATIZACION
+  GESTION_ALQUILERES
+  COLIVING
+  COMUNIDADES
+  ROI_INMOBILIARIO
+  TIEMPO_LIBERTAD
+  ESCALABILIDAD
+  INTEGRACIONES
+  REPORTES_ANALYTICS
+}
+
+model SocialPost {
+  id String @id @default(cuid())
+
+  // Contenido
+  topic       SocialPostTopic
+  platform    SocialPlatform
+  content     String         @db.Text
+  imageUrl    String?
+  imagePrompt String?        @db.Text // Prompt usado para generar la imagen
+
+  // Estado
+  status      SocialPostStatus @default(DRAFT)
+  scheduledAt DateTime?
+  publishedAt DateTime?
+
+  // Metadata
+  engagement  Json? // { likes, comments, shares, impressions }
+  webhookSent Boolean          @default(false)
+  errorLog    String?          @db.Text
+
+  // Audit
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([platform])
+  @@index([topic])
+  @@map("social_posts")
+}
+

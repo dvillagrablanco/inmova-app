@@ -171,6 +171,7 @@
     "@upstash/ratelimit": "^2.0.7",
     "@upstash/redis": "^1.35.7",
     "@vercel/blob": "^2.0.0",
+    "@vercel/og": "^0.8.6",
     "autoprefixer": "10.4.15",
     "axios": "^1.13.2",
     "bcryptjs": "2.4.3",
