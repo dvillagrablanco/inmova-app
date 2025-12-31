@@ -1,7 +1,0 @@
-[main b14e3d13] abc1ec9c-312b-407a-8518-053487082fb4
- 7 files changed, 29 insertions(+), 19831 deletions(-)
- create mode 100644 next.config.js
- mode change 100644 => 120000 nextjs_space/yarn.lock
- create mode 100644 package.json
- create mode 120000 yarn.lock
-###b14e3d138fd4735a5d897399f3b908503d4f6ca2###

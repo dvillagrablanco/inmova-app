@@ -30,21 +30,15 @@ const nextConfig = {
     optimizePackageImports: ['lucide-react', 'recharts', 'date-fns'],
   },
 
-  // Output file tracing (movido de experimental)
-  outputFileTracingRoot: path.join(__dirname, '../'),
-
   // Build configuration
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false, // Habilitar validación de tipos
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false, // Habilitar linting
   },
 
-  // Deployment optimizations para Vercel
-  // output: 'standalone', // Commented out - using npm start instead
-
-  // Image optimization - CRÍTICO: NO desactivar en producción
+  // Image optimization - Optimizado para producción
   images: {
     unoptimized: false,
     formats: ['image/avif', 'image/webp'],
@@ -68,6 +62,11 @@ const nextConfig = {
         hostname: '**.abacusai.app',
       },
     ],
+  },
+
+  // Optimización de generación estática
+  generateBuildId: async () => {
+    return `${Date.now()}`;
   },
 
   // Cache headers for static assets
@@ -106,16 +105,11 @@ const nextConfig = {
   // Compression
   compress: true,
 
-  // Optimización de output file tracing
-  outputFileTracingExcludes: {
-    '*': [
-      'node_modules/@swc/core-linux-x64-gnu',
-      'node_modules/@swc/core-linux-x64-musl',
-      'node_modules/@esbuild/linux-x64',
-      '.git/**',
-      'node_modules/@prisma/engines/**',
-    ],
-  },
+  // Optimización de PoweredByHeader
+  poweredByHeader: false,
+
+  // Optimización de SWC Minify
+  swcMinify: true,
 
   // Webpack optimizations
   webpack: (config, { isServer, webpack }) => {
