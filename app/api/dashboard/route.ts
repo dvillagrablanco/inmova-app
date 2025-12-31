@@ -18,10 +18,12 @@ export async function GET() {
     
     return NextResponse.json(cachedData);
   } catch (error: any) {
-    logger.error('Error fetching dashboard data:', error);
+    // No loggear errores de auth (son normales en prefetch)
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
+    
+    logger.error('Error fetching dashboard data:', error);
     return NextResponse.json({ error: 'Error al obtener datos del dashboard' }, { status: 500 });
   }
 }

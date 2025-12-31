@@ -36,15 +36,30 @@ export function PhotoUploader({
   }, []);
 
   const uploadToS3 = async (file: File): Promise<string> => {
-    // Simular upload a S3 con delay
-    // En producción, aquí iría la lógica real de S3
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Generar URL temporal (en producción sería la URL de S3)
-        const tempUrl = URL.createObjectURL(file);
-        resolve(tempUrl);
-      }, 1000);
-    });
+    // Upload real a S3 vía API
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', propertyId ? `properties/${propertyId}` : 'properties/temp');
+
+    try {
+      const response = await fetch('/api/upload/photos', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al subir archivo');
+      }
+
+      const data = await response.json();
+      return data.url;
+    } catch (error: any) {
+      console.error('Upload to S3 failed:', error);
+      // Fallback a URL temporal si falla
+      toast.error('Error al subir foto, se usará versión temporal');
+      return URL.createObjectURL(file);
+    }
   };
 
   const processFiles = async (files: FileList | File[]) => {

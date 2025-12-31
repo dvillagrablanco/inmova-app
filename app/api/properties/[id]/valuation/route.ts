@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { AIValuationService } from '@/lib/ai-valuation-service';
+import { ValuationCacheService } from '@/lib/valuation-cache-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -122,7 +123,13 @@ export async function GET(
       marketData
     );
 
-    // Guardar valoración en BD (opcional)
+    // 4. Guardar en caché (no bloqueante)
+    ValuationCacheService.set(propertyId, {
+      propertyId,
+      ...valuation,
+    }).catch((err) => console.error('Cache save error:', err));
+
+    // 5. Guardar valoración en BD (histórico)
     try {
       await prisma.propertyValuation.create({
         data: {
