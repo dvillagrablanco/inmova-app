@@ -353,6 +353,9 @@ model User {
   // Nuevas funcionalidades IA (Valoración, Firma Digital)
   propertyValuations PropertyValuation[] @relation("UserPropertyValuations")
   contractSignatures ContractSignature[] @relation("UserContractSignatures")
+  
+  // Partner Program
+  partnerAccount     Partner?
 
   @@index([email])
   @@index([companyId])
@@ -1245,6 +1248,10 @@ model Company {
   strChannelSyncs      STRChannelSync[]       @relation
   flippingProjects     FlippingProject[]      @relation
   constructionProjects ConstructionProject[]  @relation
+  
+  // Partner Program
+  referrals            Referral[]
+  commissions          Commission[]
 
   // Administrador de Fincas
   communityManagements CommunityManagement[] @relation
@@ -13261,5 +13268,203 @@ model WebVitals {
   @@index([rating])
   @@index([url])
   @@map("web_vitals")
+}
+
+// ========================================
+// PARTNER PROGRAM MODELS
+// ========================================
+
+enum PartnerType {
+  BANK                // Banco
+  INSURANCE           // Aseguradora
+  BUSINESS_SCHOOL     // Escuela de negocios
+  REAL_ESTATE         // Inmobiliaria
+  CONSTRUCTION        // Constructora
+  LAW_FIRM            // Despacho abogados
+  OTHER               // Otro
+}
+
+enum PartnerLevel {
+  BRONZE              // 1-10 clientes (20%)
+  SILVER              // 11-25 clientes (25%)
+  GOLD                // 26-50 clientes (30%)
+  PLATINUM            // 51-100 clientes (35%)
+  DIAMOND             // 100+ clientes (40%)
+}
+
+enum PartnerStatus {
+  PENDING_APPROVAL    // Pendiente de aprobación
+  ACTIVE              // Activo
+  SUSPENDED           // Suspendido
+  INACTIVE            // Inactivo
+}
+
+enum CommissionStatus {
+  PENDING             // Pendiente
+  APPROVED            // Aprobado
+  PAID                // Pagado
+  CANCELLED           // Cancelado
+}
+
+enum CommissionType {
+  RECURRING           // Comisión recurrente mensual
+  SIGNUP_BONUS        // Bono de alta
+  PERFORMANCE_BONUS   // Bono de performance (90 días)
+  QUARTERLY_BONUS     // Bono trimestral
+  MULTILEVEL          // Comisión multinivel
+  VERTICAL_BONUS      // Bono por especialización vertical
+}
+
+model Partner {
+  id                  String         @id @default(cuid())
+  
+  // Información básica
+  name                String
+  email               String         @unique
+  phone               String?
+  company             String?
+  website             String?
+  
+  // Tipo y nivel
+  type                PartnerType
+  level               PartnerLevel   @default(BRONZE)
+  status              PartnerStatus  @default(PENDING_APPROVAL)
+  
+  // Link de referido
+  referralCode        String         @unique // Ej: PARTNER123
+  customSlug          String?        @unique // Ej: banco-santander
+  
+  // Estadísticas
+  totalClients        Int            @default(0)
+  activeClients       Int            @default(0)
+  totalEarned         Float          @default(0)
+  monthlyRevenue      Float          @default(0)
+  conversionRate      Float          @default(0) // 0-100
+  
+  // Comisión actual (según nivel)
+  commissionRate      Float          @default(20) // 20-40%
+  
+  // Early adopter bonus
+  earlyAdopterBonus   Boolean        @default(false) // +5% lifetime
+  
+  // Información de pago
+  iban                String?
+  paypalEmail         String?
+  paymentMethod       String?        // BANK_TRANSFER, PAYPAL
+  
+  // Cuenta de usuario asociada (opcional)
+  userId              String?        @unique
+  user                User?          @relation(fields: [userId], references: [id])
+  
+  // Partner que lo refirió (multinivel)
+  referredById        String?
+  referredBy          Partner?       @relation("PartnerReferrals", fields: [referredById], references: [id])
+  referrals           Partner[]      @relation("PartnerReferrals")
+  
+  // Relaciones
+  referredClients     Referral[]
+  commissions         Commission[]
+  
+  // Timestamps
+  approvedAt          DateTime?
+  lastActivityAt      DateTime?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  
+  @@index([email])
+  @@index([referralCode])
+  @@index([type])
+  @@index([level])
+  @@index([status])
+  @@index([referredById])
+  @@map("partners")
+}
+
+model Referral {
+  id                  String         @id @default(cuid())
+  
+  // Partner que refirió
+  partnerId           String
+  partner             Partner        @relation(fields: [partnerId], references: [id])
+  
+  // Cliente referido
+  companyId           String
+  company             Company        @relation(fields: [companyId], references: [id])
+  
+  // Tracking
+  referralCode        String         // Código usado
+  clickedAt           DateTime?      // Cuándo hizo click
+  signedUpAt          DateTime?      // Cuándo se registró
+  activatedAt         DateTime?      // Cuándo activó cuenta (primer pago)
+  
+  // Metadata
+  ipAddress           String?
+  userAgent           String?
+  source              String?        // utm_source
+  medium              String?        // utm_medium
+  campaign            String?        // utm_campaign
+  
+  // Estado
+  status              String         @default("CLICKED") // CLICKED, SIGNED_UP, ACTIVE, CANCELLED
+  
+  // Plan contratado
+  plan                String?        // Starter, Professional, Enterprise
+  monthlyValue        Float?         // Valor mensual del plan
+  
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  
+  @@index([partnerId])
+  @@index([companyId])
+  @@index([referralCode])
+  @@index([status])
+  @@map("referrals")
+}
+
+model Commission {
+  id                  String            @id @default(cuid())
+  
+  // Partner que recibe la comisión
+  partnerId           String
+  partner             Partner           @relation(fields: [partnerId], references: [id])
+  
+  // Tipo y monto
+  type                CommissionType
+  amount              Float
+  currency            String            @default("EUR")
+  
+  // Cliente que generó la comisión
+  companyId           String
+  company             Company           @relation(fields: [companyId], references: [id])
+  
+  // Periodo (para comisiones recurrentes)
+  periodStart         DateTime?
+  periodEnd           DateTime?
+  
+  // Estado
+  status              CommissionStatus  @default(PENDING)
+  
+  // Pago
+  paidAt              DateTime?
+  paymentMethod       String?
+  transactionId       String?
+  
+  // Metadata
+  description         String?
+  notes               String?           @db.Text
+  
+  // Comisión multinivel (si aplica)
+  multilevelFrom      String?           // ID del partner que generó el cliente original
+  multilevelLevel     Int?              // 1, 2, o 3
+  
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  
+  @@index([partnerId])
+  @@index([companyId])
+  @@index([status])
+  @@index([type])
+  @@index([periodStart, periodEnd])
+  @@map("commissions")
 }
 

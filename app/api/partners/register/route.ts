@@ -1,78 +1,117 @@
 import { NextRequest, NextResponse } from 'next/server';
-import logger from '@/lib/logger';
-import { prisma } from '@/lib/db';
-import bcrypt from 'bcryptjs';
+import { getPrismaClient } from '@/lib/db';
+import { z } from 'zod';
+import { nanoid } from 'nanoid';
 
 export const dynamic = 'force-dynamic';
 
-// POST /api/partners/register - Registro de nuevo Partner
+const registerSchema = z.object({
+  name: z.string().min(2, 'Nombre mínimo 2 caracteres'),
+  email: z.string().email('Email inválido'),
+  phone: z.string().optional(),
+  company: z.string().optional(),
+  website: z.string().url().optional().or(z.literal('')),
+  type: z.enum([
+    'BANK',
+    'INSURANCE',
+    'BUSINESS_SCHOOL',
+    'REAL_ESTATE',
+    'CONSTRUCTION',
+    'LAW_FIRM',
+    'OTHER',
+  ]),
+});
+
 export async function POST(request: NextRequest) {
   try {
-    const data = await request.json();
-    const {
-      nombre,
-      razonSocial,
-      cif,
-      tipo,
-      contactoNombre,
-      contactoEmail,
-      contactoTelefono,
-      email,
-      password,
-    } = data;
-    // Validaciones básicas
-    if (!nombre || !razonSocial || !cif || !email || !password) {
+    const body = await request.json();
+
+    // Validar datos
+    const validated = registerSchema.parse(body);
+
+    const prisma = getPrismaClient();
+
+    // Verificar si el email ya existe
+    const existingPartner = await prisma.partner.findUnique({
+      where: { email: validated.email },
+    });
+
+    if (existingPartner) {
       return NextResponse.json(
-        { error: 'Faltan campos obligatorios' },
+        { error: 'Este email ya está registrado como partner' },
         { status: 400 }
       );
     }
-    // Verificar si ya existe el Partner
-    const existingPartner = await prisma.partner.findFirst({
-      where: {
-        OR: [
-          { email },
-          { cif },
-          { contactoEmail }
-        ]
-      }
+
+    // Generar código de referido único
+    let referralCode = nanoid(10).toUpperCase();
+    let codeExists = await prisma.partner.findUnique({
+      where: { referralCode },
     });
-    if (existingPartner) {
-      return NextResponse.json(
-        { error: 'Ya existe un Partner con estos datos (email, CIF o contacto)' },
-        { status: 409 }
-      );
+
+    // Regenerar si existe (muy improbable)
+    while (codeExists) {
+      referralCode = nanoid(10).toUpperCase();
+      codeExists = await prisma.partner.findUnique({
+        where: { referralCode },
+      });
     }
-    // Hash de la contraseña
-    const hashedPassword = await bcrypt.hash(password, 10);
-    // Crear el Partner
+
+    // Determinar si es early adopter (primeros 100)
+    const totalPartners = await prisma.partner.count();
+    const earlyAdopterBonus = totalPartners < 100;
+
+    // Crear partner
     const partner = await prisma.partner.create({
       data: {
-        nombre,
-        razonSocial,
-        cif,
-        tipo: tipo || 'OTRO',
-        contactoNombre,
-        contactoEmail,
-        contactoTelefono,
-        email,
-        password: hashedPassword,
-        estado: 'PENDING', // Requiere aprobación
-        activo: false,
-        comisionPorcentaje: 20.0, // 20% inicial
+        name: validated.name,
+        email: validated.email,
+        phone: validated.phone,
+        company: validated.company,
+        website: validated.website || undefined,
+        type: validated.type,
+        referralCode,
+        earlyAdopterBonus,
+        status: 'PENDING_APPROVAL',
+        level: 'BRONZE',
+        commissionRate: earlyAdopterBonus ? 25 : 20, // +5% early adopter
       },
     });
-    // No devolver el password
-    const { password: _, ...partnerWithoutPassword } = partner;
-    return NextResponse.json({
-      message: 'Partner registrado correctamente. Pendiente de aprobación.',
-      partner: partnerWithoutPassword,
-    }, { status: 201 });
-  } catch (error: any) {
-    logger.error('Error registrando Partner:', error);
+
+    // TODO: Enviar email de bienvenida
+    // TODO: Notificar al admin para aprobar
+
     return NextResponse.json(
-      { error: 'Error interno del servidor', details: error?.message },
-      { status: 500 }
+      {
+        success: true,
+        data: {
+          id: partner.id,
+          name: partner.name,
+          email: partner.email,
+          type: partner.type,
+          referralCode: partner.referralCode,
+          earlyAdopterBonus: partner.earlyAdopterBonus,
+          status: partner.status,
+        },
+        message: 'Solicitud de partner recibida. Te contactaremos en 24h.',
+      },
+      { status: 201 }
     );
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          error: 'Datos inválidos',
+          details: error.errors.map((e) => ({
+            field: e.path.join('.'),
+            message: e.message,
+          })),
+        },
+        { status: 400 }
+      );
+    }
+
+    console.error('[Partner Register Error]:', error);
+    return NextResponse.json({ error: 'Error registrando partner' }, { status: 500 });
   }
 }
