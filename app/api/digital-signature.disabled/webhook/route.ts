@@ -7,16 +7,13 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
+
     // Registrar el webhook para debugging (en modo demo no se procesa)
     logger.info('📥 [MODO DEMO] Webhook de firma digital recibido:', body.event);
 
     return NextResponse.json({ received: true, mode: 'demo' });
   } catch (error) {
     logger.error('Error procesando webhook:', error);
-    return NextResponse.json(
-      { error: 'Error procesando webhook' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error procesando webhook' }, { status: 500 });
   }
 }
