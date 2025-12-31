@@ -1,13 +1,16 @@
-import { ComingSoonPage } from "@/components/shared/ComingSoonPage";
+import { ComingSoonPage } from '@/components/shared/ComingSoonPage';
 
 export default function WorkspacePage() {
   return (
     <ComingSoonPage
-      title="Workspace"
-      description="Gestión de espacios de trabajo"
+      title="Espacios de Trabajo"
+      description="Gestión de espacios de coworking y oficinas flexibles"
       expectedFeatures={[
-        "Funcionalidad en desarrollo",
-        "Próximamente disponible",
+        "Gestión de espacios compartidos",
+        "Reservas de salas y puestos",
+        "Membresías y planes",
+        "Control de accesos",
+        "Comunidad de coworkers"
       ]}
     />
   );

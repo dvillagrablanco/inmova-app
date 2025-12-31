@@ -1,13 +1,16 @@
-import { ComingSoonPage } from "@/components/shared/ComingSoonPage";
+import { ComingSoonPage } from '@/components/shared/ComingSoonPage';
 
 export default function WarehousePage() {
   return (
     <ComingSoonPage
-      title="Warehouse"
-      description="Gestión de almacenes"
+      title="Almacén"
+      description="Gestión de almacenes y logística inmobiliaria"
       expectedFeatures={[
-        "Funcionalidad en desarrollo",
-        "Próximamente disponible",
+        "Control de inventario",
+        "Gestión de ubicaciones",
+        "Movimientos de stock",
+        "Órdenes de trabajo",
+        "Trazabilidad completa"
       ]}
     />
   );
