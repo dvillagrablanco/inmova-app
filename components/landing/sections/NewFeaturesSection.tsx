@@ -4,12 +4,12 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Sparkles, 
-  Home, 
-  Users, 
-  Zap, 
-  Calculator, 
+import {
+  Sparkles,
+  Home,
+  Users,
+  Zap,
+  Calculator,
   CalendarClock,
   BarChart3,
   Tag,
@@ -17,100 +17,114 @@ import {
   Clock,
   Target,
   Gift,
-  CheckCircle2
+  CheckCircle2,
+  Shield,
+  Landmark,
+  GraduationCap,
+  UserCheck,
+  Hammer,
+  FileCheck,
+  Euro,
+  Building2,
 } from 'lucide-react';
 
-interface Feature {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}
-
-const roomRentalFeatures: Feature[] = [
+const newModules = [
   {
-    icon: <Calculator className="h-5 w-5" />,
-    title: 'Prorrateo Automático',
-    description: 'Distribuye automáticamente luz, agua y gas por habitación o persona'
+    icon: Home,
+    title: 'Room Rental PRO',
+    desc: 'Gestión avanzada de coliving y alquiler por habitaciones',
+    features: [
+      'Prorrateo automático de suministros',
+      'Calendario de limpieza',
+      'Reglas de convivencia',
+      'Dashboard especializado',
+    ],
+    gradient: 'from-green-500 to-emerald-600',
+    stats: { value1: '100', label1: 'Habitaciones', value2: '10h', label2: 'Ahorradas/mes' },
+    href: '/room-rental',
   },
   {
-    icon: <CalendarClock className="h-5 w-5" />,
-    title: 'Calendario de Limpieza',
-    description: 'Programa y gestiona la limpieza de habitaciones y espacios comunes'
+    icon: Tag,
+    title: 'Cupones & Promociones',
+    desc: 'Marketing automatizado con descuentos inteligentes',
+    features: [
+      'Descuentos % o fijos',
+      'Límites de uso configurables',
+      'Validación en tiempo real',
+      'Analytics de conversión',
+    ],
+    gradient: 'from-purple-500 to-pink-600',
+    stats: { value1: '+30%', label1: 'Conversión', value2: '4x', label2: 'ROI' },
+    href: '/promociones',
   },
   {
-    icon: <Users className="h-5 w-5" />,
-    title: 'Reglas de Co-living',
-    description: 'Define y aplica reglas personalizadas para cada propiedad compartida'
+    icon: Shield,
+    title: 'Módulo de Seguros',
+    desc: 'Gestión completa de pólizas y siniestros',
+    features: [
+      'Alertas de vencimiento',
+      'Gestión de siniestros',
+      'Analytics avanzados',
+      'Exportación de reportes',
+    ],
+    gradient: 'from-blue-600 to-cyan-600',
+    stats: { value1: '100%', label1: 'Compliance', value2: '0', label2: 'Pólizas vencidas' },
+    href: '/seguros',
   },
   {
-    icon: <Home className="h-5 w-5" />,
-    title: 'Espacios Comunes',
-    description: 'Gestiona salón, cocina, baños compartidos y otros espacios'
+    icon: UserCheck,
+    title: 'Gestión de Visitas',
+    desc: 'Organiza visitas con confirmaciones automáticas',
+    features: [
+      'Calendario integrado',
+      'Confirmaciones SMS',
+      'Tracking de estado',
+      'Historial completo',
+    ],
+    gradient: 'from-indigo-600 to-purple-600',
+    stats: { value1: '0', label1: 'Olvidos', value2: '100%', label2: 'Confirmadas' },
+    href: '/visitas',
   },
   {
-    icon: <BarChart3 className="h-5 w-5" />,
-    title: 'Dashboard Especializado',
-    description: 'Vista 360º con ocupación, ingresos y estadísticas por habitación'
+    icon: Users,
+    title: 'Programa de Partners',
+    desc: 'Alianzas con bancos, aseguradoras y escuelas',
+    features: [
+      'Hipotecas preferenciales',
+      'Seguros ventajosos',
+      'Formación especializada',
+      'Beneficios exclusivos',
+    ],
+    gradient: 'from-pink-600 to-rose-600',
+    stats: { value1: '15+', label1: 'Partners', value2: '100%', label2: 'Gratis' },
+    href: '/partners',
   },
   {
-    icon: <Clock className="h-5 w-5" />,
-    title: 'Ahorra 10h/mes',
-    description: 'Elimina cálculos manuales y gestiona hasta 100 habitaciones fácilmente'
-  }
+    icon: Hammer,
+    title: 'ewoorker (B2B Construcción)',
+    desc: 'Plataforma para subcontratación segura en obras',
+    features: [
+      'Compliance Ley 32/2006',
+      'Escrow de pagos',
+      'Marketplace de obras',
+      'Libro digital',
+    ],
+    gradient: 'from-orange-600 to-yellow-500',
+    stats: { value1: '2.5K', label1: 'Empresas', value2: '€12M', label2: 'Facturado' },
+    href: '/ewoorker-landing',
+    badge: 'PLATAFORMA B2B',
+  },
 ];
 
-const couponSystemFeatures: Feature[] = [
+const allInOneFeatures = [
   {
-    icon: <Tag className="h-5 w-5" />,
-    title: 'Cupones Flexibles',
-    description: 'Crea descuentos por porcentaje o monto fijo con total control'
+    icon: Leaf,
+    title: 'ESG & Sostenibilidad',
+    desc: 'Reportes de huella de carbono y compliance europeo',
   },
-  {
-    icon: <Target className="h-5 w-5" />,
-    title: 'Límites Inteligentes',
-    description: 'Define usos máximos, validez temporal y restricciones por usuario'
-  },
-  {
-    icon: <Zap className="h-5 w-5" />,
-    title: 'Validación en Tiempo Real',
-    description: 'El sistema valida automáticamente elegibilidad y condiciones'
-  },
-  {
-    icon: <BarChart3 className="h-5 w-5" />,
-    title: 'Panel de Estadísticas',
-    description: 'Monitorea conversión, ingresos y usuarios únicos en tiempo real'
-  },
-  {
-    icon: <TrendingUp className="h-5 w-5" />,
-    title: 'ROI Comprobado',
-    description: '25-35% aumento en conversión de leads, €4 generados por cada €1 de descuento'
-  },
-  {
-    icon: <Gift className="h-5 w-5" />,
-    title: 'Campañas Automatizadas',
-    description: 'Lanza promociones estacionales y ofertas flash sin esfuerzo manual'
-  }
-];
-
-const useCases = [
-  {
-    type: 'Coliving Urbano',
-    problem: 'Calcular facturas de luz manualmente para 15 inquilinos',
-    solution: 'INMOVA prorratea automáticamente por habitación en 3 clics',
-    savings: 'Ahorra 8h/mes'
-  },
-  {
-    type: 'Residencia Estudiantil',
-    problem: 'Gestionar 50 habitaciones con contratos escalonados',
-    solution: 'Dashboard unificado con ocupación, vencimientos y alertas',
-    savings: 'Visibilidad total'
-  },
-  {
-    type: 'Agencia Inmobiliaria',
-    problem: 'Lanzar campaña de descuento para inquilinos nuevos',
-    solution: 'Sistema de cupones con límites y tracking de conversión',
-    savings: '+30% leads'
-  }
+  { icon: Building2, title: 'Marketplace B2C', desc: 'Servicios para inquilinos verificados' },
+  { icon: DollarSign, title: 'Pricing Dinámico IA', desc: 'Optimiza tarifas automáticamente' },
+  { icon: FileCheck, title: 'Firma Digital', desc: 'Contratos firmados electrónicamente' },
 ];
 
 export function NewFeaturesSection() {
@@ -127,199 +141,124 @@ export function NewFeaturesSection() {
         <div className="text-center mb-16">
           <Badge className="mb-4 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200 px-6 py-3 text-base font-bold">
             <Sparkles className="h-5 w-5 mr-2 inline" />
-            NOVEDADES Q4 2024
+            NOVEDADES 2025
           </Badge>
           <h2 className="text-4xl md:text-6xl font-black mb-6 bg-gradient-to-r from-gray-900 via-indigo-900 to-violet-900 bg-clip-text text-transparent">
-            Las Características que Revolucionan el Sector
+            6 Módulos Nuevos que Revolucionan la Industria
           </h2>
           <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            Dos <strong className="text-indigo-600">killer features</strong> que ningún competidor tiene y que ya están ayudando a cientos de gestoras a ahorrar tiempo y aumentar ingresos.
+            Desde <strong className="text-indigo-600">gestión de seguros</strong> hasta{' '}
+            <strong className="text-orange-600">construcción B2B</strong>. Inmova cubre todo el
+            ecosistema PropTech.
           </p>
         </div>
 
-        {/* Dos Columnas Principales */}
+        {/* Grid de Nuevos Módulos */}
         <div className="grid lg:grid-cols-2 gap-8 mb-16">
-          {/* Room Rental PRO */}
-          <Card className="group hover:shadow-2xl transition-all duration-300 border-2 border-green-200 hover:border-green-400 bg-white relative overflow-hidden">
-            {/* Badge de NUEVO */}
-            <div className="absolute -top-3 -right-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-2 rotate-12 shadow-lg">
-              <span className="text-xs font-black">✨ NUEVO</span>
-            </div>
+          {newModules.map((module, i) => {
+            const Icon = module.icon;
+            return (
+              <Card
+                key={i}
+                className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-indigo-300 bg-white relative overflow-hidden"
+              >
+                {/* Badge si tiene */}
+                {module.badge && (
+                  <div className="absolute top-4 right-4 z-10">
+                    <Badge className="bg-orange-500 text-white">{module.badge}</Badge>
+                  </div>
+                )}
 
-            <CardHeader className="pb-6 pt-8">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-4 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl text-white shadow-lg group-hover:scale-110 transition-transform">
-                  <Home className="h-8 w-8" />
-                </div>
-                <div>
-                  <h3 className="text-3xl font-black text-gray-900">Room Rental PRO</h3>
-                  <p className="text-sm text-green-600 font-bold">Gestión Avanzada de Coliving</p>
-                </div>
-              </div>
-              <p className="text-lg text-gray-700 leading-relaxed">
-                El <strong>primer y único sistema</strong> del mercado español que automatiza completamente la gestión de alquiler por habitaciones con <strong>prorrateo inteligente de suministros</strong>.
-              </p>
-            </CardHeader>
-
-            <CardContent className="space-y-6">
-              {/* Features */}
-              <div className="grid sm:grid-cols-2 gap-3">
-                {roomRentalFeatures.map((feature, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-green-50 hover:bg-green-100 transition-colors">
-                    <div className="p-2 bg-green-100 rounded-lg text-green-600 shrink-0">
-                      {feature.icon}
+                <CardHeader className="pb-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div
+                      className={`p-4 bg-gradient-to-r ${module.gradient} rounded-2xl text-white shadow-lg group-hover:scale-110 transition-transform`}
+                    >
+                      <Icon className="h-8 w-8" />
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-gray-900">{feature.title}</div>
-                      <div className="text-xs text-gray-600">{feature.description}</div>
+                      <h3 className="text-2xl font-black text-gray-900">{module.title}</h3>
+                      <p className="text-sm text-gray-600">{module.desc}</p>
                     </div>
                   </div>
-                ))}
-              </div>
+                </CardHeader>
 
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
-                <div className="text-center">
-                  <div className="text-3xl font-black text-green-600">100</div>
-                  <div className="text-xs text-gray-600 font-semibold">Habitaciones</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-black text-green-600">10h</div>
-                  <div className="text-xs text-gray-600 font-semibold">Ahorradas/mes</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-black text-green-600">0€</div>
-                  <div className="text-xs text-gray-600 font-semibold">Errores manuales</div>
-                </div>
-              </div>
+                <CardContent className="space-y-6">
+                  {/* Features */}
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {module.features.map((feature, j) => (
+                      <div
+                        key={j}
+                        className="flex items-start gap-2 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                      >
+                        <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
 
-              {/* CTA */}
-              <div className="pt-4">
-                <Link href="/room-rental" className="block">
-                  <Button className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-6 text-lg shadow-lg hover:shadow-xl transition-all group">
-                    <span>Ver Room Rental PRO en Acción</span>
-                    <Sparkles className="ml-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
-                  </Button>
-                </Link>
-                <p className="text-xs text-center text-gray-500 mt-2">
-                  Incluido en planes <strong>Professional</strong> y <strong>Business</strong>
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Sistema de Cupones */}
-          <Card className="group hover:shadow-2xl transition-all duration-300 border-2 border-purple-200 hover:border-purple-400 bg-white relative overflow-hidden">
-            {/* Badge de NUEVO */}
-            <div className="absolute -top-3 -right-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white px-8 py-2 rotate-12 shadow-lg">
-              <span className="text-xs font-black">✨ NUEVO</span>
-            </div>
-
-            <CardHeader className="pb-6 pt-8">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-4 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl text-white shadow-lg group-hover:scale-110 transition-transform">
-                  <Tag className="h-8 w-8" />
-                </div>
-                <div>
-                  <h3 className="text-3xl font-black text-gray-900">Sistema de Cupones</h3>
-                  <p className="text-sm text-purple-600 font-bold">Marketing Automatizado Inteligente</p>
-                </div>
-              </div>
-              <p className="text-lg text-gray-700 leading-relaxed">
-                Lanza <strong>campañas de descuento profesionales</strong> con tracking en tiempo real, límites de uso y estadísticas avanzadas. Integrado con tu sistema de pagos.
-              </p>
-            </CardHeader>
-
-            <CardContent className="space-y-6">
-              {/* Features */}
-              <div className="grid sm:grid-cols-2 gap-3">
-                {couponSystemFeatures.map((feature, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors">
-                    <div className="p-2 bg-purple-100 rounded-lg text-purple-600 shrink-0">
-                      {feature.icon}
+                  {/* Stats */}
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl">
+                    <div className="text-center">
+                      <div className="text-3xl font-black text-blue-600">{module.stats.value1}</div>
+                      <div className="text-xs text-gray-600 font-semibold">
+                        {module.stats.label1}
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-sm font-bold text-gray-900">{feature.title}</div>
-                      <div className="text-xs text-gray-600">{feature.description}</div>
+                    <div className="text-center">
+                      <div className="text-3xl font-black text-blue-600">{module.stats.value2}</div>
+                      <div className="text-xs text-gray-600 font-semibold">
+                        {module.stats.label2}
+                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
 
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl">
-                <div className="text-center">
-                  <div className="text-3xl font-black text-purple-600">+30%</div>
-                  <div className="text-xs text-gray-600 font-semibold">Conversión leads</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-black text-purple-600">4x</div>
-                  <div className="text-xs text-gray-600 font-semibold">ROI promedio</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-black text-purple-600">∞</div>
-                  <div className="text-xs text-gray-600 font-semibold">Cupones posibles</div>
-                </div>
-              </div>
-
-              {/* CTA */}
-              <div className="pt-4">
-                <Link href="/cupones" className="block">
-                  <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-6 text-lg shadow-lg hover:shadow-xl transition-all group">
-                    <span>Crear Tu Primera Campaña</span>
-                    <Gift className="ml-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
-                  </Button>
-                </Link>
-                <p className="text-xs text-center text-gray-500 mt-2">
-                  <strong>INCLUIDO GRATIS</strong> en plan Business • Add-on €29/mes en Professional
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+                  {/* CTA */}
+                  <Link href={module.href}>
+                    <Button
+                      className={`w-full bg-gradient-to-r ${module.gradient} text-white font-bold py-6 shadow-lg hover:shadow-xl transition-all group/btn`}
+                    >
+                      Explorar Módulo
+                      <Sparkles className="ml-2 h-5 w-5 group-hover/btn:rotate-12 transition-transform" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
-        {/* Casos de Uso Reales */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
-          <h3 className="text-3xl font-black text-center mb-2">
-            Casos de Uso Reales
-          </h3>
-          <p className="text-center text-gray-600 mb-8">
-            Cómo nuestros clientes están usando estas características para transformar su negocio
-          </p>
+        {/* Módulos Adicionales */}
+        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 mb-12">
+          <h3 className="text-3xl font-black text-center mb-8">Y Muchos Más Módulos Incluidos</h3>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {useCases.map((useCase, i) => (
-              <div key={i} className="p-6 rounded-xl border-2 border-gray-200 hover:border-indigo-300 hover:shadow-lg transition-all">
-                <Badge className="mb-3 bg-indigo-100 text-indigo-700 border-indigo-200">
-                  {useCase.type}
-                </Badge>
-                <div className="space-y-3">
-                  <div>
-                    <div className="text-xs font-bold text-gray-500 mb-1">❌ ANTES:</div>
-                    <div className="text-sm text-gray-700">{useCase.problem}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-green-600 mb-1">✅ AHORA:</div>
-                    <div className="text-sm text-gray-900 font-semibold">{useCase.solution}</div>
-                  </div>
-                  <div className="pt-2 border-t border-gray-200">
-                    <div className="text-sm font-black text-indigo-600">
-                      📈 {useCase.savings}
-                    </div>
-                  </div>
+          <div className="grid md:grid-cols-4 gap-6">
+            {allInOneFeatures.map((feature, i) => {
+              const Icon = feature.icon;
+              return (
+                <div
+                  key={i}
+                  className="text-center p-6 rounded-xl border-2 border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all"
+                >
+                  <Icon className="h-10 w-10 text-blue-600 mx-auto mb-3" />
+                  <h4 className="font-bold text-gray-900 mb-2">{feature.title}</h4>
+                  <p className="text-sm text-gray-600">{feature.desc}</p>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         {/* CTA Final */}
-        <div className="text-center mt-16">
+        <div className="text-center">
           <p className="text-lg text-gray-600 mb-6">
-            ¿Quieres ver estas características en acción?
+            ¿Quieres ver todas estas características en acción?
           </p>
           <Link href="/register">
-            <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold px-8 py-6 text-lg shadow-2xl hover:shadow-3xl transition-all hover:scale-105">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold px-8 py-6 text-lg shadow-2xl hover:shadow-3xl transition-all hover:scale-105"
+            >
               Prueba Gratis 30 Días
               <Sparkles className="ml-2 h-6 w-6" />
             </Button>

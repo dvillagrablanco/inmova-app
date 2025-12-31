@@ -4,10 +4,13 @@ import dynamic from 'next/dynamic';
 import { StructuredData } from '@/components/StructuredData';
 
 // Lazy load de componentes pesados
-const LandingChatbot = dynamic(() => import('@/components/LandingChatbot').then(mod => ({ default: mod.LandingChatbot })), {
-  ssr: false,
-  loading: () => null
-});
+const LandingChatbot = dynamic(
+  () => import('@/components/LandingChatbot').then((mod) => ({ default: mod.LandingChatbot })),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+);
 
 // Componentes modulares de la landing page
 import { Navigation } from '@/components/landing/sections/Navigation';
@@ -15,6 +18,7 @@ import { HeroSectionSegmentado } from '@/components/landing/sections/HeroSection
 import { PromoBanner } from '@/components/landing/sections/PromoBanner';
 import { PromoSection } from '@/components/landing/sections/PromoSection';
 import { StatsSection } from '@/components/landing/sections/StatsSection';
+import { EcosystemSection } from '@/components/landing/sections/EcosystemSection';
 import { MarketPotentialSection } from '@/components/landing/sections/MarketPotentialSection';
 import { FeaturesSection } from '@/components/landing/sections/FeaturesSection';
 import { NewFeaturesSection } from '@/components/landing/sections/NewFeaturesSection';
@@ -26,7 +30,6 @@ import { IntegrationsSection } from '@/components/landing/sections/IntegrationsS
 import { Footer } from '@/components/landing/sections/Footer';
 
 export function LandingPageContent() {
-
   return (
     <>
       <StructuredData />
@@ -45,6 +48,9 @@ export function LandingPageContent() {
 
         {/* Stats Section */}
         <StatsSection />
+
+        {/* Ecosystem Highlight (NUEVO) */}
+        <EcosystemSection />
 
         {/* Market Potential Section */}
         <MarketPotentialSection />

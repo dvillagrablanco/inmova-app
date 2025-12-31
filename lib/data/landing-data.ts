@@ -185,11 +185,12 @@ export const navigationItems: NavItem[] = [
 // ============================================================================
 
 export const heroData = {
-  eyebrow: '🏠 LA PLATAFORMA PROPTECH #1 EN ESPAÑA',
-  headline: 'Gestiona tus Propiedades en Piloto Automático y Aumenta tu ROI un 40%',
-  subheadline: '88 módulos todo-en-uno | Sin permanencia | Desde €149/mes',
+  eyebrow: '🏠 EL ECOSISTEMA PROPTECH MÁS COMPLETO DE ESPAÑA',
+  headline: 'Del Alquiler a la Construcción: Todo tu Negocio Inmobiliario en Una Plataforma',
+  subheadline:
+    '7 verticales + 20 módulos | Desde alquiler hasta construcción B2B | Sin permanencia',
   description:
-    'La única plataforma que centraliza, automatiza y optimiza toda tu gestión inmobiliaria. Elimina 5 herramientas, ahorra 8 horas/semana y reduce morosidad 80%.',
+    'Inmova cubre todo el ciclo de vida inmobiliario: alquiler, coliving, construcción (ewoorker), seguros, partners estratégicos y más. Elimina 5-7 herramientas, ahorra 10+ horas/semana.',
   primaryCTA: {
     text: '🚀 Prueba GRATIS 30 Días',
     subtext: 'Sin tarjeta · Setup en 10 min',
@@ -217,12 +218,12 @@ export const heroData = {
 // ============================================================================
 
 export const socialProofStats: Stat[] = [
-  { icon: 'Trophy', label: '#1 PropTech España' },
-  { icon: 'Users', label: '500+ clientes activos' },
+  { icon: 'Trophy', label: '#1 Ecosistema PropTech' },
+  { icon: 'Users', label: '3,000+ usuarios activos' },
   { icon: 'Star', label: '4.8/5 estrellas' },
-  { icon: 'Euro', label: '€2.5M gestionados/mes' },
-  { icon: 'Zap', label: '99.9% uptime' },
-  { icon: 'Shield', label: 'ISO 27001 certificado' },
+  { icon: 'Euro', label: '€15M+ gestionados/mes' },
+  { icon: 'Building2', label: '7 verticales' },
+  { icon: 'Zap', label: '20+ módulos' },
 ];
 
 // ============================================================================
@@ -503,6 +504,64 @@ export const personaTabs: PersonaTab[] = [
     },
   },
   {
+    id: 'constructores',
+    label: '🏗️ Constructores',
+    icon: 'Hammer',
+    headline: 'Para Constructores que Necesitan Subcontratar con Seguridad',
+    features: [
+      {
+        icon: 'Shield',
+        title: 'Compliance Ley 32/2006',
+        description:
+          'Libro de subcontratación digital automático. Evita sanciones y mantén todos tus documentos al día.',
+        metric: '100% legal',
+      },
+      {
+        icon: 'Euro',
+        title: 'Sistema Escrow de Pagos',
+        description:
+          'Pago seguro con retención de fondos. Paga solo cuando el trabajo esté perfecto.',
+        metric: '0% riesgo',
+      },
+      {
+        icon: 'Users',
+        title: 'Marketplace de Subcontratistas',
+        description:
+          'Encuentra profesionales verificados con REA. Más de 500 obras activas cada semana.',
+        metric: '2.5K empresas',
+      },
+      {
+        icon: 'FileCheck',
+        title: 'Gestión Documental',
+        description: 'REA, TC1, TC2, Seguros. Alertas automáticas de vencimiento.',
+        metric: '0 docs vencidos',
+      },
+      {
+        icon: 'BarChart3',
+        title: 'Control Total de Obra',
+        description: 'Certificaciones digitales, partes diarios, mediciones con evidencia.',
+        metric: 'Transparencia 100%',
+      },
+      {
+        icon: 'Star',
+        title: 'Sistema de Reviews',
+        description: 'Valora subcontratistas y construye tu reputación profesional.',
+        metric: '4.8/5 media',
+      },
+    ],
+    pricing: {
+      plan: 'CAPATAZ / CONSTRUCTOR',
+      price: 49,
+      savings: 'Planes desde €49/mes',
+      roi: 'Escrow + Compliance',
+    },
+    cta: {
+      text: 'Explorar ewoorker →',
+      href: '/ewoorker-landing',
+      variant: 'default',
+    },
+  },
+  {
     id: 'inversores',
     label: '💼 Inversores',
     icon: 'Briefcase',
@@ -648,14 +707,14 @@ export function calculateROI(inputs: {
 export const comparisonData: ComparisonRow[] = [
   {
     feature: 'Módulos incluidos',
-    inmova: { value: '88', highlight: true, icon: '✅' },
+    inmova: { value: '100+', highlight: true, icon: '✅' },
     homming: { value: '35' },
     rentger: { value: '42' },
     buildium: { value: '28' },
   },
   {
     feature: 'Verticales de negocio',
-    inmova: { value: '7', highlight: true, icon: '✅' },
+    inmova: { value: '7 + B2B', highlight: true, icon: '✅' },
     homming: { value: '2' },
     rentger: { value: '3' },
     buildium: { value: '2' },
@@ -1102,6 +1161,7 @@ export const footerSections: Record<string, FooterSection> = {
       { label: 'Para Agentes', href: '/agentes' },
       { label: 'Para Coliving', href: '/coliving' },
       { label: 'Para Admin Fincas', href: '/admin-fincas' },
+      { label: 'Para Construcción (ewoorker)', href: '/ewoorker-landing' },
     ],
   },
   resources: {
@@ -1121,7 +1181,10 @@ export const footerSections: Record<string, FooterSection> = {
       { label: 'Contacto', href: '/contact' },
       { label: 'Careers', href: '/careers' },
       { label: 'Prensa', href: '/press' },
-      { label: 'Partners', href: '/partners' },
+      { label: 'Programa de Partners', href: '/partners' },
+      { label: 'Partners Bancos', href: '/partners/bancos' },
+      { label: 'Partners Aseguradoras', href: '/partners/aseguradoras' },
+      { label: 'Partners Escuelas', href: '/partners/escuelas' },
     ],
   },
   legal: {
@@ -1170,14 +1233,15 @@ export const trustBadges = [
 // ============================================================================
 
 export const seoMetadata = {
-  title: 'INMOVA - Plataforma PropTech #1 | Gestión Inmobiliaria Inteligente',
+  title: 'INMOVA - Ecosistema PropTech Completo | Alquiler + Construcción + Partners',
   description:
-    'Gestiona tus propiedades en piloto automático con INMOVA. 88 módulos, IA integrada, desde €149/mes. ROI en 60 días. ✓ 500+ clientes ✓ 4.8/5 ⭐ ✓ Prueba gratis 30 días.',
+    'El ecosistema PropTech más completo: Alquiler, Coliving, Construcción B2B (ewoorker), Seguros, Partners. 7 verticales + 20 módulos. ✓ 3,000+ usuarios ✓ 4.8/5 ⭐ ✓ Prueba gratis 30 días.',
   keywords:
-    'software gestión inmobiliaria, proptech españa, gestión alquileres, crm inmobiliario, software propietarios, gestión inquilinos, alternativa homming, software agentes inmobiliarios',
+    'software gestión inmobiliaria, proptech españa, gestión alquileres, crm inmobiliario, software propietarios, gestión inquilinos, alternativa homming, software agentes inmobiliarios, construcción B2B, ewoorker, seguros inmobiliarios, partners inmobiliarios',
   openGraph: {
-    title: 'INMOVA - Gestiona tus Propiedades en Piloto Automático',
-    description: '88 módulos todo-en-uno | ROI en 60 días | Desde €149/mes | 500+ clientes confían',
+    title: 'INMOVA - Del Alquiler a la Construcción: Ecosistema PropTech Completo',
+    description:
+      '7 verticales + 20 módulos | Alquiler, Coliving, Construcción B2B | ROI en 60 días | 3,000+ usuarios',
     image: 'https://inmovaapp.com/og-image.jpg',
     type: 'website',
     url: 'https://inmovaapp.com',
