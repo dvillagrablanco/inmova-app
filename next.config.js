@@ -61,6 +61,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: '**.abacusai.app',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.abacus.ai',
+      },
     ],
   },
 
