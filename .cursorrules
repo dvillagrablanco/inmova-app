@@ -3146,6 +3146,578 @@ const worker = new Worker('social-media', async (job) => {
 
 ---
 
+## 🚀 MOTOR DE CRECIMIENTO SAAS (MARKETING AUTÓNOMO)
+
+### 1. IDENTIDAD VISUAL & BRANDING (Estilo Homming/Rentger)
+
+**Concepto**: No vendemos "pisos", vendemos **Control, Tiempo y Rentabilidad**.
+
+#### Estética Generativa
+
+```typescript
+// 📁 app/api/og/property/route.tsx
+import { ImageResponse } from '@vercel/og';
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const property = JSON.parse(searchParams.get('data') || '{}');
+
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          width: '100%',
+          height: '100%',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          padding: '80px',
+        }}
+      >
+        {/* Mockup de Dashboard (CSS) */}
+        <div
+          style={{
+            display: 'flex',
+            background: 'white',
+            borderRadius: '20px',
+            padding: '40px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          }}
+        >
+          {/* Gráfico de barras ascendente */}
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+            <div style={{ width: '40px', height: '80px', background: '#10b981' }} />
+            <div style={{ width: '40px', height: '120px', background: '#10b981' }} />
+            <div style={{ width: '40px', height: '160px', background: '#10b981' }} />
+            <div style={{ width: '40px', height: '200px', background: '#10b981' }} />
+          </div>
+
+          {/* Tipografía masiva */}
+          <div style={{ marginLeft: '60px' }}>
+            <h1 style={{ fontSize: '72px', fontWeight: 900, margin: 0 }}>
+              {property.revenue}€
+            </h1>
+            <p style={{ fontSize: '32px', color: '#6b7280', margin: 0 }}>
+              Ingresos este mes
+            </p>
+          </div>
+        </div>
+
+        {/* Footer con logo */}
+        <div
+          style={{
+            display: 'flex',
+            marginTop: 'auto',
+            color: 'white',
+            fontSize: '28px',
+            fontWeight: 700,
+          }}
+        >
+          INMOVA — Control Total
+        </div>
+      </div>
+    ),
+    {
+      width: 1200,
+      height: 630,
+    }
+  );
+}
+```
+
+**Reglas Estrictas**:
+- ❌ **PROHIBIDO**: Fotos de stock genéricas (gente dándose la mano, apretones de manos)
+- ✅ **OBLIGATORIO**: 
+  - Representaciones abstractas de la UI (Mockups de móvil/dashboard hechos con CSS)
+  - Gráficos de barras ascendentes (verde #10b981)
+  - Tipografía sans-serif masiva sobre fondos sólidos o degradados corporativos
+- ✅ **OBJETIVO**: Transmitir tecnología puntera y limpieza visual
+
+---
+
+### 2. ESTRATEGIA DE COPYWRITING (Multi-Plataforma)
+
+El sistema debe generar variaciones específicas para cada red:
+
+#### LinkedIn (Thought Leadership)
+
+**Tono**: Profesional, enfocado en negocio, escalabilidad y problemas del sector inmobiliario.
+
+**Estructura**:
+1. **Gancho** (primera línea potente)
+2. **Problema** (pain point del sector)
+3. **Solución Inmova** (sin ser vendedor)
+4. **Reflexión** (llamada a la acción sutil)
+
+```typescript
+// 📁 lib/marketing/linkedin-copywriter.ts
+export function generateLinkedInPost(topic: 'automation' | 'scale' | 'time') {
+  const templates = {
+    automation: `La gestión inmobiliaria tradicional consume 15h/semana en tareas repetitivas.
+
+El problema: 
+→ Emails manuales a inquilinos
+→ Excel para seguimiento de pagos
+→ WhatsApp para coordinar mantenimiento
+
+El resultado: Menos tiempo para hacer crecer tu cartera.
+
+¿La alternativa?
+Automatización inteligente que te devuelve esas 15 horas.
+
+No se trata de "más tecnología", se trata de recuperar el control de tu tiempo.
+
+¿Cuántas horas dedicas a tareas que podrían automatizarse?`,
+
+    scale: `De 10 a 50 propiedades: el salto que rompe cualquier sistema casero.
+
+He visto gestores brillantes colapsar al escalar porque:
+→ Excel ya no da más de sí
+→ Contratar un asistente no resuelve el caos
+→ Los errores humanos se multiplican
+
+La clave no es trabajar más duro.
+Es trabajar con sistemas que escalen contigo.
+
+Inmova gestiona 500 unidades con el mismo esfuerzo que 50.
+
+¿Estás limitando tu crecimiento por tu sistema de gestión?`,
+
+    time: `Pregunta honesta: ¿Cuánto tiempo tardas en cerrar un nuevo inquilino?
+
+Proceso tradicional:
+→ Publicar en 5 portales (1h)
+→ Coordinar visitas (2h de ida y vuelta)
+→ Revisar documentación (3h)
+→ Firmar contrato (1h + reunión)
+
+Total: 7 horas. Por UN inquilino.
+
+Con automatización:
+→ Publicación multi-portal (5 min)
+→ Visitas autoguiadas
+→ Validación documental automática
+→ Firma digital
+
+Total: 30 minutos.
+
+No es magia. Es optimización.
+
+¿Cuánto vale tu tiempo?`,
+  };
+
+  return templates[topic];
+}
+```
+
+#### X/Twitter (Punchy)
+
+**Tono**: Directo, frases cortas, hilos (threads) sobre productividad y gestión.
+
+**Reglas**:
+- Sin hashtags excesivos (máximo 2)
+- Primera línea = gancho
+- Thread de 3-5 tweets máximo
+
+```typescript
+// 📁 lib/marketing/twitter-copywriter.ts
+export function generateTwitterThread(topic: string) {
+  const threads = {
+    automation: [
+      '¿Cuántas horas pierdes enviando emails a inquilinos? 🕐',
+      'La media en España: 8h/semana.\n\nTareas repetitivas:\n→ Recordatorios de pago\n→ Avisos de mantenimiento\n→ Renovaciones de contrato',
+      'Solución simple: Automatiza.\n\n1 email → 100 emails\nMismo esfuerzo.',
+      '¿El resultado?\n\n8 horas recuperadas cada semana.\n\n= Tiempo para escalar tu cartera.\n\n#PropTech #Automatización',
+    ],
+
+    scale: [
+      'De 5 a 50 propiedades en 2 años. 📈\n\nLo que nadie te cuenta:',
+      'El problema NO es conseguir más propiedades.\n\nEl problema es gestionarlas sin colapsar.',
+      'Excel → Caos\nAsistente → Caro\nSistema manual → No escala',
+      'La solución:\n\nSistema que crece contigo.\nAutomáticamente.\n\nSin contratar más gente.',
+    ],
+  };
+
+  return threads[topic];
+}
+```
+
+#### Instagram (Aspiracional/Visual)
+
+**Tono**: Enfocado en el estilo de vida que consigues al automatizar (libertad).
+
+**Reglas**:
+- Imagen: Mockup de app + texto overlay
+- Copy: Beneficio emocional > Features técnicos
+- Hashtags: 5-10 relevantes
+
+```typescript
+// 📁 lib/marketing/instagram-copywriter.ts
+export function generateInstagramPost(theme: 'freedom' | 'growth' | 'control') {
+  const posts = {
+    freedom: {
+      caption: `Imagina gestionar 20 propiedades desde la playa. 🏖️
+
+No es un sueño.
+Es automatización.
+
+→ Pagos automatizados
+→ Inquilinos notificados
+→ Mantenimiento programado
+
+Todo desde tu móvil.
+
+Tu negocio inmobiliario ya no te ata a una oficina.
+
+#PropTech #LibertadFinanciera #GestionInmobiliaria #Automatizacion #NegocioDigital #RealEstate #Emprendedor #TiempoLibre`,
+      imagePrompt: 'Mockup de iPhone con dashboard de Inmova + playa de fondo',
+    },
+
+    growth: {
+      caption: `De 5 a 50 propiedades en 18 meses. ✨
+
+Sin contratar asistentes.
+Sin caos.
+Sin perder el control.
+
+¿El secreto?
+Un sistema que escala CONTIGO.
+
+Inmova gestiona 500 unidades con el mismo esfuerzo que 10.
+
+¿Cuál es tu límite?
+
+#PropTech #Escalabilidad #GestionInmobiliaria #Inversion #RealEstate #Rentabilidad #NegocioInmobiliario`,
+      imagePrompt: 'Gráfico de barras creciente + mockup dashboard',
+    },
+  };
+
+  return posts[theme];
+}
+```
+
+---
+
+### 3. PROTOCOLO DE AUTOMATIZACIÓN (The Dispatcher)
+
+#### Arquitectura del Sistema
+
+```typescript
+// 📁 lib/marketing/content-dispatcher.ts
+
+interface MarketingPayload {
+  platform: 'linkedin' | 'twitter' | 'instagram' | 'facebook';
+  content: string;
+  imageUrl?: string;
+  scheduledFor?: Date;
+  metadata?: {
+    topic?: string;
+    campaign?: string;
+    audience?: string;
+  };
+}
+
+export class ContentDispatcher {
+  private webhookUrl: string;
+  private webhookSecret: string;
+
+  constructor() {
+    this.webhookUrl = process.env.MARKETING_WEBHOOK_URL!;
+    this.webhookSecret = process.env.MARKETING_WEBHOOK_SECRET!;
+  }
+
+  /**
+   * Despacha contenido a plataformas externas vía webhook seguro
+   * NO conecta directamente con APIs de redes sociales
+   */
+  async dispatch(payload: MarketingPayload): Promise<boolean> {
+    try {
+      // 1. Generar firma HMAC
+      const signature = this.generateSignature(payload);
+
+      // 2. Enviar a webhook (n8n/Make/Metricool)
+      const response = await fetch(this.webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Inmova-Signature': signature,
+          'X-Inmova-Timestamp': Date.now().toString(),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Webhook failed: ${response.statusText}`);
+      }
+
+      // 3. Log para auditoría
+      await prisma.marketingLog.create({
+        data: {
+          platform: payload.platform,
+          content: payload.content,
+          scheduledFor: payload.scheduledFor,
+          status: 'dispatched',
+          webhookResponse: await response.json(),
+        },
+      });
+
+      return true;
+    } catch (error) {
+      console.error('[ContentDispatcher] Error:', error);
+      
+      // Log de error
+      await prisma.marketingLog.create({
+        data: {
+          platform: payload.platform,
+          content: payload.content,
+          status: 'failed',
+          errorMessage: String(error),
+        },
+      });
+
+      return false;
+    }
+  }
+
+  private generateSignature(payload: MarketingPayload): string {
+    const crypto = require('crypto');
+    const data = JSON.stringify(payload);
+    return crypto
+      .createHmac('sha256', this.webhookSecret)
+      .update(data)
+      .digest('hex');
+  }
+}
+```
+
+#### Triggers Automáticos (Cron Jobs)
+
+```typescript
+// 📁 app/api/cron/marketing-automation/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { ContentDispatcher } from '@/lib/marketing/content-dispatcher';
+import { generateLinkedInPost } from '@/lib/marketing/linkedin-copywriter';
+import { generateTwitterThread } from '@/lib/marketing/twitter-copywriter';
+
+export const dynamic = 'force-dynamic';
+
+export async function POST(req: NextRequest) {
+  try {
+    // Verificar cron secret
+    const authHeader = req.headers.get('authorization');
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const dispatcher = new ContentDispatcher();
+
+    // 1. LinkedIn Post (Lunes, Miércoles, Viernes a las 9 AM)
+    if (shouldPostLinkedIn()) {
+      const topic = selectRandomTopic(['automation', 'scale', 'time']);
+      const content = generateLinkedInPost(topic);
+      const imageUrl = await generateOgImage({ type: 'dashboard', topic });
+
+      await dispatcher.dispatch({
+        platform: 'linkedin',
+        content,
+        imageUrl,
+        scheduledFor: getNextBusinessHour(9), // 9 AM siguiente día hábil
+        metadata: { topic, campaign: 'thought-leadership' },
+      });
+    }
+
+    // 2. Twitter Thread (Martes, Jueves a las 12 PM)
+    if (shouldPostTwitter()) {
+      const topic = selectRandomTopic(['automation', 'scale']);
+      const thread = generateTwitterThread(topic);
+
+      await dispatcher.dispatch({
+        platform: 'twitter',
+        content: thread.join('\n\n'),
+        scheduledFor: getNextBusinessHour(12),
+        metadata: { topic, campaign: 'threads' },
+      });
+    }
+
+    // 3. Instagram Post (Lunes, Jueves a las 6 PM)
+    if (shouldPostInstagram()) {
+      const theme = selectRandomTheme(['freedom', 'growth', 'control']);
+      const post = generateInstagramPost(theme);
+
+      await dispatcher.dispatch({
+        platform: 'instagram',
+        content: post.caption,
+        imageUrl: await generateMarketingImage(post.imagePrompt),
+        scheduledFor: getNextBusinessHour(18), // 6 PM
+        metadata: { theme, campaign: 'lifestyle' },
+      });
+    }
+
+    return NextResponse.json({ success: true, message: 'Marketing automation executed' });
+  } catch (error) {
+    console.error('[Marketing Automation] Error:', error);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
+}
+
+// Helpers
+function shouldPostLinkedIn(): boolean {
+  const day = new Date().getDay();
+  return [1, 3, 5].includes(day); // Lunes, Miércoles, Viernes
+}
+
+function shouldPostTwitter(): boolean {
+  const day = new Date().getDay();
+  return [2, 4].includes(day); // Martes, Jueves
+}
+
+function shouldPostInstagram(): boolean {
+  const day = new Date().getDay();
+  return [1, 4].includes(day); // Lunes, Jueves
+}
+
+function selectRandomTopic(topics: string[]): any {
+  return topics[Math.floor(Math.random() * topics.length)];
+}
+
+function selectRandomTheme(themes: string[]): any {
+  return themes[Math.floor(Math.random() * themes.length)];
+}
+
+function getNextBusinessHour(hour: number): Date {
+  const date = new Date();
+  date.setHours(hour, 0, 0, 0);
+  if (date < new Date()) {
+    date.setDate(date.getDate() + 1);
+  }
+  return date;
+}
+```
+
+#### Configuración en vercel.json
+
+```json
+{
+  "crons": [
+    {
+      "path": "/api/cron/marketing-automation",
+      "schedule": "0 9 * * 1,3,5"
+    }
+  ]
+}
+```
+
+---
+
+### 4. WEBHOOK RECEPTOR (n8n/Make Configuration)
+
+**Payload Recibido**:
+
+```json
+{
+  "platform": "linkedin",
+  "content": "Post content here...",
+  "imageUrl": "https://inmova.app/api/og/...",
+  "scheduledFor": "2025-01-15T09:00:00Z",
+  "metadata": {
+    "topic": "automation",
+    "campaign": "thought-leadership"
+  }
+}
+```
+
+**Flujo en n8n** (recomendado):
+
+1. **Webhook Trigger** → Recibe payload de Inmova
+2. **Verificar Firma** → Valida HMAC signature
+3. **Switch Platform** → Ruta según `platform`
+   - LinkedIn → LinkedIn API Node
+   - Twitter → Twitter API Node
+   - Instagram → Instagram Graph API Node
+4. **Schedule Post** → Si `scheduledFor` presente, programar
+5. **Send Confirmation** → Responder a Inmova con success/failure
+
+**Ventajas de esta Arquitectura**:
+- ✅ Inmova NO mantiene tokens de redes sociales
+- ✅ Cambio de plataforma = solo cambiar workflow en n8n
+- ✅ Logs centralizados en ambos lados
+- ✅ Rate limiting manejado por n8n
+- ✅ Retry automático en n8n
+- ✅ Multi-cuenta (staging/production) fácil
+
+---
+
+### 5. MÉTRICAS Y OPTIMIZACIÓN
+
+```typescript
+// 📁 app/api/admin/marketing-analytics/route.ts
+export async function GET() {
+  const last30Days = new Date();
+  last30Days.setDate(last30Days.getDate() - 30);
+
+  const stats = await prisma.marketingLog.groupBy({
+    by: ['platform', 'status'],
+    where: {
+      createdAt: { gte: last30Days },
+    },
+    _count: true,
+  });
+
+  const analytics = {
+    linkedin: {
+      dispatched: stats.filter((s) => s.platform === 'linkedin' && s.status === 'dispatched').length,
+      failed: stats.filter((s) => s.platform === 'linkedin' && s.status === 'failed').length,
+    },
+    twitter: {
+      dispatched: stats.filter((s) => s.platform === 'twitter' && s.status === 'dispatched').length,
+      failed: stats.filter((s) => s.platform === 'twitter' && s.status === 'failed').length,
+    },
+    instagram: {
+      dispatched: stats.filter((s) => s.platform === 'instagram' && s.status === 'dispatched').length,
+      failed: stats.filter((s) => s.platform === 'instagram' && s.status === 'failed').length,
+    },
+  };
+
+  return NextResponse.json(analytics);
+}
+```
+
+**Dashboard Admin**: Ver métricas de posts enviados, tasa de éxito, topics más usados.
+
+---
+
+### 6. BEST PRACTICES
+
+1. **Contenido Generativo**:
+   - ✅ Usar IA (Claude/GPT-4) para variaciones de copy
+   - ✅ Mantener templates base para consistencia de marca
+   - ❌ NO repetir exactamente el mismo contenido
+
+2. **Imágenes**:
+   - ✅ Usar `@vercel/og` para generación dinámica
+   - ✅ Mockups CSS (no Photoshop manual)
+   - ✅ Degradados corporativos (#667eea, #764ba2, #10b981)
+   - ❌ NO fotos de stock genéricas
+
+3. **Frecuencia**:
+   - LinkedIn: 3x/semana (L, X, V a las 9 AM)
+   - Twitter: 2x/semana (M, J a las 12 PM)
+   - Instagram: 2x/semana (L, J a las 6 PM)
+
+4. **Seguridad**:
+   - ✅ HMAC signature en todos los webhooks
+   - ✅ Secrets en variables de entorno
+   - ✅ Rate limiting en n8n
+   - ✅ Logs de auditoría en Prisma
+
+5. **Escalabilidad**:
+   - ✅ Sistema funciona sin intervención humana
+   - ✅ Fácil añadir nuevas plataformas
+   - ✅ A/B testing de copy (metadata tags)
+   - ✅ Rollback rápido (deshabilitar cron)
+
+---
+
 ## 🔌 DESARROLLO DE APIS & CONEXIONES BACKEND
 
 ### 1. Diseño de Endpoints RESTful
