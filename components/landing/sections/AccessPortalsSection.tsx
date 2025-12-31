@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Briefcase, Home, Building, Users, ArrowRight, UserCircle } from 'lucide-react';
+import { Briefcase, Home, Building, Users, ArrowRight, UserCircle, Hammer } from 'lucide-react';
 
 export function AccessPortalsSection() {
   const portals = [
@@ -20,8 +20,8 @@ export function AccessPortalsSection() {
         'Gestión de órdenes de trabajo',
         'Facturación automática',
         'Calendario de servicios',
-        'Comunicación directa'
-      ]
+        'Comunicación directa',
+      ],
     },
     {
       title: 'Portal de Inquilinos',
@@ -35,8 +35,8 @@ export function AccessPortalsSection() {
         'Pago de rentas online',
         'Solicitudes de mantenimiento',
         'Documentos del contrato',
-        'Chat con administración'
-      ]
+        'Chat con administración',
+      ],
     },
     {
       title: 'Portal de Propietarios',
@@ -50,8 +50,8 @@ export function AccessPortalsSection() {
         'Informes financieros',
         'Estado de propiedades',
         'Análisis de rentabilidad',
-        'Alertas en tiempo real'
-      ]
+        'Alertas en tiempo real',
+      ],
     },
     {
       title: 'Portal Administrativo',
@@ -62,12 +62,28 @@ export function AccessPortalsSection() {
       bgColor: 'bg-green-50',
       borderColor: 'border-green-200',
       features: [
-        '88 módulos profesionales',
+        '100+ módulos profesionales',
         'Gestión multi-vertical',
         'Informes avanzados',
-        'Automatizaciones IA'
-      ]
-    }
+        'Automatizaciones IA',
+      ],
+    },
+    {
+      title: 'ewoorker (Construcción B2B)',
+      description: 'Plataforma para constructores y subcontratistas',
+      icon: Hammer,
+      link: '/ewoorker/dashboard',
+      color: 'from-orange-600 to-yellow-500',
+      bgColor: 'bg-orange-50',
+      borderColor: 'border-orange-200',
+      badge: 'NUEVO',
+      features: [
+        'Marketplace de obras',
+        'Compliance Ley 32/2006',
+        'Escrow de pagos',
+        'Gestión documental',
+      ],
+    },
   ];
 
   return (
@@ -90,7 +106,7 @@ export function AccessPortalsSection() {
         </div>
 
         {/* Portals Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           {portals.map((portal) => {
             const Icon = portal.icon;
             return (
@@ -98,19 +114,26 @@ export function AccessPortalsSection() {
                 key={portal.title}
                 className={`relative overflow-hidden border-2 ${portal.borderColor} hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group`}
               >
+                {/* Badge si tiene */}
+                {portal.badge && (
+                  <div className="absolute top-3 right-3 z-20">
+                    <Badge className="bg-orange-500 text-white text-xs">{portal.badge}</Badge>
+                  </div>
+                )}
+
                 {/* Background Gradient */}
-                <div className={`absolute inset-0 ${portal.bgColor} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-                
+                <div
+                  className={`absolute inset-0 ${portal.bgColor} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+                />
+
                 <CardHeader className="relative z-10">
-                  <div className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${portal.color} mb-4`}>
+                  <div
+                    className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${portal.color} mb-4`}
+                  >
                     <Icon className="h-6 w-6 text-white" />
                   </div>
-                  <CardTitle className="text-xl font-bold mb-2">
-                    {portal.title}
-                  </CardTitle>
-                  <CardDescription className="text-sm">
-                    {portal.description}
-                  </CardDescription>
+                  <CardTitle className="text-xl font-bold mb-2">{portal.title}</CardTitle>
+                  <CardDescription className="text-sm">{portal.description}</CardDescription>
                 </CardHeader>
 
                 <CardContent className="relative z-10 space-y-4">
@@ -143,11 +166,17 @@ export function AccessPortalsSection() {
         <div className="mt-12 text-center">
           <p className="text-gray-600">
             ¿No tienes cuenta aún?{' '}
-            <Link href="/register" className="text-indigo-600 hover:text-indigo-700 font-semibold underline">
+            <Link
+              href="/register"
+              className="text-indigo-600 hover:text-indigo-700 font-semibold underline"
+            >
               Regístrate gratis
-            </Link>
-            {' '}o{' '}
-            <Link href="/landing/contacto" className="text-indigo-600 hover:text-indigo-700 font-semibold underline">
+            </Link>{' '}
+            o{' '}
+            <Link
+              href="/landing/contacto"
+              className="text-indigo-600 hover:text-indigo-700 font-semibold underline"
+            >
               contacta con ventas
             </Link>
           </p>

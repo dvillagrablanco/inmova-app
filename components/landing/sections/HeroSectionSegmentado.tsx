@@ -5,13 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { 
-  Building2, 
-  Users, 
-  TrendingUp, 
-  Star, 
-  ArrowRight, 
-  Play, 
+import {
+  Building2,
+  Users,
+  TrendingUp,
+  Star,
+  ArrowRight,
+  Play,
   Rocket,
   Home,
   Briefcase,
@@ -22,7 +22,7 @@ import {
   Clock,
   DollarSign,
   CheckCircle2,
-  Sparkles
+  Sparkles,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -42,82 +42,112 @@ interface PersonaContent {
 const personasContent: Record<string, PersonaContent> = {
   propietarios: {
     title: 'Simplifica tu gestión inmobiliaria',
-    subtitle: 'Automatiza todo el proceso de alquiler y recupera tu tiempo. Sin complicaciones, sin morosidad, sin estrés.',
+    subtitle:
+      'Automatiza todo el proceso de alquiler y recupera tu tiempo. Sin complicaciones, sin morosidad, sin estrés.',
     painPoints: [
       'Gestión manual caótica con Excel y WhatsApp',
       'Morosidad de inquilinos (15% promedio)',
       '10 horas semanales perdidas en tareas administrativas',
-      'Desconocimiento legal y fiscal'
+      'Desconocimiento legal y fiscal',
     ],
     benefits: [
       'Screening automático de inquilinos con IA',
       'Alertas de pagos y recordatorios automáticos',
       'Contratos legales pre-aprobados',
-      'Panel de control simple e intuitivo'
+      'Panel de control simple e intuitivo',
     ],
     cta: {
       primary: { text: 'Empezar Gratis', href: '/register' },
-      secondary: { text: 'Ver Demo', href: '/landing/demo' }
+      secondary: { text: 'Ver Demo', href: '/landing/demo' },
     },
     stats: [
       { icon: Clock, value: '10h', label: 'Ahorro semanal' },
       { icon: Shield, value: '95%', label: 'Reducción morosidad' },
-      { icon: Zap, value: '3min', label: 'Onboarding' }
+      { icon: Zap, value: '3min', label: 'Onboarding' },
     ],
-    image: '/images/hero-propietarios.jpg'
+    image: '/images/hero-propietarios.jpg',
   },
   gestores: {
     title: 'Escala tu negocio inmobiliario',
-    subtitle: 'Todo-en-uno que elimina 5-7 herramientas. Ahorra €300-€1,000/mes y automatiza el 60% de tus tareas repetitivas.',
+    subtitle:
+      'Todo-en-uno que elimina 5-7 herramientas. Ahorra €300-€1,000/mes y automatiza el 60% de tus tareas repetitivas.',
     painPoints: [
       'Software fragmentado (6-8 herramientas diferentes)',
       'Costos elevados (€500-€1,500/mes en software)',
       'Falta de automatización y reportes manuales',
-      'Escalabilidad limitada'
+      'Escalabilidad limitada',
     ],
     benefits: [
       'Todo-en-uno que elimina múltiples herramientas',
       'Ahorro de €300-€1,000/mes en software',
       'Automatización del 60% de tareas repetitivas',
-      'Escalable a 1,000+ propiedades'
+      'Escalable a 1,000+ propiedades',
     ],
     cta: {
       primary: { text: 'Prueba 30 Días', href: '/register' },
-      secondary: { text: 'Agendar Demo', href: '/contact?type=gestor' }
+      secondary: { text: 'Agendar Demo', href: '/contact?type=gestor' },
     },
     stats: [
       { icon: DollarSign, value: '€1K', label: 'Ahorro mensual' },
       { icon: TrendingUp, value: '60%', label: 'Automatización' },
-      { icon: Target, value: '1-3meses', label: 'ROI garantizado' }
+      { icon: Target, value: '1-3meses', label: 'ROI garantizado' },
     ],
-    image: '/images/hero-gestores.jpg'
+    image: '/images/hero-gestores.jpg',
   },
   inversores: {
     title: 'Maximiza tu rentabilidad patrimonial',
-    subtitle: 'Dashboard ejecutivo en tiempo real con BI avanzado. Ahorra €30K-€150K/año en costos operativos.',
+    subtitle:
+      'Dashboard ejecutivo en tiempo real con BI avanzado. Ahorra €30K-€150K/año en costos operativos.',
     painPoints: [
       'Sistemas legacy costosos (€50K-€200K/año)',
       'Falta de dashboard ejecutivo en tiempo real',
       'Analytics limitados y reportes manuales',
-      'Integración contable compleja'
+      'Integración contable compleja',
     ],
     benefits: [
       'Dashboard ejecutivo en tiempo real',
       'BI avanzado con predictive analytics',
       'Integración contable automática',
-      'Blockchain para tokenización de activos'
+      'Blockchain para tokenización de activos',
     ],
     cta: {
       primary: { text: 'Agendar Demo Privada', href: '/contact?type=inversor' },
-      secondary: { text: 'Descargar Brochure', href: '/downloads/inversores-brochure.pdf' }
+      secondary: { text: 'Descargar Brochure', href: '/downloads/inversores-brochure.pdf' },
     },
     stats: [
       { icon: BarChart3, value: '€150K', label: 'Ahorro anual' },
       { icon: Sparkles, value: 'Real-time', label: 'Analytics' },
-      { icon: Building2, value: '10K+', label: 'Propiedades' }
+      { icon: Building2, value: '10K+', label: 'Propiedades' },
     ],
-    image: '/images/hero-inversores.jpg'
-  }
+    image: '/images/hero-inversores.jpg',
+  },
+  constructores: {
+    title: 'Subcontrata con seguridad legal total',
+    subtitle:
+      'Marketplace B2B + Compliance Ley 32/2006 + Escrow de pagos. Todo en ewoorker by Inmova.',
+    painPoints: [
+      'Libro de subcontratación manual (sanciones hasta €10K)',
+      'Subcontratistas sin papeles al día (REA, TC1, TC2)',
+      'Riesgo de impago o trabajo mal hecho',
+      'Gestión documental caótica',
+    ],
+    benefits: [
+      'Libro digital automático (Ley 32/2006)',
+      'Solo empresas verificadas con REA vigente',
+      'Escrow: paga solo si el trabajo está perfecto',
+      'Alertas de vencimiento de documentos',
+    ],
+    cta: {
+      primary: { text: 'Explorar ewoorker', href: '/ewoorker-landing' },
+      secondary: { text: 'Ver Marketplace', href: '/ewoorker/dashboard' },
+    },
+    stats: [
+      { icon: Users, value: '2.5K', label: 'Empresas' },
+      { icon: Building2, value: '500+', label: 'Obras/semana' },
+      { icon: Shield, value: '100%', label: 'Legal' },
+    ],
+    image: '/images/hero-constructores.jpg',
+  },
 };
 
 export function HeroSectionSegmentado() {
@@ -155,7 +185,7 @@ export function HeroSectionSegmentado() {
               </span>
             </h1>
             <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              6 verticales de negocio + 6 módulos transversales de IA, IoT y Blockchain.
+              7 verticales (alquiler a construcción B2B) + 20 módulos de IA, IoT y Blockchain.
               <span className="font-semibold text-indigo-600"> Todo en un solo lugar.</span>
             </p>
           </div>
@@ -163,26 +193,36 @@ export function HeroSectionSegmentado() {
           {/* Tabs de Segmentación */}
           <div className="max-w-5xl mx-auto mb-12">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 bg-white/80 backdrop-blur-sm border-2 border-gray-200 rounded-xl p-1.5 h-auto">
-                <TabsTrigger 
-                  value="propietarios" 
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-violet-500 data-[state=active]:text-white rounded-lg py-3 px-6 text-base font-semibold transition-all"
+              <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-white/80 backdrop-blur-sm border-2 border-gray-200 rounded-xl p-1.5 h-auto">
+                <TabsTrigger
+                  value="propietarios"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-violet-500 data-[state=active]:text-white rounded-lg py-3 px-4 text-sm md:text-base font-semibold transition-all"
                 >
-                  <Home className="h-5 w-5 mr-2 inline" />
+                  <Home className="h-5 w-5 mr-1 md:mr-2 inline" />
                   Propietarios
                 </TabsTrigger>
-                <TabsTrigger 
+                <TabsTrigger
                   value="gestores"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-violet-500 data-[state=active]:text-white rounded-lg py-3 px-6 text-base font-semibold transition-all"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-violet-500 data-[state=active]:text-white rounded-lg py-3 px-4 text-sm md:text-base font-semibold transition-all"
                 >
-                  <Briefcase className="h-5 w-5 mr-2 inline" />
+                  <Briefcase className="h-5 w-5 mr-1 md:mr-2 inline" />
                   Gestores
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="inversores"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-violet-500 data-[state=active]:text-white rounded-lg py-3 px-6 text-base font-semibold transition-all"
+                <TabsTrigger
+                  value="constructores"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-yellow-500 data-[state=active]:text-white rounded-lg py-3 px-4 text-sm md:text-base font-semibold transition-all relative"
                 >
-                  <BarChart3 className="h-5 w-5 mr-2 inline" />
+                  <Building2 className="h-5 w-5 mr-1 md:mr-2 inline" />
+                  Construcción
+                  <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                    B2B
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="inversores"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-violet-500 data-[state=active]:text-white rounded-lg py-3 px-4 text-sm md:text-base font-semibold transition-all"
+                >
+                  <BarChart3 className="h-5 w-5 mr-1 md:mr-2 inline" />
                   Inversores
                 </TabsTrigger>
               </TabsList>
@@ -236,7 +276,10 @@ export function HeroSectionSegmentado() {
                     {/* Stats */}
                     <div className="grid grid-cols-3 gap-4 pt-4">
                       {currentContent.stats.map((stat, idx) => (
-                        <div key={idx} className="text-center p-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200">
+                        <div
+                          key={idx}
+                          className="text-center p-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200"
+                        >
                           <stat.icon className="h-6 w-6 mx-auto mb-2 text-indigo-600" />
                           <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
                           <p className="text-xs text-gray-600 mt-1">{stat.label}</p>
@@ -275,9 +318,15 @@ export function HeroSectionSegmentado() {
                       <div className="aspect-[4/3] bg-gradient-to-br from-indigo-100 via-violet-100 to-pink-100 flex items-center justify-center">
                         <div className="text-center p-8">
                           <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 mb-6">
-                            {activeTab === 'propietarios' && <Home className="h-12 w-12 text-white" />}
-                            {activeTab === 'gestores' && <Briefcase className="h-12 w-12 text-white" />}
-                            {activeTab === 'inversores' && <BarChart3 className="h-12 w-12 text-white" />}
+                            {activeTab === 'propietarios' && (
+                              <Home className="h-12 w-12 text-white" />
+                            )}
+                            {activeTab === 'gestores' && (
+                              <Briefcase className="h-12 w-12 text-white" />
+                            )}
+                            {activeTab === 'inversores' && (
+                              <BarChart3 className="h-12 w-12 text-white" />
+                            )}
                           </div>
                           <h3 className="text-2xl font-bold text-gray-900 mb-2">
                             {activeTab === 'propietarios' && 'Gestión Simplificada'}
@@ -285,14 +334,17 @@ export function HeroSectionSegmentado() {
                             {activeTab === 'inversores' && 'Analytics Avanzado'}
                           </h3>
                           <p className="text-gray-600">
-                            {activeTab === 'propietarios' && 'Todo lo que necesitas en un solo lugar'}
-                            {activeTab === 'gestores' && 'Gestiona miles de propiedades sin límites'}
-                            {activeTab === 'inversores' && 'Toma decisiones basadas en datos en tiempo real'}
+                            {activeTab === 'propietarios' &&
+                              'Todo lo que necesitas en un solo lugar'}
+                            {activeTab === 'gestores' &&
+                              'Gestiona miles de propiedades sin límites'}
+                            {activeTab === 'inversores' &&
+                              'Toma decisiones basadas en datos en tiempo real'}
                           </p>
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Badge flotante */}
                     <div className="absolute -bottom-4 -right-4 bg-white rounded-xl shadow-xl p-4 border-2 border-indigo-200">
                       <div className="flex items-center gap-2">
