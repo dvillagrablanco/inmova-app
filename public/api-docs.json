@@ -1,0 +1,424 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Inmova API v1",
+    "version": "1.0.0",
+    "description": "API REST para gestión inmobiliaria PropTech",
+    "contact": {
+      "name": "Inmova Support",
+      "email": "api@inmovaapp.com",
+      "url": "https://inmovaapp.com"
+    },
+    "license": {
+      "name": "Proprietary"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://inmovaapp.com/api/v1",
+      "description": "Production"
+    },
+    {
+      "url": "http://localhost:3000/api/v1",
+      "description": "Development"
+    }
+  ],
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "API Key (sk_live_...)"
+      }
+    },
+    "schemas": {
+      "Property": {
+        "type": "object",
+        "required": ["address", "city", "price"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cljk3..."
+          },
+          "address": {
+            "type": "string",
+            "example": "Calle Mayor 123"
+          },
+          "city": {
+            "type": "string",
+            "example": "Madrid"
+          },
+          "postalCode": {
+            "type": "string",
+            "example": "28013"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["HOUSE", "APARTMENT", "STUDIO", "ROOM", "OFFICE", "LOCAL", "PARKING", "STORAGE"],
+            "example": "APARTMENT"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["AVAILABLE", "RENTED", "MAINTENANCE", "INACTIVE"],
+            "example": "AVAILABLE"
+          },
+          "price": {
+            "type": "number",
+            "example": 1200
+          },
+          "rooms": {
+            "type": "integer",
+            "example": 3
+          },
+          "bathrooms": {
+            "type": "integer",
+            "example": 2
+          },
+          "squareMeters": {
+            "type": "number",
+            "example": 85
+          },
+          "description": {
+            "type": "string",
+            "example": "Piso luminoso en el centro de Madrid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object"
+          }
+        }
+      },
+      "PaginatedResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {}
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "integer"
+              },
+              "limit": {
+                "type": "integer"
+              },
+              "total": {
+                "type": "integer"
+              },
+              "totalPages": {
+                "type": "integer"
+              },
+              "hasMore": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/properties": {
+      "get": {
+        "summary": "Listar propiedades",
+        "description": "Obtiene lista paginada de propiedades de la empresa",
+        "tags": ["Properties"],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["AVAILABLE", "RENTED", "MAINTENANCE", "INACTIVE"]
+            }
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de propiedades",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear propiedad",
+        "description": "Crea una nueva propiedad",
+        "tags": ["Properties"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Property"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Propiedad creada exitosamente"
+          },
+          "400": {
+            "description": "Datos inválidos"
+          },
+          "401": {
+            "description": "No autenticado"
+          }
+        }
+      }
+    },
+    "/properties/{id}": {
+      "get": {
+        "summary": "Obtener propiedad por ID",
+        "tags": ["Properties"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Propiedad encontrada"
+          },
+          "404": {
+            "description": "Propiedad no encontrada"
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualizar propiedad",
+        "tags": ["Properties"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Property"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Propiedad actualizada"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar propiedad",
+        "tags": ["Properties"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Propiedad eliminada"
+          }
+        }
+      }
+    },
+    "/api-keys": {
+      "get": {
+        "summary": "Listar API Keys",
+        "tags": ["API Keys"],
+        "responses": {
+          "200": {
+            "description": "Lista de API keys"
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear API Key",
+        "tags": ["API Keys"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "scopes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "rateLimit": {
+                    "type": "integer",
+                    "default": 1000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "API key creada"
+          }
+        }
+      }
+    },
+    "/webhooks": {
+      "get": {
+        "summary": "Listar Webhooks",
+        "tags": ["Webhooks"],
+        "responses": {
+          "200": {
+            "description": "Lista de webhooks"
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear Webhook",
+        "tags": ["Webhooks"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["url", "events"],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "events": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "PROPERTY_CREATED",
+                        "PROPERTY_UPDATED",
+                        "TENANT_CREATED",
+                        "CONTRACT_SIGNED",
+                        "PAYMENT_RECEIVED"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Webhook creado"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Properties",
+      "description": "Gestión de propiedades inmobiliarias"
+    },
+    {
+      "name": "API Keys",
+      "description": "Gestión de claves de API"
+    },
+    {
+      "name": "Webhooks",
+      "description": "Gestión de webhooks"
+    }
+  ]
+}

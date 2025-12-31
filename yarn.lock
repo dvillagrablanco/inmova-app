@@ -18510,9 +18510,9 @@ swagger-parser@^10.0.3:
   dependencies:
     "@apidevtools/swagger-parser" "10.0.3"
 
-swagger-ui-react@^5.30.3:
+swagger-ui-react@^5.31.0:
   version "5.31.0"
-  resolved "https://registry.npmjs.org/swagger-ui-react/-/swagger-ui-react-5.31.0.tgz"
+  resolved "https://registry.yarnpkg.com/swagger-ui-react/-/swagger-ui-react-5.31.0.tgz#c785fbb505b40c068dc2367be5b929e634170199"
   integrity sha512-E/sTgKADThzpVksaGXbhED0pQCYdajiBNOzvSAan+RhV7pdoi2qvdwWhZsIo8nRvHk9UXJ0nkuxrud854ICr7A==
   dependencies:
     "@babel/runtime-corejs3" "^7.27.1"
