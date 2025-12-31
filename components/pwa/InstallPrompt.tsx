@@ -1,15 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+/**
+ * PWA Install Prompt Component
+ *
+ * Muestra prompt personalizado para instalar la PWA
+ * Detecta BeforeInstallPromptEvent y guía al usuario
+ */
+
+import { useState, useEffect } from 'react';
 import { Download, X } from 'lucide-react';
-import { toast } from 'sonner';
-import logger, { logError } from '@/lib/logger';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+  readonly platforms: string[];
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed';
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
 }
 
 export function InstallPrompt() {
@@ -18,67 +27,74 @@ export function InstallPrompt() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    // Verificar si ya está instalada
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    if (isStandalone) {
+    // Check if already installed
+    if (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true
+    ) {
       setIsInstalled(true);
       return;
     }
 
-    // Verificar si el usuario ya rechazó la instalación
+    // Check if prompt was dismissed
     const dismissed = localStorage.getItem('pwa-install-dismissed');
-    if (dismissed === 'true') {
-      return;
+    if (dismissed) {
+      const dismissedDate = new Date(dismissed);
+      const daysSince = (Date.now() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24);
+
+      // Show again after 7 days
+      if (daysSince < 7) {
+        return;
+      }
     }
 
+    // Listen for beforeinstallprompt
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      // Mostrar el prompt después de 5 segundos
-      setTimeout(() => {
-        setShowPrompt(true);
-      }, 5000);
+      setShowPrompt(true);
     };
 
     window.addEventListener('beforeinstallprompt', handler);
 
-    // Detectar cuando se instala
-    window.addEventListener('appinstalled', () => {
+    // Listen for appinstalled
+    const installedHandler = () => {
       setIsInstalled(true);
       setShowPrompt(false);
-      toast.success('¡App instalada exitosamente!');
-    });
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener('appinstalled', installedHandler);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('appinstalled', installedHandler);
     };
   }, []);
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
 
-    try {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
+    // Show native install prompt
+    deferredPrompt.prompt();
 
-      if (outcome === 'accepted') {
-        toast.success('Instalando aplicación...');
-      } else {
-        toast.info('Instalación cancelada');
-      }
+    // Wait for user choice
+    const choiceResult = await deferredPrompt.userChoice;
 
-      setDeferredPrompt(null);
-      setShowPrompt(false);
-    } catch (error) {
-      logger.error('Error installing app:', error);
-      toast.error('Error al instalar la aplicación');
+    if (choiceResult.outcome === 'accepted') {
+      console.log('User accepted PWA install');
+    } else {
+      console.log('User dismissed PWA install');
     }
+
+    // Clear prompt
+    setDeferredPrompt(null);
+    setShowPrompt(false);
   };
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    localStorage.setItem('pwa-install-dismissed', 'true');
-    toast.info('Puedes instalar la app desde el menú de tu navegador');
+    localStorage.setItem('pwa-install-dismissed', new Date().toISOString());
   };
 
   if (isInstalled || !showPrompt) {
@@ -86,34 +102,28 @@ export function InstallPrompt() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 max-w-sm">
-      <Card className="shadow-lg border-2">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <CardTitle className="text-lg">Instalar INMOVA</CardTitle>
-              <CardDescription className="mt-1">
-                Instala la aplicación para un acceso rápido y experiencia completa
-              </CardDescription>
+    <div className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:w-96 animate-slide-up">
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <Download className="h-6 w-6 text-primary" />
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 -mt-1"
-              onClick={handleDismiss}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex-1">
+              <h3 className="font-semibold text-sm">Instalar Inmova</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Instala la app para acceso rápido y funcionalidad offline
+              </p>
+              <div className="flex gap-2 mt-3">
+                <Button size="sm" onClick={handleInstall}>
+                  Instalar
+                </Button>
+                <Button size="sm" variant="ghost" onClick={handleDismiss}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </div>
-        </CardHeader>
-        <CardContent className="flex gap-2">
-          <Button onClick={handleInstall} className="flex-1">
-            <Download className="h-4 w-4 mr-2" />
-            Instalar App
-          </Button>
-          <Button variant="outline" onClick={handleDismiss}>
-            Ahora no
-          </Button>
         </CardContent>
       </Card>
     </div>

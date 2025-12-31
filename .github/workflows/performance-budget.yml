@@ -1,0 +1,147 @@
+name: Performance Budget
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run daily at 3 AM UTC
+    - cron: '0 3 * * *'
+
+jobs:
+  performance:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build Next.js app
+        run: yarn build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          ANALYZE: true
+
+      - name: Analyze bundle size
+        run: |
+          echo "## 📦 Bundle Size Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Get bundle sizes
+          du -sh .next/static >> $GITHUB_STEP_SUMMARY
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Largest Chunks:" >> $GITHUB_STEP_SUMMARY
+          find .next/static -type f -name "*.js" -exec du -h {} + | sort -rh | head -10 >> $GITHUB_STEP_SUMMARY
+
+      - name: Check bundle size limits
+        run: |
+          # Define size limits (in KB)
+          MAX_BUNDLE_SIZE=500
+          MAX_CHUNK_SIZE=100
+          
+          BUNDLE_SIZE=$(du -sk .next/static | cut -f1)
+          
+          if [ $BUNDLE_SIZE -gt $MAX_BUNDLE_SIZE ]; then
+            echo "❌ Bundle size ($BUNDLE_SIZE KB) exceeds limit ($MAX_BUNDLE_SIZE KB)"
+            exit 1
+          else
+            echo "✅ Bundle size ($BUNDLE_SIZE KB) within limit ($MAX_BUNDLE_SIZE KB)"
+          fi
+
+      - name: Start Next.js server
+        run: yarn start &
+        env:
+          PORT: 3000
+
+      - name: Wait for server
+        run: npx wait-on http://localhost:3000 --timeout 60000
+
+      - name: Run WebPageTest
+        uses: WebPageTest/wpt-action@v1
+        if: github.event_name == 'schedule' || github.event_name == 'push'
+        with:
+          api-key: ${{ secrets.WEBPAGETEST_API_KEY }}
+          test-url: http://localhost:3000/landing
+          test-location: 'Dulles:Chrome'
+          test-runs: 3
+          
+      - name: Measure Core Web Vitals
+        run: |
+          npx web-vitals-cli http://localhost:3000/landing \
+            --output-format json \
+            --output-file web-vitals-report.json
+
+      - name: Upload performance reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-reports
+          path: |
+            web-vitals-report.json
+            .next/analyze/
+          retention-days: 30
+
+      - name: Comment PR with performance metrics
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const fs = require('fs');
+            
+            let comment = '## ⚡ Performance Metrics\n\n';
+            
+            // Bundle size
+            const bundleSize = fs.statSync('.next/static').size / 1024;
+            comment += `**Bundle Size:** ${bundleSize.toFixed(2)} KB\n\n`;
+            
+            // Web Vitals
+            if (fs.existsSync('web-vitals-report.json')) {
+              const vitals = JSON.parse(fs.readFileSync('web-vitals-report.json', 'utf8'));
+              
+              comment += '### Core Web Vitals\n\n';
+              comment += '| Metric | Value | Status |\n';
+              comment += '|--------|-------|--------|\n';
+              comment += `| LCP | ${vitals.LCP}ms | ${vitals.LCP < 2500 ? '✅' : '❌'} |\n`;
+              comment += `| FID | ${vitals.FID}ms | ${vitals.FID < 100 ? '✅' : '❌'} |\n`;
+              comment += `| CLS | ${vitals.CLS} | ${vitals.CLS < 0.1 ? '✅' : '❌'} |\n`;
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Fail if performance budget exceeded
+        run: |
+          if [ -f web-vitals-report.json ]; then
+            # Check LCP
+            LCP=$(jq -r '.LCP' web-vitals-report.json)
+            if (( $(echo "$LCP > 2500" | bc -l) )); then
+              echo "❌ LCP ($LCP ms) exceeds budget (2500 ms)"
+              exit 1
+            fi
+            
+            # Check CLS
+            CLS=$(jq -r '.CLS' web-vitals-report.json)
+            if (( $(echo "$CLS > 0.1" | bc -l) )); then
+              echo "❌ CLS ($CLS) exceeds budget (0.1)"
+              exit 1
+            fi
+            
+            echo "✅ All performance budgets met"
+          fi
