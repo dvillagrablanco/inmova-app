@@ -7,15 +7,11 @@ import { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  
+
   if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
-    return NextResponse.json(
-      { error: 'No autorizado' },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
   try {
@@ -30,26 +26,23 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       diasExpiracion,
       recordatorios,
       diasRecordatorio,
-      firmantes
+      firmantes,
     } = body;
 
     // Verificar que el documento pertenece a la empresa del usuario
     const existingDocumento = await prisma.documentoFirma.findFirst({
       where: {
         id,
-        companyId: session.user.companyId
-      }
+        companyId: session.user.companyId,
+      },
     });
 
     if (!existingDocumento) {
-      return NextResponse.json(
-        { error: 'Documento no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Documento no encontrado' }, { status: 404 });
     }
 
     // No permitir editar documentos ya firmados
-    if (existingDocumento.estado === 'firmado') {
+    if (existingDocumento.estado === 'SIGNED') {
       return NextResponse.json(
         { error: 'No se puede editar un documento ya firmado' },
         { status: 400 }
@@ -61,7 +54,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     // Eliminar firmantes existentes y crear nuevos
     await prisma.firmante.deleteMany({
-      where: { documentoId: id }
+      where: { documentoId: id },
     });
 
     const documento = await prisma.documentoFirma.update({
@@ -82,17 +75,17 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             telefono: firmante.telefono || null,
             rol: firmante.rol,
             orden: firmante.orden,
-            estado: 'pendiente'
-          }))
-        }
+            estado: 'pendiente',
+          })),
+        },
       },
       include: {
         firmantes: {
           orderBy: {
-            orden: 'asc'
-          }
-        }
-      }
+            orden: 'asc',
+          },
+        },
+      },
     });
 
     return NextResponse.json(documento);
@@ -102,10 +95,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       documentId: params?.id,
       companyId: session?.user?.companyId,
     });
-    return NextResponse.json(
-      { error: 'Error al actualizar documento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar documento' }, { status: 500 });
   }
 }
 
@@ -113,10 +103,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   const session = await getServerSession(authOptions);
 
   if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
-    return NextResponse.json(
-      { error: 'No autorizado' },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
   try {
@@ -126,25 +113,22 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const existingDocumento = await prisma.documentoFirma.findFirst({
       where: {
         id,
-        companyId: session.user.companyId
-      }
+        companyId: session.user.companyId,
+      },
     });
 
     if (!existingDocumento) {
-      return NextResponse.json(
-        { error: 'Documento no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Documento no encontrado' }, { status: 404 });
     }
 
     // Eliminar firmantes primero (aunque con onDelete: Cascade debería ser automático)
     await prisma.firmante.deleteMany({
-      where: { documentoId: id }
+      where: { documentoId: id },
     });
 
     // Eliminar el documento
     await prisma.documentoFirma.delete({
-      where: { id }
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Documento eliminado correctamente' });
@@ -154,9 +138,6 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       documentId: params?.id,
       companyId: session?.user?.companyId,
     });
-    return NextResponse.json(
-      { error: 'Error al eliminar documento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar documento' }, { status: 500 });
   }
 }
