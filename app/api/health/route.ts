@@ -5,14 +5,24 @@ import { prisma } from '@/lib/db';
 
 export async function GET() {
   try {
-    // Test database connection
-    await prisma.$queryRaw`SELECT 1`;
-    
-    // Get basic system info
-    const dbConnection = 'connected';
     const uptime = process.uptime();
     const memoryUsage = process.memoryUsage();
-    
+
+    // Intentar conectar a la BD de forma segura
+    let dbConnection = 'unknown';
+    try {
+      // Solo intentar conectar si DATABASE_URL existe
+      if (process.env.DATABASE_URL) {
+        await prisma.$queryRaw`SELECT 1`;
+        dbConnection = 'connected';
+      } else {
+        dbConnection = 'not_configured';
+      }
+    } catch (dbError) {
+      console.error('[Health Check] DB Error:', dbError);
+      dbConnection = 'disconnected';
+    }
+
     return NextResponse.json(
       {
         status: 'ok',
@@ -27,7 +37,7 @@ export async function GET() {
         },
         environment: process.env.NODE_ENV,
       },
-      { 
+      {
         status: 200,
         headers: {
           'Cache-Control': 'no-store, max-age=0',
@@ -36,16 +46,16 @@ export async function GET() {
     );
   } catch (error) {
     console.error('[Health Check] Error:', error);
-    
+
     return NextResponse.json(
       {
         status: 'error',
         timestamp: new Date().toISOString(),
-        database: 'disconnected',
+        database: 'error',
         error: error instanceof Error ? error.message : 'Unknown error',
         environment: process.env.NODE_ENV,
       },
-      { 
+      {
         status: 500,
         headers: {
           'Cache-Control': 'no-store, max-age=0',
