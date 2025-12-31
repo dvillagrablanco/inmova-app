@@ -6,11 +6,7 @@
  */
 
 import { prisma } from '@/lib/db';
-import {
-  MarketingMarketingSocialPlatform,
-  MarketingMarketingSocialPostStatus,
-  MarketingTopic,
-} from '@prisma/client';
+import { MarketingSocialPlatform, MarketingSocialPostStatus, MarketingTopic } from '@prisma/client';
 
 interface WeeklyContentPlan {
   topic: MarketingTopic;
