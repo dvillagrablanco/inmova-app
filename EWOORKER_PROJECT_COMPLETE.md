@@ -8,13 +8,13 @@
 2. **Pago Seguro**: Sistema escrow que protege a ambas partes
 3. **Marketplace Eficiente**: Matching inteligente entre obras y profesionales verificados
 
-**Modelo de Negocio**: División 50/50 con socio fundador sobre todas las comisiones.
+**Modelo de Negocio**: División 50/50 con socio fundador SOLO sobre comisiones de marketplace/escrow (NO suscripciones SaaS).
 
 ---
 
 ## 🎯 Líneas de Negocio
 
-### 1. **Suscripciones SaaS (MRR)**
+### 1. **Suscripciones SaaS (MRR)** ✅ 100% INMOVA
 
 | Plan                         | Precio/Mes | Target      | Features Clave                     |
 | ---------------------------- | ---------- | ----------- | ---------------------------------- |
@@ -22,51 +22,86 @@
 | **CAPATAZ** (Pro)            | €49        | PYMEs       | Ofertas ilimitadas, Compliance Hub |
 | **CONSTRUCTOR** (Enterprise) | €149       | Empresas    | API, White-label, Account manager  |
 
+**IMPORTANTE**: Las suscripciones SaaS son 100% para Inmova (NO se reparten con el socio).
+
 **Ingresos proyectados**:
 
-- 100 empresas CAPATAZ = €4,900/mes → **€2,450 para tu socio**
-- 20 empresas CONSTRUCTOR = €2,980/mes → **€1,490 para tu socio**
+- 100 empresas CAPATAZ = €4,900/mes → **100% Inmova**
+- 20 empresas CONSTRUCTOR = €2,980/mes → **100% Inmova**
+- **Total MRR**: €7,880 → **100% Inmova**
+- **ARR**: €94,560 → **100% Inmova**
 
 ---
 
-###2. **Comisiones por Transacción (Escrow)**
+### 2. **Comisiones por Transacción (Escrow)** ⚠️ 50/50 CON SOCIO
 
 **Modelo**: 1.5% - 3% del valor de cada pago procesado
+
+**IMPORTANTE**: Solo las comisiones de marketplace/escrow se reparten 50/50 con el socio fundador.
 
 ```
 Ejemplo: Obra de €50,000
 - Comisión ewoorker (2%): €1,000
-- Tu socio recibe: €500
-- Plataforma Inmova: €500
+  - Tu socio recibe: €500 (50%)
+  - Plataforma Inmova: €500 (50%)
 ```
 
 **Proyección conservadora**:
 
 - GMV mensual: €500,000
 - Comisión promedio: 2%
-- Ingresos: €10,000/mes → **€5,000 para tu socio**
+- **Ingreso mensual TOTAL**: €10,000
+  - Socio (50%): €5,000
+  - Inmova (50%): €5,000
+- **Ingreso anual TOTAL**: €120,000
+  - **Socio**: €60,000
+  - **Inmova**: €60,000
+
+**Proyección optimista**:
+
+- GMV mensual: €1,500,000
+- Comisión: 2%
+- **Ingreso anual TOTAL**: €360,000
+  - **Socio**: €180,000
+  - **Inmova**: €180,000
 
 ---
 
-### 3. **Servicios Premium (Adicionales)**
+### 3. **Servicios Premium (Adicionales)** ✅ 100% INMOVA
 
 - **Contratación Urgente**: 5-10% extra en obras <48h
 - **Certificaciones Digitales**: €29/certificación
 - **Verificación Prioritaria**: €99/empresa
 - **Marketplace Destacado**: €199/mes
 
+**IMPORTANTE**: Los servicios premium son 100% para Inmova (NO se reparten con el socio).
+
+**Proyección conservadora**: €2,500/mes → **100% Inmova**
+
 ---
 
 ## 💰 Proyección Financiera Año 1
 
-| Fuente             | Conservador | Optimista |
-| ------------------ | ----------- | --------- |
-| Suscripciones      | €70K        | €150K     |
-| Comisiones Escrow  | €120K       | €300K     |
-| Servicios Premium  | €30K        | €80K      |
-| **TOTAL INGRESOS** | **€220K**   | **€530K** |
-| **TU SOCIO (50%)** | **€110K**   | **€265K** |
-| **INMOVA (50%)**   | **€110K**   | **€265K** |
+### Desglose de Ingresos
+
+| Fuente             | Conservador | Optimista | División Socio        |
+| ------------------ | ----------- | --------- | --------------------- |
+| Suscripciones      | €70K        | €150K     | ❌ 100% Inmova        |
+| Comisiones Escrow  | €120K       | €300K     | ✅ 50/50 (€60K-€150K) |
+| Servicios Premium  | €30K        | €80K      | ❌ 100% Inmova        |
+| **TOTAL INGRESOS** | **€220K**   | **€530K** |                       |
+
+### Distribución Real
+
+| Concepto                         | Conservador | Optimista |
+| -------------------------------- | ----------- | --------- |
+| **Ingresos 100% Inmova**         | €100K       | €230K     |
+| (Suscripciones + Premium)        |             |           |
+| **Ingresos 50/50 (Marketplace)** | €120K       | €300K     |
+| → Socio (50%)                    | €60K        | €150K     |
+| → Inmova (50%)                   | €60K        | €150K     |
+| **TOTAL SOCIO**                  | **€60K**    | **€150K** |
+| **TOTAL INMOVA**                 | **€160K**   | **€380K** |
 
 ---
 
@@ -421,13 +456,16 @@ const calcularBeneficios = (transaccion) => {
 
 ### Responsabilidades
 
-| Socio                              | Inmova (Plataforma)                |
-| ---------------------------------- | ---------------------------------- |
-| BD de clientes inicial             | Desarrollo y mantenimiento técnico |
-| Relaciones comerciales             | Hosting e infraestructura          |
-| Soporte especializado construcción | Soporte técnico 24/7               |
-| Validación compliance              | Integración con APIs externas      |
-| Expansión gremios                  | Marketing digital y SEO            |
+| Socio                              | Inmova (Plataforma)                      |
+| ---------------------------------- | ---------------------------------------- |
+| BD de clientes inicial             | Desarrollo y mantenimiento técnico       |
+| Relaciones comerciales             | Hosting e infraestructura                |
+| Soporte especializado construcción | Soporte técnico 24/7                     |
+| Validación compliance              | Integración con APIs externas            |
+| Expansión gremios                  | Marketing digital y SEO                  |
+|                                    | **Desarrollo de software (100% Inmova)** |
+|                                    | **Suscripciones SaaS (100% Inmova)**     |
+| **Marketplace (50% comisión)**     | **Marketplace (50% comisión)**           |
 
 ---
 
