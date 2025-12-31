@@ -42,6 +42,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PhotoUploader } from '@/components/property/PhotoUploader';
 
 interface Building {
   id: string;
@@ -56,6 +57,7 @@ export default function CrearPropiedadPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [loadingBuildings, setLoadingBuildings] = useState(true);
+  const [photos, setPhotos] = useState<string[]>([]);
 
   // Datos del formulario
   const [formData, setFormData] = useState({
@@ -594,6 +596,26 @@ export default function CrearPropiedadPage() {
                   URL del tour virtual 360° (opcional)
                 </p>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Fotos de la Propiedad */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Fotos de la Propiedad
+              </CardTitle>
+              <CardDescription>
+                Sube hasta 10 fotos de la propiedad. La primera será la foto principal.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PhotoUploader
+                existingPhotos={photos}
+                onPhotosChange={setPhotos}
+                maxPhotos={10}
+              />
             </CardContent>
           </Card>
 

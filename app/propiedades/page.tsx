@@ -98,6 +98,7 @@ export default function PropiedadesPage() {
   const [precioMin, setPrecioMin] = useState<string>('');
   const [precioMax, setPrecioMax] = useState<string>('');
   const [habitacionesMin, setHabitacionesMin] = useState<string>('');
+  const [sortBy, setSortBy] = useState<string>('newest'); // newest, oldest, price-asc, price-desc, size-asc, size-desc
 
   // Redirect si no autenticado
   useEffect(() => {
@@ -171,8 +172,31 @@ export default function PropiedadesPage() {
       );
     }
 
-    setFilteredProperties(filtered);
-  }, [searchTerm, estadoFilter, tipoFilter, precioMin, precioMax, habitacionesMin, properties]);
+    // Aplicar ordenamiento
+    const sorted = [...filtered];
+    switch (sortBy) {
+      case 'newest':
+        sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        break;
+      case 'oldest':
+        sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
+      case 'price-asc':
+        sorted.sort((a, b) => a.rentaMensual - b.rentaMensual);
+        break;
+      case 'price-desc':
+        sorted.sort((a, b) => b.rentaMensual - a.rentaMensual);
+        break;
+      case 'size-asc':
+        sorted.sort((a, b) => a.superficie - b.superficie);
+        break;
+      case 'size-desc':
+        sorted.sort((a, b) => b.superficie - a.superficie);
+        break;
+    }
+
+    setFilteredProperties(sorted);
+  }, [searchTerm, estadoFilter, tipoFilter, precioMin, precioMax, habitacionesMin, sortBy, properties]);
 
   // Funciones de utilidad
   const getEstadoBadge = (estado: string) => {
@@ -227,6 +251,7 @@ export default function PropiedadesPage() {
     setPrecioMin('');
     setPrecioMax('');
     setHabitacionesMin('');
+    setSortBy('newest');
   };
 
   const hasActiveFilters =
@@ -455,6 +480,24 @@ export default function PropiedadesPage() {
                 value={habitacionesMin}
                 onChange={(e) => setHabitacionesMin(e.target.value)}
               />
+            </div>
+
+            {/* Ordenamiento */}
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-muted-foreground">Ordenar por:</label>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Más recientes</SelectItem>
+                  <SelectItem value="oldest">Más antiguos</SelectItem>
+                  <SelectItem value="price-desc">Precio: Mayor a menor</SelectItem>
+                  <SelectItem value="price-asc">Precio: Menor a mayor</SelectItem>
+                  <SelectItem value="size-desc">Superficie: Mayor a menor</SelectItem>
+                  <SelectItem value="size-asc">Superficie: Menor a mayor</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Botón limpiar filtros */}

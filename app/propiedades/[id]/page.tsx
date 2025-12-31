@@ -41,6 +41,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 import { PropertyMap } from '@/components/property/PropertyMap';
 import { ValuationCard } from '@/components/property/ValuationCard';
+import { DeletePropertyDialog } from '@/components/property/DeletePropertyDialog';
 
 interface PropertyDetails {
   id: string;
@@ -247,14 +248,12 @@ export default function PropiedadDetallesPage() {
               <Edit className="mr-2 h-4 w-4" />
               Editar
             </Button>
-            <Button
+            <DeletePropertyDialog
+              propertyId={property.id}
+              propertyName={`${property.building.nombre} - ${property.numero}`}
               variant="outline"
               className="text-red-600 hover:text-red-700"
-              onClick={() => toast.error('Función en desarrollo')}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Eliminar
-            </Button>
+            />
           </div>
         </div>
 
