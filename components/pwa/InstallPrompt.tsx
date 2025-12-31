@@ -27,6 +27,11 @@ export function InstallPrompt() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
+    // ✅ FIX: Safe check for browser environment
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     // Check if already installed
     if (
       window.matchMedia('(display-mode: standalone)').matches ||

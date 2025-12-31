@@ -9,6 +9,11 @@ interface DesignSystemProviderProps {
 
 export function DesignSystemProvider({ children }: DesignSystemProviderProps) {
   useEffect(() => {
+    // ✅ FIX: Safe check for browser environment
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return;
+    }
+
     const root = document.documentElement;
     
     // Apply color tokens as CSS variables

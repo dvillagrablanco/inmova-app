@@ -15,6 +15,11 @@ export function ConnectivityIndicator() {
   const [isRetrying, setIsRetrying] = useState(false);
 
   useEffect(() => {
+    // ✅ FIX: Safe check for browser environment
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return;
+    }
+
     // Set initial state
     setIsOnline(navigator.onLine);
 

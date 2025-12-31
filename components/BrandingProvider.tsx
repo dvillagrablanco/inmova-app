@@ -29,6 +29,12 @@ export function BrandingProvider({ children }: BrandingProviderProps) {
   const { data: session, status } = useSession();
 
   const loadBranding = async () => {
+    // ✅ FIX: Safe check for browser environment
+    if (typeof window === 'undefined') {
+      setIsLoading(false);
+      return;
+    }
+
     try {
       if (session?.user?.companyId) {
         const response = await fetch('/api/branding');

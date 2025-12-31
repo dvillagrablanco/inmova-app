@@ -69,7 +69,12 @@ export class ErrorBoundary extends Component<Props, State> {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => window.location.href = '/dashboard'}
+                  onClick={() => {
+                    // ✅ FIX: Safe check for browser environment
+                    if (typeof window !== 'undefined') {
+                      window.location.href = '/dashboard';
+                    }
+                  }}
                   className="flex-1"
                 >
                   Ir al Dashboard

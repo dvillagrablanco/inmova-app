@@ -6,6 +6,11 @@ import logger, { logError } from '@/lib/logger';
 
 export function ServiceWorkerRegister() {
   useEffect(() => {
+    // ✅ FIX: Safe check for browser environment
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return;
+    }
+
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/sw.js', { scope: '/' })
