@@ -1,0 +1,17 @@
+{
+  "name": "inmova-zapier",
+  "version": "1.0.0",
+  "description": "Zapier integration for Inmova PropTech API",
+  "main": "index.js",
+  "scripts": {
+    "test": "zapier test",
+    "push": "zapier push",
+    "validate": "zapier validate"
+  },
+  "dependencies": {
+    "zapier-platform-core": "^15.0.0"
+  },
+  "devDependencies": {
+    "zapier-platform-cli": "^15.0.0"
+  }
+}
