@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { MapboxService } from '@/lib/mapbox-service';
 
 interface PropertyMapProps {
   address: string;
@@ -34,30 +35,21 @@ export function PropertyMap({
         return;
       }
 
-      // Simular geocoding (en producción usar Mapbox Geocoding API)
-      setTimeout(() => {
-        // Coordenadas simuladas para ciudades principales de España
-        const cityCoords: Record<string, { lat: number; lng: number }> = {
-          madrid: { lat: 40.4168, lng: -3.7038 },
-          barcelona: { lat: 41.3851, lng: 2.1734 },
-          valencia: { lat: 39.4699, lng: -0.3763 },
-          sevilla: { lat: 37.3891, lng: -5.9845 },
-          zaragoza: { lat: 41.6488, lng: -0.8891 },
-          málaga: { lat: 36.7213, lng: -4.4214 },
-          default: { lat: 40.4168, lng: -3.7038 },
-        };
-
-        const cityKey = city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        const coords = cityCoords[cityKey] || cityCoords.default;
+      // Usar MapboxService para geocoding (real o simulado)
+      try {
+        const result = await MapboxService.geocodeAddress(address, city);
         
-        // Añadir pequeña variación aleatoria para simular dirección específica
-        const variation = 0.01;
-        setCoordinates({
-          lat: coords.lat + (Math.random() - 0.5) * variation,
-          lng: coords.lng + (Math.random() - 0.5) * variation,
-        });
+        if (result) {
+          setCoordinates(result.coordinates);
+        } else {
+          setError('No se pudo encontrar la ubicación');
+        }
+      } catch (err) {
+        console.error('Geocoding error:', err);
+        setError('Error al buscar la ubicación');
+      } finally {
         setLoading(false);
-      }, 1000);
+      }
     };
 
     geocodeAddress();
