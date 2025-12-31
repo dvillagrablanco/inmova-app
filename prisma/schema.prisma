@@ -357,6 +357,12 @@ model User {
   // Partner Program
   partnerAccount     Partner?
 
+  // API & Integrations Ecosystem
+  createdApiKeys             ApiKey[]                 @relation("UserCreatedApiKeys")
+  createdWebhookSubscriptions WebhookSubscription[]   @relation("UserCreatedWebhookSubscriptions")
+  oauthAuthorizationCodes    OAuthAuthorizationCode[]
+  oauthAccessTokens          OAuthAccessToken[]
+
   @@index([email])
   @@index([companyId])
   @@index([role, companyId])
@@ -1407,6 +1413,13 @@ model Company {
   // crmPipelines          CRMPipeline[]
   // crmEmailTemplates     CRMEmailTemplate[]
   // linkedInScrapingJobs  LinkedInScrapingJob[]
+  
+  // 🌐 API & INTEGRATIONS ECOSYSTEM (NEW)
+  apiKeys                   ApiKey[]
+  oauthAuthorizationCodes   OAuthAuthorizationCode[]
+  oauthAccessTokens         OAuthAccessToken[]
+  webhookSubscriptions      WebhookSubscription[]
+  apiLogs                   ApiLog[]
   
   @@map("company")
 }
@@ -13466,5 +13479,385 @@ model Commission {
   @@index([type])
   @@index([periodStart, periodEnd])
   @@map("commissions")
+}
+
+// ============================================================================
+// ECOSISTEMA DE INTEGRACIONES - API REST, OAuth 2.0, Webhooks
+// ============================================================================
+
+enum ApiKeyStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+enum OAuthGrantType {
+  AUTHORIZATION_CODE
+  REFRESH_TOKEN
+  CLIENT_CREDENTIALS
+}
+
+enum WebhookEventType {
+  PROPERTY_CREATED
+  PROPERTY_UPDATED
+  PROPERTY_DELETED
+  TENANT_CREATED
+  TENANT_UPDATED
+  CONTRACT_CREATED
+  CONTRACT_SIGNED
+  PAYMENT_CREATED
+  PAYMENT_RECEIVED
+  MAINTENANCE_CREATED
+  MAINTENANCE_RESOLVED
+  DOCUMENT_UPLOADED
+  USER_CREATED
+}
+
+model ApiKey {
+  id          String       @id @default(cuid())
+  
+  // Empresa propietaria
+  companyId   String
+  company     Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Key (hash SHA-256)
+  key         String       @unique
+  keyPrefix   String       // Primeros 8 chars para display (sk_live_abc12345)
+  
+  // Metadata
+  name        String       // "Production API", "Zapier Integration", etc.
+  description String?      @db.Text
+  
+  // Scopes/Permissions
+  scopes      String[]     @default(["properties:read", "tenants:read"])
+  
+  // Status
+  status      ApiKeyStatus @default(ACTIVE)
+  
+  // Rate limiting
+  rateLimit   Int          @default(1000) // requests/min
+  
+  // Expiration
+  expiresAt   DateTime?
+  
+  // Tracking
+  lastUsedAt  DateTime?
+  lastUsedIp  String?
+  
+  // Audit
+  createdBy   String
+  createdByUser User       @relation(fields: [createdBy], references: [id])
+  revokedBy   String?
+  revokedAt   DateTime?
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  // Relations
+  logs        ApiLog[]
+  
+  @@index([companyId])
+  @@index([status])
+  @@index([keyPrefix])
+  @@map("api_keys")
+}
+
+model OAuthApp {
+  id                String               @id @default(cuid())
+  
+  // Identificación
+  clientId          String               @unique
+  clientSecret      String               // Hasheado
+  name              String
+  description       String?              @db.Text
+  website           String?
+  logo              String?
+  
+  // Tipo de app
+  type              String               @default("PUBLIC") // PUBLIC, CONFIDENTIAL
+  
+  // OAuth settings
+  redirectUris      String[]             // URLs permitidas para redirect
+  allowedGrants     OAuthGrantType[]     @default([AUTHORIZATION_CODE, REFRESH_TOKEN])
+  defaultScopes     String[]             @default(["properties:read"])
+  
+  // Owner (puede ser Inmova o partner externo)
+  ownerId           String?
+  ownerEmail        String
+  
+  // Status
+  active            Boolean              @default(true)
+  
+  // Rate limiting
+  rateLimit         Int                  @default(1000)
+  
+  // Audit
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  
+  // Relations
+  authorizationCodes OAuthAuthorizationCode[]
+  accessTokens      OAuthAccessToken[]
+  
+  @@index([clientId])
+  @@index([ownerId])
+  @@map("oauth_apps")
+}
+
+model OAuthAuthorizationCode {
+  id          String    @id @default(cuid())
+  
+  // App que solicitó el código
+  appId       String
+  app         OAuthApp  @relation(fields: [appId], references: [id], onDelete: Cascade)
+  
+  // Usuario que autorizó
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId   String
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Código
+  code        String    @unique
+  
+  // Scopes autorizados
+  scopes      String[]
+  
+  // Redirect URI
+  redirectUri String
+  
+  // PKCE (opcional)
+  codeChallenge       String?
+  codeChallengeMethod String? // S256 o plain
+  
+  // Status
+  used        Boolean   @default(false)
+  usedAt      DateTime?
+  
+  // Expiration (códigos duran 10 minutos)
+  expiresAt   DateTime
+  
+  createdAt   DateTime  @default(now())
+  
+  @@index([code])
+  @@index([appId])
+  @@index([userId])
+  @@map("oauth_authorization_codes")
+}
+
+model OAuthAccessToken {
+  id          String    @id @default(cuid())
+  
+  // App que tiene el token
+  appId       String
+  app         OAuthApp  @relation(fields: [appId], references: [id], onDelete: Cascade)
+  
+  // Usuario asociado
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId   String
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Token
+  token       String    @unique
+  
+  // Scopes
+  scopes      String[]
+  
+  // Expiration (tokens duran 1 hora)
+  expiresAt   DateTime
+  
+  // Refresh token
+  refreshToken String?  @unique
+  refreshExpiresAt DateTime?
+  
+  // Status
+  revoked     Boolean   @default(false)
+  revokedAt   DateTime?
+  
+  // Tracking
+  lastUsedAt  DateTime?
+  lastUsedIp  String?
+  
+  createdAt   DateTime  @default(now())
+  
+  // Relations
+  logs        ApiLog[]
+  
+  @@index([token])
+  @@index([refreshToken])
+  @@index([appId])
+  @@index([userId])
+  @@map("oauth_access_tokens")
+}
+
+model WebhookSubscription {
+  id          String             @id @default(cuid())
+  
+  // Empresa suscrita
+  companyId   String
+  company     Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // URL de destino
+  url         String
+  
+  // Eventos suscritos
+  events      WebhookEventType[]
+  
+  // Secret para firma HMAC
+  secret      String
+  
+  // Status
+  active      Boolean            @default(true)
+  
+  // Retry config
+  maxRetries  Int                @default(3)
+  
+  // Stats
+  successCount Int               @default(0)
+  failureCount Int               @default(0)
+  lastSuccessAt DateTime?
+  lastFailureAt DateTime?
+  
+  // Audit
+  createdBy   String
+  createdByUser User             @relation(fields: [createdBy], references: [id])
+  
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  
+  // Relations
+  deliveries  WebhookDelivery[]
+  
+  @@index([companyId])
+  @@index([active])
+  @@map("webhook_subscriptions")
+}
+
+model WebhookDelivery {
+  id              String               @id @default(cuid())
+  
+  // Suscripción
+  subscriptionId  String
+  subscription    WebhookSubscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  
+  // Evento
+  event           WebhookEventType
+  payload         Json
+  
+  // Request
+  url             String
+  method          String               @default("POST")
+  headers         Json?
+  
+  // Response
+  statusCode      Int?
+  responseBody    String?              @db.Text
+  responseTime    Int?                 // ms
+  
+  // Status
+  success         Boolean              @default(false)
+  attempts        Int                  @default(0)
+  maxAttempts     Int                  @default(3)
+  nextRetryAt     DateTime?
+  
+  // Error
+  error           String?              @db.Text
+  
+  // Audit
+  sentAt          DateTime?
+  createdAt       DateTime             @default(now())
+  
+  @@index([subscriptionId])
+  @@index([event])
+  @@index([success])
+  @@map("webhook_deliveries")
+}
+
+model ApiLog {
+  id              String            @id @default(cuid())
+  
+  // Company/API Key
+  companyId       String?
+  company         Company?          @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  apiKeyId        String?
+  apiKey          ApiKey?           @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+  oauthTokenId    String?
+  oauthToken      OAuthAccessToken? @relation(fields: [oauthTokenId], references: [id], onDelete: SetNull)
+  
+  // Request
+  method          String            // GET, POST, PUT, DELETE
+  path            String            // /api/v1/properties
+  query           Json?
+  body            Json?
+  headers         Json?
+  
+  // Response
+  statusCode      Int
+  responseBody    Json?
+  responseTime    Int               // ms
+  
+  // Metadata
+  ipAddress       String
+  userAgent       String?
+  
+  // Rate limiting
+  rateLimitHit    Boolean           @default(false)
+  
+  // Error
+  error           String?           @db.Text
+  
+  timestamp       DateTime          @default(now())
+  
+  @@index([companyId])
+  @@index([apiKeyId])
+  @@index([oauthTokenId])
+  @@index([method])
+  @@index([path])
+  @@index([statusCode])
+  @@index([timestamp])
+  @@map("api_logs")
+}
+
+model IntegrationTemplate {
+  id              String       @id @default(cuid())
+  
+  // Identificación
+  name            String
+  slug            String       @unique
+  description     String       @db.Text
+  icon            String?
+  logo            String?
+  
+  // Categoría
+  category        String       // automation, analytics, communication, etc.
+  
+  // Provider
+  provider        String       // zapier, make, google, slack, etc.
+  
+  // Template config
+  config          Json         // Configuración pre-definida
+  steps           Json         // Pasos del wizard
+  
+  // Features
+  triggers        String[]
+  actions         String[]
+  
+  // Popularidad
+  installCount    Int          @default(0)
+  rating          Float?
+  
+  // Status
+  active          Boolean      @default(true)
+  featured        Boolean      @default(false)
+  
+  // Audit
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  
+  @@index([slug])
+  @@index([category])
+  @@index([provider])
+  @@map("integration_templates")
 }
 
