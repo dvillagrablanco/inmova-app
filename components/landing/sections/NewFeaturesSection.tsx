@@ -26,6 +26,8 @@ import {
   FileCheck,
   Euro,
   Building2,
+  Leaf,
+  DollarSign,
 } from 'lucide-react';
 
 const newModules = [

@@ -530,7 +530,11 @@ export default function PartnersPage() {
 
               <p className="text-xs text-center text-muted-foreground">
                 Al registrarte aceptas los{' '}
-                <a href="#" className="underline">
+                <a
+                  href="/partners/terminos"
+                  className="underline hover:text-primary"
+                  target="_blank"
+                >
                   términos del programa
                 </a>
                 . Te contactaremos en menos de 24 horas.

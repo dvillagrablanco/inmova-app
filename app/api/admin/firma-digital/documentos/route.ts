@@ -7,32 +7,28 @@ import { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
 
   if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
-    return NextResponse.json(
-      { error: 'No autorizado' },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
   try {
     const documentos = await prisma.documentoFirma.findMany({
       where: {
-        companyId: session.user.companyId
+        companyId: session.user.companyId,
       },
       include: {
         firmantes: {
           orderBy: {
-            orden: 'asc'
-          }
-        }
+            orden: 'asc',
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     });
 
     return NextResponse.json(documentos);
@@ -41,10 +37,7 @@ export async function GET(req: NextRequest) {
       context: 'GET /api/admin/firma-digital/documentos',
       companyId: session?.user?.companyId,
     });
-    return NextResponse.json(
-      { error: 'Error al obtener documentos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener documentos' }, { status: 500 });
   }
 }
 
@@ -52,10 +45,7 @@ export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
 
   if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
-    return NextResponse.json(
-      { error: 'No autorizado' },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
   let body: any;
@@ -70,14 +60,11 @@ export async function POST(req: NextRequest) {
       diasExpiracion,
       recordatorios,
       diasRecordatorio,
-      firmantes
+      firmantes,
     } = body;
 
     if (!titulo || !tipoDocumento || !firmantes || firmantes.length === 0) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     // Calcular fecha de expiración
@@ -96,7 +83,7 @@ export async function POST(req: NextRequest) {
         recordatorios: recordatorios !== false,
         diasRecordatorio: parseInt(diasRecordatorio) || 3,
         creadoPor: session.user.id,
-        estado: 'pendiente',
+        estado: 'PENDING',
         firmantes: {
           create: firmantes.map((firmante: any) => ({
             nombre: firmante.nombre,
@@ -104,17 +91,17 @@ export async function POST(req: NextRequest) {
             telefono: firmante.telefono || null,
             rol: firmante.rol,
             orden: firmante.orden,
-            estado: 'pendiente'
-          }))
-        }
+            estado: 'pendiente',
+          })),
+        },
       },
       include: {
         firmantes: {
           orderBy: {
-            orden: 'asc'
-          }
-        }
-      }
+            orden: 'asc',
+          },
+        },
+      },
     });
 
     return NextResponse.json(documento, { status: 201 });
@@ -124,9 +111,6 @@ export async function POST(req: NextRequest) {
       titulo: body?.titulo,
       companyId: session?.user?.companyId,
     });
-    return NextResponse.json(
-      { error: 'Error al crear documento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear documento' }, { status: 500 });
   }
 }
