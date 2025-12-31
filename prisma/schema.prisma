@@ -13241,3 +13241,25 @@ model IncidentClassification {
   @@index([urgency])
   @@map("incident_classifications")
 }
+
+
+// Web Vitals & Performance Monitoring
+model WebVitals {
+  id              String   @id @default(cuid())
+  metric          String   // LCP, FID, CLS, FCP, TTFB, INP
+  value           Float
+  rating          String   // good, needs-improvement, poor
+  delta           Float
+  metricId        String
+  navigationType  String
+  url             String?
+  userAgent       String?
+  ipAddress       String?
+  createdAt       DateTime @default(now())
+
+  @@index([metric, createdAt(sort: Desc)])
+  @@index([rating])
+  @@index([url])
+  @@map("web_vitals")
+}
+

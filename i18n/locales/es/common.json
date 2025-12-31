@@ -1,0 +1,82 @@
+{
+  "app": {
+    "name": "Inmova",
+    "tagline": "Plataforma PropTech Integral",
+    "description": "Gestión inmobiliaria profesional todo en uno"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "properties": "Propiedades",
+    "buildings": "Edificios",
+    "tenants": "Inquilinos",
+    "contracts": "Contratos",
+    "payments": "Pagos",
+    "maintenance": "Mantenimiento",
+    "communities": "Comunidades",
+    "settings": "Configuración",
+    "help": "Ayuda",
+    "logout": "Cerrar Sesión"
+  },
+  "actions": {
+    "create": "Crear",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "refresh": "Actualizar",
+    "view": "Ver",
+    "download": "Descargar",
+    "upload": "Subir",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "finish": "Finalizar",
+    "confirm": "Confirmar"
+  },
+  "status": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "pending": "Pendiente",
+    "completed": "Completado",
+    "cancelled": "Cancelado",
+    "available": "Disponible",
+    "occupied": "Ocupado",
+    "maintenance": "Mantenimiento"
+  },
+  "time": {
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "tomorrow": "Mañana",
+    "thisWeek": "Esta semana",
+    "thisMonth": "Este mes",
+    "thisYear": "Este año",
+    "lastWeek": "Última semana",
+    "lastMonth": "Último mes",
+    "lastYear": "Último año"
+  },
+  "pagination": {
+    "first": "Primera",
+    "last": "Última",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "page": "Página",
+    "of": "de",
+    "showing": "Mostrando",
+    "to": "a",
+    "entries": "entradas"
+  },
+  "feedback": {
+    "loading": "Cargando...",
+    "success": "Éxito",
+    "error": "Error",
+    "warning": "Advertencia",
+    "info": "Información",
+    "noData": "No hay datos disponibles",
+    "noResults": "No se encontraron resultados",
+    "tryAgain": "Intentar de nuevo"
+  }
+}
