@@ -248,7 +248,7 @@
     "speakeasy": "^2.0.0",
     "stripe": "^20.0.0",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-react": "^5.30.3",
+    "swagger-ui-react": "^5.31.0",
     "swr": "2.2.4",
     "tailwind-merge": "2.5.2",
     "tailwind-scrollbar-hide": "1.1.7",
