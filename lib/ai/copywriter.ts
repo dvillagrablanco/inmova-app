@@ -3,11 +3,11 @@
  * Genera contenido persuasivo para redes sociales con personalidad de Growth Manager
  */
 
-import { SocialPlatform, SocialPostTopic } from '@prisma/client';
+import { MarketingMarketingSocialPlatform, MarketingTopic } from '@prisma/client';
 
 interface CopywriterConfig {
-  topic: SocialPostTopic;
-  platform: SocialPlatform;
+  topic: MarketingTopic;
+  platform: MarketingSocialPlatform;
   useAI?: boolean; // Si false, usa templates
 }
 
@@ -215,7 +215,7 @@ Genera el contenido ahora (SOLO el texto, sin etiquetas ni explicaciones):
 /**
  * Parsea la respuesta de la IA
  */
-function parseAIResponse(aiResponse: string, platform: SocialPlatform): GeneratedContent {
+function parseAIResponse(aiResponse: string, platform: MarketingSocialPlatform): GeneratedContent {
   // Extraer hashtags si existen (Instagram)
   const hashtagMatch = aiResponse.match(/#\w+/g);
   const hashtags = hashtagMatch || [];
@@ -428,9 +428,9 @@ export async function generateCompletePost(config: CopywriterConfig & { imagePro
  * Selecciona la variante de imagen apropiada según el topic
  */
 function selectImageVariant(
-  topic: SocialPostTopic
+  topic: MarketingTopic
 ): 'notification' | 'dashboard' | 'chart' | 'mobile' | 'simple' {
-  const variantMap: Record<SocialPostTopic, any> = {
+  const variantMap: Record<MarketingTopic, any> = {
     FIRMA_DIGITAL: 'notification',
     AUTOMATIZACION: 'dashboard',
     GESTION_ALQUILERES: 'dashboard',

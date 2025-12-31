@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     console.log('[Auto-Growth] 🤖 Generando contenido para posts en DRAFT...');
 
     // 2. Obtener posts en DRAFT sin contenido
-    const draftPosts = await prisma.socialPost.findMany({
+    const draftPosts = await prisma.marketingSocialPost.findMany({
       where: {
         status: 'DRAFT',
         content: '',

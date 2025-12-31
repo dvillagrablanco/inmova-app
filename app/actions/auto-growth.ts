@@ -6,11 +6,15 @@
  */
 
 import { prisma } from '@/lib/db';
-import { SocialPlatform, SocialPostStatus, SocialPostTopic } from '@prisma/client';
+import {
+  MarketingMarketingSocialPlatform,
+  MarketingMarketingSocialPostStatus,
+  MarketingTopic,
+} from '@prisma/client';
 
 interface WeeklyContentPlan {
-  topic: SocialPostTopic;
-  platform: SocialPlatform;
+  topic: MarketingTopic;
+  platform: MarketingSocialPlatform;
   scheduledAt: Date;
   imagePrompt: string;
 }
@@ -34,66 +38,66 @@ export async function generateWeeklyContent(userId?: string) {
     const contentPlan: WeeklyContentPlan[] = [
       // LUNES
       {
-        topic: 'AUTOMATIZACION' as SocialPostTopic,
-        platform: 'LINKEDIN' as SocialPlatform,
+        topic: 'AUTOMATIZACION' as MarketingTopic,
+        platform: 'LINKEDIN' as MarketingSocialPlatform,
         scheduledAt: nextWeek.monday9AM,
         imagePrompt: 'Dashboard con gráfico de barras ascendente verde mostrando ahorro de tiempo',
       },
       {
-        topic: 'ROI_INMOBILIARIO' as SocialPostTopic,
-        platform: 'INSTAGRAM' as SocialPlatform,
+        topic: 'ROI_INMOBILIARIO' as MarketingTopic,
+        platform: 'INSTAGRAM' as MarketingSocialPlatform,
         scheduledAt: nextWeek.monday6PM,
         imagePrompt: 'Notificación móvil: "✅ Alquiler c/Goya: Cobrado 1,200€"',
       },
 
       // MARTES
       {
-        topic: 'TIEMPO_LIBERTAD' as SocialPostTopic,
-        platform: 'X' as SocialPlatform,
+        topic: 'TIEMPO_LIBERTAD' as MarketingTopic,
+        platform: 'X' as MarketingSocialPlatform,
         scheduledAt: nextWeek.tuesday12PM,
         imagePrompt: 'Mockup de móvil con dashboard simplificado',
       },
 
       // MIÉRCOLES
       {
-        topic: 'GESTION_ALQUILERES' as SocialPostTopic,
-        platform: 'LINKEDIN' as SocialPlatform,
+        topic: 'GESTION_ALQUILERES' as MarketingTopic,
+        platform: 'LINKEDIN' as MarketingSocialPlatform,
         scheduledAt: nextWeek.wednesday9AM,
         imagePrompt: 'Panel de control con propiedades y estados de pago',
       },
 
       // JUEVES
       {
-        topic: 'ESCALABILIDAD' as SocialPostTopic,
-        platform: 'X' as SocialPlatform,
+        topic: 'ESCALABILIDAD' as MarketingTopic,
+        platform: 'X' as MarketingSocialPlatform,
         scheduledAt: nextWeek.thursday12PM,
         imagePrompt: 'Gráfico simple: 5 propiedades → 50 propiedades',
       },
       {
-        topic: 'COLIVING' as SocialPostTopic,
-        platform: 'INSTAGRAM' as SocialPlatform,
+        topic: 'COLIVING' as MarketingTopic,
+        platform: 'INSTAGRAM' as MarketingSocialPlatform,
         scheduledAt: nextWeek.thursday6PM,
         imagePrompt: 'Interfaz moderna de gestión de espacios compartidos',
       },
 
       // VIERNES
       {
-        topic: 'FIRMA_DIGITAL' as SocialPostTopic,
-        platform: 'LINKEDIN' as SocialPlatform,
+        topic: 'FIRMA_DIGITAL' as MarketingTopic,
+        platform: 'LINKEDIN' as MarketingSocialPlatform,
         scheduledAt: nextWeek.friday9AM,
         imagePrompt: 'Notificación: "📝 Contrato firmado digitalmente"',
       },
     ];
 
     // Crear posts en BD con estado DRAFT (el copywriter los completará)
-    const createdPosts = await prisma.socialPost.createMany({
+    const createdPosts = await prisma.marketingSocialPost.createMany({
       data: contentPlan.map((plan) => ({
         topic: plan.topic,
         platform: plan.platform,
         scheduledAt: plan.scheduledAt,
         imagePrompt: plan.imagePrompt,
         content: '', // Se generará con IA en el siguiente paso
-        status: 'DRAFT' as SocialPostStatus,
+        status: 'DRAFT' as MarketingSocialPostStatus,
         createdBy: userId,
       })),
     });
@@ -119,7 +123,7 @@ export async function generateWeeklyContent(userId?: string) {
  */
 export async function getPendingDraftPosts() {
   try {
-    const posts = await prisma.socialPost.findMany({
+    const posts = await prisma.marketingSocialPost.findMany({
       where: {
         status: 'DRAFT',
         content: '',
@@ -140,7 +144,7 @@ export async function getPendingDraftPosts() {
  */
 export async function getScheduledPosts() {
   try {
-    const posts = await prisma.socialPost.findMany({
+    const posts = await prisma.marketingSocialPost.findMany({
       where: {
         status: 'SCHEDULED',
         scheduledAt: { lte: new Date() },
@@ -162,7 +166,7 @@ export async function getScheduledPosts() {
  */
 export async function markPostAsPublished(postId: string) {
   try {
-    const post = await prisma.socialPost.update({
+    const post = await prisma.marketingSocialPost.update({
       where: { id: postId },
       data: {
         status: 'PUBLISHED',
@@ -183,7 +187,7 @@ export async function markPostAsPublished(postId: string) {
  */
 export async function markPostAsFailed(postId: string, errorMessage: string) {
   try {
-    const post = await prisma.socialPost.update({
+    const post = await prisma.marketingSocialPost.update({
       where: { id: postId },
       data: {
         status: 'FAILED',
@@ -203,7 +207,7 @@ export async function markPostAsFailed(postId: string, errorMessage: string) {
  */
 export async function updatePostContent(postId: string, content: string, imageUrl?: string) {
   try {
-    const post = await prisma.socialPost.update({
+    const post = await prisma.marketingSocialPost.update({
       where: { id: postId },
       data: {
         content,
@@ -225,11 +229,11 @@ export async function updatePostContent(postId: string, content: string, imageUr
 export async function getPostStats() {
   try {
     const [total, draft, scheduled, published, failed] = await Promise.all([
-      prisma.socialPost.count(),
-      prisma.socialPost.count({ where: { status: 'DRAFT' } }),
-      prisma.socialPost.count({ where: { status: 'SCHEDULED' } }),
-      prisma.socialPost.count({ where: { status: 'PUBLISHED' } }),
-      prisma.socialPost.count({ where: { status: 'FAILED' } }),
+      prisma.marketingSocialPost.count(),
+      prisma.marketingSocialPost.count({ where: { status: 'DRAFT' } }),
+      prisma.marketingSocialPost.count({ where: { status: 'SCHEDULED' } }),
+      prisma.marketingSocialPost.count({ where: { status: 'PUBLISHED' } }),
+      prisma.marketingSocialPost.count({ where: { status: 'FAILED' } }),
     ]);
 
     return {

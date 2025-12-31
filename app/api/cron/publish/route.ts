@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
     // 2. Obtener posts SCHEDULED cuya fecha ya pasó
     const now = new Date();
-    const scheduledPosts = await prisma.socialPost.findMany({
+    const scheduledPosts = await prisma.marketingSocialPost.findMany({
       where: {
         status: 'SCHEDULED',
         scheduledAt: { lte: now },

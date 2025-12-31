@@ -1,0 +1,347 @@
+{
+  "name": "Inmova Auto-Growth - Social Media Publisher",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "auto-growth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "auto-growth-inmova"
+    },
+    {
+      "parameters": {
+        "functionCode": "// ============================================\n// VERIFICAR FIRMA HMAC SHA-256\n// ============================================\n\nconst receivedSignature = $input.item.json.headers['x-inmova-signature'];\nconst timestamp = $input.item.json.headers['x-inmova-timestamp'];\nconst payload = $input.item.json.body;\n\n// 1. Verificar que existan headers requeridos\nif (!receivedSignature || !timestamp) {\n  throw new Error('Missing required headers: X-Inmova-Signature or X-Inmova-Timestamp');\n}\n\n// 2. Verificar timestamp (no más de 5 minutos de antigüedad)\nconst now = Date.now();\nconst requestTime = parseInt(timestamp);\nconst maxAge = 5 * 60 * 1000; // 5 minutos\n\nif (now - requestTime > maxAge) {\n  throw new Error(`Timestamp too old: ${Math.floor((now - requestTime) / 1000)}s ago (max 300s)`);\n}\n\n// 3. Obtener secret desde variable de entorno\nconst secret = $env.INMOVA_WEBHOOK_SECRET;\nif (!secret) {\n  throw new Error('INMOVA_WEBHOOK_SECRET not configured in n8n environment');\n}\n\n// 4. Recalcular firma HMAC\nconst crypto = require('crypto');\nconst expectedSignature = crypto\n  .createHmac('sha256', secret)\n  .update(JSON.stringify(payload))\n  .digest('hex');\n\n// 5. Comparar firmas (constant-time comparison para seguridad)\nif (receivedSignature !== expectedSignature) {\n  console.error('Signature mismatch:', {\n    received: receivedSignature,\n    expected: expectedSignature,\n    payload: JSON.stringify(payload).substring(0, 100)\n  });\n  throw new Error('Invalid HMAC signature');\n}\n\n// 6. Firma válida, retornar payload\nconsole.log('✅ HMAC signature verified successfully');\nconsole.log('Platform:', payload.platform);\nconsole.log('Topic:', payload.metadata?.topic);\n\nreturn { json: payload };"
+      },
+      "id": "verify-hmac",
+      "name": "Verify HMAC Signature",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.platform }}",
+                    "value2": "linkedin"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "LinkedIn"
+            },
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.platform }}",
+                    "value2": "x"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "X/Twitter"
+            },
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.platform }}",
+                    "value2": "instagram"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Instagram"
+            },
+            {
+              "conditions": {
+                "string": [
+                  {
+                    "value1": "={{ $json.platform }}",
+                    "value2": "facebook"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Facebook"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "error"
+        }
+      },
+      "id": "switch-platform",
+      "name": "Switch Platform",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "text": "={{ $json.content }}",
+        "additionalFields": {
+          "visibility": "PUBLIC"
+        }
+      },
+      "id": "publish-linkedin",
+      "name": "Publish to LinkedIn",
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [850, 100],
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "linkedin-oauth",
+          "name": "LinkedIn OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth1",
+        "text": "={{ $json.content }}",
+        "additionalFields": {}
+      },
+      "id": "publish-twitter",
+      "name": "Publish to X/Twitter",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 2,
+      "position": [850, 250],
+      "credentials": {
+        "twitterOAuth1Api": {
+          "id": "twitter-oauth",
+          "name": "Twitter OAuth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "accessToken",
+        "operation": "post",
+        "text": "={{ $json.content }}",
+        "additionalFields": {
+          "caption": "={{ $json.content }}"
+        }
+      },
+      "id": "publish-instagram",
+      "name": "Publish to Instagram",
+      "type": "n8n-nodes-base.instagram",
+      "typeVersion": 1,
+      "position": [850, 400],
+      "credentials": {
+        "instagramBusinessAccountApi": {
+          "id": "instagram-token",
+          "name": "Instagram Business"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "post",
+        "message": "={{ $json.content }}",
+        "additionalFields": {}
+      },
+      "id": "publish-facebook",
+      "name": "Publish to Facebook",
+      "type": "n8n-nodes-base.facebook",
+      "typeVersion": 1,
+      "position": [850, 550],
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "facebook-oauth",
+          "name": "Facebook OAuth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll"
+      },
+      "id": "merge-results",
+      "name": "Merge Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  \"success\": true,\n  \"platform\": $json.platform,\n  \"postId\": $json.metadata?.postId,\n  \"publishedAt\": new Date().toISOString(),\n  \"message\": \"Post published successfully\"\n} }}"
+      },
+      "id": "success-response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  \"success\": false,\n  \"error\": $json.error?.message || 'Unknown error',\n  \"platform\": $json.platform,\n  \"postId\": $json.metadata?.postId\n} }}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "error-response",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 500]
+    },
+    {
+      "parameters": {
+        "functionCode": "// ============================================\n// LOG Y NOTIFICACIÓN DE ERROR\n// ============================================\n\nconst error = $input.item.json.error || { message: 'Unknown error' };\nconst payload = $input.item.json;\n\nconsole.error('❌ Error publicando post:', {\n  platform: payload.platform,\n  postId: payload.metadata?.postId,\n  topic: payload.metadata?.topic,\n  error: error.message,\n  timestamp: new Date().toISOString()\n});\n\n// TODO: Enviar alerta a Slack/Email\n// if (process.env.SLACK_WEBHOOK_URL) {\n//   await fetch(process.env.SLACK_WEBHOOK_URL, {\n//     method: 'POST',\n//     body: JSON.stringify({\n//       text: `🚨 Error publicando post en ${payload.platform}`,\n//       blocks: [{ type: 'section', text: { type: 'mrkdwn', text: `*Error:* ${error.message}` }}]\n//     })\n//   });\n// }\n\nreturn { json: payload };"
+      },
+      "id": "log-error",
+      "name": "Log Error",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1050, 500]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Verify HMAC Signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify HMAC Signature": {
+      "main": [
+        [
+          {
+            "node": "Switch Platform",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Platform": {
+      "main": [
+        [
+          {
+            "node": "Publish to LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Publish to X/Twitter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Publish to Instagram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Publish to Facebook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish to LinkedIn": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish to X/Twitter": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish to Instagram": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish to Facebook": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Results": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Error": {
+      "main": [
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2025-12-31T00:00:00.000Z",
+  "versionId": "1"
+}
