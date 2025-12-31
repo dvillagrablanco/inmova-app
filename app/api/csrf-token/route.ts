@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  generateCSRFToken,
-  getCSRFTokenFromCookie,
-  setCSRFCookie,
+  generateCsrfToken,
+  getCsrfTokenFromCookies,
+  addCsrfTokenToResponse,
 } from '@/lib/csrf-protection';
 import logger from '@/lib/logger';
 
@@ -15,11 +15,11 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     // Intentar obtener token existente
-    let token = getCSRFTokenFromCookie(request);
+    let token = getCsrfTokenFromCookies(request);
 
     // Si no existe, generar uno nuevo
     if (!token) {
-      token = generateCSRFToken();
+      token = generateCsrfToken();
       logger.info('Generated new CSRF token');
     }
 
@@ -29,9 +29,9 @@ export async function GET(request: NextRequest) {
     });
 
     // Configurar la cookie con el token
-    setCSRFCookie(response, token);
+    const responseWithToken = addCsrfTokenToResponse(response);
 
-    return response;
+    return responseWithToken;
   } catch (error) {
     logger.error('Error generating CSRF token', {
       error: error instanceof Error ? error.message : 'Unknown error',

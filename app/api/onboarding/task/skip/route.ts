@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: POST /api/onboarding/task/skip
  * Marca una tarea de onboarding como saltada

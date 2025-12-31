@@ -1,0 +1,326 @@
+[
+  {
+    "url": "https://inmovaapp.com",
+    "timestamp": "2025-12-30T12:24:37.088Z",
+    "finalUrl": "https://inmovaapp.com/landing",
+    "statusCode": 200,
+    "headers": {
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cache-control": "s-maxage=31536000",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9b61839edb448b90-PDX",
+      "content-encoding": "zstd",
+      "content-type": "text/html; charset=utf-8",
+      "date": "Tue, 30 Dec 2025 12:24:26 GMT",
+      "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+      "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=0uHn4aZErOmaBrg4GQUaMVHDvOgXCBTzh2HUept5r114CwHkwk9QRZW2k%2B%2Bd3cC07XTBytuz3Ch9z66Rsiar3oUme3JEb1QOMCCK\"}]}",
+      "server": "cloudflare",
+      "server-timing": "cfCacheStatus;desc=\"DYNAMIC\"\ncfEdge;dur=1,cfOrigin;dur=215",
+      "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+      "x-nextjs-cache": "HIT",
+      "x-nextjs-prerender": "1\n1",
+      "x-nextjs-stale-time": "300",
+      "x-powered-by": "Next.js"
+    },
+    "htmlPreview": "<!DOCTYPE html><html lang=\"es\" class=\"light\" style=\"color-scheme: light; --color-primary-50: hsl(235, 89%, 97%); --color-primary-100: hsl(235, 89%, 93%); --color-primary-200: hsl(235, 89%, 86%); --color-primary-300: hsl(235, 89%, 77%); --color-primary-400: hsl(235, 89%, 66%); --color-primary-500: hsl(235, 89%, 55%); --color-primary-600: hsl(235, 89%, 45%); --color-primary-700: hsl(235, 70%, 35%); --color-primary-800: hsl(235, 60%, 25%); --color-primary-900: hsl(235, 50%, 15%); --color-secondary-50: hsl(340, 82%, 97%); --color-secondary-100: hsl(340, 82%, 93%); --color-secondary-200: hsl(340, 82%, 86%); --color-secondary-300: hsl(340, 82%, 77%); --color-secondary-400: hsl(340, 82%, 66%); --color-secondary-500: hsl(340, 82%, 55%); --color-secondary-600: hsl(340, 82%, 45%); --color-secondary-700: hsl(340, 70%, 35%); --color-secondary-800: hsl(340, 60%, 25%); --color-secondary-900: hsl(340, 50%, 15%); --color-success-light: hsl(142, 76%, 90%); --color-success: hsl(142, 76%, 36%); --color-success-dark: hsl(142, 76%, 24%); --color-error-light: hsl(0, 84%, 90%); --color-error: hsl(0, 84%, 60%); --color-error-dark: hsl(0, 84%, 40%); --color-warning-light: hsl(45, 93%, 90%); --color-warning: hsl(45, 93%, 47%); --color-warning-dark: hsl(45, 93%, 30%); --color-info-light: hsl(200, 98%, 90%); --color-info: hsl(200, 98%, 39%); --color-info-dark: hsl(200, 98%, 25%); --color-neutral-50: hsl(0, 0%, 98%); --color-neutral-100: hsl(0, 0%, 96%); --color-neutral-200: hsl(0, 0%, 90%); --color-neutral-300: hsl(0, 0%, 83%); --color-neutral-400: hsl(0, 0%, 64%); --color-neutral-500: hsl(0, 0%, 45%); --color-neutral-600: hsl(0, 0%, 32%); --color-neutral-700: hsl(0, 0%, 25%); --color-neutral-800: hsl(0, 0%, 15%); --color-neutral-900: hsl(0, 0%, 9%); --spacing-xs: 0.25rem; --spacing-sm: 0.5rem; --spacing-md: 1rem; --spacing-lg: 1.5rem; --spacing-xl: 2rem; --spacing-2xl: 3rem; --spacing-3xl: 4rem; --spacing-4xl: 6rem; --spacing-5xl: 8rem; --shadow-none: none; --shadow-sm: 0 1px 2px 0 rgba(0, 0,",
+    "title": "INMOVA - Plataforma PropTech #1 | Gestión Inmobiliaria Inteligente | Inmova App",
+    "metaDescription": "Gestiona tus propiedades en piloto automático con INMOVA. 88 módulos, IA integrada, desde €149/mes. ROI en 60 días. ✓ 500+ clientes ✓ 4.8/5 ⭐ ✓ Prueba gratis 30 días.",
+    "bodyText": "INMOVA\nPropTech\nCaracterísticas\nAccesos\nPrecios\nIntegraciones\nIniciar Sesión\nComenzar Gratis\n#1 PropTech Multi-Vertical en España\n70% más económico que Homming • 6x más funcionalidad\n6 Verticales + 6 Módulos.\nPoder Multiplicado.\n\nLa única plataforma que combina verticales de negocio inmobiliario con módulos transversales de IA, IoT y Blockchain. Todo en un solo lugar.\n\nPrueba Gratis 30 Días\nVer Demo\n€850M Mercado España\n34 Tipos de Partners\n€150M Potencial 5 Años\n6 Verticales\n\nModelos de negocio completos\n\n🏢 Alquiler Tradicional\n🏖️ STR (Vacacional)\n🛏️ Coliving / Habitaciones\n💹 House Flipping\n🏗️ Construcción\n💼 Servicios Profesionales\n6 Módulos\n\nMultiplicadores de valor\n\n🌱 ESG & Sostenibilidad\n🛍️ Marketplace B2C\n💰 Pricing IA\n👓 Tours AR/VR\n🏠 IoT Inteligente\n⛓️ Blockchain\n\n6+6\n\nVerticales + Módulos\n\n€49\n\nDesde €49/mes\n\n100%\n\nArquitectura Modular\n\n24/7\n\nSoporte Premium\n\nCódigo: FLIPPING25\nAdiós al Excel\n\nPlan Basic a solo €29/mes\n\nDeja de perder dinero en tus reformas. Controla t",
+    "screenshot": "/workspace/landing-investigation/screenshot-1767097473348.png",
+    "redirects": [
+      {
+        "from": "https://inmovaapp.com/",
+        "to": "https://inmovaapp.com/landing",
+        "status": 301
+      }
+    ],
+    "networkRequests": [
+      {
+        "url": "https://inmovaapp.com/",
+        "method": "GET",
+        "status": 301,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/landing",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/_next/static/css/ad8b4f7915efe553.css",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/_next/static/chunks/webpack-5b8da17f84d2233c.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/_next/static/chunks/main-app-57ba3998289c9eec.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/_next/static/css/2876164708d74434.css",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/_next/static/chunks/app/layout-c5048e4028b55261.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/_next/static/chunks/app/global-error-f5de9c9d0ecbe509.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/_next/static/chunks/app/error-d0e9923fa61603c5.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/_next/static/chunks/app/landing/page-7a3fc13de8c718a7.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/_next/static/css/ad8b4f7915efe553.css",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/_next/static/chunks/common-6ecde7fa3a9df5a5.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/_next/static/chunks/ui-163234cc89c2ba69.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/_next/static/chunks/vendor-34066d47f2fc6719.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/cdn-cgi/rum?",
+        "method": "POST",
+        "status": 204,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/api/auth/session",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/landing/demo?_rsc=qhohq",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://inmovaapp.com/register?_rsc=qhohq",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      }
+    ],
+    "consoleErrors": [],
+    "pageErrors": [
+      "Invalid or unexpected token"
+    ]
+  },
+  {
+    "url": "https://www.inmovaapp.com",
+    "timestamp": "2025-12-30T12:24:48.028Z",
+    "finalUrl": "https://www.inmovaapp.com/landing",
+    "statusCode": 200,
+    "headers": {
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cache-control": "s-maxage=31536000",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9b6183e49af5ef83-PDX",
+      "content-encoding": "zstd",
+      "content-type": "text/html; charset=utf-8",
+      "date": "Tue, 30 Dec 2025 12:24:38 GMT",
+      "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+      "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=89HAgSMpmdzzn%2FlIlbWfVZf7XC%2BQK4O2qcNZ%2FMOS9FT7vJgyjMjRLg86iDns%2Fix%2F5yiVSVrCqiP3XDWKazUkRhtu%2FfYR2YIaAVvsC2kkLA%3D%3D\"}]}",
+      "server": "cloudflare",
+      "server-timing": "cfCacheStatus;desc=\"DYNAMIC\"\ncfEdge;dur=2,cfOrigin;dur=226",
+      "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+      "x-nextjs-cache": "HIT",
+      "x-nextjs-prerender": "1\n1",
+      "x-nextjs-stale-time": "300",
+      "x-powered-by": "Next.js"
+    },
+    "htmlPreview": "<!DOCTYPE html><html lang=\"es\" class=\"light\" style=\"color-scheme: light; --color-primary-50: hsl(235, 89%, 97%); --color-primary-100: hsl(235, 89%, 93%); --color-primary-200: hsl(235, 89%, 86%); --color-primary-300: hsl(235, 89%, 77%); --color-primary-400: hsl(235, 89%, 66%); --color-primary-500: hsl(235, 89%, 55%); --color-primary-600: hsl(235, 89%, 45%); --color-primary-700: hsl(235, 70%, 35%); --color-primary-800: hsl(235, 60%, 25%); --color-primary-900: hsl(235, 50%, 15%); --color-secondary-50: hsl(340, 82%, 97%); --color-secondary-100: hsl(340, 82%, 93%); --color-secondary-200: hsl(340, 82%, 86%); --color-secondary-300: hsl(340, 82%, 77%); --color-secondary-400: hsl(340, 82%, 66%); --color-secondary-500: hsl(340, 82%, 55%); --color-secondary-600: hsl(340, 82%, 45%); --color-secondary-700: hsl(340, 70%, 35%); --color-secondary-800: hsl(340, 60%, 25%); --color-secondary-900: hsl(340, 50%, 15%); --color-success-light: hsl(142, 76%, 90%); --color-success: hsl(142, 76%, 36%); --color-success-dark: hsl(142, 76%, 24%); --color-error-light: hsl(0, 84%, 90%); --color-error: hsl(0, 84%, 60%); --color-error-dark: hsl(0, 84%, 40%); --color-warning-light: hsl(45, 93%, 90%); --color-warning: hsl(45, 93%, 47%); --color-warning-dark: hsl(45, 93%, 30%); --color-info-light: hsl(200, 98%, 90%); --color-info: hsl(200, 98%, 39%); --color-info-dark: hsl(200, 98%, 25%); --color-neutral-50: hsl(0, 0%, 98%); --color-neutral-100: hsl(0, 0%, 96%); --color-neutral-200: hsl(0, 0%, 90%); --color-neutral-300: hsl(0, 0%, 83%); --color-neutral-400: hsl(0, 0%, 64%); --color-neutral-500: hsl(0, 0%, 45%); --color-neutral-600: hsl(0, 0%, 32%); --color-neutral-700: hsl(0, 0%, 25%); --color-neutral-800: hsl(0, 0%, 15%); --color-neutral-900: hsl(0, 0%, 9%); --spacing-xs: 0.25rem; --spacing-sm: 0.5rem; --spacing-md: 1rem; --spacing-lg: 1.5rem; --spacing-xl: 2rem; --spacing-2xl: 3rem; --spacing-3xl: 4rem; --spacing-4xl: 6rem; --spacing-5xl: 8rem; --shadow-none: none; --shadow-sm: 0 1px 2px 0 rgba(0, 0,",
+    "title": "INMOVA - Plataforma PropTech #1 | Gestión Inmobiliaria Inteligente | Inmova App",
+    "metaDescription": "Gestiona tus propiedades en piloto automático con INMOVA. 88 módulos, IA integrada, desde €149/mes. ROI en 60 días. ✓ 500+ clientes ✓ 4.8/5 ⭐ ✓ Prueba gratis 30 días.",
+    "bodyText": "INMOVA\nPropTech\nCaracterísticas\nAccesos\nPrecios\nIntegraciones\nIniciar Sesión\nComenzar Gratis\n#1 PropTech Multi-Vertical en España\n70% más económico que Homming • 6x más funcionalidad\n6 Verticales + 6 Módulos.\nPoder Multiplicado.\n\nLa única plataforma que combina verticales de negocio inmobiliario con módulos transversales de IA, IoT y Blockchain. Todo en un solo lugar.\n\nPrueba Gratis 30 Días\nVer Demo\n€850M Mercado España\n34 Tipos de Partners\n€150M Potencial 5 Años\n6 Verticales\n\nModelos de negocio completos\n\n🏢 Alquiler Tradicional\n🏖️ STR (Vacacional)\n🛏️ Coliving / Habitaciones\n💹 House Flipping\n🏗️ Construcción\n💼 Servicios Profesionales\n6 Módulos\n\nMultiplicadores de valor\n\n🌱 ESG & Sostenibilidad\n🛍️ Marketplace B2C\n💰 Pricing IA\n👓 Tours AR/VR\n🏠 IoT Inteligente\n⛓️ Blockchain\n\n6+6\n\nVerticales + Módulos\n\n€49\n\nDesde €49/mes\n\n100%\n\nArquitectura Modular\n\n24/7\n\nSoporte Premium\n\nCódigo: FLIPPING25\nAdiós al Excel\n\nPlan Basic a solo €29/mes\n\nDeja de perder dinero en tus reformas. Controla t",
+    "screenshot": "/workspace/landing-investigation/screenshot-1767097484746.png",
+    "redirects": [
+      {
+        "from": "https://www.inmovaapp.com/",
+        "to": "https://www.inmovaapp.com/landing",
+        "status": 301
+      }
+    ],
+    "networkRequests": [
+      {
+        "url": "https://www.inmovaapp.com/",
+        "method": "GET",
+        "status": 301,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/landing",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/_next/static/chunks/main-app-57ba3998289c9eec.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/_next/static/chunks/app/layout-c5048e4028b55261.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/_next/static/chunks/app/error-d0e9923fa61603c5.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/_next/static/css/ad8b4f7915efe553.css",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/_next/static/css/2876164708d74434.css",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/_next/static/chunks/app/global-error-f5de9c9d0ecbe509.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/_next/static/chunks/webpack-5b8da17f84d2233c.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/_next/static/chunks/ui-163234cc89c2ba69.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/_next/static/chunks/common-6ecde7fa3a9df5a5.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/_next/static/css/ad8b4f7915efe553.css",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/_next/static/chunks/app/landing/page-7a3fc13de8c718a7.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/_next/static/chunks/vendor-34066d47f2fc6719.js",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/cdn-cgi/rum?",
+        "method": "POST",
+        "status": 204,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/login?_rsc=qhohq",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/landing/demo?_rsc=qhohq",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      },
+      {
+        "url": "https://www.inmovaapp.com/register?_rsc=qhohq",
+        "method": "GET",
+        "status": 200,
+        "cached": false
+      }
+    ],
+    "consoleErrors": [],
+    "pageErrors": [
+      "Invalid or unexpected token"
+    ]
+  }
+]

@@ -11,10 +11,11 @@ const LandingChatbot = dynamic(() => import('@/components/LandingChatbot').then(
 
 // Componentes modulares de la landing page
 import { Navigation } from '@/components/landing/sections/Navigation';
-import { HeroSection } from '@/components/landing/sections/HeroSection';
+import { HeroSectionSegmentado } from '@/components/landing/sections/HeroSectionSegmentado';
 import { PromoBanner } from '@/components/landing/sections/PromoBanner';
 import { PromoSection } from '@/components/landing/sections/PromoSection';
 import { StatsSection } from '@/components/landing/sections/StatsSection';
+import { MarketPotentialSection } from '@/components/landing/sections/MarketPotentialSection';
 import { FeaturesSection } from '@/components/landing/sections/FeaturesSection';
 import { NewFeaturesSection } from '@/components/landing/sections/NewFeaturesSection';
 import { AccessPortalsSection } from '@/components/landing/sections/AccessPortalsSection';
@@ -33,8 +34,8 @@ export function LandingPageContent() {
         {/* Navigation */}
         <Navigation />
 
-        {/* Hero Section */}
-        <HeroSection />
+        {/* Hero Section Segmentado por Buyer Persona */}
+        <HeroSectionSegmentado />
 
         {/* Banner Promocional Rotativo */}
         <PromoBanner />
@@ -44,6 +45,9 @@ export function LandingPageContent() {
 
         {/* Stats Section */}
         <StatsSection />
+
+        {/* Market Potential Section */}
+        <MarketPotentialSection />
 
         {/* Features & Verticals */}
         <FeaturesSection />

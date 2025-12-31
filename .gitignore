@@ -1,58 +1,63 @@
-**/node_modules
-.next
-.cache
-.build
-*.nfs*
-**/.yarn/
-!**/.yarn/patches
-!**/.yarn/plugins
-!**/.yarn/releases
-!**/.yarn/sdks
-!**/.yarn/versions
-!**/.yarn/cache
-**/.yarn/build-state.yml
-**/.yarn/install-state.gz
-dist
-target
-out
-.deploy
-.logs
-*.tsbuildinfo
-core
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Evitar directorio duplicado
-nextjs_space/
-.env
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
 
-# Environment files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# testing
+/coverage
 
-# Database
-*.db
-*.db-journal
-*.sqlite
-*.sqlite3
+# next.js
+/.next/
+/out/
 
-# Debug
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# local env files
+.env*.local
+.env.production
+.env.development
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# prisma
+prisma/.env
+
 # IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+.vscode
+.idea
+
+# Logs
+logs
+*.log
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Backup files
+# Scripts con contraseñas (SEGURIDAD)
+scripts/deploy-with-password.sh
+
+# Backups
 *.backup
 *.bak
-*.old
+
+# Test results
+test-results/
+playwright-report/

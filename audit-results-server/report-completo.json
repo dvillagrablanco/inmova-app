@@ -1,0 +1,1832 @@
+{
+  "routes": [
+    {
+      "route": "Admin - Activity",
+      "url": "/admin/activity",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1119
+    },
+    {
+      "route": "Admin - Alertas",
+      "url": "/admin/alertas",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1089
+    },
+    {
+      "route": "Admin - Aprobaciones",
+      "url": "/admin/aprobaciones",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1054
+    },
+    {
+      "route": "Admin - Backup Restore",
+      "url": "/admin/backup-restore",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1043
+    },
+    {
+      "route": "Admin - Clientes - Comparar",
+      "url": "/admin/clientes/comparar",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1103
+    },
+    {
+      "route": "Admin - Clientes",
+      "url": "/admin/clientes",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error 500: Internal Server Error {stack: Error: Error 500: Internal Server Error\n    at c (…/admin/clientes/page-35d89a4d784175c8.js:1:11977), context: useCompanies.fetchPlans}"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error 500: Internal Server Error {stack: Error: Error 500: Internal Server Error\n    at l (…/admin/clientes/page-35d89a4d784175c8.js:1:11581), context: useCompanies.fetchCompanies}"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/admin/subscription-plans",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/admin/companies",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1059
+    },
+    {
+      "route": "Admin - Configuracion",
+      "url": "/admin/configuracion",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1145
+    },
+    {
+      "route": "Admin - Dashboard",
+      "url": "/admin/dashboard",
+      "category": "admin",
+      "priority": "high",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1077
+    },
+    {
+      "route": "Admin - Facturacion B2b",
+      "url": "/admin/facturacion-b2b",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1037
+    },
+    {
+      "route": "Admin - Firma Digital",
+      "url": "/admin/firma-digital",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error 500: Internal Server Error undefined"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/admin/firma-digital/documentos",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1180
+    },
+    {
+      "route": "Admin - Importar",
+      "url": "/admin/importar",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1034
+    },
+    {
+      "route": "Admin - Integraciones Contables",
+      "url": "/admin/integraciones-contables",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1138
+    },
+    {
+      "route": "Admin - Legal",
+      "url": "/admin/legal",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error 500: Internal Server Error undefined"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/admin/legal/templates",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1081
+    },
+    {
+      "route": "Admin - Marketplace",
+      "url": "/admin/marketplace",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error 500: Internal Server Error undefined"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/admin/marketplace/services",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1133
+    },
+    {
+      "route": "Admin - Metricas Uso",
+      "url": "/admin/metricas-uso",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1065
+    },
+    {
+      "route": "Admin - Modulos",
+      "url": "/admin/modulos",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1093
+    },
+    {
+      "route": "Admin - Ocr Import",
+      "url": "/admin/ocr-import",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1072
+    },
+    {
+      "route": "Admin - Personalizacion",
+      "url": "/admin/personalizacion",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1072
+    },
+    {
+      "route": "Admin - Planes",
+      "url": "/admin/planes",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1081
+    },
+    {
+      "route": "Admin - Plantillas Sms",
+      "url": "/admin/plantillas-sms",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1078
+    },
+    {
+      "route": "Admin - Portales Externos",
+      "url": "/admin/portales-externos",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1080
+    },
+    {
+      "route": "Admin - Recuperar Contrasena",
+      "url": "/admin/recuperar-contrasena",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [
+        "No se encontró ningún elemento <h1>"
+      ],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1077
+    },
+    {
+      "route": "Admin - Reportes Programados",
+      "url": "/admin/reportes-programados",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1081
+    },
+    {
+      "route": "Admin - Salud Sistema",
+      "url": "/admin/salud-sistema",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1074
+    },
+    {
+      "route": "Admin - Seguridad",
+      "url": "/admin/seguridad",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1072
+    },
+    {
+      "route": "Admin - Sugerencias",
+      "url": "/admin/sugerencias",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1077
+    },
+    {
+      "route": "Admin - Usuarios",
+      "url": "/admin/usuarios",
+      "category": "admin",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1081
+    },
+    {
+      "route": "Alquiler Tradicional - Warranties",
+      "url": "/alquiler-tradicional/warranties",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1080
+    },
+    {
+      "route": "Analytics",
+      "url": "/analytics",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1069
+    },
+    {
+      "route": "Anuncios",
+      "url": "/anuncios",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1075
+    },
+    {
+      "route": "Api Docs.disabled",
+      "url": "/api-docs.disabled",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching API spec: {}"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/docs",
+          "status": 404
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1075
+    },
+    {
+      "route": "Asistente Ia",
+      "url": "/asistente-ia",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1128
+    },
+    {
+      "route": "Auditoria",
+      "url": "/auditoria",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1064
+    },
+    {
+      "route": "Automatizacion",
+      "url": "/automatizacion",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1079
+    },
+    {
+      "route": "Automatizacion Resumen",
+      "url": "/automatizacion-resumen",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [
+        "No se encontró ningún elemento <h1>"
+      ],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1084
+    },
+    {
+      "route": "Bi",
+      "url": "/bi",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1067
+    },
+    {
+      "route": "Blockchain",
+      "url": "/blockchain",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1084
+    },
+    {
+      "route": "Calendario",
+      "url": "/calendario",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1072
+    },
+    {
+      "route": "Candidatos - Nuevo",
+      "url": "/candidatos/nuevo",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1073
+    },
+    {
+      "route": "Candidatos",
+      "url": "/candidatos",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1077
+    },
+    {
+      "route": "Certificaciones",
+      "url": "/certificaciones",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1076
+    },
+    {
+      "route": "Chat",
+      "url": "/chat",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1080
+    },
+    {
+      "route": "Comparativa - Homming",
+      "url": "/comparativa/homming",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1129
+    },
+    {
+      "route": "Comunidades - Actas",
+      "url": "/comunidades/actas",
+      "category": "comunidades",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1083
+    },
+    {
+      "route": "Comunidades - Cumplimiento",
+      "url": "/comunidades/cumplimiento",
+      "category": "comunidades",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1074
+    },
+    {
+      "route": "Comunidades - Cuotas",
+      "url": "/comunidades/cuotas",
+      "category": "comunidades",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1082
+    },
+    {
+      "route": "Comunidades - Finanzas",
+      "url": "/comunidades/finanzas",
+      "category": "comunidades",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1075
+    },
+    {
+      "route": "Comunidades - Fondos",
+      "url": "/comunidades/fondos",
+      "category": "comunidades",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1060
+    },
+    {
+      "route": "Comunidades",
+      "url": "/comunidades",
+      "category": "comunidades",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1071
+    },
+    {
+      "route": "Comunidades - Presidente",
+      "url": "/comunidades/presidente",
+      "category": "comunidades",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1081
+    },
+    {
+      "route": "Comunidades - Renovaciones",
+      "url": "/comunidades/renovaciones",
+      "category": "comunidades",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1068
+    },
+    {
+      "route": "Comunidades - Votaciones",
+      "url": "/comunidades/votaciones",
+      "category": "comunidades",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1081
+    },
+    {
+      "route": "Comunidad Social",
+      "url": "/comunidad-social",
+      "category": "other",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1077
+    },
+    {
+      "route": "Configuracion - Integraciones - Stripe",
+      "url": "/configuracion/integraciones/stripe",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/configuracion?_rsc=11nnd",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/configuracion/integraciones?_rsc=11nnd",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1076
+    },
+    {
+      "route": "Configuracion - Notificaciones",
+      "url": "/configuracion/notificaciones",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1074
+    },
+    {
+      "route": "Configuracion - Ui Mode",
+      "url": "/configuracion/ui-mode",
+      "category": "other",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [
+        "No se encontró ningún elemento <h1>"
+      ],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1075
+    },
+    {
+      "route": "Construction - Gantt",
+      "url": "/construction/gantt",
+      "category": "construction",
+      "priority": "low",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1096
+    },
+    {
+      "route": "Construction",
+      "url": "/construction",
+      "category": "construction",
+      "priority": "medium",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        }
+      ],
+      "networkErrors": [],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "warning",
+      "loadTime": 1079
+    }
+  ]
+}

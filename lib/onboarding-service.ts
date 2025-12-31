@@ -586,12 +586,37 @@ export async function getOnboardingProgress(userId: string, companyId: string) {
   const remainingTasks = tasks.filter(t => t.status === 'pending' || t.status === 'in_progress');
   const estimatedTimeRemaining = remainingTasks.reduce((sum, task) => sum + task.estimatedTime, 0);
 
+  // Encontrar el índice del primer paso no completado (currentStep)
+  const currentStepIndex = tasks.findIndex(t => t.status !== 'completed');
+
+  // Transformar tasks a steps con el formato esperado por el frontend
+  const steps = tasks.map(task => ({
+    id: task.taskId,
+    title: task.title,
+    description: task.description,
+    action: task.route || 'acknowledge',
+    completed: task.status === 'completed',
+    required: task.isMandatory,
+    order: task.order,
+    videoUrl: task.videoUrl,
+    estimatedTime: Math.ceil(task.estimatedTime / 60), // convertir segundos a minutos
+  }));
+
   return {
+    // Formato antiguo (mantener por compatibilidad)
     totalTasks,
     completedTasks: completedTasks.length,
     percentage,
     estimatedTimeRemaining, // en segundos
-    tasks
+    tasks,
+
+    // Formato nuevo para SmartOnboardingWizard
+    currentStep: currentStepIndex >= 0 ? currentStepIndex : tasks.length - 1,
+    totalSteps: totalTasks,
+    completedSteps: completedTasks.length,
+    percentageComplete: percentage,
+    steps,
+    vertical: 'general', // TODO: obtener del usuario/company
   };
 }
 

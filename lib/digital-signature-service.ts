@@ -1,392 +1,621 @@
+/**
+ * Servicio de Firma Digital de Contratos
+ * 
+ * Abstracción para múltiples proveedores de firma electrónica:
+ * - Signaturit (eIDAS compliant, Europa)
+ * - DocuSign (líder global)
+ * - Self-hosted (firma simple con certificado propio)
+ * 
+ * @module DigitalSignatureService
+ */
+
 import { prisma } from './db';
-import logger, { logError } from '@/lib/logger';
-
-// Definiciones de tipos inline (reemplaza imports de @prisma/client)
-type SignatureStatus = 'pendiente' | 'firmado' | 'rechazado' | 'expirado';
-type SignerStatus = 'pendiente' | 'visto' | 'firmado' | 'rechazado';
+import logger from './logger';
+import crypto from 'crypto';
 
 // ============================================================================
-// CONFIGURACIÓN - Variables de Entorno
+// TIPOS
 // ============================================================================
-const DOCUSIGN_INTEGRATION_KEY = process.env.DOCUSIGN_INTEGRATION_KEY;
-const DOCUSIGN_USER_ID = process.env.DOCUSIGN_USER_ID;
-const DOCUSIGN_ACCOUNT_ID = process.env.DOCUSIGN_ACCOUNT_ID;
-const DOCUSIGN_PRIVATE_KEY = process.env.DOCUSIGN_PRIVATE_KEY;
-const DOCUSIGN_BASE_PATH = process.env.DOCUSIGN_BASE_PATH || 'https://demo.docusign.net/restapi';
 
-const SIGNATURIT_API_KEY = process.env.SIGNATURIT_API_KEY;
-const SIGNATURIT_SANDBOX = process.env.SIGNATURIT_SANDBOX === 'true';
+export type SignatureProvider = 'DOCUSIGN' | 'SIGNATURIT' | 'SELF_HOSTED';
 
-// Detectar si hay credenciales configuradas
-const isDocuSignConfigured = !!(DOCUSIGN_INTEGRATION_KEY && DOCUSIGN_USER_ID && DOCUSIGN_ACCOUNT_ID);
-const isSignaturitConfigured = !!SIGNATURIT_API_KEY;
-
-interface FirmanteData {
+export interface Signatory {
+  name: string;
   email: string;
-  nombre: string;
-  rol: string;
-  tenantId?: string;
+  role: 'LANDLORD' | 'TENANT' | 'WITNESS' | 'OTHER';
+  phone?: string;
 }
 
-interface CrearDocumentoFirmaParams {
+export interface SignatureRequest {
+  contractId: string;
   companyId: string;
-  contractId?: string;
-  tenantId?: string;
-  titulo: string;
-  tipoDocumento: string;
   documentUrl: string;
-  mensaje?: string;
-  firmantes: FirmanteData[];
-  creadoPor: string;
-  diasExpiracion?: number;
-  provider?: 'docusign' | 'signaturit' | 'demo';
+  documentName: string;
+  signatories: Signatory[];
+  provider?: SignatureProvider;
+  emailSubject?: string;
+  emailMessage?: string;
+  expiresInDays?: number;
+  requestedBy: string;
+  ipAddress?: string;
+  userAgent?: string;
+}
+
+export interface SignatureResponse {
+  id: string;
+  signatureId: string; // ID en la BD
+  externalId?: string; // ID en proveedor externo
+  status: 'PENDING' | 'SIGNED' | 'DECLINED' | 'EXPIRED' | 'CANCELLED';
+  signingUrl?: string;
+  completedUrl?: string;
+  expiresAt?: Date;
+}
+
+export interface SignatureStatusUpdate {
+  status: 'SIGNED' | 'DECLINED' | 'EXPIRED' | 'CANCELLED';
+  signedBy?: string;
+  signedAt?: Date;
+  ipAddress?: string;
+  completedUrl?: string;
 }
 
 // ============================================================================
-// FUNCIONES AUXILIARES - Integración con Proveedores
+// INTERFAZ DE PROVEEDOR
+// ============================================================================
+
+interface ISignatureProvider {
+  createSignatureRequest(request: SignatureRequest): Promise<{
+    externalId: string;
+    signingUrl: string;
+    expiresAt: Date;
+  }>;
+  
+  getSignatureStatus(externalId: string): Promise<{
+    status: 'PENDING' | 'SIGNED' | 'DECLINED' | 'EXPIRED';
+    completedUrl?: string;
+  }>;
+  
+  cancelSignature(externalId: string): Promise<void>;
+  
+  downloadSignedDocument(externalId: string): Promise<Buffer>;
+}
+
+// ============================================================================
+// PROVEEDOR: SIGNATURIT
+// ============================================================================
+
+class SignaturitProvider implements ISignatureProvider {
+  private apiKey: string;
+  private baseUrl: string = 'https://api.signaturit.com/v3';
+  
+  constructor() {
+    this.apiKey = process.env.SIGNATURIT_API_KEY || '';
+    if (!this.apiKey) {
+      logger.warn('SIGNATURIT_API_KEY not configured');
+    }
+  }
+  
+  async createSignatureRequest(request: SignatureRequest) {
+    try {
+      // Simulated implementation - En producción, usar SDK oficial
+      logger.info('📝 Creating signature request with Signaturit', {
+        contractId: request.contractId,
+        signatories: request.signatories.length,
+      });
+      
+      // Mock de respuesta para desarrollo
+      // En producción:
+      // const signaturit = require('@signaturit/signaturit-sdk');
+      // const client = new signaturit.Client(this.apiKey);
+      // const result = await client.createSignature({ ... });
+      
+      const externalId = `sig_${crypto.randomBytes(16).toString('hex')}`;
+      const signingUrl = `https://app.signaturit.com/sign/${externalId}`;
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + (request.expiresInDays || 7));
+      
+      return {
+        externalId,
+        signingUrl,
+        expiresAt,
+      };
+    } catch (error) {
+      logger.error('Error creating Signaturit signature:', error);
+      throw new Error(`Signaturit error: ${error}`);
+    }
+  }
+  
+  async getSignatureStatus(externalId: string) {
+    try {
+      // Mock - En producción usar SDK
+      return {
+        status: 'PENDING' as const,
+        completedUrl: undefined,
+      };
+    } catch (error) {
+      logger.error('Error getting Signaturit status:', error);
+      throw error;
+    }
+  }
+  
+  async cancelSignature(externalId: string) {
+    try {
+      logger.info('❌ Cancelling Signaturit signature:', externalId);
+      // Mock - En producción usar SDK
+    } catch (error) {
+      logger.error('Error cancelling Signaturit signature:', error);
+      throw error;
+    }
+  }
+  
+  async downloadSignedDocument(externalId: string): Promise<Buffer> {
+    try {
+      // Mock - En producción usar SDK para descargar documento firmado
+      return Buffer.from('Mock signed document');
+    } catch (error) {
+      logger.error('Error downloading signed document:', error);
+      throw error;
+    }
+  }
+}
+
+// ============================================================================
+// PROVEEDOR: DOCUSIGN
+// ============================================================================
+
+class DocuSignProvider implements ISignatureProvider {
+  private apiKey: string;
+  private accountId: string;
+  private baseUrl: string = 'https://demo.docusign.net/restapi';
+  
+  constructor() {
+    this.apiKey = process.env.DOCUSIGN_INTEGRATION_KEY || '';
+    this.accountId = process.env.DOCUSIGN_ACCOUNT_ID || '';
+    
+    if (!this.apiKey || !this.accountId) {
+      logger.warn('DocuSign not fully configured');
+    }
+  }
+  
+  async createSignatureRequest(request: SignatureRequest) {
+    try {
+      logger.info('📝 Creating signature request with DocuSign', {
+        contractId: request.contractId,
+        signatories: request.signatories.length,
+      });
+      
+      // Mock - En producción usar SDK oficial de DocuSign
+      // const docusign = require('docusign-esign');
+      // const apiClient = new docusign.ApiClient();
+      // ...
+      
+      const externalId = `env_${crypto.randomBytes(16).toString('hex')}`;
+      const signingUrl = `https://demo.docusign.net/Signing/${externalId}`;
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + (request.expiresInDays || 7));
+      
+      return {
+        externalId,
+        signingUrl,
+        expiresAt,
+      };
+    } catch (error) {
+      logger.error('Error creating DocuSign signature:', error);
+      throw new Error(`DocuSign error: ${error}`);
+    }
+  }
+  
+  async getSignatureStatus(externalId: string) {
+    try {
+      return {
+        status: 'PENDING' as const,
+        completedUrl: undefined,
+      };
+    } catch (error) {
+      logger.error('Error getting DocuSign status:', error);
+      throw error;
+    }
+  }
+  
+  async cancelSignature(externalId: string) {
+    try {
+      logger.info('❌ Cancelling DocuSign envelope:', externalId);
+    } catch (error) {
+      logger.error('Error cancelling DocuSign envelope:', error);
+      throw error;
+    }
+  }
+  
+  async downloadSignedDocument(externalId: string): Promise<Buffer> {
+    try {
+      return Buffer.from('Mock signed document');
+    } catch (error) {
+      logger.error('Error downloading signed document:', error);
+      throw error;
+    }
+  }
+}
+
+// ============================================================================
+// PROVEEDOR: SELF-HOSTED (Firma Simple)
+// ============================================================================
+
+class SelfHostedProvider implements ISignatureProvider {
+  async createSignatureRequest(request: SignatureRequest) {
+    try {
+      logger.info('📝 Creating self-hosted signature request', {
+        contractId: request.contractId,
+      });
+      
+      // Para firma simple auto-hospedada
+      // Generar URL única de firma
+      const externalId = crypto.randomBytes(32).toString('hex');
+      const signingUrl = `${process.env.NEXTAUTH_URL}/sign/${externalId}`;
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + (request.expiresInDays || 7));
+      
+      return {
+        externalId,
+        signingUrl,
+        expiresAt,
+      };
+    } catch (error) {
+      logger.error('Error creating self-hosted signature:', error);
+      throw error;
+    }
+  }
+  
+  async getSignatureStatus(externalId: string) {
+    return {
+      status: 'PENDING' as const,
+      completedUrl: undefined,
+    };
+  }
+  
+  async cancelSignature(externalId: string) {
+    logger.info('❌ Cancelling self-hosted signature:', externalId);
+  }
+  
+  async downloadSignedDocument(externalId: string): Promise<Buffer> {
+    return Buffer.from('Mock signed document');
+  }
+}
+
+// ============================================================================
+// FACTORY PATTERN
+// ============================================================================
+
+function getProvider(provider: SignatureProvider): ISignatureProvider {
+  switch (provider) {
+    case 'SIGNATURIT':
+      return new SignaturitProvider();
+    case 'DOCUSIGN':
+      return new DocuSignProvider();
+    case 'SELF_HOSTED':
+      return new SelfHostedProvider();
+    default:
+      throw new Error(`Unknown provider: ${provider}`);
+  }
+}
+
+// ============================================================================
+// FUNCIONES PRINCIPALES
 // ============================================================================
 
 /**
- * Determina qué proveedor usar basándose en la configuración y preferencias
+ * Calcula hash SHA-256 del documento
  */
-export function getActiveProvider(): 'docusign' | 'signaturit' | 'demo' {
-  if (isDocuSignConfigured) return 'docusign';
-  if (isSignaturitConfigured) return 'signaturit';
-  return 'demo';
-}
-
-/**
- * Envia documento a DocuSign (cuando esté configurado)
- * 
- * NOTA IMPORTANTE: La integración real de DocuSign está preparada pero requiere
- * implementación manual debido a incompatibilidades del paquete docusign-esign con Next.js.
- * 
- * Ver documentación completa en:
- * - /home/ubuntu/homming_vidaro/INTEGRACION_DOCUSIGN_VIDARO.md
- * - /home/ubuntu/homming_vidaro/GUIA_RAPIDA_DOCUSIGN.md
- * 
- * Para activar la integración real:
- * 1. Obtener credenciales de DocuSign (ver guías)
- * 2. Configurar variables de entorno en .env
- * 3. Implementar el código de integración proporcionado en la documentación
- */
-async function enviarDocuSignEnvelope(params: {
-  titulo: string;
-  documentUrl: string;
-  mensaje?: string;
-  firmantes: FirmanteData[];
-  diasExpiracion: number;
-}) {
-  // TODO: Implementar integración real con DocuSign API
-  // Referencia: Ver INTEGRACION_DOCUSIGN_VIDARO.md para código completo
-  
-  const isConfigured = isDocuSignConfigured;
-  
-  logger.info('📧 [DocuSign] Envío de documento', {
-    modo: isConfigured ? 'PREPARADO (requiere implementación)' : 'DEMO',
-    titulo: params.titulo,
-    firmantes: params.firmantes.length,
-    credencialesConfiguradas: isConfigured
-  });
-  
-  return {
-    envelopeId: `DS_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-    status: 'sent',
-    message: isConfigured 
-      ? 'Documento preparado para DocuSign (Consulte la documentación para activar integración real)'
-      : 'Documento enviado via DocuSign (MODO DEMO - Configure credenciales en .env)'
-  };
-}
-
-/**
- * Envia documento a Signaturit (cuando esté configurado)
- */
-async function enviarSignaturitDocument(params: {
-  titulo: string;
-  documentUrl: string;
-  mensaje?: string;
-  firmantes: FirmanteData[];
-  diasExpiracion: number;
-}) {
-  // TODO: Implementar integración real con Signaturit API
-  // Referencia: https://docs.signaturit.com/
-  
-  logger.info('📧 [Signaturit] Envío de documento (preparado para integración real)');
-  
-  return {
-    documentId: `SIG_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-    status: 'sent',
-    message: 'Documento enviado via Signaturit (simulado - configure credenciales)'
-  };
+function calculateDocumentHash(documentUrl: string): string {
+  // En producción, descargar el archivo y calcular hash real
+  return crypto
+    .createHash('sha256')
+    .update(documentUrl)
+    .digest('hex');
 }
 
 /**
  * Crea una solicitud de firma digital
  */
-export async function crearSolicitudFirma(params: CrearDocumentoFirmaParams) {
-  const {
-    companyId,
-    contractId,
-    tenantId,
-    titulo,
-    tipoDocumento,
-    documentUrl,
-    mensaje,
-    firmantes,
-    creadoPor,
-    diasExpiracion = 30,
-    provider: requestedProvider
-  } = params;
-
-  const fechaExpiracion = new Date();
-  fechaExpiracion.setDate(fechaExpiracion.getDate() + diasExpiracion);
-
-  // Determinar proveedor a usar
-  const provider = requestedProvider || getActiveProvider();
-  let externalId: string;
-  let providerMessage: string;
-
-  // Enviar a proveedor externo si está configurado
-  if (provider === 'docusign' && isDocuSignConfigured) {
-    const result = await enviarDocuSignEnvelope({
-      titulo,
-      documentUrl,
-      mensaje,
-      firmantes,
-      diasExpiracion
+export async function createSignatureRequest(
+  request: SignatureRequest
+): Promise<SignatureResponse> {
+  try {
+    const provider = request.provider || 'SIGNATURIT';
+    
+    logger.info('🚀 Creating digital signature request', {
+      contractId: request.contractId,
+      provider,
+      signatories: request.signatories.length,
     });
-    externalId = result.envelopeId;
-    providerMessage = result.message;
-  } else if (provider === 'signaturit' && isSignaturitConfigured) {
-    const result = await enviarSignaturitDocument({
-      titulo,
-      documentUrl,
-      mensaje,
-      firmantes,
-      diasExpiracion
+    
+    // 1. Calcular hash del documento
+    const documentHash = calculateDocumentHash(request.documentUrl);
+    
+    // 2. Crear solicitud en proveedor externo
+    const providerInstance = getProvider(provider);
+    const providerResponse = await providerInstance.createSignatureRequest(request);
+    
+    // 3. Preparar signatarios con estado inicial
+    const signatoriesData = request.signatories.map((s) => ({
+      name: s.name,
+      email: s.email,
+      role: s.role,
+      phone: s.phone || null,
+      status: 'PENDING',
+      signedAt: null,
+      ipAddress: null,
+    }));
+    
+    // 4. Guardar en base de datos
+    const signature = await prisma.contractSignature.create({
+      data: {
+        companyId: request.companyId,
+        contractId: request.contractId,
+        provider,
+        externalId: providerResponse.externalId,
+        documentUrl: request.documentUrl,
+        documentName: request.documentName,
+        documentHash,
+        signatories: signatoriesData,
+        status: 'PENDING',
+        signingUrl: providerResponse.signingUrl,
+        emailSubject: request.emailSubject || `Firma de contrato: ${request.documentName}`,
+        emailMessage: request.emailMessage || 'Por favor, revisa y firma el documento adjunto.',
+        sentAt: new Date(),
+        expiresAt: providerResponse.expiresAt,
+        requestedBy: request.requestedBy,
+        ipAddress: request.ipAddress || null,
+        userAgent: request.userAgent || null,
+      },
     });
-    externalId = result.documentId;
-    providerMessage = result.message;
-  } else {
-    // Modo demo
-    externalId = `DEMO_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    providerMessage = '[MODO DEMO] Documento enviado para firma (simulado)';
+    
+    logger.info('✅ Digital signature request created', {
+      signatureId: signature.id,
+      externalId: signature.externalId,
+    });
+    
+    // TODO: Enviar emails a firmantes
+    // await sendSignatureEmails(signature);
+    
+    return {
+      id: signature.id,
+      signatureId: signature.id,
+      externalId: signature.externalId || undefined,
+      status: signature.status as any,
+      signingUrl: signature.signingUrl || undefined,
+      completedUrl: signature.completedUrl || undefined,
+      expiresAt: signature.expiresAt || undefined,
+    };
+  } catch (error) {
+    logger.error('Error creating signature request:', error);
+    throw error;
   }
+}
 
-  const documento = await prisma.documentoFirma.create({
-    data: {
-      companyId,
+/**
+ * Obtiene el estado de una solicitud de firma
+ */
+export async function getSignatureStatus(signatureId: string): Promise<SignatureResponse> {
+  try {
+    const signature = await prisma.contractSignature.findUnique({
+      where: { id: signatureId },
+    });
+    
+    if (!signature) {
+      throw new Error('Signature not found');
+    }
+    
+    // Si está pendiente, consultar proveedor externo para actualizar estado
+    if (signature.status === 'PENDING' && signature.externalId) {
+      const provider = getProvider(signature.provider);
+      const status = await provider.getSignatureStatus(signature.externalId);
+      
+      // Actualizar en BD si cambió
+      if (status.status !== signature.status) {
+        await prisma.contractSignature.update({
+          where: { id: signatureId },
+          data: {
+            status: status.status,
+            completedUrl: status.completedUrl || null,
+            completedAt: status.status === 'SIGNED' ? new Date() : null,
+          },
+        });
+        
+        return {
+          id: signature.id,
+          signatureId: signature.id,
+          externalId: signature.externalId || undefined,
+          status: status.status as any,
+          signingUrl: signature.signingUrl || undefined,
+          completedUrl: status.completedUrl,
+          expiresAt: signature.expiresAt || undefined,
+        };
+      }
+    }
+    
+    return {
+      id: signature.id,
+      signatureId: signature.id,
+      externalId: signature.externalId || undefined,
+      status: signature.status as any,
+      signingUrl: signature.signingUrl || undefined,
+      completedUrl: signature.completedUrl || undefined,
+      expiresAt: signature.expiresAt || undefined,
+    };
+  } catch (error) {
+    logger.error('Error getting signature status:', error);
+    throw error;
+  }
+}
+
+/**
+ * Cancela una solicitud de firma
+ */
+export async function cancelSignature(
+  signatureId: string,
+  companyId: string
+): Promise<void> {
+  try {
+    const signature = await prisma.contractSignature.findFirst({
+      where: {
+        id: signatureId,
+        companyId,
+      },
+    });
+    
+    if (!signature) {
+      throw new Error('Signature not found');
+    }
+    
+    if (signature.status !== 'PENDING') {
+      throw new Error('Only pending signatures can be cancelled');
+    }
+    
+    // Cancelar en proveedor externo
+    if (signature.externalId) {
+      const provider = getProvider(signature.provider);
+      await provider.cancelSignature(signature.externalId);
+    }
+    
+    // Actualizar en BD
+    await prisma.contractSignature.update({
+      where: { id: signatureId },
+      data: {
+        status: 'CANCELLED',
+        updatedAt: new Date(),
+      },
+    });
+    
+    logger.info('✅ Signature cancelled', { signatureId });
+  } catch (error) {
+    logger.error('Error cancelling signature:', error);
+    throw error;
+  }
+}
+
+/**
+ * Procesa webhook de proveedor externo
+ */
+export async function processSignatureWebhook(
+  provider: SignatureProvider,
+  event: string,
+  payload: any
+): Promise<void> {
+  try {
+    logger.info('📨 Processing signature webhook', { provider, event });
+    
+    // Guardar webhook raw
+    await prisma.signatureWebhook.create({
+      data: {
+        signatureId: payload.externalId || 'unknown',
+        provider,
+        event,
+        rawPayload: payload,
+        processed: false,
+      },
+    });
+    
+    // Procesar según evento
+    switch (event) {
+      case 'signature_completed':
+        await handleSignatureCompleted(payload);
+        break;
+      case 'signature_declined':
+        await handleSignatureDeclined(payload);
+        break;
+      case 'signature_expired':
+        await handleSignatureExpired(payload);
+        break;
+      default:
+        logger.warn(`Unknown webhook event: ${event}`);
+    }
+  } catch (error) {
+    logger.error('Error processing webhook:', error);
+    throw error;
+  }
+}
+
+async function handleSignatureCompleted(payload: any) {
+  const externalId = payload.externalId;
+  
+  const signature = await prisma.contractSignature.findFirst({
+    where: { externalId },
+  });
+  
+  if (signature) {
+    await prisma.contractSignature.update({
+      where: { id: signature.id },
+      data: {
+        status: 'SIGNED',
+        completedAt: new Date(),
+        completedUrl: payload.completedUrl || null,
+      },
+    });
+    
+    logger.info('✅ Signature completed', { signatureId: signature.id });
+  }
+}
+
+async function handleSignatureDeclined(payload: any) {
+  const externalId = payload.externalId;
+  
+  const signature = await prisma.contractSignature.findFirst({
+    where: { externalId },
+  });
+  
+  if (signature) {
+    await prisma.contractSignature.update({
+      where: { id: signature.id },
+      data: {
+        status: 'DECLINED',
+      },
+    });
+    
+    logger.info('❌ Signature declined', { signatureId: signature.id });
+  }
+}
+
+async function handleSignatureExpired(payload: any) {
+  const externalId = payload.externalId;
+  
+  const signature = await prisma.contractSignature.findFirst({
+    where: { externalId },
+  });
+  
+  if (signature) {
+    await prisma.contractSignature.update({
+      where: { id: signature.id },
+      data: {
+        status: 'EXPIRED',
+      },
+    });
+    
+    logger.info('⏱️ Signature expired', { signatureId: signature.id });
+  }
+}
+
+/**
+ * Obtiene historial de firmas de un contrato
+ */
+export async function getContractSignatures(
+  contractId: string,
+  companyId: string
+): Promise<any[]> {
+  return await prisma.contractSignature.findMany({
+    where: {
       contractId,
-      tenantId,
-      titulo,
-      tipoDocumento,
-      urlDocumento: documentUrl,
-      signaturitId: externalId,
-      estado: SignatureStatus.pendiente,
-      diasExpiracion,
-      fechaExpiracion,
-      creadoPor,
-      firmantes: {
-        create: firmantes.map((firmante, index) => ({
-          email: firmante.email,
-          nombre: firmante.nombre,
-          rol: firmante.rol,
-          orden: index + 1,
-          estado: SignerStatus.pendiente
-        }))
-      }
+      companyId,
+    },
+    orderBy: {
+      createdAt: 'desc',
     },
     include: {
-      firmantes: true,
-      tenant: true,
-      contract: true
-    }
-  });
-
-  logger.info(`✍️ Solicitud de firma creada: ${documento.id} via ${provider}`);
-
-  return {
-    success: true,
-    documento,
-    provider,
-    message: providerMessage
-  };
-}
-
-export async function firmarDocumento(
-  documentoId: string,
-  firmanteId: string,
-  firmaData: {
-    nombreCompleto: string;
-    dni?: string;
-    ubicacion?: string;
-  }
-) {
-  const documento = await prisma.documentoFirma.findUnique({
-    where: { id: documentoId },
-    include: { firmantes: true }
-  });
-
-  if (!documento) {
-    throw new Error('Documento no encontrado');
-  }
-
-  if (documento.fechaExpiracion && new Date() > documento.fechaExpiracion) {
-    await prisma.documentoFirma.update({
-      where: { id: documentoId },
-      data: { estado: SignatureStatus.expirado }
-    });
-    throw new Error('El documento ha expirado');
-  }
-
-  const firmante = documento.firmantes.find(f => f.id === firmanteId);
-  if (!firmante) {
-    throw new Error('Firmante no encontrado');
-  }
-
-  if (firmante.estado === SignerStatus.firmado) {
-    throw new Error('Este documento ya ha sido firmado por este usuario');
-  }
-
-  // Actualizar el firmante
-  await prisma.firmante.update({
-    where: { id: firmanteId },
-    data: {
-      estado: SignerStatus.firmado,
-      firmadoEn: new Date(),
-      ipFirma: '192.168.1.1',
-      dispositivo: 'Demo Browser',
-      geolocalizacion: firmaData.ubicacion || 'No especificada'
-    }
-  });
-
-  const firmantesPendientes = documento.firmantes.filter(
-    f => f.id !== firmanteId && f.estado !== SignerStatus.firmado
-  ).length;
-
-  const nuevoEstado = firmantesPendientes === 0 
-    ? SignatureStatus.firmado 
-    : SignatureStatus.pendiente;
-
-  const documentoActualizado = await prisma.documentoFirma.update({
-    where: { id: documentoId },
-    data: {
-      estado: nuevoEstado,
-      ...(nuevoEstado === SignatureStatus.firmado && {
-        fechaCompletada: new Date()
-      })
+      user: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
     },
-    include: {
-      firmantes: true
-    }
   });
-
-  return {
-    success: true,
-    documento: documentoActualizado,
-    message: nuevoEstado === SignatureStatus.firmado
-      ? 'Documento firmado completamente'
-      : 'Firma registrada, esperando a otros firmantes'
-  };
-}
-
-export async function rechazarDocumento(
-  documentoId: string,
-  firmanteId: string,
-  motivo: string
-) {
-  await prisma.firmante.update({
-    where: { id: firmanteId },
-    data: {
-      estado: SignerStatus.rechazado,
-      rechazadoEn: new Date(),
-      motivoRechazo: motivo
-    }
-  });
-
-  await prisma.documentoFirma.update({
-    where: { id: documentoId },
-    data: {
-      estado: SignatureStatus.rechazado
-    }
-  });
-
-  return {
-    success: true,
-    message: 'Documento rechazado'
-  };
-}
-
-export async function obtenerEstadoDocumento(documentoId: string) {
-  const documento = await prisma.documentoFirma.findUnique({
-    where: { id: documentoId },
-    include: {
-      firmantes: true,
-      tenant: true,
-      contract: {
-        include: {
-          unit: {
-            include: {
-              building: true
-            }
-          }
-        }
-      }
-    }
-  });
-
-  if (!documento) {
-    throw new Error('Documento no encontrado');
-  }
-
-  const totalFirmantes = documento.firmantes.length;
-  const firmados = documento.firmantes.filter(f => f.estado === SignerStatus.firmado).length;
-  const pendientes = documento.firmantes.filter(f => f.estado === SignerStatus.pendiente).length;
-  const rechazados = documento.firmantes.filter(f => f.estado === SignerStatus.rechazado).length;
-
-  return {
-    documento,
-    estadisticas: {
-      totalFirmantes,
-      firmados,
-      pendientes,
-      rechazados,
-      porcentajeCompletado: Math.round((firmados / totalFirmantes) * 100)
-    }
-  };
-}
-
-export async function reenviarInvitacion(
-  documentoId: string,
-  firmanteId: string
-) {
-  const firmante = await prisma.firmante.findUnique({
-    where: { id: firmanteId }
-  });
-
-  if (!firmante) {
-    throw new Error('Firmante no encontrado');
-  }
-
-  logger.info(`📧 [MODO DEMO] Reenvío de invitación simulado`);
-
-  return {
-    success: true,
-    message: '[MODO DEMO] Invitación reenviada (simulado)'
-  };
-}
-
-export async function cancelarSolicitudFirma(documentoId: string, motivo: string) {
-  await prisma.documentoFirma.update({
-    where: { id: documentoId },
-    data: {
-      estado: SignatureStatus.cancelado,
-      canceladoEn: new Date()
-    }
-  });
-
-  return {
-    success: true,
-    message: 'Solicitud cancelada'
-  };
 }

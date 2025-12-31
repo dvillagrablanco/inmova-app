@@ -1,75 +1,100 @@
 {
-  "name": "INMOVA - Innovación Inmobiliaria",
-  "short_name": "INMOVA",
-  "description": "Sistema profesional de gestión inmobiliaria y property management con capacidades offline",
-  "start_url": "/dashboard",
-  "scope": "/",
+  "name": "Inmova - Plataforma PropTech",
+  "short_name": "Inmova",
+  "description": "Gestión inmobiliaria profesional todo en uno",
+  "start_url": "/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#ffffff",
-  "theme_color": "#000000",
-  "orientation": "any",
-  "lang": "es-ES",
-  "dir": "ltr",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/inmova-logo-icon.jpg",
-      "sizes": "192x192",
-      "type": "image/jpeg",
-      "purpose": "any maskable"
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "/inmova-logo-icon.jpg",
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/jpeg",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "maskable any"
     }
   ],
-  "categories": ["business", "productivity", "finance"],
   "screenshots": [
     {
-      "src": "/inmova-logo-cover.jpg",
+      "src": "/screenshots/desktop-1.png",
       "sizes": "1280x720",
-      "type": "image/jpeg",
+      "type": "image/png",
       "form_factor": "wide",
-      "label": "Dashboard principal de INMOVA"
+      "label": "Dashboard principal"
+    },
+    {
+      "src": "/screenshots/mobile-1.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Vista móvil del dashboard"
     }
   ],
+  "categories": ["business", "finance", "productivity"],
   "shortcuts": [
     {
       "name": "Dashboard",
       "short_name": "Dashboard",
-      "description": "Ver el panel de control principal",
+      "description": "Ir al dashboard principal",
       "url": "/dashboard",
-      "icons": [{ "src": "/inmova-logo-icon.jpg", "sizes": "192x192" }]
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
     },
     {
-      "name": "Edificios",
-      "short_name": "Edificios",
-      "description": "Gestionar edificios y propiedades",
-      "url": "/edificios",
-      "icons": [{ "src": "/inmova-logo-icon.jpg", "sizes": "192x192" }]
+      "name": "Propiedades",
+      "short_name": "Propiedades",
+      "description": "Gestionar propiedades",
+      "url": "/propiedades",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
     },
     {
-      "name": "Pagos",
-      "short_name": "Pagos",
-      "description": "Gestionar pagos de rentas",
-      "url": "/pagos",
-      "icons": [{ "src": "/inmova-logo-icon.jpg", "sizes": "192x192" }]
-    },
-    {
-      "name": "Mantenimiento",
-      "short_name": "Mantenimiento",
-      "description": "Ver solicitudes de mantenimiento",
-      "url": "/mantenimiento",
-      "icons": [{ "src": "/inmova-logo-icon.jpg", "sizes": "192x192" }]
-    },
-    {
-      "name": "Notificaciones",
-      "short_name": "Notificaciones",
-      "description": "Ver notificaciones del sistema",
-      "url": "/notificaciones",
-      "icons": [{ "src": "/inmova-logo-icon.jpg", "sizes": "192x192" }]
+      "name": "Inquilinos",
+      "short_name": "Inquilinos",
+      "description": "Gestionar inquilinos",
+      "url": "/inquilinos",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
     }
   ],
   "share_target": {
@@ -83,7 +108,7 @@
       "files": [
         {
           "name": "file",
-          "accept": ["image/*", "application/pdf", "text/*"]
+          "accept": ["image/*", "application/pdf"]
         }
       ]
     }

@@ -1,135 +1,42 @@
 /**
- * Utilidades para optimización de performance
+ * Performance Utilities
+ * 
+ * Herramientas para optimizar rendimiento de la aplicación
  */
 
-import { headers } from 'next/headers';
-
 /**
- * Detecta si el cliente soporta formatos de imagen modernos
- */
-export function supportsModernImageFormats(): boolean {
-  if (typeof window === 'undefined') return true;
-  
-  const canvas = document.createElement('canvas');
-  if (!canvas.getContext || !canvas.getContext('2d')) {
-    return false;
-  }
-  
-  // Check AVIF support
-  const avifSupport = canvas.toDataURL('image/avif').indexOf('data:image/avif') === 0;
-  // Check WebP support
-  const webpSupport = canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
-  
-  return avifSupport || webpSupport;
-}
-
-/**
- * Calcula el tamaño de imagen óptimo basado en el viewport
- */
-export function getOptimalImageSize(containerWidth: number): number {
-  const deviceSizes = [640, 750, 828, 1080, 1200, 1920, 2048, 3840];
-  const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
-  const targetWidth = containerWidth * dpr;
-  
-  return deviceSizes.find(size => size >= targetWidth) || deviceSizes[deviceSizes.length - 1];
-}
-
-/**
- * Preload de recursos críticos
- */
-export function preloadCriticalResources(resources: { href: string; as: string; type?: string }[]) {
-  if (typeof window === 'undefined') return;
-  
-  resources.forEach(({ href, as, type }) => {
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.href = href;
-    link.as = as;
-    if (type) link.type = type;
-    document.head.appendChild(link);
-  });
-}
-
-/**
- * Lazy load de scripts
- */
-export function lazyLoadScript(src: string, async = true): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === 'undefined') {
-      reject(new Error('Window is not defined'));
-      return;
-    }
-    
-    const script = document.createElement('script');
-    script.src = src;
-    script.async = async;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
-    document.body.appendChild(script);
-  });
-}
-
-/**
- * Detecta conexión lenta
- */
-export function isSlowConnection(): boolean {
-  if (typeof navigator === 'undefined') return false;
-  
-  const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
-  
-  if (!connection) return false;
-  
-  const slowTypes = ['slow-2g', '2g'];
-  return slowTypes.includes(connection.effectiveType) || connection.saveData;
-}
-
-/**
- * Mide el performance de una función
- */
-export async function measurePerformance<T>(
-  name: string,
-  fn: () => Promise<T> | T
-): Promise<{ result: T; duration: number }> {
-  const start = performance.now();
-  const result = await fn();
-  const duration = performance.now() - start;
-  
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[Performance] ${name}: ${duration.toFixed(2)}ms`);
-  }
-  
-  return { result, duration };
-}
-
-/**
- * Debounce function para optimizar eventos
+ * Debounce function
+ * Retrasa la ejecución de una función hasta que pasen X ms sin llamadas
+ * Útil para búsquedas en tiempo real, resize events, etc.
  */
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
-  
+  let timeout: NodeJS.Timeout;
+
   return function executedFunction(...args: Parameters<T>) {
     const later = () => {
-      timeout = null;
+      clearTimeout(timeout);
       func(...args);
     };
-    
-    if (timeout) clearTimeout(timeout);
+
+    clearTimeout(timeout);
     timeout = setTimeout(later, wait);
   };
 }
 
 /**
- * Throttle function para optimizar eventos
+ * Throttle function
+ * Limita la frecuencia de ejecución de una función a 1 vez cada X ms
+ * Útil para scroll events, mouse move, etc.
  */
 export function throttle<T extends (...args: any[]) => any>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean;
-  
+
   return function executedFunction(...args: Parameters<T>) {
     if (!inThrottle) {
       func(...args);
@@ -140,112 +47,161 @@ export function throttle<T extends (...args: any[]) => any>(
 }
 
 /**
- * Chunking de arrays grandes para prevenir bloqueo del UI
+ * Memoize function
+ * Cachea resultados de funciones pesadas
  */
-export async function processInChunks<T, R>(
-  items: T[],
-  chunkSize: number,
-  processor: (chunk: T[]) => Promise<R[]> | R[]
-): Promise<R[]> {
-  const results: R[] = [];
-  
-  for (let i = 0; i < items.length; i += chunkSize) {
-    const chunk = items.slice(i, i + chunkSize);
-    const chunkResults = await processor(chunk);
-    results.push(...chunkResults);
-    
-    // Yield to browser to prevent blocking
-    await new Promise(resolve => setTimeout(resolve, 0));
-  }
-  
-  return results;
-}
+export function memoize<T extends (...args: any[]) => any>(fn: T): T {
+  const cache = new Map<string, any>();
 
-/**
- * Memoización con TTL
- */
-export function memoizeWithTTL<T extends (...args: any[]) => any>(
-  fn: T,
-  ttl: number = 60000
-): T {
-  const cache = new Map<string, { value: any; timestamp: number }>();
-  
-  return ((...args: Parameters<T>) => {
+  return ((...args: any[]) => {
     const key = JSON.stringify(args);
-    const cached = cache.get(key);
-    const now = Date.now();
-    
-    if (cached && now - cached.timestamp < ttl) {
-      return cached.value;
+    if (cache.has(key)) {
+      return cache.get(key);
     }
-    
-    const value = fn(...args);
-    cache.set(key, { value, timestamp: now });
-    
-    // Clean old entries
-    setTimeout(() => {
-      cache.forEach((val, k) => {
-        if (now - val.timestamp >= ttl) {
-          cache.delete(k);
-        }
-      });
-    }, ttl);
-    
-    return value;
+    const result = fn(...args);
+    cache.set(key, result);
+    return result;
   }) as T;
 }
 
 /**
- * Intersection Observer hook para lazy loading
+ * Measure performance
+ * Mide el tiempo de ejecución de una función
  */
-export function createIntersectionObserver(
-  callback: (entries: IntersectionObserverEntry[]) => void,
-  options?: IntersectionObserverInit
-): IntersectionObserver | null {
-  if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
-    return null;
-  }
+export async function measurePerformance<T>(
+  name: string,
+  fn: () => Promise<T> | T
+): Promise<T> {
+  const start = performance.now();
   
-  return new IntersectionObserver(callback, {
-    root: null,
-    rootMargin: '50px',
-    threshold: 0.01,
-    ...options,
+  try {
+    const result = await fn();
+    const duration = performance.now() - start;
+    
+    console.log(`⏱️ [Performance] ${name}: ${duration.toFixed(2)}ms`);
+    
+    return result;
+  } catch (error) {
+    const duration = performance.now() - start;
+    console.error(`❌ [Performance] ${name}: Failed after ${duration.toFixed(2)}ms`, error);
+    throw error;
+  }
+}
+
+/**
+ * Lazy load images with Intersection Observer
+ * Carga imágenes solo cuando están cerca del viewport
+ */
+export function lazyLoadImage(imgElement: HTMLImageElement, src: string) {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        imgElement.src = src;
+        imgElement.classList.add('loaded');
+        observer.unobserve(imgElement);
+      }
+    });
+  }, {
+    rootMargin: '100px', // Cargar 100px antes de ser visible
+  });
+
+  observer.observe(imgElement);
+
+  return () => observer.disconnect();
+}
+
+/**
+ * Preload critical resources
+ * Precarga recursos críticos para mejorar LCP
+ */
+export function preloadCriticalResources(resources: Array<{ href: string; as: string }>) {
+  if (typeof window === 'undefined') return;
+
+  resources.forEach(({ href, as }) => {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = as;
+    link.href = href;
+    document.head.appendChild(link);
   });
 }
 
 /**
- * Resource hints para mejorar performance
+ * Optimize large lists with virtual scrolling
+ * Para listas de 1000+ items
  */
-export function addResourceHints(hints: {
-  preconnect?: string[];
-  dnsPrefetch?: string[];
-  prefetch?: string[];
-}) {
-  if (typeof document === 'undefined') return;
-  
-  // Preconnect
-  hints.preconnect?.forEach(url => {
-    const link = document.createElement('link');
-    link.rel = 'preconnect';
-    link.href = url;
-    link.crossOrigin = 'anonymous';
-    document.head.appendChild(link);
+export function calculateVisibleRange(
+  scrollTop: number,
+  containerHeight: number,
+  itemHeight: number,
+  totalItems: number,
+  overscan: number = 3
+) {
+  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
+  const endIndex = Math.min(
+    totalItems - 1,
+    Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan
+  );
+
+  return { startIndex, endIndex };
+}
+
+/**
+ * Format large numbers for display
+ * Optimiza rendering de números grandes
+ */
+export const formatNumber = memoize((num: number, locale: string = 'es-ES'): string => {
+  return num.toLocaleString(locale);
+});
+
+/**
+ * Check if user prefers reduced motion
+ * Respeta preferencias de accesibilidad del usuario
+ */
+export function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/**
+ * Get optimal image format support
+ * Detecta soporte de formatos modernos (WebP, AVIF)
+ */
+export async function getSupportedImageFormat(): Promise<'avif' | 'webp' | 'jpeg'> {
+  if (typeof window === 'undefined') return 'jpeg';
+
+  // Check AVIF support
+  const avifSupported = await checkImageSupport(
+    'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAABYAAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAEAAAABAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgANogQEAwgMg8f8D///8WfhwB8+ErK42A='
+  );
+  if (avifSupported) return 'avif';
+
+  // Check WebP support
+  const webpSupported = await checkImageSupport(
+    'data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA=='
+  );
+  if (webpSupported) return 'webp';
+
+  return 'jpeg';
+}
+
+async function checkImageSupport(dataUrl: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = dataUrl;
   });
-  
-  // DNS Prefetch
-  hints.dnsPrefetch?.forEach(url => {
-    const link = document.createElement('link');
-    link.rel = 'dns-prefetch';
-    link.href = url;
-    document.head.appendChild(link);
-  });
-  
-  // Prefetch
-  hints.prefetch?.forEach(url => {
-    const link = document.createElement('link');
-    link.rel = 'prefetch';
-    link.href = url;
-    document.head.appendChild(link);
-  });
+}
+
+/**
+ * Batch multiple state updates
+ * Reduce re-renders agrupando actualizaciones
+ */
+export function batchUpdates<T extends Record<string, any>>(
+  setState: (updates: Partial<T>) => void,
+  updates: Partial<T>[]
+): void {
+  const merged = updates.reduce((acc, update) => ({ ...acc, ...update }), {});
+  setState(merged);
 }

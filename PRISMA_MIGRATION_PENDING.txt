@@ -1,0 +1,10 @@
+⚠️ RECORDATORIO: Para aplicar los cambios de schema Prisma, ejecuta:
+
+  npx prisma migrate dev --name add_matching_and_incidents
+
+Esto creará y aplicará la migración para:
+- TenantPropertyMatch
+- TenantPreferences
+- IncidentClassification
+
+IMPORTANTE: Ejecutar en entorno de desarrollo antes de producción.

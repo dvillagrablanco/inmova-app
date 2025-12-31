@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: /api/notifications/unread-count
  * Obtener el número de notificaciones no leídas
@@ -31,7 +33,6 @@ export async function GET(request: NextRequest) {
       count: result.count,
     });
   } catch (error) {
-    console.error('[API] Error in GET /api/notifications/unread-count:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

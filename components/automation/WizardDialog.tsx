@@ -44,9 +44,15 @@ export default function WizardDialog({
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
 
-  const currentStepData = steps[currentStep];
-  const isLastStep = currentStep === steps.length - 1;
-  const progress = ((currentStep + 1) / steps.length) * 100;
+  // Validación: asegurar que steps no esté vacío y currentStep esté en rango
+  if (!steps || steps.length === 0) {
+    return null;
+  }
+
+  const safeCurrentStep = Math.min(Math.max(0, currentStep), steps.length - 1);
+  const currentStepData = steps[safeCurrentStep];
+  const isLastStep = safeCurrentStep === steps.length - 1;
+  const progress = ((safeCurrentStep + 1) / steps.length) * 100;
 
   const handleFieldChange = (fieldName: string, value: any) => {
     setFormData(prev => ({

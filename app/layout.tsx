@@ -1,39 +1,146 @@
-import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import './globals.css';
-import '@/styles/mobile-first.css';
-// import 'react-big-calendar/lib/css/react-big-calendar.css'; // Desactivado temporalmente - requiere paquete react-big-calendar
+import { Metadata } from 'next';
 import { Providers } from '@/components/providers';
-import { SkipLink } from '@/components/ui/skip-link';
-import { BottomNavigation } from '@/components/mobile/BottomNavigation';
-// import { WebVitalsInit } from '@/components/WebVitalsInit'; // Desactivado temporalmente - requiere paquete web-vitals
-import { defaultMetadata } from '@/lib/seo-config';
+import { Toaster } from '@/components/ui/toaster';
+import './globals.css';
+import Script from 'next/script';
+import { GA_MEASUREMENT_ID } from '@/lib/analytics';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  ...defaultMetadata,
-  icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon.svg',
+  title: {
+    default: 'Inmova App - Gestión Inmobiliaria Inteligente',
+    template: '%s | Inmova App',
   },
-  manifest: '/manifest.json',
-  verification: {
-    other: {
-      'vercel-deployment': '220194',
+  description:
+    'Plataforma PropTech B2B/B2C para gestión inmobiliaria integral. CRM, gestión de propiedades, inquilinos, contratos y más.',
+  keywords: [
+    'gestión inmobiliaria',
+    'proptech',
+    'CRM inmobiliario',
+    'gestión de propiedades',
+    'alquiler',
+    'contratos',
+  ],
+  authors: [{ name: 'Inmova' }],
+  creator: 'Inmova',
+  publisher: 'Inmova',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://inmovaapp.com'),
+  openGraph: {
+    type: 'website',
+    locale: 'es_ES',
+    url: process.env.NEXT_PUBLIC_BASE_URL || 'https://inmovaapp.com',
+    title: 'Inmova App - Gestión Inmobiliaria Inteligente',
+    description:
+      'Plataforma PropTech B2B/B2C para gestión inmobiliaria integral. CRM, gestión de propiedades, inquilinos, contratos y más.',
+    siteName: 'Inmova App',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Inmova App - Gestión Inmobiliaria Inteligente',
+    description: 'Plataforma PropTech B2B/B2C para gestión inmobiliaria integral.',
+    creator: '@inmovaapp',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
     },
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
-        <SkipLink />
+      <head>
+        {/* Google Analytics */}
+        {GA_MEASUREMENT_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA_MEASUREMENT_ID}', {
+                  page_path: window.location.pathname,
+                  anonymize_ip: true,
+                });
+              `}
+            </Script>
+          </>
+        )}
+
+        {/* Hotjar Script */}
+        {process.env.NEXT_PUBLIC_HOTJAR_ID && (
+          <Script id="hotjar" strategy="afterInteractive">
+            {`
+              (function(h,o,t,j,a,r){
+                h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+                h._hjSettings={hjid:${process.env.NEXT_PUBLIC_HOTJAR_ID},hjsv:6};
+                a=o.getElementsByTagName('head')[0];
+                r=o.createElement('script');r.async=1;
+                r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+                a.appendChild(r);
+              })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+            `}
+          </Script>
+        )}
+
+        {/* Microsoft Clarity */}
+        {process.env.NEXT_PUBLIC_CLARITY_ID && (
+          <Script id="clarity" strategy="afterInteractive">
+            {`
+              (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+              })(window, document, "clarity", "script", "${process.env.NEXT_PUBLIC_CLARITY_ID}");
+            `}
+          </Script>
+        )}
+
+        {/* CSS Bug Workaround - Next.js RSC */}
+        <Script id="css-error-suppressor" strategy="beforeInteractive">
+          {`
+            (function() {
+              const originalError = console.error;
+              console.error = function(...args) {
+                const message = args[0]?.toString() || '';
+                const stack = args[1]?.toString() || '';
+                
+                // Suprimir solo error CSS de Next.js RSC
+                if (
+                  message.includes('Invalid or unexpected token') &&
+                  (stack.includes('/_next/static/css/') || stack.includes('.css'))
+                ) {
+                  // Silencioso en producción
+                  return;
+                }
+                
+                // Pasar todos los demás errores
+                originalError.apply(console, args);
+              };
+            })();
+          `}
+        </Script>
+      </head>
+      <body className={inter.className}>
         <Providers>
           {children}
-          <BottomNavigation />
-          {/* <WebVitalsInit /> */}
+          <Toaster />
         </Providers>
       </body>
     </html>

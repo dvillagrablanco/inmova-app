@@ -1,24 +1,13 @@
 {
-  "buildCommand": "yarn build",
-  "outputDirectory": ".next",
-  "devCommand": "yarn dev",
-  "installCommand": "yarn install",
+  "buildCommand": "yarn build:vercel",
   "framework": "nextjs",
-  "regions": ["iad1"],
-  "env": {
-    "NODE_ENV": "production"
-  },
+  "installCommand": "yarn install",
   "functions": {
-    "app/api/**/*": {
-      "maxDuration": 60
+    "app/api/**": {
+      "maxDuration": 60,
+      "memory": 1024
     }
   },
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -38,6 +27,10 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
         }
       ]
     }

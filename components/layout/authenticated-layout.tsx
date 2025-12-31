@@ -6,6 +6,7 @@ import { Header } from './header';
 import { BottomNavigation } from './bottom-navigation';
 import { useIsMobile } from '@/lib/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
+import { SkipLink } from '@/components/accessibility/SkipLink';
 
 /**
  * Layout autenticado con navegación optimizada para mobile-first
@@ -40,6 +41,9 @@ export function AuthenticatedLayout({
 
   return (
     <div className="flex h-screen overflow-hidden">
+      {/* Skip Link para accesibilidad */}
+      <SkipLink />
+
       {/* Sidebar - Solo en desktop */}
       <Sidebar />
 
@@ -50,6 +54,7 @@ export function AuthenticatedLayout({
 
         {/* Área de contenido con scroll */}
         <main
+          id="main-content"
           className={cn(
             'flex-1 overflow-y-auto',
             isMobile ? 'pb-20' : '', // Espacio para bottom nav en móvil

@@ -38,16 +38,17 @@ export function HeroSection() {
 
             {/* Main Heading */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight">
-              <span className="block text-gray-900 mb-2">7 Verticales. 88 Módulos.</span>
+              <span className="block text-gray-900 mb-2">6 Verticales + 6 Módulos.</span>
               <span className="block bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600 bg-clip-text text-transparent">
-                Una Sola Plataforma.
+                Poder Multiplicado.
               </span>
             </h1>
 
             {/* Subheading */}
             <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              La plataforma <span className="font-semibold text-indigo-600">multi-vertical más completa</span> del mercado.
-              Gestiona <span className="font-semibold text-violet-600">Alquiler, STR, Coliving, Flipping, Construcción</span> y más en un solo lugar.
+              La única plataforma que combina <span className="font-semibold text-indigo-600">verticales de negocio inmobiliario</span> con 
+              <span className="font-semibold text-violet-600"> módulos transversales de IA, IoT y Blockchain</span>. 
+              Todo en un solo lugar.
             </p>
 
             {/* CTA Buttons */}
@@ -77,41 +78,83 @@ export function HeroSection() {
             <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-gray-600">
               <div className="flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-indigo-600" />
-                <span className="font-medium">500+ Empresas</span>
+                <span className="font-medium">€850M Mercado España</span>
               </div>
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-violet-600" />
-                <span className="font-medium">10,000+ Propiedades</span>
+                <span className="font-medium">34 Tipos de Partners</span>
               </div>
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-pink-600" />
-                <span className="font-medium">98% Satisfacción</span>
+                <span className="font-medium">€150M Potencial 5 Años</span>
               </div>
             </div>
 
-            {/* Video Demo Hero */}
-            <div className="mt-12 max-w-5xl mx-auto">
-              <Card className="overflow-hidden shadow-2xl border-4 border-indigo-200">
-                <CardContent className="p-0">
-                  <div className="relative aspect-video bg-black">
-                    <iframe 
-                      src="https://www.youtube.com/embed/zm55Gdl5G1Q?si=XZe1uSGRtyAUzLGX" 
-                      title="INMOVA Platform Demo" 
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                      allowFullScreen
-                      className="absolute inset-0 w-full h-full"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Architecture Showcase */}
+            <div className="mt-16 max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Verticales Column */}
+                <Card className="hover:shadow-2xl transition-all border-2 border-indigo-200 hover:border-indigo-400">
+                  <CardContent className="p-8">
+                    <div className="text-center mb-6">
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 mb-4">
+                        <Building2 className="h-8 w-8 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900">6 Verticales</h3>
+                      <p className="text-sm text-gray-600 mt-2">Modelos de negocio completos</p>
+                    </div>
+                    <div className="space-y-3">
+                      {[
+                        '🏢 Alquiler Tradicional',
+                        '🏖️ STR (Vacacional)',
+                        '🛏️ Coliving / Habitaciones',
+                        '💹 House Flipping',
+                        '🏗️ Construcción',
+                        '💼 Servicios Profesionales'
+                      ].map((vertical, idx) => (
+                        <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 transition-colors">
+                          <span className="text-lg">{vertical}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
 
-              {/* Stats Grid Below Video */}
+                {/* Módulos Transversales Column */}
+                <Card className="hover:shadow-2xl transition-all border-2 border-violet-200 hover:border-violet-400">
+                  <CardContent className="p-8">
+                    <div className="text-center mb-6">
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-violet-500 to-pink-500 mb-4">
+                        <Star className="h-8 w-8 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900">6 Módulos</h3>
+                      <p className="text-sm text-gray-600 mt-2">Multiplicadores de valor</p>
+                    </div>
+                    <div className="space-y-3">
+                      {[
+                        '🌱 ESG & Sostenibilidad',
+                        '🛍️ Marketplace B2C',
+                        '💰 Pricing IA',
+                        '👓 Tours AR/VR',
+                        '🏠 IoT Inteligente',
+                        '⛓️ Blockchain'
+                      ].map((modulo, idx) => (
+                        <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-violet-50 transition-colors">
+                          <span className="text-lg">{modulo}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Stats Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
                 {[
-                  { number: '88', label: 'Módulos Profesionales', icon: Building2 },
-                  { number: '7', label: 'Verticales de Negocio', icon: TrendingUp },
-                  { number: '€60', label: 'Desde €60/mes', icon: Star },
-                  { number: '<24h', label: 'Respuesta Soporte', icon: Users },
+                  { number: '6+6', label: 'Verticales + Módulos', icon: Building2 },
+                  { number: '€49', label: 'Desde €49/mes', icon: Star },
+                  { number: '100%', label: 'Arquitectura Modular', icon: TrendingUp },
+                  { number: '24/7', label: 'Soporte Premium', icon: Users },
                 ].map((stat, index) => (
                   <Card key={index} className="hover:shadow-lg transition-shadow">
                     <CardContent className="p-6 text-center">

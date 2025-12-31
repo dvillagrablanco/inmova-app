@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: GET /api/cron/process-email-triggers
  * Cron job para procesar emails programados que deben enviarse

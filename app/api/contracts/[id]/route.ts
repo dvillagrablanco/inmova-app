@@ -3,9 +3,44 @@ import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
-import { invalidateContractsCache, invalidateUnitsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
+import {
+  invalidateContractsCache,
+  invalidateUnitsCache,
+  invalidateDashboardCache,
+} from '@/lib/api-cache-helpers';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+// Schema de validación para actualizar contrato
+const contractUpdateSchema = z.object({
+  fechaInicio: z
+    .string()
+    .datetime()
+    .or(z.string().regex(/^\d{4}-\d{2}-\d{2}/))
+    .optional(),
+  fechaFin: z
+    .string()
+    .datetime()
+    .or(z.string().regex(/^\d{4}-\d{2}-\d{2}/))
+    .optional(),
+  rentaMensual: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((val) => (typeof val === 'string' ? parseFloat(val) : val))
+    .refine((val) => val === undefined || val > 0, {
+      message: 'La renta mensual debe ser positiva',
+    }),
+  deposito: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((val) => (typeof val === 'string' ? parseFloat(val) : val))
+    .refine((val) => val === undefined || val >= 0, {
+      message: 'El depósito no puede ser negativo',
+    }),
+  estado: z.enum(['activo', 'finalizado', 'cancelado', 'pendiente']).optional(),
+  tipo: z.enum(['alquiler', 'compra', 'traspaso', 'otro']).optional(),
+});
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -50,15 +85,28 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     const companyId = session.user?.companyId;
     const body = await req.json();
-    const { fechaInicio, fechaFin, rentaMensual, deposito, estado, tipo } = body;
+
+    // Validación con Zod
+    const validationResult = contractUpdateSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map((err) => ({
+        field: err.path.join('.'),
+        message: err.message,
+      }));
+      logger.warn('Validation error updating contract:', { errors, contractId: params.id });
+      return NextResponse.json({ error: 'Datos inválidos', details: errors }, { status: 400 });
+    }
+
+    const { fechaInicio, fechaFin, rentaMensual, deposito, estado, tipo } = validationResult.data;
 
     const contract = await prisma.contract.update({
       where: { id: params.id },
       data: {
         fechaInicio: fechaInicio ? new Date(fechaInicio) : undefined,
         fechaFin: fechaFin ? new Date(fechaFin) : undefined,
-        rentaMensual: rentaMensual ? parseFloat(rentaMensual) : undefined,
-        deposito: deposito ? parseFloat(deposito) : undefined,
+        rentaMensual,
+        deposito,
         estado,
         tipo,
       },

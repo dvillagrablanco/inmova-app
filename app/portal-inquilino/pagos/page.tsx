@@ -23,7 +23,9 @@ import { Elements } from '@stripe/react-stripe-js';
 import StripePaymentForm from './components/StripePaymentForm';
 import logger, { logError } from '@/lib/logger';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+// Solo inicializar Stripe si la key está configurada
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
 interface Payment {
   id: string;
@@ -81,6 +83,11 @@ export default function TenantPaymentsPage() {
   };
 
   const handlePayNow = async (payment: Payment) => {
+    if (!stripePromise) {
+      toast.error('Stripe no está configurado. Contacte con el administrador.');
+      return;
+    }
+    
     setProcessingPayment(true);
     try {
       const response = await fetch('/api/stripe/create-payment-intent', {
@@ -253,20 +260,30 @@ export default function TenantPaymentsPage() {
               </div>
             </div>
 
-            <Elements
-              stripe={stripePromise}
-              options={{
-                clientSecret,
-                appearance: {
-                  theme: 'stripe',
-                  variables: {
-                    colorPrimary: '#000000',
+            {stripePromise ? (
+              <Elements
+                stripe={stripePromise}
+                options={{
+                  clientSecret,
+                  appearance: {
+                    theme: 'stripe',
+                    variables: {
+                      colorPrimary: '#000000',
+                    },
                   },
-                },
-              }}
-            >
-              <StripePaymentForm onSuccess={handlePaymentSuccess} onCancel={handlePaymentCancel} />
-            </Elements>
+                }}
+              >
+                <StripePaymentForm onSuccess={handlePaymentSuccess} onCancel={handlePaymentCancel} />
+              </Elements>
+            ) : (
+              <div className="text-center py-8">
+                <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                <p className="text-lg font-semibold mb-2">Pagos no disponibles</p>
+                <p className="text-gray-600">
+                  El sistema de pagos no está configurado. Contacte al administrador.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

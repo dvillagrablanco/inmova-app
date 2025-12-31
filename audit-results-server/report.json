@@ -1,0 +1,164 @@
+{
+  "routes": [
+    {
+      "route": "Admin - Dashboard",
+      "url": "/admin/dashboard",
+      "category": "admin",
+      "priority": "high",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "[next-auth][error][CLIENT_FETCH_ERROR] \nhttps://next-auth.js.org/errors#client_fetch_error There is a problem with the server configuration. Check the server logs for more information. {error: Object, url: /api/auth/session, message: There is a problem with the server configuration. Check the server logs for more information.}"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/auth/session",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/auth/_log",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1105
+    },
+    {
+      "route": "Dashboard",
+      "url": "/dashboard",
+      "category": "dashboard",
+      "priority": "high",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "[next-auth][error][CLIENT_FETCH_ERROR] \nhttps://next-auth.js.org/errors#client_fetch_error There is a problem with the server configuration. Check the server logs for more information. {error: Object, url: /api/auth/session, message: There is a problem with the server configuration. Check the server logs for more information.}"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "Error fetching unread count: SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/auth/session",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/auth/_log",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/modules/active",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/notifications/unread-count",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1089
+    },
+    {
+      "route": "Landing",
+      "url": "/landing",
+      "category": "landing",
+      "priority": "high",
+      "consoleErrors": [
+        {
+          "type": "pageerror",
+          "message": "Invalid or unexpected token"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        },
+        {
+          "type": "error",
+          "message": "[next-auth][error][CLIENT_FETCH_ERROR] \nhttps://next-auth.js.org/errors#client_fetch_error There is a problem with the server configuration. Check the server logs for more information. {error: Object, url: /api/auth/session, message: There is a problem with the server configuration. Check the server logs for more information.}"
+        },
+        {
+          "type": "error",
+          "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        }
+      ],
+      "networkErrors": [
+        {
+          "url": "http://localhost:3000/api/auth/session",
+          "status": 500
+        },
+        {
+          "url": "http://localhost:3000/api/auth/_log",
+          "status": 500
+        }
+      ],
+      "hydrationErrors": false,
+      "accessibilityIssues": [],
+      "missingElements": [],
+      "brokenImages": [],
+      "status": "error",
+      "loadTime": 1113
+    }
+  ]
+}

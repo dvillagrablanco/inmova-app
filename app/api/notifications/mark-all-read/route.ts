@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: /api/notifications/mark-all-read
  * Marcar todas las notificaciones del usuario como leídas

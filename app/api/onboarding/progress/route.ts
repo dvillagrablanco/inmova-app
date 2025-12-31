@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: GET /api/onboarding/progress
  * Obtiene el progreso del onboarding del usuario

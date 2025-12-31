@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: /api/onboarding/chatbot
  * Endpoint para el chatbot de onboarding con IA

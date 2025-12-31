@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 // Swagger documentation temporarily disabled for deployment optimization
 // import { NextResponse } from 'next/server';
 // import { getApiDocs } from '@/lib/swagger-config';

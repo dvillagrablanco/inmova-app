@@ -1,7 +1,6 @@
 generator client {
     provider = "prisma-client-js"
     binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
-    output = "/home/ubuntu/homming_vidaro/nextjs_space/node_modules/.prisma/client"
 }
 
 datasource db {
@@ -343,6 +342,17 @@ model User {
   emailLogs             EmailLog[]
   chatbotInteractions   ChatbotInteraction[]
   userCelebrations      UserCelebration[]
+  
+  // CRM Avanzado - Comentado temporalmente
+  // ownedLeads            CRMLead[]       @relation("LeadOwner")
+  // ownedDeals            Deal[]          @relation("DealOwner")
+  // crmActivities         CRMActivity[]   @relation("ActivityPerformer")
+  // assignedCRMTasks      CRMTask[]       @relation("TaskAssignee")
+  pomelliPosts          PomelliSocialPost[]
+
+  // Nuevas funcionalidades IA (Valoración, Firma Digital)
+  propertyValuations PropertyValuation[] @relation("UserPropertyValuations")
+  contractSignatures ContractSignature[] @relation("UserContractSignatures")
 
   @@index([email])
   @@index([companyId])
@@ -535,6 +545,10 @@ model Tenant {
   serviceRatings      ServiceRating[]
   onboarding          TenantOnboarding?
 
+  // Nuevas funcionalidades IA (Matching, Preferencias)
+  tenantPropertyMatches TenantPropertyMatch[] @relation("TenantMatches")
+  tenantPreferences     TenantPreferences?    @relation("TenantPreferences")
+
   // Coliving
   colivingProfile         ColivingProfile?
   colivingServiceBookings ColivingServiceBooking[]
@@ -645,6 +659,10 @@ model Unit {
   colivingCheckInOuts ColivingCheckInOut[]
   smartLocks          SmartLock[]
 
+  // Nuevas funcionalidades IA (Valoración, Matching)
+  propertyValuations    PropertyValuation[]   @relation("UnitPropertyValuations")
+  tenantPropertyMatches TenantPropertyMatch[] @relation("UnitTenantMatches")
+
   @@unique([buildingId, numero])
   // Índices optimizados para consultas frecuentes
   @@index([buildingId, estado])
@@ -694,6 +712,9 @@ model Contract {
 
   // Gestión de Comunidades
   depositManagement DepositManagement?
+
+  // Nuevas funcionalidades IA (Firma Digital)
+  contractSignatures ContractSignature[] @relation("ContractSignatures")
 
   // Índices optimizados para consultas frecuentes
   @@index([tenantId, estado])
@@ -1275,6 +1296,11 @@ model Company {
   providerAvailability      ProviderAvailability[]
   providerInvoices          ProviderInvoice[]
   providerInvoicePayments   ProviderInvoicePayment[]
+
+  // Nuevas funcionalidades IA (Valoración, Firma Digital, Matching)
+  propertyValuations    PropertyValuation[]   @relation("CompanyPropertyValuations")
+  contractSignatures    ContractSignature[]   @relation("CompanyContractSignatures")
+  tenantPropertyMatches TenantPropertyMatch[] @relation("CompanyTenantMatches")
   providerQuotes            ProviderQuote[]
   providerReviews           ProviderReview[]
   providerChatConversations ProviderChatConversation[]
@@ -1351,6 +1377,29 @@ model Company {
   webhookEvents         WebhookEvent[]
   chatbotInteractions   ChatbotInteraction[]
   userCelebrations      UserCelebration[]
+  
+  // 🏗️ EWOORKER - B2B Marketplace Construcción
+  ewoorkerPerfil        EwoorkerPerfilEmpresa?
+  ewoorkerObras         EwoorkerObra[]
+  
+  // 📱 POMELLI SOCIAL MEDIA INTEGRATION
+  pomelliConfig         PomelliConfig?
+  socialProfiles        SocialProfile[]
+  pomelliSocialPosts    PomelliSocialPost[]
+  socialAnalytics       SocialAnalytics[]
+  
+  // 🔌 INTEGRATION MANAGEMENT CENTER
+  integrationConfigs    IntegrationConfig[]
+  integrationLogs       IntegrationLog[]
+  
+  // 📊 CRM AVANZADO - Comentado temporalmente
+  // crmLeads              CRMLead[]
+  // crmDeals              Deal[]
+  // crmActivities         CRMActivity[]
+  // crmTasks              CRMTask[]
+  // crmPipelines          CRMPipeline[]
+  // crmEmailTemplates     CRMEmailTemplate[]
+  // linkedInScrapingJobs  LinkedInScrapingJob[]
   
   @@map("company")
 }
@@ -2665,16 +2714,17 @@ model EnergyAlert {
 // ============================================
 
 model UserPreference {
-  id         String   @id @default(cuid())
-  userId     String   @unique
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  language   String   @default("es") // "es", "en"
-  timezone   String   @default("Europe/Madrid")
-  dateFormat String   @default("DD/MM/YYYY")
-  currency   String   @default("EUR")
-  theme      String   @default("light") // "light", "dark"
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id                       String   @id @default(cuid())
+  userId                   String   @unique
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  language                 String   @default("es") // "es", "en"
+  timezone                 String   @default("Europe/Madrid")
+  dateFormat               String   @default("DD/MM/YYYY")
+  currency                 String   @default("EUR")
+  theme                    String   @default("light") // "light", "dark"
+  notificationPreferences  Json?    @default("{\"pushEnabled\": true, \"emailEnabled\": true, \"smsEnabled\": false}")
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
 
   @@map("user_preferences")
 }
@@ -2901,13 +2951,7 @@ model MorosidadHistorial {
 // ALTA PRIORIDAD 3: FIRMA DIGITAL (SIGNATURIT)
 // ============================================
 
-enum SignatureStatus {
-  pendiente // Enviado pero no firmado
-  firmado // Firmado por todas las partes
-  rechazado // Rechazado por algún firmante
-  cancelado // Cancelado por el administrador
-  expirado // Expiró el plazo
-}
+// Nota: SignatureStatus se define más adelante en el schema (línea 12990)
 
 enum SignerStatus {
   pendiente
@@ -2932,7 +2976,7 @@ model DocumentoFirma {
 
   // Signaturit Integration
   signaturitId String?         @unique // ID del documento en Signaturit
-  estado       SignatureStatus @default(pendiente)
+  estado       SignatureStatus @default(PENDING)
   urlDocumento String?         @db.Text // URL del documento original
   urlFirmado   String?         @db.Text // URL del documento firmado
 
@@ -3007,22 +3051,7 @@ model Firmante {
   @@map("firmantes")
 }
 
-model SignatureWebhook {
-  id           String    @id @default(cuid())
-  signaturitId String // ID del evento en Signaturit
-  tipo         String // "document_completed", "signature_completed", etc.
-  documentoId  String?
-  payload      Json // Payload completo del webhook
-  procesado    Boolean   @default(false)
-  errorProceso String?   @db.Text
-  createdAt    DateTime  @default(now())
-  procesadoEn  DateTime?
-
-  @@index([signaturitId])
-  @@index([tipo])
-  @@index([procesado])
-  @@map("signature_webhooks")
-}
+// Nota: SignatureWebhook se define más adelante en el schema (línea ~13053)
 
 // ============================================
 // ALTA PRIORIDAD 4: OPEN BANKING
@@ -11509,6 +11538,1100 @@ model ChatbotInteraction {
   @@map("chatbot_interactions")
 }
 
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 🏗️ EWOORKER - B2B MARKETPLACE PARA CONSTRUCCIÓN
+// Módulo integrado en INMOVA con personalidad propia
+// Modelo de negocio: 50% beneficios para socio fundador
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ──────────────────────────────────────────────────────────────────────────────
+// ENUMS ESPECÍFICOS DE EWOORKER
+// ──────────────────────────────────────────────────────────────────────────────
+
+enum EwoorkerTipoEmpresa {
+  CONTRATISTA_PRINCIPAL     // Constructor principal, gestiona obra
+  SUBCONTRATISTA_N1         // Primer nivel de subcontratación
+  SUBCONTRATISTA_N2         // Segundo nivel (límite legal)
+  AUTONOMO                  // Trabajador autónomo (NO puede subcontratar)
+}
+
+enum EwoorkerPlanSuscripcion {
+  OBRERO_FREE              // €0/mes - Autónomos y pequeñas subcontratas
+  CAPATAZ_PRO              // €29-49/mes - PYMEs subcontratistas activas
+  CONSTRUCTOR_ENTERPRISE   // €99-149/mes - Jefes de Grupo y Constructoras
+}
+
+enum EwoorkerEstadoDocumento {
+  VERDE                    // Todo OK, vigente >30 días
+  AMARILLO                 // Caduca en <30 días
+  ROJO                     // Caducado o faltante
+  PENDIENTE_VALIDACION     // Subido pero no verificado
+}
+
+enum EwoorkerEstadoObra {
+  BORRADOR                 // Constructor creando la obra
+  PUBLICADA                // Visible para subcontratistas
+  EN_LICITACION            // Recibiendo ofertas
+  ADJUDICADA               // Subcontratista seleccionado
+  EN_EJECUCION             // Trabajo en curso
+  COMPLETADA               // Finalizada
+  CANCELADA                // Cancelada por el constructor
+}
+
+enum EwoorkerEstadoOferta {
+  BORRADOR                 // Subcontratista preparando
+  ENVIADA                  // Enviada al constructor
+  VISTA                    // Constructor la vio
+  EN_REVISION              // Constructor analizando
+  PRESELECCIONADA          // En shortlist
+  RECHAZADA                // No aceptada
+  ACEPTADA                 // Adjudicada
+  RETIRADA                 // Cancelada por subcontratista
+  EXPIRADA                 // Venció el plazo de validez
+}
+
+enum EwoorkerEstadoContrato {
+  BORRADOR                 // Generándose
+  PENDIENTE_FIRMA          // Esperando firmas digitales
+  ACTIVO                   // Vigente
+  EN_EJECUCION             // Trabajo iniciado
+  COMPLETADO               // Finalizado exitosamente
+  CANCELADO                // Cancelado por alguna parte
+  EN_DISPUTA               // Problema legal/económico
+  RESUELTO                 // Disputa resuelta
+}
+
+enum EwoorkerEstadoPago {
+  PENDIENTE                // No pagado aún
+  RETENIDO_ESCROW          // Dinero en custodia de ewoorker
+  LIBERADO                 // Autorizado para transferir
+  PAGADO                   // Transferido al subcontratista
+  CANCELADO                // Pago cancelado
+  EN_DISPUTA               // Problema con el pago
+}
+
+enum EwoorkerTipoComision {
+  SUSCRIPCION_MENSUAL      // Plan de pago recurrente
+  PAGO_SEGURO_ESCROW       // 1.5-3% por usar escrow
+  CONTRATACION_URGENTE     // 5-10% trabajos urgentes
+  MAQUINARIA_ON_DEMAND     // 5-10% alquiler maquinaria
+  SERVICIO_PREMIUM         // Otros servicios
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// MODELOS PRINCIPALES
+// ──────────────────────────────────────────────────────────────────────────────
+
+// Perfil extendido de empresa para ewoorker
+model EwoorkerPerfilEmpresa {
+  id                    String   @id @default(cuid())
+  companyId             String   @unique
+  company               Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Clasificación ewoorker
+  tipoEmpresa           EwoorkerTipoEmpresa
+  especialidades        String[] // ['Estructura', 'Electricidad', 'Fontanería']
+  subespecialidades     String[] // ['Hormigón armado', 'Domótica', 'Aerotermia']
+  
+  // Datos legales específicos construcción
+  numeroREA             String?  // Registro Empresas Acreditadas
+  provinciaREA          String?
+  fechaCaducidadREA     DateTime?
+  estadoREA             EwoorkerEstadoDocumento @default(PENDIENTE_VALIDACION)
+  
+  // Seguros
+  numeroSeguroRC        String?  // Responsabilidad Civil
+  companiaSeguro        String?
+  coberturaRC           Float?   // Monto en €
+  fechaCaducidadSeguro  DateTime?
+  estadoSeguro          EwoorkerEstadoDocumento @default(PENDIENTE_VALIDACION)
+  
+  // Capacidad operativa
+  numeroTrabajadores    Int      @default(0)
+  maquinariaPropia      Json     @default("[]") // Array de maquinaria
+  experienciaAnios      Int      @default(0)
+  
+  // Geolocalización
+  zonasOperacion        String[] // ['Madrid', 'Toledo']
+  radioOperacionKm      Int      @default(50)
+  latitud               Float?
+  longitud              Float?
+  
+  // Suscripción ewoorker
+  planActual            EwoorkerPlanSuscripcion @default(OBRERO_FREE)
+  fechaInicioplan       DateTime @default(now())
+  fechaProximoPago      DateTime?
+  stripeCustomerId      String?  @unique
+  stripeSubscriptionId  String?  @unique
+  
+  // Ratings y reputación
+  valoracionMedia       Float    @default(0)
+  totalReviews          Int      @default(0)
+  proyectosCompletados  Int      @default(0)
+  tasaCumplimientoPlazos Float   @default(100) // %
+  
+  // Estado de cuenta
+  disponible            Boolean  @default(true)
+  verificado            Boolean  @default(false)
+  destacado             Boolean  @default(false)
+  motivoSuspension      String?  @db.Text
+  
+  // Portfolio
+  portfolioFotos        String[] @default([])
+  certificadosCalidad   String[] @default([])
+  
+  // Timestamps
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  ultimaActividad       DateTime @default(now())
+  
+  // Relaciones ewoorker
+  documentos            EwoorkerDocumento[]
+  obrasPublicadas       EwoorkerObra[] @relation("ObraConstructor")
+  ofertasEnviadas       EwoorkerOferta[]
+  contratosComoConstructor EwoorkerContrato[] @relation("ContratoConstructor")
+  contratosComoSubcontratista EwoorkerContrato[] @relation("ContratoSubcontratista")
+  reviewsRecibidas      EwoorkerReview[] @relation("ReviewsRecibidas")
+  reviewsEscritas       EwoorkerReview[] @relation("ReviewsEscritas")
+  pagosRecibidos        EwoorkerPago[]
+  certificaciones       EwoorkerCertificacion[] @relation("CertificacionesEmpresa")
+  
+  @@index([tipoEmpresa])
+  @@index([planActual])
+  @@index([verificado])
+  @@index([disponible])
+  @@index([valoracionMedia])
+  @@map("ewoorker_perfil_empresa")
+}
+
+// Documentación legal de empresas
+model EwoorkerDocumento {
+  id                    String   @id @default(cuid())
+  perfilId              String
+  perfil                EwoorkerPerfilEmpresa @relation(fields: [perfilId], references: [id], onDelete: Cascade)
+  
+  // Tipo de documento
+  tipo                  String   // 'REA', 'SEGURO_RC', 'TC1', 'TC2', 'PRL', 'CERTIFICADO_FORMACION', etc.
+  categoria             String   // 'EMPRESA', 'TRABAJADOR', 'PRL', 'FISCAL'
+  
+  // Archivo
+  nombreArchivo         String
+  urlArchivo            String
+  tamanoBytes           Int
+  mimeType              String
+  
+  // Datos extraídos por OCR
+  datosExtraidos        Json?    // Datos parseados del documento
+  numeroDocumento       String?  // Número de póliza, REA, etc.
+  fechaEmision          DateTime?
+  fechaCaducidad        DateTime?
+  
+  // Validación
+  estado                EwoorkerEstadoDocumento @default(PENDIENTE_VALIDACION)
+  validadoPor           String?  // 'AUTOMATICO' | 'MANUAL' | userId
+  fechaValidacion       DateTime?
+  confianzaOCR          Float?   // % de confianza del OCR (0-100)
+  requiereRevisionManual Boolean @default(false)
+  
+  // Alertas
+  alertaCaducidad30dias Boolean  @default(false)
+  alertaCaducidad15dias Boolean  @default(false)
+  alertaCaducidad7dias  Boolean  @default(false)
+  fechaUltimaAlerta     DateTime?
+  
+  // Metadata
+  observaciones         String?  @db.Text
+  version               Int      @default(1) // Si se reemplaza el documento
+  documentoAnteriorId   String?  // Referencia al doc que reemplaza
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@index([perfilId])
+  @@index([tipo])
+  @@index([estado])
+  @@index([fechaCaducidad])
+  @@map("ewoorker_documento")
+}
+
+// Obra/Proyecto publicado en el marketplace
+model EwoorkerObra {
+  id                    String   @id @default(cuid())
+  companyId             String   // Constructor principal
+  company               Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  perfilConstructorId   String
+  perfilConstructor     EwoorkerPerfilEmpresa @relation("ObraConstructor", fields: [perfilConstructorId], references: [id])
+  
+  // Información básica
+  titulo                String
+  descripcion           String   @db.Text
+  codigoObra            String   @unique // Código único interno
+  
+  // Clasificación
+  categoria             String   // 'Estructura', 'Electricidad', etc.
+  subcategorias         String[] // Más específico
+  especialidadesRequeridas String[]
+  
+  // Ubicación
+  provincia             String
+  municipio             String
+  direccion             String
+  codigoPostal          String?
+  latitud               Float?
+  longitud              Float?
+  
+  // Alcance del trabajo
+  unidadesObra          Json     // Array de unidades con mediciones y precios estimados
+  tipoContrato          String   // 'POR_UNIDADES', 'ALZADO', 'ADMINISTRACION'
+  duracionEstimadaDias  Int
+  fechaInicioDeseada    DateTime
+  fechaFinDeseada       DateTime?
+  urgencia              String   @default("NORMAL") // NORMAL, ALTA, URGENTE
+  
+  // Presupuesto
+  presupuestoMinimo     Float?
+  presupuestoMaximo     Float?
+  formaPago             String   // 'MENSUAL', 'CERTIFICACION', 'FIN_OBRA'
+  
+  // Requisitos legales
+  nivelSubcontratacionMaximo Int @default(2) // 1 o 2 (3 excepcional)
+  requiereREA           Boolean  @default(true)
+  requiereSeguroRC      Boolean  @default(true)
+  coberturaMinima       Float?
+  certificacionesEspecificas String[] @default([])
+  experienciaMinima     Int      @default(0)
+  
+  // Proceso de selección
+  tipoLicitacion        String   @default("PUBLICA") // PUBLICA, PRIVADA, POR_INVITACION
+  candidatosInvitados   String[] @default([]) // IDs de perfiles invitados
+  plazoRecepcionOfertas Int      @default(15) // días
+  fechaCierreLicitacion DateTime?
+  numeroMaximoOfertas   Int      @default(20)
+  
+  // Documentación
+  planosUrls            String[] @default([])
+  memoriaCalidades      String?
+  planSeguridad         String?
+  otrosDocumentos       String[] @default([])
+  
+  // Estado
+  estado                EwoorkerEstadoObra @default(BORRADOR)
+  fechaPublicacion      DateTime?
+  fechaAdjudicacion     DateTime?
+  fechaInicio           DateTime?
+  fechaFin              DateTime?
+  
+  // Oferta ganadora
+  ofertaAceptadaId      String?  @unique
+  subcontratistaAsignadoId String?
+  
+  // Metadata
+  visitas               Int      @default(0)
+  favoritosCount        Int      @default(0)
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  // Relaciones
+  ofertas               EwoorkerOferta[]
+  contrato              EwoorkerContrato?
+  libroSubcontratacion  EwoorkerLibroSubcontratacion?
+  
+  @@index([companyId])
+  @@index([perfilConstructorId])
+  @@index([estado])
+  @@index([categoria])
+  @@index([provincia])
+  @@index([municipio])
+  @@index([fechaPublicacion])
+  @@index([urgencia])
+  @@map("ewoorker_obra")
+}
+
+// Oferta de un subcontratista a una obra
+model EwoorkerOferta {
+  id                    String   @id @default(cuid())
+  obraId                String
+  obra                  EwoorkerObra @relation(fields: [obraId], references: [id], onDelete: Cascade)
+  perfilSubcontratistaId String
+  perfilSubcontratista  EwoorkerPerfilEmpresa @relation(fields: [perfilSubcontratistaId], references: [id])
+  
+  // Propuesta económica
+  presupuestoTotal      Float
+  desgloseManoObra      Float
+  desgloseMateriales    Float
+  desgloseOtros         Float
+  
+  // Desglose por unidades (si aplica)
+  unidadesPresupuestadas Json // Array de unidades con precio unitario
+  
+  // Forma de pago propuesta
+  anticipoPorc          Float    @default(20) // %
+  certificaciones       Json     @default("[]") // Array de certificaciones con % y descripción
+  
+  // Timing
+  diasEjecucion         Int
+  fechaInicioDisponible DateTime
+  garantiaMeses         Int      @default(12)
+  
+  // Propuesta detallada
+  descripcionDetallada  String   @db.Text
+  metodologia           String?  @db.Text
+  equipoTrabajo         Json?    // Descripción del equipo asignado
+  maquinariaAsignada    Json?    // Maquinaria que usará
+  materialesDetalle     Json?    // Materiales con marca/modelo
+  
+  // Referencias
+  proyectosSimilares    Json     @default("[]") // Referencias de trabajos anteriores
+  clientesReferencia    Json     @default("[]") // Contactos de referencia
+  
+  // Documentación adjunta
+  documentosAdjuntos    String[] @default([])
+  certificados          String[] @default([])
+  polizaSeguro          String?
+  
+  // Estado de la oferta
+  estado                EwoorkerEstadoOferta @default(ENVIADA)
+  validezDias           Int      @default(30)
+  fechaEnvio            DateTime @default(now())
+  fechaVista            DateTime? // Cuando el constructor la abre
+  fechaRespuesta        DateTime? // Cuando se acepta/rechaza
+  motivoRechazo         String?  @db.Text
+  
+  // Metadata
+  esUrgente             Boolean  @default(false)
+  esDestacada           Boolean  @default(false) // Si pagó por destacar
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  // Relación
+  contrato              EwoorkerContrato?
+  
+  @@unique([obraId, perfilSubcontratistaId]) // Una oferta por subcontratista por obra
+  @@index([obraId])
+  @@index([perfilSubcontratistaId])
+  @@index([estado])
+  @@index([fechaEnvio])
+  @@map("ewoorker_oferta")
+}
+
+// Contrato resultante de adjudicar una obra
+model EwoorkerContrato {
+  id                    String   @id @default(cuid())
+  obraId                String   @unique
+  obra                  EwoorkerObra @relation(fields: [obraId], references: [id], onDelete: Cascade)
+  ofertaId              String   @unique
+  oferta                EwoorkerOferta @relation(fields: [ofertaId], references: [id])
+  
+  // Partes del contrato
+  constructorId         String
+  constructor           EwoorkerPerfilEmpresa @relation("ContratoConstructor", fields: [constructorId], references: [id])
+  subcontratistaId      String
+  subcontratista        EwoorkerPerfilEmpresa @relation("ContratoSubcontratista", fields: [subcontratistaId], references: [id])
+  
+  // Términos económicos
+  presupuestoTotal      Float
+  formaPago             String
+  certificaciones       Json     // Hitos de pago
+  garantiaMeses         Int
+  
+  // Términos de ejecución
+  fechaInicio           DateTime
+  fechaFinEstimada      DateTime
+  plazoEjecucionDias    Int
+  fechaFinReal          DateTime?
+  
+  // Estado del contrato
+  estado                EwoorkerEstadoContrato @default(BORRADOR)
+  progreso              Int      @default(0) // % de avance
+  
+  // Firmas digitales
+  firmaConstructor      String?  // Hash de la firma
+  firmaSubcontratista   String?
+  fechaFirmaConstructor DateTime?
+  fechaFirmaSubcontratista DateTime?
+  ipFirmaConstructor    String?
+  ipFirmaSubcontratista String?
+  
+  // Escrow (pagos seguros)
+  usaEscrow             Boolean  @default(false)
+  comisionEscrow        Float    @default(2.5) // %
+  
+  // Metadata legal
+  numeroContrato        String   @unique // Número oficial del contrato
+  condicionesEspeciales String?  @db.Text
+  clausulasPenalizacion String?  @db.Text
+  
+  // Finalización
+  fechaFinalizacion     DateTime?
+  motivoCancelacion     String?  @db.Text
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  // Relaciones
+  hitos                 EwoorkerHitoContrato[]
+  partesTrabajo         EwoorkerParteTrabajo[]
+  certificacionesContrato EwoorkerCertificacion[] @relation("CertificacionesContrato")
+  pagos                 EwoorkerPago[]
+  incidencias           EwoorkerIncidencia[]
+  changeOrders          EwoorkerChangeOrder[]
+  fichajes              EwoorkerFichaje[]
+  mensajes              EwoorkerMensajeObra[]
+  reviews               EwoorkerReview[]
+  
+  @@index([obraId])
+  @@index([constructorId])
+  @@index([subcontratistaId])
+  @@index([estado])
+  @@index([fechaInicio])
+  @@map("ewoorker_contrato")
+}
+
+// Hitos del contrato para tracking de progreso
+model EwoorkerHitoContrato {
+  id                    String   @id @default(cuid())
+  contratoId            String
+  contrato              EwoorkerContrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+  
+  // Información del hito
+  numero                Int      // Secuencial: 1, 2, 3...
+  nombre                String
+  descripcion           String   @db.Text
+  
+  // Timing
+  fechaPrevista         DateTime
+  fechaReal             DateTime?
+  
+  // Estado
+  estado                String   @default("PENDIENTE") // PENDIENTE, EN_PROGRESO, COMPLETADO, BLOQUEADO
+  porcentajePeso        Float    // % que representa del total del proyecto
+  
+  // Validación
+  aprobadoConstructor   Boolean  @default(false)
+  fechaAprobacion       DateTime?
+  observacionesConstructor String? @db.Text
+  
+  // Evidencias
+  fotosEvidencia        String[] @default([])
+  documentosAdjuntos    String[] @default([])
+  
+  // Pago asociado
+  pagaAsociado          Boolean  @default(false)
+  montoPago             Float?
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@index([contratoId])
+  @@index([estado])
+  @@index([fechaPrevista])
+  @@map("ewoorker_hito_contrato")
+}
+
+// Parte de trabajo diario/semanal
+model EwoorkerParteTrabajo {
+  id                    String   @id @default(cuid())
+  contratoId            String
+  contrato              EwoorkerContrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+  
+  // Información básica
+  fecha                 DateTime
+  numeroParte           String   // Código único del parte
+  
+  // Unidades ejecutadas
+  unidadesEjecutadas    Json     // Array de unidades con cantidad y fotos
+  
+  // Personal empleado
+  trabajadores          Json     // Array de trabajadores con horas
+  totalHorasTrabajadas  Float
+  
+  // Maquinaria utilizada
+  maquinaria            Json     @default("[]")
+  
+  // Materiales consumidos
+  materiales            Json     @default("[]")
+  
+  // Incidencias del día
+  incidencias           Json?    // Incidencias menores del día
+  
+  // Condiciones climáticas
+  clima                 String?  // 'Soleado', 'Lluvia', 'Nieve'
+  temperaturaCelsius    Float?
+  
+  // Estado
+  estado                String   @default("BORRADOR") // BORRADOR, ENVIADO, APROBADO, RECHAZADO
+  
+  // Firmas
+  firmaCapataz          String?
+  nombreCapataz         String?
+  fechaFirmaCapataz     DateTime?
+  
+  firmaJefeObra         String?
+  nombreJefeObra        String?
+  fechaAprobacion       DateTime?
+  motivoRechazo         String?  @db.Text
+  
+  // Fotos del día
+  fotos                 String[] @default([])
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@unique([contratoId, numeroParte])
+  @@index([contratoId])
+  @@index([fecha])
+  @@index([estado])
+  @@map("ewoorker_parte_trabajo")
+}
+
+// Certificación mensual de obra
+model EwoorkerCertificacion {
+  id                    String   @id @default(cuid())
+  contratoId            String
+  contrato              EwoorkerContrato @relation("CertificacionesContrato", fields: [contratoId], references: [id], onDelete: Cascade)
+  perfilSubcontratistaId String
+  perfilSubcontratista  EwoorkerPerfilEmpresa @relation("CertificacionesEmpresa", fields: [perfilSubcontratistaId], references: [id])
+  
+  // Periodo
+  mes                   Int      // 1-12
+  ano                   Int
+  numeroCertificacion   Int      // Secuencial: 1, 2, 3...
+  
+  // Importes
+  subtotal              Float
+  iva                   Float
+  total                 Float
+  
+  // Partes de trabajo incluidos
+  partesIncluidos       String[] // IDs de partes de trabajo
+  
+  // Unidades certificadas
+  unidadesCertificadas  Json     // Resumen de unidades del mes
+  
+  // Estado
+  estado                String   @default("PROFORMA") // PROFORMA, APROBADA, PAGADA, RECHAZADA
+  fechaAprobacion       DateTime?
+  fechaPago             DateTime?
+  
+  // Documentos
+  pdfUrl                String?
+  observaciones         String?  @db.Text
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@unique([contratoId, mes, ano])
+  @@index([contratoId])
+  @@index([perfilSubcontratistaId])
+  @@index([estado])
+  @@map("ewoorker_certificacion")
+}
+
+// Pagos del sistema ewoorker
+model EwoorkerPago {
+  id                    String   @id @default(cuid())
+  contratoId            String?
+  contrato              EwoorkerContrato? @relation(fields: [contratoId], references: [id])
+  perfilReceptorId      String
+  perfilReceptor        EwoorkerPerfilEmpresa @relation(fields: [perfilReceptorId], references: [id])
+  
+  // Tipo de pago
+  tipo                  EwoorkerTipoComision
+  concepto              String
+  descripcion           String?  @db.Text
+  
+  // Importes
+  montoBase             Float    // Monto sobre el que se calcula
+  porcentajeComision    Float?   // Si aplica
+  montoComision         Float    // Comisión de ewoorker
+  montoNeto             Float    // Lo que recibe el subcontratista
+  
+  // División de beneficios (50/50 con socio)
+  beneficioEwoorker     Float    // 50% para plataforma
+  beneficioSocio        Float    // 50% para socio fundador
+  
+  // Estado
+  estado                EwoorkerEstadoPago @default(PENDIENTE)
+  fechaSolicitud        DateTime @default(now())
+  fechaPago             DateTime?
+  
+  // Método de pago
+  metodoPago            String?  // 'STRIPE', 'TRANSFERENCIA', 'ESCROW'
+  
+  // Referencias externas
+  stripePaymentIntentId String?  @unique
+  stripeTransferId      String?
+  transaccionBancoId    String?
+  
+  // Escrow
+  retenidoEscrow        Boolean  @default(false)
+  fechaRetencion        DateTime?
+  fechaLiberacion       DateTime?
+  condicionesLiberacion Json?    // Condiciones para liberar
+  
+  // Metadata
+  metadata              Json?
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@index([contratoId])
+  @@index([perfilReceptorId])
+  @@index([tipo])
+  @@index([estado])
+  @@index([fechaPago])
+  @@map("ewoorker_pago")
+}
+
+// Fichajes con geolocalización (para app móvil)
+model EwoorkerFichaje {
+  id                    String   @id @default(cuid())
+  contratoId            String
+  contrato              EwoorkerContrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+  
+  // Trabajador
+  nombreTrabajador      String
+  dniTrabajador         String
+  empresaId             String   // Empresa a la que pertenece
+  
+  // Tipo de fichaje
+  tipo                  String   // 'ENTRADA', 'SALIDA', 'PAUSA_INICIO', 'PAUSA_FIN'
+  
+  // Timestamp
+  timestamp             DateTime @default(now())
+  fecha                 DateTime // Solo fecha para agrupaciones
+  hora                  String   // HH:MM
+  
+  // Geolocalización
+  latitud               Float
+  longitud              Float
+  precisión             Float?   // Precisión del GPS en metros
+  dentroPerimetro       Boolean  @default(true)
+  distanciaObraMetros   Float?
+  
+  // Verificación adicional
+  fotoSelfie            String?  // URL de la foto (opcional)
+  dispositivoId         String?  // ID del dispositivo móvil
+  ipAddress             String?
+  
+  // Validación documental en el momento
+  documentosValidados   Boolean  @default(true)
+  alertasDocumentales   Json?    // Docs caducados o próximos a caducar
+  
+  // Metadata
+  observaciones         String?  @db.Text
+  
+  createdAt             DateTime @default(now())
+  
+  @@index([contratoId])
+  @@index([dniTrabajador])
+  @@index([fecha])
+  @@index([tipo])
+  @@map("ewoorker_fichaje")
+}
+
+// Incidencias en obra
+model EwoorkerIncidencia {
+  id                    String   @id @default(cuid())
+  contratoId            String
+  contrato              EwoorkerContrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+  
+  // Información básica
+  titulo                String
+  descripcion           String   @db.Text
+  tipo                  String   // 'RETRASO', 'FALTA_MATERIAL', 'CLIMA', 'SEGURIDAD', 'CALIDAD', 'OTRO'
+  gravedad              String   // 'BAJA', 'MEDIA', 'ALTA', 'CRITICA'
+  
+  // Reportado por
+  reportadoPor          String   // 'CONSTRUCTOR' | 'SUBCONTRATISTA'
+  reportadorNombre      String
+  reportadorEmail       String?
+  
+  // Impacto
+  impactoPlazo          Boolean  @default(false)
+  diasRetraso           Int      @default(0)
+  impactoPresupuesto    Boolean  @default(false)
+  montoAdicional        Float    @default(0)
+  
+  // Solución
+  solucionPropuesta     String?  @db.Text
+  solucionAplicada      String?  @db.Text
+  resuelta              Boolean  @default(false)
+  fechaResolucion       DateTime?
+  resolvidoPor          String?
+  
+  // Evidencias
+  fotos                 String[] @default([])
+  documentosAdjuntos    String[] @default([])
+  
+  // Seguimiento
+  prioridad             String   @default("MEDIA") // BAJA, MEDIA, ALTA
+  fechaLimite           DateTime?
+  responsableResolucion String?
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@index([contratoId])
+  @@index([tipo])
+  @@index([gravedad])
+  @@index([resuelta])
+  @@map("ewoorker_incidencia")
+}
+
+// Change Orders (cambios en el alcance del proyecto)
+model EwoorkerChangeOrder {
+  id                    String   @id @default(cuid())
+  contratoId            String
+  contrato              EwoorkerContrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+  
+  // Información del cambio
+  numero                Int      // Secuencial
+  titulo                String
+  descripcion           String   @db.Text
+  justificacion         String   @db.Text
+  
+  // Solicitado por
+  solicitadoPor         String   // 'CONSTRUCTOR' | 'SUBCONTRATISTA'
+  solicitanteNombre     String
+  fechaSolicitud        DateTime @default(now())
+  
+  // Impacto económico
+  impactoPresupuesto    Float    // Puede ser positivo o negativo
+  nuevoPresupuestoTotal Float?
+  
+  // Impacto en plazo
+  impactoPlazo          Int      // Días (positivo = retraso, negativo = adelanto)
+  nuevaFechaFin         DateTime?
+  
+  // Estado
+  estado                String   @default("PENDIENTE") // PENDIENTE, APROBADO, RECHAZADO, NEGOCIANDO
+  fechaRespuesta        DateTime?
+  respondidoPor         String?
+  motivoRechazo         String?  @db.Text
+  
+  // Documentación
+  planos                String[] @default([])
+  presupuestoDetallado  String?
+  documentosAdjuntos    String[] @default([])
+  
+  // Aprobación
+  aprobado              Boolean  @default(false)
+  fechaAprobacion       DateTime?
+  firmaAprobacion       String?
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@unique([contratoId, numero])
+  @@index([contratoId])
+  @@index([estado])
+  @@map("ewoorker_change_order")
+}
+
+// Mensajería en obra (chat contextual)
+model EwoorkerMensajeObra {
+  id                    String   @id @default(cuid())
+  contratoId            String
+  contrato              EwoorkerContrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+  
+  // Remitente
+  remitenteId           String   // Puede ser userId o perfilId
+  remitenteNombre       String
+  remitenteTipo         String   // 'CONSTRUCTOR' | 'SUBCONTRATISTA' | 'TECNICO'
+  remitenteEmpresa      String
+  
+  // Mensaje
+  mensaje               String   @db.Text
+  tipo                  String   @default("NORMAL") // NORMAL, NOTIFICACION_OFICIAL, ALERTA
+  
+  // Adjuntos
+  adjuntos              String[] @default([])
+  
+  // Contexto
+  referenciaHitoId      String?  // Si es sobre un hito específico
+  referenciaParteId     String?  // Si es sobre un parte de trabajo
+  referenciaIncidenciaId String? // Si es sobre una incidencia
+  
+  // Notificación oficial (requiere acuse)
+  esNotificacionOficial Boolean  @default(false)
+  requiereAcuseRecibo   Boolean  @default(false)
+  acuseRecibo           Boolean  @default(false)
+  fechaAcuseRecibo      DateTime?
+  firmante              String?
+  
+  // Estado de lectura
+  leido                 Boolean  @default(false)
+  fechaLectura          DateTime?
+  
+  // Legal
+  hashIntegridad        String?  // SHA-256 para verificar no modificación
+  exportable            Boolean  @default(true) // Puede usarse como evidencia
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@index([contratoId])
+  @@index([remitenteId])
+  @@index([tipo])
+  @@index([createdAt])
+  @@index([leido])
+  @@map("ewoorker_mensaje_obra")
+}
+
+// Reviews bidireccionales
+model EwoorkerReview {
+  id                    String   @id @default(cuid())
+  contratoId            String
+  contrato              EwoorkerContrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+  
+  // Quién evalúa a quién
+  reviewerPerfilId      String
+  reviewerPerfil        EwoorkerPerfilEmpresa @relation("ReviewsEscritas", fields: [reviewerPerfilId], references: [id])
+  reviewedPerfilId      String
+  reviewedPerfil        EwoorkerPerfilEmpresa @relation("ReviewsRecibidas", fields: [reviewedPerfilId], references: [id])
+  reviewerTipo          String   // 'CONSTRUCTOR' | 'SUBCONTRATISTA'
+  
+  // Calificaciones generales (1-5)
+  calificacionGeneral   Float
+  puntualidad           Float
+  calidad               Float
+  comunicacion          Float
+  profesionalismo       Float
+  cumplimientoPresupuesto Float
+  
+  // Si constructor evalúa a subcontratista
+  cumplimientoPlazos    Float?
+  limpiezaObra          Float?
+  seguridadTrabajo      Float?
+  
+  // Si subcontratista evalúa a constructor
+  claridadRequerimientos Float?
+  puntualidadPagos      Float?
+  condicionesTrabajo    Float?
+  
+  // Texto
+  comentario            String   @db.Text
+  aspectosPositivos     String[] @default([])
+  aspectosMejorables    String[] @default([])
+  recomendaria          Boolean
+  
+  // Evidencias
+  fotos                 String[] @default([])
+  
+  // Metadata
+  verificado            Boolean  @default(false) // Plataforma verifica que el trabajo se realizó
+  respuesta             String?  @db.Text // El evaluado puede responder
+  fechaRespuesta        DateTime?
+  visible               Boolean  @default(true)
+  reportado             Boolean  @default(false)
+  motivoReporte         String?  @db.Text
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@unique([contratoId, reviewerPerfilId]) // Solo una review por parte en cada contrato
+  @@index([reviewedPerfilId])
+  @@index([reviewerPerfilId])
+  @@index([calificacionGeneral])
+  @@index([verificado])
+  @@map("ewoorker_review")
+}
+
+// Libro de Subcontratación Digital (Art. 8 Ley 32/2006)
+model EwoorkerLibroSubcontratacion {
+  id                    String   @id @default(cuid())
+  obraId                String   @unique
+  obra                  EwoorkerObra @relation(fields: [obraId], references: [id], onDelete: Cascade)
+  
+  // Datos de la obra
+  nombreObra            String
+  ubicacion             String
+  licenciaObra          String?
+  promotor              String
+  
+  // Habilitación oficial
+  habilitadoPor         String   // Autoridad laboral competente
+  numeroHabilitacion    String   @unique
+  provinciaHabilitacion String
+  
+  // Control de versiones
+  version               Int      @default(1)
+  fechaApertura         DateTime @default(now())
+  fechaCierre           DateTime?
+  
+  // Exportación oficial
+  pdfOficialUrl         String?  // PDF sellado digitalmente
+  ultimaExportacion     DateTime?
+  
+  // Estado
+  cerrado               Boolean  @default(false)
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  // Relaciones
+  asientos              EwoorkerAsientoSubcontratacion[]
+  
+  @@index([obraId])
+  @@index([numeroHabilitacion])
+  @@map("ewoorker_libro_subcontratacion")
+}
+
+// Asiento del Libro de Subcontratación
+model EwoorkerAsientoSubcontratacion {
+  id                    String   @id @default(cuid())
+  libroId               String
+  libro                 EwoorkerLibroSubcontratacion @relation(fields: [libroId], references: [id], onDelete: Cascade)
+  
+  // Número de asiento (secuencial)
+  numeroAsiento         Int
+  fechaRegistro         DateTime @default(now())
+  
+  // Empresa subcontratista
+  subcontratistaId      String
+  subcontratistaNombre  String
+  subcontratistaCIF     String
+  
+  // Datos del contrato
+  objetoContrato        String   @db.Text
+  importeContrato       Float
+  fechaInicio           DateTime
+  fechaFinPrevista      DateTime
+  fechaFinReal          DateTime?
+  
+  // Nivel de subcontratación
+  nivelSubcontratacion  Int      // 1, 2 ó 3 (excepcional)
+  empresaContratante    String   // Quién subcontrata a ésta
+  cifContratante        String
+  
+  // Trabajadores
+  numeroTrabajadores    Int
+  listaTrabajadores     Json     // Array con nombre, DNI, oficio
+  
+  // Documentación
+  numeroREA             String?
+  fechaCaducidadREA     DateTime?
+  numeroSeguroRC        String?
+  cobertura             Float?
+  
+  // Observaciones
+  observaciones         String?  @db.Text
+  autorizacionEspecial  String?  @db.Text // Si es nivel 3
+  
+  // Estado
+  vigente               Boolean  @default(true)
+  motivoBaja            String?  @db.Text
+  fechaBaja             DateTime?
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@unique([libroId, numeroAsiento])
+  @@index([libroId])
+  @@index([subcontratistaId])
+  @@index([nivelSubcontratacion])
+  @@map("ewoorker_asiento_subcontratacion")
+}
+
+// Panel de admin para el socio fundador
+model EwoorkerMetricaSocio {
+  id                    String   @id @default(cuid())
+  
+  // Periodo
+  fecha                 DateTime @default(now())
+  mes                   Int
+  ano                   Int
+  
+  // Usuarios y empresas
+  totalEmpresas         Int      @default(0)
+  empresasActivas       Int      @default(0)
+  nuevasEmpresasMes     Int      @default(0)
+  empresasVerificadas   Int      @default(0)
+  
+  // Actividad del marketplace
+  obrasPublicadas       Int      @default(0)
+  ofertasEnviadas       Int      @default(0)
+  contratosActivos      Int      @default(0)
+  contratosCompletados  Int      @default(0)
+  
+  // Financiero (en céntimos para precisión)
+  gmvTotal              Int      @default(0) // Gross Merchandise Value en céntimos
+  comisionesGeneradas   Int      @default(0) // Total comisiones en céntimos
+  beneficioSocio        Int      @default(0) // 50% en céntimos
+  beneficioPlataforma   Int      @default(0) // 50% en céntimos
+  
+  // Suscripciones
+  suscripcionesActivas  Int      @default(0)
+  mrrSuscripciones      Int      @default(0) // Monthly Recurring Revenue en céntimos
+  
+  // Por plan
+  usuariosObrero        Int      @default(0)
+  usuariosCapataz       Int      @default(0)
+  usuariosConstructor   Int      @default(0)
+  
+  // Engagement
+  tasaConversion        Float    @default(0) // % ofertas que se convierten en contratos
+  tiempoMedioAdjudicacion Float  @default(0) // Días
+  valoracionMediaPlataforma Float @default(0) // Rating promedio
+  
+  // Desglose de comisiones por tipo
+  comisionSuscripciones Int      @default(0)
+  comisionEscrow        Int      @default(0)
+  comisionUrgentes      Int      @default(0)
+  comisionOtros         Int      @default(0)
+  
+  // Metadata
+  metadataAdicional     Json?    // Para datos extra que se añadan después
+  
+  createdAt             DateTime @default(now())
+  
+  @@unique([mes, ano])
+  @@index([fecha])
+  @@index([mes])
+  @@index([ano])
+  @@map("ewoorker_metrica_socio")
+}
+
+// Log de acciones del socio para auditoría
+model EwoorkerLogSocio {
+  id                    String   @id @default(cuid())
+  
+  // Usuario (si aplica)
+  userId                String?
+  userName              String?
+  userEmail             String?
+  
+  // Acción
+  accion                String   // 'LOGIN', 'VER_METRICAS', 'EXPORTAR_REPORTE', 'MODIFICAR_CONFIG'
+  descripcion           String   @db.Text
+  modulo                String   // 'DASHBOARD', 'FINANCIERO', 'USUARIOS', 'CONFIGURACION'
+  
+  // Contexto
+  ipAddress             String?
+  userAgent             String?  @db.Text
+  
+  // Datos afectados
+  recursoTipo           String?  // 'EMPRESA', 'CONTRATO', 'PAGO'
+  recursoId             String?
+  datosAnteriores       Json?    // Estado antes del cambio
+  datosNuevos           Json?    // Estado después del cambio
+  
+  // Resultado
+  exitoso               Boolean  @default(true)
+  error                 String?  @db.Text
+  
+  createdAt             DateTime @default(now())
+  
+  @@index([userId])
+  @@index([accion])
+  @@index([createdAt])
+  @@map("ewoorker_log_socio")
+}
+
 model UserCelebration {
   id          String   @id @default(cuid())
   userId      String
@@ -11530,3 +12653,613 @@ model UserCelebration {
   @@index([createdAt])
   @@map("user_celebrations")
 }
+// ============================================================================
+// POMELLI SOCIAL MEDIA INTEGRATION
+// ============================================================================
+
+model PomelliConfig {
+  id          String   @id @default(cuid())
+  companyId   String   @unique
+  
+  // Credenciales API
+  apiKey      String
+  apiSecret   String   // Encriptado
+  webhookUrl  String?
+  
+  // Estado
+  enabled     Boolean  @default(true)
+  lastSyncAt  DateTime?
+  
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  profiles    SocialProfile[]
+  pomelliSocialPosts PomelliSocialPost[]
+  
+  @@index([companyId])
+  @@map("pomelli_configs")
+}
+
+model SocialProfile {
+  id               String   @id @default(cuid())
+  companyId        String
+  pomelliConfigId  String
+  
+  // Identificación del perfil
+  platform         String   // linkedin, instagram, x, facebook
+  profileId        String   // ID en Pomelli
+  profileName      String
+  profileUsername  String   // @username
+  profileUrl       String?
+  profileImageUrl  String?
+  
+  // Tokens de acceso (encriptados)
+  accessToken      String?  @db.Text
+  refreshToken     String?  @db.Text
+  tokenExpiresAt   DateTime?
+  
+  // Estado
+  isActive         Boolean  @default(true)
+  isConnected      Boolean  @default(true)
+  lastSyncAt       DateTime?
+  
+  // Estadísticas
+  followersCount   Int      @default(0)
+  followingCount   Int      @default(0)
+  postsCount       Int      @default(0)
+  
+  // Metadata adicional
+  metadata         Json?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  company          Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  pomelliConfig    PomelliConfig  @relation(fields: [pomelliConfigId], references: [id], onDelete: Cascade)
+  pomelliPosts     PomelliSocialPost[] @relation("PostProfiles")
+  
+  @@unique([companyId, platform])
+  @@index([companyId])
+  @@index([platform])
+  @@index([isActive])
+  @@map("social_profiles")
+}
+
+
+model SocialAnalytics {
+  id            String   @id @default(cuid())
+  companyId     String
+  platform      String   // linkedin, instagram, x
+  
+  // Periodo
+  date          DateTime
+  periodType    String   // daily, weekly, monthly
+  
+  // Métricas
+  impressions   Int      @default(0)
+  reach         Int      @default(0)
+  likes         Int      @default(0)
+  comments      Int      @default(0)
+  shares        Int      @default(0)
+  clicks        Int      @default(0)
+  followers     Int      @default(0)
+  engagement    Float    @default(0)
+  
+  // Métricas calculadas
+  growthRate    Float    @default(0)
+  bestPostTime  String?  // Mejor hora para publicar
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@unique([companyId, platform, date, periodType])
+  @@index([companyId])
+  @@index([platform])
+  @@index([date])
+  @@map("social_analytics")
+}
+
+// ============================================================================
+// INTEGRATION MANAGEMENT CENTER (Centro de Control de Integraciones)
+// ============================================================================
+
+model IntegrationConfig {
+  id          String   @id @default(cuid())
+  companyId   String
+  
+  // Identificación
+  provider    String   // 'twilio', 'paypal', 'bizum', 'airbnb', 'booking', etc.
+  name        String
+  category    String   // 'payment', 'communication', 'channel_manager', 'accounting', etc.
+  
+  // Credenciales (encriptadas)
+  credentials Json     // Almacena las credenciales de forma segura
+  
+  // Configuración
+  settings    Json?    // Configuraciones adicionales
+  
+  // Estado
+  enabled     Boolean  @default(true)
+  isConfigured Boolean @default(false)
+  lastSyncAt  DateTime?
+  lastTestAt  DateTime?
+  testStatus  String?  // 'success', 'failed', 'pending'
+  
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?  // User ID que configuró
+  
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  logs        IntegrationLog[]
+  
+  @@unique([companyId, provider])
+  @@index([companyId])
+  @@index([provider])
+  @@index([category])
+  @@index([enabled])
+  @@map("integration_configs")
+}
+
+model IntegrationLog {
+  id            String   @id @default(cuid())
+  integrationId String
+  companyId     String
+  
+  // Evento
+  event         String   // 'test', 'sync', 'send', 'error', etc.
+  status        String   // 'success', 'failed', 'warning'
+  message       String?  @db.Text
+  
+  // Datos
+  requestData   Json?
+  responseData  Json?
+  errorDetails  Json?
+  
+  // Metadata
+  duration      Int?     // Duración en ms
+  createdAt     DateTime @default(now())
+  
+  integration   IntegrationConfig @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@index([integrationId])
+  @@index([companyId])
+  @@index([event])
+  @@index([status])
+  @@index([createdAt])
+  @@map("integration_logs")
+}
+
+
+model PomelliSocialPost {
+  id              String   @id @default(cuid())
+  companyId       String
+  pomelliConfigId String
+  userId          String   // Creador del post
+  
+  // Contenido
+  content         String   @db.Text
+  contentType     String   // text, image, video, carousel, story
+  mediaUrls       String[] @default([])
+  
+  // Plataformas
+  platforms       String[] @default([]) // linkedin, instagram, x
+  
+  // Estado
+  status          String   // draft, scheduled, published, failed, archived
+  
+  // Programación
+  scheduledAt     DateTime?
+  publishedAt     DateTime?
+  
+  // ID en Pomelli
+  pomelliPostId   String?
+  
+  // Analytics
+  impressions     Int      @default(0)
+  reach           Int      @default(0)
+  likes           Int      @default(0)
+  comments        Int      @default(0)
+  shares          Int      @default(0)
+  clicks          Int      @default(0)
+  engagementRate  Float    @default(0)
+  
+  // Error handling
+  errorMessage    String?  @db.Text
+  retryCount      Int      @default(0)
+  maxRetries      Int      @default(3)
+  lastAttemptAt   DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  company         Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  pomelliConfig   PomelliConfig  @relation(fields: [pomelliConfigId], references: [id], onDelete: Cascade)
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profiles        SocialProfile[] @relation("PostProfiles")
+  
+  @@index([companyId])
+  @@index([userId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([publishedAt])
+  @@map("pomelli_social_posts")
+}
+
+
+// ============================================================================
+// VALORACIÓN AUTOMÁTICA DE PROPIEDADES CON IA
+// ============================================================================
+
+enum PropertyCondition {
+  NEW
+  EXCELLENT
+  GOOD
+  FAIR
+  NEEDS_RENOVATION
+  POOR
+}
+
+enum MarketTrend {
+  UP
+  STABLE
+  DOWN
+}
+
+model PropertyValuation {
+  id         String   @id @default(cuid())
+  companyId  String
+  unitId     String?  // Opcional: puede ser valoración de propiedad no ingresada
+  
+  // Input features - Características de la propiedad
+  address         String
+  postalCode      String
+  city            String
+  province        String?
+  neighborhood    String?
+  squareMeters    Float
+  rooms           Int
+  bathrooms       Int
+  floor           Int?
+  hasElevator     Boolean   @default(false)
+  hasParking      Boolean   @default(false)
+  hasGarden       Boolean   @default(false)
+  hasPool         Boolean   @default(false)
+  hasTerrace      Boolean   @default(false)
+  hasGarage       Boolean   @default(false)
+  condition       PropertyCondition @default(GOOD)
+  yearBuilt       Int?
+  
+  // Market data - Datos del mercado
+  avgPricePerM2   Float?
+  marketTrend     MarketTrend?
+  comparables     Json?     // Array de propiedades similares
+  
+  // Output - Resultado de la valoración
+  estimatedValue  Float     // Precio estimado
+  confidenceScore Float     // 0-100
+  minValue        Float     // Rango mínimo
+  maxValue        Float     // Rango máximo
+  pricePerM2      Float?    // Precio por m² calculado
+  
+  // IA Details
+  model           String    // "claude-3-5-sonnet", "gpt-4", etc.
+  reasoning       String?   @db.Text  // Explicación de la valoración
+  keyFactors      String[]  @default([])  // Factores clave que influyeron
+  
+  // ROI & Investment
+  estimatedRent   Float?    // Renta mensual estimada
+  estimatedROI    Float?    // ROI anual estimado (%)
+  capRate         Float?    // Capitalization rate
+  
+  // Recommendations
+  recommendations String[]  @default([])  // Recomendaciones para mejorar valor
+  
+  // Metadata
+  requestedBy     String    // User ID
+  ipAddress       String?
+  userAgent       String?   @db.Text
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  company         Company  @relation("CompanyPropertyValuations", fields: [companyId], references: [id], onDelete: Cascade)
+  unit            Unit?    @relation("UnitPropertyValuations", fields: [unitId], references: [id], onDelete: SetNull)
+  user            User     @relation("UserPropertyValuations", fields: [requestedBy], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([unitId])
+  @@index([requestedBy])
+  @@index([city])
+  @@index([postalCode])
+  @@index([createdAt])
+  @@map("property_valuations")
+}
+
+// ============================================================================
+// FIRMA DIGITAL DE CONTRATOS
+// ============================================================================
+
+enum SignatureStatus {
+  PENDING
+  SIGNED
+  DECLINED
+  EXPIRED
+  CANCELLED
+}
+
+enum SignatureProvider {
+  DOCUSIGN
+  SIGNATURIT
+  SELF_HOSTED
+}
+
+model ContractSignature {
+  id         String   @id @default(cuid())
+  companyId  String
+  contractId String   // ID del contrato a firmar
+  
+  // Proveedor de firma
+  provider          SignatureProvider @default(SIGNATURIT)
+  externalId        String?          // ID en sistema externo (DocuSign/Signaturit)
+  
+  // Documento
+  documentUrl       String           // URL del PDF del contrato
+  documentName      String
+  documentHash      String?          // SHA-256 hash para verificación
+  
+  // Firmantes (signatories)
+  signatories       Json             // Array de firmantes: [{ name, email, role, status, signedAt }]
+  
+  // Estado
+  status            SignatureStatus  @default(PENDING)
+  
+  // URLs
+  signingUrl        String?          @db.Text  // URL para firmar (DocuSign/Signaturit)
+  completedUrl      String?          @db.Text  // URL del documento firmado
+  
+  // Notificaciones
+  emailSubject      String?
+  emailMessage      String?          @db.Text
+  remindersSent     Int              @default(0)
+  
+  // Fechas
+  sentAt            DateTime?
+  expiresAt         DateTime?
+  completedAt       DateTime?
+  
+  // Metadata
+  ipAddress         String?
+  userAgent         String?          @db.Text
+  requestedBy       String           // User ID
+  
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  // Relations
+  company           Company          @relation("CompanyContractSignatures", fields: [companyId], references: [id], onDelete: Cascade)
+  contract          Contract         @relation("ContractSignatures", fields: [contractId], references: [id], onDelete: Cascade)
+  user              User             @relation("UserContractSignatures", fields: [requestedBy], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([contractId])
+  @@index([status])
+  @@index([provider])
+  @@index([expiresAt])
+  @@map("contract_signatures")
+}
+
+model SignatureWebhook {
+  id               String   @id @default(cuid())
+  signatureId      String
+  provider         SignatureProvider
+  
+  // Evento
+  event            String   // 'signature_completed', 'signature_declined', 'reminder_sent', etc.
+  externalEventId  String?
+  
+  // Payload
+  rawPayload       Json
+  
+  // Procesamiento
+  processed        Boolean  @default(false)
+  processedAt      DateTime?
+  errorMessage     String?  @db.Text
+  
+  createdAt        DateTime @default(now())
+  
+  @@index([signatureId])
+  @@index([provider])
+  @@index([event])
+  @@index([processed])
+  @@map("signature_webhooks")
+}
+
+// ============================================================================
+// MATCHING AUTOMÁTICO INQUILINO-PROPIEDAD
+// ============================================================================
+
+model TenantPropertyMatch {
+  id         String   @id @default(cuid())
+  companyId  String
+  tenantId   String
+  unitId     String
+  
+  // Scoring (0-100)
+  matchScore        Int      // Score total
+  locationScore     Int      // Proximidad a transporte, servicios
+  priceScore        Int      // Ajuste precio/presupuesto
+  featuresScore     Int      // Características deseadas vs disponibles
+  sizeScore         Int      // Tamaño adecuado
+  availabilityScore Int      // Disponibilidad de fecha
+  
+  // Análisis IA
+  aiRecommendation  String?  @db.Text // Recomendación de Claude
+  pros              String[] @default([]) // Ventajas del match
+  cons              String[] @default([]) // Desventajas del match
+  
+  // Estado
+  status            String   @default("SUGGESTED") // SUGGESTED, VIEWED, CONTACTED, RENTED, REJECTED
+  viewedAt          DateTime?
+  contactedAt       DateTime?
+  
+  // Metadata
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  // Relations
+  company           Company  @relation("CompanyTenantMatches", fields: [companyId], references: [id], onDelete: Cascade)
+  tenant            Tenant   @relation("TenantMatches", fields: [tenantId], references: [id], onDelete: Cascade)
+  unit              Unit     @relation("UnitTenantMatches", fields: [unitId], references: [id], onDelete: Cascade)
+  
+  @@unique([tenantId, unitId])
+  @@index([companyId])
+  @@index([tenantId])
+  @@index([unitId])
+  @@index([matchScore])
+  @@index([status])
+  @@map("tenant_property_matches")
+}
+
+model TenantPreferences {
+  id                String   @id @default(cuid())
+  tenantId          String   @unique
+  
+  // Presupuesto
+  minBudget         Float?
+  maxBudget         Float?
+  idealBudget       Float?   // Precio ideal
+  
+  // Ubicación
+  preferredCities   String[] @default([])
+  preferredZones    String[] @default([]) // Barrios específicos
+  maxDistanceToWork Float?   // km
+  workAddress       String?
+  
+  // Transporte
+  needsPublicTransport Boolean @default(true)
+  needsParking         Boolean @default(false)
+  hasCar               Boolean @default(false)
+  
+  // Características
+  minRooms          Int?
+  minBathrooms      Int?
+  minSquareMeters   Float?
+  needsFurnished    Boolean  @default(false)
+  prefersModern     Boolean  @default(true)
+  
+  // Extras
+  hasPets           Boolean  @default(false)
+  needsPetFriendly  Boolean  @default(false)
+  needsElevator     Boolean  @default(false)
+  needsAccessibility Boolean @default(false)
+  
+  // Lifestyle
+  prefersQuiet      Boolean  @default(true)
+  workFromHome      Boolean  @default(false)
+  hasChildren       Boolean  @default(false)
+  
+  // Disponibilidad
+  moveInDate        DateTime?
+  leaseDuration     Int?     // meses
+  
+  // Prioridades (peso de cada factor, 0-10)
+  priorityLocation  Int      @default(8)
+  priorityPrice     Int      @default(9)
+  prioritySize      Int      @default(7)
+  priorityFeatures  Int      @default(6)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  tenant            Tenant   @relation("TenantPreferences", fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@index([tenantId])
+  @@map("tenant_preferences")
+}
+
+// ============================================================================
+// GESTIÓN DE INCIDENCIAS CON CLASIFICACIÓN IA
+// ============================================================================
+
+enum IncidentCategory {
+  PLUMBING           // Fontanería
+  ELECTRICAL         // Eléctrica
+  HVAC              // Climatización
+  STRUCTURAL        // Estructural
+  APPLIANCE         // Electrodomésticos
+  CARPENTRY         // Carpintería
+  LOCKSMITH         // Cerrajería
+  CLEANING          // Limpieza
+  PEST_CONTROL      // Control de plagas
+  OTHER             // Otro
+}
+
+enum IncidentUrgency {
+  LOW               // Baja - puede esperar semanas
+  MEDIUM            // Media - días
+  HIGH              // Alta - 24-48h
+  CRITICAL          // Crítica - inmediata
+}
+
+model IncidentClassification {
+  id                String   @id @default(cuid())
+  incidentId        String   @unique
+  
+  // Clasificación IA
+  category          IncidentCategory
+  urgency           IncidentUrgency
+  estimatedCost     Float?   // Coste estimado en €
+  estimatedDuration Int?     // Duración estimada en horas
+  
+  // Proveedor recomendado
+  providerType      String?  // PLUMBER, ELECTRICIAN, etc.
+  suggestedProvider String?  // ID del proveedor
+  
+  // Análisis IA
+  aiAnalysis        String?  @db.Text // Análisis detallado
+  keywords          String[] @default([]) // Palabras clave detectadas
+  confidence        Float    @default(0) // 0-100
+  
+  // Acciones recomendadas
+  immediateActions  String[] @default([])
+  preventiveMeasures String[] @default([])
+  
+  // Modelo utilizado
+  model             String   // "claude-3-5-sonnet", etc.
+  
+  createdAt         DateTime @default(now())
+  
+  @@index([incidentId])
+  @@index([category])
+  @@index([urgency])
+  @@map("incident_classifications")
+}
+
+
+// Web Vitals & Performance Monitoring
+model WebVitals {
+  id              String   @id @default(cuid())
+  metric          String   // LCP, FID, CLS, FCP, TTFB, INP
+  value           Float
+  rating          String   // good, needs-improvement, poor
+  delta           Float
+  metricId        String
+  navigationType  String
+  url             String?
+  userAgent       String?
+  ipAddress       String?
+  createdAt       DateTime @default(now())
+
+  @@index([metric, createdAt(sort: Desc)])
+  @@index([rating])
+  @@index([url])
+  @@map("web_vitals")
+}
+

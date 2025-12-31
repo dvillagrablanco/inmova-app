@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: POST /api/chatbot
  * Chatbot IA para asistencia durante el onboarding

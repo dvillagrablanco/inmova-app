@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: /api/notifications/[id]/read
  * Marcar una notificación como leída

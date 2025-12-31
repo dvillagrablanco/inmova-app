@@ -1,0 +1,82 @@
+{
+  "app": {
+    "name": "Inmova",
+    "tagline": "Plataforma PropTech Integral",
+    "description": "Gestão imobiliária profissional tudo em um"
+  },
+  "navigation": {
+    "dashboard": "Painel",
+    "properties": "Propriedades",
+    "buildings": "Edifícios",
+    "tenants": "Inquilinos",
+    "contracts": "Contratos",
+    "payments": "Pagamentos",
+    "maintenance": "Manutenção",
+    "communities": "Comunidades",
+    "settings": "Configurações",
+    "help": "Ajuda",
+    "logout": "Sair"
+  },
+  "actions": {
+    "create": "Criar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "search": "Pesquisar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "refresh": "Atualizar",
+    "view": "Ver",
+    "download": "Baixar",
+    "upload": "Carregar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "finish": "Finalizar",
+    "confirm": "Confirmar"
+  },
+  "status": {
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "pending": "Pendente",
+    "completed": "Concluído",
+    "cancelled": "Cancelado",
+    "available": "Disponível",
+    "occupied": "Ocupado",
+    "maintenance": "Manutenção"
+  },
+  "time": {
+    "today": "Hoje",
+    "yesterday": "Ontem",
+    "tomorrow": "Amanhã",
+    "thisWeek": "Esta semana",
+    "thisMonth": "Este mês",
+    "thisYear": "Este ano",
+    "lastWeek": "Última semana",
+    "lastMonth": "Último mês",
+    "lastYear": "Último ano"
+  },
+  "pagination": {
+    "first": "Primeira",
+    "last": "Última",
+    "previous": "Anterior",
+    "next": "Próxima",
+    "page": "Página",
+    "of": "de",
+    "showing": "Mostrando",
+    "to": "a",
+    "entries": "entradas"
+  },
+  "feedback": {
+    "loading": "Carregando...",
+    "success": "Sucesso",
+    "error": "Erro",
+    "warning": "Aviso",
+    "info": "Informação",
+    "noData": "Nenhum dado disponível",
+    "noResults": "Nenhum resultado encontrado",
+    "tryAgain": "Tentar novamente"
+  }
+}
