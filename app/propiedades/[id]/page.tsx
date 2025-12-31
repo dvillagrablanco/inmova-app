@@ -39,6 +39,8 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
+import { PropertyMap } from '@/components/property/PropertyMap';
+import { ValuationCard } from '@/components/property/ValuationCard';
 
 interface PropertyDetails {
   id: string;
@@ -538,6 +540,16 @@ export default function PropiedadDetallesPage() {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Mapa de Ubicación */}
+            <PropertyMap
+              address={property.building.direccion}
+              city={property.building.ciudad}
+              showNearbyPoints={true}
+            />
+
+            {/* Valoración con IA */}
+            <ValuationCard propertyId={property.id} />
 
             {/* Metadatos */}
             <Card>
