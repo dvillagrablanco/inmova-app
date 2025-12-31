@@ -69,6 +69,8 @@ interface Property {
   orientacion?: string;
   rentaMensual: number;
   imagenes?: string[];
+  createdAt?: string;
+  updatedAt?: string;
   building: {
     id: string;
     nombre: string;
@@ -176,10 +178,18 @@ export default function PropiedadesPage() {
     const sorted = [...filtered];
     switch (sortBy) {
       case 'newest':
-        sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        sorted.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
         break;
       case 'oldest':
-        sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        sorted.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateA - dateB;
+        });
         break;
       case 'price-asc':
         sorted.sort((a, b) => a.rentaMensual - b.rentaMensual);
