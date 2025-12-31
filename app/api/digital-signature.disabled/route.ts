@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const tenantId = searchParams.get('tenantId');
 
     const where: any = {
-      companyId: session.user.companyId
+      companyId: session.user.companyId,
     };
 
     if (estado) {
@@ -48,24 +48,21 @@ export async function GET(request: NextRequest) {
           include: {
             unit: {
               include: {
-                building: true
-              }
-            }
-          }
-        }
+                building: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     });
 
     return NextResponse.json(documentos);
   } catch (error) {
     logger.error('Error obteniendo documentos de firma:', error);
-    return NextResponse.json(
-      { error: 'Error obteniendo documentos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error obteniendo documentos' }, { status: 500 });
   }
 }
 
@@ -97,14 +94,11 @@ export async function POST(request: NextRequest) {
       documentUrl,
       mensaje,
       firmantes,
-      diasExpiracion = 30
+      diasExpiracion = 30,
     } = body;
 
     if (!titulo || !tipoDocumento || !documentUrl || !firmantes || firmantes.length === 0) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     const result = await crearSolicitudFirma({
@@ -117,15 +111,12 @@ export async function POST(request: NextRequest) {
       mensaje,
       firmantes,
       creadoPor: session.user.id,
-      diasExpiracion
+      diasExpiracion,
     });
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     logger.error('Error creando solicitud de firma:', error);
-    return NextResponse.json(
-      { error: 'Error creando solicitud de firma' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error creando solicitud de firma' }, { status: 500 });
   }
 }
