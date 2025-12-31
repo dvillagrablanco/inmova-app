@@ -70,7 +70,7 @@ export default function PlanesPage() {
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
-    tier: 'basico',
+    tier: 'basic',
     precioMensual: 0,
     maxUsuarios: null as number | null,
     maxPropiedades: null as number | null,
@@ -127,7 +127,7 @@ export default function PlanesPage() {
       setFormData({
         nombre: '',
         descripcion: '',
-        tier: 'basico',
+        tier: 'basic',
         precioMensual: 0,
         maxUsuarios: null,
         maxPropiedades: null,
@@ -234,9 +234,7 @@ export default function PlanesPage() {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold gradient-text">Planes de Suscripción</h1>
-            <p className="text-gray-600 mt-1">
-              Gestiona los planes disponibles para las empresas
-            </p>
+            <p className="text-gray-600 mt-1">Gestiona los planes disponibles para las empresas</p>
           </div>
           <Button
             size="lg"
@@ -288,9 +286,7 @@ export default function PlanesPage() {
                     <span className="text-gray-500">/mes</span>
                   </div>
 
-                  {plan.descripcion && (
-                    <p className="text-sm text-gray-600">{plan.descripcion}</p>
-                  )}
+                  {plan.descripcion && <p className="text-sm text-gray-600">{plan.descripcion}</p>}
 
                   <div className="space-y-2 pt-4 border-t">
                     <div className="flex items-center justify-between text-sm">

@@ -4836,10 +4836,10 @@ model PerformanceMetric {
 // ============================================
 
 enum SubscriptionTier {
-  basico
-  profesional
-  empresarial
-  personalizado
+  basic
+  professional
+  business
+  enterprise
 }
 
 // ==========================================

@@ -14,7 +14,16 @@ export interface WizardStep {
 export interface WizardField {
   name: string;
   label: string;
-  type: 'text' | 'email' | 'number' | 'select' | 'multiselect' | 'date' | 'textarea' | 'file' | 'checkbox';
+  type:
+    | 'text'
+    | 'email'
+    | 'number'
+    | 'select'
+    | 'multiselect'
+    | 'date'
+    | 'textarea'
+    | 'file'
+    | 'checkbox';
   placeholder?: string;
   required?: boolean;
   options?: Array<{ value: string; label: string }>;
@@ -42,7 +51,7 @@ export const initialSetupWizard: WizardStep[] = [
           { value: 'gestion_comunidades', label: 'Gestión de comunidades' },
           { value: 'flipping', label: 'Compra-venta / Flipping' },
           { value: 'construccion', label: 'Construcción / Promoción' },
-          { value: 'profesional', label: 'Servicios profesionales' },
+          { value: 'professional', label: 'Servicios profesionales' },
         ],
         helpText: 'Configuraremos los módulos específicos para tu negocio',
       },

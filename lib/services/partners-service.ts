@@ -1,6 +1,6 @@
 /**
  * Servicio de Partners Avanzado
- * 
+ *
  * Gestiona funcionalidades avanzadas del programa de partners:
  * - API pública para integraciones
  * - White Label y branding personalizado
@@ -23,9 +23,9 @@ import crypto from 'crypto';
 export async function generatePartnerAPIKey(salesRepId: string) {
   const apiKey = `pk_${crypto.randomBytes(32).toString('hex')}`;
   const apiSecret = `sk_${crypto.randomBytes(32).toString('hex')}`;
-  
+
   const hashedSecret = crypto.createHash('sha256').update(apiSecret).digest('hex');
-  
+
   await prisma.salesRepresentative.update({
     where: { id: salesRepId },
     data: {
@@ -34,7 +34,7 @@ export async function generatePartnerAPIKey(salesRepId: string) {
       apiEnabled: true,
     },
   });
-  
+
   // Solo devolver el secret esta única vez
   return {
     apiKey,
@@ -48,7 +48,7 @@ export async function generatePartnerAPIKey(salesRepId: string) {
  */
 export async function verifyPartnerAPIKey(apiKey: string, apiSecret: string) {
   const hashedSecret = crypto.createHash('sha256').update(apiSecret).digest('hex');
-  
+
   const partner = await prisma.salesRepresentative.findFirst({
     where: {
       apiKey,
@@ -57,7 +57,7 @@ export async function verifyPartnerAPIKey(apiKey: string, apiSecret: string) {
       activo: true,
     },
   });
-  
+
   return partner;
 }
 
@@ -94,10 +94,7 @@ interface WhiteLabelConfig {
 /**
  * Configurar White Label para un partner
  */
-export async function configureWhiteLabel(
-  salesRepId: string,
-  config: WhiteLabelConfig
-) {
+export async function configureWhiteLabel(salesRepId: string, config: WhiteLabelConfig) {
   await prisma.salesRepresentative.update({
     where: { id: salesRepId },
     data: {
@@ -105,7 +102,7 @@ export async function configureWhiteLabel(
       whiteLabelConfig: config as any,
     },
   });
-  
+
   return { success: true, message: 'Configuración de White Label guardada' };
 }
 
@@ -120,7 +117,7 @@ export async function getWhiteLabelConfig(salesRepId: string) {
       whiteLabelConfig: true,
     },
   });
-  
+
   return partner;
 }
 
@@ -164,7 +161,7 @@ export async function createMarketingMaterial(data: {
 export async function getMarketingMaterials(tipo?: string) {
   const where: any = { activo: true };
   if (tipo) where.tipo = tipo;
-  
+
   return await prisma.marketingMaterial.findMany({
     where,
     orderBy: { createdAt: 'desc' },
@@ -174,10 +171,7 @@ export async function getMarketingMaterials(tipo?: string) {
 /**
  * Registrar descarga de material por partner
  */
-export async function trackMaterialDownload(
-  salesRepId: string,
-  materialId: string
-) {
+export async function trackMaterialDownload(salesRepId: string, materialId: string) {
   await prisma.materialDownload.create({
     data: {
       salesRepId,
@@ -194,7 +188,7 @@ interface Certification {
   id: string;
   nombre: string;
   descripcion: string;
-  nivel: 'basico' | 'intermedio' | 'avanzado' | 'experto';
+  nivel: 'basic' | 'intermedio' | 'avanzado' | 'experto';
   requisitos: string[];
   beneficios: string[];
   activo: boolean;
@@ -221,16 +215,13 @@ export async function createCertification(data: {
 /**
  * Asignar certificación a un partner
  */
-export async function awardCertification(
-  salesRepId: string,
-  certificationId: string
-) {
+export async function awardCertification(salesRepId: string, certificationId: string) {
   const cert = await prisma.partnerCertification.findUnique({
     where: { id: certificationId },
   });
-  
+
   if (!cert) throw new Error('Certificación no encontrada');
-  
+
   const awarded = await prisma.partnerCertificationAwarded.create({
     data: {
       salesRepId,
@@ -239,12 +230,12 @@ export async function awardCertification(
       certificadoNumero: `CERT-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`,
     },
   });
-  
+
   // Enviar email de felicitación
   const partner = await prisma.salesRepresentative.findUnique({
     where: { id: salesRepId },
   });
-  
+
   if (partner && partner.email) {
     await sendEmail({
       to: partner.email,
@@ -279,7 +270,7 @@ export async function awardCertification(
       `,
     });
   }
-  
+
   return awarded;
 }
 
@@ -324,12 +315,12 @@ export async function createSubAffiliate(data: {
       estado: 'PENDIENTE',
     } as any,
   });
-  
+
   // Notificar al partner padre
   const parent = await prisma.salesRepresentative.findUnique({
     where: { id: data.parentSalesRepId },
   });
-  
+
   if (parent && parent.email) {
     await sendEmail({
       to: parent.email,
@@ -341,7 +332,7 @@ export async function createSubAffiliate(data: {
       `,
     });
   }
-  
+
   return subAffiliate;
 }
 
@@ -367,12 +358,12 @@ export async function calculateParentCommission(
     where: { id: subAffiliateSalesRepId },
     include: { parentSalesRep: true },
   });
-  
+
   if (!subAffiliate || !subAffiliate.parentSalesRepId) return null;
-  
+
   const parentCommissionRate = 0.1; // 10% de las comisiones del sub-afiliado
   const parentCommission = commission * parentCommissionRate;
-  
+
   // Crear comisión para el padre
   return await prisma.salesCommission.create({
     data: {
@@ -400,12 +391,16 @@ export async function getPartnerAdvancedAnalytics(salesRepId: string, periodo?: 
     where: { id: salesRepId },
     include: {
       leads: {
-        where: periodo ? {
-          fechaCaptura: {
-            gte: new Date(`${periodo}-01`),
-            lte: new Date(new Date(`${periodo}-01`).setMonth(new Date(`${periodo}-01`).getMonth() + 1)),
-          },
-        } : {},
+        where: periodo
+          ? {
+              fechaCaptura: {
+                gte: new Date(`${periodo}-01`),
+                lte: new Date(
+                  new Date(`${periodo}-01`).setMonth(new Date(`${periodo}-01`).getMonth() + 1)
+                ),
+              },
+            }
+          : {},
       },
       comisiones: {
         where: periodo ? { periodo } : {},
@@ -413,19 +408,19 @@ export async function getPartnerAdvancedAnalytics(salesRepId: string, periodo?: 
       subAffiliates: true,
     },
   });
-  
+
   if (!partner) throw new Error('Partner no encontrado');
-  
+
   // Calcular métricas avanzadas
   const totalLeads = partner.leads.length;
   const leadsConvertidos = partner.leads.filter((l) => l.convertido).length;
   const tasaConversion = totalLeads > 0 ? (leadsConvertidos / totalLeads) * 100 : 0;
-  
+
   const comisionesTotales = partner.comisiones.reduce((sum, c) => sum + c.montoNeto, 0);
   const comisionesPendientes = partner.comisiones
     .filter((c) => c.estado === 'PENDIENTE')
     .reduce((sum, c) => sum + c.montoNeto, 0);
-  
+
   // Métricas de sub-afiliados
   const subAffiliatesActivos = partner.subAffiliates?.filter((s) => s.activo).length || 0;
   const subAffiliatesComisiones = await prisma.salesCommission.findMany({
@@ -436,19 +431,25 @@ export async function getPartnerAdvancedAnalytics(salesRepId: string, periodo?: 
     },
   });
   const comisionesNivel2 = subAffiliatesComisiones.reduce((sum, c) => sum + c.montoNeto, 0);
-  
+
   // Distribución de leads por estado
-  const leadsPorEstado = partner.leads.reduce((acc, lead) => {
-    acc[lead.estado] = (acc[lead.estado] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  
+  const leadsPorEstado = partner.leads.reduce(
+    (acc, lead) => {
+      acc[lead.estado] = (acc[lead.estado] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
+
   // Distribución de comisiones por tipo
-  const comisionesPorTipo = partner.comisiones.reduce((acc, com) => {
-    acc[com.tipo] = (acc[com.tipo] || 0) + com.montoNeto;
-    return acc;
-  }, {} as Record<string, number>);
-  
+  const comisionesPorTipo = partner.comisiones.reduce(
+    (acc, com) => {
+      acc[com.tipo] = (acc[com.tipo] || 0) + com.montoNeto;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
+
   return {
     resumen: {
       totalLeads,
@@ -471,26 +472,26 @@ export default {
   generatePartnerAPIKey,
   verifyPartnerAPIKey,
   revokePartnerAPIKey,
-  
+
   // White Label
   configureWhiteLabel,
   getWhiteLabelConfig,
-  
+
   // Materiales de Marketing
   createMarketingMaterial,
   getMarketingMaterials,
   trackMaterialDownload,
-  
+
   // Certificaciones
   createCertification,
   awardCertification,
   getPartnerCertifications,
-  
+
   // Sub-Afiliados
   createSubAffiliate,
   getSubAffiliates,
   calculateParentCommission,
-  
+
   // Analytics
   getPartnerAdvancedAnalytics,
 };

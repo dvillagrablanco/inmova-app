@@ -85,7 +85,7 @@ const tiposPrecio = [
   { value: 'hora', label: 'Por Hora' },
   { value: 'dia', label: 'Por Día' },
   { value: 'proyecto', label: 'Por Proyecto' },
-  { value: 'personalizado', label: 'Personalizado' },
+  { value: 'enterprise', label: 'Personalizado' },
 ];
 
 export default function MarketplacePage() {
