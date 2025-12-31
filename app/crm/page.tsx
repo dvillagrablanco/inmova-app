@@ -147,14 +147,28 @@ export default function CRMPage() {
 
   const fetchLeads = async () => {
     try {
-      const res = await fetch('/api/crm/leads');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+      
+      const res = await fetch('/api/crm/leads?limit=50', {
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      
       if (res.ok) {
         const data = await res.json();
         setLeads(data);
+      } else {
+        toast.error('Error al cargar los leads');
       }
-    } catch (error) {
-      logger.error('Error fetching leads:', error);
-      toast.error('Error al cargar los leads');
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        logger.error('Request timeout fetching leads');
+        toast.error('Tiempo de espera agotado');
+      } else {
+        logger.error('Error fetching leads:', error);
+        toast.error('Error al cargar los leads');
+      }
     } finally {
       setLoading(false);
     }
@@ -162,13 +176,22 @@ export default function CRMPage() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch('/api/crm/stats');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+      
+      const res = await fetch('/api/crm/stats', {
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      
       if (res.ok) {
         const data = await res.json();
         setStats(data);
       }
-    } catch (error) {
-      logger.error('Error fetching stats:', error);
+    } catch (error: any) {
+      if (error.name !== 'AbortError') {
+        logger.error('Error fetching stats:', error);
+      }
     }
   };
 

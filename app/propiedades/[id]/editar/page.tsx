@@ -38,6 +38,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PhotoUploader } from '@/components/property/PhotoUploader';
 
 interface Building {
   id: string;
@@ -53,6 +54,7 @@ export default function EditarPropiedadPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [buildings, setBuildings] = useState<Building[]>([]);
+  const [photos, setPhotos] = useState<string[]>([]);
 
   const propertyId = params?.id as string;
 
@@ -126,6 +128,11 @@ export default function EditarPropiedadPage() {
             amueblado: property.amueblado || false,
             tourVirtual: property.tourVirtual || '',
           });
+          
+          // Cargar fotos existentes
+          if (property.imagenes && Array.isArray(property.imagenes)) {
+            setPhotos(property.imagenes);
+          }
         } else if (propertyResponse.status === 404) {
           toast.error('Propiedad no encontrada');
           router.push('/propiedades');
@@ -613,6 +620,27 @@ export default function EditarPropiedadPage() {
                   onChange={(e) => handleInputChange('tourVirtual', e.target.value)}
                 />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Fotos de la Propiedad */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Fotos de la Propiedad
+              </CardTitle>
+              <CardDescription>
+                Sube hasta 10 fotos de la propiedad. La primera será la foto principal.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PhotoUploader
+                propertyId={propertyId}
+                existingPhotos={photos}
+                onPhotosChange={setPhotos}
+                maxPhotos={10}
+              />
             </CardContent>
           </Card>
 
