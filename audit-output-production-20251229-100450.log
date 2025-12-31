@@ -1,0 +1,212 @@
+🚀 Iniciando auditoría visual de páginas admin...
+
+🌐 URL base: http://localhost:3000
+
+🔐 Intentando login como superadmin...
+❌ Error en login: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/login
+Call log:
+  - navigating to "http://localhost:3000/login", waiting until "networkidle"
+
+⚠️  Continuando sin login
+
+⚠️  Auditando sin autenticación - se capturarán errores de JavaScript y red
+   (Las páginas protegidas redirigirán a /login, pero aún se detectarán errores)
+
+
+📄 Auditando: Dashboard (/admin/dashboard)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/dashboard
+Call log:
+  - navigating to "http://localhost:3000/admin/dashboard", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Usuarios (/admin/usuarios)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/usuarios
+Call log:
+  - navigating to "http://localhost:3000/admin/usuarios", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Clientes (/admin/clientes)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/clientes
+Call log:
+  - navigating to "http://localhost:3000/admin/clientes", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Comparar Clientes (/admin/clientes/comparar)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/clientes/comparar
+Call log:
+  - navigating to "http://localhost:3000/admin/clientes/comparar", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Activity (/admin/activity)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/activity
+Call log:
+  - navigating to "http://localhost:3000/admin/activity", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Alertas (/admin/alertas)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/alertas
+Call log:
+  - navigating to "http://localhost:3000/admin/alertas", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Aprobaciones (/admin/aprobaciones)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/aprobaciones
+Call log:
+  - navigating to "http://localhost:3000/admin/aprobaciones", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Backup & Restore (/admin/backup-restore)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/backup-restore
+Call log:
+  - navigating to "http://localhost:3000/admin/backup-restore", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Configuración (/admin/configuracion)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/configuracion
+Call log:
+  - navigating to "http://localhost:3000/admin/configuracion", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Facturación B2B (/admin/facturacion-b2b)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/facturacion-b2b
+Call log:
+  - navigating to "http://localhost:3000/admin/facturacion-b2b", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Firma Digital (/admin/firma-digital)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/firma-digital
+Call log:
+  - navigating to "http://localhost:3000/admin/firma-digital", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Importar (/admin/importar)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/importar
+Call log:
+  - navigating to "http://localhost:3000/admin/importar", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Integraciones Contables (/admin/integraciones-contables)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/integraciones-contables
+Call log:
+  - navigating to "http://localhost:3000/admin/integraciones-contables", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Legal (/admin/legal)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/legal
+Call log:
+  - navigating to "http://localhost:3000/admin/legal", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Marketplace (/admin/marketplace)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/marketplace
+Call log:
+  - navigating to "http://localhost:3000/admin/marketplace", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Métricas de Uso (/admin/metricas-uso)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/metricas-uso
+Call log:
+  - navigating to "http://localhost:3000/admin/metricas-uso", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Módulos (/admin/modulos)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/modulos
+Call log:
+  - navigating to "http://localhost:3000/admin/modulos", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: OCR Import (/admin/ocr-import)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/ocr-import
+Call log:
+  - navigating to "http://localhost:3000/admin/ocr-import", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Personalización (/admin/personalizacion)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/personalizacion
+Call log:
+  - navigating to "http://localhost:3000/admin/personalizacion", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Planes (/admin/planes)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/planes
+Call log:
+  - navigating to "http://localhost:3000/admin/planes", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Plantillas SMS (/admin/plantillas-sms)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/plantillas-sms
+Call log:
+  - navigating to "http://localhost:3000/admin/plantillas-sms", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Portales Externos (/admin/portales-externos)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/portales-externos
+Call log:
+  - navigating to "http://localhost:3000/admin/portales-externos", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Recuperar Contraseña (/admin/recuperar-contrasena)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/recuperar-contrasena
+Call log:
+  - navigating to "http://localhost:3000/admin/recuperar-contrasena", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Reportes Programados (/admin/reportes-programados)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/reportes-programados
+Call log:
+  - navigating to "http://localhost:3000/admin/reportes-programados", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Salud del Sistema (/admin/salud-sistema)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/salud-sistema
+Call log:
+  - navigating to "http://localhost:3000/admin/salud-sistema", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Seguridad (/admin/seguridad)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/seguridad
+Call log:
+  - navigating to "http://localhost:3000/admin/seguridad", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Auditando: Sugerencias (/admin/sugerencias)
+  ❌ Error al cargar página: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/sugerencias
+Call log:
+  - navigating to "http://localhost:3000/admin/sugerencias", waiting until "domcontentloaded"
+
+   ⏱️  Esperando 3 segundos para evitar rate limiting...
+
+📄 Reporte generado: /workspace/AUDITORIA_VISUAL_ADMIN.md
+
+✅ Auditoría completada exitosamente
+
+📊 RESUMEN:
+   - Páginas auditadas: 27
+   - Páginas con errores: 27
+   - Total de errores: 27

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: GET /api/cron/cleanup-notifications
  * Cron job para limpiar notificaciones expiradas

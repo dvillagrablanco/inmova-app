@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: POST /api/analytics/track
  * Endpoint para enviar eventos de analytics desde el cliente

@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -763,48 +763,38 @@ export default function ImportarPage() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-bg">
-      <Sidebar />
+    <AuthenticatedLayout>
+      <div className="max-w-7xl mx-auto">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard">
+                <Home className="h-4 w-4" />
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Importar Datos</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
-      <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold gradient-text mb-2">Migración desde Otros Sistemas</h1>
+          <p className="text-muted-foreground">
+            Importa tus datos desde Homming, Rentger, Nester, Buildium, AppFolio y otros sistemas de
+            gestión
+          </p>
+        </div>
 
-        <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <Breadcrumb className="mb-6">
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/home">
-                    <Home className="h-4 w-4" />
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Importar Datos</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+        {renderStepIndicator()}
 
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold gradient-text mb-2">
-                Migración desde Otros Sistemas
-              </h1>
-              <p className="text-muted-foreground">
-                Importa tus datos desde Homming, Rentger, Nester, Buildium, AppFolio y otros
-                sistemas de gestión
-              </p>
-            </div>
-
-            {renderStepIndicator()}
-
-            {currentStep === 'select' && renderSelectStep()}
-            {currentStep === 'validate' && renderValidateStep()}
-            {currentStep === 'preview' && renderPreviewStep()}
-            {currentStep === 'import' && renderImportStep()}
-            {currentStep === 'results' && renderResultsStep()}
-          </div>
-        </main>
+        {currentStep === 'select' && renderSelectStep()}
+        {currentStep === 'validate' && renderValidateStep()}
+        {currentStep === 'preview' && renderPreviewStep()}
+        {currentStep === 'import' && renderImportStep()}
+        {currentStep === 'results' && renderResultsStep()}
       </div>
-    </div>
+    </AuthenticatedLayout>
   );
 }

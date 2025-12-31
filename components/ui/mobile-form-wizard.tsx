@@ -84,6 +84,15 @@ export function MobileFormWizard({
   }
 
   // Vista de wizard para móvil
+  // Validación: asegurar que currentStep esté en rango
+  if (!steps || steps.length === 0 || currentStep >= steps.length || currentStep < 0) {
+    return (
+      <div className="p-4 text-center text-muted-foreground">
+        No hay pasos disponibles
+      </div>
+    );
+  }
+  
   const step = steps[currentStep];
 
   return (

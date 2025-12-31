@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: /api/celebrations/[id]/shown
  * Marcar una celebración como mostrada

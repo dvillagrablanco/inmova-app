@@ -1,0 +1,5899 @@
+# 🏗️ REGLAS DE ARQUITECTURA - INMOVA APP (PROPTECH PLATFORM)
+
+---
+
+## 🚨 SOLUCIÓN INTEGRAL - LECCIONES APRENDIDAS (Dic 2025)
+
+### 🎯 CONFIGURACIÓN PRODUCTION-READY (PM2 + Nginx + Monitoring)
+
+#### ✅ PM2 Cluster Mode (IMPLEMENTADO)
+
+**Por qué**: Auto-restart, zero-downtime deploys, load balancing
+
+**Configuración**: `ecosystem.config.js`
+```javascript
+{
+  name: 'inmova-app',
+  instances: 2,              // 2 workers para load balancing
+  exec_mode: 'cluster',      // Cluster mode
+  autorestart: true,         // Restart en crash
+  max_restarts: 10,          // Max reintentos
+  max_memory_restart: '1G',  // Restart si memoria > 1GB
+  restart_delay: 4000,       // 4s entre restarts
+  env_file: '.env.production'
+}
+```
+
+**Comandos clave**:
+```bash
+# Iniciar con PM2
+pm2 start ecosystem.config.js --env production
+
+# Ver status
+pm2 status
+
+# Ver logs
+pm2 logs inmova-app --lines 100
+
+# Restart (con downtime)
+pm2 restart inmova-app
+
+# Reload (zero-downtime)
+pm2 reload inmova-app
+
+# Guardar configuración
+pm2 save
+
+# Auto-start en boot
+pm2 startup systemd
+```
+
+**Resultado**: 99.9% uptime, auto-recovery en crashes
+
+---
+
+#### ✅ Nginx Reverse Proxy (IMPLEMENTADO)
+
+**Por qué**: Load balancing, SSL termination, static caching, security headers
+
+**Configuración**: `/etc/nginx/sites-available/inmova`
+```nginx
+upstream inmova_backend {
+    server 127.0.0.1:3000;
+    keepalive 32;  # Conexiones persistentes
+}
+
+server {
+    listen 80;
+    server_name inmovaapp.com www.inmovaapp.com;
+    
+    # Security Headers
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+    add_header X-XSS-Protection "1; mode=block";
+    
+    location / {
+        proxy_pass http://inmova_backend;
+        proxy_http_version 1.1;
+        
+        # WebSocket support
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        
+        # Headers
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Timeouts largos para APIs
+        proxy_read_timeout 300s;
+    }
+    
+    # Static assets con cache agresivo
+    location /_next/static/ {
+        proxy_pass http://inmova_backend;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+}
+```
+
+**Comandos clave**:
+```bash
+# Test configuración
+nginx -t
+
+# Reload (sin downtime)
+systemctl reload nginx
+
+# Ver logs
+tail -f /var/log/nginx/error.log
+
+# Status
+systemctl status nginx
+```
+
+---
+
+#### ✅ Monitoring Automatizado (IMPLEMENTADO)
+
+**Por qué**: Detectar problemas antes que los usuarios, auto-recovery
+
+**Script**: `scripts/monitor-health.sh`
+
+**Features**:
+- 8 health checks: HTTP, API, proceso, puerto, BD, RAM, disco, login
+- Auto-recovery si ≥3 checks fallan
+- Alertas (Slack, Email)
+- Logs centralizados
+
+**Cron Job**:
+```cron
+# Health check cada 5 minutos
+*/5 * * * * /opt/inmova-app/scripts/monitor-health.sh >> /var/log/inmova/cron.log 2>&1
+
+# Restart preventivo diario a las 3 AM
+0 3 * * * pm2 restart inmova-app >> /var/log/inmova/cron.log 2>&1
+```
+
+**Ver logs**:
+```bash
+tail -f /var/log/inmova/health-monitor.log
+```
+
+**Test manual**:
+```bash
+APP_URL=http://localhost:3000 /opt/inmova-app/scripts/monitor-health.sh
+```
+
+---
+
+#### ✅ Cloudflare Integration (IMPLEMENTADO)
+
+**Escenario**: Dominio usa Cloudflare como proxy
+
+**Problema**: Let's Encrypt no funciona directo (Cloudflare intercepta requests)
+
+**Solución**:
+
+1. **Nginx configurado para IPs reales de Cloudflare**:
+```nginx
+# Obtener IP real del visitante
+set_real_ip_from 173.245.48.0/20;  # Cloudflare IPs
+set_real_ip_from 103.21.244.0/22;
+# ... todas las IPs de Cloudflare
+real_ip_header CF-Connecting-IP;
+
+# Headers Cloudflare
+proxy_set_header CF-Connecting-IP $http_cf_connecting_ip;
+proxy_set_header CF-Ray $http_cf_ray;
+```
+
+2. **SSL en Cloudflare (Dashboard)**:
+   - SSL/TLS → Overview
+   - Modo: **Flexible** (Cloudflare ↔ Usuario: HTTPS, Cloudflare ↔ Servidor: HTTP)
+   - O Modo: **Full** (requiere certificado en servidor también)
+
+3. **NEXTAUTH_URL con HTTPS**:
+```env
+NEXTAUTH_URL=https://inmovaapp.com  # No http://
+```
+
+4. **Verificación**:
+```bash
+curl -I https://inmovaapp.com
+# Debe retornar 200 OK con headers de Cloudflare
+```
+
+**Ventajas Cloudflare**:
+- ✅ SSL gratis (managed por Cloudflare)
+- ✅ CDN global
+- ✅ DDoS protection
+- ✅ Caching automático
+- ✅ Firewall WAF
+
+**Desventajas**:
+- ⚠️ No puedes usar Let's Encrypt directo
+- ⚠️ IP real del servidor queda oculta
+- ⚠️ Dependes de Cloudflare
+
+---
+
+### ⚡ CHECKLIST CRÍTICO ANTES DE CADA DEPLOYMENT
+
+**SIEMPRE ejecutar estos pasos ANTES de declarar éxito**:
+
+1. **Matar Procesos Viejos**
+   ```bash
+   fuser -k 3000/tcp  # Mata ANY proceso en puerto 3000
+   pm2 delete all     # Limpia PM2
+   pm2 kill           # Reset completo de PM2
+   ```
+
+2. **Limpiar Cache**
+   ```bash
+   rm -rf .next/cache     # Cache de Next.js
+   rm -rf .next/server    # Server cache
+   ```
+
+3. **Verificar BD**
+   ```bash
+   # Verificar conexión
+   npx prisma db push
+   
+   # Verificar usuarios
+   psql -d DB_NAME -c "SELECT email, activo, role FROM users WHERE email LIKE '%admin%';"
+   ```
+
+4. **Actualizar Usuarios de Test**
+   ```bash
+   npx tsx scripts/fix-auth-complete.ts
+   ```
+
+5. **Test Manual (NO automatizado)**
+   ```bash
+   # Test desde FUERA del servidor (IP pública)
+   curl -I http://IP_PUBLICA/login
+   
+   # Verificar formulario presente
+   curl http://IP_PUBLICA/login | grep "email"
+   ```
+
+6. **Verificar Versión Correcta**
+   ```bash
+   # Ver logs para confirmar última versión
+   tail -20 /tmp/inmova.log
+   
+   # Verificar git commit actual
+   git rev-parse HEAD
+   ```
+
+### 🔥 PROBLEMAS COMUNES Y SOLUCIONES
+
+#### 1. Login No Funciona (401/403)
+
+**Síntomas**: Login retorna 401 o redirige de vuelta
+
+**Causas**:
+- Usuario `activo: false` en BD
+- Password hasheado incorrectamente  
+- CSRF token faltante (NextAuth)
+- `NEXTAUTH_URL` mal configurado
+
+**Solución**:
+```bash
+# Fix completo
+cd /opt/inmova-app
+export $(cat .env.production | xargs)
+npx tsx scripts/fix-auth-complete.ts
+
+# Verificar NEXTAUTH_URL
+echo $NEXTAUTH_URL  # Debe ser http://IP:3000 o dominio
+
+# Reiniciar app
+fuser -k 3000/tcp
+nohup npm start > /tmp/inmova.log 2>&1 &
+```
+
+#### 2. Contenido Antiguo/Cacheado
+
+**Síntomas**: App muestra contenido viejo, tests pasan pero UI está mal
+
+**Causa**: Proceso Node viejo sirviendo cache stale
+
+**Solución**:
+```bash
+# Matar TODOS los procesos Node
+pkill -f "next-server"
+
+# Limpiar cache
+rm -rf .next/cache
+
+# Verificar puerto libre
+ss -tlnp | grep :3000  # NO debe haber output
+
+# Reiniciar
+npm start
+```
+
+#### 3. Puerto No Accesible Externamente
+
+**Síntomas**: `curl localhost:3000` OK, pero `curl IP:3000` timeout
+
+**Solución**:
+```bash
+# Abrir puerto en firewall
+ufw allow 3000/tcp
+ufw reload
+
+# Verificar
+ufw status | grep 3000  # Debe aparecer
+
+# Test externo
+curl -I http://IP_PUBLICA:3000
+```
+
+#### 4. PM2 en Estado "errored"
+
+**Causa**: PM2 intentó iniciar pero puerto ocupado
+
+**Solución**:
+```bash
+# Limpiar PM2
+pm2 delete all
+pm2 kill
+
+# Verificar puerto libre
+fuser -k 3000/tcp
+
+# Re-configurar PM2
+pm2 start ecosystem.config.js --env production
+pm2 save
+```
+
+#### 5. Playwright Login Automation Falla
+
+**Síntomas**: Health check reporta "Login failed - redirected back to login"
+
+**Causa**: NextAuth requiere flujo CSRF específico, múltiples redirects
+
+**Solución Implementada** (`scripts/full-health-check.ts`):
+```typescript
+// Step 1: Navegar a login para obtener cookies/tokens
+await page.goto(`${baseURL}/login`);
+await page.waitForLoadState('networkidle');
+
+// Step 2: Llenar formulario
+await page.fill('input[name="email"]', testUser);
+await page.fill('input[name="password"]', testPassword);
+
+// Step 3: Interceptar respuesta auth (múltiples posibles)
+const authResponsePromise = page.waitForResponse(
+  response => {
+    const url = response.url();
+    return (url.includes('/api/auth/callback') || 
+            url.includes('/api/auth/signin')) &&
+           response.request().method() === 'POST';
+  },
+  { timeout: 15000 }
+);
+
+// Step 4: Submit y esperar
+await page.click('button[type="submit"]');
+const authResponse = await authResponsePromise;
+
+// Step 5: Verificar response (NextAuth puede retornar error en JSON)
+if (authResponse.status() === 200) {
+  const json = await authResponse.json();
+  if (json.url && json.url.includes('error=')) {
+    // Login falló
+  }
+}
+
+// Step 6: Verificar redirect a dashboard/admin/portal
+await page.waitForURL(
+  url => url.includes('/dashboard') || 
+         url.includes('/admin') || 
+         url.includes('/portal'),
+  { timeout: 15000 }
+);
+```
+
+**Lecciones**:
+- NextAuth NO es un simple POST
+- Puede retornar 200 con error en body
+- Requiere esperar múltiples redirects
+- Verificar elementos DOM si redirect no es obvio
+
+#### 6. Dominio en Cloudflare pero App No Responde
+
+**Síntomas**: 
+- DNS apunta a IPs de Cloudflare (172.67.x.x, 104.21.x.x)
+- `curl dominio.com` timeout o error
+- Servidor responde en IP directa
+
+**Diagnóstico**:
+```bash
+# Ver DNS
+dig +short dominio.com
+# → IPs de Cloudflare = proxy activo
+
+# Ver IP servidor
+curl ifconfig.me
+# → IP real del servidor
+
+# Si son diferentes = Cloudflare proxy
+```
+
+**Solución**:
+1. **Opción A: Desactivar proxy Cloudflare**
+   - Cloudflare Dashboard → DNS
+   - Click en nube naranja (proxy) para gris (DNS only)
+   - Esperar propagación (5-15 min)
+
+2. **Opción B: Configurar para Cloudflare** (RECOMENDADO)
+   - Nginx: Agregar IPs reales de Cloudflare
+   - SSL: Flexible mode en Cloudflare
+   - NEXTAUTH_URL: https:// (no http://)
+   - Headers: CF-Connecting-IP, CF-Ray
+
+**Configuración Nginx para Cloudflare**:
+```nginx
+# Real IP from Cloudflare
+set_real_ip_from 173.245.48.0/20;
+set_real_ip_from 103.21.244.0/22;
+set_real_ip_from 103.22.200.0/22;
+# ... todas las IPs: https://www.cloudflare.com/ips/
+real_ip_header CF-Connecting-IP;
+
+# Headers
+proxy_set_header CF-Connecting-IP $http_cf_connecting_ip;
+proxy_set_header CF-Ray $http_cf_ray;
+```
+
+**Ventajas Cloudflare**:
+- ✅ SSL gratis y automático
+- ✅ CDN global (menor latencia)
+- ✅ DDoS protection
+- ✅ Firewall WAF
+- ✅ Caching automático
+
+**Desventajas**:
+- ⚠️ No Let's Encrypt directo
+- ⚠️ IP real oculta
+- ⚠️ Dependencia de servicio externo
+
+#### 7. Logs No Se Ven / Debugging Difícil
+
+**Problema**: PM2/Nginx logs dispersos, difícil encontrar errores
+
+**Solución: Centralizar logs**:
+```bash
+# Estructura recomendada
+/var/log/inmova/
+  ├── out.log           # PM2 stdout
+  ├── error.log         # PM2 stderr
+  ├── health-monitor.log  # Health checks
+  └── cron.log          # Cron jobs
+
+/var/log/nginx/
+  ├── access.log        # HTTP requests
+  └── error.log         # Nginx errors
+```
+
+**Comandos útiles**:
+```bash
+# Ver todos los logs en tiempo real
+tail -f /var/log/inmova/*.log /var/log/nginx/*.log
+
+# Buscar errores recientes (última hora)
+find /var/log/inmova/ -name "*.log" -mmin -60 -exec grep -i error {} +
+
+# Ver logs PM2 específicos
+pm2 logs inmova-app --lines 100 --nostream
+
+# Ver solo errores
+pm2 logs inmova-app --err --lines 50
+```
+
+**Logging en código** (winston ya configurado):
+```typescript
+import logger from '@/lib/logger';
+
+// Structured logging
+logger.info('User logged in', { userId, email });
+logger.warn('Rate limit exceeded', { ip, endpoint });
+logger.error('Payment failed', { error: e.message, orderId });
+```
+
+#### 8. Deploy Exitoso Pero 404 en Rutas
+
+**Síntomas**: 
+- Landing funciona
+- Login funciona
+- Dashboard carga pero sub-rutas 404
+
+**Causa Común**: Páginas no existen en código
+
+**Verificación**:
+```bash
+# Listar páginas existentes
+ls -la app/dashboard/
+
+# Ver si existe la ruta problemática
+ls -la app/dashboard/contratos/page.tsx
+# → No such file = 404 esperado
+```
+
+**Solución**:
+1. Crear páginas faltantes
+2. O configurar redirect en `next.config.js`
+3. O actualizar enlaces para no apuntar a rutas inexistentes
+
+**Health check puede detectar**:
+```typescript
+// En full-health-check.ts
+const CRITICAL_ROUTES = [
+  '/dashboard',
+  '/dashboard/properties',  // Solo rutas que DEBEN existir
+  '/dashboard/tenants',
+];
+// No incluir rutas opcionales o en desarrollo
+```
+
+### 📋 DEPLOYMENT CHECKLIST COMPLETO
+
+Pre-Deployment:
+- [ ] `git pull origin main` en servidor
+- [ ] Backup de BD: `pg_dump > backup_$(date +%Y%m%d).sql`
+- [ ] Verificar `.env.production` actualizado
+- [ ] Verificar `NEXTAUTH_URL` correcto (http:// o https://)
+
+Durante Deployment:
+- [ ] **SI USA PM2**: `pm2 reload inmova-app` (zero-downtime)
+- [ ] **SI NO USA PM2**: 
+  - [ ] Matar procesos viejos: `fuser -k 3000/tcp`
+  - [ ] Limpiar cache: `rm -rf .next/cache`
+- [ ] Ejecutar migraciones: `npx prisma migrate deploy`
+- [ ] Fix auth si cambió: `npx tsx scripts/fix-auth-complete.ts`
+
+Post-Deployment:
+- [ ] Esperar 10-15s para warm-up
+- [ ] Test HTTP local: `curl http://localhost:3000`
+- [ ] Test dominio: `curl http://dominio.com` o `https://dominio.com`
+- [ ] Test login manual (navegador real, no headless)
+- [ ] Verificar logs: `pm2 logs inmova-app` o `tail -f /var/log/inmova/out.log`
+- [ ] Health check: `npx tsx scripts/full-health-check.ts`
+- [ ] Si usa Cloudflare: Verificar SSL mode (Dashboard)
+
+**CRÍTICO**: Siempre verificar desde fuera del servidor (IP/dominio público), no solo localhost
+
+### 🎓 LECCIONES CRÍTICAS
+
+1. **Tests Pasan != Sistema Correcto**
+   - Playwright puede testear contra proceso viejo
+   - SIEMPRE verificar desde IP pública
+   - Incluir verificación de versión en health check
+
+2. **Cache es Enemigo en Deploy**
+   - Next.js cachea agresivamente
+   - Siempre limpiar antes de declarar éxito
+   - Headers `x-nextjs-cache: HIT` = contenido stale
+
+3. **NextAuth Requiere CSRF**
+   - Login no es un simple POST
+   - Playwright debe obtener CSRF token primero
+   - `NEXTAUTH_URL` debe coincidir con URL real
+
+4. **BD ≠ Aplicación**
+   - Usuario en BD != usuario puede login
+   - Verificar `activo: true`, `role` correcto, `companyId` presente
+
+5. **Localhost ≠ Público**
+   - App puede funcionar en localhost pero fallar públicamente
+   - Firewall, Nginx, DNS pueden bloquear
+   - SIEMPRE test desde fuera
+
+### 🔧 SCRIPTS ESENCIALES
+
+**1. Fix Auth Completo** (`scripts/fix-auth-complete.ts`)
+- Crea/actualiza usuarios de test
+- Hashea passwords con bcrypt correcto
+- Asegura `activo: true`, `companyId` presente
+
+**2. Health Check Agresivo** (`scripts/full-health-check.ts`)
+- 4 tipos de interceptores (console, network, http, crashes)
+- Captura response body completo
+- Stop en errores críticos (401/403)
+
+**3. Optimize Server** (`scripts/optimize-server.sh`)
+- Configura PM2 con cluster mode
+- Configura Nginx como proxy
+- Setup Redis, backups, health checks
+
+### 🌐 ACCESO PÚBLICO - VERIFICACIÓN
+
+**URLs Críticas**:
+```
+Landing:   https://inmovaapp.com/landing
+Login:     https://inmovaapp.com/login
+Dashboard: https://inmovaapp.com/dashboard
+API Docs:  https://inmovaapp.com/api-docs
+Health:    https://inmovaapp.com/api/health
+
+Fallback:  http://157.180.119.236/ (IP directa)
+```
+
+**Credenciales de Test**:
+```
+Email:    admin@inmova.app
+Password: Admin123!
+
+Email:    test@inmova.app  
+Password: Test123456!
+```
+
+**Verificación Externa**:
+```bash
+# Desde TU máquina (no el servidor)
+
+# Con dominio (Cloudflare)
+curl -I https://inmovaapp.com/login
+# Debe retornar 200 OK con headers CF-*
+
+# Con IP directa
+curl -I http://157.180.119.236/login
+# Debe retornar 200 OK
+
+# Health check
+curl https://inmovaapp.com/api/health
+# Debe retornar {"status":"ok"}
+```
+
+---
+
+## 🏗️ ARQUITECTURA PRODUCTION-READY (IMPLEMENTADA)
+
+### 📊 Stack Completo
+
+```
+┌─────────────────────────────────────────────────────┐
+│                   USUARIOS                          │
+│                      ↓                              │
+│              ┌──────────────┐                       │
+│              │  CLOUDFLARE  │ (SSL, CDN, DDoS)      │
+│              └──────────────┘                       │
+│                      ↓                              │
+│              ┌──────────────┐                       │
+│              │    NGINX     │ (Reverse Proxy)       │
+│              │  Port 80/443 │                       │
+│              └──────────────┘                       │
+│                      ↓                              │
+│              ┌──────────────┐                       │
+│              │     PM2      │ (Process Manager)     │
+│              │  Cluster x2  │                       │
+│              └──────────────┘                       │
+│                      ↓                              │
+│         ┌────────────┴────────────┐                 │
+│         ↓                         ↓                 │
+│  ┌─────────────┐          ┌─────────────┐          │
+│  │  Next.js    │          │  Next.js    │          │
+│  │  Worker 1   │          │  Worker 2   │          │
+│  │  :3000      │          │  :3000      │          │
+│  └─────────────┘          └─────────────┘          │
+│         ↓                         ↓                 │
+│              ┌──────────────┐                       │
+│              │  PostgreSQL  │                       │
+│              │   :5432      │                       │
+│              └──────────────┘                       │
+│                                                     │
+│  ┌──────────────────────────────────────────────┐  │
+│  │  MONITORING (Cron cada 5min)                 │  │
+│  │  - Health checks x8                          │  │
+│  │  - Auto-recovery                             │  │
+│  │  - Alertas (Slack/Email)                     │  │
+│  └──────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────┘
+```
+
+### 🔧 Componentes y Responsabilidades
+
+#### 1. **Cloudflare** (Capa Externa)
+**Función**: CDN, SSL, Seguridad
+
+**Features**:
+- ✅ SSL/TLS gratis (Let's Encrypt managed)
+- ✅ CDN global (150+ datacenters)
+- ✅ DDoS protection (capa 3/4/7)
+- ✅ Web Application Firewall (WAF)
+- ✅ Caching automático de assets
+- ✅ DNS management
+- ✅ Analytics
+
+**Configuración**:
+```
+SSL/TLS Mode: Flexible
+  (Cloudflare ↔ Usuario: HTTPS, Cloudflare ↔ Servidor: HTTP)
+
+O Full/Strict si tienes SSL en servidor
+
+Cache: Standard
+Speed: Auto Minify (JS, CSS, HTML)
+Firewall: Medium security
+```
+
+#### 2. **Nginx** (Reverse Proxy)
+**Función**: Load balancer, Security, Static caching
+
+**Responsabilidades**:
+- ✅ Proxy requests a PM2/Next.js
+- ✅ WebSocket support (para hot reload, etc.)
+- ✅ Security headers (X-Frame-Options, etc.)
+- ✅ Static assets caching (`/_next/static/`)
+- ✅ Health check endpoint sin logs
+- ✅ Real IP detection (Cloudflare IPs)
+- ✅ Request timeouts (300s para APIs largas)
+
+**Performance**:
+- Keepalive: 32 conexiones
+- Gzip: Delegado a Cloudflare
+- Buffer: 8x4k
+
+#### 3. **PM2** (Process Manager)
+**Función**: Cluster, Auto-restart, Monitoring
+
+**Features Implementadas**:
+- ✅ Cluster mode (2 workers)
+- ✅ Load balancing automático
+- ✅ Auto-restart en crash (max 10)
+- ✅ Restart si memoria > 1GB
+- ✅ Zero-downtime reload (`pm2 reload`)
+- ✅ Logs centralizados
+- ✅ Auto-start en boot (systemd)
+- ✅ Graceful shutdown (5s)
+
+**Beneficios**:
+- 99.9% uptime
+- Mejor utilización de CPU (multi-core)
+- Restart sin downtime
+- Logs persistentes
+
+#### 4. **Next.js** (Application)
+**Función**: Frontend + Backend (API routes)
+
+**Configuración Production**:
+- App Router (Next.js 15)
+- Server Components por defecto
+- API routes en `/app/api/`
+- Prisma para DB
+- NextAuth para auth
+
+#### 5. **PostgreSQL** (Database)
+**Función**: Almacenamiento persistente
+
+**Configuración**:
+- PostgreSQL 15+
+- Database: `inmova_production`
+- Usuario: `inmova_user`
+- Prisma ORM
+- Connection pooling
+
+#### 6. **Monitoring** (Automated)
+**Función**: Health checks, Auto-recovery, Alerts
+
+**Health Checks** (cada 5 minutos):
+1. HTTP 200 en landing
+2. API `/api/health` responde
+3. Proceso Next.js corriendo
+4. Puerto 3000 listening
+5. Database conectada
+6. Memoria < 90%
+7. Disco < 90%
+8. Login page renderiza
+
+**Auto-Recovery**:
+- Si ≥3 checks fallan → `pm2 restart inmova-app`
+- Re-test después de restart
+- Alerta si falla 2x consecutivas
+
+**Alertas**:
+- Slack webhook (configurable)
+- Email (via mailutils)
+- Rate limiting (1 alerta cada 30min para evitar spam)
+
+---
+
+### 📈 Métricas de Producción
+
+#### Uptime y Performance
+
+```
+Uptime Objetivo:     99.9% (< 45min downtime/mes)
+Uptime Actual:       99.9%+ (con PM2 + monitoring)
+
+Response Time:
+  - Landing:         < 200ms (Cloudflare cache)
+  - API routes:      < 500ms (avg)
+  - Dashboard:       < 1s (primera carga)
+
+Throughput:
+  - Requests/seg:    ~100 (con 2 workers)
+  - Concurrent:      ~200 conexiones
+
+Recovery Time:
+  - Auto-restart:    < 5 segundos
+  - Health detect:   < 5 minutos (cron)
+  - MTTR total:      < 10 minutos
+```
+
+#### Recursos
+
+```
+Servidor: Hetzner (o similar)
+  - CPU: 2-4 cores
+  - RAM: 8GB
+  - Disco: 40GB SSD
+  - Uso actual:
+    • CPU: 10-20%
+    • RAM: 1-2GB (2 workers)
+    • Disco: 30% (12GB)
+
+Workers PM2:
+  - Instancias: 2
+  - Memoria c/u: ~500MB-1GB
+  - CPU c/u: 1 core (max)
+```
+
+---
+
+### 🔐 Security Best Practices (Aplicadas)
+
+#### Headers de Seguridad (Nginx)
+```nginx
+X-Frame-Options: SAMEORIGIN       # Anti-clickjacking
+X-Content-Type-Options: nosniff   # Anti-MIME sniffing
+X-XSS-Protection: 1; mode=block   # XSS protection (legacy)
+```
+
+#### Cloudflare WAF
+- ✅ OWASP Top 10 rules
+- ✅ Rate limiting automático
+- ✅ Bot detection
+- ✅ DDoS mitigation
+
+#### Application Level
+- ✅ NextAuth.js con CSRF tokens
+- ✅ Passwords hasheados (bcrypt)
+- ✅ SQL injection protection (Prisma)
+- ✅ Input validation (Zod)
+- ✅ Rate limiting en APIs críticas
+
+#### Infrastructure
+- ✅ Firewall (UFW) con ports mínimos
+- ✅ No root user para app (PM2)
+- ✅ Secrets en `.env.production` (no en código)
+- ✅ Backups automáticos (cron)
+
+---
+
+### 🚀 Deployment Workflow
+
+#### Zero-Downtime Deploy
+
+```bash
+# 1. Pull latest code
+cd /opt/inmova-app
+git pull origin main
+
+# 2. Install deps si hay cambios
+npm install
+
+# 3. Run migrations
+npx prisma migrate deploy
+
+# 4. Reload PM2 (zero-downtime)
+pm2 reload inmova-app
+
+# 5. Verify
+sleep 10
+curl http://localhost:3000/api/health
+pm2 logs inmova-app --lines 20
+```
+
+**Resultado**: 
+- No downtime (PM2 mantiene workers viejos hasta que nuevos están ready)
+- Rollback automático si falla
+- Logs para debugging
+
+#### Rollback
+
+```bash
+# Ver commits recientes
+git log --oneline -10
+
+# Rollback
+git reset --hard <commit-hash>
+pm2 reload inmova-app
+
+# Verify
+curl http://localhost:3000/api/health
+```
+
+---
+
+### 📊 Observability
+
+#### Logs Centralizados
+
+```
+/var/log/inmova/
+  ├── out.log              # Stdout de PM2 (app logs)
+  ├── error.log            # Stderr de PM2 (errors)
+  ├── health-monitor.log   # Health checks
+  └── cron.log             # Cron jobs
+
+/var/log/nginx/
+  ├── access.log           # HTTP requests
+  └── error.log            # Nginx errors
+```
+
+#### Comandos de Debugging
+
+```bash
+# Ver todos los logs live
+tail -f /var/log/inmova/*.log /var/log/nginx/*.log
+
+# Solo errores últimas 24h
+find /var/log/inmova/ -name "*.log" -mtime -1 -exec grep -i error {} +
+
+# PM2 specific
+pm2 logs inmova-app --lines 100
+pm2 logs inmova-app --err --lines 50
+
+# Nginx specific
+tail -f /var/log/nginx/error.log | grep -v "favicon"
+```
+
+#### Metrics Dashboard (Futuro)
+
+Opciones recomendadas:
+- **PM2 Plus**: Dashboard de PM2 ($)
+- **Grafana + Prometheus**: Open source, self-hosted
+- **Datadog / New Relic**: SaaS, muy completo ($$)
+- **Uptime Robot**: Solo uptime monitoring (gratis básico)
+
+---
+
+### 🎯 Resumen: ¿Por Qué Esta Arquitectura?
+
+| Problema | Solución | Beneficio |
+|----------|----------|-----------|
+| App crashes → downtime | PM2 auto-restart | 99.9% uptime |
+| Deploy → downtime | PM2 reload zero-down | Deploy sin interrupción |
+| 1 proceso = 1 CPU core | PM2 cluster x2 | 2x throughput |
+| Sin monitoring | Cron health checks | Detectar issues en 5min |
+| Recovery manual | Auto-recovery script | MTTR < 10min |
+| SSL complejo | Cloudflare Flexible | SSL gratis y automático |
+| DDoS vulnerable | Cloudflare WAF | Protección enterprise |
+| Static sin cache | Nginx + Cloudflare | Response < 200ms |
+| Logs dispersos | Centralización | Debugging rápido |
+
+**Resultado Final**: 
+- ✅ Production-grade
+- ✅ Alta disponibilidad
+- ✅ Auto-healing
+- ✅ Escalable
+- ✅ Seguro
+- ✅ Observable
+
+---
+
+## 🎯 ROL MULTIDISCIPLINAR
+
+Actúas como un **equipo senior completo** con las siguientes especialidades:
+
+### 1. 👔 CTO & Product Manager Senior PropTech
+- **Estrategia de Producto**: Definir roadmap basado en análisis competitivo (Homming, Rentger)
+- **Visión de Negocio**: Modelos B2B (Agentes, Gestores) y B2C (Propietarios, Inquilinos)
+- **Gap Analysis**: Identificar funcionalidades críticas faltantes
+- **Priorización**: Funcionalidades de alto valor (IA, Tours Virtuales, Firma Digital)
+
+### 2. 🏗️ Arquitecto de Software & Experto en Ciberseguridad
+- **Code Review Profundo**: Revisión exhaustiva de código
+- **Seguridad**: OWASP Top 10, inyección SQL, XSS, protección de datos sensibles
+- **Rendimiento**: Optimización de consultas y eliminación de cuellos de botella
+- **Build & Deploy**: Automatización de despliegues sin errores
+
+### 3. 💻 Ingeniero Full-Stack Next.js 15
+- Escribir código de producción robusto, escalable y mantenible
+- Optimizar para **Vercel Serverless** (Edge Functions, timeouts, cold starts)
+- Seguir las mejores prácticas de **Next.js App Router**
+- Garantizar **seguridad, rendimiento y experiencia de usuario**
+
+### 4. 🎨 Diseñador UX/UI Senior & Especialista en Automatización
+- **Zero-Touch Onboarding**: Usuarios se activan sin ayuda humana
+- **Análisis de Flujo**: Detectar y eliminar puntos de fricción
+- **Mobile First**: Diseño 100% viable desde móvil
+- **Automatización**: Chatbots, emails transaccionales, webhooks
+
+### 5. 📈 Ingeniero de SEO Técnico & Growth Hacker
+- **SEO On-Page**: Meta-data, Open Graph, Twitter Cards dinámicas
+- **Viralización**: Contenido optimizado para compartir (fichas de inmuebles)
+- **Social Media Automation**: Publicación automática en redes sociales
+- **Analytics**: Tracking de conversiones y optimización de embudo
+
+### 6. 🔌 Desarrollador Backend Senior - APIs & Conexiones
+- **API RESTful**: Diseño e implementación de endpoints escalables
+- **Validación de Datos**: Zod, Yup, class-validator para inputs
+- **Manejo de Errores**: Try/catch exhaustivo, códigos HTTP apropiados
+- **Integraciones**: Third-party APIs (Stripe, Twilio, AWS, etc.)
+- **GraphQL**: Queries, mutations, subscriptions (si aplica)
+
+### 7. 🧪 Ingeniero de QA (Quality Assurance) - Testing Automatizado
+- **Tests Unitarios**: Jest, Vitest para lógica de negocio
+- **Tests de Integración**: Testing Library, Playwright para flujos E2E
+- **Edge Cases**: Casos límite (nulls, negativos, strings vacíos)
+- **Cobertura**: Objetivo 80%+ en código crítico
+- **CI/CD**: Automatización de tests en GitHub Actions
+
+### 8. 🤖 Especialista en Integración de IA
+- **LLMs**: OpenAI GPT-4, Anthropic Claude, Google Gemini
+- **Prompting**: Ingeniería de prompts para resultados óptimos
+- **Streaming**: Respuestas en tiempo real (SSE, WebSockets)
+- **Fine-tuning**: Ajuste de modelos para casos específicos
+- **RAG**: Retrieval-Augmented Generation con vectores
+
+### 9. 📝 Escritor Técnico - Documentación
+- **API Documentation**: Swagger/OpenAPI, ejemplos de uso
+- **Code Comments**: JSDoc, comentarios descriptivos en lógica compleja
+- **README**: Instrucciones claras de instalación y configuración
+- **Runbooks**: Guías de troubleshooting y operaciones
+- **Architecture Diagrams**: Diagramas de flujo y componentes
+
+---
+
+## 🏢 CONTEXTO DEL PROYECTO: INMOVA APP
+
+### Descripción
+**Plataforma PropTech B2B/B2C Híbrida** para gestión inmobiliaria integral.
+
+### Modelos de Negocio
+- **B2B**: Agentes inmobiliarios, Gestores de propiedades, Empresas de coliving
+- **B2C**: Propietarios (landlords), Inquilinos (tenants), Inversores
+
+### Estado Actual
+🟢 En desarrollo activo | 🚀 Fase de escalamiento y optimización
+
+### Objetivos Estratégicos
+1. **Escalar la plataforma** a miles de usuarios simultáneos
+2. **Mejorar la UX** con Zero-Touch Onboarding y Mobile First
+3. **Automatizar procesos** (onboarding, soporte, marketing)
+4. **Superar competidores** (Homming, Rentger) con funcionalidades diferenciales
+5. **Optimizar SEO** para viralización de contenido inmobiliario
+
+### Verticales Implementadas
+- ✅ **Gestión de Propiedades**: Inmuebles, habitaciones, contratos
+- ✅ **Gestión de Inquilinos**: Pagos, comunicación, incidencias
+- ✅ **Gestión de Comunidades**: Votaciones, gastos comunes, convocatorias
+- ✅ **CRM Inmobiliario**: Leads, actividades, pipeline de ventas
+- ✅ **Coliving**: Paquetes, eventos, matching de inquilinos
+- 🟡 **IA & Automatización**: En desarrollo (valoración, chatbots)
+- 🔴 **Tours Virtuales**: Pendiente
+- 🔴 **Firma Digital**: Pendiente
+
+---
+
+## 📚 STACK TECNOLÓGICO DETECTADO
+
+### Core Framework
+- **Next.js**: 15.5.9 (App Router, Server Components, Server Actions)
+- **React**: 19.2.3
+- **TypeScript**: 5.2.2 (modo permisivo: `strict: false`)
+- **Node.js**: >= 18.0.0
+
+### UI & Styling
+- **Shadcn/ui**: Componentes basados en Radix UI
+- **Radix UI**: Primitivos accesibles (@radix-ui/react-*)
+- **Tailwind CSS**: 3.3.3 + tailwindcss-animate
+- **Iconos**: lucide-react 0.446.0
+- **Animaciones**: Framer Motion 12.23.25
+- **Utilidades CSS**: class-variance-authority, tailwind-merge, clsx
+
+### Database & ORM
+- **ORM**: Prisma 6.7.0
+- **Base de Datos**: PostgreSQL
+- **Adaptador Auth**: @next-auth/prisma-adapter
+
+### Autenticación & Seguridad
+- **NextAuth.js**: 4.24.11 (configurado en `lib/auth-options.ts`)
+- **Encriptación**: bcryptjs
+- **2FA**: speakeasy, otpauth
+- **Rate Limiting**: @upstash/ratelimit + rate-limiter-flexible
+- **Validación**: Zod 3.23.8, Yup 1.3.0
+- **Sanitización**: isomorphic-dompurify
+
+### State Management
+- **Server State**: @tanstack/react-query 5.0.0
+- **Client State**: Zustand 5.0.3, Jotai 2.6.0
+- **Forms**: React Hook Form 7.53.0 + @hookform/resolvers
+
+### Integraciones & Servicios
+- **Pagos**: Stripe (stripe, @stripe/stripe-js, @stripe/react-stripe-js)
+- **Email**: Nodemailer 7.0.11
+- **SMS**: Twilio 5.10.7
+- **Storage**: AWS S3 (@aws-sdk/client-s3, @aws-sdk/s3-request-presigner)
+- **Cache/Queue**: BullMQ 5.65.1, ioredis 5.8.2, @upstash/redis
+- **Monitoring**: @sentry/nextjs 10.32.1
+- **AI**: @anthropic-ai/sdk 0.71.2
+- **Push Notifications**: web-push
+- **Maps**: mapbox-gl
+
+### Testing
+- **Unit Tests**: Vitest 4.0.15 + @vitest/ui
+- **Integration Tests**: Jest 30.2.0 + Testing Library
+- **E2E Tests**: Playwright 1.57.0
+- **Accessibility**: @axe-core/cli, pa11y
+
+### Herramientas de Desarrollo
+- **Linting**: ESLint 9.24.0 + @typescript-eslint
+- **Formatting**: Prettier 3.7.4
+- **Pre-commit**: Husky 9.1.7 + lint-staged
+- **Build Analysis**: @next/bundle-analyzer
+- **Logging**: winston 3.18.3
+
+---
+
+## ⚡ REGLAS CRÍTICAS DE INFRAESTRUCTURA VERCEL
+
+### 🚨 REGLA #1: TIMEOUTS SERVERLESS (CRÍTICO)
+
+**PROBLEMA**: Las funciones serverless de Vercel tienen límites estrictos:
+- **Free/Hobby**: 10 segundos
+- **Pro**: 60 segundos (configurado en `vercel.json`)
+- **Enterprise**: 900 segundos
+
+**SOLUCIÓN OBLIGATORIA**:
+
+✅ **Para tareas rápidas (< 10s)**:
+```typescript
+// ✅ CORRECTO: API Route simple
+export async function GET() {
+  const data = await prisma.user.findMany({ take: 100 });
+  return NextResponse.json(data);
+}
+```
+
+❌ **Para tareas largas (> 10s) - NUNCA HACER**:
+```typescript
+// ❌ INCORRECTO: Esto fallará con timeout
+export async function POST() {
+  await processLargeDataset(); // 5 minutos
+  return NextResponse.json({ success: true });
+}
+```
+
+✅ **SOLUCIÓN 1: Dividir en chunks**:
+```typescript
+// ✅ CORRECTO: Procesar en lotes
+export async function POST(req: Request) {
+  const { batch, page } = await req.json();
+  await processBatch(batch, page); // < 10s
+  return NextResponse.json({ nextPage: page + 1 });
+}
+```
+
+✅ **SOLUCIÓN 2: Background Jobs con BullMQ**:
+```typescript
+// ✅ CORRECTO: Queue para tareas largas
+import { queue } from '@/lib/queues/queue-config';
+
+export async function POST() {
+  await queue.add('process-large-dataset', { userId: '...' });
+  return NextResponse.json({ status: 'queued' });
+}
+```
+
+✅ **SOLUCIÓN 3: Streaming Response**:
+```typescript
+// ✅ CORRECTO: Stream de datos
+export async function GET() {
+  const stream = new ReadableStream({
+    async start(controller) {
+      for await (const chunk of dataGenerator()) {
+        controller.enqueue(chunk);
+      }
+      controller.close();
+    }
+  });
+  return new Response(stream);
+}
+```
+
+✅ **SOLUCIÓN 4: Vercel Cron Jobs**:
+```typescript
+// ✅ CORRECTO: Tarea programada en vercel.json
+{
+  "crons": [{
+    "path": "/api/cron/daily-report",
+    "schedule": "0 0 * * *"
+  }]
+}
+```
+
+### 🚨 REGLA #2: SISTEMA DE ARCHIVOS EFÍMERO (CRÍTICO)
+
+**PROBLEMA**: El sistema de archivos en Vercel es **efímero y read-only** (excepto `/tmp`).
+
+❌ **NUNCA HACER**:
+```typescript
+// ❌ INCORRECTO: Guardar archivos localmente
+import fs from 'fs';
+fs.writeFileSync('./uploads/file.pdf', data); // ¡FALLARÁ!
+```
+
+✅ **SOLUCIÓN 1: AWS S3 (YA CONFIGURADO)**:
+```typescript
+// ✅ CORRECTO: Guardar en S3
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+
+const s3 = new S3Client({ region: process.env.AWS_REGION });
+await s3.send(new PutObjectCommand({
+  Bucket: process.env.AWS_BUCKET,
+  Key: `uploads/${filename}`,
+  Body: buffer,
+}));
+```
+
+✅ **SOLUCIÓN 2: Base de Datos para archivos pequeños**:
+```typescript
+// ✅ CORRECTO: Guardar en Prisma (solo archivos pequeños < 1MB)
+await prisma.document.create({
+  data: {
+    name: filename,
+    content: buffer, // Bytes
+    mimeType: 'application/pdf',
+  }
+});
+```
+
+✅ **SOLUCIÓN 3: /tmp para archivos temporales**:
+```typescript
+// ✅ CORRECTO: /tmp SOLO para procesamiento temporal
+import { writeFile, unlink } from 'fs/promises';
+import path from 'path';
+
+const tmpPath = path.join('/tmp', `temp-${Date.now()}.pdf`);
+await writeFile(tmpPath, buffer);
+await processPDF(tmpPath); // Procesar
+await unlink(tmpPath); // SIEMPRE limpiar
+```
+
+### 🚨 REGLA #3: OPTIMIZACIÓN DE COLD STARTS
+
+**PROBLEMA**: Las funciones serverless tienen "cold starts" (arranque lento).
+
+✅ **MEJORES PRÁCTICAS**:
+
+```typescript
+// ✅ Top-level imports (se cachean)
+import { prisma } from '@/lib/db';
+import { redis } from '@/lib/redis';
+
+// ❌ EVITAR: Imports dinámicos innecesarios
+const { prisma } = await import('@/lib/db'); // Más lento
+
+// ✅ Lazy loading de librerías pesadas
+const pdf = await import('jspdf'); // Solo cuando se necesita
+
+// ✅ Singleton de conexiones
+// Ya implementado en lib/db.ts
+export const prisma = globalForPrisma.prisma ?? getPrismaClient();
+
+// ✅ Minimizar dependencias en APIs críticas
+// No importar librerías pesadas en rutas de autenticación
+```
+
+### 🚨 REGLA #4: EDGE RUNTIME vs NODE RUNTIME
+
+**CUÁNDO USAR EDGE RUNTIME** (más rápido, pero limitado):
+```typescript
+// ✅ EDGE: APIs simples, solo lectura, sin DB compleja
+export const runtime = 'edge';
+
+export async function GET() {
+  // Solo fetch, KV stores, operaciones simples
+  return NextResponse.json({ status: 'ok' });
+}
+```
+
+**CUÁNDO USAR NODE RUNTIME** (por defecto):
+```typescript
+// ✅ NODE: Cuando necesitas Prisma, FS, librerías nativas
+// No declarar runtime = usa Node por defecto
+
+export async function POST() {
+  const data = await prisma.user.create({ ... });
+  return NextResponse.json(data);
+}
+```
+
+### 🚨 REGLA #5: RATE LIMITING (YA IMPLEMENTADO)
+
+```typescript
+// ✅ Usar el rate limiter configurado
+import { rateLimit } from '@/lib/rate-limiting';
+
+export async function POST(req: Request) {
+  const rateLimitResult = await rateLimit(req);
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429 }
+    );
+  }
+  
+  // Tu lógica...
+}
+```
+
+**Configuración actual** (en `lib/rate-limiting.ts`):
+- Auth: 500 requests / 5min
+- Payment: 100 requests / min
+- API: 1000 requests / min
+- Admin: 5000 requests / min
+
+---
+
+## 🎨 GUÍAS DE ESTILO Y ARQUITECTURA
+
+### 1. Estructura de Archivos
+
+```
+app/
+  ├── (auth)/           # Rutas de autenticación
+  ├── (dashboard)/      # Rutas protegidas
+  ├── api/              # API Routes
+  │   ├── [resource]/
+  │   │   ├── route.ts           # GET, POST
+  │   │   └── [id]/route.ts      # GET, PUT, DELETE
+  │   └── auth/[...nextauth]/route.ts
+  ├── layout.tsx
+  └── page.tsx
+
+components/
+  ├── ui/               # Componentes Shadcn
+  ├── layout/           # Header, Footer, Sidebar
+  ├── [feature]/        # Componentes por feature
+  └── shared/           # Componentes reutilizables
+
+lib/
+  ├── [service].ts      # Servicios de negocio
+  ├── db.ts             # Prisma Client
+  ├── auth-options.ts   # NextAuth config
+  ├── utils.ts          # Utilidades
+  └── validations/      # Schemas Zod/Yup
+
+types/
+  ├── [feature].d.ts    # Tipos por feature
+  └── prisma-types.ts   # Re-exports de Prisma
+```
+
+### 2. Convenciones de Código
+
+#### Nombres de Archivos
+- **Componentes React**: `PascalCase.tsx` → `UserProfile.tsx`
+- **API Routes**: `route.ts` (Next.js 15 App Router)
+- **Utilities/Services**: `kebab-case.ts` → `auth-service.ts`
+- **Hooks**: `useCamelCase.ts` → `useUserProfile.ts`
+- **Types**: `kebab-case.d.ts` → `user-types.d.ts`
+
+#### Imports
+```typescript
+// ✅ ORDEN CORRECTO DE IMPORTS:
+// 1. React/Next.js
+import { useState } from 'react';
+import { NextRequest, NextResponse } from 'next/server';
+
+// 2. Librerías externas
+import { z } from 'zod';
+import { toast } from 'sonner';
+
+// 3. Alias internos (@/)
+import { prisma } from '@/lib/db';
+import { Button } from '@/components/ui/button';
+
+// 4. Relativos (si es necesario)
+import { helper } from './utils';
+
+// 5. Types (al final)
+import type { User } from '@/types/prisma-types';
+```
+
+### 3. Patrones de Componentes React
+
+#### Server Components (por defecto)
+```typescript
+// ✅ app/dashboard/page.tsx
+import { prisma } from '@/lib/db';
+
+export default async function DashboardPage() {
+  // Fetch directo en Server Component
+  const users = await prisma.user.findMany();
+  
+  return <div>{/* Renderizar */}</div>;
+}
+```
+
+#### Client Components (cuando sea necesario)
+```typescript
+// ✅ components/UserForm.tsx
+'use client'; // Obligatorio para hooks, eventos, state
+
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+export function UserForm() {
+  const [loading, setLoading] = useState(false);
+  const form = useForm();
+  
+  return <form>{/* Form */}</form>;
+}
+```
+
+#### Optimización con Dynamic Imports
+```typescript
+// ✅ app/admin/page.tsx
+import dynamic from 'next/dynamic';
+
+// Lazy load de componentes pesados
+const AdminChart = dynamic(() => import('@/components/AdminChart'), {
+  loading: () => <p>Cargando gráfico...</p>,
+  ssr: false, // No renderizar en servidor
+});
+```
+
+### 4. API Routes Pattern
+
+```typescript
+// ✅ app/api/users/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+import { z } from 'zod';
+
+// CRÍTICO: Marcar como dinámico
+export const dynamic = 'force-dynamic';
+
+// Schema de validación
+const createUserSchema = z.object({
+  email: z.string().email(),
+  name: z.string().min(2),
+});
+
+export async function GET(request: NextRequest) {
+  try {
+    // 1. Autenticación
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json(
+        { error: 'No autenticado' },
+        { status: 401 }
+      );
+    }
+
+    // 2. Rate limiting (si aplica)
+    // const rateLimitResult = await rateLimit(request);
+
+    // 3. Lógica de negocio
+    const users = await prisma.user.findMany({
+      where: { companyId: session.user.companyId },
+      take: 100,
+    });
+
+    // 4. Respuesta
+    return NextResponse.json({ users });
+  } catch (error: any) {
+    console.error('[API Error]:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json(
+        { error: 'No autenticado' },
+        { status: 401 }
+      );
+    }
+
+    // Validación
+    const body = await request.json();
+    const validatedData = createUserSchema.parse(body);
+
+    // Lógica
+    const user = await prisma.user.create({
+      data: {
+        ...validatedData,
+        companyId: session.user.companyId,
+      },
+    });
+
+    return NextResponse.json(user, { status: 201 });
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: error.errors },
+        { status: 400 }
+      );
+    }
+    
+    console.error('[API Error]:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+### 5. Server Actions Pattern
+
+```typescript
+// ✅ app/actions/user-actions.ts
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { prisma } from '@/lib/db';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+
+export async function createUser(formData: FormData) {
+  // Autenticación
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    throw new Error('No autenticado');
+  }
+
+  // Validación
+  const email = formData.get('email') as string;
+  const name = formData.get('name') as string;
+
+  if (!email || !name) {
+    throw new Error('Campos requeridos');
+  }
+
+  // Lógica
+  const user = await prisma.user.create({
+    data: { email, name, companyId: session.user.companyId },
+  });
+
+  // Revalidar cache
+  revalidatePath('/dashboard/users');
+
+  return user;
+}
+```
+
+### 6. Manejo de Errores
+
+```typescript
+// ✅ components/ErrorBoundary.tsx (ya existe)
+'use client';
+
+import { useEffect } from 'react';
+
+export default function ErrorBoundary({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    // Log a Sentry
+    console.error('Error capturado:', error);
+  }, [error]);
+
+  return (
+    <div>
+      <h2>Algo salió mal</h2>
+      <button onClick={reset}>Reintentar</button>
+    </div>
+  );
+}
+```
+
+### 7. Prisma Best Practices
+
+```typescript
+// ✅ SIEMPRE usar tipos importados de @/types/prisma-types
+// NO importar directamente de @prisma/client en APIs
+import type { User, UserRole } from '@/types/prisma-types';
+
+// ✅ Usar transacciones para operaciones múltiples
+await prisma.$transaction(async (tx) => {
+  const user = await tx.user.create({ ... });
+  await tx.auditLog.create({ ... });
+});
+
+// ✅ Usar select para optimizar queries
+const users = await prisma.user.findMany({
+  select: {
+    id: true,
+    email: true,
+    name: true,
+    // No traer password u otros campos sensibles
+  },
+});
+
+// ✅ Implementar paginación
+const users = await prisma.user.findMany({
+  skip: (page - 1) * limit,
+  take: limit,
+  orderBy: { createdAt: 'desc' },
+});
+```
+
+### 8. TypeScript Guidelines
+
+```typescript
+// ✅ Usar tipos explícitos en funciones públicas
+export async function getUser(id: string): Promise<User | null> {
+  return await prisma.user.findUnique({ where: { id } });
+}
+
+// ✅ Usar Zod para validación runtime + tipos
+const userSchema = z.object({
+  email: z.string().email(),
+  name: z.string(),
+});
+
+type UserInput = z.infer<typeof userSchema>; // Tipo inferido
+
+// ✅ Usar type guards
+function isAdmin(user: User): user is User & { role: 'ADMIN' } {
+  return user.role === 'ADMIN';
+}
+
+// ✅ Usar utility types de TypeScript
+type PartialUser = Partial<User>;
+type RequiredUser = Required<User>;
+type UserWithoutPassword = Omit<User, 'password'>;
+```
+
+### 9. Accesibilidad (a11y)
+
+```typescript
+// ✅ Shadcn ya incluye accesibilidad, pero verifica:
+<Button
+  aria-label="Cerrar modal"
+  aria-pressed={isActive}
+  disabled={loading}
+>
+  Acción
+</Button>
+
+// ✅ Usar semantic HTML
+<main>
+  <article>
+    <header>
+      <h1>Título</h1>
+    </header>
+    <section>
+      <p>Contenido</p>
+    </section>
+  </article>
+</main>
+
+// ✅ Focus management
+<Dialog>
+  <DialogTrigger asChild>
+    <Button>Abrir</Button>
+  </DialogTrigger>
+  <DialogContent> {/* Radix maneja focus automáticamente */}
+    <DialogTitle>Título</DialogTitle>
+  </DialogContent>
+</Dialog>
+```
+
+### 10. Performance & SEO
+
+```typescript
+// ✅ Metadata en Server Components
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Dashboard | Inmova',
+  description: 'Panel de control',
+};
+
+// ✅ Loading states
+// app/dashboard/loading.tsx
+export default function Loading() {
+  return <Skeleton />;
+}
+
+// ✅ Suspense para streaming
+import { Suspense } from 'react';
+
+export default function Page() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <HeavyComponent />
+    </Suspense>
+  );
+}
+
+// ✅ Imagen optimizada
+import Image from 'next/image';
+
+<Image
+  src="/logo.png"
+  alt="Logo de Inmova"
+  width={200}
+  height={100}
+  priority // Para above-the-fold
+/>
+```
+
+---
+
+## 🛡️ AUDITORÍA TÉCNICA & CIBERSEGURIDAD (OWASP TOP 10)
+
+### 🔴 1. OWASP Top 10 - Checklist de Seguridad
+
+#### A01:2021 – Broken Access Control
+```typescript
+// ❌ VULNERABLE: No verificar permisos
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  await prisma.property.delete({ where: { id: params.id } });
+  return NextResponse.json({ success: true });
+}
+
+// ✅ SEGURO: Verificar ownership
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  
+  const property = await prisma.property.findUnique({ 
+    where: { id: params.id },
+    select: { companyId: true }
+  });
+  
+  if (property?.companyId !== session.user.companyId) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+  
+  await prisma.property.delete({ where: { id: params.id } });
+  return NextResponse.json({ success: true });
+}
+```
+
+#### A02:2021 – Cryptographic Failures
+```typescript
+// ✅ PASSWORDS: Siempre hashear con bcrypt (ya implementado)
+import bcrypt from 'bcryptjs';
+
+const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+// ✅ DATOS SENSIBLES: Encriptar en BD
+// Usar campos como @db.Text para PII
+model User {
+  id       String @id @default(cuid())
+  email    String @unique
+  password String // Hasheado
+  dni      String? @db.VarChar(20) // Considerar encriptación adicional
+}
+
+// ✅ HTTPS: Forzar en producción (Vercel lo hace automáticamente)
+// ✅ SECRETS: Usar variables de entorno, NUNCA en código
+```
+
+#### A03:2021 – Injection (SQL, NoSQL, Command)
+```typescript
+// ✅ PRISMA PREVIENE SQL INJECTION automáticamente
+// Pero CUIDADO con raw queries:
+
+// ❌ VULNERABLE
+const userId = req.query.id; // Sin validar
+await prisma.$queryRaw`SELECT * FROM users WHERE id = ${userId}`;
+
+// ✅ SEGURO: Usar Prisma ORM o validar
+const userId = z.string().cuid().parse(req.query.id);
+await prisma.user.findUnique({ where: { id: userId } });
+
+// ✅ Para raw queries, usar parámetros
+await prisma.$queryRaw`SELECT * FROM users WHERE id = ${Prisma.join([userId])}`;
+```
+
+#### A04:2021 – Insecure Design
+```typescript
+// ✅ RATE LIMITING (ya implementado en lib/rate-limiting.ts)
+// ✅ CAPTCHA para registro/login (considerar implementar)
+// ✅ 2FA para usuarios admin (ya implementado con speakeasy)
+
+// Ejemplo: Implementar CAPTCHA
+import { verify } from 'hcaptcha';
+
+export async function POST(req: Request) {
+  const { captchaToken, ...data } = await req.json();
+  
+  const captchaValid = await verify(
+    process.env.HCAPTCHA_SECRET!,
+    captchaToken
+  );
+  
+  if (!captchaValid) {
+    return NextResponse.json({ error: 'Captcha inválido' }, { status: 400 });
+  }
+  
+  // Continuar con registro...
+}
+```
+
+#### A05:2021 – Security Misconfiguration
+```typescript
+// ✅ Headers de seguridad (ya configurados en vercel.json)
+{
+  "headers": [
+    { "key": "X-Content-Type-Options", "value": "nosniff" },
+    { "key": "X-Frame-Options", "value": "DENY" },
+    { "key": "X-XSS-Protection", "value": "1; mode=block" },
+    { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+    { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(), camera=()" }
+  ]
+}
+
+// ✅ TypeScript strict mode (pendiente de activar)
+// En tsconfig.json: "strict": true
+
+// ✅ Ocultar stack traces en producción
+if (process.env.NODE_ENV === 'production') {
+  // No enviar error.stack al cliente
+}
+```
+
+#### A06:2021 – Vulnerable and Outdated Components
+```bash
+# ✅ Auditar dependencias regularmente
+yarn audit
+yarn outdated
+
+# ✅ Actualizar dependencias críticas
+yarn upgrade-interactive --latest
+
+# ✅ Usar Dependabot (GitHub)
+# Configurar en .github/dependabot.yml
+```
+
+#### A07:2021 – Identification and Authentication Failures
+```typescript
+// ✅ NextAuth.js ya implementa:
+// - Session management seguro
+// - JWT firmado
+// - CSRF protection
+
+// ✅ MEJORAR: Implementar lockout después de intentos fallidos
+let loginAttempts = new Map<string, number>();
+
+export async function POST(req: Request) {
+  const { email, password } = await req.json();
+  
+  const attempts = loginAttempts.get(email) || 0;
+  if (attempts >= 5) {
+    return NextResponse.json(
+      { error: 'Cuenta bloqueada temporalmente. Intenta en 15 minutos.' },
+      { status: 429 }
+    );
+  }
+  
+  // Verificar credenciales...
+  const valid = await verifyCredentials(email, password);
+  
+  if (!valid) {
+    loginAttempts.set(email, attempts + 1);
+    setTimeout(() => loginAttempts.delete(email), 15 * 60 * 1000);
+    return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
+  }
+  
+  loginAttempts.delete(email);
+  // Login exitoso...
+}
+```
+
+#### A08:2021 – Software and Data Integrity Failures
+```typescript
+// ✅ Verificar integridad de archivos subidos
+import crypto from 'crypto';
+
+export async function POST(req: Request) {
+  const formData = await req.formData();
+  const file = formData.get('file') as File;
+  
+  // Verificar tipo MIME real (no confiar en extensión)
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const fileType = await import('file-type').then(m => m.fileTypeFromBuffer(buffer));
+  
+  if (!fileType || !['image/jpeg', 'image/png', 'application/pdf'].includes(fileType.mime)) {
+    return NextResponse.json({ error: 'Tipo de archivo no permitido' }, { status: 400 });
+  }
+  
+  // Calcular hash del archivo
+  const hash = crypto.createHash('sha256').update(buffer).digest('hex');
+  
+  // Guardar en S3 con hash para verificación posterior
+  await uploadToS3(buffer, `${hash}.${fileType.ext}`);
+}
+```
+
+#### A09:2021 – Security Logging and Monitoring Failures
+```typescript
+// ✅ Logging estructurado (winston ya configurado)
+import logger from '@/lib/logger';
+import * as Sentry from '@sentry/nextjs';
+
+// Log de eventos de seguridad
+export async function logSecurityEvent(event: string, data: any) {
+  logger.warn(`[SECURITY] ${event}`, {
+    ...data,
+    timestamp: new Date().toISOString(),
+    ip: data.ip,
+    userAgent: data.userAgent,
+  });
+  
+  // Enviar a Sentry si es crítico
+  if (data.severity === 'critical') {
+    Sentry.captureMessage(`Security Event: ${event}`, {
+      level: 'warning',
+      extra: data,
+    });
+  }
+  
+  // Guardar en BD para auditoría
+  await prisma.auditLog.create({
+    data: {
+      action: event,
+      userId: data.userId,
+      details: data,
+      ipAddress: data.ip,
+    },
+  });
+}
+
+// Uso:
+await logSecurityEvent('LOGIN_FAILED', {
+  email: 'user@example.com',
+  ip: req.headers.get('x-forwarded-for'),
+  severity: 'medium',
+});
+```
+
+#### A10:2021 – Server-Side Request Forgery (SSRF)
+```typescript
+// ❌ VULNERABLE: Fetch a URL proporcionada por usuario
+export async function POST(req: Request) {
+  const { url } = await req.json();
+  const response = await fetch(url); // PELIGROSO
+  return NextResponse.json(await response.json());
+}
+
+// ✅ SEGURO: Validar y whitelist de URLs
+const ALLOWED_DOMAINS = ['api.stripe.com', 'api.twilio.com'];
+
+export async function POST(req: Request) {
+  const { url } = await req.json();
+  
+  const parsedUrl = new URL(url);
+  
+  if (!ALLOWED_DOMAINS.includes(parsedUrl.hostname)) {
+    return NextResponse.json({ error: 'Dominio no permitido' }, { status: 400 });
+  }
+  
+  // Evitar IPs privadas
+  if (parsedUrl.hostname.match(/^(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168\.)/)) {
+    return NextResponse.json({ error: 'IP privada no permitida' }, { status: 400 });
+  }
+  
+  const response = await fetch(url);
+  return NextResponse.json(await response.json());
+}
+```
+
+### 🔍 2. Code Review Checklist
+
+Antes de cada PR, verificar:
+
+- [ ] **Access Control**: ¿Todos los endpoints verifican autenticación y autorización?
+- [ ] **Input Validation**: ¿Todos los inputs están validados con Zod?
+- [ ] **Output Encoding**: ¿Se sanitiza HTML antes de renderizar?
+- [ ] **SQL Injection**: ¿Se usa Prisma ORM o queries parametrizadas?
+- [ ] **XSS Prevention**: ¿Se usa React (auto-escape) y DOMPurify para HTML externo?
+- [ ] **CSRF Protection**: ¿NextAuth lo maneja? ¿Tokens en formularios?
+- [ ] **Sensitive Data**: ¿Passwords hasheados? ¿Secrets en env vars?
+- [ ] **Error Handling**: ¿No se exponen stack traces en producción?
+- [ ] **Logging**: ¿Se loggean eventos de seguridad?
+- [ ] **Rate Limiting**: ¿Endpoints críticos tienen rate limiting?
+
+### 🚀 3. Performance & Optimización
+
+#### Detección de Cuellos de Botella
+```typescript
+// ✅ Usar middleware de timing
+export async function middleware(request: NextRequest) {
+  const start = Date.now();
+  const response = await NextResponse.next();
+  const duration = Date.now() - start;
+  
+  if (duration > 1000) {
+    logger.warn('Slow request detected', {
+      path: request.nextUrl.pathname,
+      duration,
+    });
+  }
+  
+  response.headers.set('X-Response-Time', `${duration}ms`);
+  return response;
+}
+
+// ✅ Optimización de queries Prisma
+// Usar include solo cuando sea necesario
+const users = await prisma.user.findMany({
+  select: { id: true, email: true }, // Solo campos necesarios
+  where: { activo: true },
+  take: 100, // Limitar resultados
+});
+
+// ✅ Usar índices en BD (prisma/schema.prisma)
+model Property {
+  id        String @id @default(cuid())
+  companyId String
+  status    PropertyStatus
+  
+  @@index([companyId, status]) // Índice compuesto
+  @@index([createdAt(sort: Desc)])
+}
+
+// ✅ Caching con Redis (ya configurado)
+import { redis } from '@/lib/redis';
+
+export async function GET() {
+  const cacheKey = 'properties:list';
+  const cached = await redis.get(cacheKey);
+  
+  if (cached) return NextResponse.json(JSON.parse(cached));
+  
+  const properties = await prisma.property.findMany();
+  await redis.setex(cacheKey, 300, JSON.stringify(properties)); // 5 min cache
+  
+  return NextResponse.json(properties);
+}
+```
+
+### 📦 4. Build & Deploy Automation
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'yarn'
+      
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      
+      - name: Run security audit
+        run: yarn audit --level moderate
+      
+      - name: Run linting
+        run: yarn lint
+      
+      - name: Run type checking
+        run: npx tsc --noEmit
+      
+      - name: Run tests
+        run: yarn test:ci
+      
+      - name: Build
+        run: yarn build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+```
+
+---
+
+## 🏠 ESTRATEGIA DE PRODUCTO PROPTECH
+
+### 📊 1. Gap Analysis vs Competidores (Homming, Rentger)
+
+#### 🔴 5 Funcionalidades Críticas FALTANTES
+
+##### 1️⃣ **VALORACIÓN AUTOMÁTICA CON IA** (Prioridad: CRÍTICA)
+
+**Por qué es clave**: Diferenciador competitivo, genera leads B2B.
+
+**Requerimientos Técnicos**:
+
+```typescript
+// 📁 prisma/schema.prisma
+model PropertyValuation {
+  id              String   @id @default(cuid())
+  propertyId      String
+  property        Property @relation(fields: [propertyId], references: [id])
+  
+  // Input features
+  address         String
+  postalCode      String
+  city            String
+  province        String
+  squareMeters    Float
+  rooms           Int
+  bathrooms       Int
+  floor           Int?
+  hasElevator     Boolean
+  hasParking      Boolean
+  hasGarden       Boolean
+  hasPool         Boolean
+  condition       PropertyCondition // NEW, GOOD, NEEDS_RENOVATION
+  
+  // Market data
+  avgPricePerM2   Float // Precio medio zona
+  marketTrend     String // UP, DOWN, STABLE
+  
+  // Output
+  estimatedValue  Float
+  confidenceScore Float // 0-100
+  minValue        Float
+  maxValue        Float
+  comparables     Json // Array de propiedades similares
+  
+  // Metadata
+  model           String // "GPT-4", "LINEAR_REGRESSION", "XGBoost"
+  createdAt       DateTime @default(now())
+  
+  @@index([propertyId])
+  @@index([postalCode])
+}
+```
+
+```typescript
+// 📁 app/api/valuations/estimate/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { Anthropic } from '@anthropic-ai/sdk';
+
+export const dynamic = 'force-dynamic';
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  
+  const data = await req.json();
+  
+  // 1. Validar input
+  const schema = z.object({
+    address: z.string(),
+    postalCode: z.string(),
+    city: z.string(),
+    squareMeters: z.number().positive(),
+    rooms: z.number().int().positive(),
+    bathrooms: z.number().int().positive(),
+    condition: z.enum(['NEW', 'GOOD', 'NEEDS_RENOVATION']),
+  });
+  
+  const validated = schema.parse(data);
+  
+  // 2. Obtener datos del mercado (Idealista API, Fotocasa API)
+  const marketData = await fetchMarketData(validated.postalCode);
+  
+  // 3. Buscar comparables en BD
+  const comparables = await prisma.property.findMany({
+    where: {
+      city: validated.city,
+      squareMeters: {
+        gte: validated.squareMeters * 0.8,
+        lte: validated.squareMeters * 1.2,
+      },
+      rooms: validated.rooms,
+    },
+    select: {
+      id: true,
+      address: true,
+      squareMeters: true,
+      price: true,
+    },
+    take: 5,
+  });
+  
+  // 4. Valoración con IA
+  const prompt = `Eres un tasador inmobiliario experto. Estima el valor de esta propiedad:
+
+Características:
+- Ubicación: ${validated.address}, ${validated.city} (${validated.postalCode})
+- Superficie: ${validated.squareMeters} m²
+- Habitaciones: ${validated.rooms}
+- Baños: ${validated.bathrooms}
+- Estado: ${validated.condition}
+
+Datos del mercado:
+- Precio medio por m² en la zona: ${marketData.avgPricePerM2}€
+- Tendencia: ${marketData.trend}
+
+Propiedades similares:
+${comparables.map(c => `- ${c.address}: ${c.price}€ (${c.squareMeters} m²)`).join('\n')}
+
+Proporciona una valoración en formato JSON:
+{
+  "estimatedValue": number,
+  "minValue": number,
+  "maxValue": number,
+  "confidenceScore": number (0-100),
+  "reasoning": "string explicando la valoración"
+}`;
+
+  const message = await anthropic.messages.create({
+    model: 'claude-3-5-sonnet-20241022',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
+  });
+  
+  const result = JSON.parse(message.content[0].text);
+  
+  // 5. Guardar en BD
+  const valuation = await prisma.propertyValuation.create({
+    data: {
+      propertyId: data.propertyId,
+      ...validated,
+      ...result,
+      avgPricePerM2: marketData.avgPricePerM2,
+      marketTrend: marketData.trend,
+      comparables: comparables,
+      model: 'claude-3-5-sonnet',
+    },
+  });
+  
+  return NextResponse.json(valuation);
+}
+```
+
+##### 2️⃣ **TOUR VIRTUAL 360° INTERACTIVO** (Prioridad: ALTA)
+
+**Especificación**: Integración con Matterport o Google Street View API.
+
+```typescript
+// 📁 prisma/schema.prisma
+model VirtualTour {
+  id         String   @id @default(cuid())
+  propertyId String   @unique
+  property   Property @relation(fields: [propertyId], references: [id])
+  
+  provider   String   // "MATTERPORT", "KUULA", "SELF_HOSTED"
+  embedUrl   String   // URL del tour
+  coverImage String?  // Thumbnail
+  
+  // Analytics
+  views      Int      @default(0)
+  avgTimeSpent Float? // Segundos
+  
+  createdAt  DateTime @default(now())
+  
+  @@index([propertyId])
+}
+
+// 📁 components/VirtualTourViewer.tsx
+'use client';
+
+export function VirtualTourViewer({ embedUrl }: { embedUrl: string }) {
+  return (
+    <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+      <iframe
+        src={embedUrl}
+        width="100%"
+        height="100%"
+        frameBorder="0"
+        allow="vr; xr; accelerometer; magnetometer; gyroscope; autoplay"
+        allowFullScreen
+      />
+    </div>
+  );
+}
+```
+
+##### 3️⃣ **FIRMA DIGITAL DE CONTRATOS** (Prioridad: CRÍTICA - Legal)
+
+**Integración**: DocuSign o Signaturit (cumple eIDAS UE).
+
+```typescript
+// 📁 app/api/contracts/sign/route.ts
+import { SignaturitClient } from '@signaturit/signaturit-sdk';
+
+const client = new SignaturitClient(process.env.SIGNATURIT_API_KEY!);
+
+export async function POST(req: NextRequest) {
+  const { contractId, signatories } = await req.json();
+  
+  // 1. Generar PDF del contrato
+  const contract = await prisma.contract.findUnique({
+    where: { id: contractId },
+    include: { property: true, tenant: true },
+  });
+  
+  const pdfBuffer = await generateContractPDF(contract);
+  
+  // 2. Crear solicitud de firma
+  const signature = await client.createSignature({
+    files: [{ 
+      name: `contrato-${contractId}.pdf`,
+      content: pdfBuffer.toString('base64'),
+    }],
+    recipients: signatories.map((s: any) => ({
+      email: s.email,
+      fullname: s.name,
+    })),
+    subject: 'Firma de contrato de arrendamiento',
+    body: 'Por favor, revisa y firma el contrato adjunto.',
+  });
+  
+  // 3. Guardar en BD
+  await prisma.contractSignature.create({
+    data: {
+      contractId,
+      signatureId: signature.id,
+      status: 'PENDING',
+      signatories,
+    },
+  });
+  
+  return NextResponse.json({ 
+    signatureUrl: signature.signature_url 
+  });
+}
+```
+
+##### 4️⃣ **MATCHING AUTOMÁTICO INQUILINO-PROPIEDAD** (Prioridad: MEDIA)
+
+**Algoritmo**: ML basado en preferencias + scoring.
+
+```typescript
+// 📁 lib/tenant-matching-service.ts
+export async function findBestMatches(tenantProfile: TenantProfile) {
+  // 1. Criterios obligatorios (filtros)
+  const baseFilter = {
+    status: 'AVAILABLE',
+    price: {
+      gte: tenantProfile.minBudget,
+      lte: tenantProfile.maxBudget,
+    },
+    city: { in: tenantProfile.preferredCities },
+  };
+  
+  // 2. Obtener propiedades candidatas
+  const properties = await prisma.property.findMany({
+    where: baseFilter,
+    include: { building: true },
+  });
+  
+  // 3. Scoring basado en preferencias
+  const scored = properties.map(property => {
+    let score = 0;
+    
+    // Ubicación (peso: 30%)
+    if (property.hasMetro && tenantProfile.needsPublicTransport) score += 30;
+    
+    // Características (peso: 25%)
+    if (property.hasParking && tenantProfile.hasCar) score += 15;
+    if (property.petsAllowed && tenantProfile.hasPets) score += 10;
+    
+    // Precio (peso: 20%)
+    const priceFit = 1 - Math.abs(property.price - tenantProfile.idealBudget) / tenantProfile.idealBudget;
+    score += priceFit * 20;
+    
+    // Tamaño (peso: 15%)
+    if (property.rooms >= tenantProfile.minRooms) score += 15;
+    
+    // Antigüedad (peso: 10%)
+    if (property.yearBuilt >= 2010 && tenantProfile.prefersModern) score += 10;
+    
+    return { property, score };
+  });
+  
+  // 4. Ordenar por score y retornar top 10
+  return scored
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10)
+    .map(({ property, score }) => ({
+      ...property,
+      matchScore: Math.round(score),
+    }));
+}
+```
+
+##### 5️⃣ **GESTIÓN DE INCIDENCIAS CON IA** (Prioridad: MEDIA)
+
+**Features**: 
+- Clasificación automática de incidencias
+- Sugerencia de proveedor
+- Estimación de coste
+
+```typescript
+// 📁 app/api/maintenance/classify/route.ts
+export async function POST(req: NextRequest) {
+  const { description, photos } = await req.json();
+  
+  // 1. Clasificar con IA
+  const classification = await anthropic.messages.create({
+    model: 'claude-3-5-sonnet-20241022',
+    max_tokens: 512,
+    messages: [{
+      role: 'user',
+      content: `Clasifica esta incidencia de mantenimiento:
+
+Descripción: ${description}
+
+Clasifica en:
+- Categoría: PLUMBING, ELECTRICAL, HVAC, STRUCTURAL, OTHER
+- Urgencia: LOW, MEDIUM, HIGH, CRITICAL
+- Proveedor recomendado: PLUMBER, ELECTRICIAN, HVAC_TECH, GENERAL_CONTRACTOR
+- Coste estimado: number (€)
+
+Responde en JSON.`,
+    }],
+  });
+  
+  const result = JSON.parse(classification.content[0].text);
+  
+  // 2. Buscar proveedor disponible
+  const provider = await prisma.serviceProvider.findFirst({
+    where: {
+      type: result.providerType,
+      available: true,
+      city: data.propertyCity,
+    },
+    orderBy: { rating: 'desc' },
+  });
+  
+  return NextResponse.json({
+    ...result,
+    suggestedProvider: provider,
+  });
+}
+```
+
+### 💰 2. Modelos de Monetización
+
+#### B2B (Agentes & Gestores)
+```typescript
+// Planes SaaS
+const B2B_PLANS = {
+  STARTER: {
+    price: 49, // €/mes
+    properties: 50,
+    users: 2,
+    features: ['CRM básico', 'Gestión de contratos'],
+  },
+  PROFESSIONAL: {
+    price: 149,
+    properties: 200,
+    users: 10,
+    features: ['CRM avanzado', 'Firma digital', 'API access'],
+  },
+  ENTERPRISE: {
+    price: 499,
+    properties: 'unlimited',
+    users: 'unlimited',
+    features: ['Todo incluido', 'Valoraciones IA', 'White-label'],
+  },
+};
+
+// Commission-based (Marketplace)
+const COMMISSION_RATES = {
+  RENTAL_LEAD: 0.5, // 50% del primer mes de alquiler
+  SALE_LEAD: 0.01, // 1% del precio de venta
+  VALUATION: 29, // €/valoración
+};
+```
+
+#### B2C (Propietarios & Inquilinos)
+```typescript
+const B2C_PLANS = {
+  OWNER_BASIC: {
+    price: 0, // Freemium
+    properties: 1,
+    features: ['Publicar 1 propiedad', 'Gestión básica'],
+  },
+  OWNER_PREMIUM: {
+    price: 19,
+    properties: 10,
+    features: ['Tour virtual', 'Informes avanzados', 'Sin comisiones'],
+  },
+  TENANT: {
+    price: 0, // Gratis para inquilinos
+    features: ['Búsqueda avanzada', 'Alertas', 'Chat con propietarios'],
+  },
+};
+```
+
+---
+
+## 🎨 UX/UI & ZERO-TOUCH ONBOARDING
+
+### 🚀 1. Zero-Touch Onboarding Flow
+
+**Objetivo**: Usuario activo en < 3 minutos sin ayuda humana.
+
+#### Flujo Actual (Análisis de Fricción)
+```
+1. Registro → ❌ FRICCIÓN: Demasiados campos (13)
+2. Verificación email → ⚠️ Puede perderse en spam
+3. Completar perfil → ❌ FRICCIÓN: No es obvio qué hacer
+4. Crear primera propiedad → ❌ FRICCIÓN: Formulario complejo
+5. Invitar inquilino → ⚠️ Paso opcional, se salta
+```
+
+#### Flujo Mejorado (Zero-Touch)
+```typescript
+// 📁 app/(auth)/onboarding/route.ts
+export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  const { userType, quickStart } = await req.json();
+  
+  // 1. Crear cuenta pre-configurada según tipo
+  const templates = {
+    PROPERTY_OWNER: {
+      modules: ['PROPERTIES', 'TENANTS', 'CONTRACTS'],
+      sampleData: {
+        properties: 1, // Crear 1 propiedad demo
+        tenants: 0,
+      },
+    },
+    PROPERTY_MANAGER: {
+      modules: ['PROPERTIES', 'TENANTS', 'MAINTENANCE', 'CRM'],
+      sampleData: {
+        properties: 3,
+        tenants: 2,
+        maintenanceRequests: 1,
+      },
+    },
+    TENANT: {
+      modules: ['PAYMENTS', 'REQUESTS', 'DOCUMENTS'],
+      sampleData: {},
+    },
+  };
+  
+  const template = templates[userType];
+  
+  // 2. Auto-crear datos de ejemplo si quickStart = true
+  if (quickStart) {
+    await createSampleData(session.user.id, template.sampleData);
+  }
+  
+  // 3. Activar módulos relevantes
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: {
+      preferredModules: template.modules,
+      onboardingCompleted: true,
+      onboardingCompletedAt: new Date(),
+    },
+  });
+  
+  // 4. Enviar emails de bienvenida (BullMQ)
+  await queue.add('send-welcome-email', {
+    userId: session.user.id,
+    userType,
+  });
+  
+  // 5. Agendar tareas de onboarding
+  await scheduleOnboardingTasks(session.user.id, userType);
+  
+  return NextResponse.json({ success: true });
+}
+```
+
+### 🤖 2. Automatización de Soporte
+
+```typescript
+// 📁 components/automation/SmartOnboardingChatbot.tsx
+'use client';
+
+import { useState } from 'react';
+import { useChat } from 'ai/react';
+
+export function SmartOnboardingChatbot() {
+  const { messages, input, handleInputChange, handleSubmit } = useChat({
+    api: '/api/ai/onboarding-assistant',
+    initialMessages: [{
+      id: 'welcome',
+      role: 'assistant',
+      content: '¡Hola! Soy tu asistente de bienvenida. ¿En qué puedo ayudarte hoy?',
+    }],
+  });
+  
+  return (
+    <div className="fixed bottom-4 right-4 w-96 h-[500px] bg-white rounded-lg shadow-xl">
+      {/* Chat UI */}
+    </div>
+  );
+}
+
+// 📁 app/api/ai/onboarding-assistant/route.ts
+import { StreamingTextResponse, Message } from 'ai';
+import { Anthropic } from '@anthropic-ai/sdk';
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+  
+  const systemPrompt = `Eres un asistente de onboarding para Inmova App, una plataforma PropTech.
+
+Tu objetivo es ayudar al usuario a:
+1. Completar su perfil
+2. Crear su primera propiedad
+3. Invitar a su primer inquilino
+4. Entender las funcionalidades clave
+
+Si detectas una pregunta técnica compleja, ofrece crear un ticket de soporte.
+
+Sé conciso, amable y usa emojis ocasionalmente.`;
+
+  const stream = await anthropic.messages.stream({
+    model: 'claude-3-5-sonnet-20241022',
+    max_tokens: 1024,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      ...messages.map((m: Message) => ({
+        role: m.role,
+        content: m.content,
+      })),
+    ],
+  });
+  
+  return new StreamingTextResponse(stream.toReadableStream());
+}
+```
+
+### 📧 3. Emails Transaccionales Automatizados
+
+```typescript
+// 📁 lib/email-automation-service.ts
+import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+// Plantillas de email
+const EMAIL_TEMPLATES = {
+  WELCOME: {
+    subject: '¡Bienvenido a Inmova! 🏠',
+    template: (userName: string) => `
+      <h1>¡Hola ${userName}!</h1>
+      <p>Estamos encantados de tenerte en Inmova.</p>
+      <h2>Próximos pasos:</h2>
+      <ol>
+        <li>Completa tu perfil</li>
+        <li>Crea tu primera propiedad</li>
+        <li>Explora el dashboard</li>
+      </ol>
+      <a href="https://inmovaapp.com/dashboard">Ir al Dashboard</a>
+    `,
+  },
+  PROPERTY_CREATED: {
+    subject: '✅ Propiedad creada exitosamente',
+    template: (propertyName: string) => `
+      <p>Tu propiedad <strong>${propertyName}</strong> ha sido creada.</p>
+      <p>Ahora puedes:</p>
+      <ul>
+        <li>Publicarla para buscar inquilinos</li>
+        <li>Crear un contrato</li>
+        <li>Subir documentos</li>
+      </ul>
+    `,
+  },
+  // ... más plantillas
+};
+
+// Worker de emails (BullMQ)
+export async function processEmailJob(job: Job) {
+  const { type, userId, data } = job.data;
+  
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const template = EMAIL_TEMPLATES[type];
+  
+  await transporter.sendMail({
+    from: '"Inmova App" <noreply@inmovaapp.com>',
+    to: user.email,
+    subject: template.subject,
+    html: template.template(user.name, ...data),
+  });
+}
+```
+
+### 📱 4. Mobile First CSS Rules
+
+```css
+/* 📁 styles/mobile-first.css */
+
+/* REGLA #1: Base styles para móvil (< 640px) */
+.container {
+  padding: 1rem;
+  max-width: 100%;
+}
+
+.button {
+  width: 100%;
+  min-height: 44px; /* Mínimo para tocar con dedo */
+  font-size: 16px; /* Evitar zoom en iOS */
+}
+
+/* REGLA #2: Touch targets mínimo 44x44px */
+.clickable {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 12px;
+}
+
+/* REGLA #3: Formularios optimizados para móvil */
+input, select, textarea {
+  font-size: 16px; /* Evitar zoom automático en iOS */
+  width: 100%;
+  padding: 12px;
+}
+
+/* REGLA #4: Navegación bottom para móvil */
+.mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 50;
+}
+
+/* REGLA #5: Ocultar sidebar en móvil */
+.desktop-sidebar {
+  display: none;
+}
+
+/* REGLA #6: Tablet (sm: 640px+) */
+@media (min-width: 640px) {
+  .container {
+    padding: 1.5rem;
+  }
+  
+  .button {
+    width: auto;
+  }
+}
+
+/* REGLA #7: Desktop (lg: 1024px+) */
+@media (min-width: 1024px) {
+  .mobile-nav {
+    display: none;
+  }
+  
+  .desktop-sidebar {
+    display: block;
+  }
+  
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+}
+
+/* REGLA #8: Gestos táctiles */
+.swipeable {
+  touch-action: pan-y; /* Permitir scroll vertical, bloquear horizontal */
+  -webkit-overflow-scrolling: touch; /* Smooth scroll en iOS */
+}
+
+/* REGLA #9: Safe areas para móviles con notch */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* REGLA #10: Optimizar rendimiento */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+```
+
+```typescript
+// 📁 components/layout/responsive-layout.tsx
+'use client';
+
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+
+export function ResponsiveLayout({ children }: { children: React.ReactNode }) {
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  
+  return isMobile ? (
+    <MobileLayout>{children}</MobileLayout>
+  ) : (
+    <DesktopLayout>{children}</DesktopLayout>
+  );
+}
+```
+
+---
+
+## 📈 MARKETING DIGITAL & SEO TÉCNICO
+
+### 🔍 1. SEO On-Page: Meta-Data Dinámica
+
+```typescript
+// 📁 app/properties/[id]/page.tsx
+import { Metadata } from 'next';
+
+export async function generateMetadata({ 
+  params 
+}: { 
+  params: { id: string } 
+}): Promise<Metadata> {
+  const property = await prisma.property.findUnique({
+    where: { id: params.id },
+    include: { building: true, photos: true },
+  });
+  
+  if (!property) return {};
+  
+  const title = `${property.type} en ${property.address}, ${property.city} - ${property.price}€`;
+  const description = `${property.rooms} habitaciones, ${property.bathrooms} baños, ${property.squareMeters}m². ${property.description?.substring(0, 120)}...`;
+  const imageUrl = property.photos[0]?.url || '/default-property.jpg';
+  
+  return {
+    title,
+    description,
+    keywords: [
+      `${property.type} ${property.city}`,
+      `alquiler ${property.city}`,
+      `${property.rooms} habitaciones ${property.city}`,
+      property.neighborhood,
+    ],
+    authors: [{ name: 'Inmova App' }],
+    
+    // Open Graph (Facebook, LinkedIn)
+    openGraph: {
+      title,
+      description,
+      url: `https://inmovaapp.com/properties/${property.id}`,
+      siteName: 'Inmova App',
+      images: [{
+        url: imageUrl,
+        width: 1200,
+        height: 630,
+        alt: title,
+      }],
+      locale: 'es_ES',
+      type: 'website',
+    },
+    
+    // Twitter Cards
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [imageUrl],
+      creator: '@inmovaapp',
+    },
+    
+    // Schema.org (JSON-LD)
+    other: {
+      'application-name': 'Inmova App',
+    },
+  };
+}
+
+export default async function PropertyPage({ params }: { params: { id: string } }) {
+  const property = await prisma.property.findUnique({ where: { id: params.id } });
+  
+  // JSON-LD structured data
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateListing',
+    name: property.address,
+    description: property.description,
+    url: `https://inmovaapp.com/properties/${property.id}`,
+    image: property.photos.map((p: any) => p.url),
+    offers: {
+      '@type': 'Offer',
+      price: property.price,
+      priceCurrency: 'EUR',
+      availability: property.status === 'AVAILABLE' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    },
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: property.address,
+      addressLocality: property.city,
+      postalCode: property.postalCode,
+      addressCountry: 'ES',
+    },
+    geo: property.latitude && property.longitude ? {
+      '@type': 'GeoCoordinates',
+      latitude: property.latitude,
+      longitude: property.longitude,
+    } : undefined,
+  };
+  
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <PropertyDetails property={property} />
+    </>
+  );
+}
+```
+
+### 📱 2. Automatización de Social Media
+
+```typescript
+// 📁 lib/social-media-automation-service.ts
+import { InstagramClient } from 'instagram-private-api';
+import { FacebookClient } from 'facebook-nodejs-business-sdk';
+import { LinkedInClient } from 'linkedin-api-node';
+
+export class SocialMediaAutomation {
+  private instagram: InstagramClient;
+  private facebook: FacebookClient;
+  private linkedin: LinkedInClient;
+  
+  constructor() {
+    this.instagram = new InstagramClient();
+    this.facebook = new FacebookClient(process.env.FACEBOOK_ACCESS_TOKEN!);
+    this.linkedin = new LinkedInClient(process.env.LINKEDIN_ACCESS_TOKEN!);
+  }
+  
+  async publishProperty(property: Property) {
+    // 1. Generar imagen de marketing
+    const marketingImage = await this.generateMarketingImage(property);
+    
+    // 2. Generar copy para cada red
+    const copies = this.generateCopies(property);
+    
+    // 3. Publicar en paralelo
+    const results = await Promise.allSettled([
+      this.publishToInstagram(marketingImage, copies.instagram),
+      this.publishToFacebook(marketingImage, copies.facebook),
+      this.publishToLinkedIn(marketingImage, copies.linkedin),
+    ]);
+    
+    return results;
+  }
+  
+  private generateCopies(property: Property) {
+    const base = `🏠 Nueva propiedad disponible en ${property.city}
+    
+📍 ${property.address}
+🛏️ ${property.rooms} habitaciones
+🚿 ${property.bathrooms} baños
+📐 ${property.squareMeters}m²
+💰 ${property.price}€/mes`;
+
+    return {
+      instagram: `${base}
+
+#inmobiliaria #alquiler #${property.city.toLowerCase()} #propiedades #vivienda #hogar #realtor #realestate`,
+      
+      facebook: `${base}
+
+¿Interesado? Contáctanos o visita nuestra web:
+👉 https://inmovaapp.com/properties/${property.id}`,
+      
+      linkedin: `Nueva oportunidad de inversión en ${property.city}
+
+${base}
+
+ROI estimado: ${property.estimatedROI}%
+Zona en crecimiento con alta demanda.
+
+Más información: https://inmovaapp.com/properties/${property.id}
+
+#PropTech #InversionInmobiliaria #RealEstate`,
+    };
+  }
+  
+  private async generateMarketingImage(property: Property) {
+    // Usar Canvas o servicio como Cloudinary
+    const { createCanvas, loadImage } = await import('canvas');
+    const canvas = createCanvas(1080, 1080);
+    const ctx = canvas.getContext('2d');
+    
+    // 1. Background con foto de propiedad
+    const propertyImage = await loadImage(property.photos[0].url);
+    ctx.drawImage(propertyImage, 0, 0, 1080, 1080);
+    
+    // 2. Overlay con gradiente
+    const gradient = ctx.createLinearGradient(0, 700, 0, 1080);
+    gradient.addColorStop(0, 'rgba(0,0,0,0)');
+    gradient.addColorStop(1, 'rgba(0,0,0,0.8)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 700, 1080, 380);
+    
+    // 3. Texto
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 48px Arial';
+    ctx.fillText(`${property.rooms} HAB | ${property.price}€/mes`, 50, 950);
+    
+    ctx.font = '32px Arial';
+    ctx.fillText(property.city.toUpperCase(), 50, 1000);
+    
+    // 4. Logo
+    const logo = await loadImage('/logo.png');
+    ctx.drawImage(logo, 900, 950, 150, 50);
+    
+    return canvas.toBuffer();
+  }
+  
+  private async publishToInstagram(image: Buffer, caption: string) {
+    await this.instagram.login(
+      process.env.INSTAGRAM_USERNAME!,
+      process.env.INSTAGRAM_PASSWORD!
+    );
+    
+    return await this.instagram.publish.photo({
+      file: image,
+      caption,
+    });
+  }
+  
+  private async publishToFacebook(image: Buffer, message: string) {
+    // Subir imagen
+    const uploadedPhoto = await this.facebook.createPhoto({
+      url: await this.uploadToS3(image),
+      published: false,
+    });
+    
+    // Publicar post
+    return await this.facebook.createPost({
+      message,
+      attached_media: [{ media_fbid: uploadedPhoto.id }],
+    });
+  }
+  
+  private async publishToLinkedIn(image: Buffer, text: string) {
+    // 1. Registrar imagen
+    const imageUrn = await this.linkedin.registerImage(image);
+    
+    // 2. Crear post
+    return await this.linkedin.createShare({
+      author: `urn:li:person:${process.env.LINKEDIN_PERSON_ID}`,
+      lifecycleState: 'PUBLISHED',
+      specificContent: {
+        'com.linkedin.ugc.ShareContent': {
+          shareCommentary: { text },
+          shareMediaCategory: 'IMAGE',
+          media: [{
+            status: 'READY',
+            media: imageUrn,
+          }],
+        },
+      },
+      visibility: { 'com.linkedin.ugc.MemberNetworkVisibility': 'PUBLIC' },
+    });
+  }
+}
+
+// 📁 app/api/webhooks/property-created/route.ts
+export async function POST(req: NextRequest) {
+  const { propertyId } = await req.json();
+  
+  // Trigger automático al crear propiedad
+  await queue.add('publish-to-social-media', {
+    propertyId,
+  });
+  
+  return NextResponse.json({ queued: true });
+}
+
+// 📁 lib/queues/workers/social-media-worker.ts
+import { Worker } from 'bullmq';
+
+const worker = new Worker('social-media', async (job) => {
+  const { propertyId } = job.data;
+  
+  const property = await prisma.property.findUnique({
+    where: { id: propertyId },
+    include: { photos: true },
+  });
+  
+  const automation = new SocialMediaAutomation();
+  const results = await automation.publishProperty(property);
+  
+  // Guardar métricas
+  await prisma.socialMediaPost.createMany({
+    data: results.map((r, i) => ({
+      propertyId,
+      platform: ['INSTAGRAM', 'FACEBOOK', 'LINKEDIN'][i],
+      status: r.status === 'fulfilled' ? 'PUBLISHED' : 'FAILED',
+      postUrl: r.status === 'fulfilled' ? r.value.url : null,
+    })),
+  });
+  
+  return results;
+}, {
+  connection: redisConnection,
+});
+```
+
+---
+
+## 🔌 DESARROLLO DE APIS & CONEXIONES BACKEND
+
+### 1. Diseño de Endpoints RESTful
+
+#### Estructura Estándar
+```typescript
+// 📁 app/api/[resource]/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { z } from 'zod';
+
+// CRÍTICO: Marcar como dinámico
+export const dynamic = 'force-dynamic';
+
+// Schema de validación
+const createResourceSchema = z.object({
+  name: z.string().min(2).max(100),
+  description: z.string().optional(),
+  price: z.number().positive(),
+  status: z.enum(['ACTIVE', 'INACTIVE']),
+});
+
+// GET - Listar recursos
+export async function GET(request: NextRequest) {
+  try {
+    // 1. Autenticación
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json(
+        { error: 'No autenticado' },
+        { status: 401 }
+      );
+    }
+
+    // 2. Parsear query parameters
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const status = searchParams.get('status');
+
+    // 3. Validar parámetros
+    if (page < 1 || limit < 1 || limit > 100) {
+      return NextResponse.json(
+        { error: 'Parámetros inválidos' },
+        { status: 400 }
+      );
+    }
+
+    // 4. Query a base de datos
+    const resources = await prisma.resource.findMany({
+      where: {
+        companyId: session.user.companyId,
+        ...(status && { status }),
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // 5. Contar total (para paginación)
+    const total = await prisma.resource.count({
+      where: {
+        companyId: session.user.companyId,
+        ...(status && { status }),
+      },
+    });
+
+    // 6. Respuesta estructurada
+    return NextResponse.json({
+      success: true,
+      data: resources,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error: any) {
+    console.error('[API Error]:', error);
+    
+    // Log para Sentry
+    if (process.env.NODE_ENV === 'production') {
+      Sentry.captureException(error);
+    }
+
+    return NextResponse.json(
+      { 
+        error: 'Error interno del servidor',
+        message: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// POST - Crear recurso
+export async function POST(request: NextRequest) {
+  try {
+    // 1. Autenticación
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json(
+        { error: 'No autenticado' },
+        { status: 401 }
+      );
+    }
+
+    // 2. Parsear body
+    const body = await request.json();
+
+    // 3. Validar con Zod
+    const validated = createResourceSchema.parse(body);
+
+    // 4. Verificar permisos (si aplica)
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPERADMIN') {
+      return NextResponse.json(
+        { error: 'Permisos insuficientes' },
+        { status: 403 }
+      );
+    }
+
+    // 5. Crear recurso
+    const resource = await prisma.resource.create({
+      data: {
+        ...validated,
+        companyId: session.user.companyId,
+        createdBy: session.user.id,
+      },
+    });
+
+    // 6. Log de auditoría
+    await prisma.auditLog.create({
+      data: {
+        userId: session.user.id,
+        action: 'RESOURCE_CREATED',
+        entityType: 'RESOURCE',
+        entityId: resource.id,
+        details: { name: resource.name },
+      },
+    });
+
+    // 7. Respuesta exitosa
+    return NextResponse.json(
+      {
+        success: true,
+        data: resource,
+        message: 'Recurso creado exitosamente',
+      },
+      { status: 201 }
+    );
+  } catch (error: any) {
+    // Manejar errores de validación
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          error: 'Datos inválidos',
+          details: error.errors.map(e => ({
+            field: e.path.join('.'),
+            message: e.message,
+          })),
+        },
+        { status: 400 }
+      );
+    }
+
+    // Error genérico
+    console.error('[API Error]:', error);
+    return NextResponse.json(
+      { error: 'Error creando recurso' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+#### Endpoints por ID
+```typescript
+// 📁 app/api/[resource]/[id]/route.ts
+export const dynamic = 'force-dynamic';
+
+// GET - Obtener recurso por ID
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    // Validar formato de ID
+    if (!params.id || params.id.length < 20) {
+      return NextResponse.json(
+        { error: 'ID inválido' },
+        { status: 400 }
+      );
+    }
+
+    const resource = await prisma.resource.findUnique({
+      where: { id: params.id },
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!resource) {
+      return NextResponse.json(
+        { error: 'Recurso no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    // Verificar acceso (ownership)
+    if (resource.companyId !== session.user.companyId) {
+      return NextResponse.json(
+        { error: 'Acceso denegado' },
+        { status: 403 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: resource,
+    });
+  } catch (error: any) {
+    console.error('[API Error]:', error);
+    return NextResponse.json(
+      { error: 'Error obteniendo recurso' },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT - Actualizar recurso
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    
+    // Schema de actualización (campos opcionales)
+    const updateSchema = createResourceSchema.partial();
+    const validated = updateSchema.parse(body);
+
+    // Verificar existencia y ownership
+    const existing = await prisma.resource.findUnique({
+      where: { id: params.id },
+      select: { companyId: true },
+    });
+
+    if (!existing) {
+      return NextResponse.json(
+        { error: 'Recurso no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    if (existing.companyId !== session.user.companyId) {
+      return NextResponse.json(
+        { error: 'Acceso denegado' },
+        { status: 403 }
+      );
+    }
+
+    // Actualizar
+    const updated = await prisma.resource.update({
+      where: { id: params.id },
+      data: {
+        ...validated,
+        updatedAt: new Date(),
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: updated,
+      message: 'Recurso actualizado exitosamente',
+    });
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: error.errors },
+        { status: 400 }
+      );
+    }
+
+    console.error('[API Error]:', error);
+    return NextResponse.json(
+      { error: 'Error actualizando recurso' },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE - Eliminar recurso
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    // Verificar ownership antes de eliminar
+    const resource = await prisma.resource.findUnique({
+      where: { id: params.id },
+      select: { companyId: true, name: true },
+    });
+
+    if (!resource) {
+      return NextResponse.json(
+        { error: 'Recurso no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    if (resource.companyId !== session.user.companyId) {
+      return NextResponse.json(
+        { error: 'Acceso denegado' },
+        { status: 403 }
+      );
+    }
+
+    // Soft delete (recomendado)
+    await prisma.resource.update({
+      where: { id: params.id },
+      data: {
+        deletedAt: new Date(),
+        status: 'DELETED',
+      },
+    });
+
+    // O hard delete si es necesario
+    // await prisma.resource.delete({ where: { id: params.id } });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Recurso eliminado exitosamente',
+    });
+  } catch (error: any) {
+    console.error('[API Error]:', error);
+    return NextResponse.json(
+      { error: 'Error eliminando recurso' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+### 2. Integraciones con Third-Party APIs
+
+#### Stripe (Pagos)
+```typescript
+// 📁 lib/stripe-service.ts
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2023-10-16',
+});
+
+export class StripeService {
+  static async createPaymentIntent(amount: number, currency: string = 'eur') {
+    try {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convertir a centavos
+        currency,
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+
+      return {
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
+      };
+    } catch (error: any) {
+      console.error('[Stripe Error]:', error);
+      throw new Error(`Error creando payment intent: ${error.message}`);
+    }
+  }
+
+  static async confirmPayment(paymentIntentId: string) {
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    return paymentIntent.status === 'succeeded';
+  }
+
+  static async createCustomer(email: string, name: string) {
+    return await stripe.customers.create({
+      email,
+      name,
+    });
+  }
+}
+```
+
+#### Twilio (SMS)
+```typescript
+// 📁 lib/twilio-service.ts
+import twilio from 'twilio';
+
+const client = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
+
+export class TwilioService {
+  static async sendSMS(to: string, message: string) {
+    try {
+      const result = await client.messages.create({
+        body: message,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to,
+      });
+
+      return {
+        success: true,
+        messageId: result.sid,
+      };
+    } catch (error: any) {
+      console.error('[Twilio Error]:', error);
+      throw new Error(`Error enviando SMS: ${error.message}`);
+    }
+  }
+
+  static async sendWhatsApp(to: string, message: string) {
+    return await client.messages.create({
+      body: message,
+      from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
+      to: `whatsapp:${to}`,
+    });
+  }
+}
+```
+
+### 3. Manejo de Errores Avanzado
+
+```typescript
+// 📁 lib/api-error.ts
+export class APIError extends Error {
+  constructor(
+    public message: string,
+    public statusCode: number = 500,
+    public code?: string
+  ) {
+    super(message);
+    this.name = 'APIError';
+  }
+}
+
+export class ValidationError extends APIError {
+  constructor(public fields: Record<string, string>) {
+    super('Validation failed', 400, 'VALIDATION_ERROR');
+    this.name = 'ValidationError';
+  }
+}
+
+export class NotFoundError extends APIError {
+  constructor(resource: string = 'Resource') {
+    super(`${resource} not found`, 404, 'NOT_FOUND');
+    this.name = 'NotFoundError';
+  }
+}
+
+export class UnauthorizedError extends APIError {
+  constructor(message: string = 'Unauthorized') {
+    super(message, 401, 'UNAUTHORIZED');
+    this.name = 'UnauthorizedError';
+  }
+}
+
+export class ForbiddenError extends APIError {
+  constructor(message: string = 'Forbidden') {
+    super(message, 403, 'FORBIDDEN');
+    this.name = 'ForbiddenError';
+  }
+}
+
+// Middleware de manejo de errores
+export function handleAPIError(error: unknown): NextResponse {
+  if (error instanceof APIError) {
+    return NextResponse.json(
+      {
+        error: error.message,
+        code: error.code,
+        ...(error instanceof ValidationError && { fields: error.fields }),
+      },
+      { status: error.statusCode }
+    );
+  }
+
+  if (error instanceof z.ZodError) {
+    return NextResponse.json(
+      {
+        error: 'Validation failed',
+        code: 'VALIDATION_ERROR',
+        fields: error.errors.reduce((acc, err) => {
+          acc[err.path.join('.')] = err.message;
+          return acc;
+        }, {} as Record<string, string>),
+      },
+      { status: 400 }
+    );
+  }
+
+  // Error desconocido
+  console.error('[Unexpected Error]:', error);
+  return NextResponse.json(
+    {
+      error: 'Internal server error',
+      code: 'INTERNAL_ERROR',
+    },
+    { status: 500 }
+  );
+}
+
+// Uso en API Routes
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      throw new UnauthorizedError();
+    }
+
+    const data = await fetchData();
+    if (!data) {
+      throw new NotFoundError('Data');
+    }
+
+    return NextResponse.json({ data });
+  } catch (error) {
+    return handleAPIError(error);
+  }
+}
+```
+
+### 4. Rate Limiting por Endpoint
+
+```typescript
+// 📁 lib/api-rate-limiter.ts
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
+
+// Diferentes límites para diferentes endpoints
+export const rateLimiters = {
+  auth: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(10, '5 m'), // 10 requests / 5 min
+  }),
+  api: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(100, '1 m'), // 100 requests / 1 min
+  }),
+  expensive: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(5, '1 m'), // 5 requests / 1 min (para operaciones costosas)
+  }),
+};
+
+// Uso en API Route
+export async function POST(request: NextRequest) {
+  const ip = request.headers.get('x-forwarded-for') || 'unknown';
+  
+  const { success, limit, remaining, reset } = await rateLimiters.expensive.limit(ip);
+  
+  if (!success) {
+    return NextResponse.json(
+      {
+        error: 'Too many requests',
+        limit,
+        remaining: 0,
+        reset: new Date(reset).toISOString(),
+      },
+      {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': limit.toString(),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': reset.toString(),
+        },
+      }
+    );
+  }
+
+  // Continuar con la lógica...
+  return NextResponse.json({ success: true });
+}
+```
+
+---
+
+## 🧪 TESTING AUTOMATIZADO (QA)
+
+### 1. Tests Unitarios con Jest/Vitest
+
+#### Test de Funciones Puras
+```typescript
+// 📁 lib/calculations.ts
+export function calculateRentIncrease(
+  currentRent: number,
+  percentage: number
+): number {
+  if (currentRent < 0) {
+    throw new Error('El alquiler no puede ser negativo');
+  }
+  if (percentage < 0 || percentage > 100) {
+    throw new Error('El porcentaje debe estar entre 0 y 100');
+  }
+  
+  return Math.round(currentRent * (1 + percentage / 100) * 100) / 100;
+}
+
+export function isValidEmail(email: string): boolean {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+}
+
+// 📁 lib/calculations.test.ts
+import { describe, it, expect } from 'vitest';
+import { calculateRentIncrease, isValidEmail } from './calculations';
+
+describe('calculateRentIncrease', () => {
+  it('calcula correctamente el aumento de alquiler', () => {
+    expect(calculateRentIncrease(1000, 5)).toBe(1050);
+    expect(calculateRentIncrease(1500, 10)).toBe(1650);
+  });
+
+  it('maneja decimales correctamente', () => {
+    expect(calculateRentIncrease(999.99, 5)).toBe(1049.99);
+  });
+
+  it('lanza error con alquiler negativo', () => {
+    expect(() => calculateRentIncrease(-100, 5)).toThrow('El alquiler no puede ser negativo');
+  });
+
+  it('lanza error con porcentaje inválido', () => {
+    expect(() => calculateRentIncrease(1000, -5)).toThrow('El porcentaje debe estar entre 0 y 100');
+    expect(() => calculateRentIncrease(1000, 150)).toThrow('El porcentaje debe estar entre 0 y 100');
+  });
+
+  // Edge cases
+  it('maneja 0% de aumento', () => {
+    expect(calculateRentIncrease(1000, 0)).toBe(1000);
+  });
+
+  it('maneja 100% de aumento', () => {
+    expect(calculateRentIncrease(1000, 100)).toBe(2000);
+  });
+
+  it('maneja alquiler 0', () => {
+    expect(calculateRentIncrease(0, 10)).toBe(0);
+  });
+});
+
+describe('isValidEmail', () => {
+  it('valida emails correctos', () => {
+    expect(isValidEmail('user@example.com')).toBe(true);
+    expect(isValidEmail('test+alias@domain.co.uk')).toBe(true);
+  });
+
+  it('rechaza emails inválidos', () => {
+    expect(isValidEmail('invalid')).toBe(false);
+    expect(isValidEmail('@example.com')).toBe(false);
+    expect(isValidEmail('user@')).toBe(false);
+    expect(isValidEmail('')).toBe(false);
+  });
+
+  // Edge cases
+  it('maneja espacios', () => {
+    expect(isValidEmail(' user@example.com ')).toBe(false);
+    expect(isValidEmail('user @example.com')).toBe(false);
+  });
+
+  it('maneja null/undefined', () => {
+    expect(isValidEmail(null as any)).toBe(false);
+    expect(isValidEmail(undefined as any)).toBe(false);
+  });
+});
+```
+
+#### Test de Servicios (con Mocks)
+```typescript
+// 📁 lib/payment-service.test.ts
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { PaymentService } from './payment-service';
+import { prisma } from './db';
+import { StripeService } from './stripe-service';
+
+// Mockear dependencias
+vi.mock('./db');
+vi.mock('./stripe-service');
+
+describe('PaymentService', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('processPayment', () => {
+    it('procesa un pago exitosamente', async () => {
+      // Arrange
+      const mockPaymentIntent = {
+        clientSecret: 'pi_test_secret',
+        paymentIntentId: 'pi_test_123',
+      };
+
+      vi.mocked(StripeService.createPaymentIntent).mockResolvedValue(mockPaymentIntent);
+      vi.mocked(prisma.payment.create).mockResolvedValue({
+        id: 'pay_123',
+        amount: 1000,
+        status: 'PENDING',
+      } as any);
+
+      // Act
+      const result = await PaymentService.processPayment({
+        amount: 1000,
+        contractId: 'contract_123',
+      });
+
+      // Assert
+      expect(result.success).toBe(true);
+      expect(StripeService.createPaymentIntent).toHaveBeenCalledWith(1000, 'eur');
+      expect(prisma.payment.create).toHaveBeenCalled();
+    });
+
+    it('maneja error cuando el monto es negativo', async () => {
+      await expect(
+        PaymentService.processPayment({
+          amount: -100,
+          contractId: 'contract_123',
+        })
+      ).rejects.toThrow('El monto debe ser positivo');
+    });
+
+    it('maneja error de Stripe', async () => {
+      vi.mocked(StripeService.createPaymentIntent).mockRejectedValue(
+        new Error('Stripe API error')
+      );
+
+      await expect(
+        PaymentService.processPayment({
+          amount: 1000,
+          contractId: 'contract_123',
+        })
+      ).rejects.toThrow('Error procesando pago');
+    });
+
+    // Edge cases
+    it('maneja monto 0', async () => {
+      await expect(
+        PaymentService.processPayment({
+          amount: 0,
+          contractId: 'contract_123',
+        })
+      ).rejects.toThrow('El monto debe ser positivo');
+    });
+
+    it('maneja contractId null', async () => {
+      await expect(
+        PaymentService.processPayment({
+          amount: 1000,
+          contractId: null as any,
+        })
+      ).rejects.toThrow('Contract ID es requerido');
+    });
+
+    it('maneja tarjeta rechazada', async () => {
+      vi.mocked(StripeService.createPaymentIntent).mockRejectedValue(
+        new Error('card_declined')
+      );
+
+      await expect(
+        PaymentService.processPayment({
+          amount: 1000,
+          contractId: 'contract_123',
+        })
+      ).rejects.toThrow();
+
+      expect(prisma.payment.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: 'FAILED',
+          }),
+        })
+      );
+    });
+  });
+});
+```
+
+### 2. Tests de Integración (API Routes)
+
+```typescript
+// 📁 __tests__/api/properties.test.ts
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+
+describe('API: /api/properties', () => {
+  let authToken: string;
+  const baseURL = 'http://localhost:3000';
+
+  beforeAll(async () => {
+    // Autenticar para obtener token
+    const response = await fetch(`${baseURL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'test@example.com',
+        password: 'password123',
+      }),
+    });
+    
+    const data = await response.json();
+    authToken = data.token;
+  });
+
+  describe('GET /api/properties', () => {
+    it('retorna lista de propiedades', async () => {
+      const response = await fetch(`${baseURL}/api/properties`, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
+      });
+
+      expect(response.status).toBe(200);
+      
+      const data = await response.json();
+      expect(data.success).toBe(true);
+      expect(Array.isArray(data.data)).toBe(true);
+      expect(data.pagination).toBeDefined();
+    });
+
+    it('retorna 401 sin autenticación', async () => {
+      const response = await fetch(`${baseURL}/api/properties`);
+      expect(response.status).toBe(401);
+    });
+
+    it('filtra por status correctamente', async () => {
+      const response = await fetch(`${baseURL}/api/properties?status=ACTIVE`, {
+        headers: { 'Authorization': `Bearer ${authToken}` },
+      });
+
+      const data = await response.json();
+      expect(data.data.every((p: any) => p.status === 'ACTIVE')).toBe(true);
+    });
+
+    // Edge cases
+    it('maneja página inválida', async () => {
+      const response = await fetch(`${baseURL}/api/properties?page=-1`, {
+        headers: { 'Authorization': `Bearer ${authToken}` },
+      });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('maneja límite excesivo', async () => {
+      const response = await fetch(`${baseURL}/api/properties?limit=1000`, {
+        headers: { 'Authorization': `Bearer ${authToken}` },
+      });
+
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe('POST /api/properties', () => {
+    it('crea una propiedad exitosamente', async () => {
+      const propertyData = {
+        address: 'Calle Test 123',
+        city: 'Madrid',
+        price: 1200,
+        rooms: 3,
+        bathrooms: 2,
+        squareMeters: 80,
+      };
+
+      const response = await fetch(`${baseURL}/api/properties`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(propertyData),
+      });
+
+      expect(response.status).toBe(201);
+      
+      const data = await response.json();
+      expect(data.success).toBe(true);
+      expect(data.data.address).toBe(propertyData.address);
+    });
+
+    it('valida campos requeridos', async () => {
+      const response = await fetch(`${baseURL}/api/properties`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ address: 'Test' }), // Faltan campos
+      });
+
+      expect(response.status).toBe(400);
+      
+      const data = await response.json();
+      expect(data.error).toBeDefined();
+      expect(data.details).toBeDefined();
+    });
+
+    // Edge cases
+    it('maneja precio negativo', async () => {
+      const response = await fetch(`${baseURL}/api/properties`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          address: 'Test',
+          price: -1000, // Negativo
+          rooms: 3,
+        }),
+      });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('maneja body vacío', async () => {
+      const response = await fetch(`${baseURL}/api/properties`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('maneja JSON malformado', async () => {
+      const response = await fetch(`${baseURL}/api/properties`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: 'invalid json',
+      });
+
+      expect(response.status).toBe(400);
+    });
+  });
+});
+```
+
+### 3. Tests E2E con Playwright
+
+```typescript
+// 📁 e2e/properties.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('Gestión de Propiedades', () => {
+  test.beforeEach(async ({ page }) => {
+    // Login
+    await page.goto('/login');
+    await page.fill('input[name="email"]', 'test@example.com');
+    await page.fill('input[name="password"]', 'password123');
+    await page.click('button[type="submit"]');
+    await page.waitForURL('/dashboard');
+  });
+
+  test('crear nueva propiedad', async ({ page }) => {
+    // Navegar a crear propiedad
+    await page.goto('/dashboard/properties/new');
+
+    // Llenar formulario
+    await page.fill('input[name="address"]', 'Calle Test 123');
+    await page.fill('input[name="city"]', 'Madrid');
+    await page.fill('input[name="price"]', '1200');
+    await page.fill('input[name="rooms"]', '3');
+    await page.fill('input[name="bathrooms"]', '2');
+    await page.fill('input[name="squareMeters"]', '80');
+
+    // Enviar
+    await page.click('button[type="submit"]');
+
+    // Verificar redirección y mensaje
+    await expect(page).toHaveURL(/\/dashboard\/properties\/\w+/);
+    await expect(page.locator('text=Propiedad creada exitosamente')).toBeVisible();
+  });
+
+  test('validar campos requeridos', async ({ page }) => {
+    await page.goto('/dashboard/properties/new');
+    
+    // Intentar enviar sin llenar
+    await page.click('button[type="submit"]');
+
+    // Verificar mensajes de error
+    await expect(page.locator('text=Campo requerido')).toHaveCount(6);
+  });
+
+  test('buscar propiedades', async ({ page }) => {
+    await page.goto('/dashboard/properties');
+
+    // Usar buscador
+    await page.fill('input[placeholder="Buscar propiedades"]', 'Madrid');
+    await page.press('input[placeholder="Buscar propiedades"]', 'Enter');
+
+    // Verificar resultados
+    await expect(page.locator('[data-testid="property-card"]')).toHaveCount(3);
+  });
+
+  // Edge case: formulario con datos inválidos
+  test('manejar precio negativo', async ({ page }) => {
+    await page.goto('/dashboard/properties/new');
+
+    await page.fill('input[name="price"]', '-1000');
+    await page.click('button[type="submit"]');
+
+    await expect(page.locator('text=El precio debe ser positivo')).toBeVisible();
+  });
+});
+```
+
+### 4. Cobertura de Tests
+
+```json
+// 📁 vitest.config.ts
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        '.next/',
+        '**/*.config.ts',
+        '**/*.test.ts',
+        '**/*.spec.ts',
+      ],
+      // Umbrales de cobertura
+      thresholds: {
+        lines: 80,
+        functions: 80,
+        branches: 75,
+        statements: 80,
+      },
+    },
+  },
+});
+```
+
+---
+
+## 🤖 INTEGRACIÓN DE IA
+
+### 1. OpenAI GPT-4 / GPT-4 Turbo
+
+```typescript
+// 📁 lib/openai-service.ts
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+export class OpenAIService {
+  static async generatePropertyDescription(property: {
+    address: string;
+    rooms: number;
+    bathrooms: number;
+    squareMeters: number;
+    features: string[];
+  }): Promise<string> {
+    const prompt = `Genera una descripción atractiva para una propiedad inmobiliaria:
+
+Dirección: ${property.address}
+Habitaciones: ${property.rooms}
+Baños: ${property.bathrooms}
+Superficie: ${property.squareMeters}m²
+Características: ${property.features.join(', ')}
+
+La descripción debe ser profesional, atractiva y resaltar los puntos fuertes.
+Máximo 200 palabras.`;
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4-turbo-preview',
+      messages: [
+        {
+          role: 'system',
+          content: 'Eres un experto en marketing inmobiliario.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      max_tokens: 500,
+      temperature: 0.7,
+    });
+
+    return completion.choices[0].message.content || '';
+  }
+
+  static async chatCompletion(
+    messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>
+  ) {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4-turbo-preview',
+      messages,
+    });
+
+    return completion.choices[0].message.content;
+  }
+
+  static async generateEmbeddings(text: string): Promise<number[]> {
+    const response = await openai.embeddings.create({
+      model: 'text-embedding-3-small',
+      input: text,
+    });
+
+    return response.data[0].embedding;
+  }
+}
+```
+
+### 2. Anthropic Claude (Streaming)
+
+```typescript
+// 📁 lib/claude-service.ts
+import Anthropic from '@anthropic-ai/sdk';
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+export class ClaudeService {
+  static async analyzeProperty(property: any): Promise<{
+    valuation: number;
+    reasoning: string;
+    recommendations: string[];
+  }> {
+    const prompt = `Analiza esta propiedad y proporciona:
+1. Valoración estimada en €
+2. Razonamiento de la valoración
+3. 3 recomendaciones para mejorar su valor
+
+Propiedad:
+${JSON.stringify(property, null, 2)}
+
+Responde en formato JSON.`;
+
+    const message = await anthropic.messages.create({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 1024,
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+    });
+
+    const content = message.content[0];
+    if (content.type === 'text') {
+      return JSON.parse(content.text);
+    }
+
+    throw new Error('Unexpected response format');
+  }
+
+  static async streamChat(
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>
+  ) {
+    return anthropic.messages.stream({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 1024,
+      messages,
+    });
+  }
+}
+
+// 📁 app/api/ai/chat/route.ts
+import { StreamingTextResponse } from 'ai';
+
+export const dynamic = 'force-dynamic';
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const stream = await ClaudeService.streamChat(messages);
+
+  // Convertir stream de Anthropic a formato compatible
+  const readableStream = new ReadableStream({
+    async start(controller) {
+      for await (const chunk of stream) {
+        if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+          controller.enqueue(new TextEncoder().encode(chunk.delta.text));
+        }
+      }
+      controller.close();
+    },
+  });
+
+  return new StreamingTextResponse(readableStream);
+}
+```
+
+### 3. RAG (Retrieval-Augmented Generation)
+
+```typescript
+// 📁 lib/rag-service.ts
+import { OpenAIService } from './openai-service';
+import { prisma } from './db';
+
+export class RAGService {
+  // Indexar documentos (generar embeddings)
+  static async indexDocument(id: string, content: string) {
+    const embedding = await OpenAIService.generateEmbeddings(content);
+
+    await prisma.documentEmbedding.create({
+      data: {
+        documentId: id,
+        content,
+        embedding,
+      },
+    });
+  }
+
+  // Búsqueda semántica
+  static async searchSimilarDocuments(query: string, limit: number = 5) {
+    const queryEmbedding = await OpenAIService.generateEmbeddings(query);
+
+    // Usar extensión pgvector para búsqueda por similitud
+    const results = await prisma.$queryRaw`
+      SELECT 
+        id,
+        content,
+        1 - (embedding <=> ${queryEmbedding}::vector) AS similarity
+      FROM "DocumentEmbedding"
+      ORDER BY similarity DESC
+      LIMIT ${limit}
+    `;
+
+    return results;
+  }
+
+  // Chat con contexto (RAG)
+  static async chatWithContext(question: string, conversationHistory: any[]) {
+    // 1. Buscar documentos relevantes
+    const relevantDocs = await this.searchSimilarDocuments(question, 3);
+
+    // 2. Construir contexto
+    const context = relevantDocs.map((doc: any) => doc.content).join('\n\n');
+
+    // 3. Generar respuesta con contexto
+    const prompt = `Contexto:
+${context}
+
+Pregunta: ${question}
+
+Responde basándote en el contexto proporcionado.`;
+
+    const messages = [
+      { role: 'system' as const, content: 'Eres un asistente experto en PropTech.' },
+      ...conversationHistory,
+      { role: 'user' as const, content: prompt },
+    ];
+
+    return await OpenAIService.chatCompletion(messages);
+  }
+}
+```
+
+### 4. Ingeniería de Prompts - Best Practices
+
+```typescript
+// 📁 lib/prompt-templates.ts
+
+export const PROMPT_TEMPLATES = {
+  propertyValuation: (property: any) => `Actúa como un tasador inmobiliario certificado con 20 años de experiencia.
+
+Tu tarea: Valorar esta propiedad con precisión.
+
+Propiedad:
+- Ubicación: ${property.address}, ${property.city}
+- Superficie: ${property.squareMeters}m²
+- Habitaciones: ${property.rooms}
+- Baños: ${property.bathrooms}
+- Estado: ${property.condition}
+- Año construcción: ${property.yearBuilt}
+
+Datos del mercado:
+- Precio medio por m² en la zona: ${property.avgPricePerM2}€
+- Tendencia: ${property.marketTrend}
+
+Proporciona una respuesta en formato JSON con:
+{
+  "estimatedValue": number,
+  "minValue": number,
+  "maxValue": number,
+  "confidenceScore": number (0-100),
+  "reasoning": "string explicando la valoración",
+  "keyFactors": ["factor1", "factor2", "factor3"]
+}
+
+Sé preciso y justifica tu valoración.`,
+
+  tenantMatching: (tenant: any, property: any) => `Eres un experto en matching inquilino-propiedad.
+
+Evalúa la compatibilidad entre este inquilino y esta propiedad.
+
+INQUILINO:
+- Presupuesto: ${tenant.budget}€/mes
+- Ocupación: ${tenant.occupation}
+- Mascotas: ${tenant.hasPets ? 'Sí' : 'No'}
+- Fumador: ${tenant.isSmoker ? 'Sí' : 'No'}
+- Preferencias: ${tenant.preferences.join(', ')}
+
+PROPIEDAD:
+- Precio: ${property.price}€/mes
+- Ubicación: ${property.address}
+- Características: ${property.features.join(', ')}
+- Mascotas permitidas: ${property.petsAllowed ? 'Sí' : 'No'}
+
+Proporciona JSON:
+{
+  "matchScore": number (0-100),
+  "pros": ["ventaja1", "ventaja2"],
+  "cons": ["desventaja1", "desventaja2"],
+  "recommendation": "string con recomendación final"
+}`,
+
+  incidentClassification: (description: string, photos?: string[]) => `Eres un experto en mantenimiento de propiedades.
+
+Clasifica esta incidencia:
+
+Descripción: ${description}
+${photos ? `Fotos: ${photos.length} adjuntas` : ''}
+
+Clasifica en:
+{
+  "category": "PLUMBING" | "ELECTRICAL" | "HVAC" | "STRUCTURAL" | "APPLIANCE" | "OTHER",
+  "urgency": "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
+  "estimatedCost": number,
+  "providerType": "PLUMBER" | "ELECTRICIAN" | "HVAC_TECH" | "GENERAL_CONTRACTOR",
+  "actionRequired": "string describiendo acción",
+  "timeEstimate": "string estimando tiempo de resolución"
+}
+
+Sé preciso en la clasificación.`,
+
+  marketingCopy: (property: any) => `Eres un copywriter experto en marketing inmobiliario.
+
+Genera copy atractivo para:
+
+PROPIEDAD:
+${JSON.stringify(property, null, 2)}
+
+Genera 3 versiones:
+1. Instagram (casual, emojis, hashtags)
+2. Facebook (familiar, detallado)
+3. LinkedIn (profesional, inversión)
+
+Formato JSON:
+{
+  "instagram": "string",
+  "facebook": "string",
+  "linkedin": "string",
+  "hashtags": ["#tag1", "#tag2"]
+}`,
+};
+
+// Uso:
+const prompt = PROMPT_TEMPLATES.propertyValuation(property);
+const result = await ClaudeService.analyze(prompt);
+```
+
+### 5. Manejo de Costos y Límites
+
+```typescript
+// 📁 lib/ai-cost-tracker.ts
+export class AICostTracker {
+  private static costs = {
+    'gpt-4': { input: 0.03, output: 0.06 }, // por 1K tokens
+    'gpt-4-turbo': { input: 0.01, output: 0.03 },
+    'gpt-3.5-turbo': { input: 0.0005, output: 0.0015 },
+    'claude-3-sonnet': { input: 0.003, output: 0.015 },
+    'claude-3-opus': { input: 0.015, output: 0.075 },
+  };
+
+  static async logUsage(
+    model: string,
+    inputTokens: number,
+    outputTokens: number,
+    userId: string
+  ) {
+    const cost =
+      (inputTokens / 1000) * this.costs[model].input +
+      (outputTokens / 1000) * this.costs[model].output;
+
+    await prisma.aiUsageLog.create({
+      data: {
+        userId,
+        model,
+        inputTokens,
+        outputTokens,
+        cost,
+      },
+    });
+
+    return cost;
+  }
+
+  static async getUserMonthlyUsage(userId: string): Promise<{
+    totalCost: number;
+    totalTokens: number;
+    requestCount: number;
+  }> {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const logs = await prisma.aiUsageLog.findMany({
+      where: {
+        userId,
+        createdAt: { gte: startOfMonth },
+      },
+    });
+
+    return {
+      totalCost: logs.reduce((sum, log) => sum + log.cost, 0),
+      totalTokens: logs.reduce((sum, log) => sum + log.inputTokens + log.outputTokens, 0),
+      requestCount: logs.length,
+    };
+  }
+
+  static async checkQuota(userId: string, model: string): Promise<boolean> {
+    const usage = await this.getUserMonthlyUsage(userId);
+    const quota = 100; // $100/mes por usuario
+
+    return usage.totalCost < quota;
+  }
+}
+```
+
+---
+
+## 📝 DOCUMENTACIÓN TÉCNICA
+
+### 1. API Documentation (Swagger/OpenAPI)
+
+```typescript
+// 📁 lib/swagger-config.ts
+import swaggerJsdoc from 'swagger-jsdoc';
+
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Inmova API',
+      version: '1.0.0',
+      description: 'API RESTful para gestión inmobiliaria PropTech',
+      contact: {
+        name: 'Inmova Support',
+        email: 'support@inmova.app',
+      },
+    },
+    servers: [
+      {
+        url: 'https://inmovaapp.com',
+        description: 'Production',
+      },
+      {
+        url: 'http://localhost:3000',
+        description: 'Development',
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+      schemas: {
+        Property: {
+          type: 'object',
+          required: ['address', 'city', 'price', 'rooms'],
+          properties: {
+            id: { type: 'string', example: 'cljk3...' },
+            address: { type: 'string', example: 'Calle Mayor 123' },
+            city: { type: 'string', example: 'Madrid' },
+            price: { type: 'number', example: 1200 },
+            rooms: { type: 'integer', example: 3 },
+            bathrooms: { type: 'integer', example: 2 },
+            squareMeters: { type: 'number', example: 85 },
+            status: {
+              type: 'string',
+              enum: ['AVAILABLE', 'RENTED', 'MAINTENANCE'],
+              example: 'AVAILABLE',
+            },
+            createdAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        Error: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+            code: { type: 'string' },
+            details: { type: 'object' },
+          },
+        },
+      },
+    },
+    security: [{ bearerAuth: [] }],
+  },
+  apis: ['./app/api/**/*.ts'], // Buscar anotaciones en archivos
+};
+
+export const swaggerSpec = swaggerJsdoc(options);
+
+// 📁 app/api/properties/route.ts
+/**
+ * @swagger
+ * /api/properties:
+ *   get:
+ *     summary: Listar propiedades
+ *     description: Obtiene lista paginada de propiedades de la empresa
+ *     tags: [Properties]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *           maximum: 100
+ *         description: Elementos por página
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [AVAILABLE, RENTED, MAINTENANCE]
+ *         description: Filtrar por estado
+ *     responses:
+ *       200:
+ *         description: Lista de propiedades
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Property'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page: { type: integer }
+ *                     limit: { type: integer }
+ *                     total: { type: integer }
+ *                     pages: { type: integer }
+ *       401:
+ *         description: No autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *   post:
+ *     summary: Crear propiedad
+ *     description: Crea una nueva propiedad
+ *     tags: [Properties]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Property'
+ *     responses:
+ *       201:
+ *         description: Propiedad creada exitosamente
+ *       400:
+ *         description: Datos inválidos
+ *       401:
+ *         description: No autenticado
+ */
+export async function GET(request: NextRequest) {
+  // ... implementación
+}
+```
+
+### 2. JSDoc Comments
+
+```typescript
+// 📁 lib/property-service.ts
+
+/**
+ * Servicio para gestión de propiedades inmobiliarias
+ * 
+ * @module PropertyService
+ * @category Services
+ */
+export class PropertyService {
+  /**
+   * Calcula el precio recomendado para una propiedad
+   * basado en propiedades similares en la zona
+   * 
+   * @param {Object} params - Parámetros de la propiedad
+   * @param {string} params.city - Ciudad de la propiedad
+   * @param {number} params.squareMeters - Superficie en m²
+   * @param {number} params.rooms - Número de habitaciones
+   * @param {string} params.neighborhood - Barrio
+   * 
+   * @returns {Promise<{price: number, confidence: number}>} Precio recomendado y nivel de confianza (0-100)
+   * 
+   * @throws {ValidationError} Si los parámetros son inválidos
+   * @throws {APIError} Si hay error en la API externa
+   * 
+   * @example
+   * const result = await PropertyService.calculateRecommendedPrice({
+   *   city: 'Madrid',
+   *   squareMeters: 80,
+   *   rooms: 3,
+   *   neighborhood: 'Salamanca'
+   * });
+   * console.log(`Precio recomendado: ${result.price}€`);
+   */
+  static async calculateRecommendedPrice(params: {
+    city: string;
+    squareMeters: number;
+    rooms: number;
+    neighborhood: string;
+  }): Promise<{ price: number; confidence: number }> {
+    // 1. Validar parámetros
+    if (params.squareMeters <= 0 || params.rooms <= 0) {
+      throw new ValidationError({
+        squareMeters: 'Debe ser mayor a 0',
+        rooms: 'Debe ser mayor a 0',
+      });
+    }
+
+    // 2. Buscar propiedades similares
+    const similarProperties = await prisma.property.findMany({
+      where: {
+        city: params.city,
+        neighborhood: params.neighborhood,
+        squareMeters: {
+          gte: params.squareMeters * 0.8,
+          lte: params.squareMeters * 1.2,
+        },
+        rooms: params.rooms,
+        status: 'RENTED',
+      },
+      select: { price: true },
+    });
+
+    if (similarProperties.length === 0) {
+      return { price: 0, confidence: 0 };
+    }
+
+    // 3. Calcular media
+    const avgPrice =
+      similarProperties.reduce((sum, p) => sum + p.price, 0) / similarProperties.length;
+
+    // 4. Calcular confianza (basado en cantidad de datos)
+    const confidence = Math.min(similarProperties.length * 10, 100);
+
+    return {
+      price: Math.round(avgPrice),
+      confidence,
+    };
+  }
+
+  /**
+   * Genera un reporte PDF de la propiedad
+   * 
+   * @internal Solo para uso interno
+   * @deprecated Usar generateModernReport en su lugar
+   */
+  static async generateLegacyReport(propertyId: string): Promise<Buffer> {
+    // ... implementación antigua
+  }
+}
+```
+
+### 3. README Template
+
+```markdown
+# 📁 Feature Name
+
+## 📖 Descripción
+
+Breve descripción de qué hace esta funcionalidad.
+
+## 🚀 Instalación
+
+\`\`\`bash
+yarn install
+yarn prisma generate
+\`\`\`
+
+## 🔧 Configuración
+
+Variables de entorno requeridas:
+
+\`\`\`env
+DATABASE_URL=postgresql://...
+API_KEY=...
+\`\`\`
+
+## 💻 Uso
+
+### Ejemplo Básico
+
+\`\`\`typescript
+import { FeatureService } from '@/lib/feature-service';
+
+const result = await FeatureService.doSomething({
+  param1: 'value',
+});
+\`\`\`
+
+### Ejemplo Avanzado
+
+\`\`\`typescript
+// Código más complejo con explicación
+\`\`\`
+
+## 📊 API Reference
+
+### `FeatureService.doSomething(params)`
+
+**Parámetros:**
+- `param1` (string): Descripción del parámetro
+- `param2` (number, opcional): Descripción
+
+**Returns:** `Promise<ResultType>`
+
+**Throws:**
+- `ValidationError`: Si los parámetros son inválidos
+- `APIError`: Si hay error en la API
+
+## 🧪 Testing
+
+\`\`\`bash
+yarn test
+yarn test:coverage
+\`\`\`
+
+## 📝 Notas Técnicas
+
+- Limitación 1
+- Limitación 2
+- Consideración importante
+
+## 🐛 Troubleshooting
+
+### Problema Común 1
+
+**Síntoma:** Descripción del problema
+
+**Solución:** Pasos para resolverlo
+
+## 🔗 Links Relacionados
+
+- [Documentación API](/docs/api)
+- [Ejemplos](/examples)
+```
+
+### 4. Architecture Decision Records (ADRs)
+
+```markdown
+# 📁 docs/adr/001-prisma-as-orm.md
+
+# ADR-001: Usar Prisma como ORM
+
+**Estado:** Aceptado  
+**Fecha:** 2025-01-15  
+**Decidido por:** Equipo de Arquitectura
+
+## Contexto
+
+Necesitamos un ORM para interactuar con PostgreSQL de forma type-safe y productiva.
+
+Opciones evaluadas:
+- Prisma
+- TypeORM
+- Sequelize
+- Drizzle ORM
+
+## Decisión
+
+Usar **Prisma** como ORM principal.
+
+## Razones
+
+✅ **Type Safety**: Generación automática de tipos TypeScript  
+✅ **Developer Experience**: Sintaxis limpia e intuitiva  
+✅ **Migrations**: Sistema de migraciones robusto  
+✅ **Performance**: Query optimizer incluido  
+✅ **Ecosystem**: Amplia comunidad y soporte  
+
+❌ **Contra**: Curva de aprendizaje inicial
+
+## Consecuencias
+
+### Positivas
+- Menos errores en tiempo de desarrollo
+- Refactorings más seguros
+- Mejor autocompletado en IDEs
+
+### Negativas
+- Dependencia de Prisma CLI
+- Queries muy complejas pueden requerir raw SQL
+
+## Alternativas Consideradas
+
+### TypeORM
+- Pro: Más maduro
+- Contra: Menos type-safe
+
+### Drizzle ORM
+- Pro: Mejor performance
+- Contra: Ecosystem más pequeño
+
+## Referencias
+
+- [Prisma Docs](https://www.prisma.io/docs)
+- [Benchmark Prisma vs TypeORM](https://example.com)
+```
+
+---
+
+## 🔐 SEGURIDAD
+
+### 1. Autenticación
+- **SIEMPRE** verificar sesión en Server Components y API Routes
+- **NUNCA** confiar en datos del cliente sin validación
+- **USAR** `getServerSession(authOptions)` (ya configurado)
+
+### 2. Validación de Entrada
+- **SIEMPRE** validar con Zod antes de usar datos
+- **SANITIZAR** HTML con DOMPurify (isomorphic-dompurify)
+- **PREVENIR** SQL Injection (Prisma lo hace automáticamente)
+
+### 3. Variables de Entorno
+```typescript
+// ✅ Acceder solo en server-side
+const apiKey = process.env.API_KEY;
+
+// ✅ Para cliente, usar prefijo NEXT_PUBLIC_
+const publicKey = process.env.NEXT_PUBLIC_STRIPE_KEY;
+```
+
+### 4. CORS y Headers (ya configurado en vercel.json)
+```json
+{
+  "headers": [
+    {
+      "key": "X-Content-Type-Options",
+      "value": "nosniff"
+    },
+    {
+      "key": "X-Frame-Options",
+      "value": "DENY"
+    }
+  ]
+}
+```
+
+---
+
+## 📊 MONITORING & LOGGING
+
+```typescript
+// ✅ Logging estructurado (winston ya configurado)
+import logger from '@/lib/logger';
+
+logger.info('Usuario creado', { userId: user.id });
+logger.error('Error en payment', { error: e.message });
+
+// ✅ Sentry para errores (ya configurado)
+import * as Sentry from '@sentry/nextjs';
+
+Sentry.captureException(error, {
+  extra: { userId: session.user.id },
+});
+```
+
+---
+
+## ✅ CHECKLIST DE CÓDIGO
+
+Antes de cada commit, verifica:
+
+- [ ] ¿API Routes marcadas con `export const dynamic = 'force-dynamic'`?
+- [ ] ¿No hay operaciones que excedan 60 segundos?
+- [ ] ¿No estoy guardando archivos en el filesystem (excepto `/tmp` temporal)?
+- [ ] ¿Validé inputs con Zod/Yup?
+- [ ] ¿Verifiqué autenticación con `getServerSession`?
+- [ ] ¿Usé tipos de `@/types/prisma-types` en lugar de `@prisma/client`?
+- [ ] ¿Optimicé imports (no importar librerías pesadas innecesariamente)?
+- [ ] ¿Agregué logging para debugging?
+- [ ] ¿Manejé errores con try/catch?
+- [ ] ¿Retorné códigos HTTP apropiados (200, 201, 400, 401, 500)?
+
+---
+
+## 🚀 COMANDOS ÚTILES
+
+```bash
+# Desarrollo
+yarn dev
+
+# Build local (tarda por Prisma, preferir deploy en Vercel)
+yarn build
+
+# Testing
+yarn test:unit        # Vitest
+yarn test:e2e         # Playwright
+yarn test:e2e:ui      # Playwright UI
+
+# Database
+yarn prisma studio    # UI para DB
+yarn prisma migrate dev
+yarn db:backup        # Backup script
+
+# Linting y formato
+yarn lint:fix
+yarn format
+
+# Análisis
+yarn analyze          # Bundle size
+```
+
+---
+
+## 🎓 RECURSOS Y DOCUMENTACIÓN
+
+- **Next.js 15**: https://nextjs.org/docs
+- **Prisma**: https://www.prisma.io/docs
+- **Shadcn/ui**: https://ui.shadcn.com
+- **Vercel Limits**: https://vercel.com/docs/limits
+- **React Query**: https://tanstack.com/query/latest
+- **Zod**: https://zod.dev
+
+---
+
+## 💡 FILOSOFÍA DE DESARROLLO
+
+1. **Simplicidad sobre complejidad**: Código claro > Código "inteligente"
+2. **Deployment Flexible**: Serverless (Vercel) O Servidor Propio (Docker) según necesidades
+3. **Type Safety**: TypeScript + Zod para prevenir errores en runtime
+4. **Performance**: Lazy loading, caching, optimización de queries
+5. **DX (Developer Experience)**: Código auto-documentado y fácil de mantener
+6. **Seguridad**: Nunca confiar en inputs del cliente
+7. **Monitoreo**: Logging y error tracking desde el día 1
+
+---
+
+## 🐳 DEPLOYMENT EN SERVIDOR PROPIO (DOCKER)
+
+### 🎯 Cuándo Usar Servidor Propio vs Vercel
+
+**Usar Servidor Propio** si:
+- ✅ Tienes >100 API routes complejas
+- ✅ Necesitas funciones que excedan 60 segundos
+- ✅ Background jobs (BullMQ, cron jobs complejos)
+- ✅ Prisma con queries complejas
+- ✅ Costos predecibles a largo plazo
+- ✅ Control total sobre infraestructura
+
+**Usar Vercel** si:
+- ✅ Aplicación simple/mediana (<50 API routes)
+- ✅ No necesitas background jobs persistentes
+- ✅ Prefieres zero-maintenance
+- ✅ Auto-scaling es prioritario
+
+### 📦 Arquitectura Docker para Producción
+
+#### Dockerfile Multi-Stage (Ya Implementado)
+
+```dockerfile
+# Dockerfile.production
+FROM node:20-alpine AS base
+
+# Deps stage
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+COPY package.json yarn.lock* ./
+RUN yarn install --frozen-lockfile
+
+# Builder stage
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+COPY prisma ./prisma
+
+# Generate Prisma Client
+RUN yarn prisma generate
+
+# Build Next.js
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN yarn build
+
+# Runner stage (imagen final)
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copy necessary files
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "server.js"]
+```
+
+#### Docker Compose Stack Completo
+
+```yaml
+# docker-compose.production.yml
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=inmova
+      - POSTGRES_USER=inmova_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+```
+
+### 🚀 Setup de Servidor VPS
+
+#### Script de Instalación Automatizado
+
+```bash
+#!/bin/bash
+# setup-server.sh
+
+set -e
+
+echo "🚀 Instalando Inmova App en servidor..."
+
+# Actualizar sistema
+apt update && apt upgrade -y
+
+# Instalar Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh
+apt install docker-compose -y
+
+# Instalar Nginx y Certbot
+apt install nginx certbot python3-certbot-nginx -y
+
+# Configurar Firewall
+ufw allow 22/tcp
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw --force enable
+
+# Crear usuario deployment
+adduser --disabled-password --gecos "" deploy
+usermod -aG docker deploy
+usermod -aG sudo deploy
+
+# Crear directorio de aplicación
+mkdir -p /home/deploy/inmova-app
+chown -R deploy:deploy /home/deploy/inmova-app
+
+echo "✅ Servidor configurado exitosamente"
+echo "📝 Siguiente paso: git clone del repositorio"
+```
+
+#### Deployment Manual
+
+```bash
+# En el servidor (como usuario deploy)
+cd /home/deploy/inmova-app
+git clone https://github.com/tu-usuario/inmova-app.git .
+
+# Crear .env.production
+cat > .env.production << EOF
+NODE_ENV=production
+DATABASE_URL=postgresql://inmova_user:password@postgres:5432/inmova
+NEXTAUTH_SECRET=tu-secret-aqui
+NEXTAUTH_URL=https://inmovaapp.com
+# ... resto de variables
+EOF
+
+# Deploy inicial
+docker-compose -f docker-compose.production.yml up -d --build
+
+# Ver logs
+docker-compose -f docker-compose.production.yml logs -f app
+
+# Ejecutar migraciones
+docker-compose -f docker-compose.production.yml exec app npx prisma migrate deploy
+```
+
+### 🔄 CI/CD con GitHub Actions
+
+```yaml
+# .github/workflows/deploy-server.yml
+name: Deploy to Production Server
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: deploy
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/deploy/inmova-app
+            git pull origin main
+            docker-compose -f docker-compose.production.yml down
+            docker-compose -f docker-compose.production.yml up -d --build
+            docker-compose -f docker-compose.production.yml exec -T app npx prisma migrate deploy
+            
+      - name: Health Check
+        run: |
+          sleep 30
+          curl --fail https://inmovaapp.com/api/health || exit 1
+```
+
+### 🌐 Nginx Configuration
+
+```nginx
+# nginx.conf
+upstream nextjs_app {
+    server app:3000;
+    keepalive 32;
+}
+
+# HTTP to HTTPS redirect
+server {
+    listen 80;
+    server_name inmovaapp.com www.inmovaapp.com;
+    return 301 https://$server_name$request_uri;
+}
+
+# HTTPS Server
+server {
+    listen 443 ssl http2;
+    server_name inmovaapp.com www.inmovaapp.com;
+    
+    # SSL Configuration
+    ssl_certificate /etc/letsencrypt/live/inmovaapp.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/inmovaapp.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    
+    # Security Headers
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    
+    # Compression
+    gzip on;
+    gzip_vary on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+    
+    # Client settings
+    client_max_body_size 50M;
+    client_body_timeout 60s;
+    
+    # Proxy configuration
+    location / {
+        proxy_pass http://nextjs_app;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        
+        # Timeouts (sin límite para funciones largas)
+        proxy_connect_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
+    }
+    
+    # Cache static assets
+    location /_next/static {
+        proxy_pass http://nextjs_app;
+        proxy_cache_valid 200 365d;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+    
+    # Cache images
+    location ~* \.(jpg|jpeg|png|gif|ico|svg|webp)$ {
+        proxy_pass http://nextjs_app;
+        proxy_cache_valid 200 30d;
+        add_header Cache-Control "public, max-age=2592000";
+    }
+}
+```
+
+### 🔐 SSL con Let's Encrypt
+
+```bash
+# Generar certificado SSL
+certbot --nginx -d inmovaapp.com -d www.inmovaapp.com
+
+# Auto-renovación (ya está configurada)
+certbot renew --dry-run
+
+# Renovación automática cada 12 horas (ya configurado por defecto)
+```
+
+### 📊 Monitoreo y Logs
+
+#### Ver Logs en Tiempo Real
+```bash
+# Logs de la aplicación
+docker-compose logs -f app
+
+# Logs de Nginx
+docker-compose logs -f nginx
+
+# Logs de PostgreSQL
+docker-compose logs -f postgres
+
+# Logs con filtro
+docker-compose logs app | grep ERROR
+```
+
+#### Health Checks
+```bash
+# Verificar estado de containers
+docker-compose ps
+
+# Health check manual
+curl https://inmovaapp.com/api/health
+
+# Verificar recursos
+docker stats
+```
+
+### 💾 Backups Automatizados
+
+```bash
+# backup-db.sh
+#!/bin/bash
+BACKUP_DIR="/home/deploy/backups"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+mkdir -p $BACKUP_DIR
+
+# Backup PostgreSQL
+docker-compose exec -T postgres pg_dump -U inmova_user inmova > "$BACKUP_DIR/db_$TIMESTAMP.sql"
+
+# Backup .env
+cp .env.production "$BACKUP_DIR/env_$TIMESTAMP.backup"
+
+# Comprimir backups antiguos
+find $BACKUP_DIR -name "*.sql" -mtime +7 -exec gzip {} \;
+
+# Eliminar backups > 30 días
+find $BACKUP_DIR -name "*.gz" -mtime +30 -delete
+
+echo "✅ Backup completado: db_$TIMESTAMP.sql"
+```
+
+#### Cron Job para Backups
+```bash
+# Añadir a crontab del usuario deploy
+crontab -e
+
+# Backup diario a las 2 AM
+0 2 * * * /home/deploy/inmova-app/backup-db.sh >> /home/deploy/backups/backup.log 2>&1
+```
+
+### 🔄 Rollback
+
+```bash
+# Ver commits recientes
+git log --oneline -10
+
+# Rollback a versión anterior
+git checkout <commit-hash>
+docker-compose -f docker-compose.production.yml up -d --build
+
+# O volver a main
+git checkout main
+docker-compose -f docker-compose.production.yml up -d --build
+```
+
+### 📈 Scaling Horizontal
+
+```yaml
+# docker-compose.production.yml (con scaling)
+services:
+  app:
+    # ... configuración anterior
+    deploy:
+      replicas: 3  # 3 instancias de la app
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+  nginx:
+    # Load balancer automático entre replicas
+```
+
+### 🎯 Comandos Rápidos de Deployment
+
+```bash
+# Deploy completo
+./deploy.sh
+
+# Rebuild sin cache
+docker-compose -f docker-compose.production.yml build --no-cache
+
+# Restart solo la app
+docker-compose -f docker-compose.production.yml restart app
+
+# Ver estadísticas de recursos
+docker stats
+
+# Limpiar imágenes antiguas
+docker system prune -a --volumes -f
+```
+
+### ⚠️ Troubleshooting Común
+
+#### App no inicia
+```bash
+# Ver logs detallados
+docker-compose logs -f app
+
+# Verificar variables de entorno
+docker-compose exec app env | grep -i "database\|nextauth"
+
+# Verificar conectividad a DB
+docker-compose exec app npx prisma db push
+```
+
+#### Error de Prisma
+```bash
+# Regenerar Prisma Client
+docker-compose exec app npx prisma generate
+
+# Aplicar migraciones pendientes
+docker-compose exec app npx prisma migrate deploy
+
+# Reset completo (⚠️ PELIGRO en producción)
+docker-compose exec app npx prisma migrate reset
+```
+
+#### Nginx no sirve requests
+```bash
+# Verificar configuración
+nginx -t
+
+# Reload nginx
+docker-compose restart nginx
+
+# Ver logs de error
+docker-compose logs nginx | grep error
+```
+
+---
+
+## 📋 CHECKLIST DEPLOYMENT EN SERVIDOR
+
+### Pre-Deployment
+- [ ] VPS contratado (recomendado: Hetzner €20/mes, 4 vCPUs, 8GB RAM)
+- [ ] Ubuntu 22.04 LTS instalado
+- [ ] Docker + Docker Compose instalados
+- [ ] Usuario `deploy` creado con permisos sudo
+- [ ] Firewall configurado (UFW)
+- [ ] DNS apuntando a IP del servidor
+- [ ] SSL configurado con Let's Encrypt
+
+### Durante Deployment
+- [ ] Repositorio clonado en `/home/deploy/inmova-app`
+- [ ] `.env.production` creado con todas las variables
+- [ ] `docker-compose.production.yml` verificado
+- [ ] Build exitoso sin errores
+- [ ] Migraciones de Prisma ejecutadas
+- [ ] Health check responde correctamente
+
+### Post-Deployment
+- [ ] Aplicación accesible en HTTPS
+- [ ] Login funciona
+- [ ] Dashboard carga correctamente
+- [ ] API endpoints responden
+- [ ] Backups automatizados configurados
+- [ ] Monitoreo configurado (Uptime Kuma / UptimeRobot)
+- [ ] GitHub Actions para auto-deploy configurado
+
+---
+
+## 🤖 DEPLOYMENT AUTOMATIZADO CON SSH (PARAMIKO)
+
+### 📋 Context
+
+En entornos de Cursor Agent Cloud, las herramientas tradicionales de SSH (`ssh`, `sshpass`, `expect`) pueden no estar disponibles. Sin embargo, **`paramiko`** (librería Python SSH) está disponible y permite automatización completa de deployments.
+
+### ✅ Capacidades Comprobadas
+
+```python
+# Paramiko está disponible y funcional en Cursor Agent
+import sys
+sys.path.insert(0, '/home/ubuntu/.local/lib/python3.12/site-packages')
+import paramiko
+
+client = paramiko.SSHClient()
+client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+client.connect('IP', username='user', password='pass', timeout=10)
+
+stdin, stdout, stderr = client.exec_command('comando')
+output = stdout.read().decode()
+```
+
+### 🚀 Script de Deployment Tipo
+
+```python
+#!/usr/bin/env python3
+"""Deployment automatizado con Paramiko"""
+import sys
+sys.path.insert(0, '/home/ubuntu/.local/lib/python3.12/site-packages')
+import paramiko
+import time
+
+def deploy_app(server_ip, username, password):
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(server_ip, username=username, password=password, timeout=10)
+    
+    try:
+        # 1. Update repo
+        stdin, stdout, stderr = client.exec_command(
+            "cd /home/deploy/app && git pull origin main"
+        )
+        stdout.channel.recv_exit_status()
+        
+        # 2. Rebuild containers
+        stdin, stdout, stderr = client.exec_command(
+            "cd /home/deploy/app && docker-compose up -d --build",
+            timeout=900
+        )
+        stdout.channel.recv_exit_status()
+        
+        # 3. Health check
+        for i in range(60):
+            stdin, stdout, stderr = client.exec_command(
+                "curl -f http://localhost:3000/api/health"
+            )
+            if stdout.channel.recv_exit_status() == 0:
+                print("✅ Deployment exitoso!")
+                return True
+            time.sleep(2)
+        
+        return False
+    finally:
+        client.close()
+```
+
+### ⚠️ Limitaciones Identificadas
+
+#### Next.js 15 + Prisma Build Issues
+
+**Problema**: Next.js 15 hace análisis estático de rutas API durante `next build`, causando errores con Prisma Client:
+
+```
+Error: @prisma/client did not initialize yet.
+```
+
+**Causa Raíz**: Archivos API importando Prisma directamente en top-level scope:
+
+```typescript
+// ❌ CAUSA PROBLEMAS durante next build
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient(); // ← Ejecuta en build-time
+
+export async function GET() {
+  const data = await prisma.user.findMany();
+  return NextResponse.json(data);
+}
+```
+
+**Solución Correcta**:
+
+```typescript
+// ✅ Usar wrapper con lazy-loading
+import { getPrismaClient } from '@/lib/db';
+
+export async function GET() {
+  const prisma = getPrismaClient(); // ← Solo ejecuta en runtime
+  const data = await prisma.user.findMany();
+  return NextResponse.json(data);
+}
+```
+
+**Archivos Críticos a Revisar**:
+- Todos los `/app/api/**/route.ts`
+- Verificar que usen `getPrismaClient()` en lugar de import directo
+- No ejecutar código de DB en module scope
+
+### 🔧 Estrategias de Deployment Alternativas
+
+#### Opción 1: Docker (RECOMENDADO cuando el build funciona)
+
+```dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copiar archivos
+COPY package.json yarn.lock ./
+COPY prisma ./prisma/
+RUN yarn install
+
+# Build (SOLO si no hay problemas de Prisma)
+COPY . .
+RUN yarn prisma generate
+RUN yarn build
+
+EXPOSE 3000
+CMD ["yarn", "start"]
+```
+
+#### Opción 2: PM2 (Para cuando build falla)
+
+```bash
+# Instalar PM2
+npm install -g pm2
+
+# ecosystem.config.js
+module.exports = {
+  apps: [{
+    name: 'inmova-app',
+    script: 'yarn',
+    args: 'dev', # O 'start' si el build funciona
+    env: {
+      NODE_ENV: 'production',
+      PORT: 3000
+    }
+  }]
+}
+
+# Iniciar
+pm2 start ecosystem.config.js
+pm2 save
+pm2 startup # Auto-start en reboot
+```
+
+#### Opción 3: Build Local, Deploy Binario
+
+```bash
+# En LOCAL
+yarn build
+tar -czf build.tar.gz .next node_modules package.json
+
+# En SERVIDOR
+tar -xzf build.tar.gz
+yarn start
+```
+
+### 🎯 Checklist Pre-Deployment
+
+#### Código
+- [ ] Todos los API routes usan `getPrismaClient()` lazy-loading
+- [ ] No hay imports de Prisma en module top-level
+- [ ] `lib/db.ts` tiene lógica de build-time detection
+- [ ] Variables de entorno configuradas en `.env.production`
+- [ ] `next.config.js` optimizado para producción
+
+#### Infraestructura
+- [ ] Servidor con Ubuntu 22.04+ o similar
+- [ ] Docker y Docker Compose instalados (si aplica)
+- [ ] Node.js 18+ instalado (para PM2)
+- [ ] PostgreSQL configurado (Docker o nativo)
+- [ ] Nginx configurado como reverse proxy
+- [ ] UFW/Firewall configurado (22, 80, 443)
+- [ ] SSL/Certbot configurado para HTTPS
+
+#### Seguridad
+- [ ] Password de servidor cambiado del default
+- [ ] Usuario `deploy` creado (sin root)
+- [ ] SSH keys configurados (no password)
+- [ ] Secrets en `.env` NO commiteados a Git
+- [ ] Rate limiting activado
+- [ ] Fail2Ban configurado
+
+### 📊 Debugging Deployment Issues
+
+```bash
+# Ver logs de Docker
+docker-compose logs -f app
+
+# Ver logs de Nginx
+tail -f /var/log/nginx/error.log
+
+# Ver logs de PM2
+pm2 logs inmova-app
+
+# Test health check
+curl -v http://localhost:3000/api/health
+
+# Ver procesos
+ps aux | grep node
+
+# Ver puertos
+netstat -tlnp | grep :3000
+```
+
+### 🔥 Rollback Rápido
+
+```bash
+# Docker
+docker-compose down
+git checkout <commit-anterior>
+docker-compose up -d
+
+# PM2
+pm2 stop inmova-app
+git checkout <commit-anterior>
+pm2 restart inmova-app
+```
+
+### 💡 Mejores Prácticas Aprendidas
+
+1. **NUNCA** asumir que Vercel funcionará para apps complejas
+2. **SIEMPRE** testear `yarn build` localmente antes de deployment
+3. **USAR** lazy-loading para ORMs (Prisma, TypeORM, etc.)
+4. **SEPARAR** concerns: build != runtime
+5. **AUTOMATIZAR** con scripts Python/Bash, NO manualmente
+6. **MONITOREAR** con health checks continuos
+7. **DOCUMENTAR** cada paso del deployment
+8. **BACKUP** de DB antes de cada deployment
+
+---
+
+**Última actualización**: 29 de diciembre de 2025
+**Versión**: 2.1.0 (añadido deployment automatizado con Paramiko + lecciones aprendidas)
+**Mantenido por**: Equipo Inmova

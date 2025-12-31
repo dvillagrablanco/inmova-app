@@ -5,8 +5,14 @@ import { prisma } from '@/lib/db';
 import { stripe, formatAmountForStripe } from '@/lib/stripe-config';
 import { getOrCreateStripeCustomer } from '@/lib/stripe-customer';
 import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+// Schema de validación para crear suscripción
+const createSubscriptionSchema = z.object({
+  contractId: z.string().uuid({ message: 'ID de contrato inválido' }),
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,11 +29,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { contractId } = await request.json();
+    const body = await request.json();
 
-    if (!contractId) {
-      return NextResponse.json({ error: 'ID de contrato requerido' }, { status: 400 });
+    // Validación con Zod
+    const validationResult = createSubscriptionSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map((err) => ({
+        field: err.path.join('.'),
+        message: err.message,
+      }));
+      logger.warn('Validation error creating subscription:', { errors });
+      return NextResponse.json({ error: 'Datos inválidos', details: errors }, { status: 400 });
     }
+
+    const { contractId } = validationResult.data;
 
     // Get contract details
     const contract = await prisma.contract.findUnique({
@@ -82,11 +98,7 @@ export async function POST(request: NextRequest) {
 
     // Calculate billing cycle anchor (next payment day)
     const now = new Date();
-    const billingCycleAnchor = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      contract.diaPago
-    );
+    const billingCycleAnchor = new Date(now.getFullYear(), now.getMonth(), contract.diaPago);
 
     // If the day has passed this month, set it for next month
     if (billingCycleAnchor < now) {

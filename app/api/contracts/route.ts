@@ -73,13 +73,28 @@ export async function GET(req: NextRequest) {
       }),
     ]);
 
-    // Calcular días hasta vencimiento para cada contrato
+    // Calcular días hasta vencimiento y convertir valores Decimal
     const contractsWithExpiration = contracts.map(contract => {
       const daysUntilExpiration = Math.ceil(
         (new Date(contract.fechaFin).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
       );
       return {
-        ...contract,
+        id: contract.id,
+        unitId: contract.unitId,
+        tenantId: contract.tenantId,
+        fechaInicio: contract.fechaInicio,
+        fechaFin: contract.fechaFin,
+        rentaMensual: Number(contract.rentaMensual || 0),
+        deposito: Number(contract.deposito || 0),
+        estado: contract.estado,
+        tipo: contract.tipo,
+        diaPago: contract.diaPago,
+        clausulasAdicionales: contract.clausulasAdicionales,
+        renovacionAutomatica: contract.renovacionAutomatica,
+        unit: contract.unit,
+        tenant: contract.tenant,
+        createdAt: contract.createdAt,
+        updatedAt: contract.updatedAt,
         diasHastaVencimiento: daysUntilExpiration,
       };
     });

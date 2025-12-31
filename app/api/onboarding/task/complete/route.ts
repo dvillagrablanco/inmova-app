@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: POST /api/onboarding/task/complete
  * Marca una tarea de onboarding como completada

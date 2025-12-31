@@ -6,16 +6,7 @@
  */
 
 import { usePathname, useRouter } from 'next/navigation';
-import { 
-  Home, 
-  Building2, 
-  Users, 
-  FileText, 
-  Settings,
-  Search,
-  Plus,
-  Menu
-} from 'lucide-react';
+import { Home, Building2, Users, FileText, Settings, Search, Plus, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MobileNavProps {
@@ -30,14 +21,14 @@ export function MobileNavigation({ className }: MobileNavProps) {
     {
       label: 'Inicio',
       icon: Home,
-      href: '/home',
-      active: pathname === '/home'
+      href: '/dashboard',
+      active: pathname === '/dashboard',
     },
     {
       label: 'Propiedades',
       icon: Building2,
       href: '/edificios',
-      active: pathname?.startsWith('/edificios')
+      active: pathname?.startsWith('/edificios'),
     },
     {
       label: 'Añadir',
@@ -47,24 +38,24 @@ export function MobileNavigation({ className }: MobileNavProps) {
       onClick: () => {
         // Menú de creación rápida
         // Aquí se podría abrir un sheet con opciones
-      }
+      },
     },
     {
       label: 'Inquilinos',
       icon: Users,
       href: '/inquilinos',
-      active: pathname?.startsWith('/inquilinos')
+      active: pathname?.startsWith('/inquilinos'),
     },
     {
       label: 'Más',
       icon: Menu,
       href: '/menu',
-      active: pathname === '/menu'
-    }
+      active: pathname === '/menu',
+    },
   ];
 
   return (
-    <nav 
+    <nav
       className={cn(
         'mobile-nav',
         'md:hidden', // Solo visible en móvil
@@ -73,7 +64,7 @@ export function MobileNavigation({ className }: MobileNavProps) {
     >
       {navItems.map((item) => {
         const Icon = item.icon;
-        
+
         return (
           <button
             key={item.label}
@@ -84,11 +75,7 @@ export function MobileNavigation({ className }: MobileNavProps) {
                 router.push(item.href);
               }
             }}
-            className={cn(
-              'mobile-nav-item',
-              item.active && 'active',
-              item.special && 'relative'
-            )}
+            className={cn('mobile-nav-item', item.active && 'active', item.special && 'relative')}
           >
             {item.special ? (
               <div className="flex h-14 w-14 -mt-6 items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg">

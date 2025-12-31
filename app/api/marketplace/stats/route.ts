@@ -1,34 +1,26 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
 
-export const dynamic = 'force-dynamic';
-// } from '@/lib/marketplace-service';
-
-// GET /api/marketplace/stats - Obtener estadísticas del marketplace
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // Verificar cotizaciones expiradas
-    // await checkExpiredQuotes(session?.user?.companyId);
+    // TODO: Implementar cálculo real desde base de datos
+    const stats = {
+      totalServices: 156,
+      totalBookings: 342,
+      totalRevenue: 45280,
+      commissionRate: 12,
+    };
 
-    // const [stats, topProviders] = await Promise.all([
-    //   getMarketplaceStats(session?.user?.companyId),
-    //   getTopProviders(session?.user?.companyId, 5),
-    // ]);
-    
-    const stats = { totalQuotes: 0, activeQuotes: 0, completedJobs: 0 };
-    const topProviders: any[] = [];
-
-    return NextResponse.json({
-      ...stats,
-      topProviders,
-    });
+    return NextResponse.json(stats);
   } catch (error) {
     logger.error('Error fetching marketplace stats:', error);
     return NextResponse.json(

@@ -1,11 +1,17 @@
 /**
  * Configuración centralizada de precios y planes de suscripción INMOVA
- * Estrategia de Precios 2025
+ * Estrategia de Precios 2026 - ARQUITECTURA ACTUALIZADA
+ * 
+ * NUEVA ARQUITECTURA:
+ * - 6 VERTICALES de negocio (modelos específicos)
+ * - 6 MÓDULOS TRANSVERSALES (add-ons que amplifican valor)
+ * - Pricing modular: vertical base + módulos opcionales
  * 
  * IMPORTANTE: Esta configuración debe estar sincronizada con:
  * - Stripe Price IDs (cuando se creen los productos en Stripe)
  * - Base de datos (tabla subscription_plans)
  * - Landing page (components/landing/sections/PricingSection.tsx)
+ * - Plan de Negocio (PLAN_NEGOCIO_INMOVA_2026.md)
  */
 
 export type PricingInterval = 'monthly' | 'annual';
@@ -85,7 +91,7 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
     id: 'basic',
     name: 'Basic',
     tier: 'basic',
-    description: 'El gancho - Captar al usuario de Excel',
+    description: 'Perfecto para inversores particulares que quieren dejar Excel',
     
     monthlyPrice: 49,
     annualPrice: 490,
@@ -96,27 +102,27 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
     maxVerticals: 1,
     
     features: [
-      { text: 'Todos los 88+ módulos incluidos', included: true },
+      { text: '✅ 1 Vertical de Negocio (a elegir)', included: true, highlight: true },
       { text: 'Hasta 20 propiedades', included: true },
-      { text: '1 vertical de negocio (a elegir)', included: true },
       { text: '1 usuario', included: true },
-      { text: 'Room Rental básico (sin prorrateo)', included: true },
-      { text: 'Marca Blanca: Logo básico', included: true },
-      { text: 'AI Assistant', included: false },
-      { text: 'Construcción', included: false },
+      { text: 'Funciones core del vertical elegido', included: true },
+      { text: 'Dashboard y reportes básicos', included: true },
+      { text: 'Integraciones básicas', included: true },
+      { text: 'Módulos Transversales (add-ons)', included: false, badge: 'OPCIONALES' },
+      { text: 'Construcción avanzada', included: false },
       { text: 'Soporte email 48h', included: true },
     ],
     
     cta: 'Ideal para inversores particulares y flippers',
-    targetAudience: ['Inversor Particular', 'Flipper'],
-    killerFeature: 'Más barato que Buildium (€55+) con herramientas de Flipping'
+    targetAudience: ['Inversor Particular', 'Flipper', 'Landlord'],
+    killerFeature: 'Más barato que Homming (€120) y con Flipping incluido'
   },
   
   professional: {
     id: 'professional',
     name: 'Professional',
     tier: 'professional',
-    description: 'La Estrella - Convertir agencias que usan Homming/Rentger',
+    description: 'Para agencias y gestoras que necesitan múltiples verticales',
     
     monthlyPrice: 149,
     annualPrice: 1490,
@@ -127,35 +133,34 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
     maxVerticals: 2,
     
     features: [
-      { text: 'Todos los 88+ módulos incluidos', included: true },
+      { text: '✅ 2 Verticales de Negocio (combina modelos)', included: true, highlight: true },
       { text: 'Hasta 100 propiedades', included: true },
       { 
-        text: '⭐ Room Rental PRO: Prorrateo automático de suministros', 
+        text: '⭐ Funciones avanzadas por vertical', 
         included: true, 
         highlight: true,
-        badge: 'NUEVO Q4 2024'
       },
-      { text: 'Hasta 2 verticales (ej. Alquiler + STR)', included: true },
+      { text: '5 usuarios incluidos', included: true },
       { text: 'AI Assistant GPT-4 Standard', included: true },
-      { text: 'Construcción: Reformas', included: true },
-      { text: '5 usuarios', included: true },
-      { text: 'Sistema de Cupones (add-on +€29/mes)', included: true },
+      { text: 'Dashboard avanzado + Analytics', included: true },
+      { text: 'Integraciones premium (OTAs, pagos)', included: true },
+      { text: '1 Módulo Transversal incluido', included: true, badge: 'GRATIS' },
       { text: 'Marca Blanca: Colores + Dominio', included: true },
       { text: 'Soporte chat prioritario', included: true },
     ],
     
     popular: true,
-    newFeature: 'Room Rental PRO',
-    cta: 'Perfecto para agencias y gestoras de coliving',
-    targetAudience: ['Agencia Pequeña', 'Coliving', 'Gestora de habitaciones'],
-    killerFeature: 'Room Rental PRO - Gestiona hasta 100 habitaciones con prorrateo automático'
+    newFeature: '2 Verticales + 1 Módulo Gratis',
+    cta: 'Perfecto para agencias y gestoras profesionales',
+    targetAudience: ['Agencia', 'Gestora', 'Coliving Manager'],
+    killerFeature: 'Multi-vertical: Combina Alquiler + STR o Flipping + Construcción'
   },
   
   business: {
     id: 'business',
     name: 'Business',
     tier: 'business',
-    description: 'El Escalamiento - Gestoras consolidadas y Promotoras',
+    description: 'Todo incluido para gestoras consolidadas y promotoras',
     
     monthlyPrice: 349,
     annualPrice: 3490,
@@ -166,27 +171,22 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
     maxVerticals: 'all',
     
     features: [
-      { text: 'Todos los 88+ módulos incluidos', included: true },
-      { text: 'Propiedades ilimitadas', included: true, highlight: true },
-      { text: 'Todos los 7 verticales de negocio', included: true },
-      { text: '⭐ Room Rental PRO completo', included: true, highlight: true },
-      { 
-        text: '✨ Sistema de Cupones INCLUIDO (valor €29/mes)', 
-        included: true, 
-        highlight: true,
-        badge: 'INCLUIDO'
-      },
+      { text: '✅ TODOS los 6 Verticales incluidos', included: true, highlight: true },
+      { text: '✅ Propiedades ilimitadas', included: true, highlight: true },
+      { text: '✅ 3 Módulos Transversales incluidos', included: true, highlight: true, badge: 'VALOR €180/MES' },
+      { text: '15 usuarios incluidos', included: true },
       { text: 'AI Assistant GPT-4 Advanced (entrenable)', included: true },
       { text: 'Construcción: Obra Nueva completa', included: true },
-      { text: 'Marca Blanca: App Nativa Personalizada', included: true },
-      { text: '15 usuarios', included: true },
+      { text: 'White-label completo + App móvil', included: true },
+      { text: 'Migraciones de datos incluidas', included: true },
       { text: 'Gestor de Cuenta Dedicado', included: true },
+      { text: 'Soporte prioritario 24/7', included: true },
     ],
     
-    newFeature: 'Sistema de Cupones Incluido',
+    newFeature: 'Todos los Verticales + 3 Módulos Gratis',
     cta: 'Para promotoras y gestoras consolidadas',
-    targetAudience: ['Gestora', 'Promotora', 'Socimi'],
-    killerFeature: 'Módulo de Construcción + Ilimitados + Sistema de Cupones incluido'
+    targetAudience: ['Gestora Consolidada', 'Promotora', 'Multi-vertical'],
+    killerFeature: '6 verticales + 3 módulos transversales incluidos (€180 gratis/mes)'
   },
   
   enterprise: {
@@ -221,16 +221,57 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
 };
 
 /**
- * ADD-ONS DISPONIBLES
+ * MÓDULOS TRANSVERSALES DISPONIBLES
+ * Estos módulos amplifican el valor de los verticales
  */
 export const ADD_ONS: Record<string, AddOn> = {
-  couponSystem: {
-    id: 'coupon_system',
-    name: 'Sistema de Cupones',
-    description: 'Crea campañas de descuento automatizadas con límites de uso y estadísticas',
-    monthlyPrice: 29,
-    availableFor: ['basic', 'professional'],
-    includedIn: ['business', 'enterprise'],
+  esg: {
+    id: 'esg_sustainability',
+    name: 'ESG & Sostenibilidad',
+    description: 'Huella de carbono, certificaciones verdes, reportes CSRD. Compliance europeo.',
+    monthlyPrice: 50,
+    availableFor: ['basic', 'professional', 'business'],
+    includedIn: ['enterprise'],
+  },
+  marketplace: {
+    id: 'marketplace_b2c',
+    name: 'Marketplace de Servicios',
+    description: 'Monetiza con servicios B2C (limpieza, wifi, seguros). Comisión 12%.',
+    monthlyPrice: 0, // Basado en comisiones
+    availableFor: ['basic', 'professional', 'business'],
+    includedIn: ['enterprise'],
+  },
+  pricingIA: {
+    id: 'pricing_ai',
+    name: 'Pricing Dinámico IA',
+    description: 'Optimiza tarifas STR/Coliving con ML. +15-30% ingresos.',
+    monthlyPrice: 30,
+    availableFor: ['basic', 'professional', 'business'],
+    includedIn: ['enterprise'],
+  },
+  toursVR: {
+    id: 'tours_vr',
+    name: 'Tours Virtuales AR/VR',
+    description: 'Tours 360°, realidad virtual y aumentada. +40% conversión.',
+    monthlyPrice: 30,
+    availableFor: ['basic', 'professional', 'business'],
+    includedIn: ['enterprise'],
+  },
+  iot: {
+    id: 'iot_smart',
+    name: 'IoT & Edificios Inteligentes',
+    description: 'Integración con termostatos, cerraduras, sensores. Automatización total.',
+    monthlyPrice: 100,
+    availableFor: ['professional', 'business'],
+    includedIn: ['enterprise'],
+  },
+  blockchain: {
+    id: 'blockchain_tokenization',
+    name: 'Blockchain & Tokenización',
+    description: 'Tokeniza propiedades, inversión fraccionada, smart contracts.',
+    monthlyPrice: 0, // Basado en comisiones
+    availableFor: ['business'],
+    includedIn: ['enterprise'],
   }
 };
 

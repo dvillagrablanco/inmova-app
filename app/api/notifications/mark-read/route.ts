@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: POST /api/notifications/mark-read
  * Marca notificaciones como leídas
@@ -44,7 +46,6 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error('[API /notifications/mark-read] Error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

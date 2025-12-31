@@ -1,0 +1,800 @@
+[
+  {
+    "page": "/automatizacion/resumen",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:10:43.350Z"
+  },
+  {
+    "page": "/coliving/comunidad",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:10:57.355Z"
+  },
+  {
+    "page": "/coliving/emparejamiento",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:10:59.102Z"
+  },
+  {
+    "page": "/coliving/eventos",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:11:00.853Z"
+  },
+  {
+    "page": "/coliving/paquetes",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:11:02.601Z"
+  },
+  {
+    "page": "/configuracion/ui-mode",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:11:28.902Z"
+  },
+  {
+    "page": "/contabilidad",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:11:37.649Z"
+  },
+  {
+    "page": "/dashboard/adaptive",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:11:48.158Z"
+  },
+  {
+    "page": "/energia-solar",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:12:03.896Z"
+  },
+  {
+    "page": "/espacios-coworking",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:12:07.398Z"
+  },
+  {
+    "page": "/estadisticas",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:12:09.139Z"
+  },
+  {
+    "page": "/finanzas",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:12:21.385Z"
+  },
+  {
+    "page": "/gestion-incidencias",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:12:44.102Z"
+  },
+  {
+    "page": "/guardias",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:12:45.850Z"
+  },
+  {
+    "page": "/hospitality",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:12:51.131Z"
+  },
+  {
+    "page": "/huerto-urbano",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:12:52.882Z"
+  },
+  {
+    "page": "/impuestos",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:12:54.635Z"
+  },
+  {
+    "page": "/informes",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:12:58.135Z"
+  },
+  {
+    "page": "/inspeccion-digital",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:13:03.430Z"
+  },
+  {
+    "page": "/instalaciones-deportivas",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:13:06.928Z"
+  },
+  {
+    "page": "/integraciones",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:13:08.683Z"
+  },
+  {
+    "page": "/licitaciones",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:13:44.139Z"
+  },
+  {
+    "page": "/marketplace/proveedores",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:13:54.648Z"
+  },
+  {
+    "page": "/marketplace/servicios",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:13:56.394Z"
+  },
+  {
+    "page": "/microtransacciones",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:13:58.142Z"
+  },
+  {
+    "page": "/obras",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:14:06.917Z"
+  },
+  {
+    "page": "/pagos/planes",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:14:21.026Z"
+  },
+  {
+    "page": "/permisos",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:14:54.494Z"
+  },
+  {
+    "page": "/planes",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:14:56.236Z"
+  },
+  {
+    "page": "/planificacion",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:14:59.750Z"
+  },
+  {
+    "page": "/portal-inquilino",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:01.501Z"
+  },
+  {
+    "page": "/portal-inquilino/chatbot",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:03.246Z"
+  },
+  {
+    "page": "/portal-inquilino/comunicacion",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:04.991Z"
+  },
+  {
+    "page": "/portal-inquilino/contrato",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:06.772Z"
+  },
+  {
+    "page": "/portal-inquilino/incidencias",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:12.013Z"
+  },
+  {
+    "page": "/portal-inquilino/mantenimiento",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:15.498Z"
+  },
+  {
+    "page": "/portal-inquilino/valoraciones",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:18.985Z"
+  },
+  {
+    "page": "/presupuestos",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:20.730Z"
+  },
+  {
+    "page": "/promociones",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:22.476Z"
+  },
+  {
+    "page": "/propiedades",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:24.221Z"
+  },
+  {
+    "page": "/propiedades/crear",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:25.958Z"
+  },
+  {
+    "page": "/propiedades/nuevo",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:27.707Z"
+  },
+  {
+    "page": "/proyectos-renovacion",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:29.455Z"
+  },
+  {
+    "page": "/puntos-carga",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:31.198Z"
+  },
+  {
+    "page": "/real-estate-developer",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:32.940Z"
+  },
+  {
+    "page": "/real-estate-developer/commercial",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:34.681Z"
+  },
+  {
+    "page": "/real-estate-developer/dashboard",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:36.414Z"
+  },
+  {
+    "page": "/real-estate-developer/marketing",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:38.166Z"
+  },
+  {
+    "page": "/real-estate-developer/projects",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:39.915Z"
+  },
+  {
+    "page": "/real-estate-developer/sales",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:41.658Z"
+  },
+  {
+    "page": "/red-agentes",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:43.398Z"
+  },
+  {
+    "page": "/red-agentes/agentes",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:45.137Z"
+  },
+  {
+    "page": "/red-agentes/comisiones",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:46.914Z"
+  },
+  {
+    "page": "/red-agentes/dashboard",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:48.658Z"
+  },
+  {
+    "page": "/red-agentes/formacion",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:50.407Z"
+  },
+  {
+    "page": "/red-agentes/registro",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:52.155Z"
+  },
+  {
+    "page": "/red-agentes/zonas",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:53.898Z"
+  },
+  {
+    "page": "/renovaciones",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:55.642Z"
+  },
+  {
+    "page": "/renovaciones-contratos",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:15:57.390Z"
+  },
+  {
+    "page": "/reportes/financieros",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:00.889Z"
+  },
+  {
+    "page": "/reportes/operacionales",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:02.630Z"
+  },
+  {
+    "page": "/reservas",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:04.374Z"
+  },
+  {
+    "page": "/retail",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:06.122Z"
+  },
+  {
+    "page": "/salas-reuniones",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:07.870Z"
+  },
+  {
+    "page": "/seguros",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:09.611Z"
+  },
+  {
+    "page": "/servicios-concierge",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:11.362Z"
+  },
+  {
+    "page": "/servicios-limpieza",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:13.105Z"
+  },
+  {
+    "page": "/sincronizacion",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:14.848Z"
+  },
+  {
+    "page": "/sincronizacion-avanzada",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:16.586Z"
+  },
+  {
+    "page": "/stock-gestion",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:18.344Z"
+  },
+  {
+    "page": "/student-housing",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:20.091Z"
+  },
+  {
+    "page": "/student-housing/actividades",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:21.836Z"
+  },
+  {
+    "page": "/student-housing/aplicaciones",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:23.578Z"
+  },
+  {
+    "page": "/student-housing/dashboard",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:25.330Z"
+  },
+  {
+    "page": "/student-housing/habitaciones",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:27.071Z"
+  },
+  {
+    "page": "/student-housing/mantenimiento",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:28.813Z"
+  },
+  {
+    "page": "/student-housing/pagos",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:30.554Z"
+  },
+  {
+    "page": "/student-housing/residentes",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:32.303Z"
+  },
+  {
+    "page": "/subastas",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:34.044Z"
+  },
+  {
+    "page": "/suscripciones",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:35.791Z"
+  },
+  {
+    "page": "/tareas",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:37.536Z"
+  },
+  {
+    "page": "/turismo-alquiler",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:39.280Z"
+  },
+  {
+    "page": "/unidades/nueva",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:42.770Z"
+  },
+  {
+    "page": "/usuarios",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:44.513Z"
+  },
+  {
+    "page": "/usuarios/nuevo",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:46.245Z"
+  },
+  {
+    "page": "/vacaciones",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:47.990Z"
+  },
+  {
+    "page": "/valoracion-ia",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:49.739Z"
+  },
+  {
+    "page": "/verificacion-inquilinos",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:51.485Z"
+  },
+  {
+    "page": "/viajes-corporativos",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:53.227Z"
+  },
+  {
+    "page": "/viajes-corporativos/bookings",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:54.971Z"
+  },
+  {
+    "page": "/viajes-corporativos/dashboard",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:56.703Z"
+  },
+  {
+    "page": "/viajes-corporativos/expense-reports",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:16:58.467Z"
+  },
+  {
+    "page": "/viajes-corporativos/guests",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:00.218Z"
+  },
+  {
+    "page": "/viajes-corporativos/policies",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:01.960Z"
+  },
+  {
+    "page": "/visitas",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:03.702Z"
+  },
+  {
+    "page": "/vivienda-social",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:05.446Z"
+  },
+  {
+    "page": "/vivienda-social/applications",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:07.193Z"
+  },
+  {
+    "page": "/vivienda-social/compliance",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:08.936Z"
+  },
+  {
+    "page": "/vivienda-social/dashboard",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:10.677Z"
+  },
+  {
+    "page": "/vivienda-social/eligibility",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:12.418Z"
+  },
+  {
+    "page": "/vivienda-social/reporting",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:14.160Z"
+  },
+  {
+    "page": "/warranty-management",
+    "type": "404",
+    "message": "Página no encontrada (HTTP 404)",
+    "severity": "critical",
+    "timestamp": "2025-12-31T01:17:14.409Z"
+  },
+  {
+    "page": "/warehouse",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:16.158Z"
+  },
+  {
+    "page": "/warehouse/inventory",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:17.892Z"
+  },
+  {
+    "page": "/warehouse/locations",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:19.641Z"
+  },
+  {
+    "page": "/warehouse/movements",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:21.383Z"
+  },
+  {
+    "page": "/workspace",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:23.134Z"
+  },
+  {
+    "page": "/workspace/booking",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:24.878Z"
+  },
+  {
+    "page": "/workspace/coworking",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:26.621Z"
+  },
+  {
+    "page": "/workspace/dashboard",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:28.354Z"
+  },
+  {
+    "page": "/workspace/members",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:30.115Z"
+  },
+  {
+    "page": "/portal-propietario/configuracion",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:17:47.582Z"
+  },
+  {
+    "page": "/portal-proveedor/reseñas",
+    "type": "404",
+    "message": "Página no encontrada (HTTP 404)",
+    "severity": "critical",
+    "timestamp": "2025-12-31T01:18:05.327Z"
+  },
+  {
+    "page": "/test-auth",
+    "type": "no-buttons",
+    "message": "Página sin botones o links interactivos",
+    "severity": "medium",
+    "timestamp": "2025-12-31T01:18:50.865Z"
+  }
+]

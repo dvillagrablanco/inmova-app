@@ -1,0 +1,477 @@
+📋 Cargadas 234 rutas desde routes-to-verify.json
+🚀 Inicializando navegador...
+✅ Navegador inicializado
+
+🔍 Verificando 234 rutas...
+
+============================================================
+
+📄 Verificando: https://inmovaapp.com/
+  ⏱️  Tiempo de carga: 2009ms
+  📸 Screenshot guardado: _.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/login
+  ⏱️  Tiempo de carga: 1526ms
+  📸 Screenshot guardado: _login.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/home
+  ⏱️  Tiempo de carga: 1159ms
+  📸 Screenshot guardado: _home.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/dashboard
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/dashboard", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/admin-fincas
+  ⏱️  Tiempo de carga: 1590ms
+  📸 Screenshot guardado: _admin-fincas.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin-fincas/comunidades
+  ⏱️  Tiempo de carga: 1542ms
+  📸 Screenshot guardado: _admin-fincas_comunidades.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin-fincas/facturas
+  ⏱️  Tiempo de carga: 1678ms
+  📸 Screenshot guardado: _admin-fincas_facturas.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin-fincas/informes
+  ⏱️  Tiempo de carga: 1657ms
+  📸 Screenshot guardado: _admin-fincas_informes.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin-fincas/libro-caja
+  ⏱️  Tiempo de carga: 1539ms
+  📸 Screenshot guardado: _admin-fincas_libro-caja.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin/activity
+  ⏱️  Tiempo de carga: 1549ms
+  📸 Screenshot guardado: _admin_activity.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin/alertas
+  ⏱️  Tiempo de carga: 1501ms
+  📸 Screenshot guardado: _admin_alertas.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin/aprobaciones
+  ⏱️  Tiempo de carga: 1569ms
+  📸 Screenshot guardado: _admin_aprobaciones.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin/backup-restore
+  ⏱️  Tiempo de carga: 1526ms
+  📸 Screenshot guardado: _admin_backup-restore.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin/clientes
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/admin/clientes", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/admin/clientes/comparar
+  ⏱️  Tiempo de carga: 1567ms
+  📸 Screenshot guardado: _admin_clientes_comparar.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin/configuracion
+  ⏱️  Tiempo de carga: 1612ms
+  📸 Screenshot guardado: _admin_configuracion.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin/dashboard
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/admin/dashboard", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/admin/facturacion-b2b
+  ⏱️  Tiempo de carga: 1730ms
+  📸 Screenshot guardado: _admin_facturacion-b2b.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin/firma-digital
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/admin/firma-digital", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/admin/importar
+  ⏱️  Tiempo de carga: 1659ms
+  📸 Screenshot guardado: _admin_importar.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin/integraciones-contables
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/admin/integraciones-contables", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/admin/legal
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/admin/legal", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/admin/marketplace
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/admin/marketplace", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/admin/metricas-uso
+  ⏱️  Tiempo de carga: 1729ms
+  📸 Screenshot guardado: _admin_metricas-uso.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin/modulos
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/admin/modulos", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/admin/ocr-import
+  ⏱️  Tiempo de carga: 1534ms
+  📸 Screenshot guardado: _admin_ocr-import.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin/personalizacion
+  ⏱️  Tiempo de carga: 1513ms
+  📸 Screenshot guardado: _admin_personalizacion.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin/planes
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/admin/planes", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/admin/plantillas-sms
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/admin/plantillas-sms", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/admin/portales-externos
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/admin/portales-externos", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/admin/recuperar-contrasena
+  ⏱️  Tiempo de carga: 1313ms
+  📸 Screenshot guardado: _admin_recuperar-contrasena.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin/reportes-programados
+  ⏱️  Tiempo de carga: 1553ms
+  📸 Screenshot guardado: _admin_reportes-programados.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin/salud-sistema
+  ⏱️  Tiempo de carga: 1467ms
+  📸 Screenshot guardado: _admin_salud-sistema.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin/seguridad
+  ⏱️  Tiempo de carga: 1631ms
+  📸 Screenshot guardado: _admin_seguridad.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin/sugerencias
+  ⏱️  Tiempo de carga: 1512ms
+  📸 Screenshot guardado: _admin_sugerencias.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/admin/usuarios
+  ⏱️  Tiempo de carga: 1497ms
+  📸 Screenshot guardado: _admin_usuarios.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/alquiler-tradicional/warranties
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/alquiler-tradicional/warranties", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/analytics
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/analytics", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/anuncios
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/anuncios", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/api-docs.disabled
+  ⏱️  Tiempo de carga: 1399ms
+  📸 Screenshot guardado: _api-docs.disabled.png
+  ⚠️  Errores: 8
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/asistente-ia
+  ⏱️  Tiempo de carga: 1493ms
+  📸 Screenshot guardado: _asistente-ia.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/auditoria
+  ⏱️  Tiempo de carga: 1486ms
+  📸 Screenshot guardado: _auditoria.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/automatizacion
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/automatizacion", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/automatizacion-resumen
+  ⏱️  Tiempo de carga: 1393ms
+  📸 Screenshot guardado: _automatizacion-resumen.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/bi
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/bi", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/blockchain
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/blockchain", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/calendario
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/calendario", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/candidatos
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/candidatos", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/candidatos/nuevo
+  ⏱️  Tiempo de carga: 1514ms
+  📸 Screenshot guardado: _candidatos_nuevo.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/certificaciones
+  ⏱️  Tiempo de carga: 1515ms
+  📸 Screenshot guardado: _certificaciones.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/chat
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/chat", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/coliving
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/coliving", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/comparativa/homming
+  ⏱️  Tiempo de carga: 1264ms
+  📸 Screenshot guardado: _comparativa_homming.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/comunidad-social
+  ⏱️  Tiempo de carga: 1539ms
+  📸 Screenshot guardado: _comunidad-social.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/comunidades
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/comunidades", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/comunidades/actas
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/comunidades/actas", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/comunidades/cumplimiento
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/comunidades/cumplimiento", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/comunidades/cuotas
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/comunidades/cuotas", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/comunidades/finanzas
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/comunidades/finanzas", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/comunidades/fondos
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/comunidades/fondos", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/comunidades/presidente
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/comunidades/presidente", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/comunidades/renovaciones
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/comunidades/renovaciones", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/comunidades/votaciones
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/comunidades/votaciones", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/configuracion/integraciones/stripe
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/configuracion/integraciones/stripe", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/configuracion/notificaciones
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/configuracion/notificaciones", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/configuracion/ui-mode
+  ⏱️  Tiempo de carga: 1276ms
+  📸 Screenshot guardado: _configuracion_ui-mode.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/construction
+  ⏱️  Tiempo de carga: 1482ms
+  📸 Screenshot guardado: _construction.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/construction/gantt
+  ⏱️  Tiempo de carga: 1581ms
+  📸 Screenshot guardado: _construction_gantt.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/construction/projects
+  ⏱️  Tiempo de carga: 1502ms
+  📸 Screenshot guardado: _construction_projects.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/construction/quality-control
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/construction/quality-control", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/contabilidad
+  ⏱️  Tiempo de carga: 1249ms
+  📸 Screenshot guardado: _contabilidad.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/contratos
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/contratos", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/contratos/nuevo
+  ⏱️  Tiempo de carga: 1536ms
+  📸 Screenshot guardado: _contratos_nuevo.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/crm
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/crm", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/cupones
+  ⏱️  Tiempo de carga: 1667ms
+  📸 Screenshot guardado: _cupones.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/dashboard-adaptive
+  ⏱️  Tiempo de carga: 1303ms
+  📸 Screenshot guardado: _dashboard-adaptive.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/dashboard-propietarios
+  ❌ Error: page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://inmovaapp.com/dashboard-propietarios", waiting until "networkidle"
+
+
+📄 Verificando: https://inmovaapp.com/dashboard/community
+  ⏱️  Tiempo de carga: 1807ms
+  📸 Screenshot guardado: _dashboard_community.png
+  ⚠️  Errores: 5
+  ⚡ Warnings: 0
+
+📄 Verificando: https://inmovaapp.com/dashboard/crm

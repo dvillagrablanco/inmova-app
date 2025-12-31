@@ -5,26 +5,26 @@ import { Building2, Users, TrendingUp, TrendingDown } from 'lucide-react';
 const stats = [
   {
     icon: Building2,
-    number: '10,000+',
-    label: 'Propiedades Gestionadas',
+    number: '€850M',
+    label: 'Mercado España (TAM)',
     gradient: 'from-yellow-300 to-amber-300'
   },
   {
     icon: Users,
-    number: '500+',
-    label: 'Gestoras Inmobiliarias',
+    number: '34',
+    label: 'Tipos de Partners',
     gradient: 'from-green-300 to-emerald-300'
   },
   {
     icon: TrendingDown,
     number: '-70%',
-    label: 'Reducción Costes Software',
+    label: 'Más Barato que Competencia',
     gradient: 'from-blue-300 to-cyan-300'
   },
   {
     icon: TrendingUp,
-    number: '+25%',
-    label: 'Aumento ROI Promedio',
+    number: '€150M',
+    label: 'Potencial 5 Años',
     gradient: 'from-pink-300 to-rose-300'
   },
 ];

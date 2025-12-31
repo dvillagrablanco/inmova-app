@@ -1,11 +1,13 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
-import { UIMode } from '@prisma/client';
+import type { UIMode } from '@/types/prisma-types';
 
 /**
  * PUT /api/user/ui-mode
- * 
+ *
  * Actualiza el modo de interfaz del usuario (simple, standard, advanced)
  */
 export async function PUT(request: NextRequest) {
@@ -13,10 +15,7 @@ export async function PUT(request: NextRequest) {
     const session = await getServerSession();
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -63,7 +62,7 @@ export async function PUT(request: NextRequest) {
 
 /**
  * GET /api/user/ui-mode
- * 
+ *
  * Obtiene el modo de interfaz actual del usuario
  */
 export async function GET(request: NextRequest) {
@@ -71,10 +70,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession();
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -91,10 +87,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     return NextResponse.json({

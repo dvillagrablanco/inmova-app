@@ -5,8 +5,14 @@ import { prisma } from '@/lib/db';
 import { stripe, formatAmountForStripe } from '@/lib/stripe-config';
 import { getOrCreateStripeCustomer } from '@/lib/stripe-customer';
 import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+// Schema de validación para crear payment intent
+const createPaymentIntentSchema = z.object({
+  paymentId: z.string().uuid({ message: 'ID de pago inválido' }),
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,11 +29,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { paymentId } = await request.json();
+    const body = await request.json();
 
-    if (!paymentId) {
-      return NextResponse.json({ error: 'ID de pago requerido' }, { status: 400 });
+    // Validación con Zod
+    const validationResult = createPaymentIntentSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map((err) => ({
+        field: err.path.join('.'),
+        message: err.message,
+      }));
+      logger.warn('Validation error creating payment intent:', { errors });
+      return NextResponse.json({ error: 'Datos inválidos', details: errors }, { status: 400 });
     }
+
+    const { paymentId } = validationResult.data;
 
     // Get payment details
     const payment = await prisma.payment.findUnique({
@@ -58,15 +74,10 @@ export async function POST(request: NextRequest) {
 
     // Check if payment already has a payment intent
     if (payment.stripePaymentIntentId) {
-      const existingIntent = await stripe.paymentIntents.retrieve(
-        payment.stripePaymentIntentId
-      );
+      const existingIntent = await stripe.paymentIntents.retrieve(payment.stripePaymentIntentId);
 
       if (existingIntent.status === 'succeeded') {
-        return NextResponse.json(
-          { error: 'Este pago ya ha sido procesado' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Este pago ya ha sido procesado' }, { status: 400 });
       }
 
       // Return existing intent if not succeeded

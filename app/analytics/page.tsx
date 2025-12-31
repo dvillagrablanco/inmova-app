@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -181,15 +181,9 @@ function AnalyticsPageContent() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="flex h-screen">
-        <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 p-6">
+      <AuthenticatedLayout>
             <div className="text-center">Cargando...</div>
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
     );
   }
 
@@ -208,11 +202,7 @@ function AnalyticsPageContent() {
   const occupancyPredictions = predictions.filter((p) => p.tipo === 'ocupacion');
 
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-6 bg-muted/30">
+    <AuthenticatedLayout>
           {/* Header */}
           <div className="mb-6">
             <Button variant="ghost" onClick={() => router.push('/dashboard')} className="mb-4">
@@ -389,7 +379,14 @@ function AnalyticsPageContent() {
                     {revenuePredictions.length > 0 ? (
                       <div className="space-y-4">
                         {revenuePredictions.map((pred, idx) => {
-                          const factores = JSON.parse(pred.factores || '[]');
+                          let factores: string[] = [];
+                          try {
+                            const parsed = JSON.parse(pred.factores || '[]');
+                            factores = Array.isArray(parsed) ? parsed : [];
+                          } catch (e) {
+                            logger.error('Error parsing factores:', e);
+                            factores = [];
+                          }
                           return (
                             <div key={idx} className="border-l-4 border-primary pl-4">
                               <div className="flex items-center justify-between mb-2">
@@ -431,7 +428,14 @@ function AnalyticsPageContent() {
                     {occupancyPredictions.length > 0 ? (
                       <div className="space-y-4">
                         {occupancyPredictions.map((pred, idx) => {
-                          const factores = JSON.parse(pred.factores || '[]');
+                          let factores: string[] = [];
+                          try {
+                            const parsed = JSON.parse(pred.factores || '[]');
+                            factores = Array.isArray(parsed) ? parsed : [];
+                          } catch (e) {
+                            logger.error('Error parsing factores:', e);
+                            factores = [];
+                          }
                           return (
                             <div key={idx} className="border-l-4 border-primary pl-4">
                               <div className="flex items-center justify-between mb-2">
@@ -528,9 +532,7 @@ function AnalyticsPageContent() {
               )}
             </TabsContent>
           </Tabs>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }
 

@@ -1,0 +1,669 @@
+[2025-12-30T22:21:46.339Z] / | CONSOLE | Failed to fetch RSC payload for https://inmovaapp.com/garajes-trasteros. Falling back to browser navigation. TypeError: Failed to fetch
+    at u (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1123345)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1136896
+    at Object.a [as task] (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1109717)
+    at c.u (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1110422)
+    at Object.a [as task] (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1109779)
+[2025-12-30T22:21:46.339Z] / | CONSOLE | Failed to fetch RSC payload for https://inmovaapp.com/dashboard. Falling back to browser navigation. TypeError: Failed to fetch
+    at u (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1123345)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1136896
+    at Object.a [as task] (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1109717)
+    at c.u (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1110422)
+    at c.enqueue (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1109847)
+    at u (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1136859)
+    at l (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1136252)
+    at s (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1143225)
+    at d (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1153050)
+    at Object.action (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:19515)
+[2025-12-30T22:21:46.339Z] / | CONSOLE | Failed to fetch RSC payload for https://inmovaapp.com/unidades. Falling back to browser navigation. TypeError: Failed to fetch
+    at u (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1123345)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1136896
+    at Object.a [as task] (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1109717)
+    at c.u (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1110422)
+    at c.enqueue (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1109847)
+    at u (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1136859)
+    at l (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1136399)
+    at s (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1143225)
+    at d (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1153050)
+    at Object.action (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:19515)
+[2025-12-30T22:21:46.339Z] / | CONSOLE | Error fetching dashboard data: {}
+[2025-12-30T22:21:46.339Z] / | CONSOLE | Failed to fetch RSC payload for https://inmovaapp.com/inquilinos. Falling back to browser navigation. TypeError: Failed to fetch
+    at u (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1123345)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1136896
+    at Object.a [as task] (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1109717)
+    at c.u (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1110422)
+    at Object.a [as task] (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1109779)
+[2025-12-30T22:21:46.340Z] / | CONSOLE | Failed to fetch RSC payload for https://inmovaapp.com/edificios. Falling back to browser navigation. TypeError: Failed to fetch
+    at u (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1123345)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1136896
+    at Object.a [as task] (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1109717)
+    at c.u (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1110422)
+    at c.enqueue (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1109847)
+    at u (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1136859)
+    at l (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1136399)
+    at s (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1143225)
+    at d (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1153050)
+    at Object.action (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:19515)
+[2025-12-30T22:21:46.363Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:21:51.603Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:21:51.603Z] /landing | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:21:56.770Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:21:56.770Z] /landing | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:21:56.770Z] /login | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:21:58.815Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:21:58.816Z] /landing | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:21:58.816Z] /login | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:21:58.816Z] /dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:00.769Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:00.770Z] /landing | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:00.770Z] /login | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:00.770Z] /dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:00.770Z] /edificios | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:02.857Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:02.857Z] /landing | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:02.857Z] /login | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:02.857Z] /dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:02.857Z] /edificios | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:02.857Z] /unidades | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:04.825Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:04.825Z] /landing | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:04.825Z] /login | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:04.825Z] /dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:04.825Z] /edificios | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:04.825Z] /unidades | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:04.825Z] /inquilinos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:06.796Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:06.797Z] /landing | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:06.798Z] /login | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:06.798Z] /dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:06.798Z] /edificios | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:06.799Z] /unidades | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:06.799Z] /inquilinos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:06.799Z] /contratos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:08.759Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:08.760Z] /landing | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:08.760Z] /login | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:08.760Z] /dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:08.760Z] /edificios | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:08.760Z] /unidades | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:08.760Z] /inquilinos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:08.760Z] /contratos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:08.760Z] /pagos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:10.731Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:10.732Z] /landing | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:10.732Z] /login | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:10.732Z] /dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:10.732Z] /edificios | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:10.732Z] /unidades | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:10.732Z] /inquilinos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:10.732Z] /contratos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:10.732Z] /pagos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:10.732Z] /mantenimiento | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:13.321Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:13.321Z] /landing | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:13.321Z] /login | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:13.321Z] /dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:13.321Z] /edificios | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:13.321Z] /unidades | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:13.321Z] /inquilinos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:13.321Z] /contratos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:13.321Z] /pagos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:13.321Z] /mantenimiento | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:13.321Z] /calendario | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:15.263Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:15.263Z] /landing | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:15.263Z] /login | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:15.263Z] /dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:15.263Z] /edificios | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:15.263Z] /unidades | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:15.263Z] /inquilinos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:15.263Z] /contratos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:15.263Z] /pagos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:15.263Z] /mantenimiento | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:15.263Z] /calendario | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:15.263Z] /chat | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:15.843Z] / | CONSOLE | TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.843Z] /landing | CONSOLE | TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.843Z] /login | CONSOLE | TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.843Z] /dashboard | CONSOLE | TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.843Z] /edificios | CONSOLE | TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.843Z] /unidades | CONSOLE | TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.843Z] /inquilinos | CONSOLE | TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.843Z] /contratos | CONSOLE | TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.843Z] /pagos | CONSOLE | TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.843Z] /mantenimiento | CONSOLE | TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.843Z] /calendario | CONSOLE | TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.843Z] /chat | CONSOLE | TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.897Z] / | CONSOLE | Global error: TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.898Z] /landing | CONSOLE | Global error: TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.898Z] /login | CONSOLE | Global error: TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.898Z] /dashboard | CONSOLE | Global error: TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.898Z] /edificios | CONSOLE | Global error: TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.898Z] /unidades | CONSOLE | Global error: TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.898Z] /inquilinos | CONSOLE | Global error: TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.898Z] /contratos | CONSOLE | Global error: TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.898Z] /pagos | CONSOLE | Global error: TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.898Z] /mantenimiento | CONSOLE | Global error: TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.898Z] /calendario | CONSOLE | Global error: TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:15.898Z] /chat | CONSOLE | Global error: TypeError: Cannot read properties of undefined (reading 'split')
+    at L (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:1035)
+    at https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2493
+    at Array.map (<anonymous>)
+    at D (https://inmovaapp.com/_next/static/chunks/app/chat/page-a7df128e897eb0d5.js:1:2085)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:770526)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+[2025-12-30T22:22:17.219Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:17.219Z] /landing | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:17.220Z] /login | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:17.220Z] /dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:17.220Z] /edificios | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:17.220Z] /unidades | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:17.220Z] /inquilinos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:17.220Z] /contratos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:17.220Z] /pagos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:17.221Z] /mantenimiento | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:17.221Z] /calendario | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:17.221Z] /chat | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:17.221Z] /documentos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.221Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.225Z] /landing | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.225Z] /login | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.225Z] /dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.225Z] /edificios | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.225Z] /unidades | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.225Z] /inquilinos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.225Z] /contratos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.225Z] /pagos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.225Z] /mantenimiento | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.225Z] /calendario | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.225Z] /chat | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.225Z] /documentos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.225Z] /configuracion | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.719Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.719Z] /landing | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.719Z] /login | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.719Z] /dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.719Z] /edificios | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.719Z] /unidades | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.719Z] /inquilinos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.719Z] /contratos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.719Z] /pagos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.719Z] /mantenimiento | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.719Z] /calendario | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.719Z] /chat | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.719Z] /documentos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:19.719Z] /configuracion | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:21.915Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:21.915Z] /landing | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:21.915Z] /login | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:21.915Z] /dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:21.915Z] /edificios | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:21.915Z] /unidades | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:21.915Z] /inquilinos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:21.915Z] /contratos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:21.915Z] /pagos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:21.915Z] /mantenimiento | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:21.915Z] /calendario | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:21.915Z] /chat | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:21.915Z] /documentos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:21.915Z] /configuracion | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:21.915Z] /admin/dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:23.903Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:23.903Z] /landing | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:23.903Z] /login | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:23.903Z] /dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:23.903Z] /edificios | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:23.903Z] /unidades | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:23.903Z] /inquilinos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:23.903Z] /contratos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:23.903Z] /pagos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:23.903Z] /mantenimiento | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:23.903Z] /calendario | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:23.903Z] /chat | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:23.903Z] /documentos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:23.903Z] /configuracion | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:23.903Z] /admin/dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:23.903Z] /analytics | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:24.870Z] / | CONSOLE | TypeError: b.map is not a function
+    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)
+    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)
+[2025-12-30T22:22:24.870Z] /landing | CONSOLE | TypeError: b.map is not a function
+    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)
+    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)
+[2025-12-30T22:22:24.870Z] /login | CONSOLE | TypeError: b.map is not a function
+    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)
+    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)
+[2025-12-30T22:22:24.870Z] /dashboard | CONSOLE | TypeError: b.map is not a function
+    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)
+    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)
+[2025-12-30T22:22:24.870Z] /edificios | CONSOLE | TypeError: b.map is not a function
+    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)
+    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)
+[2025-12-30T22:22:24.870Z] /unidades | CONSOLE | TypeError: b.map is not a function
+    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)
+    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)
+[2025-12-30T22:22:24.870Z] /inquilinos | CONSOLE | TypeError: b.map is not a function
+    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)
+    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)
+[2025-12-30T22:22:24.870Z] /contratos | CONSOLE | TypeError: b.map is not a function
+    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)
+    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)
+[2025-12-30T22:22:24.870Z] /pagos | CONSOLE | TypeError: b.map is not a function
+    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)
+    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)
+[2025-12-30T22:22:24.870Z] /mantenimiento | CONSOLE | TypeError: b.map is not a function
+    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)
+    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)
+[2025-12-30T22:22:24.870Z] /calendario | CONSOLE | TypeError: b.map is not a function
+    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)
+    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)
+[2025-12-30T22:22:24.870Z] /chat | CONSOLE | TypeError: b.map is not a function
+    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)
+    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)
+[2025-12-30T22:22:24.870Z] /documentos | CONSOLE | TypeError: b.map is not a function
+    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)
+    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)
+[2025-12-30T22:22:24.870Z] /configuracion | CONSOLE | TypeError: b.map is not a function
+    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)
+    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)
+[2025-12-30T22:22:24.870Z] /admin/dashboard | CONSOLE | TypeError: b.map is not a function
+    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)
+    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)
+[2025-12-30T22:22:24.870Z] /analytics | CONSOLE | TypeError: b.map is not a function
+    at S (https://inmovaapp.com/_next/static/chunks/app/analytics/page-bef1bed9715707a1.js:1:2117)
+    at rS (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:693841)
+    at iq (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:712816)
+    at sX (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:771423)
+    at so (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748662)
+    at https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748484
+    at sa (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:748491)
+    at o1 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745847)
+    at o0 (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:2:745266)
+    at MessagePort.O (https://inmovaapp.com/_next/static/chunks/vendor-ee53074649938e1e.js:1:1179300)
+[2025-12-30T22:22:24.870Z] / | CONSOLE | ErrorBoundary caught an error {error: Object, errorInfo: Object}
+[2025-12-30T22:22:24.870Z] /landing | CONSOLE | ErrorBoundary caught an error {error: Object, errorInfo: Object}
+[2025-12-30T22:22:24.870Z] /login | CONSOLE | ErrorBoundary caught an error {error: Object, errorInfo: Object}
+[2025-12-30T22:22:24.870Z] /dashboard | CONSOLE | ErrorBoundary caught an error {error: Object, errorInfo: Object}
+[2025-12-30T22:22:24.870Z] /edificios | CONSOLE | ErrorBoundary caught an error {error: Object, errorInfo: Object}
+[2025-12-30T22:22:24.870Z] /unidades | CONSOLE | ErrorBoundary caught an error {error: Object, errorInfo: Object}
+[2025-12-30T22:22:24.870Z] /inquilinos | CONSOLE | ErrorBoundary caught an error {error: Object, errorInfo: Object}
+[2025-12-30T22:22:24.870Z] /contratos | CONSOLE | ErrorBoundary caught an error {error: Object, errorInfo: Object}
+[2025-12-30T22:22:24.870Z] /pagos | CONSOLE | ErrorBoundary caught an error {error: Object, errorInfo: Object}
+[2025-12-30T22:22:24.870Z] /mantenimiento | CONSOLE | ErrorBoundary caught an error {error: Object, errorInfo: Object}
+[2025-12-30T22:22:24.870Z] /calendario | CONSOLE | ErrorBoundary caught an error {error: Object, errorInfo: Object}
+[2025-12-30T22:22:24.870Z] /chat | CONSOLE | ErrorBoundary caught an error {error: Object, errorInfo: Object}
+[2025-12-30T22:22:24.870Z] /documentos | CONSOLE | ErrorBoundary caught an error {error: Object, errorInfo: Object}
+[2025-12-30T22:22:24.870Z] /configuracion | CONSOLE | ErrorBoundary caught an error {error: Object, errorInfo: Object}
+[2025-12-30T22:22:24.870Z] /admin/dashboard | CONSOLE | ErrorBoundary caught an error {error: Object, errorInfo: Object}
+[2025-12-30T22:22:24.870Z] /analytics | CONSOLE | ErrorBoundary caught an error {error: Object, errorInfo: Object}
+[2025-12-30T22:22:25.865Z] / | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:25.865Z] /landing | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:25.865Z] /login | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:25.865Z] /dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:25.865Z] /edificios | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:25.865Z] /unidades | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:25.865Z] /inquilinos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:25.865Z] /contratos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:25.866Z] /pagos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:25.866Z] /mantenimiento | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:25.866Z] /calendario | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:25.866Z] /chat | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:25.866Z] /documentos | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:25.866Z] /configuracion | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:25.866Z] /admin/dashboard | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:25.866Z] /analytics | JAVASCRIPT | Invalid or unexpected token
+[2025-12-30T22:22:25.866Z] /api-docs | JAVASCRIPT | Invalid or unexpected token

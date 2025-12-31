@@ -1,0 +1,31 @@
+FROM node:20-alpine
+
+RUN apk add --no-cache libc6-compat openssl git python3 make g++
+
+WORKDIR /app
+
+# Install dependencies
+COPY package.json yarn.lock ./
+COPY prisma ./prisma/
+
+# Install all dependencies including critters
+RUN yarn install --network-timeout 1000000
+RUN yarn add critters --dev
+
+# Generate Prisma Client
+RUN yarn prisma generate
+
+# Copy source code
+COPY . .
+
+# Build Next.js
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN yarn build
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["yarn", "start"]

@@ -74,8 +74,14 @@ export async function GET(req: NextRequest) {
 
     logger.info(`Gastos obtenidos: ${expenses.length} de ${total}`, { userId: user.id });
     
+    // Convertir valores Decimal a números
+    const expensesWithNumbers = expenses.map(expense => ({
+      ...expense,
+      monto: Number(expense.monto || 0),
+    }));
+    
     return NextResponse.json({
-      data: expenses,
+      data: expensesWithNumbers,
       meta: {
         total,
         limit: take,

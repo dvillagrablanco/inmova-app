@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import {
   Home,
   Plus,
@@ -208,11 +208,7 @@ export default function UnidadesPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="flex h-screen overflow-hidden bg-gradient-bg">
-        <Sidebar />
-        <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-          <Header />
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+      <AuthenticatedLayout>
             <div className="max-w-7xl mx-auto space-y-6">
               {/* Skeleton for breadcrumbs */}
               <div className="flex items-center gap-4">
@@ -250,9 +246,7 @@ export default function UnidadesPage() {
               {/* Loading message */}
               <LoadingState message="Cargando unidades..." size="sm" />
             </div>
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
     );
   }
 
@@ -282,11 +276,7 @@ export default function UnidadesPage() {
   const ocupacionRate = units.length > 0 ? Math.round((unitsOcupadas / units.length) * 100) : 0;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-muted/30">
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Botón Volver y Breadcrumbs */}
             <div className="flex items-center gap-4">
@@ -434,9 +424,9 @@ export default function UnidadesPage() {
                             <span className="text-sm text-muted-foreground">Tipo</span>
                             <span className="text-sm font-medium">{getTipoLabel(unit.tipo)}</span>
                           </div>
-                          <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Superficie</span>
-                            <span className="text-sm font-medium">{unit.superficie}m²</span>
+                            <span className="text-sm font-medium">{Number(unit.superficie || 0)}m²</span>
                           </div>
                           {unit.habitaciones && (
                             <div className="flex items-center justify-between">
@@ -456,7 +446,7 @@ export default function UnidadesPage() {
                             <div className="flex items-center justify-between">
                               <span className="text-sm text-muted-foreground">Renta mensual</span>
                               <span className="text-lg font-bold text-green-600">
-                                €{unit.rentaMensual.toLocaleString('es-ES')}
+                                €{Number(unit.rentaMensual || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </span>
                             </div>
                           </div>
@@ -500,7 +490,7 @@ export default function UnidadesPage() {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                               <div>
                                 <p className="text-sm text-muted-foreground">Superficie</p>
-                                <p className="text-lg font-semibold">{unit.superficie}m²</p>
+                                <p className="text-lg font-semibold">{Number(unit.superficie || 0)}m²</p>
                               </div>
                               {unit.habitaciones && (
                                 <div>
@@ -517,7 +507,7 @@ export default function UnidadesPage() {
                               <div>
                                 <p className="text-sm text-muted-foreground">Renta/mes</p>
                                 <p className="text-lg font-semibold text-green-600">
-                                  €{unit.rentaMensual.toLocaleString('es-ES')}
+                                  €{Number(unit.rentaMensual || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </p>
                               </div>
                             </div>
@@ -574,7 +564,7 @@ export default function UnidadesPage() {
                               <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                                 <span>{getTipoLabel(unit.tipo)}</span>
                                 <span>•</span>
-                                <span>{unit.superficie}m²</span>
+                                <span>{Number(unit.superficie || 0)}m²</span>
                                 {unit.habitaciones && (
                                   <>
                                     <span>•</span>
@@ -599,7 +589,7 @@ export default function UnidadesPage() {
                             <div className="text-center">
                               <p className="text-muted-foreground">Renta/mes</p>
                               <p className="font-semibold text-green-600">
-                                €{unit.rentaMensual.toLocaleString('es-ES')}
+                                €{Number(unit.rentaMensual || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </p>
                             </div>
                             <Button variant="ghost" size="icon">
@@ -640,8 +630,6 @@ export default function UnidadesPage() {
                 />
               ))}
           </div>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }

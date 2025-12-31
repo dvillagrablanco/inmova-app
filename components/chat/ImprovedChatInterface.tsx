@@ -84,11 +84,12 @@ export function ImprovedChatInterface({
 
   const filteredConversations = conversations.filter(
     (conv) =>
-      conv.asunto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      conv.tenantName.toLowerCase().includes(searchTerm.toLowerCase())
+      (conv.asunto?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (conv.tenantName?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
 
   const getInitials = (name: string) => {
+    if (!name) return '??';
     return name
       .split(' ')
       .map((n) => n[0])

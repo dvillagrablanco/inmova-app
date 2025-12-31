@@ -2,54 +2,60 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * API: Pagos para Portal Inquilino
+ * GET - Obtener historial de pagos del inquilino
+ */
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    // Get tenant by email
-    const tenant = await prisma.tenant.findUnique({
-      where: { email: session.user.email! },
-    });
-
-    if (!tenant) {
-      return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
+    // Verificar que sea inquilino
+    if (session.user.role !== 'TENANT' && session.user.role !== 'INQUILINO') {
+      return NextResponse.json(
+        { error: 'Acceso denegado - Solo para inquilinos' },
+        { status: 403 }
+      );
     }
 
-    // Get all payments for this tenant's contracts
-    const payments = await prisma.payment.findMany({
+    // Buscar pagos del inquilino
+    const pagos = await prisma.pago.findMany({
       where: {
-        contract: {
-          tenantId: tenant.id,
-        },
+        inquilinoId: session.user.id,
       },
       include: {
-        contract: {
+        contrato: {
           include: {
-            unit: {
-              include: {
-                building: true,
+            propiedad: {
+              select: {
+                direccion: true,
+                ciudad: true,
               },
             },
           },
         },
       },
       orderBy: {
-        fechaVencimiento: 'desc',
+        fechaPago: 'desc',
       },
+      take: 50,
     });
 
-    return NextResponse.json({ payments });
+    return NextResponse.json({
+      success: true,
+      payments: pagos,
+    });
   } catch (error: any) {
-    logger.error('Error fetching tenant payments:', error);
+    console.error('[API Error]:', error);
     return NextResponse.json(
-      { error: error.message || 'Error al cargar pagos' },
+      { error: 'Error interno del servidor', details: error.message },
       { status: 500 }
     );
   }

@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { KPICard } from '@/components/ui/kpi-card';
 import { ContextualHelp } from '@/components/ui/contextual-help';
 import { LoadingState } from '@/components/ui/loading-state';
@@ -101,8 +100,12 @@ function DashboardPageContent() {
           }
           setData(dashboardData);
         }
-      } catch (error) {
-        logger.error('Error fetching dashboard data:', error);
+      } catch (error: any) {
+        logger.error('Error fetching dashboard data:', {
+          message: error?.message || 'Unknown error',
+          name: error?.name,
+          stack: error?.stack?.substring(0, 200),
+        });
       } finally {
         setIsLoading(false);
       }
@@ -115,61 +118,53 @@ function DashboardPageContent() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="flex h-screen bg-gradient-bg">
-        <Sidebar />
-        <div className="flex-1 ml-0 lg:ml-64 flex flex-col">
-          <Header />
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto">
-              {/* Header */}
-              <div className="mb-8 space-y-2">
-                <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
-                <div className="h-5 w-64 bg-gray-200 rounded animate-pulse" />
-              </div>
+      <AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="mb-8 space-y-2">
+            <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
+            <div className="h-5 w-64 bg-gray-200 rounded animate-pulse" />
+          </div>
 
-              {/* KPIs Grid */}
-              <div className="mb-8">
-                <SkeletonKPICards count={4} />
-              </div>
+          {/* KPIs Grid */}
+          <div className="mb-8">
+            <SkeletonKPICards count={4} />
+          </div>
 
-              {/* Financial KPIs */}
-              <div className="mb-8">
-                <div className="grid gap-4 md:grid-cols-3">
-                  <SkeletonKPICards count={3} />
-                </div>
-              </div>
-
-              {/* Charts */}
-              <div className="space-y-6">
-                <SkeletonChart height={300} />
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <SkeletonChart height={300} />
-                  <SkeletonChart height={300} />
-                </div>
-              </div>
+          {/* Financial KPIs */}
+          <div className="mb-8">
+            <div className="grid gap-4 md:grid-cols-3">
+              <SkeletonKPICards count={3} />
             </div>
-          </main>
+          </div>
+
+          {/* Charts */}
+          <div className="space-y-6">
+            <SkeletonChart height={300} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <SkeletonChart height={300} />
+              <SkeletonChart height={300} />
+            </div>
+          </div>
         </div>
-      </div>
+      </AuthenticatedLayout>
     );
   }
 
   if (!session || !data || !data.kpis) {
     return (
-      <div className="flex h-screen bg-gradient-bg items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">No hay datos disponibles</p>
+      <AuthenticatedLayout>
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <p className="text-gray-600">No hay datos disponibles</p>
+          </div>
         </div>
-      </div>
+      </AuthenticatedLayout>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gradient-bg">
-      <Sidebar />
-      <div className="flex-1 ml-0 lg:ml-64 flex flex-col">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <AuthenticatedLayout maxWidth="7xl">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="mb-8">
@@ -195,23 +190,23 @@ function DashboardPageContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <KPICard
                 title="Ingresos Mensuales"
-                value={`€${safeFormatNumber(data.kpis.ingresosTotalesMensuales)}`}
+                value={`€${safeFormatNumber(Number(data.kpis.ingresosTotalesMensuales || 0))}`}
                 icon={TrendingUp}
               />
               <KPICard
                 title="Total Propiedades"
-                value={data.kpis.numeroPropiedades ?? 0}
+                value={Number(data.kpis.numeroPropiedades || 0)}
                 icon={Building2}
               />
               <KPICard
                 title="Tasa de Ocupación"
-                value={data.kpis.tasaOcupacion ?? 0}
+                value={Number(data.kpis.tasaOcupacion || 0).toFixed(1)}
                 suffix="%"
                 icon={Percent}
               />
               <KPICard
                 title="Tasa de Morosidad"
-                value={data.kpis.tasaMorosidad ?? 0}
+                value={Number(data.kpis.tasaMorosidad || 0).toFixed(1)}
                 suffix="%"
                 icon={AlertTriangle}
               />
@@ -221,15 +216,15 @@ function DashboardPageContent() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <KPICard
                 title="Ingresos Netos"
-                value={`€${safeFormatNumber(data.kpis.ingresosNetos)}`}
+                value={`€${safeFormatNumber(Number(data.kpis.ingresosNetos || 0))}`}
                 icon={DollarSign}
               />
               <KPICard
                 title="Gastos Totales"
-                value={`€${safeFormatNumber(data.kpis.gastosTotales)}`}
+                value={`€${safeFormatNumber(Number(data.kpis.gastosTotales || 0))}`}
                 icon={TrendingDown}
               />
-              <KPICard title="Margen Neto" value={data.kpis.margenNeto ?? 0} suffix="%" icon={Percent} />
+              <KPICard title="Margen Neto" value={Number(data.kpis.margenNeto || 0).toFixed(1)} suffix="%" icon={Percent} />
             </div>
 
             {/* Monthly Income Chart - Optimizado para móvil */}
@@ -401,7 +396,7 @@ function DashboardPageContent() {
                       <div className="flex-1">
                         <p className="font-medium text-gray-900">{pago?.periodo}</p>
                         <p className="text-sm text-gray-600">
-                          €{pago?.monto?.toLocaleString('es-ES')}
+                          €{Number(pago?.monto || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                       </div>
                       <span
@@ -577,14 +572,13 @@ function DashboardPageContent() {
               },
             ]}
           />
-        </main>
-      </div>
-      <AIAssistant />
-      {/* Chatbot inteligente de soporte 24/7 - Sistema automatizado sin intervenci\u00f3n humana */}
-      <IntelligentSupportChatbot />
-    </div>
-  );
-}
+
+          <AIAssistant />
+          {/* Chatbot inteligente de soporte 24/7 - Sistema automatizado sin intervenci\u00f3n humana */}
+          <IntelligentSupportChatbot />
+        </AuthenticatedLayout>
+      );
+    }
 
 export default function DashboardPage() {
   return (

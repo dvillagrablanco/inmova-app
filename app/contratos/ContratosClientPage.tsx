@@ -206,7 +206,7 @@ export default function ContratosClientPage({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/home">
+                <BreadcrumbLink href="/dashboard">
                   <Home className="h-4 w-4" />
                 </BreadcrumbLink>
               </BreadcrumbItem>
@@ -221,9 +221,7 @@ export default function ContratosClientPage({
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Contratos</h1>
-              <p className="text-muted-foreground mt-2">
-                Gestiona todos los contratos de alquiler
-              </p>
+              <p className="text-muted-foreground mt-2">Gestiona todos los contratos de alquiler</p>
             </div>
             {canCreate && (
               <Button onClick={() => router.push('/contratos/nuevo')}>
@@ -273,7 +271,7 @@ export default function ContratosClientPage({
                   {formatCurrency(
                     initialContracts
                       .filter((c) => c.estado === 'activo')
-                      .reduce((sum, c) => sum + c.rentaMensual, 0)
+                      .reduce((sum, c) => sum + Number(c.rentaMensual || 0), 0)
                   )}
                 </div>
               </CardContent>
@@ -322,14 +320,14 @@ export default function ContratosClientPage({
                       },
                     ]
                   : canCreate
-                  ? [
-                      {
-                        label: 'Crear Contrato',
-                        onClick: () => router.push('/contratos/nuevo'),
-                        variant: 'default' as const,
-                      },
-                    ]
-                  : undefined
+                    ? [
+                        {
+                          label: 'Crear Contrato',
+                          onClick: () => router.push('/contratos/nuevo'),
+                          variant: 'default' as const,
+                        },
+                      ]
+                    : undefined
               }
             />
           ) : (
@@ -369,7 +367,7 @@ export default function ContratosClientPage({
                             </span>
                             <span className="flex items-center gap-1">
                               <Euro className="h-3 w-3" />
-                              {formatCurrency(contract.rentaMensual)}/mes
+                              {formatCurrency(Number(contract.rentaMensual || 0))}/mes
                             </span>
                           </div>
                         </div>

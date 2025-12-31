@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: POST /api/onboarding/initialize
  * Inicializa las tareas de onboarding para un usuario

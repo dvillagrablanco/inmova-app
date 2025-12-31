@@ -216,7 +216,12 @@ export async function GET(request: Request) {
       FROM company_income ci, company_expenses ce, company_units cu
     `;
 
-    const stats = globalStats[0];
+    const stats = globalStats[0] || {
+      ingresosBrutos: 0,
+      gastos: 0,
+      unidades: 0,
+      unidadesOcupadas: 0,
+    };
     const ingresosNetos = stats.ingresosBrutos - stats.gastos;
     const rentabilidadBruta = stats.ingresosBrutos > 0 
       ? (stats.ingresosBrutos / (stats.ingresosBrutos + stats.gastos)) * 100 

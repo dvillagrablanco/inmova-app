@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: /api/celebrations
  * Gestión de celebraciones de logros del usuario
