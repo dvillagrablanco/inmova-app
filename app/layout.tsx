@@ -112,14 +112,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </Script>
         )}
 
-        {/* CSS Bug Workaround - Next.js RSC */}
+        {/* CSS Bug Workaround - DESACTIVADO TEMPORALMENTE
+            Causa problemas de serialización en Next.js streaming.
+            El script se duplica en __next_s push y causa "Invalid or unexpected token"
+        
         <Script id="css-error-suppressor" strategy="beforeInteractive">
           {`
             (function() {
               const originalError = console.error;
               console.error = function(...args) {
-                const message = args[0]?.toString() || '';
-                const stack = args[1]?.toString() || '';
+                const firstArg = args[0];
+                const message = firstArg?.toString() || '';
+                const stack = firstArg?.stack || args[1]?.toString() || '';
                 
                 // Suprimir solo error CSS de Next.js RSC
                 if (
@@ -136,6 +140,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             })();
           `}
         </Script>
+        */}
       </head>
       <body className={inter.className}>
         <Providers>
