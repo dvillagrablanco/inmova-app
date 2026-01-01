@@ -161,6 +161,33 @@ const PLANES_NEGOCIO_2026 = [
       'Soporte compartido'
     ],
     activo: false // No visible públicamente
+  },
+  // Plan Demo (para demostraciones del superadmin)
+  {
+    nombre: 'Demo',
+    descripcion: 'Plan especial para demostraciones a potenciales clientes. Incluye todas las funcionalidades y datos de ejemplo.',
+    tier: 'premium',
+    precioMensual: 0, // Gratis
+    maxUsuarios: null, // Ilimitado
+    maxPropiedades: null, // Ilimitado
+    maxVerticales: 6,
+    modulosIncluidos: [
+      'TODAS las funcionalidades',
+      'Datos de ejemplo precargados',
+      'Acceso completo a todos los módulos',
+      'Todos los verticales activos',
+      'Todos los módulos transversales',
+      'Sin limitaciones'
+    ],
+    features: [
+      'Todas las características Enterprise',
+      'Datos demo precargados',
+      'Perfecto para demostraciones',
+      'Acceso completo e ilimitado',
+      'Sin costo',
+      'Solo para uso interno'
+    ],
+    activo: false // No visible públicamente, solo para superadmin
   }
 ];
 
