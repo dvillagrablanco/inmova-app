@@ -2,6 +2,29 @@
 
 ---
 
+## ⚡ REGLA CRÍTICA DE COMUNICACIÓN
+
+**IMPORTANTE:** Al completar tareas o realizar cambios:
+- ❌ **NO proporcionar resúmenes ejecutivos extensos**
+- ❌ **NO crear reportes detallados de lo realizado**
+- ❌ **NO listar estadísticas o métricas al finalizar**
+- ✅ **SÍ confirmar brevemente que la tarea está completada**
+- ✅ **SÍ mencionar solo errores críticos si los hay**
+- ✅ **SÍ proceder directamente con la siguiente acción**
+
+**Ejemplo correcto:**
+```
+✅ Sidebar corregida. Archivos deployados.
+```
+
+**Ejemplo incorrecto:**
+```
+✅ MISIÓN COMPLETADA - RESUMEN EJECUTIVO
+[50 líneas de estadísticas y análisis detallado]
+```
+
+---
+
 ## 🚨 SOLUCIÓN INTEGRAL - LECCIONES APRENDIDAS (Dic 2025)
 
 ### 🎯 CONFIGURACIÓN PRODUCTION-READY (PM2 + Nginx + Monitoring)
