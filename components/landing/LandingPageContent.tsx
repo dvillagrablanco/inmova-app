@@ -33,10 +33,9 @@ export function LandingPageContent() {
   return (
     <>
       <StructuredData />
-      {/* Navigation debe estar fuera de <main> para ser un header global */}
-      <Navigation />
-      
       <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        {/* Navigation */}
+        <Navigation />
 
         {/* Hero Section Segmentado por Buyer Persona */}
         <HeroSectionSegmentado />
