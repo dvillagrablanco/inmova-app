@@ -62,10 +62,10 @@ export default function CalculadoraROIPage() {
 
   // Definición de precios de competidores y servicios adicionales
   const competitorPricing: Record<string, { base: number; perUnit?: number; name: string }> = {
-    homming: { base: 0, perUnit: 12, name: 'Homming' },
-    rentger: { base: 0, perUnit: 9, name: 'Rentger' },
-    buildium: { base: 174, perUnit: 0, name: 'Buildium' },
-    appfolio: { base: 280, perUnit: 1, name: 'AppFolio' },
+    sistema1: { base: 0, perUnit: 12, name: 'Sistema A' },
+    sistema2: { base: 0, perUnit: 9, name: 'Sistema B' },
+    sistema3: { base: 174, perUnit: 0, name: 'Sistema C' },
+    sistema4: { base: 280, perUnit: 1, name: 'Sistema D' },
     otro: { base: 150, perUnit: 0, name: 'Otro Sistema' },
   };
 
@@ -244,8 +244,8 @@ export default function CalculadoraROIPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="homming">Homming</SelectItem>
-                      <SelectItem value="rentger">Rentger</SelectItem>
+                      <SelectItem value="sistema1">Sistema A</SelectItem>
+                      <SelectItem value="sistema2">Sistema B</SelectItem>
                       <SelectItem value="buildium">Buildium</SelectItem>
                       <SelectItem value="appfolio">AppFolio</SelectItem>
                       <SelectItem value="otro">Otro Sistema</SelectItem>
@@ -538,7 +538,7 @@ export default function CalculadoraROIPage() {
                   ))}
                 </div>
                 <p className="text-gray-700 italic mb-4">
-                  "Pasé de pagar €420/mes entre Homming y Guesty a solo €199 con INMOVA. Y tengo MU
+                  "Pasé de pagar €420/mes entre múltiples sistemas a solo €199 con INMOVA. Y tengo MU
                   CHAS más funcionalidades. El ROI fue inmediato."
                 </p>
                 <p className="font-semibold text-gray-900">

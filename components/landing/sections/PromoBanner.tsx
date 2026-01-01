@@ -44,7 +44,7 @@ const campaigns: PromoCampaign[] = [
   {
     id: 'switch2025',
     code: 'SWITCH2025',
-    title: 'El Desafío Homming/Rentger',
+    title: 'La Solución PropTech Definitiva',
     subtitle: 'Igualamos tu precio 1 año + Upgrade gratis',
     description: 'Trae tu última factura de la competencia. Te damos INMOVA al mismo precio con el plan superior.',
     cta: 'Cambia ahora',

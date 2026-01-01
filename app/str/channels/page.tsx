@@ -123,8 +123,8 @@ export default function STRChannelsPage() {
           apiStatus: 'error',
         },
         {
-          id: 'idealista',
-          name: 'Idealista',
+          id: 'portal1',
+          name: 'Portal Inmobiliario',
           logo: '🟢',
           connected: true,
           active: true,

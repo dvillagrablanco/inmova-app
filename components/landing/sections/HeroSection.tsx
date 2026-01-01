@@ -32,7 +32,7 @@ export function HeroSection() {
             <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-100 border-2 border-green-300 rounded-full">
               <TrendingUp className="h-4 w-4 text-green-700" />
               <span className="text-sm font-bold text-green-700">
-                70% más económico que Homming • 6x más funcionalidad
+                La solución PropTech más completa del mercado • 6x más funcionalidad
               </span>
             </div>
 

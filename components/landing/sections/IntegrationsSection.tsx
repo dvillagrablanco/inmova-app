@@ -22,8 +22,8 @@ const integrations = [
     desc: 'Publicación automática',
     gradient: 'from-blue-500 to-indigo-500',
     items: [
-      { name: 'Idealista', desc: 'Sincronización automática' },
-      { name: 'Fotocasa', desc: 'Anuncios optimizados' },
+      { name: 'Portales Inmobiliarios', desc: 'Sincronización automática' },
+      { name: 'Redes Sociales', desc: 'Publicación optimizada' },
       { name: 'Habitaclia', desc: 'Multi-publicación' },
     ]
   },

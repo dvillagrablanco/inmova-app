@@ -782,7 +782,7 @@ export default function ImportarPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold gradient-text mb-2">Migración desde Otros Sistemas</h1>
           <p className="text-muted-foreground">
-            Importa tus datos desde Homming, Rentger, Nester, Buildium, AppFolio y otros sistemas de
+            Importa tus datos desde Excel, CSV o cualquier sistema de gestión existente de
             gestión
           </p>
         </div>

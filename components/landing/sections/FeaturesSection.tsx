@@ -167,7 +167,7 @@ const modulosTransversales = [
     icon: Link2,
     title: 'Integraciones',
     desc: 'Conecta con +50 herramientas',
-    benefits: ['Idealista', 'Fotocasa', 'Airbnb', 'Booking'],
+    benefits: ['Portales inmobiliarios', 'OTAs', 'Redes sociales', 'Web propia'],
     gradient: 'from-indigo-500 to-purple-500',
     usedBy: 'Todos los verticales',
   },
