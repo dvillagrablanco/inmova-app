@@ -17,40 +17,84 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    // Verificar que sea inquilino
-    if (session.user.role !== 'TENANT' && session.user.role !== 'INQUILINO') {
+    // Buscar el tenant asociado al usuario
+    const tenant = await prisma.tenant.findFirst({
+      where: {
+        email: session.user.email,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!tenant) {
       return NextResponse.json(
-        { error: 'Acceso denegado - Solo para inquilinos' },
-        { status: 403 }
+        { error: 'No se encontró información de inquilino' },
+        { status: 404 }
       );
     }
 
-    // Buscar pagos del inquilino
-    const pagos = await prisma.pago.findMany({
+    // Buscar contratos del inquilino
+    const contracts = await prisma.contract.findMany({
       where: {
-        inquilinoId: session.user.id,
+        tenantId: tenant.id,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const contractIds = contracts.map((c) => c.id);
+
+    // Buscar pagos de los contratos del inquilino
+    const payments = await prisma.payment.findMany({
+      where: {
+        contractId: { in: contractIds },
       },
       include: {
-        contrato: {
+        contract: {
           include: {
-            propiedad: {
-              select: {
-                direccion: true,
-                ciudad: true,
+            unit: {
+              include: {
+                building: {
+                  select: {
+                    nombre: true,
+                    direccion: true,
+                    ciudad: true,
+                  },
+                },
               },
             },
           },
         },
       },
       orderBy: {
-        fechaPago: 'desc',
+        fechaVencimiento: 'desc',
       },
       take: 50,
     });
 
+    // Transformar estructura para facilitar uso en frontend
+    const transformedPayments = payments.map((payment) => ({
+      id: payment.id,
+      periodo: payment.periodo,
+      monto: payment.monto,
+      fechaVencimiento: payment.fechaVencimiento,
+      fechaPago: payment.fechaPago,
+      estado: payment.estado,
+      metodoPago: payment.metodoPago,
+      nivelRiesgo: payment.nivelRiesgo,
+      propiedad: {
+        nombre: payment.contract.unit.building.nombre,
+        direccion: payment.contract.unit.building.direccion,
+        ciudad: payment.contract.unit.building.ciudad,
+        unidad: payment.contract.unit.numero,
+      },
+    }));
+
     return NextResponse.json({
       success: true,
-      payments: pagos,
+      payments: transformedPayments,
     });
   } catch (error: any) {
     console.error('[API Error]:', error);
