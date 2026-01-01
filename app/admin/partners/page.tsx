@@ -12,6 +12,9 @@ import {
   Building2,
   Eye,
   Filter,
+  Plus,
+  Edit,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -71,6 +74,21 @@ export default function AdminPartnersPage() {
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<'approve' | 'reject' | 'suspend' | null>(null);
   const [actionNotes, setActionNotes] = useState('');
+  
+  // CRUD state
+  const [createEditDialogOpen, setCreateEditDialogOpen] = useState(false);
+  const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingPartner, setDeletingPartner] = useState<Partner | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    website: '',
+    type: 'REAL_ESTATE',
+    commissionRate: '25',
+  });
 
   useEffect(() => {
     loadPartners();
@@ -177,6 +195,88 @@ export default function AdminPartnersPage() {
     }
   };
 
+  const handleOpenCreateEdit = (partner?: Partner) => {
+    if (partner) {
+      setEditingPartner(partner);
+      setFormData({
+        name: partner.name,
+        email: partner.email,
+        phone: partner.phone || '',
+        company: partner.company || '',
+        website: partner.website || '',
+        type: partner.type,
+        commissionRate: partner.commissionRate.toString(),
+      });
+    } else {
+      setEditingPartner(null);
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        company: '',
+        website: '',
+        type: 'REAL_ESTATE',
+        commissionRate: '25',
+      });
+    }
+    setCreateEditDialogOpen(true);
+  };
+
+  const handleSavePartner = async () => {
+    try {
+      // TODO: Call API to create/update partner
+      const partnerData = {
+        ...formData,
+        commissionRate: parseFloat(formData.commissionRate),
+      };
+
+      if (editingPartner) {
+        // Update existing
+        setPartners(
+          partners.map((p) =>
+            p.id === editingPartner.id ? { ...p, ...partnerData } : p
+          )
+        );
+        toast.success('Partner actualizado correctamente');
+      } else {
+        // Create new
+        const newPartner: Partner = {
+          id: Date.now().toString(),
+          ...partnerData,
+          status: 'PENDING_APPROVAL',
+          referralCode: `PARTNER${Date.now()}`,
+          totalClients: 0,
+          totalEarned: 0,
+          level: 'BRONZE',
+          createdAt: new Date().toISOString(),
+        };
+        setPartners([...partners, newPartner]);
+        toast.success('Partner creado correctamente');
+      }
+
+      setCreateEditDialogOpen(false);
+      setEditingPartner(null);
+    } catch (error) {
+      console.error('Error saving partner:', error);
+      toast.error('Error al guardar partner');
+    }
+  };
+
+  const handleDeletePartner = async () => {
+    if (!deletingPartner) return;
+
+    try {
+      // TODO: Call API to delete partner
+      setPartners(partners.filter((p) => p.id !== deletingPartner.id));
+      toast.success('Partner eliminado correctamente');
+      setDeleteDialogOpen(false);
+      setDeletingPartner(null);
+    } catch (error) {
+      console.error('Error deleting partner:', error);
+      toast.error('Error al eliminar partner');
+    }
+  };
+
   const getStatusBadge = (status: Partner['status']) => {
     const variants = {
       PENDING_APPROVAL: { variant: 'secondary' as const, label: 'Pendiente', icon: Clock },
@@ -224,9 +324,15 @@ export default function AdminPartnersPage() {
   return (
     <AuthenticatedLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Administración de Partners</h1>
-          <p className="text-muted-foreground">Aprueba y gestiona solicitudes de partners</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Administración de Partners</h1>
+            <p className="text-muted-foreground">Aprueba y gestiona solicitudes de partners</p>
+          </div>
+          <Button onClick={() => handleOpenCreateEdit()}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo Partner
+          </Button>
         </div>
 
         {/* Stats */}
@@ -351,6 +457,13 @@ export default function AdminPartnersPage() {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenCreateEdit(partner)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
                           {partner.status === 'PENDING_APPROVAL' && (
                             <>
                               <Button
@@ -392,6 +505,16 @@ export default function AdminPartnersPage() {
                               Suspender
                             </Button>
                           )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setDeletingPartner(partner);
+                              setDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -509,6 +632,134 @@ export default function AdminPartnersPage() {
                 onClick={handleAction}
               >
                 Confirmar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create/Edit Dialog */}
+        <Dialog open={createEditDialogOpen} onOpenChange={setCreateEditDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>{editingPartner ? 'Editar Partner' : 'Nuevo Partner'}</DialogTitle>
+              <DialogDescription>
+                {editingPartner
+                  ? 'Modifica los datos del partner'
+                  : 'Completa los datos del nuevo partner'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Nombre *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Nombre del partner"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="company">Empresa</Label>
+                  <Input
+                    id="company"
+                    value={formData.company}
+                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                    placeholder="Nombre de la empresa"
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="email@ejemplo.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Teléfono</Label>
+                  <Input
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="+34 600 000 000"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="website">Website</Label>
+                <Input
+                  id="website"
+                  value={formData.website}
+                  onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                  placeholder="https://ejemplo.com"
+                />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="type">Tipo de Partner *</Label>
+                  <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="BANK">Banco</SelectItem>
+                      <SelectItem value="INSURANCE">Aseguradora</SelectItem>
+                      <SelectItem value="BUSINESS_SCHOOL">Escuela de Negocios</SelectItem>
+                      <SelectItem value="REAL_ESTATE">Inmobiliaria</SelectItem>
+                      <SelectItem value="CONSTRUCTION">Constructora</SelectItem>
+                      <SelectItem value="LAW_FIRM">Despacho Legal</SelectItem>
+                      <SelectItem value="OTHER">Otro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="commissionRate">Comisión (%)</Label>
+                  <Input
+                    id="commissionRate"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    value={formData.commissionRate}
+                    onChange={(e) => setFormData({ ...formData, commissionRate: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setCreateEditDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleSavePartner}>
+                {editingPartner ? 'Actualizar' : 'Crear'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Dialog */}
+        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Eliminar Partner</DialogTitle>
+              <DialogDescription>
+                ¿Estás seguro de que deseas eliminar al partner "{deletingPartner?.name}"? Esta acción no se puede deshacer.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button variant="destructive" onClick={handleDeletePartner}>
+                Eliminar
               </Button>
             </DialogFooter>
           </DialogContent>
