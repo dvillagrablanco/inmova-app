@@ -47,8 +47,11 @@ export function AuthenticatedLayout({
       {/* Sidebar - Solo en desktop */}
       <Sidebar />
 
-      {/* Contenido principal */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      {/* Contenido principal con padding para compensar sidebar fija */}
+      <div className={cn(
+        "flex flex-1 flex-col overflow-hidden",
+        "lg:pl-64" // Padding left en desktop para compensar sidebar de 256px (w-64)
+      )}>
         {/* Header */}
         <Header />
 
