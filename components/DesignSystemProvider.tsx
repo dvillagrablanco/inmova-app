@@ -9,6 +9,9 @@ interface DesignSystemProviderProps {
 
 export function DesignSystemProvider({ children }: DesignSystemProviderProps) {
   useEffect(() => {
+    // ✅ FIX: Guard SSR - solo ejecutar en browser
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    
     const root = document.documentElement;
     
     // Apply color tokens as CSS variables

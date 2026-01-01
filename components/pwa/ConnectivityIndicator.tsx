@@ -15,6 +15,9 @@ export function ConnectivityIndicator() {
   const [isRetrying, setIsRetrying] = useState(false);
 
   useEffect(() => {
+    // ✅ FIX: Guard SSR - solo ejecutar en browser
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') return;
+    
     // Set initial state
     setIsOnline(navigator.onLine);
 
