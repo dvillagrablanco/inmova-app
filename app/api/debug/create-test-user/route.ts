@@ -15,11 +15,20 @@ if (!process.env.DATABASE_URL) {
 }
 
 export async function POST(request: Request) {
+  // 🔒 PROTECCIÓN: Solo disponible en desarrollo
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { error: 'Not found' },
+      { status: 404 }
+    );
+  }
+
   try {
     const { secret } = await request.json();
 
-    // Protección básica
-    if (secret !== 'create-test-user-2025') {
+    // Protección con variable de entorno
+    const expectedSecret = process.env.DEBUG_SECRET || 'create-test-user-2025';
+    if (secret !== expectedSecret) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -102,6 +111,14 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
+  // 🔒 PROTECCIÓN: Solo disponible en desarrollo
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { error: 'Not found' },
+      { status: 404 }
+    );
+  }
+
   try {
     // Usar instancia global de Prisma
     await prisma.$connect();

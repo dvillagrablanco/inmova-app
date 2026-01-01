@@ -15,6 +15,14 @@ if (!process.env.DATABASE_URL) {
 }
 
 export async function GET() {
+  // 🔒 PROTECCIÓN: Solo disponible en desarrollo
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { error: 'Not found' },
+      { status: 404 }
+    );
+  }
+
   try {
     console.log('[InitAdmin] Iniciando creación de usuario administrador...');
 
