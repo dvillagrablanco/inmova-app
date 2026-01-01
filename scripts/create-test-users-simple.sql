@@ -21,7 +21,8 @@ VALUES
   ('company_admin_fincas', 'Administrador de Fincas Madrid', 'comunidades', true, false, '{"setupStep": "pending", "preferredModules": []}', NOW(), NOW()),
   ('company_fincas_total', 'Fincas Gestion Total', 'comunidades', true, false, '{"setupStep": "pending", "preferredModules": []}', NOW(), NOW()),
   ('company_360_integral', 'Gestora 360 Integral', 'mixto', true, false, '{"setupStep": "pending", "preferredModules": []}', NOW(), NOW()),
-  ('company_arquitectura', 'Arquitectura & Asesoría', 'servicios_profesionales', true, false, '{"setupStep": "pending", "preferredModules": []}', NOW(), NOW())
+  ('company_arquitectura', 'Arquitectura & Asesoría', 'servicios_profesionales', true, false, '{"setupStep": "pending", "preferredModules": []}', NOW(), NOW()),
+  ('company_eworker', 'eWorker Coworking & Coliving', 'coliving', true, false, '{"setupStep": "pending", "preferredModules": []}', NOW(), NOW())
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
   "businessVertical" = EXCLUDED."businessVertical",
@@ -64,7 +65,10 @@ VALUES
   
   -- CASOS ESPECIALES
   ('user_gestor_mixto', 'gestor.mixto@inmova.app', 'Gestor Multi-Vertical', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'gestor', 'company_360_integral', true, NOW(), false, '{"experienceLevel": "avanzado", "vertical": "mixto", "theme": "light", "language": "es"}', NOW(), NOW()),
-  ('user_admin_servicios', 'admin.servicios@inmova.app', 'Admin Servicios Profesionales', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'administrador', 'company_arquitectura', true, NOW(), false, '{"experienceLevel": "avanzado", "vertical": "servicios_profesionales", "theme": "light", "language": "es"}', NOW(), NOW())
+  ('user_admin_servicios', 'admin.servicios@inmova.app', 'Admin Servicios Profesionales', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'administrador', 'company_arquitectura', true, NOW(), false, '{"experienceLevel": "avanzado", "vertical": "servicios_profesionales", "theme": "light", "language": "es"}', NOW(), NOW()),
+  
+  -- SOCIO EWORKER
+  ('user_socio_eworker', 'socio@eworker.es', 'Socio eWorker', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'administrador', 'company_eworker', true, NOW(), false, '{"experienceLevel": "avanzado", "vertical": "coliving", "theme": "light", "language": "es"}', NOW(), NOW())
 ON CONFLICT (email) DO UPDATE SET
   name = EXCLUDED.name,
   password = EXCLUDED.password,
