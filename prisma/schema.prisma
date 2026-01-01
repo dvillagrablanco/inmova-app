@@ -263,14 +263,16 @@ model User {
   mfaRecoveryCodes Int               @default(10) // Count of remaining codes
   
   // Zero-Touch Onboarding - User Profile
-  experienceLevel     ExperienceLevel? @default(intermedio)
-  techSavviness       TechSavviness?   @default(medio)
-  portfolioSize       PortfolioSize?   @default(size_1_5)
-  uiMode              UIMode           @default(standard)
-  onboardingCompleted Boolean          @default(false)
-  preferredModules    String[]         @default([]) // IDs de módulos favoritos
-  hiddenModules       String[]         @default([]) // IDs de módulos ocultados
-  lastAction          String?          // Última acción realizada
+  experienceLevel        ExperienceLevel? @default(intermedio)
+  techSavviness          TechSavviness?   @default(medio)
+  portfolioSize          PortfolioSize?   @default(size_1_5)
+  uiMode                 UIMode           @default(standard)
+  onboardingCompleted    Boolean          @default(false)
+  hasCompletedOnboarding Boolean          @default(false)
+  onboardingCompletedAt  DateTime?
+  preferredModules       String[]         @default([]) // IDs de módulos favoritos
+  hiddenModules          String[]         @default([]) // IDs de módulos ocultados
+  lastAction             String?          // Última acción realizada
   
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
@@ -362,6 +364,9 @@ model User {
   createdWebhookSubscriptions WebhookSubscription[]
   oauthAuthorizationCodes    OAuthAuthorizationCode[]
   oauthAccessTokens          OAuthAccessToken[]
+  
+  // Tutorial & Setup Progress
+  onboardingProgressDetailed UserOnboardingProgress?
 
   @@index([email])
   @@index([companyId])
@@ -13666,3 +13671,23 @@ model IntegrationTemplate {
   @@map("integration_templates")
 }
 
+
+model UserOnboardingProgress {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Progress
+  completedSteps  String[]  // IDs de pasos completados
+  currentStep     Int       @default(0)
+  isCompleted     Boolean   @default(false)
+  setupVersion    String?   // Versión del setup para tracking
+  
+  // Timestamps
+  lastUpdated     DateTime  @default(now()) @updatedAt
+  createdAt       DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([isCompleted])
+  @@map("user_onboarding_progress")
+}

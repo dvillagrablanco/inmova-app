@@ -1,13 +1,16 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { Sidebar } from './sidebar';
 import { Header } from './header';
 import { BottomNavigation } from './bottom-navigation';
 import { TourAutoStarter } from '@/components/tours/TourAutoStarter';
 import { FloatingTourButton } from '@/components/tours/FloatingTourButton';
 import { ContextualHelp } from '@/components/help/ContextualHelp';
+import { OnboardingChecklist } from '@/components/tutorials/OnboardingChecklist';
+import { FirstTimeSetupWizard } from '@/components/tutorials/FirstTimeSetupWizard';
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useIsMobile } from '@/lib/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 import { SkipLink } from '@/components/accessibility/SkipLink';
@@ -35,6 +38,12 @@ export function AuthenticatedLayout({
 }: AuthenticatedLayoutProps) {
   const isMobile = useIsMobile();
   const pathname = usePathname();
+  const { data: session } = useSession();
+  
+  // Estados para tutoriales y onboarding
+  const [showSetupWizard, setShowSetupWizard] = useState(false);
+  const [showChecklist, setShowChecklist] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false);
 
   const maxWidthClasses = {
     full: 'max-w-none',
@@ -42,6 +51,53 @@ export function AuthenticatedLayout({
     '6xl': 'max-w-6xl',
     '5xl': 'max-w-5xl',
     '4xl': 'max-w-4xl',
+  };
+
+  // Verificar estado de onboarding
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      if (!session?.user?.id) return;
+
+      try {
+        const response = await fetch('/api/user/onboarding-status');
+        if (!response.ok) return;
+
+        const data = await response.json();
+        setIsNewUser(data.isNewUser);
+
+        // Si es usuario nuevo Y nunca completó onboarding
+        if (!data.hasCompletedOnboarding && data.isNewUser) {
+          // Mostrar wizard si nunca lo saltó
+          const hasSkippedWizard = localStorage.getItem('skipped-setup-wizard');
+          if (!hasSkippedWizard) {
+            setShowSetupWizard(true);
+          }
+        }
+
+        // Checklist visible hasta completar todo
+        setShowChecklist(!data.hasCompletedOnboarding);
+      } catch (error) {
+        console.error('Error checking onboarding:', error);
+      }
+    };
+
+    checkOnboarding();
+  }, [session]);
+
+  // Handlers para wizard
+  const handleCompleteSetup = () => {
+    setShowSetupWizard(false);
+    setShowChecklist(true);
+  };
+
+  const handleSkipSetup = () => {
+    setShowSetupWizard(false);
+    setShowChecklist(true);
+    localStorage.setItem('skipped-setup-wizard', 'true');
+  };
+
+  const handleDismissChecklist = () => {
+    setShowChecklist(false);
   };
 
   // Determinar página para ayuda contextual
@@ -101,6 +157,23 @@ export function AuthenticatedLayout({
 
       {/* Contextual Help - Ayuda específica según página */}
       <ContextualHelp page={getPageForHelp()} />
+
+      {/* Setup Wizard - Primera vez */}
+      {showSetupWizard && (
+        <FirstTimeSetupWizard
+          onComplete={handleCompleteSetup}
+          onSkip={handleSkipSetup}
+        />
+      )}
+
+      {/* Onboarding Checklist - Hasta completar */}
+      {showChecklist && session?.user?.id && (
+        <OnboardingChecklist
+          userId={session.user.id}
+          isNewUser={isNewUser}
+          onDismiss={handleDismissChecklist}
+        />
+      )}
     </div>
   );
 }
