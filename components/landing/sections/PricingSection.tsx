@@ -131,7 +131,7 @@ export function PricingSection() {
             <strong className="text-indigo-600">Todos los 88+ módulos incluidos en todos los planes.</strong> Sistema Operativo Integral del Real Estate.
           </p>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            Reemplaza <strong>Rentger + Guesty + Presto</strong> en una sola plataforma. Ahorra <strong className="text-green-600">€240/mes</strong> consolidando 5-8 herramientas.
+            Reemplaza múltiples herramientas en una sola plataforma. Ahorra <strong className="text-green-600">€240/mes</strong> consolidando 5-8 sistemas diferentes.
           </p>
         </div>
 

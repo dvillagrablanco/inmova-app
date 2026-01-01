@@ -147,8 +147,8 @@ export default function ToursVirtualesPage() {
         totalConversions: 612,
         avgConversionRate: 14.4,
         viewsBySource: [
-          { source: 'Idealista', views: 1842 },
-          { source: 'Fotocasa', views: 1325 },
+          { source: 'Portal Inmobiliario 1', views: 1842 },
+          { source: 'Portal Inmobiliario 2', views: 1325 },
           { source: 'Web Propia', views: 680 },
           { source: 'Redes Sociales', views: 390 },
         ],

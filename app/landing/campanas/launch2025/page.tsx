@@ -181,7 +181,7 @@ export default function Launch2025Page() {
             ¿Por Qué Cambiar a INMOVA?
           </h2>
           <p className="text-xl text-indigo-200 text-center mb-12 max-w-3xl mx-auto">
-            Homming, Rentger y otros te obligan a contratar múltiples herramientas. <br />
+            Otros sistemas te obligan a contratar múltiples herramientas. <br />
             <strong className="text-white">INMOVA lo incluye TODO en una sola plataforma.</strong>
           </p>
 
@@ -191,7 +191,7 @@ export default function Launch2025Page() {
               <CardHeader>
                 <CardTitle className="text-2xl text-white flex items-center gap-2">
                   <X className="h-6 w-6 text-red-400" />
-                  Competencia (Homming, Rentger, etc.)
+                  Otros Sistemas
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">

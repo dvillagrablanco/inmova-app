@@ -77,7 +77,7 @@ export default function MigracionPage() {
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto">
-            Importa tus datos desde Excel, Buildium, Homming o cualquier sistema.
+            Importa tus datos desde Excel, hojas de cálculo o cualquier sistema.
             <br />
             <strong className="text-indigo-600">
               Sin pérdida de información. Sin interrupciones.
@@ -134,8 +134,8 @@ export default function MigracionPage() {
               <TabsTrigger value="buildium" className="text-lg">
                 Buildium
               </TabsTrigger>
-              <TabsTrigger value="homming" className="text-lg">
-                Homming / Rentger
+              <TabsTrigger value="otros-sistemas" className="text-lg">
+                Otros Sistemas
               </TabsTrigger>
               <TabsTrigger value="otro" className="text-lg">
                 Otro Sistema
@@ -340,13 +340,13 @@ export default function MigracionPage() {
               </Card>
             </TabsContent>
 
-            {/* HOMMING / RENTGER */}
-            <TabsContent value="homming" className="space-y-8">
+            {/* OTROS SISTEMAS */}
+            <TabsContent value="otros-sistemas" className="space-y-8">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-3xl flex items-center gap-3">
                     <ArrowRight className="h-8 w-8 text-violet-600" />
-                    Migración desde Homming / Rentger
+                    Migración desde Otros Sistemas
                   </CardTitle>
                   <CardDescription className="text-lg">
                     Cambio rápido y sin fricciones desde plataformas locales.
@@ -356,7 +356,7 @@ export default function MigracionPage() {
                   <Alert className="bg-yellow-50 border-yellow-200">
                     <AlertCircle className="h-5 w-5 text-yellow-600" />
                     <AlertTitle className="text-yellow-800 font-semibold">
-                      Importante sobre Homming/Rentger
+                      Importante sobre la Migración
                     </AlertTitle>
                     <AlertDescription className="text-yellow-700">
                       Estas plataformas no ofrecen API pública ni exportación masiva de datos. Te
@@ -377,7 +377,7 @@ export default function MigracionPage() {
                             <div>
                               <h4 className="font-semibold mb-2">Exporta lo que puedas</h4>
                               <p className="text-sm text-gray-700 mb-2">
-                                Desde Homming/Rentger, exporta los listados de propiedades e
+                                Desde tu sistema actual, exporta los listados de propiedades e
                                 inquilinos (suelen tener exportación a Excel parcial)
                               </p>
                             </div>
@@ -427,7 +427,7 @@ export default function MigracionPage() {
 
                   <div className="bg-indigo-50 rounded-lg p-6">
                     <h3 className="font-semibold text-lg mb-4">
-                      ¿Por qué vale la pena migrar desde Homming/Rentger?
+                      ¿Por qué vale la pena migrar a INMOVA?
                     </h3>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
@@ -440,7 +440,7 @@ export default function MigracionPage() {
                         <CheckCircle className="h-5 w-5 text-green-600" />
                         <span>
                           <strong>Multi-vertical</strong>: gestiona STR, flipping y obras (imposible
-                          en Homming)
+                          en otros sistemas)
                         </span>
                       </div>
                       <div className="flex items-center gap-2">

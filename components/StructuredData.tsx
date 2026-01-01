@@ -16,7 +16,7 @@ export function StructuredData() {
       availability: 'https://schema.org/InStock',
     },
     operatingSystem: 'Web-based',
-    description: 'Software de gestión inmobiliaria profesional todo-en-uno. Alternativa superior a Homming, Rentger, Nester, Buildium y AppFolio. 88 módulos integrados, 7 modelos de negocio, tecnología avanzada con IA, Blockchain e IoT.',
+    description: 'Software de gestión inmobiliaria profesional todo-en-uno. La plataforma PropTech más completa. 88 módulos integrados, 7 modelos de negocio, tecnología avanzada con IA, Blockchain e IoT.',
     aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue: '4.8',
@@ -97,7 +97,7 @@ export function StructuredData() {
     mainEntity: [
       {
         '@type': 'Question',
-        name: '¿Por qué elegir INMOVA en lugar de Homming, Rentger o Nester?',
+        name: '¿Por qué elegir INMOVA?',
         acceptedAnswer: {
           '@type': 'Answer',
           text: 'INMOVA ofrece 88 módulos profesionales integrados vs los 15-25 de la competencia, soporta 7 modelos de negocio diferentes, incluye tecnología avanzada como IA, Blockchain e IoT, y todo esto desde 149€/mes, siendo hasta 70% más económico que alternativas como Buildium o AppFolio.',
@@ -108,7 +108,7 @@ export function StructuredData() {
         name: '¿INMOVA incluye gestión de alquiler por habitaciones?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Sí, INMOVA incluye un módulo completo de Room Rental para gestión de alquiler por habitaciones y coliving, con prorrateo automático de gastos, calendarios de limpieza rotatorios y gestión de espacios comunes. Una funcionalidad que no ofrecen competidores como Homming o Rentger.',
+          text: 'Sí, INMOVA incluye un módulo completo de Room Rental para gestión de alquiler por habitaciones y coliving, con prorrateo automático de gastos, calendarios de limpieza rotatorios y gestión de espacios comunes. Una funcionalidad única en el mercado.',
         },
       },
       {

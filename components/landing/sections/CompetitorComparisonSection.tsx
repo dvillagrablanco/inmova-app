@@ -42,6 +42,8 @@ const pricing = [
 ];
 
 export function CompetitorComparisonSection() {
+  // Sección oculta - reemplazada por features
+  return null;
   return (
     <section id="comparison" className="py-20 px-4 bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="container mx-auto">
