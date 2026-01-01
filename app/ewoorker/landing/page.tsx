@@ -471,7 +471,8 @@ export default function EwoorkerLandingPage() {
                   <div className="text-5xl font-extrabold text-gray-900 mb-2">
                     Gratis
                   </div>
-                  <p className="text-gray-600">Para empezar</p>
+                  <p className="text-gray-600">+ 5% comisión</p>
+                  <p className="text-xs text-gray-500 mt-1">Por obra cerrada</p>
                 </div>
               </CardHeader>
               <CardContent>
@@ -517,7 +518,8 @@ export default function EwoorkerLandingPage() {
                   <div className="text-5xl font-extrabold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent mb-2">
                     €49
                   </div>
-                  <p className="text-gray-600">/mes</p>
+                  <p className="text-gray-600">/mes + 2% comisión</p>
+                  <p className="text-xs text-gray-500 mt-1">Por obra cerrada</p>
                 </div>
               </CardHeader>
               <CardContent>
@@ -540,7 +542,7 @@ export default function EwoorkerLandingPage() {
                   </li>
                   <li className="flex items-center">
                     <CheckCircle2 className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
-                    <span>Sistema escrow</span>
+                    <span>Sistema escrow (+2% comisión)</span>
                   </li>
                   <li className="flex items-center">
                     <CheckCircle2 className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
@@ -564,7 +566,8 @@ export default function EwoorkerLandingPage() {
                   <div className="text-5xl font-extrabold text-blue-700 mb-2">
                     €149
                   </div>
-                  <p className="text-gray-600">/mes</p>
+                  <p className="text-gray-600">/mes + 0% comisión</p>
+                  <p className="text-xs text-gray-500 mt-1">Sin comisiones extra</p>
                 </div>
               </CardHeader>
               <CardContent>
@@ -580,6 +583,10 @@ export default function EwoorkerLandingPage() {
                   <li className="flex items-center">
                     <CheckCircle2 className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
                     <span>Marketplace destacado</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle2 className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
+                    <span>0% comisión por obra</span>
                   </li>
                   <li className="flex items-center">
                     <CheckCircle2 className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
@@ -749,9 +756,14 @@ export default function EwoorkerLandingPage() {
                 <CardTitle>¿Hay comisión por uso?</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700">
-                  Depende del plan. Plan Obrero (gratis): 5% comisión por obra cerrada. Plan Capataz (€49/mes): 2% comisión. Plan Constructor (€149/mes): 0% comisión + obras destacadas. La comisión solo se cobra si cierras obra.
+                <p className="text-gray-700 mb-4">
+                  Depende del plan. <strong>Plan Obrero (gratis): 5% comisión</strong> por obra cerrada. <strong>Plan Capataz (€49/mes): 2% comisión</strong>. <strong>Plan Constructor (€149/mes): 0% comisión</strong> + obras destacadas. La comisión solo se cobra si cierras obra.
                 </p>
+                <div className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded">
+                  <p className="text-sm text-gray-700">
+                    <strong>Modelo de negocio eWoorker:</strong> Suscripciones mensuales + comisiones por éxito. Los ingresos se reparten 50% para la plataforma y 50% para el socio fundador.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>
