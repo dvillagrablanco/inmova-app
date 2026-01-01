@@ -1,0 +1,1924 @@
+{
+  "timestamp": "2026-01-01T16:08:28.506Z",
+  "summary": {
+    "totalPages": 383,
+    "uniqueRoutes": 383,
+    "duplicates": 0,
+    "missingCritical": 0,
+    "withoutLayout": 381,
+    "routeGroups": 2
+  },
+  "duplicateRoutes": [],
+  "missingCriticalRoutes": [],
+  "routesWithoutLayout": [
+    {
+      "route": "/admin/activity",
+      "file": "app/admin/activity/page.tsx"
+    },
+    {
+      "route": "/admin/alertas",
+      "file": "app/admin/alertas/page.tsx"
+    },
+    {
+      "route": "/admin/aprobaciones",
+      "file": "app/admin/aprobaciones/page.tsx"
+    },
+    {
+      "route": "/admin/backup-restore",
+      "file": "app/admin/backup-restore/page.tsx"
+    },
+    {
+      "route": "/admin/clientes/comparar",
+      "file": "app/admin/clientes/comparar/page.tsx"
+    },
+    {
+      "route": "/admin/clientes",
+      "file": "app/admin/clientes/page.tsx"
+    },
+    {
+      "route": "/admin/configuracion",
+      "file": "app/admin/configuracion/page.tsx"
+    },
+    {
+      "route": "/admin/dashboard",
+      "file": "app/admin/dashboard/page.tsx"
+    },
+    {
+      "route": "/admin/facturacion-b2b",
+      "file": "app/admin/facturacion-b2b/page.tsx"
+    },
+    {
+      "route": "/admin/firma-digital",
+      "file": "app/admin/firma-digital/page.tsx"
+    },
+    {
+      "route": "/admin/importar",
+      "file": "app/admin/importar/page.tsx"
+    },
+    {
+      "route": "/admin/integraciones-contables",
+      "file": "app/admin/integraciones-contables/page.tsx"
+    },
+    {
+      "route": "/admin/legal",
+      "file": "app/admin/legal/page.tsx"
+    },
+    {
+      "route": "/admin/marketplace",
+      "file": "app/admin/marketplace/page.tsx"
+    },
+    {
+      "route": "/admin/metricas-uso",
+      "file": "app/admin/metricas-uso/page.tsx"
+    },
+    {
+      "route": "/admin/modulos",
+      "file": "app/admin/modulos/page.tsx"
+    },
+    {
+      "route": "/admin/ocr-import",
+      "file": "app/admin/ocr-import/page.tsx"
+    },
+    {
+      "route": "/admin",
+      "file": "app/admin/page.tsx"
+    },
+    {
+      "route": "/admin/partners",
+      "file": "app/admin/partners/page.tsx"
+    },
+    {
+      "route": "/admin/personalizacion",
+      "file": "app/admin/personalizacion/page.tsx"
+    },
+    {
+      "route": "/admin/planes",
+      "file": "app/admin/planes/page.tsx"
+    },
+    {
+      "route": "/admin/plantillas-sms",
+      "file": "app/admin/plantillas-sms/page.tsx"
+    },
+    {
+      "route": "/admin/portales-externos",
+      "file": "app/admin/portales-externos/page.tsx"
+    },
+    {
+      "route": "/admin/recuperar-contrasena",
+      "file": "app/admin/recuperar-contrasena/page.tsx"
+    },
+    {
+      "route": "/admin/reportes-programados",
+      "file": "app/admin/reportes-programados/page.tsx"
+    },
+    {
+      "route": "/admin/salud-sistema",
+      "file": "app/admin/salud-sistema/page.tsx"
+    },
+    {
+      "route": "/admin/seguridad",
+      "file": "app/admin/seguridad/page.tsx"
+    },
+    {
+      "route": "/admin/sugerencias",
+      "file": "app/admin/sugerencias/page.tsx"
+    },
+    {
+      "route": "/admin/usuarios",
+      "file": "app/admin/usuarios/page.tsx"
+    },
+    {
+      "route": "/alquiler-tradicional/warranties",
+      "file": "app/alquiler-tradicional/warranties/page.tsx"
+    },
+    {
+      "route": "/analytics",
+      "file": "app/analytics/page.tsx"
+    },
+    {
+      "route": "/anuncios",
+      "file": "app/anuncios/page.tsx"
+    },
+    {
+      "route": "/api-docs.disabled",
+      "file": "app/api-docs.disabled/page.tsx"
+    },
+    {
+      "route": "/api-docs",
+      "file": "app/api-docs/page.tsx"
+    },
+    {
+      "route": "/api/docs/swagger",
+      "file": "app/api/docs/swagger/page.tsx"
+    },
+    {
+      "route": "/asistente-ia",
+      "file": "app/asistente-ia/page.tsx"
+    },
+    {
+      "route": "/auditoria",
+      "file": "app/auditoria/page.tsx"
+    },
+    {
+      "route": "/automatizacion",
+      "file": "app/automatizacion/page.tsx"
+    },
+    {
+      "route": "/automatizacion-resumen",
+      "file": "app/automatizacion-resumen/page.tsx"
+    },
+    {
+      "route": "/automatizacion/resumen",
+      "file": "app/automatizacion/resumen/page.tsx"
+    },
+    {
+      "route": "/bi",
+      "file": "app/bi/page.tsx"
+    },
+    {
+      "route": "/blockchain",
+      "file": "app/blockchain/page.tsx"
+    },
+    {
+      "route": "/calendario",
+      "file": "app/calendario/page.tsx"
+    },
+    {
+      "route": "/candidatos/nuevo",
+      "file": "app/candidatos/nuevo/page.tsx"
+    },
+    {
+      "route": "/candidatos",
+      "file": "app/candidatos/page.tsx"
+    },
+    {
+      "route": "/certificaciones",
+      "file": "app/certificaciones/page.tsx"
+    },
+    {
+      "route": "/chat",
+      "file": "app/chat/page.tsx"
+    },
+    {
+      "route": "/coliving/comunidad",
+      "file": "app/coliving/comunidad/page.tsx"
+    },
+    {
+      "route": "/coliving/emparejamiento",
+      "file": "app/coliving/emparejamiento/page.tsx"
+    },
+    {
+      "route": "/coliving/eventos",
+      "file": "app/coliving/eventos/page.tsx"
+    },
+    {
+      "route": "/coliving/paquetes",
+      "file": "app/coliving/paquetes/page.tsx"
+    },
+    {
+      "route": "/community",
+      "file": "app/community/page.tsx"
+    },
+    {
+      "route": "/comparativa/homming",
+      "file": "app/comparativa/homming/page.tsx"
+    },
+    {
+      "route": "/comunidades/actas",
+      "file": "app/comunidades/actas/page.tsx"
+    },
+    {
+      "route": "/comunidades/cumplimiento",
+      "file": "app/comunidades/cumplimiento/page.tsx"
+    },
+    {
+      "route": "/comunidades/cuotas",
+      "file": "app/comunidades/cuotas/page.tsx"
+    },
+    {
+      "route": "/comunidades/finanzas",
+      "file": "app/comunidades/finanzas/page.tsx"
+    },
+    {
+      "route": "/comunidades/fondos",
+      "file": "app/comunidades/fondos/page.tsx"
+    },
+    {
+      "route": "/comunidades",
+      "file": "app/comunidades/page.tsx"
+    },
+    {
+      "route": "/comunidades/presidente",
+      "file": "app/comunidades/presidente/page.tsx"
+    },
+    {
+      "route": "/comunidades/renovaciones",
+      "file": "app/comunidades/renovaciones/page.tsx"
+    },
+    {
+      "route": "/comunidades/votaciones",
+      "file": "app/comunidades/votaciones/page.tsx"
+    },
+    {
+      "route": "/comunidad",
+      "file": "app/comunidad/page.tsx"
+    },
+    {
+      "route": "/comunidad-social",
+      "file": "app/comunidad-social/page.tsx"
+    },
+    {
+      "route": "/configuracion/integraciones/stripe",
+      "file": "app/configuracion/integraciones/stripe/page.tsx"
+    },
+    {
+      "route": "/configuracion/notificaciones",
+      "file": "app/configuracion/notificaciones/page.tsx"
+    },
+    {
+      "route": "/configuracion",
+      "file": "app/configuracion/page.tsx"
+    },
+    {
+      "route": "/configuracion/ui-mode",
+      "file": "app/configuracion/ui-mode/page.tsx"
+    },
+    {
+      "route": "/construction/gantt",
+      "file": "app/construction/gantt/page.tsx"
+    },
+    {
+      "route": "/construction",
+      "file": "app/construction/page.tsx"
+    },
+    {
+      "route": "/construction/projects",
+      "file": "app/construction/projects/page.tsx"
+    },
+    {
+      "route": "/construction/quality-control",
+      "file": "app/construction/quality-control/page.tsx"
+    },
+    {
+      "route": "/contabilidad",
+      "file": "app/contabilidad/page.tsx"
+    },
+    {
+      "route": "/contratos/nuevo",
+      "file": "app/contratos/nuevo/page.tsx"
+    },
+    {
+      "route": "/contratos",
+      "file": "app/contratos/page.tsx"
+    },
+    {
+      "route": "/crm",
+      "file": "app/crm/page.tsx"
+    },
+    {
+      "route": "/cupones",
+      "file": "app/cupones/page.tsx"
+    },
+    {
+      "route": "/dashboard-adaptive",
+      "file": "app/dashboard-adaptive/page.tsx"
+    },
+    {
+      "route": "/dashboard/adaptive",
+      "file": "app/dashboard/adaptive/page.tsx"
+    },
+    {
+      "route": "/admin-fincas/comunidades",
+      "file": "app/(dashboard)/admin-fincas/comunidades/page.tsx"
+    },
+    {
+      "route": "/admin-fincas/facturas",
+      "file": "app/(dashboard)/admin-fincas/facturas/page.tsx"
+    },
+    {
+      "route": "/admin-fincas/informes",
+      "file": "app/(dashboard)/admin-fincas/informes/page.tsx"
+    },
+    {
+      "route": "/admin-fincas/libro-caja",
+      "file": "app/(dashboard)/admin-fincas/libro-caja/page.tsx"
+    },
+    {
+      "route": "/admin-fincas",
+      "file": "app/(dashboard)/admin-fincas/page.tsx"
+    },
+    {
+      "route": "/dashboard/analytics",
+      "file": "app/dashboard/analytics/page.tsx"
+    },
+    {
+      "route": "/dashboard/budgets",
+      "file": "app/dashboard/budgets/page.tsx"
+    },
+    {
+      "route": "/coliving",
+      "file": "app/(dashboard)/coliving/page.tsx"
+    },
+    {
+      "route": "/dashboard/community",
+      "file": "app/dashboard/community/page.tsx"
+    },
+    {
+      "route": "/dashboard/contracts",
+      "file": "app/dashboard/contracts/page.tsx"
+    },
+    {
+      "route": "/dashboard/coupons",
+      "file": "app/dashboard/coupons/page.tsx"
+    },
+    {
+      "route": "/dashboard-propietarios",
+      "file": "app/(dashboard)/dashboard-propietarios/page.tsx"
+    },
+    {
+      "route": "/documentos/buscar",
+      "file": "app/(dashboard)/documentos/buscar/page.tsx"
+    },
+    {
+      "route": "/dashboard/documents",
+      "file": "app/dashboard/documents/page.tsx"
+    },
+    {
+      "route": "/dashboard/integrations/api-keys",
+      "file": "app/dashboard/integrations/api-keys/page.tsx"
+    },
+    {
+      "route": "/dashboard/integrations",
+      "file": "app/dashboard/integrations/page.tsx"
+    },
+    {
+      "route": "/dashboard/maintenance",
+      "file": "app/dashboard/maintenance/page.tsx"
+    },
+    {
+      "route": "/mensajes",
+      "file": "app/(dashboard)/mensajes/page.tsx"
+    },
+    {
+      "route": "/dashboard/messages",
+      "file": "app/dashboard/messages/page.tsx"
+    },
+    {
+      "route": "/dashboard",
+      "file": "app/dashboard/page.tsx"
+    },
+    {
+      "route": "/dashboard/payments",
+      "file": "app/dashboard/payments/page.tsx"
+    },
+    {
+      "route": "/dashboard/properties",
+      "file": "app/dashboard/properties/page.tsx"
+    },
+    {
+      "route": "/dashboard/referrals",
+      "file": "app/dashboard/referrals/page.tsx"
+    },
+    {
+      "route": "/reportes/programados",
+      "file": "app/(dashboard)/reportes/programados/page.tsx"
+    },
+    {
+      "route": "/dashboard/tenants",
+      "file": "app/dashboard/tenants/page.tsx"
+    },
+    {
+      "route": "/traditional-rental/communities",
+      "file": "app/(dashboard)/traditional-rental/communities/page.tsx"
+    },
+    {
+      "route": "/traditional-rental/compliance",
+      "file": "app/(dashboard)/traditional-rental/compliance/page.tsx"
+    },
+    {
+      "route": "/traditional-rental",
+      "file": "app/(dashboard)/traditional-rental/page.tsx"
+    },
+    {
+      "route": "/traditional-rental/renewals",
+      "file": "app/(dashboard)/traditional-rental/renewals/page.tsx"
+    },
+    {
+      "route": "/traditional-rental/treasury",
+      "file": "app/(dashboard)/traditional-rental/treasury/page.tsx"
+    },
+    {
+      "route": "/developers",
+      "file": "app/developers/page.tsx"
+    },
+    {
+      "route": "/developers/samples",
+      "file": "app/developers/samples/page.tsx"
+    },
+    {
+      "route": "/developers/sandbox",
+      "file": "app/developers/sandbox/page.tsx"
+    },
+    {
+      "route": "/developers/status",
+      "file": "app/developers/status/page.tsx"
+    },
+    {
+      "route": "/documentos",
+      "file": "app/documentos/page.tsx"
+    },
+    {
+      "route": "/economia-circular",
+      "file": "app/economia-circular/page.tsx"
+    },
+    {
+      "route": "/edificios/nuevo",
+      "file": "app/edificios/nuevo/page.tsx"
+    },
+    {
+      "route": "/edificios/nuevo-wizard",
+      "file": "app/edificios/nuevo-wizard/page.tsx"
+    },
+    {
+      "route": "/edificios",
+      "file": "app/edificios/page.tsx"
+    },
+    {
+      "route": "/ejemplo-ux",
+      "file": "app/ejemplo-ux/page.tsx"
+    },
+    {
+      "route": "/energia",
+      "file": "app/energia/page.tsx"
+    },
+    {
+      "route": "/energia-solar",
+      "file": "app/energia-solar/page.tsx"
+    },
+    {
+      "route": "/esg",
+      "file": "app/esg/page.tsx"
+    },
+    {
+      "route": "/espacios-coworking",
+      "file": "app/espacios-coworking/page.tsx"
+    },
+    {
+      "route": "/estadisticas",
+      "file": "app/estadisticas/page.tsx"
+    },
+    {
+      "route": "/ewoorker/admin-socio",
+      "file": "app/ewoorker/admin-socio/page.tsx"
+    },
+    {
+      "route": "/ewoorker/compliance",
+      "file": "app/ewoorker/compliance/page.tsx"
+    },
+    {
+      "route": "/ewoorker/dashboard",
+      "file": "app/ewoorker/dashboard/page.tsx"
+    },
+    {
+      "route": "/ewoorker-landing",
+      "file": "app/ewoorker-landing/page.tsx"
+    },
+    {
+      "route": "/ewoorker/obras",
+      "file": "app/ewoorker/obras/page.tsx"
+    },
+    {
+      "route": "/ewoorker/pagos",
+      "file": "app/ewoorker/pagos/page.tsx"
+    },
+    {
+      "route": "/facturacion",
+      "file": "app/facturacion/page.tsx"
+    },
+    {
+      "route": "/finanzas",
+      "file": "app/finanzas/page.tsx"
+    },
+    {
+      "route": "/firma-digital",
+      "file": "app/firma-digital/page.tsx"
+    },
+    {
+      "route": "/firma-digital/templates",
+      "file": "app/firma-digital/templates/page.tsx"
+    },
+    {
+      "route": "/flipping/calculator",
+      "file": "app/flipping/calculator/page.tsx"
+    },
+    {
+      "route": "/flipping/comparator",
+      "file": "app/flipping/comparator/page.tsx"
+    },
+    {
+      "route": "/flipping/dashboard",
+      "file": "app/flipping/dashboard/page.tsx"
+    },
+    {
+      "route": "/flipping",
+      "file": "app/flipping/page.tsx"
+    },
+    {
+      "route": "/flipping/projects",
+      "file": "app/flipping/projects/page.tsx"
+    },
+    {
+      "route": "/flipping/timeline",
+      "file": "app/flipping/timeline/page.tsx"
+    },
+    {
+      "route": "/galerias",
+      "file": "app/galerias/page.tsx"
+    },
+    {
+      "route": "/garajes-trasteros/nuevo",
+      "file": "app/garajes-trasteros/nuevo/page.tsx"
+    },
+    {
+      "route": "/garajes-trasteros",
+      "file": "app/garajes-trasteros/page.tsx"
+    },
+    {
+      "route": "/gastos",
+      "file": "app/gastos/page.tsx"
+    },
+    {
+      "route": "/gestion-incidencias",
+      "file": "app/gestion-incidencias/page.tsx"
+    },
+    {
+      "route": "/guardias",
+      "file": "app/guardias/page.tsx"
+    },
+    {
+      "route": "/guia-ux",
+      "file": "app/guia-ux/page.tsx"
+    },
+    {
+      "route": "/home-mobile",
+      "file": "app/home-mobile/page.tsx"
+    },
+    {
+      "route": "/hospitality",
+      "file": "app/hospitality/page.tsx"
+    },
+    {
+      "route": "/huerto-urbano",
+      "file": "app/huerto-urbano/page.tsx"
+    },
+    {
+      "route": "/impuestos",
+      "file": "app/impuestos/page.tsx"
+    },
+    {
+      "route": "/incidencias",
+      "file": "app/incidencias/page.tsx"
+    },
+    {
+      "route": "/informes",
+      "file": "app/informes/page.tsx"
+    },
+    {
+      "route": "/inquilinos/[id]",
+      "file": "app/inquilinos/[id]/page.tsx"
+    },
+    {
+      "route": "/inquilinos/nuevo",
+      "file": "app/inquilinos/nuevo/page.tsx"
+    },
+    {
+      "route": "/inquilinos",
+      "file": "app/inquilinos/page.tsx"
+    },
+    {
+      "route": "/inspeccion-digital",
+      "file": "app/inspeccion-digital/page.tsx"
+    },
+    {
+      "route": "/inspecciones",
+      "file": "app/inspecciones/page.tsx"
+    },
+    {
+      "route": "/instalaciones-deportivas",
+      "file": "app/instalaciones-deportivas/page.tsx"
+    },
+    {
+      "route": "/integraciones",
+      "file": "app/integraciones/page.tsx"
+    },
+    {
+      "route": "/iot",
+      "file": "app/iot/page.tsx"
+    },
+    {
+      "route": "/knowledge-base",
+      "file": "app/knowledge-base/page.tsx"
+    },
+    {
+      "route": "/landing/blog",
+      "file": "app/landing/blog/page.tsx"
+    },
+    {
+      "route": "/landing/calculadora-roi",
+      "file": "app/landing/calculadora-roi/page.tsx"
+    },
+    {
+      "route": "/landing/campanas/launch2025",
+      "file": "app/landing/campanas/launch2025/page.tsx"
+    },
+    {
+      "route": "/landing/casos-exito",
+      "file": "app/landing/casos-exito/page.tsx"
+    },
+    {
+      "route": "/landing/contacto",
+      "file": "app/landing/contacto/page.tsx"
+    },
+    {
+      "route": "/landing/demo",
+      "file": "app/landing/demo/page.tsx"
+    },
+    {
+      "route": "/landing/legal/cookies",
+      "file": "app/landing/legal/cookies/page.tsx"
+    },
+    {
+      "route": "/landing/legal/gdpr",
+      "file": "app/landing/legal/gdpr/page.tsx"
+    },
+    {
+      "route": "/landing/legal/privacidad",
+      "file": "app/landing/legal/privacidad/page.tsx"
+    },
+    {
+      "route": "/landing/legal/terminos",
+      "file": "app/landing/legal/terminos/page.tsx"
+    },
+    {
+      "route": "/landing/migracion",
+      "file": "app/landing/migracion/page.tsx"
+    },
+    {
+      "route": "/landing/modulos/coliving",
+      "file": "app/landing/modulos/coliving/page.tsx"
+    },
+    {
+      "route": "/landing/modulos/house-flipping",
+      "file": "app/landing/modulos/house-flipping/page.tsx"
+    },
+    {
+      "route": "/landing",
+      "file": "app/landing/page.tsx"
+    },
+    {
+      "route": "/landing/sobre-nosotros",
+      "file": "app/landing/sobre-nosotros/page.tsx"
+    },
+    {
+      "route": "/landing/webinars",
+      "file": "app/landing/webinars/page.tsx"
+    },
+    {
+      "route": "/legal",
+      "file": "app/legal/page.tsx"
+    },
+    {
+      "route": "/licitaciones",
+      "file": "app/licitaciones/page.tsx"
+    },
+    {
+      "route": "/login",
+      "file": "app/login/page.tsx"
+    },
+    {
+      "route": "/mantenimiento/nuevo",
+      "file": "app/mantenimiento/nuevo/page.tsx"
+    },
+    {
+      "route": "/mantenimiento",
+      "file": "app/mantenimiento/page.tsx"
+    },
+    {
+      "route": "/mantenimiento-pro",
+      "file": "app/mantenimiento-pro/page.tsx"
+    },
+    {
+      "route": "/marketplace",
+      "file": "app/marketplace/page.tsx"
+    },
+    {
+      "route": "/marketplace/proveedores",
+      "file": "app/marketplace/proveedores/page.tsx"
+    },
+    {
+      "route": "/marketplace/servicios",
+      "file": "app/marketplace/servicios/page.tsx"
+    },
+    {
+      "route": "/microtransacciones",
+      "file": "app/microtransacciones/page.tsx"
+    },
+    {
+      "route": "/notificaciones/historial",
+      "file": "app/notificaciones/historial/page.tsx"
+    },
+    {
+      "route": "/notificaciones",
+      "file": "app/notificaciones/page.tsx"
+    },
+    {
+      "route": "/notificaciones/plantillas",
+      "file": "app/notificaciones/plantillas/page.tsx"
+    },
+    {
+      "route": "/notificaciones/reglas",
+      "file": "app/notificaciones/reglas/page.tsx"
+    },
+    {
+      "route": "/obras",
+      "file": "app/obras/page.tsx"
+    },
+    {
+      "route": "/ocr",
+      "file": "app/ocr/page.tsx"
+    },
+    {
+      "route": "/offline",
+      "file": "app/offline/page.tsx"
+    },
+    {
+      "route": "/operador/dashboard",
+      "file": "app/operador/dashboard/page.tsx"
+    },
+    {
+      "route": "/operador/maintenance-history",
+      "file": "app/operador/maintenance-history/page.tsx"
+    },
+    {
+      "route": "/operador/work-orders/history",
+      "file": "app/operador/work-orders/history/page.tsx"
+    },
+    {
+      "route": "/pagos/nuevo",
+      "file": "app/pagos/nuevo/page.tsx"
+    },
+    {
+      "route": "/pagos",
+      "file": "app/pagos/page.tsx"
+    },
+    {
+      "route": "/pagos/planes",
+      "file": "app/pagos/planes/page.tsx"
+    },
+    {
+      "route": "/partners/analiticas",
+      "file": "app/partners/analiticas/page.tsx"
+    },
+    {
+      "route": "/partners/aseguradoras",
+      "file": "app/partners/aseguradoras/page.tsx"
+    },
+    {
+      "route": "/partners/bancos",
+      "file": "app/partners/bancos/page.tsx"
+    },
+    {
+      "route": "/partners/calculator",
+      "file": "app/partners/calculator/page.tsx"
+    },
+    {
+      "route": "/partners/capacitacion",
+      "file": "app/partners/capacitacion/page.tsx"
+    },
+    {
+      "route": "/partners/clients",
+      "file": "app/partners/clients/page.tsx"
+    },
+    {
+      "route": "/partners/comisiones",
+      "file": "app/partners/comisiones/page.tsx"
+    },
+    {
+      "route": "/partners/commissions",
+      "file": "app/partners/commissions/page.tsx"
+    },
+    {
+      "route": "/partners/dashboard",
+      "file": "app/partners/dashboard/page.tsx"
+    },
+    {
+      "route": "/partners/escuelas",
+      "file": "app/partners/escuelas/page.tsx"
+    },
+    {
+      "route": "/partners/integraciones",
+      "file": "app/partners/integraciones/page.tsx"
+    },
+    {
+      "route": "/partners/invitations",
+      "file": "app/partners/invitations/page.tsx"
+    },
+    {
+      "route": "/partners/login",
+      "file": "app/partners/login/page.tsx"
+    },
+    {
+      "route": "/partners/marketing",
+      "file": "app/partners/marketing/page.tsx"
+    },
+    {
+      "route": "/partners-program",
+      "file": "app/partners-program/page.tsx"
+    },
+    {
+      "route": "/partners/recursos",
+      "file": "app/partners/recursos/page.tsx"
+    },
+    {
+      "route": "/partners/register",
+      "file": "app/partners/register/page.tsx"
+    },
+    {
+      "route": "/partners/registro",
+      "file": "app/partners/registro/page.tsx"
+    },
+    {
+      "route": "/partners/settings",
+      "file": "app/partners/settings/page.tsx"
+    },
+    {
+      "route": "/partners/soporte",
+      "file": "app/partners/soporte/page.tsx"
+    },
+    {
+      "route": "/partners/terminos",
+      "file": "app/partners/terminos/page.tsx"
+    },
+    {
+      "route": "/perfil",
+      "file": "app/perfil/page.tsx"
+    },
+    {
+      "route": "/permisos",
+      "file": "app/permisos/page.tsx"
+    },
+    {
+      "route": "/planes",
+      "file": "app/planes/page.tsx"
+    },
+    {
+      "route": "/planificacion",
+      "file": "app/planificacion/page.tsx"
+    },
+    {
+      "route": "/plantillas",
+      "file": "app/plantillas/page.tsx"
+    },
+    {
+      "route": "/portal-comercial/comisiones",
+      "file": "app/portal-comercial/comisiones/page.tsx"
+    },
+    {
+      "route": "/portal-comercial/leads",
+      "file": "app/portal-comercial/leads/page.tsx"
+    },
+    {
+      "route": "/portal-comercial/objetivos",
+      "file": "app/portal-comercial/objetivos/page.tsx"
+    },
+    {
+      "route": "/portal-comercial",
+      "file": "app/portal-comercial/page.tsx"
+    },
+    {
+      "route": "/portal-inquilino/chatbot",
+      "file": "app/portal-inquilino/chatbot/page.tsx"
+    },
+    {
+      "route": "/portal-inquilino/chat",
+      "file": "app/portal-inquilino/chat/page.tsx"
+    },
+    {
+      "route": "/portal-inquilino/comunicacion",
+      "file": "app/portal-inquilino/comunicacion/page.tsx"
+    },
+    {
+      "route": "/portal-inquilino/contrato",
+      "file": "app/portal-inquilino/contrato/page.tsx"
+    },
+    {
+      "route": "/portal-inquilino/dashboard",
+      "file": "app/portal-inquilino/dashboard/page.tsx"
+    },
+    {
+      "route": "/portal-inquilino/documentos",
+      "file": "app/portal-inquilino/documentos/page.tsx"
+    },
+    {
+      "route": "/portal-inquilino/incidencias",
+      "file": "app/portal-inquilino/incidencias/page.tsx"
+    },
+    {
+      "route": "/portal-inquilino/login",
+      "file": "app/portal-inquilino/login/page.tsx"
+    },
+    {
+      "route": "/portal-inquilino/mantenimiento",
+      "file": "app/portal-inquilino/mantenimiento/page.tsx"
+    },
+    {
+      "route": "/portal-inquilino",
+      "file": "app/portal-inquilino/page.tsx"
+    },
+    {
+      "route": "/portal-inquilino/pagos",
+      "file": "app/portal-inquilino/pagos/page.tsx"
+    },
+    {
+      "route": "/portal-inquilino/password-reset",
+      "file": "app/portal-inquilino/password-reset/page.tsx"
+    },
+    {
+      "route": "/portal-inquilino/perfil",
+      "file": "app/portal-inquilino/perfil/page.tsx"
+    },
+    {
+      "route": "/portal-inquilino/register",
+      "file": "app/portal-inquilino/register/page.tsx"
+    },
+    {
+      "route": "/portal-inquilino/valoraciones",
+      "file": "app/portal-inquilino/valoraciones/page.tsx"
+    },
+    {
+      "route": "/portal-propietario/configuracion",
+      "file": "app/portal-propietario/configuracion/page.tsx"
+    },
+    {
+      "route": "/portal-propietario/login",
+      "file": "app/portal-propietario/login/page.tsx"
+    },
+    {
+      "route": "/portal-propietario",
+      "file": "app/portal-propietario/page.tsx"
+    },
+    {
+      "route": "/portal-proveedor/chat",
+      "file": "app/portal-proveedor/chat/page.tsx"
+    },
+    {
+      "route": "/portal-proveedor/facturas/nueva",
+      "file": "app/portal-proveedor/facturas/nueva/page.tsx"
+    },
+    {
+      "route": "/portal-proveedor/facturas",
+      "file": "app/portal-proveedor/facturas/page.tsx"
+    },
+    {
+      "route": "/portal-proveedor/forgot-password",
+      "file": "app/portal-proveedor/forgot-password/page.tsx"
+    },
+    {
+      "route": "/portal-proveedor/login",
+      "file": "app/portal-proveedor/login/page.tsx"
+    },
+    {
+      "route": "/portal-proveedor/ordenes",
+      "file": "app/portal-proveedor/ordenes/page.tsx"
+    },
+    {
+      "route": "/portal-proveedor",
+      "file": "app/portal-proveedor/page.tsx"
+    },
+    {
+      "route": "/portal-proveedor/presupuestos/nuevo",
+      "file": "app/portal-proveedor/presupuestos/nuevo/page.tsx"
+    },
+    {
+      "route": "/portal-proveedor/presupuestos",
+      "file": "app/portal-proveedor/presupuestos/page.tsx"
+    },
+    {
+      "route": "/portal-proveedor/register",
+      "file": "app/portal-proveedor/register/page.tsx"
+    },
+    {
+      "route": "/portal-proveedor/reseñas",
+      "file": "app/portal-proveedor/reseñas/page.tsx"
+    },
+    {
+      "route": "/portal-proveedor/reset-password",
+      "file": "app/portal-proveedor/reset-password/page.tsx"
+    },
+    {
+      "route": "/presupuestos",
+      "file": "app/presupuestos/page.tsx"
+    },
+    {
+      "route": "/professional/clients",
+      "file": "app/professional/clients/page.tsx"
+    },
+    {
+      "route": "/professional/invoicing",
+      "file": "app/professional/invoicing/page.tsx"
+    },
+    {
+      "route": "/professional",
+      "file": "app/professional/page.tsx"
+    },
+    {
+      "route": "/professional/projects",
+      "file": "app/professional/projects/page.tsx"
+    },
+    {
+      "route": "/promociones",
+      "file": "app/promociones/page.tsx"
+    },
+    {
+      "route": "/propiedades/crear",
+      "file": "app/propiedades/crear/page.tsx"
+    },
+    {
+      "route": "/propiedades/[id]/editar",
+      "file": "app/propiedades/[id]/editar/page.tsx"
+    },
+    {
+      "route": "/propiedades/[id]",
+      "file": "app/propiedades/[id]/page.tsx"
+    },
+    {
+      "route": "/propiedades/nuevo",
+      "file": "app/propiedades/nuevo/page.tsx"
+    },
+    {
+      "route": "/propiedades",
+      "file": "app/propiedades/page.tsx"
+    },
+    {
+      "route": "/dashboard/crm",
+      "file": "app/(protected)/dashboard/crm/page.tsx"
+    },
+    {
+      "route": "/dashboard/social-media",
+      "file": "app/(protected)/dashboard/social-media/page.tsx"
+    },
+    {
+      "route": "/str-advanced/channel-manager",
+      "file": "app/(protected)/str-advanced/channel-manager/page.tsx"
+    },
+    {
+      "route": "/str-advanced/guest-experience",
+      "file": "app/(protected)/str-advanced/guest-experience/page.tsx"
+    },
+    {
+      "route": "/str-advanced/housekeeping",
+      "file": "app/(protected)/str-advanced/housekeeping/page.tsx"
+    },
+    {
+      "route": "/str-advanced/legal",
+      "file": "app/(protected)/str-advanced/legal/page.tsx"
+    },
+    {
+      "route": "/str-advanced",
+      "file": "app/(protected)/str-advanced/page.tsx"
+    },
+    {
+      "route": "/str-advanced/revenue",
+      "file": "app/(protected)/str-advanced/revenue/page.tsx"
+    },
+    {
+      "route": "/proveedores",
+      "file": "app/proveedores/page.tsx"
+    },
+    {
+      "route": "/proyectos-renovacion",
+      "file": "app/proyectos-renovacion/page.tsx"
+    },
+    {
+      "route": "/puntos-carga",
+      "file": "app/puntos-carga/page.tsx"
+    },
+    {
+      "route": "/qa/checklist",
+      "file": "app/qa/checklist/page.tsx"
+    },
+    {
+      "route": "/real-estate-developer/commercial",
+      "file": "app/real-estate-developer/commercial/page.tsx"
+    },
+    {
+      "route": "/real-estate-developer/dashboard",
+      "file": "app/real-estate-developer/dashboard/page.tsx"
+    },
+    {
+      "route": "/real-estate-developer/marketing",
+      "file": "app/real-estate-developer/marketing/page.tsx"
+    },
+    {
+      "route": "/real-estate-developer",
+      "file": "app/real-estate-developer/page.tsx"
+    },
+    {
+      "route": "/real-estate-developer/projects",
+      "file": "app/real-estate-developer/projects/page.tsx"
+    },
+    {
+      "route": "/real-estate-developer/sales",
+      "file": "app/real-estate-developer/sales/page.tsx"
+    },
+    {
+      "route": "/recordatorios",
+      "file": "app/recordatorios/page.tsx"
+    },
+    {
+      "route": "/red-agentes/agentes",
+      "file": "app/red-agentes/agentes/page.tsx"
+    },
+    {
+      "route": "/red-agentes/comisiones",
+      "file": "app/red-agentes/comisiones/page.tsx"
+    },
+    {
+      "route": "/red-agentes/dashboard",
+      "file": "app/red-agentes/dashboard/page.tsx"
+    },
+    {
+      "route": "/red-agentes/formacion",
+      "file": "app/red-agentes/formacion/page.tsx"
+    },
+    {
+      "route": "/red-agentes",
+      "file": "app/red-agentes/page.tsx"
+    },
+    {
+      "route": "/red-agentes/registro",
+      "file": "app/red-agentes/registro/page.tsx"
+    },
+    {
+      "route": "/red-agentes/zonas",
+      "file": "app/red-agentes/zonas/page.tsx"
+    },
+    {
+      "route": "/register",
+      "file": "app/register/page.tsx"
+    },
+    {
+      "route": "/renovaciones-contratos",
+      "file": "app/renovaciones-contratos/page.tsx"
+    },
+    {
+      "route": "/renovaciones",
+      "file": "app/renovaciones/page.tsx"
+    },
+    {
+      "route": "/reportes/financieros",
+      "file": "app/reportes/financieros/page.tsx"
+    },
+    {
+      "route": "/reportes/operacionales",
+      "file": "app/reportes/operacionales/page.tsx"
+    },
+    {
+      "route": "/reportes",
+      "file": "app/reportes/page.tsx"
+    },
+    {
+      "route": "/reservas",
+      "file": "app/reservas/page.tsx"
+    },
+    {
+      "route": "/retail",
+      "file": "app/retail/page.tsx"
+    },
+    {
+      "route": "/reuniones",
+      "file": "app/reuniones/page.tsx"
+    },
+    {
+      "route": "/reviews",
+      "file": "app/reviews/page.tsx"
+    },
+    {
+      "route": "/room-rental/common-areas",
+      "file": "app/room-rental/common-areas/page.tsx"
+    },
+    {
+      "route": "/room-rental/tenants",
+      "file": "app/room-rental/tenants/page.tsx"
+    },
+    {
+      "route": "/salas-reuniones",
+      "file": "app/salas-reuniones/page.tsx"
+    },
+    {
+      "route": "/screening",
+      "file": "app/screening/page.tsx"
+    },
+    {
+      "route": "/seguridad-compliance",
+      "file": "app/seguridad-compliance/page.tsx"
+    },
+    {
+      "route": "/seguros/analisis",
+      "file": "app/seguros/analisis/page.tsx"
+    },
+    {
+      "route": "/seguros/[id]",
+      "file": "app/seguros/[id]/page.tsx"
+    },
+    {
+      "route": "/seguros/nuevo",
+      "file": "app/seguros/nuevo/page.tsx"
+    },
+    {
+      "route": "/seguros",
+      "file": "app/seguros/page.tsx"
+    },
+    {
+      "route": "/servicios-concierge",
+      "file": "app/servicios-concierge/page.tsx"
+    },
+    {
+      "route": "/servicios-limpieza",
+      "file": "app/servicios-limpieza/page.tsx"
+    },
+    {
+      "route": "/sincronizacion-avanzada",
+      "file": "app/sincronizacion-avanzada/page.tsx"
+    },
+    {
+      "route": "/sincronizacion",
+      "file": "app/sincronizacion/page.tsx"
+    },
+    {
+      "route": "/sms",
+      "file": "app/sms/page.tsx"
+    },
+    {
+      "route": "/stock-gestion",
+      "file": "app/stock-gestion/page.tsx"
+    },
+    {
+      "route": "/str/bookings",
+      "file": "app/str/bookings/page.tsx"
+    },
+    {
+      "route": "/str/channels",
+      "file": "app/str/channels/page.tsx"
+    },
+    {
+      "route": "/str/listings",
+      "file": "app/str/listings/page.tsx"
+    },
+    {
+      "route": "/str",
+      "file": "app/str/page.tsx"
+    },
+    {
+      "route": "/str/pricing",
+      "file": "app/str/pricing/page.tsx"
+    },
+    {
+      "route": "/str/reviews",
+      "file": "app/str/reviews/page.tsx"
+    },
+    {
+      "route": "/str/settings/integrations",
+      "file": "app/str/settings/integrations/page.tsx"
+    },
+    {
+      "route": "/str/setup-wizard",
+      "file": "app/str/setup-wizard/page.tsx"
+    },
+    {
+      "route": "/student-housing/actividades",
+      "file": "app/student-housing/actividades/page.tsx"
+    },
+    {
+      "route": "/student-housing/aplicaciones",
+      "file": "app/student-housing/aplicaciones/page.tsx"
+    },
+    {
+      "route": "/student-housing/dashboard",
+      "file": "app/student-housing/dashboard/page.tsx"
+    },
+    {
+      "route": "/student-housing/habitaciones",
+      "file": "app/student-housing/habitaciones/page.tsx"
+    },
+    {
+      "route": "/student-housing/mantenimiento",
+      "file": "app/student-housing/mantenimiento/page.tsx"
+    },
+    {
+      "route": "/student-housing",
+      "file": "app/student-housing/page.tsx"
+    },
+    {
+      "route": "/student-housing/pagos",
+      "file": "app/student-housing/pagos/page.tsx"
+    },
+    {
+      "route": "/student-housing/residentes",
+      "file": "app/student-housing/residentes/page.tsx"
+    },
+    {
+      "route": "/subastas",
+      "file": "app/subastas/page.tsx"
+    },
+    {
+      "route": "/sugerencias",
+      "file": "app/sugerencias/page.tsx"
+    },
+    {
+      "route": "/suscripciones",
+      "file": "app/suscripciones/page.tsx"
+    },
+    {
+      "route": "/tareas",
+      "file": "app/tareas/page.tsx"
+    },
+    {
+      "route": "/test-auth",
+      "file": "app/test-auth/page.tsx"
+    },
+    {
+      "route": "/tours-virtuales",
+      "file": "app/tours-virtuales/page.tsx"
+    },
+    {
+      "route": "/turismo-alquiler",
+      "file": "app/turismo-alquiler/page.tsx"
+    },
+    {
+      "route": "/unauthorized",
+      "file": "app/unauthorized/page.tsx"
+    },
+    {
+      "route": "/unidades/nueva",
+      "file": "app/unidades/nueva/page.tsx"
+    },
+    {
+      "route": "/unidades/nuevo",
+      "file": "app/unidades/nuevo/page.tsx"
+    },
+    {
+      "route": "/unidades",
+      "file": "app/unidades/page.tsx"
+    },
+    {
+      "route": "/usuarios/nuevo",
+      "file": "app/usuarios/nuevo/page.tsx"
+    },
+    {
+      "route": "/usuarios",
+      "file": "app/usuarios/page.tsx"
+    },
+    {
+      "route": "/vacaciones",
+      "file": "app/vacaciones/page.tsx"
+    },
+    {
+      "route": "/valoraciones",
+      "file": "app/valoraciones/page.tsx"
+    },
+    {
+      "route": "/valoracion-ia",
+      "file": "app/valoracion-ia/page.tsx"
+    },
+    {
+      "route": "/verificacion-inquilinos",
+      "file": "app/verificacion-inquilinos/page.tsx"
+    },
+    {
+      "route": "/viajes-corporativos/bookings",
+      "file": "app/viajes-corporativos/bookings/page.tsx"
+    },
+    {
+      "route": "/viajes-corporativos/dashboard",
+      "file": "app/viajes-corporativos/dashboard/page.tsx"
+    },
+    {
+      "route": "/viajes-corporativos/expense-reports",
+      "file": "app/viajes-corporativos/expense-reports/page.tsx"
+    },
+    {
+      "route": "/viajes-corporativos/guests",
+      "file": "app/viajes-corporativos/guests/page.tsx"
+    },
+    {
+      "route": "/viajes-corporativos",
+      "file": "app/viajes-corporativos/page.tsx"
+    },
+    {
+      "route": "/viajes-corporativos/policies",
+      "file": "app/viajes-corporativos/policies/page.tsx"
+    },
+    {
+      "route": "/visitas",
+      "file": "app/visitas/page.tsx"
+    },
+    {
+      "route": "/vivienda-social/applications",
+      "file": "app/vivienda-social/applications/page.tsx"
+    },
+    {
+      "route": "/vivienda-social/compliance",
+      "file": "app/vivienda-social/compliance/page.tsx"
+    },
+    {
+      "route": "/vivienda-social/dashboard",
+      "file": "app/vivienda-social/dashboard/page.tsx"
+    },
+    {
+      "route": "/vivienda-social/eligibility",
+      "file": "app/vivienda-social/eligibility/page.tsx"
+    },
+    {
+      "route": "/vivienda-social",
+      "file": "app/vivienda-social/page.tsx"
+    },
+    {
+      "route": "/vivienda-social/reporting",
+      "file": "app/vivienda-social/reporting/page.tsx"
+    },
+    {
+      "route": "/votaciones",
+      "file": "app/votaciones/page.tsx"
+    },
+    {
+      "route": "/warehouse/inventory",
+      "file": "app/warehouse/inventory/page.tsx"
+    },
+    {
+      "route": "/warehouse/locations",
+      "file": "app/warehouse/locations/page.tsx"
+    },
+    {
+      "route": "/warehouse/movements",
+      "file": "app/warehouse/movements/page.tsx"
+    },
+    {
+      "route": "/warehouse",
+      "file": "app/warehouse/page.tsx"
+    },
+    {
+      "route": "/warranty-management",
+      "file": "app/warranty-management/page.tsx"
+    },
+    {
+      "route": "/workflows",
+      "file": "app/workflows/page.tsx"
+    },
+    {
+      "route": "/workspace/booking",
+      "file": "app/workspace/booking/page.tsx"
+    },
+    {
+      "route": "/workspace/coworking",
+      "file": "app/workspace/coworking/page.tsx"
+    },
+    {
+      "route": "/workspace/dashboard",
+      "file": "app/workspace/dashboard/page.tsx"
+    },
+    {
+      "route": "/workspace/members",
+      "file": "app/workspace/members/page.tsx"
+    },
+    {
+      "route": "/workspace",
+      "file": "app/workspace/page.tsx"
+    }
+  ],
+  "allRoutes": [
+    "/",
+    "/admin",
+    "/admin-fincas",
+    "/admin-fincas/comunidades",
+    "/admin-fincas/facturas",
+    "/admin-fincas/informes",
+    "/admin-fincas/libro-caja",
+    "/admin/activity",
+    "/admin/alertas",
+    "/admin/aprobaciones",
+    "/admin/backup-restore",
+    "/admin/clientes",
+    "/admin/clientes/comparar",
+    "/admin/configuracion",
+    "/admin/dashboard",
+    "/admin/facturacion-b2b",
+    "/admin/firma-digital",
+    "/admin/importar",
+    "/admin/integraciones-contables",
+    "/admin/legal",
+    "/admin/marketplace",
+    "/admin/metricas-uso",
+    "/admin/modulos",
+    "/admin/ocr-import",
+    "/admin/partners",
+    "/admin/personalizacion",
+    "/admin/planes",
+    "/admin/plantillas-sms",
+    "/admin/portales-externos",
+    "/admin/recuperar-contrasena",
+    "/admin/reportes-programados",
+    "/admin/salud-sistema",
+    "/admin/seguridad",
+    "/admin/sugerencias",
+    "/admin/usuarios",
+    "/alquiler-tradicional/warranties",
+    "/analytics",
+    "/anuncios",
+    "/api-docs",
+    "/api-docs.disabled",
+    "/api/docs/swagger",
+    "/asistente-ia",
+    "/auditoria",
+    "/automatizacion",
+    "/automatizacion-resumen",
+    "/automatizacion/resumen",
+    "/bi",
+    "/blockchain",
+    "/calendario",
+    "/candidatos",
+    "/candidatos/nuevo",
+    "/certificaciones",
+    "/chat",
+    "/coliving",
+    "/coliving/comunidad",
+    "/coliving/emparejamiento",
+    "/coliving/eventos",
+    "/coliving/paquetes",
+    "/community",
+    "/comparativa/homming",
+    "/comunidad",
+    "/comunidad-social",
+    "/comunidades",
+    "/comunidades/actas",
+    "/comunidades/cumplimiento",
+    "/comunidades/cuotas",
+    "/comunidades/finanzas",
+    "/comunidades/fondos",
+    "/comunidades/presidente",
+    "/comunidades/renovaciones",
+    "/comunidades/votaciones",
+    "/configuracion",
+    "/configuracion/integraciones/stripe",
+    "/configuracion/notificaciones",
+    "/configuracion/ui-mode",
+    "/construction",
+    "/construction/gantt",
+    "/construction/projects",
+    "/construction/quality-control",
+    "/contabilidad",
+    "/contratos",
+    "/contratos/nuevo",
+    "/crm",
+    "/cupones",
+    "/dashboard",
+    "/dashboard-adaptive",
+    "/dashboard-propietarios",
+    "/dashboard/adaptive",
+    "/dashboard/analytics",
+    "/dashboard/budgets",
+    "/dashboard/community",
+    "/dashboard/contracts",
+    "/dashboard/coupons",
+    "/dashboard/crm",
+    "/dashboard/documents",
+    "/dashboard/integrations",
+    "/dashboard/integrations/api-keys",
+    "/dashboard/maintenance",
+    "/dashboard/messages",
+    "/dashboard/payments",
+    "/dashboard/properties",
+    "/dashboard/referrals",
+    "/dashboard/social-media",
+    "/dashboard/tenants",
+    "/developers",
+    "/developers/samples",
+    "/developers/sandbox",
+    "/developers/status",
+    "/documentos",
+    "/documentos/buscar",
+    "/economia-circular",
+    "/edificios",
+    "/edificios/nuevo",
+    "/edificios/nuevo-wizard",
+    "/ejemplo-ux",
+    "/energia",
+    "/energia-solar",
+    "/esg",
+    "/espacios-coworking",
+    "/estadisticas",
+    "/ewoorker-landing",
+    "/ewoorker/admin-socio",
+    "/ewoorker/compliance",
+    "/ewoorker/dashboard",
+    "/ewoorker/obras",
+    "/ewoorker/pagos",
+    "/facturacion",
+    "/finanzas",
+    "/firma-digital",
+    "/firma-digital/templates",
+    "/flipping",
+    "/flipping/calculator",
+    "/flipping/comparator",
+    "/flipping/dashboard",
+    "/flipping/projects",
+    "/flipping/timeline",
+    "/galerias",
+    "/garajes-trasteros",
+    "/garajes-trasteros/nuevo",
+    "/gastos",
+    "/gestion-incidencias",
+    "/guardias",
+    "/guia-ux",
+    "/home-mobile",
+    "/hospitality",
+    "/huerto-urbano",
+    "/impuestos",
+    "/incidencias",
+    "/informes",
+    "/inquilinos",
+    "/inquilinos/[id]",
+    "/inquilinos/nuevo",
+    "/inspeccion-digital",
+    "/inspecciones",
+    "/instalaciones-deportivas",
+    "/integraciones",
+    "/iot",
+    "/knowledge-base",
+    "/landing",
+    "/landing/blog",
+    "/landing/calculadora-roi",
+    "/landing/campanas/launch2025",
+    "/landing/casos-exito",
+    "/landing/contacto",
+    "/landing/demo",
+    "/landing/legal/cookies",
+    "/landing/legal/gdpr",
+    "/landing/legal/privacidad",
+    "/landing/legal/terminos",
+    "/landing/migracion",
+    "/landing/modulos/coliving",
+    "/landing/modulos/house-flipping",
+    "/landing/sobre-nosotros",
+    "/landing/webinars",
+    "/legal",
+    "/licitaciones",
+    "/login",
+    "/mantenimiento",
+    "/mantenimiento-pro",
+    "/mantenimiento/nuevo",
+    "/marketplace",
+    "/marketplace/proveedores",
+    "/marketplace/servicios",
+    "/mensajes",
+    "/microtransacciones",
+    "/notificaciones",
+    "/notificaciones/historial",
+    "/notificaciones/plantillas",
+    "/notificaciones/reglas",
+    "/obras",
+    "/ocr",
+    "/offline",
+    "/operador/dashboard",
+    "/operador/maintenance-history",
+    "/operador/work-orders/history",
+    "/pagos",
+    "/pagos/nuevo",
+    "/pagos/planes",
+    "/partners",
+    "/partners-program",
+    "/partners/analiticas",
+    "/partners/aseguradoras",
+    "/partners/bancos",
+    "/partners/calculator",
+    "/partners/capacitacion",
+    "/partners/clients",
+    "/partners/comisiones",
+    "/partners/commissions",
+    "/partners/dashboard",
+    "/partners/escuelas",
+    "/partners/integraciones",
+    "/partners/invitations",
+    "/partners/login",
+    "/partners/marketing",
+    "/partners/recursos",
+    "/partners/register",
+    "/partners/registro",
+    "/partners/settings",
+    "/partners/soporte",
+    "/partners/terminos",
+    "/perfil",
+    "/permisos",
+    "/planes",
+    "/planificacion",
+    "/plantillas",
+    "/portal-comercial",
+    "/portal-comercial/comisiones",
+    "/portal-comercial/leads",
+    "/portal-comercial/objetivos",
+    "/portal-inquilino",
+    "/portal-inquilino/chat",
+    "/portal-inquilino/chatbot",
+    "/portal-inquilino/comunicacion",
+    "/portal-inquilino/contrato",
+    "/portal-inquilino/dashboard",
+    "/portal-inquilino/documentos",
+    "/portal-inquilino/incidencias",
+    "/portal-inquilino/login",
+    "/portal-inquilino/mantenimiento",
+    "/portal-inquilino/pagos",
+    "/portal-inquilino/password-reset",
+    "/portal-inquilino/perfil",
+    "/portal-inquilino/register",
+    "/portal-inquilino/valoraciones",
+    "/portal-propietario",
+    "/portal-propietario/configuracion",
+    "/portal-propietario/login",
+    "/portal-proveedor",
+    "/portal-proveedor/chat",
+    "/portal-proveedor/facturas",
+    "/portal-proveedor/facturas/nueva",
+    "/portal-proveedor/forgot-password",
+    "/portal-proveedor/login",
+    "/portal-proveedor/ordenes",
+    "/portal-proveedor/presupuestos",
+    "/portal-proveedor/presupuestos/nuevo",
+    "/portal-proveedor/register",
+    "/portal-proveedor/reset-password",
+    "/portal-proveedor/reseñas",
+    "/presupuestos",
+    "/professional",
+    "/professional/clients",
+    "/professional/invoicing",
+    "/professional/projects",
+    "/promociones",
+    "/propiedades",
+    "/propiedades/[id]",
+    "/propiedades/[id]/editar",
+    "/propiedades/crear",
+    "/propiedades/nuevo",
+    "/proveedores",
+    "/proyectos-renovacion",
+    "/puntos-carga",
+    "/qa/checklist",
+    "/real-estate-developer",
+    "/real-estate-developer/commercial",
+    "/real-estate-developer/dashboard",
+    "/real-estate-developer/marketing",
+    "/real-estate-developer/projects",
+    "/real-estate-developer/sales",
+    "/recordatorios",
+    "/red-agentes",
+    "/red-agentes/agentes",
+    "/red-agentes/comisiones",
+    "/red-agentes/dashboard",
+    "/red-agentes/formacion",
+    "/red-agentes/registro",
+    "/red-agentes/zonas",
+    "/register",
+    "/renovaciones",
+    "/renovaciones-contratos",
+    "/reportes",
+    "/reportes/financieros",
+    "/reportes/operacionales",
+    "/reportes/programados",
+    "/reservas",
+    "/retail",
+    "/reuniones",
+    "/reviews",
+    "/room-rental/common-areas",
+    "/room-rental/tenants",
+    "/salas-reuniones",
+    "/screening",
+    "/seguridad-compliance",
+    "/seguros",
+    "/seguros/[id]",
+    "/seguros/analisis",
+    "/seguros/nuevo",
+    "/servicios-concierge",
+    "/servicios-limpieza",
+    "/sincronizacion",
+    "/sincronizacion-avanzada",
+    "/sms",
+    "/stock-gestion",
+    "/str",
+    "/str-advanced",
+    "/str-advanced/channel-manager",
+    "/str-advanced/guest-experience",
+    "/str-advanced/housekeeping",
+    "/str-advanced/legal",
+    "/str-advanced/revenue",
+    "/str/bookings",
+    "/str/channels",
+    "/str/listings",
+    "/str/pricing",
+    "/str/reviews",
+    "/str/settings/integrations",
+    "/str/setup-wizard",
+    "/student-housing",
+    "/student-housing/actividades",
+    "/student-housing/aplicaciones",
+    "/student-housing/dashboard",
+    "/student-housing/habitaciones",
+    "/student-housing/mantenimiento",
+    "/student-housing/pagos",
+    "/student-housing/residentes",
+    "/subastas",
+    "/sugerencias",
+    "/suscripciones",
+    "/tareas",
+    "/test-auth",
+    "/tours-virtuales",
+    "/traditional-rental",
+    "/traditional-rental/communities",
+    "/traditional-rental/compliance",
+    "/traditional-rental/renewals",
+    "/traditional-rental/treasury",
+    "/turismo-alquiler",
+    "/unauthorized",
+    "/unidades",
+    "/unidades/nueva",
+    "/unidades/nuevo",
+    "/usuarios",
+    "/usuarios/nuevo",
+    "/vacaciones",
+    "/valoracion-ia",
+    "/valoraciones",
+    "/verificacion-inquilinos",
+    "/viajes-corporativos",
+    "/viajes-corporativos/bookings",
+    "/viajes-corporativos/dashboard",
+    "/viajes-corporativos/expense-reports",
+    "/viajes-corporativos/guests",
+    "/viajes-corporativos/policies",
+    "/visitas",
+    "/vivienda-social",
+    "/vivienda-social/applications",
+    "/vivienda-social/compliance",
+    "/vivienda-social/dashboard",
+    "/vivienda-social/eligibility",
+    "/vivienda-social/reporting",
+    "/votaciones",
+    "/warehouse",
+    "/warehouse/inventory",
+    "/warehouse/locations",
+    "/warehouse/movements",
+    "/warranty-management",
+    "/workflows",
+    "/workspace",
+    "/workspace/booking",
+    "/workspace/coworking",
+    "/workspace/dashboard",
+    "/workspace/members"
+  ]
+}
