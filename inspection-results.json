@@ -1,0 +1,537 @@
+{
+  "summary": {
+    "total": 34,
+    "success": 0,
+    "errors": 34,
+    "warnings": 0
+  },
+  "pages": [
+    {
+      "name": "Landing",
+      "url": "/landing",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 ()"
+      ],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1922,
+      "hasButtons": false
+    },
+    {
+      "name": "Home",
+      "url": "/",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1177,
+      "hasButtons": false
+    },
+    {
+      "name": "Login",
+      "url": "/login",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 2002,
+      "hasButtons": false
+    },
+    {
+      "name": "Register",
+      "url": "/register",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1067,
+      "hasButtons": false
+    },
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "status": "error",
+      "httpCode": null,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 ()",
+        "Failed to load resource: the server responded with a status of 401 ()"
+      ],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: Navigation timeout of 30000 ms exceeded"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 0,
+      "hasButtons": false
+    },
+    {
+      "name": "Properties",
+      "url": "/dashboard/properties",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1071,
+      "hasButtons": false
+    },
+    {
+      "name": "Tenants",
+      "url": "/dashboard/tenants",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1067,
+      "hasButtons": false
+    },
+    {
+      "name": "Contracts",
+      "url": "/dashboard/contracts",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1066,
+      "hasButtons": false
+    },
+    {
+      "name": "Payments",
+      "url": "/dashboard/payments",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1067,
+      "hasButtons": false
+    },
+    {
+      "name": "Maintenance",
+      "url": "/dashboard/maintenance",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1066,
+      "hasButtons": false
+    },
+    {
+      "name": "Analytics",
+      "url": "/dashboard/analytics",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1068,
+      "hasButtons": false
+    },
+    {
+      "name": "Messages",
+      "url": "/dashboard/messages",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1069,
+      "hasButtons": false
+    },
+    {
+      "name": "Documents",
+      "url": "/dashboard/documents",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1064,
+      "hasButtons": false
+    },
+    {
+      "name": "Referrals",
+      "url": "/dashboard/referrals",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1066,
+      "hasButtons": false
+    },
+    {
+      "name": "Budgets",
+      "url": "/dashboard/budgets",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1064,
+      "hasButtons": false
+    },
+    {
+      "name": "Coupons",
+      "url": "/dashboard/coupons",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1067,
+      "hasButtons": false
+    },
+    {
+      "name": "Admin",
+      "url": "/admin",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1190,
+      "hasButtons": false
+    },
+    {
+      "name": "AdminUsers",
+      "url": "/admin/usuarios",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1065,
+      "hasButtons": false
+    },
+    {
+      "name": "AdminConfig",
+      "url": "/admin/configuracion",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1064,
+      "hasButtons": false
+    },
+    {
+      "name": "AdminPlanes",
+      "url": "/admin/planes",
+      "status": "error",
+      "httpCode": null,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 ()",
+        "Failed to load resource: the server responded with a status of 401 ()"
+      ],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: Navigation timeout of 30000 ms exceeded"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 0,
+      "hasButtons": false
+    },
+    {
+      "name": "AdminModulos",
+      "url": "/admin/modulos",
+      "status": "error",
+      "httpCode": null,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 ()",
+        "Failed to load resource: the server responded with a status of 401 ()"
+      ],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: Navigation timeout of 30000 ms exceeded"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 0,
+      "hasButtons": false
+    },
+    {
+      "name": "PortalInquilino",
+      "url": "/portal-inquilino",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 930,
+      "hasButtons": false
+    },
+    {
+      "name": "PortalProveedor",
+      "url": "/portal-proveedor",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1068,
+      "hasButtons": false
+    },
+    {
+      "name": "PortalComercial",
+      "url": "/portal-comercial",
+      "status": "error",
+      "httpCode": null,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 ()",
+        "Failed to load resource: the server responded with a status of 401 ()"
+      ],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: Navigation timeout of 30000 ms exceeded"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 0,
+      "hasButtons": false
+    },
+    {
+      "name": "Propiedades",
+      "url": "/propiedades",
+      "status": "error",
+      "httpCode": null,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 ()",
+        "Failed to load resource: the server responded with a status of 401 ()"
+      ],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: Navigation timeout of 30000 ms exceeded"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 0,
+      "hasButtons": false
+    },
+    {
+      "name": "Seguros",
+      "url": "/seguros",
+      "status": "error",
+      "httpCode": null,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 ()",
+        "Failed to load resource: the server responded with a status of 401 ()"
+      ],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: Navigation timeout of 30000 ms exceeded"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 0,
+      "hasButtons": false
+    },
+    {
+      "name": "Reportes",
+      "url": "/reportes",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 1082,
+      "hasButtons": false
+    },
+    {
+      "name": "STR",
+      "url": "/str",
+      "status": "error",
+      "httpCode": null,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 ()",
+        "Failed to load resource: the server responded with a status of 401 ()"
+      ],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: Navigation timeout of 30000 ms exceeded"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 0,
+      "hasButtons": false
+    },
+    {
+      "name": "Partners",
+      "url": "/partners",
+      "status": "error",
+      "httpCode": null,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 ()",
+        "Failed to load resource: the server responded with a status of 401 ()"
+      ],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: Navigation timeout of 30000 ms exceeded"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 0,
+      "hasButtons": false
+    },
+    {
+      "name": "Coliving",
+      "url": "/coliving",
+      "status": "error",
+      "httpCode": null,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 ()",
+        "Failed to load resource: the server responded with a status of 401 ()",
+        "Failed to load resource: the server responded with a status of 401 ()"
+      ],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: Navigation timeout of 30000 ms exceeded"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 0,
+      "hasButtons": false
+    },
+    {
+      "name": "StudentHousing",
+      "url": "/student-housing",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 901,
+      "hasButtons": false
+    },
+    {
+      "name": "Workspace",
+      "url": "/workspace",
+      "status": "error",
+      "httpCode": 200,
+      "consoleErrors": [],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 930,
+      "hasButtons": false
+    },
+    {
+      "name": "Votaciones",
+      "url": "/votaciones",
+      "status": "error",
+      "httpCode": null,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 ()",
+        "Failed to load resource: the server responded with a status of 401 ()"
+      ],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: Navigation timeout of 30000 ms exceeded"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 0,
+      "hasButtons": false
+    },
+    {
+      "name": "Visitas",
+      "url": "/visitas",
+      "status": "error",
+      "httpCode": null,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 401 ()",
+        "Failed to load resource: the server responded with a status of 401 ()"
+      ],
+      "jsErrors": [
+        "Invalid or unexpected token",
+        "Navigation error: Navigation timeout of 30000 ms exceeded"
+      ],
+      "hydrationErrors": [],
+      "loadTime": 0,
+      "hasButtons": false
+    }
+  ],
+  "criticalErrors": [
+    {
+      "page": "Landing",
+      "error": "page.waitForTimeout is not a function"
+    },
+    {
+      "page": "Login",
+      "error": "page.waitForTimeout is not a function"
+    },
+    {
+      "page": "Dashboard",
+      "error": "Navigation timeout of 30000 ms exceeded"
+    }
+  ]
+}

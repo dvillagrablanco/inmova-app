@@ -1,0 +1,2121 @@
+{
+  "timestamp": "2026-01-01T11:54:41.039Z",
+  "summary": {
+    "total": 59,
+    "success": 0,
+    "warnings": 14,
+    "errors": 25,
+    "critical": 20
+  },
+  "pages": [
+    {
+      "name": "Landing",
+      "url": "/landing",
+      "category": "public",
+      "httpStatus": 200,
+      "loadTime": 1716,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268482023
+        }
+      ],
+      "buttons": [
+        {
+          "selector": "Comenzar Gratis",
+          "text": "Comenzar Gratis",
+          "found": true,
+          "clickable": true
+        },
+        {
+          "selector": "Ver Demo",
+          "text": "Ver Demo",
+          "found": true,
+          "clickable": true
+        },
+        {
+          "selector": "Probar Gratis",
+          "text": "Probar Gratis",
+          "found": false,
+          "clickable": false
+        }
+      ],
+      "hasH1": true,
+      "hasNavigation": true,
+      "hasFooter": true,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Home Root",
+      "url": "/",
+      "category": "public",
+      "httpStatus": 200,
+      "loadTime": 1216,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268485752
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": true,
+      "hasFooter": true,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Unauthorized",
+      "url": "/unauthorized",
+      "category": "public",
+      "httpStatus": 200,
+      "loadTime": 912,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268488912
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Login",
+      "url": "/login",
+      "category": "auth",
+      "httpStatus": 200,
+      "loadTime": 869,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268491924
+        }
+      ],
+      "buttons": [
+        {
+          "selector": "button[type=\"submit\"]",
+          "text": "button[type=\"submit\"]",
+          "found": true,
+          "clickable": true
+        },
+        {
+          "selector": "Iniciar Sesión",
+          "text": "Iniciar Sesión",
+          "found": true,
+          "clickable": true
+        }
+      ],
+      "hasH1": true,
+      "hasNavigation": true,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Register",
+      "url": "/register",
+      "category": "auth",
+      "httpStatus": 200,
+      "loadTime": 962,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268494914
+        }
+      ],
+      "buttons": [
+        {
+          "selector": "button[type=\"submit\"]",
+          "text": "button[type=\"submit\"]",
+          "found": true,
+          "clickable": true
+        },
+        {
+          "selector": "Registrarse",
+          "text": "Registrarse",
+          "found": false,
+          "clickable": false
+        }
+      ],
+      "hasH1": true,
+      "hasNavigation": true,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "category": "dashboard",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268498000
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767268498223
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268498223
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767268498224
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268498224
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/dashboard\", waiting until \"networkidle\"\n",
+          "timestamp": 1767268527855
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Dashboard/Properties",
+      "url": "/dashboard/properties",
+      "category": "dashboard",
+      "httpStatus": 200,
+      "loadTime": 818,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268528016
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Dashboard/Tenants",
+      "url": "/dashboard/tenants",
+      "category": "dashboard",
+      "httpStatus": 200,
+      "loadTime": 743,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268530888
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Dashboard/Contracts",
+      "url": "/dashboard/contracts",
+      "category": "dashboard",
+      "httpStatus": 200,
+      "loadTime": 801,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268533745
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Dashboard/Payments",
+      "url": "/dashboard/payments",
+      "category": "dashboard",
+      "httpStatus": 200,
+      "loadTime": 811,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268536632
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Dashboard/Maintenance",
+      "url": "/dashboard/maintenance",
+      "category": "dashboard",
+      "httpStatus": 200,
+      "loadTime": 813,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268539528
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Dashboard/Analytics",
+      "url": "/dashboard/analytics",
+      "category": "dashboard",
+      "httpStatus": 200,
+      "loadTime": 819,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268542430
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Dashboard/Messages",
+      "url": "/dashboard/messages",
+      "category": "dashboard",
+      "httpStatus": 200,
+      "loadTime": 837,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268545346
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Dashboard/Documents",
+      "url": "/dashboard/documents",
+      "category": "dashboard",
+      "httpStatus": 200,
+      "loadTime": 811,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268548260
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Dashboard/Referrals",
+      "url": "/dashboard/referrals",
+      "category": "dashboard",
+      "httpStatus": 200,
+      "loadTime": 810,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268551140
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Dashboard/Budgets",
+      "url": "/dashboard/budgets",
+      "category": "dashboard",
+      "httpStatus": 200,
+      "loadTime": 815,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268554037
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Dashboard/Coupons",
+      "url": "/dashboard/coupons",
+      "category": "dashboard",
+      "httpStatus": 200,
+      "loadTime": 813,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268556932
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Admin",
+      "url": "/admin",
+      "category": "admin",
+      "httpStatus": 200,
+      "loadTime": 1085,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268559835
+        },
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268560197
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": true,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Admin/Usuarios",
+      "url": "/admin/usuarios",
+      "category": "admin",
+      "httpStatus": 200,
+      "loadTime": 1010,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268562989
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": true,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "warning"
+    },
+    {
+      "name": "Admin/Configuracion",
+      "url": "/admin/configuracion",
+      "category": "admin",
+      "httpStatus": 200,
+      "loadTime": 1016,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268566081
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": true,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "warning"
+    },
+    {
+      "name": "Admin/Planes",
+      "url": "/admin/planes",
+      "category": "admin",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268569214
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767268569458
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268569458
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767268569461
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268569461
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/admin/planes\", waiting until \"networkidle\"\n",
+          "timestamp": 1767268599090
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Admin/Modulos",
+      "url": "/admin/modulos",
+      "category": "admin",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268599262
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767268599494
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268599494
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767268599498
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268599498
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/admin/modulos\", waiting until \"networkidle\"\n",
+          "timestamp": 1767268629136
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Admin/Marketplace",
+      "url": "/admin/marketplace",
+      "category": "admin",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268629323
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767268629571
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268629571
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767268629575
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268629575
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/admin/marketplace/services",
+          "url": "https://inmovaapp.com/api/admin/marketplace/services",
+          "statusCode": 401,
+          "timestamp": 1767268629582
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268629582
+        },
+        {
+          "type": "console",
+          "message": "Error 401: al cargar servicios undefined",
+          "timestamp": 1767268629584
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/admin/marketplace\", waiting until \"networkidle\"\n",
+          "timestamp": 1767268659184
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Portal Inquilino",
+      "url": "/portal-inquilino",
+      "category": "portal",
+      "httpStatus": 200,
+      "loadTime": 850,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268659351
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Portal Inquilino/Pagos",
+      "url": "/portal-inquilino/pagos",
+      "category": "portal",
+      "httpStatus": 200,
+      "loadTime": 1010,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268662276
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "warning"
+    },
+    {
+      "name": "Portal Inquilino/Incidencias",
+      "url": "/portal-inquilino/incidencias",
+      "category": "portal",
+      "httpStatus": 200,
+      "loadTime": 905,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268665389
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "warning"
+    },
+    {
+      "name": "Portal Inquilino/Contrato",
+      "url": "/portal-inquilino/contrato",
+      "category": "portal",
+      "httpStatus": 200,
+      "loadTime": 857,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268668378
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "warning"
+    },
+    {
+      "name": "Portal Inquilino/Comunicacion",
+      "url": "/portal-inquilino/comunicacion",
+      "category": "portal",
+      "httpStatus": 200,
+      "loadTime": 867,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268671316
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "warning"
+    },
+    {
+      "name": "Portal Proveedor",
+      "url": "/portal-proveedor",
+      "category": "portal",
+      "httpStatus": 200,
+      "loadTime": 801,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268674259
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Portal Proveedor/Ordenes",
+      "url": "/portal-proveedor/ordenes",
+      "category": "portal",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268677142
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/auth-proveedor/me",
+          "url": "https://inmovaapp.com/api/auth-proveedor/me",
+          "statusCode": 401,
+          "timestamp": 1767268677413
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268677413
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/portal-proveedor/ordenes\", waiting until \"networkidle\"\n",
+          "timestamp": 1767268707032
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Portal Proveedor/Presupuestos",
+      "url": "/portal-proveedor/presupuestos",
+      "category": "portal",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268707228
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767268707460
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268707460
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767268707465
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268707465
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/portal-proveedor/quotes?",
+          "url": "https://inmovaapp.com/api/portal-proveedor/quotes?",
+          "statusCode": 401,
+          "timestamp": 1767268707471
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268707471
+        },
+        {
+          "type": "console",
+          "message": "Error fetching quotes: {}",
+          "timestamp": 1767268707472
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/portal-proveedor/presupuestos\", waiting until \"networkidle\"\n",
+          "timestamp": 1767268737079
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Portal Proveedor/Facturas",
+      "url": "/portal-proveedor/facturas",
+      "category": "portal",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268737273
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767268737537
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268737537
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/portal-proveedor/invoices?",
+          "url": "https://inmovaapp.com/api/portal-proveedor/invoices?",
+          "statusCode": 401,
+          "timestamp": 1767268737543
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268737544
+        },
+        {
+          "type": "console",
+          "message": "Error fetching invoices: {}",
+          "timestamp": 1767268737544
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767268737583
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268737583
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/portal-proveedor/facturas\", waiting until \"networkidle\"\n",
+          "timestamp": 1767268767126
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Portal Comercial",
+      "url": "/portal-comercial",
+      "category": "portal",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268767300
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767268767545
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268767546
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767268767551
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268767551
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/portal-comercial\", waiting until \"networkidle\"\n",
+          "timestamp": 1767268797175
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Portal Comercial/Leads",
+      "url": "/portal-comercial/leads",
+      "category": "portal",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268797349
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767268797607
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268797607
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767268797611
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268797611
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/portal-comercial/leads\", waiting until \"networkidle\"\n",
+          "timestamp": 1767268827221
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Portal Comercial/Objetivos",
+      "url": "/portal-comercial/objetivos",
+      "category": "portal",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268827393
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767268827639
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268827639
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767268827639
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268827640
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/portal-comercial/objetivos\", waiting until \"networkidle\"\n",
+          "timestamp": 1767268857269
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Propiedades",
+      "url": "/propiedades",
+      "category": "feature",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268857446
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767268857707
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268857707
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767268857716
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268857716
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/propiedades\", waiting until \"networkidle\"\n",
+          "timestamp": 1767268887315
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Propiedades/Crear",
+      "url": "/propiedades/crear",
+      "category": "feature",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268887488
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767268887752
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268887752
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767268887757
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268887757
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/propiedades/crear\", waiting until \"networkidle\"\n",
+          "timestamp": 1767268917362
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Seguros",
+      "url": "/seguros",
+      "category": "feature",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268917541
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767268917793
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268917793
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767268917796
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268917796
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/seguros\", waiting until \"networkidle\"\n",
+          "timestamp": 1767268947409
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Seguros/Nuevo",
+      "url": "/seguros/nuevo",
+      "category": "feature",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268947621
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767268947866
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268947866
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767268947870
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268947870
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/buildings",
+          "url": "https://inmovaapp.com/api/buildings",
+          "statusCode": 401,
+          "timestamp": 1767268947942
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268947942
+        },
+        {
+          "type": "console",
+          "message": "Error loading buildings: Error\n    at $ (https://inmovaapp.com/_next/static/chunks/app/seguros/nuevo/page-8092841879869378.js:1:1388)",
+          "timestamp": 1767268947942
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/seguros/nuevo\", waiting until \"networkidle\"\n",
+          "timestamp": 1767268977456
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Reportes",
+      "url": "/reportes",
+      "category": "feature",
+      "httpStatus": 200,
+      "loadTime": 1039,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268977607
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": true,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "critical"
+    },
+    {
+      "name": "Reportes/Financieros",
+      "url": "/reportes/financieros",
+      "category": "feature",
+      "httpStatus": 200,
+      "loadTime": 856,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268980754
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "warning"
+    },
+    {
+      "name": "Visitas",
+      "url": "/visitas",
+      "category": "feature",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767268983707
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767268983941
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268983941
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767268983945
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767268983945
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/visitas\", waiting until \"networkidle\"\n",
+          "timestamp": 1767269013573
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Votaciones",
+      "url": "/votaciones",
+      "category": "feature",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767269013748
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767269013995
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269013995
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767269014001
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269014001
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/votaciones\", waiting until \"networkidle\"\n",
+          "timestamp": 1767269043621
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Tareas",
+      "url": "/tareas",
+      "category": "feature",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767269043791
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767269044053
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269044053
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767269044057
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269044057
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/tareas\", waiting until \"networkidle\"\n",
+          "timestamp": 1767269073670
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Usuarios",
+      "url": "/usuarios",
+      "category": "feature",
+      "httpStatus": 200,
+      "loadTime": 914,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767269073838
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "warning"
+    },
+    {
+      "name": "Proveedores",
+      "url": "/proveedores",
+      "category": "feature",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767269076830
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767269077097
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269077097
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767269077102
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269077102
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/proveedores\", waiting until \"networkidle\"\n",
+          "timestamp": 1767269106714
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Screening",
+      "url": "/screening",
+      "category": "feature",
+      "httpStatus": 200,
+      "loadTime": 1033,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767269106870
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": true,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "warning"
+    },
+    {
+      "name": "Tours Virtuales",
+      "url": "/tours-virtuales",
+      "category": "feature",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767269109995
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767269110258
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269110258
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767269110262
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269110262
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/tours-virtuales\", waiting until \"networkidle\"\n",
+          "timestamp": 1767269139879
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Valoraciones",
+      "url": "/valoraciones",
+      "category": "feature",
+      "httpStatus": 200,
+      "loadTime": 1046,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767269140037
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": true,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "warning"
+    },
+    {
+      "name": "STR",
+      "url": "/str",
+      "category": "vertical",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767269143190
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767269143450
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269143450
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767269143451
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269143451
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/str\", waiting until \"networkidle\"\n",
+          "timestamp": 1767269173061
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "STR/Bookings",
+      "url": "/str/bookings",
+      "category": "vertical",
+      "httpStatus": 200,
+      "loadTime": 1033,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767269173225
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": true,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "warning"
+    },
+    {
+      "name": "STR/Listings",
+      "url": "/str/listings",
+      "category": "vertical",
+      "httpStatus": 200,
+      "loadTime": 1023,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767269176339
+        }
+      ],
+      "buttons": [],
+      "hasH1": true,
+      "hasNavigation": true,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "warning"
+    },
+    {
+      "name": "STR/Channels",
+      "url": "/str/channels",
+      "category": "vertical",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767269179468
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767269179728
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269179728
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767269179733
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269179733
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/str/channels\", waiting until \"networkidle\"\n",
+          "timestamp": 1767269209336
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Coliving",
+      "url": "/coliving",
+      "category": "vertical",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767269209508
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767269209766
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269209766
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/coliving/feed?companyId=undefined",
+          "url": "https://inmovaapp.com/api/coliving/feed?companyId=undefined",
+          "statusCode": 401,
+          "timestamp": 1767269209773
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269209773
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767269209780
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269209780
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/coliving\", waiting until \"networkidle\"\n",
+          "timestamp": 1767269239383
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Student Housing",
+      "url": "/student-housing",
+      "category": "vertical",
+      "httpStatus": 200,
+      "loadTime": 916,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767269239550
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "warning"
+    },
+    {
+      "name": "Workspace",
+      "url": "/workspace",
+      "category": "vertical",
+      "httpStatus": 200,
+      "loadTime": 858,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767269242544
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "warning"
+    },
+    {
+      "name": "Partners",
+      "url": "/partners",
+      "category": "vertical",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767269245506
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767269245770
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269245770
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767269245774
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269245774
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/partners\", waiting until \"networkidle\"\n",
+          "timestamp": 1767269275374
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Partners/Dashboard",
+      "url": "/partners/dashboard",
+      "category": "vertical",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767269275555
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767269275855
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269275855
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767269275862
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269275862
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/partners/dashboard\", waiting until \"networkidle\"\n",
+          "timestamp": 1767269305421
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    },
+    {
+      "name": "Partners/Clients",
+      "url": "/partners/clients",
+      "category": "vertical",
+      "httpStatus": null,
+      "loadTime": 0,
+      "errors": [
+        {
+          "type": "javascript",
+          "message": "Invalid or unexpected token",
+          "timestamp": 1767269305580
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/notifications/unread-count",
+          "url": "https://inmovaapp.com/api/notifications/unread-count",
+          "statusCode": 401,
+          "timestamp": 1767269305842
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269305842
+        },
+        {
+          "type": "network",
+          "message": "Failed to load: https://inmovaapp.com/api/modules/active",
+          "url": "https://inmovaapp.com/api/modules/active",
+          "statusCode": 401,
+          "timestamp": 1767269305845
+        },
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 401 ()",
+          "timestamp": 1767269305845
+        },
+        {
+          "type": "navigation",
+          "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/partners/clients\", waiting until \"networkidle\"\n",
+          "timestamp": 1767269335467
+        }
+      ],
+      "buttons": [],
+      "hasH1": false,
+      "hasNavigation": false,
+      "hasFooter": false,
+      "screenshotPath": null,
+      "status": "error"
+    }
+  ],
+  "criticalIssues": [
+    {
+      "page": "Landing",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Home Root",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Unauthorized",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Login",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Register",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Dashboard",
+      "issue": "Navigation failed: page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/dashboard\", waiting until \"networkidle\"\n"
+    },
+    {
+      "page": "Dashboard/Properties",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Dashboard/Tenants",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Dashboard/Contracts",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Dashboard/Payments",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Dashboard/Maintenance",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Dashboard/Analytics",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Dashboard/Messages",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Dashboard/Documents",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Dashboard/Referrals",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Dashboard/Budgets",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Dashboard/Coupons",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Admin",
+      "issue": "2 errors on critical page"
+    },
+    {
+      "page": "Portal Inquilino",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Portal Proveedor",
+      "issue": "1 errors on critical page"
+    },
+    {
+      "page": "Reportes",
+      "issue": "1 errors on critical page"
+    }
+  ]
+}
