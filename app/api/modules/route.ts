@@ -1,212 +1,174 @@
+export const dynamic = 'force-dynamic';
+
+/**
+ * API: Gestión de Módulos Activos del Usuario
+ * GET: Obtener módulos disponibles y activos
+ * POST: Activar/desactivar módulos
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
-import logger from '@/lib/logger';
+import { 
+  getUserPreferences,
+  activateModule,
+  deactivateModule
+} from '@/lib/user-preferences-service';
+import { 
+  MODULES,
+  getAvailableModules,
+  getRecommendedModules,
+  getSuggestedModules,
+  getModulesByCategory
+} from '@/lib/modules-management-system';
+import { z } from 'zod';
 
-export const dynamic = 'force-dynamic';
-
-// Definición de módulos disponibles con sus beneficios
-const MODULE_DEFINITIONS = [
-  {
-    codigo: 'bi',
-    nombre: 'Business Intelligence',
-    descripcion: 'Análisis avanzado de datos y métricas predictivas',
-    categoria: 'avanzado',
-    icono: 'BarChart3',
-    ruta: '/bi',
-    benefits: [
-      'Dashboards ejecutivos personalizables',
-      'Análisis predictivo con IA',
-      'Benchmarking vs mercado',
-      'Alertas inteligentes automáticas'
-    ]
-  },
-  {
-    codigo: 'str',
-    nombre: 'STR / Alquiler Vacacional',
-    descripcion: 'Gestión de alquileres vacacionales y channel manager',
-    categoria: 'gestion',
-    icono: 'MapPin',
-    ruta: '/str',
-    benefits: [
-      'Sincronización con Airbnb y Booking',
-      'Pricing dinámico automático',
-      'Gestión de calendarios unificada',
-      'Automatización de mensajes a huéspedes'
-    ]
-  },
-  {
-    codigo: 'flipping',
-    nombre: 'House Flipping',
-    descripcion: 'Análisis y seguimiento de proyectos de inversión inmobiliaria',
-    categoria: 'gestion',
-    icono: 'TrendingUp',
-    ruta: '/flipping',
-    benefits: [
-      'Cálculo de ROI y TIR en tiempo real',
-      'Seguimiento de presupuestos de reforma',
-      'Análisis comparativo de mercado',
-      'Proyecciones de venta'
-    ]
-  },
-  {
-    codigo: 'construction',
-    nombre: 'Gestión de Construcción',
-    descripcion: 'Administración de proyectos de obra nueva y rehabilitación',
-    categoria: 'gestion',
-    icono: 'Building2',
-    ruta: '/construction',
-    benefits: [
-      'Control de permisos y licencias',
-      'Gestión de fases y cronogramas',
-      'Seguimiento de agentes y subcontratas',
-      'Alertas de hitos críticos'
-    ]
-  },
-  {
-    codigo: 'professional',
-    nombre: 'Servicios Profesionales',
-    descripcion: 'Facturación por horas para arquitectos e ingenieros',
-    categoria: 'financiero',
-    icono: 'DollarSign',
-    ruta: '/professional',
-    benefits: [
-      'Time tracking integrado',
-      'Facturación automática recurrente',
-      'Portfolio público personalizable',
-      'Gestión de proyectos y clientes'
-    ]
-  },
-  {
-    codigo: 'room_rental',
-    nombre: 'Alquiler por Habitaciones',
-    descripcion: 'Gestión de coliving y viviendas compartidas',
-    categoria: 'gestion',
-    icono: 'Users',
-    ruta: '/room-rental',
-    benefits: [
-      'Prorrateo automático de gastos comunes',
-      'Gestión de normas de convivencia',
-      'Control de habitaciones individuales',
-      'Contratos y pagos por inquilino'
-    ]
-  },
-  {
-    codigo: 'legal',
-    nombre: 'Asesoría Legal',
-    descripcion: 'Documentos legales y cumplimiento normativo',
-    categoria: 'core',
-    icono: 'FileText',
-    ruta: '/legal',
-    benefits: [
-      'Plantillas de documentos actualizadas',
-      'Alertas de cambios legislativos',
-      'Gestión de desahucios y reclamaciones',
-      'Consultas con abogados especializados'
-    ]
-  },
-  {
-    codigo: 'seguros',
-    nombre: 'Gestión de Seguros',
-    descripcion: 'Administración de pólizas y siniestros',
-    categoria: 'financiero',
-    icono: 'Building2',
-    ruta: '/seguros',
-    benefits: [
-      'Comparador de pólizas de seguros',
-      'Recordatorios de renovación',
-      'Gestión de siniestros y reclamaciones',
-      'Integración con aseguradoras'
-    ]
-  },
-  {
-    codigo: 'energia',
-    nombre: 'Gestión Energética',
-    descripcion: 'Optimización de consumos y eficiencia energética',
-    categoria: 'avanzado',
-    icono: 'Zap',
-    ruta: '/energia',
-    benefits: [
-      'Monitorización de consumos en tiempo real',
-      'Alertas de consumos anómalos',
-      'Cálculo de certificación energética',
-      'Sugerencias de mejora de eficiencia'
-    ]
-  },
-  {
-    codigo: 'esg',
-    nombre: 'ESG & Sostenibilidad',
-    descripcion: 'Métricas de impacto ambiental y social',
-    categoria: 'avanzado',
-    icono: 'TrendingUp',
-    ruta: '/esg',
-    benefits: [
-      'Cálculo de huella de carbono',
-      'Reportes ESG para inversores',
-      'Certificaciones de sostenibilidad',
-      'Análisis de impacto social'
-    ]
-  }
-];
-
+// GET: Obtener información de módulos
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.id) {
+    if (!session?.user) {
       return NextResponse.json(
         { error: 'No autenticado' },
         { status: 401 }
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
-    });
+    const { searchParams } = new URL(request.url);
+    const view = searchParams.get('view') || 'all'; // all | active | available | recommended | suggested
 
-    if (!user) {
+    const prefs = await getUserPreferences(session.user.id);
+    const activeModuleIds = prefs.activeModules;
+
+    // Obtener datos de módulos activos
+    const activeModules = activeModuleIds.map(id => MODULES[id]).filter(Boolean);
+
+    let response: any = {
+      success: true,
+      activeModules,
+      experienceLevel: prefs.experienceLevel
+    };
+
+    switch (view) {
+      case 'active':
+        response.modules = activeModules;
+        break;
+
+      case 'available':
+        const available = getAvailableModules(
+          session.user.role,
+          session.user.vertical || 'alquiler_tradicional',
+          activeModuleIds
+        );
+        response.modules = available;
+        break;
+
+      case 'recommended':
+        const recommendedIds = getRecommendedModules(
+          session.user.role,
+          session.user.vertical || 'alquiler_tradicional',
+          prefs.experienceLevel
+        );
+        response.modules = recommendedIds.map(id => MODULES[id]).filter(Boolean);
+        break;
+
+      case 'suggested':
+        const suggested = getSuggestedModules(
+          activeModuleIds,
+          session.user.role,
+          session.user.vertical || 'alquiler_tradicional'
+        );
+        response.modules = suggested;
+        response.message = suggested.length > 0 
+          ? `Encontramos ${suggested.length} módulos que podrían interesarte`
+          : 'Ya tienes activos todos los módulos recomendados';
+        break;
+
+      case 'categories':
+        response.categories = {
+          core: getModulesByCategory('core'),
+          advanced: getModulesByCategory('advanced'),
+          specialized: getModulesByCategory('specialized'),
+          premium: getModulesByCategory('premium')
+        };
+        break;
+
+      default: // 'all'
+        response.allModules = Object.values(MODULES);
+        response.modulesByCategory = {
+          core: getModulesByCategory('core'),
+          advanced: getModulesByCategory('advanced'),
+          specialized: getModulesByCategory('specialized'),
+          premium: getModulesByCategory('premium')
+        };
+    }
+
+    return NextResponse.json(response);
+  } catch (error: any) {
+    console.error('Error obteniendo módulos:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor', details: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+// POST: Activar/desactivar módulo
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
       return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
+        { error: 'No autenticado' },
+        { status: 401 }
       );
     }
 
-    const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status'); // 'active', 'inactive', 'all'
-
-    // Obtener módulos activos de la empresa
-    const activeModules = await prisma.companyModule.findMany({
-      where: {
-        companyId: user.companyId,
-        activo: true
-      }
+    const schema = z.object({
+      action: z.enum(['activate', 'deactivate']),
+      moduleId: z.string().min(1)
     });
 
-    const activeModuleCodes = new Set(activeModules.map(m => m.moduloCodigo));
+    const body = await request.json();
+    const { action, moduleId } = schema.parse(body);
 
-    // Filtrar módulos según el estado solicitado
-    let modules = MODULE_DEFINITIONS.map(def => ({
-      ...def,
-      activo: activeModuleCodes.has(def.codigo)
-    }));
-
-    if (status === 'active') {
-      modules = modules.filter((m: { activo: boolean }) => m.activo);
-    } else if (status === 'inactive') {
-      modules = modules.filter((m: { activo: boolean }) => !m.activo);
+    let result;
+    if (action === 'activate') {
+      result = await activateModule(session.user.id, moduleId);
+    } else {
+      result = await deactivateModule(session.user.id, moduleId);
     }
 
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.error },
+        { status: 400 }
+      );
+    }
+
+    // Obtener módulos activos actualizados con sus datos completos
+    const activeModules = result.activeModules?.map(id => MODULES[id]).filter(Boolean);
+
     return NextResponse.json({
-      modules,
-      total: modules.length,
-      active: modules.filter((m: { activo: boolean }) => m.activo).length,
-      inactive: modules.filter((m: { activo: boolean }) => !m.activo).length
+      success: true,
+      action,
+      moduleId,
+      activeModules,
+      message: action === 'activate' 
+        ? `Módulo "${MODULES[moduleId]?.name}" activado`
+        : `Módulo "${MODULES[moduleId]?.name}" desactivado`
     });
-  } catch (error) {
-    logger.error('Error loading modules:', error);
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: error.errors },
+        { status: 400 }
+      );
+    }
+
+    console.error('Error gestionando módulo:', error);
     return NextResponse.json(
-      { error: 'Error al cargar módulos' },
+      { error: 'Error interno del servidor', details: error.message },
       { status: 500 }
     );
   }
