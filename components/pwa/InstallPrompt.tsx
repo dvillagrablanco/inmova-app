@@ -27,6 +27,9 @@ export function InstallPrompt() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
+    // ✅ FIX: Guard SSR - solo ejecutar en browser
+    if (typeof window === 'undefined') return;
+    
     // Check if already installed
     if (
       window.matchMedia('(display-mode: standalone)').matches ||
@@ -94,7 +97,9 @@ export function InstallPrompt() {
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    localStorage.setItem('pwa-install-dismissed', new Date().toISOString());
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('pwa-install-dismissed', new Date().toISOString());
+    }
   };
 
   if (isInstalled || !showPrompt) {
