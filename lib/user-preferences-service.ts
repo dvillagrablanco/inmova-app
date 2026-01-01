@@ -3,11 +3,9 @@
  * Gestiona módulos activos, tours completados y configuraciones personalizadas
  */
 
-import { getPrismaClient } from './db';
+import prisma from './db';
 import { getDefaultActiveModules, validateModuleDependencies, MODULES } from './modules-management-system';
 import type { UserRole, BusinessVertical } from '@prisma/client';
-
-const prisma = getPrismaClient();
 
 export interface UserPreferences {
   activeModules: string[];
