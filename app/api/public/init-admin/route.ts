@@ -69,7 +69,7 @@ export async function GET() {
         email: 'admin@inmova.app',
         name: 'Admin Demo',
         password: hashedPassword,
-        role: 'SUPERADMIN',
+        role: 'super_admin',
         companyId: company.id,
         activo: true,
       },

@@ -17,15 +17,11 @@ export async function GET(request: NextRequest) {
       where: { id: session.user.id },
       select: {
         onboardingCompleted: true,
-        onboardingCompletedAt: true,
-        onboardingSkipped: true,
       },
     });
 
     return NextResponse.json({
       completed: user?.onboardingCompleted || false,
-      skipped: user?.onboardingSkipped || false,
-      completedAt: user?.onboardingCompletedAt,
     });
   } catch (error: any) {
     console.error('[Onboarding Status Error]:', error);

@@ -13,11 +13,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Using global prisma instance
+    // Skip onboarding is considered as completed
     await prisma.user.update({
       where: { id: session.user.id },
       data: {
-        onboardingSkipped: true,
-        onboardingCompletedAt: new Date(),
+        onboardingCompleted: true,
       },
     });
 

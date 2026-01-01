@@ -17,7 +17,6 @@ export async function POST(request: NextRequest) {
       where: { id: session.user.id },
       data: {
         onboardingCompleted: true,
-        onboardingCompletedAt: new Date(),
       },
     });
 

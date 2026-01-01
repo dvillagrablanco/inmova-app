@@ -38,8 +38,8 @@ const contractUpdateSchema = z.object({
     .refine((val) => val === undefined || val >= 0, {
       message: 'El depósito no puede ser negativo',
     }),
-  estado: z.enum(['activo', 'finalizado', 'cancelado', 'pendiente']).optional(),
-  tipo: z.enum(['alquiler', 'compra', 'traspaso', 'otro']).optional(),
+  estado: z.enum(['activo', 'vencido', 'cancelado']).optional(),
+  tipo: z.enum(['residencial', 'comercial', 'temporal']).optional(),
 });
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
