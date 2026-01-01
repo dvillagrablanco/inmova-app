@@ -357,7 +357,7 @@ export default function RegisterPage() {
                     {isLoading && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                     )}
-                    {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
+                    {isLoading ? 'Registrando...' : 'Registrarse'}
                   </Button>
                 </form>
 

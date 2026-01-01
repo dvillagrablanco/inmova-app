@@ -35,7 +35,7 @@ export function ComingSoonPage({ title, description, expectedFeatures }: ComingS
                 Próximamente
               </span>
             </div>
-            <CardTitle className="text-3xl font-bold">{title}</CardTitle>
+            <h1 className="text-3xl font-bold">{title}</h1>
             {description && (
               <CardDescription className="text-base mt-2">{description}</CardDescription>
             )}

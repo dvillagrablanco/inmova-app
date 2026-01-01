@@ -63,8 +63,22 @@ export function Footer() {
           </div>
         </div>
 
+        {/* CTA Final */}
+        <div className="border-t border-gray-800 pt-8 pb-6 text-center">
+          <h3 className="text-2xl font-bold mb-3">¿Listo para transformar tu negocio inmobiliario?</h3>
+          <p className="text-gray-400 mb-6">Únete a más de 3,000 profesionales que ya confían en INMOVA</p>
+          <Link href="/register?trial=30">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white px-8 py-6 text-lg font-semibold shadow-lg shadow-indigo-500/50"
+            >
+              Probar Gratis 30 Días
+            </Button>
+          </Link>
+        </div>
+
         {/* Copyright */}
-        <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
+        <div className="border-t border-gray-800 pt-6 text-center text-sm text-gray-400">
           <p>© 2026 INMOVA. Todos los derechos reservados.</p>
           <p className="mt-2">Powered by <span className="text-indigo-400 font-semibold">Enxames Investments SL</span></p>
         </div>
