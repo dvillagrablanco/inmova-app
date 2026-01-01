@@ -6,6 +6,8 @@ import { Header } from './header';
 import { BottomNavigation } from './bottom-navigation';
 import { TourAutoStarter } from '@/components/tours/TourAutoStarter';
 import { FloatingTourButton } from '@/components/tours/FloatingTourButton';
+import { ContextualHelp } from '@/components/help/ContextualHelp';
+import { usePathname } from 'next/navigation';
 import { useIsMobile } from '@/lib/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 import { SkipLink } from '@/components/accessibility/SkipLink';
@@ -32,6 +34,7 @@ export function AuthenticatedLayout({
   maxWidth = 'full',
 }: AuthenticatedLayoutProps) {
   const isMobile = useIsMobile();
+  const pathname = usePathname();
 
   const maxWidthClasses = {
     full: 'max-w-none',
@@ -39,6 +42,15 @@ export function AuthenticatedLayout({
     '6xl': 'max-w-6xl',
     '5xl': 'max-w-5xl',
     '4xl': 'max-w-4xl',
+  };
+
+  // Determinar página para ayuda contextual
+  const getPageForHelp = () => {
+    if (pathname?.includes('/edificios')) return 'edificios';
+    if (pathname?.includes('/inquilinos')) return 'inquilinos';
+    if (pathname?.includes('/contratos')) return 'contratos';
+    if (pathname?.includes('/configuracion')) return 'configuracion';
+    return 'dashboard';
   };
 
   return (
@@ -86,6 +98,9 @@ export function AuthenticatedLayout({
 
       {/* Floating Tour Button - Acceso rápido a tours */}
       <FloatingTourButton />
+
+      {/* Contextual Help - Ayuda específica según página */}
+      <ContextualHelp page={getPageForHelp()} />
     </div>
   );
 }
