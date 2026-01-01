@@ -6,9 +6,11 @@ export type BusinessVertical =
   | 'alquiler_tradicional'
   | 'str_vacacional'
   | 'coliving'
+  | 'room_rental'
   | 'construccion'
   | 'flipping'
   | 'servicios_profesionales'
+  | 'comunidades'
   | 'mixto';
 
 // Definición de tours por vertical
@@ -612,6 +614,95 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
         icon: 'Receipt',
         completed: false,
         weight: 25,
+      },
+    ],
+  },
+
+  room_rental: {
+    id: 'room_rental',
+    name: 'Alquiler por Habitaciones',
+    description: 'Gestión de alquiler de habitaciones individuales',
+    steps: [
+      {
+        target: 'body',
+        content: (
+          <div className="space-y-3">
+            <h3 className="text-lg font-bold text-teal-600">¡Bienvenido a INMOVA Room Rental!</h3>
+            <p className="text-sm">Configuraremos tu gestión de habitaciones individuales.</p>
+            <p className="text-sm font-medium">Duración estimada: 5 minutos</p>
+          </div>
+        ),
+        placement: 'center',
+        disableBeacon: true,
+      },
+    ],
+    setupActions: [
+      {
+        id: 'configurar_habitaciones',
+        title: 'Configurar habitaciones',
+        description: 'Define las habitaciones disponibles',
+        route: '/inmuebles',
+        icon: 'Home',
+        completed: false,
+        weight: 50,
+      },
+      {
+        id: 'crear_contratos',
+        title: 'Crear contratos',
+        description: 'Gestiona contratos por habitación',
+        route: '/contratos',
+        icon: 'FileText',
+        completed: false,
+        weight: 50,
+      },
+    ],
+  },
+
+  comunidades: {
+    id: 'comunidades',
+    name: 'Gestión de Comunidades',
+    description: 'Administración de comunidades de propietarios',
+    steps: [
+      {
+        target: 'body',
+        content: (
+          <div className="space-y-3">
+            <h3 className="text-lg font-bold text-green-600">¡Bienvenido a INMOVA Comunidades!</h3>
+            <p className="text-sm">Configuraremos la gestión de tu comunidad de propietarios.</p>
+            <p className="text-sm font-medium">Duración estimada: 5 minutos</p>
+          </div>
+        ),
+        placement: 'center',
+        disableBeacon: true,
+      },
+    ],
+    setupActions: [
+      {
+        id: 'crear_comunidad',
+        title: 'Crear comunidad',
+        description: 'Registra tu comunidad de propietarios',
+        route: '/comunidades',
+        icon: 'Users',
+        completed: false,
+        weight: 40,
+      },
+      {
+        id: 'gestionar_gastos',
+        title: 'Gestionar gastos comunes',
+        description: 'Configura la gestión de gastos compartidos',
+        route: '/comunidades/gastos',
+        icon: 'DollarSign',
+        completed: false,
+        weight: 30,
+      },
+      {
+        id: 'convocar_junta',
+        title: 'Convocar junta',
+        description: 'Organiza la primera junta de propietarios',
+        route: '/comunidades/juntas',
+        icon: 'Calendar',
+        completed: false,
+        weight: 30,
       },
     ],
   },

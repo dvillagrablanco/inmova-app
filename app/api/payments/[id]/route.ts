@@ -33,9 +33,9 @@ const paymentUpdateSchema = z.object({
     .or(z.string().regex(/^\d{4}-\d{2}-\d{2}/))
     .optional()
     .nullable(),
-  estado: z.enum(['pendiente', 'pagado', 'atrasado', 'cancelado']).optional(),
+  estado: z.enum(['pendiente', 'pagado', 'atrasado']).optional(),
   metodoPago: z.string().optional().nullable(),
-  nivelRiesgo: z.string().optional().nullable(),
+  nivelRiesgo: z.enum(['bajo', 'medio', 'alto', 'critico']).optional().nullable(),
 });
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {

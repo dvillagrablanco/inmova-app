@@ -24,18 +24,18 @@ export default async function ConfiguracionPage() {
   // Redirigir según el rol del usuario
   const role = session.user.role;
 
-  if (role === 'ADMIN' || role === 'super_admin' || role === 'SUPERADMIN') {
+  if (role === 'super_admin' || role === 'administrador') {
     // Administradores → Configuración de admin
     redirect('/admin/configuracion');
-  } else if (role === 'OWNER' || role === 'PROPIETARIO') {
-    // Propietarios → Portal propietario
-    redirect('/portal-propietario/configuracion');
-  } else if (role === 'TENANT' || role === 'INQUILINO') {
-    // Inquilinos → Perfil
-    redirect('/perfil');
-  } else if (role === 'PROVIDER' || role === 'PROVEEDOR') {
-    // Proveedores → Settings de proveedor
-    redirect('/portal-proveedor/settings');
+  } else if (role === 'gestor' || role === 'operador') {
+    // Gestores y operadores → Dashboard
+    redirect('/dashboard');
+  } else if (role === 'soporte') {
+    // Soporte → Panel de soporte
+    redirect('/soporte');
+  } else if (role === 'community_manager') {
+    // Community manager → Dashboard
+    redirect('/dashboard');
   } else {
     // Otros roles → Dashboard
     redirect('/dashboard');

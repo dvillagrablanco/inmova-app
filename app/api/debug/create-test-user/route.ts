@@ -66,7 +66,7 @@ export async function POST(request: Request) {
         email: 'admin@inmova.app',
         name: 'Admin Demo',
         password: hashedPassword,
-        role: 'SUPERADMIN',
+        role: 'super_admin',
         companyId: company.id,
         activo: true,
       },
