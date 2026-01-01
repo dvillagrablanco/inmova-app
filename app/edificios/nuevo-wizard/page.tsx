@@ -14,7 +14,6 @@ export default function PropertyWizardPage() {
   return (
     <PropertyWizard
       onComplete={(data) => {
-        console.log('Propiedad creada:', data);
         router.push('/edificios');
       }}
     />

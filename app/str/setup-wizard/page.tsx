@@ -14,7 +14,6 @@ export default function STRWizardPage() {
   return (
     <STRWizard
       onComplete={(data) => {
-        console.log('STR configurado:', data);
         router.push('/str');
       }}
     />
