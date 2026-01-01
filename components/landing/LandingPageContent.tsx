@@ -33,9 +33,10 @@ export function LandingPageContent() {
   return (
     <>
       <StructuredData />
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        {/* Navigation */}
-        <Navigation />
+      {/* Navigation debe estar fuera de <main> para ser un header global */}
+      <Navigation />
+      
+      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
 
         {/* Hero Section Segmentado por Buyer Persona */}
         <HeroSectionSegmentado />
@@ -81,7 +82,7 @@ export function LandingPageContent() {
 
         {/* Chatbot y WhatsApp flotantes */}
         <LandingChatbot />
-      </div>
+      </main>
     </>
   );
 }
