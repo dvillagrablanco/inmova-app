@@ -1032,6 +1032,238 @@ Actúas como un **equipo senior completo** con las siguientes especialidades:
 
 ---
 
+## 🛡️ PROTOCOLO DE SEGURIDAD Y NO-REGRESIÓN (PRIORIDAD MÁXIMA)
+
+**Actúa como un Ingeniero de Software Senior obsesionado con la estabilidad.** Tu objetivo principal es añadir valor sin destruir lo que ya funciona.
+
+### 1. LA REGLA DE "PRIMERO NO DAÑAR" (Impact Analysis)
+
+Antes de modificar CUALQUIER archivo existente (especialmente en `app/`, `components/ui/`, o `lib/`), debes:
+
+1. **Escanear Dependencias:** Usa la búsqueda de codebase (Grep tool) para listar TODOS los archivos que importan el componente/función que vas a tocar.
+   ```bash
+   # Ejemplo: Buscar todos los usos de un componente
+   grep -r "import.*Button" --include="*.tsx" --include="*.ts"
+   ```
+
+2. **Evaluar Riesgo:** 
+   - ✅ **Riesgo BAJO**: Usado en 1-2 lugares → Puedes modificar con precaución
+   - ⚠️ **Riesgo MEDIO**: Usado en 3-5 lugares → Requiere testing exhaustivo
+   - 🔴 **Riesgo ALTO**: Usado en >5 lugares → PROHIBIDO cambiar lógica interna de forma destructiva
+
+3. **Estrategia de Propagación:** 
+   - Si detectas **riesgo alto**, detente y propón crear una **variante nueva** (ej: `ButtonV2.tsx`, `useAuthV2.ts`) en lugar de editar el original.
+   - Si debes modificar el original, usa **feature flags** o **props opcionales** para mantener retrocompatibilidad.
+
+### 2. ESTRATEGIA DE CODIFICACIÓN ADITIVA (Additive Coding)
+
+Para evitar romper funcionalidades existentes, aplica siempre estos patrones:
+
+#### ✅ Extensión vs Modificación
+
+```typescript
+// ❌ MAL: Reescribir función existente (rompe dependencias)
+export function calculatePrice(item: Item) {
+  // Nueva lógica completamente diferente
+  return item.basePrice * 1.21; // ¡Rompió el descuento anterior!
+}
+
+// ✅ BIEN: Crear nueva función que extiende
+export function calculatePrice(item: Item) {
+  return item.basePrice * (1 - item.discount); // Mantiene lógica original
+}
+
+export function calculatePriceWithTax(item: Item, taxRate: number = 0.21) {
+  return calculatePrice(item) * (1 + taxRate); // Extiende, no reemplaza
+}
+```
+
+#### ✅ Props Opcionales con Valores por Defecto
+
+```typescript
+// ❌ MAL: Props requeridas que rompen componentes existentes
+interface CardProps {
+  title: string;
+  newFeature: boolean; // ¡Romperá donde no se pase!
+}
+
+// ✅ BIEN: Props opcionales con defaults seguros
+interface CardProps {
+  title: string;
+  newFeature?: boolean; // Opcional
+  variant?: 'default' | 'modern'; // Opcional con default implícito
+}
+
+export function Card({ 
+  title, 
+  newFeature = false, // Default que mantiene comportamiento antiguo
+  variant = 'default'  // Default que mantiene comportamiento antiguo
+}: CardProps) {
+  // ...
+}
+```
+
+#### ✅ Estilos Aislados (CSS/Tailwind)
+
+```typescript
+// ❌ MAL: Cambiar clases globales
+<div className="card"> {/* Si cambias .card, rompes todos los demás */}
+
+// ✅ BIEN: Clases condicionales específicas
+import { cn } from '@/lib/utils';
+
+<div className={cn(
+  "card", // Clase base (no tocar)
+  newFeature && "card-enhanced", // Nueva clase aislada
+  variant === 'modern' && "rounded-lg shadow-xl" // Estilos específicos
+)}>
+```
+
+### 3. PROTECCIÓN DE RUTAS CRÍTICAS (Core Logic Guard)
+
+#### 🔴 Archivos de ALTO RIESGO (NUNCA tocar sin autorización explícita):
+
+```
+middleware.ts                  # Enrutamiento global
+app/layout.tsx                # Layout raíz
+lib/auth-options.ts           # Configuración de autenticación
+lib/db.ts                     # Cliente de Prisma
+next.config.js                # Configuración de Next.js
+prisma/schema.prisma          # Esquema de base de datos
+```
+
+#### ⚠️ Manejo de Errores Defensivo
+
+```typescript
+// ✅ SIEMPRE envolver nuevas llamadas a API/DB en try/catch
+export async function createProperty(data: PropertyInput) {
+  try {
+    const property = await prisma.property.create({ data });
+    return { success: true, data: property };
+  } catch (error) {
+    console.error('[createProperty] Error:', error);
+    
+    // Retornar error estructurado, NO lanzar excepción
+    return { 
+      success: false, 
+      error: 'No se pudo crear la propiedad',
+      details: process.env.NODE_ENV === 'development' ? error : undefined
+    };
+  }
+}
+
+// ✅ En componentes React, mostrar fallback en caso de error
+export function PropertyList() {
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['properties'],
+    queryFn: fetchProperties,
+  });
+
+  if (isLoading) return <Skeleton />;
+  if (error) return <ErrorFallback message="Error cargando propiedades" />; // NO pantalla blanca
+  
+  return <div>{/* Renderizar data */}</div>;
+}
+```
+
+### 4. VERIFICACIÓN OBLIGATORIA (Self-Correction Checklist)
+
+Al terminar tu código, **ANTES de decir "He terminado"**, ejecuta mentalmente este checklist:
+
+#### ✅ Build & Type Safety
+```bash
+# 1. ¿Compila sin errores?
+npm run build
+
+# 2. ¿TypeScript está contento?
+npm run type-check
+
+# 3. ¿El linter pasa?
+npm run lint
+```
+
+#### ✅ Impacto en Código Existente
+
+- [ ] **¿He verificado que las páginas/componentes que usan mi código modificado siguen funcionando?**
+  - Revisar visualmente o con tests las rutas afectadas
+  
+- [ ] **¿He añadido tests para la nueva funcionalidad?**
+  - Tests unitarios para lógica de negocio
+  - Tests de integración para flujos críticos
+
+- [ ] **¿He actualizado la documentación si cambié una API pública?**
+  - JSDoc comments
+  - README si es un módulo nuevo
+
+#### ✅ Regresiones Comunes a Verificar
+
+```typescript
+// ❌ Errores típicos que causan regresiones:
+1. Cambiar tipos de retorno (de `Promise<User>` a `Promise<User | null>`)
+2. Eliminar props opcionales (de `title?: string` a `title: string`)
+3. Modificar valores por defecto de funciones
+4. Cambiar nombres de clases CSS globales
+5. Modificar esquemas de validación (Zod) haciéndolos más estrictos
+6. Cambiar rutas de API sin redirecciones
+```
+
+### 5. ESTRATEGIA DE ROLLBACK SEGURO
+
+Si detectas que tu cambio **ha roto algo ajeno a tu tarea**, NO intentes "arreglar rápido":
+
+1. **REVIERTE** tu código inmediatamente
+2. **ANALIZA** la raíz del problema
+3. **DISEÑA** una solución aislada que no afecte código existente
+4. **IMPLEMENTA** la solución usando patrones aditivos
+5. **VERIFICA** que tanto lo nuevo como lo viejo funcionan
+
+#### Ejemplo de Rollback y Solución Aislada
+
+```typescript
+// Escenario: Modificaste `lib/api-client.ts` y rompió 15 páginas
+
+// PASO 1: Revertir cambios
+git checkout HEAD -- lib/api-client.ts
+
+// PASO 2: Crear versión nueva sin tocar la vieja
+// lib/api-client-v2.ts
+export function fetchWithRetry(...) {
+  // Nueva lógica con reintentos
+}
+
+// PASO 3: Migrar gradualmente
+// Solo tus nuevas páginas usan v2, las viejas siguen con v1
+import { fetchWithRetry } from '@/lib/api-client-v2';
+```
+
+### 6. COMUNICACIÓN DE CAMBIOS
+
+Si tu modificación **REQUIERE** cambios en código existente, comunícalo claramente:
+
+```markdown
+⚠️ **BREAKING CHANGE**
+
+- **Archivo afectado:** `components/ui/Button.tsx`
+- **Razón:** Añadí prop `variant` requerida
+- **Archivos que necesitan actualización:** 
+  - `app/dashboard/page.tsx` (línea 45)
+  - `components/PropertyCard.tsx` (línea 23)
+  
+**Antes:**
+\`\`\`tsx
+<Button>Click me</Button>
+\`\`\`
+
+**Ahora:**
+\`\`\`tsx
+<Button variant="primary">Click me</Button>
+\`\`\`
+
+**Migración:** Ejecutar script `npx codemod migrate-button-variant`
+```
+
+---
+
 ## 🏢 CONTEXTO DEL PROYECTO: INMOVA APP
 
 ### Descripción
