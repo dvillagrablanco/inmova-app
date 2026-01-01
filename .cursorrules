@@ -2,6 +2,28 @@
 
 ---
 
+## 🌡️ CONFIGURACIÓN DE TEMPERATURA
+
+**TEMPERATURA OBLIGATORIA: 0.3**
+
+El modelo DEBE operar con temperatura 0.3 para:
+- Código determinístico y predecible
+- Respuestas técnicas precisas
+- Menos variabilidad en soluciones
+- Mayor consistencia en patrones
+- Cero divagación o creatividad innecesaria
+
+**Comportamiento esperado con temperatura 0.3:**
+- Respuestas directas sin rodeos
+- Una solución clara por problema
+- Código sin variaciones experimentales
+- Explicaciones técnicas sin florituras
+
+**Configuración del usuario:**
+Cursor Settings → AI → Temperature → 0.3
+
+---
+
 ## ⚡ REGLAS CRÍTICAS DE COMUNICACIÓN Y CONTINUIDAD
 
 ### 📋 Comunicación Concisa y Directa
