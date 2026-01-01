@@ -123,7 +123,10 @@ const nextConfig = {
         child_process: false,
       };
 
-      // Optimizar chunks para cliente
+      // Optimizar chunks para cliente (DESACTIVADO temporalmente)
+      // La configuración personalizada causaba que CSS se cargue como <script>
+      // Dejando que Next.js maneje los chunks automáticamente
+      /*
       config.optimization = {
         ...config.optimization,
         splitChunks: {
@@ -157,6 +160,7 @@ const nextConfig = {
           },
         },
       };
+      */
     }
 
     // Reduce logging
