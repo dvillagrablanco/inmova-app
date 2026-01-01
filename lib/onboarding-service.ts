@@ -4,7 +4,7 @@
  */
 
 import { prisma } from '@/lib/db';
-import type { BusinessVertical, OnboardingTaskStatus, OnboardingTaskType } from '@prisma/client';
+import type { BusinessVertical, OnboardingTaskStatus, OnboardingTaskType, UserRole } from '@prisma/client';
 import { sendOnboardingEmail } from '@/lib/onboarding-email-service';
 import { createWebhookEvent } from '@/lib/webhook-service';
 import { 
@@ -14,6 +14,14 @@ import {
   notifyFirstContract 
 } from '@/lib/notification-service';
 import { celebrateOnboardingCompleted } from '@/lib/celebration-service';
+import { 
+  filterTasksByRole, 
+  adjustEstimatedTime, 
+  shouldShowVideo, 
+  getAdditionalTasksByRole,
+  shouldAutoComplete,
+  type ExperienceLevel 
+} from '@/lib/onboarding-role-adapter';
 
 interface OnboardingTaskDefinition {
   taskId: string;
@@ -443,11 +451,14 @@ const ONBOARDING_TASKS_BY_VERTICAL: Record<string, OnboardingTaskDefinition[]> =
 
 /**
  * Inicializa las tareas de onboarding para un usuario
+ * ADAPTADO POR ROL Y EXPERIENCIA
  */
 export async function initializeOnboardingTasks(
   userId: string,
   companyId: string,
-  vertical: string
+  vertical: string,
+  role?: UserRole,
+  experience?: ExperienceLevel
 ) {
   try {
     // Verificar si ya tiene tareas creadas
@@ -460,35 +471,70 @@ export async function initializeOnboardingTasks(
       return existingTasks;
     }
 
-    // Obtener las tareas para este vertical
-    const taskDefinitions = ONBOARDING_TASKS_BY_VERTICAL[vertical] || ONBOARDING_GENERAL;
+    // Obtener usuario para extraer rol y experiencia si no se pasan
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { 
+        role: true, 
+        preferences: true 
+      }
+    });
+
+    const userRole = role || user?.role || 'gestor';
+    const userExperience = experience || (user?.preferences as any)?.experienceLevel || 'intermedio';
+
+    console.log(`Inicializando onboarding para: rol=${userRole}, vertical=${vertical}, experiencia=${userExperience}`);
+
+    // Obtener las tareas base para este vertical
+    let taskDefinitions = ONBOARDING_TASKS_BY_VERTICAL[vertical] || ONBOARDING_GENERAL;
+
+    // 1. Filtrar tareas según el rol
+    taskDefinitions = filterTasksByRole(taskDefinitions, userRole);
+
+    // 2. Agregar tareas específicas del rol
+    const additionalTasks = getAdditionalTasksByRole(userRole);
+    taskDefinitions = [...taskDefinitions, ...additionalTasks];
+
+    // 3. Ajustar estimatedTime según rol y experiencia
+    taskDefinitions = taskDefinitions.map(def => ({
+      ...def,
+      estimatedTime: adjustEstimatedTime(def.estimatedTime, userRole, userExperience),
+      videoUrl: shouldShowVideo(userRole, userExperience) ? def.videoUrl : undefined
+    }));
+
+    // 4. Auto-completar tareas triviales para usuarios avanzados
+    const tasksToCreate = taskDefinitions.map(def => {
+      const autoComplete = shouldAutoComplete(def.taskId, userExperience);
+      return {
+        userId,
+        companyId,
+        vertical,
+        taskId: def.taskId,
+        title: def.title,
+        description: def.description,
+        type: def.type,
+        order: def.order,
+        isMandatory: def.isMandatory,
+        estimatedTime: def.estimatedTime,
+        route: def.route,
+        videoUrl: def.videoUrl,
+        helpArticle: def.helpArticle,
+        unlocks: def.unlocks,
+        status: autoComplete ? 'completed' : 'pending',
+        completedAt: autoComplete ? new Date() : null
+      };
+    });
 
     // Crear las tareas en la base de datos
     const tasks = await Promise.all(
-      taskDefinitions.map(def =>
-        prisma.onboardingTask.create({
-          data: {
-            userId,
-            companyId,
-            vertical,
-            taskId: def.taskId,
-            title: def.title,
-            description: def.description,
-            type: def.type,
-            order: def.order,
-            isMandatory: def.isMandatory,
-            estimatedTime: def.estimatedTime,
-            route: def.route,
-            videoUrl: def.videoUrl,
-            helpArticle: def.helpArticle,
-            unlocks: def.unlocks,
-            status: 'pending'
-          }
-        })
-      )
+      tasksToCreate.map(data => prisma.onboardingTask.create({ data }))
     );
 
-    console.log(`Creadas ${tasks.length} tareas de onboarding para usuario ${userId}`);
+    console.log(`✅ Creadas ${tasks.length} tareas de onboarding para usuario ${userId}`);
+    console.log(`   - Rol: ${userRole}`);
+    console.log(`   - Experiencia: ${userExperience}`);
+    console.log(`   - Tareas auto-completadas: ${tasks.filter(t => t.status === 'completed').length}`);
+    
     return tasks;
   } catch (error) {
     console.error('Error inicializando tareas de onboarding:', error);
