@@ -1,25 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
-import { nanoid } from 'nanoid';
+import bcrypt from 'bcryptjs';
 
 export const dynamic = 'force-dynamic';
 
 const registerSchema = z.object({
-  name: z.string().min(2, 'Nombre mínimo 2 caracteres'),
-  email: z.string().email('Email inválido'),
-  phone: z.string().optional(),
-  company: z.string().optional(),
-  website: z.string().url().optional().or(z.literal('')),
-  type: z.enum([
-    'BANK',
-    'INSURANCE',
-    'BUSINESS_SCHOOL',
-    'REAL_ESTATE',
-    'CONSTRUCTION',
-    'LAW_FIRM',
-    'OTHER',
+  nombre: z.string().min(2, 'Nombre mínimo 2 caracteres'),
+  razonSocial: z.string().min(2, 'Razón social requerida'),
+  cif: z.string().min(9, 'CIF inválido'),
+  tipo: z.enum([
+    'BANCO',
+    'MULTIFAMILY_OFFICE',
+    'PLATAFORMA_MEMBRESIA',
+    'ASOCIACION',
+    'CONSULTORA',
+    'INMOBILIARIA',
+    'OTRO',
   ]),
+  contactoNombre: z.string().min(2, 'Nombre de contacto requerido'),
+  contactoEmail: z.string().email('Email de contacto inválido'),
+  contactoTelefono: z.string().optional(),
+  email: z.string().email('Email inválido'),
+  password: z.string().min(8, 'Password mínimo 8 caracteres'),
+  comisionPorcentaje: z.number().min(0).max(100).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -28,8 +32,6 @@ export async function POST(request: NextRequest) {
 
     // Validar datos
     const validated = registerSchema.parse(body);
-
-    // Using global prisma instance
 
     // Verificar si el email ya existe
     const existingPartner = await prisma.partner.findUnique({
@@ -43,61 +45,78 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generar código de referido único
-    let referralCode = nanoid(10).toUpperCase();
-    let codeExists = await prisma.partner.findUnique({
-      where: { referralCode },
+    // Verificar si el CIF ya existe
+    const existingCif = await prisma.partner.findUnique({
+      where: { cif: validated.cif },
     });
 
-    // Regenerar si existe (muy improbable)
-    while (codeExists) {
-      referralCode = nanoid(10).toUpperCase();
-      codeExists = await prisma.partner.findUnique({
-        where: { referralCode },
-      });
+    if (existingCif) {
+      return NextResponse.json(
+        { error: 'Este CIF ya está registrado' },
+        { status: 400 }
+      );
     }
 
-    // Determinar si es early adopter (primeros 100)
-    const totalPartners = await prisma.partner.count();
-    const earlyAdopterBonus = totalPartners < 100;
+    // Verificar si el contactoEmail ya existe
+    const existingContactEmail = await prisma.partner.findUnique({
+      where: { contactoEmail: validated.contactoEmail },
+    });
 
-    // Crear partner
+    if (existingContactEmail) {
+      return NextResponse.json(
+        { error: 'Este email de contacto ya está registrado' },
+        { status: 400 }
+      );
+    }
+
+    // Hashear password
+    const hashedPassword = await bcrypt.hash(validated.password, 10);
+
+    // Crear partner (estado PENDING por defecto)
     const partner = await prisma.partner.create({
       data: {
-        name: validated.name,
+        nombre: validated.nombre,
+        razonSocial: validated.razonSocial,
+        cif: validated.cif,
+        tipo: validated.tipo,
+        contactoNombre: validated.contactoNombre,
+        contactoEmail: validated.contactoEmail,
+        contactoTelefono: validated.contactoTelefono,
         email: validated.email,
-        phone: validated.phone,
-        company: validated.company,
-        website: validated.website || undefined,
-        type: validated.type,
-        referralCode,
-        earlyAdopterBonus,
-        status: 'PENDING_APPROVAL',
-        level: 'BRONZE',
-        commissionRate: earlyAdopterBonus ? 25 : 20, // +5% early adopter
+        password: hashedPassword,
+        comisionPorcentaje: validated.comisionPorcentaje || 20.0,
+        estado: 'PENDING', // Alineado con PartnerStatus enum
+        activo: false, // Inactivo hasta aprobación
+      },
+      select: {
+        id: true,
+        nombre: true,
+        razonSocial: true,
+        email: true,
+        contactoEmail: true,
+        tipo: true,
+        estado: true,
+        comisionPorcentaje: true,
       },
     });
 
-    // Send welcome email and admin notification
+    // Send welcome email and admin notification (opcional)
     try {
       const { sendPartnerWelcomeEmail, sendAdminNewPartnerNotification } =
         await import('@/lib/emails/partner-emails');
 
       await sendPartnerWelcomeEmail({
-        name: partner.name,
+        nombre: partner.nombre,
         email: partner.email,
-        type: partner.type,
-        referralCode: partner.referralCode,
+        tipo: partner.tipo,
       });
 
       await sendAdminNewPartnerNotification({
-        name: partner.name,
+        nombre: partner.nombre,
         email: partner.email,
-        type: partner.type,
-        company: partner.company || undefined,
+        tipo: partner.tipo,
+        razonSocial: partner.razonSocial,
       });
-
-      // Emails sent successfully
     } catch (emailError) {
       console.error('[Partner Registration Email Error]:', emailError);
       // Continue even if email fails
@@ -108,14 +127,14 @@ export async function POST(request: NextRequest) {
         success: true,
         data: {
           id: partner.id,
-          name: partner.name,
+          nombre: partner.nombre,
+          razonSocial: partner.razonSocial,
           email: partner.email,
-          type: partner.type,
-          referralCode: partner.referralCode,
-          earlyAdopterBonus: partner.earlyAdopterBonus,
-          status: partner.status,
+          tipo: partner.tipo,
+          estado: partner.estado,
+          comisionPorcentaje: partner.comisionPorcentaje,
         },
-        message: 'Solicitud de partner recibida. Te contactaremos en 24h.',
+        message: 'Solicitud de partner recibida. Te contactaremos en 24-48h.',
       },
       { status: 201 }
     );

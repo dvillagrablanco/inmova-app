@@ -25,7 +25,7 @@ const leadUpdateSchema = z.object({
   codigoPostal: z.string().optional(),
   pais: z.string().optional(),
   estado: z
-    .enum(['nuevo', 'contactado', 'calificado', 'propuesta', 'negociacion', 'ganado', 'perdido'])
+    .enum(['nuevo', 'contactado', 'calificado', 'visitado', 'propuesta_enviada', 'negociacion', 'ganado', 'perdido'])
     .optional(),
   etapa: z.string().optional(),
   tipoNegocio: z.enum(['propietario', 'inquilino', 'inversor', 'agente']).optional(),
