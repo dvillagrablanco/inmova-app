@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { vertical } = await request.json();
+    const { vertical, role, experience } = await request.json();
 
     if (!vertical) {
       return NextResponse.json(
@@ -32,14 +32,29 @@ export async function POST(request: Request) {
 
     const userId = session.user.id;
     const companyId = session.user.companyId;
+    const userRole = role || session.user.role;
+    const userExperience = experience; // Puede ser undefined
 
-    // Inicializar tareas
-    const tasks = await initializeOnboardingTasks(userId, companyId, vertical);
+    // Inicializar tareas (ahora adaptadas por rol y experiencia)
+    const tasks = await initializeOnboardingTasks(
+      userId, 
+      companyId, 
+      vertical,
+      userRole,
+      userExperience
+    );
 
     return NextResponse.json({
       success: true,
       tasks,
-      message: `Inicializadas ${tasks.length} tareas de onboarding`
+      message: `Inicializadas ${tasks.length} tareas de onboarding adaptadas para ${userRole}`,
+      metadata: {
+        role: userRole,
+        vertical,
+        experience: userExperience || 'no especificado',
+        totalTasks: tasks.length,
+        autoCompleted: tasks.filter(t => t.status === 'completed').length
+      }
     });
   } catch (error: any) {
     console.error('Error inicializando onboarding:', error);
