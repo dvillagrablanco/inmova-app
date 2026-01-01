@@ -178,7 +178,9 @@ function DashboardPageContent() {
             {data?.kpis?.numeroPropiedades === 0 && <DemoDataGenerator />}
 
             {/* Vertical-Specific Widgets - Accesos rápidos personalizados por tipo de negocio */}
-            <VerticalSpecificWidgets className="mb-8" />
+            <div data-tour="quick-actions">
+              <VerticalSpecificWidgets className="mb-8" />
+            </div>
 
             {/* Proactive Suggestions - Sugerencias inteligentes personalizadas */}
 
@@ -187,7 +189,7 @@ function DashboardPageContent() {
             <ProactiveSuggestions />
 
             {/* KPIs Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div data-tour="kpi-cards" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <KPICard
                 title="Ingresos Mensuales"
                 value={`€${safeFormatNumber(Number(data.kpis.ingresosTotalesMensuales || 0))}`}
@@ -228,7 +230,7 @@ function DashboardPageContent() {
             </div>
 
             {/* Monthly Income Chart - Optimizado para móvil */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 md:p-6 mb-6 sm:mb-8">
+            <div data-tour="charts" className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 md:p-6 mb-6 sm:mb-8">
               <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">
                 Ingresos Mensuales
               </h2>
@@ -375,7 +377,7 @@ function DashboardPageContent() {
             </div>
 
             {/* Data Tables Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div data-tour="alerts" className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Pending Payments */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <div className="flex items-center justify-between mb-4">

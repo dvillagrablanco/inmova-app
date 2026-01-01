@@ -2090,6 +2090,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {/* Settings Link */}
                 <Link
                   href="/configuracion"
+                  data-tour="configuracion-link"
                   className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-all duration-200"
                 >
                   <Settings size={18} />

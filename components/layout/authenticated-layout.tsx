@@ -4,6 +4,8 @@ import { ReactNode } from 'react';
 import { Sidebar } from './sidebar';
 import { Header } from './header';
 import { BottomNavigation } from './bottom-navigation';
+import { TourAutoStarter } from '@/components/tours/TourAutoStarter';
+import { FloatingTourButton } from '@/components/tours/FloatingTourButton';
 import { useIsMobile } from '@/lib/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 import { SkipLink } from '@/components/accessibility/SkipLink';
@@ -78,6 +80,12 @@ export function AuthenticatedLayout({
         {/* Bottom Navigation - Solo en móvil */}
         <BottomNavigation />
       </div>
+
+      {/* Tour Auto-Starter - Sistema de tours virtuales */}
+      <TourAutoStarter />
+
+      {/* Floating Tour Button - Acceso rápido a tours */}
+      <FloatingTourButton />
     </div>
   );
 }
