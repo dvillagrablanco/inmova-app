@@ -1,0 +1,303 @@
+{
+  "timestamp": "2026-01-01T16:13:53.250Z",
+  "summary": {
+    "totalPages": 383,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 35,
+    "total": 36
+  },
+  "issuesByType": [
+    [
+      "TODO_COMMENT",
+      14
+    ],
+    [
+      "UNNECESSARY_USE_CLIENT",
+      14
+    ],
+    [
+      "CONSOLE_LOG",
+      5
+    ],
+    [
+      "EXCESSIVE_ANY",
+      2
+    ],
+    [
+      "MISSING_KEY",
+      1
+    ]
+  ],
+  "issues": [
+    {
+      "file": "app/admin/clientes/comparar/page.tsx",
+      "route": "/admin/clientes/comparar",
+      "severity": "MEDIUM",
+      "type": "MISSING_KEY",
+      "message": "Componente en map() sin key prop",
+      "line": 282,
+      "code": "<ComparisonRow label=\"Tareas\" values={companies.map((c) => c.metrics.tasks)} />"
+    },
+    {
+      "file": "app/admin/partners/page.tsx",
+      "route": "/admin/partners",
+      "severity": "LOW",
+      "type": "TODO_COMMENT",
+      "message": "// TODO: Fetch from API /api/admin/partners",
+      "line": 82
+    },
+    {
+      "file": "app/admin/partners/page.tsx",
+      "route": "/admin/partners",
+      "severity": "LOW",
+      "type": "TODO_COMMENT",
+      "message": "// TODO: Call API to approve/reject/suspend",
+      "line": 146
+    },
+    {
+      "file": "app/api-docs/page.tsx",
+      "route": "/api-docs",
+      "severity": "LOW",
+      "type": "UNNECESSARY_USE_CLIENT",
+      "message": "'use client' no necesario (no usa hooks/eventos)"
+    },
+    {
+      "file": "app/automatizacion-resumen/page.tsx",
+      "route": "/automatizacion-resumen",
+      "severity": "LOW",
+      "type": "UNNECESSARY_USE_CLIENT",
+      "message": "'use client' no necesario (no usa hooks/eventos)"
+    },
+    {
+      "file": "app/bi/page.tsx",
+      "route": "/bi",
+      "severity": "LOW",
+      "type": "EXCESSIVE_ANY",
+      "message": "11 usos de 'any'"
+    },
+    {
+      "file": "app/comunidades/page.tsx",
+      "route": "/comunidades",
+      "severity": "LOW",
+      "type": "TODO_COMMENT",
+      "message": "// TODO: Cargar estadísticas desde la API cuando se seleccione un edificio",
+      "line": 37
+    },
+    {
+      "file": "app/developers/page.tsx",
+      "route": "/developers",
+      "severity": "LOW",
+      "type": "CONSOLE_LOG",
+      "message": "1 console.log statements"
+    },
+    {
+      "file": "app/developers/samples/page.tsx",
+      "route": "/developers/samples",
+      "severity": "LOW",
+      "type": "CONSOLE_LOG",
+      "message": "8 console.log statements"
+    },
+    {
+      "file": "app/developers/sandbox/page.tsx",
+      "route": "/developers/sandbox",
+      "severity": "LOW",
+      "type": "CONSOLE_LOG",
+      "message": "1 console.log statements"
+    },
+    {
+      "file": "app/edificios/nuevo-wizard/page.tsx",
+      "route": "/edificios/nuevo-wizard",
+      "severity": "LOW",
+      "type": "CONSOLE_LOG",
+      "message": "1 console.log statements"
+    },
+    {
+      "file": "app/flipping/timeline/page.tsx",
+      "route": "/flipping/timeline",
+      "severity": "LOW",
+      "type": "TODO_COMMENT",
+      "message": "// TODO: Cargar proyecto real desde API",
+      "line": 72
+    },
+    {
+      "file": "app/landing/blog/page.tsx",
+      "route": "/landing/blog",
+      "severity": "LOW",
+      "type": "UNNECESSARY_USE_CLIENT",
+      "message": "'use client' no necesario (no usa hooks/eventos)"
+    },
+    {
+      "file": "app/landing/casos-exito/page.tsx",
+      "route": "/landing/casos-exito",
+      "severity": "LOW",
+      "type": "UNNECESSARY_USE_CLIENT",
+      "message": "'use client' no necesario (no usa hooks/eventos)"
+    },
+    {
+      "file": "app/landing/legal/cookies/page.tsx",
+      "route": "/landing/legal/cookies",
+      "severity": "LOW",
+      "type": "UNNECESSARY_USE_CLIENT",
+      "message": "'use client' no necesario (no usa hooks/eventos)"
+    },
+    {
+      "file": "app/landing/legal/gdpr/page.tsx",
+      "route": "/landing/legal/gdpr",
+      "severity": "LOW",
+      "type": "UNNECESSARY_USE_CLIENT",
+      "message": "'use client' no necesario (no usa hooks/eventos)"
+    },
+    {
+      "file": "app/landing/legal/privacidad/page.tsx",
+      "route": "/landing/legal/privacidad",
+      "severity": "LOW",
+      "type": "UNNECESSARY_USE_CLIENT",
+      "message": "'use client' no necesario (no usa hooks/eventos)"
+    },
+    {
+      "file": "app/landing/legal/terminos/page.tsx",
+      "route": "/landing/legal/terminos",
+      "severity": "LOW",
+      "type": "UNNECESSARY_USE_CLIENT",
+      "message": "'use client' no necesario (no usa hooks/eventos)"
+    },
+    {
+      "file": "app/landing/sobre-nosotros/page.tsx",
+      "route": "/landing/sobre-nosotros",
+      "severity": "LOW",
+      "type": "UNNECESSARY_USE_CLIENT",
+      "message": "'use client' no necesario (no usa hooks/eventos)"
+    },
+    {
+      "file": "app/partners-program/page.tsx",
+      "route": "/partners-program",
+      "severity": "LOW",
+      "type": "UNNECESSARY_USE_CLIENT",
+      "message": "'use client' no necesario (no usa hooks/eventos)"
+    },
+    {
+      "file": "app/partners/calculator/page.tsx",
+      "route": "/partners/calculator",
+      "severity": "LOW",
+      "type": "TODO_COMMENT",
+      "message": "// TODO: Implementar envío de email",
+      "line": 129
+    },
+    {
+      "file": "app/portal-propietario/page.tsx",
+      "route": "/portal-propietario",
+      "severity": "LOW",
+      "type": "EXCESSIVE_ANY",
+      "message": "11 usos de 'any'"
+    },
+    {
+      "file": "app/portal-propietario/page.tsx",
+      "route": "/portal-propietario",
+      "severity": "LOW",
+      "type": "TODO_COMMENT",
+      "message": "// TODO: Implementar generación de reporte",
+      "line": 351
+    },
+    {
+      "file": "app/seguros/[id]/page.tsx",
+      "route": "/seguros/[id]",
+      "severity": "LOW",
+      "type": "TODO_COMMENT",
+      "message": "// TODO: Llamar a API real",
+      "line": 124
+    },
+    {
+      "file": "app/seguros/[id]/page.tsx",
+      "route": "/seguros/[id]",
+      "severity": "LOW",
+      "type": "TODO_COMMENT",
+      "message": "// TODO: Llamar a API real",
+      "line": 198
+    },
+    {
+      "file": "app/seguros/[id]/page.tsx",
+      "route": "/seguros/[id]",
+      "severity": "LOW",
+      "type": "TODO_COMMENT",
+      "message": "// TODO: Llamar a API real",
+      "line": 211
+    },
+    {
+      "file": "app/seguros/[id]/page.tsx",
+      "route": "/seguros/[id]",
+      "severity": "LOW",
+      "type": "TODO_COMMENT",
+      "message": "// TODO: Upload to S3 via API",
+      "line": 235
+    },
+    {
+      "file": "app/seguros/analisis/page.tsx",
+      "route": "/seguros/analisis",
+      "severity": "LOW",
+      "type": "TODO_COMMENT",
+      "message": "// TODO: Fetch real data from API",
+      "line": 82
+    },
+    {
+      "file": "app/seguros/analisis/page.tsx",
+      "route": "/seguros/analisis",
+      "severity": "LOW",
+      "type": "TODO_COMMENT",
+      "message": "// TODO: Generate and download PDF/Excel report",
+      "line": 95
+    },
+    {
+      "file": "app/str/setup-wizard/page.tsx",
+      "route": "/str/setup-wizard",
+      "severity": "LOW",
+      "type": "CONSOLE_LOG",
+      "message": "1 console.log statements"
+    },
+    {
+      "file": "app/test-auth/page.tsx",
+      "route": "/test-auth",
+      "severity": "LOW",
+      "type": "UNNECESSARY_USE_CLIENT",
+      "message": "'use client' no necesario (no usa hooks/eventos)"
+    },
+    {
+      "file": "app/(dashboard)/traditional-rental/page.tsx",
+      "route": "/traditional-rental",
+      "severity": "LOW",
+      "type": "UNNECESSARY_USE_CLIENT",
+      "message": "'use client' no necesario (no usa hooks/eventos)"
+    },
+    {
+      "file": "app/(dashboard)/traditional-rental/renewals/page.tsx",
+      "route": "/traditional-rental/renewals",
+      "severity": "LOW",
+      "type": "UNNECESSARY_USE_CLIENT",
+      "message": "'use client' no necesario (no usa hooks/eventos)"
+    },
+    {
+      "file": "app/(dashboard)/traditional-rental/treasury/page.tsx",
+      "route": "/traditional-rental/treasury",
+      "severity": "LOW",
+      "type": "UNNECESSARY_USE_CLIENT",
+      "message": "'use client' no necesario (no usa hooks/eventos)"
+    },
+    {
+      "file": "app/visitas/page.tsx",
+      "route": "/visitas",
+      "severity": "LOW",
+      "type": "TODO_COMMENT",
+      "message": "// TODO: Fetch from API",
+      "line": 101
+    },
+    {
+      "file": "app/visitas/page.tsx",
+      "route": "/visitas",
+      "severity": "LOW",
+      "type": "TODO_COMMENT",
+      "message": "// TODO: Call API",
+      "line": 165
+    }
+  ]
+}
