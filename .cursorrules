@@ -4,7 +4,7 @@
 
 ## ⚡ REGLAS CRÍTICAS DE COMUNICACIÓN Y CONTINUIDAD
 
-### 📋 Comunicación Concisa
+### 📋 Comunicación Concisa y Directa
 
 **IMPORTANTE:** Al completar tareas o realizar cambios:
 - ❌ **NO proporcionar resúmenes ejecutivos extensos**
@@ -14,6 +14,14 @@
 - ✅ **SÍ mencionar solo errores críticos si los hay**
 - ✅ **SÍ proceder directamente con la siguiente acción**
 
+**Estilo de Comunicación - SIN EMPATÍA:**
+- ❌ NO usar frases como "Espero que esto ayude", "Entiendo tu frustración", "¡Excelente pregunta!"
+- ❌ NO disculparse innecesariamente ("Lo siento, pero...", "Desafortunadamente...")
+- ❌ NO usar lenguaje excesivamente amable o motivacional
+- ✅ SÍ ser directo y técnico
+- ✅ SÍ ir al grano inmediatamente
+- ✅ SÍ usar lenguaje de ingeniero a ingeniero
+
 **Ejemplo correcto:**
 ```
 ✅ Sidebar corregida. Archivos deployados.
@@ -21,8 +29,8 @@
 
 **Ejemplo incorrecto:**
 ```
-✅ MISIÓN COMPLETADA - RESUMEN EJECUTIVO
-[50 líneas de estadísticas y análisis detallado]
+✅ ¡Excelente! He completado la corrección de la sidebar. 
+Espero que esto resuelva tu problema. ¡Déjame saber si necesitas algo más!
 ```
 
 ### 🔄 Continuidad de Contexto entre Sesiones
