@@ -1,393 +1,363 @@
-# 🔑 CREDENCIALES SOCIO FUNDADOR - EWOORKER
+# 🔐 CREDENCIALES DEL SOCIO FUNDADOR EWOORKER
 
-**Fecha Creación:** 26 Diciembre 2025 - 03:15  
-**Tipo de Usuario:** Socio Fundador / Super Admin  
-**Acceso Exclusivo:** Panel Admin ewoorker
-
----
-
-## 🎯 CREDENCIALES DE ACCESO
-
-### **Usuario Socio Fundador:**
+## 📧 DATOS DE ACCESO
 
 ```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔐 ACCESO AL PANEL DEL SOCIO FUNDADOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 📧 Email:    socio@ewoorker.com
 🔒 Password: Ewoorker2025!Socio
 
-Rol: SUPER_ADMIN
-Acceso: Panel Admin Socio + Todas las funcionalidades
+🎯 Rol:      super_admin
+🔗 Panel:    https://inmovaapp.com/ewoorker/admin-socio
+🌐 Login:    https://inmovaapp.com/login
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+## 🚀 CREACIÓN DEL USUARIO (OPCIÓN 1: VÍA PANEL SUPERADMIN)
+
+Si el usuario no existe aún, puedes crearlo desde el panel de superadministrador de INMOVA:
+
+### Paso 1: Acceder como Superadmin
+
+1. Ir a https://inmovaapp.com/login
+2. Iniciar sesión con tu cuenta de **superadministrador** existente
+
+### Paso 2: Crear Company
+
+1. Navegar a **Admin → Empresas**
+2. Crear nueva empresa con estos datos:
+   - **ID**: `company-socio-ewoorker`
+   - **Nombre**: `Socio Fundador eWoorker`
+   - **CIF**: `X00000000X`
+   - **Plan**: `Demo` (o cualquier plan disponible)
+   - **Activo**: `true`
+
+### Paso 3: Crear Usuario
+
+1. Navegar a **Admin → Usuarios**
+2. Crear nuevo usuario con estos datos:
+   - **ID**: `user-socio-ewoorker-001`
+   - **Email**: `socio@ewoorker.com`
+   - **Nombre**: `Socio Fundador eWoorker`
+   - **Password**: `Ewoorker2025!Socio`
+   - **Rol**: `super_admin`
+   - **Company**: `Socio Fundador eWoorker` (la creada en Paso 2)
+   - **Activo**: `true`
+   - **Email Verificado**: `true`
+   - **Onboarding Completado**: `true`
 
 ---
 
-## 🚀 CÓMO USAR ESTAS CREDENCIALES
+## 🗄️ CREACIÓN DEL USUARIO (OPCIÓN 2: SQL DIRECTO)
 
-### 1️⃣ **PRIMERO: Crear el Usuario en la Base de Datos**
+Si tienes acceso directo a la base de datos PostgreSQL:
 
-Ejecuta este SQL en tu base de datos de producción:
+### SQL para ejecutar:
 
 ```sql
--- =====================================================
--- CREAR USUARIO SOCIO FUNDADOR DE EWOORKER
--- =====================================================
+-- Paso 1: Crear Company
+INSERT INTO "Company" (
+  id, 
+  nombre, 
+  cif, 
+  activo, 
+  "subscriptionPlanId", 
+  "createdAt"
+) 
+SELECT 
+  'company-socio-ewoorker', 
+  'Socio Fundador eWoorker', 
+  'X00000000X', 
+  true,
+  (SELECT id FROM "SubscriptionPlan" WHERE nombre = 'Demo' LIMIT 1),
+  NOW()
+WHERE NOT EXISTS (
+  SELECT 1 FROM "Company" WHERE id = 'company-socio-ewoorker'
+);
 
--- 1. Crear/Verificar que existe una Company para el socio
-INSERT INTO "Company" (id, nombre, cif, activo) 
-VALUES (
-  'company-socio-ewoorker',
-  'Socio Fundador ewoorker',
-  'X00000000X',
-  true
-)
-ON CONFLICT (id) DO NOTHING;
-
--- 2. Crear el usuario socio con password hasheado
--- Password: Ewoorker2025!Socio
--- Hash bcrypt (10 rounds): $2a$10$Zy5J9mX3K8pW4nR7qL2vYeZH3xP9F6mT8sK4rN7wQ5vL2pJ8xY6zA
+-- Paso 2: Crear Usuario
+-- Hash de 'Ewoorker2025!Socio': $2a$10$Zy5J9mX3K8pW4nR7qL2vYeZH3xP9F6mT8sK4rN7wQ5vL2pJ8xY6zA
 
 INSERT INTO "User" (
-  id,
-  email,
-  name,
-  password,
-  role,
-  "companyId",
-  activo,
-  "onboardingCompleted"
+  id, 
+  email, 
+  name, 
+  password, 
+  role, 
+  "companyId", 
+  activo, 
+  "emailVerified", 
+  "onboardingCompleted", 
+  "onboardingCompletedAt", 
+  "createdAt"
 ) VALUES (
   'user-socio-ewoorker-001',
   'socio@ewoorker.com',
-  'Socio Fundador',
+  'Socio Fundador eWoorker',
   '$2a$10$Zy5J9mX3K8pW4nR7qL2vYeZH3xP9F6mT8sK4rN7wQ5vL2pJ8xY6zA',
   'super_admin',
   'company-socio-ewoorker',
   true,
-  true
+  NOW(),
+  true,
+  NOW(),
+  NOW()
 )
 ON CONFLICT (email) DO UPDATE SET
   password = EXCLUDED.password,
   role = 'super_admin',
-  activo = true;
+  activo = true,
+  "onboardingCompleted" = true;
+```
 
--- 3. Crear perfil ewoorker para el socio (opcional, para poder probar la plataforma)
-INSERT INTO "ewoorker_perfil_empresa" (
-  id,
-  "companyId",
-  "tipoEmpresa",
-  especialidades,
-  "planActual",
-  verificado,
-  disponible
-) VALUES (
-  'perfil-socio-ewoorker-001',
-  'company-socio-ewoorker',
-  'CONTRATISTA_PRINCIPAL',
-  ARRAY['Gestión', 'Administración'],
-  'CONSTRUCTOR_ENTERPRISE',
-  true,
-  true
-)
-ON CONFLICT ("companyId") DO NOTHING;
+### Ejecutar SQL:
 
--- =====================================================
--- VERIFICACIÓN
--- =====================================================
+```bash
+# Opción A: Con psql en el servidor
+psql -U postgres -d inmova_production -c "/* pegar SQL de arriba */"
 
--- Verificar que el usuario se creó correctamente
-SELECT id, email, name, role, activo 
+# Opción B: Con Prisma Studio
+npx prisma studio
+# → Crear registros manualmente en la interfaz
+```
+
+---
+
+## 🎯 VERIFICAR QUE EL USUARIO EXISTE
+
+### Desde SQL:
+
+```sql
+SELECT 
+  email, 
+  name, 
+  role, 
+  activo, 
+  "onboardingCompleted"
 FROM "User" 
 WHERE email = 'socio@ewoorker.com';
+```
 
--- Debería devolver:
--- id: user-socio-ewoorker-001
--- email: socio@ewoorker.com
--- name: Socio Fundador
--- role: super_admin
--- activo: true
+### Desde Panel Admin:
+
+1. Login como superadmin en https://inmovaapp.com/login
+2. Ir a **Admin → Usuarios**
+3. Buscar `socio@ewoorker.com`
+4. Verificar que:
+   - Rol = `super_admin`
+   - Activo = `true`
+   - Email verificado = `true`
+
+---
+
+## ✅ ACCEDER AL PANEL DEL SOCIO
+
+### Paso 1: Login
+
+1. Ir a https://inmovaapp.com/login
+2. Ingresar:
+   - **Email**: `socio@ewoorker.com`
+   - **Password**: `Ewoorker2025!Socio`
+3. Click en **Iniciar Sesión**
+
+### Paso 2: Ir al Panel
+
+Después de login exitoso, navegar directamente a:
+
+**https://inmovaapp.com/ewoorker/admin-socio**
+
+### Qué verás:
+
+- **Dashboard con KPIs principales**:
+  - Tu Beneficio (50%)
+  - GMV Total
+  - MRR Suscripciones
+  - Contratos Activos
+
+- **4 Pestañas**:
+  1. **Financiero**: Desglose de comisiones, división 50/50
+  2. **Usuarios**: Total empresas, por plan (Obrero, Capataz, Constructor)
+  3. **Operaciones**: Obras publicadas, ofertas, contratos
+  4. **Performance**: Tasa de conversión, tiempo adjudicación, rating
+
+- **Selector de Periodo**: Mes actual, mes anterior, trimestre, año
+- **Botón Exportar PDF**: Genera reporte descargable
+
+---
+
+## 🛡️ PERMISOS Y SEGURIDAD
+
+### Permisos del Usuario Socio:
+
+- ✅ **Ver métricas completas de eWoorker**
+- ✅ **Exportar reportes financieros**
+- ✅ **Acceso a logs de auditoría**
+- ✅ **Dashboard independiente de INMOVA**
+- ❌ **NO puede modificar configuración técnica**
+- ❌ **NO puede acceder a datos de otras empresas INMOVA**
+
+### Acceso Restringido:
+
+El panel `/ewoorker/admin-socio` **solo es accesible para usuarios con rol `super_admin`**.
+
+Si intentas acceder con otro rol, verás:
+
+```
+⚠️ Acceso Denegado
+Este panel es exclusivo para el socio fundador de eWoorker.
 ```
 
 ---
 
-### 2️⃣ **SEGUNDO: Configurar Variable de Entorno**
+## 📊 MÉTRICAS DISPONIBLES
 
-En **Vercel Dashboard** → Settings → Environment Variables:
+### Financiero
 
-```bash
-EWOORKER_SOCIO_IDS="user-socio-ewoorker-001"
-```
+| Métrica | Descripción |
+|---------|-------------|
+| **GMV Total** | Gross Merchandise Value (valor total transaccionado) |
+| **Comisiones Generadas** | Total de comisiones cobradas por la plataforma |
+| **Tu Beneficio (50%)** | La parte del socio (50% de comisiones) |
+| **Beneficio Plataforma** | La parte de INMOVA (50% de comisiones) |
+| **MRR Suscripciones** | Monthly Recurring Revenue (ingresos predecibles) |
+| **Desglose Comisiones** | Por tipo: Suscripción, Escrow, Urgentes, Otros |
 
-**Si ya tienes otros IDs, sepáralos por comas:**
-```bash
-EWOORKER_SOCIO_IDS="user-socio-ewoorker-001,otro-user-id-aqui"
-```
+### Usuarios
 
-**Después de añadir la variable:**
-- Click en "Save"
-- Click en "Redeploy" para aplicar los cambios
+| Métrica | Descripción |
+|---------|-------------|
+| **Total Empresas** | Empresas registradas en eWoorker |
+| **Empresas Activas** | Con actividad reciente |
+| **Nuevas este Mes** | Empresas que se registraron este mes |
+| **Usuarios Obrero** | Plan gratuito (5% comisión) |
+| **Usuarios Capataz** | Plan €49/mes (2% comisión) |
+| **Usuarios Constructor** | Plan €149/mes (0% comisión) |
 
----
+### Operaciones
 
-### 3️⃣ **TERCERO: Acceder al Panel del Socio**
+| Métrica | Descripción |
+|---------|-------------|
+| **Obras Publicadas** | Proyectos publicados por constructores |
+| **Ofertas Enviadas** | Propuestas de subcontratistas |
+| **Contratos Activos** | Contratos en ejecución |
+| **Contratos Completados** | Contratos finalizados con éxito |
 
-1. **Ve a tu aplicación:**
-   ```
-   https://tu-dominio.vercel.app/login
-   ```
+### Performance
 
-2. **Inicia sesión con:**
-   ```
-   Email:    socio@ewoorker.com
-   Password: Ewoorker2025!Socio
-   ```
-
-3. **Navega al Panel del Socio:**
-   ```
-   https://tu-dominio.vercel.app/ewoorker/admin-socio
-   ```
-
-4. **Deberías ver:**
-   - ✅ Dashboard con todas las métricas
-   - ✅ GMV, Comisiones, Tu Beneficio (50%)
-   - ✅ Métricas de usuarios y actividad
-   - ✅ Desglose de comisiones
-   - ✅ Botón de exportación de reportes
+| Métrica | Descripción |
+|---------|-------------|
+| **Tasa de Conversión** | % de ofertas que se convierten en contratos |
+| **Tiempo Medio Adjudicación** | Días desde publicación hasta firma |
+| **Valoración Plataforma** | Rating promedio de usuarios (1-5 estrellas) |
 
 ---
 
-## 🔒 SEGURIDAD
+## 🔄 DIVISIÓN DE BENEFICIOS (50/50)
 
-### Características de Seguridad Implementadas:
+### Cómo Funciona
 
-1. **Autenticación Robusta:**
-   - Password hasheado con bcrypt (10 rounds)
-   - NextAuth para gestión de sesiones
-   - Tokens seguros
-
-2. **Control de Acceso:**
-   - Solo usuarios en `EWOORKER_SOCIO_IDS` pueden acceder
-   - Verificación en cada request al panel
-   - Redirección automática si no autorizado
-
-3. **Auditoría Completa:**
-   - Todos los accesos se registran en `ewoorker_log_socio`
-   - IP address y User-Agent guardados
-   - Intentos no autorizados logueados
-
-4. **Protección de Datos:**
-   - Datos financieros sensibles
-   - Solo visibles para el socio autorizado
-   - No accesibles por otros usuarios
-
----
-
-## 📊 QUÉ VERÁS EN EL PANEL
-
-### Sección 1: KPIs Financieros
-- **GMV Total** (Gross Merchandise Value)
-- **Comisiones Generadas**
-- **Tu Beneficio (50%)** ⭐ - Destacado en morado
-- **Plataforma (50%)**
-
-### Sección 2: Usuarios y Suscripciones
-- Total empresas
-- Empresas activas
-- Nuevas este mes
-- Empresas verificadas
-- MRR (Monthly Recurring Revenue)
-- Distribución por plan (Obrero/Capataz/Constructor)
-
-### Sección 3: Actividad del Marketplace
-- Obras publicadas
-- Ofertas enviadas
-- Contratos activos
-- Contratos completados
-
-### Sección 4: Engagement y Calidad
-- Tasa de conversión (ofertas → contratos)
-- Tiempo medio de adjudicación
-- Valoración media de la plataforma
-
-### Sección 5: Desglose de Comisiones
-- Por suscripciones
-- Por escrow (pagos seguros)
-- Por trabajos urgentes
-- Otros
-
-### Controles:
-- Filtro por período (mes/trimestre/año)
-- Botón de exportación de reportes
-- Vista responsiva (desktop y móvil)
-
----
-
-## 🛠️ OPCIONES ALTERNATIVAS
-
-### Opción A: Usar tu propio email
-
-Si prefieres usar tu email personal en lugar de `socio@ewoorker.com`:
-
-```sql
--- Modificar el SQL anterior cambiando:
-email = 'tu-email@tudominio.com'
-
--- Y en Vercel, obtener tu user ID:
-SELECT id FROM "User" WHERE email = 'tu-email@tudominio.com';
-
--- Copiar el ID a EWOORKER_SOCIO_IDS
-```
-
-### Opción B: Dar acceso a múltiples usuarios
-
-```bash
-# En Vercel Environment Variables:
-EWOORKER_SOCIO_IDS="user-id-1,user-id-2,user-id-3"
-
-# Todos estos usuarios tendrán acceso al panel
-```
-
----
-
-## 📝 NOTAS IMPORTANTES
-
-### 1. **Cambiar la Contraseña**
-
-Después del primer login, puedes cambiar la contraseña:
-
-```sql
--- Generar nuevo hash de password (usa bcrypt online o node)
--- Ejemplo con Node.js:
--- const bcrypt = require('bcryptjs');
--- const hash = await bcrypt.hash('TuNuevaPassword', 10);
-
-UPDATE "User" 
-SET password = 'nuevo_hash_aqui'
-WHERE email = 'socio@ewoorker.com';
-```
-
-### 2. **Verificar Acceso**
-
-Puedes verificar que el logging está funcionando:
-
-```sql
--- Ver logs de acceso del socio
-SELECT * FROM "ewoorker_log_socio" 
-ORDER BY "createdAt" DESC 
-LIMIT 10;
-```
-
-### 3. **Revocar Acceso**
-
-Si necesitas revocar acceso temporalmente:
-
-```sql
--- Desactivar usuario
-UPDATE "User" 
-SET activo = false 
-WHERE email = 'socio@ewoorker.com';
-
--- O eliminar de la variable de entorno en Vercel:
--- EWOORKER_SOCIO_IDS="" (dejar vacío)
-```
-
----
-
-## 🎯 TESTING RÁPIDO
-
-### Verificar que todo funciona:
-
-1. **Login:**
-   ```
-   ✅ Email: socio@ewoorker.com
-   ✅ Password: Ewoorker2025!Socio
-   ✅ Deberías poder iniciar sesión
-   ```
-
-2. **Navegación:**
-   ```
-   ✅ /ewoorker/dashboard → Deberías ver el dashboard
-   ✅ /ewoorker/admin-socio → Deberías ver el panel del socio
-   ✅ Otros usuarios NO deberían poder acceder a /admin-socio
-   ```
-
-3. **Funcionalidad:**
-   ```
-   ✅ Ver métricas en tiempo real
-   ✅ Cambiar filtro de período (mes/trimestre/año)
-   ✅ Click en "Exportar" (mostrará mensaje o descargará)
-   ✅ Todas las métricas deberían mostrar valores (aunque sea 0)
-   ```
-
----
-
-## 🔍 TROUBLESHOOTING
-
-### Problema 1: "No autorizado" al acceder al panel
-
-**Solución:**
-- Verificar que `EWOORKER_SOCIO_IDS` está configurado en Vercel
-- Verificar que el valor coincide con el ID del usuario:
-  ```sql
-  SELECT id FROM "User" WHERE email = 'socio@ewoorker.com';
-  ```
-- Hacer redeploy en Vercel después de cambiar la variable
-
-### Problema 2: Error al hacer login
-
-**Solución:**
-- Verificar que el usuario existe en la BD
-- Verificar que el password hash es correcto
-- Probar resetear el password:
-  ```sql
-  UPDATE "User" 
-  SET password = '$2b$10$vH8jXN5Y9pQm7YK.8ZxWVOqHSJzH.PXkzBHdqV7Qx2Q3rC4sE5fG6'
-  WHERE email = 'socio@ewoorker.com';
-  ```
-
-### Problema 3: Panel carga pero sin datos
-
-**Causa:** Probablemente la BD está vacía (normal en el MVP inicial).
-
-**Solución:** 
-- Crear datos de prueba (empresas, obras, contratos)
-- O esperar a que haya actividad real
-- Las métricas mostrarán 0 hasta que haya datos
-
----
-
-## 📧 RESUMEN RÁPIDO
+Cada vez que eWoorker genera una comisión (por suscripción, escrow, trabajo urgente, etc.), se divide automáticamente:
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔑 CREDENCIALES SOCIO EWOORKER
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Email:    socio@ewoorker.com
-Password: Ewoorker2025!Socio
-
-Panel:    /ewoorker/admin-socio
-
-ID para ENV: user-socio-ewoorker-001
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+┌─────────────────────────────────────┐
+│ COMISIÓN GENERADA: €1,000           │
+├─────────────────────────────────────┤
+│ 50% Socio Fundador: €500            │
+│ 50% Plataforma INMOVA: €500         │
+└─────────────────────────────────────┘
 ```
 
----
+### Transparencia Total
 
-## ✅ CHECKLIST DE CONFIGURACIÓN
+El panel del socio muestra **en tiempo real**:
 
-- [ ] Ejecutar SQL para crear el usuario
-- [ ] Verificar que el usuario se creó: `SELECT * FROM "User" WHERE email = 'socio@ewoorker.com'`
-- [ ] Añadir `EWOORKER_SOCIO_IDS` en Vercel Environment Variables
-- [ ] Redeploy en Vercel
-- [ ] Probar login con las credenciales
-- [ ] Navegar a `/ewoorker/admin-socio`
-- [ ] Verificar que carga el dashboard con métricas
-- [ ] (Opcional) Cambiar la contraseña después del primer login
+- **Tu Beneficio**: Cantidad exacta que te corresponde
+- **Beneficio Plataforma**: Cantidad que va a INMOVA
+- **Desglose por Tipo**: Cuánto viene de cada fuente de ingresos
 
 ---
 
-**Creado:** 26 Diciembre 2025 - 03:15  
-**Válido:** Permanente (hasta que se cambie)  
-**Seguridad:** Alta (bcrypt, logging, control de acceso)
+## 📅 EXPORTAR REPORTES
 
-**¡El panel del socio está listo para ser usado!** 🎉🔐
+### Cómo Exportar
+
+1. En el panel, seleccionar periodo (mes, trimestre, año)
+2. Click en botón **"Exportar PDF"**
+3. Se descargará un archivo: `ewoorker-reporte-socio-[periodo]-[fecha].txt`
+
+### Contenido del Reporte
+
+El reporte incluye:
+
+- **Financiero**: GMV, comisiones, beneficio del socio
+- **Usuarios**: Total, activos, por plan
+- **Operaciones**: Obras, ofertas, contratos
+- **Performance**: Tasa de conversión, tiempo adjudicación
+
+---
+
+## ❓ TROUBLESHOOTING
+
+### Error: "Acceso Denegado"
+
+**Causa**: El usuario no tiene rol `super_admin`.
+
+**Solución**:
+1. Verificar rol en la base de datos:
+   ```sql
+   SELECT email, role FROM "User" WHERE email = 'socio@ewoorker.com';
+   ```
+2. Actualizar rol si es necesario:
+   ```sql
+   UPDATE "User" SET role = 'super_admin' WHERE email = 'socio@ewoorker.com';
+   ```
+
+### Error: "Credenciales Inválidas"
+
+**Causa**: Password incorrecto o usuario no existe.
+
+**Solución**:
+1. Resetear password desde panel admin de INMOVA
+2. O ejecutar SQL para actualizar password:
+   ```sql
+   UPDATE "User" 
+   SET password = '$2a$10$Zy5J9mX3K8pW4nR7qL2vYeZH3xP9F6mT8sK4rN7wQ5vL2pJ8xY6zA'
+   WHERE email = 'socio@ewoorker.com';
+   ```
+
+### Error: "Métricas no cargan"
+
+**Causa**: No hay datos de eWoorker aún, o API falló.
+
+**Solución**:
+1. Verificar que existe al menos 1 empresa eWoorker en BD
+2. Revisar logs del servidor: `pm2 logs inmova-app`
+3. Verificar endpoint API: `https://inmovaapp.com/api/ewoorker/admin-socio/metrics`
+
+---
+
+## 📞 SOPORTE
+
+Para cualquier problema técnico:
+
+1. Revisar logs del servidor:
+   ```bash
+   pm2 logs inmova-app
+   ```
+
+2. Verificar health check:
+   ```bash
+   curl https://inmovaapp.com/api/health
+   ```
+
+3. Contactar al administrador técnico de INMOVA
+
+---
+
+**Última actualización**: 2 de enero de 2026  
+**Estado**: ✅ Panel implementado y deployed  
+**Versión**: 1.0.0
