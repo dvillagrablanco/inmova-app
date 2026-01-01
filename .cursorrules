@@ -2,7 +2,9 @@
 
 ---
 
-## ⚡ REGLA CRÍTICA DE COMUNICACIÓN
+## ⚡ REGLAS CRÍTICAS DE COMUNICACIÓN Y CONTINUIDAD
+
+### 📋 Comunicación Concisa
 
 **IMPORTANTE:** Al completar tareas o realizar cambios:
 - ❌ **NO proporcionar resúmenes ejecutivos extensos**
@@ -22,6 +24,43 @@
 ✅ MISIÓN COMPLETADA - RESUMEN EJECUTIVO
 [50 líneas de estadísticas y análisis detallado]
 ```
+
+### 🔄 Continuidad de Contexto entre Sesiones
+
+**AL INICIAR UNA NUEVA SESIÓN/CHAT:**
+
+1. **Buscar y leer documentación de estado actual:**
+   - Buscar archivos `REPORTE_*.md` en raíz del proyecto
+   - Leer `TODO.md` o listas de tareas pendientes si existen
+   - Revisar últimos commits git para entender cambios recientes
+   - Buscar archivos `.cursor/` con contexto de sesiones anteriores
+
+2. **Identificar punto de trabajo actual:**
+   - Qué features se completaron recientemente
+   - Qué está en progreso
+   - Qué errores conocidos existen
+   - Qué deployment fue el último
+
+3. **Preguntar contexto específico solo si es necesario:**
+   - Si los reportes no son claros
+   - Si hay ambigüedad en el estado
+   - Si el usuario pide algo que contradice trabajo anterior
+
+4. **NO empezar desde cero:**
+   - ❌ No pedir explicaciones de la arquitectura completa
+   - ❌ No preguntar "¿en qué estamos trabajando?"
+   - ❌ No ignorar trabajo previo documentado
+   - ✅ Continuar desde el último punto conocido
+   - ✅ Proponer siguiente paso lógico si aplica
+
+**Archivos clave a revisar siempre:**
+- `REPORTE_*.md` (en raíz)
+- `TODO.md` o `.cursor/todos.json`
+- `.git/logs/HEAD` (últimos commits)
+- `CHANGELOG.md` si existe
+- Archivos en `.cursor/` o `.vscode/`
+
+**Temperatura recomendada:** 0.3-0.4 para balance entre precisión y naturalidad
 
 ---
 
