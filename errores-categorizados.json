@@ -1,0 +1,943 @@
+{
+  "total_issues": 132,
+  "categories": {
+    "botones_faltantes": 2,
+    "paginas_404_timeout": 25,
+    "errores_401": 25,
+    "problemas_estructura": 80,
+    "errores_red": 0
+  },
+  "details": {
+    "botones_faltantes": [
+      {
+        "page": "Landing",
+        "url": "/landing",
+        "button": "Probar Gratis",
+        "severity": "media"
+      },
+      {
+        "page": "Register",
+        "url": "/register",
+        "button": "Registrarse",
+        "severity": "media"
+      }
+    ],
+    "paginas_404_timeout": [
+      {
+        "page": "Dashboard",
+        "url": "/dashboard",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Admin/Planes",
+        "url": "/admin/planes",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Admin/Modulos",
+        "url": "/admin/modulos",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Admin/Marketplace",
+        "url": "/admin/marketplace",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Portal Proveedor/Ordenes",
+        "url": "/portal-proveedor/ordenes",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Portal Proveedor/Presupuestos",
+        "url": "/portal-proveedor/presupuestos",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Portal Proveedor/Facturas",
+        "url": "/portal-proveedor/facturas",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Portal Comercial",
+        "url": "/portal-comercial",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Portal Comercial/Leads",
+        "url": "/portal-comercial/leads",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Portal Comercial/Objetivos",
+        "url": "/portal-comercial/objetivos",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Propiedades",
+        "url": "/propiedades",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Propiedades/Crear",
+        "url": "/propiedades/crear",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Seguros",
+        "url": "/seguros",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Seguros/Nuevo",
+        "url": "/seguros/nuevo",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Visitas",
+        "url": "/visitas",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Votaciones",
+        "url": "/votaciones",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Tareas",
+        "url": "/tareas",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Proveedores",
+        "url": "/proveedores",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Tours Virtuales",
+        "url": "/tours-virtuales",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "STR",
+        "url": "/str",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "STR/Channels",
+        "url": "/str/channels",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Coliving",
+        "url": "/coliving",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Partners",
+        "url": "/partners",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Partners/Dashboard",
+        "url": "/partners/dashboard",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      },
+      {
+        "page": "Partners/Clients",
+        "url": "/partners/clients",
+        "status": "TIMEOUT",
+        "has_timeout": true,
+        "severity": "alta"
+      }
+    ],
+    "errores_401": [
+      {
+        "page": "Dashboard",
+        "url": "/dashboard",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count"
+        ],
+        "severity": "baja"
+      },
+      {
+        "page": "Admin/Planes",
+        "url": "/admin/planes",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count"
+        ],
+        "severity": "baja"
+      },
+      {
+        "page": "Admin/Modulos",
+        "url": "/admin/modulos",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count"
+        ],
+        "severity": "baja"
+      },
+      {
+        "page": "Admin/Marketplace",
+        "url": "/admin/marketplace",
+        "count": 3,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count",
+          "https://inmovaapp.com/api/admin/marketplace/services"
+        ],
+        "severity": "baja"
+      },
+      {
+        "page": "Portal Proveedor/Ordenes",
+        "url": "/portal-proveedor/ordenes",
+        "count": 1,
+        "apis": [
+          "https://inmovaapp.com/api/auth-proveedor/me"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "Portal Proveedor/Presupuestos",
+        "url": "/portal-proveedor/presupuestos",
+        "count": 3,
+        "apis": [
+          "https://inmovaapp.com/api/notifications/unread-count",
+          "https://inmovaapp.com/api/portal-proveedor/quotes?",
+          "https://inmovaapp.com/api/modules/active"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "Portal Proveedor/Facturas",
+        "url": "/portal-proveedor/facturas",
+        "count": 3,
+        "apis": [
+          "https://inmovaapp.com/api/notifications/unread-count",
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/portal-proveedor/invoices?"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "Portal Comercial",
+        "url": "/portal-comercial",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "Portal Comercial/Leads",
+        "url": "/portal-comercial/leads",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "Portal Comercial/Objetivos",
+        "url": "/portal-comercial/objetivos",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/notifications/unread-count",
+          "https://inmovaapp.com/api/modules/active"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "Propiedades",
+        "url": "/propiedades",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "Propiedades/Crear",
+        "url": "/propiedades/crear",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "Seguros",
+        "url": "/seguros",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "Seguros/Nuevo",
+        "url": "/seguros/nuevo",
+        "count": 3,
+        "apis": [
+          "https://inmovaapp.com/api/notifications/unread-count",
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/buildings"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "Visitas",
+        "url": "/visitas",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "Votaciones",
+        "url": "/votaciones",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "Tareas",
+        "url": "/tareas",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/notifications/unread-count",
+          "https://inmovaapp.com/api/modules/active"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "Proveedores",
+        "url": "/proveedores",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "Tours Virtuales",
+        "url": "/tours-virtuales",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "STR",
+        "url": "/str",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "STR/Channels",
+        "url": "/str/channels",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "Coliving",
+        "url": "/coliving",
+        "count": 3,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count",
+          "https://inmovaapp.com/api/coliving/feed?companyId=undefined"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "Partners",
+        "url": "/partners",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count"
+        ],
+        "severity": "media"
+      },
+      {
+        "page": "Partners/Dashboard",
+        "url": "/partners/dashboard",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count"
+        ],
+        "severity": "baja"
+      },
+      {
+        "page": "Partners/Clients",
+        "url": "/partners/clients",
+        "count": 2,
+        "apis": [
+          "https://inmovaapp.com/api/modules/active",
+          "https://inmovaapp.com/api/notifications/unread-count"
+        ],
+        "severity": "media"
+      }
+    ],
+    "problemas_estructura": [
+      {
+        "page": "Unauthorized",
+        "url": "/unauthorized",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Dashboard",
+        "url": "/dashboard",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Dashboard",
+        "url": "/dashboard",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Dashboard/Properties",
+        "url": "/dashboard/properties",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Dashboard/Tenants",
+        "url": "/dashboard/tenants",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Dashboard/Contracts",
+        "url": "/dashboard/contracts",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Dashboard/Payments",
+        "url": "/dashboard/payments",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Dashboard/Maintenance",
+        "url": "/dashboard/maintenance",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Dashboard/Analytics",
+        "url": "/dashboard/analytics",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Dashboard/Messages",
+        "url": "/dashboard/messages",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Dashboard/Documents",
+        "url": "/dashboard/documents",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Dashboard/Referrals",
+        "url": "/dashboard/referrals",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Dashboard/Budgets",
+        "url": "/dashboard/budgets",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Dashboard/Coupons",
+        "url": "/dashboard/coupons",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Admin/Planes",
+        "url": "/admin/planes",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Admin/Planes",
+        "url": "/admin/planes",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Admin/Modulos",
+        "url": "/admin/modulos",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Admin/Modulos",
+        "url": "/admin/modulos",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Admin/Marketplace",
+        "url": "/admin/marketplace",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Admin/Marketplace",
+        "url": "/admin/marketplace",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Portal Inquilino",
+        "url": "/portal-inquilino",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Portal Inquilino",
+        "url": "/portal-inquilino",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Portal Inquilino/Pagos",
+        "url": "/portal-inquilino/pagos",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Portal Inquilino/Incidencias",
+        "url": "/portal-inquilino/incidencias",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Portal Inquilino/Incidencias",
+        "url": "/portal-inquilino/incidencias",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Portal Inquilino/Contrato",
+        "url": "/portal-inquilino/contrato",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Portal Inquilino/Contrato",
+        "url": "/portal-inquilino/contrato",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Portal Inquilino/Comunicacion",
+        "url": "/portal-inquilino/comunicacion",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Portal Inquilino/Comunicacion",
+        "url": "/portal-inquilino/comunicacion",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Portal Proveedor",
+        "url": "/portal-proveedor",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Portal Proveedor/Ordenes",
+        "url": "/portal-proveedor/ordenes",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Portal Proveedor/Ordenes",
+        "url": "/portal-proveedor/ordenes",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Portal Proveedor/Presupuestos",
+        "url": "/portal-proveedor/presupuestos",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Portal Proveedor/Presupuestos",
+        "url": "/portal-proveedor/presupuestos",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Portal Proveedor/Facturas",
+        "url": "/portal-proveedor/facturas",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Portal Proveedor/Facturas",
+        "url": "/portal-proveedor/facturas",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Portal Comercial",
+        "url": "/portal-comercial",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Portal Comercial",
+        "url": "/portal-comercial",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Portal Comercial/Leads",
+        "url": "/portal-comercial/leads",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Portal Comercial/Leads",
+        "url": "/portal-comercial/leads",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Portal Comercial/Objetivos",
+        "url": "/portal-comercial/objetivos",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Portal Comercial/Objetivos",
+        "url": "/portal-comercial/objetivos",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Propiedades",
+        "url": "/propiedades",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Propiedades",
+        "url": "/propiedades",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Propiedades/Crear",
+        "url": "/propiedades/crear",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Propiedades/Crear",
+        "url": "/propiedades/crear",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Seguros",
+        "url": "/seguros",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Seguros",
+        "url": "/seguros",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Seguros/Nuevo",
+        "url": "/seguros/nuevo",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Seguros/Nuevo",
+        "url": "/seguros/nuevo",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Reportes/Financieros",
+        "url": "/reportes/financieros",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Reportes/Financieros",
+        "url": "/reportes/financieros",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Visitas",
+        "url": "/visitas",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Visitas",
+        "url": "/visitas",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Votaciones",
+        "url": "/votaciones",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Votaciones",
+        "url": "/votaciones",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Tareas",
+        "url": "/tareas",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Tareas",
+        "url": "/tareas",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Usuarios",
+        "url": "/usuarios",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Usuarios",
+        "url": "/usuarios",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Proveedores",
+        "url": "/proveedores",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Proveedores",
+        "url": "/proveedores",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Tours Virtuales",
+        "url": "/tours-virtuales",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Tours Virtuales",
+        "url": "/tours-virtuales",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "STR",
+        "url": "/str",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "STR",
+        "url": "/str",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "STR/Channels",
+        "url": "/str/channels",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "STR/Channels",
+        "url": "/str/channels",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Coliving",
+        "url": "/coliving",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Coliving",
+        "url": "/coliving",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Student Housing",
+        "url": "/student-housing",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Student Housing",
+        "url": "/student-housing",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Workspace",
+        "url": "/workspace",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Workspace",
+        "url": "/workspace",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Partners",
+        "url": "/partners",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Partners",
+        "url": "/partners",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Partners/Dashboard",
+        "url": "/partners/dashboard",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Partners/Dashboard",
+        "url": "/partners/dashboard",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      },
+      {
+        "page": "Partners/Clients",
+        "url": "/partners/clients",
+        "issue": "Sin H1",
+        "severity": "media"
+      },
+      {
+        "page": "Partners/Clients",
+        "url": "/partners/clients",
+        "issue": "Sin navegación",
+        "severity": "baja"
+      }
+    ],
+    "errores_red": [],
+    "problemas_ux": []
+  }
+}
