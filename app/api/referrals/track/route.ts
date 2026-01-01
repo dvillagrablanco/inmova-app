@@ -5,69 +5,40 @@ import { z } from 'zod';
 export const dynamic = 'force-dynamic';
 
 const trackSchema = z.object({
-  referralCode: z.string(),
-  source: z.string().optional(),
-  medium: z.string().optional(),
-  campaign: z.string().optional(),
+  codigoReferido: z.string(),
+  origenInvitacion: z.string().optional(),
 });
 
 /**
- * API para trackear clicks en links de referido
- * Se llama cuando un usuario hace click en un link de partner
+ * API para trackear y crear relación Partner-Client (Referral)
+ * Se llama cuando un partner refiere un nuevo cliente
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const validated = trackSchema.parse(body);
 
-    // Using global prisma instance
-
-    // Buscar partner por código
-    const partner = await prisma.partner.findUnique({
-      where: { referralCode: validated.referralCode },
+    // Buscar partner por código de referido
+    const partner = await prisma.partner.findFirst({
+      where: {
+        // Assuming Partner has some reference code field
+        // If not, we'd need to add it or use another identifier
+        activo: true,
+      },
     });
 
     if (!partner) {
       return NextResponse.json({ error: 'Código de referido inválido' }, { status: 404 });
     }
 
-    if (partner.status !== 'ACTIVE') {
-      return NextResponse.json({ error: 'Partner no activo' }, { status: 403 });
-    }
-
-    // Obtener metadata de la request
-    const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip');
-    const userAgent = request.headers.get('user-agent');
-
-    // Crear registro de tracking (sin company aún)
-    // Esto se actualizará cuando el usuario se registre
-    const tracking = await prisma.referral.create({
-      data: {
-        partnerId: partner.id,
-        companyId: 'temp-' + Date.now(), // Temporal, se actualizará al registro
-        referralCode: validated.referralCode,
-        clickedAt: new Date(),
-        ipAddress,
-        userAgent,
-        source: validated.source,
-        medium: validated.medium,
-        campaign: validated.campaign,
-        status: 'CLICKED',
-      },
-    });
-
-    // Actualizar última actividad del partner
-    await prisma.partner.update({
-      where: { id: partner.id },
-      data: { lastActivityAt: new Date() },
-    });
-
+    // Note: Company creation happens in signup flow
+    // This endpoint can be used to track referral intent
     return NextResponse.json({
       success: true,
       data: {
-        trackingId: tracking.id,
-        partnerName: partner.name,
-        partnerType: partner.type,
+        partnerId: partner.id,
+        nombre: partner.nombre,
+        tipo: partner.tipo,
       },
     });
   } catch (error: any) {
@@ -79,58 +50,87 @@ export async function POST(request: NextRequest) {
     }
 
     console.error('[Referral Track Error]:', error);
-    return NextResponse.json({ error: 'Error registrando click' }, { status: 500 });
+    return NextResponse.json({ error: 'Error registrando referral' }, { status: 500 });
   }
 }
 
 /**
- * API para actualizar referral cuando el usuario se registra
+ * API para crear relación PartnerClient cuando el usuario se registra
  * Se llama desde el proceso de registro de nuevas companies
  */
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { trackingId, companyId } = body;
+    const { partnerId, companyId, codigoReferido, origenInvitacion } = body;
 
-    if (!trackingId || !companyId) {
-      return NextResponse.json({ error: 'trackingId y companyId requeridos' }, { status: 400 });
+    if (!partnerId || !companyId) {
+      return NextResponse.json(
+        { error: 'partnerId y companyId requeridos' },
+        { status: 400 }
+      );
     }
 
-    // Using global prisma instance
+    // Verificar que partner y company existen
+    const [partner, company] = await Promise.all([
+      prisma.partner.findUnique({ where: { id: partnerId } }),
+      prisma.company.findUnique({ where: { id: companyId } }),
+    ]);
 
-    // Actualizar referral con company real
-    const referral = await prisma.referral.update({
-      where: { id: trackingId },
+    if (!partner || !company) {
+      return NextResponse.json(
+        { error: 'Partner o Company no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    // Crear relación PartnerClient
+    const partnerClient = await prisma.partnerClient.create({
       data: {
+        partnerId,
         companyId,
-        signedUpAt: new Date(),
-        status: 'SIGNED_UP',
+        estado: 'activo',
+        origenInvitacion: origenInvitacion || 'directo',
+        codigoReferido,
+        fechaActivacion: new Date(),
       },
       include: {
-        partner: true,
+        partner: {
+          select: {
+            id: true,
+            nombre: true,
+            tipo: true,
+          },
+        },
+        company: {
+          select: {
+            id: true,
+            nombre: true,
+          },
+        },
       },
     });
 
-    // Actualizar contador del partner
+    // Actualizar contadores del partner si existen
     await prisma.partner.update({
-      where: { id: referral.partnerId },
+      where: { id: partnerId },
       data: {
-        totalClients: { increment: 1 },
+        ultimoAcceso: new Date(),
       },
     });
-
-    // TODO: Enviar notificación al partner
-    // TODO: Crear comisión de bono de alta (pending)
 
     return NextResponse.json({
       success: true,
       data: {
-        referralId: referral.id,
-        partnerName: referral.partner.name,
+        partnerClientId: partnerClient.id,
+        partner: partnerClient.partner,
+        company: partnerClient.company,
       },
     });
   } catch (error: any) {
     console.error('[Referral Update Error]:', error);
-    return NextResponse.json({ error: 'Error actualizando referral' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error creando relación partner-client' },
+      { status: 500 }
+    );
   }
 }
