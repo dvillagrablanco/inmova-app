@@ -15,8 +15,8 @@ export const dynamic = 'force-dynamic';
 // Schema de validación para actualizar unidad
 const unitUpdateSchema = z.object({
   numero: z.string().min(1, { message: 'El número de unidad es requerido' }).optional(),
-  tipo: z.enum(['vivienda', 'local', 'oficina', 'garaje', 'trastero', 'otro']).optional(),
-  estado: z.enum(['disponible', 'ocupada', 'mantenimiento', 'reservada']).optional(),
+  tipo: z.enum(['vivienda', 'local', 'garaje', 'trastero']).optional(),
+  estado: z.enum(['disponible', 'ocupada', 'en_mantenimiento']).optional(),
   superficie: z
     .union([z.string(), z.number()])
     .optional()
