@@ -920,6 +920,18 @@ const administradorEmpresaItems = [
     icon: Upload,
     roles: ['administrador', 'super_admin'],
   },
+  {
+    name: 'Legal y Cumplimiento',
+    href: '/admin/legal',
+    icon: Shield,
+    roles: ['administrador', 'super_admin'],
+  },
+  {
+    name: 'Sugerencias',
+    href: '/admin/sugerencias',
+    icon: MessageCircle,
+    roles: ['administrador', 'super_admin'],
+  },
 ];
 
 // 5.2 SUPER ADMIN - GESTIÓN DE PLATAFORMA
@@ -931,7 +943,7 @@ const superAdminPlatformItems = [
     roles: ['super_admin'],
   },
   {
-    name: 'Gestión de Clientes',
+    name: 'Gestión de Clientes (B2B)',
     href: '/admin/clientes',
     icon: Building2,
     roles: ['super_admin'],
@@ -946,6 +958,42 @@ const superAdminPlatformItems = [
     name: 'Facturación B2B',
     href: '/admin/facturacion-b2b',
     icon: FileText,
+    roles: ['super_admin'],
+  },
+  {
+    name: 'Partners y Aliados',
+    href: '/admin/partners',
+    icon: Briefcase,
+    roles: ['super_admin'],
+  },
+  {
+    name: 'Integraciones Contables',
+    href: '/admin/integraciones-contables',
+    icon: Package,
+    roles: ['super_admin'],
+  },
+  {
+    name: 'Marketplace Admin',
+    href: '/admin/marketplace',
+    icon: ShoppingCart,
+    roles: ['super_admin'],
+  },
+  {
+    name: 'Plantillas SMS',
+    href: '/admin/plantillas-sms',
+    icon: MessageCircle,
+    roles: ['super_admin'],
+  },
+  {
+    name: 'Firma Digital Config',
+    href: '/admin/firma-digital',
+    icon: FileSignature,
+    roles: ['super_admin'],
+  },
+  {
+    name: 'OCR Import Config',
+    href: '/admin/ocr-import',
+    icon: Scan,
     roles: ['super_admin'],
   },
   {
@@ -979,15 +1027,15 @@ const superAdminPlatformItems = [
     roles: ['super_admin'],
   },
   {
-    name: 'Portales Externos',
-    href: '/admin/portales-externos',
-    icon: Zap,
+    name: 'Backup y Restauración',
+    href: '/admin/backup-restore',
+    icon: Upload,
     roles: ['super_admin'],
   },
   {
-    name: 'Equipo Comercial',
-    href: '/admin/sales-team',
-    icon: Users2,
+    name: 'Portales Externos',
+    href: '/admin/portales-externos',
+    icon: Zap,
     roles: ['super_admin'],
   },
   {
@@ -1037,8 +1085,8 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     // Roles específicos
     operador: true,
     // Administración
-    administradorEmpresa: true,
-    superAdminPlatform: false,
+    administradorEmpresa: false,
+    superAdminPlatform: true,
   });
 
   // Cargar estado expandido desde localStorage de forma segura
@@ -1913,62 +1961,66 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* ADMINISTRACIÓN Y CONFIGURACIÓN - Separador visual */}
-            {(filteredAdministradorEmpresaItems.length > 0 ||
-              filteredSuperAdminPlatformItems.length > 0) && (
-              <div className="px-2 py-3 mb-2 border-t border-gray-800">
-                <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                  ⚙️ Administración
-                </h3>
-              </div>
-            )}
-
-            {/* Configuración de Empresa - Administrador */}
-            {filteredAdministradorEmpresaItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('administradorEmpresa')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🏢 Configuración Empresa</span>
-                  {expandedSections.administradorEmpresa ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.administradorEmpresa && (
-                  <div className="space-y-1 mt-1">
-                    {filteredAdministradorEmpresaItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Super Admin - Gestión de Plataforma */}
+            {/* SUPER ADMIN - GESTIÓN DE PLATAFORMA (Solo Super Admin) */}
             {filteredSuperAdminPlatformItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('superAdminPlatform')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🔧 Super Admin</span>
-                  {expandedSections.superAdminPlatform ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
+              <>
+                <div className="px-2 py-3 mb-2 border-t border-gray-800">
+                  <h3 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">
+                    ⚡ Super Admin - Plataforma
+                  </h3>
+                </div>
+                <div className="mb-4">
+                  <button
+                    onClick={() => toggleSection('superAdminPlatform')}
+                    className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-indigo-300 uppercase hover:text-white transition-colors"
+                  >
+                    <span>🔧 Gestión de Plataforma</span>
+                    {expandedSections.superAdminPlatform ? (
+                      <ChevronDown size={16} />
+                    ) : (
+                      <ChevronRight size={16} />
+                    )}
+                  </button>
+                  {expandedSections.superAdminPlatform && (
+                    <div className="space-y-1 mt-1">
+                      {filteredSuperAdminPlatformItems.map((item) => (
+                        <NavItem key={item.href} item={item} />
+                      ))}
+                    </div>
                   )}
-                </button>
-                {expandedSections.superAdminPlatform && (
-                  <div className="space-y-1 mt-1">
-                    {filteredSuperAdminPlatformItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
-                    ))}
-                  </div>
-                )}
-              </div>
+                </div>
+              </>
+            )}
+
+            {/* ADMINISTRACIÓN DE EMPRESA (Admin y Super Admin) */}
+            {filteredAdministradorEmpresaItems.length > 0 && (
+              <>
+                <div className="px-2 py-3 mb-2 border-t border-gray-800">
+                  <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                    ⚙️ Configuración Empresa
+                  </h3>
+                </div>
+                <div className="mb-4">
+                  <button
+                    onClick={() => toggleSection('administradorEmpresa')}
+                    className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                  >
+                    <span>🏢 Gestión de Empresa</span>
+                    {expandedSections.administradorEmpresa ? (
+                      <ChevronDown size={16} />
+                    ) : (
+                      <ChevronRight size={16} />
+                    )}
+                  </button>
+                  {expandedSections.administradorEmpresa && (
+                    <div className="space-y-1 mt-1">
+                      {filteredAdministradorEmpresaItems.map((item) => (
+                        <NavItem key={item.href} item={item} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
             )}
 
             {/* No results message */}
