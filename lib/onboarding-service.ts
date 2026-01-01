@@ -22,6 +22,7 @@ import {
   shouldAutoComplete,
   type ExperienceLevel 
 } from '@/lib/onboarding-role-adapter';
+import { initializeDefaultModules } from '@/lib/user-preferences-service';
 
 interface OnboardingTaskDefinition {
   taskId: string;
@@ -534,6 +535,27 @@ export async function initializeOnboardingTasks(
     console.log(`   - Rol: ${userRole}`);
     console.log(`   - Experiencia: ${userExperience}`);
     console.log(`   - Tareas auto-completadas: ${tasks.filter(t => t.status === 'completed').length}`);
+    
+    // Inicializar módulos por defecto según rol, vertical y experiencia
+    try {
+      const company = await prisma.company.findUnique({
+        where: { id: companyId },
+        select: { businessVertical: true }
+      });
+
+      if (company) {
+        await initializeDefaultModules(
+          userId, 
+          userRole, 
+          company.businessVertical,
+          userExperience
+        );
+        console.log(`✅ Módulos por defecto inicializados para usuario ${userId}`);
+      }
+    } catch (moduleError) {
+      console.error('Error inicializando módulos (continuando):', moduleError);
+      // No lanzar error para no bloquear el onboarding
+    }
     
     return tasks;
   } catch (error) {
