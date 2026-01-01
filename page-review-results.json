@@ -1,0 +1,636 @@
+[
+  {
+    "file": "app/landing/page.tsx",
+    "exists": true,
+    "hasH1": false,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": false
+  },
+  {
+    "file": "app/login/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": false
+  },
+  {
+    "file": "app/register/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": false
+  },
+  {
+    "file": "app/unauthorized/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": false
+  },
+  {
+    "file": "app/dashboard/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/page.tsx",
+    "exists": true,
+    "hasH1": false,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": false
+  },
+  {
+    "file": "app/edificios/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/unidades/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/inquilinos/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/contratos/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/pagos/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/mantenimiento/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/calendario/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/documentos/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/reportes/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/proveedores/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/gastos/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/tareas/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/notificaciones/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/chat/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/admin/dashboard/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/admin/clientes/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/admin/planes/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/admin/modulos/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/admin/usuarios/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/admin/configuracion/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/admin/marketplace/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/admin/personalizacion/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/admin/activity/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/admin/alertas/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/admin/facturacion-b2b/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/portal-inquilino/page.tsx",
+    "exists": true,
+    "hasH1": false,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": true,
+    "usesAuthLayout": false
+  },
+  {
+    "file": "app/portal-inquilino/dashboard/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": false
+  },
+  {
+    "file": "app/portal-inquilino/incidencias/page.tsx",
+    "exists": true,
+    "hasH1": false,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": true,
+    "usesAuthLayout": false
+  },
+  {
+    "file": "app/portal-inquilino/contrato/page.tsx",
+    "exists": true,
+    "hasH1": false,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": true,
+    "usesAuthLayout": false
+  },
+  {
+    "file": "app/portal-inquilino/comunicacion/page.tsx",
+    "exists": true,
+    "hasH1": false,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": true,
+    "usesAuthLayout": false
+  },
+  {
+    "file": "app/portal-proveedor/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": false
+  },
+  {
+    "file": "app/portal-proveedor/ordenes/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/portal-proveedor/presupuestos/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/portal-proveedor/facturas/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/portal-comercial/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/portal-comercial/leads/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/portal-comercial/objetivos/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/portal-comercial/comisiones/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/str/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/str/channels/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/str/listings/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/str/bookings/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/coliving/page.tsx",
+    "exists": false,
+    "hasH1": false,
+    "hasErrors": true,
+    "errors": [
+      "Archivo no existe"
+    ],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": false
+  },
+  {
+    "file": "app/student-housing/page.tsx",
+    "exists": true,
+    "hasH1": false,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": true,
+    "usesAuthLayout": false
+  },
+  {
+    "file": "app/workspace/page.tsx",
+    "exists": true,
+    "hasH1": false,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": true,
+    "usesAuthLayout": false
+  },
+  {
+    "file": "app/flipping/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/flipping/dashboard/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/partners/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/partners/dashboard/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/propiedades/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/seguros/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/visitas/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/votaciones/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/tours-virtuales/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/crm/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/bi/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [
+      "Exceso de 'any' (11 veces)"
+    ],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  },
+  {
+    "file": "app/analytics/page.tsx",
+    "exists": true,
+    "hasH1": true,
+    "hasErrors": false,
+    "errors": [],
+    "warnings": [],
+    "isComingSoon": false,
+    "usesAuthLayout": true
+  }
+]
