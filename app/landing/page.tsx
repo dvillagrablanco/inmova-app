@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { SimpleLandingContentV2 } from '@/components/landing/SimpleLandingContentV2';
+import { MinimalLanding } from '@/components/landing/MinimalLanding';
 
 /**
  * Landing Page Principal - Inmova PropTech Platform
@@ -44,5 +44,5 @@ export const metadata: Metadata = {
 };
 
 export default function LandingPage() {
-  return <SimpleLandingContentV2 />;
+  return <MinimalLanding />;
 }
