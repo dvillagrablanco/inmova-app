@@ -14,7 +14,7 @@ const LandingChatbot = dynamic(
 
 // Componentes modulares de la landing page
 import { Navigation } from '@/components/landing/sections/Navigation';
-import { HeroSectionSegmentado } from '@/components/landing/sections/HeroSectionSegmentado';
+import { HeroSection } from '@/components/landing/sections/HeroSection';
 import { PromoBanner } from '@/components/landing/sections/PromoBanner';
 import { PromoSection } from '@/components/landing/sections/PromoSection';
 import { StatsSection } from '@/components/landing/sections/StatsSection';
@@ -39,7 +39,7 @@ export function LandingPageContent() {
         <Navigation />
 
         {/* Hero Section Segmentado por Buyer Persona */}
-        <HeroSectionSegmentado />
+        <HeroSection />
 
         {/* Banner Promocional Rotativo */}
         <PromoBanner />
