@@ -557,7 +557,7 @@ export const personaTabs: PersonaTab[] = [
     },
     cta: {
       text: 'Explorar ewoorker →',
-      href: '/ewoorker-landing',
+      href: '/ewoorker/landing',
       variant: 'default',
     },
   },
@@ -1161,7 +1161,7 @@ export const footerSections: Record<string, FooterSection> = {
       { label: 'Para Agentes', href: '/agentes' },
       { label: 'Para Coliving', href: '/coliving' },
       { label: 'Para Admin Fincas', href: '/admin-fincas' },
-      { label: 'Para Construcción (ewoorker)', href: '/ewoorker-landing' },
+      { label: 'Para Construcción (ewoorker)', href: '/ewoorker/landing' },
     ],
   },
   resources: {

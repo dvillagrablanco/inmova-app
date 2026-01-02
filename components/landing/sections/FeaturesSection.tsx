@@ -74,7 +74,7 @@ const verticales = [
     gradient: 'from-orange-600 to-yellow-500',
     color: 'orange',
     badge: 'NUEVO',
-    href: '/ewoorker-landing',
+    href: '/ewoorker/landing',
   },
   {
     icon: Briefcase,
