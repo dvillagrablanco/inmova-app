@@ -20,8 +20,15 @@ if (SENTRY_DSN) {
     // Setting this option to true will print useful information to the console while you're setting up Sentry.
     debug: false,
 
+    // Enable logs (captures console.log, console.error, console.warn)
+    enableLogs: true,
+
     integrations: [
       Sentry.prismaIntegration(),
+      // Capture console logs automatically
+      Sentry.consoleLoggingIntegration({
+        levels: ['log', 'error', 'warn'],
+      }),
     ],
 
     // Ignore common noise

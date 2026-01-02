@@ -19,6 +19,9 @@ if (SENTRY_DSN) {
     // Setting this option to true will print useful information to the console while you're setting up Sentry.
     debug: false,
 
+    // Enable logs (captures console.log, console.error, console.warn)
+    enableLogs: true,
+
     // Replay configuration
     replaysOnErrorSampleRate: 1.0, // Capture 100% of errors for replay
     replaysSessionSampleRate: 0.1, // Capture 10% of all sessions for replay
@@ -30,6 +33,10 @@ if (SENTRY_DSN) {
         blockAllMedia: true,
       }),
       Sentry.browserTracingIntegration(),
+      // Capture console logs automatically
+      Sentry.consoleLoggingIntegration({
+        levels: ['log', 'error', 'warn'],
+      }),
     ],
 
     // Ignore common noise
