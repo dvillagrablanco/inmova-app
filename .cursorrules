@@ -2,6 +2,54 @@
 
 ---
 
+## 🛡️ SISTEMA DE BLINDAJE DE BASE DE DATOS (CRÍTICO - LEER PRIMERO)
+
+**⚠️ ANTES DE CUALQUIER DEPLOY O CAMBIO EN SERVIDOR:**
+
+El proyecto tiene un **sistema de blindaje** que protege la configuración de base de datos y usuarios para evitar que se pierdan en deploys.
+
+**📖 DOCUMENTACIÓN COMPLETA**: Ver archivo `.cursorrules-blindaje-db.md`
+
+**🚀 COMANDOS OBLIGATORIOS:**
+
+```bash
+# DEPLOY SEGURO (usar SIEMPRE en lugar de git pull manual)
+bash /opt/inmova-app/scripts/blindaje-db/04-deploy-seguro.sh
+
+# Verificar integridad del sistema
+bash /opt/inmova-app/scripts/blindaje-db/02-verificar-integridad.sh
+
+# Restaurar configuración si algo falla
+bash /opt/inmova-app/scripts/blindaje-db/03-restaurar-config.sh
+
+# Backup manual
+bash /opt/inmova-app/scripts/blindaje-db/01-backup-automatico.sh
+```
+
+**❌ NUNCA HACER:**
+- `prisma migrate reset` en producción
+- Sobrescribir `.env.production` sin backup
+- `git pull` sin proteger archivos críticos
+- Cambiar password de PostgreSQL sin actualizar `.env`
+
+**✅ ARCHIVOS PROTEGIDOS (no se sobrescriben en deploy):**
+- `.env.production`
+- `ecosystem.config.js`
+- `create-superadmin.js`
+- Base de datos PostgreSQL
+
+**📦 Backups automáticos:**
+- Ubicación: `/opt/inmova-backups/`
+- Frecuencia: Diarios a las 2 AM + antes de cada deploy
+- Retención: 30 días
+
+**🆘 Si el login deja de funcionar:**
+```bash
+bash /opt/inmova-app/scripts/blindaje-db/03-restaurar-config.sh
+```
+
+---
+
 ## 🌡️ CONFIGURACIÓN DE TEMPERATURA
 
 **TEMPERATURA OBLIGATORIA: 0.3**

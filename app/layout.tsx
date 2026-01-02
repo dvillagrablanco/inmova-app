@@ -2,6 +2,8 @@ import { Inter } from 'next/font/google';
 import { Metadata } from 'next';
 import { Providers } from '@/components/providers';
 import { Toaster } from '@/components/ui/toaster';
+import { GlobalErrorBoundary } from '@/components/ui/GlobalErrorBoundary';
+import { ChatWidget } from '@/components/support/ChatWidget';
 import './globals.css';
 import Script from 'next/script';
 import { GA_MEASUREMENT_ID } from '@/lib/analytics';
@@ -143,10 +145,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         */}
       </head>
       <body className={inter.className}>
-        <Providers>
-          {children}
-          <Toaster />
-        </Providers>
+        <GlobalErrorBoundary>
+          <Providers>
+            {children}
+            <Toaster />
+          </Providers>
+        </GlobalErrorBoundary>
+        {/* Chat de soporte - El Escudo */}
+        <ChatWidget />
       </body>
     </html>
   );

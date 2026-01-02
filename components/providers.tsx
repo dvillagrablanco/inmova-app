@@ -10,11 +10,17 @@ import { I18nProvider } from '@/lib/i18n-context';
 import { BrandingProvider } from '@/components/BrandingProvider';
 import { DesignSystemProvider } from '@/components/DesignSystemProvider';
 import { QueryProvider } from '@/components/QueryProvider';
-import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { EnhancedErrorBoundary } from '@/components/ui/enhanced-error-boundary';
+import { WhiteScreenMonitor } from '@/components/WhiteScreenMonitor';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ErrorBoundary>
+    <EnhancedErrorBoundary
+      onError={(error, errorInfo) => {
+        // Log a servicio de monitoreo (Sentry, etc.)
+        console.error('🔴 [Providers] Error capturado:', { error, errorInfo });
+      }}
+    >
       <SessionProvider>
         <QueryProvider>
           <DesignSystemProvider>
@@ -26,6 +32,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                   enableSystem
                   disableTransitionOnChange
                 >
+                  <WhiteScreenMonitor />
                   <ServiceWorkerRegister />
                   {children}
                   <InstallPrompt />
@@ -37,6 +44,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
           </DesignSystemProvider>
         </QueryProvider>
       </SessionProvider>
-    </ErrorBoundary>
+    </EnhancedErrorBoundary>
   );
 }

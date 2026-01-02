@@ -113,7 +113,7 @@ const newModules = [
     ],
     gradient: 'from-orange-600 to-yellow-500',
     stats: { value1: '2.5K', label1: 'Empresas', value2: '€12M', label2: 'Facturado' },
-    href: '/ewoorker-landing',
+    href: '/ewoorker/landing',
     badge: 'PLATAFORMA B2B',
   },
 ];

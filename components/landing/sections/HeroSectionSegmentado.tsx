@@ -138,7 +138,7 @@ const personasContent: Record<string, PersonaContent> = {
       'Alertas de vencimiento de documentos',
     ],
     cta: {
-      primary: { text: 'Explorar ewoorker', href: '/ewoorker-landing' },
+      primary: { text: 'Explorar ewoorker', href: '/ewoorker/landing' },
       secondary: { text: 'Ver Marketplace', href: '/ewoorker/dashboard' },
     },
     stats: [

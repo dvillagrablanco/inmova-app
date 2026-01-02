@@ -81,6 +81,20 @@ export function Footer() {
         <div className="border-t border-gray-800 pt-6 text-center text-sm text-gray-400">
           <p>© 2026 INMOVA. Todos los derechos reservados.</p>
           <p className="mt-2">Powered by <span className="text-indigo-400 font-semibold">Enxames Investments SL</span></p>
+          
+          {/* Status Page Link - La Transparencia */}
+          <p className="mt-3">
+            <a 
+              href={process.env.NEXT_PUBLIC_STATUS_PAGE_URL || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-500 hover:text-indigo-400 transition-colors inline-flex items-center gap-1"
+              title="Ver estado de los sistemas"
+            >
+              <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              Estado del Sistema
+            </a>
+          </p>
         </div>
       </div>
     </footer>

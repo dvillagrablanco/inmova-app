@@ -1,0 +1,453 @@
+# 🎯 CURSORRULES: SOLUCIÓN DEFINITIVA PANTALLA BLANCA
+
+## 📋 CONTEXTO DEL PROBLEMA
+
+**Síntoma:** La aplicación carga inicialmente, pero después de ~500ms la pantalla se pone completamente blanca.
+
+**Causa Raíz:** Errores de JavaScript no capturados que rompen el árbol de componentes de React, sin Error Boundary efectivo que muestre UI de fallback.
+
+## 🛠️ SOLUCIÓN IMPLEMENTADA
+
+### Arquitectura de la Solución
+
+```
+┌─────────────────────────────────────────────┐
+│           React Component Tree              │
+│                                             │
+│  ┌──────────────────────────────────────┐  │
+│  │  EnhancedErrorBoundary (OUTER)      │  │
+│  │  - Captura errores de providers     │  │
+│  │  - UI garantizada con inline styles │  │
+│  │                                      │  │
+│  │  ┌────────────────────────────────┐ │  │
+│  │  │  WhiteScreenMonitor            │ │  │
+│  │  │  - Detecta pantalla blanca     │ │  │
+│  │  │  - Monitoreo cada 5s           │ │  │
+│  │  │  - Recuperación automática     │ │  │
+│  │  └────────────────────────────────┘ │  │
+│  │                                      │  │
+│  │  ┌────────────────────────────────┐ │  │
+│  │  │  Providers (SessionProvider,   │ │  │
+│  │  │  QueryProvider, ThemeProvider) │ │  │
+│  │  │                                 │ │  │
+│  │  │  {children}                    │ │  │
+│  │  └────────────────────────────────┘ │  │
+│  └──────────────────────────────────────┘  │
+└─────────────────────────────────────────────┘
+```
+
+### Componentes Clave
+
+#### 1. EnhancedErrorBoundary
+**Ubicación:** `components/ui/enhanced-error-boundary.tsx`
+
+**Responsabilidades:**
+- Capturar TODOS los errores de JavaScript en el árbol de componentes
+- Mostrar UI de error garantizada (inline styles, no CSS externo)
+- Proveer múltiples opciones de recuperación (reset, reload, home)
+- Prevenir loops infinitos con contador de errores
+- Logging detallado para debugging
+
+**Uso:**
+```typescript
+import { EnhancedErrorBoundary } from '@/components/ui/enhanced-error-boundary';
+
+<EnhancedErrorBoundary 
+  onError={(error, errorInfo) => {
+    console.error('Error capturado:', error);
+    // Log a Sentry, etc.
+  }}
+>
+  <App />
+</EnhancedErrorBoundary>
+```
+
+#### 2. WhiteScreenDetector
+**Ubicación:** `lib/white-screen-detector.ts`
+
+**Responsabilidades:**
+- Detectar pantalla blanca mediante 6 checks diferentes
+- Monitoreo continuo cada 5 segundos
+- Recuperación automática (re-render forzado)
+- Mostrar UI de emergencia si falla recuperación
+- Logging de eventos para análisis
+
+**Checks realizados:**
+1. ✅ `hasBodyContent`: Verificar que el body tenga hijos
+2. ✅ `hasVisibleElements`: Contar elementos visibles (> 10)
+3. ✅ `hasVisibleText`: Verificar texto visible (> 20 chars)
+4. ✅ `hasProperHeight`: Verificar altura del body (> 100px)
+5. ✅ `hasReactRoot`: Verificar presencia de React root
+6. ✅ `hasWhiteBackground`: Detectar fondo blanco
+
+**Uso:**
+```typescript
+import { WhiteScreenDetector } from '@/lib/white-screen-detector';
+
+const detector = WhiteScreenDetector.getInstance();
+detector.start((details) => {
+  console.error('Pantalla blanca detectada:', details);
+  // Enviar a monitoreo
+});
+```
+
+#### 3. WhiteScreenMonitor Component
+**Ubicación:** `components/WhiteScreenMonitor.tsx`
+
+**Responsabilidades:**
+- Integrar WhiteScreenDetector en el árbol de componentes
+- Activar solo en producción (o con flag)
+- Reportar eventos a servicios de monitoreo
+
+**Uso:**
+```typescript
+<Providers>
+  <WhiteScreenMonitor />
+  {children}
+</Providers>
+```
+
+## 🧪 TESTING CON PLAYWRIGHT
+
+### Suite de Tests
+**Ubicación:** `e2e/white-screen-detection.spec.ts`
+
+**Tests incluidos:**
+1. ✅ Carga sin pantalla blanca
+2. ✅ Mantiene contenido después de 500ms
+3. ✅ Mantiene contenido después de 2500ms
+4. ✅ Muestra error boundary en lugar de pantalla blanca
+5. ✅ Se recupera de errores de hidratación
+6. ✅ Maneja navegación sin pantalla blanca
+7. ✅ Detecta pantalla blanca simulada
+8. ✅ Monitorea continuamente durante interacciones
+9. ✅ Carga en menos de 3 segundos
+10. ✅ Muestra contenido progresivamente (no blanco durante carga)
+
+### Ejecutar Tests
+
+```bash
+# Todos los tests
+npx playwright test e2e/white-screen-detection.spec.ts
+
+# Con UI mode
+npx playwright test e2e/white-screen-detection.spec.ts --ui
+
+# Solo un test específico
+npx playwright test e2e/white-screen-detection.spec.ts -g "debe cargar sin pantalla blanca"
+
+# Generar report
+npx playwright test e2e/white-screen-detection.spec.ts --reporter=html
+```
+
+### Helper de Detección
+
+```typescript
+async function checkForWhiteScreen(page: Page): Promise<boolean> {
+  return await page.evaluate(() => {
+    const visibleElements = Array.from(document.querySelectorAll('*'))
+      .filter(el => {
+        const style = window.getComputedStyle(el);
+        return style.display !== 'none' && 
+               style.visibility !== 'hidden' && 
+               style.opacity !== '0';
+      });
+
+    const bodyText = document.body.innerText?.trim() || '';
+    const bodyHeight = document.body.offsetHeight;
+    const bodyBg = window.getComputedStyle(document.body).backgroundColor;
+    const isWhiteBg = bodyBg === 'rgb(255, 255, 255)' || bodyBg === 'white';
+
+    return isWhiteBg && (
+      visibleElements.length < 10 ||
+      bodyText.length < 20 ||
+      bodyHeight < 100
+    );
+  });
+}
+```
+
+## 🚨 PREVENCIÓN DE PROBLEMAS COMUNES
+
+### 1. Errores de Hidratación
+
+**❌ PROBLEMA:**
+```typescript
+// Mismatch entre server y client
+<div>{new Date().toString()}</div>
+<div>{Math.random()}</div>
+```
+
+**✅ SOLUCIÓN:**
+```typescript
+// Usar componentes client-side con hydration fix
+'use client';
+
+export function ClientOnlyDate() {
+  const [date, setDate] = useState<string | null>(null);
+  
+  useEffect(() => {
+    setDate(new Date().toString());
+  }, []);
+  
+  if (!date) return <div>Cargando...</div>;
+  return <div>{date}</div>;
+}
+```
+
+### 2. Errores en Providers
+
+**❌ PROBLEMA:**
+```typescript
+// localStorage undefined en SSR
+const ThemeProvider = ({ children }) => {
+  const [theme, setTheme] = useState(localStorage.theme); // ❌ Crash en SSR
+  return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>;
+};
+```
+
+**✅ SOLUCIÓN:**
+```typescript
+'use client';
+
+const ThemeProvider = ({ children }) => {
+  const [theme, setTheme] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Solo en cliente
+    setTheme(localStorage.getItem('theme') || 'light');
+  }, []);
+  
+  return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>;
+};
+```
+
+### 3. Dynamic Imports Sin Error Handling
+
+**❌ PROBLEMA:**
+```typescript
+const HeavyComponent = dynamic(() => import('./Heavy'), {
+  loading: () => null, // ❌ No loading state
+});
+```
+
+**✅ SOLUCIÓN:**
+```typescript
+const HeavyComponent = dynamic(() => import('./Heavy'), {
+  loading: () => <LoadingSpinner />,
+  ssr: false,
+});
+
+// En el componente que lo usa
+<ErrorBoundary fallback={<ErrorFallback />}>
+  <HeavyComponent />
+</ErrorBoundary>
+```
+
+### 4. CSS que Oculta Contenido
+
+**❌ PROBLEMA:**
+```css
+/* Si .loaded nunca se aplica, queda invisible */
+body {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+body.loaded {
+  opacity: 1;
+}
+```
+
+**✅ SOLUCIÓN:**
+```css
+/* Opacidad por defecto visible */
+body {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+body.loading {
+  opacity: 0.5; /* Visible pero atenuado */
+}
+```
+
+## 📊 MONITOREO Y LOGGING
+
+### Integración con Sentry
+
+```typescript
+// components/WhiteScreenMonitor.tsx
+import * as Sentry from '@sentry/nextjs';
+
+export function WhiteScreenMonitor() {
+  const { start } = useWhiteScreenDetector();
+
+  useEffect(() => {
+    start((details) => {
+      // Log a Sentry
+      Sentry.captureMessage('White Screen Detected', {
+        level: 'error',
+        extra: {
+          ...details,
+          userAgent: navigator.userAgent,
+          url: window.location.href,
+        },
+        tags: {
+          type: 'white_screen',
+          recovery_attempted: true,
+        },
+      });
+    });
+  }, [start]);
+
+  return null;
+}
+```
+
+### Custom Logging Endpoint
+
+```typescript
+// app/api/log-error/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+  
+  // Log a base de datos, servicio externo, etc.
+  console.error('[API] White Screen Detected:', body);
+  
+  // Guardar en BD
+  await prisma.errorLog.create({
+    data: {
+      type: 'WHITE_SCREEN',
+      details: body,
+      userAgent: req.headers.get('user-agent'),
+      timestamp: new Date(),
+    },
+  });
+  
+  return NextResponse.json({ success: true });
+}
+```
+
+## 🔧 CONFIGURACIÓN DE VARIABLES DE ENTORNO
+
+```env
+# .env.local (Development)
+NEXT_PUBLIC_FORCE_WHITE_SCREEN_MONITOR=true
+
+# .env.production
+NEXT_PUBLIC_FORCE_WHITE_SCREEN_MONITOR=false  # Se activa automáticamente en prod
+```
+
+## 📈 MÉTRICAS Y KPIs
+
+### Indicadores de Éxito
+
+1. **Error Capture Rate**: 100% de errores capturados por ErrorBoundary
+2. **White Screen Incidents**: 0 reportes de pantalla blanca
+3. **Auto-Recovery Rate**: > 80% de casos se recuperan automáticamente
+4. **Mean Time to Recovery (MTTR)**: < 5 segundos
+5. **User-Initiated Reloads**: < 5% de usuarios necesitan recargar
+
+### Dashboards de Monitoreo
+
+```typescript
+// Query para Sentry
+sentryEvent.type === 'white_screen' 
+  && sentryEvent.timestamp > last_7_days
+```
+
+## 🎯 CHECKLIST DE IMPLEMENTACIÓN
+
+### Fase 1: Instalación
+- [x] Copiar `EnhancedErrorBoundary` a proyecto
+- [x] Copiar `WhiteScreenDetector` a proyecto
+- [x] Copiar `WhiteScreenMonitor` a proyecto
+- [x] Actualizar `Providers` para usar nuevos componentes
+
+### Fase 2: Testing
+- [x] Copiar suite de tests de Playwright
+- [x] Ejecutar tests localmente
+- [x] Verificar que todos los tests pasan
+- [x] Revisar screenshots generados
+
+### Fase 3: Despliegue
+- [ ] Deploy a staging
+- [ ] Verificar en staging (24 horas)
+- [ ] Deploy a producción
+- [ ] Monitorear logs (1 semana)
+
+### Fase 4: Optimización
+- [ ] Analizar logs de white screen detection
+- [ ] Optimizar estrategias de recuperación
+- [ ] Ajustar thresholds de detección
+- [ ] Documentar casos edge
+
+## 🚀 COMANDOS RÁPIDOS
+
+```bash
+# Ejecutar tests
+npm run test:e2e:white-screen
+
+# Con UI para debugging
+npm run test:e2e:white-screen:ui
+
+# Solo verificar carga de landing
+npx playwright test -g "debe cargar la landing page"
+
+# Generar report HTML
+npx playwright test e2e/white-screen-detection.spec.ts --reporter=html
+```
+
+## 📚 RECURSOS Y REFERENCIAS
+
+- [React Error Boundaries Docs](https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary)
+- [Playwright Testing Best Practices](https://playwright.dev/docs/best-practices)
+- [Next.js Error Handling](https://nextjs.org/docs/advanced-features/error-handling)
+- [Sentry React Integration](https://docs.sentry.io/platforms/javascript/guides/react/)
+- [Web Vitals](https://web.dev/vitals/)
+
+## 🐛 TROUBLESHOOTING
+
+### Problema: Tests fallan con "pantalla blanca detectada"
+
+**Solución:**
+1. Verificar que EnhancedErrorBoundary está en Providers
+2. Verificar que no hay CSS que oculte contenido
+3. Revisar logs de consola en el test
+4. Tomar screenshot para análisis visual
+
+### Problema: WhiteScreenMonitor no se activa
+
+**Solución:**
+1. Verificar NODE_ENV=production o flag activado
+2. Verificar que el componente está montado
+3. Revisar logs de consola para errores
+4. Verificar que el detector no está en stop()
+
+### Problema: Recovery UI no aparece
+
+**Solución:**
+1. Verificar que pasan > 3 segundos después de detección
+2. Verificar que no hay overlay duplicado (#white-screen-recovery)
+3. Revisar logs de attemptRecovery()
+4. Verificar que document.body existe
+
+## 📝 CHANGELOG
+
+### v1.0.0 (2 Enero 2026)
+- ✅ Implementación inicial de EnhancedErrorBoundary
+- ✅ Implementación de WhiteScreenDetector
+- ✅ Implementación de WhiteScreenMonitor
+- ✅ Suite completa de tests de Playwright
+- ✅ Documentación completa
+- ✅ Integración con Providers
+
+---
+
+**Mantenido por:** Equipo Inmova  
+**Última actualización:** 2 de Enero de 2026  
+**Versión:** 1.0.0  
+**Estado:** ✅ Producción
