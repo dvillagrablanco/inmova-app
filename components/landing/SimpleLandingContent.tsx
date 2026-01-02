@@ -276,27 +276,30 @@ export function SimpleLandingContent() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
             {[
               {
                 name: 'Starter',
                 price: '€49',
-                features: ['Hasta 10 propiedades', 'Módulos básicos', 'Soporte email']
+                period: '/mes',
+                features: ['Hasta 10 propiedades', 'Módulos básicos', 'Soporte email', '1 usuario']
               },
               {
                 name: 'Professional',
                 price: '€149',
-                features: ['Hasta 100 propiedades', 'Todos los módulos', 'Soporte prioritario'],
+                period: '/mes',
+                features: ['Hasta 100 propiedades', 'Todos los módulos', 'Soporte prioritario', '5 usuarios'],
                 featured: true
               },
               {
                 name: 'Enterprise',
                 price: 'Custom',
-                features: ['Propiedades ilimitadas', 'White-label', 'Soporte dedicado']
+                period: '',
+                features: ['Propiedades ilimitadas', 'White-label', 'Soporte dedicado', 'Usuarios ilimitados']
               }
             ].map((plan, idx) => (
-              <Card key={idx} className={plan.featured ? 'border-2 border-indigo-600 shadow-xl' : ''}>
-                <CardContent className="p-8">
+              <Card key={idx} className={`${plan.featured ? 'border-2 border-indigo-600 shadow-xl ring-2 ring-indigo-200' : 'border border-gray-200'} hover:shadow-2xl transition-all`}>
+                <CardContent className="p-6 md:p-8">
                   {plan.featured && (
                     <div className="text-center mb-4">
                       <span className="inline-block px-4 py-1 bg-indigo-600 text-white text-sm font-semibold rounded-full">
@@ -305,21 +308,27 @@ export function SimpleLandingContent() {
                     </div>
                   )}
                   <div className="text-center mb-6">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                    <div className="text-4xl font-extrabold text-indigo-600 mb-4">{plan.price}</div>
-                    {plan.price !== 'Custom' && <p className="text-gray-600">/mes</p>}
+                    <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                    <div className="flex items-baseline justify-center gap-1">
+                      <span className="text-3xl md:text-4xl font-extrabold text-indigo-600">{plan.price}</span>
+                      {plan.period && <span className="text-base text-gray-600">{plan.period}</span>}
+                    </div>
                   </div>
-                  <ul className="space-y-3 mb-8">
+                  <ul className="space-y-2.5 md:space-y-3 mb-6 md:mb-8 min-h-[140px]">
                     {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-green-600" />
-                        <span className="text-gray-700">{feature}</span>
+                      <li key={i} className="flex items-start gap-2">
+                        <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm md:text-base text-gray-700">{feature}</span>
                       </li>
                     ))}
                   </ul>
                   <Link href="/register" className="block">
-                    <Button className="w-full" variant={plan.featured ? 'default' : 'outline'}>
-                      Empezar Ahora
+                    <Button 
+                      className="w-full min-h-[44px]" 
+                      variant={plan.featured ? 'default' : 'outline'}
+                      size="lg"
+                    >
+                      {plan.featured ? '🔥 ' : ''}Empezar Ahora
                     </Button>
                   </Link>
                 </CardContent>

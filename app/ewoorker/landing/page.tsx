@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Building2,
@@ -39,7 +38,6 @@ import { Badge } from '@/components/ui/badge';
  */
 
 export default function EwoorkerLandingPage() {
-  const router = useRouter();
   const [registerType, setRegisterType] = useState<'constructor' | 'subcontratista'>('constructor');
 
   return (
@@ -74,19 +72,21 @@ export default function EwoorkerLandingPage() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
-                onClick={() => router.push('/login')}
-                className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-              >
-                Iniciar Sesión
-              </Button>
-              <Button 
-                onClick={() => router.push('/registro?platform=ewoorker')}
-                className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white shadow-lg"
-              >
-                Empezar Gratis
-              </Button>
+              <Link href="/login">
+                <Button 
+                  variant="ghost" 
+                  className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                >
+                  Iniciar Sesión
+                </Button>
+              </Link>
+              <Link href="/register?platform=ewoorker">
+                <Button 
+                  className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white shadow-lg"
+                >
+                  Empezar Gratis
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -498,12 +498,11 @@ export default function EwoorkerLandingPage() {
                     <span>Soporte email</span>
                   </li>
                 </ul>
-                <Button
-                  className="w-full bg-gray-700 hover:bg-gray-800"
-                  onClick={() => router.push('/registro?platform=ewoorker&plan=obrero')}
-                >
-                  Empezar Gratis
-                </Button>
+                <Link href="/register?platform=ewoorker&plan=obrero" className="block">
+                  <Button className="w-full bg-gray-700 hover:bg-gray-800">
+                    Empezar Gratis
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
@@ -549,12 +548,11 @@ export default function EwoorkerLandingPage() {
                     <span>Certificaciones digitales</span>
                   </li>
                 </ul>
-                <Button
-                  className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600"
-                  onClick={() => router.push('/registro?platform=ewoorker&plan=capataz')}
-                >
-                  Probar 14 días gratis
-                </Button>
+                <Link href="/register?platform=ewoorker&plan=capataz" className="block">
+                  <Button className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600">
+                    Probar 14 días gratis
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
@@ -605,12 +603,11 @@ export default function EwoorkerLandingPage() {
                     <span>White-label</span>
                   </li>
                 </ul>
-                <Button
-                  className="w-full bg-blue-700 hover:bg-blue-800"
-                  onClick={() => router.push('/contacto?plan=constructor')}
-                >
-                  Hablar con Ventas
-                </Button>
+                <Link href="/contact?plan=constructor" className="block">
+                  <Button className="w-full bg-blue-700 hover:bg-blue-800">
+                    Hablar con Ventas
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>
