@@ -46,6 +46,11 @@ export default function CalculadoraROIPage() {
   // State para inputs del usuario
   const [unidades, setUnidades] = useState(50);
   const [sistemaActual, setSistemaActual] = useState<string>('homming');
+  
+  // Obtener competitor o usar valor por defecto
+  const getCompetitor = (key: string) => {
+    return competitorPricing[key] || { base: 150, perUnit: 0, name: 'Sistema Desconocido' };
+  };
   const [necesitaSTR, setNecesitaSTR] = useState<boolean>(true);
   const [necesitaFirmaDigital, setNecesitaFirmaDigital] = useState<boolean>(true);
   const [necesitaCRM, setNecesitaCRM] = useState<boolean>(true);
@@ -66,6 +71,9 @@ export default function CalculadoraROIPage() {
     sistema2: { base: 0, perUnit: 9, name: 'Sistema B' },
     sistema3: { base: 174, perUnit: 0, name: 'Sistema C' },
     sistema4: { base: 280, perUnit: 1, name: 'Sistema D' },
+    buildium: { base: 50, perUnit: 1.5, name: 'Buildium' },
+    appfolio: { base: 200, perUnit: 1.25, name: 'AppFolio' },
+    homming: { base: 99, perUnit: 0, name: 'Homming' },
     otro: { base: 150, perUnit: 0, name: 'Otro Sistema' },
   };
 
@@ -92,7 +100,7 @@ export default function CalculadoraROIPage() {
 
   const calcularCostos = () => {
     // Calcular coste del sistema actual
-    const competitor = competitorPricing[sistemaActual];
+    const competitor = getCompetitor(sistemaActual);
     let softwareBase = competitor.base;
     if (competitor.perUnit) {
       softwareBase += competitor.perUnit * unidades;
@@ -244,10 +252,11 @@ export default function CalculadoraROIPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="sistema1">Sistema A</SelectItem>
-                      <SelectItem value="sistema2">Sistema B</SelectItem>
+                      <SelectItem value="homming">Homming</SelectItem>
                       <SelectItem value="buildium">Buildium</SelectItem>
                       <SelectItem value="appfolio">AppFolio</SelectItem>
+                      <SelectItem value="sistema1">Sistema A</SelectItem>
+                      <SelectItem value="sistema2">Sistema B</SelectItem>
                       <SelectItem value="otro">Otro Sistema</SelectItem>
                     </SelectContent>
                   </Select>
@@ -328,7 +337,7 @@ export default function CalculadoraROIPage() {
                     Tu Coste Actual Mensual
                   </CardTitle>
                   <CardDescription className="text-red-600">
-                    {competitorPricing[sistemaActual].name} + Servicios Adicionales
+                    {getCompetitor(sistemaActual).name} + Servicios Adicionales
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
