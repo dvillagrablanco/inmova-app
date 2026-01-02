@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-01-02T16:17:42.406Z",
+  "timestamp": "2026-01-02T16:46:07.741Z",
   "baseUrl": "http://157.180.119.236",
   "summary": {
     "total": 16,
-    "success": 14,
-    "failed": 2,
-    "errors": 2,
+    "success": 16,
+    "failed": 0,
+    "errors": 0,
     "warnings": 0
   },
   "results": [
@@ -14,126 +14,112 @@
       "success": true,
       "errors": [],
       "screenshot": "/workspace/scripts/screenshots/landing-principal.png",
-      "loadTime": 5784
+      "loadTime": 5463
     },
     {
       "url": "/landing/calculadora-roi",
       "success": true,
       "errors": [],
       "screenshot": "/workspace/scripts/screenshots/calculadora-roi.png",
-      "loadTime": 3377
+      "loadTime": 3371
     },
     {
       "url": "/landing/blog",
       "success": true,
       "errors": [],
       "screenshot": "/workspace/scripts/screenshots/blog.png",
-      "loadTime": 3268
+      "loadTime": 3068
     },
     {
       "url": "/landing/casos-exito",
       "success": true,
       "errors": [],
       "screenshot": "/workspace/scripts/screenshots/casos-de-éxito.png",
-      "loadTime": 3324
+      "loadTime": 3083
     },
     {
       "url": "/landing/contacto",
       "success": true,
       "errors": [],
       "screenshot": "/workspace/scripts/screenshots/contacto.png",
-      "loadTime": 3278
+      "loadTime": 3132
     },
     {
       "url": "/landing/demo",
       "success": true,
       "errors": [],
       "screenshot": "/workspace/scripts/screenshots/demo.png",
-      "loadTime": 3329
+      "loadTime": 3159
     },
     {
       "url": "/landing/sobre-nosotros",
       "success": true,
       "errors": [],
       "screenshot": "/workspace/scripts/screenshots/sobre-nosotros.png",
-      "loadTime": 3433
+      "loadTime": 3228
     },
     {
       "url": "/landing/webinars",
       "success": true,
       "errors": [],
       "screenshot": "/workspace/scripts/screenshots/webinars.png",
-      "loadTime": 3629
+      "loadTime": 3409
     },
     {
       "url": "/landing/migracion",
       "success": true,
       "errors": [],
       "screenshot": "/workspace/scripts/screenshots/migración.png",
-      "loadTime": 3374
+      "loadTime": 3321
     },
     {
       "url": "/landing/legal/privacidad",
       "success": true,
       "errors": [],
       "screenshot": "/workspace/scripts/screenshots/privacidad.png",
-      "loadTime": 3253
+      "loadTime": 2990
     },
     {
       "url": "/landing/legal/terminos",
       "success": true,
       "errors": [],
       "screenshot": "/workspace/scripts/screenshots/términos.png",
-      "loadTime": 3230
+      "loadTime": 2994
     },
     {
       "url": "/landing/legal/cookies",
       "success": true,
       "errors": [],
       "screenshot": "/workspace/scripts/screenshots/cookies.png",
-      "loadTime": 3228
+      "loadTime": 2997
     },
     {
       "url": "/landing/legal/gdpr",
       "success": true,
       "errors": [],
       "screenshot": "/workspace/scripts/screenshots/gdpr.png",
-      "loadTime": 3236
+      "loadTime": 3036
     },
     {
       "url": "/ewoorker/landing",
       "success": true,
       "errors": [],
       "screenshot": "/workspace/scripts/screenshots/ewoorker-landing.png",
-      "loadTime": 2997
+      "loadTime": 3636
     },
     {
       "url": "/login",
-      "success": false,
-      "errors": [
-        {
-          "page": "Login",
-          "type": "crash",
-          "severity": "error",
-          "message": "Login failed - still on login page",
-          "timestamp": "2026-01-02T16:17:33.249Z"
-        }
-      ],
-      "loadTime": 32548
+      "success": true,
+      "errors": [],
+      "screenshot": "/workspace/scripts/screenshots/after-login.png",
+      "loadTime": 3945
     },
     {
       "url": "/configuracion (tours tab)",
-      "success": false,
-      "errors": [
-        {
-          "page": "Tours Virtuales",
-          "type": "crash",
-          "severity": "error",
-          "message": "Login failed in tours test - redirected back to login",
-          "timestamp": "2026-01-02T16:17:42.401Z"
-        }
-      ],
-      "loadTime": 9126
+      "success": true,
+      "errors": [],
+      "screenshot": "/workspace/scripts/screenshots/tours-virtuales.png",
+      "loadTime": 11313
     }
   ]
 }
