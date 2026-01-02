@@ -1,289 +1,197 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
-import {
-  Shield,
-  TrendingUp,
-  Users,
-  Euro,
-  CheckCircle2,
-  Zap,
-  Target,
-  Award,
-  FileText,
-  Calculator,
-  ArrowRight,
-} from 'lucide-react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { toast } from 'sonner';
+import { ArrowRight, CheckCircle, Shield, Home, Users, Euro, Phone, Mail } from 'lucide-react';
 
-export default function PartnersAseguradorasPage() {
-  const router = useRouter();
-  const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
-  const [clients, setClients] = useState(100);
-  const monthlyCommission = clients * 149 * 0.25;
-  const yearlyTotal = monthlyCommission * 12 + clients * 200;
+const aseguradoras = [
+  {
+    nombre: 'Mapfre',
+    logo: '🛡️',
+    descripcion: 'Seguros de hogar y alquiler con coberturas premium',
+    beneficios: [
+      '15% descuento para clientes Inmova',
+      'Cobertura multirriesgo completa',
+      'Impago de alquiler incluido',
+      'Asistencia 24/7',
+    ],
+    destacado: true,
+  },
+  {
+    nombre: 'Generali',
+    logo: '🛡️',
+    descripcion: 'Protección integral para propietarios',
+    beneficios: [
+      'Sin carencias en impagos',
+      'Cobertura de daños inquilino',
+      'Defensa jurídica incluida',
+      'Gestión digital completa',
+    ],
+    destacado: false,
+  },
+  {
+    nombre: 'AXA',
+    logo: '🛡️',
+    descripcion: 'Seguros especializados en inmuebles de inversión',
+    beneficios: [
+      'Pólizas multi-propiedad',
+      'Cobertura vacacional STR',
+      'Responsabilidad civil ampliada',
+      'Franquicia reducida',
+    ],
+    destacado: false,
+  },
+];
 
-  const benefits = [
-    {
-      icon: Users,
-      title: 'Base de Clientes Potencial',
-      description: 'Acceso a propietarios que ya aseguran con ustedes',
-      color: 'text-blue-600',
-    },
-    {
-      icon: Shield,
-      title: 'Complemento Perfecto',
-      description: 'Gestión digital para propiedades aseguradas',
-      color: 'text-green-600',
-    },
-    {
-      icon: TrendingUp,
-      title: 'Retención Mejorada',
-      description: 'Clientes digitalizados son más fieles',
-      color: 'text-purple-600',
-    },
-    {
-      icon: Euro,
-      title: 'Ingresos Recurrentes',
-      description: '25% comisión mensual de por vida',
-      color: 'text-emerald-600',
-    },
-  ];
-
+export default function AseguradorasPage() {
   return (
-    <AuthenticatedLayout>
-      <div className="min-h-screen">
-        {/* Hero */}
-        <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-20">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <Badge className="mb-4 bg-white text-blue-600">
-                Programa de Partners - Aseguradoras
-              </Badge>
-              <h1 className="text-5xl font-bold mb-6">
-                Genera hasta €{(yearlyTotal / 1000).toFixed(0)}K/año con Tus Clientes Existentes
-              </h1>
-              <p className="text-xl mb-8 opacity-90">
-                Ofrece Inmova a propietarios asegurados. Comisiones del 25% mensuales + bonos por
-                firma
-              </p>
-              <Button
-                size="lg"
-                onClick={() => setRegisterDialogOpen(true)}
-                className="bg-white text-blue-600 hover:bg-gray-100"
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
+      {/* Header */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto max-w-7xl">
+          <Link href="/landing" className="inline-flex items-center text-sm text-gray-600 hover:text-green-600 mb-8">
+            ← Volver a inicio
+          </Link>
+
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-green-100 text-green-700 border-green-200">
+              <Shield className="h-4 w-4 mr-2 inline" />
+              Partners Aseguradoras
+            </Badge>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                Aseguradoras de Confianza
+              </span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Protege tu patrimonio inmobiliario con las mejores condiciones del mercado
+            </p>
+          </div>
+
+          {/* Beneficios del programa */}
+          <div className="grid md:grid-cols-4 gap-6 mb-16">
+            {[
+              { icon: Euro, title: 'Hasta 15% Dto', desc: 'Descuento exclusivo' },
+              { icon: Shield, title: 'Coberturas Premium', desc: 'Protección completa' },
+              { icon: Home, title: 'Multi-Propiedad', desc: 'Gestión centralizada' },
+              { icon: Users, title: 'Sin Franquicia', desc: 'En muchos casos' },
+            ].map((item, i) => (
+              <Card key={i} className="text-center hover:shadow-lg transition-shadow">
+                <CardContent className="pt-6">
+                  <div className="bg-gradient-to-br from-green-500 to-emerald-500 p-3 rounded-lg w-fit mx-auto mb-3">
+                    <item.icon className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="font-bold mb-1">{item.title}</h3>
+                  <p className="text-sm text-gray-600">{item.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Tipos de seguros */}
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
+            {[
+              {
+                titulo: 'Seguro de Hogar',
+                desc: 'Protección completa del inmueble',
+                items: ['Daños estructurales', 'Contenido', 'Responsabilidad civil', 'Fenómenos naturales'],
+              },
+              {
+                titulo: 'Seguro de Impago',
+                desc: 'Protección contra morosidad',
+                items: ['Impago de alquiler', 'Defensa jurídica', 'Desahucio express', 'Daños inquilino'],
+              },
+              {
+                titulo: 'Seguro STR/Vacacional',
+                desc: 'Específico para alquiler turístico',
+                items: ['Cancelaciones', 'Daños huéspedes', 'RC ampliada', 'Robo contenido'],
+              },
+            ].map((tipo, i) => (
+              <Card key={i} className="hover:shadow-xl transition-shadow">
+                <CardHeader>
+                  <CardTitle className="text-xl">{tipo.titulo}</CardTitle>
+                  <p className="text-sm text-gray-600">{tipo.desc}</p>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {tipo.items.map((item, j) => (
+                      <li key={j} className="flex items-center gap-2 text-sm">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Lista de aseguradoras */}
+          <div className="space-y-6 mb-12">
+            {aseguradoras.map((aseguradora, i) => (
+              <Card
+                key={i}
+                className={`hover:shadow-xl transition-all ${
+                  aseguradora.destacado ? 'border-2 border-green-500' : ''
+                }`}
               >
-                <CheckCircle2 className="h-5 w-5 mr-2" />
-                Quiero Ser Partner
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Remuneration */}
-        <div className="py-16 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">Modelo de Remuneración</h2>
-            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              <Card className="border-2 border-blue-200">
+                {aseguradora.destacado && (
+                  <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white text-center py-2 text-sm font-semibold">
+                    ⭐ Partner Destacado
+                  </div>
+                )}
                 <CardHeader>
-                  <CardTitle className="text-center">
-                    <Euro className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-                    25% Recurrente
-                  </CardTitle>
+                  <div className="flex items-center gap-4">
+                    <div className="text-5xl">{aseguradora.logo}</div>
+                    <div className="flex-1">
+                      <CardTitle className="text-2xl mb-2">{aseguradora.nombre}</CardTitle>
+                      <p className="text-gray-600">{aseguradora.descripcion}</p>
+                    </div>
+                  </div>
                 </CardHeader>
-                <CardContent className="text-center">
-                  <p className="text-3xl font-bold text-blue-600 mb-2">€37.25/mes</p>
-                  <p className="text-sm text-muted-foreground">Por cliente (plan Pro €149)</p>
-                  <p className="text-xs mt-4 text-muted-foreground">
-                    De por vida mientras cliente activo
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="border-2 border-green-200">
-                <CardHeader>
-                  <CardTitle className="text-center">
-                    <Award className="h-8 w-8 mx-auto mb-2 text-green-600" />
-                    Bono Alta
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <p className="text-3xl font-bold text-green-600 mb-2">€200</p>
-                  <p className="text-sm text-muted-foreground">Por cada nuevo cliente</p>
-                  <p className="text-xs mt-4 text-muted-foreground">Pago único al contratar</p>
-                </CardContent>
-              </Card>
-              <Card className="border-2 border-purple-200">
-                <CardHeader>
-                  <CardTitle className="text-center">
-                    <TrendingUp className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-                    Bonos Volumen
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <p className="text-3xl font-bold text-purple-600 mb-2">Hasta 30%</p>
-                  <p className="text-sm text-muted-foreground">Con 50+ clientes activos</p>
-                  <p className="text-xs mt-4 text-muted-foreground">Comisión trimestral extra</p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-
-        {/* Benefits */}
-        <div className="py-16">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">
-              ¿Por Qué Tu Aseguradora Debe Ser Partner?
-            </h2>
-            <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-              {benefits.map((benefit, i) => {
-                const Icon = benefit.icon;
-                return (
-                  <Card key={i}>
-                    <CardContent className="pt-6">
-                      <div className="flex items-start gap-4">
-                        <div className={`p-3 rounded-lg bg-gray-50 ${benefit.color}`}>
-                          <Icon className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold mb-2">{benefit.title}</h3>
-                          <p className="text-sm text-muted-foreground">{benefit.description}</p>
-                        </div>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-3 mb-6">
+                    {aseguradora.beneficios.map((beneficio, j) => (
+                      <div key={j} className="flex items-start gap-2">
+                        <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm">{beneficio}</span>
                       </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Calculator */}
-        <div className="py-16 bg-blue-50">
-          <div className="container mx-auto px-4">
-            <div className="max-w-2xl mx-auto">
-              <h2 className="text-3xl font-bold text-center mb-8">Calculadora de Ingresos</h2>
-              <Card>
-                <CardContent className="pt-6 space-y-6">
-                  <div>
-                    <Label>Nº de Clientes Potenciales</Label>
-                    <input
-                      type="range"
-                      min="10"
-                      max="500"
-                      value={clients}
-                      onChange={(e) => setClients(parseInt(e.target.value))}
-                      className="w-full"
-                    />
-                    <p className="text-center text-2xl font-bold mt-2">{clients} clientes</p>
+                    ))}
                   </div>
-                  <div className="grid md:grid-cols-2 gap-4 pt-4 border-t">
-                    <div className="text-center">
-                      <p className="text-sm text-muted-foreground">Ingresos Mensuales</p>
-                      <p className="text-3xl font-bold text-green-600">
-                        €{monthlyCommission.toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm text-muted-foreground">Total Año 1</p>
-                      <p className="text-3xl font-bold text-blue-600">
-                        €{yearlyTotal.toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                  <Button className="w-full" size="lg" onClick={() => setRegisterDialogOpen(true)}>
-                    Calcular Mi Potencial
+                  <Button className="w-full md:w-auto bg-gradient-to-r from-green-600 to-emerald-600">
+                    Solicitar Cotización
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </CardContent>
               </Card>
-            </div>
+            ))}
           </div>
-        </div>
 
-        {/* CTA */}
-        <div className="py-20 bg-gradient-to-br from-blue-600 to-blue-800 text-white">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl font-bold mb-6">¿Listo para Generar Ingresos Adicionales?</h2>
-            <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-              Únete a nuestro programa de partners y empieza a monetizar tu base de clientes
-              existente
-            </p>
-            <Button
-              size="lg"
-              onClick={() => setRegisterDialogOpen(true)}
-              className="bg-white text-blue-600 hover:bg-gray-100"
-            >
-              Solicitar Asociación Ahora
-            </Button>
-          </div>
-        </div>
-
-        {/* Dialog */}
-        <Dialog open={registerDialogOpen} onOpenChange={setRegisterDialogOpen}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Registro de Aseguradora Partner</DialogTitle>
-              <DialogDescription>Completa tus datos y te contactaremos en 24h</DialogDescription>
-            </DialogHeader>
-            <form
-              className="space-y-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                toast.success('Solicitud enviada correctamente');
-                setRegisterDialogOpen(false);
-              }}
-            >
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Nombre de la Aseguradora *</Label>
-                  <Input placeholder="Mapfre, Allianz..." required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Persona de Contacto *</Label>
-                  <Input placeholder="Juan García" required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Email *</Label>
-                  <Input type="email" placeholder="contacto@aseguradora.com" required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Teléfono *</Label>
-                  <Input type="tel" placeholder="+34 600 000 000" required />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Nº de Clientes Propietarios (aprox)</Label>
-                  <Input type="number" placeholder="1000" />
-                </div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setRegisterDialogOpen(false)}
-                >
-                  Cancelar
+          {/* CTA */}
+          <Card className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+            <CardContent className="p-8 text-center">
+              <h2 className="text-3xl font-bold mb-4">Protege tu Inversión Inmobiliaria</h2>
+              <p className="text-lg mb-6 opacity-90">
+                Solicita una cotización personalizada sin compromiso
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/landing/contacto">
+                  <Button size="lg" className="bg-white text-green-600 hover:bg-gray-100">
+                    <Mail className="h-5 w-5 mr-2" />
+                    Solicitar Cotización
+                  </Button>
+                </Link>
+                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/20">
+                  <Phone className="h-5 w-5 mr-2" />
+                  +34 900 123 456
                 </Button>
-                <Button type="submit">Enviar Solicitud</Button>
               </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </AuthenticatedLayout>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+    </div>
   );
 }

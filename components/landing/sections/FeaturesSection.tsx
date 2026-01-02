@@ -349,7 +349,7 @@ export function FeaturesSection() {
             {partnersByCategory.map((partner, i) => {
               const Icon = partner.icon;
               return (
-                <Link key={i} href="/landing/contacto">
+                <Link key={i} href={partner.href}>
                   <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-300 cursor-pointer h-full">
                     <CardContent className="pt-6">
                       <div
@@ -360,7 +360,7 @@ export function FeaturesSection() {
                       <h4 className="text-xl font-bold text-center mb-2">{partner.title}</h4>
                       <p className="text-sm text-gray-600 text-center mb-4">{partner.desc}</p>
                       <Button variant="outline" className="w-full group/btn">
-                        Contactar
+                        Ver Partners
                         <ArrowRight className="h-4 w-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
                       </Button>
                     </CardContent>
