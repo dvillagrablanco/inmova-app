@@ -119,25 +119,27 @@ export default function EwoorkerLandingPage() {
 
             {/* CTA Principal */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <Button
-                size="lg"
-                onClick={() => router.push('/registro?platform=ewoorker&type=constructor')}
-                className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white text-lg px-8 py-6 shadow-2xl hover:shadow-orange-300 transition-all"
-              >
-                <Building2 className="w-5 h-5 mr-2" />
-                Soy Constructor
-                <ChevronRight className="w-5 h-5 ml-2" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => router.push('/registro?platform=ewoorker&type=subcontratista')}
-                className="border-2 border-orange-600 text-orange-600 hover:bg-orange-50 text-lg px-8 py-6"
-              >
-                <HardHat className="w-5 h-5 mr-2" />
-                Soy Subcontratista
-                <ChevronRight className="w-5 h-5 ml-2" />
-              </Button>
+              <Link href="/register?platform=ewoorker&type=constructor">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white text-lg px-8 py-6 shadow-2xl hover:shadow-orange-300 transition-all"
+                >
+                  <Building2 className="w-5 h-5 mr-2" />
+                  Soy Constructor
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
+              <Link href="/register?platform=ewoorker&type=subcontratista">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-2 border-orange-600 text-orange-600 hover:bg-orange-50 text-lg px-8 py-6"
+                >
+                  <HardHat className="w-5 h-5 mr-2" />
+                  Soy Subcontratista
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
             </div>
 
             {/* Social Proof */}
@@ -777,23 +779,25 @@ export default function EwoorkerLandingPage() {
             Únete a las 2,500+ empresas que ya usan eWoorker. 14 días gratis, sin tarjeta.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              size="lg"
-              onClick={() => router.push('/registro?platform=ewoorker')}
-              className="bg-white text-orange-600 hover:bg-gray-100 text-lg px-10 py-6 shadow-2xl"
-            >
-              <Building2 className="w-5 h-5 mr-2" />
-              Empezar Gratis
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => router.push('/contacto?platform=ewoorker')}
-              className="border-2 border-white text-white hover:bg-white/10 text-lg px-10 py-6"
-            >
-              Hablar con Ventas
-            </Button>
+            <Link href="/register?platform=ewoorker">
+              <Button
+                size="lg"
+                className="bg-white text-orange-600 hover:bg-gray-100 text-lg px-10 py-6 shadow-2xl"
+              >
+                <Building2 className="w-5 h-5 mr-2" />
+                Empezar Gratis
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+            <Link href="/contact?platform=ewoorker">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-2 border-white text-white hover:bg-white/10 text-lg px-10 py-6"
+              >
+                Hablar con Ventas
+              </Button>
+            </Link>
           </div>
           <p className="mt-8 text-sm opacity-75">
             Sin permanencia • Cancela cuando quieras • Soporte en español 24/7
