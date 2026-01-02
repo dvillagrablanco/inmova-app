@@ -20,6 +20,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
+import { useSession } from 'next-auth/react';
 
 interface OnboardingStep {
   id: string;
@@ -44,9 +45,17 @@ interface OnboardingProgress {
 
 export default function SmartOnboardingWizard() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [progress, setProgress] = useState<OnboardingProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(true);
+
+  // No mostrar tutorial para super_admin (expertos en la herramienta)
+  const isSuperAdmin = session?.user?.role === 'super_admin';
+  
+  if (isSuperAdmin) {
+    return null;
+  }
 
   useEffect(() => {
     loadProgress();
