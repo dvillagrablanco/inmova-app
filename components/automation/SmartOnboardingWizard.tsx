@@ -172,92 +172,91 @@ export default function SmartOnboardingWizard() {
 
   return (
     <Dialog open={isVisible} onOpenChange={setIsVisible}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Sparkles className="h-5 w-5 text-primary" />
+      <DialogContent className="max-w-2xl w-[95vw] max-h-[85vh] sm:max-h-[90vh] p-0 gap-0">
+        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 border-b shrink-0">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg shrink-0">
+                <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
-              <div>
-                <DialogTitle className="text-lg">Bienvenido a INMOVA</DialogTitle>
-                <DialogDescription className="text-sm">
-                  Configuración {progress.vertical} - {progress.completedSteps}/{progress.totalSteps} pasos
+              <div className="min-w-0">
+                <DialogTitle className="text-base sm:text-lg truncate">Bienvenido a INMOVA</DialogTitle>
+                <DialogDescription className="text-xs sm:text-sm truncate">
+                  {progress.completedSteps}/{progress.totalSteps} pasos
                 </DialogDescription>
               </div>
             </div>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleSkip}
-                className="text-xs text-muted-foreground hover:text-foreground"
-              >
-                Omitir
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSkip}
+              className="text-xs shrink-0 h-8 px-2 sm:px-3"
+            >
+              Omitir
+            </Button>
           </div>
 
           {/* Barra de progreso */}
-          <div className="mt-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">
-                {progress.percentageComplete}% completado
+          <div className="mt-3 sm:mt-4">
+            <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+              <span className="text-xs sm:text-sm font-medium">
+                {progress.percentageComplete}%
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground hidden sm:inline">
                 ~{progress.steps.reduce((acc, s) => acc + (s.estimatedTime || 0), 0)} min
               </span>
             </div>
-            <Progress value={progress.percentageComplete} className="h-2" />
+            <Progress value={progress.percentageComplete} className="h-1.5 sm:h-2" />
           </div>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[calc(90vh-200px)] px-6 py-4">
+        <ScrollArea className="flex-1 px-4 sm:px-6 py-3 sm:py-4" style={{ maxHeight: 'calc(85vh - 180px)' }}>
           {/* Paso actual destacado */}
           {currentStepData && !currentStepData.completed && (
-            <div className="mb-4 p-4 bg-primary/5 border border-primary/20 rounded-lg">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-primary rounded-lg flex-shrink-0">
-                  <Play className="h-4 w-4 text-primary-foreground" />
+            <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-primary/5 border border-primary/20 rounded-lg">
+              <div className="flex items-start gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-primary rounded-lg flex-shrink-0">
+                  <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-base mb-1">
-                    {currentStepData.title}
+                  <h3 className="font-semibold text-sm sm:text-base mb-1 flex items-center gap-2 flex-wrap">
+                    <span className="truncate">{currentStepData.title}</span>
                     {currentStepData.required && (
-                      <Badge variant="destructive" className="ml-2 text-xs">
+                      <Badge variant="destructive" className="text-xs shrink-0">
                         Requerido
                       </Badge>
                     )}
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-3">
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2">
                     {currentStepData.description}
                   </p>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                     <Button
                       onClick={() => {
                         handleStepClick(currentStepData);
                         setIsVisible(false);
                       }}
                       size="sm"
-                      className="font-medium"
+                      className="font-medium text-xs h-8 px-3"
                     >
                       Comenzar
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                     </Button>
                     {currentStepData.videoUrl && (
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => window.open(currentStepData.videoUrl, '_blank')}
+                        className="text-xs h-8 px-3"
                       >
-                        <Play className="mr-2 h-4 w-4" />
-                        Tutorial
+                        <Play className="mr-1.5 h-3.5 w-3.5" />
+                        Video
                       </Button>
                     )}
                     {currentStepData.estimatedTime && (
-                      <span className="text-sm text-muted-foreground flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {currentStepData.estimatedTime} min
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5" />
+                        {currentStepData.estimatedTime}m
                       </span>
                     )}
                   </div>
@@ -267,8 +266,8 @@ export default function SmartOnboardingWizard() {
           )}
 
           {/* Lista de todos los pasos */}
-          <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-muted-foreground mb-3">
+          <div className="space-y-1.5 sm:space-y-2">
+            <h4 className="text-xs sm:text-sm font-semibold text-muted-foreground mb-2 sm:mb-3">
               Todos los pasos:
             </h4>
             {progress.steps.map((step, index) => (
@@ -282,43 +281,43 @@ export default function SmartOnboardingWizard() {
                 }}
                 disabled={step.completed}
                 className={`
-                  w-full flex items-center gap-3 p-3 rounded-lg border transition-all
+                  w-full flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg border transition-all
                   ${step.completed
                     ? 'bg-muted/50 border-muted cursor-default opacity-70'
                     : index === safeCurrentStep
-                    ? 'border-primary bg-primary/5 hover:bg-primary/10'
-                    : 'border-border hover:border-primary/50 hover:bg-accent'
+                    ? 'border-primary bg-primary/5 active:bg-primary/10'
+                    : 'border-border active:border-primary/50 active:bg-accent'
                   }
                 `}
               >
                 <div className="flex-shrink-0">
                   {step.completed ? (
-                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                   ) : (
-                    <Circle className={`h-5 w-5 ${
+                    <Circle className={`h-4 w-4 sm:h-5 sm:w-5 ${
                       index === safeCurrentStep ? 'text-primary' : 'text-muted-foreground'
                     }`} />
                   )}
                 </div>
                 <div className="flex-1 text-left min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`text-sm font-medium ${
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <span className={`text-xs sm:text-sm font-medium truncate ${
                       step.completed ? 'line-through text-muted-foreground' : ''
                     }`}>
                       {step.title}
                     </span>
                     {step.required && !step.completed && (
-                      <Badge variant="outline" className="text-xs">
-                        Requerido
+                      <Badge variant="outline" className="text-[10px] sm:text-xs shrink-0 h-4 sm:h-5 px-1 sm:px-2">
+                        Req.
                       </Badge>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
                     {step.description}
                   </p>
                 </div>
                 {step.estimatedTime && !step.completed && (
-                  <span className="text-xs text-muted-foreground flex items-center gap-1 flex-shrink-0">
+                  <span className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
                     <Clock className="h-3 w-3" />
                     {step.estimatedTime}m
                   </span>
@@ -328,21 +327,22 @@ export default function SmartOnboardingWizard() {
           </div>
         </ScrollArea>
 
-        <div className="px-6 py-4 border-t bg-muted/30">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-t bg-muted/30 shrink-0">
           <div className="flex items-center justify-between gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={handleRestart}
-              className="text-muted-foreground"
+              className="text-muted-foreground h-8 sm:h-9 px-2 sm:px-3 text-xs"
             >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Reiniciar
+              <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Reiniciar</span>
             </Button>
             <Button
               variant="default"
               size="sm"
               onClick={() => setIsVisible(false)}
+              className="h-8 sm:h-9 px-4 sm:px-6 text-xs sm:text-sm font-medium"
             >
               Cerrar
             </Button>
