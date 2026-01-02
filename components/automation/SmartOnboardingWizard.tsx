@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   CheckCircle2,
   Circle,
@@ -151,18 +152,6 @@ export default function SmartOnboardingWizard() {
     }
   };
 
-  if (loading) {
-    return (
-      <Card className="mb-6">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-center py-8">
-            <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   if (!progress || !isVisible) {
     return null;
   }
@@ -182,184 +171,184 @@ export default function SmartOnboardingWizard() {
   const currentStepData = progress.steps[safeCurrentStep];
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.3 }}
-      >
-        <Card className="mb-6 border-2 border-primary/20 shadow-lg">
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Sparkles className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-xl">Bienvenido a INMOVA</CardTitle>
-                  <CardDescription>
-                    Configuración {progress.vertical} - {progress.completedSteps}/{progress.totalSteps} pasos completados
-                  </CardDescription>
-                </div>
+    <Dialog open={isVisible} onOpenChange={setIsVisible}>
+      <DialogContent className="max-w-2xl max-h-[90vh] p-0">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Sparkles className="h-5 w-5 text-primary" />
               </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleRestart}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleSkip}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Omitir
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsVisible(false)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+              <div>
+                <DialogTitle className="text-lg">Bienvenido a INMOVA</DialogTitle>
+                <DialogDescription className="text-sm">
+                  Configuración {progress.vertical} - {progress.completedSteps}/{progress.totalSteps} pasos
+                </DialogDescription>
               </div>
             </div>
-
-            {/* Barra de progreso */}
-            <div className="mt-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">
-                  {progress.percentageComplete}% completado
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  ~{progress.steps.reduce((acc, s) => acc + (s.estimatedTime || 0), 0)} min restantes
-                </span>
-              </div>
-              <Progress value={progress.percentageComplete} className="h-2" />
-            </div>
-          </CardHeader>
-
-          <CardContent>
-            {/* Paso actual destacado */}
-            {currentStepData && !currentStepData.completed && (
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="mb-6 p-4 bg-primary/5 border-2 border-primary/20 rounded-lg"
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSkip}
+                className="text-xs text-muted-foreground hover:text-foreground"
               >
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-primary rounded-lg">
-                    <Play className="h-5 w-5 text-primary-foreground" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-1">
-                      {currentStepData.title}
-                      {currentStepData.required && (
-                        <Badge variant="destructive" className="ml-2 text-xs">
-                          Requerido
-                        </Badge>
-                      )}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      {currentStepData.description}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        onClick={() => handleStepClick(currentStepData)}
-                        size="sm"
-                        className="font-medium"
-                      >
-                        Comenzar
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                      {currentStepData.videoUrl && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.open(currentStepData.videoUrl, '_blank')}
-                        >
-                          <Play className="mr-2 h-4 w-4" />
-                          Ver tutorial
-                        </Button>
-                      )}
-                      {currentStepData.estimatedTime && (
-                        <span className="text-sm text-muted-foreground flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {currentStepData.estimatedTime} min
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+                Omitir
+              </Button>
+            </div>
+          </div>
 
-            {/* Lista de todos los pasos */}
-            <div className="space-y-2">
-              <h4 className="text-sm font-semibold text-muted-foreground mb-3">
-                Todos los pasos:
-              </h4>
-              {progress.steps.map((step, index) => (
-                <motion.button
-                  key={step.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  onClick={() => !step.completed && handleStepClick(step)}
-                  disabled={step.completed}
-                  className={`
-                    w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all
-                    ${step.completed
-                      ? 'bg-muted/50 border-muted cursor-default opacity-70'
-                      : index === safeCurrentStep
-                      ? 'border-primary bg-primary/5 hover:bg-primary/10'
-                      : 'border-border hover:border-primary/50 hover:bg-accent'
-                    }
-                  `}
-                >
-                  <div className="flex-shrink-0">
-                    {step.completed ? (
-                      <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    ) : (
-                      <Circle className={`h-5 w-5 ${
-                        index === safeCurrentStep ? 'text-primary' : 'text-muted-foreground'
-                      }`} />
+          {/* Barra de progreso */}
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium">
+                {progress.percentageComplete}% completado
+              </span>
+              <span className="text-xs text-muted-foreground">
+                ~{progress.steps.reduce((acc, s) => acc + (s.estimatedTime || 0), 0)} min
+              </span>
+            </div>
+            <Progress value={progress.percentageComplete} className="h-2" />
+          </div>
+        </DialogHeader>
+
+        <ScrollArea className="max-h-[calc(90vh-200px)] px-6 py-4">
+          {/* Paso actual destacado */}
+          {currentStepData && !currentStepData.completed && (
+            <div className="mb-4 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-primary rounded-lg flex-shrink-0">
+                  <Play className="h-4 w-4 text-primary-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-base mb-1">
+                    {currentStepData.title}
+                    {currentStepData.required && (
+                      <Badge variant="destructive" className="ml-2 text-xs">
+                        Requerido
+                      </Badge>
+                    )}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {currentStepData.description}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      onClick={() => {
+                        handleStepClick(currentStepData);
+                        setIsVisible(false);
+                      }}
+                      size="sm"
+                      className="font-medium"
+                    >
+                      Comenzar
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                    {currentStepData.videoUrl && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(currentStepData.videoUrl, '_blank')}
+                      >
+                        <Play className="mr-2 h-4 w-4" />
+                        Tutorial
+                      </Button>
+                    )}
+                    {currentStepData.estimatedTime && (
+                      <span className="text-sm text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        {currentStepData.estimatedTime} min
+                      </span>
                     )}
                   </div>
-                  <div className="flex-1 text-left">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-sm font-medium ${
-                        step.completed ? 'line-through text-muted-foreground' : ''
-                      }`}>
-                        {step.title}
-                      </span>
-                      {step.required && !step.completed && (
-                        <Badge variant="outline" className="text-xs">
-                          Requerido
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {step.description}
-                    </p>
-                  </div>
-                  {step.estimatedTime && !step.completed && (
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {step.estimatedTime}m
-                    </span>
-                  )}
-                </motion.button>
-              ))}
+                </div>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </AnimatePresence>
+          )}
+
+          {/* Lista de todos los pasos */}
+          <div className="space-y-2">
+            <h4 className="text-sm font-semibold text-muted-foreground mb-3">
+              Todos los pasos:
+            </h4>
+            {progress.steps.map((step, index) => (
+              <button
+                key={step.id}
+                onClick={() => {
+                  if (!step.completed) {
+                    handleStepClick(step);
+                    setIsVisible(false);
+                  }
+                }}
+                disabled={step.completed}
+                className={`
+                  w-full flex items-center gap-3 p-3 rounded-lg border transition-all
+                  ${step.completed
+                    ? 'bg-muted/50 border-muted cursor-default opacity-70'
+                    : index === safeCurrentStep
+                    ? 'border-primary bg-primary/5 hover:bg-primary/10'
+                    : 'border-border hover:border-primary/50 hover:bg-accent'
+                  }
+                `}
+              >
+                <div className="flex-shrink-0">
+                  {step.completed ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <Circle className={`h-5 w-5 ${
+                      index === safeCurrentStep ? 'text-primary' : 'text-muted-foreground'
+                    }`} />
+                  )}
+                </div>
+                <div className="flex-1 text-left min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`text-sm font-medium ${
+                      step.completed ? 'line-through text-muted-foreground' : ''
+                    }`}>
+                      {step.title}
+                    </span>
+                    {step.required && !step.completed && (
+                      <Badge variant="outline" className="text-xs">
+                        Requerido
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {step.description}
+                  </p>
+                </div>
+                {step.estimatedTime && !step.completed && (
+                  <span className="text-xs text-muted-foreground flex items-center gap-1 flex-shrink-0">
+                    <Clock className="h-3 w-3" />
+                    {step.estimatedTime}m
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </ScrollArea>
+
+        <div className="px-6 py-4 border-t bg-muted/30">
+          <div className="flex items-center justify-between gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRestart}
+              className="text-muted-foreground"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Reiniciar
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => setIsVisible(false)}
+            >
+              Cerrar
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
