@@ -268,7 +268,7 @@ function DashboardPageContent() {
                     wrapperStyle={{ fontSize: 10, paddingBottom: 10 }}
                     className="sm:text-xs"
                   />
-                  <Bar dataKey="ingresos" fill="#000000" name="Ingresos" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="ingresos" fill="#4F46E5" name="Ingresos" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -310,7 +310,7 @@ function DashboardPageContent() {
                       />
                       <Bar
                         dataKey="ocupadas"
-                        fill="#000000"
+                        fill="#4F46E5"
                         name="Ocupadas"
                         stackId="a"
                         radius={[4, 4, 0, 0]}

@@ -68,7 +68,7 @@ const verticales = [
   },
   {
     icon: Hammer,
-    title: 'Construcción (ewoorker)',
+    title: 'Construcción (eWoorker)',
     desc: 'Plataforma B2B para subcontratación segura en construcción',
     features: ['Compliance Ley 32/2006', 'Escrow de pagos', 'Marketplace obras', 'Libro digital'],
     gradient: 'from-orange-600 to-yellow-500',
@@ -207,7 +207,7 @@ export function FeaturesSection() {
           <Badge className="mb-4 text-lg px-4 py-1">🚀 Ecosistema Completo PropTech</Badge>
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              7 Verticales + 15 Módulos
+              6 Verticales + 10 Módulos
             </span>
             <br />
             Todo en Una Plataforma
@@ -223,7 +223,7 @@ export function FeaturesSection() {
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-3xl font-bold">Verticales de Negocio</h3>
             <Badge variant="outline" className="text-sm">
-              7 modelos especializados
+              6 modelos especializados
             </Badge>
           </div>
 
@@ -281,7 +281,7 @@ export function FeaturesSection() {
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-3xl font-bold">Módulos Transversales</h3>
             <Badge variant="outline" className="text-sm">
-              15+ módulos potenciadores
+              10+ módulos potenciadores
             </Badge>
           </div>
 
@@ -349,7 +349,7 @@ export function FeaturesSection() {
             {partnersByCategory.map((partner, i) => {
               const Icon = partner.icon;
               return (
-                <Link key={i} href={partner.href}>
+                <Link key={i} href="/landing/contacto">
                   <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-300 cursor-pointer h-full">
                     <CardContent className="pt-6">
                       <div
@@ -360,7 +360,7 @@ export function FeaturesSection() {
                       <h4 className="text-xl font-bold text-center mb-2">{partner.title}</h4>
                       <p className="text-sm text-gray-600 text-center mb-4">{partner.desc}</p>
                       <Button variant="outline" className="w-full group/btn">
-                        Ver Partners
+                        Contactar
                         <ArrowRight className="h-4 w-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
                       </Button>
                     </CardContent>

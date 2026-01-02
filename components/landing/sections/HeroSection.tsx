@@ -23,7 +23,7 @@ export function HeroSection() {
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-violet-500/10 backdrop-blur-sm border border-indigo-200 rounded-full">
               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
               <span className="text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-                #1 PropTech Multi-Vertical en España
+                Plataforma PropTech Multi-Vertical en España
               </span>
               <Rocket className="h-4 w-4 text-indigo-600" />
             </div>
@@ -32,13 +32,13 @@ export function HeroSection() {
             <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-100 border-2 border-green-300 rounded-full">
               <TrendingUp className="h-4 w-4 text-green-700" />
               <span className="text-sm font-bold text-green-700">
-                La solución PropTech más completa del mercado • 6x más funcionalidad
+                Plataforma PropTech integral • 6 verticales especializados
               </span>
             </div>
 
             {/* Main Heading */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight">
-              <span className="block text-gray-900 mb-2">6 Verticales + 6 Módulos.</span>
+              <span className="block text-gray-900 mb-2">6 Verticales + 10 Módulos.</span>
               <span className="block bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600 bg-clip-text text-transparent">
                 Poder Multiplicado.
               </span>

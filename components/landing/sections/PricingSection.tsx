@@ -128,7 +128,7 @@ export function PricingSection() {
             El Fin de la Fragmentación
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
-            <strong className="text-indigo-600">Todos los 88+ módulos incluidos en todos los planes.</strong> Sistema Operativo Integral del Real Estate.
+            <strong className="text-indigo-600">6 Verticales + 10 Módulos transversales en todos los planes.</strong> Sistema Operativo Integral del Real Estate.
           </p>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto">
             Reemplaza múltiples herramientas en una sola plataforma. Ahorra <strong className="text-green-600">€240/mes</strong> consolidando 5-8 sistemas diferentes.
