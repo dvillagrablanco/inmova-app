@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { 
   Building2, 
   Users, 
@@ -12,48 +14,114 @@ import {
   CheckCircle2,
   Zap,
   Shield,
-  BarChart3
+  BarChart3,
+  Menu,
+  X
 } from 'lucide-react';
 
 export function SimpleLandingContent() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Header/Navigation */}
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            {/* Logo */}
+            <Link href="/landing" className="flex items-center gap-2">
               <Building2 className="h-8 w-8 text-indigo-600" />
               <span className="text-2xl font-bold text-gray-900">INMOVA</span>
-            </div>
-            <div className="flex items-center gap-4">
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-4">
+              <Link href="/landing#features">
+                <Button variant="ghost" className="text-gray-700">
+                  Características
+                </Button>
+              </Link>
+              <Link href="/landing#pricing">
+                <Button variant="ghost" className="text-gray-700">
+                  Precios
+                </Button>
+              </Link>
               <Link href="/login">
-                <Button variant="ghost">Iniciar Sesión</Button>
+                <Button variant="ghost" className="text-gray-700">
+                  Iniciar Sesión
+                </Button>
               </Link>
               <Link href="/register">
-                <Button className="bg-indigo-600 hover:bg-indigo-700">
+                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
                   Empezar Gratis
                 </Button>
               </Link>
             </div>
+
+            {/* Mobile Menu Button */}
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon" className="text-gray-900">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Abrir menú</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                <SheetHeader>
+                  <SheetTitle className="flex items-center gap-2">
+                    <Building2 className="h-6 w-6 text-indigo-600" />
+                    <span className="text-xl font-bold">INMOVA</span>
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-4 mt-8">
+                  <Link href="/landing#features" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-lg">
+                      Características
+                    </Button>
+                  </Link>
+                  <Link href="/landing#pricing" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-lg">
+                      Precios
+                    </Button>
+                  </Link>
+                  <Link href="/ewoorker/landing" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-lg">
+                      eWoorker
+                    </Button>
+                  </Link>
+                  <div className="border-t pt-4 mt-4">
+                    <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="outline" className="w-full mb-3 text-lg py-6">
+                        Iniciar Sesión
+                      </Button>
+                    </Link>
+                    <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
+                      <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-lg py-6">
+                        Empezar Gratis
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 px-4">
+      <section className="py-12 md:py-20 px-4">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center space-y-8">
+          <div className="text-center space-y-6 md:space-y-8">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 rounded-full">
               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-              <span className="text-sm font-semibold text-indigo-900">
+              <span className="text-xs sm:text-sm font-semibold text-indigo-900">
                 Plataforma PropTech Multi-Vertical
               </span>
             </div>
 
             {/* Heading */}
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold tracking-tight px-4">
               <span className="block text-gray-900 mb-2">
                 6 Verticales + 10 Módulos
               </span>
@@ -63,39 +131,39 @@ export function SimpleLandingContent() {
             </h1>
 
             {/* Description */}
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4">
               La única plataforma que combina verticales de negocio inmobiliario 
               con módulos transversales de IA, IoT y Blockchain. Todo en un solo lugar.
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Link href="/register">
-                <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 px-8 py-6 text-lg">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 pt-4 px-4">
+              <Link href="/register" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg min-h-[48px]">
                   Prueba Gratis 30 Días
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link href="/contact">
-                <Button size="lg" variant="outline" className="px-8 py-6 text-lg">
+              <Link href="/contact" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg min-h-[48px]">
                   Contactar Ventas
                 </Button>
               </Link>
             </div>
 
             {/* Trust Indicators */}
-            <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-gray-600">
+            <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4 sm:gap-6 md:gap-8 pt-6 md:pt-8 text-xs sm:text-sm text-gray-600 px-4">
               <div className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-indigo-600" />
-                <span className="font-medium">€850M Mercado España</span>
+                <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 flex-shrink-0" />
+                <span className="font-medium whitespace-nowrap">€850M Mercado España</span>
               </div>
               <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-violet-600" />
-                <span className="font-medium">34 Tipos de Partners</span>
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-violet-600 flex-shrink-0" />
+                <span className="font-medium whitespace-nowrap">34 Tipos de Partners</span>
               </div>
               <div className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-pink-600" />
-                <span className="font-medium">ROI Garantizado</span>
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-pink-600 flex-shrink-0" />
+                <span className="font-medium whitespace-nowrap">ROI Garantizado</span>
               </div>
             </div>
           </div>
@@ -103,13 +171,13 @@ export function SimpleLandingContent() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 px-4 bg-white">
+      <section id="features" className="py-12 md:py-16 px-4 bg-white">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-8 md:mb-12 px-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 md:mb-4">
               6 Verticales Especializados
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600">
               Cada vertical con funcionalidades completas y específicas
             </p>
           </div>
@@ -162,13 +230,13 @@ export function SimpleLandingContent() {
       </section>
 
       {/* Modules Section */}
-      <section className="py-16 px-4">
+      <section className="py-12 md:py-16 px-4">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-8 md:mb-12 px-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 md:mb-4">
               10 Módulos Transversales
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600">
               Potenciadores que multiplican el valor de cada vertical
             </p>
           </div>
@@ -197,13 +265,13 @@ export function SimpleLandingContent() {
       </section>
 
       {/* Pricing Section */}
-      <section className="py-16 px-4 bg-white">
+      <section id="pricing" className="py-12 md:py-16 px-4 bg-white">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-8 md:mb-12 px-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 md:mb-4">
               Planes y Precios
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600">
               Empieza gratis y escala según tu negocio crece
             </p>
           </div>
@@ -262,23 +330,23 @@ export function SimpleLandingContent() {
       </section>
 
       {/* CTA Final */}
-      <section className="py-20 px-4 bg-gradient-to-r from-indigo-600 to-violet-600">
+      <section className="py-12 md:py-20 px-4 bg-gradient-to-r from-indigo-600 to-violet-600">
         <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 md:mb-6 px-4">
             ¿Listo para transformar tu negocio inmobiliario?
           </h2>
-          <p className="text-xl text-indigo-100 mb-8">
+          <p className="text-base sm:text-lg md:text-xl text-indigo-100 mb-6 md:mb-8 px-4">
             Únete a las empresas que ya confían en INMOVA
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/register">
-              <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-6 text-lg">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 px-4">
+            <Link href="/register" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto bg-white text-indigo-600 hover:bg-gray-100 px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg min-h-[48px]">
                 Empezar Gratis
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/contact">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 px-8 py-6 text-lg">
+            <Link href="/contact" className="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto border-2 border-white text-white hover:bg-white/10 px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg min-h-[48px]">
                 Hablar con Ventas
               </Button>
             </Link>
