@@ -27,13 +27,10 @@ export function WhiteScreenMonitor() {
     // Solo en cliente
     if (typeof window === 'undefined') return;
 
-    // Solo en producción (en desarrollo es molesto)
-    const isProduction = process.env.NODE_ENV === 'production';
-    
-    // O forzar en desarrollo con flag
-    const forceMonitoring = process.env.NEXT_PUBLIC_FORCE_WHITE_SCREEN_MONITOR === 'true';
+    // ALWAYS monitor (eliminado chequeo de producción para debugging)
+    const shouldMonitor = true;
 
-    if (isProduction || forceMonitoring) {
+    if (shouldMonitor) {
       // Iniciar monitoreo
       start((details) => {
         console.error('🔴 [WhiteScreenMonitor] Pantalla blanca detectada:', details);
