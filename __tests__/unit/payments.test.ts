@@ -44,6 +44,10 @@ vi.mock('@/lib/api-cache-helpers', () => ({
   invalidateDashboardCache: vi.fn(),
 }));
 
+vi.mock('@/lib/rate-limiting', () => ({
+  withPaymentRateLimit: vi.fn((req, handler) => handler()),
+}));
+
 describe('🧪 Payments API - GET Endpoint', () => {
   const mockSession = {
     user: {
@@ -85,14 +89,17 @@ describe('🧪 Payments API - GET Endpoint', () => {
   test('✅ Debe devolver pagos cuando el usuario está autenticado', async () => {
     (getServerSession as vi.Mock).mockResolvedValue(mockSession);
     (prisma.payment.findMany as vi.Mock).mockResolvedValue(mockPayments);
+    (prisma.payment.count as vi.Mock).mockResolvedValue(mockPayments.length);
 
-    const req = new NextRequest('http://localhost:3000/api/payments');
+    const req = new NextRequest('http://localhost:3000/api/payments?page=1&limit=20');
     const response = await GET(req);
-    const data = await response.json();
+    const result = await response.json();
 
     expect(response.status).toBe(200);
-    expect(Array.isArray(data)).toBe(true);
-    expect(data.length).toBeGreaterThan(0);
+    expect(result.data).toBeDefined();
+    expect(Array.isArray(result.data)).toBe(true);
+    expect(result.data.length).toBeGreaterThan(0);
+    expect(result.pagination).toBeDefined();
   });
 
   test('✅ Debe aplicar filtros correctamente (estado)', async () => {
@@ -228,14 +235,17 @@ describe('🧪 Payments API - GET Endpoint', () => {
   test('✅ Debe manejar lista vacía de pagos', async () => {
     (getServerSession as vi.Mock).mockResolvedValue(mockSession);
     (prisma.payment.findMany as vi.Mock).mockResolvedValue([]);
+    (prisma.payment.count as vi.Mock).mockResolvedValue(0);
 
-    const req = new NextRequest('http://localhost:3000/api/payments');
+    const req = new NextRequest('http://localhost:3000/api/payments?page=1&limit=20');
     const response = await GET(req);
-    const data = await response.json();
+    const result = await response.json();
 
     expect(response.status).toBe(200);
-    expect(Array.isArray(data)).toBe(true);
-    expect(data.length).toBe(0);
+    expect(result.data).toBeDefined();
+    expect(Array.isArray(result.data)).toBe(true);
+    expect(result.data.length).toBe(0);
+    expect(result.pagination.total).toBe(0);
   });
 
   // ========================================
