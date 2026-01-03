@@ -145,6 +145,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
   // ========================================
 
   test('✅ Debe retornar datos completos del dashboard', async () => {
+    (requireAuth as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
     (cachedDashboardStats as ReturnType<typeof vi.fn>).mockResolvedValue(mockDashboardData);
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
