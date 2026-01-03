@@ -352,6 +352,28 @@ Umbrales de Calidad:
         exec_cmd(ssh, "node -v", "Node.js version")
         exec_cmd(ssh, "pm2 -v", "PM2 version", ignore_errors=True)
         
+        # VERIFICAR NEXTAUTH_URL (CRÍTICO)
+        log("🔐 Verificando NEXTAUTH_URL...", Colors.BLUE)
+        success, nextauth_url = exec_cmd(
+            ssh,
+            f"cat {APP_PATH}/.env.production | grep '^NEXTAUTH_URL=' | cut -d= -f2",
+            "NEXTAUTH_URL check",
+            ignore_errors=True
+        )
+        
+        if success and nextauth_url:
+            nextauth_url = nextauth_url.strip()
+            
+            # Validar formato
+            if nextauth_url == 'https://' or len(nextauth_url) < 10 or not nextauth_url.startswith('https://'):
+                error(f"NEXTAUTH_URL mal configurado: '{nextauth_url}'\n"
+                      f"   Debe ser https://{DOMAIN}\n"
+                      f"   Deployment ABORTADO para prevenir problemas de login")
+            
+            log(f"✅ NEXTAUTH_URL: {nextauth_url}", Colors.GREEN)
+        else:
+            error("No se pudo leer NEXTAUTH_URL de .env.production")
+        
         # GIT PULL
         log("📥 Actualizando código...", Colors.BLUE)
         exec_cmd(ssh, f"cd {APP_PATH} && git stash", "Git stash", ignore_errors=True)
