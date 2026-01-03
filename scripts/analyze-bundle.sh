@@ -1,88 +1,145 @@
 #!/bin/bash
-
-# Script para analizar el bundle de Next.js
-# Autor: DeepAgent - Abacus.AI
+# Script de Análisis de Bundle Size
+# Optimización Sprint 3
 
 set -e
 
-echo "📊 INMOVA - Análisis de Bundle"
-echo "================================"
-echo ""
-
-PROJECT_DIR="/home/ubuntu/homming_vidaro/nextjs_space"
-cd "$PROJECT_DIR"
+echo "======================================================================="
+echo "📊 ANÁLISIS DE BUNDLE SIZE - INMOVA APP"
+echo "======================================================================="
 
 # Colores
+RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m'
+NC='\033[0m' # No Color
 
-echo "📦 Verificando bundle-analyzer..."
-if ! grep -q "@next/bundle-analyzer" package.json; then
-    echo "   🔄 Instalando @next/bundle-analyzer..."
-    yarn add -D @next/bundle-analyzer
-else
-    echo -e "   ${GREEN}✅ Ya instalado${NC}"
+# ============================================================================
+# PASO 1: Build con análisis
+# ============================================================================
+
+echo ""
+echo "🏗️ Building con análisis de bundle..."
+
+# Instalar herramientas si no existen
+if ! command -v next &> /dev/null; then
+    echo "❌ Next.js no encontrado. Instala dependencias primero: npm install"
+    exit 1
 fi
 
-echo ""
-echo "⚙️  Verificando configuración..."
+# Build
+ANALYZE=true npm run build
 
-# Crear configuración temporal si no existe
-if ! grep -q "withBundleAnalyzer" next.config.js; then
-    echo "   📝 Creando configuración temporal..."
-    
-    cat > next.config.analyze.js << 'EOF'
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
-});
-
-const nextConfig = require('./next.config.js');
-
-module.exports = withBundleAnalyzer(nextConfig);
-EOF
-    
-    mv next.config.js next.config.original.js
-    cp next.config.analyze.js next.config.js
-    RESTORE_CONFIG=true
-else
-    echo -e "   ${GREEN}✅ Configuración ya presente${NC}"
-    RESTORE_CONFIG=false
-fi
+# ============================================================================
+# PASO 2: Analizar tamaños
+# ============================================================================
 
 echo ""
-echo "🛠️  Ejecutando análisis (esto tomará varios minutos)..."
-echo ""
+echo "📦 Analizando tamaños de archivos..."
 
-ANALYZE=true NODE_OPTIONS="--max-old-space-size=6144" yarn build
-
-echo ""
-echo -e "${GREEN}✨ ¡Análisis completado! ✨${NC}"
-echo ""
-
-# Restaurar configuración si fue modificada
-if [ "$RESTORE_CONFIG" = true ]; then
-    mv next.config.original.js next.config.js
-    rm -f next.config.analyze.js
-    echo "🔄 Configuración restaurada"
+# Buscar .next/static
+if [ -d ".next/static" ]; then
     echo ""
+    echo "=== JavaScript Bundles ==="
+    find .next/static/chunks -name "*.js" -type f -exec du -h {} + | sort -rh | head -20
+    
+    echo ""
+    echo "=== CSS Files ==="
+    find .next/static/css -name "*.css" -type f -exec du -h {} + | sort -rh 2>/dev/null || echo "No CSS files found"
+    
+    echo ""
+    echo "=== Total Size por Directorio ==="
+    du -sh .next/static/*
+    
+    echo ""
+    echo "=== Tamaño Total de .next ==="
+    du -sh .next
+else
+    echo "❌ Directorio .next no encontrado. Build falló?"
+    exit 1
 fi
 
-echo "📋 Reportes generados:"
-echo "   - .next/analyze/client.html"
-echo "   - .next/analyze/server.html"
-echo ""
-echo "👁️  Abre estos archivos en tu navegador para ver el análisis detallado"
-echo ""
+# ============================================================================
+# PASO 3: Verificar límites
+# ============================================================================
 
-echo "💡 Interpretación:"
-echo "   - Azul oscuro: Tu código"
-echo "   - Colores claros: node_modules"
-echo "   - Tamaño del cuadro = tamaño del módulo"
 echo ""
+echo "⚠️ VERIFICANDO LÍMITES RECOMENDADOS"
+echo "======================================================================="
 
-echo "🎯 Busca:"
-echo "   1. Módulos grandes (>100KB)"
-echo "   2. Duplicados"
-echo "   3. Librerías no usadas"
+# Obtener tamaño de First Load JS (del build output)
+FIRST_LOAD=$(grep -oP "First Load JS.*\K[0-9.]+ [kM]B" .next/build-manifest.json 2>/dev/null || echo "N/A")
+
+# Umbrales recomendados
+echo "Umbrales Recomendados:"
+echo "  - First Load JS: < 200 kB (ideal)"
+echo "  - Individual chunk: < 244 kB (límite Vercel)"
+echo "  - Total bundle: < 5 MB"
+
 echo ""
+echo "Tamaños Actuales:"
+echo "  - First Load JS: $FIRST_LOAD"
+
+# Verificar chunks grandes
+echo ""
+echo "🔍 Chunks > 200 kB (revisar):"
+find .next/static/chunks -name "*.js" -type f -size +200k -exec du -h {} \; 2>/dev/null || echo "  ✅ Ninguno"
+
+# ============================================================================
+# PASO 4: Recomendaciones
+# ============================================================================
+
+echo ""
+echo "💡 RECOMENDACIONES DE OPTIMIZACIÓN"
+echo "======================================================================="
+
+# Buscar dependencias pesadas en node_modules
+if command -v ncdu &> /dev/null; then
+    echo "Top 10 dependencias más pesadas:"
+    du -sh node_modules/* | sort -rh | head -10
+else
+    echo "Instala 'ncdu' para análisis detallado de node_modules: brew install ncdu"
+fi
+
+echo ""
+echo "Acciones recomendadas:"
+echo "  1. Revisar imports de librerías pesadas (lucide-react, recharts)"
+echo "  2. Lazy load componentes pesados con dynamic()"
+echo "  3. Verificar que tree-shaking funcione correctamente"
+echo "  4. Considerar code splitting adicional"
+echo "  5. Analizar con @next/bundle-analyzer: ANALYZE=true npm run build"
+
+# ============================================================================
+# PASO 5: Generar reporte
+# ============================================================================
+
+echo ""
+echo "📄 Generando reporte..."
+
+cat > bundle-analysis-report.txt << EOF
+BUNDLE ANALYSIS REPORT - $(date)
+=================================
+
+First Load JS: $FIRST_LOAD
+
+TOP 20 LARGEST FILES:
+$(find .next/static/chunks -name "*.js" -type f -exec du -h {} + | sort -rh | head -20)
+
+TOTAL SIZES:
+$(du -sh .next/static/*)
+
+RECOMMENDATIONS:
+- Review heavy dependencies
+- Implement lazy loading for heavy components
+- Verify tree-shaking is working
+- Consider additional code splitting
+
+Generated by: scripts/analyze-bundle.sh
+EOF
+
+echo "✅ Reporte guardado en: bundle-analysis-report.txt"
+
+echo ""
+echo "======================================================================="
+echo "✅ ANÁLISIS COMPLETADO"
+echo "======================================================================="

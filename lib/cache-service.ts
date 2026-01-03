@@ -1,189 +1,442 @@
 /**
- * Sistema de caché en memoria para optimizar consultas a la base de datos
- * Incluye TTL configurable, invalidación manual y logs para debugging
+ * Servicio de Caching Avanzado con Redis
+ * 
+ * Optimiza performance mediante caching inteligente de queries
+ * y resultados de IA.
+ * 
+ * @module CacheService
  */
 
+import { Redis } from '@upstash/redis';
 import logger from './logger';
 
-// Tipo para las entradas de caché
-interface CacheEntry<T> {
-  data: T;
-  timestamp: number;
-  ttl: number;
+// ============================================================================
+// CONFIGURACIÓN
+// ============================================================================
+
+let redis: Redis | null = null;
+
+// Intentar conectar a Redis si está configurado
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
 }
 
-// Configuración por defecto
-const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutos
-const CLEANUP_INTERVAL = 60 * 1000; // Limpieza cada 1 minuto
+// ============================================================================
+// TIPOS
+// ============================================================================
+
+export interface CacheOptions {
+  ttl?: number; // Time to live en segundos (default: 300 = 5 min)
+  namespace?: string; // Prefijo para la key
+  tags?: string[]; // Tags para invalidación selectiva
+}
+
+export type CacheKey = string | { [key: string]: any };
+
+// ============================================================================
+// UTILIDADES
+// ============================================================================
 
 /**
- * Clase principal del servicio de caché
+ * Genera una cache key consistente desde cualquier input
  */
-class CacheService {
-  private cache: Map<string, CacheEntry<any>>;
-  private cleanupInterval: NodeJS.Timeout | null;
+function generateCacheKey(key: CacheKey, namespace?: string): string {
+  let keyString: string;
 
-  constructor() {
-    this.cache = new Map();
-    this.cleanupInterval = null;
-    this.startCleanup();
+  if (typeof key === 'string') {
+    keyString = key;
+  } else {
+    // Convertir objeto a string determinístico
+    keyString = JSON.stringify(key, Object.keys(key).sort());
   }
 
-  /**
-   * Inicia el proceso de limpieza automática de entradas expiradas
-   */
-  private startCleanup(): void {
-    this.cleanupInterval = setInterval(() => {
-      this.cleanExpired();
-    }, CLEANUP_INTERVAL);
-  }
+  return namespace ? `${namespace}:${keyString}` : keyString;
+}
 
-  /**
-   * Limpia todas las entradas expiradas
-   */
-  private cleanExpired(): void {
-    const now = Date.now();
-    let cleaned = 0;
+/**
+ * Verifica si Redis está disponible
+ */
+export function isRedisAvailable(): boolean {
+  return redis !== null;
+}
 
-    for (const [key, entry] of this.cache.entries()) {
-      if (now - entry.timestamp > entry.ttl) {
-        this.cache.delete(key);
-        cleaned++;
-      }
+// ============================================================================
+// OPERACIONES BÁSICAS
+// ============================================================================
+
+/**
+ * Obtiene un valor del cache
+ */
+export async function get<T = any>(
+  key: CacheKey,
+  options: CacheOptions = {}
+): Promise<T | null> {
+  if (!redis) return null;
+
+  try {
+    const cacheKey = generateCacheKey(key, options.namespace);
+    const value = await redis.get(cacheKey);
+
+    if (value) {
+      logger.debug('🎯 Cache HIT', { key: cacheKey });
+      return value as T;
     }
 
-    if (cleaned > 0) {
-      logger.info(`Cache cleanup: ${cleaned} expired entries removed`);
-    }
-  }
+    logger.debug('❌ Cache MISS', { key: cacheKey });
+    return null;
 
-  /**
-   * Obtiene un valor del caché
-   * @param key Clave del caché
-   * @returns El valor almacenado o undefined si no existe o está expirado
-   */
-  get<T>(key: string): T | undefined {
-    const entry = this.cache.get(key);
-
-    if (!entry) {
-      return undefined;
-    }
-
-    const now = Date.now();
-    if (now - entry.timestamp > entry.ttl) {
-      this.cache.delete(key);
-      logger.info(`Cache expired for key: ${key}`);
-      return undefined;
-    }
-
-    logger.info(`Cache hit for key: ${key}`);
-    return entry.data as T;
-  }
-
-  /**
-   * Almacena un valor en el caché
-   * @param key Clave del caché
-   * @param data Datos a almacenar
-   * @param ttl Tiempo de vida en milisegundos (opcional)
-   */
-  set<T>(key: string, data: T, ttl: number = DEFAULT_TTL): void {
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now(),
-      ttl,
-    });
-    logger.info(`Cache set for key: ${key} (TTL: ${ttl}ms)`);
-  }
-
-  /**
-   * Elimina una entrada específica del caché
-   * @param key Clave del caché
-   */
-  delete(key: string): boolean {
-    const deleted = this.cache.delete(key);
-    if (deleted) {
-      logger.info(`Cache deleted for key: ${key}`);
-    }
-    return deleted;
-  }
-
-  /**
-   * Invalida múltiples entradas que coincidan con un patrón
-   * @param pattern Patrón de búsqueda (puede ser un string parcial)
-   */
-  invalidateByPattern(pattern: string): number {
-    let invalidated = 0;
-
-    for (const key of this.cache.keys()) {
-      if (key.includes(pattern)) {
-        this.cache.delete(key);
-        invalidated++;
-      }
-    }
-
-    if (invalidated > 0) {
-      logger.info(`Cache invalidated ${invalidated} entries matching pattern: ${pattern}`);
-    }
-
-    return invalidated;
-  }
-
-  /**
-   * Limpia todo el caché
-   */
-  clear(): void {
-    const size = this.cache.size;
-    this.cache.clear();
-    logger.info(`Cache cleared: ${size} entries removed`);
-  }
-
-  /**
-   * Obtiene estadísticas del caché
-   */
-  getStats(): { size: number; keys: string[] } {
-    return {
-      size: this.cache.size,
-      keys: Array.from(this.cache.keys()),
-    };
-  }
-
-  /**
-   * Detiene el proceso de limpieza (útil para testing)
-   */
-  stopCleanup(): void {
-    if (this.cleanupInterval) {
-      clearInterval(this.cleanupInterval);
-      this.cleanupInterval = null;
-    }
+  } catch (error: any) {
+    logger.warn('⚠️ Cache get error:', error);
+    return null;
   }
 }
 
-// Instancia singleton del servicio de caché
-const cacheService = new CacheService();
+/**
+ * Guarda un valor en el cache
+ */
+export async function set<T = any>(
+  key: CacheKey,
+  value: T,
+  options: CacheOptions = {}
+): Promise<boolean> {
+  if (!redis) return false;
+
+  try {
+    const cacheKey = generateCacheKey(key, options.namespace);
+    const ttl = options.ttl || 300; // Default 5 minutos
+
+    if (options.tags && options.tags.length > 0) {
+      // Guardar tags para invalidación
+      await Promise.all([
+        redis.setex(cacheKey, ttl, JSON.stringify(value)),
+        ...options.tags.map((tag) =>
+          redis.sadd(`tag:${tag}`, cacheKey)
+        ),
+      ]);
+    } else {
+      await redis.setex(cacheKey, ttl, JSON.stringify(value));
+    }
+
+    logger.debug('💾 Cache SET', { key: cacheKey, ttl });
+    return true;
+
+  } catch (error: any) {
+    logger.warn('⚠️ Cache set error:', error);
+    return false;
+  }
+}
 
 /**
- * Helper genérico para ejecutar funciones con caché
- * @param key Clave del caché
- * @param fetcher Función que obtiene los datos
- * @param ttl Tiempo de vida en milisegundos (opcional)
- * @returns Los datos cacheados o recién obtenidos
+ * Elimina un valor del cache
  */
-export async function withCache<T>(
-  key: string,
-  fetcher: () => Promise<T>,
-  ttl?: number
+export async function del(
+  key: CacheKey,
+  options: CacheOptions = {}
+): Promise<boolean> {
+  if (!redis) return false;
+
+  try {
+    const cacheKey = generateCacheKey(key, options.namespace);
+    await redis.del(cacheKey);
+
+    logger.debug('🗑️ Cache DEL', { key: cacheKey });
+    return true;
+
+  } catch (error: any) {
+    logger.warn('⚠️ Cache del error:', error);
+    return false;
+  }
+}
+
+/**
+ * Invalida todas las keys con un tag específico
+ */
+export async function invalidateByTag(tag: string): Promise<number> {
+  if (!redis) return 0;
+
+  try {
+    // Obtener todas las keys con este tag
+    const keys = await redis.smembers(`tag:${tag}`);
+    
+    if (keys.length === 0) return 0;
+
+    // Eliminar keys
+    await redis.del(...keys);
+
+    // Eliminar el set de tags
+    await redis.del(`tag:${tag}`);
+
+    logger.info(`🗑️ Cache invalidated by tag: ${tag}`, { count: keys.length });
+    return keys.length;
+
+  } catch (error: any) {
+    logger.warn('⚠️ Cache invalidate by tag error:', error);
+    return 0;
+  }
+}
+
+/**
+ * Limpia todo el cache (usar con precaución)
+ */
+export async function flush(): Promise<boolean> {
+  if (!redis) return false;
+
+  try {
+    await redis.flushdb();
+    logger.warn('🗑️ Cache FLUSHED (all keys deleted)');
+    return true;
+
+  } catch (error: any) {
+    logger.error('❌ Cache flush error:', error);
+    return false;
+  }
+}
+
+// ============================================================================
+// PATRONES AVANZADOS
+// ============================================================================
+
+/**
+ * Cache-aside pattern: obtener o computar
+ */
+export async function getOrCompute<T = any>(
+  key: CacheKey,
+  computeFn: () => Promise<T>,
+  options: CacheOptions = {}
 ): Promise<T> {
-  // Intentar obtener del caché
-  const cached = cacheService.get<T>(key);
-  if (cached !== undefined) {
+  // Intentar obtener del cache
+  const cached = await get<T>(key, options);
+  if (cached !== null) {
     return cached;
   }
 
-  // Si no está en caché, obtener los datos
-  const data = await fetcher();
-  cacheService.set(key, data, ttl);
-  return data;
+  // Si no está en cache, computar
+  const value = await computeFn();
+
+  // Guardar en cache (no esperar)
+  set(key, value, options).catch((err) => {
+    logger.warn('Failed to cache computed value:', err);
+  });
+
+  return value;
 }
 
-export { cacheService };
-export default cacheService;
+/**
+ * Cache con retry automático si falla
+ */
+export async function getWithRetry<T = any>(
+  key: CacheKey,
+  options: CacheOptions & { retries?: number } = {}
+): Promise<T | null> {
+  const maxRetries = options.retries || 3;
+  let attempt = 0;
+
+  while (attempt < maxRetries) {
+    try {
+      return await get<T>(key, options);
+    } catch (error) {
+      attempt++;
+      if (attempt >= maxRetries) {
+        logger.error(`Cache get failed after ${maxRetries} retries`);
+        return null;
+      }
+      // Esperar antes de reintentar (exponential backoff)
+      await new Promise((resolve) => setTimeout(resolve, 100 * Math.pow(2, attempt)));
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Batch get: obtener múltiples valores a la vez
+ */
+export async function mget<T = any>(
+  keys: CacheKey[],
+  options: CacheOptions = {}
+): Promise<(T | null)[]> {
+  if (!redis) return keys.map(() => null);
+
+  try {
+    const cacheKeys = keys.map((k) => generateCacheKey(k, options.namespace));
+    const values = await redis.mget(...cacheKeys);
+
+    return values.map((v) => (v ? (v as T) : null));
+
+  } catch (error: any) {
+    logger.warn('⚠️ Cache mget error:', error);
+    return keys.map(() => null);
+  }
+}
+
+/**
+ * Incrementa un contador
+ */
+export async function increment(
+  key: CacheKey,
+  options: CacheOptions = {}
+): Promise<number> {
+  if (!redis) return 0;
+
+  try {
+    const cacheKey = generateCacheKey(key, options.namespace);
+    const newValue = await redis.incr(cacheKey);
+
+    // Setear TTL si se especifica
+    if (options.ttl) {
+      await redis.expire(cacheKey, options.ttl);
+    }
+
+    return newValue;
+
+  } catch (error: any) {
+    logger.warn('⚠️ Cache increment error:', error);
+    return 0;
+  }
+}
+
+// ============================================================================
+// CACHING ESPECÍFICO DE INMOVA
+// ============================================================================
+
+/**
+ * Cache para resultados de valoraciones de IA
+ */
+export async function cachePropertyValuation(
+  propertyId: string,
+  valuation: any,
+  ttl: number = 24 * 60 * 60 // 24 horas
+): Promise<boolean> {
+  return set(
+    { type: 'valuation', propertyId },
+    valuation,
+    {
+      ttl,
+      namespace: 'ai',
+      tags: ['valuations', `property:${propertyId}`],
+    }
+  );
+}
+
+/**
+ * Obtiene valoración cacheada
+ */
+export async function getCachedPropertyValuation(
+  propertyId: string
+): Promise<any | null> {
+  return get(
+    { type: 'valuation', propertyId },
+    { namespace: 'ai' }
+  );
+}
+
+/**
+ * Cache para matches de inquilinos
+ */
+export async function cacheTenantMatches(
+  tenantId: string,
+  matches: any[],
+  ttl: number = 7 * 24 * 60 * 60 // 7 días
+): Promise<boolean> {
+  return set(
+    { type: 'matches', tenantId },
+    matches,
+    {
+      ttl,
+      namespace: 'matching',
+      tags: ['matches', `tenant:${tenantId}`],
+    }
+  );
+}
+
+/**
+ * Obtiene matches cacheados
+ */
+export async function getCachedTenantMatches(
+  tenantId: string
+): Promise<any[] | null> {
+  return get(
+    { type: 'matches', tenantId },
+    { namespace: 'matching' }
+  );
+}
+
+/**
+ * Invalida cache cuando una propiedad se actualiza
+ */
+export async function invalidatePropertyCache(propertyId: string): Promise<void> {
+  await Promise.all([
+    invalidateByTag(`property:${propertyId}`),
+    del({ type: 'properties', filter: 'list' }, { namespace: 'api' }),
+  ]);
+}
+
+/**
+ * Invalida cache cuando un inquilino se actualiza
+ */
+export async function invalidateTenantCache(tenantId: string): Promise<void> {
+  await Promise.all([
+    invalidateByTag(`tenant:${tenantId}`),
+    del({ type: 'tenants', filter: 'list' }, { namespace: 'api' }),
+  ]);
+}
+
+// ============================================================================
+// ESTADÍSTICAS
+// ============================================================================
+
+/**
+ * Obtiene estadísticas de uso del cache
+ */
+export async function getCacheStats(): Promise<{
+  available: boolean;
+  keysCount?: number;
+  memoryUsage?: string;
+  hitRate?: number;
+} | null> {
+  if (!redis) {
+    return { available: false };
+  }
+
+  try {
+    // Obtener info de Redis
+    const info = await redis.info();
+    
+    // Parsear info (simplificado, Redis info es texto)
+    const keysMatch = info.match(/keys=(\d+)/);
+    const keysCount = keysMatch ? parseInt(keysMatch[1]) : undefined;
+
+    return {
+      available: true,
+      keysCount,
+      // Otros stats si se necesitan
+    };
+
+  } catch (error: any) {
+    logger.error('❌ Failed to get cache stats:', error);
+    return null;
+  }
+}
+
+export default {
+  get,
+  set,
+  del,
+  invalidateByTag,
+  flush,
+  getOrCompute,
+  getWithRetry,
+  mget,
+  increment,
+  isRedisAvailable,
+  cachePropertyValuation,
+  getCachedPropertyValuation,
+  cacheTenantMatches,
+  getCachedTenantMatches,
+  invalidatePropertyCache,
+  invalidateTenantCache,
+  getCacheStats,
+};

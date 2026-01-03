@@ -27,7 +27,24 @@ const nextConfig = {
       bodySizeLimit: '2mb',
     },
     // optimizeCss: true, // DISABLED: Causaba bug donde CSS se carga como <script> en Next.js 15
-    optimizePackageImports: ['lucide-react', 'recharts', 'date-fns'],
+    optimizePackageImports: [
+      'lucide-react',
+      'recharts',
+      'date-fns',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-select',
+      '@radix-ui/react-popover',
+      'framer-motion',
+    ],
+    // Optimizaciones de Sprint 3
+    typedRoutes: true, // Type-safe routing
+    turbo: {
+      // Turbopack optimizations
+      loaders: {
+        '.svg': ['@svgr/webpack'],
+      },
+    },
   },
 
   // Build configuration
@@ -110,6 +127,21 @@ const nextConfig = {
 
   // Optimización de SWC Minify
   swcMinify: true,
+
+  // Output configuration (Sprint 3)
+  output: 'standalone', // Para Docker deployment
+  
+  // Modularize imports (reduce bundle size)
+  modularizeImports: {
+    'lucide-react': {
+      transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
+      preventFullImport: true,
+    },
+    '@radix-ui/react-icons': {
+      transform: '@radix-ui/react-icons/dist/{{member}}',
+      preventFullImport: true,
+    },
+  },
 
   // Webpack optimizations
   webpack: (config, { isServer, webpack }) => {

@@ -1332,6 +1332,181 @@ Recibe notificaciones en tiempo real de eventos. Ver [Webhook Events](#tag/Webho
         },
       },
     },
+
+    // ========================================================================
+    // SPRINT 3 - FEATURES AVANZADAS
+    // ========================================================================
+
+    // Matching Automático Inquilino-Propiedad
+    '/api/matching/find': {
+      post: {
+        tags: ['AI & Automation'],
+        summary: 'Matching automático inquilino-propiedad',
+        description: 'Encuentra las mejores propiedades para un inquilino usando algoritmo ML + IA',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['tenantId'],
+                properties: {
+                  tenantId: { type: 'string', description: 'ID del inquilino' },
+                  limit: { type: 'integer', default: 10, minimum: 1, maximum: 50, description: 'Número máximo de matches' },
+                  useAI: { type: 'boolean', default: true, description: 'Usar IA para análisis avanzado' },
+                  saveResults: { type: 'boolean', default: true, description: 'Guardar resultados en BD' },
+                },
+                example: {
+                  tenantId: 'tenant_123',
+                  limit: 10,
+                  useAI: true,
+                  saveResults: true,
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Matches encontrados exitosamente',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        tenantId: { type: 'string' },
+                        tenantName: { type: 'string' },
+                        matches: {
+                          type: 'array',
+                          items: {
+                            type: 'object',
+                            properties: {
+                              unitId: { type: 'string' },
+                              matchScore: { type: 'integer', description: 'Score 0-100' },
+                              scores: {
+                                type: 'object',
+                                properties: {
+                                  location: { type: 'integer' },
+                                  price: { type: 'integer' },
+                                  features: { type: 'integer' },
+                                  size: { type: 'integer' },
+                                  availability: { type: 'integer' },
+                                },
+                              },
+                              recommendation: { type: 'string', description: 'Análisis IA' },
+                              pros: { type: 'array', items: { type: 'string' } },
+                              cons: { type: 'array', items: { type: 'string' } },
+                            },
+                          },
+                        },
+                        totalMatches: { type: 'integer' },
+                        avgScore: { type: 'integer' },
+                      },
+                    },
+                    message: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
+          '400': { $ref: '#/components/responses/BadRequest' },
+          '401': { $ref: '#/components/responses/Unauthorized' },
+          '404': { description: 'Inquilino no encontrado' },
+        },
+      },
+    },
+
+    // Clasificación Automática de Incidencias
+    '/api/v1/maintenance/classify': {
+      post: {
+        tags: ['AI & Automation'],
+        summary: 'Clasificar incidencia con IA',
+        description: 'Clasifica una incidencia de mantenimiento automáticamente: categoría, urgencia, costo estimado, proveedor recomendado',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['description'],
+                properties: {
+                  description: { type: 'string', minLength: 10, description: 'Descripción del problema' },
+                  photos: { type: 'array', items: { type: 'string', format: 'uri' }, description: 'URLs de fotos' },
+                  location: { type: 'string', description: 'Ubicación (ej: Baño principal)' },
+                  unitId: { type: 'string', description: 'ID de la unidad afectada' },
+                  createRequest: { type: 'boolean', default: false, description: 'Crear solicitud de mantenimiento automáticamente' },
+                },
+                example: {
+                  description: 'Hay una fuga de agua en el grifo del baño que gotea constantemente',
+                  location: 'Baño principal',
+                  unitId: 'unit_123',
+                  createRequest: true,
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Incidencia clasificada exitosamente',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        classification: {
+                          type: 'object',
+                          properties: {
+                            category: { type: 'string', enum: ['PLUMBING', 'ELECTRICAL', 'HVAC', 'STRUCTURAL', 'APPLIANCE', 'CLEANING', 'PAINTING', 'CARPENTRY', 'LOCKSMITH', 'PEST_CONTROL', 'OTHER'] },
+                            urgency: { type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] },
+                            estimatedCost: { type: 'number', example: 250 },
+                            estimatedCostRange: {
+                              type: 'object',
+                              properties: {
+                                min: { type: 'number', example: 175 },
+                                max: { type: 'number', example: 375 },
+                              },
+                            },
+                            providerType: { type: 'string', example: 'PLUMBER' },
+                            actionRequired: { type: 'string', example: 'Reparar fuga en grifo' },
+                            timeEstimate: { type: 'string', example: '24-48h' },
+                            reasoning: { type: 'string', description: 'Explicación de IA' },
+                            recommendations: { type: 'array', items: { type: 'string' } },
+                            requiresEmergencyCall: { type: 'boolean' },
+                          },
+                        },
+                        request: {
+                          type: 'object',
+                          nullable: true,
+                          description: 'Solicitud creada (si createRequest=true)',
+                          properties: {
+                            id: { type: 'string' },
+                            status: { type: 'string' },
+                            createdAt: { type: 'string', format: 'date-time' },
+                          },
+                        },
+                      },
+                    },
+                    message: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
+          '400': { $ref: '#/components/responses/BadRequest' },
+          '401': { $ref: '#/components/responses/Unauthorized' },
+          '503': { description: 'Servicio de IA no disponible' },
+        },
+      },
+    },
   },
 };
 
