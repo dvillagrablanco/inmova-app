@@ -294,6 +294,12 @@ const alquilerResidencialItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Propiedades',
+    href: '/propiedades',
+    icon: Building2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Inquilinos',
     href: '/inquilinos',
     icon: Users,
