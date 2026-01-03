@@ -88,12 +88,24 @@ export async function POST(
     // 5. Determinar proveedor activo
     const provider = getActiveProvider();
 
-    // 6. Enviar documento según proveedor
+    // 6. Obtener metadata
+    const ipAddress = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || undefined;
+    const userAgent = req.headers.get('user-agent') || undefined;
+
+    // 7. Enviar documento según proveedor
     let signatureData;
 
     switch (provider) {
       case 'signaturit':
-        signatureData = await sendToSignaturit(contract, signatories, expirationDays);
+        signatureData = await sendToSignaturit(
+          contract,
+          signatories,
+          expirationDays,
+          session.user.companyId,
+          session.user.id,
+          ipAddress,
+          userAgent
+        );
         break;
 
       case 'docusign':
@@ -151,44 +163,42 @@ export async function POST(
 async function sendToSignaturit(
   contract: any,
   signatories: any[],
-  expirationDays: number
+  expirationDays: number,
+  companyId: string,
+  userId: string,
+  ipAddress?: string,
+  userAgent?: string
 ) {
-  const API_KEY = process.env.SIGNATURIT_API_KEY;
+  const { SignaturitService } = await import('@/lib/signaturit-service');
 
-  if (!API_KEY) {
+  if (!SignaturitService.isConfigured()) {
     throw new Error('SIGNATURIT_API_KEY no configurada');
   }
 
-  // TODO: Implementar cuando se tengan credenciales
-  // const signaturit = new SignaturitClient(API_KEY);
-  
-  // const signature = await signaturit.createSignature({
-  //   files: [{
-  //     name: `contrato-${contract.id}.pdf`,
-  //     content: await generateContractPDF(contract),
-  //   }],
-  //   recipients: signatories.map(s => ({
-  //     email: s.email,
-  //     fullname: s.name,
-  //   })),
-  //   subject: `Firma de contrato - ${contract.property.address}`,
-  //   body: 'Por favor, revisa y firma el contrato de arrendamiento.',
-  //   expires_in: expirationDays,
-  // });
+  // Generar URL del documento (en producción, generar PDF del contrato)
+  // Por ahora, usar URL placeholder
+  const documentUrl = `${process.env.NEXTAUTH_URL}/api/contracts/${contract.id}/pdf`;
+  const documentName = `contrato-${contract.id}.pdf`;
 
-  // return {
-  //   id: signature.id,
-  //   url: signature.signature_url,
-  //   provider: 'signaturit',
-  // };
+  const signature = await SignaturitService.createSignature({
+    contractId: contract.id,
+    documentUrl,
+    documentName,
+    signatories,
+    expirationDays,
+    emailSubject: `Firma de contrato - ${contract.unit?.numero || 'Unidad'}`,
+    emailMessage: 'Por favor, revisa y firma el contrato de arrendamiento adjunto.',
+    companyId,
+    userId,
+    ipAddress,
+    userAgent,
+  });
 
-  console.log('[Signaturit] Credenciales configuradas pero implementación pendiente');
-  
   return {
-    id: `sig_demo_${Date.now()}`,
-    url: `https://app.signaturit.com/document/${Date.now()}`,
+    id: signature.id,
+    externalId: signature.externalId,
+    url: signature.signingUrl,
     provider: 'signaturit',
-    demo: true,
   };
 }
 
