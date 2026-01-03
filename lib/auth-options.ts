@@ -42,6 +42,11 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        console.log('[NextAuth] authorize() llamado', { 
+          email: credentials?.email,
+          hasPassword: !!credentials?.password 
+        });
+        
         // Delay constante para prevenir timing attacks (100-200ms)
         const CONSTANT_DELAY_MS = 150;
         const startTime = Date.now();
@@ -57,6 +62,7 @@ export const authOptions: NextAuthOptions = {
 
         try {
           if (!credentials?.email || !credentials?.password) {
+            console.log('[NextAuth] Credenciales vacías');
             await addConstantDelay();
             throw new Error('Credenciales inválidas');
           }
@@ -72,6 +78,14 @@ export const authOptions: NextAuthOptions = {
             include: { company: true },
           });
 
+          console.log('[NextAuth] Usuario encontrado:', { 
+            found: !!user,
+            email: user?.email,
+            activo: user?.activo,
+            hasPassword: !!user?.password,
+            hasCompany: !!user?.company
+          });
+
           // Hash ficticio para mantener timing constante cuando usuario no existe
           const dummyHash = '$2a$10$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012';
           const passwordHash = user?.password || dummyHash;
@@ -79,18 +93,23 @@ export const authOptions: NextAuthOptions = {
           // Siempre ejecutar bcrypt.compare para mantener timing constante
           const isPasswordValid = await bcrypt.compare(credentials.password, passwordHash);
 
+          console.log('[NextAuth] Password válido:', isPasswordValid);
+
           if (user) {
             // Usuario encontrado - validar credenciales y estado
             if (!user.password || !isPasswordValid) {
+              console.log('[NextAuth] Password incorrecto');
               await addConstantDelay();
               throw new Error('Email o contraseña incorrectos');
             }
 
             if (!user.activo) {
+              console.log('[NextAuth] Usuario inactivo');
               await addConstantDelay();
               throw new Error('Cuenta inactiva. Contacte al administrador.');
             }
 
+            console.log('[NextAuth] Login exitoso para:', user.email);
             await addConstantDelay();
             return {
               id: user.id,
@@ -142,6 +161,7 @@ export const authOptions: NextAuthOptions = {
           };
         } catch (error) {
           // Asegurar delay constante incluso en errores
+          console.error('[NextAuth] Error en authorize():', error instanceof Error ? error.message : error);
           await addConstantDelay();
           throw error;
         }
