@@ -28,6 +28,12 @@ vi.mock('@/lib/permissions', () => ({
   badRequestResponse: vi.fn((msg) => NextResponse.json({ error: msg }, { status: 400 })),
 }));
 
+vi.mock('@/lib/validations', () => ({
+  buildingCreateSchema: {
+    safeParse: vi.fn(),
+  },
+}));
+
 vi.mock('@/lib/logger', () => ({
   default: {
     info: vi.fn(),
@@ -44,8 +50,9 @@ vi.mock('@/lib/api-cache-helpers', () => ({
 }));
 
 import { prisma } from '@/lib/db';
-import { requireAuth } from '@/lib/permissions';
+import { requireAuth, requirePermission } from '@/lib/permissions';
 import { cachedBuildings } from '@/lib/api-cache-helpers';
+import { buildingCreateSchema } from '@/lib/validations';
 import { GET, POST } from '@/app/api/buildings/route';
 
 describe('🏢 Buildings API - GET Endpoint', () => {
@@ -288,6 +295,11 @@ describe('🏢 Buildings API - POST Endpoint', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (requireAuth as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
+    (requirePermission as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
+    (buildingCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
+      success: true,
+      data: validBuildingData,
+    });
   });
 
   // ========================================

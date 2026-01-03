@@ -33,6 +33,12 @@ vi.mock('@/lib/logger', () => ({
   logError: vi.fn(),
 }));
 
+vi.mock('@/lib/validations', () => ({
+  unitCreateSchema: {
+    safeParse: vi.fn(),
+  },
+}));
+
 vi.mock('@/lib/api-cache-helpers', () => ({
   cachedUnits: vi.fn(),
   invalidateUnitsCache: vi.fn(),
@@ -61,6 +67,7 @@ vi.mock('@/lib/pagination-helper', () => ({
 import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { cachedUnits } from '@/lib/api-cache-helpers';
+import { unitCreateSchema } from '@/lib/validations';
 import { GET, POST } from '@/app/api/units/route';
 
 describe('🏠 Units API - GET Endpoint', () => {
@@ -339,6 +346,10 @@ describe('🏠 Units API - POST Endpoint', () => {
     vi.clearAllMocks();
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockUser,
+    });
+    (unitCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
+      success: true,
+      data: validUnitData,
     });
   });
 
