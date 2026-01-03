@@ -14,9 +14,20 @@ import { prisma } from './db';
 import logger from './logger';
 import { redis } from './redis';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization para evitar errores en build-time
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openai) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY no configurada');
+    }
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openai;
+}
 
 // ============================================================================
 // TIPOS
@@ -48,6 +59,7 @@ export interface SemanticSearchResult {
  * Genera embedding para un texto
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
+  const openaiClient = getOpenAI();
   try {
     const response = await openai.embeddings.create({
       model: 'text-embedding-3-small',
