@@ -37,6 +37,7 @@ vi.mock('@/lib/db', () => ({
     },
     workOrder: {
       create: vi.fn(),
+      update: vi.fn(),
     },
     notification: {
       create: vi.fn(),

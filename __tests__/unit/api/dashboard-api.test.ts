@@ -40,6 +40,10 @@ vi.mock('next-auth', () => ({
   getServerSession: vi.fn(),
 }));
 
+vi.mock('@/lib/permissions', () => ({
+  requireAuth: vi.fn(),
+}));
+
 vi.mock('@/lib/logger', () => ({
   default: {
     info: vi.fn(),
@@ -49,13 +53,15 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 vi.mock('@/lib/api-cache-helpers', () => ({
+  cachedDashboardStats: vi.fn(),
   cachedDashboard: vi.fn(),
   invalidateDashboardCache: vi.fn(),
 }));
 
 import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
-import { cachedDashboard } from '@/lib/api-cache-helpers';
+import { requireAuth } from '@/lib/permissions';
+import { cachedDashboardStats, cachedDashboard } from '@/lib/api-cache-helpers';
 import { GET } from '@/app/api/dashboard/route';
 
 describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
@@ -131,6 +137,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockUser,
     });
+    (requireAuth as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
   });
 
   // ========================================
@@ -138,7 +145,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
   // ========================================
 
   test('✅ Debe retornar datos completos del dashboard', async () => {
-    (cachedDashboard as ReturnType<typeof vi.fn>).mockResolvedValue(mockDashboardData);
+    (cachedDashboardStats as ReturnType<typeof vi.fn>).mockResolvedValue(mockDashboardData);
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
