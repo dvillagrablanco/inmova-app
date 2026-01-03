@@ -650,7 +650,7 @@ const operacionesNavItems = [
   },
   {
     name: 'Mantenimiento Preventivo',
-    href: '/mantenimiento-preventivo',
+    href: '/mantenimiento',
     icon: Calendar,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
@@ -708,7 +708,7 @@ const comunicacionesNavItems = [
   },
   {
     name: 'Publicaciones',
-    href: '/publicaciones',
+    href: '/dashboard/social-media',
     icon: Megaphone,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
