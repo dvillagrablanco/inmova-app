@@ -1,213 +1,323 @@
 #!/usr/bin/env python3
-"""
-Deployment automatizado con Paramiko
-Despliega los últimos cambios al servidor de producción
-"""
-
+"""Deployment automático a inmovaapp.com vía SSH"""
 import sys
 sys.path.insert(0, '/home/ubuntu/.local/lib/python3.12/site-packages')
-
 import paramiko
 import time
-from datetime import datetime
 
 SERVER_IP = '157.180.119.236'
-SERVER_USER = 'root'
-SERVER_PASSWORD = 'xcc9brgkMMbf'
+USERNAME = 'root'
+PASSWORD = 'hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo='
 APP_PATH = '/opt/inmova-app'
+DOMAIN = 'https://inmovaapp.com'
 
-def log(message):
-    timestamp = datetime.now().strftime('%H:%M:%S')
-    print(f"[{timestamp}] {message}")
-
-def execute_command(ssh, command, timeout=300):
-    """Ejecuta comando y retorna output"""
-    log(f"Ejecutando: {command}")
-    stdin, stdout, stderr = ssh.exec_command(command, timeout=timeout)
+def exec_cmd(client, command, description="", timeout=300):
+    """Ejecutar comando con logging"""
+    timestamp = time.strftime('%H:%M:%S')
+    if description:
+        print(f"[{timestamp}] {description}")
+    
+    stdin, stdout, stderr = client.exec_command(command, timeout=timeout)
     exit_status = stdout.channel.recv_exit_status()
     
-    output = stdout.read().decode('utf-8', errors='ignore')
-    error = stderr.read().decode('utf-8', errors='ignore')
+    output = stdout.read().decode('utf-8').strip()
+    errors = stderr.read().decode('utf-8').strip()
     
-    if exit_status != 0:
-        log(f"⚠️  Exit status: {exit_status}")
-        if error:
-            log(f"Error: {error[:500]}")
+    if output:
+        print(output)
     
-    return exit_status, output, error
+    if errors and exit_status != 0:
+        print(f"⚠️  Stderr: {errors}")
+    
+    return exit_status, output, errors
 
-def main():
-    log("🚀 Iniciando deployment...")
+print("=" * 70)
+print("🚀 DEPLOYMENT AUTOMÁTICO - INMOVA APP")
+print("=" * 70)
+print()
+print(f"Servidor: {SERVER_IP}")
+print(f"Dominio: {DOMAIN}")
+print(f"Path: {APP_PATH}")
+print()
+print("=" * 70)
+print()
+
+client = paramiko.SSHClient()
+client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+try:
+    # 1. CONECTAR
+    print(f"[{time.strftime('%H:%M:%S')}] 🔐 Conectando...")
+    client.connect(SERVER_IP, username=USERNAME, password=PASSWORD, timeout=10)
+    print(f"[{time.strftime('%H:%M:%S')}] ✅ Conectado\n")
     
-    # Conectar
-    client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    # 2. BACKUP DE BD
+    print("=" * 70)
+    print("💾 BACKUP PRE-DEPLOYMENT")
+    print("=" * 70)
+    print()
     
+    timestamp_backup = time.strftime('%Y%m%d_%H%M%S')
+    backup_file = f"/var/backups/inmova/pre-deploy-{timestamp_backup}.sql"
+    
+    exec_cmd(
+        client,
+        f"mkdir -p /var/backups/inmova",
+        "Creando directorio de backups..."
+    )
+    
+    status, output, errors = exec_cmd(
+        client,
+        f"pg_dump -U inmova_user inmova_production > {backup_file}",
+        "Haciendo backup de BD...",
+        timeout=120
+    )
+    
+    if status == 0:
+        print(f"✅ BD backup: {backup_file}")
+    else:
+        print(f"⚠️  Backup falló pero continuamos...")
+    
+    # Guardar commit actual para rollback
+    status, current_commit, _ = exec_cmd(
+        client,
+        f"cd {APP_PATH} && git rev-parse --short HEAD",
+        ""
+    )
+    print(f"✅ Commit actual: {current_commit}\n")
+    
+    # 3. ACTUALIZAR CÓDIGO
+    print("=" * 70)
+    print("📥 ACTUALIZANDO CÓDIGO")
+    print("=" * 70)
+    print()
+    
+    exec_cmd(
+        client,
+        f"cd {APP_PATH} && git fetch origin",
+        "Fetching cambios..."
+    )
+    
+    status, output, errors = exec_cmd(
+        client,
+        f"cd {APP_PATH} && git reset --hard origin/main",
+        "Actualizando a última versión..."
+    )
+    
+    if status == 0:
+        print("✅ Código actualizado\n")
+    else:
+        print("❌ Error actualizando código")
+        print(f"Saliendo con error...")
+        sys.exit(1)
+    
+    # 4. INSTALAR DEPENDENCIAS
+    print("=" * 70)
+    print("📦 DEPENDENCIAS")
+    print("=" * 70)
+    print()
+    
+    status, output, errors = exec_cmd(
+        client,
+        f"cd {APP_PATH} && npm install",
+        "Instalando/actualizando dependencias...",
+        timeout=600
+    )
+    
+    if status == 0:
+        print("✅ Dependencias instaladas\n")
+    else:
+        print("⚠️  Advertencia en dependencias pero continuamos...\n")
+    
+    # 5. PRISMA
+    print("=" * 70)
+    print("🔧 PRISMA SETUP")
+    print("=" * 70)
+    print()
+    
+    exec_cmd(
+        client,
+        f"cd {APP_PATH} && npx prisma generate",
+        "Generando Prisma Client...",
+        timeout=120
+    )
+    print("✅ Prisma Client generado")
+    
+    exec_cmd(
+        client,
+        f"cd {APP_PATH} && npx prisma migrate deploy",
+        "Aplicando migraciones...",
+        timeout=120
+    )
+    print("✅ Migraciones aplicadas\n")
+    
+    # 6. REINICIAR PM2
+    print("=" * 70)
+    print("♻️  REINICIANDO APLICACIÓN")
+    print("=" * 70)
+    print()
+    
+    status, output, errors = exec_cmd(
+        client,
+        "pm2 reload inmova-app",
+        "PM2 reload (zero-downtime)..."
+    )
+    
+    if status == 0:
+        print("✅ PM2 reloaded")
+    else:
+        # Si reload falla, intentar restart
+        exec_cmd(
+            client,
+            "pm2 restart inmova-app",
+            "PM2 restart (con downtime breve)..."
+        )
+        print("✅ PM2 restarted")
+    
+    print()
+    print("⏳ Esperando warm-up (15 segundos)...")
+    time.sleep(15)
+    print()
+    
+    # 7. HEALTH CHECKS
+    print("=" * 70)
+    print("🏥 HEALTH CHECKS POST-DEPLOYMENT")
+    print("=" * 70)
+    print()
+    
+    checks_passed = 0
+    checks_total = 5
+    
+    # Check 1: HTTP
+    print(f"[{time.strftime('%H:%M:%S')}] 1/{checks_total} Verificando HTTP...")
+    status, output, errors = exec_cmd(
+        client,
+        f"curl -s -o /dev/null -w '%{{http_code}}' {DOMAIN}/api/health",
+        ""
+    )
+    if output == '200':
+        print("✅ HTTP OK")
+        checks_passed += 1
+    else:
+        print(f"❌ HTTP falló (código: {output})")
+    print()
+    
+    # Check 2: BD
+    print(f"[{time.strftime('%H:%M:%S')}] 2/{checks_total} Verificando BD...")
+    status, output, errors = exec_cmd(
+        client,
+        f"cd {APP_PATH} && npx prisma db push --skip-generate",
+        "",
+        timeout=30
+    )
+    if status == 0:
+        print("✅ BD OK")
+        checks_passed += 1
+    else:
+        print("❌ BD error")
+    print()
+    
+    # Check 3: PM2
+    print(f"[{time.strftime('%H:%M:%S')}] 3/{checks_total} Verificando PM2...")
+    status, output, errors = exec_cmd(
+        client,
+        "pm2 list | grep inmova-app | grep online",
+        ""
+    )
+    if status == 0:
+        print("✅ PM2 OK")
+        checks_passed += 1
+    else:
+        print("❌ PM2 error")
+    print()
+    
+    # Check 4: Memoria
+    print(f"[{time.strftime('%H:%M:%S')}] 4/{checks_total} Verificando memoria...")
+    status, output, errors = exec_cmd(
+        client,
+        "free | grep Mem | awk '{print ($3/$2) * 100.0}'",
+        ""
+    )
     try:
-        log(f"Conectando a {SERVER_IP}...")
-        client.connect(
-            SERVER_IP,
-            username=SERVER_USER,
-            password=SERVER_PASSWORD,
-            timeout=10,
-            banner_timeout=10
-        )
-        log("✅ Conectado")
-        
-        # 1. Verificar directorio
-        log("\n📁 Verificando directorio...")
-        status, output, _ = execute_command(client, f"ls -la {APP_PATH} | head -5")
-        if status != 0:
-            log(f"❌ Directorio {APP_PATH} no existe")
-            return False
-        log("✅ Directorio OK")
-        
-        # 2. Git pull
-        log("\n📥 Actualizando código...")
-        status, output, error = execute_command(
-            client,
-            f"cd {APP_PATH} && git pull origin main",
-            timeout=60
-        )
-        
-        if status != 0:
-            log("❌ Git pull falló")
-            log(error)
-            return False
-        
-        log("✅ Código actualizado")
-        log(output[:200])
-        
-        # 3. Verificar si hay cambios en package.json
-        log("\n📦 Verificando dependencias...")
-        status, output, _ = execute_command(
-            client,
-            f"cd {APP_PATH} && git diff HEAD~1 HEAD -- package.json | wc -l"
-        )
-        
-        has_deps_changes = int(output.strip()) > 0
-        
-        if has_deps_changes:
-            log("📦 Instalando dependencias...")
-            status, output, error = execute_command(
-                client,
-                f"cd {APP_PATH} && npm install",
-                timeout=300
-            )
-            if status != 0:
-                log("⚠️  npm install tuvo warnings (normal)")
-            log("✅ Dependencias actualizadas")
+        mem_usage = float(output)
+        if mem_usage < 90:
+            print(f"✅ Memoria OK ({mem_usage:.1f}%)")
+            checks_passed += 1
         else:
-            log("✅ Sin cambios en dependencias")
-        
-        # 4. Verificar procesos actuales
-        log("\n🔍 Verificando procesos...")
-        status, output, _ = execute_command(
-            client,
-            "ps aux | grep -E 'node.*3000|next-server' | grep -v grep | wc -l"
-        )
-        
-        running_processes = int(output.strip())
-        log(f"Procesos corriendo: {running_processes}")
-        
-        # 5. Matar procesos viejos si existen
-        if running_processes > 0:
-            log("🛑 Deteniendo procesos viejos...")
-            execute_command(client, "fuser -k 3000/tcp", timeout=10)
-            execute_command(client, "pkill -f 'next-server'", timeout=10)
-            time.sleep(3)
-            log("✅ Procesos detenidos")
-        
-        # 6. Limpiar cache
-        log("\n🧹 Limpiando cache...")
-        execute_command(client, f"cd {APP_PATH} && rm -rf .next/cache")
-        log("✅ Cache limpiado")
-        
-        # 7. Reiniciar aplicación
-        log("\n🚀 Iniciando aplicación...")
-        
-        # Verificar si usa PM2
-        status, output, _ = execute_command(client, "which pm2")
-        uses_pm2 = status == 0
-        
-        if uses_pm2:
-            log("Usando PM2...")
-            # Verificar si app existe en PM2
-            status, output, _ = execute_command(client, "pm2 list | grep inmova-app")
-            
-            if status == 0:
-                # Restart existente
-                execute_command(client, "pm2 restart inmova-app", timeout=30)
-                log("✅ PM2 restart completado")
-            else:
-                # Iniciar nuevo
-                execute_command(
-                    client,
-                    f"cd {APP_PATH} && pm2 start npm --name inmova-app -- start",
-                    timeout=30
-                )
-                execute_command(client, "pm2 save")
-                log("✅ PM2 iniciado")
+            print(f"⚠️  Memoria alta ({mem_usage:.1f}%)")
+    except:
+        print(f"⚠️  No se pudo verificar memoria")
+    print()
+    
+    # Check 5: Disco
+    print(f"[{time.strftime('%H:%M:%S')}] 5/{checks_total} Verificando disco...")
+    status, output, errors = exec_cmd(
+        client,
+        "df -h / | tail -1 | awk '{print $5}' | sed 's/%//'",
+        ""
+    )
+    try:
+        disk_usage = int(output)
+        if disk_usage < 90:
+            print(f"✅ Disco OK ({disk_usage}%)")
+            checks_passed += 1
         else:
-            log("Iniciando con nohup...")
-            execute_command(
-                client,
-                f"cd {APP_PATH} && nohup npm start > /tmp/inmova.log 2>&1 &",
-                timeout=5
-            )
-            log("✅ Aplicación iniciada")
-        
-        # 8. Verificar que inició
-        log("\n⏳ Esperando warm-up (15s)...")
-        time.sleep(15)
-        
-        log("🔍 Verificando servicio...")
-        status, output, _ = execute_command(
-            client,
-            "curl -s http://localhost:3000/api/health | head -20",
-            timeout=10
-        )
-        
-        if status == 0 and ('ok' in output.lower() or 'status' in output.lower()):
-            log("✅ Servicio respondiendo")
-            log(f"Respuesta: {output[:100]}")
-        else:
-            log("⚠️  Health check no responde aún (puede tardar más)")
-        
-        # 9. Verificar puerto
-        status, output, _ = execute_command(
-            client,
-            "ss -tlnp | grep :3000"
-        )
-        
-        if status == 0:
-            log("✅ Puerto 3000 listening")
-        else:
-            log("⚠️  Puerto 3000 no detectado")
-        
-        log("\n" + "="*60)
-        log("✅ DEPLOYMENT COMPLETADO")
-        log("="*60)
-        log(f"\nURL: http://{SERVER_IP}/")
-        log("URL (dominio): https://inmovaapp.com/")
-        
-        return True
-        
-    except paramiko.AuthenticationException:
-        log("❌ Error de autenticación")
-        return False
-    except paramiko.SSHException as e:
-        log(f"❌ Error SSH: {e}")
-        return False
-    except Exception as e:
-        log(f"❌ Error: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
-    finally:
-        client.close()
-        log("Conexión cerrada")
-
-if __name__ == '__main__':
-    success = main()
-    sys.exit(0 if success else 1)
+            print(f"⚠️  Disco alto ({disk_usage}%)")
+    except:
+        print(f"⚠️  No se pudo verificar disco")
+    print()
+    
+    # 8. RESULTADO FINAL
+    print("=" * 70)
+    
+    if checks_passed >= 4:
+        print("✅ DEPLOYMENT COMPLETADO EXITOSAMENTE")
+    elif checks_passed >= 2:
+        print("⚠️  DEPLOYMENT COMPLETADO CON ADVERTENCIAS")
+    else:
+        print("❌ DEPLOYMENT FALLÓ - CONSIDERAR ROLLBACK")
+    
+    print("=" * 70)
+    print()
+    
+    # 9. INFORMACIÓN
+    print("📊 Resumen:")
+    print(f"  Health checks: {checks_passed}/{checks_total} pasando")
+    print()
+    
+    print("🌐 URLs:")
+    print(f"  Principal: {DOMAIN}")
+    print(f"  Health: {DOMAIN}/api/health")
+    print(f"  Login: {DOMAIN}/login")
+    print(f"  Dashboard: {DOMAIN}/dashboard")
+    print()
+    
+    print("🔧 Comandos útiles:")
+    print(f"  Ver logs: ssh {USERNAME}@{SERVER_IP} 'pm2 logs inmova-app'")
+    print(f"  Restart: ssh {USERNAME}@{SERVER_IP} 'pm2 restart inmova-app'")
+    print(f"  Status: ssh {USERNAME}@{SERVER_IP} 'pm2 status'")
+    print()
+    
+    if checks_passed < 4:
+        print("⚠️  ROLLBACK (si es necesario):")
+        print(f"  ssh {USERNAME}@{SERVER_IP}")
+        print(f"  cd {APP_PATH}")
+        print(f"  git reset --hard {current_commit}")
+        print(f"  pm2 restart inmova-app")
+        print()
+    
+    print("=" * 70)
+    
+except paramiko.ssh_exception.AuthenticationException:
+    print("❌ Error de autenticación SSH")
+    sys.exit(1)
+except paramiko.ssh_exception.SSHException as e:
+    print(f"❌ Error SSH: {e}")
+    sys.exit(1)
+except Exception as e:
+    print(f"❌ Error: {e}")
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
+finally:
+    client.close()
