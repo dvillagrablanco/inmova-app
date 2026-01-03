@@ -347,6 +347,20 @@ Umbrales de Calidad:
         # BACKUP PRE-DEPLOYMENT
         previous_commit = backup_current_deployment(ssh)
         
+        # BACKUP DE .ENV.PRODUCTION (CRÍTICO)
+        log("💾 Backup de .env.production...", Colors.BLUE)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        success, _ = exec_cmd(
+            ssh,
+            f"cp {APP_PATH}/.env.production {APP_PATH}/.env.production.backup.{timestamp}",
+            "Backup .env",
+            ignore_errors=True
+        )
+        if success:
+            log(f"✅ Backup guardado: .env.production.backup.{timestamp}")
+        else:
+            warning("No se pudo crear backup de .env (puede no existir aún)")
+        
         # PRE-DEPLOYMENT CHECKS
         log("📋 Pre-deployment checks...", Colors.BLUE)
         exec_cmd(ssh, "node -v", "Node.js version")
