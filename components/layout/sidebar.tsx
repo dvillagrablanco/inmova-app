@@ -100,6 +100,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/ocr': 'ocr',
   '/redes-sociales': 'redes_sociales',
   '/dashboard/social-media': 'redes_sociales',
+  '/propiedades': 'gestion_inmobiliaria',
   '/admin/dashboard': 'admin_dashboard',
   '/admin/clientes': 'gestion_clientes',
   '/admin/planes': 'admin_planes',
