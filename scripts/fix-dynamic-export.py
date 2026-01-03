@@ -104,7 +104,10 @@ def main():
     errors = 0
     
     for route in routes:
-        relative_path = route.relative_to(Path.cwd())
+        try:
+            relative_path = route.relative_to(Path.cwd())
+        except ValueError:
+            relative_path = route
         modified, message = fix_file(route)
         
         if modified:

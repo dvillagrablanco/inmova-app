@@ -61,3 +61,9 @@ scripts/deploy-with-password.sh
 # Test results
 test-results/
 playwright-report/
+
+# Testing
+coverage/
+test-results/
+.vitest/
+*.test.ts.snap
