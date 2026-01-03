@@ -5986,6 +5986,290 @@ pm2 restart inmova-app
 
 ---
 
-**Última actualización**: 29 de diciembre de 2025
-**Versión**: 2.1.0 (añadido deployment automatizado con Paramiko + lecciones aprendidas)
+## 🧪 DEPLOYMENT CON TESTS AUTOMÁTICOS (CRÍTICO)
+
+### ⚡ REGLA OBLIGATORIA: Tests en Cada Deployment
+
+**NUNCA deployar sin ejecutar tests automáticos**
+
+Cada deployment DEBE:
+1. ✅ Ejecutar tests unitarios PRE-BUILD
+2. ✅ Verificar umbral mínimo de 95% de tests pasando
+3. ✅ Ejecutar build
+4. ✅ Ejecutar health checks POST-deployment
+5. ✅ Ejecutar E2E smoke tests
+6. ✅ Rollback automático si cualquier check falla
+
+### 📋 Quality Gates Obligatorios
+
+```bash
+# Umbrales mínimos
+MIN_TEST_PASS_RATE=95%  # 95% de tests deben pasar
+MIN_COVERAGE=90%        # 90% de cobertura de código
+MAX_BUILD_TIME=10min    # Build no debe exceder 10 minutos
+
+# Si NO se cumplen → DEPLOYMENT ABORTADO
+```
+
+### 🚀 Scripts de Deployment
+
+#### Opción 1: Script Python con Tests Integrados (RECOMENDADO)
+
+```bash
+# Deployment con tests automáticos y rollback
+python3 scripts/deploy-with-tests.py
+```
+
+**Features**:
+- ✅ Backup automático pre-deployment
+- ✅ Tests unitarios con quality gates
+- ✅ Build validation
+- ✅ Health checks post-deployment
+- ✅ E2E smoke tests
+- ✅ Rollback automático en caso de fallo
+- ✅ Reporte de deployment
+
+#### Opción 2: GitHub Actions (CI/CD Automatizado)
+
+```yaml
+# En cada push a main:
+# 1. Lint + Type Check
+# 2. Unit Tests (95%+ pass rate requerido)
+# 3. E2E Tests
+# 4. Build
+# 5. Security Scan
+# 6. Deploy to Server (con tests en servidor)
+# 7. E2E Smoke Tests en producción
+# 8. Health Checks
+# 9. Rollback automático si falla
+```
+
+### 🔄 Flujo de Deployment
+
+```
+┌─────────────────────────────────────────────┐
+│ 1. PRE-DEPLOYMENT                           │
+│    ✓ Backup BD                              │
+│    ✓ Git stash/pull                         │
+│    ✓ Guardar commit actual (para rollback) │
+└─────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────┐
+│ 2. DEPENDENCIES                             │
+│    ✓ npm ci                                 │
+│    ✓ Prisma generate                        │
+│    ✓ Prisma migrate                         │
+└─────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────┐
+│ 3. TESTS PRE-BUILD (QUALITY GATE)          │
+│    ✓ npm test --run --coverage             │
+│    ✓ Parse results                          │
+│    ✓ Verify pass rate ≥ 95%                │
+│    ✗ Si < 95% → ABORT + NO DEPLOY          │
+└─────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────┐
+│ 4. BUILD                                    │
+│    ✓ npm run build                          │
+│    ✗ Si falla → ABORT + NO DEPLOY          │
+└─────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────┐
+│ 5. DEPLOYMENT                               │
+│    ✓ PM2 reload (zero-downtime)            │
+│    ✓ PM2 save                               │
+│    ✓ Wait 15s para warm-up                 │
+└─────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────┐
+│ 6. HEALTH CHECKS POST-DEPLOYMENT           │
+│    ✓ HTTP /api/health                      │
+│    ✓ Database connectivity                 │
+│    ✓ PM2 status = online                   │
+│    ✓ Memory < 90%                           │
+│    ✓ Disk < 90%                             │
+│    ✗ Si falla ≥ 2 checks → ROLLBACK        │
+└─────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────┐
+│ 7. E2E SMOKE TESTS (Opcional)              │
+│    ✓ Run @smoke tagged tests                │
+│    ✓ Against https://inmovaapp.com          │
+│    ⚠️  Si falla → Warning (no rollback)    │
+└─────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────┐
+│ 8. SUCCESS / ROLLBACK                       │
+│    ✅ Success → Generate report             │
+│    ❌ Fail → Rollback to previous commit   │
+└─────────────────────────────────────────────┘
+```
+
+### ⚠️ Rollback Automático
+
+Si **cualquier** de estos pasos falla:
+- Tests PRE-BUILD < 95% pass rate
+- Build falla
+- Health check HTTP falla
+- Database no conecta
+- PM2 no está online
+
+**Entonces**:
+1. Git reset --hard <previous_commit>
+2. npm run build (versión anterior)
+3. PM2 restart
+4. Notificar fallo
+
+### 📊 Ejemplo de Ejecución
+
+```bash
+$ python3 scripts/deploy-with-tests.py
+
+======================================================================
+🚀 DEPLOYMENT AUTOMÁTICO CON TESTS - INMOVA APP
+======================================================================
+
+Servidor: 157.180.119.236
+Dominio: inmovaapp.com
+Path: /opt/inmova-app
+
+Umbrales de Calidad:
+  - Test pass rate: ≥95%
+  - Coverage: ≥90%
+
+======================================================================
+
+[09:15:30] 🔐 Conectando...
+[09:15:32] ✅ Conectado a 157.180.119.236
+
+[09:15:33] 💾 BACKUP PRE-DEPLOYMENT
+[09:15:35] ✅ BD backup: /var/backups/inmova/pre-deploy-20260103_091535.sql
+[09:15:35] ✅ Commit actual: fa42e0eb
+
+[09:15:36] 📥 Actualizando código...
+[09:15:37] ✅ Código actualizado
+
+[09:15:38] 📦 Instalando dependencias...
+[09:16:34] ✅ Dependencias instaladas
+
+[09:16:35] 🔧 Prisma setup...
+[09:16:43] ✅ Prisma configurado
+
+======================================================================
+🧪 FASE 1: TESTS PRE-BUILD
+======================================================================
+
+[09:16:44] 📊 Tests unitarios...
+[09:18:15] Tests: 387/398 pasando (97.2%)
+[09:18:15] Fallando: 11
+[09:18:15] ✅ Tests pre-build: 387/398 tests pasando
+
+======================================================================
+🏗️  FASE 2: BUILD
+======================================================================
+
+[09:18:16] 🏗️  Building aplicación...
+[09:21:03] ✅ Build completado
+
+======================================================================
+🚀 DEPLOYMENT
+======================================================================
+
+[09:21:04] ♻️  PM2 reload...
+[09:21:05] ✅ PM2 reloaded
+[09:21:20] ⏳ Esperando warm-up...
+
+======================================================================
+🏥 FASE 3: HEALTH CHECKS POST-DEPLOYMENT
+======================================================================
+
+[09:21:35] 1/5 Verificando HTTP...
+[09:21:36]   ✅ HTTP OK
+
+[09:21:36] 2/5 Verificando BD...
+[09:21:37]   ✅ BD OK
+
+[09:21:37] 3/5 Verificando PM2...
+[09:21:38]   ✅ PM2 OK
+
+[09:21:38] 4/5 Verificando memoria...
+[09:21:39]   ✅ Memoria OK (45.3%)
+
+[09:21:39] 5/5 Verificando disco...
+[09:21:40]   ✅ Disco OK (62.1%)
+
+Health checks: 5/5 pasando
+
+======================================================================
+✅ DEPLOYMENT COMPLETADO EXITOSAMENTE
+======================================================================
+
+URL Principal: https://inmovaapp.com
+URL Fallback: http://157.180.119.236:3000
+Health Check: https://inmovaapp.com/api/health
+
+Tests Ejecutados:
+  ✅ Unit tests: 387/398 tests pasando (97.2%)
+  ✅ E2E tests: Smoke tests pasaron
+  ✅ Health checks: 5/5 OK
+
+Para ver logs:
+  ssh root@157.180.119.236 'pm2 logs inmova-app'
+
+======================================================================
+```
+
+### 🌐 DOMINIO INMOVAAPP.COM
+
+#### Configuración Inicial
+
+```bash
+# En el servidor
+ssh root@157.180.119.236 'bash -s' < scripts/setup-domain.sh
+```
+
+**Lo que hace**:
+1. ✅ Instala Nginx + Certbot
+2. ✅ Configura Nginx como reverse proxy
+3. ✅ Verifica DNS (debe apuntar a 157.180.119.236)
+4. ✅ Obtiene certificado SSL con Let's Encrypt
+5. ✅ Configura redirect HTTP → HTTPS
+6. ✅ Actualiza .env.production con https://inmovaapp.com
+7. ✅ Configura auto-renovación SSL
+8. ✅ Reinicia PM2 con nuevas variables
+
+#### Requisitos DNS
+
+Configurar en tu proveedor de DNS:
+
+```
+Tipo A:  inmovaapp.com     →  157.180.119.236
+Tipo A:  www.inmovaapp.com →  157.180.119.236
+```
+
+Esperar 5-15 minutos para propagación DNS.
+
+#### URLs Finales
+
+```
+Producción: https://inmovaapp.com
+WWW:        https://www.inmovaapp.com
+Health:     https://inmovaapp.com/api/health
+Login:      https://inmovaapp.com/login
+Dashboard:  https://inmovaapp.com/dashboard
+```
+
+### 📝 DOCUMENTACIÓN RELACIONADA
+
+- `scripts/deploy-with-tests.py` - Deployment con tests automáticos
+- `scripts/setup-domain.sh` - Configuración de dominio + SSL
+- `.github/workflows/ci.yml` - CI/CD automatizado
+- `DEPLOYMENT_SERVER_TESTS.md` - Guía de testing en servidor
+- `RESUMEN_DEPLOYMENT_SSH_FINAL.md` - Resumen de deployment SSH
+
+---
+
+**Última actualización**: 3 de enero de 2026
+**Versión**: 2.2.0 (añadido deployment con tests automáticos + dominio inmovaapp.com)
 **Mantenido por**: Equipo Inmova

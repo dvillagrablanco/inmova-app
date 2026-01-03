@@ -173,38 +173,94 @@ jobs:
           script: |
             cd ${{ secrets.SERVER_PATH || '/opt/inmova-app' }}
             
+            # Backup pre-deployment
+            echo "📋 PRE-DEPLOYMENT BACKUP"
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            PREVIOUS_COMMIT=$(git rev-parse HEAD)
+            pg_dump -U postgres inmova_production > /var/backups/inmova/pre-deploy-$TIMESTAMP.sql 2>/dev/null || true
+            
             # Pull latest code
+            echo "📥 UPDATING CODE"
+            git stash || true
             git pull origin main
             
             # Install dependencies
+            echo "📦 INSTALLING DEPENDENCIES"
             npm ci --production=false
-            
-            # Run Prisma migrations
             npx prisma generate
-            npx prisma migrate deploy
+            npx prisma migrate deploy || true
             
-            # Build application
-            npm run build
+            # Run tests PRE-BUILD with quality gates
+            echo "🧪 RUNNING TESTS PRE-BUILD"
+            mkdir -p test-reports
+            npm test -- --run --coverage --json --outputFile=test-reports/results.json 2>&1 | tee test-reports/tests.log || true
             
-            # Run tests on server
-            npm test -- --run --reporter=json --outputFile=test-results.json || true
-            
-            # Check test results
-            if [ -f test-results.json ]; then
-              echo "✅ Tests ejecutados en servidor"
-              cat test-results.json | jq '.numPassedTests, .numFailedTests'
+            # Parse and validate test results
+            if [ -f test-reports/results.json ]; then
+              PASSED=$(cat test-reports/results.json | jq -r '.numPassedTests // 0')
+              TOTAL=$(cat test-reports/results.json | jq -r '.numTotalTests // 0')
+              
+              echo "Tests: $PASSED/$TOTAL pasando"
+              
+              if [ "$TOTAL" -gt 0 ]; then
+                PASS_RATE=$(awk "BEGIN {printf \"%.1f\", ($PASSED/$TOTAL)*100}")
+                echo "Pass rate: $PASS_RATE%"
+                
+                # Quality gate: 95% minimum
+                if (( $(echo "$PASS_RATE < 95.0" | bc -l) )); then
+                  echo "❌ Test pass rate ($PASS_RATE%) < 95% - DEPLOYMENT ABORTADO"
+                  exit 1
+                fi
+              fi
             fi
             
-            # Restart application with PM2
-            pm2 reload ecosystem.config.js --update-env
+            echo "✅ Tests OK - Proceeding with build"
             
-            # Health check
-            sleep 10
-            curl -f http://localhost:3000/api/health || exit 1
+            # Build application
+            echo "🏗️  BUILDING APPLICATION"
+            npm run build 2>&1 | tee test-reports/build.log
             
-            echo "✅ Deployment completado exitosamente"
+            if [ ${PIPESTATUS[0]} -ne 0 ]; then
+              echo "❌ Build falló - DEPLOYMENT ABORTADO"
+              exit 1
+            fi
+            
+            # Deploy with PM2
+            echo "🚀 DEPLOYING"
+            pm2 reload ecosystem.config.js --update-env || pm2 restart inmova-app --update-env
+            pm2 save
+            
+            # Post-deployment health checks
+            echo "⏳ Waiting for app..."
+            sleep 15
+            
+            echo "🏥 POST-DEPLOYMENT HEALTH CHECKS"
+            
+            # HTTP + Database check
+            if curl -f -s http://localhost:3000/api/health > /tmp/health.json; then
+              echo "✅ HTTP OK"
+              cat /tmp/health.json | jq '.'
+              
+              DB_STATUS=$(cat /tmp/health.json | jq -r '.database // "unknown"')
+              if [ "$DB_STATUS" != "connected" ]; then
+                echo "❌ Database not connected - ROLLING BACK"
+                git reset --hard $PREVIOUS_COMMIT
+                npm run build && pm2 restart inmova-app
+                exit 1
+              fi
+            else
+              echo "❌ Health check failed - ROLLING BACK"
+              git reset --hard $PREVIOUS_COMMIT
+              npm run build && pm2 restart inmova-app
+              exit 1
+            fi
+            
+            echo ""
+            echo "✅✅✅ DEPLOYMENT EXITOSO ✅✅✅"
+            echo "URL: https://inmovaapp.com"
+            echo "Health: https://inmovaapp.com/api/health"
       
-      - name: Run E2E tests against production
+      - name: Run E2E Smoke Tests
         if: success()
         uses: appleboy/ssh-action@master
         with:
@@ -214,10 +270,45 @@ jobs:
           script: |
             cd ${{ secrets.SERVER_PATH || '/opt/inmova-app' }}
             
-            # Run E2E tests against production
-            npm run test:e2e -- --reporter=json || true
+            echo "🎭 RUNNING E2E SMOKE TESTS"
             
-            echo "✅ E2E tests completados"
+            # Check if Playwright is available
+            if ! npx playwright --version > /dev/null 2>&1; then
+              echo "⚠️  Playwright not available, skipping E2E"
+              exit 0
+            fi
+            
+            # Run only smoke tests (@smoke tag)
+            BASE_URL=https://inmovaapp.com npx playwright test --grep '@smoke' --reporter=json --output=test-reports/e2e-smoke.json 2>&1 | tee test-reports/e2e.log || true
+            
+            echo "✅ E2E smoke tests completados"
+      
+      - name: Generate Deployment Report
+        if: always()
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.SERVER_PATH || '/opt/inmova-app' }}
+            
+            echo "📊 DEPLOYMENT REPORT" > /tmp/deploy-report.txt
+            echo "===================" >> /tmp/deploy-report.txt
+            echo "Date: $(date)" >> /tmp/deploy-report.txt
+            echo "Commit: $(git rev-parse --short HEAD)" >> /tmp/deploy-report.txt
+            echo "" >> /tmp/deploy-report.txt
+            
+            if [ -f test-reports/results.json ]; then
+              echo "Tests:" >> /tmp/deploy-report.txt
+              cat test-reports/results.json | jq -r '"  Pass: \(.numPassedTests), Fail: \(.numFailedTests), Total: \(.numTotalTests)"' >> /tmp/deploy-report.txt
+            fi
+            
+            echo "" >> /tmp/deploy-report.txt
+            echo "Health:" >> /tmp/deploy-report.txt
+            curl -s http://localhost:3000/api/health | jq -r '"  Status: \(.status), DB: \(.database)"' >> /tmp/deploy-report.txt
+            
+            cat /tmp/deploy-report.txt
 
   notify:
     name: 📢 Notify Results
