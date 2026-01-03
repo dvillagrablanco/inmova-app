@@ -1,0 +1,69 @@
+/**
+ * API Route: Stripe Connect Account
+ * 
+ * POST /api/v1/billing/connect-account - Crear cuenta Connect
+ * GET /api/v1/billing/connect-account - Obtener estado
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { createConnectAccount, getConnectAccountStatus } from '@/lib/stripe-connect-service';
+import { prisma } from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    // Solo admins pueden crear cuenta Connect
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPERADMIN') {
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
+    }
+
+    const result = await createConnectAccount(session.user.companyId);
+
+    return NextResponse.json(result);
+
+  } catch (error: any) {
+    console.error('Error creating Connect account:', error);
+    return NextResponse.json(
+      { error: 'Error interno', message: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    const company = await prisma.company.findUnique({
+      where: { id: session.user.companyId },
+      select: { stripeConnectAccountId: true },
+    });
+
+    if (!company?.stripeConnectAccountId) {
+      return NextResponse.json({ hasAccount: false });
+    }
+
+    const status = await getConnectAccountStatus(company.stripeConnectAccountId);
+
+    return NextResponse.json({
+      hasAccount: true,
+      accountId: company.stripeConnectAccountId,
+      ...status,
+    });
+
+  } catch (error: any) {
+    console.error('Error fetching Connect account:', error);
+    return NextResponse.json({ error: 'Error interno' }, { status: 500 });
+  }
+}
