@@ -90,7 +90,7 @@ export async function findBestMatches(
       idealBudget: tenant.presupuestoIdeal || 1000,
       preferredCities: tenant.ciudadesPreferidas || [],
       minRooms: tenant.habitacionesMin || 1,
-      prefersModern: tenant.prefiereModer no || false,
+      prefersModern: tenant.prefiereModerno || false,
       needsPublicTransport: tenant.necesitaTransportePublico || false,
       hasCar: tenant.tieneCoche || false,
       hasPets: tenant.tieneMascotas || false,
