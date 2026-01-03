@@ -99,6 +99,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/incidencias': 'incidencias',
   '/ocr': 'ocr',
   '/redes-sociales': 'redes_sociales',
+  '/dashboard/social-media': 'redes_sociales',
   '/admin/dashboard': 'admin_dashboard',
   '/admin/clientes': 'gestion_clientes',
   '/admin/planes': 'admin_planes',
@@ -693,8 +694,8 @@ const comunicacionesNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Redes Sociales',
-    href: '/redes-sociales',
+    name: 'Gestión de Redes Sociales',
+    href: '/dashboard/social-media',
     icon: Share2,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
