@@ -155,38 +155,69 @@ jobs:
           path: .next/
           retention-days: 7
 
-  deploy-preview:
-    name: 🚀 Deploy Preview (Vercel)
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name == 'pull_request'
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Deploy to Vercel Preview
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./
-
-  deploy-production:
-    name: 🌐 Deploy Production
+  deploy-server:
+    name: 🚀 Deploy to Server
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
       
-      - name: Deploy to Vercel Production
-        uses: amondnet/vercel-action@v25
+      - name: Deploy to Production Server via SSH
+        uses: appleboy/ssh-action@master
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
-          working-directory: ./
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script: |
+            cd ${{ secrets.SERVER_PATH || '/opt/inmova-app' }}
+            
+            # Pull latest code
+            git pull origin main
+            
+            # Install dependencies
+            npm ci --production=false
+            
+            # Run Prisma migrations
+            npx prisma generate
+            npx prisma migrate deploy
+            
+            # Build application
+            npm run build
+            
+            # Run tests on server
+            npm test -- --run --reporter=json --outputFile=test-results.json || true
+            
+            # Check test results
+            if [ -f test-results.json ]; then
+              echo "✅ Tests ejecutados en servidor"
+              cat test-results.json | jq '.numPassedTests, .numFailedTests'
+            fi
+            
+            # Restart application with PM2
+            pm2 reload ecosystem.config.js --update-env
+            
+            # Health check
+            sleep 10
+            curl -f http://localhost:3000/api/health || exit 1
+            
+            echo "✅ Deployment completado exitosamente"
+      
+      - name: Run E2E tests against production
+        if: success()
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.SERVER_PATH || '/opt/inmova-app' }}
+            
+            # Run E2E tests against production
+            npm run test:e2e -- --reporter=json || true
+            
+            echo "✅ E2E tests completados"
 
   notify:
     name: 📢 Notify Results

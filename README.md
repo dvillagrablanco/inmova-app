@@ -236,17 +236,37 @@ SENTRY_DSN=https://...
 
 ## 🚀 Deployment
 
-### Vercel (Recommended)
+### Servidor Propio (Producción)
+
+**Deployment directo en servidor con tests integrados**
 
 ```bash
-# Install Vercel CLI
-npm i -g vercel
+# Setup inicial (una sola vez)
+git clone git@github.com:inmova/inmova-app.git /opt/inmova-app
+cd /opt/inmova-app
+npm ci --production=false
+cp .env.production.example .env.production
+# Editar .env.production con valores reales
+npx prisma migrate deploy
+npm run build
+pm2 start ecosystem.config.js
 
-# Deploy
-vercel
+# Deployments posteriores (automático vía GitHub Actions)
+# O manualmente:
+./scripts/server-deploy.sh
 ```
 
-### Docker
+**Features**:
+
+- ✅ Tests automáticos en servidor
+- ✅ Zero-downtime con PM2
+- ✅ Backups automáticos
+- ✅ Health checks post-deployment
+- ✅ Rollback automático si falla
+
+Ver guía completa: [DEPLOYMENT_SERVER_TESTS.md](DEPLOYMENT_SERVER_TESTS.md)
+
+### Docker (Alternativa)
 
 ```bash
 # Build
@@ -256,9 +276,12 @@ docker build -t inmova-app .
 docker run -p 3000:3000 inmova-app
 ```
 
-### Manual Server
+### Vercel (Solo para staging)
 
-See [DEPLOYMENT.md](docs/DEPLOYMENT.md) for detailed instructions.
+```bash
+npm i -g vercel
+vercel
+```
 
 ---
 
