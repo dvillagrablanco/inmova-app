@@ -60,6 +60,12 @@ def find_components(base_paths: List[str] = ["components", "app"]) -> List[Dict]
                     # Detectar si es form
                     is_form = 'form' in content.lower() or 'input' in content.lower()
                     
+                    try:
+                        rel_path = str(file_path.relative_to(Path.cwd()))
+                    except ValueError:
+                        # Si falla, usar el path relativo desde base_path
+                        rel_path = str(file_path)
+                    
                     components.append({
                         'path': str(file_path),
                         'name': component_name,
@@ -69,7 +75,7 @@ def find_components(base_paths: List[str] = ["components", "app"]) -> List[Dict]
                         'uses_effect': uses_effect,
                         'uses_context': uses_context,
                         'is_form': is_form,
-                        'relative_path': str(file_path.relative_to(Path.cwd()))
+                        'relative_path': rel_path
                     })
     
     return components

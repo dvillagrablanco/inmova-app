@@ -20,7 +20,7 @@
     "test:visual": "tsx scripts/visual-test-playwright.ts",
     "audit:visual": "tsx scripts/visual-audit.ts",
     "audit:app": "tsx scripts/audit-full-app.ts",
-    "test:all": "yarn test:ci && yarn test:e2e",
+    "test:all": "yarn test:unit && yarn test:integration && yarn test:e2e",
     "postinstall": "prisma generate",
     "analyze": "ANALYZE=true yarn build",
     "analyze:server": "ANALYZE=true BUNDLE_ANALYZE=server yarn build",
@@ -34,7 +34,14 @@
     "db:seed": "prisma db seed",
     "db:status": "prisma migrate status",
     "audit:deployment": "node scripts/pre-deployment-audit.js",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "vitest run __tests__/integration",
+    "coverage:verify": "./scripts/coverage-verify.sh",
+    "coverage:report": "vitest run --coverage && open coverage/index.html",
+    "coverage:missing": "vitest run --coverage && grep -r \"0%\" coverage/lcov-report",
+    "generate:tests": "python3 scripts/generate-api-tests.py",
+    "generate:tests-components": "python3 scripts/generate-component-tests.py"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
