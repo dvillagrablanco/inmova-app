@@ -39,7 +39,7 @@ export function AuthenticatedLayout({
   const isMobile = useIsMobile();
   const pathname = usePathname();
   const { data: session } = useSession();
-  
+
   // Estados para tutoriales y onboarding
   const [showSetupWizard, setShowSetupWizard] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
@@ -57,6 +57,14 @@ export function AuthenticatedLayout({
   useEffect(() => {
     const checkOnboarding = async () => {
       if (!session?.user?.id) return;
+
+      // OCULTAR TOURS Y ONBOARDING PARA SUPERADMIN
+      if (session.user.role === 'super_admin') {
+        setShowSetupWizard(false);
+        setShowChecklist(false);
+        setIsNewUser(false);
+        return;
+      }
 
       try {
         const response = await fetch('/api/user/onboarding-status');
@@ -118,10 +126,12 @@ export function AuthenticatedLayout({
       <Sidebar />
 
       {/* Contenido principal con padding para compensar sidebar fija */}
-      <div className={cn(
-        "flex flex-1 flex-col overflow-hidden",
-        "lg:pl-64" // Padding left en desktop para compensar sidebar de 256px (w-64)
-      )}>
+      <div
+        className={cn(
+          'flex flex-1 flex-col overflow-hidden',
+          'lg:pl-64' // Padding left en desktop para compensar sidebar de 256px (w-64)
+        )}
+      >
         {/* Header */}
         <Header />
 
@@ -149,21 +159,18 @@ export function AuthenticatedLayout({
         <BottomNavigation />
       </div>
 
-      {/* Tour Auto-Starter - Sistema de tours virtuales */}
-      <TourAutoStarter />
+      {/* Tour Auto-Starter - Sistema de tours virtuales (NO para superadmin) */}
+      {session?.user?.role !== 'super_admin' && <TourAutoStarter />}
 
-      {/* Floating Tour Button - Acceso rápido a tours */}
-      <FloatingTourButton />
+      {/* Floating Tour Button - Acceso rápido a tours (NO para superadmin) */}
+      {session?.user?.role !== 'super_admin' && <FloatingTourButton />}
 
       {/* Contextual Help - Ayuda específica según página */}
       <ContextualHelp page={getPageForHelp()} />
 
       {/* Setup Wizard - Primera vez */}
       {showSetupWizard && (
-        <FirstTimeSetupWizard
-          onComplete={handleCompleteSetup}
-          onSkip={handleSkipSetup}
-        />
+        <FirstTimeSetupWizard onComplete={handleCompleteSetup} onSkip={handleSkipSetup} />
       )}
 
       {/* Onboarding Checklist - Hasta completar */}
@@ -180,7 +187,7 @@ export function AuthenticatedLayout({
 
 /**
  * Ejemplo de uso en una página:
- * 
+ *
  * export default function EdificiosPage() {
  *   return (
  *     <AuthenticatedLayout maxWidth="7xl">

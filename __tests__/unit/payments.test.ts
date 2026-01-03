@@ -10,38 +10,42 @@ import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 
 // Mock de dependencias
-jest.mock('@/lib/db', () => ({
+vi.mock('@/lib/db', () => ({
   prisma: {
     payment: {
-      findMany: jest.fn(),
-      count: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
+      findMany: vi.fn(),
+      count: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
     },
   },
 }));
 
-jest.mock('next-auth', () => ({
-  getServerSession: jest.fn(),
+vi.mock('next-auth', () => ({
+  getServerSession: vi.fn(),
 }));
 
-jest.mock('@/lib/auth-options', () => ({
+vi.mock('@/lib/auth-options', () => ({
   authOptions: {},
 }));
 
-jest.mock('@/lib/logger', () => ({
+vi.mock('@/lib/logger', () => ({
   default: {
-    info: jest.fn(),
-    error: jest.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
   },
-  logError: jest.fn(),
+  logError: vi.fn(),
 }));
 
-jest.mock('@/lib/api-cache-helpers', () => ({
-  cachedPayments: jest.fn(),
-  invalidatePaymentsCache: jest.fn(),
-  invalidateDashboardCache: jest.fn(),
+vi.mock('@/lib/api-cache-helpers', () => ({
+  cachedPayments: vi.fn(),
+  invalidatePaymentsCache: vi.fn(),
+  invalidateDashboardCache: vi.fn(),
+}));
+
+vi.mock('@/lib/rate-limiting', () => ({
+  withPaymentRateLimit: vi.fn((req, handler) => handler()),
 }));
 
 describe('🧪 Payments API - GET Endpoint', () => {
@@ -75,7 +79,7 @@ describe('🧪 Payments API - GET Endpoint', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // ========================================
@@ -83,27 +87,28 @@ describe('🧪 Payments API - GET Endpoint', () => {
   // ========================================
 
   test('✅ Debe devolver pagos cuando el usuario está autenticado', async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
-    (prisma.payment.findMany as jest.Mock).mockResolvedValue(mockPayments);
+    (getServerSession as vi.Mock).mockResolvedValue(mockSession);
+    (prisma.payment.findMany as vi.Mock).mockResolvedValue(mockPayments);
+    (prisma.payment.count as vi.Mock).mockResolvedValue(mockPayments.length);
 
-    const req = new NextRequest('http://localhost:3000/api/payments');
+    const req = new NextRequest('http://localhost:3000/api/payments?page=1&limit=20');
     const response = await GET(req);
-    const data = await response.json();
+    const result = await response.json();
 
     expect(response.status).toBe(200);
-    expect(Array.isArray(data)).toBe(true);
-    expect(data.length).toBeGreaterThan(0);
+    expect(result.data).toBeDefined();
+    expect(Array.isArray(result.data)).toBe(true);
+    expect(result.data.length).toBeGreaterThan(0);
+    expect(result.pagination).toBeDefined();
   });
 
   test('✅ Debe aplicar filtros correctamente (estado)', async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
-    (prisma.payment.findMany as jest.Mock).mockResolvedValue(
+    (getServerSession as vi.Mock).mockResolvedValue(mockSession);
+    (prisma.payment.findMany as vi.Mock).mockResolvedValue(
       mockPayments.filter((p) => p.estado === 'pendiente')
     );
 
-    const req = new NextRequest(
-      'http://localhost:3000/api/payments?estado=pendiente'
-    );
+    const req = new NextRequest('http://localhost:3000/api/payments?estado=pendiente');
     const response = await GET(req);
     const data = await response.json();
 
@@ -112,13 +117,11 @@ describe('🧪 Payments API - GET Endpoint', () => {
   });
 
   test('✅ Debe implementar paginación correctamente', async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
-    (prisma.payment.findMany as jest.Mock).mockResolvedValue(mockPayments);
-    (prisma.payment.count as jest.Mock).mockResolvedValue(100);
+    (getServerSession as vi.Mock).mockResolvedValue(mockSession);
+    (prisma.payment.findMany as vi.Mock).mockResolvedValue(mockPayments);
+    (prisma.payment.count as vi.Mock).mockResolvedValue(100);
 
-    const req = new NextRequest(
-      'http://localhost:3000/api/payments?page=2&limit=10'
-    );
+    const req = new NextRequest('http://localhost:3000/api/payments?page=2&limit=10');
     const response = await GET(req);
     const data = await response.json();
 
@@ -135,7 +138,7 @@ describe('🧪 Payments API - GET Endpoint', () => {
   // ========================================
 
   test('❌ Debe retornar 401 si no hay sesión', async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(null);
+    (getServerSession as vi.Mock).mockResolvedValue(null);
 
     const req = new NextRequest('http://localhost:3000/api/payments');
     const response = await GET(req);
@@ -146,7 +149,7 @@ describe('🧪 Payments API - GET Endpoint', () => {
   });
 
   test('❌ Debe retornar 400 si no hay companyId en la sesión', async () => {
-    (getServerSession as jest.Mock).mockResolvedValue({
+    (getServerSession as vi.Mock).mockResolvedValue({
       user: { id: 'user-123', email: 'test@example.com' },
     });
 
@@ -163,13 +166,11 @@ describe('🧪 Payments API - GET Endpoint', () => {
   // ========================================
 
   test('⚠️ Debe manejar page=0 (valor límite inferior)', async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
-    (prisma.payment.findMany as jest.Mock).mockResolvedValue(mockPayments);
-    (prisma.payment.count as jest.Mock).mockResolvedValue(50);
+    (getServerSession as vi.Mock).mockResolvedValue(mockSession);
+    (prisma.payment.findMany as vi.Mock).mockResolvedValue(mockPayments);
+    (prisma.payment.count as vi.Mock).mockResolvedValue(50);
 
-    const req = new NextRequest(
-      'http://localhost:3000/api/payments?page=0&limit=10'
-    );
+    const req = new NextRequest('http://localhost:3000/api/payments?page=0&limit=10');
     const response = await GET(req);
     const data = await response.json();
 
@@ -179,13 +180,11 @@ describe('🧪 Payments API - GET Endpoint', () => {
   });
 
   test('⚠️ Debe manejar page negativo', async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
-    (prisma.payment.findMany as jest.Mock).mockResolvedValue(mockPayments);
-    (prisma.payment.count as jest.Mock).mockResolvedValue(50);
+    (getServerSession as vi.Mock).mockResolvedValue(mockSession);
+    (prisma.payment.findMany as vi.Mock).mockResolvedValue(mockPayments);
+    (prisma.payment.count as vi.Mock).mockResolvedValue(50);
 
-    const req = new NextRequest(
-      'http://localhost:3000/api/payments?page=-5&limit=10'
-    );
+    const req = new NextRequest('http://localhost:3000/api/payments?page=-5&limit=10');
     const response = await GET(req);
 
     expect(response.status).toBe(200);
@@ -193,13 +192,11 @@ describe('🧪 Payments API - GET Endpoint', () => {
   });
 
   test('⚠️ Debe manejar limit=0', async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
-    (prisma.payment.findMany as jest.Mock).mockResolvedValue([]);
-    (prisma.payment.count as jest.Mock).mockResolvedValue(50);
+    (getServerSession as vi.Mock).mockResolvedValue(mockSession);
+    (prisma.payment.findMany as vi.Mock).mockResolvedValue([]);
+    (prisma.payment.count as vi.Mock).mockResolvedValue(50);
 
-    const req = new NextRequest(
-      'http://localhost:3000/api/payments?page=1&limit=0'
-    );
+    const req = new NextRequest('http://localhost:3000/api/payments?page=1&limit=0');
     const response = await GET(req);
     const data = await response.json();
 
@@ -208,13 +205,11 @@ describe('🧪 Payments API - GET Endpoint', () => {
   });
 
   test('⚠️ Debe manejar limit muy grande (1000000)', async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
-    (prisma.payment.findMany as jest.Mock).mockResolvedValue(mockPayments);
-    (prisma.payment.count as jest.Mock).mockResolvedValue(50);
+    (getServerSession as vi.Mock).mockResolvedValue(mockSession);
+    (prisma.payment.findMany as vi.Mock).mockResolvedValue(mockPayments);
+    (prisma.payment.count as vi.Mock).mockResolvedValue(50);
 
-    const req = new NextRequest(
-      'http://localhost:3000/api/payments?page=1&limit=1000000'
-    );
+    const req = new NextRequest('http://localhost:3000/api/payments?page=1&limit=1000000');
     const response = await GET(req);
 
     expect(response.status).toBe(200);
@@ -222,13 +217,11 @@ describe('🧪 Payments API - GET Endpoint', () => {
   });
 
   test('⚠️ Debe manejar parámetros no numéricos', async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
-    (prisma.payment.findMany as jest.Mock).mockResolvedValue(mockPayments);
-    (prisma.payment.count as jest.Mock).mockResolvedValue(50);
+    (getServerSession as vi.Mock).mockResolvedValue(mockSession);
+    (prisma.payment.findMany as vi.Mock).mockResolvedValue(mockPayments);
+    (prisma.payment.count as vi.Mock).mockResolvedValue(50);
 
-    const req = new NextRequest(
-      'http://localhost:3000/api/payments?page=abc&limit=xyz'
-    );
+    const req = new NextRequest('http://localhost:3000/api/payments?page=abc&limit=xyz');
     const response = await GET(req);
 
     expect(response.status).toBe(200);
@@ -240,16 +233,19 @@ describe('🧪 Payments API - GET Endpoint', () => {
   // ========================================
 
   test('✅ Debe manejar lista vacía de pagos', async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
-    (prisma.payment.findMany as jest.Mock).mockResolvedValue([]);
+    (getServerSession as vi.Mock).mockResolvedValue(mockSession);
+    (prisma.payment.findMany as vi.Mock).mockResolvedValue([]);
+    (prisma.payment.count as vi.Mock).mockResolvedValue(0);
 
-    const req = new NextRequest('http://localhost:3000/api/payments');
+    const req = new NextRequest('http://localhost:3000/api/payments?page=1&limit=20');
     const response = await GET(req);
-    const data = await response.json();
+    const result = await response.json();
 
     expect(response.status).toBe(200);
-    expect(Array.isArray(data)).toBe(true);
-    expect(data.length).toBe(0);
+    expect(result.data).toBeDefined();
+    expect(Array.isArray(result.data)).toBe(true);
+    expect(result.data.length).toBe(0);
+    expect(result.pagination.total).toBe(0);
   });
 
   // ========================================
@@ -257,10 +253,8 @@ describe('🧪 Payments API - GET Endpoint', () => {
   // ========================================
 
   test('❌ Debe manejar errores de conexión a BD', async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
-    (prisma.payment.findMany as jest.Mock).mockRejectedValue(
-      new Error('Database connection failed')
-    );
+    (getServerSession as vi.Mock).mockResolvedValue(mockSession);
+    (prisma.payment.findMany as vi.Mock).mockRejectedValue(new Error('Database connection failed'));
 
     const req = new NextRequest('http://localhost:3000/api/payments');
     const response = await GET(req);
@@ -269,8 +263,8 @@ describe('🧪 Payments API - GET Endpoint', () => {
   });
 
   test('❌ Debe manejar timeout de consulta', async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
-    (prisma.payment.findMany as jest.Mock).mockImplementation(() => {
+    (getServerSession as vi.Mock).mockResolvedValue(mockSession);
+    (prisma.payment.findMany as vi.Mock).mockImplementation(() => {
       return new Promise((resolve) => setTimeout(resolve, 30000));
     });
 
@@ -286,14 +280,12 @@ describe('🧪 Payments API - GET Endpoint', () => {
   // ========================================
 
   test('🔒 Debe prevenir SQL Injection en filtros', async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
-    (prisma.payment.findMany as jest.Mock).mockResolvedValue(mockPayments);
+    (getServerSession as vi.Mock).mockResolvedValue(mockSession);
+    (prisma.payment.findMany as vi.Mock).mockResolvedValue(mockPayments);
 
     const maliciousInput = "'; DROP TABLE payments; --";
     const req = new NextRequest(
-      `http://localhost:3000/api/payments?estado=${encodeURIComponent(
-        maliciousInput
-      )}`
+      `http://localhost:3000/api/payments?estado=${encodeURIComponent(maliciousInput)}`
     );
     const response = await GET(req);
 
@@ -307,14 +299,12 @@ describe('🧪 Payments API - GET Endpoint', () => {
   // ========================================
 
   test('⚠️ Debe manejar caracteres especiales en contractId', async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
-    (prisma.payment.findMany as jest.Mock).mockResolvedValue([]);
+    (getServerSession as vi.Mock).mockResolvedValue(mockSession);
+    (prisma.payment.findMany as vi.Mock).mockResolvedValue([]);
 
     const specialChars = 'contract-<>|\\/:*?"';
     const req = new NextRequest(
-      `http://localhost:3000/api/payments?contractId=${encodeURIComponent(
-        specialChars
-      )}`
+      `http://localhost:3000/api/payments?contractId=${encodeURIComponent(specialChars)}`
     );
     const response = await GET(req);
 
@@ -322,14 +312,12 @@ describe('🧪 Payments API - GET Endpoint', () => {
   });
 
   test('⚠️ Debe manejar emojis en parámetros', async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
-    (prisma.payment.findMany as jest.Mock).mockResolvedValue([]);
+    (getServerSession as vi.Mock).mockResolvedValue(mockSession);
+    (prisma.payment.findMany as vi.Mock).mockResolvedValue([]);
 
     const emojiInput = '🏠💰🔥';
     const req = new NextRequest(
-      `http://localhost:3000/api/payments?estado=${encodeURIComponent(
-        emojiInput
-      )}`
+      `http://localhost:3000/api/payments?estado=${encodeURIComponent(emojiInput)}`
     );
     const response = await GET(req);
 

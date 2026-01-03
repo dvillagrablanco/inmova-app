@@ -1,25 +1,34 @@
 /**
- * PM2 Ecosystem Configuration
- * Para producción con auto-restart, cluster mode y monitoreo
+ * PM2 ECOSYSTEM CONFIG - INMOVA APP
+ * Configuración para deployment en servidor con PM2
  */
 
 module.exports = {
   apps: [
     {
       name: 'inmova-app',
-      script: 'npm',
+      script: 'node_modules/next/dist/bin/next',
       args: 'start',
-      cwd: '/opt/inmova-app',
+      instances: 2, // 2 workers para load balancing
+      exec_mode: 'cluster', // Cluster mode
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '1G',
+      restart_delay: 4000,
+      max_restarts: 10,
+      min_uptime: '10s',
+      kill_timeout: 5000,
+      wait_ready: true,
+      listen_timeout: 10000,
 
-      // Execution Mode
-      instances: 'max', // Auto-detectar número de CPUs disponibles
-      exec_mode: 'cluster',
-
-      // Environment
-      env: {
+      // Environment variables
+      env_production: {
         NODE_ENV: 'production',
         PORT: 3000,
-        NODE_OPTIONS: '--max-old-space-size=2048', // Limitar memoria heap a 2GB
+        // Las siguientes variables deben estar en .env.production
+        // DATABASE_URL: 'postgresql://...',
+        // NEXTAUTH_SECRET: '...',
+        // NEXTAUTH_URL: 'https://...',
       },
 
       // Logs
@@ -28,57 +37,24 @@ module.exports = {
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       merge_logs: true,
 
-      // Auto-Restart Configuration
-      autorestart: true,
-      max_restarts: 10,
-      min_uptime: '10s',
-      max_memory_restart: '1G',
-
-      // Restart Delay
-      restart_delay: 4000, // 4 segundos entre restarts
-
-      // Kill Timeout
-      kill_timeout: 5000, // 5 segundos para graceful shutdown
-
-      // Watch (desactivado en producción)
-      watch: false,
-      ignore_watch: ['node_modules', '.next', 'logs'],
-
-      // Time
-      time: true,
-
-      // Source Map Support
+      // Advanced features
       source_map_support: true,
-
-      // Graceful Shutdown
-      listen_timeout: 3000,
-      shutdown_with_message: true,
-
-      // Health Check (experimental)
-      wait_ready: true,
-
-      // Cron Restart (restart diario a las 3 AM para liberar memoria)
-      cron_restart: '0 3 * * *',
-
-      // Node Args para optimización
-      node_args: '--max-old-space-size=2048',
-
-      // Environment Variables (se cargan desde .env.production)
-      env_file: '/opt/inmova-app/.env.production',
+      instance_var: 'INSTANCE_ID',
     },
   ],
 
-  // Deploy Configuration (opcional)
+  // Deployment configuration
   deploy: {
     production: {
-      user: 'root',
-      host: '157.180.119.236',
+      user: 'deploy',
+      host: process.env.SERVER_HOST || 'SERVER_IP',
       ref: 'origin/main',
-      repo: 'https://github.com/tu-usuario/inmova-app.git',
+      repo: 'git@github.com:inmova/inmova-app.git',
       path: '/opt/inmova-app',
       'post-deploy':
-        'npm install && npm run build && pm2 reload ecosystem.config.js --env production',
-      'pre-setup': 'mkdir -p /var/log/inmova',
+        'npm ci && npx prisma generate && npx prisma migrate deploy && npm run build && pm2 reload ecosystem.config.js --update-env',
+      'pre-deploy-local': '',
+      'post-setup': 'npm ci && npx prisma generate',
     },
   },
 };

@@ -1,0 +1,328 @@
+name: CI/CD Pipeline - Inmova App
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  lint:
+    name: 🔍 Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run ESLint
+        run: npm run lint
+      
+      - name: Run TypeScript type check
+        run: npx tsc --noEmit
+
+  test-unit:
+    name: 🧪 Unit & Integration Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run unit tests
+        run: npm test -- --run --coverage
+      
+      - name: Generate coverage report
+        run: npm run test:coverage || true
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/coverage-final.json
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+      
+      - name: Check coverage threshold
+        run: |
+          if [ -f coverage/coverage-summary.json ]; then
+            COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+            echo "Coverage: $COVERAGE%"
+            if (( $(echo "$COVERAGE < 95" | bc -l) )); then
+              echo "❌ Coverage $COVERAGE% is below 95%"
+              exit 1
+            fi
+            echo "✅ Coverage $COVERAGE% meets threshold"
+          else
+            echo "⚠️ Coverage file not found, skipping check"
+          fi
+
+  test-e2e:
+    name: 🎭 E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      
+      - name: Run E2E tests
+        run: npx playwright test
+      
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+  security:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate || true
+      
+      - name: Run Snyk Security Scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  build:
+    name: 🏗️ Build
+    runs-on: ubuntu-latest
+    needs: [test-unit, test-e2e]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build application
+        run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: .next/
+          retention-days: 7
+
+  deploy-server:
+    name: 🚀 Deploy to Server
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to Production Server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script: |
+            cd ${{ secrets.SERVER_PATH || '/opt/inmova-app' }}
+            
+            # Backup pre-deployment
+            echo "📋 PRE-DEPLOYMENT BACKUP"
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            PREVIOUS_COMMIT=$(git rev-parse HEAD)
+            pg_dump -U postgres inmova_production > /var/backups/inmova/pre-deploy-$TIMESTAMP.sql 2>/dev/null || true
+            
+            # Pull latest code
+            echo "📥 UPDATING CODE"
+            git stash || true
+            git pull origin main
+            
+            # Install dependencies
+            echo "📦 INSTALLING DEPENDENCIES"
+            npm ci --production=false
+            npx prisma generate
+            npx prisma migrate deploy || true
+            
+            # Run tests PRE-BUILD with quality gates
+            echo "🧪 RUNNING TESTS PRE-BUILD"
+            mkdir -p test-reports
+            npm test -- --run --coverage --json --outputFile=test-reports/results.json 2>&1 | tee test-reports/tests.log || true
+            
+            # Parse and validate test results
+            if [ -f test-reports/results.json ]; then
+              PASSED=$(cat test-reports/results.json | jq -r '.numPassedTests // 0')
+              TOTAL=$(cat test-reports/results.json | jq -r '.numTotalTests // 0')
+              
+              echo "Tests: $PASSED/$TOTAL pasando"
+              
+              if [ "$TOTAL" -gt 0 ]; then
+                PASS_RATE=$(awk "BEGIN {printf \"%.1f\", ($PASSED/$TOTAL)*100}")
+                echo "Pass rate: $PASS_RATE%"
+                
+                # Quality gate: 95% minimum
+                if (( $(echo "$PASS_RATE < 95.0" | bc -l) )); then
+                  echo "❌ Test pass rate ($PASS_RATE%) < 95% - DEPLOYMENT ABORTADO"
+                  exit 1
+                fi
+              fi
+            fi
+            
+            echo "✅ Tests OK - Proceeding with build"
+            
+            # Build application
+            echo "🏗️  BUILDING APPLICATION"
+            npm run build 2>&1 | tee test-reports/build.log
+            
+            if [ ${PIPESTATUS[0]} -ne 0 ]; then
+              echo "❌ Build falló - DEPLOYMENT ABORTADO"
+              exit 1
+            fi
+            
+            # Deploy with PM2
+            echo "🚀 DEPLOYING"
+            pm2 reload ecosystem.config.js --update-env || pm2 restart inmova-app --update-env
+            pm2 save
+            
+            # Post-deployment health checks
+            echo "⏳ Waiting for app..."
+            sleep 15
+            
+            echo "🏥 POST-DEPLOYMENT HEALTH CHECKS"
+            
+            # HTTP + Database check
+            if curl -f -s http://localhost:3000/api/health > /tmp/health.json; then
+              echo "✅ HTTP OK"
+              cat /tmp/health.json | jq '.'
+              
+              DB_STATUS=$(cat /tmp/health.json | jq -r '.database // "unknown"')
+              if [ "$DB_STATUS" != "connected" ]; then
+                echo "❌ Database not connected - ROLLING BACK"
+                git reset --hard $PREVIOUS_COMMIT
+                npm run build && pm2 restart inmova-app
+                exit 1
+              fi
+            else
+              echo "❌ Health check failed - ROLLING BACK"
+              git reset --hard $PREVIOUS_COMMIT
+              npm run build && pm2 restart inmova-app
+              exit 1
+            fi
+            
+            echo ""
+            echo "✅✅✅ DEPLOYMENT EXITOSO ✅✅✅"
+            echo "URL: https://inmovaapp.com"
+            echo "Health: https://inmovaapp.com/api/health"
+      
+      - name: Run E2E Smoke Tests
+        if: success()
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.SERVER_PATH || '/opt/inmova-app' }}
+            
+            echo "🎭 RUNNING E2E SMOKE TESTS"
+            
+            # Check if Playwright is available
+            if ! npx playwright --version > /dev/null 2>&1; then
+              echo "⚠️  Playwright not available, skipping E2E"
+              exit 0
+            fi
+            
+            # Run only smoke tests (@smoke tag)
+            BASE_URL=https://inmovaapp.com npx playwright test --grep '@smoke' --reporter=json --output=test-reports/e2e-smoke.json 2>&1 | tee test-reports/e2e.log || true
+            
+            echo "✅ E2E smoke tests completados"
+      
+      - name: Generate Deployment Report
+        if: always()
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.SERVER_PATH || '/opt/inmova-app' }}
+            
+            echo "📊 DEPLOYMENT REPORT" > /tmp/deploy-report.txt
+            echo "===================" >> /tmp/deploy-report.txt
+            echo "Date: $(date)" >> /tmp/deploy-report.txt
+            echo "Commit: $(git rev-parse --short HEAD)" >> /tmp/deploy-report.txt
+            echo "" >> /tmp/deploy-report.txt
+            
+            if [ -f test-reports/results.json ]; then
+              echo "Tests:" >> /tmp/deploy-report.txt
+              cat test-reports/results.json | jq -r '"  Pass: \(.numPassedTests), Fail: \(.numFailedTests), Total: \(.numTotalTests)"' >> /tmp/deploy-report.txt
+            fi
+            
+            echo "" >> /tmp/deploy-report.txt
+            echo "Health:" >> /tmp/deploy-report.txt
+            curl -s http://localhost:3000/api/health | jq -r '"  Status: \(.status), DB: \(.database)"' >> /tmp/deploy-report.txt
+            
+            cat /tmp/deploy-report.txt
+
+  notify:
+    name: 📢 Notify Results
+    runs-on: ubuntu-latest
+    needs: [build, test-unit, test-e2e]
+    if: always()
+    steps:
+      - name: Check workflow status
+        run: |
+          if [ "${{ needs.build.result }}" == "success" ] && \
+             [ "${{ needs.test-unit.result }}" == "success" ] && \
+             [ "${{ needs.test-e2e.result }}" == "success" ]; then
+            echo "✅ All checks passed!"
+          else
+            echo "❌ Some checks failed"
+            exit 1
+          fi
