@@ -73,10 +73,20 @@ export const authOptions: NextAuthOptions = {
             throw new Error('Database not available');
           }
 
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email },
-            include: { company: true },
-          });
+          // Intentar con include primero, si falla obtener sin company
+          let user;
+          try {
+            user = await prisma.user.findUnique({
+              where: { email: credentials.email },
+              include: { company: true },
+            });
+          } catch (error) {
+            console.log('[NextAuth] Error con include company, reintentando sin include');
+            // Fallback: obtener usuario sin company
+            user = await prisma.user.findUnique({
+              where: { email: credentials.email },
+            });
+          }
 
           console.log('[NextAuth] Usuario encontrado:', { 
             found: !!user,
