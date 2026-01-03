@@ -1,297 +1,408 @@
-# 📚 ÍNDICE DE DOCUMENTACIÓN - Proyecto Inmova
+# 📚 ÍNDICE DE DOCUMENTACIÓN - INMOVA APP
 
-**Creado**: 3 de Enero de 2026  
-**Estado**: Setup completado, listo para ejecución
-
----
-
-## 🎯 EMPIEZA AQUÍ
-
-### 1. **RESUMEN_FINAL_SETUP.md** ⭐ LEER PRIMERO
-> Resumen visual de lo que acabas de lograr en 15 minutos
-
-**Qué incluye**:
-- ✅ Lo que se completó
-- 📊 Progreso visual
-- 🎬 Próximo comando inmediato
-
-**Tiempo de lectura**: 3 minutos
+**Última actualización**: 3 de enero de 2026
 
 ---
 
-### 2. **PROGRESO_SETUP_COMPLETO.md** ⭐ LEER SEGUNDO
-> Estado detallado y próximos pasos
+## 🎯 RESÚMENES EJECUTIVOS
 
-**Qué incluye**:
-- Archivos creados (302 tests)
-- Comandos útiles
-- Cronograma sugerido
-- Verificación de progreso
+### Status General
+- **`STATUS_FINAL_3_ENE_2026.md`** ⭐ 
+  - Resumen completo del estado actual
+  - Lista de funcionalidades operativas
+  - Métricas y próximos pasos
 
-**Tiempo de lectura**: 5 minutos
+- **`RESUMEN_GMAIL_SMTP_COMPLETADO.md`** 📧
+  - Configuración de Gmail SMTP
+  - Capacidad y límites
+  - Testing y troubleshooting
 
----
-
-## 📖 GUÍAS DE EJECUCIÓN
-
-### 3. **INICIO_COBERTURA_100.md**
-> Instrucciones paso a paso para comenzar HOY
-
-**Usa cuando**: Estés listo para comenzar el plan de 15 días
-
-**Incluye**:
-- Checklist día por día
-- Comandos de inicio
-- Tracking de progreso
+- **`INTEGRACIONES_PLATAFORMA_VS_CLIENTES.md`** 🔌
+  - Diferenciación de integraciones
+  - Status completo de servicios
+  - Costos y prioridades
 
 ---
 
-### 4. **PLAN_COBERTURA_100_COMPLETO.md**
-> Plan maestro detallado de 15 días
+## 📧 GMAIL SMTP
 
-**Usa cuando**: Necesites ver el plan completo
+### Configuración
+- **`GMAIL_SMTP_EXITO_FINAL.md`** ✅
+  - Guía completa de configuración
+  - Tipos de emails automáticos
+  - Troubleshooting detallado
+  - Testing manual
 
-**Incluye**:
-- Desglose día por día
-- 1005 tests a crear
-- Estimaciones de tiempo
-- Hitos y entregables
-
----
-
-### 5. **README_COBERTURA_100.md**
-> Guía de referencia rápida
-
-**Usa cuando**: Necesites consultar comandos o troubleshooting
-
-**Incluye**:
-- Comandos disponibles
-- Estructura de tests
-- Troubleshooting
-- Tips y mejores prácticas
+- **`GMAIL_SMTP_CONFIGURACION.md`**
+  - Pasos de configuración desde cero
+  - Activar verificación en 2 pasos
+  - Generar App Password
+  - Scripts de configuración
 
 ---
 
-## 📊 AUDITORÍAS Y ANÁLISIS
+## 💳 STRIPE
 
-### 6. **AUDITORIA_ESTADO_PROYECTO_INMOVA.md**
-> Auditoría técnica completa (15 páginas)
+### Webhook
+- **`STRIPE_WEBHOOK_EXITO_FINAL.md`** ✅
+  - Configuración de webhook secret
+  - Eventos capturados
+  - Verificación y testing
+  - Troubleshooting
 
-**Usa cuando**: Necesites detalles técnicos profundos
+- **`STRIPE_WEBHOOK_CONFIGURACION_FINAL.md`**
+  - Problemas encontrados y soluciones
+  - Configuración de variables de entorno
+  - Modos de desarrollo vs producción
 
-**Incluye**:
-- Gap analysis completo
-- 3 problemas bloqueantes
-- Checklist pre-lanzamiento
-- Comandos de verificación
-
----
-
-### 7. **RESUMEN_AUDITORIA_EJECUTIVO.md**
-> Resumen ejecutivo (2 páginas)
-
-**Usa cuando**: Necesites el veredicto rápido
-
-**Incluye**:
-- Estado: NO production-ready
-- Opciones: Beta (1 día) vs GA (15 días)
-- Recomendación final
+- **`RESUMEN_EJECUTIVO_STRIPE_WEBHOOK.md`**
+  - Resumen conciso de la configuración
 
 ---
 
-### 8. **RESUMEN_PLAN_COBERTURA_100.md**
-> Resumen de todo lo creado
+## 🔗 API Y WEBHOOKS (Para Clientes)
 
-**Usa cuando**: Quieras ver qué tienes disponible
+### Documentación API
+- **`docs/API_QUICK_START.md`** 🚀
+  - Guía de inicio rápido
+  - Autenticación con API Keys
+  - Ejemplos básicos
+  - Rate limiting
 
-**Incluye**:
-- Documentos creados (14)
-- Scripts (6)
-- Opciones disponibles
-- Next steps
+- **`docs/CODE_EXAMPLES.md`** 💻
+  - Ejemplos en cURL
+  - Ejemplos en JavaScript
+  - Ejemplos en Python
+  - Casos de uso reales
+
+### Webhooks
+- **`docs/WEBHOOK_GUIDE.md`** 🔔
+  - Sistema de webhooks de Inmova
+  - Eventos disponibles
+  - Verificación HMAC
+  - Retry logic
+  - Testing con ngrok
+
+- **`docs/DONDE_SE_CONFIGURA_WEBHOOKS.md`** ℹ️
+  - Diferencia entre webhooks de Stripe y webhooks para clientes
+  - Dónde configurar cada tipo
+
+### Integraciones
+- **`docs/ZAPIER_DEPLOYMENT_GUIDE.md`** ⚡
+  - Deployment de integración Zapier
+  - Zapier Platform CLI
+  - Testing y publicación
+  - Promoción en marketplace
+
+- **`docs/DOCUSIGN_JWT_AUTH_GUIDE.md`** ✍️
+  - Autorización JWT de DocuSign
+  - Configuración one-time
+  - Troubleshooting
+
+### Documentación Visual
+- **`DIAGRAMA_INTEGRACIONES.md`** 📊
+  - Diagramas ASCII de arquitectura
+  - Flujos de datos
+  - Componentes del sistema
+
+- **Swagger UI**: https://inmovaapp.com/docs
+  - Documentación interactiva
+  - Probar endpoints desde el navegador
+  - Schemas y modelos
 
 ---
 
-## ⚡ ALTERNATIVAS RÁPIDAS
+## 🛠️ OPERACIONES Y DEPLOYMENT
 
-### 9. **INSTRUCCIONES_FIX_RAPIDO.md**
-> Plan alternativo de 1 día para beta
+### Comandos
+- **`COMANDOS_UTILES.md`** 🔧 ⭐
+  - Comandos SSH más usados
+  - Monitoreo y logs
+  - Gestión de PM2
+  - Troubleshooting
+  - Backups
+  - Deployment
 
-**Usa cuando**: No tengas 15 días disponibles
+### Deployment
+- **`DEPLOYMENT_LANDING_EWOORKER_RESUMEN.md`**
+  - Deployment en servidor propio
+  - Configuración de PM2
+  - Nginx reverse proxy
 
-**Incluye**:
-- Fix de bloqueantes críticos
-- Tests E2E mínimos
-- Lanzamiento en beta con disclaimers
+- **`DEPLOYMENT_TOURS_EXITOSO.md`**
+  - Deployment de funcionalidades específicas
 
-**Tiempo**: 1 día de trabajo
+### Health Checks
+- **`HEALTH_CHECK_AGRESIVO_REPORT.md`**
+  - Sistema de health checks
+  - Monitoreo automatizado
+  - Auto-recovery
 
 ---
 
-## 🛠️ SCRIPTS Y HERRAMIENTAS
+## 🏗️ ARQUITECTURA Y DESARROLLO
 
-### Scripts Disponibles
+### Arquitectura General
+- **`.cursorrules`** (archivo raíz)
+  - Reglas de desarrollo
+  - Stack tecnológico
+  - Patrones de código
+  - Best practices
+  - Seguridad (OWASP Top 10)
+
+### Reports Técnicos
+- **`CRUD_IMPLEMENTATION_REPORT.md`**
+  - Implementación de CRUDs
+  - Endpoints creados
+  - Validaciones
+
+- **`ERROR_ANALYSIS_COMPLETE.md`**
+  - Análisis de errores históricos
+  - Soluciones implementadas
+
+- **`FRONTEND_AUDIT_FINAL.md`**
+  - Auditoría de frontend
+  - Componentes React
+  - Optimizaciones
+
+---
+
+## 🗂️ HISTORIALES Y RESOLUCIONES
+
+### Git y GitHub
+- **`HISTORIAL_LIMPIADO_PUSH_EXITOSO.md`**
+  - Limpieza de secrets del historial
+  - GitHub Push Protection
+  - Comandos ejecutados
+
+### Trabajo Autónomo
+- **`RESUMEN_TRABAJO_AUTONOMO_COMPLETADO.md`**
+  - Tareas completadas sin intervención del usuario
+  - Documentación generada
+  - Código implementado
+
+### Developer Docs
+- **`DEVELOPER_DOCS_COMPLETADO.md`**
+  - Resumen de toda la documentación para desarrolladores
+  - Swagger, guías, ejemplos, webhooks
+
+---
+
+## 📋 AUDITORÍAS Y STATUS
+
+### Integraciones
+- **`INTEGRACIONES_PLATAFORMA_VS_CLIENTES.md`** 🔌 ⭐
+  - Auditoría completa de integraciones
+  - Diferenciación plataforma vs clientes
+  - Status, costos, prioridades
+
+- **`RESUMEN_INTEGRACIONES_STATUS.md`**
+  - Resumen ejecutivo de integraciones
+
+### Sistema
+- **`ADMIN_CRUD_AUDIT_02_ENE_2026.md`**
+  - Auditoría de CRUDs de admin
+  - Estado de endpoints
+
+---
+
+## 🧪 TESTING
+
+- **`TESTS_E2E_IMPLEMENTADOS.md`**
+  - Tests end-to-end con Playwright
+  - Cobertura de tests
+
+- **`GUIA_TESTING_MOVIL.md`**
+  - Testing en dispositivos móviles
+  - Herramientas recomendadas
+
+---
+
+## 🎨 UX Y MEJORAS
+
+- **`MEJORAS_UX_IMPLEMENTADAS.md`**
+  - Mejoras de experiencia de usuario
+  - Optimizaciones de UI
+
+- **`MEJORAS_USABILIDAD_COMPLETAS.md`**
+  - Mejoras de usabilidad implementadas
+
+- **`REPRESENTACION_VISUAL_SIDEBAR.md`**
+  - Diseño de sidebar
+  - Navegación
+
+---
+
+## 💼 NEGOCIO Y ESTRATEGIA
+
+### Modelo de Negocio
+- **`PARTNER_BUSINESS_MODEL.md`**
+  - Modelo de negocio B2B
+  - Partners y colaboradores
+
+- **`SISTEMA_FACTURACION_B2B.md`**
+  - Sistema de facturación
+  - Integraciones contables
+
+### Marketing
+- **`PROPUESTA_VALOR_MARKETING.md`**
+  - Propuesta de valor
+  - Diferenciadores
+
+- **`ANALISIS_COMPETITIVO_HOMMING.md`**
+  - Análisis de competencia
+  - Gap analysis
+
+---
+
+## 🔐 SEGURIDAD Y CONFIGURACIÓN
+
+- **`CONFIGURACION_CLOUDFLARE.md`**
+  - Configuración de Cloudflare
+  - DNS, SSL, CDN
+
+- **`REDSYS_CONFIGURACION.md`**
+  - Configuración de Redsys (pasarela de pagos española)
+
+---
+
+## 🚀 DEPLOYMENT Y INFRAESTRUCTURA
+
+### Guías de Deployment
+- **`DEPLOYMENT.md`**
+  - Guía general de deployment
+
+- **`DEPLOYMENT_GUIDE.pdf`**
+  - PDF con instrucciones visuales
+
+- **`PASOS_DEPLOYMENT.pdf`**
+  - Pasos detallados
+
+### Configuración de Servidor
+- **`ESTUDIO_PRE_DEPLOYMENT_SERVIDOR.md`**
+  - Análisis previo de servidor
+  - Requisitos de infraestructura
+
+- **`COOLIFY_QUICK_START.md`**
+  - Alternativa con Coolify (PaaS)
+
+---
+
+## 📞 CONTACTO Y SOPORTE
+
+### Dashboards de Servicios
+
+- **Aplicación**: https://inmovaapp.com
+- **API Docs**: https://inmovaapp.com/docs
+- **Health Check**: https://inmovaapp.com/api/health
+
+### Servicios Externos
+
+- **Stripe**: https://dashboard.stripe.com/
+- **AWS S3**: https://s3.console.aws.amazon.com/
+- **Gmail**: https://myaccount.google.com/apppasswords
+- **Signaturit**: https://app.signaturit.com/
+- **DocuSign**: https://demo.docusign.net/
+
+### Servidor
 
 ```bash
-scripts/
-├── setup-testing-infrastructure.sh    # Setup completo ✅
-├── generate-api-tests.py             # 216 tests API ✅
-├── generate-component-tests.py       # 86 tests componentes ✅
-├── fix-dynamic-export.py             # Fix API routes ✅
-├── fix-dynamic-export.sh             # Versión bash
-└── coverage-verify.sh                # Verificar 100%
-```
+# SSH
+ssh root@157.180.119.236
 
-**Todos ejecutables y listos para usar**
+# App Path
+cd /opt/inmova-app
 
----
-
-## 📂 ESTRUCTURA DE ARCHIVOS
-
-```
-DOCUMENTACIÓN (9 archivos):
-├── RESUMEN_FINAL_SETUP.md           ⭐ Empieza aquí
-├── PROGRESO_SETUP_COMPLETO.md       ⭐ Estado actual
-├── INICIO_COBERTURA_100.md          📅 Plan diario
-├── PLAN_COBERTURA_100_COMPLETO.md   📖 Plan maestro
-├── README_COBERTURA_100.md          📚 Referencia
-├── AUDITORIA_ESTADO_PROYECTO.md     🔍 Análisis técnico
-├── RESUMEN_AUDITORIA_EJECUTIVO.md   📋 Resumen 2 pág
-├── RESUMEN_PLAN_COBERTURA_100.md    📊 Qué tienes
-└── INSTRUCCIONES_FIX_RAPIDO.md      ⚡ 1 día beta
-
-SCRIPTS (6 archivos):
-├── setup-testing-infrastructure.sh
-├── generate-api-tests.py
-├── generate-component-tests.py
-├── fix-dynamic-export.py
-├── fix-dynamic-export.sh
-└── coverage-verify.sh
-
-CONFIGURACIÓN (1 archivo):
-└── vitest.config.100.ts
-
-TESTS GENERADOS (302 archivos):
-├── __tests__/integration/api/     (216 archivos)
-└── __tests__/unit/components/     (86 archivos)
+# Logs
+pm2 logs inmova-app
 ```
 
 ---
 
-## 🎯 FLUJO DE LECTURA RECOMENDADO
+## 🗂️ ORGANIZACIÓN DE ARCHIVOS
 
-### Si tienes 10 minutos
-1. `RESUMEN_FINAL_SETUP.md` (3 min)
-2. `PROGRESO_SETUP_COMPLETO.md` (5 min)
-3. Ejecutar: `yarn test:coverage` (2 min)
-
-### Si tienes 30 minutos
-1-3. Lo anterior (10 min)
-4. `INICIO_COBERTURA_100.md` (10 min)
-5. `README_COBERTURA_100.md` (10 min)
-
-### Si vas a ejecutar el plan completo
-1-5. Lo anterior (30 min)
-6. `PLAN_COBERTURA_100_COMPLETO.md` (20 min)
-7. `AUDITORIA_ESTADO_PROYECTO.md` (30 min)
-
-### Si necesitas lanzar rápido
-1. `RESUMEN_AUDITORIA_EJECUTIVO.md` (5 min)
-2. `INSTRUCCIONES_FIX_RAPIDO.md` (10 min)
-3. Ejecutar fixes (1 día)
-
----
-
-## 📊 COMPARACIÓN DE OPCIONES
-
-| Documento | Tiempo Lectura | Cuándo Usar |
-|-----------|----------------|-------------|
-| RESUMEN_FINAL_SETUP | 3 min | Ahora (ver qué lograste) |
-| PROGRESO_SETUP_COMPLETO | 5 min | Entender estado actual |
-| INICIO_COBERTURA_100 | 10 min | Comenzar plan 15 días |
-| PLAN_COBERTURA_100 | 20 min | Ver plan completo |
-| README_COBERTURA_100 | 10 min | Referencia comandos |
-| AUDITORIA_COMPLETA | 30 min | Detalles técnicos |
-| RESUMEN_EJECUTIVO | 5 min | Veredicto rápido |
-| FIX_RAPIDO | 10 min | Lanzar en 1 día |
-
----
-
-## 🚀 COMANDOS INMEDIATOS
-
-### Para ver estado actual
-```bash
-yarn test:coverage
-open coverage/index.html
 ```
-
-### Para comenzar plan
-```bash
-cat INICIO_COBERTURA_100.md
-```
-
-### Para lanzar rápido
-```bash
-cat INSTRUCCIONES_FIX_RAPIDO.md
+/workspace/
+├── 📊 STATUS_FINAL_3_ENE_2026.md (⭐ EMPEZAR AQUÍ)
+├── 📧 Email Configuration
+│   ├── GMAIL_SMTP_EXITO_FINAL.md
+│   ├── GMAIL_SMTP_CONFIGURACION.md
+│   └── RESUMEN_GMAIL_SMTP_COMPLETADO.md
+├── 💳 Stripe Configuration
+│   ├── STRIPE_WEBHOOK_EXITO_FINAL.md
+│   ├── STRIPE_WEBHOOK_CONFIGURACION_FINAL.md
+│   └── RESUMEN_EJECUTIVO_STRIPE_WEBHOOK.md
+├── 🔌 Integrations Audit
+│   ├── INTEGRACIONES_PLATAFORMA_VS_CLIENTES.md (⭐)
+│   ├── RESUMEN_INTEGRACIONES_STATUS.md
+│   └── DIAGRAMA_INTEGRACIONES.md
+├── 📚 API Documentation (for clients)
+│   └── docs/
+│       ├── API_QUICK_START.md
+│       ├── CODE_EXAMPLES.md
+│       ├── WEBHOOK_GUIDE.md
+│       ├── ZAPIER_DEPLOYMENT_GUIDE.md
+│       └── DOCUSIGN_JWT_AUTH_GUIDE.md
+├── 🛠️ Operations
+│   ├── COMANDOS_UTILES.md (⭐ REFERENCIA RÁPIDA)
+│   ├── DEPLOYMENT_*.md
+│   └── HEALTH_CHECK_*.md
+├── 🏗️ Architecture
+│   ├── .cursorrules (reglas de desarrollo)
+│   ├── CRUD_IMPLEMENTATION_REPORT.md
+│   └── FRONTEND_AUDIT_FINAL.md
+└── 📋 Reports & Audits
+    ├── ADMIN_CRUD_AUDIT_02_ENE_2026.md
+    ├── RESUMEN_TRABAJO_AUTONOMO_COMPLETADO.md
+    └── DEVELOPER_DOCS_COMPLETADO.md
 ```
 
 ---
 
-## ✅ VERIFICACIÓN RÁPIDA
+## 🎯 DOCUMENTOS MÁS IMPORTANTES
 
-```bash
-# Documentos creados
-ls -1 *.md | grep -E "(SETUP|COBERTURA|AUDITORIA|PLAN)" | wc -l
-# Esperado: 9
+### Para Empezar (Top 3)
+1. **`STATUS_FINAL_3_ENE_2026.md`** - Estado general de la app
+2. **`COMANDOS_UTILES.md`** - Comandos del día a día
+3. **`INTEGRACIONES_PLATAFORMA_VS_CLIENTES.md`** - Entender integraciones
 
-# Scripts creados
-ls -1 scripts/*.{py,sh} | wc -l
-# Esperado: 6
+### Para Configuración (Top 3)
+1. **`GMAIL_SMTP_EXITO_FINAL.md`** - Emails funcionando
+2. **`STRIPE_WEBHOOK_EXITO_FINAL.md`** - Pagos funcionando
+3. **`.cursorrules`** - Reglas de desarrollo
 
-# Tests generados
-find __tests__ -name "*.test.t*" | wc -l
-# Esperado: 302
-```
+### Para Integraciones de Clientes (Top 3)
+1. **`docs/API_QUICK_START.md`** - Empezar con la API
+2. **`docs/CODE_EXAMPLES.md`** - Ejemplos de código
+3. **`docs/WEBHOOK_GUIDE.md`** - Recibir eventos
 
----
-
-## 💡 RECOMENDACIÓN FINAL
-
-**Tu siguiente paso**:
-
-1. ✅ Lee `RESUMEN_FINAL_SETUP.md` (3 min)
-2. ✅ Lee `PROGRESO_SETUP_COMPLETO.md` (5 min)
-3. ✅ Ejecuta `yarn test:coverage` (2 min)
-4. ✅ Decide tu plan:
-   - **15 días cobertura 100%** → Lee `INICIO_COBERTURA_100.md`
-   - **1 día beta** → Lee `INSTRUCCIONES_FIX_RAPIDO.md`
+### Para Operaciones (Top 3)
+1. **`COMANDOS_UTILES.md`** - Comandos SSH y PM2
+2. **`DEPLOYMENT.md`** - Cómo hacer deploy
+3. **`HEALTH_CHECK_AGRESIVO_REPORT.md`** - Monitoreo
 
 ---
 
-## 🎉 RESUMEN
+## 📞 SOPORTE RÁPIDO
 
-**Tienes**:
-- ✅ 9 documentos de guía
-- ✅ 6 scripts automatizados
-- ✅ 302 tests generados
-- ✅ Plan completo de 15 días
-- ✅ Alternativa de 1 día
+**¿No funciona algo?**
 
-**Todo listo para alcanzar cobertura 100%**
+1. Ver logs: `ssh root@157.180.119.236 'pm2 logs inmova-app'`
+2. Consultar: `COMANDOS_UTILES.md` > Sección "Troubleshooting"
+3. Health check: https://inmovaapp.com/api/health
 
----
+**¿Configurar integración?**
 
-**Próximo comando**:
-```bash
-cat RESUMEN_FINAL_SETUP.md
-```
+1. Para Inmova (email, pagos): Ver `INTEGRACIONES_PLATAFORMA_VS_CLIENTES.md`
+2. Para clientes (API, webhooks): Ver `docs/API_QUICK_START.md`
 
-**¡Éxito!** 🚀
+**¿Hacer deployment?**
+
+1. Consultar: `COMANDOS_UTILES.md` > Sección "Deployment"
+2. O ejecutar: `ssh root@157.180.119.236` y seguir comandos
 
 ---
 
-**Creado**: 3 de Enero de 2026  
-**Documentos**: 9  
-**Scripts**: 6  
-**Tests**: 302  
-**Estado**: ✅ COMPLETO
+**Documentación generada por**: Cursor Agent  
+**Fecha**: 3 de enero de 2026  
+**Versión**: 1.0

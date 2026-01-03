@@ -1,633 +1,617 @@
-# 💻 Comandos Útiles - Deployment y Gestión
+# 🛠️ COMANDOS ÚTILES - INMOVA APP
 
-## 📋 Índice
-
-1. [Git y GitHub](#git-y-github)
-2. [Prisma y Base de Datos](#prisma-y-base-de-datos)
-3. [Vercel CLI](#vercel-cli)
-4. [Next.js](#nextjs)
-5. [Verificación y Testing](#verificación-y-testing)
-6. [Troubleshooting](#troubleshooting)
+**Servidor**: 157.180.119.236  
+**Usuario**: root  
+**Path**: /opt/inmova-app
 
 ---
 
-## 1. Git y GitHub
-
-### Inicializar y Subir a GitHub
+## 🔐 Acceso SSH
 
 ```bash
-# Navegar al proyecto
-cd /home/ubuntu/homming_vidaro/nextjs_space
+# Conectar al servidor
+ssh root@157.180.119.236
 
-# Inicializar Git
-git init
-
-# Agregar todos los archivos
-git add .
-
-# Commit inicial
-git commit -m "Preparación para deployment en Vercel"
-
-# Cambiar a branch main
-git branch -M main
-
-# Agregar remote de GitHub
-git remote add origin https://github.com/dvillagrab/inmova-platform.git
-
-# Push inicial
-git push -u origin main
+# Ir al directorio de la app
+cd /opt/inmova-app
 ```
 
-### Verificar Estado
+---
+
+## 📊 Monitoreo
+
+### PM2 (Proceso Node.js)
 
 ```bash
-# Ver estado actual
+# Ver status de la app
+pm2 status
+
+# Ver logs en tiempo real
+pm2 logs inmova-app
+
+# Ver logs con filtros
+pm2 logs inmova-app | grep -i "error"
+pm2 logs inmova-app | grep -i "email"
+pm2 logs inmova-app | grep -i "stripe"
+
+# Ver últimas 50 líneas
+pm2 logs inmova-app --lines 50
+
+# Ver logs sin streaming (termina solo)
+pm2 logs inmova-app --lines 100 --nostream
+
+# Ver estadísticas de uso
+pm2 monit
+
+# Ver información detallada
+pm2 describe inmova-app
+```
+
+### Logs del Sistema
+
+```bash
+# Logs de Nginx
+tail -f /var/log/nginx/access.log
+tail -f /var/log/nginx/error.log
+
+# Logs de Inmova
+tail -f /var/log/inmova/out.log
+tail -f /var/log/inmova/error.log
+
+# Buscar errores en logs
+grep -i "error" /var/log/inmova/*.log
+
+# Buscar emails en logs
+grep -i "email\|smtp" /var/log/inmova/*.log
+```
+
+### Health Checks
+
+```bash
+# Health check interno
+curl http://localhost:3000/api/health
+
+# Health check externo (dominio)
+curl https://inmovaapp.com/api/health
+
+# Con más detalles
+curl -v https://inmovaapp.com/api/health
+
+# Test de login page
+curl -I https://inmovaapp.com/login
+```
+
+---
+
+## 🔄 Gestión de la App
+
+### Reiniciar la App
+
+```bash
+# Restart rápido (con downtime)
+pm2 restart inmova-app
+
+# Reload sin downtime (recomendado)
+pm2 reload inmova-app
+
+# Restart con variables actualizadas
+pm2 restart inmova-app --update-env
+
+# Stop y start (restart completo)
+pm2 stop inmova-app
+pm2 start inmova-app
+```
+
+### Actualizar Código
+
+```bash
+# Ir al directorio
+cd /opt/inmova-app
+
+# Ver cambios pendientes
 git status
 
-# Ver archivos trackeados
-git ls-files
+# Actualizar código
+git pull origin main
 
-# Ver remotes configurados
-git remote -v
+# Instalar nuevas dependencias (si hay)
+npm install
 
-# Ver historial de commits
-git log --oneline
+# Aplicar migraciones de BD (si hay)
+npx prisma migrate deploy
+
+# Restart de la app
+pm2 reload inmova-app
 ```
 
-### Commits y Push
+### Limpiar Cache
 
 ```bash
-# Agregar archivos específicos
-git add archivo.ts
+# Limpiar cache de Next.js
+rm -rf .next/cache
 
-# Agregar todo
-git add .
+# Limpiar node_modules (solo si hay problemas)
+rm -rf node_modules
+npm install
 
-# Commit
-git commit -m "Mensaje del commit"
-
-# Push a main
-git push origin main
-
-# Push forzado (usar con cuidado)
-git push -f origin main
-```
-
-### Branches
-
-```bash
-# Crear nueva branch
-git checkout -b feature/nueva-funcionalidad
-
-# Cambiar de branch
-git checkout main
-
-# Ver todas las branches
-git branch -a
-
-# Eliminar branch local
-git branch -d feature/vieja
-
-# Eliminar branch remota
-git push origin --delete feature/vieja
-```
-
-### Deshacer Cambios
-
-```bash
-# Deshacer cambios locales (no commiteados)
-git checkout -- archivo.ts
-
-# Deshacer último commit (mantener cambios)
-git reset --soft HEAD~1
-
-# Deshacer último commit (descartar cambios)
-git reset --hard HEAD~1
-
-# Remover archivo de Git pero mantenerlo local
-git rm --cached archivo.ts
+# Rebuild completo
+rm -rf .next
+npm run build
+pm2 restart inmova-app
 ```
 
 ---
 
-## 2. Prisma y Base de Datos
+## 📧 Gmail SMTP
 
-### Generar Cliente Prisma
+### Verificar Configuración
 
 ```bash
-cd /home/ubuntu/homming_vidaro/nextjs_space
+# Ver variables SMTP
+cd /opt/inmova-app
+cat .env.local | grep SMTP
+cat .env.production | grep SMTP
 
-# Generar cliente
-yarn prisma generate
+# Test de conexión
+node -e "const nodemailer = require('nodemailer'); \
+const t = nodemailer.createTransport({ \
+  host: 'smtp.gmail.com', port: 587, secure: false, \
+  auth: { user: 'inmovaapp@gmail.com', pass: 'eeemxyuasvsnyxyu' } \
+}); \
+t.verify().then(() => console.log('✅ OK')).catch(e => console.error('❌', e.message));"
+```
 
-# Generar con output específico
-yarn prisma generate --schema=./prisma/schema.prisma
+### Actualizar Password
+
+```bash
+# Si necesitas cambiar la App Password
+cd /opt/inmova-app
+sed -i 's/^SMTP_PASSWORD=.*/SMTP_PASSWORD=NUEVA_PASSWORD/' .env.local
+sed -i 's/^SMTP_PASSWORD=.*/SMTP_PASSWORD=NUEVA_PASSWORD/' .env.production
+pm2 restart inmova-app
+```
+
+### Monitorear Emails
+
+```bash
+# Ver logs de emails
+pm2 logs inmova-app | grep -i "email\|smtp\|nodemailer"
+
+# Ver emails enviados
+grep -i "email sent" /var/log/inmova/*.log
+
+# Ver errores de email
+grep -i "error sending email" /var/log/inmova/*.log
+```
+
+---
+
+## 💳 Stripe
+
+### Verificar Webhook
+
+```bash
+# Ver configuración
+cd /opt/inmova-app
+cat .env.local | grep STRIPE
+
+# Test del endpoint
+curl -X POST http://localhost:3000/api/webhooks/stripe \
+  -H "Content-Type: application/json" \
+  -d '{"type":"test"}'
+```
+
+### Monitorear Pagos
+
+```bash
+# Ver logs de Stripe
+pm2 logs inmova-app | grep -i "stripe\|payment\|webhook"
+
+# Ver webhooks recibidos
+grep -i "webhook" /var/log/inmova/*.log | grep stripe
+```
+
+---
+
+## 🗄️ Base de Datos
+
+### Prisma Studio (GUI para BD)
+
+```bash
+# Abrir Prisma Studio (web UI)
+cd /opt/inmova-app
+npx prisma studio
+
+# Se abre en: http://localhost:5555
+# Crear túnel SSH para acceder desde tu PC:
+# En TU PC:
+ssh -L 5555:localhost:5555 root@157.180.119.236
+# Luego abrir: http://localhost:5555
+```
+
+### Consultas SQL
+
+```bash
+# Conectar a PostgreSQL
+psql -U inmova_user -d inmova_production
+
+# Ver usuarios
+SELECT email, role, activo FROM users;
+
+# Ver propiedades
+SELECT address, city, price, status FROM properties;
+
+# Ver pagos recientes
+SELECT amount, status, "createdAt" FROM payments ORDER BY "createdAt" DESC LIMIT 10;
+
+# Salir
+\q
 ```
 
 ### Migraciones
 
 ```bash
-# Crear nueva migración (desarrollo)
-yarn prisma migrate dev --name nombre_migracion
+# Ver status de migraciones
+cd /opt/inmova-app
+npx prisma migrate status
 
-# Aplicar migraciones (producción)
-yarn prisma migrate deploy
+# Aplicar migraciones pendientes
+npx prisma migrate deploy
 
-# Ver estado de migraciones
-yarn prisma migrate status
-
-# Resetear BD (CUIDADO: Borra datos)
-yarn prisma migrate reset
-```
-
-### Prisma Studio (UI)
-
-```bash
-# Abrir Prisma Studio
-yarn prisma studio
-
-# Se abre en http://localhost:5555
-```
-
-### Database Push (Sin migraciones)
-
-```bash
-# Sincronizar schema directo a BD
-yarn prisma db push
-
-# Útil para prototipos, NO usar en producción
-```
-
-### Seed (Poblar datos)
-
-```bash
-# Ejecutar seed
-yarn prisma db seed
-
-# O directamente
-yarn db:seed
-node scripts/seed.ts
-```
-
-### Introspect (Generar schema desde BD existente)
-
-```bash
-# Introspect BD
-yarn prisma db pull
-```
-
-### Validar Schema
-
-```bash
-# Validar schema.prisma
-yarn prisma validate
-
-# Formatear schema.prisma
-yarn prisma format
-```
-
-### Conectar a BD de Producción
-
-```bash
-# Crear .env.production
-echo "DATABASE_URL=postgresql://user:pass@host:5432/db" > .env.production
-
-# Usar .env.production
-export $(cat .env.production | xargs)
-yarn prisma migrate deploy
+# Resetear BD (⚠️ PELIGRO - borra todos los datos)
+npx prisma migrate reset
 ```
 
 ---
 
-## 3. Vercel CLI
+## 📦 Backups
 
-### Instalar Vercel CLI
+### Backup de BD
 
 ```bash
-# Instalar globalmente
-npm install -g vercel
+# Backup manual
+pg_dump -U inmova_user inmova_production > backup_$(date +%Y%m%d_%H%M%S).sql
 
-# O con yarn
-yarn global add vercel
+# Comprimir backup
+gzip backup_*.sql
+
+# Ver backups existentes
+ls -lh /var/backups/inmova/
 ```
 
-### Login y Setup
+### Backup de .env
 
 ```bash
-# Login en Vercel
-vercel login
-
-# Link proyecto local con Vercel
-cd /home/ubuntu/homming_vidaro/nextjs_space
-vercel link
+# Backup de variables de entorno
+cd /opt/inmova-app
+cp .env.production .env.production.backup_$(date +%Y%m%d)
+cp .env.local .env.local.backup_$(date +%Y%m%d)
 ```
 
-### Deployment
+### Restaurar desde Backup
 
 ```bash
-# Deploy a preview
-vercel
+# Restaurar BD
+psql -U inmova_user -d inmova_production < backup_20260103.sql
 
-# Deploy a producción
-vercel --prod
-
-# Deploy con build log completo
-vercel --prod --debug
-```
-
-### Variables de Entorno
-
-```bash
-# Listar env vars
-vercel env ls
-
-# Agregar env var
-vercel env add DATABASE_URL production
-
-# Remover env var
-vercel env rm DATABASE_URL production
-
-# Descargar env vars
-vercel env pull .env.production
-```
-
-### Logs
-
-```bash
-# Ver logs en tiempo real
-vercel logs tu-proyecto --follow
-
-# Ver logs de un deployment específico
-vercel logs [deployment-url]
-
-# Ver logs con errores solamente
-vercel logs --filter=error
-```
-
-### Dominios
-
-```bash
-# Listar dominios
-vercel domains ls
-
-# Agregar dominio
-vercel domains add inmova.app
-
-# Remover dominio
-vercel domains rm inmova.app
-```
-
-### Proyectos
-
-```bash
-# Listar proyectos
-vercel projects ls
-
-# Ver info del proyecto
-vercel project inmova-platform
-```
-
-### Otros
-
-```bash
-# Ver información del usuario
-vercel whoami
-
-# Ver lista de deployments
-vercel ls
-
-# Rollback a deployment anterior
-vercel rollback [deployment-url]
-
-# Eliminar deployment
-vercel rm [deployment-url]
+# Restaurar .env
+cd /opt/inmova-app
+cp .env.production.backup_20260103 .env.production
+pm2 restart inmova-app
 ```
 
 ---
 
-## 4. Next.js
+## 🔧 Troubleshooting
 
-### Desarrollo
+### App no responde
 
 ```bash
-cd /home/ubuntu/homming_vidaro/nextjs_space
+# 1. Ver logs
+pm2 logs inmova-app --lines 50
 
-# Iniciar dev server
-yarn dev
+# 2. Ver status de PM2
+pm2 status
 
-# Iniciar en puerto específico
-yarn dev -p 3001
+# 3. Reiniciar
+pm2 restart inmova-app
 
-# Iniciar con turbopack (más rápido)
-yarn dev --turbo
+# 4. Si sigue sin funcionar, restart completo
+pm2 delete inmova-app
+pm2 kill
+cd /opt/inmova-app
+pm2 start ecosystem.config.js --env production
+pm2 save
 ```
 
-### Build
+### Puerto 3000 ocupado
 
 ```bash
-# Build para producción
-yarn build
-
-# Build con análisis de bundle
-ANALYZE=true yarn build
-
-# Build con output standalone
-NEXT_OUTPUT_MODE=standalone yarn build
-```
-
-### Start (Producción)
-
-```bash
-# Iniciar servidor de producción
-yarn start
-
-# Iniciar en puerto específico
-yarn start -p 3000
-```
-
-### Lint
-
-```bash
-# Ejecutar ESLint
-yarn lint
-
-# Lint con fix automático
-yarn lint --fix
-```
-
-### Info
-
-```bash
-# Ver info de Next.js
-npx next info
-```
-
----
-
-## 5. Verificación y Testing
-
-### TypeScript
-
-```bash
-# Verificar tipos
-yarn tsc --noEmit
-
-# Verificar archivo específico
-yarn tsc archivo.ts --noEmit
-```
-
-### Tests
-
-```bash
-# Ejecutar tests
-yarn test
-
-# Tests con coverage
-yarn test:ci
-
-# Tests e2e
-yarn test:e2e
-
-# Tests en modo watch
-yarn test --watch
-```
-
-### Build y Verificación Local
-
-```bash
-# Build completo
-yarn build
-
-# Si build tiene éxito, iniciar
-yarn start
-
-# Abrir en navegador
-open http://localhost:3000
-```
-
-### Verificar Env Vars
-
-```bash
-# Ver variables de entorno
-env | grep DATABASE
-
-# Verificar archivo .env
-cat .env | grep DATABASE_URL
-```
-
----
-
-## 6. Troubleshooting
-
-### Limpiar Caché
-
-```bash
-cd /home/ubuntu/homming_vidaro/nextjs_space
-
-# Limpiar .next
-rm -rf .next
-
-# Limpiar node_modules
-rm -rf node_modules
-yarn install
-
-# Limpiar yarn cache
-yarn cache clean
-
-# Limpiar todo y reinstalar
-rm -rf .next node_modules yarn.lock
-yarn install
-```
-
-### Regenerar Prisma Client
-
-```bash
-# Eliminar cliente generado
-rm -rf node_modules/.prisma
-rm -rf node_modules/@prisma/client
-
-# Regenerar
-yarn prisma generate
-```
-
-### Verificar Conexión a BD
-
-```bash
-# Usar psql
-psql "postgresql://user:pass@host:5432/db"
-
-# O con docker
-docker run -it --rm postgres psql "postgresql://user:pass@host:5432/db"
-
-# Verificar con node
-node -e "const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); prisma.\$connect().then(() => console.log('Conectado')).catch(e => console.error(e));"
-```
-
-### Ver Logs de Errores
-
-```bash
-# Ver logs de desarrollo
-cat .next/trace
-
-# Ver logs de Next.js
-tail -f .next/server/pages-manifest.json
-
-# Ver errores en tiempo real
-yarn dev 2>&1 | tee dev.log
-```
-
-### Verificar Puerto en Uso
-
-```bash
-# Ver qué está usando puerto 3000
+# Ver qué proceso usa el puerto
 lsof -i :3000
+# o
+ss -tlnp | grep :3000
 
-# Matar proceso en puerto 3000
-kill -9 $(lsof -t -i:3000)
+# Matar proceso
+kill -9 <PID>
+# o
+fuser -k 3000/tcp
+
+# Reiniciar PM2
+pm2 restart inmova-app
 ```
 
-### Verificar Permisos
+### BD no conecta
 
 ```bash
-# Ver permisos de archivos
-ls -la
+# Test de conexión
+cd /opt/inmova-app
+npx prisma db push
 
-# Cambiar permisos de scripts
-chmod +x scripts/*.sh
+# Ver status de PostgreSQL
+systemctl status postgresql
 
-# Cambiar owner
-sudo chown -R $USER:$USER .
+# Reiniciar PostgreSQL
+systemctl restart postgresql
 ```
 
-### Verificar Dependencias
+### Emails no llegan
 
 ```bash
-# Verificar dependencias rotas
-yarn check
+# 1. Verificar variables
+cat .env.local | grep SMTP
 
-# Verificar versiones
-yarn list --depth=0
+# 2. Test de conexión
+node -e "const nodemailer = require('nodemailer'); \
+const t = nodemailer.createTransport({ \
+  host: 'smtp.gmail.com', port: 587, secure: false, \
+  auth: { user: 'inmovaapp@gmail.com', pass: 'eeemxyuasvsnyxyu' } \
+}); \
+t.verify().then(() => console.log('✅ OK')).catch(e => console.error('❌', e.message));"
 
-# Actualizar dependencias
-yarn upgrade-interactive
+# 3. Ver logs
+pm2 logs inmova-app | grep -i email
+
+# 4. Reiniciar app
+pm2 restart inmova-app
+```
+
+### Disco lleno
+
+```bash
+# Ver uso de disco
+df -h
+
+# Ver archivos grandes
+du -sh * | sort -h
+
+# Limpiar logs antiguos
+find /var/log -name "*.log" -mtime +30 -delete
+
+# Limpiar cache de npm
+npm cache clean --force
+
+# Limpiar backups antiguos
+find /var/backups/inmova -name "*.sql.gz" -mtime +30 -delete
 ```
 
 ---
 
-## 🚀 Scripts de Deployment
+## 🚀 Deployment
 
-### Script Completo de Pre-Deployment
+### Deployment Manual
 
 ```bash
-#!/bin/bash
+# 1. Conectar al servidor
+ssh root@157.180.119.236
 
-cd /home/ubuntu/homming_vidaro/nextjs_space
+# 2. Ir al directorio
+cd /opt/inmova-app
 
-echo "🧼 Limpiando..."
-rm -rf .next
+# 3. Backup de BD
+pg_dump -U inmova_user inmova_production > /var/backups/inmova/pre-deploy-$(date +%Y%m%d_%H%M%S).sql
 
-echo "📦 Instalando dependencias..."
-yarn install
+# 4. Actualizar código
+git pull origin main
 
-echo "🔧 Generando Prisma client..."
-yarn prisma generate
+# 5. Instalar dependencias
+npm install
 
-echo "🔍 Verificando TypeScript..."
-yarn tsc --noEmit
+# 6. Aplicar migraciones
+npx prisma migrate deploy
 
-echo "🏛️ Building..."
-yarn build
+# 7. Reload PM2 (sin downtime)
+pm2 reload inmova-app
 
-echo "✅ Todo listo para deployment!"
+# 8. Esperar warm-up
+sleep 10
+
+# 9. Health check
+curl https://inmovaapp.com/api/health
+
+# 10. Ver logs
+pm2 logs inmova-app --lines 20
 ```
 
-### Script de Migración en Producción
+### Rollback
 
 ```bash
-#!/bin/bash
+# Ver commits recientes
+git log --oneline -10
 
-cd /home/ubuntu/homming_vidaro/nextjs_space
+# Rollback a versión anterior
+git reset --hard <commit-hash>
 
-echo "DATABASE_URL de producción:"
-read -s DATABASE_URL
+# Reinstalar dependencias de esa versión
+npm install
 
-export DATABASE_URL
+# Aplicar migraciones
+npx prisma migrate deploy
 
-echo "📦 Generando cliente Prisma..."
-yarn prisma generate
-
-echo "🚀 Ejecutando migraciones..."
-yarn prisma migrate deploy
-
-echo "✅ Migraciones completadas!"
-```
-
-### Script de Verificación Post-Deployment
-
-```bash
-#!/bin/bash
-
-URL="https://tu-proyecto.vercel.app"
-
-echo "🔍 Verificando health..."
-curl -I $URL
-
-echo ""
-echo "🔍 Verificando API..."
-curl $URL/api/health
-
-echo ""
-echo "🔍 Verificando login..."
-curl -X POST $URL/api/auth/signin/credentials \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@inmova.com","password":"admin123"}'
-
-echo ""
-echo "✅ Verificación completada!"
+# Restart
+pm2 reload inmova-app
 ```
 
 ---
 
-## 📚 Comandos de Referencia Rápida
+## 📊 Métricas y Estadísticas
+
+### Uso de Recursos
 
 ```bash
-# Setup inicial
-./deploy-setup.sh
+# CPU y RAM
+top
+# o
+htop
 
-# Commit y push
-git add . && git commit -m "Update" && git push
+# Uso por proceso
+pm2 monit
 
-# Build local
-yarn build && yarn start
+# Disco
+df -h
 
-# Migraciones
-yarn prisma migrate deploy
+# Memoria
+free -h
 
-# Deploy a Vercel
-vercel --prod
+# Uptime del servidor
+uptime
+```
 
-# Ver logs
-vercel logs --follow
+### Estadísticas de la App
 
-# Verificar que todo funciona
-curl https://tu-proyecto.vercel.app
+```bash
+# Número de usuarios en BD
+psql -U inmova_user -d inmova_production -c "SELECT COUNT(*) FROM users;"
+
+# Número de propiedades
+psql -U inmova_user -d inmova_production -c "SELECT COUNT(*) FROM properties;"
+
+# Pagos del último mes
+psql -U inmova_user -d inmova_production -c "SELECT COUNT(*), SUM(amount) FROM payments WHERE \"createdAt\" > NOW() - INTERVAL '30 days';"
+
+# Requests en última hora (Nginx)
+tail -1000 /var/log/nginx/access.log | grep "$(date '+%d/%b/%Y:%H')" | wc -l
 ```
 
 ---
 
-## 🔗 Enlaces Útiles
+## 🔐 Seguridad
 
-- **Documentación:**
-  - Next.js: https://nextjs.org/docs
-  - Prisma: https://www.prisma.io/docs
-  - Vercel: https://vercel.com/docs
-  - Git: https://git-scm.com/doc
+### Firewall (UFW)
 
-- **Troubleshooting:**
-  - Next.js Errors: https://nextjs.org/docs/messages
-  - Prisma Errors: https://www.prisma.io/docs/reference/api-reference/error-reference
-  - Vercel Status: https://vercel-status.com
+```bash
+# Ver status
+ufw status
+
+# Ver reglas
+ufw status numbered
+
+# Permitir puerto
+ufw allow 3000/tcp
+
+# Denegar puerto
+ufw deny 3000/tcp
+
+# Reload
+ufw reload
+```
+
+### SSL (Certbot)
+
+```bash
+# Ver certificados
+certbot certificates
+
+# Renovar certificados
+certbot renew
+
+# Renovar con dry-run (test)
+certbot renew --dry-run
+```
+
+### Logs de Seguridad
+
+```bash
+# Ver intentos de login fallidos
+grep "Failed password" /var/log/auth.log
+
+# Ver accesos SSH exitosos
+grep "Accepted password" /var/log/auth.log
+```
 
 ---
 
-*Comandos Útiles para INMOVA Platform - Enero 2026*
+## 📱 Accesos Rápidos
+
+### Dashboards
+
+```bash
+# Stripe (pagos)
+https://dashboard.stripe.com/
+
+# AWS S3 (archivos)
+https://s3.console.aws.amazon.com/
+
+# Gmail (emails)
+https://myaccount.google.com/
+https://myaccount.google.com/apppasswords
+
+# Signaturit (firmas)
+https://app.signaturit.com/
+
+# DocuSign (firmas backup)
+https://demo.docusign.net/
+```
+
+### Aplicación
+
+```bash
+# Landing
+https://inmovaapp.com/landing
+
+# Login
+https://inmovaapp.com/login
+
+# Dashboard
+https://inmovaapp.com/dashboard
+
+# API Docs
+https://inmovaapp.com/docs
+
+# Health Check
+https://inmovaapp.com/api/health
+```
+
+---
+
+## 🆘 Soporte Rápido
+
+### Comandos de Diagnóstico Completo
+
+```bash
+# Ejecutar esto y compartir el output:
+echo "=== SISTEMA ==="
+uname -a
+uptime
+df -h
+free -h
+
+echo "=== PM2 ==="
+pm2 status
+pm2 describe inmova-app
+
+echo "=== HEALTH CHECK ==="
+curl -I https://inmovaapp.com/api/health
+
+echo "=== ÚLTIMOS LOGS (20 líneas) ==="
+pm2 logs inmova-app --lines 20 --nostream
+
+echo "=== VARIABLES CRÍTICAS ==="
+cd /opt/inmova-app && grep -E "(DATABASE_URL|NEXTAUTH_URL|STRIPE_SECRET_KEY|SMTP_HOST)" .env.local | grep -v "PASSWORD\|SECRET_KEY"
+```
+
+---
+
+**Última actualización**: 3 de enero de 2026  
+**Servidor**: 157.180.119.236  
+**App**: https://inmovaapp.com

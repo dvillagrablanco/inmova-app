@@ -19,7 +19,7 @@ Este documento diferencia entre:
 
 Servicios externos que **Inmova necesita** para funcionar.
 
-### ✅ COMPLETAMENTE CONFIGURADAS (6)
+### ✅ COMPLETAMENTE CONFIGURADAS (7)
 
 #### 1. AWS S3 (Storage)
 ```
@@ -130,31 +130,39 @@ Propósito: Persistencia de datos de Inmova
 
 ---
 
-### ⚠️ PARCIALMENTE CONFIGURADAS (4)
-
-#### 7. SendGrid / Gmail SMTP (Email)
+#### 7. Gmail SMTP (Email)
 ```
-Estado: ⚠️ CÓDIGO IMPLEMENTADO, SIN CREDENCIALES
+Estado: ✅ OPERATIVO
 Uso: Emails transaccionales (registro, pagos, firmas)
 Propósito: Comunicación automática de Inmova
 ```
 
-**Configuración pendiente**:
+**Configuración**:
 ```env
-❌ SENDGRID_API_KEY
-❌ SENDGRID_FROM_EMAIL
+✅ SMTP_HOST=smtp.gmail.com
+✅ SMTP_PORT=587
+✅ SMTP_USER=inmovaapp@gmail.com
+✅ SMTP_PASSWORD (App Password configurada)
+✅ SMTP_FROM="Inmova App <inmovaapp@gmail.com>"
 ```
 
-**Alternativa**:
-```env
-Gmail SMTP (configuración manual pendiente)
-```
+**Capacidad**: 500 emails/día (suficiente para 50-100 usuarios activos)
 
-**Costo**: €0-15/mes
+**Costo**: €0 (cuenta gratuita)
 
-**Prioridad**: 🔴 CRÍTICA - Necesaria para producción
+**Tipos de emails**:
+- Bienvenida al registrarse
+- Verificación de email
+- Recuperación de contraseña
+- Notificaciones de pagos
+- Alertas de mantenimiento
+- Recordatorios de contratos
+
+**Escalamiento**: Si se necesita >500 emails/día, migrar a SendGrid o AWS SES
 
 ---
+
+### ⚠️ PARCIALMENTE CONFIGURADAS (3)
 
 #### 8. Twilio (SMS + WhatsApp)
 ```
@@ -452,11 +460,11 @@ Uso: Portal para que clientes gestionen API keys, webhooks
 ### INTEGRACIONES DE LA PLATAFORMA
 
 ```
-✅ Configuradas y operativas:      6/6  (100%)
-  - AWS S3, Stripe, Signaturit, DocuSign, NextAuth, PostgreSQL
+✅ Configuradas y operativas:      7/7  (100%)
+  - AWS S3, Stripe, Signaturit, DocuSign, NextAuth, PostgreSQL, Gmail SMTP
 
-⚠️ Código listo, faltan credenciales: 4/4 (prioridad alta/media)
-  - SendGrid/Gmail, Twilio, Google Analytics, Slack
+⚠️ Código listo, faltan credenciales: 3/3 (prioridad media)
+  - Twilio, Google Analytics, Slack
 
 🤖 IA (diferenciador crítico):      0/1 (pendiente)
   - Anthropic Claude
@@ -466,8 +474,8 @@ Uso: Portal para que clientes gestionen API keys, webhooks
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Total de servicios ESENCIALES:     10
-Configurados:                      6 (60%)
-Pendientes críticos:               1 (Email)
+Configurados:                      7 (70%)
+Pendientes críticos:               0 ✅
 Pendientes importantes:            3 (Claude, Twilio, GA)
 ```
 
@@ -511,19 +519,20 @@ Documentación:                     ⚠️ BÁSICA (mejorable)
 ### PLATAFORMA (Inmova paga)
 
 ```
-Configuración mínima operativa (HOY):
+Configuración actual operativa:
   Servidor VPS:           €20.00/mes
   AWS S3:                 €0.40/mes
   Stripe:                 1.4% por transacción
   Signaturit:             €50.00/mes
+  Gmail SMTP:             €0.00/mes (500 emails/día)
   ──────────────────────────────────
   Subtotal:               ~€70/mes + comisiones
 
-Configuración recomendada (PRÓXIMA SEMANA):
-  + SendGrid/Gmail:       €0-15/mes
+Configuración recomendada para escalar:
   + Anthropic Claude:     €30/mes (estimado)
   + Twilio:               €20/mes (estimado)
   + Google Analytics:     €0
+  + SendGrid (si >500 emails/día): €15/mes
   ──────────────────────────────────
   Subtotal:               ~€135/mes + comisiones
 ```
@@ -609,15 +618,14 @@ Nota: Los clientes solo pagan su suscripción a Inmova,
 
 ### Para Inmova (Plataforma)
 - [x] AWS S3 configurado
-- [x] Stripe configurado (falta webhook secret)
+- [x] Stripe configurado completamente (incluye webhook secret)
 - [x] Signaturit configurado
-- [x] DocuSign configurado (falta JWT auth)
+- [x] DocuSign configurado (falta JWT auth - one-time step)
 - [x] NextAuth configurado
 - [x] PostgreSQL configurado
-- [ ] Email configurado (SendGrid/Gmail)
-- [ ] Stripe Webhook Secret
+- [x] Gmail SMTP configurado (500 emails/día)
 - [ ] Anthropic Claude
-- [ ] Twilio
+- [ ] Twilio (credenciales listas, falta comprar número)
 - [ ] Google Analytics
 
 ### Para Clientes (Integraciones)
@@ -625,27 +633,27 @@ Nota: Los clientes solo pagan su suscripción a Inmova,
 - [x] API Keys management operativo
 - [x] Webhooks operativo
 - [x] Zapier código completo
+- [x] API Documentation mejorada (Swagger UI + guías + ejemplos)
 - [ ] Zapier deployed en marketplace
-- [ ] API Documentation mejorada
-- [ ] Developer Portal UI
+- [ ] Developer Portal UI (opcional)
 - [ ] OAuth 2.0 (opcional)
 
 ---
 
 ## 🚀 PRÓXIMOS PASOS INMEDIATOS
 
-### HOY (3 de enero, 2026)
+### ✅ COMPLETADO HOY (3 de enero, 2026)
 
 **PLATAFORMA**:
-1. Configurar SendGrid/Gmail SMTP (30 min)
-2. Configurar Stripe Webhook Secret (15 min)
+1. ✅ Gmail SMTP configurado (30 min)
+2. ✅ Stripe Webhook Secret configurado (15 min)
 
 **CLIENTES**:
-3. Mejorar documentación API (2 horas)
-   - Publicar Swagger en `/api-docs`
-   - Agregar ejemplos curl, JS, Python
+3. ✅ Documentación API mejorada (2 horas)
+   - ✅ Swagger publicado en `/docs`
+   - ✅ Ejemplos curl, JS, Python agregados
 
-### MAÑANA (4 de enero, 2026)
+### PRÓXIMO (4 de enero, 2026)
 
 **PLATAFORMA**:
 4. Configurar Anthropic Claude (1 hora)
@@ -688,10 +696,10 @@ Nota: Los clientes solo pagan su suscripción a Inmova,
 
 ### PLATAFORMA (Inmova → Servicios)
 
-✅ **Estado**: 60% configurado, 100% operativo  
-✅ **Infraestructura crítica**: Completa (S3, Stripe, Firma, Auth, DB)  
-⚠️ **Pendiente prioritario**: Email (SendGrid/Gmail) + IA (Claude)  
-💰 **Costo**: ~€70-135/mes según features activadas
+✅ **Estado**: 70% configurado, 100% operativo  
+✅ **Infraestructura crítica**: Completa (S3, Stripe, Firma, Auth, DB, Email)  
+🎯 **Próximas mejoras**: IA (Claude) para diferenciación competitiva  
+💰 **Costo**: ~€70/mes (escalable a €135/mes con IA y Twilio)
 
 ---
 
