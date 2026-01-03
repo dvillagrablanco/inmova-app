@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { getPrismaClient } from '@/lib/db';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,8 +16,6 @@ export async function GET(request: NextRequest) {
         { status: 403 }
       );
     }
-
-    const prisma = getPrismaClient();
     const { searchParams } = new URL(request.url);
     const periodo = searchParams.get('periodo') || 'mes_actual';
 
@@ -204,8 +202,7 @@ export async function GET(request: NextRequest) {
     const mrrSuscripciones = suscripcionesActivas * 4900; // Promedio €49
 
     // Calcular tasa de conversión
-    const tasaConversion =
-      ofertasEnviadas > 0 ? ((contratosCompletados / ofertasEnviadas) * 100) : 0;
+    const tasaConversion = ofertasEnviadas > 0 ? (contratosCompletados / ofertasEnviadas) * 100 : 0;
 
     const metrics = {
       totalEmpresas,
