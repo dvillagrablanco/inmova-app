@@ -61,7 +61,7 @@ export interface SemanticSearchResult {
 export async function generateEmbedding(text: string): Promise<number[]> {
   const openaiClient = getOpenAI();
   try {
-    const response = await openai.embeddings.create({
+    const response = await openaiClient.embeddings.create({
       model: 'text-embedding-3-small',
       input: text,
       encoding_format: 'float',
