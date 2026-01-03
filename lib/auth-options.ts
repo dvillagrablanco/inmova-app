@@ -98,7 +98,7 @@ export const authOptions: NextAuthOptions = {
               name: user.name,
               role: user.role,
               companyId: user.companyId,
-              companyName: user.company.nombre,
+              companyName: user.company?.nombre || 'Sin Empresa',
               userType: 'user',
             };
           }
