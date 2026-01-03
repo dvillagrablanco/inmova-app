@@ -11,6 +11,7 @@ vi.mock('@/lib/db', () => ({
   prisma: {
     payment: {
       findMany: vi.fn(),
+      findUnique: vi.fn(),
       update: vi.fn(),
     },
     notification: {
@@ -233,6 +234,7 @@ describe('💰 Payment Reminder Service', () => {
   describe('processPaymentReminders', () => {
     test('✅ Debe procesar recordatorios detectados', async () => {
       (prisma.payment.findMany as ReturnType<typeof vi.fn>).mockResolvedValue(mockPayments(5));
+      (prisma.payment.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockPayments(5)[0]);
       (sendEmail as ReturnType<typeof vi.fn>).mockResolvedValue({ messageId: 'email-123' });
       (createNotification as ReturnType<typeof vi.fn>).mockResolvedValue({
         id: 'notif-123',

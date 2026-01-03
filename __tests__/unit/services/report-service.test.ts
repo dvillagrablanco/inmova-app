@@ -6,24 +6,25 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 
 // Mock de dependencias
-vi.mock('jspdf', () => {
-  const mockDoc = {
-    internal: {
-      pageSize: {
-        width: 210,
-        height: 297,
-      },
+const mockDoc = {
+  internal: {
+    pageSize: {
+      width: 210,
+      height: 297,
     },
-    setFontSize: vi.fn(),
-    setFont: vi.fn(),
-    setTextColor: vi.fn(),
-    text: vi.fn(),
-    output: vi.fn(() => Buffer.from('mock-pdf')),
-  };
-  return {
-    default: vi.fn(() => mockDoc),
-  };
-});
+  },
+  setFontSize: vi.fn(),
+  setFont: vi.fn(),
+  setTextColor: vi.fn(),
+  text: vi.fn(),
+  output: vi.fn(() => Buffer.from('mock-pdf')),
+};
+
+vi.mock('jspdf', () => ({
+  default: vi.fn(function () {
+    return mockDoc;
+  }),
+}));
 
 vi.mock('jspdf-autotable', () => ({
   default: vi.fn(),
