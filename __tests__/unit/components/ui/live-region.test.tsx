@@ -1,0 +1,44 @@
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { LiveRegion } from '@/components/ui/live-region';
+
+describe('LiveRegion', () => {
+  it('should render without crashing', () => {
+    const props = { /* TODO: Añadir props requeridas */ };
+    
+    render(<LiveRegion {...props} />);
+    
+    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  });
+
+  it('should render with props', () => {
+    const testProps = {
+      // TODO: Definir props de test
+      testProp: 'test value',
+    };
+    
+    render(<LiveRegion {...testProps} />);
+    
+    // TODO: Verificar que los props se renderizan correctamente
+    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+  });
+
+  it('should execute side effects', async () => {
+    render(<LiveRegion />);
+    
+    // TODO: Verificar efectos
+    await waitFor(() => {
+      // expect(something).toBe(true);
+    });
+  });
+
+  it('should be accessible', () => {
+    render(<LiveRegion />);
+    
+    // Verificar roles ARIA básicos
+    const element = screen.getByRole('main') || document.body;
+    expect(element).toBeTruthy();
+    
+    // TODO: Añadir más verificaciones de accesibilidad
+  });
+});

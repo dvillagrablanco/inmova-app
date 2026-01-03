@@ -62,6 +62,7 @@ export default function CalculadoraROIPage() {
 
   // Definición de precios de competidores y servicios adicionales
   const competitorPricing: Record<string, { base: number; perUnit?: number; name: string }> = {
+    homming: { base: 0, perUnit: 12, name: 'Homming' },
     sistema1: { base: 0, perUnit: 12, name: 'Sistema A' },
     sistema2: { base: 0, perUnit: 9, name: 'Sistema B' },
     sistema3: { base: 174, perUnit: 0, name: 'Sistema C' },
@@ -141,7 +142,8 @@ export default function CalculadoraROIPage() {
     setAhorroAnualConDescuento(ahorroConDesc);
   };
 
-  const planInmova = inmovaPricing.find((p) => unidades >= p.min && unidades <= p.max);
+  const planInmova =
+    inmovaPricing.find((p) => unidades >= p.min && unidades <= p.max) || inmovaPricing[0];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-violet-50">
@@ -328,7 +330,8 @@ export default function CalculadoraROIPage() {
                     Tu Coste Actual Mensual
                   </CardTitle>
                   <CardDescription className="text-red-600">
-                    {competitorPricing[sistemaActual].name} + Servicios Adicionales
+                    {competitorPricing[sistemaActual]?.name || 'Sistema Actual'} + Servicios
+                    Adicionales
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -397,7 +400,7 @@ export default function CalculadoraROIPage() {
                 <CardHeader>
                   <CardTitle className="text-2xl text-green-700 flex items-center gap-2">
                     <CheckCircle className="h-6 w-6" />
-                    Con INMOVA {planInmova?.name}
+                    Con INMOVA {planInmova.name}
                   </CardTitle>
                   <CardDescription className="text-green-600">
                     TODO Incluido - 88 Módulos Profesionales
@@ -538,8 +541,8 @@ export default function CalculadoraROIPage() {
                   ))}
                 </div>
                 <p className="text-gray-700 italic mb-4">
-                  "Pasé de pagar €420/mes entre múltiples sistemas a solo €199 con INMOVA. Y tengo MU
-                  CHAS más funcionalidades. El ROI fue inmediato."
+                  "Pasé de pagar €420/mes entre múltiples sistemas a solo €199 con INMOVA. Y tengo
+                  MU CHAS más funcionalidades. El ROI fue inmediato."
                 </p>
                 <p className="font-semibold text-gray-900">
                   Carlos M. - Agencia PropTech, 85 unidades

@@ -36,28 +36,32 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# prisma
-prisma/.env
-
 # IDE
-.vscode
-.idea
+.vscode/
+.idea/
+*.swp
+*.swo
 
-# Logs
+# logs
 logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Scripts con contraseñas (SEGURIDAD)
-scripts/deploy-with-password.sh
+# Test
+/test-results/
+/playwright-report/
+/playwright/.cache/
 
-# Backups
-*.backup
-*.bak
-
-# Test results
-test-results/
-playwright-report/
+# Credentials (IMPORTANTE)
+scripts/deploy-ssh-paramiko.py
+*credentials*
+*password*
+*secret*
