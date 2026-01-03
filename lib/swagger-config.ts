@@ -849,6 +849,456 @@ Recibe notificaciones en tiempo real de eventos. Ver [Webhook Events](#tag/Webho
       },
     },
 
+    // Tenants
+    '/api/v1/tenants': {
+      get: {
+        tags: ['Tenants'],
+        summary: 'Listar inquilinos',
+        description: 'Obtiene lista paginada de inquilinos de la empresa',
+        parameters: [
+          {
+            name: 'page',
+            in: 'query',
+            schema: { type: 'integer', default: 1, minimum: 1 },
+            description: 'Número de página',
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            schema: { type: 'integer', default: 20, minimum: 1, maximum: 100 },
+            description: 'Elementos por página',
+          },
+          {
+            name: 'status',
+            in: 'query',
+            schema: {
+              type: 'string',
+              enum: ['ACTIVE', 'INACTIVE', 'PENDING'],
+            },
+            description: 'Filtrar por estado',
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Lista de inquilinos',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string' },
+                          name: { type: 'string' },
+                          email: { type: 'string' },
+                          phone: { type: 'string' },
+                          status: { type: 'string', enum: ['ACTIVE', 'INACTIVE', 'PENDING'] },
+                          propertyId: { type: 'string' },
+                          createdAt: { type: 'string', format: 'date-time' },
+                        },
+                      },
+                    },
+                    pagination: { $ref: '#/components/schemas/PaginationMeta' },
+                  },
+                },
+              },
+            },
+          },
+          '401': { $ref: '#/components/responses/Unauthorized' },
+        },
+      },
+      post: {
+        tags: ['Tenants'],
+        summary: 'Crear inquilino',
+        description: 'Crea un nuevo inquilino',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['name', 'email'],
+                properties: {
+                  name: { type: 'string', example: 'Juan Pérez' },
+                  email: { type: 'string', format: 'email', example: 'juan.perez@example.com' },
+                  phone: { type: 'string', example: '+34666555444' },
+                  dni: { type: 'string', example: '12345678A' },
+                  propertyId: { type: 'string', description: 'ID de la propiedad asignada' },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '201': {
+            description: 'Inquilino creado exitosamente',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: { type: 'object' },
+                    message: { type: 'string', example: 'Tenant created successfully' },
+                  },
+                },
+              },
+            },
+          },
+          '400': { $ref: '#/components/responses/ValidationError' },
+          '401': { $ref: '#/components/responses/Unauthorized' },
+        },
+      },
+    },
+
+    // Contracts
+    '/api/v1/contracts': {
+      get: {
+        tags: ['Contracts'],
+        summary: 'Listar contratos',
+        description: 'Obtiene lista paginada de contratos de arrendamiento',
+        parameters: [
+          {
+            name: 'page',
+            in: 'query',
+            schema: { type: 'integer', default: 1, minimum: 1 },
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            schema: { type: 'integer', default: 20, minimum: 1, maximum: 100 },
+          },
+          {
+            name: 'status',
+            in: 'query',
+            schema: {
+              type: 'string',
+              enum: ['DRAFT', 'PENDING_SIGNATURE', 'ACTIVE', 'EXPIRED', 'CANCELLED'],
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Lista de contratos',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string' },
+                          propertyId: { type: 'string' },
+                          tenantId: { type: 'string' },
+                          startDate: { type: 'string', format: 'date' },
+                          endDate: { type: 'string', format: 'date' },
+                          rentAmount: { type: 'number' },
+                          status: { type: 'string' },
+                          signedAt: { type: 'string', format: 'date-time', nullable: true },
+                        },
+                      },
+                    },
+                    pagination: { $ref: '#/components/schemas/PaginationMeta' },
+                  },
+                },
+              },
+            },
+          },
+          '401': { $ref: '#/components/responses/Unauthorized' },
+        },
+      },
+      post: {
+        tags: ['Contracts'],
+        summary: 'Crear contrato',
+        description: 'Crea un nuevo contrato de arrendamiento',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['propertyId', 'tenantId', 'startDate', 'endDate', 'rentAmount'],
+                properties: {
+                  propertyId: { type: 'string' },
+                  tenantId: { type: 'string' },
+                  startDate: { type: 'string', format: 'date', example: '2026-02-01' },
+                  endDate: { type: 'string', format: 'date', example: '2027-02-01' },
+                  rentAmount: { type: 'number', example: 1200 },
+                  deposit: { type: 'number', example: 1200 },
+                  paymentDay: { type: 'integer', minimum: 1, maximum: 31, default: 1 },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '201': {
+            description: 'Contrato creado',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: { type: 'object' },
+                    message: { type: 'string', example: 'Contract created successfully' },
+                  },
+                },
+              },
+            },
+          },
+          '400': { $ref: '#/components/responses/ValidationError' },
+          '401': { $ref: '#/components/responses/Unauthorized' },
+        },
+      },
+    },
+
+    // Payments
+    '/api/v1/payments': {
+      get: {
+        tags: ['Payments'],
+        summary: 'Listar pagos',
+        description: 'Obtiene lista paginada de pagos',
+        parameters: [
+          {
+            name: 'page',
+            in: 'query',
+            schema: { type: 'integer', default: 1 },
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            schema: { type: 'integer', default: 20 },
+          },
+          {
+            name: 'status',
+            in: 'query',
+            schema: {
+              type: 'string',
+              enum: ['PENDING', 'PAID', 'OVERDUE', 'CANCELLED'],
+            },
+          },
+          {
+            name: 'tenantId',
+            in: 'query',
+            schema: { type: 'string' },
+            description: 'Filtrar por inquilino',
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Lista de pagos',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string' },
+                          tenantId: { type: 'string' },
+                          contractId: { type: 'string' },
+                          amount: { type: 'number' },
+                          dueDate: { type: 'string', format: 'date' },
+                          paidAt: { type: 'string', format: 'date-time', nullable: true },
+                          status: { type: 'string' },
+                          method: { type: 'string', nullable: true },
+                        },
+                      },
+                    },
+                    pagination: { $ref: '#/components/schemas/PaginationMeta' },
+                  },
+                },
+              },
+            },
+          },
+          '401': { $ref: '#/components/responses/Unauthorized' },
+        },
+      },
+      post: {
+        tags: ['Payments'],
+        summary: 'Registrar pago',
+        description: 'Registra un nuevo pago',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['contractId', 'amount', 'dueDate'],
+                properties: {
+                  contractId: { type: 'string' },
+                  amount: { type: 'number', example: 1200 },
+                  dueDate: { type: 'string', format: 'date', example: '2026-02-01' },
+                  concept: { type: 'string', example: 'Alquiler Febrero 2026' },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '201': {
+            description: 'Pago registrado',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: { type: 'object' },
+                    message: { type: 'string', example: 'Payment registered successfully' },
+                  },
+                },
+              },
+            },
+          },
+          '400': { $ref: '#/components/responses/ValidationError' },
+          '401': { $ref: '#/components/responses/Unauthorized' },
+        },
+      },
+    },
+
+    // Documents
+    '/api/v1/documents': {
+      get: {
+        tags: ['Documents'],
+        summary: 'Listar documentos',
+        description: 'Obtiene lista de documentos de la empresa',
+        parameters: [
+          {
+            name: 'page',
+            in: 'query',
+            schema: { type: 'integer', default: 1 },
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            schema: { type: 'integer', default: 20 },
+          },
+          {
+            name: 'type',
+            in: 'query',
+            schema: {
+              type: 'string',
+              enum: ['CONTRACT', 'INVOICE', 'RECEIPT', 'IDENTITY', 'OTHER'],
+            },
+          },
+          {
+            name: 'entityType',
+            in: 'query',
+            schema: {
+              type: 'string',
+              enum: ['PROPERTY', 'TENANT', 'CONTRACT', 'PAYMENT'],
+            },
+            description: 'Tipo de entidad relacionada',
+          },
+          {
+            name: 'entityId',
+            in: 'query',
+            schema: { type: 'string' },
+            description: 'ID de la entidad relacionada',
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Lista de documentos',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string' },
+                          name: { type: 'string' },
+                          type: { type: 'string' },
+                          url: { type: 'string', format: 'uri' },
+                          size: { type: 'integer', description: 'Tamaño en bytes' },
+                          mimeType: { type: 'string' },
+                          uploadedAt: { type: 'string', format: 'date-time' },
+                        },
+                      },
+                    },
+                    pagination: { $ref: '#/components/schemas/PaginationMeta' },
+                  },
+                },
+              },
+            },
+          },
+          '401': { $ref: '#/components/responses/Unauthorized' },
+        },
+      },
+      post: {
+        tags: ['Documents'],
+        summary: 'Subir documento',
+        description: 'Sube un nuevo documento',
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['file'],
+                properties: {
+                  file: { type: 'string', format: 'binary' },
+                  type: {
+                    type: 'string',
+                    enum: ['CONTRACT', 'INVOICE', 'RECEIPT', 'IDENTITY', 'OTHER'],
+                  },
+                  entityType: { type: 'string' },
+                  entityId: { type: 'string' },
+                  name: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '201': {
+            description: 'Documento subido exitosamente',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        name: { type: 'string' },
+                        url: { type: 'string', format: 'uri' },
+                        size: { type: 'integer' },
+                      },
+                    },
+                    message: { type: 'string', example: 'Document uploaded successfully' },
+                  },
+                },
+              },
+            },
+          },
+          '400': { $ref: '#/components/responses/ValidationError' },
+          '401': { $ref: '#/components/responses/Unauthorized' },
+        },
+      },
+    },
+
     // Sandbox
     '/api/v1/sandbox': {
       get: {
