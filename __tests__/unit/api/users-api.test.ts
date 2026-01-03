@@ -147,7 +147,7 @@ describe('👤 Users API - POST', () => {
     email: 'newuser@example.com',
     name: 'New User',
     password: 'SecurePass123!',
-    role: 'gestor',
+    role: 'administrador' as const, // Usar rol válido según schema
     companyId: 'company-123',
   };
 
