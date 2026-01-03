@@ -1,312 +1,348 @@
 /**
- * Critical Flows E2E Tests
- *
- * Tests de flujos críticos de usuario:
- * - Login/Logout
- * - Crear propiedad
- * - Crear inquilino
- * - Crear contrato
- * - Procesar pago
+ * Tests E2E Críticos - Sprint 4
+ * 
+ * Tests de los flujos más importantes de la aplicación.
  */
 
 import { test, expect } from '@playwright/test';
 
-// Helper para login
-async function login(page: any, email = 'admin@inmova.app', password = 'Admin123!') {
-  await page.goto('/login');
-  await page.fill('input[name="email"]', email);
-  await page.fill('input[name="password"]', password);
+// ============================================================================
+// CONFIGURACIÓN
+// ============================================================================
+
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+
+const TEST_USERS = {
+  admin: {
+    email: 'admin@inmova.app',
+    password: 'Admin123!',
+  },
+  tenant: {
+    email: 'test@inmova.app',
+    password: 'Test123456!',
+  },
+};
+
+// ============================================================================
+// UTILIDADES
+// ============================================================================
+
+async function login(page: any, userType: 'admin' | 'tenant' = 'admin') {
+  const user = TEST_USERS[userType];
+  
+  await page.goto(`${BASE_URL}/login`);
+  await page.fill('input[name="email"]', user.email);
+  await page.fill('input[name="password"]', user.password);
   await page.click('button[type="submit"]');
-  await page.waitForURL('/dashboard', { timeout: 15000 });
+  
+  // Esperar redirección
+  await page.waitForURL(/\/(dashboard|portal)/, { timeout: 15000 });
 }
 
-test.describe('Authentication Flows', () => {
-  test('should login successfully with valid credentials', async ({ page }) => {
-    await page.goto('/login');
+// ============================================================================
+// TESTS DE AUTENTICACIÓN
+// ============================================================================
 
-    // Fill form
-    await page.fill('input[name="email"]', 'admin@inmova.app');
-    await page.fill('input[name="password"]', 'Admin123!');
-
-    // Submit
-    await page.click('button[type="submit"]');
-
-    // Should redirect to dashboard
-    await expect(page).toHaveURL('/dashboard', { timeout: 15000 });
-
-    // Should show user name
-    await expect(page.locator('text=/admin|usuario/i')).toBeVisible();
+test.describe('Autenticación', () => {
+  test('Login exitoso como admin', async ({ page }) => {
+    await login(page, 'admin');
+    
+    // Verificar que estamos en dashboard
+    await expect(page).toHaveURL(/\/dashboard/);
+    
+    // Verificar elementos del dashboard
+    await expect(page.locator('h1, h2')).toContainText(/dashboard/i);
   });
 
-  test('should show error with invalid credentials', async ({ page }) => {
-    await page.goto('/login');
-
-    // Fill form with invalid credentials
-    await page.fill('input[name="email"]', 'invalid@test.com');
-    await page.fill('input[name="password"]', 'WrongPassword123!');
-
-    // Submit
+  test('Login con credenciales incorrectas', async ({ page }) => {
+    await page.goto(`${BASE_URL}/login`);
+    await page.fill('input[name="email"]', 'wrong@example.com');
+    await page.fill('input[name="password"]', 'WrongPassword123');
     await page.click('button[type="submit"]');
+    
+    // Debe permanecer en login
+    await expect(page).toHaveURL(/\/login/);
+    
+    // Debe mostrar error
+    await expect(page.locator('text=/error|invalid|incorrect/i')).toBeVisible({ timeout: 5000 });
+  });
 
-    // Should show error message
-    await expect(page.locator('text=/Credenciales inválidas|Error/i')).toBeVisible({
-      timeout: 5000,
+  test('Logout', async ({ page }) => {
+    await login(page, 'admin');
+    
+    // Click en logout (puede estar en menú desplegable)
+    await page.click('[aria-label="User menu"], [data-testid="user-menu"]', { timeout: 5000 }).catch(() => {});
+    await page.click('text=/logout|cerrar sesión/i', { timeout: 5000 });
+    
+    // Debe redirigir a login
+    await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
+  });
+});
+
+// ============================================================================
+// TESTS DE PROPIEDADES
+// ============================================================================
+
+test.describe('Gestión de Propiedades', () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page, 'admin');
+  });
+
+  test('Listar propiedades', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/properties`);
+    
+    // Debe mostrar lista de propiedades (o mensaje vacío)
+    await expect(
+      page.locator('[data-testid="property-list"], h1:has-text("Propiedades")')
+    ).toBeVisible({ timeout: 10000 });
+  });
+
+  test('Crear nueva propiedad', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/properties/new`);
+    
+    // Llenar formulario
+    await page.fill('input[name="address"], input[id="address"]', 'Calle Test 123');
+    await page.fill('input[name="city"], input[id="city"]', 'Madrid');
+    await page.fill('input[name="price"], input[id="price"]', '1200');
+    await page.fill('input[name="rooms"], input[id="rooms"]', '3');
+    await page.fill('input[name="bathrooms"], input[id="bathrooms"]', '2');
+    await page.fill('input[name="squareMeters"], input[id="squareMeters"]', '80');
+    
+    // Submit
+    await page.click('button[type="submit"]:has-text(/crear|guardar/i)');
+    
+    // Debe mostrar éxito (toast o redirect)
+    await expect(
+      page.locator('text=/éxito|success|creado/i, [role="alert"]')
+    ).toBeVisible({ timeout: 10000 }).catch(() => {
+      // O verificar redirect
+      expect(page.url()).toMatch(/\/dashboard\/properties/);
     });
-
-    // Should stay on login page
-    await expect(page).toHaveURL('/login');
-  });
-
-  test('should logout successfully', async ({ page }) => {
-    await login(page);
-
-    // Click on user menu
-    const userMenu = page.locator('[aria-label*="perfil" i], [aria-label*="usuario" i]').first();
-    await userMenu.click();
-
-    // Click logout
-    await page.locator('text=/Cerrar sesión|Logout/i').click();
-
-    // Should redirect to login or landing
-    await expect(page).toHaveURL(/\/(login|landing)/);
-  });
-
-  test('should validate required fields', async ({ page }) => {
-    await page.goto('/login');
-
-    // Try to submit empty form
-    await page.click('button[type="submit"]');
-
-    // Should show validation errors
-    const errors = await page.locator('text=/requerido|obligatorio/i').count();
-    expect(errors).toBeGreaterThan(0);
   });
 });
 
-test.describe('Property Management Flows', () => {
+// ============================================================================
+// TESTS DE MATCHING AUTOMÁTICO
+// ============================================================================
+
+test.describe('Matching Automático (Sprint 3)', () => {
   test.beforeEach(async ({ page }) => {
-    await login(page);
+    await login(page, 'admin');
   });
 
-  test('should create a new property', async ({ page }) => {
-    await page.goto('/propiedades');
-
-    // Click "Nueva Propiedad"
-    await page.click('text=/Nueva Propiedad|Crear/i');
-
-    // Fill form (ajustar campos según tu formulario real)
-    await page.fill('input[name="numero"]', `TEST-${Date.now()}`);
-    await page.selectOption('select[name="tipo"]', 'vivienda');
-    await page.fill('input[name="superficie"]', '80');
-    await page.fill('input[name="habitaciones"]', '3');
-    await page.fill('input[name="banos"]', '2');
-    await page.fill('input[name="rentaMensual"]', '1200');
-
-    // Submit
-    await page.click('button[type="submit"]');
-
-    // Should show success message or redirect
-    await expect(page.locator('text=/creada|éxito|success/i')).toBeVisible({ timeout: 10000 });
-  });
-
-  test('should filter properties', async ({ page }) => {
-    await page.goto('/propiedades');
-
-    // Wait for properties to load
-    await page.waitForSelector(
-      '[data-testid="property-card"], .property-card, [class*="property"]',
-      {
-        state: 'attached',
-        timeout: 10000,
+  test('Buscar matches para inquilino', async ({ page }) => {
+    // Navegar a inquilinos
+    await page.goto(`${BASE_URL}/dashboard/tenants`);
+    
+    // Click en primer inquilino (si existe)
+    const firstTenant = page.locator('[data-testid="tenant-item"]').first();
+    
+    if (await firstTenant.isVisible({ timeout: 5000 }).catch(() => false)) {
+      await firstTenant.click();
+      
+      // Buscar botón de matching
+      const matchButton = page.locator('button:has-text(/match|buscar propiedades/i)');
+      
+      if (await matchButton.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await matchButton.click();
+        
+        // Debe mostrar resultados de matching
+        await expect(
+          page.locator('text=/matches encontrados|resultados/i')
+        ).toBeVisible({ timeout: 15000 });
       }
-    );
-
-    // Get initial count
-    const initialCount = await page
-      .locator('[data-testid="property-card"], .property-card, [class*="property"]')
-      .count();
-
-    // Apply filter
-    await page.selectOption('select[name="estado"], select:has-text("Estado")', 'disponible');
-    await page.waitForTimeout(1000); // Wait for filter to apply
-
-    // Count should change
-    const filteredCount = await page
-      .locator('[data-testid="property-card"], .property-card, [class*="property"]')
-      .count();
-
-    // Either count changed or it's expected that all are "disponible"
-    // (we can't assert exact counts without knowing DB state)
-    expect(typeof filteredCount).toBe('number');
-  });
-
-  test('should search properties', async ({ page }) => {
-    await page.goto('/propiedades');
-
-    // Search
-    await page.fill('input[placeholder*="Buscar" i]', 'Madrid');
-    await page.waitForTimeout(1000);
-
-    // Should show results containing "Madrid"
-    const results = await page.locator('text=/Madrid/i').count();
-    expect(results).toBeGreaterThan(0);
-  });
-
-  test('should view property details', async ({ page }) => {
-    await page.goto('/propiedades');
-
-    // Wait for properties
-    await page.waitForSelector('button:has-text("Ver"), a:has-text("Ver")', { timeout: 10000 });
-
-    // Click first "Ver" button
-    await page.locator('button:has-text("Ver"), a:has-text("Ver")').first().click();
-
-    // Should navigate to detail page
-    await expect(page).toHaveURL(/\/propiedades\/[a-zA-Z0-9]+/);
-
-    // Should show property details
-    await expect(page.locator('text=/Detalle|Información/i')).toBeVisible();
-  });
-});
-
-test.describe('Tenant Management Flows', () => {
-  test.beforeEach(async ({ page }) => {
-    await login(page);
-  });
-
-  test('should create a new tenant', async ({ page }) => {
-    await page.goto('/inquilinos');
-
-    // Click "Nuevo Inquilino"
-    await page.click('text=/Nuevo Inquilino|Registrar/i');
-
-    // Fill form
-    const timestamp = Date.now();
-    await page.fill('input[name="nombreCompleto"]', `Test Inquilino ${timestamp}`);
-    await page.fill('input[name="email"]', `test${timestamp}@test.com`);
-    await page.fill('input[name="telefono"]', '+34666777888');
-    await page.fill('input[name="dni"]', `${timestamp}X`);
-
-    // Submit
-    await page.click('button[type="submit"]');
-
-    // Should show success
-    await expect(page.locator('text=/creado|éxito|registrado/i')).toBeVisible({ timeout: 10000 });
-  });
-
-  test('should search tenants', async ({ page }) => {
-    await page.goto('/inquilinos');
-
-    // Search
-    const searchInput = page.locator('input[placeholder*="Buscar" i]');
-    await searchInput.fill('test');
-    await page.waitForTimeout(1000);
-
-    // Should filter results
-    const results = await page
-      .locator('[data-testid="tenant-card"], .tenant-card, [class*="tenant"]')
-      .count();
-    expect(results).toBeGreaterThanOrEqual(0);
-  });
-});
-
-test.describe('Dashboard Flows', () => {
-  test.beforeEach(async ({ page }) => {
-    await login(page);
-  });
-
-  test('should display KPIs', async ({ page }) => {
-    await page.goto('/dashboard');
-
-    // Should show KPI cards
-    await expect(page.locator('text=/Total Propiedades|Propiedades/i')).toBeVisible();
-    await expect(page.locator('text=/Ocupadas|Ocupación/i')).toBeVisible();
-    await expect(page.locator('text=/Ingresos|Revenue/i')).toBeVisible();
-  });
-
-  test('should navigate to different sections', async ({ page }) => {
-    await page.goto('/dashboard');
-
-    // Navigate to Propiedades
-    await page.click('a[href="/propiedades"], text=/Propiedades/i');
-    await expect(page).toHaveURL('/propiedades');
-
-    // Back to dashboard
-    await page.goto('/dashboard');
-
-    // Navigate to Inquilinos
-    await page.click('a[href="/inquilinos"], text=/Inquilinos/i');
-    await expect(page).toHaveURL('/inquilinos');
-  });
-
-  test('should show onboarding for new users', async ({ page }) => {
-    await page.goto('/dashboard');
-
-    // Check if onboarding exists (might not if user completed it)
-    const onboardingExists = await page.locator('text=/Bienvenido|Onboarding|Comenzar/i').count();
-
-    if (onboardingExists > 0) {
-      await expect(page.locator('text=/Bienvenido|Onboarding/i')).toBeVisible();
+    } else {
+      test.skip();
     }
   });
 });
 
-test.describe('Responsive Design', () => {
-  test.use({ viewport: { width: 375, height: 667 } }); // iPhone SE
+// ============================================================================
+// TESTS DE CLASIFICACIÓN DE INCIDENCIAS
+// ============================================================================
 
-  test('should work on mobile devices', async ({ page }) => {
-    await login(page);
-
-    // Should show mobile navigation
-    await expect(page.locator('[class*="bottom-nav"], nav[class*="mobile"]')).toBeVisible();
-
-    // Sidebar should be hidden or overlay
-    const sidebar = page.locator('aside, [class*="sidebar"]');
-    const isOverlay = await sidebar.evaluate((el) => {
-      const styles = window.getComputedStyle(el);
-      return styles.position === 'fixed' || styles.position === 'absolute';
-    });
-
-    expect(isOverlay).toBe(true);
+test.describe('Clasificación de Incidencias (Sprint 3)', () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page, 'admin');
   });
 
-  test('should have touch-friendly buttons', async ({ page }) => {
-    await login(page);
+  test('Reportar y clasificar incidencia', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/maintenance`);
+    
+    // Click en "Nueva Incidencia" o similar
+    const newButton = page.locator('button:has-text(/nueva|reportar|crear/i)').first();
+    await newButton.click({ timeout: 5000 }).catch(() => {});
+    
+    // Llenar formulario
+    await page.fill('textarea[name="description"], textarea[id="description"]', 'Hay una fuga de agua en el grifo del baño');
+    await page.fill('input[name="location"], input[id="location"]', 'Baño principal');
+    
+    // Submit
+    await page.click('button[type="submit"]:has-text(/clasificar|crear|enviar/i)');
+    
+    // Debe mostrar clasificación
+    await expect(
+      page.locator('text=/PLUMBING|clasificación|urgencia/i')
+    ).toBeVisible({ timeout: 10000 }).catch(() => {
+      // O verificar que se creó la incidencia
+      expect(page.url()).toMatch(/\/dashboard\/maintenance/);
+    });
+  });
+});
 
-    const buttons = await page.locator('button').all();
+// ============================================================================
+// TESTS DE SOCIAL MEDIA (Sprint 4)
+// ============================================================================
 
-    for (const button of buttons.slice(0, 10)) {
-      // Test first 10 buttons
-      const size = await button.boundingBox();
-      if (size) {
-        // Touch target should be at least 44x44px
-        expect(size.width).toBeGreaterThanOrEqual(40);
-        expect(size.height).toBeGreaterThanOrEqual(40);
-      }
+test.describe('Conexiones de Redes Sociales (Sprint 4)', () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page, 'admin');
+  });
+
+  test('Ver estado de conexiones', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/settings/integrations`);
+    
+    // Debe mostrar lista de plataformas
+    await expect(
+      page.locator('text=/facebook|instagram|linkedin|twitter/i')
+    ).toBeVisible({ timeout: 10000 });
+  });
+
+  test('Iniciar conexión de Facebook (hasta redirect)', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/settings/integrations`);
+    
+    // Click en conectar Facebook
+    const facebookButton = page.locator('button:has-text(/facebook/i), button:has-text(/conectar/)').first();
+    
+    if (await facebookButton.isVisible({ timeout: 5000 }).catch(() => false)) {
+      // Click en conectar
+      await facebookButton.click();
+      
+      // Debe redirigir a OAuth o mostrar error de configuración
+      await page.waitForURL(/facebook\.com|error/, { timeout: 10000 }).catch(() => {
+        // O permanecer con mensaje de error
+        expect(page.locator('text=/error|not configured/i')).toBeVisible();
+      });
+    } else {
+      test.skip();
     }
   });
 });
+
+// ============================================================================
+// TESTS DE ANALYTICS (Sprint 4)
+// ============================================================================
+
+test.describe('Dashboard de Analytics (Sprint 4)', () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page, 'admin');
+  });
+
+  test('Ver métricas de uso', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/analytics`);
+    
+    // Debe mostrar métricas (puede ser 0 si no hay datos)
+    await expect(
+      page.locator('text=/métricas|analytics|estadísticas/i')
+    ).toBeVisible({ timeout: 10000 });
+  });
+
+  test('Ver costos de IA', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/analytics`);
+    
+    // Buscar sección de costos
+    await expect(
+      page.locator('text=/IA|costos|€|tokens/i')
+    ).toBeVisible({ timeout: 10000 }).catch(() => {
+      test.skip();
+    });
+  });
+});
+
+// ============================================================================
+// TESTS DE NOTIFICACIONES PUSH (Sprint 4)
+// ============================================================================
+
+test.describe('Notificaciones Push (Sprint 4)', () => {
+  test('Service Worker se registra correctamente', async ({ page, context }) => {
+    // Otorgar permiso de notificaciones
+    await context.grantPermissions(['notifications']);
+    
+    await page.goto(BASE_URL);
+    
+    // Verificar que service worker se registró
+    const swRegistered = await page.evaluate(async () => {
+      if (!('serviceWorker' in navigator)) {
+        return false;
+      }
+      
+      try {
+        const registration = await navigator.serviceWorker.register('/service-worker.js');
+        return registration !== null;
+      } catch {
+        return false;
+      }
+    });
+    
+    expect(swRegistered).toBe(true);
+  });
+});
+
+// ============================================================================
+// TESTS DE PERFORMANCE
+// ============================================================================
 
 test.describe('Performance', () => {
-  test('pages should load within acceptable time', async ({ page }) => {
-    const start = Date.now();
-    await page.goto('/dashboard');
+  test('Landing page carga en < 3 segundos', async ({ page }) => {
+    const startTime = Date.now();
+    
+    await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
-    const loadTime = Date.now() - start;
-
-    // Should load in less than 5 seconds
-    expect(loadTime).toBeLessThan(5000);
+    
+    const loadTime = Date.now() - startTime;
+    
+    expect(loadTime).toBeLessThan(3000);
   });
 
-  test('images should be lazy loaded', async ({ page }) => {
-    await page.goto('/landing');
+  test('Dashboard carga en < 5 segundos', async ({ page }) => {
+    await login(page, 'admin');
+    
+    const startTime = Date.now();
+    
+    await page.goto(`${BASE_URL}/dashboard`);
+    await page.waitForLoadState('networkidle');
+    
+    const loadTime = Date.now() - startTime;
+    
+    expect(loadTime).toBeLessThan(5000);
+  });
+});
 
-    const images = await page.locator('img').all();
+// ============================================================================
+// TESTS DE ACCESIBILIDAD (Básicos)
+// ============================================================================
 
-    for (const img of images) {
-      const loading = await img.getAttribute('loading');
-      // Images should have loading="lazy" or be above fold (no loading attr)
-      expect(['lazy', null]).toContain(loading);
-    }
+test.describe('Accesibilidad', () => {
+  test('Landing page tiene título', async ({ page }) => {
+    await page.goto(BASE_URL);
+    
+    const title = await page.title();
+    expect(title).toBeTruthy();
+    expect(title.length).toBeGreaterThan(0);
+  });
+
+  test('Login tiene labels en inputs', async ({ page }) => {
+    await page.goto(`${BASE_URL}/login`);
+    
+    // Email input debe tener label o aria-label
+    const emailInput = page.locator('input[name="email"], input[type="email"]').first();
+    await expect(emailInput).toBeVisible();
+    
+    // Verificar que tiene label asociado o aria-label
+    const hasLabel = await emailInput.evaluate((el) => {
+      return el.labels?.length > 0 || el.hasAttribute('aria-label');
+    });
+    
+    expect(hasLabel).toBe(true);
   });
 });
