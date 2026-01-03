@@ -1144,9 +1144,9 @@ model Company {
   maxPropiedades Int? @default(10)
   maxEdificios   Int? @default(5)
 
-  // Suscripción (Sistema Modular) - OBLIGATORIO
-  subscriptionPlanId String
-  subscriptionPlan   SubscriptionPlan @relation(fields: [subscriptionPlanId], references: [id])
+  // Suscripción (Sistema Modular) - OPCIONAL (puede ser NULL para companies legacy)
+  subscriptionPlanId String?
+  subscriptionPlan   SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
 
   // Sistema de tags para organización
   tags     String[]         @default([])
