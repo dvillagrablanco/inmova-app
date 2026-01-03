@@ -78,7 +78,7 @@ def run_tests_with_coverage(ssh):
     log("📊 Tests unitarios...")
     success, output = exec_cmd(
         ssh,
-        f"cd {APP_PATH} && npm test -- --run --coverage --json --outputFile=test-reports/unit-results.json 2>&1 | tail -50",
+        f"cd {APP_PATH} && npm run test:ci -- --json --outputFile=test-reports/unit-results.json 2>&1 | tail -50",
         "Unit tests",
         timeout=180,
         ignore_errors=True

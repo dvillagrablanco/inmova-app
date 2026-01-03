@@ -59,14 +59,14 @@ export function VirtualTourPlayer({ tour, onComplete, onSkip }: VirtualTourPlaye
 
     // Buscar el elemento target
     const targetElement = document.querySelector(currentStep.target) as HTMLElement;
-    
+
     if (targetElement && currentStep.highlightElement) {
       setHighlightedElement(targetElement);
-      
+
       // Scroll al elemento
       targetElement.scrollIntoView({
         behavior: 'smooth',
-        block: 'center'
+        block: 'center',
       });
 
       // Añadir clase de highlight
@@ -85,13 +85,13 @@ export function VirtualTourPlayer({ tour, onComplete, onSkip }: VirtualTourPlaye
     if (isLastStep) {
       handleComplete();
     } else {
-      setCurrentStepIndex(prev => prev + 1);
+      setCurrentStepIndex((prev) => prev + 1);
     }
   };
 
   const handlePrevious = () => {
     if (currentStepIndex > 0) {
-      setCurrentStepIndex(prev => prev - 1);
+      setCurrentStepIndex((prev) => prev - 1);
     }
   };
 
@@ -103,8 +103,8 @@ export function VirtualTourPlayer({ tour, onComplete, onSkip }: VirtualTourPlaye
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'complete',
-          tourId: tour.id
-        })
+          tourId: tour.id,
+        }),
       });
     } catch (error) {
       console.error('Error completing tour:', error);
@@ -130,105 +130,109 @@ export function VirtualTourPlayer({ tour, onComplete, onSkip }: VirtualTourPlaye
         return {
           top: `${rect.top - 20}px`,
           left: `${rect.left + rect.width / 2}px`,
-          transform: 'translate(-50%, -100%)'
+          transform: 'translate(-50%, -100%)',
         };
       case 'bottom':
         return {
           top: `${rect.bottom + 20}px`,
           left: `${rect.left + rect.width / 2}px`,
-          transform: 'translate(-50%, 0)'
+          transform: 'translate(-50%, 0)',
         };
       case 'left':
         return {
           top: `${rect.top + rect.height / 2}px`,
           left: `${rect.left - 20}px`,
-          transform: 'translate(-100%, -50%)'
+          transform: 'translate(-100%, -50%)',
         };
       case 'right':
         return {
           top: `${rect.top + rect.height / 2}px`,
           left: `${rect.right + 20}px`,
-          transform: 'translate(0, -50%)'
+          transform: 'translate(0, -50%)',
         };
       default:
         return {
           top: '50%',
           left: '50%',
-          transform: 'translate(-50%, -50%)'
+          transform: 'translate(-50%, -50%)',
         };
     }
   };
 
   if (!isPlaying) return null;
 
-  // Render modal type
+  // Render modal type - RESPONSIVE PARA MÓVIL
   if (currentStep.type === 'modal' || currentStep.placement === 'center') {
     return (
-      <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-        <Card className="max-w-2xl w-full p-6 animate-in fade-in zoom-in duration-300">
+      <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-2 sm:p-4">
+        <Card className="max-w-2xl w-full max-h-[95vh] overflow-y-auto p-4 sm:p-6 animate-in fade-in zoom-in duration-300">
           {/* Header */}
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <Badge>{tour.name}</Badge>
+          <div className="flex items-start justify-between mb-3 sm:mb-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2 flex-wrap">
+                <Badge className="text-xs">{tour.name}</Badge>
                 {currentStep.showProgress && (
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="text-xs">
                     Paso {currentStepIndex + 1} de {tour.steps.length}
                   </Badge>
                 )}
               </div>
-              <h3 className="text-xl font-bold">{currentStep.title}</h3>
+              <h3 className="text-base sm:text-xl font-bold pr-2">{currentStep.title}</h3>
             </div>
             {currentStep.allowSkip && (
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 onClick={handleSkipTour}
+                className="h-9 w-9 sm:h-8 sm:w-8 flex-shrink-0"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5 sm:h-4 sm:w-4" />
               </Button>
             )}
           </div>
 
           {/* Progress */}
           {currentStep.showProgress && (
-            <Progress value={progress} className="mb-4" />
+            <Progress value={progress} className="mb-3 sm:mb-4 h-1.5 sm:h-2" />
           )}
 
           {/* Content */}
-          <div className="space-y-4">
-            <p className="text-gray-600">{currentStep.description}</p>
+          <div className="space-y-3 sm:space-y-4">
+            <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+              {currentStep.description}
+            </p>
 
             {currentStep.videoUrl && (
               <div className="aspect-video rounded-lg overflow-hidden bg-gray-100">
-                <video
-                  src={currentStep.videoUrl}
-                  controls
-                  className="w-full h-full object-cover"
-                />
+                <video src={currentStep.videoUrl} controls className="w-full h-full object-cover" />
               </div>
             )}
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center justify-between mt-6 pt-4 border-t">
+          {/* Actions - RESPONSIVE */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mt-4 sm:mt-6 pt-3 sm:pt-4 border-t gap-2 sm:gap-0">
             <Button
               variant="ghost"
               onClick={handlePrevious}
               disabled={currentStepIndex === 0}
+              className="w-full sm:w-auto text-sm sm:text-base"
             >
               <ChevronLeft className="h-4 w-4 mr-2" />
               Anterior
             </Button>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full sm:w-auto">
               {currentStep.allowSkip && !isLastStep && (
-                <Button variant="outline" onClick={handleSkipTour}>
+                <Button
+                  variant="outline"
+                  onClick={handleSkipTour}
+                  className="hidden sm:flex text-sm"
+                >
                   <SkipForward className="h-4 w-4 mr-2" />
-                  Saltar tour
+                  Saltar
                 </Button>
               )}
-              <Button onClick={handleNext}>
+              <Button onClick={handleNext} className="w-full sm:w-auto text-sm sm:text-base">
                 {isLastStep ? (
                   <>
                     <Eye className="h-4 w-4 mr-2" />
@@ -254,7 +258,7 @@ export function VirtualTourPlayer({ tour, onComplete, onSkip }: VirtualTourPlaye
   return (
     <>
       {/* Overlay oscuro */}
-      <div 
+      <div
         ref={overlayRef}
         className="fixed inset-0 z-40 bg-black/40 pointer-events-none"
         style={{
@@ -267,7 +271,7 @@ export function VirtualTourPlayer({ tour, onComplete, onSkip }: VirtualTourPlaye
                 ${highlightedElement.getBoundingClientRect().right + 8}px ${highlightedElement.getBoundingClientRect().top - 8}px,
                 ${highlightedElement.getBoundingClientRect().left - 8}px ${highlightedElement.getBoundingClientRect().top - 8}px
               )`
-            : undefined
+            : undefined,
         }}
       />
 
@@ -287,12 +291,7 @@ export function VirtualTourPlayer({ tour, onComplete, onSkip }: VirtualTourPlaye
             <h4 className="font-semibold">{currentStep.title}</h4>
           </div>
           {currentStep.allowSkip && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSkipTour}
-              className="h-6 w-6 p-0"
-            >
+            <Button variant="ghost" size="sm" onClick={handleSkipTour} className="h-6 w-6 p-0">
               <X className="h-3 w-3" />
             </Button>
           )}
@@ -302,9 +301,7 @@ export function VirtualTourPlayer({ tour, onComplete, onSkip }: VirtualTourPlaye
         <p className="text-sm text-gray-600 mb-4">{currentStep.description}</p>
 
         {/* Progress */}
-        {currentStep.showProgress && (
-          <Progress value={progress} className="mb-3 h-1" />
-        )}
+        {currentStep.showProgress && <Progress value={progress} className="mb-3 h-1" />}
 
         {/* Actions */}
         <div className="flex items-center justify-between gap-2">
