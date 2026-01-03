@@ -11,7 +11,7 @@ import time
 # Configuración
 SERVER_IP = '157.180.119.236'
 USERNAME = 'root'
-PASSWORD = 'Dvillabla200775*'
+PASSWORD = 'hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo='
 APP_PATH = '/opt/inmova-app'
 
 def exec_cmd(client, command, description=""):
