@@ -266,6 +266,12 @@ const dashboardNavItems = [
 // 2.1 ALQUILER RESIDENCIAL TRADICIONAL
 const alquilerResidencialItems = [
   {
+    name: 'Dashboard Alquiler',
+    href: '/traditional-rental',
+    icon: LayoutDashboard,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Edificios',
     href: '/edificios',
     icon: Building2,
@@ -567,6 +573,12 @@ const finanzasNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Presupuestos',
+    href: '/dashboard/budgets',
+    icon: DollarSign,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Facturación',
     href: '/facturacion',
     icon: FileText,
@@ -588,6 +600,12 @@ const finanzasNavItems = [
 
 // 3.2 ANALYTICS E INTELIGENCIA
 const analyticsNavItems = [
+  {
+    name: 'Dashboard Adaptativo',
+    href: '/dashboard/adaptive',
+    icon: LayoutDashboard,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
   {
     name: 'Business Intelligence',
     href: '/bi',
@@ -746,6 +764,18 @@ const crmMarketingNavItems = [
     name: 'Portal Comercial',
     href: '/portal-comercial',
     icon: Briefcase,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Programa de Referidos',
+    href: '/dashboard/referrals',
+    icon: UserPlus,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Cupones y Descuentos',
+    href: '/dashboard/coupons',
+    icon: Package,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -946,6 +976,12 @@ const superAdminPlatformItems = [
     name: 'Gestión de Clientes (B2B)',
     href: '/admin/clientes',
     icon: Building2,
+    roles: ['super_admin'],
+  },
+  {
+    name: 'Integraciones',
+    href: '/dashboard/integrations',
+    icon: Zap,
     roles: ['super_admin'],
   },
   {
