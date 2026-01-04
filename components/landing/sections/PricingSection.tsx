@@ -6,7 +6,31 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, DollarSign } from 'lucide-react';
 
-const plans = [
+interface UsageLimits {
+  signatures: string;
+  storage: string;
+  ai: string;
+  sms: string;
+}
+
+interface Plan {
+  name: string;
+  price: string;
+  period: string;
+  yearlyPrice?: string;
+  yearlySavings?: string;
+  modules: string;
+  properties: string;
+  costPerProperty: string;
+  popular?: boolean;
+  newFeature?: string;
+  usageLimits?: UsageLimits;
+  features: string[];
+  addons: string[];
+  cta: string;
+}
+
+const plans: Plan[] = [
   {
     name: 'Basic',
     price: '€49',
@@ -16,6 +40,12 @@ const plans = [
     modules: '1 Vertical',
     properties: 'Hasta 20 propiedades',
     costPerProperty: '€2.45/propiedad',
+    usageLimits: {
+      signatures: '5 firmas/mes',
+      storage: '2 GB',
+      ai: '5K tokens IA/mes',
+      sms: '10 SMS/mes',
+    },
     features: [
       '✅ 1 Vertical de Negocio (a elegir)',
       'Hasta 20 propiedades',
@@ -44,6 +74,12 @@ const plans = [
     costPerProperty: '€1.49/propiedad (max)',
     popular: true,
     newFeature: '2 Verticales + 1 Módulo Gratis',
+    usageLimits: {
+      signatures: '25 firmas/mes',
+      storage: '10 GB',
+      ai: '50K tokens IA/mes',
+      sms: '100 SMS/mes',
+    },
     features: [
       '✅ 2 Verticales de Negocio (combina modelos)',
       'Hasta 100 propiedades',
@@ -73,6 +109,12 @@ const plans = [
     properties: 'Propiedades ilimitadas',
     costPerProperty: 'Sin límite',
     newFeature: 'Todos los Verticales + 3 Módulos Gratis',
+    usageLimits: {
+      signatures: '100 firmas/mes',
+      storage: '50 GB',
+      ai: '500K tokens IA/mes',
+      sms: '500 SMS/mes',
+    },
     features: [
       '✅ TODOS los 6 Verticales incluidos',
       '✅ Propiedades ilimitadas',
@@ -99,6 +141,12 @@ const plans = [
     modules: '6 Verticales + 6 Módulos + Custom',
     properties: 'Ilimitadas',
     costPerProperty: 'Personalizado',
+    usageLimits: {
+      signatures: 'Ilimitadas',
+      storage: 'Ilimitado',
+      ai: 'Ilimitados',
+      sms: 'Ilimitados',
+    },
     features: [
       '✅ Todos los verticales + módulos',
       'Desarrollos custom incluidos',
@@ -175,6 +223,19 @@ export function PricingSection() {
                   )}
                 </div>
                 <div className="text-sm text-indigo-600 font-semibold mt-2">{plan.properties}</div>
+                
+                {/* Usage Limits */}
+                {plan.usageLimits && (
+                  <div className="mt-3 p-2 bg-blue-50 rounded-lg space-y-1">
+                    <div className="text-xs font-semibold text-blue-900 mb-1">Límites incluidos/mes:</div>
+                    <div className="text-xs text-blue-700 space-y-0.5">
+                      <div>📝 {plan.usageLimits.signatures}</div>
+                      <div>💾 {plan.usageLimits.storage}</div>
+                      <div>🤖 {plan.usageLimits.ai}</div>
+                      <div>📱 {plan.usageLimits.sms}</div>
+                    </div>
+                  </div>
+                )}
               </CardHeader>
               <CardContent>
                 <div className="mb-4 p-3 bg-indigo-50 rounded-lg">
