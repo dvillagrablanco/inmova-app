@@ -342,19 +342,50 @@ curl -I https://inmovaapp.com
 
 ### 🔥 PROBLEMAS COMUNES Y SOLUCIONES
 
-#### 1. Login No Funciona (401/403)
+#### 1. Login No Funciona (401/403/500) - PROBLEMA MÁS COMÚN
 
-**Síntomas**: Login retorna 401 o redirige de vuelta
+**Síntomas**: Login retorna error o redirige de vuelta
 
-**Causas**:
+**Causas Comunes**:
+- **NEXTAUTH_SECRET faltante** (MÁS COMÚN - ver fix específico abajo)
+- `NEXTAUTH_URL` mal configurado
+- Runtime incorrecto (Edge vs Node.js)
 - Usuario `activo: false` en BD
 - Password hasheado incorrectamente  
 - CSRF token faltante (NextAuth)
-- `NEXTAUTH_URL` mal configurado
+- DATABASE_URL placeholder
 
-**Solución**:
+**Diagnóstico Rápido**:
 ```bash
-# Fix completo
+# Ver logs de error
+pm2 logs inmova-app --err --lines 20 | grep -i 'error\|nextauth'
+
+# Si ves NO_SECRET → ejecutar fix automático
+python3 scripts/fix-nextauth-secret.py
+
+# Si ves "Edge Runtime" → verificar runtime
+grep "export const runtime" app/api/auth/[...nextauth]/route.ts
+
+# Si ves "database" → verificar DATABASE_URL
+cat .env.production | grep DATABASE_URL
+```
+
+**Solución para NEXTAUTH_SECRET (MÁS COMÚN)**:
+```bash
+# Ejecutar script de diagnóstico
+python3 scripts/check-login-error.py
+
+# Ejecutar fix automático
+python3 scripts/fix-nextauth-secret.py
+
+# O manual:
+openssl rand -base64 32 | xargs -I {} echo "NEXTAUTH_SECRET={}" >> .env.production
+pm2 restart inmova-app --update-env
+```
+
+**Solución para otros problemas**:
+```bash
+# Fix completo de usuarios
 cd /opt/inmova-app
 export $(cat .env.production | xargs)
 npx tsx scripts/fix-auth-complete.ts
@@ -363,8 +394,19 @@ npx tsx scripts/fix-auth-complete.ts
 echo $NEXTAUTH_URL  # Debe ser http://IP:3000 o dominio
 
 # Reiniciar app
-fuser -k 3000/tcp
-nohup npm start > /tmp/inmova.log 2>&1 &
+pm2 restart inmova-app --update-env
+```
+
+**SIEMPRE verificar login después del fix**:
+```bash
+# Test API
+curl http://localhost:3000/api/auth/session
+
+# Test login page
+curl -I http://localhost:3000/login
+
+# Ver logs sin errores
+pm2 logs inmova-app --err --lines 10
 ```
 
 #### 2. Contenido Antiguo/Cacheado
@@ -633,7 +675,11 @@ Post-Deployment:
 - [ ] Esperar 10-15s para warm-up
 - [ ] Test HTTP local: `curl http://localhost:3000`
 - [ ] Test dominio: `curl http://dominio.com` o `https://dominio.com`
-- [ ] Test login manual (navegador real, no headless)
+- [ ] **CRÍTICO: Verificar Login Funciona** (ver sección LOGIN VERIFICATION)
+  - [ ] Test API: `curl http://localhost:3000/api/auth/session`
+  - [ ] Test Login POST (script automatizado)
+  - [ ] Verificar logs sin error NO_SECRET o 500
+  - [ ] Test manual desde navegador
 - [ ] Verificar logs: `pm2 logs inmova-app` o `tail -f /var/log/inmova/out.log`
 - [ ] Health check: `npx tsx scripts/full-health-check.ts`
 - [ ] Si usa Cloudflare: Verificar SSL mode (Dashboard)
@@ -665,6 +711,243 @@ Post-Deployment:
    - App puede funcionar en localhost pero fallar públicamente
    - Firewall, Nginx, DNS pueden bloquear
    - SIEMPRE test desde fuera
+
+---
+
+## 🔐 LOGIN VERIFICATION OBLIGATORIA - CADA DEPLOYMENT
+
+**REGLA CRÍTICA**: El login es MUY propenso a romperse con cambios nuevos. **SIEMPRE** verificar login después de CADA deployment, sin excepción.
+
+### ⚠️ Problemas Comunes que Rompen Login
+
+1. **NEXTAUTH_SECRET faltante o no cargado**
+   - Error: `[next-auth][error][NO_SECRET]`
+   - Causa: Variable no en `.env.production` o PM2 no la cargó
+   - Fix: Regenerar y `pm2 restart --update-env`
+
+2. **NEXTAUTH_URL mal configurado**
+   - Error: Redirect loops, CSRF errors
+   - Causa: URL no coincide con dominio real
+   - Fix: Verificar https:// vs http://, puerto, dominio
+
+3. **Runtime incorrecto en auth route**
+   - Error: `PrismaClient is not configured to run in Edge Runtime`
+   - Causa: Falta `export const runtime = 'nodejs';`
+   - Fix: Añadir runtime explícito
+
+4. **DATABASE_URL placeholder**
+   - Error: Login retorna 500, "Cannot connect to database"
+   - Causa: URL dummy del build no reemplazada
+   - Fix: Verificar URL real en .env.production
+
+5. **Prisma relation errors**
+   - Error: 500 en authorize(), "company relation failed"
+   - Causa: Query con `include` que falla
+   - Fix: Usar `select` y lazy loading
+
+### ✅ CHECKLIST DE VERIFICACIÓN DE LOGIN (OBLIGATORIO)
+
+**Ejecutar SIEMPRE después de cada deployment**:
+
+#### 1. Verificación de Variables de Entorno
+
+```bash
+# En el servidor
+cat /opt/inmova-app/.env.production | grep -E '(NEXTAUTH_SECRET|NEXTAUTH_URL|DATABASE_URL)'
+
+# Verificar que PM2 las cargó
+pm2 env 0 | grep -E '(NEXTAUTH_SECRET|NEXTAUTH_URL)'
+
+# Si NO están cargadas → pm2 restart --update-env
+```
+
+**Validación**:
+- ✅ `NEXTAUTH_SECRET` presente y NO vacío
+- ✅ `NEXTAUTH_URL` coincide con dominio/URL real
+- ✅ `DATABASE_URL` NO es placeholder "dummy-build-host"
+
+#### 2. Test de API de Autenticación
+
+```bash
+# Test 1: Session API debe responder sin error de servidor
+curl -s http://localhost:3000/api/auth/session
+
+# ✅ Correcto: {} (sin session) o {"user":{...}}
+# ❌ Incorrecto: {"message":"There is a problem with the server configuration"}
+
+# Test 2: Login page debe cargar
+curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/login
+
+# ✅ Correcto: 200
+# ❌ Incorrecto: 500, 404
+```
+
+#### 3. Verificación de Logs (Sin Errores Críticos)
+
+```bash
+# Verificar que NO hay errores de NextAuth en logs
+pm2 logs inmova-app --err --lines 20 --nostream | grep -i 'NO_SECRET\|next-auth.*error'
+
+# ✅ Correcto: Sin output (0 errores)
+# ❌ Incorrecto: Múltiples líneas con [next-auth][error]
+```
+
+#### 4. Test de Login Automatizado
+
+```bash
+# Ejecutar script de test de login
+python3 /workspace/scripts/test-login-automated.py
+
+# O script alternativo (si existe)
+npx tsx scripts/test-login-flow.ts
+```
+
+**El script debe verificar**:
+- ✅ POST a `/api/auth/signin/credentials` retorna 200
+- ✅ Respuesta incluye session o redirect válido
+- ✅ NO retorna error de servidor
+
+#### 5. Test Manual desde Navegador (CRÍTICO)
+
+**NO confiar SOLO en tests automatizados**. Verificar manualmente:
+
+1. Abrir `https://inmovaapp.com/login` en navegador
+2. Ingresar credenciales válidas:
+   ```
+   Email: admin@inmova.app
+   Password: Admin123!
+   ```
+3. Verificar:
+   - ✅ Redirect a `/dashboard` o `/admin` (NO volver a `/login`)
+   - ✅ Dashboard carga correctamente
+   - ✅ NO hay error "Server configuration problem"
+
+4. Test de logout y re-login
+5. Test desde móvil (opcional pero recomendado)
+
+### 🚨 SI LOGIN FALLA: PASOS INMEDIATOS
+
+```bash
+# 1. Ver logs de error
+pm2 logs inmova-app --err --lines 50
+
+# 2. Ejecutar diagnóstico automático
+python3 /workspace/scripts/check-login-error.py
+
+# 3. Si es NO_SECRET → ejecutar fix
+python3 /workspace/scripts/fix-nextauth-secret.py
+
+# 4. Si es otro error → revisar runtime y Prisma
+grep "export const runtime" app/api/auth/[...nextauth]/route.ts
+cat lib/auth-options.ts | grep -A 10 "authorize"
+
+# 5. Verificar DATABASE_URL no es placeholder
+cat .env.production | grep DATABASE_URL
+```
+
+### 📋 SCRIPTS DE VERIFICACIÓN AUTOMÁTICA
+
+#### Script 1: `scripts/test-login-automated.py`
+
+Crea un script que:
+- Conecta por SSH al servidor
+- Ejecuta curl tests de API auth
+- Verifica logs sin errores
+- Retorna exit code 0 (éxito) o 1 (fallo)
+
+```python
+# Ejemplo de uso en deployment:
+status = subprocess.run(['python3', 'scripts/test-login-automated.py'])
+if status.returncode != 0:
+    print("❌ LOGIN VERIFICATION FAILED - ABORTING DEPLOYMENT")
+    # Rollback automático
+    rollback_deployment()
+    sys.exit(1)
+```
+
+#### Script 2: `scripts/fix-login-common-issues.py`
+
+Script all-in-one que:
+- Detecta problema común (NO_SECRET, URL, runtime, etc.)
+- Aplica fix automático
+- Re-verifica login
+- Reporta éxito/fallo
+
+### 🎯 INTEGRACIÓN EN DEPLOYMENT SCRIPTS
+
+**TODOS los scripts de deployment DEBEN incluir**:
+
+```python
+# Paso 7: VERIFICACIÓN DE LOGIN (OBLIGATORIO)
+log("📋 VERIFICACIÓN DE LOGIN", Colors.CYAN)
+log("=" * 70, Colors.CYAN)
+
+# Test 1: API Session
+status, output = exec_cmd(client, "curl -s http://localhost:3000/api/auth/session")
+if 'problem with the server' in output.lower():
+    log("❌ LOGIN API FALLÓ - ABORTANDO", Colors.RED)
+    raise Exception("Login verification failed")
+
+# Test 2: No hay errores NO_SECRET
+status, output = exec_cmd(
+    client,
+    "pm2 logs inmova-app --err --lines 20 --nostream | grep -i 'NO_SECRET' | wc -l"
+)
+error_count = int(output.strip())
+if error_count > 0:
+    log(f"❌ {error_count} errores NO_SECRET encontrados", Colors.RED)
+    raise Exception("NEXTAUTH_SECRET missing")
+
+# Test 3: Login page responde 200
+status, output = exec_cmd(
+    client,
+    "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/login"
+)
+if '200' not in output:
+    log(f"❌ Login page retorna {output.strip()}, esperado 200", Colors.RED)
+    raise Exception("Login page not responding")
+
+log("✅ Login verification PASSED", Colors.GREEN)
+```
+
+### 📊 MÉTRICAS DE ÉXITO
+
+**Deployment NO es exitoso si**:
+- ❌ Login retorna 500
+- ❌ API auth retorna "server configuration problem"
+- ❌ Logs tienen errores de NextAuth
+- ❌ Test manual de login falla
+
+**Deployment ES exitoso solo si**:
+- ✅ API auth responde sin error
+- ✅ Login page carga (200)
+- ✅ Logs sin errores de NextAuth
+- ✅ Test manual de login funciona
+- ✅ Dashboard carga después de login
+
+### 🎓 LECCIÓN CRÍTICA
+
+> **"El login es MUY propenso a romperse con cambios nuevos. SIEMPRE verificar login después de CADA deployment."**
+
+**Por qué es tan frágil**:
+- Depende de múltiples variables de entorno
+- Requiere runtime específico (Node.js, no Edge)
+- Usa Prisma (requiere DB connection)
+- NextAuth es complejo (CSRF, cookies, redirects)
+- Cualquier cambio en auth/ puede romperlo
+- Cache puede ocultar problemas
+
+**Consecuencia de NO verificar**:
+- 🔥 Usuarios no pueden acceder a la app
+- 🔥 Downtime crítico
+- 🔥 Pérdida de confianza
+- 🔥 Tiempo de detección/fix largo si no se detecta inmediatamente
+
+**Tiempo de verificación**: ~2 minutos  
+**Tiempo de fix si se rompe**: ~30-60 minutos  
+**ROI**: **Verificar SIEMPRE**
+
+---
 
 ### 🔧 SCRIPTS ESENCIALES
 

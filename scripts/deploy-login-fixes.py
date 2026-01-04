@@ -272,23 +272,53 @@ def main():
         else:
             log(f"   ⚠️  API health: {output[:100]}", Colors.YELLOW)
         
-        # Check 4: Login page
+        # Check 4: Login page HTTP
         status, output = exec_cmd(
             client,
-            "curl -s http://localhost:3000/login | grep -i 'INMOVA' | head -1 || echo 'not found'",
-            "4/5 Verificar página de login"
+            "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/login",
+            "4/7 Verificar Login page HTTP"
         )
         
-        if 'INMOVA' in output or 'inmova' in output.lower():
-            log("   ✅ Login page renderiza", Colors.GREEN)
+        if '200' in output:
+            log("   ✅ Login page HTTP 200", Colors.GREEN)
         else:
-            log("   ⚠️  Login page no encontrada", Colors.YELLOW)
+            log(f"   ⚠️  Login page HTTP {output.strip()}", Colors.YELLOW)
         
-        # Check 5: Memoria
+        # Check 5: API Auth Session (CRÍTICO)
+        status, output = exec_cmd(
+            client,
+            "curl -s http://localhost:3000/api/auth/session",
+            "5/7 Verificar API Auth Session (CRÍTICO)"
+        )
+        
+        if 'problem with the server' in output.lower():
+            log("   ❌ API Auth retorna error de configuración", Colors.RED)
+            log("   🚨 LOGIN NO FUNCIONAL - REVISAR", Colors.RED)
+        elif output.strip() in ['{}', ''] or 'user' in output.lower():
+            log("   ✅ API Auth OK", Colors.GREEN)
+        else:
+            log(f"   ⚠️  API Auth respuesta inesperada: {output[:50]}", Colors.YELLOW)
+        
+        # Check 6: Logs sin errores NextAuth
+        status, output = exec_cmd(
+            client,
+            "pm2 logs inmova-app --err --lines 10 --nostream | grep -i 'NO_SECRET\\|next-auth.*error' | wc -l",
+            "6/7 Verificar logs sin errores NextAuth"
+        )
+        
+        error_count = int(output.strip()) if output.strip().isdigit() else 0
+        
+        if error_count == 0:
+            log("   ✅ No hay errores de NextAuth", Colors.GREEN)
+        else:
+            log(f"   ❌ {error_count} errores de NextAuth encontrados", Colors.RED)
+            log("   🚨 EJECUTAR: python3 scripts/check-login-error.py", Colors.RED)
+        
+        # Check 7: Memoria
         exec_cmd(
             client,
             "free -h | grep Mem",
-            "5/5 Verificar memoria del servidor"
+            "7/7 Verificar memoria del servidor"
         )
         
         log("")
