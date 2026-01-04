@@ -295,20 +295,35 @@ curl -I https://inmovaapp.com
 
 **SIEMPRE ejecutar estos pasos ANTES de declarar éxito**:
 
-1. **Matar Procesos Viejos**
+1. **Verificar Variables de Entorno CRÍTICAS** ⚠️ NUEVO - 04 Ene 2026
+   ```bash
+   # Verificar que NEXTAUTH_SECRET y NEXTAUTH_URL existen
+   grep -E 'NEXTAUTH_SECRET|NEXTAUTH_URL' .env.production
+   
+   # Si faltan, añadir:
+   echo "NEXTAUTH_SECRET=$(openssl rand -base64 32)" >> .env.production
+   echo "NEXTAUTH_URL=https://inmovaapp.com" >> .env.production
+   
+   # CRÍTICO: Reiniciar PM2 con --update-env
+   pm2 restart inmova-app --update-env
+   ```
+   
+   **Por qué**: NextAuth REQUIERE `NEXTAUTH_SECRET` en producción. Sin él, el login falla con "Server error".
+
+2. **Matar Procesos Viejos**
    ```bash
    fuser -k 3000/tcp  # Mata ANY proceso en puerto 3000
    pm2 delete all     # Limpia PM2
    pm2 kill           # Reset completo de PM2
    ```
 
-2. **Limpiar Cache**
+3. **Limpiar Cache**
    ```bash
    rm -rf .next/cache     # Cache de Next.js
    rm -rf .next/server    # Server cache
    ```
 
-3. **Verificar BD**
+4. **Verificar BD**
    ```bash
    # Verificar conexión
    npx prisma db push
@@ -317,7 +332,7 @@ curl -I https://inmovaapp.com
    psql -d DB_NAME -c "SELECT email, activo, role FROM users WHERE email LIKE '%admin%';"
    ```
 
-4. **Actualizar Usuarios de Test**
+5. **Actualizar Usuarios de Test**
    ```bash
    npx tsx scripts/fix-auth-complete.ts
    ```
