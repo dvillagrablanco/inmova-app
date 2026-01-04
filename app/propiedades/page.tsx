@@ -55,6 +55,8 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import Image from 'next/image';
+import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
+import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 
 interface Property {
   id: string;
@@ -310,46 +312,23 @@ export default function PropiedadesPage() {
   return (
     <AuthenticatedLayout>
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Breadcrumbs y Botón Volver */}
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push('/dashboard')}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Dashboard
-          </Button>
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard">
-                  <Home className="h-4 w-4" />
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Gestión de Propiedades</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
+        {/* Smart Breadcrumbs */}
+        <SmartBreadcrumbs
+          totalCount={totalProperties}
+          showBackButton={true}
+        />
 
-        {/* Header */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        {/* Header con Quick Actions */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Gestión de Propiedades</h1>
             <p className="text-muted-foreground">
               Administra tu portfolio inmobiliario completo
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.push('/propiedades/crear')}>
-              <Plus className="mr-2 h-4 w-4" />
-              Nueva Propiedad
-            </Button>
-          </div>
+          
+          {/* Quick Actions */}
+          <ContextualQuickActions />
         </div>
 
         {/* Estadísticas */}

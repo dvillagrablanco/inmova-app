@@ -53,6 +53,8 @@ import { ErrorBoundary } from '@/components/ui/error-boundary';
 import toast from 'react-hot-toast';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import logger, { logError } from '@/lib/logger';
+import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
+import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 
 interface Tenant {
   id: string;
@@ -253,34 +255,14 @@ function InquilinosPageContent() {
   return (
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
-            {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/dashboard')}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Volver al Dashboard
-              </Button>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="h-4 w-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Inquilinos</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
+            {/* Smart Breadcrumbs */}
+            <SmartBreadcrumbs
+              totalCount={tenants.length}
+              showBackButton={true}
+            />
 
-            {/* Header Section */}
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            {/* Header Section con Quick Actions */}
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <div className="flex items-start gap-3">
                 <div>
                   <h1 className="text-3xl font-bold tracking-tight">Inquilinos</h1>
@@ -305,12 +287,9 @@ function InquilinosPageContent() {
                   }
                 />
               </div>
-              {canCreate && (
-                <Button onClick={() => router.push('/inquilinos/nuevo')}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Nuevo Inquilino
-                </Button>
-              )}
+              
+              {/* Quick Actions */}
+              {canCreate && <ContextualQuickActions />}
             </div>
 
             {/* Error Alert */}

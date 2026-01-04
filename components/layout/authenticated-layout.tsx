@@ -14,6 +14,9 @@ import { useSession } from 'next-auth/react';
 import { useIsMobile } from '@/lib/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 import { SkipLink } from '@/components/accessibility/SkipLink';
+import { CommandPalette } from '@/components/navigation/command-palette';
+import { GlobalShortcuts } from '@/components/navigation/global-shortcuts';
+import { ShortcutsHelpDialog } from '@/components/navigation/shortcuts-help-dialog';
 
 /**
  * Layout autenticado con navegación optimizada para mobile-first
@@ -21,6 +24,9 @@ import { SkipLink } from '@/components/accessibility/SkipLink';
  * - Sidebar (desktop)
  * - Header (todas las pantallas)
  * - Bottom Navigation (solo móvil)
+ * - Command Palette (Cmd+K navegación rápida)
+ * - Global Shortcuts (G+P, G+T, N, F, etc.)
+ * - Shortcuts Help (? para ayuda)
  */
 
 interface AuthenticatedLayoutProps {
@@ -181,6 +187,15 @@ export function AuthenticatedLayout({
           onDismiss={handleDismissChecklist}
         />
       )}
+
+      {/* Command Palette - Navegación rápida con Cmd+K */}
+      <CommandPalette />
+
+      {/* Global Shortcuts - Atajos de teclado globales */}
+      <GlobalShortcuts />
+
+      {/* Shortcuts Help Dialog - Ayuda de atajos con ? */}
+      <ShortcutsHelpDialog />
     </div>
   );
 }

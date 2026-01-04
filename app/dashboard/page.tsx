@@ -44,6 +44,7 @@ import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { VerticalSpecificWidgets } from '@/components/dashboard/VerticalSpecificWidgets';
 import DemoDataGenerator from '@/components/automation/DemoDataGenerator';
 import logger, { logError } from '@/lib/logger';
+import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 
 interface DashboardData {
   kpis: {
@@ -166,10 +167,19 @@ function DashboardPageContent() {
   return (
     <AuthenticatedLayout maxWidth="7xl">
           <div className="max-w-7xl mx-auto">
-            {/* Header */}
+            {/* Header con Quick Actions */}
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-600 mt-1">Bienvenido, {session?.user?.name || 'Usuario'}</p>
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+                  <p className="text-gray-600 mt-1">Bienvenido, {session?.user?.name || 'Usuario'}</p>
+                </div>
+                
+                {/* Quick Actions */}
+                <ContextualQuickActions
+                  pendingPayments={data?.pagosPendientes?.length || 0}
+                />
+              </div>
             </div>
 
             {/* Smart Onboarding Wizard - Sistema automatizado de configuraci\u00f3n inicial */}
