@@ -73,27 +73,26 @@ export const authOptions: NextAuthOptions = {
             throw new Error('Database not available');
           }
 
-          // Intentar con include primero, si falla obtener sin company
-          let user;
-          try {
-            user = await prisma.user.findUnique({
-              where: { email: credentials.email },
-              include: { company: true },
-            });
-          } catch (error) {
-            console.log('[NextAuth] Error con include company, reintentando sin include');
-            // Fallback: obtener usuario sin company
-            user = await prisma.user.findUnique({
-              where: { email: credentials.email },
-            });
-          }
+          // Obtener usuario sin include para evitar errores con relaciones
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              password: true,
+              role: true,
+              activo: true,
+              companyId: true,
+            },
+          });
 
           console.log('[NextAuth] Usuario encontrado:', { 
             found: !!user,
             email: user?.email,
             activo: user?.activo,
             hasPassword: !!user?.password,
-            hasCompany: !!user?.company
+            companyId: user?.companyId
           });
 
           // Hash ficticio para mantener timing constante cuando usuario no existe
@@ -120,6 +119,23 @@ export const authOptions: NextAuthOptions = {
             }
 
             console.log('[NextAuth] Login exitoso para:', user.email);
+            
+            // Obtener nombre de la empresa si existe
+            let companyName = 'Sin Empresa';
+            if (user.companyId) {
+              try {
+                const company = await prisma.company.findUnique({
+                  where: { id: user.companyId },
+                  select: { nombre: true },
+                });
+                if (company) {
+                  companyName = company.nombre;
+                }
+              } catch (error) {
+                console.log('[NextAuth] No se pudo obtener nombre de empresa');
+              }
+            }
+            
             await addConstantDelay();
             return {
               id: user.id,
@@ -127,7 +143,7 @@ export const authOptions: NextAuthOptions = {
               name: user.name,
               role: user.role,
               companyId: user.companyId,
-              companyName: user.company?.nombre || 'Sin Empresa',
+              companyName,
               userType: 'user',
             };
           }

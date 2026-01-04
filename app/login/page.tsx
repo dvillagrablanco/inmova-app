@@ -146,8 +146,9 @@ export default function LoginPage() {
                       placeholder="tu@correo.com"
                       value={email}
                       onChange={(e) => setValue('email', e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-indigo-300/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                      className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white/15 transition-all"
                       required
+                      autoComplete="email"
                     />
                   </div>
                   {errors.email && (
@@ -170,8 +171,9 @@ export default function LoginPage() {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setValue('password', e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-indigo-300/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                      className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white/15 transition-all"
                       required
+                      autoComplete="current-password"
                     />
                   </div>
                   {errors.password && (
