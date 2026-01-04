@@ -11,7 +11,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { ClaudeAIService, PropertyData } from '@/lib/claude-ai-service';
+import * as ClaudeAIService from '@/lib/claude-ai-service';
+import { PropertyData } from '@/lib/claude-ai-service';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
@@ -72,17 +73,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Obtener configuración de Claude AI (de la empresa o default de Inmova)
-    const company = await prisma.company.findUnique({
-      where: { id: session.user.companyId },
-      select: {
-        anthropicApiKey: true,
-      },
-    });
-
-    const claudeConfig = ClaudeAIService.getConfig(company);
-
-    if (!claudeConfig) {
+    // 2. Verificar que Claude esté configurado
+    if (!ClaudeAIService.isClaudeConfigured()) {
       return NextResponse.json(
         {
           error: 'IA no configurada',
@@ -146,8 +138,8 @@ export async function POST(request: NextRequest) {
       comparables: comparables.length > 0 ? comparables : undefined,
     };
 
-    // 6. Llamar a Claude AI (usando configuración de la empresa o default de Inmova)
-    const valuation = await ClaudeAIService.valuateProperty(claudeConfig, propertyData);
+    // 6. Llamar a Claude AI
+    const valuation = await ClaudeAIService.valuateProperty(propertyData);
 
     // 7. Guardar valoración en BD
     if (validated.unitId) {

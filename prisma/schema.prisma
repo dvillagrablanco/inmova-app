@@ -1155,27 +1155,6 @@ model Company {
   // Stripe
   stripeCustomerId String? @unique
 
-  // Integraciones del Cliente (cada empresa tiene sus propias credenciales)
-  // Signaturit / DocuSign
-  signatureProvider      String? // "signaturit", "docusign", null
-  signatureApiKey        String? // Encriptada en la app
-  signatureWebhookSecret String? // Encriptada en la app
-  signatureEnvironment   String? @default("sandbox") // "sandbox", "production"
-
-  // AWS S3 (opcional, cada empresa puede tener su propio bucket)
-  awsAccessKeyId     String?
-  awsSecretAccessKey String? // Encriptada en la app
-  awsBucket          String?
-  awsRegion          String? @default("eu-west-1")
-
-  // Anthropic Claude (opcional, cada empresa puede tener su propia API key)
-  anthropicApiKey String? // Encriptada en la app
-
-  // Otras integraciones futuras...
-  twilioAccountSid  String?
-  twilioAuthToken   String?
-  twilioPhoneNumber String?
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
