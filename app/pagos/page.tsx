@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
+import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 
 import {
   CreditCard,
@@ -241,33 +243,13 @@ function PagosPage() {
   return (
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
-            {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/dashboard')}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Volver al Dashboard
-              </Button>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="h-4 w-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Pagos</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
+            {/* Smart Breadcrumbs */}
+            <SmartBreadcrumbs
+              totalCount={payments.length}
+              showBackButton={true}
+            />
 
-            {/* Header Section */}
+            {/* Header Section con Quick Actions */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-3 min-w-0">
                 <div>
@@ -283,6 +265,8 @@ function PagosPage() {
                   sections={helpData.pagos.sections}
                 />
               </div>
+              
+              {/* View Mode + Quick Actions */}
               <div className="flex gap-2">
                 <Button
                   variant={viewMode === 'list' ? 'default' : 'outline'}
@@ -310,6 +294,14 @@ function PagosPage() {
                   <TrendingUp className="mr-2 h-4 w-4" />
                   Stripe
                 </Button>
+                
+                <ContextualQuickActions
+                  pendingPayments={payments.filter(p => p.estado === 'pendiente').length}
+                  overduePayments={payments.filter(p => {
+                    const isOverdue = new Date(p.fechaVencimiento) < new Date();
+                    return p.estado === 'pendiente' && isOverdue;
+                  }).length}
+                />
               </div>
             </div>
 

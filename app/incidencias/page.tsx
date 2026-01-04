@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
+import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -270,36 +272,34 @@ export default function IncidenciasPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto">
-            {/* Breadcrumbs */}
-            <div className="mb-6">
-              <Button variant="ghost" onClick={() => router.push('/dashboard')} className="mb-4">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Volver al Dashboard
-              </Button>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="w-4 h-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Incidencias Vecinales</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
+          <div className="max-w-7xl mx-auto space-y-6">
+            {/* Smart Breadcrumbs */}
+            <SmartBreadcrumbs
+              totalCount={incidencias.length}
+              showBackButton={true}
+            />
 
-            {/* Header */}
+            {/* Header con Quick Actions */}
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold mb-2">Incidencias Vecinales</h1>
                 <p className="text-gray-600">Gestiona reportes y problemas de la comunidad</p>
               </div>
+              
+              {/* Quick Actions */}
               {canCreate && (
-                <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+                <div className="flex gap-2">
+                  <ContextualQuickActions
+                    pendingIssues={incidencias.filter(i => i.estado === 'pendiente').length}
+                    criticalIssues={incidencias.filter(i => i.prioridad === 'alta' || i.prioridad === 'critica').length}
+                  />
+                </div>
+              )}
+            </div>
+            
+            {/* Diálogo de nueva incidencia */}
+            {canCreate && (
+              <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                   <DialogTrigger asChild>
                     <Button className="gradient-primary hover:opacity-90 shadow-primary">
                       <Plus className="w-4 h-4 mr-2" />

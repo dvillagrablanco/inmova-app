@@ -60,6 +60,12 @@ interface ContextualQuickActionsProps {
   daysUntilExpiration?: number;
   pendingPayments?: number;
   hasActiveIncidents?: boolean;
+  
+  // Nuevos metadatos para Contratos, Pagos, Incidencias
+  expiringContracts?: number;
+  overduePayments?: number;
+  pendingIssues?: number;
+  criticalIssues?: number;
 }
 
 export function ContextualQuickActions(props: ContextualQuickActionsProps) {
@@ -508,7 +514,45 @@ function generateActions(
   }
 
   // ========================================
-  // PAGOS - LISTA
+  // CONTRATOS - LISTA (ACTUALIZADO)
+  // ========================================
+  if (pathname === '/contratos' && !pathname.startsWith('/contratos/')) {
+    actions.push(
+      {
+        label: 'Nuevo Contrato',
+        icon: Plus,
+        onClick: () => router.push('/contratos/nuevo'),
+        variant: 'default',
+      },
+      {
+        label: 'Por Vencer',
+        icon: Clock,
+        onClick: () => {
+          // TODO: Filtrar por vencimiento
+        },
+        variant: 'outline',
+        badge: props.expiringContracts ? `${props.expiringContracts}` : undefined,
+        tooltip: 'Contratos que vencen en 30 días',
+      },
+      {
+        label: 'Importar',
+        icon: Upload,
+        onClick: () => router.push('/contratos/importar'),
+        variant: 'ghost',
+      },
+      {
+        label: 'Exportar',
+        icon: Download,
+        onClick: () => {
+          // TODO: Exportar contratos
+        },
+        variant: 'ghost',
+      }
+    );
+  }
+
+  // ========================================
+  // PAGOS - LISTA (ACTUALIZADO)
   // ========================================
   if (pathname === '/pagos') {
     actions.push(
@@ -528,7 +572,17 @@ function generateActions(
         badge: props.pendingPayments ? `${props.pendingPayments}` : undefined,
       },
       {
-        label: 'Enviar Recordatorios',
+        label: 'Vencidos',
+        icon: Clock,
+        onClick: () => {
+          // TODO: Filtrar vencidos
+        },
+        variant: 'outline',
+        badge: props.overduePayments ? `${props.overduePayments}` : undefined,
+        tooltip: 'Pagos vencidos',
+      },
+      {
+        label: 'Recordatorios',
         icon: Mail,
         onClick: () => {
           // TODO: Enviar emails masivos
@@ -539,7 +593,53 @@ function generateActions(
         label: 'Exportar',
         icon: Download,
         onClick: () => {
-          // TODO: Exportar
+          // TODO: Exportar pagos
+        },
+        variant: 'ghost',
+      }
+    );
+  }
+
+  // ========================================
+  // INCIDENCIAS - LISTA
+  // ========================================
+  if (pathname === '/incidencias') {
+    actions.push(
+      {
+        label: 'Nueva Incidencia',
+        icon: Plus,
+        onClick: () => {
+          // Trigger dialog de nueva incidencia
+          const event = new CustomEvent('open-new-incidencia-dialog');
+          window.dispatchEvent(event);
+        },
+        variant: 'default',
+      },
+      {
+        label: 'Pendientes',
+        icon: Clock,
+        onClick: () => {
+          // TODO: Filtrar pendientes
+        },
+        variant: 'outline',
+        badge: props.pendingIssues ? `${props.pendingIssues}` : undefined,
+        tooltip: 'Incidencias pendientes',
+      },
+      {
+        label: 'Críticas',
+        icon: AlertCircle,
+        onClick: () => {
+          // TODO: Filtrar críticas
+        },
+        variant: 'outline',
+        badge: props.criticalIssues ? `${props.criticalIssues}` : undefined,
+        tooltip: 'Incidencias de alta prioridad',
+      },
+      {
+        label: 'Exportar',
+        icon: Download,
+        onClick: () => {
+          // TODO: Exportar incidencias
         },
         variant: 'ghost',
       }
