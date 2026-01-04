@@ -15,6 +15,8 @@ import * as SignaturitService from '@/lib/signaturit-service';
 import { Signer, SignatureType } from '@/lib/signaturit-service';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import { checkUsageLimit, createLimitExceededResponse, logUsageWarning } from '@/lib/usage-limits';
+import { trackUsage } from '@/lib/usage-tracking-service';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -69,7 +71,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Verificar que Signaturit esté configurado (globalmente por Inmova)
+    // 2. Verificar límite de firmas mensuales
+    const limitCheck = await checkUsageLimit(session.user.companyId, 'signaturit');
+    if (!limitCheck.allowed) {
+      return createLimitExceededResponse(limitCheck);
+    }
+    
+    // Log warning si está cerca del límite (80%)
+    logUsageWarning(session.user.companyId, limitCheck);
+
+    // 3. Verificar que Signaturit esté configurado (globalmente por Inmova)
     if (!SignaturitService.isSignaturitConfigured()) {
       return NextResponse.json(
         {
@@ -80,7 +91,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Parsear y validar body
+    // 4. Parsear y validar body
     const body = await request.json();
     const validated = createSignatureSchema.parse(body);
 
@@ -194,7 +205,20 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 12. Respuesta exitosa
+    // 12. Tracking de uso (Control de costos)
+    await trackUsage({
+      companyId: session.user.companyId,
+      service: 'signaturit',
+      metric: 'signatures',
+      value: 1,
+      metadata: {
+        signatureId: result.signatureId,
+        type: signatureOptions.type || 'simple',
+        contractId: validated.contractId,
+      },
+    });
+
+    // 13. Respuesta exitosa
     return NextResponse.json({
       success: true,
       signatureId: result.signatureId,

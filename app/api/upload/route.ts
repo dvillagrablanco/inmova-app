@@ -16,6 +16,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import * as S3Service from '@/lib/aws-s3-service';
 import { FileType } from '@/lib/aws-s3-service';
+import { checkStorageLimit, createLimitExceededResponse, logUsageWarning } from '@/lib/usage-limits';
+import { trackUsage } from '@/lib/usage-tracking-service';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -83,10 +85,22 @@ export async function POST(request: NextRequest) {
         buffer: Buffer.from(await file.arrayBuffer()),
         originalName: file.name,
         mimeType: file.type,
+        size: file.size,
       }))
     );
 
-    // 5. Upload a S3
+    // 5. Verificar límite de storage
+    const totalSize = fileBuffers.reduce((sum, f) => sum + f.size, 0);
+    const limitCheck = await checkStorageLimit(session.user.companyId, totalSize);
+    
+    if (!limitCheck.allowed) {
+      return createLimitExceededResponse(limitCheck);
+    }
+    
+    // Log warning si está cerca del límite (80%)
+    logUsageWarning(session.user.companyId, limitCheck);
+
+    // 6. Upload a S3
     const results = await S3Service.uploadMultipleToS3(fileBuffers, folder, fileType);
 
     // 6. Verificar si hubo errores
@@ -103,7 +117,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 7. Respuesta exitosa
+    // 7. Tracking de uso (Control de costos)
+    const totalSizeGB = totalSize / (1024 * 1024 * 1024);
+    await trackUsage({
+      companyId: session.user.companyId,
+      service: 's3',
+      metric: 'storage_gb',
+      value: totalSizeGB,
+      metadata: {
+        fileCount: files.length,
+        folder,
+        fileType,
+        keys: results.map(r => r.key),
+      },
+    });
+
+    // 8. Respuesta exitosa
     const uploads = results.map((r) => ({
       url: r.url,
       key: r.key,

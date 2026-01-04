@@ -1425,6 +1425,10 @@ model Company {
   webhookSubscriptions    WebhookSubscription[]
   apiLogs                 ApiLog[]
 
+  // Control de Costos - Tracking de Uso de Integraciones
+  usageLogs      UsageLog[]
+  usageSummaries UsageSummary[]
+
   @@map("company")
 }
 
@@ -4953,6 +4957,28 @@ model SubscriptionPlan {
   // Módulos incluidos (JSON array de códigos de módulos)
   modulosIncluidos Json // ["edificios", "inquilinos", "pagos", ...]
 
+  // ═══════════════════════════════════════════════════════════════
+  // LÍMITES DE USO (Control de Costos de Integraciones)
+  // ═══════════════════════════════════════════════════════════════
+
+  // Signaturit: Firma Digital
+  signaturesIncludedMonth Int   @default(0) // Número de firmas incluidas por mes
+  extraSignaturePrice     Float @default(2.00) // Precio por firma adicional en €
+
+  // AWS S3: Almacenamiento
+  storageIncludedGB   Float @default(0) // GB de almacenamiento incluidos
+  extraStorageGBPrice Float @default(0.05) // Precio por GB adicional en €/mes
+
+  // Anthropic Claude: IA
+  aiTokensIncludedMonth Int   @default(0) // Tokens de IA incluidos por mes
+  extraAITokensPrice    Float @default(0.01) // Precio por 1K tokens adicionales en €
+
+  // Twilio: SMS (Futuro)
+  smsIncludedMonth Int   @default(0) // SMS incluidos por mes
+  extraSMSPrice    Float @default(0.10) // Precio por SMS adicional en €
+
+  // ═══════════════════════════════════════════════════════════════
+
   activo    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -4990,6 +5016,92 @@ model CompanyModule {
   @@index([moduloCodigo])
   @@map("company_modules")
 }
+
+// ═══════════════════════════════════════════════════════════════
+// TRACKING DE USO DE INTEGRACIONES (Control de Costos)
+// ═══════════════════════════════════════════════════════════════
+
+model UsageLog {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Servicio usado
+  service String // "signaturit", "s3", "claude", "twilio"
+
+  // Métrica específica
+  metric String // "signatures", "storage_gb", "tokens", "sms"
+
+  // Valor usado (ej: 1 firma, 0.5 GB, 1000 tokens)
+  value Float
+
+  // Costo incurrido por Inmova en € (calculado)
+  cost Float
+
+  // Período de facturación (primer día del mes)
+  period DateTime
+
+  // Metadata adicional (JSON)
+  metadata Json? // { signatureId, fileKey, prompt, etc. }
+
+  // Auditoría
+  createdAt DateTime @default(now())
+
+  @@index([companyId, service, period])
+  @@index([companyId, period])
+  @@index([service, period])
+  @@map("usage_logs")
+}
+
+model UsageSummary {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Período (primer día del mes)
+  period DateTime
+
+  // Resumen por servicio
+  signaturesUsed Int   @default(0)
+  signaturesCost Float @default(0)
+
+  storageUsedGB Float @default(0)
+  storageCost   Float @default(0)
+
+  aiTokensUsed Int   @default(0)
+  aiCost       Float @default(0)
+
+  smsUsed Int   @default(0)
+  smsCost Float @default(0)
+
+  // Total del mes
+  totalCost Float @default(0)
+
+  // Límites del plan (snapshot del momento)
+  planSignaturesLimit Int?
+  planStorageLimit    Float?
+  planAITokensLimit   Int?
+  planSMSLimit        Int?
+
+  // Excesos
+  signaturesOverage Int   @default(0)
+  storageOverageGB  Float @default(0)
+  aiTokensOverage   Int   @default(0)
+  smsOverage        Int   @default(0)
+
+  // Costo de excesos
+  overageCost Float @default(0)
+
+  // Auditoría
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, period])
+  @@index([companyId])
+  @@index([period])
+  @@map("usage_summaries")
+}
+
+// ═══════════════════════════════════════════════════════════════
 
 model ModuleDefinition {
   id          String  @id @default(cuid())

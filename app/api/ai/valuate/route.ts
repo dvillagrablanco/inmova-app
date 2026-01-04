@@ -15,6 +15,8 @@ import * as ClaudeAIService from '@/lib/claude-ai-service';
 import { PropertyData } from '@/lib/claude-ai-service';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import { checkAILimit, createLimitExceededResponse, logUsageWarning } from '@/lib/usage-limits';
+import { trackUsage } from '@/lib/usage-tracking-service';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -73,7 +75,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Verificar que Claude esté configurado
+    // 2. Verificar límite de IA (estimar ~1000 tokens por valoración)
+    const ESTIMATED_TOKENS_PER_VALUATION = 1000;
+    const limitCheck = await checkAILimit(session.user.companyId, ESTIMATED_TOKENS_PER_VALUATION);
+    
+    if (!limitCheck.allowed) {
+      return createLimitExceededResponse(limitCheck);
+    }
+    
+    // Log warning si está cerca del límite (80%)
+    logUsageWarning(session.user.companyId, limitCheck);
+
+    // 3. Verificar que Claude esté configurado
     if (!ClaudeAIService.isClaudeConfigured()) {
       return NextResponse.json(
         {
@@ -84,7 +97,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Parsear y validar body
+    // 4. Parsear y validar body
     const body = await request.json();
     const validated = valuateSchema.parse(body);
 
@@ -193,7 +206,21 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 9. Respuesta exitosa
+    // 9. Tracking de uso (Control de costos)
+    await trackUsage({
+      companyId: session.user.companyId,
+      service: 'claude',
+      metric: 'tokens',
+      value: ESTIMATED_TOKENS_PER_VALUATION, // Valor real vendría de la API
+      metadata: {
+        action: 'valuation',
+        unitId: validated.unitId,
+        address: validated.address,
+        estimatedValue: valuation.estimatedValue,
+      },
+    });
+
+    // 10. Respuesta exitosa
     return NextResponse.json({
       success: true,
       valuation,
