@@ -286,20 +286,16 @@ export default function IncidenciasPage() {
                 <p className="text-gray-600">Gestiona reportes y problemas de la comunidad</p>
               </div>
               
-              {/* Quick Actions */}
-              {canCreate && (
-                <div className="flex gap-2">
+              {/* Quick Actions y botón nueva incidencia */}
+              <div className="flex gap-2">
+                {canCreate && (
                   <ContextualQuickActions
                     pendingIssues={incidencias.filter(i => i.estado === 'pendiente').length}
                     criticalIssues={incidencias.filter(i => i.prioridad === 'alta' || i.prioridad === 'critica').length}
                   />
-                </div>
-              )}
-            </div>
-            
-            {/* Diálogo de nueva incidencia */}
-            {canCreate && (
-              <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+                )}
+                {canCreate && (
+                  <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                   <DialogTrigger asChild>
                     <Button className="gradient-primary hover:opacity-90 shadow-primary">
                       <Plus className="w-4 h-4 mr-2" />
@@ -425,8 +421,10 @@ export default function IncidenciasPage() {
                   </DialogContent>
                 </Dialog>
               )}
+              </div>
+            </div>
 
-              {/* Dialog de Edición */}
+            {/* Dialog de Edición */}
               <Dialog
                 open={openEditDialog}
                 onOpenChange={(open) => {
