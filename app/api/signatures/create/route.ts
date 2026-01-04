@@ -11,7 +11,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { SignaturitService, Signer, SignatureType } from '@/lib/signaturit-service';
+import * as SignaturitService from '@/lib/signaturit-service';
+import { Signer, SignatureType } from '@/lib/signaturit-service';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
@@ -68,44 +69,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Obtener configuración de Signaturit de la empresa
-    const company = await prisma.company.findUnique({
-      where: { id: session.user.companyId },
-      select: {
-        signatureProvider: true,
-        signatureApiKey: true,
-        signatureWebhookSecret: true,
-        signatureEnvironment: true,
-      },
-    });
-
-    if (!company || !company.signatureApiKey) {
+    // 2. Verificar que Signaturit esté configurado (globalmente por Inmova)
+    if (!SignaturitService.isSignaturitConfigured()) {
       return NextResponse.json(
         {
           error: 'Firma digital no configurada',
-          message: 'Tu empresa no tiene configurado un proveedor de firma digital. Contacta al administrador para configurar Signaturit o DocuSign.',
+          message: 'El servicio de firma digital no está disponible. Contacta al administrador de Inmova.',
         },
         { status: 503 }
       );
     }
-
-    // Verificar que sea Signaturit (por ahora solo soportamos Signaturit)
-    if (company.signatureProvider !== 'signaturit') {
-      return NextResponse.json(
-        {
-          error: 'Proveedor no soportado',
-          message: `El proveedor ${company.signatureProvider} aún no está soportado. Usa Signaturit.`,
-        },
-        { status: 400 }
-      );
-    }
-
-    // Configuración de Signaturit de la empresa
-    const signaturitConfig = {
-      apiKey: company.signatureApiKey,
-      environment: (company.signatureEnvironment as 'sandbox' | 'production') || 'sandbox',
-      webhookSecret: company.signatureWebhookSecret || undefined,
-    };
 
     // 3. Parsear y validar body
     const body = await request.json();
@@ -179,9 +152,8 @@ export async function POST(request: NextRequest) {
       callbackUrl: `${process.env.NEXTAUTH_URL}/api/webhooks/signaturit`,
     };
 
-    // 9. Crear firma en Signaturit (usando credenciales de la empresa)
+    // 9. Crear firma en Signaturit (usando credenciales globales de Inmova)
     const result = await SignaturitService.createSignature(
-      signaturitConfig,
       pdfBuffer,
       fileName,
       validated.signers as Signer[],

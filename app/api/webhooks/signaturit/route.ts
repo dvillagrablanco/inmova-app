@@ -12,9 +12,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { SignaturitService, SignatureStatus } from '@/lib/signaturit-service';
+import * as SignaturitService from '@/lib/signaturit-service';
+import { SignatureStatus } from '@/lib/signaturit-service';
 import { prisma } from '@/lib/db';
-import { S3Service } from '@/lib/aws-s3-service';
+import * as S3Service from '@/lib/aws-s3-service';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -47,7 +48,18 @@ export async function POST(request: NextRequest) {
 
     console.log('[Signaturit Webhook] Event received:', event, 'ID:', data.id);
 
-    // 3. Buscar contrato asociado
+    // 3. Verificar firma del webhook (usando webhook secret global de Inmova)
+    const isValid = SignaturitService.verifyWebhookSignature(bodyText, signature);
+    
+    if (!isValid && process.env.NODE_ENV === 'production') {
+      console.error('[Signaturit Webhook] Invalid signature');
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 401 }
+      );
+    }
+
+    // 4. Buscar contrato asociado
     const contract = await prisma.contract.findFirst({
       where: { signatureId: data.id },
       include: {
@@ -57,34 +69,12 @@ export async function POST(request: NextRequest) {
           },
         },
         tenant: true,
-        company: {
-          select: {
-            signatureWebhookSecret: true,
-          },
-        },
       },
     });
 
     if (!contract) {
       console.warn('[Signaturit Webhook] Contract not found for signature:', data.id);
       return NextResponse.json({ received: true, warning: 'Contract not found' });
-    }
-
-    // 4. Verificar firma del webhook (usando webhook secret de la empresa)
-    if (contract.company.signatureWebhookSecret) {
-      const isValid = SignaturitService.verifyWebhookSignature(
-        bodyText,
-        signature,
-        contract.company.signatureWebhookSecret
-      );
-      
-      if (!isValid && process.env.NODE_ENV === 'production') {
-        console.error('[Signaturit Webhook] Invalid signature for company:', contract.companyId);
-        return NextResponse.json(
-          { error: 'Invalid signature' },
-          { status: 401 }
-        );
-      }
     }
 
     // 5. Procesar evento según tipo
@@ -170,38 +160,19 @@ async function handleSignatureCompleted(contract: any, data: any) {
     });
 
     // 2. Descargar documento firmado y guardarlo en S3 (si está configurado)
-    if (S3Service.isConfigured() && data.documents && data.documents.length > 0) {
+    if (S3Service.isS3Configured() && data.documents && data.documents.length > 0) {
       try {
-        // Obtener configuración de Signaturit de la empresa
-        const company = await prisma.company.findUnique({
-          where: { id: contract.companyId },
-          select: {
-            signatureApiKey: true,
-            signatureEnvironment: true,
-          },
-        });
-
-        if (!company || !company.signatureApiKey) {
-          console.warn('[handleSignatureCompleted] No Signaturit config for company');
-          return;
-        }
-
-        const signaturitConfig = {
-          apiKey: company.signatureApiKey,
-          environment: (company.signatureEnvironment as 'sandbox' | 'production') || 'sandbox',
-        };
-
         const documentId = data.documents[0].id;
         const signedPdf = await SignaturitService.downloadSignedDocument(
-          signaturitConfig,
+          data.id,
           documentId
         );
 
         if (signedPdf) {
-          const uploadResult = await S3Service.upload(
+          const uploadResult = await S3Service.uploadToS3(
             signedPdf,
             'contracts/signed',
-            'document',
+            'pdf',
             `contract-${contract.id}-signed.pdf`,
             'application/pdf'
           );
@@ -222,37 +193,15 @@ async function handleSignatureCompleted(contract: any, data: any) {
     }
 
     // 3. Descargar certificado de firma
-    if (S3Service.isConfigured()) {
+    if (S3Service.isS3Configured()) {
       try {
-        // Usar la misma configuración de Signaturit
-        const company = await prisma.company.findUnique({
-          where: { id: contract.companyId },
-          select: {
-            signatureApiKey: true,
-            signatureEnvironment: true,
-          },
-        });
-
-        if (!company || !company.signatureApiKey) {
-          console.warn('[handleSignatureCompleted] No Signaturit config for company');
-          return;
-        }
-
-        const signaturitConfig = {
-          apiKey: company.signatureApiKey,
-          environment: (company.signatureEnvironment as 'sandbox' | 'production') || 'sandbox',
-        };
-
-        const certificate = await SignaturitService.downloadCertificate(
-          signaturitConfig,
-          data.id
-        );
+        const certificate = await SignaturitService.downloadCertificate(data.id);
 
         if (certificate) {
-          const uploadResult = await S3Service.upload(
+          const uploadResult = await S3Service.uploadToS3(
             certificate,
             'contracts/certificates',
-            'document',
+            'pdf',
             `contract-${contract.id}-certificate.pdf`,
             'application/pdf'
           );
