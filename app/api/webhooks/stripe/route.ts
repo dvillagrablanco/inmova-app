@@ -11,6 +11,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { prisma } from '@/lib/db';
+import { inmovaContasimpleBridge } from '@/lib/inmova-contasimple-bridge';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -71,6 +73,19 @@ export async function POST(req: NextRequest) {
 
       case 'charge.refunded':
         await handleChargeRefunded(event.data.object as Stripe.Charge);
+        break;
+
+      // Eventos de facturas B2B (Invoices de Stripe)
+      case 'invoice.payment_succeeded':
+        await handleB2BInvoicePaymentSucceeded(event.data.object as Stripe.Invoice);
+        break;
+
+      case 'invoice.payment_failed':
+        await handleB2BInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+        break;
+
+      case 'invoice.created':
+        await handleB2BInvoiceCreated(event.data.object as Stripe.Invoice);
         break;
 
       default:
@@ -179,5 +194,127 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
     });
 
     console.log(`[Stripe] Payment ${payment.id} marked as REFUNDED`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HANDLERS DE FACTURAS B2B
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Cuando Stripe crea una factura, sincronizarla con Contasimple
+ */
+async function handleB2BInvoiceCreated(stripeInvoice: Stripe.Invoice) {
+  logger.info(`[Stripe Webhook] Factura B2B creada: ${stripeInvoice.id}`);
+
+  try {
+    // Buscar factura en BD por stripeInvoiceId
+    const b2bInvoice = await prisma.b2BInvoice.findFirst({
+      where: { stripeInvoiceId: stripeInvoice.id },
+    });
+
+    if (!b2bInvoice) {
+      logger.warn(`[Stripe Webhook] No se encontró B2BInvoice para Stripe Invoice ${stripeInvoice.id}`);
+      return;
+    }
+
+    // Sincronizar con Contasimple si está configurado
+    if (inmovaContasimpleBridge.isConfigured()) {
+      await inmovaContasimpleBridge.syncB2BInvoiceToContasimple(b2bInvoice.id);
+      logger.info(`[Stripe Webhook] ✅ Factura ${b2bInvoice.numeroFactura} sincronizada con Contasimple`);
+    }
+  } catch (error: any) {
+    logger.error('[Stripe Webhook] Error sincronizando factura con Contasimple:', error);
+    // No lanzar error para no fallar el webhook
+  }
+}
+
+/**
+ * Cuando se paga una factura en Stripe, actualizar en BD y Contasimple
+ */
+async function handleB2BInvoicePaymentSucceeded(stripeInvoice: Stripe.Invoice) {
+  logger.info(`[Stripe Webhook] Pago de factura B2B exitoso: ${stripeInvoice.id}`);
+
+  try {
+    // Buscar factura en BD
+    const b2bInvoice = await prisma.b2BInvoice.findFirst({
+      where: { stripeInvoiceId: stripeInvoice.id },
+    });
+
+    if (!b2bInvoice) {
+      logger.warn(`[Stripe Webhook] No se encontró B2BInvoice para Stripe Invoice ${stripeInvoice.id}`);
+      return;
+    }
+
+    // Actualizar estado en BD
+    await prisma.b2BInvoice.update({
+      where: { id: b2bInvoice.id },
+      data: {
+        estado: 'PAGADA',
+        fechaPago: new Date(),
+        metodoPago: 'stripe',
+        stripePaymentIntentId: stripeInvoice.payment_intent as string || null,
+      },
+    });
+
+    logger.info(`[Stripe Webhook] ✅ Factura ${b2bInvoice.numeroFactura} marcada como PAGADA`);
+
+    // Registrar historial de pago
+    await prisma.b2BPaymentHistory.create({
+      data: {
+        companyId: b2bInvoice.companyId,
+        invoiceId: b2bInvoice.id,
+        amount: stripeInvoice.amount_paid / 100,
+        date: new Date(),
+        method: 'stripe',
+        status: 'completed',
+        stripePaymentIntentId: stripeInvoice.payment_intent as string || null,
+      },
+    });
+
+    // Sincronizar pago con Contasimple
+    if (inmovaContasimpleBridge.isConfigured()) {
+      await inmovaContasimpleBridge.syncPaymentToContasimple(b2bInvoice.id, {
+        amount: stripeInvoice.amount_paid / 100,
+        date: new Date(),
+        stripePaymentIntentId: stripeInvoice.payment_intent as string || 'unknown',
+        method: 'card',
+      });
+
+      logger.info(`[Stripe Webhook] ✅ Pago sincronizado con Contasimple`);
+    }
+  } catch (error: any) {
+    logger.error('[Stripe Webhook] Error procesando pago de factura B2B:', error);
+  }
+}
+
+/**
+ * Cuando falla el pago de una factura
+ */
+async function handleB2BInvoicePaymentFailed(stripeInvoice: Stripe.Invoice) {
+  logger.warn(`[Stripe Webhook] Pago de factura B2B falló: ${stripeInvoice.id}`);
+
+  try {
+    const b2bInvoice = await prisma.b2BInvoice.findFirst({
+      where: { stripeInvoiceId: stripeInvoice.id },
+    });
+
+    if (!b2bInvoice) {
+      return;
+    }
+
+    // Actualizar estado
+    await prisma.b2BInvoice.update({
+      where: { id: b2bInvoice.id },
+      data: {
+        estado: 'VENCIDA', // Marcar como vencida si el pago falla
+      },
+    });
+
+    // TODO: Enviar notificación al cliente sobre pago fallido
+
+    logger.info(`[Stripe Webhook] Factura ${b2bInvoice.numeroFactura} marcada como VENCIDA`);
+  } catch (error: any) {
+    logger.error('[Stripe Webhook] Error procesando fallo de pago:', error);
   }
 }

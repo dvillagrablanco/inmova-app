@@ -1155,6 +1155,11 @@ model Company {
   // Stripe
   stripeCustomerId String? @unique
 
+  // Contasimple - Configuración por empresa (para clientes)
+  contasimpleEnabled    Boolean @default(false)
+  contasimpleAuthKey    String? // Credenciales del cliente para su propia contabilidad
+  contasimpleCustomerId String? // ID del cliente en Contasimple de Inmova (para facturación B2B)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -8038,6 +8043,9 @@ model B2BInvoice {
   stripeInvoiceId       String? @unique
   stripePaymentIntentId String?
   stripePdfUrl          String?
+
+  // Contasimple Integration
+  contasimpleInvoiceId String? @unique
 
   // Details
   conceptos    Json // [{descripcion, cantidad, precioUnitario, total}]
