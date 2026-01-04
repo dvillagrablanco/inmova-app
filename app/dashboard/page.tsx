@@ -45,6 +45,7 @@ import { VerticalSpecificWidgets } from '@/components/dashboard/VerticalSpecific
 import DemoDataGenerator from '@/components/automation/DemoDataGenerator';
 import logger, { logError } from '@/lib/logger';
 import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
+import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 
 interface DashboardData {
   kpis: {
@@ -588,6 +589,9 @@ function DashboardPageContent() {
           <AIAssistant />
           {/* Chatbot inteligente de soporte 24/7 - Sistema automatizado sin intervenci\u00f3n humana */}
           <IntelligentSupportChatbot />
+          
+          {/* Onboarding Tour Guiado */}
+          <OnboardingTour role={session?.user?.role} />
         </AuthenticatedLayout>
       );
     }

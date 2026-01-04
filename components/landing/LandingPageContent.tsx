@@ -27,6 +27,7 @@ import { CompetitorComparisonSection } from '@/components/landing/sections/Compe
 import { PricingSection } from '@/components/landing/sections/PricingSection';
 import { TestimonialsSection } from '@/components/landing/sections/TestimonialsSection';
 import { IntegrationsSection } from '@/components/landing/sections/IntegrationsSection';
+import { FAQSection } from '@/components/landing/sections/FAQSection';
 import { Footer } from '@/components/landing/sections/Footer';
 
 export function LandingPageContent() {
@@ -76,6 +77,9 @@ export function LandingPageContent() {
 
         {/* Integrations Section */}
         <IntegrationsSection />
+
+        {/* FAQ Section */}
+        <FAQSection />
 
         {/* Footer */}
         <Footer />
