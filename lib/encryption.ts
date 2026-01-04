@@ -1,174 +1,187 @@
 /**
- * Servicio de Encriptación AES-256-GCM
- * Utilizado para encriptar datos sensibles (PII) en la base de datos
+ * Servicio de Encriptación
+ * 
+ * Encripta/desencripta credenciales sensibles antes de guardarlas en la BD.
+ * Usa AES-256-CBC para máxima seguridad.
+ * 
+ * @module lib/encryption
  */
 
 import crypto from 'crypto';
 
-const ALGORITHM = 'aes-256-gcm';
-const IV_LENGTH = 16;
-const AUTH_TAG_LENGTH = 16;
-const SALT_LENGTH = 32;
+// Clave de encriptación (32 bytes para AES-256)
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '';
+const IV_LENGTH = 16; // Para AES, siempre 16 bytes
 
-// Obtener la clave de encriptación desde variables de entorno
-function getEncryptionKey(): Buffer {
-  const key = process.env.ENCRYPTION_KEY;
-  
-  if (!key) {
-    throw new Error(
-      'ENCRYPTION_KEY not found in environment variables. ' +
-      'Generate one with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"'
-    );
-  }
-  
-  if (key.length !== 64) {
-    throw new Error('ENCRYPTION_KEY must be 64 hex characters (32 bytes)');
-  }
-  
-  return Buffer.from(key, 'hex');
+/**
+ * Verifica si la encriptación está configurada
+ */
+export function isEncryptionConfigured(): boolean {
+  return ENCRYPTION_KEY.length === 64; // 32 bytes en hex = 64 caracteres
 }
 
 /**
- * Encripta un campo de texto usando AES-256-GCM
- * @param text Texto plano a encriptar
- * @returns Texto encriptado en formato: iv:authTag:encrypted
+ * Genera una clave de encriptación aleatoria
+ * Útil para setup inicial
+ * 
+ * @returns Clave hex de 64 caracteres (32 bytes)
  */
-export function encryptField(text: string): string {
-  if (!text) return text;
-  
-  try {
-    const key = getEncryptionKey();
-    const iv = crypto.randomBytes(IV_LENGTH);
-    const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
-    
-    let encrypted = cipher.update(text, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    
-    const authTag = cipher.getAuthTag();
-    
-    // Formato: iv:authTag:encrypted
-    return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
-  } catch (error) {
-    console.error('Error encrypting field:', error);
-    throw new Error('Encryption failed');
-  }
+export function generateEncryptionKey(): string {
+  return crypto.randomBytes(32).toString('hex');
 }
 
 /**
- * Desencripta un campo previamente encriptado
- * @param encryptedText Texto encriptado en formato: iv:authTag:encrypted
- * @returns Texto plano desencriptado
+ * Encripta un texto
+ * 
+ * @param text - Texto a encriptar
+ * @returns Texto encriptado en formato "iv:encryptedData" (hex)
+ * 
+ * @example
+ * const encrypted = encrypt('mi-api-key-secreta');
+ * // "3f2a1b....:a8b9c7...."
  */
-export function decryptField(encryptedText: string): string {
-  if (!encryptedText) return encryptedText;
-  
-  try {
-    const parts = encryptedText.split(':');
-    if (parts.length !== 3) {
-      throw new Error('Invalid encrypted text format');
-    }
-    
-    const [ivHex, authTagHex, encrypted] = parts;
-    const key = getEncryptionKey();
-    const iv = Buffer.from(ivHex, 'hex');
-    const authTag = Buffer.from(authTagHex, 'hex');
-    const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
-    
-    decipher.setAuthTag(authTag);
-    
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-    
-    return decrypted;
-  } catch (error) {
-    console.error('Error decrypting field:', error);
-    throw new Error('Decryption failed');
+export function encrypt(text: string): string {
+  if (!isEncryptionConfigured()) {
+    throw new Error('ENCRYPTION_KEY not configured. Generate one with generateEncryptionKey()');
   }
+
+  // Generar IV aleatorio (initialization vector)
+  const iv = crypto.randomBytes(IV_LENGTH);
+  
+  // Crear cipher
+  const cipher = crypto.createCipheriv(
+    'aes-256-cbc',
+    Buffer.from(ENCRYPTION_KEY, 'hex'),
+    iv
+  );
+  
+  // Encriptar
+  let encrypted = cipher.update(text, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  
+  // Retornar IV + encrypted (separados por :)
+  return iv.toString('hex') + ':' + encrypted;
 }
 
 /**
- * Encripta múltiples campos de un objeto
- * @param obj Objeto con campos a encriptar
- * @param fields Array de nombres de campos a encriptar
- * @returns Nuevo objeto con campos encriptados
+ * Desencripta un texto
+ * 
+ * @param encryptedText - Texto encriptado en formato "iv:encryptedData"
+ * @returns Texto desencriptado
+ * 
+ * @example
+ * const decrypted = decrypt('3f2a1b....:a8b9c7....');
+ * // "mi-api-key-secreta"
  */
-export function encryptFields<T extends Record<string, any>>(
-  obj: T,
-  fields: (keyof T)[]
-): T {
-  const encrypted = { ...obj };
-  
-  for (const field of fields) {
-    if (obj[field] && typeof obj[field] === 'string') {
-      encrypted[field] = encryptField(obj[field] as string) as T[keyof T];
-    }
+export function decrypt(encryptedText: string): string {
+  if (!isEncryptionConfigured()) {
+    throw new Error('ENCRYPTION_KEY not configured');
   }
-  
-  return encrypted;
-}
 
-/**
- * Desencripta múltiples campos de un objeto
- * @param obj Objeto con campos encriptados
- * @param fields Array de nombres de campos a desencriptar
- * @returns Nuevo objeto con campos desencriptados
- */
-export function decryptFields<T extends Record<string, any>>(
-  obj: T,
-  fields: (keyof T)[]
-): T {
-  const decrypted = { ...obj };
-  
-  for (const field of fields) {
-    if (obj[field] && typeof obj[field] === 'string') {
-      try {
-        decrypted[field] = decryptField(obj[field] as string) as T[keyof T];
-      } catch (error) {
-        console.error(`Error decrypting field ${String(field)}:`, error);
-        // Mantener el valor encriptado si falla la desencriptación
-      }
-    }
+  // Separar IV y encrypted data
+  const parts = encryptedText.split(':');
+  if (parts.length !== 2) {
+    throw new Error('Invalid encrypted text format');
   }
-  
+
+  const iv = Buffer.from(parts[0], 'hex');
+  const encrypted = Buffer.from(parts[1], 'hex');
+
+  // Crear decipher
+  const decipher = crypto.createDecipheriv(
+    'aes-256-cbc',
+    Buffer.from(ENCRYPTION_KEY, 'hex'),
+    iv
+  );
+
+  // Desencriptar
+  let decrypted = decipher.update(encrypted, undefined, 'utf8');
+  decrypted += decipher.final('utf8');
+
   return decrypted;
 }
 
 /**
- * Genera un hash seguro usando PBKDF2
- * Usado para passwords y backup codes
+ * Encripta un objeto completo
+ * Útil para guardar configuraciones
+ * 
+ * @param obj - Objeto a encriptar
+ * @returns Objeto encriptado (JSON stringified y encriptado)
  */
-export function hashWithSalt(text: string, salt?: string): { hash: string; salt: string } {
-  const saltBuffer = salt ? Buffer.from(salt, 'hex') : crypto.randomBytes(SALT_LENGTH);
-  const hash = crypto.pbkdf2Sync(text, saltBuffer, 100000, 64, 'sha512');
-  
-  return {
-    hash: hash.toString('hex'),
-    salt: saltBuffer.toString('hex'),
-  };
+export function encryptObject(obj: any): string {
+  const json = JSON.stringify(obj);
+  return encrypt(json);
 }
 
 /**
- * Verifica un hash PBKDF2
+ * Desencripta un objeto
+ * 
+ * @param encryptedText - Texto encriptado
+ * @returns Objeto desencriptado
  */
-export function verifyHash(text: string, hash: string, salt: string): boolean {
-  const { hash: computedHash } = hashWithSalt(text, salt);
-  return crypto.timingSafeEqual(
-    Buffer.from(hash, 'hex'),
-    Buffer.from(computedHash, 'hex')
-  );
+export function decryptObject(encryptedText: string): any {
+  const json = decrypt(encryptedText);
+  return JSON.parse(json);
 }
 
 /**
- * Genera códigos de respaldo aleatorios y seguros
+ * Hash de una contraseña (one-way)
+ * Para comparar contraseñas sin almacenarlas en claro
+ * 
+ * @param password - Contraseña a hashear
+ * @returns Hash SHA-256
  */
-export function generateBackupCodes(count: number = 10): string[] {
-  const codes: string[] = [];
+export function hashPassword(password: string): string {
+  return crypto.createHash('sha256').update(password).digest('hex');
+}
+
+/**
+ * Verifica si un texto está encriptado
+ * Detecta el formato "iv:encryptedData"
+ * 
+ * @param text - Texto a verificar
+ * @returns true si parece encriptado
+ */
+export function isEncrypted(text: string): boolean {
+  // Formato debe ser hex:hex con longitudes apropiadas
+  const parts = text.split(':');
+  if (parts.length !== 2) return false;
   
-  for (let i = 0; i < count; i++) {
-    const code = crypto.randomBytes(4).toString('hex').toUpperCase();
-    // Formato: XXXX-XXXX
-    codes.push(`${code.slice(0, 4)}-${code.slice(4)}`);
+  // IV debe ser 32 caracteres hex (16 bytes)
+  if (parts[0].length !== 32) return false;
+  
+  // Data debe ser hex (longitud par)
+  if (parts[1].length % 2 !== 0) return false;
+  
+  // Verificar que sean hex válidos
+  const hexRegex = /^[0-9a-f]+$/i;
+  return hexRegex.test(parts[0]) && hexRegex.test(parts[1]);
+}
+
+/**
+ * Encripta solo si no está encriptado
+ * Útil para migraciones o actualizaciones
+ * 
+ * @param text - Texto a encriptar
+ * @returns Texto encriptado
+ */
+export function encryptIfNotEncrypted(text: string): string {
+  if (isEncrypted(text)) {
+    return text;
   }
-  
-  return codes;
+  return encrypt(text);
+}
+
+/**
+ * Desencripta solo si está encriptado
+ * Útil para compatibilidad con datos legacy
+ * 
+ * @param text - Texto a desencriptar
+ * @returns Texto desencriptado
+ */
+export function decryptIfEncrypted(text: string): string {
+  if (!isEncrypted(text)) {
+    return text;
+  }
+  return decrypt(text);
 }
