@@ -17,6 +17,7 @@ import { SkipLink } from '@/components/accessibility/SkipLink';
 import { CommandPalette } from '@/components/navigation/command-palette';
 import { GlobalShortcuts } from '@/components/navigation/global-shortcuts';
 import { ShortcutsHelpDialog } from '@/components/navigation/shortcuts-help-dialog';
+import { NavigationTutorial } from '@/components/navigation/navigation-tutorial';
 
 /**
  * Layout autenticado con navegación optimizada para mobile-first
@@ -196,6 +197,9 @@ export function AuthenticatedLayout({
 
       {/* Shortcuts Help Dialog - Ayuda de atajos con ? */}
       <ShortcutsHelpDialog />
+
+      {/* Navigation Tutorial - Tutorial interactivo para nuevos usuarios */}
+      <NavigationTutorial />
     </div>
   );
 }

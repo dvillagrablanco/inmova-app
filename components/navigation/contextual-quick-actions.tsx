@@ -66,6 +66,16 @@ interface ContextualQuickActionsProps {
   overduePayments?: number;
   pendingIssues?: number;
   criticalIssues?: number;
+  
+  // Nuevos metadatos para Candidatos
+  newCandidates?: number;
+  highScoreCandidates?: number;
+  pendingReviewCandidates?: number;
+  
+  // Nuevos metadatos para Mantenimiento
+  pendingMaintenanceRequests?: number;
+  urgentMaintenanceRequests?: number;
+  upcomingMaintenanceTasks?: number;
 }
 
 export function ContextualQuickActions(props: ContextualQuickActionsProps) {
@@ -640,6 +650,110 @@ function generateActions(
         icon: Download,
         onClick: () => {
           // TODO: Exportar incidencias
+        },
+        variant: 'ghost',
+      }
+    );
+  }
+
+  // ========================================
+  // CANDIDATOS - LISTA
+  // ========================================
+  if (pathname === '/candidatos') {
+    actions.push(
+      {
+        label: 'Nuevo Candidato',
+        icon: Plus,
+        onClick: () => router.push('/candidatos/nuevo'),
+        variant: 'default',
+      },
+      {
+        label: 'Nuevos',
+        icon: Users,
+        onClick: () => {
+          // TODO: Filtrar nuevos
+        },
+        variant: 'outline',
+        badge: props.newCandidates ? `${props.newCandidates}` : undefined,
+        tooltip: 'Candidatos nuevos',
+      },
+      {
+        label: 'Alto Score',
+        icon: TrendingUp,
+        onClick: () => {
+          // TODO: Filtrar por scoring alto
+        },
+        variant: 'outline',
+        badge: props.highScoreCandidates ? `${props.highScoreCandidates}` : undefined,
+        tooltip: 'Candidatos con scoring ≥ 80',
+      },
+      {
+        label: 'En Revisión',
+        icon: Clock,
+        onClick: () => {
+          // TODO: Filtrar en revisión
+        },
+        variant: 'outline',
+        badge: props.pendingReviewCandidates ? `${props.pendingReviewCandidates}` : undefined,
+        tooltip: 'Candidatos pendientes de revisión',
+      },
+      {
+        label: 'Exportar',
+        icon: Download,
+        onClick: () => {
+          // TODO: Exportar candidatos
+        },
+        variant: 'ghost',
+      }
+    );
+  }
+
+  // ========================================
+  // MANTENIMIENTO - LISTA
+  // ========================================
+  if (pathname === '/mantenimiento') {
+    actions.push(
+      {
+        label: 'Nueva Solicitud',
+        icon: Plus,
+        onClick: () => router.push('/mantenimiento/nueva'),
+        variant: 'default',
+      },
+      {
+        label: 'Pendientes',
+        icon: Clock,
+        onClick: () => {
+          // TODO: Cambiar a tab de solicitudes + filtrar pendientes
+        },
+        variant: 'outline',
+        badge: props.pendingMaintenanceRequests ? `${props.pendingMaintenanceRequests}` : undefined,
+        tooltip: 'Solicitudes pendientes',
+      },
+      {
+        label: 'Urgentes',
+        icon: AlertCircle,
+        onClick: () => {
+          // TODO: Filtrar urgentes
+        },
+        variant: 'outline',
+        badge: props.urgentMaintenanceRequests ? `${props.urgentMaintenanceRequests}` : undefined,
+        tooltip: 'Solicitudes urgentes',
+      },
+      {
+        label: 'Próximos',
+        icon: Calendar,
+        onClick: () => {
+          // TODO: Cambiar a tab preventivo
+        },
+        variant: 'outline',
+        badge: props.upcomingMaintenanceTasks ? `${props.upcomingMaintenanceTasks}` : undefined,
+        tooltip: 'Mantenimiento preventivo próximo',
+      },
+      {
+        label: 'Exportar',
+        icon: Download,
+        onClick: () => {
+          // TODO: Exportar solicitudes
         },
         variant: 'ghost',
       }

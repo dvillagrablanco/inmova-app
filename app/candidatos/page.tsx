@@ -4,6 +4,8 @@ import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
+import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -208,44 +210,29 @@ export default function CandidatosPage() {
   return (
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
-            {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/dashboard')}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Volver al Dashboard
-              </Button>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="h-4 w-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Candidatos</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
+            {/* Smart Breadcrumbs */}
+            <SmartBreadcrumbs
+              totalCount={candidates.length}
+              showBackButton={true}
+            />
 
-            {/* Header Section */}
+            {/* Header Section con Quick Actions */}
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">Candidatos</h1>
                 <p className="text-muted-foreground">Gestión de candidatos a inquilinos</p>
               </div>
-              {canCreate && (
-                <Button onClick={() => router.push('/candidatos/nuevo')}>
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Nuevo Candidato
-                </Button>
-              )}
+              
+              {/* Quick Actions */}
+              <div className="flex gap-2">
+                {canCreate && (
+                  <ContextualQuickActions
+                    newCandidates={stats.nuevos}
+                    highScoreCandidates={candidates.filter(c => c.scoring >= 80).length}
+                    pendingReviewCandidates={candidates.filter(c => c.estado === 'en_revision').length}
+                  />
+                )}
+              </div>
             </div>
 
             {/* Estadísticas */}

@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -28,6 +29,7 @@ import {
   ArrowLeft,
   Plus,
   Home,
+  Play,
   Building2,
   Users,
   FileText,
@@ -292,8 +294,23 @@ export function ShortcutsHelpDialog() {
             ))}
           </div>
 
+          {/* Botón para tutorial interactivo */}
+          <div className="mt-8">
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={() => {
+                setIsOpen(false);
+                window.dispatchEvent(new CustomEvent('open-navigation-tutorial'));
+              }}
+            >
+              <Play className="h-4 w-4" />
+              Ver Tutorial Interactivo
+            </Button>
+          </div>
+
           {/* Tip final */}
-          <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
             <div className="flex items-start gap-3">
               <Zap className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
               <div className="space-y-2">

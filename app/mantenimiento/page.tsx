@@ -3,6 +3,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
+import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -440,38 +442,27 @@ function MantenimientoPage() {
   return (<div>
       <AuthenticatedLayout>
         <div className="max-w-7xl mx-auto space-y-6">
-            {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/dashboard')}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Volver al Dashboard
-              </Button>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="h-4 w-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Mantenimiento</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
+            {/* Smart Breadcrumbs */}
+            <SmartBreadcrumbs
+              totalCount={requests.length + schedules.length}
+              showBackButton={true}
+            />
 
-            {/* Header Section */}
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Mantenimiento</h1>
-              <p className="text-muted-foreground">
-                Gestiona solicitudes correctivas, mantenimiento preventivo y calendario unificado
-              </p>
+            {/* Header Section con Quick Actions */}
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Mantenimiento</h1>
+                <p className="text-muted-foreground">
+                  Gestiona solicitudes correctivas, mantenimiento preventivo y calendario unificado
+                </p>
+              </div>
+              
+              {/* Quick Actions */}
+              <ContextualQuickActions
+                pendingMaintenanceRequests={statsReq.pendientes}
+                urgentMaintenanceRequests={statsReq.urgentes}
+                upcomingMaintenanceTasks={statsSched.proximos}
+              />
             </div>
 
             {/* Tabs Navigation */}
