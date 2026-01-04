@@ -22,7 +22,7 @@ from datetime import datetime
 # Configuración del servidor
 SERVER_IP = "157.180.119.236"
 SERVER_USER = "root"
-SERVER_PASS = "XVcL9qHxqA7f"
+SERVER_PASS = "hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo="
 APP_PATH = "/opt/inmova-app"
 
 # Colores
