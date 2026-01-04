@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { LegalLayout, LastUpdated } from '@/components/legal/legal-layout';
+import { OpenCookieBannerButton } from '@/components/legal/open-cookie-banner-button';
 
 export const metadata: Metadata = {
   title: 'Política de Cookies | Inmova',
@@ -215,18 +216,7 @@ export default function CookiesPage() {
           Puede gestionar sus preferencias de cookies en cualquier momento desde nuestro
           panel de configuración:
         </p>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 my-4">
-          <p className="font-semibold mb-2">Configurar Cookies</p>
-          <button
-            onClick={() => {
-              // Esto abrirá el banner de cookies
-              window.dispatchEvent(new CustomEvent('open-cookie-banner'));
-            }}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
-          >
-            Abrir Panel de Cookies
-          </button>
-        </div>
+        <OpenCookieBannerButton />
 
         <h3>4.2. Configuración del Navegador</h3>
         <p>
