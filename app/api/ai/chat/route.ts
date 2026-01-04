@@ -1,97 +1,132 @@
+/**
+ * API Route: Chatbot Inteligente con IA
+ * POST /api/ai/chat
+ * 
+ * Chatbot 24/7 especializado en PropTech
+ * Responde preguntas sobre la plataforma, gestión inmobiliaria, etc.
+ * 
+ * Auth: Requiere sesión activa
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { processAIQuery, executeTool, AVAILABLE_TOOLS } from '@/lib/ai-workflow-service';
-import logger, { logError } from '@/lib/logger';
+import { ClaudeAIService, ChatMessage } from '@/lib/claude-ai-service';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
+// Schema de validación
+const chatSchema = z.object({
+  message: z.string().min(1).max(1000),
+  conversationHistory: z
+    .array(
+      z.object({
+        role: z.enum(['user', 'assistant']),
+        content: z.string(),
+      })
+    )
+    .optional(),
+  context: z.string().optional(),
+});
 
 /**
- * POST /api/ai/chat - Procesa consultas del asistente IA
+ * POST /api/ai/chat
+ * 
+ * Body:
+ * {
+ *   message: string,
+ *   conversationHistory?: ChatMessage[],
+ *   context?: string
+ * }
+ * 
+ * Response:
+ * {
+ *   success: true,
+ *   response: string
+ * }
  */
 export async function POST(request: NextRequest) {
   try {
+    // 1. Verificar autenticación
     const session = await getServerSession(authOptions);
-
-    if (!session?.user?.companyId || !session?.user?.id) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const { message, conversationHistory, toolCall } = body;
-
-    // Si es una llamada directa a herramienta (tool call)
-    if (toolCall) {
-      const result = await executeTool(
-        toolCall.name,
-        toolCall.input,
-        {
-          companyId: session.user.companyId,
-          userId: session.user.id,
-        }
-      );
-
-      return NextResponse.json({
-        success: true,
-        toolResult: result,
-      });
-    }
-
-    // Si es una consulta normal de chat
-    if (!message) {
+    if (!session) {
       return NextResponse.json(
-        { error: 'Mensaje requerido' },
+        { error: 'No autenticado. Inicia sesión para usar el chatbot.' },
+        { status: 401 }
+      );
+    }
+
+    // 2. Verificar que Claude AI esté configurado
+    if (!ClaudeAIService.isConfigured()) {
+      return NextResponse.json(
+        {
+          error: 'IA no configurada',
+          message: 'El chatbot no está disponible. Contacta al administrador.',
+        },
+        { status: 503 }
+      );
+    }
+
+    // 3. Parsear y validar body
+    const body = await request.json();
+    const validated = chatSchema.parse(body);
+
+    // 4. Enriquecer contexto con info del usuario
+    const userContext = `Usuario: ${session.user.name} (${session.user.email})
+Role: ${session.user.role}
+Company: ${session.user.companyId}`;
+
+    const fullContext = validated.context
+      ? `${userContext}\n\n${validated.context}`
+      : userContext;
+
+    // 5. Llamar a Claude AI
+    const response = await ClaudeAIService.chat(validated.message, {
+      conversationHistory: validated.conversationHistory,
+      context: fullContext,
+    });
+
+    // 6. Respuesta exitosa
+    return NextResponse.json({
+      success: true,
+      response,
+    });
+  } catch (error: any) {
+    console.error('[API AI Chat] Error:', error);
+
+    // Error de validación
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          error: 'Datos inválidos',
+          details: error.errors.map((e) => ({
+            field: e.path.join('.'),
+            message: e.message,
+          })),
+        },
         { status: 400 }
       );
     }
 
-    const result = await processAIQuery(
-      message,
-      {
-        companyId: session.user.companyId,
-        userId: session.user.id,
-      },
-      conversationHistory || []
-    );
-
-    logger.info('Consulta de IA procesada', {
-      userId: session.user.id,
-      toolsUsed: result.toolsUsed,
-    });
-
-    return NextResponse.json({
-      success: result.success,
-      response: result.response,
-      toolsUsed: result.toolsUsed,
-    });
-  } catch (error) {
-    logError(error as Error, { context: 'Error en endpoint de IA' });
-    return NextResponse.json(
-      { error: 'Error procesando la solicitud' },
-      { status: 500 }
-    );
-  }
-}
-
-/**
- * GET /api/ai/chat - Obtiene las herramientas disponibles
- */
-export async function GET(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.companyId) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    // Error de IA
+    if (error.message?.includes('IA') || error.message?.includes('chatbot')) {
+      return NextResponse.json(
+        {
+          error: 'Error en chatbot',
+          message: error.message,
+        },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({
-      tools: AVAILABLE_TOOLS,
-      message: 'Herramientas disponibles para el asistente IA',
-    });
-  } catch (error) {
-    logError(error as Error, { context: 'Error obteniendo herramientas de IA' });
+    // Error genérico
     return NextResponse.json(
-      { error: 'Error al obtener herramientas' },
+      {
+        error: 'Error procesando mensaje',
+        message: error.message || 'Error desconocido',
+      },
       { status: 500 }
     );
   }
