@@ -2922,10 +2922,10 @@
   dependencies:
     webpack-bundle-analyzer "4.10.1"
 
-"@next/env@14.2.21":
-  version "14.2.21"
-  resolved "https://registry.npmjs.org/@next/env/-/env-14.2.21.tgz"
-  integrity sha512-lXcwcJd5oR01tggjWJ6SrNNYFGuOOMB9c251wUNkjCpkoXOPkDeF/15c3mnVlBqrW4JJXb2kVxDFhC4GduJt2A==
+"@next/env@14.2.35":
+  version "14.2.35"
+  resolved "https://registry.npmjs.org/@next/env/-/env-14.2.35.tgz"
+  integrity sha512-DuhvCtj4t9Gwrx80dmz2F4t/zKQ4ktN8WrMwOuVzkJfBilwAwGr6v16M5eI8yCuZ63H9TTuEU09Iu2HqkzFPVQ==
 
 "@next/eslint-plugin-next@15.3.0":
   version "15.3.0"
@@ -2934,10 +2934,10 @@
   dependencies:
     fast-glob "3.3.1"
 
-"@next/swc-linux-x64-gnu@14.2.21":
-  version "14.2.21"
-  resolved "https://registry.npmjs.org/@next/swc-linux-x64-gnu/-/swc-linux-x64-gnu-14.2.21.tgz"
-  integrity sha512-uokj0lubN1WoSa5KKdThVPRffGyiWlm/vCc/cMkWOQHw69Qt0X1o3b2PyLLx8ANqlefILZh1EdfLRz9gVpG6tg==
+"@next/swc-linux-x64-gnu@14.2.33":
+  version "14.2.33"
+  resolved "https://registry.npmjs.org/@next/swc-linux-x64-gnu/-/swc-linux-x64-gnu-14.2.33.tgz"
+  integrity sha512-FnFn+ZBgsVMbGDsTqo8zsnRzydvsGV8vfiWwUo1LD8FTmPTdV+otGSWKc4LJec0oSexFnCYVO4hX8P8qQKaSlg==
 
 "@next/swc-wasm-nodejs@13.5.1":
   version "13.5.1"
@@ -14300,12 +14300,12 @@ next-themes@0.3.0:
   resolved "https://registry.npmjs.org/next-themes/-/next-themes-0.3.0.tgz"
   integrity sha512-/QHIrsYpd6Kfk7xakK4svpDI5mmXP0gfvCoJdGpZQ2TOrQZmsW0QxjaiLn8wbIKjtm4BTSqLoix4lxYYOnLJ/w==
 
-next@14.2.21:
-  version "14.2.21"
-  resolved "https://registry.npmjs.org/next/-/next-14.2.21.tgz"
-  integrity sha512-rZmLwucLHr3/zfDMYbJXbw0ZeoBpirxkXuvsJbk7UPorvPYZhP7vq7aHbKnU7dQNCYIimRrbB2pp3xmf+wsYUg==
+next@^14.2.35:
+  version "14.2.35"
+  resolved "https://registry.npmjs.org/next/-/next-14.2.35.tgz"
+  integrity sha512-KhYd2Hjt/O1/1aZVX3dCwGXM1QmOV4eNM2UTacK5gipDdPN/oHHK/4oVGy7X8GMfPMsUTUEmGlsy0EY1YGAkig==
   dependencies:
-    "@next/env" "14.2.21"
+    "@next/env" "14.2.35"
     "@swc/helpers" "0.5.5"
     busboy "1.6.0"
     caniuse-lite "^1.0.30001579"
@@ -14313,15 +14313,15 @@ next@14.2.21:
     postcss "8.4.31"
     styled-jsx "5.1.1"
   optionalDependencies:
-    "@next/swc-darwin-arm64" "14.2.21"
-    "@next/swc-darwin-x64" "14.2.21"
-    "@next/swc-linux-arm64-gnu" "14.2.21"
-    "@next/swc-linux-arm64-musl" "14.2.21"
-    "@next/swc-linux-x64-gnu" "14.2.21"
-    "@next/swc-linux-x64-musl" "14.2.21"
-    "@next/swc-win32-arm64-msvc" "14.2.21"
-    "@next/swc-win32-ia32-msvc" "14.2.21"
-    "@next/swc-win32-x64-msvc" "14.2.21"
+    "@next/swc-darwin-arm64" "14.2.33"
+    "@next/swc-darwin-x64" "14.2.33"
+    "@next/swc-linux-arm64-gnu" "14.2.33"
+    "@next/swc-linux-arm64-musl" "14.2.33"
+    "@next/swc-linux-x64-gnu" "14.2.33"
+    "@next/swc-linux-x64-musl" "14.2.33"
+    "@next/swc-win32-arm64-msvc" "14.2.33"
+    "@next/swc-win32-ia32-msvc" "14.2.33"
+    "@next/swc-win32-x64-msvc" "14.2.33"
 
 no-case@^3.0.4:
   version "3.0.4"

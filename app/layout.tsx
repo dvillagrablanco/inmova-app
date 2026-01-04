@@ -2,6 +2,7 @@ import { Inter } from 'next/font/google';
 import { Metadata } from 'next';
 import { Providers } from '@/components/providers';
 import { Toaster } from '@/components/ui/toaster';
+import { CookieConsentBanner } from '@/components/legal/cookie-consent-banner';
 import './globals.css';
 import Script from 'next/script';
 import { GA_MEASUREMENT_ID } from '@/lib/analytics';
@@ -146,6 +147,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           {children}
           <Toaster />
+          <CookieConsentBanner />
         </Providers>
       </body>
     </html>
