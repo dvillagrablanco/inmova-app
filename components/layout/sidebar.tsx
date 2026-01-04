@@ -72,6 +72,13 @@ import { Button } from '@/components/ui/button';
 import logger, { logError } from '@/lib/logger';
 import { safeLocalStorage } from '@/lib/safe-storage';
 import { toggleMobileMenu, closeMobileMenu } from '@/lib/mobile-menu';
+import { 
+  getInitialExpandedSections, 
+  getSectionName, 
+  getSectionOrder,
+  type UserRole,
+  type BusinessVertical,
+} from './sidebar-config';
 
 // Mapeo de rutas a códigos de módulos para sistema modular
 const ROUTE_TO_MODULE: Record<string, string> = {
@@ -1105,46 +1112,57 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const [modulesLoaded, setModulesLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    favorites: true,
-    dashboard: true,
-    // Verticales
-    alquilerResidencial: true,
-    str: false,
-    coLiving: false,
-    buildToRent: false,
-    flipping: false,
-    comercial: false,
-    adminFincas: false,
-    // Herramientas Horizontales
-    finanzas: true,
-    analytics: false,
-    operaciones: true,
-    comunicaciones: false,
-    documentosLegal: false,
-    crmMarketing: false,
-    automatizacion: false,
-    innovacion: false,
-    soporte: false,
-    // Roles específicos
-    operador: true,
-    // Administración
-    administradorEmpresa: false,
-    superAdminPlatform: true,
-  });
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [primaryVertical, setPrimaryVertical] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Cargar estado expandido desde localStorage de forma segura
+  // Cargar vertical principal de la empresa
   useEffect(() => {
-    try {
-      const storedExpanded = safeLocalStorage.getItem('sidebar_expanded_sections');
-      if (storedExpanded) {
-        setExpandedSections(JSON.parse(storedExpanded));
+    async function loadCompanyVertical() {
+      try {
+        const res = await fetch('/api/company/vertical');
+        if (res.ok) {
+          const data = await res.json();
+          setPrimaryVertical(data.vertical);
+        }
+      } catch (error) {
+        logger.error('Error loading company vertical:', error);
       }
-    } catch (error) {
-      logger.error('Error loading expanded sections:', error);
-      // Continuar con estado por defecto
     }
+    loadCompanyVertical();
   }, []);
+
+  // Inicializar estado expandido basado en rol y vertical
+  useEffect(() => {
+    if (!role || isInitialized) return;
+
+    try {
+      // Intentar cargar preferencias del usuario desde localStorage
+      const storedExpanded = safeLocalStorage.getItem('sidebar_expanded_sections');
+      
+      if (storedExpanded) {
+        // Usuario tiene preferencias guardadas
+        setExpandedSections(JSON.parse(storedExpanded));
+      } else {
+        // Primera vez: usar configuración por defecto según rol
+        const initialState = getInitialExpandedSections(
+          role as UserRole, 
+          primaryVertical as BusinessVertical
+        );
+        setExpandedSections(initialState);
+      }
+      
+      setIsInitialized(true);
+    } catch (error) {
+      logger.error('Error initializing expanded sections:', error);
+      // Fallback a estado vacío (todo colapsado)
+      setExpandedSections({
+        favorites: true,
+        dashboard: true,
+      });
+      setIsInitialized(true);
+    }
+  }, [role, primaryVertical, isInitialized]);
 
   // Persistir posición de scroll de forma segura
   useEffect(() => {
@@ -1576,11 +1594,16 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               filteredBuildToRentItems.length > 0 ||
               filteredFlippingItems.length > 0 ||
               filteredComercialItems.length > 0 ||
-              filteredAdminFincasItems.length > 0) && (
+              filteredAdminFincasItems.length > 0) && role === 'administrador' && (
               <div className="px-2 py-3 mb-2 border-t border-gray-800">
                 <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                   📊 Verticales de Negocio
                 </h3>
+                {primaryVertical && (
+                  <p className="text-[9px] text-gray-600 mt-1">
+                    Principal: {primaryVertical.replace('_', ' ').toUpperCase()}
+                  </p>
+                )}
               </div>
             )}
 
