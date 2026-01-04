@@ -51,12 +51,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Verificar que AWS S3 esté configurado
-    if (!S3Service.isConfigured()) {
+    // 2. Obtener configuración de S3 (de la empresa o default de Inmova)
+    const company = await prisma.company.findUnique({
+      where: { id: session.user.companyId },
+      select: {
+        awsAccessKeyId: true,
+        awsSecretAccessKey: true,
+        awsBucket: true,
+        awsRegion: true,
+      },
+    });
+
+    const s3Config = S3Service.getConfig(company);
+
+    if (!s3Config) {
       return NextResponse.json(
         { 
           error: 'AWS S3 no configurado',
-          message: 'El almacenamiento en la nube no está disponible. Contacta al administrador.',
+          message: 'El almacenamiento en la nube no está disponible. Contacta al administrador para configurar AWS S3.',
         },
         { status: 503 }
       );
@@ -85,8 +97,8 @@ export async function POST(request: NextRequest) {
       }))
     );
 
-    // 5. Upload a S3
-    const results = await S3Service.uploadMultiple(fileBuffers, folder, fileType);
+    // 5. Upload a S3 (usando configuración de la empresa o default de Inmova)
+    const results = await S3Service.uploadMultiple(s3Config, fileBuffers, folder, fileType);
 
     // 6. Verificar si hubo errores
     const errors = results.filter((r) => !r.success);
@@ -160,8 +172,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 2. Verificar configuración
-    if (!S3Service.isConfigured()) {
+    // 2. Obtener configuración de S3
+    const company = await prisma.company.findUnique({
+      where: { id: session.user.companyId },
+      select: {
+        awsAccessKeyId: true,
+        awsSecretAccessKey: true,
+        awsBucket: true,
+        awsRegion: true,
+      },
+    });
+
+    const s3Config = S3Service.getConfig(company);
+
+    if (!s3Config) {
       return NextResponse.json(
         { error: 'AWS S3 no configurado' },
         { status: 503 }
@@ -181,7 +205,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. Generar URL pre-firmada
-    const url = await S3Service.getSignedUrl(key, expiresIn);
+    const url = await S3Service.getSignedUrl(s3Config, key, expiresIn);
 
     return NextResponse.json({ url });
   } catch (error: any) {
@@ -214,8 +238,20 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // 2. Verificar configuración
-    if (!S3Service.isConfigured()) {
+    // 2. Obtener configuración de S3
+    const company = await prisma.company.findUnique({
+      where: { id: session.user.companyId },
+      select: {
+        awsAccessKeyId: true,
+        awsSecretAccessKey: true,
+        awsBucket: true,
+        awsRegion: true,
+      },
+    });
+
+    const s3Config = S3Service.getConfig(company);
+
+    if (!s3Config) {
       return NextResponse.json(
         { error: 'AWS S3 no configurado' },
         { status: 503 }
@@ -234,7 +270,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // 4. Eliminar de S3
-    const deleted = await S3Service.delete(key);
+    const deleted = await S3Service.delete(s3Config, key);
 
     if (!deleted) {
       return NextResponse.json(

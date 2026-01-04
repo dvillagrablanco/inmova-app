@@ -58,12 +58,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Verificar que Claude AI esté configurado
-    if (!ClaudeAIService.isConfigured()) {
+    // 2. Obtener configuración de Claude AI (de la empresa o default de Inmova)
+    const company = await prisma.company.findUnique({
+      where: { id: session.user.companyId },
+      select: {
+        anthropicApiKey: true,
+      },
+    });
+
+    const claudeConfig = ClaudeAIService.getConfig(company);
+
+    if (!claudeConfig) {
       return NextResponse.json(
         {
           error: 'IA no configurada',
-          message: 'El chatbot no está disponible. Contacta al administrador.',
+          message: 'El chatbot no está disponible. Contacta al administrador para configurar Claude AI.',
         },
         { status: 503 }
       );
@@ -82,8 +91,8 @@ Company: ${session.user.companyId}`;
       ? `${userContext}\n\n${validated.context}`
       : userContext;
 
-    // 5. Llamar a Claude AI
-    const response = await ClaudeAIService.chat(validated.message, {
+    // 5. Llamar a Claude AI (usando configuración de la empresa o default de Inmova)
+    const response = await ClaudeAIService.chat(claudeConfig, validated.message, {
       conversationHistory: validated.conversationHistory,
       context: fullContext,
     });

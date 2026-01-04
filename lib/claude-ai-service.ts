@@ -19,29 +19,42 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 
-// Configuración
-const CLAUDE_API_KEY = process.env.ANTHROPIC_API_KEY || '';
+/**
+ * MODELO DE INTEGRACIÓN POR CLIENTE
+ * 
+ * Cada empresa (Company) puede tener su propia API key de Anthropic Claude.
+ * Inmova puede ofrecer:
+ * 1. API key compartida (de Inmova) - Para clientes pequeños, se les cobra el costo
+ * 2. BYOK (Bring Your Own Key) - Para clientes enterprise que quieren su propia cuenta
+ * 
+ * Las credenciales se almacenan en la tabla Company:
+ * - anthropicApiKey: API key del cliente (encriptada) o null (usa el de Inmova)
+ */
+
 const CLAUDE_MODEL = 'claude-3-5-sonnet-20241022'; // Último modelo
 
 /**
- * Cliente Claude (singleton)
+ * Configuración de Claude por empresa
  */
-let claudeClient: Anthropic | null = null;
+export interface ClaudeConfig {
+  apiKey: string;
+}
 
 /**
- * Obtiene el cliente Claude (lazy loading)
+ * Obtiene el cliente Claude con la configuración proporcionada
  */
-function getClaudeClient(): Anthropic {
-  if (!claudeClient) {
-    if (!CLAUDE_API_KEY) {
-      throw new Error('ANTHROPIC_API_KEY not configured');
-    }
-    claudeClient = new Anthropic({
-      apiKey: CLAUDE_API_KEY,
-    });
-  }
-  return claudeClient;
+function getClaudeClient(config: ClaudeConfig): Anthropic {
+  return new Anthropic({
+    apiKey: config.apiKey,
+  });
 }
+
+// Configuración por defecto de Inmova (para clientes sin su propia API key)
+const DEFAULT_CLAUDE_CONFIG: ClaudeConfig | null = process.env.ANTHROPIC_API_KEY
+  ? {
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    }
+  : null;
 
 /**
  * Datos de propiedad para valoración
@@ -118,11 +131,12 @@ export interface ChatMessage {
  * - Datos del mercado
  * - Propiedades comparables
  * 
+ * @param config - Configuración de Claude (de la empresa o default de Inmova)
  * @param property - Datos de la propiedad
  * @returns Valoración estimada
  * 
  * @example
- * const valuation = await valuateProperty({
+ * const valuation = await valuateProperty(claudeConfig, {
  *   address: 'Calle Mayor 123',
  *   city: 'Madrid',
  *   squareMeters: 80,
@@ -134,10 +148,11 @@ export interface ChatMessage {
  * console.log(`Valor estimado: ${valuation.estimatedValue}€`);
  */
 export async function valuateProperty(
+  config: ClaudeConfig,
   property: PropertyData
 ): Promise<PropertyValuation> {
   try {
-    const client = getClaudeClient();
+    const client = getClaudeClient(config);
 
     // Construir prompt detallado
     const prompt = `Actúa como un tasador inmobiliario certificado con 20 años de experiencia en España.
@@ -244,20 +259,22 @@ Responde SOLO con un objeto JSON válido con esta estructura:
  * - Procesos legales
  * - Preguntas técnicas
  * 
+ * @param config - Configuración de Claude
  * @param userMessage - Mensaje del usuario
  * @param options - Opciones adicionales
  * @returns Respuesta del chatbot
  * 
  * @example
- * const response = await chat('¿Cómo creo un contrato de alquiler?');
+ * const response = await chat(claudeConfig, '¿Cómo creo un contrato de alquiler?');
  * console.log(response);
  */
 export async function chat(
+  config: ClaudeConfig,
   userMessage: string,
   options: ChatOptions = {}
 ): Promise<string> {
   try {
-    const client = getClaudeClient();
+    const client = getClaudeClient(config);
 
     const systemPrompt = `Eres un asistente virtual experto de Inmova, una plataforma PropTech para gestión inmobiliaria.
 
@@ -326,12 +343,13 @@ ${options.context ? `\nCONTEXTO ADICIONAL:\n${options.context}` : ''}`;
  * Genera descripciones profesionales y atractivas para propiedades
  * que maximizan el engagement y conversión
  * 
+ * @param config - Configuración de Claude
  * @param property - Datos de la propiedad
  * @param style - Estilo de descripción ('professional', 'casual', 'luxury')
  * @returns Descripción generada
  * 
  * @example
- * const description = await generatePropertyDescription({
+ * const description = await generatePropertyDescription(claudeConfig, {
  *   address: 'Calle Mayor 123',
  *   city: 'Madrid',
  *   squareMeters: 80,
@@ -340,11 +358,12 @@ ${options.context ? `\nCONTEXTO ADICIONAL:\n${options.context}` : ''}`;
  * }, 'professional');
  */
 export async function generatePropertyDescription(
+  config: ClaudeConfig,
   property: Partial<PropertyData>,
   style: 'professional' | 'casual' | 'luxury' = 'professional'
 ): Promise<string> {
   try {
-    const client = getClaudeClient();
+    const client = getClaudeClient(config);
 
     const styleGuides = {
       professional:
@@ -414,17 +433,19 @@ Genera SOLO la descripción, sin títulos ni metadata.`;
  * Chat con respuestas en streaming (en tiempo real)
  * Para mejor UX en interfaces de chat
  * 
+ * @param config - Configuración de Claude
  * @param userMessage - Mensaje del usuario
  * @param onChunk - Callback para cada chunk de respuesta
  * @param options - Opciones adicionales
  */
 export async function chatStream(
+  config: ClaudeConfig,
   userMessage: string,
   onChunk: (text: string) => void,
   options: ChatOptions = {}
 ): Promise<void> {
   try {
-    const client = getClaudeClient();
+    const client = getClaudeClient(config);
 
     const systemPrompt = `Eres un asistente virtual experto de Inmova, una plataforma PropTech para gestión inmobiliaria.
 
@@ -467,10 +488,30 @@ Sé conciso, amigable y profesional.`;
 }
 
 /**
- * Verifica si Claude AI está configurado
+ * Verifica si una empresa tiene Claude AI configurado
  */
-export function isClaudeConfigured(): boolean {
-  return !!CLAUDE_API_KEY;
+export function isClaudeConfigured(config?: ClaudeConfig | null): boolean {
+  if (config) {
+    return !!config.apiKey;
+  }
+  return !!DEFAULT_CLAUDE_CONFIG;
+}
+
+/**
+ * Obtiene la configuración de Claude (de la empresa o default de Inmova)
+ */
+export function getClaudeConfig(companyConfig?: {
+  anthropicApiKey?: string | null;
+}): ClaudeConfig | null {
+  // Si la empresa tiene su propia configuración, usarla
+  if (companyConfig?.anthropicApiKey) {
+    return {
+      apiKey: companyConfig.anthropicApiKey,
+    };
+  }
+
+  // Sino, usar la configuración default de Inmova
+  return DEFAULT_CLAUDE_CONFIG;
 }
 
 /**
@@ -482,4 +523,5 @@ export const ClaudeAIService = {
   chatStream,
   generatePropertyDescription,
   isConfigured: isClaudeConfigured,
+  getConfig: getClaudeConfig,
 };

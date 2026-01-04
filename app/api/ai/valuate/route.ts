@@ -72,12 +72,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Verificar que Claude AI esté configurado
-    if (!ClaudeAIService.isConfigured()) {
+    // 2. Obtener configuración de Claude AI (de la empresa o default de Inmova)
+    const company = await prisma.company.findUnique({
+      where: { id: session.user.companyId },
+      select: {
+        anthropicApiKey: true,
+      },
+    });
+
+    const claudeConfig = ClaudeAIService.getConfig(company);
+
+    if (!claudeConfig) {
       return NextResponse.json(
         {
           error: 'IA no configurada',
-          message: 'El servicio de valoración con IA no está disponible. Contacta al administrador.',
+          message: 'El servicio de valoración con IA no está disponible. Contacta al administrador para configurar Claude AI.',
         },
         { status: 503 }
       );
@@ -137,8 +146,8 @@ export async function POST(request: NextRequest) {
       comparables: comparables.length > 0 ? comparables : undefined,
     };
 
-    // 6. Llamar a Claude AI
-    const valuation = await ClaudeAIService.valuateProperty(propertyData);
+    // 6. Llamar a Claude AI (usando configuración de la empresa o default de Inmova)
+    const valuation = await ClaudeAIService.valuateProperty(claudeConfig, propertyData);
 
     // 7. Guardar valoración en BD
     if (validated.unitId) {

@@ -68,16 +68,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Verificar que Signaturit esté configurado
-    if (!SignaturitService.isConfigured()) {
+    // 2. Obtener configuración de Signaturit de la empresa
+    const company = await prisma.company.findUnique({
+      where: { id: session.user.companyId },
+      select: {
+        signatureProvider: true,
+        signatureApiKey: true,
+        signatureWebhookSecret: true,
+        signatureEnvironment: true,
+      },
+    });
+
+    if (!company || !company.signatureApiKey) {
       return NextResponse.json(
         {
           error: 'Firma digital no configurada',
-          message: 'El servicio de firma digital no está disponible. Contacta al administrador.',
+          message: 'Tu empresa no tiene configurado un proveedor de firma digital. Contacta al administrador para configurar Signaturit o DocuSign.',
         },
         { status: 503 }
       );
     }
+
+    // Verificar que sea Signaturit (por ahora solo soportamos Signaturit)
+    if (company.signatureProvider !== 'signaturit') {
+      return NextResponse.json(
+        {
+          error: 'Proveedor no soportado',
+          message: `El proveedor ${company.signatureProvider} aún no está soportado. Usa Signaturit.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Configuración de Signaturit de la empresa
+    const signaturitConfig = {
+      apiKey: company.signatureApiKey,
+      environment: (company.signatureEnvironment as 'sandbox' | 'production') || 'sandbox',
+      webhookSecret: company.signatureWebhookSecret || undefined,
+    };
 
     // 3. Parsear y validar body
     const body = await request.json();
@@ -151,8 +179,9 @@ export async function POST(request: NextRequest) {
       callbackUrl: `${process.env.NEXTAUTH_URL}/api/webhooks/signaturit`,
     };
 
-    // 9. Crear firma en Signaturit
+    // 9. Crear firma en Signaturit (usando credenciales de la empresa)
     const result = await SignaturitService.createSignature(
+      signaturitConfig,
       pdfBuffer,
       fileName,
       validated.signers as Signer[],

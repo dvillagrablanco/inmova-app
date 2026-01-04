@@ -22,12 +22,18 @@ import fetch from 'node-fetch';
 import FormData from 'form-data';
 import crypto from 'crypto';
 
-// Configuración
-const SIGNATURIT_API_KEY = process.env.SIGNATURIT_API_KEY || '';
-const SIGNATURIT_ENV = process.env.SIGNATURIT_ENV || 'sandbox'; // 'sandbox' o 'production'
-const API_BASE_URL = SIGNATURIT_ENV === 'production' 
-  ? 'https://api.signaturit.com/v3'
-  : 'https://api.sandbox.signaturit.com/v3';
+/**
+ * MODELO DE INTEGRACIÓN POR CLIENTE
+ * 
+ * Cada empresa (Company) tiene sus propias credenciales de Signaturit.
+ * Inmova NO paga por Signaturit, solo integra con las cuentas de los clientes.
+ * 
+ * Las credenciales se almacenan en la tabla Company:
+ * - signatureProvider: "signaturit" | "docusign" | null
+ * - signatureApiKey: API key del cliente (encriptada)
+ * - signatureWebhookSecret: Webhook secret (encriptada)
+ * - signatureEnvironment: "sandbox" | "production"
+ */
 
 /**
  * Tipo de firma
@@ -110,15 +116,28 @@ export interface SignatureDetail {
 }
 
 /**
- * Cliente Signaturit (singleton)
+ * Configuración de Signaturit por empresa
+ */
+export interface SignaturitConfig {
+  apiKey: string;
+  environment: 'sandbox' | 'production';
+  webhookSecret?: string;
+}
+
+/**
+ * Cliente Signaturit
  */
 class SignaturitClient {
   private apiKey: string;
   private baseUrl: string;
+  private webhookSecret?: string;
 
-  constructor() {
-    this.apiKey = SIGNATURIT_API_KEY;
-    this.baseUrl = API_BASE_URL;
+  constructor(config: SignaturitConfig) {
+    this.apiKey = config.apiKey;
+    this.webhookSecret = config.webhookSecret;
+    this.baseUrl = config.environment === 'production'
+      ? 'https://api.signaturit.com/v3'
+      : 'https://api.sandbox.signaturit.com/v3';
   }
 
   /**
@@ -360,27 +379,11 @@ class SignaturitClient {
   }
 }
 
-// Instancia singleton
-let signaturitClient: SignaturitClient | null = null;
-
 /**
- * Obtiene el cliente Signaturit (lazy loading)
+ * Verifica si una empresa tiene Signaturit configurado
  */
-function getSignaturitClient(): SignaturitClient {
-  if (!signaturitClient) {
-    if (!SIGNATURIT_API_KEY) {
-      throw new Error('SIGNATURIT_API_KEY not configured');
-    }
-    signaturitClient = new SignaturitClient();
-  }
-  return signaturitClient;
-}
-
-/**
- * Verifica si Signaturit está configurado
- */
-export function isSignaturitConfigured(): boolean {
-  return !!SIGNATURIT_API_KEY;
+export function isSignaturitConfigured(config?: SignaturitConfig | null): boolean {
+  return !!(config && config.apiKey);
 }
 
 /**
@@ -389,12 +392,12 @@ export function isSignaturitConfigured(): boolean {
  */
 export function verifyWebhookSignature(
   payload: string,
-  signature: string
+  signature: string,
+  webhookSecret: string
 ): boolean {
   try {
-    const webhookSecret = process.env.SIGNATURIT_WEBHOOK_SECRET || '';
     if (!webhookSecret) {
-      console.warn('[Signaturit] SIGNATURIT_WEBHOOK_SECRET not configured');
+      console.warn('[Signaturit] Webhook secret not provided');
       return true; // Permitir en desarrollo
     }
 
@@ -411,30 +414,68 @@ export function verifyWebhookSignature(
 }
 
 /**
- * Servicio de Signaturit exportado
+ * Servicio de Signaturit
+ * Requiere configuración de la empresa
  */
 export const SignaturitService = {
-  createSignature: (
+  /**
+   * Crea un cliente Signaturit con la configuración de la empresa
+   */
+  createClient: (config: SignaturitConfig) => new SignaturitClient(config),
+  
+  /**
+   * Crea una solicitud de firma
+   */
+  createSignature: async (
+    config: SignaturitConfig,
     pdfBuffer: Buffer,
     fileName: string,
     signers: Signer[],
     options?: SignatureOptions
-  ) => getSignaturitClient().createSignature(pdfBuffer, fileName, signers, options),
+  ) => {
+    const client = new SignaturitClient(config);
+    return await client.createSignature(pdfBuffer, fileName, signers, options);
+  },
   
-  getSignature: (signatureId: string) => 
-    getSignaturitClient().getSignature(signatureId),
+  /**
+   * Obtiene el estado de una firma
+   */
+  getSignature: async (config: SignaturitConfig, signatureId: string) => {
+    const client = new SignaturitClient(config);
+    return await client.getSignature(signatureId);
+  },
   
-  cancelSignature: (signatureId: string) => 
-    getSignaturitClient().cancelSignature(signatureId),
+  /**
+   * Cancela una firma pendiente
+   */
+  cancelSignature: async (config: SignaturitConfig, signatureId: string) => {
+    const client = new SignaturitClient(config);
+    return await client.cancelSignature(signatureId);
+  },
   
-  downloadSignedDocument: (documentId: string) => 
-    getSignaturitClient().downloadSignedDocument(documentId),
+  /**
+   * Descarga el documento firmado
+   */
+  downloadSignedDocument: async (config: SignaturitConfig, documentId: string) => {
+    const client = new SignaturitClient(config);
+    return await client.downloadSignedDocument(documentId);
+  },
   
-  downloadCertificate: (signatureId: string) => 
-    getSignaturitClient().downloadCertificate(signatureId),
+  /**
+   * Descarga el certificado de firma
+   */
+  downloadCertificate: async (config: SignaturitConfig, signatureId: string) => {
+    const client = new SignaturitClient(config);
+    return await client.downloadCertificate(signatureId);
+  },
   
-  sendReminder: (signatureId: string) => 
-    getSignaturitClient().sendReminder(signatureId),
+  /**
+   * Envía recordatorio a firmantes pendientes
+   */
+  sendReminder: async (config: SignaturitConfig, signatureId: string) => {
+    const client = new SignaturitClient(config);
+    return await client.sendReminder(signatureId);
+  },
   
   isConfigured: isSignaturitConfigured,
   
