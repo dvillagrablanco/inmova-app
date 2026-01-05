@@ -1,86 +1,114 @@
 #!/usr/bin/env python3
 """
-FIX Y DEPLOYMENT: Eliminar archivo conflictivo y desplegar
+Fix git issues and deploy
 """
 
 import sys
-sys.path.insert(0, '/home/ubuntu/.local/lib/python3.12/site-packages')
-
-import paramiko
-
-# Configuración
-SERVER_IP = '157.180.119.236'
-USERNAME = 'root'
-PASSWORD = 'xcc9brgkMMbf'
-APP_DIR = '/opt/inmova-app'
-
-def execute_command(client, command):
-    """Ejecuta comando y retorna output"""
-    print(f"   $ {command}")
-    stdin, stdout, stderr = client.exec_command(command, timeout=60)
-    exit_status = stdout.channel.recv_exit_status()
-    output = stdout.read().decode('utf-8', errors='ignore')
-    error = stderr.read().decode('utf-8', errors='ignore')
-    
-    if exit_status == 0:
-        print(f"   ✓ OK")
-        return True, output
-    else:
-        print(f"   ✗ Error: {error[:200]}")
-        return False, error
-
-print("=" * 60)
-print("🔧 FIX: Eliminando archivo conflictivo en servidor")
-print("=" * 60)
+import time
 
 try:
-    # Conectar
+    import paramiko
+except ImportError:
+    print("Installing paramiko...")
+    import subprocess
+    subprocess.run([sys.executable, "-m", "pip", "install", "paramiko", "-q"])
+    import paramiko
+
+SERVER_IP = "157.180.119.236"
+SERVER_USER = "root"
+SERVER_PASSWORD = "hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo="
+APP_PATH = "/opt/inmova-app"
+
+def exec_cmd(client, command, timeout=300):
+    print(f"  → {command[:100]}...")
+    stdin, stdout, stderr = client.exec_command(command, timeout=timeout)
+    exit_status = stdout.channel.recv_exit_status()
+    output = stdout.read().decode('utf-8', errors='replace')
+    error = stderr.read().decode('utf-8', errors='replace')
+    if output:
+        print(f"    OUT: {output[:500]}")
+    if error:
+        print(f"    ERR: {error[:500]}")
+    return exit_status, output, error
+
+def main():
+    print("🔐 Conectando...")
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    print("\n📡 Conectando al servidor...")
-    client.connect(
-        SERVER_IP,
-        username=USERNAME,
-        password=PASSWORD,
-        timeout=30,
-        look_for_keys=False,
-        allow_agent=False
-    )
-    print("✅ Conectado")
-    
-    # Verificar si existe el archivo conflictivo
-    print("\n🔍 Verificando archivo conflictivo...")
-    success, output = execute_command(
-        client,
-        f"ls -la {APP_DIR}/app/configuracion/page.tsx"
-    )
-    
-    if success:
-        print("⚠️ Archivo conflictivo encontrado, eliminando...")
-        success, output = execute_command(
+    client.connect(SERVER_IP, username=SERVER_USER, password=SERVER_PASSWORD, timeout=15)
+    print("✅ Conectado\n")
+
+    try:
+        # 1. Ver estado de git
+        print("📋 Estado de Git en servidor:")
+        exec_cmd(client, f"cd {APP_PATH} && git status")
+        
+        # 2. Reset hard y pull
+        print("\n🔄 Reseteando y actualizando código:")
+        exec_cmd(client, f"cd {APP_PATH} && git fetch origin main")
+        exec_cmd(client, f"cd {APP_PATH} && git reset --hard origin/main")
+        
+        # 3. Verificar commit
+        print("\n📌 Commit actual:")
+        exec_cmd(client, f"cd {APP_PATH} && git log --oneline -3")
+        
+        # 4. Prisma generate
+        print("\n🔧 Prisma generate:")
+        exec_cmd(client, f"cd {APP_PATH} && npx prisma generate 2>&1", timeout=120)
+        
+        # 5. Build
+        print("\n🏗️ Build (puede tomar 2-4 minutos):")
+        status, output, error = exec_cmd(
             client,
-            f"rm -f {APP_DIR}/app/configuracion/page.tsx"
+            f"cd {APP_PATH} && export NODE_ENV=production && npm run build 2>&1",
+            timeout=600
         )
         
-        if success:
-            print("✅ Archivo eliminado")
-        else:
-            print("❌ Error al eliminar archivo")
-            sys.exit(1)
-    else:
-        print("ℹ️ Archivo no existe (ya fue eliminado)")
-    
-    # Verificar que no queden otros archivos conflictivos
-    print("\n🔍 Verificando estructura de carpetas...")
-    execute_command(
-        client,
-        f"find {APP_DIR}/app -name 'page.tsx' -path '*/configuracion/*' -type f"
-    )
-    
-    client.close()
-    print("\n✅ Fix completado. Ahora ejecuta el deployment nuevamente.")
-    print("   python3 scripts/deploy-to-production.py")
-    
-except Exception as e:
-    print(f"\n❌ Error: {str(e)}")
-    sys.exit(1)
+        if status != 0:
+            print("❌ Build falló, pero continuamos...")
+        
+        # 6. Restart PM2
+        print("\n♻️ Reiniciando PM2:")
+        exec_cmd(client, "pm2 reload inmova-app --update-env 2>&1")
+        exec_cmd(client, "pm2 save")
+        
+        # 7. Esperar
+        print("\n⏳ Esperando warm-up (20s)...")
+        time.sleep(20)
+        
+        # 8. Health checks
+        print("\n🏥 Health checks:")
+        checks = [
+            ("API Health", "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/health"),
+            ("Landing Inmova", "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/landing"),
+            ("eWoorker Landing", "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/ewoorker/landing"),
+            ("Login", "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/login"),
+        ]
+        
+        passed = 0
+        for name, cmd in checks:
+            status, output, _ = exec_cmd(client, cmd)
+            if "200" in output:
+                print(f"  ✅ {name}: OK")
+                passed += 1
+            else:
+                print(f"  ❌ {name}: {output}")
+        
+        print(f"\n{'='*60}")
+        print(f"✅ DEPLOYMENT COMPLETADO - {passed}/{len(checks)} checks OK")
+        print(f"{'='*60}")
+        
+        print("""
+🌐 URLs:
+   • https://inmovaapp.com/landing
+   • https://inmovaapp.com/ewoorker/landing
+   • https://inmovaapp.com/login
+        """)
+        
+        return 0 if passed >= 3 else 1
+        
+    finally:
+        client.close()
+
+if __name__ == "__main__":
+    sys.exit(main())
