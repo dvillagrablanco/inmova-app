@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { getPrismaClient } from '@/lib/db';
+import prisma from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -20,8 +20,6 @@ export async function GET(req: NextRequest) {
         { status: 401 }
       );
     }
-
-    const prisma = getPrismaClient();
     
     const company = await prisma.company.findUnique({
       where: { id: session.user.companyId },

@@ -1,4 +1,4 @@
-import { getPrismaClient } from '@/lib/db';
+import prisma from '@/lib/db';
 import nodemailer from 'nodemailer';
 
 /**
@@ -34,8 +34,6 @@ export class InsuranceNotificationService {
    * Verificar seguros próximos a vencer y enviar notificaciones
    */
   static async checkExpiringInsurances(): Promise<void> {
-    const prisma = getPrismaClient();
-
     try {
       // Fechas de corte para notificaciones
       const today = new Date();
@@ -315,8 +313,6 @@ export class InsuranceNotificationService {
     insurance: ExpiringInsurance,
     priority: 'URGENT' | 'WARNING' | 'REMINDER'
   ): Promise<void> {
-    const prisma = getPrismaClient();
-
     try {
       const titles = {
         URGENT: `⚠️ Seguro vence en ${insurance.daysUntilExpiration} días`,
@@ -374,8 +370,6 @@ export class InsuranceNotificationService {
    * Renovar automáticamente seguros configurados
    */
   static async autoRenewInsurances(): Promise<void> {
-    const prisma = getPrismaClient();
-
     try {
       const today = new Date();
       const in7Days = new Date(today);
