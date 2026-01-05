@@ -28,10 +28,7 @@ export async function GET() {
     return NextResponse.json(company);
   } catch (error) {
     logger.error('Error fetching company:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener la empresa' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener la empresa' }, { status: 500 });
   }
 }
 
@@ -44,7 +41,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const user = session.user as any;
-    if (user.role !== 'administrador') {
+    if (user.role !== 'administrador' && user.role !== 'super_admin') {
       return NextResponse.json(
         { error: 'No tienes permisos para editar la empresa' },
         { status: 403 }
@@ -70,9 +67,6 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json(company);
   } catch (error) {
     logger.error('Error updating company:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar la empresa' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar la empresa' }, { status: 500 });
   }
 }

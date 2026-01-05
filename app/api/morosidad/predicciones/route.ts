@@ -17,10 +17,13 @@ export async function GET(request: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+      where: { email: session.user.email },
     });
 
-    if (!user || (user.role !== 'administrador' && user.role !== 'gestor')) {
+    if (
+      !user ||
+      (user.role !== 'administrador' && user.role !== 'super_admin' && user.role !== 'gestor')
+    ) {
       return NextResponse.json({ error: 'Sin permisos' }, { status: 403 });
     }
 
@@ -29,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     const whereClause: any = {
       companyId: user.companyId,
-      validaHasta: { gte: new Date() } // Solo predicciones válidas
+      validaHasta: { gte: new Date() }, // Solo predicciones válidas
     };
 
     if (nivelRiesgo) {
@@ -43,30 +46,24 @@ export async function GET(request: NextRequest) {
           select: {
             nombreCompleto: true,
             email: true,
-            telefono: true
-          }
+            telefono: true,
+          },
         },
         contract: {
           include: {
             unit: {
-              include: { building: true }
-            }
-          }
-        }
+              include: { building: true },
+            },
+          },
+        },
       },
-      orderBy: [
-        { probabilidadImpago: 'desc' },
-        { updatedAt: 'desc' }
-      ]
+      orderBy: [{ probabilidadImpago: 'desc' }, { updatedAt: 'desc' }],
     });
 
     return NextResponse.json(predicciones);
   } catch (error: any) {
     logger.error('Error al obtener predicciones:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener predicciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener predicciones' }, { status: 500 });
   }
 }
 
@@ -79,10 +76,13 @@ export async function POST(request: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+      where: { email: session.user.email },
     });
 
-    if (!user || (user.role !== 'administrador' && user.role !== 'gestor')) {
+    if (
+      !user ||
+      (user.role !== 'administrador' && user.role !== 'super_admin' && user.role !== 'gestor')
+    ) {
       return NextResponse.json({ error: 'Sin permisos' }, { status: 403 });
     }
 
@@ -90,10 +90,7 @@ export async function POST(request: NextRequest) {
     const { tenantId, contractId } = body;
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'tenantId es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'tenantId es requerido' }, { status: 400 });
     }
 
     // Calcular predicción
@@ -124,17 +121,18 @@ export async function POST(request: NextRequest) {
         confianzaModelo: 0.89,
         ultimoEntrenamiento: new Date(),
         alertaGenerada: result.nivelRiesgo === 'alto' || result.nivelRiesgo === 'critico',
-        fechaAlerta: result.nivelRiesgo === 'alto' || result.nivelRiesgo === 'critico' ? new Date() : null,
-        validaHasta: addDays(new Date(), 30)
+        fechaAlerta:
+          result.nivelRiesgo === 'alto' || result.nivelRiesgo === 'critico' ? new Date() : null,
+        validaHasta: addDays(new Date(), 30),
       },
       include: {
         tenant: {
           select: {
             nombreCompleto: true,
-            email: true
-          }
-        }
-      }
+            email: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json(prediccion, { status: 201 });

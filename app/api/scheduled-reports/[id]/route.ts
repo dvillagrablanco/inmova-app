@@ -10,15 +10,12 @@ export const dynamic = 'force-dynamic';
  * PUT /api/scheduled-reports/[id]
  * Actualiza un reporte programado
  */
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
-    
-    // Solo administradores pueden modificar reportes programados
-    if (user.role !== 'administrador') {
+
+    // Solo administradores y super_admin pueden modificar reportes programados
+    if (user.role !== 'administrador' && user.role !== 'super_admin') {
       return NextResponse.json(
         { error: 'Solo los administradores pueden modificar reportes programados' },
         { status: 403 }
@@ -34,10 +31,7 @@ export async function PUT(
     });
 
     if (!existingReport) {
-      return NextResponse.json(
-        { error: 'Reporte no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Reporte no encontrado' }, { status: 404 });
     }
 
     if (existingReport.companyId !== user.companyId) {
@@ -66,10 +60,7 @@ export async function PUT(
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
-    return NextResponse.json(
-      { error: 'Error al actualizar reporte programado' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar reporte programado' }, { status: 500 });
   }
 }
 
@@ -77,15 +68,12 @@ export async function PUT(
  * DELETE /api/scheduled-reports/[id]
  * Elimina un reporte programado
  */
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
-    
-    // Solo administradores pueden eliminar reportes programados
-    if (user.role !== 'administrador') {
+
+    // Solo administradores y super_admin pueden eliminar reportes programados
+    if (user.role !== 'administrador' && user.role !== 'super_admin') {
       return NextResponse.json(
         { error: 'Solo los administradores pueden eliminar reportes programados' },
         { status: 403 }
@@ -100,10 +88,7 @@ export async function DELETE(
     });
 
     if (!existingReport) {
-      return NextResponse.json(
-        { error: 'Reporte no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Reporte no encontrado' }, { status: 404 });
     }
 
     if (existingReport.companyId !== user.companyId) {
@@ -123,10 +108,7 @@ export async function DELETE(
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
-    return NextResponse.json(
-      { error: 'Error al eliminar reporte programado' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar reporte programado' }, { status: 500 });
   }
 }
 
@@ -134,15 +116,12 @@ export async function DELETE(
  * POST /api/scheduled-reports/[id]/send
  * Envía un reporte programado inmediatamente (para pruebas)
  */
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
-    
-    // Solo administradores pueden enviar reportes manualmente
-    if (user.role !== 'administrador') {
+
+    // Solo administradores y super_admin pueden enviar reportes manualmente
+    if (user.role !== 'administrador' && user.role !== 'super_admin') {
       return NextResponse.json(
         { error: 'Solo los administradores pueden enviar reportes manualmente' },
         { status: 403 }
@@ -157,10 +136,7 @@ export async function POST(
     });
 
     if (!existingReport) {
-      return NextResponse.json(
-        { error: 'Reporte no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Reporte no encontrado' }, { status: 404 });
     }
 
     if (existingReport.companyId !== user.companyId) {
@@ -179,9 +155,6 @@ export async function POST(
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
-    return NextResponse.json(
-      { error: 'Error al enviar reporte programado' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al enviar reporte programado' }, { status: 500 });
   }
 }

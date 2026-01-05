@@ -4,12 +4,12 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { checkRoomAvailability } from '@/lib/room-rental-service';
 import logger, { logError } from '@/lib/logger';
-import { 
-  selectUnitMinimal, 
-  selectBuildingMinimal, 
-  selectRoomContractMinimal, 
+import {
+  selectUnitMinimal,
+  selectBuildingMinimal,
+  selectRoomContractMinimal,
   selectTenantMinimal,
-  selectRoomPaymentMinimal
+  selectRoomPaymentMinimal,
 } from '@/lib/query-optimizer';
 
 export const dynamic = 'force-dynamic';
@@ -18,17 +18,14 @@ export const dynamic = 'force-dynamic';
  * GET /api/room-rental/rooms/[id]
  * Obtiene una habitación específica con detalles completos
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // OPTIMIZADO - Bug Fix Week: Query Optimization  
+    // OPTIMIZADO - Bug Fix Week: Query Optimization
     const room = await prisma.room.findUnique({
       where: {
         id: params.id,
@@ -101,10 +98,7 @@ export async function GET(
  * PATCH /api/room-rental/rooms/[id]
  * Actualiza una habitación
  */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -204,13 +198,13 @@ export async function PATCH(
  * DELETE /api/room-rental/rooms/[id]
  * Elimina una habitación (solo si no tiene contratos activos)
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.companyId || session.user.role !== 'administrador') {
+    if (
+      !session?.user?.companyId ||
+      (session.user.role !== 'administrador' && session.user.role !== 'super_admin')
+    ) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
