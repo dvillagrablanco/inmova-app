@@ -4850,6 +4850,12 @@ model PerformanceMetric {
 // ============================================
 
 enum SubscriptionTier {
+  FREE
+  STARTER
+  PROFESSIONAL
+  BUSINESS
+  ENTERPRISE
+  // Legacy values (mantener para compatibilidad)
   basico
   profesional
   empresarial
