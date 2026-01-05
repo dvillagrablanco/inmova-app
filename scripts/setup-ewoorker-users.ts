@@ -58,26 +58,24 @@ async function setupUsers() {
 
       // Buscar o crear empresa
       let company = await prisma.company.findFirst({
-        where: { name: userConfig.companyName },
+        where: { nombre: userConfig.companyName },
       });
 
       if (!company) {
         company = await prisma.company.create({
           data: {
-            name: userConfig.companyName,
+            nombre: userConfig.companyName,
             email: userConfig.email,
-            phone: '+34600000000',
-            nif: `B${Math.random().toString().slice(2, 10)}`,
-            address: 'Calle Demo 123',
-            city: 'Madrid',
-            postalCode: '28001',
-            province: 'Madrid',
-            country: 'España',
-            businessVertical: 'construccion',
+            telefono: '+34600000000',
+            cif: `B${Math.random().toString().slice(2, 10)}`,
+            direccion: 'Calle Demo 123',
+            ciudad: 'Madrid',
+            codigoPostal: '28001',
+            pais: 'España',
             activo: true,
           },
         });
-        console.log(`   ✅ Empresa creada: ${company.name}`);
+        console.log(`   ✅ Empresa creada: ${company.nombre}`);
       }
 
       // Buscar usuario existente
@@ -163,7 +161,7 @@ async function setupUsers() {
       name: true,
       role: true,
       activo: true,
-      company: { select: { name: true } },
+      company: { select: { nombre: true } },
     },
   });
 
@@ -173,7 +171,7 @@ async function setupUsers() {
     console.log(`${status} ${u.email}`);
     console.log(`   Nombre: ${u.name}`);
     console.log(`   Role: ${u.role}`);
-    console.log(`   Empresa: ${u.company?.name || 'N/A'}`);
+    console.log(`   Empresa: ${u.company?.nombre || 'N/A'}`);
     console.log('');
   });
 
