@@ -1,0 +1,118 @@
+{
+  "name": "eWoorker - Marketplace de Subcontratación",
+  "short_name": "eWoorker",
+  "description": "Conecta con empresas de construcción verificadas. Publica obras, recibe ofertas y gestiona contratos.",
+  "start_url": "/ewoorker/dashboard",
+  "scope": "/ewoorker/",
+  "display": "standalone",
+  "background_color": "#1e3a5f",
+  "theme_color": "#f59e0b",
+  "orientation": "portrait-primary",
+  "lang": "es",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/ewoorker/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/ewoorker/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/ewoorker/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/ewoorker/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/ewoorker/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/ewoorker/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/ewoorker/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/ewoorker/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/ewoorker/screenshots/desktop-obras.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Marketplace de obras"
+    },
+    {
+      "src": "/ewoorker/screenshots/mobile-dashboard.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Dashboard móvil"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Mis Obras",
+      "short_name": "Obras",
+      "description": "Ver y gestionar obras",
+      "url": "/ewoorker/obras",
+      "icons": [{ "src": "/ewoorker/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Buscar Empresas",
+      "short_name": "Empresas",
+      "description": "Buscar subcontratistas",
+      "url": "/ewoorker/empresas",
+      "icons": [{ "src": "/ewoorker/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Trabajadores",
+      "short_name": "Trabajadores",
+      "description": "Gestionar trabajadores",
+      "url": "/ewoorker/trabajadores",
+      "icons": [{ "src": "/ewoorker/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Chat",
+      "short_name": "Chat",
+      "description": "Conversaciones",
+      "url": "/ewoorker/chat",
+      "icons": [{ "src": "/ewoorker/icons/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "protocol_handlers": [
+    {
+      "protocol": "web+ewoorker",
+      "url": "/ewoorker/handle?url=%s"
+    }
+  ]
+}

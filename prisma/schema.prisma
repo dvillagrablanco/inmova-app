@@ -11863,6 +11863,13 @@ model EwoorkerPerfilEmpresa {
   onboardingFirstActionCompletedAt   DateTime?
   onboardingCompletedAt              DateTime?
 
+  // Campos de gamificación (Sprint 3)
+  gamificationPoints       Int      @default(0)
+  gamificationLevel        Int      @default(1)
+  gamificationAchievements Json     @default("[]") // Array de IDs de logros
+  loginStreak              Int      @default(0)
+  lastLoginDate            DateTime?
+
   // Timestamps
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -11882,6 +11889,9 @@ model EwoorkerPerfilEmpresa {
   trabajadores                EwoorkerTrabajador[]    // Trabajadores de la empresa (modelo ewoorker original)
   verificacionSolicitudes     EwoorkerVerificacionSolicitud[]
   conversacionesParticipante  EwoorkerParticipanteConversacion[]
+  puntosLog                   EwoorkerPuntosLog[]
+  referralsEnviados           EwoorkerReferral[] @relation("ReferralsEnviados")
+  referralRecibido            EwoorkerReferral?  @relation("ReferralRecibido")
 
   @@index([tipoEmpresa])
   @@index([planActual])
@@ -13050,6 +13060,56 @@ model EwoorkerMensajeChat {
   @@index([remitenteId])
   @@index([leido])
   @@map("ewoorker_mensaje_chat")
+}
+
+// Log de puntos de gamificación (Sprint 3)
+model EwoorkerPuntosLog {
+  id              String                @id @default(cuid())
+  perfilEmpresaId String
+  perfilEmpresa   EwoorkerPerfilEmpresa @relation(fields: [perfilEmpresaId], references: [id], onDelete: Cascade)
+
+  action     String // Acción que generó los puntos (PUBLISH_OBRA, SIGN_CONTRACT, etc.)
+  points     Int // Puntos añadidos (positivos o negativos)
+  totalAfter Int // Total de puntos después de esta transacción
+  metadata   Json @default("{}") // Datos adicionales
+
+  createdAt DateTime @default(now())
+
+  @@index([perfilEmpresaId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("ewoorker_puntos_log")
+}
+
+// Sistema de Referidos (Sprint 3)
+model EwoorkerReferral {
+  id                  String                @id @default(cuid())
+  code                String                @unique // Código único de referido
+  referrerEmpresaId   String
+  referrerEmpresa     EwoorkerPerfilEmpresa @relation("ReferralsEnviados", fields: [referrerEmpresaId], references: [id], onDelete: Cascade)
+
+  // Referido (opcional hasta que se use)
+  referredEmail       String?
+  referredEmpresaId   String?               @unique
+  referredEmpresa     EwoorkerPerfilEmpresa? @relation("ReferralRecibido", fields: [referredEmpresaId], references: [id], onDelete: SetNull)
+
+  // Estado
+  status              String                @default("pending") // pending, registered, verified, expired, cancelled
+  rewardGiven         Boolean               @default(false)
+
+  // Fechas
+  expiresAt           DateTime
+  usedAt              DateTime?
+  verifiedAt          DateTime?
+
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+
+  @@index([referrerEmpresaId])
+  @@index([code])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("ewoorker_referral")
 }
 
 model UserCelebration {
