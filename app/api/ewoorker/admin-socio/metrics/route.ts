@@ -161,7 +161,7 @@ export async function GET(request: NextRequest) {
         montoBase: true,
         montoComision: true,
         beneficioSocio: true,
-        beneficioPlataforma: true,
+        beneficioEwoorker: true,
         tipo: true,
       },
     });
@@ -170,7 +170,7 @@ export async function GET(request: NextRequest) {
     const comisionesGeneradas = Math.round(pagos.reduce((sum, p) => sum + p.montoComision, 0));
     const beneficioSocio = Math.round(pagos.reduce((sum, p) => sum + p.beneficioSocio, 0));
     const beneficioPlataforma = Math.round(
-      pagos.reduce((sum, p) => sum + p.beneficioPlataforma, 0)
+      pagos.reduce((sum, p) => sum + p.beneficioEwoorker, 0)
     );
 
     // Desglose comisiones
