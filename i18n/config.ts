@@ -2,10 +2,10 @@
  * i18n Configuration
  *
  * Configuración de internacionalización con next-intl
- * Soporta: ES (Español), EN (English), PT (Português)
+ * Soporta: ES, EN, PT, FR, DE, IT
  */
 
-export const locales = ['es', 'en', 'pt'] as const;
+export const locales = ['es', 'en', 'pt', 'fr', 'de', 'it'] as const;
 export type Locale = (typeof locales)[number];
 
 export const defaultLocale: Locale = 'es';
@@ -14,12 +14,18 @@ export const localeNames: Record<Locale, string> = {
   es: 'Español',
   en: 'English',
   pt: 'Português',
+  fr: 'Français',
+  de: 'Deutsch',
+  it: 'Italiano',
 };
 
 export const localeFlags: Record<Locale, string> = {
   es: '🇪🇸',
   en: '🇬🇧',
   pt: '🇵🇹',
+  fr: '🇫🇷',
+  de: '🇩🇪',
+  it: '🇮🇹',
 };
 
 // Namespace keys para organizar traducciones
@@ -53,6 +59,18 @@ export const dateFormats: Record<Locale, Intl.DateTimeFormatOptions> = {
     dateStyle: 'long',
     timeStyle: 'short',
   },
+  fr: {
+    dateStyle: 'long',
+    timeStyle: 'short',
+  },
+  de: {
+    dateStyle: 'long',
+    timeStyle: 'short',
+  },
+  it: {
+    dateStyle: 'long',
+    timeStyle: 'short',
+  },
 };
 
 export const numberFormats: Record<Locale, Intl.NumberFormatOptions> = {
@@ -65,6 +83,18 @@ export const numberFormats: Record<Locale, Intl.NumberFormatOptions> = {
     currency: 'USD',
   },
   pt: {
+    style: 'currency',
+    currency: 'EUR',
+  },
+  fr: {
+    style: 'currency',
+    currency: 'EUR',
+  },
+  de: {
+    style: 'currency',
+    currency: 'EUR',
+  },
+  it: {
     style: 'currency',
     currency: 'EUR',
   },
