@@ -33,7 +33,7 @@ import { Badge } from '@/components/ui/badge';
 
 /**
  * eWoorker - B2B Marketplace para Subcontratación en Construcción
- * 
+ *
  * Personalidad de marca: Profesional, confiable, naranja energético
  * Target: Constructores, promotores, subcontratistas
  */
@@ -59,29 +59,41 @@ export default function EwoorkerLandingPage() {
                 </div>
               </Link>
               <div className="hidden md:flex space-x-6">
-                <Link href="#como-funciona" className="text-gray-700 hover:text-orange-600 transition-colors font-medium">
+                <Link
+                  href="#como-funciona"
+                  className="text-gray-700 hover:text-orange-600 transition-colors font-medium"
+                >
                   Cómo Funciona
                 </Link>
-                <Link href="#planes" className="text-gray-700 hover:text-orange-600 transition-colors font-medium">
+                <Link
+                  href="#planes"
+                  className="text-gray-700 hover:text-orange-600 transition-colors font-medium"
+                >
                   Planes
                 </Link>
-                <Link href="#beneficios" className="text-gray-700 hover:text-orange-600 transition-colors font-medium">
+                <Link
+                  href="#beneficios"
+                  className="text-gray-700 hover:text-orange-600 transition-colors font-medium"
+                >
                   Beneficios
                 </Link>
-                <Link href="/landing" className="text-gray-500 hover:text-orange-600 transition-colors">
+                <Link
+                  href="/landing"
+                  className="text-gray-500 hover:text-orange-600 transition-colors"
+                >
                   Plataforma Inmova
                 </Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 onClick={() => router.push('/ewoorker/login')}
                 className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
               >
                 Iniciar Sesión
               </Button>
-              <Button 
+              <Button
                 onClick={() => router.push('/ewoorker/registro')}
                 className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white shadow-lg"
               >
@@ -111,7 +123,8 @@ export default function EwoorkerLandingPage() {
               Sin Complicaciones
             </h1>
             <p className="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed">
-              El marketplace B2B que conecta <strong>constructores</strong> con <strong>subcontratistas certificados</strong>.
+              El marketplace B2B que conecta <strong>constructores</strong> con{' '}
+              <strong>subcontratistas certificados</strong>.
               <span className="block mt-2 text-orange-600 font-semibold">
                 Cumple Ley 32/2006 automáticamente. Pagos seguros con escrow.
               </span>
@@ -156,7 +169,6 @@ export default function EwoorkerLandingPage() {
               </div>
             </div>
           </div>
-
         </div>
       </section>
 
@@ -188,7 +200,8 @@ export default function EwoorkerLandingPage() {
                 <div className="flex items-start">
                   <span className="text-red-600 font-bold mr-3">❌</span>
                   <p className="text-gray-700">
-                    <strong>Pagos sin garantía:</strong> Subcontratistas impagados, constructores estafados
+                    <strong>Pagos sin garantía:</strong> Subcontratistas impagados, constructores
+                    estafados
                   </p>
                 </div>
                 <div className="flex items-start">
@@ -218,19 +231,22 @@ export default function EwoorkerLandingPage() {
                 <div className="flex items-start">
                   <span className="text-green-600 font-bold mr-3">✓</span>
                   <p className="text-gray-700">
-                    <strong>Alertas inteligentes:</strong> Nunca más docs vencidos. Renovación 1-click
+                    <strong>Alertas inteligentes:</strong> Nunca más docs vencidos. Renovación
+                    1-click
                   </p>
                 </div>
                 <div className="flex items-start">
                   <span className="text-green-600 font-bold mr-3">✓</span>
                   <p className="text-gray-700">
-                    <strong>Escrow banking:</strong> Pagos seguros para ambas partes. €0 en impagados
+                    <strong>Escrow banking:</strong> Pagos seguros para ambas partes. €0 en
+                    impagados
                   </p>
                 </div>
                 <div className="flex items-start">
                   <span className="text-green-600 font-bold mr-3">✓</span>
                   <p className="text-gray-700">
-                    <strong>Libro digital automático:</strong> Genera Libro de Subcontratación oficial en 2 clics
+                    <strong>Libro digital automático:</strong> Genera Libro de Subcontratación
+                    oficial en 2 clics
                   </p>
                 </div>
               </CardContent>
@@ -243,12 +259,8 @@ export default function EwoorkerLandingPage() {
       <section id="como-funciona" className="py-20 bg-gradient-to-br from-orange-50 to-yellow-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Cómo Funciona eWoorker
-            </h2>
-            <p className="text-xl text-gray-600">
-              Simple, rápido y 100% legal
-            </p>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Cómo Funciona eWoorker</h2>
+            <p className="text-xl text-gray-600">Simple, rápido y 100% legal</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -349,12 +361,8 @@ export default function EwoorkerLandingPage() {
       <section id="beneficios" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Por Qué Elegir eWoorker
-            </h2>
-            <p className="text-xl text-gray-600">
-              La plataforma más completa del sector
-            </p>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Por Qué Elegir eWoorker</h2>
+            <p className="text-xl text-gray-600">La plataforma más completa del sector</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -441,16 +449,88 @@ export default function EwoorkerLandingPage() {
         </div>
       </section>
 
+      {/* NUEVAS FUNCIONALIDADES - Sprint 3 */}
+      <section className="py-20 bg-gradient-to-br from-orange-600 to-yellow-500 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <Badge className="mb-6 bg-white text-orange-600 px-6 py-2 text-sm font-semibold">
+              🚀 NOVEDADES 2026
+            </Badge>
+            <h2 className="text-4xl font-bold mb-4">Nuevas Funcionalidades</h2>
+            <p className="text-xl opacity-90">Innovación constante para tu negocio</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Gamificación */}
+            <Card className="bg-white/10 border-white/20 backdrop-blur-sm text-white">
+              <CardContent className="pt-6 text-center">
+                <div className="text-5xl mb-4">🏆</div>
+                <h3 className="text-lg font-bold mb-2">Gamificación</h3>
+                <p className="text-sm opacity-90">
+                  Gana puntos, sube de nivel y desbloquea logros. 6 niveles de Novato a Leyenda.
+                </p>
+                <Badge className="mt-4 bg-white/20">+40% engagement</Badge>
+              </CardContent>
+            </Card>
+
+            {/* Referidos */}
+            <Card className="bg-white/10 border-white/20 backdrop-blur-sm text-white">
+              <CardContent className="pt-6 text-center">
+                <div className="text-5xl mb-4">🎁</div>
+                <h3 className="text-lg font-bold mb-2">Sistema Referidos</h3>
+                <p className="text-sm opacity-90">
+                  Invita empresas y gana 500 puntos + 10% dto. Referido obtiene 20% dto en
+                  verificación.
+                </p>
+                <Badge className="mt-4 bg-white/20">Crecimiento viral</Badge>
+              </CardContent>
+            </Card>
+
+            {/* Matching IA */}
+            <Card className="bg-white/10 border-white/20 backdrop-blur-sm text-white">
+              <CardContent className="pt-6 text-center">
+                <div className="text-5xl mb-4">🤖</div>
+                <h3 className="text-lg font-bold mb-2">Matching con IA</h3>
+                <p className="text-sm opacity-90">
+                  IA recomienda subcontratistas ideales basándose en especialidad, zona y rating.
+                </p>
+                <Badge className="mt-4 bg-white/20">Claude AI integrado</Badge>
+              </CardContent>
+            </Card>
+
+            {/* Analytics */}
+            <Card className="bg-white/10 border-white/20 backdrop-blur-sm text-white">
+              <CardContent className="pt-6 text-center">
+                <div className="text-5xl mb-4">📊</div>
+                <h3 className="text-lg font-bold mb-2">Analytics Dashboard</h3>
+                <p className="text-sm opacity-90">
+                  20+ KPIs, tendencias históricas, distribución geográfica. Decisiones basadas en
+                  datos.
+                </p>
+                <Badge className="mt-4 bg-white/20">Métricas en tiempo real</Badge>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-12">
+            <Button
+              size="lg"
+              onClick={() => router.push('/ewoorker/registro')}
+              className="bg-white text-orange-600 hover:bg-gray-100 text-lg px-10 py-6 shadow-2xl"
+            >
+              Probar Nuevas Funcionalidades
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* Planes y Precios Section */}
       <section id="planes" className="py-20 bg-gradient-to-br from-orange-50 to-yellow-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Planes para Cada Necesidad
-            </h2>
-            <p className="text-xl text-gray-600">
-              Sin permanencia. Cancela cuando quieras.
-            </p>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Planes para Cada Necesidad</h2>
+            <p className="text-xl text-gray-600">Sin permanencia. Cancela cuando quieras.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -459,9 +539,7 @@ export default function EwoorkerLandingPage() {
               <CardHeader>
                 <div className="text-center">
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">OBRERO</h3>
-                  <div className="text-5xl font-extrabold text-gray-900 mb-2">
-                    Gratis
-                  </div>
+                  <div className="text-5xl font-extrabold text-gray-900 mb-2">Gratis</div>
                   <p className="text-gray-600">+ 5% comisión</p>
                   <p className="text-xs text-gray-500 mt-1">Por obra cerrada</p>
                 </div>
@@ -517,7 +595,9 @@ export default function EwoorkerLandingPage() {
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-center">
                     <CheckCircle2 className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
-                    <span><strong>Todo de Obrero</strong></span>
+                    <span>
+                      <strong>Todo de Obrero</strong>
+                    </span>
                   </li>
                   <li className="flex items-center">
                     <CheckCircle2 className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
@@ -554,9 +634,7 @@ export default function EwoorkerLandingPage() {
               <CardHeader>
                 <div className="text-center">
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">CONSTRUCTOR</h3>
-                  <div className="text-5xl font-extrabold text-blue-700 mb-2">
-                    €149
-                  </div>
+                  <div className="text-5xl font-extrabold text-blue-700 mb-2">€149</div>
                   <p className="text-gray-600">/mes + 0% comisión</p>
                   <p className="text-xs text-gray-500 mt-1">Sin comisiones extra</p>
                 </div>
@@ -565,7 +643,9 @@ export default function EwoorkerLandingPage() {
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-center">
                     <CheckCircle2 className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
-                    <span><strong>Todo de Capataz</strong></span>
+                    <span>
+                      <strong>Todo de Capataz</strong>
+                    </span>
                   </li>
                   <li className="flex items-center">
                     <CheckCircle2 className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
@@ -610,7 +690,10 @@ export default function EwoorkerLandingPage() {
             <p className="text-gray-600 mb-4">
               <strong>Sin permanencia.</strong> Cancela cuando quieras. Prueba 14 días gratis.
             </p>
-            <Link href="#planes" className="text-orange-600 hover:text-orange-700 font-semibold underline">
+            <Link
+              href="#planes"
+              className="text-orange-600 hover:text-orange-700 font-semibold underline"
+            >
               Ver comparativa detallada de planes →
             </Link>
           </div>
@@ -624,9 +707,7 @@ export default function EwoorkerLandingPage() {
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
               Lo Que Dicen Nuestros Usuarios
             </h2>
-            <p className="text-xl text-gray-600">
-              2,500+ empresas ya confían en eWoorker
-            </p>
+            <p className="text-xl text-gray-600">2,500+ empresas ya confían en eWoorker</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -638,7 +719,8 @@ export default function EwoorkerLandingPage() {
                   ))}
                 </div>
                 <p className="text-gray-700 mb-4 italic">
-                  "Antes perdíamos 2 días/mes haciendo el libro de subcontratación. Ahora son 2 clics. Una maravilla."
+                  "Antes perdíamos 2 días/mes haciendo el libro de subcontratación. Ahora son 2
+                  clics. Una maravilla."
                 </p>
                 <div className="flex items-center">
                   <div className="w-12 h-12 rounded-full bg-orange-200 flex items-center justify-center text-orange-700 font-bold mr-3">
@@ -660,7 +742,8 @@ export default function EwoorkerLandingPage() {
                   ))}
                 </div>
                 <p className="text-gray-700 mb-4 italic">
-                  "El escrow es lo mejor. Cobro siempre a tiempo, el constructor no me puede estafar. Cero impagados desde que uso eWoorker."
+                  "El escrow es lo mejor. Cobro siempre a tiempo, el constructor no me puede
+                  estafar. Cero impagados desde que uso eWoorker."
                 </p>
                 <div className="flex items-center">
                   <div className="w-12 h-12 rounded-full bg-orange-200 flex items-center justify-center text-orange-700 font-bold mr-3">
@@ -682,7 +765,8 @@ export default function EwoorkerLandingPage() {
                   ))}
                 </div>
                 <p className="text-gray-700 mb-4 italic">
-                  "Las alertas de docs vencidos nos salvaron de una multa de €8,000. No teníamos el REA actualizado y nos avisaron 30 días antes."
+                  "Las alertas de docs vencidos nos salvaron de una multa de €8,000. No teníamos el
+                  REA actualizado y nos avisaron 30 días antes."
                 </p>
                 <div className="flex items-center">
                   <div className="w-12 h-12 rounded-full bg-orange-200 flex items-center justify-center text-orange-700 font-bold mr-3">
@@ -703,9 +787,7 @@ export default function EwoorkerLandingPage() {
       <section className="py-20 bg-gradient-to-br from-orange-50 to-yellow-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Preguntas Frecuentes
-            </h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Preguntas Frecuentes</h2>
           </div>
 
           <div className="space-y-6">
@@ -715,7 +797,10 @@ export default function EwoorkerLandingPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700">
-                  El escrow es un sistema de custodia de pagos. Cuando el constructor acepta una oferta, deposita el dinero en una cuenta custodia de eWoorker. El dinero se libera al subcontratista automáticamente cuando se cumplen los hitos acordados. Ambas partes están protegidas.
+                  El escrow es un sistema de custodia de pagos. Cuando el constructor acepta una
+                  oferta, deposita el dinero en una cuenta custodia de eWoorker. El dinero se libera
+                  al subcontratista automáticamente cuando se cumplen los hitos acordados. Ambas
+                  partes están protegidas.
                 </p>
               </CardContent>
             </Card>
@@ -726,7 +811,9 @@ export default function EwoorkerLandingPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700">
-                  Verificamos REA (Registro Empresas Acreditadas), TC1, TC2, seguro RC, documentación fiscal. Si falta algo, la empresa no puede enviar ofertas hasta regularizar. Las alertas automáticas avisan 30 días antes de vencimiento.
+                  Verificamos REA (Registro Empresas Acreditadas), TC1, TC2, seguro RC,
+                  documentación fiscal. Si falta algo, la empresa no puede enviar ofertas hasta
+                  regularizar. Las alertas automáticas avisan 30 días antes de vencimiento.
                 </p>
               </CardContent>
             </Card>
@@ -737,7 +824,9 @@ export default function EwoorkerLandingPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700">
-                  Si tienes docs al día: 10 minutos. Subes REA, TC1, TC2, seguro → verificación automática → perfil activo. Puedes empezar a ver obras o publicar la tuya inmediatamente.
+                  Si tienes docs al día: 10 minutos. Subes REA, TC1, TC2, seguro → verificación
+                  automática → perfil activo. Puedes empezar a ver obras o publicar la tuya
+                  inmediatamente.
                 </p>
               </CardContent>
             </Card>
@@ -748,7 +837,10 @@ export default function EwoorkerLandingPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700">
-                  Depende del plan. <strong>Plan Obrero (gratis): 5% comisión</strong> por obra cerrada. <strong>Plan Capataz (€49/mes): 2% comisión</strong>. <strong>Plan Constructor (€149/mes): 0% comisión</strong> + obras destacadas. La comisión solo se cobra si cierras obra.
+                  Depende del plan. <strong>Plan Obrero (gratis): 5% comisión</strong> por obra
+                  cerrada. <strong>Plan Capataz (€49/mes): 2% comisión</strong>.{' '}
+                  <strong>Plan Constructor (€149/mes): 0% comisión</strong> + obras destacadas. La
+                  comisión solo se cobra si cierras obra.
                 </p>
               </CardContent>
             </Card>
@@ -778,7 +870,7 @@ export default function EwoorkerLandingPage() {
             <Button
               size="lg"
               variant="outline"
-                onClick={() => router.push('/landing/contacto?platform=ewoorker')}
+              onClick={() => router.push('/landing/contacto?platform=ewoorker')}
               className="border-2 border-white text-white hover:bg-white/10 text-lg px-10 py-6"
             >
               Hablar con Ventas
@@ -806,26 +898,84 @@ export default function EwoorkerLandingPage() {
             <div>
               <h3 className="font-semibold text-white mb-4">Producto</h3>
               <ul className="space-y-2 text-sm">
-                <li><Link href="#como-funciona" className="hover:text-orange-500 transition-colors">Cómo Funciona</Link></li>
-                <li><Link href="#planes" className="hover:text-orange-500 transition-colors">Planes y Precios</Link></li>
-                <li><Link href="/ewoorker/compliance" className="hover:text-orange-500 transition-colors">Compliance Hub</Link></li>
-                <li><Link href="/ewoorker/obras" className="hover:text-orange-500 transition-colors">Marketplace</Link></li>
+                <li>
+                  <Link href="#como-funciona" className="hover:text-orange-500 transition-colors">
+                    Cómo Funciona
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#planes" className="hover:text-orange-500 transition-colors">
+                    Planes y Precios
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/ewoorker/compliance"
+                    className="hover:text-orange-500 transition-colors"
+                  >
+                    Compliance Hub
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/ewoorker/obras" className="hover:text-orange-500 transition-colors">
+                    Marketplace
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold text-white mb-4">Empresa</h3>
               <ul className="space-y-2 text-sm">
-                <li><Link href="/landing/sobre-nosotros" className="hover:text-orange-500 transition-colors">Sobre Nosotros</Link></li>
-                <li><Link href="/landing/contacto" className="hover:text-orange-500 transition-colors">Contacto</Link></li>
-                <li><Link href="/landing" className="hover:text-orange-500 transition-colors">Plataforma Inmova</Link></li>
+                <li>
+                  <Link
+                    href="/landing/sobre-nosotros"
+                    className="hover:text-orange-500 transition-colors"
+                  >
+                    Sobre Nosotros
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/landing/contacto"
+                    className="hover:text-orange-500 transition-colors"
+                  >
+                    Contacto
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/landing" className="hover:text-orange-500 transition-colors">
+                    Plataforma Inmova
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold text-white mb-4">Legal</h3>
               <ul className="space-y-2 text-sm">
-                <li><Link href="/landing/legal/terminos" className="hover:text-orange-500 transition-colors">Términos y Condiciones</Link></li>
-                <li><Link href="/landing/legal/privacidad" className="hover:text-orange-500 transition-colors">Privacidad</Link></li>
-                <li><Link href="/landing/legal/cookies" className="hover:text-orange-500 transition-colors">Cookies</Link></li>
+                <li>
+                  <Link
+                    href="/landing/legal/terminos"
+                    className="hover:text-orange-500 transition-colors"
+                  >
+                    Términos y Condiciones
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/landing/legal/privacidad"
+                    className="hover:text-orange-500 transition-colors"
+                  >
+                    Privacidad
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/landing/legal/cookies"
+                    className="hover:text-orange-500 transition-colors"
+                  >
+                    Cookies
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

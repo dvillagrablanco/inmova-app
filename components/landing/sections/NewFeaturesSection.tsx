@@ -104,17 +104,17 @@ const newModules = [
   {
     icon: Hammer,
     title: 'ewoorker (B2B Construcción)',
-    desc: 'Plataforma para subcontratación segura en obras',
+    desc: 'Plataforma para subcontratación segura en obras con IA',
     features: [
-      'Compliance Ley 32/2006',
-      'Escrow de pagos',
-      'Marketplace de obras',
-      'Libro digital',
+      'Matching IA con Claude',
+      'Gamificación y logros',
+      'Sistema de referidos',
+      'Analytics dashboard avanzado',
     ],
     gradient: 'from-orange-600 to-yellow-500',
-    stats: { value1: '2.5K', label1: 'Empresas', value2: '€12M', label2: 'Facturado' },
-    href: '/ewoorker-landing',
-    badge: 'PLATAFORMA B2B',
+    stats: { value1: '2.5K', label1: 'Empresas', value2: '€15M', label2: 'Facturado' },
+    href: '/ewoorker/landing',
+    badge: '🚀 NOVEDADES 2026',
   },
 ];
 
@@ -143,7 +143,7 @@ export function NewFeaturesSection() {
         <div className="text-center mb-16">
           <Badge className="mb-4 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200 px-6 py-3 text-base font-bold">
             <Sparkles className="h-5 w-5 mr-2 inline" />
-            NOVEDADES 2025
+            NOVEDADES 2026
           </Badge>
           <h2 className="text-4xl md:text-6xl font-black mb-6 bg-gradient-to-r from-gray-900 via-indigo-900 to-violet-900 bg-clip-text text-transparent">
             6 Módulos Nuevos que Revolucionan la Industria

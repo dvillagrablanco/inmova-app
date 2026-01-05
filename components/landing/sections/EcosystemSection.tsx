@@ -44,14 +44,15 @@ const ecosystem = [
   {
     category: 'CONSTRUCCIÓN B2B',
     color: 'from-orange-600 to-yellow-500',
-    badge: 'NUEVO',
+    badge: '🚀 NOVEDADES 2026',
     verticales: [
       {
         icon: Hammer,
         name: 'ewoorker',
-        desc: 'Subcontratación segura + Escrow',
+        desc: 'Subcontratación + IA + Gamificación',
         users: '2,500+',
         highlight: true,
+        badge: 'IA',
       },
     ],
   },
