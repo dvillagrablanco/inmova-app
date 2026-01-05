@@ -11848,6 +11848,7 @@ model EwoorkerPerfilEmpresa {
   pagosRecibidos              EwoorkerPago[]
   certificaciones             EwoorkerCertificacion[] @relation("CertificacionesEmpresa")
   suscripciones               EwoorkerSuscripcion[]
+  trabajadores                EwoorkerTrabajador[]    // Trabajadores de la empresa (modelo ewoorker original)
 
   @@index([tipoEmpresa])
   @@index([planActual])
@@ -11905,6 +11906,91 @@ model EwoorkerDocumento {
   @@index([estado])
   @@index([fechaCaducidad])
   @@map("ewoorker_documento")
+}
+
+// Trabajadores individuales de una empresa (modelo ewoorker original)
+// Permite ofrecer trabajadores específicos para subcontratación cuando hay baja carga
+model EwoorkerTrabajador {
+  id              String                @id @default(cuid())
+  perfilEmpresaId String
+  perfilEmpresa   EwoorkerPerfilEmpresa @relation(fields: [perfilEmpresaId], references: [id], onDelete: Cascade)
+
+  // Datos del trabajador
+  nombre             String
+  apellidos          String?
+  especialidad       String // 'Electricista', 'Soldador', 'Albañil', etc.
+  especialidadesSecundarias String[] @default([])
+  experienciaAnios   Int?
+  descripcion        String? @db.Text
+  fotoUrl            String?
+
+  // Disponibilidad (core del modelo ewoorker)
+  disponible         Boolean   @default(true)
+  disponibleDesde    DateTime?
+  disponibleHasta    DateTime?
+  motivoNoDisponible String?
+
+  // Tarifa
+  tarifaHora         Float?
+  tarifaDia          Float?
+
+  // Certificaciones del trabajador
+  tienePRL           Boolean   @default(false)
+  fechaCaducidadPRL  DateTime?
+  tieneReconocimientoMedico Boolean @default(false)
+  fechaReconocimientoMedico DateTime?
+  certificacionesAdicionales String[] @default([])
+
+  // Métricas individuales
+  rating             Float     @default(0)
+  totalReviews       Int       @default(0)
+  trabajosCompletados Int      @default(0)
+  tasaPuntualidad    Float     @default(100) // %
+
+  // Estado
+  activo             Boolean   @default(true)
+  verificado         Boolean   @default(false)
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // Relaciones
+  asignaciones       EwoorkerAsignacionTrabajador[]
+
+  @@index([perfilEmpresaId, disponible])
+  @@index([especialidad, disponible])
+  @@index([activo, verificado])
+  @@map("ewoorker_trabajador")
+}
+
+// Asignación de trabajadores a contratos/obras
+model EwoorkerAsignacionTrabajador {
+  id              String              @id @default(cuid())
+  trabajadorId    String
+  trabajador      EwoorkerTrabajador  @relation(fields: [trabajadorId], references: [id], onDelete: Cascade)
+  contratoId      String
+  contrato        EwoorkerContrato    @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+
+  // Período de asignación
+  fechaInicio     DateTime
+  fechaFin        DateTime?
+  horasTrabajadas Float?
+
+  // Estado
+  estado          String    @default("asignado") // asignado, en_curso, completado, cancelado
+
+  // Valoración del trabajo
+  valoracion      Int? // 1-5
+  comentario      String? @db.Text
+
+  notas           String? @db.Text
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([trabajadorId])
+  @@index([contratoId])
+  @@map("ewoorker_asignacion_trabajador")
 }
 
 // Obra/Proyecto publicado en el marketplace
@@ -12124,15 +12210,16 @@ model EwoorkerContrato {
   updatedAt DateTime @updatedAt
 
   // Relaciones
-  hitos                   EwoorkerHitoContrato[]
-  partesTrabajo           EwoorkerParteTrabajo[]
-  certificacionesContrato EwoorkerCertificacion[] @relation("CertificacionesContrato")
-  pagos                   EwoorkerPago[]
-  incidencias             EwoorkerIncidencia[]
-  changeOrders            EwoorkerChangeOrder[]
-  fichajes                EwoorkerFichaje[]
-  mensajes                EwoorkerMensajeObra[]
-  reviews                 EwoorkerReview[]
+  hitos                       EwoorkerHitoContrato[]
+  partesTrabajo               EwoorkerParteTrabajo[]
+  certificacionesContrato     EwoorkerCertificacion[] @relation("CertificacionesContrato")
+  pagos                       EwoorkerPago[]
+  incidencias                 EwoorkerIncidencia[]
+  changeOrders                EwoorkerChangeOrder[]
+  fichajes                    EwoorkerFichaje[]
+  mensajes                    EwoorkerMensajeObra[]
+  reviews                     EwoorkerReview[]
+  asignacionesTrabajadores    EwoorkerAsignacionTrabajador[] // Trabajadores asignados al contrato
 
   @@index([obraId])
   @@index([constructorId])

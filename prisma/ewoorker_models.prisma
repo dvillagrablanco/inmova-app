@@ -1,0 +1,600 @@
+// ===========================================
+// MODELOS EWOORKER - MARKETPLACE DE SERVICIOS B2B
+// Integración con Inmova PropTech
+// ===========================================
+// 
+// Para integrar estos modelos en schema.prisma:
+// 1. Añadir los enums al inicio del archivo
+// 2. Añadir los modelos en la sección correspondiente
+// 3. Ejecutar: npx prisma migrate dev --name add_ewoorker_marketplace
+//
+
+// ===== ENUMS =====
+
+enum ProfessionalSpecialty {
+  // Construcción e Instalaciones
+  electricidad
+  fontaneria
+  pintura
+  albanileria
+  carpinteria
+  soldadura
+  climatizacion
+  cerrajeria
+  cristaleria
+  
+  // Servicios PropTech específicos
+  limpieza_profesional
+  limpieza_fin_obra
+  jardineria
+  mudanzas
+  reformas_integrales
+  impermeabilizacion
+  fumigacion
+  
+  // Técnicos especializados
+  ascensores
+  piscinas
+  domotica
+  telecomunicaciones
+  seguridad_sistemas
+  
+  // Otros
+  otros
+}
+
+enum ProfessionalType {
+  autonomo           // Trabajador independiente
+  empresa_micro      // < 10 trabajadores
+  empresa_pequena    // 10-50 trabajadores
+  empresa_mediana    // 50-250 trabajadores
+  empresa_grande     // > 250 trabajadores
+}
+
+enum JobPostingType {
+  busco_profesional    // Empresa/propietario busca profesional
+  ofrezco_trabajadores // Empresa ofrece sus trabajadores (modelo ewoorker)
+  ofrezco_servicios    // Profesional ofrece sus servicios
+}
+
+enum JobPostingStatus {
+  borrador
+  activo
+  pausado
+  cerrado
+  expirado
+}
+
+enum ServiceRequestStatus {
+  pendiente         // Esperando respuesta del profesional
+  presupuestado     // Profesional envió presupuesto
+  aceptado          // Cliente aceptó
+  rechazado         // Cliente o profesional rechazó
+  en_progreso       // Trabajo en curso
+  completado        // Trabajo terminado
+  cancelado         // Cancelado por alguna parte
+  disputa           // Hay una disputa
+}
+
+enum ProfessionalSubscriptionPlan {
+  free
+  starter
+  professional
+  business
+}
+
+enum VerificationStatus {
+  pendiente
+  en_revision
+  aprobado
+  rechazado
+}
+
+// ===== MODELOS PRINCIPALES =====
+
+// Perfil extendido de proveedor de servicios
+model ServiceProfessional {
+  id        String @id @default(cuid())
+  
+  // Vinculación opcional con Provider existente
+  providerId String? @unique
+  // provider   Provider? @relation(fields: [providerId], references: [id])
+  
+  // Datos de empresa/profesional
+  nombreComercial     String
+  razonSocial         String?
+  cif                 String @unique
+  tipoEmpresa         ProfessionalType
+  
+  // Contacto
+  email               String @unique
+  telefono            String
+  telefonoSecundario  String?
+  direccion           String
+  ciudad              String
+  provincia           String
+  codigoPostal        String
+  pais                String @default("España")
+  
+  // Geolocalización para búsquedas
+  latitud             Float?
+  longitud            Float?
+  radioServicio       Int @default(50) // km que está dispuesto a desplazarse
+  
+  // Especialidades (múltiples)
+  especialidades      ProfessionalSpecialty[]
+  descripcion         String @db.Text
+  logoUrl             String?
+  websiteUrl          String?
+  
+  // Autenticación
+  passwordHash        String
+  activo              Boolean @default(true)
+  
+  // Verificación
+  verificado          Boolean @default(false)
+  estadoVerificacion  VerificationStatus @default(pendiente)
+  fechaVerificacion   DateTime?
+  motivoRechazo       String?
+  
+  // Suscripción
+  plan                ProfessionalSubscriptionPlan @default(free)
+  planExpira          DateTime?
+  stripeCustomerId    String?
+  stripeSubscriptionId String?
+  
+  // Relaciones
+  certificaciones     ServiceCertification[]
+  documentos          ServiceProfessionalDocument[]
+  trabajadores        ServiceWorker[]
+  serviciosOfrecidos  ProfessionalService[]
+  anunciosTrabajo     JobPosting[]
+  solicitudesRecibidas ServiceRequest[]
+  solicitudesEnviadas  ServiceRequest[] @relation("RequestedByProfessional")
+  respuestasAnuncios  JobPostingResponse[]
+  
+  // Métricas y reputación
+  rating              Float @default(0)
+  totalReviews        Int @default(0)
+  totalTrabajos       Int @default(0)
+  tiempoRespuestaMin  Int? // Minutos promedio
+  tasaCancelacion     Float @default(0)
+  nivelVendedor       Int @default(0) // 0, 1, 2, 3
+  
+  // Financiero
+  tarifaHoraBase      Float?
+  tarifaMinima        Float?
+  formasPago          String[] @default(["transferencia"])
+  iban                String?
+  
+  // Configuración
+  notificacionesEmail Boolean @default(true)
+  notificacionesPush  Boolean @default(true)
+  notificacionesSms   Boolean @default(false)
+  
+  // Auditoría
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  ultimoAcceso        DateTime?
+  
+  @@index([ciudad, provincia])
+  @@index([verificado, activo])
+  @@index([plan])
+  @@map("service_professionals")
+}
+
+// Trabajadores de una empresa (modelo ewoorker)
+model ServiceWorker {
+  id              String @id @default(cuid())
+  professionalId  String
+  professional    ServiceProfessional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  
+  nombre          String
+  apellidos       String?
+  especialidad    ProfessionalSpecialty
+  especialidadesSecundarias ProfessionalSpecialty[] @default([])
+  experienciaAnos Int? // Años
+  descripcion     String?
+  fotoUrl         String?
+  
+  // Disponibilidad (core de ewoorker)
+  disponible      Boolean @default(true)
+  disponibleDesde DateTime?
+  disponibleHasta DateTime?
+  motivoNoDisponible String?
+  
+  // Tarifa específica del trabajador
+  tarifaHora      Float?
+  
+  // Métricas individuales
+  rating          Float @default(0)
+  totalTrabajos   Int @default(0)
+  
+  activo          Boolean @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Trabajos asignados
+  asignaciones    ServiceJobAssignment[]
+  
+  @@index([professionalId, disponible])
+  @@index([especialidad, disponible])
+  @@map("service_workers")
+}
+
+// Certificaciones y acreditaciones
+model ServiceCertification {
+  id              String @id @default(cuid())
+  professionalId  String
+  professional    ServiceProfessional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  
+  tipo            String // ISO_9001, ISO_14001, PRL, CARNET_INSTALADOR, etc.
+  nombre          String
+  entidadEmisora  String?
+  numero          String?
+  fechaEmision    DateTime?
+  fechaCaducidad  DateTime?
+  documentoUrl    String?
+  
+  verificado      Boolean @default(false)
+  fechaVerificacion DateTime?
+  
+  createdAt       DateTime @default(now())
+  
+  @@index([professionalId])
+  @@index([tipo])
+  @@map("service_certifications")
+}
+
+// Documentos del profesional
+model ServiceProfessionalDocument {
+  id              String @id @default(cuid())
+  professionalId  String
+  professional    ServiceProfessional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  
+  tipo            String // SEGURO_RC, ALTA_AUTONOMO, MODELO_036, SS_CORRIENTE, RECONOCIMIENTO_MEDICO
+  nombre          String
+  url             String
+  fechaCaducidad  DateTime?
+  
+  verificado      Boolean @default(false)
+  estadoVerificacion VerificationStatus @default(pendiente)
+  fechaVerificacion DateTime?
+  motivoRechazo   String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([professionalId, tipo])
+  @@index([professionalId])
+  @@map("service_professional_documents")
+}
+
+// Servicios ofrecidos por profesional
+model ProfessionalService {
+  id              String @id @default(cuid())
+  professionalId  String
+  professional    ServiceProfessional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  
+  nombre          String
+  descripcion     String @db.Text
+  especialidad    ProfessionalSpecialty
+  
+  // Precios
+  tipoPrecio      String // hora, proyecto, m2, unidad
+  precioDesde     Float
+  precioHasta     Float?
+  
+  // Características
+  duracionEstimada String?
+  incluye         String[] @default([])
+  noIncluye       String[] @default([])
+  requisitos      String?
+  imagenesUrl     String[] @default([])
+  
+  // Estado
+  activo          Boolean @default(true)
+  destacado       Boolean @default(false)
+  
+  // Métricas
+  vecesContratado Int @default(0)
+  rating          Float @default(0)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([especialidad, activo])
+  @@index([professionalId])
+  @@map("professional_services")
+}
+
+// Anuncios de trabajo (modelo ewoorker - bidireccional)
+model JobPosting {
+  id              String @id @default(cuid())
+  
+  // Quién publica (uno u otro)
+  companyId       String?
+  // company         Company? @relation(fields: [companyId], references: [id])
+  professionalId  String?
+  professional    ServiceProfessional? @relation(fields: [professionalId], references: [id])
+  
+  // Tipo de anuncio (bidireccional como ewoorker)
+  tipo            JobPostingType
+  
+  titulo          String
+  descripcion     String @db.Text
+  especialidad    ProfessionalSpecialty
+  especialidadesAdicionales ProfessionalSpecialty[] @default([])
+  
+  // Ubicación
+  ciudad          String
+  provincia       String
+  direccion       String?
+  latitud         Float?
+  longitud        Float?
+  
+  // Fechas
+  fechaInicio     DateTime?
+  fechaFin        DateTime?
+  duracionEstimada String?
+  urgente         Boolean @default(false)
+  
+  // Presupuesto
+  presupuestoMin  Float?
+  presupuestoMax  Float?
+  tipoPago        String? // hora, proyecto, etc.
+  
+  // Requisitos
+  experienciaMinima Int?
+  certificacionesRequeridas String[] @default([])
+  requisitosAdicionales String?
+  
+  // Para "ofrezco_trabajadores"
+  numTrabajadores Int?
+  
+  // Estado
+  estado          JobPostingStatus @default(activo)
+  destacado       Boolean @default(false)
+  
+  // Respuestas recibidas
+  respuestas      JobPostingResponse[]
+  
+  // Métricas
+  vistas          Int @default(0)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  expiresAt       DateTime?
+  
+  @@index([estado, especialidad])
+  @@index([ciudad, provincia])
+  @@index([tipo, estado])
+  @@map("job_postings")
+}
+
+// Respuestas a anuncios de trabajo
+model JobPostingResponse {
+  id              String @id @default(cuid())
+  jobPostingId    String
+  jobPosting      JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  
+  // Quién responde
+  professionalId  String?
+  professional    ServiceProfessional? @relation(fields: [professionalId], references: [id])
+  companyId       String?
+  // company         Company? @relation(fields: [companyId], references: [id])
+  
+  mensaje         String @db.Text
+  presupuesto     Float?
+  disponibilidadDesde DateTime?
+  disponibilidadHasta DateTime?
+  adjuntos        String[] @default([])
+  
+  estado          String @default("pendiente") // pendiente, aceptado, rechazado, en_conversacion
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([jobPostingId])
+  @@index([professionalId])
+  @@map("job_posting_responses")
+}
+
+// Solicitudes de servicio
+model ServiceRequest {
+  id              String @id @default(cuid())
+  
+  // Quién solicita
+  companyId       String?
+  // company         Company? @relation(fields: [companyId], references: [id])
+  userId          String? // Usuario de Inmova que solicita
+  requestedByProfessionalId String?
+  requestedByProfessional   ServiceProfessional? @relation("RequestedByProfessional", fields: [requestedByProfessionalId], references: [id])
+  
+  // A quién se solicita
+  professionalId  String
+  professional    ServiceProfessional @relation(fields: [professionalId], references: [id])
+  
+  // Detalles
+  titulo          String
+  descripcion     String @db.Text
+  especialidad    ProfessionalSpecialty
+  
+  // Vinculación con propiedad (ventaja Inmova)
+  unitId          String?
+  // unit            Unit? @relation(fields: [unitId], references: [id])
+  buildingId      String?
+  // building        Building? @relation(fields: [buildingId], references: [id])
+  maintenanceRequestId String? // Vinculación con incidencia existente
+  
+  // Ubicación alternativa
+  direccion       String?
+  ciudad          String
+  provincia       String
+  codigoPostal    String?
+  
+  // Fechas
+  fechaDeseada    DateTime?
+  horaPreferida   String? // mañana, tarde, cualquiera
+  urgente         Boolean @default(false)
+  flexibilidad    String? // flexible, fecha_exacta
+  
+  // Presupuesto del cliente
+  presupuestoMax  Float?
+  
+  // Estado
+  estado          ServiceRequestStatus @default(pendiente)
+  
+  // Respuesta del profesional
+  presupuestoOfrecido Float?
+  fechaPropuesta  DateTime?
+  notasProveedor  String? @db.Text
+  tiempoEstimado  String?
+  
+  // Ejecución
+  fechaInicio     DateTime?
+  fechaFin        DateTime?
+  costoFinal      Float?
+  horasTrabajadas Float?
+  
+  // Valoración
+  valoracion      Int? // 1-5
+  comentarioValoracion String? @db.Text
+  fechaValoracion DateTime?
+  
+  // Fotos
+  fotosAntes      String[] @default([])
+  fotosDespues    String[] @default([])
+  
+  // Chat
+  mensajes        ServiceRequestMessage[]
+  
+  // Trabajadores asignados
+  asignaciones    ServiceJobAssignment[]
+  
+  // Facturación
+  facturaId       String?
+  pagado          Boolean @default(false)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([professionalId, estado])
+  @@index([companyId])
+  @@index([estado])
+  @@map("service_requests")
+}
+
+// Mensajes en solicitud de servicio
+model ServiceRequestMessage {
+  id              String @id @default(cuid())
+  requestId       String
+  request         ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  
+  emisor          String // "cliente" | "profesional"
+  emisorId        String? // ID del usuario o profesional
+  mensaje         String @db.Text
+  adjuntos        String[] @default([])
+  
+  leido           Boolean @default(false)
+  fechaLectura    DateTime?
+  
+  createdAt       DateTime @default(now())
+  
+  @@index([requestId])
+  @@map("service_request_messages")
+}
+
+// Asignación de trabajadores a trabajos
+model ServiceJobAssignment {
+  id              String @id @default(cuid())
+  
+  workerId        String
+  worker          ServiceWorker @relation(fields: [workerId], references: [id])
+  
+  requestId       String
+  request         ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  
+  fechaInicio     DateTime
+  fechaFin        DateTime?
+  horasTrabajadas Float?
+  
+  estado          String @default("asignado") // asignado, en_curso, completado, cancelado
+  notas           String? @db.Text
+  
+  // Valoración específica del trabajador
+  valoracion      Int?
+  comentario      String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([workerId])
+  @@index([requestId])
+  @@map("service_job_assignments")
+}
+
+// Historial de verificaciones
+model ProfessionalVerificationLog {
+  id              String @id @default(cuid())
+  professionalId  String
+  
+  tipo            String // documento, certificacion, identidad
+  documentoId     String?
+  certificacionId String?
+  
+  estadoAnterior  VerificationStatus
+  estadoNuevo     VerificationStatus
+  motivo          String?
+  verificadoPor   String? // ID del admin
+  
+  createdAt       DateTime @default(now())
+  
+  @@index([professionalId])
+  @@map("professional_verification_logs")
+}
+
+// Estadísticas diarias de profesional
+model ProfessionalDailyStats {
+  id              String @id @default(cuid())
+  professionalId  String
+  fecha           DateTime @db.Date
+  
+  vistas          Int @default(0)
+  solicitudesRecibidas Int @default(0)
+  solicitudesAceptadas Int @default(0)
+  trabajosCompletados Int @default(0)
+  ingresosBrutos  Float @default(0)
+  
+  createdAt       DateTime @default(now())
+  
+  @@unique([professionalId, fecha])
+  @@index([professionalId])
+  @@map("professional_daily_stats")
+}
+
+// Pagos y comisiones
+model ServicePayment {
+  id              String @id @default(cuid())
+  
+  requestId       String @unique
+  // request         ServiceRequest @relation(fields: [requestId], references: [id])
+  
+  montoBruto      Float
+  comisionPlataforma Float
+  montoNeto       Float
+  
+  stripePaymentIntentId String?
+  stripeTransferId      String?
+  
+  estado          String @default("pendiente") // pendiente, procesando, completado, fallido, reembolsado
+  
+  fechaPago       DateTime?
+  fechaTransferencia DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([estado])
+  @@map("service_payments")
+}
