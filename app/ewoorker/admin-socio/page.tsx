@@ -22,8 +22,11 @@ import {
   CheckCircle2,
   Building2,
   HardHat,
+  LogOut,
+  ExternalLink,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { signOut } from 'next-auth/react';
 
 interface Metrics {
   totalEmpresas: number;
@@ -107,7 +110,9 @@ export default function AdminSocioPage() {
   }
 
   // Verificar roles permitidos para el panel del socio
-  const allowedRoles = ['super_admin', 'administrador'];
+  // socio_ewoorker: rol específico para el socio fundador (acceso solo a eWoorker)
+  // super_admin/administrador: pueden acceder a todo
+  const allowedRoles = ['super_admin', 'administrador', 'socio_ewoorker'];
   const hasAccess = session && allowedRoles.includes(session.user.role as string);
 
   if (!session) {
@@ -204,9 +209,9 @@ export default function AdminSocioPage() {
               </div>
               <p className="text-orange-100">Métricas y análisis de eWoorker</p>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               <Select value={periodo} onValueChange={(value: any) => setPeriodo(value)}>
-                <SelectTrigger className="bg-white text-gray-900 w-48">
+                <SelectTrigger className="bg-white text-gray-900 w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -222,7 +227,23 @@ export default function AdminSocioPage() {
                 className="bg-white text-orange-600 hover:bg-gray-100"
               >
                 <Download className="w-4 h-4 mr-2" />
-                Exportar PDF
+                Exportar
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => window.open('/ewoorker/landing', '_blank')}
+                className="text-white hover:bg-white/20"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Ver Landing
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => signOut({ callbackUrl: '/login' })}
+                className="text-white hover:bg-white/20"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Cerrar Sesión
               </Button>
             </div>
           </div>

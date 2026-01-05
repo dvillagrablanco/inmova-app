@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     // Verificar roles permitidos para el panel del socio
-    const allowedRoles = ['super_admin', 'administrador'];
+    const allowedRoles = ['super_admin', 'administrador', 'socio_ewoorker'];
     if (!session || !allowedRoles.includes(session.user.role as string)) {
       return NextResponse.json(
         { error: 'Acceso denegado. Solo para socio fundador.', currentRole: session?.user?.role },

@@ -9,7 +9,7 @@ import { FloatingTourButton } from '@/components/tours/FloatingTourButton';
 import { ContextualHelp } from '@/components/help/ContextualHelp';
 import { OnboardingChecklist } from '@/components/tutorials/OnboardingChecklist';
 import { FirstTimeSetupWizard } from '@/components/tutorials/FirstTimeSetupWizard';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useIsMobile } from '@/lib/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
@@ -45,12 +45,33 @@ export function AuthenticatedLayout({
 }: AuthenticatedLayoutProps) {
   const isMobile = useIsMobile();
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const router = useRouter();
+  const { data: session, status } = useSession();
 
   // Estados para tutoriales y onboarding
   const [showSetupWizard, setShowSetupWizard] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
+
+  // Redirección para socios de eWoorker: solo pueden acceder a rutas de eWoorker
+  useEffect(() => {
+    if (status === 'loading') return;
+    
+    if (session?.user?.role === 'socio_ewoorker') {
+      // Rutas permitidas para socios de eWoorker
+      const allowedPaths = [
+        '/ewoorker',
+        '/api/ewoorker',
+      ];
+      
+      const isAllowedPath = allowedPaths.some(path => pathname?.startsWith(path));
+      
+      if (!isAllowedPath && pathname) {
+        // Redirigir al panel del socio
+        router.replace('/ewoorker/admin-socio');
+      }
+    }
+  }, [session, pathname, router, status]);
 
   const maxWidthClasses = {
     full: 'max-w-none',

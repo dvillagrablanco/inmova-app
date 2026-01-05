@@ -31,10 +31,11 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    const allowedRoles = ['super_admin', 'administrador'];
+    const allowedRoles = ['super_admin', 'administrador', 'socio_ewoorker'];
     const isSocio = SOCIO_FUNDADOR_IDS.includes(userId) || 
                     allowedRoles.includes(user?.role as string) ||
-                    user?.email?.includes("@socio-ewoorker.com");
+                    user?.email?.includes("@socio-ewoorker.com") ||
+                    user?.email?.includes("@ewoorker.com");
 
     if (!isSocio) {
       // Log intento de acceso no autorizado

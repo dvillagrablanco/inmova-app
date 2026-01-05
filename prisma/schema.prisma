@@ -15,6 +15,7 @@ enum UserRole {
   operador
   soporte
   community_manager
+  socio_ewoorker
 }
 
 enum BusinessVertical {
