@@ -22,18 +22,19 @@ export async function GET(request: NextRequest) {
 
     const userId = session.user.id;
 
-    // Verificar si es el socio fundador o superadmin
+    // Verificar si es el socio fundador o tiene rol autorizado
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { 
-        rol: true,
+        role: true,
         email: true
       }
     });
 
+    const allowedRoles = ['super_admin', 'administrador'];
     const isSocio = SOCIO_FUNDADOR_IDS.includes(userId) || 
-                    user?.rol === "SUPER_ADMIN" ||
-                    user?.email?.includes("@socio-ewoorker.com"); // Ejemplo
+                    allowedRoles.includes(user?.role as string) ||
+                    user?.email?.includes("@socio-ewoorker.com");
 
     if (!isSocio) {
       // Log intento de acceso no autorizado

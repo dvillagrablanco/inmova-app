@@ -8,7 +8,9 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'super_admin') {
+    // Verificar roles permitidos para el panel del socio
+    const allowedRoles = ['super_admin', 'administrador'];
+    if (!session || !allowedRoles.includes(session.user.role as string)) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 

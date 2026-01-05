@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Building2 } from 'lucide-react';
+import { Building2, HardHat } from 'lucide-react';
 
 export function Footer() {
   return (
     <footer className="bg-gray-900 text-white py-12 px-4">
       <div className="container mx-auto">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
+        <div className="grid md:grid-cols-5 gap-8 mb-8">
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
@@ -37,6 +37,20 @@ export function Footer() {
               <li><Link href="/landing/demo" className="hover:text-white transition-colors">Ver Demo</Link></li>
               <li><a href="#integraciones" className="hover:text-white transition-colors">Integraciones</a></li>
               <li><Link href="/landing/ventajas" className="hover:text-indigo-400 transition-colors font-medium">Ventajas de INMOVA</Link></li>
+            </ul>
+          </div>
+
+          {/* eWoorker - Construcción B2B */}
+          <div>
+            <h4 className="font-semibold mb-4 flex items-center gap-2">
+              <HardHat className="h-5 w-5 text-orange-500" />
+              eWoorker
+            </h4>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li><Link href="/ewoorker/landing" className="hover:text-orange-400 transition-colors font-medium">Marketplace B2B</Link></li>
+              <li><Link href="/ewoorker/landing#como-funciona" className="hover:text-white transition-colors">Cómo Funciona</Link></li>
+              <li><Link href="/ewoorker/landing#planes" className="hover:text-white transition-colors">Planes</Link></li>
+              <li><Link href="/ewoorker/compliance" className="hover:text-white transition-colors">Compliance Hub</Link></li>
             </ul>
           </div>
 

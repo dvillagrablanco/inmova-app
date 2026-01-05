@@ -106,7 +106,42 @@ export default function AdminSocioPage() {
     );
   }
 
-  if (!session || session.user.role !== 'super_admin') {
+  // Verificar roles permitidos para el panel del socio
+  const allowedRoles = ['super_admin', 'administrador'];
+  const hasAccess = session && allowedRoles.includes(session.user.role as string);
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-white flex items-center justify-center p-4">
+        <Card className="max-w-md">
+          <CardHeader>
+            <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-2" />
+            <CardTitle className="text-center text-red-600">Sesión No Iniciada</CardTitle>
+            <CardDescription className="text-center">
+              Debes iniciar sesión para acceder al panel del socio.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button
+              className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600"
+              onClick={() => window.location.href = '/login?callbackUrl=/ewoorker/admin-socio'}
+            >
+              Iniciar Sesión
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => window.location.href = '/ewoorker/landing'}
+            >
+              Volver a eWoorker
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!hasAccess) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-white flex items-center justify-center p-4">
         <Card className="max-w-md">
@@ -115,14 +150,25 @@ export default function AdminSocioPage() {
             <CardTitle className="text-center text-red-600">Acceso Denegado</CardTitle>
             <CardDescription className="text-center">
               Este panel es exclusivo para el socio fundador de eWoorker.
+              <br />
+              <span className="text-xs text-gray-500 mt-2 block">
+                Rol actual: {session.user.role || 'No definido'}
+              </span>
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             <Button
               className="w-full"
               onClick={() => window.location.href = '/dashboard'}
             >
-              Volver al Dashboard
+              Ir al Dashboard
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => window.location.href = '/ewoorker/landing'}
+            >
+              Volver a eWoorker
             </Button>
           </CardContent>
         </Card>

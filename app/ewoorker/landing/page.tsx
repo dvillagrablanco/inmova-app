@@ -82,7 +82,7 @@ export default function EwoorkerLandingPage() {
                 Iniciar Sesión
               </Button>
               <Button 
-                onClick={() => router.push('/registro?platform=ewoorker')}
+                onClick={() => router.push('/register?platform=ewoorker')}
                 className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white shadow-lg"
               >
                 Empezar Gratis
@@ -121,7 +121,7 @@ export default function EwoorkerLandingPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
               <Button
                 size="lg"
-                onClick={() => router.push('/registro?platform=ewoorker&type=constructor')}
+                onClick={() => router.push('/register?platform=ewoorker&type=constructor')}
                 className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white text-lg px-8 py-6 shadow-2xl hover:shadow-orange-300 transition-all"
               >
                 <Building2 className="w-5 h-5 mr-2" />
@@ -131,7 +131,7 @@ export default function EwoorkerLandingPage() {
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() => router.push('/registro?platform=ewoorker&type=subcontratista')}
+                onClick={() => router.push('/register?platform=ewoorker&type=subcontratista')}
                 className="border-2 border-orange-600 text-orange-600 hover:bg-orange-50 text-lg px-8 py-6"
               >
                 <HardHat className="w-5 h-5 mr-2" />
@@ -157,15 +157,6 @@ export default function EwoorkerLandingPage() {
             </div>
           </div>
 
-          {/* Hero Image / Video Placeholder */}
-          <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-orange-200">
-            <div className="aspect-video bg-gradient-to-br from-orange-100 to-yellow-100 flex items-center justify-center">
-              <div className="text-center">
-                <Building2 className="w-24 h-24 text-orange-600 mx-auto mb-4" />
-                <p className="text-gray-600 font-medium">Video Demo de eWoorker</p>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -500,7 +491,7 @@ export default function EwoorkerLandingPage() {
                 </ul>
                 <Button
                   className="w-full bg-gray-700 hover:bg-gray-800"
-                  onClick={() => router.push('/registro?platform=ewoorker&plan=obrero')}
+                  onClick={() => router.push('/register?platform=ewoorker&plan=obrero')}
                 >
                   Empezar Gratis
                 </Button>
@@ -551,7 +542,7 @@ export default function EwoorkerLandingPage() {
                 </ul>
                 <Button
                   className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600"
-                  onClick={() => router.push('/registro?platform=ewoorker&plan=capataz')}
+                  onClick={() => router.push('/register?platform=ewoorker&plan=capataz')}
                 >
                   Probar 14 días gratis
                 </Button>
@@ -607,7 +598,7 @@ export default function EwoorkerLandingPage() {
                 </ul>
                 <Button
                   className="w-full bg-blue-700 hover:bg-blue-800"
-                  onClick={() => router.push('/contacto?plan=constructor')}
+                  onClick={() => router.push('/landing/contacto?plan=constructor')}
                 >
                   Hablar con Ventas
                 </Button>
@@ -619,7 +610,7 @@ export default function EwoorkerLandingPage() {
             <p className="text-gray-600 mb-4">
               <strong>Sin permanencia.</strong> Cancela cuando quieras. Prueba 14 días gratis.
             </p>
-            <Link href="/planes" className="text-orange-600 hover:text-orange-700 font-semibold underline">
+            <Link href="#planes" className="text-orange-600 hover:text-orange-700 font-semibold underline">
               Ver comparativa detallada de planes →
             </Link>
           </div>
@@ -756,14 +747,9 @@ export default function EwoorkerLandingPage() {
                 <CardTitle>¿Hay comisión por uso?</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 mb-4">
+                <p className="text-gray-700">
                   Depende del plan. <strong>Plan Obrero (gratis): 5% comisión</strong> por obra cerrada. <strong>Plan Capataz (€49/mes): 2% comisión</strong>. <strong>Plan Constructor (€149/mes): 0% comisión</strong> + obras destacadas. La comisión solo se cobra si cierras obra.
                 </p>
-                <div className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded">
-                  <p className="text-sm text-gray-700">
-                    <strong>Modelo de negocio eWoorker:</strong> Suscripciones mensuales + comisiones por éxito. Los ingresos se reparten 50% para la plataforma y 50% para el socio fundador.
-                  </p>
-                </div>
               </CardContent>
             </Card>
           </div>
@@ -782,7 +768,7 @@ export default function EwoorkerLandingPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"
-              onClick={() => router.push('/registro?platform=ewoorker')}
+              onClick={() => router.push('/register?platform=ewoorker')}
               className="bg-white text-orange-600 hover:bg-gray-100 text-lg px-10 py-6 shadow-2xl"
             >
               <Building2 className="w-5 h-5 mr-2" />
@@ -792,7 +778,7 @@ export default function EwoorkerLandingPage() {
             <Button
               size="lg"
               variant="outline"
-              onClick={() => router.push('/contacto?platform=ewoorker')}
+                onClick={() => router.push('/landing/contacto?platform=ewoorker')}
               className="border-2 border-white text-white hover:bg-white/10 text-lg px-10 py-6"
             >
               Hablar con Ventas

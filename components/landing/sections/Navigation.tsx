@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Building2, Sparkles, Menu, X } from 'lucide-react';
+import { Building2, Sparkles, Menu, X, HardHat } from 'lucide-react';
 
 export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -15,6 +15,7 @@ export function Navigation() {
     { href: '#accesos', label: 'Accesos' },
     { href: '#pricing', label: 'Precios' },
     { href: '#integraciones', label: 'Integraciones' },
+    { href: '/ewoorker/landing', label: 'eWoorker', icon: HardHat, highlight: true },
   ];
 
   return (
@@ -39,13 +40,24 @@ export function Navigation() {
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-6">
             {menuItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors"
-              >
-                {item.label}
-              </a>
+              item.highlight ? (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center gap-1.5 text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors bg-orange-50 px-3 py-1.5 rounded-full border border-orange-200 hover:border-orange-300"
+                >
+                  {item.icon && <item.icon className="h-4 w-4" />}
+                  {item.label}
+                </Link>
+              ) : (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors"
+                >
+                  {item.label}
+                </a>
+              )
             ))}
             <Link href="/login">
               <Button variant="ghost" className="hover:bg-indigo-50">
@@ -78,14 +90,27 @@ export function Navigation() {
                 </SheetHeader>
                 <div className="flex flex-col gap-4 mt-8">
                   {menuItems.map((item) => (
-                    <a
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="text-lg font-medium text-gray-700 hover:text-indigo-600 transition-colors py-2 px-4 hover:bg-indigo-50 rounded-lg"
-                    >
-                      {item.label}
-                    </a>
+                    item.highlight ? (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-2 text-lg font-semibold text-orange-600 hover:text-orange-700 transition-colors py-2 px-4 hover:bg-orange-50 rounded-lg border border-orange-200"
+                      >
+                        {item.icon && <item.icon className="h-5 w-5" />}
+                        {item.label}
+                        <Badge className="bg-orange-500 text-white text-xs ml-auto">B2B</Badge>
+                      </Link>
+                    ) : (
+                      <a
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="text-lg font-medium text-gray-700 hover:text-indigo-600 transition-colors py-2 px-4 hover:bg-indigo-50 rounded-lg"
+                      >
+                        {item.label}
+                      </a>
+                    )
                   ))}
                   <div className="border-t pt-4 mt-4 space-y-3">
                     <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
