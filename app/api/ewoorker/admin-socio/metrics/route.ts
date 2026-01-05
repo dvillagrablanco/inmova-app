@@ -147,7 +147,7 @@ export async function GET(request: NextRequest) {
     const contratosCompletados = await prisma.ewoorkerContrato.count({
       where: {
         estado: 'COMPLETADO',
-        fechaFin: { gte: startDate, lte: endDate },
+        fechaFinalizacion: { gte: startDate, lte: endDate },
       },
     });
 
