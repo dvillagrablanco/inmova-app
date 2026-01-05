@@ -82,7 +82,7 @@ export default function EwoorkerLandingPage() {
                 Iniciar Sesión
               </Button>
               <Button 
-                onClick={() => router.push('/register?platform=ewoorker')}
+                onClick={() => router.push('/ewoorker/registro')}
                 className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white shadow-lg"
               >
                 Empezar Gratis
@@ -121,7 +121,7 @@ export default function EwoorkerLandingPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
               <Button
                 size="lg"
-                onClick={() => router.push('/register?platform=ewoorker&type=constructor')}
+                onClick={() => router.push('/ewoorker/registro?type=constructor')}
                 className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white text-lg px-8 py-6 shadow-2xl hover:shadow-orange-300 transition-all"
               >
                 <Building2 className="w-5 h-5 mr-2" />
@@ -131,7 +131,7 @@ export default function EwoorkerLandingPage() {
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() => router.push('/register?platform=ewoorker&type=subcontratista')}
+                onClick={() => router.push('/ewoorker/registro?type=subcontratista')}
                 className="border-2 border-orange-600 text-orange-600 hover:bg-orange-50 text-lg px-8 py-6"
               >
                 <HardHat className="w-5 h-5 mr-2" />
@@ -491,7 +491,7 @@ export default function EwoorkerLandingPage() {
                 </ul>
                 <Button
                   className="w-full bg-gray-700 hover:bg-gray-800"
-                  onClick={() => router.push('/register?platform=ewoorker&plan=obrero')}
+                  onClick={() => router.push('/ewoorker/registro?plan=obrero')}
                 >
                   Empezar Gratis
                 </Button>
@@ -542,7 +542,7 @@ export default function EwoorkerLandingPage() {
                 </ul>
                 <Button
                   className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600"
-                  onClick={() => router.push('/register?platform=ewoorker&plan=capataz')}
+                  onClick={() => router.push('/ewoorker/registro?plan=capataz')}
                 >
                   Probar 14 días gratis
                 </Button>
@@ -768,7 +768,7 @@ export default function EwoorkerLandingPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"
-              onClick={() => router.push('/register?platform=ewoorker')}
+              onClick={() => router.push('/ewoorker/registro')}
               className="bg-white text-orange-600 hover:bg-gray-100 text-lg px-10 py-6 shadow-2xl"
             >
               <Building2 className="w-5 h-5 mr-2" />
@@ -809,7 +809,7 @@ export default function EwoorkerLandingPage() {
                 <li><Link href="#como-funciona" className="hover:text-orange-500 transition-colors">Cómo Funciona</Link></li>
                 <li><Link href="#planes" className="hover:text-orange-500 transition-colors">Planes y Precios</Link></li>
                 <li><Link href="/ewoorker/compliance" className="hover:text-orange-500 transition-colors">Compliance Hub</Link></li>
-                <li><Link href="/ewoorker/marketplace" className="hover:text-orange-500 transition-colors">Marketplace</Link></li>
+                <li><Link href="/ewoorker/obras" className="hover:text-orange-500 transition-colors">Marketplace</Link></li>
               </ul>
             </div>
             <div>
