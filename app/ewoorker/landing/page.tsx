@@ -76,7 +76,7 @@ export default function EwoorkerLandingPage() {
             <div className="flex items-center space-x-4">
               <Button 
                 variant="ghost" 
-                onClick={() => router.push('/login')}
+                onClick={() => router.push('/ewoorker/login')}
                 className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
               >
                 Iniciar Sesión

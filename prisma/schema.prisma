@@ -16,6 +16,8 @@ enum UserRole {
   soporte
   community_manager
   socio_ewoorker
+  contratista_ewoorker
+  subcontratista_ewoorker
 }
 
 enum BusinessVertical {
