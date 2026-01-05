@@ -22,13 +22,6 @@ import { trackUsage } from '@/lib/usage-tracking-service';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Configuración de Next.js para body parsing
-export const config = {
-  api: {
-    bodyParser: false, // Desactivar para manejar multipart/form-data
-  },
-};
-
 /**
  * POST /api/upload
  * 
