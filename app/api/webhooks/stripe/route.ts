@@ -2,16 +2,23 @@
  * API Route: Webhook de Stripe
  * POST /api/webhooks/stripe
  * 
- * Maneja eventos de Stripe:
- * - payment_intent.succeeded
- * - payment_intent.failed
- * - payment_intent.canceled
+ * Maneja eventos de Stripe para AMBAS plataformas:
+ * 
+ * 1. INMOVA - Pagos 100% para la plataforma
+ *    - Suscripciones de gestores inmobiliarios
+ *    - Pagos de alquiler (con comisión)
+ * 
+ * 2. EWOORKER - Pagos con división 50/50
+ *    - 50% para socio fundador
+ *    - 50% para plataforma
+ *    - Identificados por metadata.platform === 'ewoorker'
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { prisma } from '@/lib/db';
 import { inmovaContasimpleBridge } from '@/lib/inmova-contasimple-bridge';
+import { handleEwoorkerStripeWebhook } from '@/lib/ewoorker-stripe-service';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -58,6 +65,26 @@ export async function POST(req: NextRequest) {
     // Manejar eventos
     console.log(`[Stripe Webhook] Received event: ${event.type}`);
 
+    // ══════════════════════════════════════════════════════════════════
+    // PASO 1: Verificar si es un evento de eWoorker
+    // Los pagos de eWoorker tienen metadata.platform === 'ewoorker'
+    // y se dividen 50/50 entre socio y plataforma
+    // ══════════════════════════════════════════════════════════════════
+    
+    const ewoorkerResult = await handleEwoorkerStripeWebhook(event);
+    if (ewoorkerResult.handled) {
+      console.log(`[Stripe Webhook] Evento manejado por eWoorker: ${ewoorkerResult.message}`);
+      return NextResponse.json({ 
+        received: true, 
+        platform: 'ewoorker',
+        message: ewoorkerResult.message,
+      });
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // PASO 2: Si no es eWoorker, es un pago de Inmova (100% plataforma)
+    // ══════════════════════════════════════════════════════════════════
+
     switch (event.type) {
       case 'payment_intent.succeeded':
         await handlePaymentSucceeded(event.data.object as Stripe.PaymentIntent);
@@ -88,11 +115,18 @@ export async function POST(req: NextRequest) {
         await handleB2BInvoiceCreated(event.data.object as Stripe.Invoice);
         break;
 
+      // Eventos de suscripciones
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated':
+      case 'customer.subscription.deleted':
+        await handleSubscriptionEvent(event);
+        break;
+
       default:
         console.log(`[Stripe Webhook] Unhandled event type: ${event.type}`);
     }
 
-    return NextResponse.json({ received: true });
+    return NextResponse.json({ received: true, platform: 'inmova' });
 
   } catch (error: any) {
     console.error('[Stripe Webhook Error]:', error);
@@ -316,5 +350,54 @@ async function handleB2BInvoicePaymentFailed(stripeInvoice: Stripe.Invoice) {
     logger.info(`[Stripe Webhook] Factura ${b2bInvoice.numeroFactura} marcada como VENCIDA`);
   } catch (error: any) {
     logger.error('[Stripe Webhook] Error procesando fallo de pago:', error);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HANDLERS DE SUSCRIPCIONES INMOVA (100% plataforma)
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Maneja eventos de suscripciones de Inmova
+ * Nota: Los pagos de Inmova van 100% a la plataforma
+ */
+async function handleSubscriptionEvent(event: Stripe.Event) {
+  const subscription = event.data.object as Stripe.Subscription;
+  
+  // Verificar que NO sea una suscripción de eWoorker
+  if (subscription.metadata?.platform === 'ewoorker') {
+    return; // Ya manejado por handleEwoorkerStripeWebhook
+  }
+
+  logger.info(`[Stripe Webhook] Evento de suscripción Inmova: ${event.type}`, {
+    subscriptionId: subscription.id,
+    status: subscription.status,
+  });
+
+  try {
+    switch (event.type) {
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated':
+        await prisma.subscription.updateMany({
+          where: { stripeSubscriptionId: subscription.id },
+          data: {
+            status: subscription.status,
+            currentPeriodStart: new Date(subscription.current_period_start * 1000),
+            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+          },
+        });
+        break;
+
+      case 'customer.subscription.deleted':
+        await prisma.subscription.updateMany({
+          where: { stripeSubscriptionId: subscription.id },
+          data: { status: 'canceled' },
+        });
+        break;
+    }
+
+    logger.info(`[Stripe Webhook] ✅ Suscripción Inmova actualizada: ${subscription.id}`);
+  } catch (error: any) {
+    logger.error('[Stripe Webhook] Error actualizando suscripción Inmova:', error);
   }
 }

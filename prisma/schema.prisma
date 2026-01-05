@@ -11839,6 +11839,7 @@ model EwoorkerPerfilEmpresa {
   reviewsEscritas             EwoorkerReview[]        @relation("ReviewsEscritas")
   pagosRecibidos              EwoorkerPago[]
   certificaciones             EwoorkerCertificacion[] @relation("CertificacionesEmpresa")
+  suscripciones               EwoorkerSuscripcion[]
 
   @@index([tipoEmpresa])
   @@index([planActual])
@@ -12737,6 +12738,49 @@ model EwoorkerMetricaSocio {
   @@index([mes])
   @@index([ano])
   @@map("ewoorker_metrica_socio")
+}
+
+// Suscripciones de empresas en eWoorker
+model EwoorkerSuscripcion {
+  id               String                @id @default(cuid())
+  perfilEmpresaId  String
+  perfilEmpresa    EwoorkerPerfilEmpresa @relation(fields: [perfilEmpresaId], references: [id])
+
+  // Stripe
+  stripeSubscriptionId String  @unique
+  stripePriceId        String
+  stripeCustomerId     String?
+
+  // Plan
+  plan   String // 'OBRERO', 'CAPATAZ', 'CONSTRUCTOR'
+  precio Int    // En céntimos
+
+  // Estado
+  estado EwoorkerEstadoSuscripcion @default(PENDIENTE)
+
+  // Fechas
+  fechaInicio       DateTime
+  fechaProximoPago  DateTime?
+  fechaCancelacion  DateTime?
+
+  // Metadata
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([perfilEmpresaId])
+  @@index([stripeSubscriptionId])
+  @@index([estado])
+  @@map("ewoorker_suscripciones")
+}
+
+enum EwoorkerEstadoSuscripcion {
+  PENDIENTE
+  ACTIVA
+  PAUSADA
+  CANCELADA
+  VENCIDA
 }
 
 // Log de acciones del socio para auditoría
