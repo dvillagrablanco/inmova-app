@@ -310,10 +310,10 @@ export function LandingChatbot() {
 
   return (
     <>
-      {/* WhatsApp Floating Button */}
+      {/* WhatsApp Floating Button - Posición ajustada para no solapar con Crisp Chat */}
       <button
         onClick={openWhatsApp}
-        className="fixed bottom-6 right-6 z-[60] p-4 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-200 group"
+        className="fixed bottom-24 right-6 md:bottom-6 z-[60] p-4 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-200 group"
         aria-label="Contactar por WhatsApp"
       >
         <Phone size={24} className="group-hover:animate-pulse" />
@@ -322,10 +322,10 @@ export function LandingChatbot() {
         </span>
       </button>
 
-      {/* Chatbot Widget Button */}
+      {/* Chatbot Widget Button - Posición ajustada para móvil */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-24 z-[60] p-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-200 ${
+        className={`fixed bottom-24 right-20 md:bottom-6 md:right-24 z-[60] p-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-200 ${
           isOpen ? 'rotate-90' : ''
         }`}
         aria-label={isOpen ? 'Cerrar chat' : 'Abrir chat'}
