@@ -1,0 +1,156 @@
+'use client';
+
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle2, ArrowRight, Building2, Users, Briefcase, Crown } from 'lucide-react';
+
+const planes = [
+  {
+    nombre: 'Starter',
+    precio: 0,
+    periodo: 'Gratis',
+    descripcion: 'Perfecto para empezar',
+    features: [
+      'Hasta 5 propiedades',
+      'Gestión básica de inquilinos',
+      'Contratos simples',
+      'Soporte por email',
+    ],
+    cta: 'Empezar Gratis',
+    destacado: false,
+    icon: Users,
+  },
+  {
+    nombre: 'Profesional',
+    precio: 49,
+    periodo: '/mes',
+    descripcion: 'Para propietarios activos',
+    features: [
+      'Hasta 25 propiedades',
+      'Gestión avanzada de inquilinos',
+      'Contratos con firma digital',
+      'Cobro automático de rentas',
+      'Informes financieros',
+      'Soporte prioritario',
+    ],
+    cta: 'Probar 14 días gratis',
+    destacado: true,
+    icon: Building2,
+  },
+  {
+    nombre: 'Gestor',
+    precio: 149,
+    periodo: '/mes',
+    descripcion: 'Para gestores profesionales',
+    features: [
+      'Propiedades ilimitadas',
+      'Multi-propietario',
+      'CRM integrado',
+      'API de integración',
+      'White-label disponible',
+      'Account manager dedicado',
+    ],
+    cta: 'Contactar Ventas',
+    destacado: false,
+    icon: Briefcase,
+  },
+  {
+    nombre: 'Enterprise',
+    precio: 'Personalizado',
+    periodo: '',
+    descripcion: 'Para grandes empresas',
+    features: [
+      'Todo de Gestor',
+      'Infraestructura dedicada',
+      'SLA garantizado',
+      'Formación in-company',
+      'Integraciones personalizadas',
+      'Soporte 24/7',
+    ],
+    cta: 'Solicitar Demo',
+    destacado: false,
+    icon: Crown,
+  },
+];
+
+export default function PreciosPage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            Planes y Precios
+          </h1>
+          <p className="text-xl text-blue-100 max-w-2xl mx-auto">
+            Elige el plan que mejor se adapte a tus necesidades. Sin permanencia, cancela cuando quieras.
+          </p>
+        </div>
+      </div>
+
+      {/* Planes */}
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {planes.map((plan) => (
+            <Card 
+              key={plan.nombre}
+              className={`relative ${plan.destacado ? 'border-2 border-blue-500 shadow-xl scale-105' : 'border'}`}
+            >
+              {plan.destacado && (
+                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600">
+                  Más Popular
+                </Badge>
+              )}
+              <CardHeader className="text-center pb-2">
+                <plan.icon className={`w-12 h-12 mx-auto mb-3 ${plan.destacado ? 'text-blue-600' : 'text-gray-600'}`} />
+                <CardTitle className="text-xl">{plan.nombre}</CardTitle>
+                <p className="text-gray-500 text-sm">{plan.descripcion}</p>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold">
+                    {typeof plan.precio === 'number' ? `€${plan.precio}` : plan.precio}
+                  </span>
+                  <span className="text-gray-500">{plan.periodo}</span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3 mb-6">
+                  {plan.features.map((feature, i) => (
+                    <li key={i} className="flex items-start text-sm">
+                      <CheckCircle2 className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <Link href={plan.precio === 'Personalizado' ? '/landing/contacto' : '/register'}>
+                  <Button 
+                    className={`w-full ${plan.destacado ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+                    variant={plan.destacado ? 'default' : 'outline'}
+                  >
+                    {plan.cta}
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* FAQ rápido */}
+        <div className="mt-16 text-center">
+          <p className="text-gray-600 mb-4">
+            ¿Tienes preguntas? Consulta nuestras{' '}
+            <Link href="/landing/faq" className="text-blue-600 hover:underline">
+              preguntas frecuentes
+            </Link>{' '}
+            o{' '}
+            <Link href="/landing/contacto" className="text-blue-600 hover:underline">
+              contacta con nosotros
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
