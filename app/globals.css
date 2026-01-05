@@ -1253,3 +1253,37 @@ select[aria-invalid='true']:focus {
 .animation-delay-4000 {
   animation-delay: 4s;
 }
+
+/* ========================================
+   FLOATING CHAT BUTTONS - MOBILE LAYOUT
+   WhatsApp, Chatbot Inmova, Crisp Chat
+   Alineados horizontalmente en móvil
+   ======================================== */
+
+/* Crisp Chat - Mover a la derecha en móvil */
+@media (max-width: 767px) {
+  /* Contenedor principal de Crisp */
+  .crisp-client .crisp-1brjxns,
+  .crisp-client .cc-1brjxns,
+  .crisp-client[data-website-id] > div > div {
+    bottom: 24px !important;
+    right: 24px !important;
+  }
+  
+  /* Botón flotante de Crisp */
+  .crisp-client .crisp-kquevr,
+  .crisp-client .cc-kquevr,
+  .crisp-client .crisp-1m5fbvw {
+    bottom: 24px !important;
+    right: 24px !important;
+  }
+  
+  /* Ventana de chat de Crisp en móvil */
+  .crisp-client .crisp-1rf4xdh {
+    bottom: 90px !important;
+    right: 16px !important;
+    left: 16px !important;
+    width: calc(100% - 32px) !important;
+    max-width: none !important;
+  }
+}
