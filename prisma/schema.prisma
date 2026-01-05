@@ -589,12 +589,23 @@ model Tenant {
   postReactions             PostReaction[]
   announcementConfirmations AnnouncementConfirmation[]
 
+  // B2C Gamificación y Referidos
+  gamificationPoints      Int                    @default(0)
+  gamificationLevel       Int                    @default(1)
+  gamificationAchievements Json                  @default("[]")
+  loginStreak             Int                    @default(0)
+  lastLoginDate           DateTime?
+  gamificationLogs        TenantGamificationLog[]
+  referralsEnviados       TenantReferral[]       @relation("TenantReferrer")
+  referralRecibido        TenantReferral?        @relation("TenantReferred")
+
   // Índices optimizados para consultas frecuentes
   @@index([companyId])
   @@index([email])
   @@index([dni])
   @@index([companyId, scoring])
   @@index([companyId, createdAt]) // Nuevo: tenants por fecha de creación
+  @@index([gamificationPoints]) // B2C: Leaderboard
   @@map("tenants")
 }
 
@@ -13110,6 +13121,56 @@ model EwoorkerReferral {
   @@index([status])
   @@index([expiresAt])
   @@map("ewoorker_referral")
+}
+
+// =========================================================
+// B2C INMOVA - Gamificación y Referidos para Inquilinos
+// =========================================================
+
+model TenantGamificationLog {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  action     String // Acción que generó los puntos
+  points     Int    // Puntos añadidos
+  totalAfter Int    // Total después de la transacción
+  metadata   Json   @default("{}")
+
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("tenant_gamification_log")
+}
+
+model TenantReferral {
+  id           String  @id @default(cuid())
+  code         String  @unique // Código único
+  referrerId   String
+  referrer     Tenant  @relation("TenantReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
+
+  // Referido
+  referredEmail    String?
+  referredId       String?  @unique
+  referred         Tenant?  @relation("TenantReferred", fields: [referredId], references: [id], onDelete: SetNull)
+
+  // Estado: pending, registered, verified, expired
+  status       String   @default("pending")
+  rewardGiven  Boolean  @default(false)
+
+  expiresAt    DateTime
+  usedAt       DateTime?
+  verifiedAt   DateTime?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([referrerId])
+  @@index([code])
+  @@index([status])
+  @@map("tenant_referral")
 }
 
 model UserCelebration {
