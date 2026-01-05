@@ -371,6 +371,9 @@ model User {
   // Tutorial & Setup Progress
   onboardingProgressDetailed UserOnboardingProgress?
 
+  // eWoorker Chat
+  ewoorkerConversacionesParticipante EwoorkerParticipanteConversacion[]
+
   @@index([email])
   @@index([companyId])
   @@index([role, companyId])
@@ -11823,14 +11826,42 @@ model EwoorkerPerfilEmpresa {
   tasaCumplimientoPlazos Float @default(100) // %
 
   // Estado de cuenta
-  disponible       Boolean @default(true)
-  verificado       Boolean @default(false)
-  destacado        Boolean @default(false)
-  motivoSuspension String? @db.Text
+  disponible         Boolean   @default(true)
+  verificado         Boolean   @default(false)
+  fechaVerificacion  DateTime?
+  destacado          Boolean   @default(false)
+  motivoSuspension   String?   @db.Text
+  notificacionesActivas Boolean @default(true)
 
   // Portfolio
   portfolioFotos      String[] @default([])
   certificadosCalidad String[] @default([])
+
+  // Campos adicionales perfil
+  descripcion         String?  @db.Text
+  telefono            String?
+  web                 String?
+  logoUrl             String?
+  cif                 String?
+  direccion           String?
+  codigoPostal        String?
+  tipoUsuario         String?  // CONTRATISTA, SUBCONTRATISTA, AMBOS
+  especialidadPrincipal String?
+  especialidadesSecundarias String[] @default([])
+  tarifaMediaHora     Float?
+  rating              Float    @default(0)
+  activo              Boolean  @default(true)
+
+  // Campos de onboarding
+  onboardingWelcomeCompletedAt       DateTime?
+  onboardingUserTypeCompletedAt      DateTime?
+  onboardingProfileCompletedAt       DateTime?
+  onboardingSpecialtiesCompletedAt   DateTime?
+  onboardingZonesCompletedAt         DateTime?
+  onboardingPlanCompletedAt          DateTime?
+  onboardingNotificationsCompletedAt DateTime?
+  onboardingFirstActionCompletedAt   DateTime?
+  onboardingCompletedAt              DateTime?
 
   // Timestamps
   createdAt       DateTime @default(now())
@@ -11849,12 +11880,15 @@ model EwoorkerPerfilEmpresa {
   certificaciones             EwoorkerCertificacion[] @relation("CertificacionesEmpresa")
   suscripciones               EwoorkerSuscripcion[]
   trabajadores                EwoorkerTrabajador[]    // Trabajadores de la empresa (modelo ewoorker original)
+  verificacionSolicitudes     EwoorkerVerificacionSolicitud[]
+  conversacionesParticipante  EwoorkerParticipanteConversacion[]
 
   @@index([tipoEmpresa])
   @@index([planActual])
   @@index([verificado])
   @@index([disponible])
   @@index([valoracionMedia])
+  @@index([activo])
   @@map("ewoorker_perfil_empresa")
 }
 
@@ -12075,12 +12109,15 @@ model EwoorkerObra {
   ofertas              EwoorkerOferta[]
   contrato             EwoorkerContrato?
   libroSubcontratacion EwoorkerLibroSubcontratacion?
+  conversaciones       EwoorkerConversacion[]
+  especialidad         String @default("General")
 
   @@index([companyId])
   @@index([perfilConstructorId])
   @@index([estado])
   @@index([categoria])
   @@index([provincia])
+  @@index([especialidad])
   @@index([municipio])
   @@index([fechaPublicacion])
   @@index([urgencia])
@@ -12220,6 +12257,8 @@ model EwoorkerContrato {
   mensajes                    EwoorkerMensajeObra[]
   reviews                     EwoorkerReview[]
   asignacionesTrabajadores    EwoorkerAsignacionTrabajador[] // Trabajadores asignados al contrato
+  conversaciones              EwoorkerConversacion[]
+  montoTotal                  Float @default(0)
 
   @@index([obraId])
   @@index([constructorId])
@@ -12912,6 +12951,105 @@ model EwoorkerLogSocio {
   @@index([accion])
   @@index([createdAt])
   @@map("ewoorker_log_socio")
+}
+
+// ============================================================================
+// EWOORKER - SPRINT 1 & 2 IMPROVEMENTS
+// ============================================================================
+
+// Solicitud de verificación exprés (€29)
+model EwoorkerVerificacionSolicitud {
+  id                    String    @id @default(cuid())
+  perfilEmpresaId       String
+  perfilEmpresa         EwoorkerPerfilEmpresa @relation(fields: [perfilEmpresaId], references: [id], onDelete: Cascade)
+  
+  tipo                  String    @default("EXPRESS") // STANDARD, EXPRESS
+  status                String    @default("PENDING") // PENDING, PAID, IN_REVIEW, APPROVED, REJECTED, REFUNDED
+  monto                 Float     @default(29)
+  
+  stripePaymentIntentId String?
+  
+  solicitadoPorId       String?
+  paidAt                DateTime?
+  reviewedAt            DateTime?
+  reviewedById          String?
+  rejectionReason       String?   @db.Text
+  
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  @@index([perfilEmpresaId])
+  @@index([status])
+  @@index([tipo])
+  @@map("ewoorker_verificacion_solicitud")
+}
+
+// Conversaciones de chat entre empresas
+model EwoorkerConversacion {
+  id                String    @id @default(cuid())
+  
+  tipo              String    // OBRA, CONTRATO, DIRECTO
+  obraId            String?
+  obra              EwoorkerObra? @relation(fields: [obraId], references: [id], onDelete: SetNull)
+  contratoId        String?
+  contrato          EwoorkerContrato? @relation(fields: [contratoId], references: [id], onDelete: SetNull)
+  
+  participantes     EwoorkerParticipanteConversacion[]
+  mensajes          EwoorkerMensajeChat[]
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@index([tipo])
+  @@index([obraId])
+  @@index([contratoId])
+  @@index([updatedAt])
+  @@map("ewoorker_conversacion")
+}
+
+// Participantes de conversación
+model EwoorkerParticipanteConversacion {
+  id                String    @id @default(cuid())
+  conversacionId    String
+  conversacion      EwoorkerConversacion @relation(fields: [conversacionId], references: [id], onDelete: Cascade)
+  perfilEmpresaId   String
+  perfilEmpresa     EwoorkerPerfilEmpresa @relation(fields: [perfilEmpresaId], references: [id], onDelete: Cascade)
+  userId            String?
+  user              User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  lastReadAt        DateTime?
+  
+  createdAt         DateTime  @default(now())
+  
+  mensajesEnviados  EwoorkerMensajeChat[]
+  
+  @@unique([conversacionId, perfilEmpresaId])
+  @@index([perfilEmpresaId])
+  @@map("ewoorker_participante_conversacion")
+}
+
+// Mensajes de chat
+model EwoorkerMensajeChat {
+  id                String    @id @default(cuid())
+  conversacionId    String
+  conversacion      EwoorkerConversacion @relation(fields: [conversacionId], references: [id], onDelete: Cascade)
+  remitenteId       String
+  remitente         EwoorkerParticipanteConversacion @relation(fields: [remitenteId], references: [id], onDelete: Cascade)
+  
+  contenido         String    @db.Text
+  tipo              String    @default("TEXT") // TEXT, FILE, IMAGE, SYSTEM
+  archivoUrl        String?
+  archivoNombre     String?
+  
+  leido             Boolean   @default(false)
+  leidoAt           DateTime?
+  
+  createdAt         DateTime  @default(now())
+  
+  @@index([conversacionId, createdAt])
+  @@index([remitenteId])
+  @@index([leido])
+  @@map("ewoorker_mensaje_chat")
 }
 
 model UserCelebration {
