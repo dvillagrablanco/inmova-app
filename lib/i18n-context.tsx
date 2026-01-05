@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-type Locale = 'es' | 'en' | 'fr' | 'pt';
+type Locale = 'es' | 'en' | 'pt' | 'fr' | 'de' | 'it';
 
 interface I18nContextType {
   locale: Locale;
@@ -20,26 +20,30 @@ const loadTranslations = async (): Promise<Record<Locale, any>> => {
   if (translationsCache) return translationsCache;
   
   try {
-    const [es, en, fr, pt] = await Promise.all([
+    const [es, en, pt, fr, de, it] = await Promise.all([
       import('@/locales/es.json').then(m => m.default),
       import('@/locales/en.json').then(m => m.default),
-      import('@/locales/fr.json').then(m => m.default),
       import('@/locales/pt.json').then(m => m.default),
+      import('@/locales/fr.json').then(m => m.default),
+      import('@/locales/de.json').then(m => m.default),
+      import('@/locales/it.json').then(m => m.default),
     ]);
     
-    translationsCache = { es, en, fr, pt };
+    translationsCache = { es, en, pt, fr, de, it };
     return translationsCache;
   } catch (error) {
     console.error('[I18n] Error loading translations:', error);
-    return { es: {}, en: {}, fr: {}, pt: {} };
+    return { es: {}, en: {}, pt: {}, fr: {}, de: {}, it: {} };
   }
 };
 
 const availableLocales = [
   { code: 'es' as Locale, name: 'Español', flag: '🇪🇸' },
   { code: 'en' as Locale, name: 'English', flag: '🇬🇧' },
-  { code: 'fr' as Locale, name: 'Français', flag: '🇫🇷' },
   { code: 'pt' as Locale, name: 'Português', flag: '🇵🇹' },
+  { code: 'fr' as Locale, name: 'Français', flag: '🇫🇷' },
+  { code: 'de' as Locale, name: 'Deutsch', flag: '🇩🇪' },
+  { code: 'it' as Locale, name: 'Italiano', flag: '🇮🇹' },
 ];
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
@@ -58,12 +62,12 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     
     // Cargar idioma guardado o detectar del navegador
     const savedLocale = localStorage.getItem('locale') as Locale;
-    if (savedLocale && ['es', 'en', 'fr', 'pt'].includes(savedLocale)) {
+    if (savedLocale && ['es', 'en', 'pt', 'fr', 'de', 'it'].includes(savedLocale)) {
       setLocaleState(savedLocale);
     } else if (typeof navigator !== 'undefined') {
       // Detectar idioma del navegador
       const browserLang = navigator.language.split('-')[0];
-      if (['es', 'en', 'fr', 'pt'].includes(browserLang)) {
+      if (['es', 'en', 'pt', 'fr', 'de', 'it'].includes(browserLang)) {
         setLocaleState(browserLang as Locale);
       }
     }

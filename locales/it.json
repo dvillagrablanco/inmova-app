@@ -1,0 +1,33 @@
+{
+  "common": {
+    "welcome": "Benvenuto",
+    "loading": "Caricamento...",
+    "error": "Errore",
+    "success": "Successo",
+    "cancel": "Annulla",
+    "save": "Salva",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "search": "Cerca",
+    "filter": "Filtra",
+    "actions": "Azioni",
+    "settings": "Impostazioni"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "properties": "Proprietà",
+    "tenants": "Inquilini",
+    "contracts": "Contratti",
+    "payments": "Pagamenti",
+    "maintenance": "Manutenzione",
+    "settings": "Impostazioni"
+  },
+  "auth": {
+    "login": "Accedi",
+    "logout": "Esci",
+    "register": "Registrati",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Password dimenticata?"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "common": {
+    "welcome": "Willkommen",
+    "loading": "Wird geladen...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "actions": "Aktionen",
+    "settings": "Einstellungen"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "properties": "Immobilien",
+    "tenants": "Mieter",
+    "contracts": "Verträge",
+    "payments": "Zahlungen",
+    "maintenance": "Wartung",
+    "settings": "Einstellungen"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "register": "Registrieren",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "forgotPassword": "Passwort vergessen?"
+  }
+}

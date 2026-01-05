@@ -24,7 +24,12 @@ export async function GET(request: NextRequest) {
         maxUsuarios: true,
         maxPropiedades: true,
         modulosIncluidos: true,
-        activo: true
+        activo: true,
+        // Límites de integraciones
+        signaturesIncludedMonth: true,
+        storageIncludedGB: true,
+        aiTokensIncludedMonth: true,
+        smsIncludedMonth: true,
       },
       orderBy: {
         precioMensual: 'asc'

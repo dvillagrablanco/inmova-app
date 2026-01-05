@@ -32,6 +32,11 @@ interface Plan {
   features?: string[];
   popular?: boolean;
   recommended?: boolean;
+  // Límites de integraciones
+  signaturesIncludedMonth?: number | null;
+  storageIncludedGB?: number | null;
+  aiTokensIncludedMonth?: number | null;
+  smsIncludedMonth?: number | null;
 }
 
 export default function PlanesPage() {
@@ -106,6 +111,22 @@ export default function PlanesPage() {
       ...plan.modulosIncluidos
     ];
 
+    // Límites de integraciones
+    const integrationLimits: string[] = [];
+    if (plan.signaturesIncludedMonth) {
+      integrationLimits.push(`${plan.signaturesIncludedMonth} firmas digitales/mes`);
+    }
+    if (plan.storageIncludedGB) {
+      integrationLimits.push(`${plan.storageIncludedGB}GB almacenamiento`);
+    }
+    if (plan.aiTokensIncludedMonth) {
+      const tokensInK = Math.round(plan.aiTokensIncludedMonth / 1000);
+      integrationLimits.push(`${tokensInK}K tokens IA/mes`);
+    }
+    if (plan.smsIncludedMonth) {
+      integrationLimits.push(`${plan.smsIncludedMonth} SMS/mes`);
+    }
+
     // Features adicionales según tier
     const additionalFeatures: Record<string, string[]> = {
       basico: [
@@ -141,7 +162,7 @@ export default function PlanesPage() {
       ]
     };
 
-    return [...baseFeatures, ...(additionalFeatures[plan.tier] || [])];
+    return [...baseFeatures, ...integrationLimits, ...(additionalFeatures[plan.tier] || [])];
   };
 
   const getAnnualPrice = (monthlyPrice: number) => {
