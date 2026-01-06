@@ -125,6 +125,35 @@ enum ContractType {
   temporal
 }
 
+// ==========================================
+// TIPOS ESPECÍFICOS PARA MEDIA ESTANCIA
+// ==========================================
+
+enum TipoArrendamiento {
+  vivienda_habitual     // LAU Art. 2 - Duración mínima 5 años (7 si empresa)
+  temporada             // LAU Art. 3.2 - Media estancia (1-11 meses)
+  vacacional            // Turístico (< 1 mes) - Regulación autonómica
+  habitacion            // Alquiler de habitación en piso compartido
+}
+
+enum MotivoTemporalidad {
+  trabajo               // Desplazamiento laboral temporal
+  estudios              // Curso académico, máster, Erasmus
+  tratamiento_medico    // Tratamiento médico prolongado
+  proyecto_profesional  // Proyecto con duración definida
+  transicion            // Entre compra/venta de vivienda
+  turismo_extendido     // Estancia turística larga (1-3 meses)
+  otro                  // Otros motivos justificados
+}
+
+enum EstadoInventario {
+  pendiente             // Inventario no realizado
+  entrada_completado    // Inventario de entrada realizado
+  salida_completado     // Inventario de salida realizado
+  comparado             // Ambos inventarios comparados
+  con_incidencias       // Hay diferencias detectadas
+}
+
 enum PaymentStatus {
   pendiente
   pagado
@@ -728,6 +757,53 @@ model Contract {
   contasimpleInvoiceId String?
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
+
+  // ==========================================
+  // CAMPOS ESPECÍFICOS PARA MEDIA ESTANCIA
+  // ==========================================
+  
+  // Tipo de arrendamiento según LAU
+  tipoArrendamiento      TipoArrendamiento?   // vivienda_habitual, temporada, vacacional, habitacion
+  motivoTemporalidad     MotivoTemporalidad?  // trabajo, estudios, tratamiento_medico, etc.
+  descripcionMotivo      String?              @db.Text // Descripción detallada del motivo
+  
+  // Duración y prorrateo
+  duracionMesesPrevista  Int?                 // Duración prevista en meses (para alertas)
+  prorrateable           Boolean              @default(false) // Si se puede prorratear por días
+  diasProrrateoInicio    Int?                 // Días a prorratear al inicio del contrato
+  diasProrrateoFin       Int?                 // Días a prorratear al final del contrato
+  importeProrrateoInicio Float?               // Importe calculado del prorrateo inicial
+  importeProrrateoFin    Float?               // Importe calculado del prorrateo final
+  
+  // Servicios incluidos (para media estancia todo incluido)
+  serviciosIncluidos     Json?                // {"wifi": true, "agua": true, "luz": true, "gas": true, "limpieza": false}
+  depositoSuministros    Float?               // Fianza adicional para suministros
+  limiteConsumoLuz       Float?               // Límite mensual en € (exceso a cargo inquilino)
+  limiteConsumoAgua      Float?               // Límite mensual en €
+  limiteConsumoGas       Float?               // Límite mensual en €
+  
+  // Inventario de entrada/salida
+  estadoInventario       EstadoInventario?    @default(pendiente)
+  inventarioEntrada      Json?                // Array de items con estado, fotos, observaciones
+  inventarioSalida       Json?                // Array de items con estado, fotos, observaciones
+  fotosEntrada           String[]             @default([]) // URLs de fotos de entrada
+  fotosSalida            String[]             @default([]) // URLs de fotos de salida
+  fechaInventarioEntrada DateTime?
+  fechaInventarioSalida  DateTime?
+  incidenciasInventario  Json?                // Diferencias detectadas entre entrada y salida
+  importeIncidencias     Float?               // Importe total de daños/incidencias
+  
+  // Condiciones específicas media estancia
+  penalizacionDesistimiento Float?            // % de penalización por desistimiento anticipado
+  diasPreaviso              Int?              @default(30) // Días de preaviso para no renovación
+  renovacionPorPeriodoIgual Boolean           @default(false) // Si se renueva por mismo período
+  maximasProrrogas          Int?              // Número máximo de prórrogas permitidas
+  prorrogasRealizadas       Int               @default(0) // Contador de prórrogas
+  
+  // Documentación específica
+  documentoMotivoPath    String?              // Path al documento que justifica la temporalidad
+  checklistEntradaPath   String?              // PDF del checklist de entrada firmado
+  checklistSalidaPath    String?              // PDF del checklist de salida firmado
 
   unit                  Unit                  @relation(fields: [unitId], references: [id], onDelete: Cascade)
   tenant                Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
