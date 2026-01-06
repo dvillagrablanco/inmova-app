@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   Zap,
   Globe,
+  Calendar,
 } from 'lucide-react';
 
 const ecosystem = [
@@ -29,6 +30,14 @@ const ecosystem = [
         name: 'Alquiler Tradicional',
         desc: 'Contratos, pagos, inquilinos',
         users: '1,500+',
+      },
+      { 
+        icon: Calendar, 
+        name: 'Media Estancia', 
+        desc: '1-11 meses, profesionales', 
+        users: '400+', 
+        badge: 'NUEVO',
+        highlight: true,
       },
       { icon: Hotel, name: 'Vacacional (STR)', desc: 'Airbnb, Booking integrado', users: '800+' },
       {
@@ -79,7 +88,7 @@ const ecosystem = [
 ];
 
 const keyNumbers = [
-  { value: '7', label: 'Verticales de Negocio', icon: Building2 },
+  { value: '8', label: 'Verticales de Negocio', icon: Building2 },
   { value: '100+', label: 'Módulos Incluidos', icon: Zap },
   { value: '5,000+', label: 'Usuarios Activos', icon: Users },
   { value: '€15M+', label: 'Gestionado Mensual', icon: TrendingUp },

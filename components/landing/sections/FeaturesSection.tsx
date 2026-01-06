@@ -43,6 +43,16 @@ const verticales = [
     color: 'blue',
   },
   {
+    icon: Calendar,
+    title: 'Media Estancia (1-11 meses)',
+    desc: 'Alquiler temporal para profesionales, estudiantes y nómadas digitales',
+    features: ['Contratos LAU Art. 3.2', 'Scoring inquilinos IA', 'Check-in digital', 'Multi-portal'],
+    gradient: 'from-teal-500 to-emerald-500',
+    color: 'teal',
+    badge: 'NUEVO',
+    href: '/landing/media-estancia',
+  },
+  {
     icon: Hotel,
     title: 'STR (Vacacional)',
     desc: 'Gestión profesional de alquileres vacacionales y corta estancia',
@@ -207,7 +217,7 @@ export function FeaturesSection() {
           <Badge className="mb-4 text-lg px-4 py-1">🚀 Ecosistema Completo PropTech</Badge>
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              7 Verticales + 15 Módulos
+              8 Verticales + 15 Módulos
             </span>
             <br />
             Todo en Una Plataforma
@@ -223,7 +233,7 @@ export function FeaturesSection() {
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-3xl font-bold">Verticales de Negocio</h3>
             <Badge variant="outline" className="text-sm">
-              7 modelos especializados
+              8 modelos especializados
             </Badge>
           </div>
 
