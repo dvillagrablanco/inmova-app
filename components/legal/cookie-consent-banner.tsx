@@ -148,11 +148,11 @@ export function CookieConsentBanner() {
                 </p>
                 <p className="text-xs text-gray-500 mt-2">
                   Más información en nuestra{' '}
-                  <Link href="/legal/cookies" className="text-blue-600 hover:underline">
+                  <Link href="/legal/cookies" className="text-blue-700 font-medium hover:underline hover:text-blue-800">
                     Política de Cookies
                   </Link>{' '}
                   y{' '}
-                  <Link href="/legal/privacy" className="text-blue-600 hover:underline">
+                  <Link href="/legal/privacy" className="text-blue-700 font-medium hover:underline hover:text-blue-800">
                     Política de Privacidad
                   </Link>
                   .
@@ -164,7 +164,7 @@ export function CookieConsentBanner() {
                   onClick={() => setShowSettings(true)}
                   variant="outline"
                   size="sm"
-                  className="gap-2"
+                  className="gap-2 border-gray-400 text-gray-900 hover:bg-gray-100 hover:border-gray-500 font-medium"
                 >
                   <Settings className="h-4 w-4" />
                   Configurar
@@ -173,13 +173,14 @@ export function CookieConsentBanner() {
                   onClick={handleAcceptNecessary}
                   variant="outline"
                   size="sm"
+                  className="border-gray-400 text-gray-900 hover:bg-gray-100 hover:border-gray-500 font-medium"
                 >
                   Solo necesarias
                 </Button>
                 <Button
                   onClick={handleAcceptAll}
                   size="sm"
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
                 >
                   Aceptar todas
                 </Button>
@@ -338,21 +339,21 @@ export function CookieConsentBanner() {
             <Button
               onClick={handleAcceptNecessary}
               variant="outline"
-              className="flex-1"
+              className="flex-1 border-gray-400 text-gray-900 hover:bg-gray-100 hover:border-gray-500 font-medium"
             >
               Solo necesarias
             </Button>
             <Button
               onClick={handleSavePreferences}
               variant="default"
-              className="flex-1 gap-2"
+              className="flex-1 gap-2 bg-gray-900 hover:bg-gray-800 text-white font-medium"
             >
               <Check className="h-4 w-4" />
               Guardar preferencias
             </Button>
             <Button
               onClick={handleAcceptAll}
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium"
             >
               Aceptar todas
             </Button>

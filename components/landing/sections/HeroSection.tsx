@@ -66,7 +66,7 @@ export function HeroSection() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="px-8 py-6 text-lg font-semibold border-2 border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50 w-full sm:w-auto group"
+                  className="px-8 py-6 text-lg font-bold border-2 border-gray-300 text-gray-900 hover:border-gray-500 hover:bg-gray-100 w-full sm:w-auto group"
                 >
                   <Play className="mr-2 h-5 w-5" />
                   Ver Demo

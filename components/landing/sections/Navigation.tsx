@@ -53,14 +53,14 @@ export function Navigation() {
                 <a
                   key={item.href}
                   href={item.href}
-                  className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors"
+                  className="text-sm font-semibold text-gray-900 hover:text-indigo-700 transition-colors"
                 >
                   {item.label}
                 </a>
               )
             ))}
             <Link href="/login">
-              <Button variant="ghost" className="hover:bg-indigo-50">
+              <Button variant="outline" className="border-gray-300 text-gray-900 hover:bg-gray-100 hover:border-gray-400 font-semibold">
                 Iniciar Sesión
               </Button>
             </Link>
@@ -106,7 +106,7 @@ export function Navigation() {
                         key={item.href}
                         href={item.href}
                         onClick={() => setMobileMenuOpen(false)}
-                        className="text-lg font-medium text-gray-700 hover:text-indigo-600 transition-colors py-2 px-4 hover:bg-indigo-50 rounded-lg"
+                        className="text-lg font-semibold text-gray-900 hover:text-indigo-700 transition-colors py-2 px-4 hover:bg-indigo-50 rounded-lg"
                       >
                         {item.label}
                       </a>

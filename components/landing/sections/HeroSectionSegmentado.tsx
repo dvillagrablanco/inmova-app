@@ -196,21 +196,21 @@ export function HeroSectionSegmentado() {
               <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-white/80 backdrop-blur-sm border-2 border-gray-200 rounded-xl p-1.5 h-auto">
                 <TabsTrigger
                   value="propietarios"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-violet-500 data-[state=active]:text-white rounded-lg py-3 px-4 text-sm md:text-base font-semibold transition-all"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=inactive]:text-gray-900 data-[state=inactive]:bg-gray-100 rounded-lg py-3 px-4 text-sm md:text-base font-bold transition-all"
                 >
                   <Home className="h-5 w-5 mr-1 md:mr-2 inline" />
                   Propietarios
                 </TabsTrigger>
                 <TabsTrigger
                   value="gestores"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-violet-500 data-[state=active]:text-white rounded-lg py-3 px-4 text-sm md:text-base font-semibold transition-all"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=inactive]:text-gray-900 data-[state=inactive]:bg-gray-100 rounded-lg py-3 px-4 text-sm md:text-base font-bold transition-all"
                 >
                   <Briefcase className="h-5 w-5 mr-1 md:mr-2 inline" />
                   Gestores
                 </TabsTrigger>
                 <TabsTrigger
                   value="constructores"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-yellow-500 data-[state=active]:text-white rounded-lg py-3 px-4 text-sm md:text-base font-semibold transition-all relative"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-yellow-500 data-[state=active]:text-white data-[state=inactive]:text-gray-900 data-[state=inactive]:bg-gray-100 rounded-lg py-3 px-4 text-sm md:text-base font-bold transition-all relative"
                 >
                   <Building2 className="h-5 w-5 mr-1 md:mr-2 inline" />
                   Construcción
@@ -220,7 +220,7 @@ export function HeroSectionSegmentado() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="inversores"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-violet-500 data-[state=active]:text-white rounded-lg py-3 px-4 text-sm md:text-base font-semibold transition-all"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=inactive]:text-gray-900 data-[state=inactive]:bg-gray-100 rounded-lg py-3 px-4 text-sm md:text-base font-bold transition-all"
                 >
                   <BarChart3 className="h-5 w-5 mr-1 md:mr-2 inline" />
                   Inversores
@@ -302,7 +302,7 @@ export function HeroSectionSegmentado() {
                         <Button
                           size="lg"
                           variant="outline"
-                          className="w-full sm:w-auto px-8 py-6 text-lg font-semibold border-2 border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50 group"
+                          className="w-full sm:w-auto px-8 py-6 text-lg font-bold border-2 border-gray-300 text-gray-900 hover:border-gray-500 hover:bg-gray-100 group"
                         >
                           <Play className="mr-2 h-5 w-5" />
                           {currentContent.cta.secondary.text}

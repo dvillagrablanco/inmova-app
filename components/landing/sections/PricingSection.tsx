@@ -323,7 +323,7 @@ export function PricingSection() {
                 {/* CTA */}
                 <Link href="/register" className="w-full block">
                   <Button 
-                    className={`w-full ${plan.popular ? 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700' : ''}`}
+                    className={`w-full font-semibold ${plan.popular ? 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white' : 'bg-white border-2 border-gray-300 text-gray-900 hover:bg-gray-50 hover:border-gray-400'}`}
                     variant={plan.popular ? 'default' : 'outline'}
                   >
                     Empezar Gratis
@@ -406,7 +406,7 @@ export function PricingSection() {
             ¿Más de 100 propiedades? ¿Necesitas personalización?
           </p>
           <Link href="/contacto">
-            <Button size="lg" variant="outline" className="border-indigo-600 text-indigo-600 hover:bg-indigo-50">
+            <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold shadow-lg">
               Solicitar Demo Personalizada
             </Button>
           </Link>

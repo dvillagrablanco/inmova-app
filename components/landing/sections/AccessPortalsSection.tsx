@@ -164,18 +164,18 @@ export function AccessPortalsSection() {
 
         {/* Help Text */}
         <div className="mt-12 text-center">
-          <p className="text-gray-600">
+          <p className="text-gray-700">
             ¿No tienes cuenta aún?{' '}
             <Link
               href="/register"
-              className="text-indigo-600 hover:text-indigo-700 font-semibold underline"
+              className="text-indigo-700 hover:text-indigo-800 font-bold underline"
             >
               Regístrate gratis
             </Link>{' '}
             o{' '}
             <Link
               href="/landing/contacto"
-              className="text-indigo-600 hover:text-indigo-700 font-semibold underline"
+              className="text-indigo-700 hover:text-indigo-800 font-bold underline"
             >
               contacta con ventas
             </Link>

@@ -20,10 +20,10 @@ export function Footer() {
             </p>
             <div className="flex gap-3">
               <a href="https://twitter.com/inmova" target="_blank" rel="noopener noreferrer">
-                <Button size="sm" variant="ghost" className="text-white hover:text-indigo-400">Twitter</Button>
+                <Button size="sm" variant="outline" className="text-white border-gray-600 hover:bg-gray-800 hover:text-indigo-300 hover:border-gray-500 font-medium">Twitter</Button>
               </a>
               <a href="https://linkedin.com/company/inmova" target="_blank" rel="noopener noreferrer">
-                <Button size="sm" variant="ghost" className="text-white hover:text-indigo-400">LinkedIn</Button>
+                <Button size="sm" variant="outline" className="text-white border-gray-600 hover:bg-gray-800 hover:text-indigo-300 hover:border-gray-500 font-medium">LinkedIn</Button>
               </a>
             </div>
           </div>
