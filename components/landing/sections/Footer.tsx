@@ -86,12 +86,11 @@ export function Footer() {
           <h3 className="text-2xl font-bold mb-3">¿Listo para simplificar tu gestión?</h3>
           <p className="text-gray-300 mb-6">Empieza gratis hoy. Sin tarjeta de crédito.</p>
           <Link href="/register">
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white px-8 py-6 text-lg font-semibold shadow-lg shadow-indigo-500/50"
+            <button
+              className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 rounded-lg shadow-lg shadow-indigo-500/50 transition-all"
             >
               Empezar Gratis
-            </Button>
+            </button>
           </Link>
         </div>
 

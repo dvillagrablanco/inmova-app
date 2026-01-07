@@ -90,7 +90,7 @@ export function TestimonialsSection() {
       <div className="container mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
-          <Badge className="mb-4 bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700 border-yellow-200 px-4 py-2">
+          <Badge className="mb-4 bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-900 border-amber-300 px-4 py-2 font-bold">
             <Star className="h-4 w-4 mr-1 inline fill-yellow-500" />
             Testimonios Verificados
           </Badge>

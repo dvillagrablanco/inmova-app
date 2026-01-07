@@ -78,7 +78,7 @@ export function IntegrationsSection() {
     <section id="integraciones" className="py-20 px-4 bg-gradient-to-br from-slate-50 to-indigo-50">
       <div className="container mx-auto">
         <div className="text-center mb-16">
-          <Badge className="mb-4 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 border-purple-200 px-4 py-2">
+          <Badge className="mb-4 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-900 border-purple-300 px-4 py-2 font-bold">
             <LinkIcon className="h-4 w-4 mr-1 inline" />
             Integraciones
           </Badge>
