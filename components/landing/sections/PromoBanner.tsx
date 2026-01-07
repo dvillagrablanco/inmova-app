@@ -222,7 +222,7 @@ export function PromoBanner() {
                     <div className="text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
                       {campaign.title}
                     </div>
-                    <div className="text-xs text-gray-500 font-semibold">
+                    <div className="text-xs text-gray-700 font-bold">
                       {campaign.code}
                     </div>
                   </div>
