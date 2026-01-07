@@ -35,7 +35,7 @@ const comparisonFeatures = [
 ];
 
 const pricing = [
-  { name: 'INMOVA', price: '€49/mes', modules: '6 verticales + 6 módulos', color: 'indigo', subtitle: 'Plan Basic' },
+  { name: 'INMOVA', price: '€49/mes', modules: '8 verticales + 15 módulos', color: 'indigo', subtitle: 'Plan Basic' },
   { name: 'Homming', price: '€120/mes', modules: '1 vertical', color: 'red', subtitle: 'Advanced' },
   { name: 'Rentger', price: '€100/mes', modules: '1 vertical', color: 'gray', subtitle: 'Estándar' },
   { name: 'Guesty', price: '$150/mes', modules: '1 vertical (Solo STR)', color: 'gray', subtitle: 'Premium' },
@@ -57,7 +57,7 @@ export function CompetitorComparisonSection() {
             ¿Por Qué Elegir INMOVA?
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Somos la única plataforma que combina <strong>6 verticales + 6 módulos transversales</strong>. Ningún competidor tiene esta arquitectura.
+            Somos la única plataforma que combina <strong>8 verticales + 15 módulos transversales</strong>. Ningún competidor tiene esta arquitectura.
           </p>
         </div>
 

@@ -185,7 +185,7 @@ export function HeroSectionSegmentado() {
               </span>
             </h1>
             <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              7 verticales (alquiler a construcción B2B) + 20 módulos de IA, IoT y Blockchain.
+              8 verticales (alquiler a construcción B2B) + 15 módulos de IA, IoT y Blockchain.
               <span className="font-semibold text-indigo-600"> Todo en un solo lugar.</span>
             </p>
           </div>
