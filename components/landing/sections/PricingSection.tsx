@@ -41,10 +41,10 @@ const plans: Plan[] = [
     properties: 'Hasta 5 propiedades',
     costPerProperty: '€5.80/propiedad',
     usageLimits: {
-      signatures: '5 firmas/mes',
+      signatures: '3 firmas/mes',
       storage: '1 GB',
       ai: 'No incluido',
-      sms: '5 SMS/mes',
+      sms: 'No incluido',
     },
     features: [
       '✅ Gestión de propiedades',
@@ -52,92 +52,96 @@ const plans: Plan[] = [
       '✅ Gestión de inquilinos',
       '✅ Cobros y recordatorios',
       '✅ Dashboard básico',
+      '✅ 1 usuario',
       'Soporte email'
     ],
     addons: [],
-    cta: 'Para propietarios con pocas propiedades'
+    cta: 'Ideal para propietarios particulares'
   },
   {
     name: 'Professional',
-    price: '€49',
+    price: '€39',
     period: '/mes',
-    yearlyPrice: '€490/año',
-    yearlySavings: 'Ahorra €98 (2 meses gratis)',
+    yearlyPrice: '€390/año',
+    yearlySavings: 'Ahorra €78 (2 meses gratis)',
     modules: '1 Vertical completo',
     properties: 'Hasta 25 propiedades',
-    costPerProperty: '€1.96/propiedad',
+    costPerProperty: '€1.56/propiedad',
     popular: true,
     usageLimits: {
-      signatures: '15 firmas/mes',
+      signatures: '10 firmas/mes',
       storage: '5 GB',
-      ai: 'Básico',
-      sms: '25 SMS/mes',
+      ai: '5K tokens/mes',
+      sms: 'No incluido',
     },
     features: [
       '✅ Todo de Starter +',
       '✅ Hasta 25 propiedades',
       '✅ 3 usuarios incluidos',
-      '✅ Reportes avanzados',
       '✅ Portal de inquilinos',
-      '✅ Integraciones (portales, calendario)',
+      '✅ Portal de propietarios',
+      '✅ Reportes avanzados',
+      '✅ Integraciones',
       '✅ Soporte chat'
     ],
     addons: [],
-    cta: 'Ideal para propietarios y pequeños gestores'
+    cta: '-44% vs competencia'
   },
   {
     name: 'Business',
-    price: '€149',
+    price: '€99',
     period: '/mes',
-    yearlyPrice: '€1,490/año',
-    yearlySavings: 'Ahorra €298 (2 meses gratis)',
+    yearlyPrice: '€990/año',
+    yearlySavings: 'Ahorra €198 (2 meses gratis)',
     modules: 'Múltiples verticales',
     properties: 'Hasta 100 propiedades',
-    costPerProperty: '€1.49/propiedad',
+    costPerProperty: '€0.99/propiedad',
     usageLimits: {
-      signatures: '50 firmas/mes',
+      signatures: '25 firmas/mes',
       storage: '20 GB',
-      ai: 'Avanzado',
-      sms: '100 SMS/mes',
+      ai: '50K tokens/mes',
+      sms: '50 SMS/mes',
     },
     features: [
       '✅ Todo de Professional +',
       '✅ Hasta 100 propiedades',
       '✅ 10 usuarios incluidos',
       '✅ Múltiples verticales',
-      '✅ API acceso',
+      '✅ Acceso API',
       '✅ Personalización de marca',
       '✅ Gestor de cuenta',
       '✅ Soporte prioritario'
     ],
     addons: [],
-    cta: 'Para agencias y gestoras profesionales'
+    cta: 'Mejor coste unitario del mercado'
   },
   {
     name: 'Enterprise',
-    price: 'A medida',
-    period: '',
+    price: '€199+',
+    period: '/mes',
+    yearlyPrice: 'Cotización anual disponible',
     modules: 'Todos los verticales',
-    properties: 'Ilimitadas',
-    costPerProperty: 'Personalizado',
+    properties: '+100 propiedades',
+    costPerProperty: 'A cotizar',
     usageLimits: {
-      signatures: 'Ilimitadas',
-      storage: 'Ilimitado',
-      ai: 'Ilimitado',
-      sms: 'Ilimitados',
+      signatures: '100+ firmas/mes',
+      storage: '100+ GB',
+      ai: '200K+ tokens/mes',
+      sms: '200+ SMS/mes',
     },
     features: [
       '✅ Todo de Business +',
       '✅ Propiedades ilimitadas',
       '✅ Usuarios ilimitados',
       '✅ Desarrollos a medida',
-      '✅ Migración de datos incluida',
-      '✅ SLA garantizado',
+      '✅ Migración incluida',
+      '✅ SLA garantizado 99.9%',
       '✅ Formación presencial',
+      '✅ Account manager dedicado',
       '✅ Soporte 24/7'
     ],
     addons: [],
-    cta: 'Grandes gestoras y promotoras'
+    cta: 'Para grandes gestoras y promotoras'
   }
 ];
 
