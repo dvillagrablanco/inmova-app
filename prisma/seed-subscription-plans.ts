@@ -1,10 +1,31 @@
 /**
  * Seed: Subscription Plans con Límites de Uso y Verticales
  * 
+ * ANÁLISIS DE COSTOS DETALLADO (ver ANALISIS_COSTOS_ESCALABLES.md):
+ * 
+ * Precios de Proveedores:
+ * - Signaturit: €1.00/firma simple, €2.50/firma avanzada
+ * - AWS S3: €0.023/GB/mes
+ * - Claude IA: €4.70/1M tokens (~€0.0047/1K tokens)
+ * - Twilio SMS: €0.075/SMS
+ * 
+ * COSTOS POR PLAN:
+ * ┌─────────────────┬────────┬──────────┬─────────┬─────────┬─────────┬───────────┬────────┐
+ * │ Plan            │ Precio │ Firmas   │ Storage │ IA      │ SMS     │ COSTO     │ MARGEN │
+ * ├─────────────────┼────────┼──────────┼─────────┼─────────┼─────────┼───────────┼────────┤
+ * │ FREE            │ €0     │ 0=€0     │ 0.5=€0  │ 100=€0  │ 0=€0    │ €0.01     │ -100%  │
+ * │ STARTER €29     │ €29    │ 3=€3     │ 1=€0.02 │ 0=€0    │ 0=€0    │ €3.02     │ 90% ✅ │
+ * │ PROFESSIONAL €49│ €49    │ 10=€10   │ 5=€0.12 │ 5K=€0.02│ 0=€0    │ €10.14    │ 79% ✅ │
+ * │ BUSINESS €99    │ €99    │ 25=€25   │ 20=€0.46│ 50K=€0.2│ 50=€3.75│ €29.45    │ 70% ✅ │
+ * │ ENTERPRISE      │ A cot. │ 100=€100 │ 100=€2.3│ 200K=€1 │ 200=€15 │ €118.24   │ Variabl│
+ * └─────────────────┴────────┴──────────┴─────────┴─────────┴─────────┴───────────┴────────┘
+ * 
+ * NOTA ENTERPRISE: Cotizar mínimo €250/mes para mantener margen >50%
+ * 
  * Estrategia Competitiva vs Homming/Rentger:
  * - Homming: 1 vertical (solo alquiler), €59-279/mes
  * - Rentger: 1-2 verticales, €39-149/mes
- * - INMOVA: 1-7 verticales según plan, €29-99/mes
+ * - INMOVA: 1-7 verticales según plan, €29-99/mes (mismo precio, 3-7x más verticales)
  * 
  * Ejecutar: npx tsx prisma/seed-subscription-plans.ts
  */
@@ -320,11 +341,30 @@ async function main() {
   
   console.log('───────────────────────────────────────────────────────────────────────────────────────');
   console.log('');
+  console.log('💰 ANÁLISIS DE COSTOS Y MÁRGENES:');
+  console.log('');
+  console.log('   Precios proveedores: Signaturit €1/firma, S3 €0.023/GB, Claude €0.0047/1K tokens, Twilio €0.075/SMS');
+  console.log('');
+  console.log('   Plan           | Precio | Firmas  | Storage | IA      | SMS    | COSTO   | MARGEN');
+  console.log('   ───────────────┼────────┼─────────┼─────────┼─────────┼────────┼─────────┼────────');
+  console.log('   STARTER        | €29    | 3=€3    | 1GB=€0  | 0       | 0      | €3.02   | 90% ✅');
+  console.log('   PROFESSIONAL   | €49    | 10=€10  | 5GB=€0.1| 5K=€0   | 0      | €10.14  | 79% ✅');
+  console.log('   BUSINESS       | €99    | 25=€25  | 20G=€0.5| 50K=€0.2| 50=€3.8| €29.45  | 70% ✅');
+  console.log('   ENTERPRISE     | Cotizar| 100=€100| 100G=€2 | 200K=€1 | 200=€15| €118.24 | 50%+ *');
+  console.log('');
+  console.log('   * Enterprise: Cotizar mínimo €250/mes para margen >50%');
+  console.log('');
   console.log('📈 VENTAJA COMPETITIVA CLAVE:');
   console.log('   • Mismo precio que competencia = 3-7x más verticales');
   console.log('   • Business €99/mes incluye TODO lo que Homming cobra €279/mes');
   console.log('   • IA integrada en Professional y superiores');
   console.log('   • API disponible desde Business (Homming solo Enterprise)');
+  console.log('   • Márgenes 70-90% garantizados con límites de uso');
+  console.log('');
+  console.log('🛡️ CONTROL DE COSTOS: Ver CONTROL_COSTOS_IMPLEMENTADO.md');
+  console.log('   • Límites estrictos por plan');
+  console.log('   • Tracking automático de uso');
+  console.log('   • Cobro por exceso si supera límites');
   console.log('');
   console.log('═══════════════════════════════════════════════════════════════════════════════════════');
 }
