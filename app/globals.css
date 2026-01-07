@@ -660,45 +660,38 @@ button[class*='green']:hover,
   background-color: #15803d !important;
 }
 
-/* Botones ghost/transparentes - asegurar visibilidad */
-button[class*='ghost'],
+/* Botones ghost/transparentes - máximo contraste con gray-900 */
 .btn-ghost {
-  background-color: transparent !important;
-  color: #4338ca !important;
+  background-color: transparent;
+  color: #111827;
   border: 1px solid transparent;
 }
 
-button[class*='ghost']:hover,
 .btn-ghost:hover {
-  background-color: #eef2ff !important;
-  color: #3730a3 !important;
-  border-color: #c7d2fe;
+  background-color: #f3f4f6;
+  color: #111827;
 }
 
-.dark button[class*='ghost'],
 .dark .btn-ghost {
-  color: #a5b4fc !important;
+  color: #f3f4f6;
 }
 
-.dark button[class*='ghost']:hover,
 .dark .btn-ghost:hover {
-  background-color: rgba(79, 70, 229, 0.1) !important;
-  color: #c7d2fe !important;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
 }
 
-/* Botones outline - mejor contraste */
-button[class*='outline'],
+/* Botones outline - máximo contraste con gray-900 */
 .btn-outline {
-  background-color: transparent !important;
-  color: #4338ca !important;
-  border: 2px solid #4338ca !important;
+  background-color: white;
+  color: #111827;
+  border: 2px solid #9ca3af;
 }
 
-button[class*='outline']:hover,
 .btn-outline:hover {
-  background-color: #eef2ff !important;
-  color: #3730a3 !important;
-  border-color: #3730a3 !important;
+  background-color: #f3f4f6;
+  color: #111827;
+  border-color: #6b7280;
 }
 
 /* Asegurar que los botones en formularios sean visibles */

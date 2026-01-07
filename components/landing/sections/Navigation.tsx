@@ -114,7 +114,7 @@ export function Navigation() {
                   ))}
                   <div className="border-t pt-4 mt-4 space-y-3">
                     <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full border-gray-400 text-gray-900 hover:bg-gray-100 font-semibold">
                         Iniciar Sesión
                       </Button>
                     </Link>

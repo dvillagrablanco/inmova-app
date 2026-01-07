@@ -108,7 +108,7 @@ export function EcosystemSection() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 font-bold">
+              <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100 font-bold border-2 border-gray-300">
                 <Zap className="h-5 w-5 mr-2" />
                 Empezar Gratis
               </Button>

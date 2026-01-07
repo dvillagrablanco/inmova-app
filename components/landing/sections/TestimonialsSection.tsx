@@ -175,8 +175,8 @@ export function TestimonialsSection() {
             <div className="inline-flex p-4 bg-indigo-100 rounded-full mb-4">
               <Building2 className="h-8 w-8 text-indigo-600" />
             </div>
-            <div className="text-4xl font-black text-indigo-600 mb-2">30 días</div>
-            <div className="text-gray-600 font-semibold">Prueba Gratis Sin Compromiso</div>
+            <div className="text-4xl font-black text-gray-900 mb-2">30 días</div>
+            <div className="text-gray-700 font-semibold">Prueba Gratis Sin Compromiso</div>
           </div>
           <div className="p-6">
             <div className="inline-flex p-4 bg-green-100 rounded-full mb-4">

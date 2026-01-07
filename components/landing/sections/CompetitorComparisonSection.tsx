@@ -132,7 +132,7 @@ export function CompetitorComparisonSection() {
                           i % 2 === 0 ? 'bg-white' : 'bg-gray-50'
                         } hover:bg-indigo-50/50 transition-colors`}
                       >
-                        <td className="p-4 font-medium text-gray-700 sticky left-0 bg-inherit z-10">
+                        <td className="p-4 font-medium text-gray-900 sticky left-0 bg-inherit z-10">
                           {row.feature}
                         </td>
                         <td className="p-4 text-center">
@@ -218,7 +218,7 @@ export function CompetitorComparisonSection() {
                 </p>
               </div>
               <Link href="/register">
-                <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-100 font-bold px-8 py-6 text-lg whitespace-nowrap">
+                <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100 font-bold px-8 py-6 text-lg whitespace-nowrap border-2 border-gray-300">
                   Prueba Gratis 30 Días
                 </Button>
               </Link>
@@ -232,7 +232,7 @@ export function CompetitorComparisonSection() {
               <span className="font-semibold"> INMOVA ofrece 6x más funcionalidad por mejor precio</span>
             </p>
             <Link href="/register">
-              <Button variant="outline" className="border-green-600 text-green-700 hover:bg-green-100">
+              <Button variant="outline" className="border-green-700 text-gray-900 hover:bg-green-100 font-semibold">
                 Empieza tu Prueba Gratis
               </Button>
             </Link>

@@ -13,11 +13,11 @@ const buttonVariants = cva(
         destructive:
           "bg-red-600 text-white hover:bg-red-700 active:bg-red-800 dark:bg-red-500 dark:hover:bg-red-600",
         outline:
-          "border-2 border-indigo-600 bg-white text-indigo-700 hover:bg-indigo-50 active:bg-indigo-100 dark:bg-gray-900 dark:text-indigo-400 dark:border-indigo-400 dark:hover:bg-gray-800",
+          "border-2 border-gray-400 bg-white text-gray-900 hover:bg-gray-100 hover:border-gray-500 active:bg-gray-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-600 dark:hover:bg-gray-800",
         secondary:
           "bg-gray-200 text-gray-900 hover:bg-gray-300 active:bg-gray-400 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600",
-        ghost: "hover:bg-indigo-100 hover:text-indigo-900 active:bg-indigo-200 dark:hover:bg-indigo-900/30 dark:hover:text-indigo-300",
-        link: "text-indigo-600 underline-offset-4 hover:underline hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300",
+        ghost: "text-gray-900 hover:bg-gray-100 hover:text-gray-900 active:bg-gray-200 dark:text-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-100",
+        link: "text-indigo-700 underline-offset-4 hover:underline hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300",
         success: "bg-green-600 text-white hover:bg-green-700 active:bg-green-800 dark:bg-green-500 dark:hover:bg-green-600",
         warning: "bg-yellow-500 text-gray-900 hover:bg-yellow-600 active:bg-yellow-700 dark:bg-yellow-600 dark:hover:bg-yellow-700",
       },
