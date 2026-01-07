@@ -596,16 +596,17 @@ button svg,
 }
 
 /* Botones de acción primaria - máximo contraste */
-button[class*='primary'],
-button[class*='indigo'],
+/* Nota: Solo afecta botones con bg-indigo-*, NO border-indigo-* */
+button[class*='bg-indigo'],
+button.btn-primary,
 .btn-primary {
   background-color: #4338ca !important;
   color: #ffffff !important;
   border: 2px solid transparent;
 }
 
-button[class*='primary']:hover,
-button[class*='indigo']:hover,
+button[class*='bg-indigo']:hover,
+button.btn-primary:hover,
 .btn-primary:hover {
   background-color: #3730a3 !important;
   border-color: #312e81;
