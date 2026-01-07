@@ -26,8 +26,8 @@ const campaigns: PromoCampaign[] = [
     title: 'Adiós al Excel',
     subtitle: 'Plan Basic desde €49/mes - ¡40% dto!',
     description: 'Deja de perder dinero en tus reformas. Controla tu ROI en tiempo real durante 6 meses.',
-    cta: 'Obtener descuento',
-    ctaHref: '/register?coupon=FLIPPING26',
+    cta: 'Ver oferta',
+    ctaHref: '/landing/ofertas#flipping26',
     icon: <Sparkles className="h-6 w-6" />,
     gradient: 'from-amber-500 via-orange-500 to-red-500',
     textGradient: 'from-amber-600 to-red-600'
@@ -38,8 +38,8 @@ const campaigns: PromoCampaign[] = [
     title: 'Revolución Coliving',
     subtitle: '50% dto. primer mes + Migración gratis',
     description: '¿Harto de calcular facturas de luz a mano? INMOVA lo hace solo. Plan Professional con Room Rental PRO.',
-    cta: 'Activar oferta',
-    ctaHref: '/register?coupon=ROOMPRO26',
+    cta: 'Ver oferta',
+    ctaHref: '/landing/ofertas#roompro',
     icon: <TrendingUp className="h-6 w-6" />,
     gradient: 'from-green-500 via-emerald-500 to-teal-500',
     textGradient: 'from-green-600 to-teal-600'
@@ -50,8 +50,8 @@ const campaigns: PromoCampaign[] = [
     title: 'La Solución PropTech Definitiva',
     subtitle: 'Igualamos tu precio 1 año + Upgrade gratis',
     description: 'Trae tu última factura de la competencia. Te damos INMOVA al mismo precio con el plan superior.',
-    cta: 'Cambia ahora',
-    ctaHref: '/landing/contacto?motivo=cambio-competencia',
+    cta: 'Ver oferta',
+    ctaHref: '/landing/ofertas#switch2026',
     icon: <ArrowRightLeft className="h-6 w-6" />,
     gradient: 'from-indigo-500 via-purple-500 to-pink-500',
     textGradient: 'from-indigo-600 to-pink-600'

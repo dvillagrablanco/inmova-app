@@ -23,7 +23,7 @@ export default function LegalNoticePage() {
           <li><strong>Denominación Social:</strong> Inmova App S.L.</li>
           <li><strong>NIF:</strong> [NIF de la empresa - Ejemplo: B-12345678]</li>
           <li><strong>Domicilio Social:</strong> [Dirección completa - Calle, número, CP, Ciudad, Provincia]</li>
-          <li><strong>Email de contacto:</strong> <a href="mailto:info@inmova.app" className="text-blue-600 hover:underline">info@inmova.app</a></li>
+          <li><strong>Email de contacto:</strong> <a href="mailto:inmovaapp@gmail.com" className="text-blue-600 hover:underline">inmovaapp@gmail.com</a></li>
           <li><strong>Teléfono:</strong> [Teléfono de contacto]</li>
           <li><strong>Registro Mercantil:</strong> [Ciudad], Tomo [X], Folio [X], Hoja [X], Inscripción [X]</li>
           <li><strong>Nombre de dominio:</strong> inmovaapp.com</li>

@@ -35,10 +35,10 @@ export default function SoportePage() {
             Envíanos un email y te responderemos en 24h
           </p>
           <a 
-            href="mailto:soporte@inmovaapp.com"
+            href="mailto:inmovaapp@gmail.com"
             className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
-            soporte@inmovaapp.com
+            inmovaapp@gmail.com
           </a>
         </div>
       </div>

@@ -9,6 +9,7 @@ import { Building2, Calendar, User } from 'lucide-react';
 export default function BlogPage() {
   const posts = [
     {
+      slug: 'tendencias-proptech-2026',
       title: '7 Tendencias PropTech que Transformarán el Sector en 2026',
       excerpt:
         'Descubre las tecnologías emergentes que están revolucionando la gestión inmobiliaria.',
@@ -17,6 +18,7 @@ export default function BlogPage() {
       category: 'Tendencias',
     },
     {
+      slug: 'ia-gestion-propiedades',
       title: 'Cómo la IA Está Cambiando la Gestión de Propiedades',
       excerpt:
         'La inteligencia artificial permite optimizar operaciones y aumentar el ROI hasta un 25%.',
@@ -25,11 +27,12 @@ export default function BlogPage() {
       category: 'Tecnología',
     },
     {
-      title: 'Blockchain en el Sector Inmobiliario: Casos Reales',
-      excerpt: 'Análisis de implementaciones exitosas de tokenización y contratos inteligentes.',
+      slug: 'guia-coliving-espana-2026',
+      title: 'Guía Completa de Coliving en España 2026',
+      excerpt: 'Todo lo que necesitas saber para gestionar espacios de coliving de forma profesional.',
       author: 'Carlos Ruiz',
       date: '5 Enero 2026',
-      category: 'Innovación',
+      category: 'Guía Práctica',
     },
   ];
 
@@ -80,16 +83,21 @@ export default function BlogPage() {
                       {post.date}
                     </div>
                   </div>
-                  <Button className="w-full mt-4" variant="outline" disabled>
-                    Próximamente
-                  </Button>
+                  <Link href={`/landing/blog/${post.slug}`}>
+                    <Button className="w-full mt-4" variant="outline">
+                      Leer artículo
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             ))}
           </div>
 
           <div className="text-center mt-12">
-            <p className="text-gray-600">Próximamente más artículos...</p>
+            <p className="text-gray-600 mb-4">¿Quieres recibir nuestras publicaciones?</p>
+            <Link href="/register">
+              <Button>Suscríbete Gratis</Button>
+            </Link>
           </div>
         </div>
       </section>

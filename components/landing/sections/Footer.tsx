@@ -38,7 +38,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-gray-300">
               <li><a href="#features" className="hover:text-white transition-colors">Características</a></li>
               <li><a href="#pricing" className="hover:text-white transition-colors">Precios</a></li>
-              <li><Link href="/landing/demo" className="hover:text-white transition-colors">Ver Demo</Link></li>
+              <li><Link href="/landing/demo#agendar-demo" className="hover:text-white transition-colors">Ver Demo</Link></li>
               <li><a href="#integraciones" className="hover:text-white transition-colors">Integraciones</a></li>
               <li><Link href="/landing/ventajas" className="hover:text-indigo-300 transition-colors font-medium text-gray-200">Ventajas de INMOVA</Link></li>
             </ul>
@@ -54,7 +54,7 @@ export function Footer() {
               <li><Link href="/ewoorker/landing" className="hover:text-orange-300 transition-colors font-medium text-orange-300">Marketplace B2B</Link></li>
               <li><Link href="/ewoorker/landing#como-funciona" className="hover:text-white transition-colors">Cómo Funciona</Link></li>
               <li><Link href="/ewoorker/landing#planes" className="hover:text-white transition-colors">Planes</Link></li>
-              <li><Link href="/ewoorker/compliance" className="hover:text-white transition-colors">Compliance Hub</Link></li>
+              <li><Link href="/ewoorker/landing/compliance" className="hover:text-white transition-colors">Compliance Hub</Link></li>
             </ul>
           </div>
 

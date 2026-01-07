@@ -310,10 +310,10 @@ export function LandingChatbot() {
 
   return (
     <>
-      {/* WhatsApp Floating Button - VISIBLE en esquina inferior derecha */}
+      {/* WhatsApp Floating Button - Posición ajustada para no solapar con cookie banner */}
       <button
         onClick={openWhatsApp}
-        className="fixed bottom-6 right-6 z-[9999] p-4 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-200 group animate-bounce"
+        className="fixed bottom-24 right-6 z-[9999] p-4 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-200 group"
         aria-label="Contactar por WhatsApp"
         style={{ boxShadow: '0 0 20px rgba(34, 197, 94, 0.5)' }}
       >
@@ -336,10 +336,10 @@ export function LandingChatbot() {
         </span>
       </button>
 
-      {/* Chatbot Widget Button - Junto al WhatsApp */}
+      {/* Chatbot Widget Button - Encima del WhatsApp */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-24 right-6 z-[9998] p-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-200 ${
+        className={`fixed bottom-40 right-6 z-[9998] p-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-200 ${
           isOpen ? 'rotate-90' : ''
         }`}
         aria-label={isOpen ? 'Cerrar chat' : 'Abrir chat'}
@@ -354,7 +354,7 @@ export function LandingChatbot() {
 
       {/* Chatbot Window */}
       {isOpen && (
-        <Card className="fixed bottom-24 right-6 z-[60] w-[380px] max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-8rem)] shadow-2xl border-2 border-indigo-200 overflow-hidden flex flex-col">
+        <Card className="fixed bottom-56 right-6 z-[60] w-[380px] max-w-[calc(100vw-3rem)] h-[500px] max-h-[calc(100vh-15rem)] shadow-2xl border-2 border-indigo-200 overflow-hidden flex flex-col">
           {/* Header */}
           <div className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">

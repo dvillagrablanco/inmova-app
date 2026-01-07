@@ -323,8 +323,7 @@ export function PricingSection() {
                 {/* CTA */}
                 <Link href="/register" className="w-full block">
                   <Button 
-                    className={`w-full font-semibold ${plan.popular ? 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white' : 'bg-white border-2 border-gray-300 text-gray-900 hover:bg-gray-50 hover:border-gray-400'}`}
-                    variant={plan.popular ? 'default' : 'outline'}
+                    className="w-full font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white"
                   >
                     Empezar Gratis
                     <ArrowRight className="h-4 w-4 ml-2" />
@@ -371,16 +370,18 @@ export function PricingSection() {
 
         {/* Tabla Comparativa Genérica */}
         <div className="max-w-3xl mx-auto">
-          <h3 className="text-2xl font-bold text-center mb-6 text-gray-800">
-            ¿Por qué elegir INMOVA?
-          </h3>
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden border">
+          <div className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white py-4 px-6 rounded-t-xl">
+            <h3 className="text-2xl font-bold text-center">
+              ¿Por qué elegir INMOVA?
+            </h3>
+          </div>
+          <div className="bg-white rounded-b-xl shadow-lg overflow-hidden border border-t-0">
             <table className="w-full">
               <thead>
-                <tr className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white">
-                  <th className="px-4 py-3 text-left text-sm font-semibold">Característica</th>
-                  <th className="px-4 py-3 text-center text-sm font-semibold">INMOVA</th>
-                  <th className="px-4 py-3 text-center text-sm font-semibold">Otras plataformas</th>
+                <tr className="bg-indigo-100">
+                  <th className="px-4 py-3 text-left text-sm font-bold text-indigo-900">Característica</th>
+                  <th className="px-4 py-3 text-center text-sm font-bold text-indigo-900">INMOVA</th>
+                  <th className="px-4 py-3 text-center text-sm font-bold text-gray-700">Otras plataformas</th>
                 </tr>
               </thead>
               <tbody>

@@ -192,10 +192,10 @@ export default function ContactoPage() {
                     <div>
                       <div className="font-semibold">Email</div>
                       <a
-                        href="mailto:ventas@inmova.com"
+                        href="mailto:inmovaapp@gmail.com"
                         className="text-sm text-indigo-600 hover:underline"
                       >
-                        ventas@inmova.com
+                        inmovaapp@gmail.com
                       </a>
                     </div>
                   </div>

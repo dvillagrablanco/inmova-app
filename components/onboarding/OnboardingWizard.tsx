@@ -272,7 +272,7 @@ const STEPS = [
           
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-sm text-blue-800">
-              <strong>💡 ¿Necesitas ayuda?</strong> Usa el chatbot de soporte (abajo a la derecha) o escríbenos a soporte@inmova.app
+              <strong>💡 ¿Necesitas ayuda?</strong> Usa el chatbot de soporte (abajo a la derecha) o escríbenos a inmovaapp@gmail.com
             </p>
           </div>
         </div>

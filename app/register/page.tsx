@@ -148,15 +148,14 @@ export default function RegisterPage() {
             {/* Left Side - Benefits & Trust Indicators */}
             <div className="hidden lg:block space-y-6 animate-fade-in">
               <div>
-                <OptimizedImage
-                  src="/inmova-logo-cover.jpg"
-                  alt="INMOVA"
-                  width={192}
-                  height={64}
-                  className="mb-6"
-                  objectFit="contain"
-                  priority
-                />
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-white/10 rounded-xl">
+                    <Building2 className="h-10 w-10 text-indigo-400" />
+                  </div>
+                  <span className="text-4xl font-black bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
+                    INMOVA
+                  </span>
+                </div>
 
                 <Badge className="mb-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 text-base px-4 py-2">
                   <Star className="h-4 w-4 mr-2" />
@@ -248,15 +247,14 @@ export default function RegisterPage() {
             <div className="w-full max-w-md mx-auto">
               {/* Mobile Logo */}
               <div className="lg:hidden text-center mb-8 animate-fade-in">
-                <OptimizedImage
-                  src="/inmova-logo-cover.jpg"
-                  alt="INMOVA"
-                  width={192}
-                  height={64}
-                  className="mx-auto mb-4"
-                  objectFit="contain"
-                  priority
-                />
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <div className="p-2 bg-indigo-100 rounded-xl">
+                    <Building2 className="h-8 w-8 text-indigo-600" />
+                  </div>
+                  <span className="text-3xl font-black bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                    INMOVA
+                  </span>
+                </div>
                 <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 px-4 py-2">
                   <Star className="h-4 w-4 mr-2" />
                   PRUEBA GRATIS 30 DÍAS

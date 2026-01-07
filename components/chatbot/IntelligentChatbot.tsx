@@ -162,7 +162,7 @@ export function IntelligentChatbot({
           timestamp: new Date(),
           actions: [
             { label: 'Sí, contáctenme', action: 'function', value: 'requestCallback' },
-            { label: 'Enviar email', action: 'link', value: 'mailto:soporte@inmova.app' }
+            { label: 'Enviar email', action: 'link', value: 'mailto:inmovaapp@gmail.com' }
           ]
         };
         setMessages(prev => [...prev, escalationMessage]);
@@ -172,7 +172,7 @@ export function IntelligentChatbot({
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'system',
-        content: 'Lo siento, hubo un error. ¿Podrías intentar de nuevo o contactar a soporte@inmova.app?',
+        content: 'Lo siento, hubo un error. ¿Podrías intentar de nuevo o contactar a inmovaapp@gmail.com?',
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -418,7 +418,7 @@ export function IntelligentChatbot({
                       </Button>
                     </div>
                     <p className="mt-2 text-xs text-gray-500 text-center">
-                      Powered by GPT-4 • <a href="mailto:soporte@inmova.app" className="text-indigo-600 hover:underline">soporte@inmova.app</a>
+                      Powered by GPT-4 • <a href="mailto:inmovaapp@gmail.com" className="text-indigo-600 hover:underline">inmovaapp@gmail.com</a>
                     </p>
                   </div>
                 </>
