@@ -38,7 +38,7 @@ export function HeroSection() {
 
             {/* Main Heading */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight">
-              <span className="block text-gray-900 mb-2">8 Verticales + 15 Módulos.</span>
+              <span className="block text-gray-900 mb-2">7 Verticales + 15 Módulos.</span>
               <span className="block bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600 bg-clip-text text-transparent">
                 Poder Multiplicado.
               </span>
@@ -100,7 +100,7 @@ export function HeroSection() {
                       <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 mb-4">
                         <Building2 className="h-8 w-8 text-white" />
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-900">8 Verticales</h3>
+                      <h3 className="text-2xl font-bold text-gray-900">7 Verticales</h3>
                       <p className="text-sm text-gray-600 mt-2">Modelos de negocio completos</p>
                     </div>
                     <div className="space-y-3">

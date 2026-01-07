@@ -28,7 +28,7 @@ export function MarketPotentialSection() {
               <ul className="space-y-2 text-sm text-gray-700">
                 <li className="flex items-start gap-2">
                   <span className="text-green-600 font-bold">✓</span>
-                  <span><strong>Única multi-vertical:</strong> 8 verticales vs 1 de la competencia</span>
+                  <span><strong>Única multi-vertical:</strong> 7 verticales vs 1 de la competencia</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-600 font-bold">✓</span>

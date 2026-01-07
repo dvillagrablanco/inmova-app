@@ -148,6 +148,12 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin-fincas/facturas': 'admin_fincas',
   '/admin-fincas/libro-caja': 'admin_fincas',
   '/admin-fincas/informes': 'admin_fincas',
+  // Media Estancia (dentro de alquiler residencial)
+  '/media-estancia': 'media_estancia',
+  '/media-estancia/calendario': 'media_estancia',
+  '/media-estancia/scoring': 'media_estancia',
+  '/media-estancia/analytics': 'media_estancia',
+  '/media-estancia/configuracion': 'media_estancia',
   '/valoraciones': 'valoraciones',
   '/publicaciones': 'publicaciones',
   '/screening': 'screening',
@@ -214,6 +220,7 @@ const CORE_MODULES = [
   'marketplace',
   'sms',
   'room_rental',
+  'media_estancia',
   'community_management',
   'esg',
   'iot',
@@ -272,7 +279,7 @@ const dashboardNavItems = [
 
 // 2. VERTICALES DE NEGOCIO - Agrupadas por modelo de negocio
 
-// 2.1 ALQUILER RESIDENCIAL TRADICIONAL
+// 2.1 ALQUILER RESIDENCIAL (Tradicional + Media Estancia)
 const alquilerResidencialItems = [
   {
     name: 'Dashboard Alquiler',
@@ -320,6 +327,39 @@ const alquilerResidencialItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
     dataTour: 'contratos-menu',
   },
+  // --- MEDIA ESTANCIA (1-11 meses) ---
+  {
+    name: '📅 Media Estancia',
+    href: '/media-estancia',
+    icon: Calendar,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'media-estancia-menu',
+  },
+  {
+    name: 'Calendario Disponibilidad',
+    href: '/media-estancia/calendario',
+    icon: Calendar,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Scoring Inquilinos IA',
+    href: '/media-estancia/scoring',
+    icon: UserCheck,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Analytics Media Estancia',
+    href: '/media-estancia/analytics',
+    icon: BarChart2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Config. Media Estancia',
+    href: '/media-estancia/configuracion',
+    icon: Settings,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  // --- FIN MEDIA ESTANCIA ---
   {
     name: 'Candidatos',
     href: '/candidatos',

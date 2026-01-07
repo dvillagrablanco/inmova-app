@@ -27,16 +27,10 @@ const ecosystem = [
     verticales: [
       {
         icon: Building2,
-        name: 'Alquiler Tradicional',
-        desc: 'Contratos, pagos, inquilinos',
-        users: '1,500+',
-      },
-      { 
-        icon: Calendar, 
-        name: 'Media Estancia', 
-        desc: '1-11 meses, profesionales', 
-        users: '400+', 
-        badge: 'NUEVO',
+        name: 'Alquiler Residencial',
+        desc: 'Tradicional + Media Estancia (1-11 meses)',
+        users: '1,900+',
+        badge: 'MEJORADO',
         highlight: true,
       },
       { icon: Hotel, name: 'Vacacional (STR)', desc: 'Airbnb, Booking integrado', users: '800+' },
@@ -88,7 +82,7 @@ const ecosystem = [
 ];
 
 const keyNumbers = [
-  { value: '8', label: 'Verticales de Negocio', icon: Building2 },
+  { value: '7', label: 'Verticales de Negocio', icon: Building2 },
   { value: '100+', label: 'Módulos Incluidos', icon: Zap },
   { value: '5,000+', label: 'Usuarios Activos', icon: Users },
   { value: '€15M+', label: 'Gestionado Mensual', icon: TrendingUp },

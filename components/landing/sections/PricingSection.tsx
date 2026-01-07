@@ -105,7 +105,7 @@ const plans: Plan[] = [
     period: '/mes',
     yearlyPrice: '€3,490/año',
     yearlySavings: 'Ahorra €698 (2 meses gratis)',
-    modules: '8 Verticales + 10 Módulos',
+    modules: '7 Verticales + 10 Módulos',
     properties: 'Propiedades ilimitadas',
     costPerProperty: 'Sin límite',
     newFeature: 'Todos los Verticales + 3 Módulos Gratis',
@@ -116,7 +116,7 @@ const plans: Plan[] = [
       sms: '500 SMS/mes',
     },
     features: [
-      '✅ TODOS los 8 Verticales incluidos',
+      '✅ TODOS los 7 Verticales incluidos',
       '✅ Propiedades ilimitadas',
       '✅ 3 Módulos Transversales incluidos',
       '💰 (Valor €180/mes gratis)',
@@ -138,7 +138,7 @@ const plans: Plan[] = [
     name: 'Enterprise+',
     price: 'A medida',
     period: '',
-    modules: '8 Verticales + 15 Módulos + Custom',
+    modules: '7 Verticales + 15 Módulos + Custom',
     properties: 'Ilimitadas',
     costPerProperty: 'Personalizado',
     usageLimits: {

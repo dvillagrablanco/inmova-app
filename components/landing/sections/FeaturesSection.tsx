@@ -36,20 +36,17 @@ import {
 const verticales = [
   {
     icon: Building2,
-    title: 'Alquiler Tradicional',
-    desc: 'Gestión completa de alquileres residenciales de largo plazo',
-    features: ['Contratos', 'Pagos recurrentes', 'Portal inquilino', 'Alertas automáticas'],
-    gradient: 'from-blue-500 to-cyan-500',
+    title: 'Alquiler Residencial',
+    desc: 'Gestión integral de alquileres: tradicional (12+ meses) y media estancia (1-11 meses)',
+    features: [
+      'Contratos LAU Art. 2 y 3.2',
+      'Scoring inquilinos IA',
+      'Check-in digital',
+      'Multi-portal',
+    ],
+    gradient: 'from-blue-500 to-teal-500',
     color: 'blue',
-  },
-  {
-    icon: Calendar,
-    title: 'Media Estancia (1-11 meses)',
-    desc: 'Alquiler temporal para profesionales, estudiantes y nómadas digitales',
-    features: ['Contratos LAU Art. 3.2', 'Scoring inquilinos IA', 'Check-in digital', 'Multi-portal'],
-    gradient: 'from-teal-500 to-emerald-500',
-    color: 'teal',
-    badge: 'NUEVO',
+    badge: 'MEJORADO',
     href: '/landing/media-estancia',
   },
   {
@@ -217,7 +214,7 @@ export function FeaturesSection() {
           <Badge className="mb-4 text-lg px-4 py-1">🚀 Ecosistema Completo PropTech</Badge>
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              8 Verticales + 15 Módulos
+              7 Verticales + 15 Módulos
             </span>
             <br />
             Todo en Una Plataforma
@@ -233,7 +230,7 @@ export function FeaturesSection() {
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-3xl font-bold">Verticales de Negocio</h3>
             <Badge variant="outline" className="text-sm">
-              8 modelos especializados
+              7 modelos especializados
             </Badge>
           </div>
 
