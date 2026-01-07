@@ -130,8 +130,8 @@ export default function DemoPage() {
         <div className="max-w-6xl mx-auto">
           {/* Header Section */}
           <div className="text-center mb-12">
-            <Badge className="mb-4 bg-gradient-to-r from-indigo-100 to-violet-100 text-indigo-900 border-indigo-300 px-4 py-2 font-bold">
-              <Sparkles className="h-4 w-4 mr-2 inline" />
+            <Badge className="mb-4 bg-white text-gray-900 border-2 border-indigo-400 px-4 py-2 font-bold shadow-sm">
+              <Sparkles className="h-4 w-4 mr-2 inline text-indigo-600" />
               Demo Interactiva
             </Badge>
             <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">

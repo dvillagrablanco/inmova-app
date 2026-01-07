@@ -35,8 +35,8 @@ export default function SobreNosotrosPage() {
       <section className="pt-32 pb-20 px-4">
         <div className="container mx-auto max-w-5xl">
           <div className="text-center mb-16">
-            <Badge className="mb-4 bg-gradient-to-r from-indigo-100 to-violet-100 text-indigo-900 border-indigo-300 px-4 py-2 font-bold">
-              <Heart className="h-4 w-4 mr-1 inline" />
+            <Badge className="mb-4 bg-white text-gray-900 border-2 border-indigo-400 px-4 py-2 font-bold shadow-sm">
+              <Heart className="h-4 w-4 mr-1 inline text-indigo-600" />
               Sobre Nosotros
             </Badge>
             <h1 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">

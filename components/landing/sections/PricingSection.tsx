@@ -193,8 +193,8 @@ export function PricingSection() {
       <div className="container mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <Badge className="mb-4 bg-gradient-to-r from-green-100 to-emerald-100 text-green-900 border-green-300 px-4 py-2 font-bold">
-            7 Verticales · Precios Transparentes · Add-ons Flexibles
+          <Badge className="mb-4 bg-white text-gray-900 border-2 border-green-400 px-4 py-2 font-bold shadow-sm">
+            <span className="text-green-700">✓</span> 7 Verticales · Precios Transparentes · Add-ons Flexibles
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
             Más Funcionalidades. Mejor Precio.
@@ -338,8 +338,8 @@ export function PricingSection() {
         {/* Add-ons Section */}
         <div className="max-w-4xl mx-auto mb-16">
           <div className="text-center mb-8">
-            <Badge className="mb-3 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-900 border-purple-300 font-bold">
-              <Zap className="h-3 w-3 mr-1 inline" />
+            <Badge className="mb-3 bg-white text-gray-900 border-2 border-purple-400 font-bold shadow-sm">
+              <Zap className="h-3 w-3 mr-1 inline text-purple-600" />
               Mejoras Opcionales
             </Badge>
             <h3 className="text-2xl font-bold text-gray-800">

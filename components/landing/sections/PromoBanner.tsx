@@ -210,7 +210,7 @@ export function PromoBanner() {
                 disabled={isAnimating}
                 className={`group p-4 rounded-xl border-2 transition-all ${
                   index === currentIndex
-                    ? 'border-indigo-500 bg-indigo-50 shadow-lg'
+                    ? 'border-indigo-500 bg-white shadow-lg ring-2 ring-indigo-100'
                     : 'border-gray-200 bg-white hover:border-indigo-300 hover:shadow-md'
                 } disabled:cursor-not-allowed`}
               >
@@ -222,7 +222,7 @@ export function PromoBanner() {
                     <div className="text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
                       {campaign.title}
                     </div>
-                    <div className="text-xs text-gray-900 font-bold">
+                    <div className="text-xs text-gray-700 font-semibold">
                       {campaign.code}
                     </div>
                   </div>
