@@ -348,6 +348,9 @@ const alquilerResidencialItems = [
 ];
 
 // 2.2 STR - SHORT TERM RENTALS (Airbnb, Booking, etc.)
+// SIMPLIFICADO: 6 items (antes 8)
+// - Fusionado: Channel Manager + Pricing → Revenue Management
+// - Eliminado: STR Avanzado (accesible desde dashboard)
 const strNavItems = [
   {
     name: 'Dashboard STR',
@@ -356,7 +359,7 @@ const strNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Anuncios y Listados',
+    name: 'Propiedades STR',
     href: '/str/listings',
     icon: Home,
     roles: ['super_admin', 'administrador', 'gestor'],
@@ -368,33 +371,21 @@ const strNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Channel Manager',
+    name: 'Revenue Management',
     href: '/str/channels',
-    icon: BarChart2,
+    icon: TrendingUp,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Pricing Dinámico',
-    href: '/str/pricing',
-    icon: DollarSign,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Gestión de Reviews',
+    name: 'Reviews',
     href: '/str/reviews',
     icon: Star,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Limpieza y Housekeeping',
+    name: 'Housekeeping',
     href: '/str-housekeeping',
     icon: ClipboardList,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'STR Avanzado',
-    href: '/str-advanced',
-    icon: Sparkles,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];
@@ -422,17 +413,13 @@ const coLivingNavItems = [
 ];
 
 // 2.4 BUILD-TO-RENT / CONSTRUCCIÓN
+// SIMPLIFICADO: 4 items (antes 5)
+// - Fusionado: Gantt dentro de Proyectos
 const buildToRentNavItems = [
   {
-    name: 'Proyectos Construcción',
+    name: 'Proyectos',
     href: '/construction/projects',
     icon: HardHat,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Gantt y Cronograma',
-    href: '/construction/gantt',
-    icon: Calendar,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -456,9 +443,11 @@ const buildToRentNavItems = [
 ];
 
 // 2.5 HOUSE FLIPPING
+// SIMPLIFICADO: 4 items (antes 5)
+// - Fusionado: Timeline dentro de Proyectos
 const flippingNavItems = [
   {
-    name: 'Dashboard Flipping',
+    name: 'Dashboard',
     href: '/flipping/dashboard',
     icon: TrendingUp,
     roles: ['super_admin', 'administrador', 'gestor'],
@@ -476,15 +465,9 @@ const flippingNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Comparador de Propiedades',
+    name: 'Análisis Mercado',
     href: '/flipping/comparator',
     icon: BarChart2,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Timeline de Proyectos',
-    href: '/flipping/timeline',
-    icon: Clock,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];
@@ -512,15 +495,17 @@ const comercialNavItems = [
 ];
 
 // 2.7 ADMINISTRADOR DE FINCAS / COMUNIDADES
+// SIMPLIFICADO: 5 items (antes 7)
+// - Fusionado: Cuotas + Fondos + Finanzas → Finanzas Comunidad
 const adminFincasItems = [
   {
-    name: 'Portal Admin Fincas',
+    name: 'Comunidades',
     href: '/comunidades',
     icon: Building2,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Anuncios Comunidad',
+    name: 'Anuncios',
     href: '/anuncios',
     icon: Megaphone,
     roles: ['super_admin', 'administrador', 'gestor', 'community_manager'],
@@ -532,27 +517,15 @@ const adminFincasItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Reuniones y Actas',
+    name: 'Reuniones',
     href: '/reuniones',
     icon: Users2,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Cuotas y Derramas',
-    href: '/comunidades/cuotas',
-    icon: Euro,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Fondos de Reserva',
-    href: '/comunidades/fondos',
-    icon: DollarSign,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Finanzas Comunidad',
+    name: 'Finanzas',
     href: '/comunidades/finanzas',
-    icon: BarChart2,
+    icon: Euro,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];
@@ -562,6 +535,8 @@ const adminFincasItems = [
 // ============================================================================
 
 // 3.1 FINANZAS Y CONTABILIDAD
+// SIMPLIFICADO: 5 items (antes 6)
+// - Fusionado: Contabilidad dentro de Gastos
 const finanzasNavItems = [
   {
     name: 'Pagos',
@@ -589,12 +564,6 @@ const finanzasNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Contabilidad',
-    href: '/contabilidad',
-    icon: BarChart2,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
     name: 'Open Banking',
     href: '/open-banking',
     icon: CreditCard,
@@ -603,19 +572,9 @@ const finanzasNavItems = [
 ];
 
 // 3.2 ANALYTICS E INTELIGENCIA
+// SIMPLIFICADO: 3 items (antes 5)
+// - Fusionado: Dashboard Adaptativo + Analytics + BI → Analytics
 const analyticsNavItems = [
-  {
-    name: 'Dashboard Adaptativo',
-    href: '/dashboard/adaptive',
-    icon: LayoutDashboard,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Business Intelligence',
-    href: '/bi',
-    icon: FileBarChart,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
   {
     name: 'Analytics',
     href: '/analytics',
@@ -637,23 +596,14 @@ const analyticsNavItems = [
 ];
 
 // 3.3 OPERACIONES Y MANTENIMIENTO
+// SIMPLIFICADO: 4 items (antes 6)
+// - Eliminado: Mantenimiento Preventivo (duplicado)
+// - Fusionado: Tareas + Incidencias conceptualmente
 const operacionesNavItems = [
   {
     name: 'Mantenimiento',
     href: '/mantenimiento',
     icon: Wrench,
-    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
-  },
-  {
-    name: 'Mantenimiento Preventivo',
-    href: '/mantenimiento',
-    icon: Calendar,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Tareas',
-    href: '/tareas',
-    icon: CheckSquare,
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
   },
   {
@@ -669,7 +619,7 @@ const operacionesNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Visitas y Showings',
+    name: 'Visitas',
     href: '/visitas',
     icon: CalendarCheck,
     roles: ['super_admin', 'administrador', 'gestor'],
@@ -677,6 +627,8 @@ const operacionesNavItems = [
 ];
 
 // 3.4 COMUNICACIONES
+// SIMPLIFICADO: 4 items (antes 5)
+// - Eliminado: Publicaciones (duplicado de Redes Sociales)
 const comunicacionesNavItems = [
   {
     name: 'Chat',
@@ -697,20 +649,17 @@ const comunicacionesNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Gestión de Redes Sociales',
+    name: 'Redes Sociales',
     href: '/dashboard/social-media',
     icon: Share2,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Publicaciones',
-    href: '/dashboard/social-media',
-    icon: Megaphone,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];
 
 // 3.5 DOCUMENTOS Y LEGAL
+// SIMPLIFICADO: 6 items (antes 8)
+// - Fusionado: Legal + Seguridad → Compliance
+// - Fusionado: OCR dentro de Documentos
 const documentosLegalNavItems = [
   {
     name: 'Documentos',
@@ -719,28 +668,16 @@ const documentosLegalNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'OCR Documentos',
-    href: '/ocr',
-    icon: Scan,
-    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
-  },
-  {
     name: 'Firma Digital',
     href: '/firma-digital',
     icon: FileSignature,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Legal y Compliance',
+    name: 'Compliance',
     href: '/legal',
     icon: Shield,
     roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Seguridad & Compliance',
-    href: '/seguridad-compliance',
-    icon: Shield,
-    roles: ['super_admin', 'administrador'],
   },
   {
     name: 'Auditoría',
@@ -763,6 +700,9 @@ const documentosLegalNavItems = [
 ];
 
 // 3.6 CRM Y MARKETING
+// SIMPLIFICADO: 5 items (antes 7)
+// - Fusionado: Referidos + Cupones → Promociones
+// - Fusionado: Galerías + Tours → Contenido Visual
 const crmMarketingNavItems = [
   {
     name: 'CRM',
@@ -777,14 +717,8 @@ const crmMarketingNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Programa de Referidos',
+    name: 'Promociones',
     href: '/dashboard/referrals',
-    icon: UserPlus,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Cupones y Descuentos',
-    href: '/dashboard/coupons',
     icon: Package,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
@@ -792,12 +726,6 @@ const crmMarketingNavItems = [
     name: 'Marketplace',
     href: '/marketplace',
     icon: ShoppingCart,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Galerías',
-    href: '/galerias',
-    icon: Folder,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -809,13 +737,9 @@ const crmMarketingNavItems = [
 ];
 
 // 3.7 AUTOMATIZACIÓN Y WORKFLOWS
+// SIMPLIFICADO: 2 items (antes 3)
+// - Fusionado: Automatización + Workflows
 const automatizacionNavItems = [
-  {
-    name: 'Automatización',
-    href: '/automatizacion',
-    icon: Zap,
-    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
-  },
   {
     name: 'Workflows',
     href: '/workflows',
@@ -917,27 +841,30 @@ const operadorNavItems = [
 // ============================================================================
 
 // 5.1 ADMINISTRADOR - GESTIÓN DE EMPRESA
+// SIMPLIFICADO: 7 items (antes 9)
+// - Eliminado: Legal (ya está en Documentos y Legal)
+// - Fusionado: Módulos + Personalización → Configuración
 const administradorEmpresaItems = [
   {
-    name: 'Configuración Empresa',
+    name: 'Configuración',
     href: '/admin/configuracion',
     icon: Settings,
     roles: ['administrador', 'super_admin'],
   },
   {
-    name: 'Usuarios y Permisos',
+    name: 'Usuarios',
     href: '/admin/usuarios',
     icon: Users,
     roles: ['administrador', 'super_admin'],
   },
   {
-    name: 'Módulos Activos',
+    name: 'Módulos',
     href: '/admin/modulos',
     icon: Package,
     roles: ['administrador', 'super_admin'],
   },
   {
-    name: 'Personalización (Branding)',
+    name: 'Branding',
     href: '/admin/personalizacion',
     icon: Palette,
     roles: ['administrador', 'super_admin'],
@@ -949,21 +876,9 @@ const administradorEmpresaItems = [
     roles: ['administrador', 'super_admin'],
   },
   {
-    name: 'Reportes Programados',
-    href: '/admin/reportes-programados',
-    icon: Clock,
-    roles: ['administrador', 'super_admin'],
-  },
-  {
     name: 'Importar Datos',
     href: '/admin/importar',
     icon: Upload,
-    roles: ['administrador', 'super_admin'],
-  },
-  {
-    name: 'Legal y Cumplimiento',
-    href: '/admin/legal',
-    icon: Shield,
     roles: ['administrador', 'super_admin'],
   },
   {
@@ -975,17 +890,35 @@ const administradorEmpresaItems = [
 ];
 
 // 5.2 SUPER ADMIN - GESTIÓN DE PLATAFORMA
+// SIMPLIFICADO: 10 items (antes 18)
+// - Fusionado: Planes + Facturación B2B → Billing
+// - Fusionado: Actividad + Alertas + Salud + Métricas → Monitoreo
+// - Fusionado: Integraciones + Integraciones Contables → Integraciones
+// - Fusionado: Plantillas SMS + OCR + Firma Digital → Config Servicios
+// - Eliminado: Seguridad (ya en Compliance), Backup (acceso desde Settings)
 const superAdminPlatformItems = [
   {
-    name: 'Dashboard Super Admin',
+    name: 'Dashboard',
     href: '/admin/dashboard',
     icon: LayoutDashboard,
     roles: ['super_admin'],
   },
   {
-    name: 'Gestión de Clientes (B2B)',
+    name: 'Clientes B2B',
     href: '/admin/clientes',
     icon: Building2,
+    roles: ['super_admin'],
+  },
+  {
+    name: 'Billing',
+    href: '/admin/planes',
+    icon: DollarSign,
+    roles: ['super_admin'],
+  },
+  {
+    name: 'Partners',
+    href: '/admin/partners',
+    icon: Briefcase,
     roles: ['super_admin'],
   },
   {
@@ -995,97 +928,31 @@ const superAdminPlatformItems = [
     roles: ['super_admin'],
   },
   {
-    name: 'Planes y Facturación B2B',
-    href: '/admin/planes',
-    icon: DollarSign,
-    roles: ['super_admin'],
-  },
-  {
-    name: 'Facturación B2B',
-    href: '/admin/facturacion-b2b',
-    icon: FileText,
-    roles: ['super_admin'],
-  },
-  {
-    name: 'Partners y Aliados',
-    href: '/admin/partners',
-    icon: Briefcase,
-    roles: ['super_admin'],
-  },
-  {
-    name: 'Integraciones Contables',
-    href: '/admin/integraciones-contables',
-    icon: Package,
-    roles: ['super_admin'],
-  },
-  {
-    name: 'Marketplace Admin',
+    name: 'Marketplace',
     href: '/admin/marketplace',
     icon: ShoppingCart,
     roles: ['super_admin'],
   },
   {
-    name: 'Plantillas SMS',
-    href: '/admin/plantillas-sms',
-    icon: MessageCircle,
-    roles: ['super_admin'],
-  },
-  {
-    name: 'Firma Digital Config',
-    href: '/admin/firma-digital',
-    icon: FileSignature,
-    roles: ['super_admin'],
-  },
-  {
-    name: 'OCR Import Config',
-    href: '/admin/ocr-import',
-    icon: Scan,
-    roles: ['super_admin'],
-  },
-  {
-    name: 'Actividad de Sistema',
+    name: 'Monitoreo',
     href: '/admin/activity',
     icon: Activity,
     roles: ['super_admin'],
   },
   {
-    name: 'Alertas de Sistema',
-    href: '/admin/alertas',
-    icon: Bell,
+    name: 'Portales',
+    href: '/admin/portales-externos',
+    icon: Share2,
     roles: ['super_admin'],
   },
   {
-    name: 'Salud del Sistema',
-    href: '/admin/salud-sistema',
-    icon: Activity,
-    roles: ['super_admin'],
-  },
-  {
-    name: 'Métricas de Uso',
-    href: '/admin/metricas-uso',
-    icon: BarChart2,
-    roles: ['super_admin'],
-  },
-  {
-    name: 'Seguridad y Logs',
+    name: 'Seguridad',
     href: '/admin/seguridad',
     icon: Shield,
     roles: ['super_admin'],
   },
   {
-    name: 'Backup y Restauración',
-    href: '/admin/backup-restore',
-    icon: Upload,
-    roles: ['super_admin'],
-  },
-  {
-    name: 'Portales Externos',
-    href: '/admin/portales-externos',
-    icon: Zap,
-    roles: ['super_admin'],
-  },
-  {
-    name: 'Documentación API',
+    name: 'API Docs',
     href: '/api-docs',
     icon: Code,
     roles: ['super_admin'],
