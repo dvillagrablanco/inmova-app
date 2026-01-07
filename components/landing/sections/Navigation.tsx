@@ -44,7 +44,7 @@ export function Navigation() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="flex items-center gap-1.5 text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors bg-orange-50 px-3 py-1.5 rounded-full border border-orange-200 hover:border-orange-300"
+                  className="flex items-center gap-1.5 text-sm font-bold text-orange-800 hover:text-orange-900 transition-colors bg-orange-100 px-3 py-1.5 rounded-full border border-orange-300 hover:border-orange-400"
                 >
                   {item.icon && <item.icon className="h-4 w-4" />}
                   {item.label}
@@ -95,11 +95,11 @@ export function Navigation() {
                         key={item.href}
                         href={item.href}
                         onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-2 text-lg font-semibold text-orange-600 hover:text-orange-700 transition-colors py-2 px-4 hover:bg-orange-50 rounded-lg border border-orange-200"
+                        className="flex items-center gap-2 text-lg font-bold text-orange-800 hover:text-orange-900 transition-colors py-2 px-4 hover:bg-orange-100 rounded-lg border border-orange-300"
                       >
                         {item.icon && <item.icon className="h-5 w-5" />}
                         {item.label}
-                        <Badge className="bg-orange-500 text-white text-xs ml-auto">B2B</Badge>
+                        <Badge className="bg-orange-600 text-white text-xs ml-auto font-bold">B2B</Badge>
                       </Link>
                     ) : (
                       <a

@@ -63,6 +63,24 @@ function isDarkColor(color: string): boolean {
   return false;
 }
 
+// Función para detectar si un fondo es transparente
+function isTransparentBg(color: string): boolean {
+  // rgba con alpha 0
+  const rgbaMatch = color.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([0-9.]+)\)/);
+  if (rgbaMatch) {
+    return parseFloat(rgbaMatch[4]) === 0;
+  }
+  return color === 'rgba(0, 0, 0, 0)' || color === 'transparent';
+}
+
+// Para fondos transparentes, usar blanco como fondo efectivo
+function getEffectiveBgColor(bgColor: string): string {
+  if (isTransparentBg(bgColor)) {
+    return 'rgb(255, 255, 255)'; // Asumir fondo blanco
+  }
+  return bgColor;
+}
+
 async function analyzeButtons(page: Page): Promise<ButtonAnalysis[]> {
   const results: ButtonAnalysis[] = [];
   
@@ -92,18 +110,20 @@ async function analyzeButtons(page: Page): Promise<ButtonAnalysis[]> {
         };
       });
       
-      const contrast = getContrastRatio(styles.textColor, styles.bgColor);
+      // Para fondos transparentes, usar el color efectivo (blanco)
+      const effectiveBgColor = getEffectiveBgColor(styles.bgColor);
+      const contrast = getContrastRatio(styles.textColor, effectiveBgColor);
       const textIsDark = isDarkColor(styles.textColor);
-      const bgIsDark = isDarkColor(styles.bgColor);
+      const bgIsDark = isDarkColor(effectiveBgColor);
       
       let issue: string | undefined;
       
-      // Detectar problemas
+      // Detectar problemas (solo si el fondo no es transparente o si calculamos contra blanco)
       if (contrast < 3) {
         issue = `Contraste muy bajo: ${contrast.toFixed(2)}:1 (mínimo 3:1)`;
       } else if (contrast < 4.5) {
         issue = `Contraste bajo: ${contrast.toFixed(2)}:1 (recomendado 4.5:1)`;
-      } else if (textIsDark && bgIsDark) {
+      } else if (textIsDark && bgIsDark && !isTransparentBg(styles.bgColor)) {
         issue = `Texto oscuro sobre fondo oscuro`;
       }
       
@@ -246,13 +266,14 @@ test.describe('Auditoría de Botones - Visibilidad y Contraste', () => {
           };
         });
         
-        const contrast = getContrastRatio(styles.textColor, styles.bgColor);
-        const status = contrast < 4.5 ? '⚠️  BAJO' : '✅ OK';
-        
-        console.log(`${status} "${text.trim().substring(0, 30)}"`);
-        console.log(`      Texto: ${styles.textColor}`);
-        console.log(`      Fondo: ${styles.bgColor}`);
-        console.log(`      Contraste: ${contrast.toFixed(2)}:1`);
+            const effectiveBg = getEffectiveBgColor(styles.bgColor);
+            const contrast = getContrastRatio(styles.textColor, effectiveBg);
+            const status = contrast < 4.5 ? '⚠️  BAJO' : '✅ OK';
+            
+            console.log(`${status} "${text.trim().substring(0, 30)}"`);
+            console.log(`      Texto: ${styles.textColor}`);
+            console.log(`      Fondo: ${styles.bgColor} ${isTransparentBg(styles.bgColor) ? '(tratado como blanco)' : ''}`);
+            console.log(`      Contraste: ${contrast.toFixed(2)}:1`);
       } catch (e) {
         // Ignorar
       }
