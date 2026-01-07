@@ -280,38 +280,25 @@ const dashboardNavItems = [
 // 2. VERTICALES DE NEGOCIO - Agrupadas por modelo de negocio
 
 // 2.1 ALQUILER RESIDENCIAL (Tradicional + Media Estancia)
+// SIMPLIFICADO: 9 items esenciales (antes eran 18)
+// - Fusionado: Edificios + Unidades + Garajes → Propiedades
+// - Fusionado: Candidatos + Screening → Candidatos
+// - Movido: Seguros → Documentos y Legal
+// - Media Estancia: Solo dashboard, sub-páginas accesibles internamente
 const alquilerResidencialItems = [
   {
     name: 'Dashboard Alquiler',
     href: '/traditional-rental',
     icon: LayoutDashboard,
     roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Edificios',
-    href: '/edificios',
-    icon: Building2,
-    roles: ['super_admin', 'administrador', 'gestor'],
-    dataTour: 'edificios-menu',
-  },
-  {
-    name: 'Unidades',
-    href: '/unidades',
-    icon: Home,
-    roles: ['super_admin', 'administrador', 'gestor'],
-    dataTour: 'unidades-menu',
-  },
-  {
-    name: 'Garajes y Trasteros',
-    href: '/garajes-trasteros',
-    icon: Car,
-    roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'alquiler-dashboard',
   },
   {
     name: 'Propiedades',
     href: '/propiedades',
     icon: Building2,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'propiedades-menu',
   },
   {
     name: 'Inquilinos',
@@ -327,7 +314,6 @@ const alquilerResidencialItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
     dataTour: 'contratos-menu',
   },
-  // --- MEDIA ESTANCIA (1-11 meses) ---
   {
     name: '📅 Media Estancia',
     href: '/media-estancia',
@@ -336,46 +322,15 @@ const alquilerResidencialItems = [
     dataTour: 'media-estancia-menu',
   },
   {
-    name: 'Calendario Disponibilidad',
-    href: '/media-estancia/calendario',
-    icon: Calendar,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Scoring Inquilinos IA',
-    href: '/media-estancia/scoring',
-    icon: UserCheck,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Analytics Media Estancia',
-    href: '/media-estancia/analytics',
-    icon: BarChart2,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Config. Media Estancia',
-    href: '/media-estancia/configuracion',
-    icon: Settings,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  // --- FIN MEDIA ESTANCIA ---
-  {
     name: 'Candidatos',
     href: '/candidatos',
     icon: UserPlus,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Screening Inquilinos',
-    href: '/screening',
-    icon: UserCheck,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Valoraciones Propiedades',
+    name: 'Valoraciones IA',
     href: '/valoraciones',
-    icon: Award,
+    icon: Sparkles,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -388,12 +343,6 @@ const alquilerResidencialItems = [
     name: 'Certificaciones',
     href: '/certificaciones',
     icon: Award,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Seguros',
-    href: '/seguros',
-    icon: Shield,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];
@@ -798,6 +747,12 @@ const documentosLegalNavItems = [
     href: '/auditoria',
     icon: ClipboardList,
     roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Seguros',
+    href: '/seguros',
+    icon: Shield,
+    roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
     name: 'Plantillas',

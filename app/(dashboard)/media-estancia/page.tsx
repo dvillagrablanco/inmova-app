@@ -124,10 +124,10 @@ function KPICard({
 
 function QuickActions() {
   const actions = [
-    { icon: Plus, label: 'Nuevo Contrato', href: '/media-estancia/contratos/nuevo', color: 'bg-blue-500' },
+    { icon: Plus, label: 'Nuevo Contrato', href: '/contratos/media-estancia/nuevo', color: 'bg-blue-500' },
     { icon: CalendarDays, label: 'Calendario', href: '/media-estancia/calendario', color: 'bg-purple-500' },
-    { icon: UserCheck, label: 'Check-in', href: '/media-estancia/check-events', color: 'bg-green-500' },
-    { icon: FileSignature, label: 'Firmas Pendientes', href: '/media-estancia/firmas', color: 'bg-orange-500' },
+    { icon: UserCheck, label: 'Scoring IA', href: '/media-estancia/scoring', color: 'bg-emerald-500' },
+    { icon: FileSignature, label: 'Firmas Pendientes', href: '/firma-digital', color: 'bg-orange-500' },
     { icon: BarChart3, label: 'Analytics', href: '/media-estancia/analytics', color: 'bg-indigo-500' },
     { icon: Settings, label: 'Configuración', href: '/media-estancia/configuracion', color: 'bg-gray-500' },
   ];
