@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Target, Rocket, Award } from 'lucide-react';
+import { TrendingUp, Target, Rocket } from 'lucide-react';
 
 export function MarketPotentialSection() {
   return (
@@ -65,61 +65,6 @@ export function MarketPotentialSection() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Proyección 5 Años */}
-        <Card className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white border-0">
-          <CardContent className="p-8">
-            <div className="flex items-center justify-center mb-6">
-              <Award className="h-12 w-12 text-yellow-300" />
-            </div>
-            <h3 className="text-3xl font-bold text-center mb-8">Proyección de Crecimiento 2026-2030</h3>
-            
-            <div className="grid md:grid-cols-5 gap-6">
-              {[
-                { year: 'Año 1', arr: '€8.5M', cuota: '3%' },
-                { year: 'Año 2', arr: '€20M', cuota: '7%' },
-                { year: 'Año 3', arr: '€45M', cuota: '16%' },
-                { year: 'Año 4', arr: '€91M', cuota: '32%' },
-                { year: 'Año 5', arr: '€150M', cuota: '53%', highlight: true },
-              ].map((item, idx) => (
-                <div 
-                  key={idx} 
-                  className={`text-center p-6 rounded-xl ${
-                    item.highlight 
-                      ? 'bg-yellow-400 text-gray-900 scale-110 shadow-2xl' 
-                      : 'bg-white/10 backdrop-blur-sm'
-                  } transition-all hover:scale-105`}
-                >
-                  <div className="text-sm font-medium mb-2 opacity-90">{item.year}</div>
-                  <div className={`text-2xl md:text-3xl font-black mb-1 ${
-                    item.highlight ? 'text-gray-900' : 'text-white'
-                  }`}>
-                    {item.arr}
-                  </div>
-                  <div className={`text-xs font-semibold ${
-                    item.highlight ? 'text-gray-700' : 'text-white/80'
-                  }`}>
-                    {item.cuota} cuota
-                  </div>
-                  {item.highlight && (
-                    <div className="mt-2 text-xs font-bold text-gray-900">
-                      🏆 LÍDER
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8 text-center">
-              <p className="text-xl font-bold text-yellow-300">
-                De 3% a 53% de cuota de mercado en 5 años
-              </p>
-              <p className="text-white/90 mt-2">
-                Crecimiento de +1,665% posicionándonos como el líder absoluto en PropTech multi-vertical en España
-              </p>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Ventaja Competitiva */}
         <div className="mt-12 grid md:grid-cols-2 gap-6">
