@@ -32,134 +32,112 @@ interface Plan {
 
 const plans: Plan[] = [
   {
-    name: 'Basic',
+    name: 'Starter',
+    price: '€29',
+    period: '/mes',
+    yearlyPrice: '€290/año',
+    yearlySavings: 'Ahorra €58 (2 meses gratis)',
+    modules: 'Alquiler Residencial',
+    properties: 'Hasta 5 propiedades',
+    costPerProperty: '€5.80/propiedad',
+    usageLimits: {
+      signatures: '5 firmas/mes',
+      storage: '1 GB',
+      ai: 'No incluido',
+      sms: '5 SMS/mes',
+    },
+    features: [
+      '✅ Gestión de propiedades',
+      '✅ Contratos digitales básicos',
+      '✅ Gestión de inquilinos',
+      '✅ Cobros y recordatorios',
+      '✅ Dashboard básico',
+      'Soporte email'
+    ],
+    addons: [],
+    cta: 'Para propietarios con pocas propiedades'
+  },
+  {
+    name: 'Professional',
     price: '€49',
     period: '/mes',
     yearlyPrice: '€490/año',
     yearlySavings: 'Ahorra €98 (2 meses gratis)',
-    modules: '1 Vertical',
-    properties: 'Hasta 20 propiedades',
-    costPerProperty: '€2.45/propiedad',
+    modules: '1 Vertical completo',
+    properties: 'Hasta 25 propiedades',
+    costPerProperty: '€1.96/propiedad',
+    popular: true,
     usageLimits: {
-      signatures: '5 firmas/mes',
-      storage: '2 GB',
-      ai: '5K tokens IA/mes',
-      sms: '10 SMS/mes',
+      signatures: '15 firmas/mes',
+      storage: '5 GB',
+      ai: 'Básico',
+      sms: '25 SMS/mes',
     },
     features: [
-      '✅ 1 Vertical de Negocio (a elegir)',
-      'Hasta 20 propiedades',
-      '1 usuario',
-      'Funciones core del vertical elegido',
-      'Dashboard y reportes básicos',
-      'Integraciones básicas',
-      'Módulos Transversales: Opcionales',
-      'Soporte email 48h'
+      '✅ Todo de Starter +',
+      '✅ Hasta 25 propiedades',
+      '✅ 3 usuarios incluidos',
+      '✅ Reportes avanzados',
+      '✅ Portal de inquilinos',
+      '✅ Integraciones (portales, calendario)',
+      '✅ Soporte chat'
     ],
-    addons: [
-      'ESG +€50/mes',
-      'Pricing IA +€30/mes',
-      'Tours VR +€30/mes'
-    ],
-    cta: 'Ideal para inversores particulares y flippers'
+    addons: [],
+    cta: 'Ideal para propietarios y pequeños gestores'
   },
   {
-    name: 'Professional',
+    name: 'Business',
     price: '€149',
     period: '/mes',
     yearlyPrice: '€1,490/año',
     yearlySavings: 'Ahorra €298 (2 meses gratis)',
-    modules: '2 Verticales + 1 Módulo',
+    modules: 'Múltiples verticales',
     properties: 'Hasta 100 propiedades',
-    costPerProperty: '€1.49/propiedad (max)',
-    popular: true,
-    newFeature: '2 Verticales + 1 Módulo Gratis',
+    costPerProperty: '€1.49/propiedad',
     usageLimits: {
-      signatures: '25 firmas/mes',
-      storage: '10 GB',
-      ai: '50K tokens IA/mes',
+      signatures: '50 firmas/mes',
+      storage: '20 GB',
+      ai: 'Avanzado',
       sms: '100 SMS/mes',
     },
     features: [
-      '✅ 2 Verticales de Negocio (combina modelos)',
-      'Hasta 100 propiedades',
-      '5 usuarios incluidos',
-      '⭐ Funciones avanzadas por vertical',
-      'AI Assistant GPT-4 Standard',
-      'Dashboard avanzado + Analytics',
-      'Integraciones premium (OTAs, pagos)',
-      '✨ 1 Módulo Transversal incluido gratis',
-      'Marca Blanca: Colores + Dominio',
-      'Soporte chat prioritario'
+      '✅ Todo de Professional +',
+      '✅ Hasta 100 propiedades',
+      '✅ 10 usuarios incluidos',
+      '✅ Múltiples verticales',
+      '✅ API acceso',
+      '✅ Personalización de marca',
+      '✅ Gestor de cuenta',
+      '✅ Soporte prioritario'
     ],
-    addons: [
-      'ESG +€50/mes',
-      'IoT +€100/mes',
-      'Módulos extra +€30-50/mes'
-    ],
-    cta: 'Perfecto para agencias y gestoras profesionales'
+    addons: [],
+    cta: 'Para agencias y gestoras profesionales'
   },
   {
-    name: 'Business',
-    price: '€349',
-    period: '/mes',
-    yearlyPrice: '€3,490/año',
-    yearlySavings: 'Ahorra €698 (2 meses gratis)',
-    modules: '7 Verticales + 10 Módulos',
-    properties: 'Propiedades ilimitadas',
-    costPerProperty: 'Sin límite',
-    newFeature: 'Todos los Verticales + 3 Módulos Gratis',
-    usageLimits: {
-      signatures: '100 firmas/mes',
-      storage: '50 GB',
-      ai: '500K tokens IA/mes',
-      sms: '500 SMS/mes',
-    },
-    features: [
-      '✅ TODOS los 7 Verticales incluidos',
-      '✅ Propiedades ilimitadas',
-      '✅ 3 Módulos Transversales incluidos',
-      '💰 (Valor €180/mes gratis)',
-      '15 usuarios incluidos',
-      'AI Assistant GPT-4 Advanced (entrenable)',
-      'Construcción: Obra Nueva completa',
-      'White-label completo + App móvil',
-      'Migraciones de datos incluidas',
-      'Gestor de Cuenta Dedicado',
-      'Soporte prioritario 24/7'
-    ],
-    addons: [
-      'Blockchain incluido',
-      'Módulos extra disponibles'
-    ],
-    cta: 'Para promotoras y gestoras consolidadas'
-  },
-  {
-    name: 'Enterprise+',
+    name: 'Enterprise',
     price: 'A medida',
     period: '',
-    modules: '7 Verticales + 15 Módulos + Custom',
+    modules: 'Todos los verticales',
     properties: 'Ilimitadas',
     costPerProperty: 'Personalizado',
     usageLimits: {
       signatures: 'Ilimitadas',
       storage: 'Ilimitado',
-      ai: 'Ilimitados',
+      ai: 'Ilimitado',
       sms: 'Ilimitados',
     },
     features: [
-      '✅ Todos los verticales + módulos',
-      'Desarrollos custom incluidos',
-      'Propiedades y usuarios ilimitados',
-      'Migración garantizada de datos',
-      'SLA 99.9% garantizado',
-      'Consultoría Tokenización Blockchain',
-      'Multi-región + Multi-moneda',
-      'Soporte 24/7 + Account Manager',
-      'Auditoría y cumplimiento normativo'
+      '✅ Todo de Business +',
+      '✅ Propiedades ilimitadas',
+      '✅ Usuarios ilimitados',
+      '✅ Desarrollos a medida',
+      '✅ Migración de datos incluida',
+      '✅ SLA garantizado',
+      '✅ Formación presencial',
+      '✅ Soporte 24/7'
     ],
     addons: [],
-    cta: 'SOCIMIs y grandes corporaciones'
+    cta: 'Grandes gestoras y promotoras'
   }
 ];
 
@@ -170,16 +148,16 @@ export function PricingSection() {
         <div className="text-center mb-16">
           <Badge className="mb-4 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200 px-4 py-2">
             <DollarSign className="h-4 w-4 mr-1 inline" />
-            Mejor Precio/Valor del Mercado - Ahorra hasta 70%
+            Precios Transparentes - Sin Sorpresas
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-            El Fin de la Fragmentación
+            Elige el Plan que Necesitas
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
-            <strong className="text-indigo-600">Todos los 88+ módulos incluidos en todos los planes.</strong> Sistema Operativo Integral del Real Estate.
+            Desde propietarios individuales hasta grandes gestoras. <strong className="text-indigo-600">Todos los planes incluyen soporte y actualizaciones.</strong>
           </p>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            Reemplaza múltiples herramientas en una sola plataforma. Ahorra <strong className="text-green-600">€240/mes</strong> consolidando 5-8 sistemas diferentes.
+            Prueba gratis 30 días. Sin tarjeta de crédito. Cancela cuando quieras.
           </p>
         </div>
 

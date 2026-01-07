@@ -126,7 +126,7 @@ export default function PropietariosPage() {
             Empieza a gestionar tus propiedades hoy
           </h2>
           <p className="text-blue-100 mb-8">
-            Únete a miles de propietarios que ya simplifican su día a día con Inmova
+            Prueba gratis durante 30 días. Sin tarjeta de crédito.
           </p>
           <Link href="/register">
             <Button size="lg" variant="secondary">

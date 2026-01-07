@@ -95,29 +95,29 @@ const personasContent: Record<string, PersonaContent> = {
     image: '/images/hero-gestores.jpg',
   },
   inversores: {
-    title: 'Maximiza tu rentabilidad patrimonial',
+    title: 'Control total de tu cartera inmobiliaria',
     subtitle:
-      'Dashboard ejecutivo en tiempo real con BI avanzado. Ahorra €30K-€150K/año en costos operativos.',
+      'Dashboard ejecutivo con métricas en tiempo real. Visualiza rendimiento, ocupación y rentabilidad de todas tus propiedades.',
     painPoints: [
-      'Sistemas legacy costosos (€50K-€200K/año)',
-      'Falta de dashboard ejecutivo en tiempo real',
-      'Analytics limitados y reportes manuales',
-      'Integración contable compleja',
+      'Información dispersa en Excel y emails',
+      'Falta de visibilidad en tiempo real',
+      'Reportes manuales que consumen tiempo',
+      'Dificultad para tomar decisiones rápidas',
     ],
     benefits: [
-      'Dashboard ejecutivo en tiempo real',
-      'BI avanzado con predictive analytics',
-      'Integración contable automática',
-      'Blockchain para tokenización de activos',
+      'Dashboard unificado todas las propiedades',
+      'Métricas de rentabilidad automatizadas',
+      'Alertas de vencimientos y pagos',
+      'Reportes exportables para contabilidad',
     ],
     cta: {
-      primary: { text: 'Agendar Demo Privada', href: '/contact?type=inversor' },
-      secondary: { text: 'Descargar Brochure', href: '/downloads/inversores-brochure.pdf' },
+      primary: { text: 'Ver Demo', href: '/landing/demo' },
+      secondary: { text: 'Contactar Ventas', href: '/landing/contacto' },
     },
     stats: [
-      { icon: BarChart3, value: '€150K', label: 'Ahorro anual' },
-      { icon: Sparkles, value: 'Real-time', label: 'Analytics' },
-      { icon: Building2, value: '10K+', label: 'Propiedades' },
+      { icon: BarChart3, value: '10h', label: 'Ahorro semanal' },
+      { icon: Sparkles, value: '100%', label: 'Visibilidad' },
+      { icon: Building2, value: 'Ilimitadas', label: 'Propiedades' },
     ],
     image: '/images/hero-inversores.jpg',
   },
@@ -357,23 +357,23 @@ export function HeroSectionSegmentado() {
             </Tabs>
           </div>
 
-          {/* Trust Indicators */}
+          {/* Trust Indicators - Beneficios para usuarios */}
           <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-gray-600 border-t border-gray-200 mt-12">
             <div className="flex items-center gap-2">
               <Building2 className="h-5 w-5 text-indigo-600" />
-              <span className="font-medium">€850M Mercado España</span>
+              <span className="font-medium">7 Verticales de Negocio</span>
             </div>
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-violet-600" />
-              <span className="font-medium">34 Tipos de Partners</span>
+              <span className="font-medium">+5,000 Usuarios Activos</span>
             </div>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-pink-600" />
-              <span className="font-medium">€150M Potencial 5 Años</span>
+              <span className="font-medium">Ahorro medio 10h/semana</span>
             </div>
             <div className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-green-600" />
-              <span className="font-medium">99.9% Uptime</span>
+              <span className="font-medium">Soporte 24/7</span>
             </div>
           </div>
         </div>

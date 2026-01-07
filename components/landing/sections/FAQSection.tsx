@@ -34,15 +34,15 @@ const faqs: FAQItem[] = [
   {
     question: '¿Puedo gestionar múltiples propiedades?',
     answer:
-      'Sí. Nuestro plan Profesional permite gestionar hasta 200 propiedades, y el plan Enterprise es ilimitado. Perfecto para gestores y empresas de coliving.',
+      'Sí. Según el plan: Starter hasta 5, Professional hasta 25, Business hasta 100, y Enterprise ilimitadas. Puedes actualizar en cualquier momento.',
     category: 'general',
   },
 
   // Pricing
   {
-    question: '¿Hay un plan gratuito?',
+    question: '¿Hay periodo de prueba?',
     answer:
-      'Sí. El plan Básico es gratuito para siempre e incluye 1 propiedad y funcionalidades core. Perfecto para probar la plataforma antes de escalar.',
+      'Sí. Todos los planes incluyen 30 días de prueba gratis sin necesidad de tarjeta de crédito. Puedes probar todas las funcionalidades antes de decidir.',
     category: 'pricing',
   },
   {
@@ -106,7 +106,7 @@ const faqs: FAQItem[] = [
   {
     question: '¿Qué soporte ofrecen?',
     answer:
-      'Plan Básico: Email (48h). Plan Profesional: Email prioritario (24h). Plan Enterprise: Email, chat en vivo, y teléfono. Todos los planes incluyen base de conocimientos y tutoriales en video.',
+      'Todos los planes incluyen soporte por email y acceso a tutoriales. Los planes Business y Enterprise incluyen chat en vivo y soporte prioritario. El plan Enterprise incluye gestor de cuenta dedicado.',
     category: 'legal',
   },
 ];

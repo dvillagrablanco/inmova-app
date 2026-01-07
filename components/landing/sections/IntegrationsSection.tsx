@@ -7,68 +7,68 @@ import { CheckCircle, CreditCard, Globe, Hotel, MessageSquare, FileText, Shield,
 const integrations = [
   {
     icon: CreditCard,
-    title: 'Pagos y Finanzas',
-    desc: 'Procesa pagos de forma segura',
+    title: 'Pagos',
+    desc: 'Cobros automáticos y seguros',
     gradient: 'from-green-500 to-emerald-500',
     items: [
-      { name: 'Stripe', desc: 'Pagos recurrentes y one-time' },
-      { name: 'Open Banking', desc: 'Verificación de ingresos' },
-      { name: 'Zucchetti', desc: 'Integración ERP/contabilidad' },
+      { name: 'Stripe', desc: 'Pagos con tarjeta' },
+      { name: 'Transferencias', desc: 'Seguimiento automático' },
+      { name: 'Recibos', desc: 'Generación automática' },
     ]
   },
   {
     icon: Globe,
-    title: 'Portales Inmobiliarios',
-    desc: 'Publicación automática',
+    title: 'Publicación',
+    desc: 'Publica en múltiples portales',
     gradient: 'from-blue-500 to-indigo-500',
     items: [
-      { name: 'Portales Inmobiliarios', desc: 'Sincronización automática' },
-      { name: 'Redes Sociales', desc: 'Publicación optimizada' },
-      { name: 'Habitaclia', desc: 'Multi-publicación' },
-    ]
-  },
-  {
-    icon: Hotel,
-    title: 'Short-Term Rental',
-    desc: 'Channel Manager nativo',
-    gradient: 'from-pink-500 to-rose-500',
-    items: [
-      { name: 'Airbnb', desc: 'Sincronización calendario' },
-      { name: 'Booking.com', desc: 'Gestión reservas' },
-      { name: 'VRBO', desc: 'Pricing dinámico' },
+      { name: 'Portales', desc: 'Idealista, Fotocasa...' },
+      { name: 'Web propia', desc: 'Exportación de datos' },
+      { name: 'Calendario', desc: 'Google Calendar, Outlook' },
     ]
   },
   {
     icon: MessageSquare,
     title: 'Comunicación',
-    desc: 'Centraliza conversaciones',
+    desc: 'Mantén el contacto',
     gradient: 'from-violet-500 to-purple-500',
     items: [
-      { name: 'WhatsApp', desc: 'Chat integrado' },
       { name: 'Email', desc: 'Notificaciones automáticas' },
-      { name: 'SMS', desc: 'Recordatorios y alertas' },
+      { name: 'SMS', desc: 'Recordatorios de pago' },
+      { name: 'Chat', desc: 'Comunicación con inquilinos' },
     ]
   },
   {
     icon: FileText,
-    title: 'Firma Digital',
-    desc: 'Contratos y documentos',
+    title: 'Documentos',
+    desc: 'Gestión documental',
     gradient: 'from-amber-500 to-yellow-500',
     items: [
-      { name: 'Signaturit', desc: 'Firma electrónica certificada' },
-      { name: 'DocuSign', desc: 'Flujos de firma múltiples' },
-      { name: 'Autoridad Certificadora', desc: 'Sello de tiempo' },
+      { name: 'Contratos', desc: 'Plantillas legales LAU' },
+      { name: 'Firma digital', desc: 'Signaturit integrado' },
+      { name: 'Almacenamiento', desc: 'Documentos en la nube' },
     ]
   },
   {
     icon: Shield,
     title: 'Seguridad',
-    desc: 'Protección de datos',
+    desc: 'Tus datos protegidos',
     gradient: 'from-red-500 to-orange-500',
     items: [
-      { name: 'Biometría', desc: 'Autenticación facial/huella' },
-      { name: 'GDPR', desc: 'Cumplimiento normativo' },
-      { name: 'SOC2/ISO27001', desc: 'Auditorías de seguridad' },
+      { name: 'Encriptación', desc: 'Datos cifrados' },
+      { name: 'GDPR', desc: 'Cumplimiento europeo' },
+      { name: 'Backups', desc: 'Copias automáticas' },
+    ]
+  },
+  {
+    icon: Hotel,
+    title: 'Vacacional',
+    desc: 'Para alquiler turístico',
+    gradient: 'from-pink-500 to-rose-500',
+    items: [
+      { name: 'Airbnb', desc: 'Sincronización' },
+      { name: 'Booking', desc: 'Gestión reservas' },
+      { name: 'iCal', desc: 'Calendario unificado' },
     ]
   },
 ];

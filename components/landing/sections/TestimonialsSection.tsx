@@ -24,100 +24,64 @@ interface Testimonial {
 const testimonials: Testimonial[] = [
   {
     id: '1',
-    name: 'María García',
-    role: 'Fundadora',
-    company: 'CoLiving Barcelona',
-    vertical: 'Coliving',
+    name: 'María G.',
+    role: 'Propietaria',
+    company: '8 propiedades en Barcelona',
+    vertical: 'Alquiler',
     avatar: '/testimonials/maria-garcia.jpg',
     rating: 5,
-    quote: 'Antes tardábamos 8 horas al mes calculando el prorrateo de luz, agua y gas para 25 habitaciones. Con Room Rental PRO de INMOVA, son literalmente 3 clics y está todo hecho. Los inquilinos reciben su factura individualizada automáticamente. Un cambio de juego total.',
+    quote: 'Pasé de gestionar todo con Excel y WhatsApp a tener todo organizado en un solo lugar. Los recordatorios automáticos de cobro me han ahorrado muchos dolores de cabeza.',
     stats: [
-      { metric: 'Tiempo ahorrado', value: '8h/mes' },
-      { metric: 'Habitaciones', value: '25' },
-      { metric: 'Satisfacción', value: '98%' }
+      { metric: 'Propiedades', value: '8' },
+      { metric: 'Tiempo ahorrado', value: '5h/sem' }
     ],
-    highlight: 'Ahorra 8h/mes en cálculos manuales'
+    highlight: 'Todo en un solo lugar'
   },
   {
     id: '2',
-    name: 'Javier Martínez',
-    role: 'Director de Operaciones',
-    company: 'Student Housing Madrid',
-    vertical: 'Residencia Estudiantil',
+    name: 'Javier M.',
+    role: 'Gestor Inmobiliario',
+    company: 'Gestiones Madrid',
+    vertical: 'Gestión',
     avatar: '/testimonials/javier-martinez.jpg',
     rating: 5,
-    quote: 'Gestionamos 3 residencias con 150 habitaciones en total. El dashboard de Room Rental PRO nos da visibilidad instantánea de ocupación, vencimientos de contratos y alertas. Hemos reducido la tasa de impagos un 35% gracias al sistema de seguimiento automatizado.',
+    quote: 'Mis clientes propietarios ahora pueden ver sus informes cuando quieran desde su portal. Ya no tengo que enviar emails con PDFs cada mes. Me ha liberado mucho tiempo.',
     stats: [
-      { metric: 'Habitaciones', value: '150' },
-      { metric: 'Impagos', value: '-35%' },
-      { metric: 'Residencias', value: '3' }
+      { metric: 'Clientes', value: '25' },
+      { metric: 'Propiedades', value: '120' }
     ],
-    highlight: 'Redujo impagos en 35%'
+    highlight: 'Portal de propietarios incluido'
   },
   {
     id: '3',
-    name: 'Laura Sánchez',
-    role: 'Directora de Marketing',
-    company: 'Inmobiliaria del Sur',
-    vertical: 'Agencia Inmobiliaria',
+    name: 'Laura S.',
+    role: 'Administradora',
+    company: 'Coliving Valencia',
+    vertical: 'Coliving',
     avatar: '/testimonials/laura-sanchez.jpg',
     rating: 5,
-    quote: 'El Sistema de Cupones de INMOVA nos permitió lanzar una campaña "Primer mes 50% OFF" en 10 minutos. Antes, teníamos que hacerlo manualmente con Excel y llamadas. Resultado: +42% de leads convertidos y ROI de 5x en la primera campaña.',
+    quote: 'Gestionar 15 habitaciones con inquilinos diferentes era un caos. Ahora cada uno tiene su contrato, sus pagos y su comunicación independiente pero yo lo veo todo junto.',
     stats: [
-      { metric: 'Leads convertidos', value: '+42%' },
-      { metric: 'ROI', value: '5x' },
-      { metric: 'Setup', value: '10min' }
+      { metric: 'Habitaciones', value: '15' },
+      { metric: 'Inquilinos', value: '15' }
     ],
-    highlight: '+42% conversión con cupones'
+    highlight: 'Gestión por habitación'
   },
   {
     id: '4',
-    name: 'Carlos Ruiz',
-    role: 'Gestor de Propiedades',
-    company: 'Urban Coliving Valencia',
-    vertical: 'Coliving',
+    name: 'Carlos R.',
+    role: 'Inversor',
+    company: 'Cartera propia',
+    vertical: 'Inversión',
     avatar: '/testimonials/carlos-ruiz.jpg',
     rating: 5,
-    quote: 'Las reglas de co-living personalizables son oro puro. Definimos horarios de limpieza, turnos de cocina, política de visitas... todo en el sistema. Los inquilinos lo ven en su app y las fricciones desaparecieron. La satisfacción subió de 6.5/10 a 9.2/10.',
+    quote: 'El dashboard me da una visión clara de rentabilidad de cada propiedad. Antes tenía que hacer cálculos en Excel que siempre me quedaban desactualizados.',
     stats: [
-      { metric: 'Satisfacción', value: '9.2/10' },
-      { metric: 'Fricciones', value: '-70%' },
-      { metric: 'Retention', value: '+25%' }
+      { metric: 'Propiedades', value: '12' },
+      { metric: 'Ciudades', value: '3' }
     ],
-    highlight: 'Satisfacción de 6.5 a 9.2/10'
+    highlight: 'Rentabilidad en tiempo real'
   },
-  {
-    id: '5',
-    name: 'Ana Torres',
-    role: 'CEO',
-    company: 'Flex Living Group',
-    vertical: 'Coliving',
-    avatar: '/testimonials/ana-torres.jpg',
-    rating: 5,
-    quote: 'Migrar desde nuestra solución anterior fue increíblemente fácil. El equipo de INMOVA nos ayudó a importar 80 habitaciones, 50 inquilinos y 2 años de historial de pagos en una tarde. Room Rental PRO nos permite escalar sin contratar más personal administrativo.',
-    stats: [
-      { metric: 'Migración', value: '1 tarde' },
-      { metric: 'Habitaciones', value: '80' },
-      { metric: 'Escalabilidad', value: '∞' }
-    ],
-    highlight: 'Escala sin más personal'
-  },
-  {
-    id: '6',
-    name: 'Pedro López',
-    role: 'Fundador',
-    company: 'Promotora Montaña',
-    vertical: 'Promotora',
-    avatar: '/testimonials/pedro-lopez.jpg',
-    rating: 5,
-    quote: 'Usamos el módulo de Construcción y cuando terminamos la obra, activamos Room Rental PRO para comercializar habitaciones individuales. Todo en la misma plataforma. De obra a ingresos recurrentes sin cambiar de sistema. Brillante.',
-    stats: [
-      { metric: 'Proyectos', value: '4' },
-      { metric: 'Hab. vendidas', value: '95%' },
-      { metric: 'Time to market', value: '-40%' }
-    ],
-    highlight: 'De obra a ingresos en un sistema'
-  }
 ];
 
 export function TestimonialsSection() {
@@ -211,22 +175,22 @@ export function TestimonialsSection() {
             <div className="inline-flex p-4 bg-indigo-100 rounded-full mb-4">
               <Building2 className="h-8 w-8 text-indigo-600" />
             </div>
-            <div className="text-4xl font-black text-indigo-600 mb-2">500+</div>
-            <div className="text-gray-600 font-semibold">Empresas Confían en INMOVA</div>
+            <div className="text-4xl font-black text-indigo-600 mb-2">30 días</div>
+            <div className="text-gray-600 font-semibold">Prueba Gratis Sin Compromiso</div>
           </div>
           <div className="p-6">
             <div className="inline-flex p-4 bg-green-100 rounded-full mb-4">
               <Users className="h-8 w-8 text-green-600" />
             </div>
-            <div className="text-4xl font-black text-green-600 mb-2">10,000+</div>
-            <div className="text-gray-600 font-semibold">Propiedades Gestionadas</div>
+            <div className="text-4xl font-black text-green-600 mb-2">10 min</div>
+            <div className="text-gray-600 font-semibold">Setup Inicial Promedio</div>
           </div>
           <div className="p-6">
             <div className="inline-flex p-4 bg-yellow-100 rounded-full mb-4">
               <Star className="h-8 w-8 text-yellow-600 fill-yellow-600" />
             </div>
-            <div className="text-4xl font-black text-yellow-600 mb-2">4.9/5</div>
-            <div className="text-gray-600 font-semibold">Valoración Promedio</div>
+            <div className="text-4xl font-black text-yellow-600 mb-2">24/7</div>
+            <div className="text-gray-600 font-semibold">Soporte Disponible</div>
           </div>
         </div>
       </div>
