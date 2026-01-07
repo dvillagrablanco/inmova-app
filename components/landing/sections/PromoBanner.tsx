@@ -208,10 +208,11 @@ export function PromoBanner() {
                 key={campaign.id}
                 onClick={() => goToSlide(index)}
                 disabled={isAnimating}
+                style={{ backgroundColor: '#ffffff' }}
                 className={`group p-4 rounded-xl border-2 transition-all ${
                   index === currentIndex
-                    ? 'border-indigo-500 bg-white shadow-lg ring-2 ring-indigo-100'
-                    : 'border-gray-200 bg-white hover:border-indigo-300 hover:shadow-md'
+                    ? 'border-indigo-500 shadow-lg ring-2 ring-indigo-100'
+                    : 'border-gray-200 hover:border-indigo-300 hover:shadow-md'
                 } disabled:cursor-not-allowed`}
               >
                 <div className="flex items-center gap-3">
@@ -222,7 +223,7 @@ export function PromoBanner() {
                     <div className="text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
                       {campaign.title}
                     </div>
-                    <div className="text-xs text-gray-700 font-semibold">
+                    <div className="text-xs text-gray-900 font-semibold">
                       {campaign.code}
                     </div>
                   </div>
