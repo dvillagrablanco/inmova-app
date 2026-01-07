@@ -386,8 +386,8 @@ export function FeaturesSection() {
             Prueba Inmova 30 días gratis. Sin tarjeta, sin permanencia.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signup">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
+            <Link href="/register">
+              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 font-bold">
                 <Zap className="h-5 w-5 mr-2" />
                 Empezar Gratis Ahora
               </Button>
@@ -395,8 +395,7 @@ export function FeaturesSection() {
             <Link href="#pricing">
               <Button
                 size="lg"
-                variant="outline"
-                className="border-white text-white hover:bg-white/20"
+                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold border-0"
               >
                 Ver Planes y Precios
                 <ArrowRight className="h-5 w-5 ml-2" />

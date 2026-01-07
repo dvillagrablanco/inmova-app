@@ -13,6 +13,7 @@ interface PromoCampaign {
   subtitle: string;
   description: string;
   cta: string;
+  ctaHref: string;
   icon: React.ReactNode;
   gradient: string;
   textGradient: string;
@@ -20,34 +21,37 @@ interface PromoCampaign {
 
 const campaigns: PromoCampaign[] = [
   {
-    id: 'flipping25',
-    code: 'FLIPPING25',
+    id: 'flipping26',
+    code: 'FLIPPING26',
     title: 'Adiós al Excel',
-    subtitle: 'Plan Basic a solo €29/mes',
+    subtitle: 'Plan Basic desde €49/mes - ¡40% dto!',
     description: 'Deja de perder dinero en tus reformas. Controla tu ROI en tiempo real durante 6 meses.',
     cta: 'Obtener descuento',
+    ctaHref: '/register?coupon=FLIPPING26',
     icon: <Sparkles className="h-6 w-6" />,
     gradient: 'from-amber-500 via-orange-500 to-red-500',
     textGradient: 'from-amber-600 to-red-600'
   },
   {
     id: 'roompro',
-    code: 'ROOMPRO',
+    code: 'ROOMPRO26',
     title: 'Revolución Coliving',
     subtitle: '50% dto. primer mes + Migración gratis',
     description: '¿Harto de calcular facturas de luz a mano? INMOVA lo hace solo. Plan Professional con Room Rental PRO.',
     cta: 'Activar oferta',
+    ctaHref: '/register?coupon=ROOMPRO26',
     icon: <TrendingUp className="h-6 w-6" />,
     gradient: 'from-green-500 via-emerald-500 to-teal-500',
     textGradient: 'from-green-600 to-teal-600'
   },
   {
-    id: 'switch2025',
-    code: 'SWITCH2025',
+    id: 'switch2026',
+    code: 'SWITCH2026',
     title: 'La Solución PropTech Definitiva',
     subtitle: 'Igualamos tu precio 1 año + Upgrade gratis',
     description: 'Trae tu última factura de la competencia. Te damos INMOVA al mismo precio con el plan superior.',
     cta: 'Cambia ahora',
+    ctaHref: '/landing/contacto?motivo=cambio-competencia',
     icon: <ArrowRightLeft className="h-6 w-6" />,
     gradient: 'from-indigo-500 via-purple-500 to-pink-500',
     textGradient: 'from-indigo-600 to-pink-600'
@@ -128,7 +132,7 @@ export function PromoBanner() {
                 </p>
 
                 <div className="flex flex-wrap items-center gap-4 pt-2">
-                  <Link href="/register">
+                  <Link href={current.ctaHref}>
                     <Button 
                       size="lg"
                       className="bg-white hover:bg-gray-100 text-gray-900 font-bold shadow-xl hover:shadow-2xl transition-all hover:scale-105"

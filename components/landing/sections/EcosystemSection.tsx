@@ -186,7 +186,7 @@ export function EcosystemSection() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
+              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 font-bold">
                 <Zap className="h-5 w-5 mr-2" />
                 Empezar Gratis
               </Button>
@@ -194,8 +194,7 @@ export function EcosystemSection() {
             <Link href="#pricing">
               <Button
                 size="lg"
-                variant="outline"
-                className="border-2 border-white text-white hover:bg-white/20"
+                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold border-0"
               >
                 Ver Planes
                 <ArrowRight className="h-5 w-5 ml-2" />

@@ -12,25 +12,25 @@ export function PromoSection() {
         <div className="max-w-6xl mx-auto bg-gradient-to-r from-indigo-600 to-violet-600 rounded-3xl p-8 md:p-12 shadow-2xl">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
-              <Badge className="mb-4 bg-yellow-400 text-gray-900 border-0 text-base px-4 py-1.5">
+              <Badge className="mb-4 bg-yellow-400 text-gray-900 border-0 text-base px-4 py-1.5 font-bold">
                 <Sparkles className="h-4 w-4 mr-2" />
-                OFERTA Q1 2026
+                🎉 OFERTA Q1 2026
               </Badge>
               <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
                 50% DE DESCUENTO<br />Primer Mes
               </h2>
               <p className="text-xl text-indigo-100 mb-6">
-                Únete a la campaña <strong className="text-yellow-300">LAUNCH2025</strong> y obtén acceso completo a los 56 módulos profesionales.
+                Únete a la campaña <strong className="text-yellow-300">LAUNCH2026</strong> y obtén acceso completo a los 88 módulos profesionales.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/landing/campanas/launch2025">
+                <Link href="/register?coupon=LAUNCH2026">
                   <Button size="lg" className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold text-lg h-14 px-8">
                     <Rocket className="mr-2 h-5 w-5" />
                     Ver Oferta Completa
                   </Button>
                 </Link>
                 <Link href="/landing/calculadora-roi">
-                  <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/30 font-semibold text-lg h-14 px-8">
+                  <Button size="lg" className="bg-white hover:bg-gray-100 text-gray-900 font-semibold text-lg h-14 px-8 border-0">
                     Calcular Mi Ahorro
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>

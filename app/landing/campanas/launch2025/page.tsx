@@ -37,9 +37,9 @@ export default function Launch2025Page() {
     seconds: 0,
   });
 
-  // Countdown timer hasta fin de Q1 2025 (31 marzo 2025)
+  // Countdown timer hasta fin de Q1 2026 (31 marzo 2026)
   useEffect(() => {
-    const countDownDate = new Date('2025-03-31T23:59:59').getTime();
+    const countDownDate = new Date('2026-03-31T23:59:59').getTime();
 
     const timer = setInterval(() => {
       const now = new Date().getTime();
@@ -64,8 +64,8 @@ export default function Launch2025Page() {
   const handleEarlyAccess = async () => {
     if (!email) return;
 
-    // Redirect to register with the email and LAUNCH2025 coupon
-    window.location.href = `/register?email=${encodeURIComponent(email)}&coupon=LAUNCH2025`;
+    // Redirect to register with the email and LAUNCH2026 coupon
+    window.location.href = `/register?email=${encodeURIComponent(email)}&coupon=LAUNCH2026`;
   };
 
   return (
@@ -87,7 +87,7 @@ export default function Launch2025Page() {
                   Iniciar Sesión
                 </Button>
               </Link>
-              <Link href="/register?coupon=LAUNCH2025">
+              <Link href="/register?coupon=LAUNCH2026">
                 <Button className="bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white">
                   Comenzar Ahora
                 </Button>
@@ -102,7 +102,7 @@ export default function Launch2025Page() {
         <div className="container mx-auto text-center">
           <Badge className="mb-6 bg-gradient-to-r from-pink-500 to-violet-500 text-white border-0 text-lg px-6 py-2">
             <Rocket className="h-5 w-5 mr-2" />
-            Campaña LAUNCH2025
+            Campaña LAUNCH2026
           </Badge>
 
           <h1 className="text-5xl md:text-7xl font-extrabold mb-6 text-white leading-tight">
@@ -128,7 +128,7 @@ export default function Launch2025Page() {
               <Sparkles className="h-8 w-8 text-yellow-300" />
             </div>
             <p className="text-xl text-indigo-100 mb-6">
-              En tu primer mes - Código: <strong className="text-yellow-300">LAUNCH2025</strong>
+              En tu primer mes - Código: <strong className="text-yellow-300">LAUNCH2026</strong>
             </p>
 
             {/* COUNTDOWN TIMER */}
@@ -158,15 +158,15 @@ export default function Launch2025Page() {
                 placeholder="tu@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-white/90 backdrop-blur-sm text-gray-900 border-white/50 h-14 text-lg"
+                className="bg-white text-gray-900 border-2 border-yellow-400 h-14 text-lg placeholder:text-gray-500"
                 onKeyPress={(e) => e.key === 'Enter' && handleEarlyAccess()}
               />
               <Button
                 size="lg"
                 onClick={handleEarlyAccess}
-                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold h-14 px-8 whitespace-nowrap shadow-lg"
+                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold h-14 px-8 whitespace-nowrap shadow-lg border-2 border-yellow-500"
               >
-                Activar Oferta
+                🎁 Activar Oferta
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </div>
@@ -276,7 +276,7 @@ export default function Launch2025Page() {
                     <p className="text-xl line-through text-green-300">€199/mes</p>
                     <p className="text-3xl font-bold text-white">€99.50/mes</p>
                   </div>
-                  <p className="text-green-200 text-sm">Con código LAUNCH2025 (50% primer mes)</p>
+                  <p className="text-green-200 text-sm">Con código LAUNCH2026 (50% primer mes)</p>
                   <p className="text-xs text-green-300 mt-1">Coste por módulo: solo €1.66</p>
                 </div>
               </CardContent>
@@ -393,8 +393,8 @@ export default function Launch2025Page() {
               <p className="text-indigo-200">Verticales de Negocio</p>
             </div>
             <div className="text-center">
-              <p className="text-5xl font-bold text-pink-400 mb-2">100+</p>
-              <p className="text-indigo-200">Clientes Objetivo Q1</p>
+            <p className="text-5xl font-bold text-pink-400 mb-2">150+</p>
+            <p className="text-indigo-200">Clientes Objetivo Q1 2026</p>
             </div>
           </div>
 
@@ -420,15 +420,15 @@ export default function Launch2025Page() {
               <div className="flex items-center justify-center gap-2 mb-4">
                 <Clock className="h-8 w-8 text-yellow-300" />
                 <Badge className="bg-yellow-400 text-gray-900 text-lg px-4 py-1">
-                  Oferta Limitada Q1 2025
+                  Oferta Limitada Q1 2026
                 </Badge>
               </div>
               <CardTitle className="text-4xl md:text-5xl font-bold text-white mb-4">
                 No Pierdas Esta Oportunidad
               </CardTitle>
               <CardDescription className="text-xl text-indigo-100">
-                Solo <strong className="text-white">100 plazas disponibles</strong> con el descuento
-                LAUNCH2025.
+                Solo <strong className="text-white">150 plazas disponibles</strong> con el descuento
+                LAUNCH2026.
                 <br />
                 Sé parte de la revolución PropTech Multi-Vertical.
               </CardDescription>
@@ -456,20 +456,19 @@ export default function Launch2025Page() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
-                <Link href="/register?coupon=LAUNCH2025" className="flex-1 sm:flex-none">
+                <Link href="/register?coupon=LAUNCH2026" className="flex-1 sm:flex-none">
                   <Button
                     size="lg"
                     className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold text-lg h-16 px-8"
                   >
                     <Rocket className="mr-2 h-6 w-6" />
-                    Activar LAUNCH2025 Ahora
+                    Activar LAUNCH2026 Ahora
                   </Button>
                 </Link>
                 <Link href="/landing/migracion" className="flex-1 sm:flex-none">
                   <Button
                     size="lg"
-                    variant="outline"
-                    className="w-full bg-white/10 hover:bg-white/20 text-white border-white/30 font-semibold text-lg h-16 px-8"
+                    className="w-full bg-white hover:bg-gray-100 text-gray-900 font-semibold text-lg h-16 px-8 border-0"
                   >
                     <ChevronRight className="mr-2 h-5 w-5" />
                     Ver Guía de Migración
@@ -480,7 +479,7 @@ export default function Launch2025Page() {
               <div className="text-center pt-4">
                 <p className="text-indigo-100 text-sm">
                   <AlertCircle className="inline h-4 w-4 mr-1" />
-                  Código LAUNCH2025 válido solo hasta el 31 de marzo de 2025
+                  Código LAUNCH2026 válido solo hasta el 31 de marzo de 2026
                 </p>
               </div>
             </CardContent>

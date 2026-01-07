@@ -138,7 +138,7 @@ export function FAQSection() {
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Aquí respondemos las preguntas más comunes. Si no encuentras tu respuesta,{' '}
-            <a href="/contact" className="text-blue-600 hover:text-blue-700 underline">
+            <a href="/landing/contacto" className="text-blue-600 hover:text-blue-700 underline">
               contáctanos
             </a>
             .
@@ -202,11 +202,11 @@ export function FAQSection() {
         <div className="mt-12 text-center">
           <p className="text-gray-600 mb-4">¿No encuentras tu respuesta?</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" asChild>
-              <a href="/contact">Contactar Soporte</a>
+            <Button size="lg" asChild className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white">
+              <a href="/landing/contacto">Contactar Soporte</a>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <a href="/docs">Ver Documentación</a>
+              <a href="/landing/ayuda">Ver Centro de Ayuda</a>
             </Button>
           </div>
         </div>

@@ -43,7 +43,7 @@ const personasContent: Record<string, PersonaContent> = {
   propietarios: {
     title: 'Simplifica tu gestión inmobiliaria',
     subtitle:
-      'Automatiza todo el proceso de alquiler y recupera tu tiempo. Sin complicaciones, sin morosidad, sin estrés.',
+      'Automatiza todo el proceso de alquiler tradicional y a medio plazo. Recupera tu tiempo sin complicaciones, sin morosidad, sin estrés.',
     painPoints: [
       'Gestión manual caótica con Excel y WhatsApp',
       'Morosidad de inquilinos (15% promedio)',
@@ -236,7 +236,7 @@ export function HeroSectionSegmentado() {
                       <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
                         {currentContent.title}
                       </h2>
-                      <p className="text-lg sm:text-xl text-gray-600 leading-relaxed">
+                      <p className="text-lg sm:text-xl text-gray-600 leading-relaxed text-justify">
                         {currentContent.subtitle}
                       </p>
                     </div>
@@ -292,7 +292,7 @@ export function HeroSectionSegmentado() {
                       <Link href={currentContent.cta.primary.href}>
                         <Button
                           size="lg"
-                          className="w-full sm:w-auto gradient-primary text-white px-8 py-6 text-lg font-semibold hover:opacity-90 transition-all shadow-primary group"
+                          className="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white px-8 py-6 text-lg font-semibold transition-all shadow-lg group"
                         >
                           {currentContent.cta.primary.text}
                           <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
