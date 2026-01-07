@@ -54,51 +54,62 @@ export const EWOORKER_REVENUE_SPLIT = {
 /**
  * Planes de suscripción eWoorker
  * Diferenciados de los planes de Inmova
+ * 
+ * SINCRONIZADO CON: /app/ewoorker/landing/page.tsx
+ * 
+ * Modelo de negocio:
+ * - Plan gratuito con comisión alta (5%) para adquisición
+ * - Planes de pago con comisión reducida para retención
+ * - Comisión 0% en plan premium incentiva upgrade
  */
 export const EWOORKER_PLANS = {
   OBRERO: {
     id: 'ewoorker_obrero',
     name: 'eWoorker Obrero',
-    price: 29, // €/mes
+    price: 0, // Gratuito - modelo freemium
     interval: 'month' as const,
     features: [
-      'Perfil verificado',
-      'Hasta 5 ofertas/mes',
-      'Mensajería básica',
+      'Perfil básico',
+      'Ver obras públicas',
+      '3 ofertas/mes',
+      'Chat básico',
       'Soporte email',
     ],
-    maxOfertas: 5,
-    comisionEscrow: 5, // 5% en pagos escrow
+    maxOfertas: 3,
+    comisionEscrow: 5, // 5% en pagos escrow (modelo freemium)
   },
   CAPATAZ: {
     id: 'ewoorker_capataz',
     name: 'eWoorker Capataz',
-    price: 79, // €/mes
+    price: 49, // €/mes - MÁS POPULAR
     interval: 'month' as const,
     features: [
-      'Perfil verificado premium',
+      'Todo de Obrero',
       'Ofertas ilimitadas',
-      'Mensajería avanzada',
-      'Análisis de mercado',
-      'Soporte prioritario',
+      'Compliance Hub completo',
+      'Chat prioritario',
+      'Sistema escrow (+2% comisión)',
+      'Certificaciones digitales',
     ],
     maxOfertas: -1, // Ilimitado
-    comisionEscrow: 4, // 4% en pagos escrow
+    comisionEscrow: 2, // 2% en pagos escrow (reducido)
   },
   CONSTRUCTOR: {
     id: 'ewoorker_constructor',
     name: 'eWoorker Constructor',
-    price: 199, // €/mes
+    price: 149, // €/mes - Premium
     interval: 'month' as const,
     features: [
       'Todo de Capataz',
+      'Obras ilimitadas',
+      'Marketplace destacado',
       'API de integración',
-      'Dashboard analytics',
-      'Account manager',
-      'Contratación urgente sin cargo extra',
+      'Dashboard analytics avanzado',
+      'Account manager dedicado',
+      'SIN comisiones extra (0%)',
     ],
     maxOfertas: -1,
-    comisionEscrow: 3, // 3% en pagos escrow
+    comisionEscrow: 0, // 0% comisión - incentivo para upgrade
   },
 };
 

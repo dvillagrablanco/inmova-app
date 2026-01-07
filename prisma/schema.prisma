@@ -1527,6 +1527,9 @@ model Company {
   usageLogs      UsageLog[]
   usageSummaries UsageSummary[]
 
+  // Add-ons contratados
+  addOns CompanyAddOn[]
+
   @@map("company")
 }
 
@@ -5091,6 +5094,120 @@ model SubscriptionPlan {
   b2bInvoices B2BInvoice[]
 
   @@map("subscription_plans")
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ADD-ONS (Mejoras opcionales para cualquier plan)
+// ═══════════════════════════════════════════════════════════════
+
+model AddOn {
+  id          String  @id @default(cuid())
+  codigo      String  @unique // "signatures_pack", "storage_pack", "ai_pack", etc.
+  nombre      String // "Pack 10 Firmas", "Pack 10GB Storage", etc.
+  descripcion String  @db.Text
+  categoria   String // "usage", "feature", "premium"
+
+  // Precios
+  precioMensual Float
+  precioAnual   Float?
+
+  // Stripe
+  stripePriceIdMonthly String?
+  stripePriceIdAnnual  String?
+
+  // Lo que incluye
+  unidades      Int?   // Ej: 10 firmas, 10 GB, 50K tokens
+  tipoUnidad    String? // "firmas", "GB", "tokens", "sms"
+
+  // Disponibilidad por plan
+  disponiblePara Json // ["STARTER", "PROFESSIONAL", "BUSINESS", "ENTERPRISE"]
+  incluidoEn     Json? // Planes donde viene incluido gratis
+
+  // Metadata para análisis
+  margenPorcentaje Float? // Margen de beneficio
+  costoUnitario    Float? // Costo real para nosotros
+
+  // Estado
+  activo    Boolean  @default(true)
+  destacado Boolean  @default(false)
+  orden     Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  suscripciones CompanyAddOn[]
+
+  @@index([categoria])
+  @@index([activo])
+  @@map("addons")
+}
+
+model CompanyAddOn {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  addOnId   String
+  addOn     AddOn   @relation(fields: [addOnId], references: [id])
+
+  // Stripe
+  stripeSubscriptionId String?
+
+  // Estado
+  activo           Boolean   @default(true)
+  fechaActivacion  DateTime  @default(now())
+  fechaCancelacion DateTime?
+
+  // Uso acumulado (para packs de uso)
+  usoAcumulado Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, addOnId])
+  @@index([companyId])
+  @@index([addOnId])
+  @@map("company_addons")
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PRECIOS EWOORKER (Planes de construcción B2B)
+// ═══════════════════════════════════════════════════════════════
+
+model EwoorkerPlan {
+  id          String @id @default(cuid())
+  codigo      String @unique // "OBRERO", "CAPATAZ", "CONSTRUCTOR"
+  nombre      String
+  descripcion String @db.Text
+
+  // Precios
+  precioMensual   Float
+  precioAnual     Float?
+  
+  // Stripe
+  stripePriceIdMonthly String?
+  stripePriceIdAnnual  String?
+
+  // Límites
+  maxOfertas      Int     @default(-1) // -1 = ilimitado
+  comisionEscrow  Float   @default(5)  // % comisión en pagos escrow
+  
+  // Features incluidas
+  features Json // Array de strings con las características
+
+  // Revenue split (para socios fundadores)
+  socioPercentage     Float @default(50)
+  plataformaPercentage Float @default(50)
+
+  // Estado
+  activo    Boolean  @default(true)
+  destacado Boolean  @default(false)
+  orden     Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ewoorker_plans")
 }
 
 model CompanyModule {
