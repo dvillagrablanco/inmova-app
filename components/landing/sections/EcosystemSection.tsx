@@ -20,65 +20,15 @@ import {
   Calendar,
 } from 'lucide-react';
 
-const ecosystem = [
-  {
-    category: 'GESTIÓN INMOBILIARIA',
-    color: 'from-blue-600 to-cyan-600',
-    verticales: [
-      {
-        icon: Building2,
-        name: 'Alquiler Residencial',
-        desc: 'Tradicional + Media Estancia (1-11 meses)',
-        users: '1,900+',
-        badge: 'MEJORADO',
-        highlight: true,
-      },
-      { icon: Hotel, name: 'Vacacional (STR)', desc: 'Airbnb, Booking integrado', users: '800+' },
-      {
-        icon: Home,
-        name: 'Coliving & Habitaciones',
-        desc: 'Prorrateo automático',
-        users: '600+',
-        badge: 'PRO',
-      },
-      { icon: TrendingUp, name: 'House Flipping', desc: 'ROI y presupuestos', users: '200+' },
-    ],
-  },
-  {
-    category: 'CONSTRUCCIÓN B2B',
-    color: 'from-orange-600 to-yellow-500',
-    badge: '🚀 NOVEDADES 2026',
-    verticales: [
-      {
-        icon: Hammer,
-        name: 'ewoorker',
-        desc: 'Subcontratación + IA + Gamificación',
-        users: '2,500+',
-        highlight: true,
-        badge: 'IA',
-      },
-    ],
-  },
-  {
-    category: 'SERVICIOS COMPLEMENTARIOS',
-    color: 'from-purple-600 to-pink-600',
-    verticales: [
-      {
-        icon: Shield,
-        name: 'Seguros',
-        desc: 'Pólizas y siniestros',
-        users: 'Todos',
-        badge: 'NUEVO',
-      },
-      {
-        icon: Users,
-        name: 'Partners',
-        desc: 'Bancos, Aseguradoras',
-        users: '15+',
-        badge: 'NUEVO',
-      },
-    ],
-  },
+// 7 Verticales de Negocio
+const verticales = [
+  { icon: Building2, name: 'Alquiler Residencial', desc: 'Tradicional + Media Estancia', color: 'from-blue-500 to-cyan-500' },
+  { icon: Hotel, name: 'STR (Vacacional)', desc: 'Airbnb, Booking, VRBO', color: 'from-orange-500 to-amber-500' },
+  { icon: Home, name: 'Coliving', desc: 'Habitaciones y prorrateo', color: 'from-purple-500 to-pink-500' },
+  { icon: TrendingUp, name: 'House Flipping', desc: 'Compra-reforma-venta', color: 'from-green-500 to-emerald-500' },
+  { icon: Hammer, name: 'Construcción B2B', desc: 'ewoorker marketplace', color: 'from-orange-600 to-yellow-500' },
+  { icon: Shield, name: 'Comunidades', desc: 'Admin de fincas', color: 'from-cyan-500 to-blue-500' },
+  { icon: Users, name: 'Servicios Pro', desc: 'Property management', color: 'from-indigo-500 to-violet-500' },
 ];
 
 const keyNumbers = [
@@ -127,54 +77,26 @@ export function EcosystemSection() {
           })}
         </div>
 
-        {/* Ecosistema por Categoría */}
-        <div className="space-y-8 mb-12">
-          {ecosystem.map((category, i) => (
-            <Card key={i} className="border-2 hover:shadow-2xl transition-all overflow-hidden">
-              <div
-                className={`bg-gradient-to-r ${category.color} p-6 text-white flex items-center justify-between`}
-              >
-                <div>
-                  <h3 className="text-2xl font-black mb-1">{category.category}</h3>
-                  <p className="text-sm opacity-90">Soluciones especializadas</p>
+        {/* 7 Verticales en Grid */}
+        <div className="mb-12">
+          <h3 className="text-2xl font-bold text-center mb-8">7 Verticales de Negocio</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
+            {verticales.map((vertical, i) => {
+              const Icon = vertical.icon;
+              return (
+                <div
+                  key={i}
+                  className="p-4 rounded-xl border-2 border-gray-200 bg-white hover:shadow-lg hover:border-blue-300 transition-all group text-center"
+                >
+                  <div className={`bg-gradient-to-br ${vertical.color} p-3 rounded-xl w-fit mx-auto mb-3 group-hover:scale-110 transition-transform`}>
+                    <Icon className="h-6 w-6 text-white" />
+                  </div>
+                  <h4 className="font-bold text-gray-900 text-sm mb-1">{vertical.name}</h4>
+                  <p className="text-xs text-gray-500">{vertical.desc}</p>
                 </div>
-                {category.badge && (
-                  <Badge className="bg-white/20 text-white">{category.badge}</Badge>
-                )}
-              </div>
-
-              <CardContent className="p-6">
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {category.verticales.map((vertical, j) => {
-                    const Icon = vertical.icon;
-                    return (
-                      <div
-                        key={j}
-                        className={`p-4 rounded-xl border-2 ${vertical.highlight ? 'border-orange-300 bg-orange-50' : 'border-gray-200 bg-white'} hover:shadow-lg transition-all group relative`}
-                      >
-                        {vertical.badge && (
-                          <div className="absolute top-2 right-2">
-                            <Badge className="bg-green-500 text-white text-xs">
-                              {vertical.badge}
-                            </Badge>
-                          </div>
-                        )}
-                        <Icon
-                          className={`h-8 w-8 mb-3 ${vertical.highlight ? 'text-orange-600' : 'text-gray-700'} group-hover:scale-110 transition-transform`}
-                        />
-                        <h4 className="font-bold text-gray-900 mb-1">{vertical.name}</h4>
-                        <p className="text-xs text-gray-600 mb-2">{vertical.desc}</p>
-                        <div className="flex items-center gap-1 text-xs text-gray-500">
-                          <Users className="h-3 w-3" />
-                          <span>{vertical.users} usuarios</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+              );
+            })}
+          </div>
         </div>
 
         {/* CTA */}

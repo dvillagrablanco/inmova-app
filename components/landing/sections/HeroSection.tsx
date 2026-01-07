@@ -38,9 +38,9 @@ export function HeroSection() {
 
             {/* Main Heading */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight">
-              <span className="block text-gray-900 mb-2">7 Verticales + 15 Módulos.</span>
+              <span className="block text-gray-900 mb-2">7 Verticales. +15 Módulos.</span>
               <span className="block bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600 bg-clip-text text-transparent">
-                Poder Multiplicado.
+                Todo en Uno.
               </span>
             </h1>
 
@@ -103,17 +103,18 @@ export function HeroSection() {
                       <h3 className="text-2xl font-bold text-gray-900">7 Verticales</h3>
                       <p className="text-sm text-gray-600 mt-2">Modelos de negocio completos</p>
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {[
-                        '🏢 Alquiler Tradicional',
+                        '🏢 Alquiler Residencial',
                         '🏖️ STR (Vacacional)',
-                        '🛏️ Coliving / Habitaciones',
+                        '🛏️ Coliving',
                         '💹 House Flipping',
-                        '🏗️ Construcción',
-                        '💼 Servicios Profesionales'
+                        '🏗️ Construcción B2B',
+                        '🏘️ Comunidades',
+                        '💼 Servicios Pro'
                       ].map((vertical, idx) => (
-                        <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 transition-colors">
-                          <span className="text-lg">{vertical}</span>
+                        <div key={idx} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg hover:bg-indigo-50 transition-colors">
+                          <span className="text-sm">{vertical}</span>
                         </div>
                       ))}
                     </div>
@@ -127,20 +128,21 @@ export function HeroSection() {
                       <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-violet-500 to-pink-500 mb-4">
                         <Star className="h-8 w-8 text-white" />
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-900">6 Módulos</h3>
-                      <p className="text-sm text-gray-600 mt-2">Multiplicadores de valor</p>
+                      <h3 className="text-2xl font-bold text-gray-900">+15 Módulos</h3>
+                      <p className="text-sm text-gray-600 mt-2">Potenciadores de valor</p>
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {[
-                        '🌱 ESG & Sostenibilidad',
-                        '🛍️ Marketplace B2C',
+                        '📅 Media Estancia',
                         '💰 Pricing IA',
-                        '👓 Tours AR/VR',
-                        '🏠 IoT Inteligente',
-                        '⛓️ Blockchain'
+                        '👓 Tours 360°',
+                        '🏠 Smart Home',
+                        '🔗 +50 Integraciones',
+                        '🛡️ Compliance',
+                        '📊 Analytics'
                       ].map((modulo, idx) => (
-                        <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-violet-50 transition-colors">
-                          <span className="text-lg">{modulo}</span>
+                        <div key={idx} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg hover:bg-violet-50 transition-colors">
+                          <span className="text-sm">{modulo}</span>
                         </div>
                       ))}
                     </div>
@@ -151,7 +153,7 @@ export function HeroSection() {
               {/* Stats Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
                 {[
-                  { number: '6+6', label: 'Verticales + Módulos', icon: Building2 },
+                  { number: '7', label: 'Verticales de Negocio', icon: Building2 },
                   { number: '€49', label: 'Desde €49/mes', icon: Star },
                   { number: '100%', label: 'Arquitectura Modular', icon: TrendingUp },
                   { number: '24/7', label: 'Soporte Premium', icon: Users },

@@ -12,18 +12,12 @@ const LandingChatbot = dynamic(
   }
 );
 
-// Componentes modulares de la landing page
+// Componentes modulares de la landing page - OPTIMIZADO
 import { Navigation } from '@/components/landing/sections/Navigation';
 import { HeroSectionSegmentado } from '@/components/landing/sections/HeroSectionSegmentado';
 import { PromoBanner } from '@/components/landing/sections/PromoBanner';
-import { PromoSection } from '@/components/landing/sections/PromoSection';
-import { StatsSection } from '@/components/landing/sections/StatsSection';
-import { EcosystemSection } from '@/components/landing/sections/EcosystemSection';
-import { MarketPotentialSection } from '@/components/landing/sections/MarketPotentialSection';
 import { FeaturesSection } from '@/components/landing/sections/FeaturesSection';
-import { NewFeaturesSection } from '@/components/landing/sections/NewFeaturesSection';
 import { AccessPortalsSection } from '@/components/landing/sections/AccessPortalsSection';
-import { CompetitorComparisonSection } from '@/components/landing/sections/CompetitorComparisonSection';
 import { PricingSection } from '@/components/landing/sections/PricingSection';
 import { TestimonialsSection } from '@/components/landing/sections/TestimonialsSection';
 import { IntegrationsSection } from '@/components/landing/sections/IntegrationsSection';
@@ -45,29 +39,11 @@ export function LandingPageContent() {
         {/* Banner Promocional Rotativo */}
         <PromoBanner />
 
-        {/* Promo Section */}
-        <PromoSection />
-
-        {/* Stats Section */}
-        <StatsSection />
-
-        {/* Ecosystem Highlight (NUEVO) */}
-        <EcosystemSection />
-
-        {/* Market Potential Section */}
-        <MarketPotentialSection />
-
-        {/* Features & Verticals */}
+        {/* Features & Verticals - 7 Verticales + Módulos */}
         <FeaturesSection />
-
-        {/* Novedades Q4 2024: Room Rental PRO + Sistema de Cupones */}
-        <NewFeaturesSection />
 
         {/* Access Portals Section */}
         <AccessPortalsSection />
-
-        {/* Competitor Comparison Section */}
-        <CompetitorComparisonSection />
 
         {/* Pricing Section */}
         <PricingSection />
