@@ -1,24 +1,36 @@
 # 📊 INMOVA - Proyecciones Financieras 5 Años (2026-2030)
 
-**Documento Confidencial - Estrategia de Pricing**
-**Versión 1.0 - Enero 2026**
+**Documento Confidencial - Estrategia de Pricing y Verticales**
+**Versión 2.0 - Enero 2026**
 
 ---
 
-## 1. Análisis Competitivo de Precios
+## 1. Análisis Competitivo de Precios Y VERTICALES
 
 ### Competidores Principales España
 
-| Plataforma | Plan Básico | Plan Pro | Plan Business | Propiedades Max |
-|------------|-------------|----------|---------------|-----------------|
-| **Rentger** | €39/mes | €69/mes | €149/mes | Ilimitadas |
-| **Homming** | €49/mes | €79/mes | €149/mes | Variable |
-| **Holded** | €25/mes | €50/mes | €100/mes | Ilimitadas |
-| **Tokko Broker** | €45/mes | €89/mes | Custom | Variable |
+| Plataforma | Plan Básico | Plan Pro | Plan Business | Verticales |
+|------------|-------------|----------|---------------|------------|
+| **Rentger** | €39/mes | €69/mes | €149/mes | 1-2 verticales |
+| **Homming** | €49/mes | €79/mes | €149/mes | **1 vertical (solo alquiler)** |
+| **Holded** | €25/mes | €50/mes | €100/mes | Contabilidad (no proptech) |
+| **Tokko Broker** | €45/mes | €89/mes | Custom | CRM inmobiliario |
 
-### Estrategia INMOVA: Posicionamiento Competitivo
+### 🎯 Ventaja Competitiva Clave: LOS 7 VERTICALES
 
-**Objetivo**: Ser un 20-35% más barato que la competencia directa (Rentger, Homming) mientras ofrecemos más valor (7 verticales vs 1-2).
+**INMOVA ofrece 7 verticales donde la competencia solo ofrece 1-2:**
+
+1. **Alquiler Residencial** - Tradicional + Media Estancia
+2. **STR / Vacacional** - Airbnb, Booking, VRBO
+3. **Coliving** - Habitaciones y prorrateo de gastos
+4. **House Flipping** - Compra-reforma-venta
+5. **Construcción** - ewoorker marketplace
+6. **Comunidades** - Administración de fincas
+7. **Servicios Profesionales** - Property management
+
+### Estrategia INMOVA: Más Verticales, Menos Precio
+
+**Objetivo**: Mismo precio o menor que competencia, pero con 3-7x más verticales de negocio.
 
 ---
 
@@ -35,24 +47,31 @@
 | 26-50 | €99/mes | €159/mes | **€99/mes** | =precio, +features |
 | 51-100 | Personalizado | Personalizado | **€99/mes** | 2x propiedades |
 
-### Estructura Final INMOVA
+### Estructura Final INMOVA (Precios + Verticales)
 
-| Plan | Precio | Propiedades | Usuarios | €/Propiedad | Vs Homming |
-|------|--------|-------------|----------|-------------|------------|
-| **Starter** | €29/mes | 1-5 | 1 | €5.80 | -51% vs €59 |
-| **Professional** | €49/mes | 6-25 | 3 | €1.96 | -38% vs €79 |
-| **Business** | €99/mes | 26-100 | 10 | €0.99 | 2x propiedades |
-| **Enterprise** | A cotizar | 100+ | Ilimitados | Personalizado | Competitivo |
+| Plan | Precio | Propiedades | **VERTICALES** | Usuarios | API | Vs Homming |
+|------|--------|-------------|----------------|----------|-----|------------|
+| **Starter** | €29/mes | 1-5 | **1 vertical** | 1 | ❌ | -51% vs €59 |
+| **Professional** | €49/mes | 6-25 | **3 verticales** | 3 | ❌ | -38%, 3x verticales |
+| **Business** | €99/mes | 26-100 | **7 verticales** | 10 | ✅ | 2x props, 7x verticales |
+| **Enterprise** | A cotizar | 100+ | **7 + custom** | Ilimitados | ✅ | White-label, SLA |
 
 ### Desglose por Plan
 
-#### Starter (€29/mes)
+#### Starter (€29/mes) - 1 VERTICAL
 - **Target**: Propietarios particulares con 1-5 propiedades
+- **Verticales incluidos**: 1 a elegir (normalmente Alquiler Residencial)
 - **Mercado potencial**: ~400,000 propietarios en España
 - **Penetración objetivo**: 0.5% = 2,000 clientes
 
 ```
-Incluye:
+VERTICALES: 1 a elegir
+├── Alquiler Residencial ✅ (default)
+├── STR / Vacacional ❌
+├── Coliving ❌
+└── ... (resto bloqueados)
+
+FUNCIONALIDADES:
 ✅ Gestión de propiedades (hasta 5)
 ✅ Contratos digitales básicos (3/mes)
 ✅ Gestión de inquilinos
@@ -60,15 +79,27 @@ Incluye:
 ✅ Dashboard básico
 ✅ 1 GB almacenamiento
 ✅ Soporte email
+❌ IA
+❌ API
 ```
 
-#### Professional (€39/mes)
+#### Professional (€49/mes) - HASTA 3 VERTICALES
 - **Target**: Pequeños gestores, inversores activos (6-25 propiedades)
+- **Verticales incluidos**: Hasta 3 combinables (Alquiler + STR + Coliving)
 - **Mercado potencial**: ~50,000 gestores/inversores
 - **Penetración objetivo**: 2% = 1,000 clientes
 
 ```
-Incluye TODO de Starter +:
+VERTICALES: Hasta 3 a elegir
+├── Alquiler Residencial ✅
+├── STR / Vacacional ✅
+├── Coliving ✅
+├── House Flipping ❌
+├── Construcción ❌
+├── Comunidades ❌
+└── Servicios Pro ❌
+
+FUNCIONALIDADES (todo de Starter +):
 ✅ Hasta 25 propiedades
 ✅ 3 usuarios
 ✅ 10 firmas digitales/mes
@@ -77,23 +108,36 @@ Incluye TODO de Starter +:
 ✅ Reportes avanzados
 ✅ Integraciones (portales, calendario)
 ✅ 5 GB almacenamiento
-✅ 5,000 tokens IA/mes
+✅ 5,000 tokens IA/mes (valoraciones, descripciones)
 ✅ Soporte chat
+❌ API
 ```
 
-#### Business (€99/mes)
+#### Business (€99/mes) - LOS 7 VERTICALES
 - **Target**: Gestoras medianas, agencias (26-100 propiedades)
+- **Verticales incluidos**: TODOS los 7 verticales
 - **Mercado potencial**: ~15,000 gestoras
 - **Penetración objetivo**: 3% = 450 clientes
 
 ```
-Incluye TODO de Professional +:
+VERTICALES: TODOS (7)
+├── Alquiler Residencial ✅
+├── STR / Vacacional ✅
+├── Coliving ✅
+├── House Flipping ✅
+├── Construcción ✅
+├── Comunidades ✅
+└── Servicios Pro ✅
+
+FUNCIONALIDADES (todo de Professional +):
 ✅ Hasta 100 propiedades
 ✅ 10 usuarios
 ✅ 25 firmas digitales/mes
-✅ Múltiples verticales
-✅ API acceso
-✅ Personalización marca básica
+✅ Todos los 7 verticales
+✅ API acceso completo
+✅ Personalización marca
+✅ CRM integrado
+✅ Automatizaciones
 ✅ 20 GB almacenamiento
 ✅ 50,000 tokens IA/mes
 ✅ 50 SMS/mes
