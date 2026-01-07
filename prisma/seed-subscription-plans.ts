@@ -101,14 +101,14 @@ async function main() {
   console.log(`   💰 Precio: €29/mes | Hasta 5 propiedades | €5.80/propiedad`);
 
   // ═══════════════════════════════════════════════════════════════
-  // PLAN PROFESSIONAL - €39/mes (hasta 25 propiedades)
-  // Competitivo: 44% más barato que Homming Pro (€69)
+  // PLAN PROFESSIONAL - €49/mes (6-25 propiedades)
+  // Competitivo: 38% más barato que Homming Starter 11-25 (€79)
   // ═══════════════════════════════════════════════════════════════
   
   const planProfessional = await prisma.subscriptionPlan.upsert({
     where: { id: 'plan-professional' },
     update: {
-      precioMensual: 39,
+      precioMensual: 49,
       maxUsuarios: 3,
       maxPropiedades: 25,
       descripcion: 'Plan para pequeños gestores e inversores. 6-25 propiedades con funcionalidades avanzadas.',
@@ -122,7 +122,7 @@ async function main() {
       nombre: 'Plan Professional',
       tier: SubscriptionTier.PROFESSIONAL,
       descripcion: 'Plan para pequeños gestores e inversores. 6-25 propiedades con funcionalidades avanzadas.',
-      precioMensual: 39,
+      precioMensual: 49,
       maxUsuarios: 3,
       maxPropiedades: 25,
       
@@ -154,7 +154,7 @@ async function main() {
     },
   });
   console.log('✅ Plan PROFESSIONAL creado:', planProfessional.nombre);
-  console.log(`   💰 Precio: €39/mes | Hasta 25 propiedades | €1.56/propiedad`);
+  console.log(`   💰 Precio: €49/mes | 6-25 propiedades | €1.96/propiedad`);
 
   // ═══════════════════════════════════════════════════════════════
   // PLAN BUSINESS - €99/mes (hasta 100 propiedades)
@@ -286,22 +286,23 @@ async function main() {
   
   const plans = [
     { name: 'FREE', price: 0, props: 1, cost: 0.01, comp: '-' },
-    { name: 'STARTER', price: 29, props: 5, cost: 2.04, comp: '-26% vs Rentger' },
-    { name: 'PROFESSIONAL', price: 39, props: 25, cost: 10.14, comp: '-44% vs Homming' },
-    { name: 'BUSINESS', price: 99, props: 100, cost: 29.45, comp: '-34% vs Homming' },
-    { name: 'ENTERPRISE', price: 199, props: 9999, cost: 118.24, comp: 'Competitivo' },
+    { name: 'STARTER', price: 29, props: 5, cost: 2.04, comp: '-51% vs Homming (€59)' },
+    { name: 'PROFESSIONAL', price: 49, props: 25, cost: 10.14, comp: '-38% vs Homming (€79)' },
+    { name: 'BUSINESS', price: 99, props: 100, cost: 29.45, comp: '2x props vs Homming' },
+    { name: 'ENTERPRISE', price: 0, props: 9999, cost: 0, comp: 'A cotizar' },
   ];
   
   plans.forEach(plan => {
     const margin = plan.price > 0 ? ((plan.price - plan.cost) / plan.price * 100).toFixed(0) : '-';
-    const costPerProp = plan.props > 0 ? (plan.price / plan.props).toFixed(2) : '-';
-    const propsLabel = plan.props >= 9999 ? '∞' : plan.props.toString();
+    const costPerProp = plan.props > 0 && plan.price > 0 ? (plan.price / plan.props).toFixed(2) : 'Custom';
+    const propsLabel = plan.props >= 9999 ? '100+' : plan.props.toString();
+    const priceLabel = plan.price > 0 ? `€${plan.price.toString().padStart(3)}/mes` : 'Cotizar  ';
     
-    console.log(`${plan.name.padEnd(15)}| €${plan.price.toString().padStart(3)}/mes | ${propsLabel.padStart(5)} | €${costPerProp.padStart(5)} | €${plan.cost.toFixed(2).padStart(6)} | ${margin.padStart(3)}%  | ${plan.comp}`);
+    console.log(`${plan.name.padEnd(15)}| ${priceLabel} | ${propsLabel.padStart(5)} | €${costPerProp.toString().padStart(5)} | €${plan.cost.toFixed(2).padStart(6)} | ${margin.padStart(3)}%  | ${plan.comp}`);
   });
   
   console.log('──────────────────────────────────────────────────────────────────────');
-  console.log('\n💡 Posicionamiento: 20-44% más barato que competencia con 7 verticales vs 1-2\n');
+  console.log('\n💡 Posicionamiento vs Homming: Starter -51%, Professional -38%, Business 2x propiedades\n');
 }
 
 main()

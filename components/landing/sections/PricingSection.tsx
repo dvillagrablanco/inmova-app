@@ -38,7 +38,7 @@ const plans: Plan[] = [
     yearlyPrice: '€290/año',
     yearlySavings: 'Ahorra €58 (2 meses gratis)',
     modules: 'Alquiler Residencial',
-    properties: 'Hasta 5 propiedades',
+    properties: '1-5 propiedades',
     costPerProperty: '€5.80/propiedad',
     usageLimits: {
       signatures: '3 firmas/mes',
@@ -56,17 +56,17 @@ const plans: Plan[] = [
       'Soporte email'
     ],
     addons: [],
-    cta: 'Ideal para propietarios particulares'
+    cta: '-51% vs Homming (€59)'
   },
   {
     name: 'Professional',
-    price: '€39',
+    price: '€49',
     period: '/mes',
-    yearlyPrice: '€390/año',
-    yearlySavings: 'Ahorra €78 (2 meses gratis)',
+    yearlyPrice: '€490/año',
+    yearlySavings: 'Ahorra €98 (2 meses gratis)',
     modules: '1 Vertical completo',
-    properties: 'Hasta 25 propiedades',
-    costPerProperty: '€1.56/propiedad',
+    properties: '6-25 propiedades',
+    costPerProperty: '€1.96/propiedad',
     popular: true,
     usageLimits: {
       signatures: '10 firmas/mes',
@@ -85,7 +85,7 @@ const plans: Plan[] = [
       '✅ Soporte chat'
     ],
     addons: [],
-    cta: '-44% vs competencia'
+    cta: '-38% vs Homming (€79)'
   },
   {
     name: 'Business',
@@ -94,7 +94,7 @@ const plans: Plan[] = [
     yearlyPrice: '€990/año',
     yearlySavings: 'Ahorra €198 (2 meses gratis)',
     modules: 'Múltiples verticales',
-    properties: 'Hasta 100 propiedades',
+    properties: '26-100 propiedades',
     costPerProperty: '€0.99/propiedad',
     usageLimits: {
       signatures: '25 firmas/mes',
@@ -113,21 +113,21 @@ const plans: Plan[] = [
       '✅ Soporte prioritario'
     ],
     addons: [],
-    cta: 'Mejor coste unitario del mercado'
+    cta: '2x propiedades vs competencia'
   },
   {
     name: 'Enterprise',
-    price: '€199+',
-    period: '/mes',
-    yearlyPrice: 'Cotización anual disponible',
+    price: 'A cotizar',
+    period: '',
+    yearlyPrice: 'Descuento anual disponible',
     modules: 'Todos los verticales',
     properties: '+100 propiedades',
-    costPerProperty: 'A cotizar',
+    costPerProperty: 'Personalizado',
     usageLimits: {
-      signatures: '100+ firmas/mes',
-      storage: '100+ GB',
-      ai: '200K+ tokens/mes',
-      sms: '200+ SMS/mes',
+      signatures: 'Ilimitadas',
+      storage: 'Ilimitado',
+      ai: 'Ilimitado',
+      sms: 'Ilimitados',
     },
     features: [
       '✅ Todo de Business +',
@@ -141,7 +141,7 @@ const plans: Plan[] = [
       '✅ Soporte 24/7'
     ],
     addons: [],
-    cta: 'Para grandes gestoras y promotoras'
+    cta: 'Para grandes gestoras'
   }
 ];
 
