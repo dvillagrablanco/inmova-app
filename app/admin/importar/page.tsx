@@ -81,35 +81,30 @@ const SYSTEM_INFO: Record<
   string,
   { name: string; description: string; icon: string; website?: string }
 > = {
-  homming: {
-    name: 'Homming',
-    description: 'Sistema de gestión inmobiliaria español',
+  sistema_gestion_a: {
+    name: 'Sistema de Gestión A',
+    description: 'Sistema de gestión inmobiliaria',
     icon: '🏢',
-    website: 'https://www.homming.es',
   },
-  rentger: {
-    name: 'Rentger',
+  sistema_gestion_b: {
+    name: 'Sistema de Gestión B',
     description: 'Software de administración de fincas',
     icon: '🏘️',
-    website: 'https://www.rentger.com',
   },
-  nester: {
-    name: 'Nester',
+  sistema_gestion_c: {
+    name: 'Sistema de Gestión C',
     description: 'Plataforma de gestión de alquileres',
     icon: '🏠',
-    website: 'https://www.nester.com',
   },
-  buildium: {
-    name: 'Buildium',
-    description: 'Property management software (USA)',
-    icon: '🇺🇸',
-    website: 'https://www.buildium.com',
+  sistema_gestion_d: {
+    name: 'Sistema de Gestión D',
+    description: 'Property management software',
+    icon: '🌐',
   },
-  appfolio: {
-    name: 'AppFolio',
+  sistema_gestion_e: {
+    name: 'Sistema de Gestión E',
     description: 'Cloud-based property management',
     icon: '☁️',
-    website: 'https://www.appfolio.com',
   },
   generic_csv: {
     name: 'CSV Genérico',

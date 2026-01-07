@@ -115,7 +115,7 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
     
     cta: 'Ideal para inversores particulares y flippers',
     targetAudience: ['Inversor Particular', 'Flipper', 'Landlord'],
-    killerFeature: 'Más barato que Homming (€120) y con Flipping incluido'
+    killerFeature: 'Más barato que la competencia y con Flipping incluido'
   },
   
   professional: {
@@ -314,7 +314,7 @@ export const PROMO_CAMPAIGNS: Record<string, PromoCampaign> = {
   switch2025: {
     id: 'switch2025',
     code: 'SWITCH2025',
-    name: 'El Desafío Homming/Rentger',
+    name: 'El Desafío Switch',
     description: 'Igualamos precio de competencia 1 año + Upgrade gratis',
     targetPlan: 'professional',
     discountType: 'percentage',
@@ -322,7 +322,7 @@ export const PROMO_CAMPAIGNS: Record<string, PromoCampaign> = {
     duration: 12, // 1 año
     validFrom: new Date('2025-01-01'),
     validUntil: new Date('2025-12-31'),
-    targetAudience: 'Agencias usando Homming/Rentger',
+    targetAudience: 'Agencias usando otras plataformas',
     message: 'Trae tu última factura. Te damos INMOVA al mismo precio durante 1 año con el plan superior gratis.'
   }
 };

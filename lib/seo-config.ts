@@ -5,19 +5,13 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://inmova.app'
 export const defaultMetadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: 'INMOVA - Software de Gestión Inmobiliaria Todo-en-Uno | Alternativa a Homming, Rentger, Nester',
+    default: 'INMOVA - Software de Gestión Inmobiliaria Todo-en-Uno | Plataforma PropTech Líder',
     template: '%s | INMOVA - Gestión Inmobiliaria Profesional'
   },
-  description: 'INMOVA es el software de gestión inmobiliaria profesional todo-en-uno. Alternativa superior a Homming, Rentger, Nester, Buildium y AppFolio. 88 módulos integrados, 7 modelos de negocio, tecnología avanzada (IA, Blockchain, IoT). Desde €149/mes. Prueba gratis 30 días.',
+  description: 'INMOVA es el software de gestión inmobiliaria profesional todo-en-uno. La plataforma PropTech más completa del mercado. 88 módulos integrados, 7 modelos de negocio, tecnología avanzada (IA, Blockchain, IoT). Desde €149/mes. Prueba gratis 30 días.',
   keywords: [
     'INMOVA', 'software gestión inmobiliaria', 'proptech', 'property management software',
-    'alternativa Homming', 'mejor que Homming', 'vs Homming', 'sustituir Homming',
-    'alternativa Rentger', 'mejor que Rentger', 'vs Rentger', 'sustituir Rentger',
-    'alternativa Nester', 'mejor que Nester', 'vs Nester', 'sustituir Nester',
-    'alternativa Inmovilla', 'alternativa Tecnocasa',
-    'alternativa Buildium', 'mejor que Buildium', 'Buildium España',
-    'alternativa AppFolio', 'mejor que AppFolio', 'AppFolio España',
-    'alternativa Yardi', 'alternativa MRI Software',
+    'mejor software inmobiliario', 'plataforma proptech líder',
     'software gestión alquileres', 'gestión propiedades', 'gestión inquilinos',
     'software inmobiliario multivertical', 'ERP inmobiliario',
     'alquiler por habitaciones', 'coliving software', 'room rental management',
@@ -49,7 +43,7 @@ export const defaultMetadata: Metadata = {
     url: baseUrl,
     siteName: 'INMOVA',
     title: 'INMOVA - Software de Gestión Inmobiliaria Todo-en-Uno',
-    description: '¿Buscas alternativa a Homming, Rentger o Nester? INMOVA es el software inmobiliario profesional todo-en-uno con 88 módulos, IA, Blockchain, IoT. Desde €149/mes. Prueba gratis 30 días.',
+    description: 'INMOVA es el software inmobiliario profesional todo-en-uno con 88 módulos, IA, Blockchain, IoT. La plataforma PropTech más completa. Desde €149/mes. Prueba gratis 30 días.',
     images: [{
       url: '/og-image.png',
       width: 1200,
@@ -59,7 +53,7 @@ export const defaultMetadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'INMOVA - Alternativa Superior a Homming, Rentger, Nester',
+    title: 'INMOVA - Plataforma PropTech Líder en España',
     description: 'Software inmobiliario profesional todo-en-uno. 88 módulos, 7 verticales, tecnología avanzada. Desde €149/mes.',
     images: ['/og-image.png'],
     creator: '@inmova_tech',

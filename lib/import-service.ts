@@ -13,7 +13,7 @@ export type ImportableEntity =
 
 // Mapeo de campos para diferentes sistemas
 export const SYSTEM_MAPPINGS = {
-  homming: {
+  sistema_gestion_a: {
     buildings: {
       nombre: ['nombre', 'name', 'building_name'],
       direccion: ['direccion', 'address', 'direccion_completa'],
@@ -55,7 +55,7 @@ export const SYSTEM_MAPPINGS = {
       mes: ['mes', 'month', 'periodo']
     }
   },
-  rentger: {
+  sistema_gestion_b: {
     buildings: {
       nombre: ['denominacion', 'edificio', 'inmueble'],
       direccion: ['direccion_fiscal', 'domicilio'],

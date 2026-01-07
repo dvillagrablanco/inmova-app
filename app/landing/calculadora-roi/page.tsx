@@ -45,7 +45,7 @@ interface CostBreakdown {
 export default function CalculadoraROIPage() {
   // State para inputs del usuario
   const [unidades, setUnidades] = useState(50);
-  const [sistemaActual, setSistemaActual] = useState<string>('homming');
+  const [sistemaActual, setSistemaActual] = useState<string>('sistema1');
   const [necesitaSTR, setNecesitaSTR] = useState<boolean>(true);
   const [necesitaFirmaDigital, setNecesitaFirmaDigital] = useState<boolean>(true);
   const [necesitaCRM, setNecesitaCRM] = useState<boolean>(true);
@@ -62,11 +62,10 @@ export default function CalculadoraROIPage() {
 
   // Definición de precios de competidores y servicios adicionales
   const competitorPricing: Record<string, { base: number; perUnit?: number; name: string }> = {
-    homming: { base: 0, perUnit: 12, name: 'Homming' },
-    sistema1: { base: 0, perUnit: 12, name: 'Sistema A' },
-    sistema2: { base: 0, perUnit: 9, name: 'Sistema B' },
-    sistema3: { base: 174, perUnit: 0, name: 'Sistema C' },
-    sistema4: { base: 280, perUnit: 1, name: 'Sistema D' },
+    sistema1: { base: 0, perUnit: 12, name: 'Sistema de Gestión A' },
+    sistema2: { base: 0, perUnit: 9, name: 'Sistema de Gestión B' },
+    sistema3: { base: 174, perUnit: 0, name: 'Sistema de Gestión C' },
+    sistema4: { base: 280, perUnit: 1, name: 'Sistema de Gestión D' },
     otro: { base: 150, perUnit: 0, name: 'Otro Sistema' },
   };
 

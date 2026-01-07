@@ -92,10 +92,10 @@ export interface ComparisonRow {
     highlight?: boolean;
     icon?: string;
   };
-  homming: {
+  plataformaA: {
     value: string;
   };
-  rentger: {
+  plataformaB: {
     value: string;
   };
   buildium: {
@@ -708,78 +708,78 @@ export const comparisonData: ComparisonRow[] = [
   {
     feature: 'Módulos incluidos',
     inmova: { value: '100+', highlight: true, icon: '✅' },
-    homming: { value: '35' },
-    rentger: { value: '42' },
+    plataformaA: { value: '35' },
+    plataformaB: { value: '42' },
     buildium: { value: '28' },
   },
   {
     feature: 'Verticales de negocio',
     inmova: { value: '7 + B2B', highlight: true, icon: '✅' },
-    homming: { value: '2' },
-    rentger: { value: '3' },
+    plataformaA: { value: '2' },
+    plataformaB: { value: '3' },
     buildium: { value: '2' },
   },
   {
     feature: 'IA integrada',
     inmova: { value: '✅', highlight: true },
-    homming: { value: '❌' },
-    rentger: { value: '❌' },
+    plataformaA: { value: '❌' },
+    plataformaB: { value: '❌' },
     buildium: { value: '❌' },
   },
   {
     feature: 'Blockchain',
     inmova: { value: '✅', highlight: true },
-    homming: { value: '❌' },
-    rentger: { value: '❌' },
+    plataformaA: { value: '❌' },
+    plataformaB: { value: '❌' },
     buildium: { value: '❌' },
   },
   {
     feature: 'Precio/mes',
     inmova: { value: '€149-€749', highlight: true, icon: '✅' },
-    homming: { value: '€300-€1,200' },
-    rentger: { value: '€250-€900' },
+    plataformaA: { value: '€300-€1,200' },
+    plataformaB: { value: '€250-€900' },
     buildium: { value: '€400-€1,500' },
   },
   {
     feature: 'Sin permanencia',
     inmova: { value: '✅ Mensual', highlight: true },
-    homming: { value: '❌ 12 meses' },
-    rentger: { value: '❌ 12 meses' },
+    plataformaA: { value: '❌ 12 meses' },
+    plataformaB: { value: '❌ 12 meses' },
     buildium: { value: '❌ Anual' },
   },
   {
     feature: 'Onboarding',
     inmova: { value: '✅ Gratis', highlight: true },
-    homming: { value: '€299' },
-    rentger: { value: '€199' },
+    plataformaA: { value: '€299' },
+    plataformaB: { value: '€199' },
     buildium: { value: '€399' },
   },
   {
     feature: 'Soporte',
     inmova: { value: '24/7 Chat', highlight: true },
-    homming: { value: '9-18h' },
-    rentger: { value: '9-18h' },
+    plataformaA: { value: '9-18h' },
+    plataformaB: { value: '9-18h' },
     buildium: { value: 'Email' },
   },
   {
     feature: 'API abierta',
     inmova: { value: '✅', highlight: true },
-    homming: { value: '❌' },
-    rentger: { value: '✅' },
+    plataformaA: { value: '❌' },
+    plataformaB: { value: '✅' },
     buildium: { value: '✅ (pago)' },
   },
   {
     feature: 'Mobile app',
     inmova: { value: '✅ 2025', highlight: true },
-    homming: { value: '❌' },
-    rentger: { value: '❌' },
+    plataformaA: { value: '❌' },
+    plataformaB: { value: '❌' },
     buildium: { value: '✅' },
   },
   {
     feature: 'ROI promedio',
     inmova: { value: '60 días', highlight: true, icon: '🚀' },
-    homming: { value: '6-12 meses' },
-    rentger: { value: '6-12 meses' },
+    plataformaA: { value: '6-12 meses' },
+    plataformaB: { value: '6-12 meses' },
     buildium: { value: '6-12 meses' },
   },
 ];
@@ -1043,7 +1043,7 @@ export const faqs: FAQ[] = [
     category: 'Migración',
     question: '¿Qué pasa con mis datos actuales?',
     answer:
-      'Los migramos gratis. Puedes importar desde Excel en 1 clic o nuestro equipo lo hace por ti sin costo adicional. Soportamos importación desde Homming, Rentger y otros competidores.',
+      'Los migramos gratis. Puedes importar desde Excel en 1 clic o nuestro equipo lo hace por ti sin costo adicional. Soportamos importación desde las principales plataformas del mercado.',
   },
   {
     id: 3,
@@ -1237,7 +1237,7 @@ export const seoMetadata = {
   description:
     'El ecosistema PropTech más completo: Alquiler, Coliving, Construcción B2B (ewoorker), Seguros, Partners. 7 verticales + 20 módulos. ✓ 3,000+ usuarios ✓ 4.8/5 ⭐ ✓ Prueba gratis 30 días.',
   keywords:
-    'software gestión inmobiliaria, proptech españa, gestión alquileres, crm inmobiliario, software propietarios, gestión inquilinos, alternativa homming, software agentes inmobiliarios, construcción B2B, ewoorker, seguros inmobiliarios, partners inmobiliarios',
+    'software gestión inmobiliaria, proptech españa, gestión alquileres, crm inmobiliario, software propietarios, gestión inquilinos, software agentes inmobiliarios, construcción B2B, ewoorker, seguros inmobiliarios, partners inmobiliarios, mejor software inmobiliario',
   openGraph: {
     title: 'INMOVA - Del Alquiler a la Construcción: Ecosistema PropTech Completo',
     description:

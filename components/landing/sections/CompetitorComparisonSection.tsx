@@ -36,9 +36,9 @@ const comparisonFeatures = [
 
 const pricing = [
   { name: 'INMOVA', price: '€49/mes', modules: '7 verticales + 15 módulos', color: 'indigo', subtitle: 'Plan Basic' },
-  { name: 'Homming', price: '€120/mes', modules: '1 vertical', color: 'red', subtitle: 'Advanced' },
-  { name: 'Rentger', price: '€100/mes', modules: '1 vertical', color: 'gray', subtitle: 'Estándar' },
-  { name: 'Guesty', price: '$150/mes', modules: '1 vertical (Solo STR)', color: 'gray', subtitle: 'Premium' },
+  { name: 'Plataforma A', price: '€120/mes', modules: '1 vertical', color: 'red', subtitle: 'Plan Avanzado' },
+  { name: 'Plataforma B', price: '€100/mes', modules: '1 vertical', color: 'gray', subtitle: 'Estándar' },
+  { name: 'Plataforma C', price: '$150/mes', modules: '1 vertical (Solo STR)', color: 'gray', subtitle: 'Premium' },
 ];
 
 export function CompetitorComparisonSection() {
@@ -97,13 +97,6 @@ export function CompetitorComparisonSection() {
                   {item.price}
                 </p>
                 <p className="text-sm text-gray-500 mt-1">{item.modules}</p>
-                {item.color === 'red' && (
-                  <Link href="/comparativa/homming" className="mt-3 inline-block">
-                    <Button variant="outline" size="sm" className="text-xs">
-                      Ver Comparativa
-                    </Button>
-                  </Link>
-                )}
               </CardHeader>
             </Card>
           ))}
@@ -126,9 +119,9 @@ export function CompetitorComparisonSection() {
                           <span>INMOVA</span>
                         </div>
                       </th>
-                      <th className="p-4 font-semibold text-center min-w-[120px]">Homming</th>
-                      <th className="p-4 font-semibold text-center min-w-[120px]">Competidor B</th>
-                      <th className="p-4 font-semibold text-center min-w-[120px]">Competidor C</th>
+                      <th className="p-4 font-semibold text-center min-w-[120px]">Plataforma A</th>
+                      <th className="p-4 font-semibold text-center min-w-[120px]">Plataforma B</th>
+                      <th className="p-4 font-semibold text-center min-w-[120px]">Plataforma C</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -232,15 +225,15 @@ export function CompetitorComparisonSection() {
             </div>
           </div>
 
-          {/* Homming Specific CTA */}
+          {/* Generic CTA */}
           <div className="bg-green-50 border-2 border-green-200 rounded-xl p-6 max-w-2xl mx-auto">
             <p className="text-sm text-gray-700 mb-3">
-              <strong className="text-green-700">¿Vienes de Homming?</strong> Descubre por qué 
-              <span className="font-semibold"> INMOVA ofrece 6x más funcionalidad por 58% menos precio</span>
+              <strong className="text-green-700">¿Vienes de otra plataforma?</strong> Descubre por qué 
+              <span className="font-semibold"> INMOVA ofrece 6x más funcionalidad por mejor precio</span>
             </p>
-            <Link href="/comparativa/homming">
+            <Link href="/register">
               <Button variant="outline" className="border-green-600 text-green-700 hover:bg-green-100">
-                Ver Comparativa Detallada con Homming
+                Empieza tu Prueba Gratis
               </Button>
             </Link>
           </div>
@@ -249,7 +242,7 @@ export function CompetitorComparisonSection() {
         {/* Disclaimer */}
         <div className="text-center mt-6">
           <p className="text-xs text-gray-500 max-w-3xl mx-auto">
-            *Comparativa basada en funcionalidades públicas de las principales plataformas PropTech del mercado español. 
+            *Comparativa basada en funcionalidades públicas de las principales plataformas PropTech del mercado. 
             Los datos se actualizan trimestralmente. Última actualización: Q1 2026.
           </p>
         </div>

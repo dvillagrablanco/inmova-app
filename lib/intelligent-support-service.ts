@@ -269,17 +269,17 @@ const KNOWLEDGE_BASE: KnowledgeArticle[] = [
   {
     id: 'kb-006',
     title: 'Cómo importar datos desde otro sistema',
-    excerpt: 'Migra tus datos desde Homming, Rentger u otros',
+    excerpt: 'Migra tus datos desde otras plataformas',
     content: `
 # Importación de datos
 
 ## Proceso de importación:
 1. **Menú Admin** > **Importar Datos**
 2. **Selecciona origen**:
-   - Homming
-   - Rentger
-   - Nester
-   - Buildium
+   - Sistema de Gestión A
+   - Sistema de Gestión B
+   - Sistema de Gestión C
+   - Sistema de Gestión D
    - CSV genérico
 3. **Selecciona entidad**:
    - Edificios
@@ -520,7 +520,7 @@ const FAQ_PATTERNS = [
     quickAnswer: 'El módulo de Alquiler por Habitaciones permite crear habitaciones individuales en una unidad y prorratear gastos comunes. ¿Necesitas ayuda configurándolo?'
   },
   {
-    patterns: ['importar datos', 'migrar', 'CSV', 'homming', 'rentger'],
+    patterns: ['importar datos', 'migrar', 'CSV', 'otra plataforma', 'importación'],
     articleId: 'kb-006',
     confidence: 0.89,
     quickAnswer: 'Puedes importar datos desde Admin > Importar. Selecciona tu sistema anterior, descarga la plantilla, prepara el CSV y súbelo. Te guiaremos en la validación.'

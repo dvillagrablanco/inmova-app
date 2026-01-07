@@ -30,9 +30,8 @@
  * - White-label: €49/mes (costo ~€5, margen 90%)
  * - API Access: €29/mes (costo ~€0, margen 100%)
  * 
- * Estrategia Competitiva vs Homming/Rentger:
- * - Homming: 1 vertical (solo alquiler), €59-279/mes
- * - Rentger: 1-2 verticales, €39-149/mes
+ * Estrategia Competitiva:
+ * - Competencia: 1-2 verticales, €59-279/mes
  * - INMOVA: 1-7 verticales según plan, €35-299/mes (mismo precio o menos, 3-7x más verticales)
  * 
  * Ejecutar: npx tsx prisma/seed-subscription-plans.ts
@@ -65,9 +64,8 @@ const VERTICALES_POR_PLAN = {
 async function main() {
   console.log('🌱 Seeding Subscription Plans con Verticales y Límites...\n');
   console.log('📊 ESTRATEGIA VS COMPETENCIA:');
-  console.log('  • Homming: 1 vertical (solo alquiler), €59-279/mes');
-  console.log('  • Rentger: 1-2 verticales, €39-149/mes');
-  console.log('  • INMOVA: 1-7 verticales según plan, €29-99/mes');
+  console.log('  • Competencia: 1-2 verticales, €59-279/mes');
+  console.log('  • INMOVA: 1-7 verticales según plan, €35-299/mes');
   console.log('');
 
   // ═══════════════════════════════════════════════════════════════
@@ -109,7 +107,7 @@ async function main() {
 
   // ═══════════════════════════════════════════════════════════════
   // PLAN STARTER - €35/mes (1-5 propiedades, 1 vertical)
-  // Margen: 94% | Competitivo: -41% vs Homming (€59)
+  // Margen: 94% | Competitivo: Mejor precio del mercado
   // Costo: 2 firmas × €1 + 1GB × €0.02 = €2.04
   // ═══════════════════════════════════════════════════════════════
   
@@ -124,7 +122,7 @@ async function main() {
       precioMensual: 35,
       maxUsuarios: 1,
       maxPropiedades: 5,
-      descripcion: '1-5 propiedades. 1 VERTICAL a elegir. -41% vs Homming (€59). Ideal para propietarios particulares.',
+      descripcion: '1-5 propiedades. 1 VERTICAL a elegir. Mejor precio del mercado. Ideal para propietarios particulares.',
       signaturesIncludedMonth: 2,  // Reducido de 3 a 2
       storageIncludedGB: 1,
       aiTokensIncludedMonth: 0,
@@ -135,7 +133,7 @@ async function main() {
       id: 'plan-starter',
       nombre: 'Plan Starter',
       tier: SubscriptionTier.STARTER,
-      descripcion: '1-5 propiedades. 1 VERTICAL a elegir. -41% vs Homming (€59). Ideal para propietarios particulares.',
+      descripcion: '1-5 propiedades. 1 VERTICAL a elegir. Mejor precio del mercado. Ideal para propietarios particulares.',
       precioMensual: 35,
       maxUsuarios: 1,
       maxPropiedades: 5,
@@ -159,7 +157,7 @@ async function main() {
 
   // ═══════════════════════════════════════════════════════════════
   // PLAN PROFESSIONAL - €59/mes (6-25 propiedades, HASTA 3 verticales)
-  // Margen: 91% | Competitivo: -25% vs Homming (€79), pero con 3x más verticales
+  // Margen: 91% | Competitivo: 3x más verticales que la competencia
   // Costo: 5 firmas × €1 + 5GB × €0.02 + 5K tokens × €0.005 = €5.14
   // ═══════════════════════════════════════════════════════════════
   
@@ -175,7 +173,7 @@ async function main() {
       precioMensual: 59,
       maxUsuarios: 3,
       maxPropiedades: 25,
-      descripcion: '6-25 propiedades. HASTA 3 VERTICALES (Alquiler + STR + Coliving). -25% vs Homming pero 3x más verticales.',
+      descripcion: '6-25 propiedades. HASTA 3 VERTICALES (Alquiler + STR + Coliving). 3x más verticales que la competencia.',
       signaturesIncludedMonth: 5,   // Reducido de 10 a 5
       storageIncludedGB: 5,
       aiTokensIncludedMonth: 5000,
@@ -186,7 +184,7 @@ async function main() {
       id: 'plan-professional',
       nombre: 'Plan Professional',
       tier: SubscriptionTier.PROFESSIONAL,
-      descripcion: '6-25 propiedades. HASTA 3 VERTICALES (Alquiler + STR + Coliving). -25% vs Homming pero 3x más verticales.',
+      descripcion: '6-25 propiedades. HASTA 3 VERTICALES (Alquiler + STR + Coliving). 3x más verticales que la competencia.',
       precioMensual: 59,
       maxUsuarios: 3,
       maxPropiedades: 25,
@@ -210,7 +208,7 @@ async function main() {
 
   // ═══════════════════════════════════════════════════════════════
   // PLAN BUSINESS - €129/mes (26-100 propiedades, LOS 7 VERTICALES)
-  // Margen: 86% | Competitivo: -19% vs Homming (€159)
+  // Margen: 86% | Competitivo: Mejor valor del mercado
   // Costo: 15 firmas × €1 + 20GB × €0.02 + 50K × €0.005 + 25 SMS × €0.075 = €17.58
   // ═══════════════════════════════════════════════════════════════
   
@@ -227,7 +225,7 @@ async function main() {
       precioMensual: 129,
       maxUsuarios: 10,
       maxPropiedades: 100,
-      descripcion: '26-100 propiedades. LOS 7 VERTICALES. -19% vs Homming (€159). API completa y CRM integrado.',
+      descripcion: '26-100 propiedades. LOS 7 VERTICALES. Mejor valor del mercado. API completa y CRM integrado.',
       signaturesIncludedMonth: 15,   // Reducido de 25 a 15
       storageIncludedGB: 20,
       aiTokensIncludedMonth: 50000,
@@ -238,7 +236,7 @@ async function main() {
       id: 'plan-business',
       nombre: 'Plan Business',
       tier: SubscriptionTier.BUSINESS,
-      descripcion: '26-100 propiedades. LOS 7 VERTICALES. -19% vs Homming (€159). API completa y CRM integrado.',
+      descripcion: '26-100 propiedades. LOS 7 VERTICALES. Mejor valor del mercado. API completa y CRM integrado.',
       precioMensual: 129,
       maxUsuarios: 10,
       maxPropiedades: 100,
@@ -329,8 +327,7 @@ async function main() {
   console.log('   6. Comunidades (administración de fincas)');
   console.log('   7. Servicios Profesionales (property management)');
   console.log('');
-  console.log('   ⚠️  Homming: SOLO 1 vertical (alquiler tradicional)');
-  console.log('   ⚠️  Rentger: SOLO 1-2 verticales');
+  console.log('   ⚠️  Competencia: SOLO 1-2 verticales (limitados)');
   console.log('');
   console.log('───────────────────────────────────────────────────────────────────────────────────────');
   console.log('Plan           | Precio   | Props  | Verts | Usuarios | API | vs Competencia');
@@ -338,9 +335,9 @@ async function main() {
   
   const plansSummary = [
     { name: 'FREE', price: 0, props: '1', verts: 1, users: 1, api: '❌', comp: 'Trial 30 días' },
-    { name: 'STARTER', price: 35, props: '1-5', verts: 1, users: 1, api: '❌', comp: '-41% vs Homming (€59)' },
-    { name: 'PROFESSIONAL', price: 59, props: '6-25', verts: 3, users: 3, api: '❌', comp: '-25%, 3x verticales' },
-    { name: 'BUSINESS', price: 129, props: '26-100', verts: 7, users: 10, api: '✅', comp: '-19% vs Homming €159' },
+    { name: 'STARTER', price: 35, props: '1-5', verts: 1, users: 1, api: '❌', comp: 'Mejor precio mercado' },
+    { name: 'PROFESSIONAL', price: 59, props: '6-25', verts: 3, users: 3, api: '❌', comp: '3x más verticales' },
+    { name: 'BUSINESS', price: 129, props: '26-100', verts: 7, users: 10, api: '✅', comp: 'Mejor valor mercado' },
     { name: 'ENTERPRISE', price: 299, props: '100+', verts: 7, users: '∞', api: '✅', comp: 'White-label, SLA' },
   ];
   
@@ -374,9 +371,9 @@ async function main() {
   console.log('');
   console.log('📈 VENTAJA COMPETITIVA CLAVE:');
   console.log('   • Mismo precio o menor que competencia = 3-7x más verticales');
-  console.log('   • Business €129/mes incluye TODO lo que Homming cobra €159/mes');
+  console.log('   • Business €129/mes incluye LOS 7 VERTICALES');
   console.log('   • IA integrada en Professional y superiores');
-  console.log('   • API disponible desde Business (Homming solo Enterprise)');
+  console.log('   • API disponible desde Business (único en el mercado)');
   console.log('   • TODOS los planes con margen >70% garantizado');
   console.log('   • Add-ons flexibles para quienes necesiten más');
   console.log('');

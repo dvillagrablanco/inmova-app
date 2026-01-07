@@ -120,7 +120,7 @@ export default function ApiDocsPage() {
                 <strong>Base URL (Desarrollo):</strong> http://localhost:3000
               </p>
               <p>
-                <strong>Base URL (Producción):</strong> https://homming-vidaro-6q1wdi.abacusai.app
+                <strong>Base URL (Producción):</strong> https://inmovaapp.com
               </p>
               <p className="mt-4">
                 Esta documentación cubre todos los endpoints de la API REST de INMOVA, incluyendo:

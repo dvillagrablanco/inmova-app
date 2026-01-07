@@ -351,8 +351,8 @@ export const ALL_ROUTES: RouteConfig[] = [
     "priority": "medium"
   },
   {
-    "name": "Comparativa - Homming",
-    "url": "/comparativa/homming",
+    "name": "Comparativa",
+    "url": "/comparativa",
     "requiresAuth": true,
     "requiresSuperAdmin": false,
     "category": "other",

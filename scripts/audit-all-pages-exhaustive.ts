@@ -78,7 +78,7 @@ const ALL_ROUTES = [
   '/coliving/emparejamiento',
   '/coliving/eventos',
   '/coliving/paquetes',
-  '/comparativa/homming',
+  '/comparativa',
   '/comunidades',
   '/comunidades/actas',
   '/comunidades/cumplimiento',
