@@ -372,9 +372,34 @@ async function handleSubscriptionEvent(event: Stripe.Event) {
   logger.info(`[Stripe Webhook] Evento de suscripción Inmova: ${event.type}`, {
     subscriptionId: subscription.id,
     status: subscription.status,
+    metadata: subscription.metadata,
   });
 
   try {
+    // ═══════════════════════════════════════════════════════════════
+    // VERIFICAR SI ES UN ADD-ON
+    // Los add-ons tienen metadata.type === 'addon'
+    // ═══════════════════════════════════════════════════════════════
+    
+    if (subscription.metadata?.type === 'addon') {
+      await handleAddOnSubscription(event, subscription);
+      return;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // VERIFICAR SI ES UN PLAN DE SUSCRIPCIÓN
+    // Los planes tienen metadata.planId y metadata.companyId
+    // ═══════════════════════════════════════════════════════════════
+    
+    if (subscription.metadata?.planId && subscription.metadata?.companyId) {
+      await handlePlanSubscription(event, subscription);
+      return;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SUSCRIPCIONES DE CONTRATOS (alquiler)
+    // ═══════════════════════════════════════════════════════════════
+    
     switch (event.type) {
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
@@ -399,5 +424,142 @@ async function handleSubscriptionEvent(event: Stripe.Event) {
     logger.info(`[Stripe Webhook] ✅ Suscripción Inmova actualizada: ${subscription.id}`);
   } catch (error: any) {
     logger.error('[Stripe Webhook] Error actualizando suscripción Inmova:', error);
+  }
+}
+
+/**
+ * Maneja eventos de suscripción de add-ons
+ */
+async function handleAddOnSubscription(event: Stripe.Event, subscription: Stripe.Subscription) {
+  const addOnId = subscription.metadata?.addOnId;
+  const companyId = subscription.metadata?.companyId;
+
+  if (!addOnId || !companyId) {
+    logger.warn('[Stripe Webhook] Add-on subscription sin metadata requerida');
+    return;
+  }
+
+  try {
+    switch (event.type) {
+      case 'customer.subscription.created':
+        // Crear o activar CompanyAddOn
+        await prisma.companyAddOn.upsert({
+          where: {
+            companyId_addOnId: { companyId, addOnId },
+          },
+          update: {
+            activo: true,
+            stripeSubscriptionId: subscription.id,
+            fechaActivacion: new Date(),
+            fechaCancelacion: null,
+          },
+          create: {
+            companyId,
+            addOnId,
+            activo: true,
+            stripeSubscriptionId: subscription.id,
+            fechaActivacion: new Date(),
+          },
+        });
+        logger.info(`[Stripe Webhook] ✅ Add-on ${addOnId} activado para empresa ${companyId}`);
+        break;
+
+      case 'customer.subscription.updated':
+        // Actualizar estado
+        await prisma.companyAddOn.updateMany({
+          where: { stripeSubscriptionId: subscription.id },
+          data: {
+            activo: subscription.status === 'active',
+          },
+        });
+        break;
+
+      case 'customer.subscription.deleted':
+        // Marcar como inactivo
+        await prisma.companyAddOn.updateMany({
+          where: { stripeSubscriptionId: subscription.id },
+          data: {
+            activo: false,
+            fechaCancelacion: new Date(),
+          },
+        });
+        logger.info(`[Stripe Webhook] ✅ Add-on cancelado para empresa ${companyId}`);
+        break;
+    }
+  } catch (error: any) {
+    logger.error('[Stripe Webhook] Error procesando add-on subscription:', error);
+  }
+}
+
+/**
+ * Maneja eventos de suscripción a planes
+ */
+async function handlePlanSubscription(event: Stripe.Event, subscription: Stripe.Subscription) {
+  const planId = subscription.metadata?.planId;
+  const companyId = subscription.metadata?.companyId;
+
+  if (!planId || !companyId) {
+    logger.warn('[Stripe Webhook] Plan subscription sin metadata requerida');
+    return;
+  }
+
+  try {
+    switch (event.type) {
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated':
+        // Actualizar plan de la empresa
+        await prisma.company.update({
+          where: { id: companyId },
+          data: {
+            subscriptionPlanId: planId,
+            estadoCliente: subscription.status === 'active' ? 'activo' : 
+                           subscription.status === 'trialing' ? 'prueba' : 'suspendido',
+          },
+        });
+
+        // Registrar cambio de suscripción
+        await prisma.subscriptionChange.create({
+          data: {
+            companyId,
+            accion: event.type === 'customer.subscription.created' ? 'nueva' : 'actualizacion',
+            planNuevoId: planId,
+            detalles: {
+              stripeSubscriptionId: subscription.id,
+              status: subscription.status,
+              currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
+            },
+          },
+        });
+
+        logger.info(`[Stripe Webhook] ✅ Empresa ${companyId} suscrita a plan ${planId}`);
+        break;
+
+      case 'customer.subscription.deleted':
+        // Cancelar plan de la empresa
+        await prisma.company.update({
+          where: { id: companyId },
+          data: {
+            subscriptionPlanId: null,
+            estadoCliente: 'suspendido',
+          },
+        });
+
+        await prisma.subscriptionChange.create({
+          data: {
+            companyId,
+            accion: 'cancelacion',
+            planAnteriorId: planId,
+            detalles: {
+              stripeSubscriptionId: subscription.id,
+              canceledAt: new Date().toISOString(),
+            },
+          },
+        });
+
+        logger.info(`[Stripe Webhook] ✅ Suscripción cancelada para empresa ${companyId}`);
+        break;
+    }
+  } catch (error: any) {
+    logger.error('[Stripe Webhook] Error procesando plan subscription:', error);
   }
 }
