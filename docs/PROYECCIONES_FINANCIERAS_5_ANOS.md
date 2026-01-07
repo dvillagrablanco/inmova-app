@@ -47,14 +47,25 @@
 | 26-50 | €99/mes | €159/mes | **€99/mes** | =precio, +features |
 | 51-100 | Personalizado | Personalizado | **€99/mes** | 2x propiedades |
 
-### Estructura Final INMOVA (Precios + Verticales)
+### Estructura Final INMOVA (Precios + Verticales + Margen >70%)
 
-| Plan | Precio | Propiedades | **VERTICALES** | Usuarios | API | Vs Homming |
-|------|--------|-------------|----------------|----------|-----|------------|
-| **Starter** | €29/mes | 1-5 | **1 vertical** | 1 | ❌ | -51% vs €59 |
-| **Professional** | €49/mes | 6-25 | **3 verticales** | 3 | ❌ | -38%, 3x verticales |
-| **Business** | €99/mes | 26-100 | **7 verticales** | 10 | ✅ | 2x props, 7x verticales |
-| **Enterprise** | A cotizar | 100+ | **7 + custom** | Ilimitados | ✅ | White-label, SLA |
+| Plan | Precio | Propiedades | **VERTICALES** | Usuarios | API | Costo | Margen | Vs Homming |
+|------|--------|-------------|----------------|----------|-----|-------|--------|------------|
+| **Starter** | €35/mes | 1-5 | **1 vertical** | 1 | ❌ | €2.04 | **94%** | -41% vs €59 |
+| **Professional** | €59/mes | 6-25 | **3 verticales** | 3 | ❌ | €5.14 | **91%** | -25%, 3x verticales |
+| **Business** | €129/mes | 26-100 | **7 verticales** | 10 | ✅ | €17.58 | **86%** | -19% vs €159 |
+| **Enterprise** | €299/mes | 100+ | **7 + custom** | Ilimitados | ✅ | €59.12 | **80%** | White-label, SLA |
+
+### Add-ons Disponibles (Mejoras Opcionales)
+
+| Add-on | Precio | Costo | Margen | Descripción |
+|--------|--------|-------|--------|-------------|
+| Pack 10 Firmas | €15/mes | €10 | 33% | Firmas digitales adicionales |
+| Pack 10GB Storage | €5/mes | €0.23 | 95% | Almacenamiento extra |
+| Pack IA 50K tokens | €10/mes | €0.25 | 97% | IA avanzada |
+| Pack 50 SMS | €8/mes | €3.75 | 53% | Notificaciones SMS |
+| White-label | €49/mes | ~€5 | 90% | Tu marca, tu dominio |
+| API Access | €29/mes | ~€0 | 100% | Integraciones custom |
 
 ### Desglose por Plan
 

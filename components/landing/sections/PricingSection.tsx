@@ -4,17 +4,27 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, Building2, Home, Hotel, Hammer, Users, Shield, Briefcase, ArrowRight } from 'lucide-react';
+import { CheckCircle, Plus, Building2, Home, Hotel, Hammer, Users, Shield, Briefcase, ArrowRight, Zap } from 'lucide-react';
 
 // Los 7 verticales de INMOVA
 const VERTICALES = [
-  { id: 'alquiler', name: 'Alquiler Residencial', icon: Building2, desc: 'Tradicional + Media Estancia' },
-  { id: 'str', name: 'STR / Vacacional', icon: Hotel, desc: 'Airbnb, Booking, VRBO' },
-  { id: 'coliving', name: 'Coliving', icon: Home, desc: 'Habitaciones y prorrateo' },
-  { id: 'flipping', name: 'House Flipping', icon: Hammer, desc: 'Compra-reforma-venta' },
-  { id: 'construccion', name: 'Construcción', icon: Hammer, desc: 'ewoorker marketplace' },
-  { id: 'comunidades', name: 'Comunidades', icon: Shield, desc: 'Administración de fincas' },
-  { id: 'servicios', name: 'Servicios Pro', icon: Briefcase, desc: 'Property management' },
+  { id: 'alquiler', name: 'Alquiler Residencial', icon: Building2 },
+  { id: 'str', name: 'STR / Vacacional', icon: Hotel },
+  { id: 'coliving', name: 'Coliving', icon: Home },
+  { id: 'flipping', name: 'House Flipping', icon: Hammer },
+  { id: 'construccion', name: 'Construcción', icon: Hammer },
+  { id: 'comunidades', name: 'Comunidades', icon: Shield },
+  { id: 'servicios', name: 'Servicios Pro', icon: Briefcase },
+];
+
+// Add-ons disponibles
+const ADDONS = [
+  { id: 'signatures', name: 'Pack 10 Firmas', price: 15, desc: 'Firmas digitales adicionales' },
+  { id: 'storage', name: 'Pack 10GB Storage', price: 5, desc: 'Almacenamiento extra' },
+  { id: 'ai', name: 'Pack IA Avanzada', price: 10, desc: '50K tokens IA/mes' },
+  { id: 'sms', name: 'Pack 50 SMS', price: 8, desc: 'Notificaciones SMS' },
+  { id: 'whitelabel', name: 'White-label', price: 49, desc: 'Tu marca, tu dominio' },
+  { id: 'api', name: 'Acceso API', price: 29, desc: 'Integraciones personalizadas' },
 ];
 
 interface PlanData {
@@ -48,17 +58,17 @@ interface PlanData {
 const plans: PlanData[] = [
   {
     name: 'Starter',
-    price: '€29',
+    price: '€35',
     period: '/mes',
-    yearlyPrice: '€290/año',
+    yearlyPrice: '€350/año',
     yearlySavings: '2 meses gratis',
     properties: '1-5 propiedades',
-    costPerProperty: '€5.80/prop',
+    costPerProperty: '€7/prop',
     verticales: 1,
     verticalesDesc: '1 vertical a elegir',
     limits: {
       users: '1 usuario',
-      signatures: '3 firmas/mes',
+      signatures: '2 firmas/mes',
       storage: '1 GB',
       ai: 'No incluido',
       sms: 'No incluido',
@@ -75,23 +85,23 @@ const plans: PlanData[] = [
     ],
     vsCompetition: {
       text: 'Homming cobra €59 por lo mismo',
-      savings: '-51%',
+      savings: '-41%',
     },
   },
   {
     name: 'Professional',
-    price: '€49',
+    price: '€59',
     period: '/mes',
-    yearlyPrice: '€490/año',
+    yearlyPrice: '€590/año',
     yearlySavings: '2 meses gratis',
     properties: '6-25 propiedades',
-    costPerProperty: '€1.96/prop',
+    costPerProperty: '€2.36/prop',
     verticales: 3,
     verticalesDesc: 'Hasta 3 verticales',
     popular: true,
     limits: {
       users: '3 usuarios',
-      signatures: '10 firmas/mes',
+      signatures: '5 firmas/mes',
       storage: '5 GB',
       ai: '5K tokens/mes',
       sms: 'No incluido',
@@ -109,25 +119,25 @@ const plans: PlanData[] = [
     ],
     vsCompetition: {
       text: 'Homming €79 = 1 vertical. Tú: 3',
-      savings: '-38%',
+      savings: '-25%',
     },
   },
   {
     name: 'Business',
-    price: '€99',
+    price: '€129',
     period: '/mes',
-    yearlyPrice: '€990/año',
+    yearlyPrice: '€1.290/año',
     yearlySavings: '2 meses gratis',
     properties: '26-100 propiedades',
-    costPerProperty: '€0.99/prop',
+    costPerProperty: '€1.29/prop',
     verticales: 7,
     verticalesDesc: 'Los 7 verticales',
     limits: {
       users: '10 usuarios',
-      signatures: '25 firmas/mes',
+      signatures: '15 firmas/mes',
       storage: '20 GB',
       ai: '50K tokens/mes',
-      sms: '50 SMS/mes',
+      sms: '25 SMS/mes',
       api: true,
       whiteLabel: false,
       support: 'Prioritario + Gestor',
@@ -135,39 +145,39 @@ const plans: PlanData[] = [
     features: [
       'Todo de Professional +',
       'TODOS los 7 verticales',
-      'API completa',
+      'API completa incluida',
       'Personalización de marca',
       'CRM integrado',
       'Automatizaciones',
       'Gestor de cuenta dedicado',
     ],
     vsCompetition: {
-      text: 'Homming €99 = 50 props. Tú: 100',
-      savings: '2x props',
+      text: 'Homming €159 = 50 props. Tú: 100',
+      savings: '-19%',
     },
   },
   {
     name: 'Enterprise',
-    price: 'A cotizar',
-    period: '',
-    yearlyPrice: 'Descuento anual',
+    price: '€299',
+    period: '/mes',
+    yearlyPrice: '€2.990/año',
     properties: '+100 propiedades',
-    costPerProperty: 'Personalizado',
+    costPerProperty: 'Desde €0.50/prop',
     verticales: 7,
     verticalesDesc: '7 verticales + Custom',
     limits: {
       users: 'Ilimitados',
-      signatures: 'Ilimitadas',
-      storage: 'Ilimitado',
-      ai: 'Ilimitado',
-      sms: 'Ilimitados',
+      signatures: '50 firmas/mes',
+      storage: '50 GB',
+      ai: '100K tokens/mes',
+      sms: '100 SMS/mes',
       api: true,
       whiteLabel: true,
       support: '24/7 + Account Manager',
     },
     features: [
       'Todo de Business +',
-      'White-label completo',
+      'White-label incluido',
       'Desarrollos a medida',
       'Migración asistida',
       'SLA 99.9% garantizado',
@@ -185,12 +195,12 @@ const plans: PlanData[] = [
 const competitorComparison = [
   { feature: 'Verticales de negocio', inmova: '7 verticales', homming: '1 (solo alquiler)', rentger: '1-2 verticales' },
   { feature: 'Propiedades (plan medio)', inmova: 'Hasta 100', homming: 'Hasta 50', rentger: 'Hasta 50' },
-  { feature: 'Precio plan medio', inmova: '€99/mes', homming: '€99-159/mes', rentger: '€89-149/mes' },
-  { feature: 'Firmas digitales', inmova: 'Incluidas', homming: 'Limitadas (120/año)', rentger: 'Limitadas' },
+  { feature: 'Precio plan medio', inmova: '€129/mes', homming: '€159/mes', rentger: '€149/mes' },
+  { feature: 'Firmas digitales', inmova: 'Incluidas + Packs', homming: 'Limitadas (120/año)', rentger: 'Limitadas' },
   { feature: 'IA integrada', inmova: '✅ Sí', homming: '❌ No', rentger: '❌ No' },
   { feature: 'Multi-vertical', inmova: '✅ Sí', homming: '❌ No', rentger: '❌ No' },
-  { feature: 'API abierta', inmova: '✅ Business+', homming: '❌ Solo Enterprise', rentger: '❌ Solo Enterprise' },
-  { feature: 'White-label', inmova: '✅ Enterprise', homming: '❌ No', rentger: '❌ No' },
+  { feature: 'API abierta', inmova: '✅ Business+ o Add-on', homming: '❌ Solo Enterprise', rentger: '❌ Solo Enterprise' },
+  { feature: 'White-label', inmova: '✅ Enterprise o Add-on', homming: '❌ No', rentger: '❌ No' },
 ];
 
 export function PricingSection() {
@@ -200,7 +210,7 @@ export function PricingSection() {
         {/* Header */}
         <div className="text-center mb-12">
           <Badge className="mb-4 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200 px-4 py-2">
-            7 Verticales · +15 Módulos · Precios Transparentes
+            7 Verticales · Precios Transparentes · Add-ons Flexibles
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
             Más Verticales. Menos Precio.
@@ -334,13 +344,47 @@ export function PricingSection() {
                     className={`w-full ${plan.popular ? 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700' : ''}`}
                     variant={plan.popular ? 'default' : 'outline'}
                   >
-                    {plan.price === 'A cotizar' ? 'Contactar' : 'Empezar Gratis'}
+                    Empezar Gratis
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </Link>
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* Add-ons Section */}
+        <div className="max-w-4xl mx-auto mb-16">
+          <div className="text-center mb-8">
+            <Badge className="mb-3 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 border-purple-200">
+              <Zap className="h-3 w-3 mr-1 inline" />
+              Mejoras Opcionales
+            </Badge>
+            <h3 className="text-2xl font-bold text-gray-800">
+              ¿Necesitas más? Añade lo que necesites
+            </h3>
+            <p className="text-gray-600 mt-2">
+              Paga solo por lo que uses. Sin compromisos.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-4">
+            {ADDONS.map((addon) => (
+              <div key={addon.id} className="bg-white p-4 rounded-xl border-2 border-gray-100 hover:border-purple-300 transition-all">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold text-gray-800">{addon.name}</span>
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+                    €{addon.price}/mes
+                  </Badge>
+                </div>
+                <p className="text-sm text-gray-500">{addon.desc}</p>
+              </div>
+            ))}
+          </div>
+          
+          <p className="text-center text-sm text-gray-500 mt-4">
+            Los add-ons se pueden añadir a cualquier plan en cualquier momento
+          </p>
         </div>
 
         {/* Tabla Comparativa vs Competencia */}
@@ -384,7 +428,7 @@ export function PricingSection() {
         {/* CTA Final */}
         <div className="text-center mt-12">
           <p className="text-lg text-gray-700 mb-4">
-            ¿Más de 100 propiedades? ¿Necesitas white-label?
+            ¿Más de 100 propiedades? ¿Necesitas personalización?
           </p>
           <Link href="/contacto">
             <Button size="lg" variant="outline" className="border-indigo-600 text-indigo-600 hover:bg-indigo-50">

@@ -1,31 +1,39 @@
 /**
- * Seed: Subscription Plans con Límites de Uso y Verticales
+ * Seed: Subscription Plans con Límites de Uso, Verticales y Add-ons
+ * 
+ * ESTRATEGIA: Todos los planes con margen >70% + Add-ons opcionales
  * 
  * ANÁLISIS DE COSTOS DETALLADO (ver ANALISIS_COSTOS_ESCALABLES.md):
  * 
  * Precios de Proveedores:
- * - Signaturit: €1.00/firma simple, €2.50/firma avanzada
+ * - Signaturit: €1.00/firma simple
  * - AWS S3: €0.023/GB/mes
- * - Claude IA: €4.70/1M tokens (~€0.0047/1K tokens)
+ * - Claude IA: €4.70/1M tokens (~€0.005/1K tokens)
  * - Twilio SMS: €0.075/SMS
  * 
- * COSTOS POR PLAN:
+ * NUEVOS PRECIOS CON MARGEN >70%:
  * ┌─────────────────┬────────┬──────────┬─────────┬─────────┬─────────┬───────────┬────────┐
  * │ Plan            │ Precio │ Firmas   │ Storage │ IA      │ SMS     │ COSTO     │ MARGEN │
  * ├─────────────────┼────────┼──────────┼─────────┼─────────┼─────────┼───────────┼────────┤
  * │ FREE            │ €0     │ 0=€0     │ 0.5=€0  │ 100=€0  │ 0=€0    │ €0.01     │ -100%  │
- * │ STARTER €29     │ €29    │ 3=€3     │ 1=€0.02 │ 0=€0    │ 0=€0    │ €3.02     │ 90% ✅ │
- * │ PROFESSIONAL €49│ €49    │ 10=€10   │ 5=€0.12 │ 5K=€0.02│ 0=€0    │ €10.14    │ 79% ✅ │
- * │ BUSINESS €99    │ €99    │ 25=€25   │ 20=€0.46│ 50K=€0.2│ 50=€3.75│ €29.45    │ 70% ✅ │
- * │ ENTERPRISE      │ A cot. │ 100=€100 │ 100=€2.3│ 200K=€1 │ 200=€15 │ €118.24   │ Variabl│
+ * │ STARTER €35     │ €35    │ 2=€2     │ 1=€0.02 │ 0=€0    │ 0=€0    │ €2.04     │ 94% ✅ │
+ * │ PROFESSIONAL €59│ €59    │ 5=€5     │ 5=€0.12 │ 5K=€0.02│ 0=€0    │ €5.14     │ 91% ✅ │
+ * │ BUSINESS €129   │ €129   │ 15=€15   │ 20=€0.46│ 50K=€0.2│ 25=€1.88│ €17.58    │ 86% ✅ │
+ * │ ENTERPRISE €299 │ €299   │ 50=€50   │ 50=€1.15│ 100K=€0.5│100=€7.5│ €59.12    │ 80% ✅ │
  * └─────────────────┴────────┴──────────┴─────────┴─────────┴─────────┴───────────┴────────┘
  * 
- * NOTA ENTERPRISE: Cotizar mínimo €250/mes para mantener margen >50%
+ * ADD-ONS DISPONIBLES (margen 50-95%):
+ * - Pack 10 Firmas: €15/mes (costo €10, margen 33%)
+ * - Pack 10GB Storage: €5/mes (costo €0.23, margen 95%)
+ * - Pack IA 50K tokens: €10/mes (costo €0.25, margen 97%)
+ * - Pack 50 SMS: €8/mes (costo €3.75, margen 53%)
+ * - White-label: €49/mes (costo ~€5, margen 90%)
+ * - API Access: €29/mes (costo ~€0, margen 100%)
  * 
  * Estrategia Competitiva vs Homming/Rentger:
  * - Homming: 1 vertical (solo alquiler), €59-279/mes
  * - Rentger: 1-2 verticales, €39-149/mes
- * - INMOVA: 1-7 verticales según plan, €29-99/mes (mismo precio, 3-7x más verticales)
+ * - INMOVA: 1-7 verticales según plan, €35-299/mes (mismo precio o menos, 3-7x más verticales)
  * 
  * Ejecutar: npx tsx prisma/seed-subscription-plans.ts
  */
@@ -100,8 +108,9 @@ async function main() {
   console.log('✅ Plan FREE:', planFree.nombre, '| 1 vertical | Demo');
 
   // ═══════════════════════════════════════════════════════════════
-  // PLAN STARTER - €29/mes (1-5 propiedades, 1 vertical)
-  // Competitivo: -51% vs Homming (€59)
+  // PLAN STARTER - €35/mes (1-5 propiedades, 1 vertical)
+  // Margen: 94% | Competitivo: -41% vs Homming (€59)
+  // Costo: 2 firmas × €1 + 1GB × €0.02 = €2.04
   // ═══════════════════════════════════════════════════════════════
   
   const starterModulos = [
@@ -112,11 +121,11 @@ async function main() {
   const planStarter = await prisma.subscriptionPlan.upsert({
     where: { id: 'plan-starter' },
     update: {
-      precioMensual: 29,
+      precioMensual: 35,
       maxUsuarios: 1,
       maxPropiedades: 5,
-      descripcion: '1-5 propiedades. 1 VERTICAL a elegir. -51% vs Homming (€59). Ideal para propietarios particulares.',
-      signaturesIncludedMonth: 3,
+      descripcion: '1-5 propiedades. 1 VERTICAL a elegir. -41% vs Homming (€59). Ideal para propietarios particulares.',
+      signaturesIncludedMonth: 2,  // Reducido de 3 a 2
       storageIncludedGB: 1,
       aiTokensIncludedMonth: 0,
       smsIncludedMonth: 0,
@@ -126,31 +135,32 @@ async function main() {
       id: 'plan-starter',
       nombre: 'Plan Starter',
       tier: SubscriptionTier.STARTER,
-      descripcion: '1-5 propiedades. 1 VERTICAL a elegir. -51% vs Homming (€59). Ideal para propietarios particulares.',
-      precioMensual: 29,
+      descripcion: '1-5 propiedades. 1 VERTICAL a elegir. -41% vs Homming (€59). Ideal para propietarios particulares.',
+      precioMensual: 35,
       maxUsuarios: 1,
       maxPropiedades: 5,
       
-      signaturesIncludedMonth: 3,
+      signaturesIncludedMonth: 2,  // Reducido para mejor margen
       storageIncludedGB: 1,
       aiTokensIncludedMonth: 0,
       smsIncludedMonth: 0,
       
-      extraSignaturePrice: 2.00,
-      extraStorageGBPrice: 0.05,
-      extraAITokensPrice: 0.01,
-      extraSMSPrice: 0.10,
+      extraSignaturePrice: 1.50,  // Pack 10 firmas = €15
+      extraStorageGBPrice: 0.50,  // Pack 10GB = €5
+      extraAITokensPrice: 0.0002, // Pack 50K = €10
+      extraSMSPrice: 0.16,        // Pack 50 SMS = €8
       
       modulosIncluidos: starterModulos,
       activo: true,
     },
   });
   console.log('✅ Plan STARTER:', planStarter.nombre);
-  console.log(`   📊 €29/mes | 1-5 props | 1 VERTICAL | -51% vs Homming`);
+  console.log(`   📊 €35/mes | 1-5 props | 1 VERTICAL | Costo €2.04 | Margen 94%`);
 
   // ═══════════════════════════════════════════════════════════════
-  // PLAN PROFESSIONAL - €49/mes (6-25 propiedades, HASTA 3 verticales)
-  // Competitivo: -38% vs Homming (€79), pero con 3x más verticales
+  // PLAN PROFESSIONAL - €59/mes (6-25 propiedades, HASTA 3 verticales)
+  // Margen: 91% | Competitivo: -25% vs Homming (€79), pero con 3x más verticales
+  // Costo: 5 firmas × €1 + 5GB × €0.02 + 5K tokens × €0.005 = €5.14
   // ═══════════════════════════════════════════════════════════════
   
   const professionalModulos = [
@@ -162,11 +172,11 @@ async function main() {
   const planProfessional = await prisma.subscriptionPlan.upsert({
     where: { id: 'plan-professional' },
     update: {
-      precioMensual: 49,
+      precioMensual: 59,
       maxUsuarios: 3,
       maxPropiedades: 25,
-      descripcion: '6-25 propiedades. HASTA 3 VERTICALES (Alquiler + STR + Coliving). -38% vs Homming pero 3x más verticales.',
-      signaturesIncludedMonth: 10,
+      descripcion: '6-25 propiedades. HASTA 3 VERTICALES (Alquiler + STR + Coliving). -25% vs Homming pero 3x más verticales.',
+      signaturesIncludedMonth: 5,   // Reducido de 10 a 5
       storageIncludedGB: 5,
       aiTokensIncludedMonth: 5000,
       smsIncludedMonth: 0,
@@ -176,31 +186,32 @@ async function main() {
       id: 'plan-professional',
       nombre: 'Plan Professional',
       tier: SubscriptionTier.PROFESSIONAL,
-      descripcion: '6-25 propiedades. HASTA 3 VERTICALES (Alquiler + STR + Coliving). -38% vs Homming pero 3x más verticales.',
-      precioMensual: 49,
+      descripcion: '6-25 propiedades. HASTA 3 VERTICALES (Alquiler + STR + Coliving). -25% vs Homming pero 3x más verticales.',
+      precioMensual: 59,
       maxUsuarios: 3,
       maxPropiedades: 25,
       
-      signaturesIncludedMonth: 10,
+      signaturesIncludedMonth: 5,   // Reducido para mejor margen
       storageIncludedGB: 5,
       aiTokensIncludedMonth: 5000,
       smsIncludedMonth: 0,
       
-      extraSignaturePrice: 1.80,
-      extraStorageGBPrice: 0.04,
-      extraAITokensPrice: 0.008,
-      extraSMSPrice: 0.09,
+      extraSignaturePrice: 1.50,  // Pack 10 firmas = €15
+      extraStorageGBPrice: 0.50,  // Pack 10GB = €5
+      extraAITokensPrice: 0.0002, // Pack 50K = €10
+      extraSMSPrice: 0.16,        // Pack 50 SMS = €8
       
       modulosIncluidos: professionalModulos,
       activo: true,
     },
   });
   console.log('✅ Plan PROFESSIONAL:', planProfessional.nombre);
-  console.log(`   📊 €49/mes | 6-25 props | 3 VERTICALES | -38% vs Homming | 3x más verticales`);
+  console.log(`   📊 €59/mes | 6-25 props | 3 VERTICALES | Costo €5.14 | Margen 91%`);
 
   // ═══════════════════════════════════════════════════════════════
-  // PLAN BUSINESS - €99/mes (26-100 propiedades, LOS 7 VERTICALES)
-  // Competitivo: 2x más propiedades que Homming, 7x más verticales
+  // PLAN BUSINESS - €129/mes (26-100 propiedades, LOS 7 VERTICALES)
+  // Margen: 86% | Competitivo: -19% vs Homming (€159)
+  // Costo: 15 firmas × €1 + 20GB × €0.02 + 50K × €0.005 + 25 SMS × €0.075 = €17.58
   // ═══════════════════════════════════════════════════════════════
   
   const businessModulos = [
@@ -213,45 +224,46 @@ async function main() {
   const planBusiness = await prisma.subscriptionPlan.upsert({
     where: { id: 'plan-business' },
     update: {
-      precioMensual: 99,
+      precioMensual: 129,
       maxUsuarios: 10,
       maxPropiedades: 100,
-      descripcion: '26-100 propiedades. LOS 7 VERTICALES. 2x más propiedades que Homming. API completa y CRM integrado.',
-      signaturesIncludedMonth: 25,
+      descripcion: '26-100 propiedades. LOS 7 VERTICALES. -19% vs Homming (€159). API completa y CRM integrado.',
+      signaturesIncludedMonth: 15,   // Reducido de 25 a 15
       storageIncludedGB: 20,
       aiTokensIncludedMonth: 50000,
-      smsIncludedMonth: 50,
+      smsIncludedMonth: 25,          // Reducido de 50 a 25
       modulosIncluidos: businessModulos,
     },
     create: {
       id: 'plan-business',
       nombre: 'Plan Business',
       tier: SubscriptionTier.BUSINESS,
-      descripcion: '26-100 propiedades. LOS 7 VERTICALES. 2x más propiedades que Homming. API completa y CRM integrado.',
-      precioMensual: 99,
+      descripcion: '26-100 propiedades. LOS 7 VERTICALES. -19% vs Homming (€159). API completa y CRM integrado.',
+      precioMensual: 129,
       maxUsuarios: 10,
       maxPropiedades: 100,
       
-      signaturesIncludedMonth: 25,
+      signaturesIncludedMonth: 15,   // Reducido para mejor margen
       storageIncludedGB: 20,
       aiTokensIncludedMonth: 50000,
-      smsIncludedMonth: 50,
+      smsIncludedMonth: 25,          // Reducido para mejor margen
       
-      extraSignaturePrice: 1.50,
-      extraStorageGBPrice: 0.03,
-      extraAITokensPrice: 0.007,
-      extraSMSPrice: 0.08,
+      extraSignaturePrice: 1.50,  // Pack 10 firmas = €15
+      extraStorageGBPrice: 0.50,  // Pack 10GB = €5
+      extraAITokensPrice: 0.0002, // Pack 50K = €10
+      extraSMSPrice: 0.16,        // Pack 50 SMS = €8
       
       modulosIncluidos: businessModulos,
       activo: true,
     },
   });
   console.log('✅ Plan BUSINESS:', planBusiness.nombre);
-  console.log(`   📊 €99/mes | 26-100 props | 7 VERTICALES | 2x props vs Homming | API + CRM`);
+  console.log(`   📊 €129/mes | 26-100 props | 7 VERTICALES | Costo €17.58 | Margen 86%`);
 
   // ═══════════════════════════════════════════════════════════════
-  // PLAN ENTERPRISE - A cotizar (+100 propiedades, 7 verticales + custom)
-  // Para grandes gestoras y promotoras. White-label, SLA, desarrollos a medida.
+  // PLAN ENTERPRISE - €299/mes (+100 propiedades, 7 verticales + custom)
+  // Margen: 80% | White-label, SLA, desarrollos a medida incluidos
+  // Costo: 50 firmas × €1 + 50GB × €0.02 + 100K × €0.005 + 100 SMS × €0.075 = €59.12
   // ═══════════════════════════════════════════════════════════════
   
   const enterpriseModulos = [
@@ -265,14 +277,14 @@ async function main() {
   const planEnterprise = await prisma.subscriptionPlan.upsert({
     where: { id: 'plan-enterprise' },
     update: {
-      precioMensual: 199,
+      precioMensual: 299,
       maxUsuarios: 999,
       maxPropiedades: 9999,
       descripcion: '+100 propiedades. 7 VERTICALES + CUSTOM. White-label, SLA 99.9%, desarrollos a medida, soporte 24/7.',
-      signaturesIncludedMonth: 100,
-      storageIncludedGB: 100,
-      aiTokensIncludedMonth: 200000,
-      smsIncludedMonth: 200,
+      signaturesIncludedMonth: 50,    // Reducido de 100 a 50
+      storageIncludedGB: 50,          // Reducido de 100 a 50
+      aiTokensIncludedMonth: 100000,  // Reducido de 200K a 100K
+      smsIncludedMonth: 100,          // Reducido de 200 a 100
       modulosIncluidos: enterpriseModulos,
     },
     create: {
@@ -280,26 +292,26 @@ async function main() {
       nombre: 'Plan Enterprise',
       tier: SubscriptionTier.ENTERPRISE,
       descripcion: '+100 propiedades. 7 VERTICALES + CUSTOM. White-label, SLA 99.9%, desarrollos a medida, soporte 24/7.',
-      precioMensual: 199,
+      precioMensual: 299,
       maxUsuarios: 999,
       maxPropiedades: 9999,
       
-      signaturesIncludedMonth: 100,
-      storageIncludedGB: 100,
-      aiTokensIncludedMonth: 200000,
-      smsIncludedMonth: 200,
+      signaturesIncludedMonth: 50,    // Reducido para mejor margen
+      storageIncludedGB: 50,          // Reducido para mejor margen
+      aiTokensIncludedMonth: 100000,  // Reducido para mejor margen
+      smsIncludedMonth: 100,          // Reducido para mejor margen
       
-      extraSignaturePrice: 1.50,
-      extraStorageGBPrice: 0.03,
-      extraAITokensPrice: 0.006,
-      extraSMSPrice: 0.08,
+      extraSignaturePrice: 1.50,  // Pack 10 firmas = €15
+      extraStorageGBPrice: 0.50,  // Pack 10GB = €5
+      extraAITokensPrice: 0.0002, // Pack 50K = €10
+      extraSMSPrice: 0.16,        // Pack 50 SMS = €8
       
       modulosIncluidos: enterpriseModulos,
       activo: true,
     },
   });
   console.log('✅ Plan ENTERPRISE:', planEnterprise.nombre);
-  console.log(`   📊 A cotizar | +100 props | 7 VERTICALES + CUSTOM | White-label | SLA 99.9%`);
+  console.log(`   📊 €299/mes | +100 props | 7 VERTICALES + CUSTOM | Costo €59.12 | Margen 80%`);
 
   console.log('\n✨ Seed completado!\n');
   
@@ -326,10 +338,10 @@ async function main() {
   
   const plansSummary = [
     { name: 'FREE', price: 0, props: '1', verts: 1, users: 1, api: '❌', comp: 'Trial 30 días' },
-    { name: 'STARTER', price: 29, props: '1-5', verts: 1, users: 1, api: '❌', comp: '-51% vs Homming (€59)' },
-    { name: 'PROFESSIONAL', price: 49, props: '6-25', verts: 3, users: 3, api: '❌', comp: '-38%, 3x verticales' },
-    { name: 'BUSINESS', price: 99, props: '26-100', verts: 7, users: 10, api: '✅', comp: '2x props, 7x verticales' },
-    { name: 'ENTERPRISE', price: 0, props: '100+', verts: 7, users: '∞', api: '✅', comp: 'White-label, SLA' },
+    { name: 'STARTER', price: 35, props: '1-5', verts: 1, users: 1, api: '❌', comp: '-41% vs Homming (€59)' },
+    { name: 'PROFESSIONAL', price: 59, props: '6-25', verts: 3, users: 3, api: '❌', comp: '-25%, 3x verticales' },
+    { name: 'BUSINESS', price: 129, props: '26-100', verts: 7, users: 10, api: '✅', comp: '-19% vs Homming €159' },
+    { name: 'ENTERPRISE', price: 299, props: '100+', verts: 7, users: '∞', api: '✅', comp: 'White-label, SLA' },
   ];
   
   plansSummary.forEach(plan => {
@@ -341,30 +353,37 @@ async function main() {
   
   console.log('───────────────────────────────────────────────────────────────────────────────────────');
   console.log('');
-  console.log('💰 ANÁLISIS DE COSTOS Y MÁRGENES:');
+  console.log('💰 ANÁLISIS DE COSTOS Y MÁRGENES (TODOS >70%):');
   console.log('');
-  console.log('   Precios proveedores: Signaturit €1/firma, S3 €0.023/GB, Claude €0.0047/1K tokens, Twilio €0.075/SMS');
+  console.log('   Precios proveedores: Signaturit €1/firma, S3 €0.02/GB, Claude €0.005/1K, Twilio €0.075/SMS');
   console.log('');
   console.log('   Plan           | Precio | Firmas  | Storage | IA      | SMS    | COSTO   | MARGEN');
   console.log('   ───────────────┼────────┼─────────┼─────────┼─────────┼────────┼─────────┼────────');
-  console.log('   STARTER        | €29    | 3=€3    | 1GB=€0  | 0       | 0      | €3.02   | 90% ✅');
-  console.log('   PROFESSIONAL   | €49    | 10=€10  | 5GB=€0.1| 5K=€0   | 0      | €10.14  | 79% ✅');
-  console.log('   BUSINESS       | €99    | 25=€25  | 20G=€0.5| 50K=€0.2| 50=€3.8| €29.45  | 70% ✅');
-  console.log('   ENTERPRISE     | Cotizar| 100=€100| 100G=€2 | 200K=€1 | 200=€15| €118.24 | 50%+ *');
+  console.log('   STARTER        | €35    | 2=€2    | 1GB=€0  | 0       | 0      | €2.04   | 94% ✅');
+  console.log('   PROFESSIONAL   | €59    | 5=€5    | 5GB=€0.1| 5K=€0   | 0      | €5.14   | 91% ✅');
+  console.log('   BUSINESS       | €129   | 15=€15  | 20G=€0.5| 50K=€0.2| 25=€1.9| €17.58  | 86% ✅');
+  console.log('   ENTERPRISE     | €299   | 50=€50  | 50G=€1  | 100K=€0.5|100=€7.5| €59.12  | 80% ✅');
   console.log('');
-  console.log('   * Enterprise: Cotizar mínimo €250/mes para margen >50%');
+  console.log('🛒 ADD-ONS DISPONIBLES (para quienes necesiten más):');
+  console.log('   • Pack 10 Firmas: €15/mes (costo €10, margen 33%)');
+  console.log('   • Pack 10GB Storage: €5/mes (costo €0.23, margen 95%)');
+  console.log('   • Pack IA 50K tokens: €10/mes (costo €0.25, margen 97%)');
+  console.log('   • Pack 50 SMS: €8/mes (costo €3.75, margen 53%)');
+  console.log('   • White-label: €49/mes (costo ~€5, margen 90%)');
+  console.log('   • API Access: €29/mes (costo ~€0, margen 100%)');
   console.log('');
   console.log('📈 VENTAJA COMPETITIVA CLAVE:');
-  console.log('   • Mismo precio que competencia = 3-7x más verticales');
-  console.log('   • Business €99/mes incluye TODO lo que Homming cobra €279/mes');
+  console.log('   • Mismo precio o menor que competencia = 3-7x más verticales');
+  console.log('   • Business €129/mes incluye TODO lo que Homming cobra €159/mes');
   console.log('   • IA integrada en Professional y superiores');
   console.log('   • API disponible desde Business (Homming solo Enterprise)');
-  console.log('   • Márgenes 70-90% garantizados con límites de uso');
+  console.log('   • TODOS los planes con margen >70% garantizado');
+  console.log('   • Add-ons flexibles para quienes necesiten más');
   console.log('');
   console.log('🛡️ CONTROL DE COSTOS: Ver CONTROL_COSTOS_IMPLEMENTADO.md');
   console.log('   • Límites estrictos por plan');
   console.log('   • Tracking automático de uso');
-  console.log('   • Cobro por exceso si supera límites');
+  console.log('   • Add-ons para necesidades extra');
   console.log('');
   console.log('═══════════════════════════════════════════════════════════════════════════════════════');
 }
