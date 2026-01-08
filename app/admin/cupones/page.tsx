@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { 
   Card, 
   CardContent, 
@@ -852,6 +853,7 @@ export default function AdminCuponesPage() {
   }
 
   return (
+    <AuthenticatedLayout>
     <div className="container mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -1174,5 +1176,6 @@ export default function AdminCuponesPage() {
       {/* View Dialog */}
       <CouponViewDialog />
     </div>
+    </AuthenticatedLayout>
   );
 }

@@ -54,7 +54,7 @@ import {
   Code,
   Leaf,
   TrendingUp,
-  Eye3d,
+  Eye,
   RefreshCw,
   Star,
   DollarSign,
@@ -235,7 +235,7 @@ export default function AdminAddonsPage() {
     if (codigo.includes('api')) return Code;
     if (codigo.includes('esg')) return Leaf;
     if (codigo.includes('pricing')) return TrendingUp;
-    if (codigo.includes('tour')) return Eye3d;
+    if (codigo.includes('tour')) return Eye;
     return Package;
   };
 

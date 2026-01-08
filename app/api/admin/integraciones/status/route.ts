@@ -50,30 +50,30 @@ export async function GET(req: NextRequest) {
       lastChecked: new Date().toISOString(),
     };
 
-    // Verificar PostgreSQL
+    // Verificar PostgreSQL - siempre intentar conectar
     try {
+      const { prisma } = await import('@/lib/db');
+      await prisma.$queryRaw`SELECT 1`;
+      statuses.postgresql = {
+        status: 'connected',
+        lastChecked: new Date().toISOString(),
+        details: 'Base de datos conectada correctamente',
+      };
+    } catch (error: any) {
       const dbUrl = process.env.DATABASE_URL;
-      if (dbUrl && !dbUrl.includes('dummy-build-host')) {
-        // Intentar una consulta simple
-        const { prisma } = await import('@/lib/db');
-        await prisma.$queryRaw`SELECT 1`;
-        statuses.postgresql = {
-          status: 'connected',
-          lastChecked: new Date().toISOString(),
-        };
-      } else {
+      if (!dbUrl || dbUrl.includes('dummy-build-host') || dbUrl.includes('placeholder')) {
         statuses.postgresql = {
           status: 'not_configured',
           lastChecked: new Date().toISOString(),
-          details: 'DATABASE_URL no configurada o es placeholder',
+          details: 'DATABASE_URL no configurada',
+        };
+      } else {
+        statuses.postgresql = {
+          status: 'error',
+          lastChecked: new Date().toISOString(),
+          details: error.message?.substring(0, 100) || 'Error de conexión',
         };
       }
-    } catch (error: any) {
-      statuses.postgresql = {
-        status: 'error',
-        lastChecked: new Date().toISOString(),
-        details: error.message,
-      };
     }
 
     // Verificar Signaturit
