@@ -149,6 +149,7 @@ const plans: PlanData[] = [
     price: '€299',
     period: '/mes',
     yearlyPrice: '€2.990/año',
+    yearlySavings: '2 meses gratis',
     properties: '+100 propiedades',
     costPerProperty: 'Desde €0.50/prop',
     verticales: 7,
@@ -225,9 +226,9 @@ export function PricingSection() {
         </div>
 
         {/* Plans Grid */}
-        <div className="grid md:grid-cols-4 gap-6 max-w-7xl mx-auto mb-16">
+        <div className="grid md:grid-cols-4 gap-6 max-w-7xl mx-auto mb-16 items-stretch">
           {plans.map((plan, i) => (
-            <Card key={i} className={`group hover:shadow-2xl transition-all ${
+            <Card key={i} className={`group hover:shadow-2xl transition-all flex flex-col ${
               plan.popular 
                 ? 'border-indigo-500 border-2 shadow-xl relative scale-105' 
                 : 'hover:border-indigo-300 border-2'
@@ -281,7 +282,7 @@ export function PricingSection() {
                 </div>
               </CardHeader>
 
-              <CardContent className="pt-0">
+              <CardContent className="pt-0 flex-grow flex flex-col">
                 {/* Límites */}
                 <div className="mb-4 p-2 bg-gray-50 rounded-lg text-xs space-y-1">
                   <div className="flex justify-between">
@@ -311,7 +312,7 @@ export function PricingSection() {
                 </div>
 
                 {/* Features */}
-                <ul className="space-y-2 mb-4">
+                <ul className="space-y-2 mb-4 flex-grow">
                   {plan.features.map((feature, j) => (
                     <li key={j} className="flex items-start gap-2 text-sm">
                       <CheckCircle className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
@@ -320,15 +321,17 @@ export function PricingSection() {
                   ))}
                 </ul>
 
-                {/* CTA */}
-                <Link href="/register" className="w-full block">
-                  <Button 
-                    className="w-full font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white"
-                  >
-                    Empezar Gratis
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </Link>
+                {/* CTA - Alineado al final */}
+                <div className="mt-auto">
+                  <Link href="/register" className="w-full block">
+                    <Button 
+                      className="w-full font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white"
+                    >
+                      Probar 30 días gratis
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           ))}

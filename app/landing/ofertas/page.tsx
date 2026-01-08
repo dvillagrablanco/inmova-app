@@ -21,8 +21,8 @@ const ofertas = [
   {
     id: 'starter26',
     code: 'STARTER26',
-    title: '¡Empieza a €17/mes!',
-    subtitle: 'Plan Starter al 50% durante 3 meses',
+    title: '50% de Descuento',
+    subtitle: 'Plan Starter a mitad de precio durante 3 meses',
     description: 'Perfecto para pequeños propietarios y house flippers. Gestión profesional de hasta 5 propiedades con todas las herramientas esenciales.',
     icon: <Sparkles className="h-8 w-8" />,
     gradient: 'from-amber-500 via-orange-500 to-red-500',
@@ -49,8 +49,8 @@ const ofertas = [
   {
     id: 'coliving26',
     code: 'COLIVING26',
-    title: 'Coliving Sin Complicaciones',
-    subtitle: 'Primer mes GRATIS + 20% dto. 6 meses',
+    title: 'Oferta Coliving',
+    subtitle: '30 días gratis + 20% dto. siguientes 6 meses',
     description: 'El plan Professional perfecto para gestores de coliving. Prorrateo automático de suministros, contratos flexibles y portal de residentes.',
     icon: <TrendingUp className="h-8 w-8" />,
     gradient: 'from-green-500 via-emerald-500 to-teal-500',
@@ -71,7 +71,7 @@ const ofertas = [
       'Onboarding personalizado 1:1'
     ],
     validUntil: '31 de Marzo 2026',
-    ctaText: 'Empezar GRATIS',
+    ctaText: 'Probar 30 días gratis',
     ctaHref: '/register?coupon=COLIVING26&plan=professional'
   },
   {
@@ -129,9 +129,9 @@ export default function OfertasPage() {
       {/* Ofertas Grid */}
       <section className="pb-20 px-4">
         <div className="container mx-auto">
-          <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto items-stretch">
             {ofertas.map((oferta) => (
-              <Card id={oferta.id} key={oferta.id} className="relative overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 hover:border-indigo-300 scroll-mt-24">
+              <Card id={oferta.id} key={oferta.id} className="relative overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 hover:border-indigo-300 scroll-mt-24 flex flex-col">
                 {/* Gradient Header */}
                 <div className={`bg-gradient-to-r ${oferta.gradient} p-6 text-white`}>
                   <div className="flex items-center gap-3 mb-4">
@@ -146,7 +146,7 @@ export default function OfertasPage() {
                   <p className="text-white/90 font-semibold">{oferta.subtitle}</p>
                 </div>
 
-                <CardContent className="p-6">
+                <CardContent className="p-6 flex-grow flex flex-col">
                   {/* Precio y Ahorro */}
                   <div className="text-center py-4 border-b mb-4">
                     <div className="flex items-center justify-center gap-4">
@@ -175,7 +175,7 @@ export default function OfertasPage() {
                   <p className="text-gray-600 mb-4 text-sm">{oferta.description}</p>
 
                   {/* Beneficios */}
-                  <ul className="space-y-3 mb-6">
+                  <ul className="space-y-3 mb-6 flex-grow">
                     {oferta.benefits.map((benefit, i) => (
                       <li key={i} className="flex items-start gap-2">
                         <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
@@ -184,19 +184,21 @@ export default function OfertasPage() {
                     ))}
                   </ul>
 
-                  {/* Validez */}
-                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-                    <Clock className="h-4 w-4" />
-                    <span>Válido hasta: {oferta.validUntil}</span>
-                  </div>
+                  {/* Validez y CTA - Alineados al final */}
+                  <div className="mt-auto">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+                      <Clock className="h-4 w-4" />
+                      <span>Válido hasta: {oferta.validUntil}</span>
+                    </div>
 
-                  {/* CTA */}
-                  <Link href={oferta.ctaHref}>
-                    <Button className={`w-full bg-gradient-to-r ${oferta.gradient} text-white font-bold py-6 text-lg hover:opacity-90`}>
-                      {oferta.ctaText}
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </Link>
+                    {/* CTA */}
+                    <Link href={oferta.ctaHref}>
+                      <Button className={`w-full bg-gradient-to-r ${oferta.gradient} text-white font-bold py-6 text-lg hover:opacity-90`}>
+                        {oferta.ctaText}
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </Button>
+                    </Link>
+                  </div>
                 </CardContent>
               </Card>
             ))}

@@ -9,24 +9,26 @@ import { CheckCircle2, ArrowRight, Building2, Users, Briefcase, Crown } from 'lu
 const planes = [
   {
     nombre: 'Starter',
-    precio: 0,
-    periodo: 'Gratis',
+    precio: 35,
+    periodo: '/mes',
     descripcion: 'Perfecto para empezar',
+    anual: '€350/año · 2 meses gratis',
     features: [
       'Hasta 5 propiedades',
       'Gestión básica de inquilinos',
       'Contratos simples',
       'Soporte por email',
     ],
-    cta: 'Empezar Gratis',
+    cta: 'Probar 30 días gratis',
     destacado: false,
     icon: Users,
   },
   {
     nombre: 'Profesional',
-    precio: 49,
+    precio: 59,
     periodo: '/mes',
     descripcion: 'Para propietarios activos',
+    anual: '€590/año · 2 meses gratis',
     features: [
       'Hasta 25 propiedades',
       'Gestión avanzada de inquilinos',
@@ -35,37 +37,39 @@ const planes = [
       'Informes financieros',
       'Soporte prioritario',
     ],
-    cta: 'Probar 14 días gratis',
+    cta: 'Probar 30 días gratis',
     destacado: true,
     icon: Building2,
   },
   {
-    nombre: 'Gestor',
-    precio: 149,
+    nombre: 'Business',
+    precio: 129,
     periodo: '/mes',
     descripcion: 'Para gestores profesionales',
+    anual: '€1.290/año · 2 meses gratis',
     features: [
-      'Propiedades ilimitadas',
+      'Hasta 100 propiedades',
       'Multi-propietario',
       'CRM integrado',
       'API de integración',
-      'White-label disponible',
+      'Los 7 verticales',
       'Account manager dedicado',
     ],
-    cta: 'Contactar Ventas',
+    cta: 'Probar 30 días gratis',
     destacado: false,
     icon: Briefcase,
   },
   {
     nombre: 'Enterprise',
-    precio: 'Personalizado',
-    periodo: '',
+    precio: 299,
+    periodo: '/mes',
     descripcion: 'Para grandes empresas',
+    anual: '€2.990/año · 2 meses gratis',
     features: [
-      'Todo de Gestor',
-      'Infraestructura dedicada',
+      'Todo de Business',
+      'Propiedades ilimitadas',
+      'White-label incluido',
       'SLA garantizado',
-      'Formación in-company',
       'Integraciones personalizadas',
       'Soporte 24/7',
     ],
@@ -92,11 +96,11 @@ export default function PreciosPage() {
 
       {/* Planes */}
       <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
           {planes.map((plan) => (
             <Card 
               key={plan.nombre}
-              className={`relative ${plan.destacado ? 'border-2 border-blue-500 shadow-xl scale-105' : 'border'}`}
+              className={`relative flex flex-col ${plan.destacado ? 'border-2 border-blue-500 shadow-xl scale-105' : 'border'}`}
             >
               {plan.destacado && (
                 <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600">
@@ -109,13 +113,16 @@ export default function PreciosPage() {
                 <p className="text-gray-500 text-sm">{plan.descripcion}</p>
                 <div className="mt-4">
                   <span className="text-4xl font-bold">
-                    {typeof plan.precio === 'number' ? `€${plan.precio}` : plan.precio}
+                    €{plan.precio}
                   </span>
                   <span className="text-gray-500">{plan.periodo}</span>
                 </div>
+                {plan.anual && (
+                  <p className="text-xs text-green-600 font-semibold mt-1">{plan.anual}</p>
+                )}
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 mb-6">
+              <CardContent className="flex-grow flex flex-col">
+                <ul className="space-y-3 mb-6 flex-grow">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-start text-sm">
                       <CheckCircle2 className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
@@ -123,15 +130,17 @@ export default function PreciosPage() {
                     </li>
                   ))}
                 </ul>
-                <Link href={plan.precio === 'Personalizado' ? '/landing/contacto' : '/register'}>
-                  <Button 
-                    className={`w-full ${plan.destacado ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
-                    variant={plan.destacado ? 'default' : 'outline'}
-                  >
-                    {plan.cta}
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
+                <div className="mt-auto">
+                  <Link href={plan.nombre === 'Enterprise' ? '/landing/contacto' : '/register'}>
+                    <Button 
+                      className={`w-full ${plan.destacado ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+                      variant={plan.destacado ? 'default' : 'outline'}
+                    >
+                      {plan.cta}
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           ))}
