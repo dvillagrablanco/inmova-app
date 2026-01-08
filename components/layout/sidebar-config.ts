@@ -128,8 +128,10 @@ export const SECTION_ORDER_BY_ROLE: Record<UserRole, string[]> = {
   super_admin: [
     'favorites',
     'dashboard',
-    'superAdminPlatform', // Prioridad 1
-    'administradorEmpresa',
+    'superAdminPlatform', // Prioridad 1 - Gestión de Plataforma Global
+    'companySelector', // Prioridad 2 - Selector de Empresa
+    'administradorEmpresa', // Prioridad 3 - Gestión de Empresa seleccionada
+    // Las siguientes secciones son opcionales para contexto de empresa
     'analytics',
     'finanzas',
     'operaciones',

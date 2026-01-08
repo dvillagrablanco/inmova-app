@@ -80,6 +80,8 @@ import {
   type UserRole,
   type BusinessVertical,
 } from './sidebar-config';
+import { CompanySelector } from './CompanySelector';
+import { useSelectedCompany } from '@/lib/hooks/admin/useSelectedCompany';
 
 // Mapeo de rutas a códigos de módulos para sistema modular
 const ROUTE_TO_MODULE: Record<string, string> = {
@@ -985,6 +987,9 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [primaryVertical, setPrimaryVertical] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Hook para empresa seleccionada (Super Admin)
+  const { selectedCompany, selectCompany: handleCompanySelect } = useSelectedCompany();
 
   // Cargar vertical principal de la empresa
   useEffect(() => {
@@ -1457,6 +1462,112 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
+            {/* ============================================================== */}
+            {/* SUPER ADMIN - GESTIÓN DE PLATAFORMA (PRIMERO para Super Admin) */}
+            {/* ============================================================== */}
+            {filteredSuperAdminPlatformItems.length > 0 && role === 'super_admin' && (
+              <>
+                <div className="px-2 py-3 mb-2 border-t border-gray-800">
+                  <h3 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">
+                    ⚡ Gestión de Plataforma
+                  </h3>
+                </div>
+                <div className="mb-4">
+                  <button
+                    onClick={() => toggleSection('superAdminPlatform')}
+                    className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-indigo-300 uppercase hover:text-white transition-colors"
+                  >
+                    <span>🌐 Plataforma Global</span>
+                    {expandedSections.superAdminPlatform ? (
+                      <ChevronDown size={16} />
+                    ) : (
+                      <ChevronRight size={16} />
+                    )}
+                  </button>
+                  {expandedSections.superAdminPlatform && (
+                    <div className="space-y-1 mt-1">
+                      {filteredSuperAdminPlatformItems.map((item) => (
+                        <NavItem key={item.href} item={item} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* ============================================================== */}
+            {/* SELECTOR DE EMPRESA Y GESTIÓN (Para Super Admin) */}
+            {/* ============================================================== */}
+            {role === 'super_admin' && filteredAdministradorEmpresaItems.length > 0 && (
+              <>
+                <div className="px-2 py-3 mb-2 border-t border-gray-800">
+                  <h3 className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                    🏢 Gestión de Empresas
+                  </h3>
+                  <p className="text-[9px] text-gray-500 mt-1">
+                    Selecciona una empresa para configurar
+                  </p>
+                </div>
+                
+                {/* Selector de Empresa */}
+                <div className="mb-4 px-2">
+                  <CompanySelector 
+                    onCompanyChange={(company) => {
+                      // Auto-expandir la sección cuando se selecciona empresa
+                      if (company) {
+                        setExpandedSections(prev => ({
+                          ...prev,
+                          administradorEmpresa: true,
+                        }));
+                      }
+                    }}
+                  />
+                </div>
+
+                {/* Gestión de Empresa - Solo visible cuando hay empresa seleccionada */}
+                {selectedCompany && (
+                  <div className="mb-4">
+                    <button
+                      onClick={() => toggleSection('administradorEmpresa')}
+                      className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-emerald-300 uppercase hover:text-white transition-colors"
+                    >
+                      <span>⚙️ Configurar: {selectedCompany.nombre.substring(0, 15)}{selectedCompany.nombre.length > 15 ? '...' : ''}</span>
+                      {expandedSections.administradorEmpresa ? (
+                        <ChevronDown size={16} />
+                      ) : (
+                        <ChevronRight size={16} />
+                      )}
+                    </button>
+                    {expandedSections.administradorEmpresa && (
+                      <div className="space-y-1 mt-1">
+                        {filteredAdministradorEmpresaItems.map((item) => (
+                          <NavItem 
+                            key={item.href} 
+                            item={{
+                              ...item,
+                              // Parametrizar URL con companyId para Super Admin
+                              href: item.href.includes('?') 
+                                ? `${item.href}&companyId=${selectedCompany.id}`
+                                : `${item.href}?companyId=${selectedCompany.id}`,
+                            }} 
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Mensaje cuando no hay empresa seleccionada */}
+                {!selectedCompany && (
+                  <div className="mx-2 mb-4 p-3 bg-gray-800/50 rounded-lg border border-dashed border-gray-700">
+                    <p className="text-xs text-gray-400 text-center">
+                      Selecciona una empresa para ver las opciones de configuración
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+
             {/* VERTICALES DE NEGOCIO - Separador visual */}
             {(filteredAlquilerResidencialItems.length > 0 ||
               filteredStrItems.length > 0 ||
@@ -1898,43 +2009,13 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* SUPER ADMIN - GESTIÓN DE PLATAFORMA (Solo Super Admin) */}
-            {filteredSuperAdminPlatformItems.length > 0 && (
-              <>
-                <div className="px-2 py-3 mb-2 border-t border-gray-800">
-                  <h3 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">
-                    ⚡ Super Admin - Plataforma
-                  </h3>
-                </div>
-                <div className="mb-4">
-                  <button
-                    onClick={() => toggleSection('superAdminPlatform')}
-                    className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-indigo-300 uppercase hover:text-white transition-colors"
-                  >
-                    <span>🔧 Gestión de Plataforma</span>
-                    {expandedSections.superAdminPlatform ? (
-                      <ChevronDown size={16} />
-                    ) : (
-                      <ChevronRight size={16} />
-                    )}
-                  </button>
-                  {expandedSections.superAdminPlatform && (
-                    <div className="space-y-1 mt-1">
-                      {filteredSuperAdminPlatformItems.map((item) => (
-                        <NavItem key={item.href} item={item} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-
-            {/* ADMINISTRACIÓN DE EMPRESA (Admin y Super Admin) */}
-            {filteredAdministradorEmpresaItems.length > 0 && (
+            {/* ADMINISTRACIÓN DE EMPRESA (Solo para Administrador - NO Super Admin) */}
+            {/* Super Admin tiene su sección de gestión de empresas arriba con selector */}
+            {filteredAdministradorEmpresaItems.length > 0 && role === 'administrador' && (
               <>
                 <div className="px-2 py-3 mb-2 border-t border-gray-800">
                   <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                    ⚙️ Configuración Empresa
+                    ⚙️ Configuración de Mi Empresa
                   </h3>
                 </div>
                 <div className="mb-4">
