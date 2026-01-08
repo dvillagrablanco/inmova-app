@@ -63,6 +63,7 @@ import {
   Share2,
   User,
   Loader2,
+  Tag,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -111,6 +112,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/dashboard': 'admin_dashboard',
   '/admin/clientes': 'gestion_clientes',
   '/admin/planes': 'admin_planes',
+  '/admin/cupones': 'admin_cupones',
   '/admin/facturacion-b2b': 'admin_facturacion_b2b',
   '/admin/personalizacion': 'admin_personalizacion',
   '/admin/activity': 'admin_activity',
@@ -913,6 +915,12 @@ const superAdminPlatformItems = [
     name: 'Billing',
     href: '/admin/planes',
     icon: DollarSign,
+    roles: ['super_admin'],
+  },
+  {
+    name: 'Cupones',
+    href: '/admin/cupones',
+    icon: Tag,
     roles: ['super_admin'],
   },
   {

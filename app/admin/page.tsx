@@ -58,6 +58,15 @@ export default async function AdminPage() {
         </a>
 
         <a
+          href="/admin/cupones"
+          className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
+        >
+          <div className="text-4xl mb-4">🏷️</div>
+          <h3 className="text-xl font-semibold mb-2">Cupones</h3>
+          <p className="text-gray-600">Códigos de descuento y promociones</p>
+        </a>
+
+        <a
           href="/admin/modulos"
           className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
         >
