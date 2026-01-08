@@ -990,6 +990,9 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   
   // Hook para empresa seleccionada (Super Admin)
   const { selectedCompany, selectCompany: handleCompanySelect } = useSelectedCompany();
+  
+  // Módulos activos de la empresa seleccionada (para Super Admin)
+  const [selectedCompanyModules, setSelectedCompanyModules] = useState<string[]>([]);
 
   // Cargar vertical principal de la empresa
   useEffect(() => {
@@ -1065,7 +1068,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     }
   }, []);
 
-  // Cargar módulos activos de la empresa
+  // Cargar módulos activos de la empresa del usuario actual
   useEffect(() => {
     async function loadActiveModules() {
       try {
@@ -1082,6 +1085,32 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     }
     loadActiveModules();
   }, []);
+
+  // Cargar módulos de la empresa seleccionada (Solo para Super Admin)
+  useEffect(() => {
+    async function loadSelectedCompanyModules() {
+      if (!selectedCompany || role !== 'super_admin') {
+        setSelectedCompanyModules([]);
+        return;
+      }
+      
+      try {
+        const res = await fetch(`/api/modules/active?companyId=${selectedCompany.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setSelectedCompanyModules(data.activeModules || []);
+          logger.info('Módulos de empresa seleccionada cargados', { 
+            companyId: selectedCompany.id, 
+            modulesCount: data.activeModules?.length || 0 
+          });
+        }
+      } catch (error) {
+        logger.error('Error loading selected company modules:', error);
+        setSelectedCompanyModules([]);
+      }
+    }
+    loadSelectedCompanyModules();
+  }, [selectedCompany, role]);
 
   // Cargar favoritos desde localStorage de forma segura
   useEffect(() => {
@@ -1147,12 +1176,19 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   };
 
   // Filtrar items según rol y módulos activos
-  const filterItems = (items: any[]) => {
+  const filterItems = (items: any[], useSelectedCompanyModules: boolean = false) => {
     // Validación: Si no hay rol o módulos aún no cargados, retornar vacío
     if (!role || !modulesLoaded) return [];
 
     // Validación: Si items no es un array válido
     if (!Array.isArray(items) || items.length === 0) return [];
+
+    // Determinar qué módulos usar para filtrar
+    // Si es super_admin con empresa seleccionada y useSelectedCompanyModules es true,
+    // usar los módulos de la empresa seleccionada
+    const modulesToCheck = (useSelectedCompanyModules && role === 'super_admin' && selectedCompany && selectedCompanyModules.length > 0)
+      ? selectedCompanyModules
+      : activeModules;
 
     let filtered = items.filter((item) => {
       // Validación: item debe tener roles
@@ -1168,7 +1204,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
       // Los módulos core siempre se muestran (esCore: true)
       if (CORE_MODULES.includes(moduleCode)) return true;
 
-      return activeModules.includes(moduleCode);
+      return modulesToCheck.includes(moduleCode);
     });
 
     // Aplicar búsqueda
@@ -1185,25 +1221,26 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   // Filtrar items por rol y módulos activos
   const filteredDashboardItems = filterItems(dashboardNavItems);
 
-  // Verticales de Negocio
-  const filteredAlquilerResidencialItems = filterItems(alquilerResidencialItems);
-  const filteredStrItems = filterItems(strNavItems);
-  const filteredCoLivingItems = filterItems(coLivingNavItems);
-  const filteredBuildToRentItems = filterItems(buildToRentNavItems);
-  const filteredFlippingItems = filterItems(flippingNavItems);
-  const filteredComercialItems = filterItems(comercialNavItems);
-  const filteredAdminFincasItems = filterItems(adminFincasItems);
+  // Verticales de Negocio - Usar módulos de empresa seleccionada si hay una (Super Admin)
+  const useCompanyModules = role === 'super_admin' && !!selectedCompany;
+  const filteredAlquilerResidencialItems = filterItems(alquilerResidencialItems, useCompanyModules);
+  const filteredStrItems = filterItems(strNavItems, useCompanyModules);
+  const filteredCoLivingItems = filterItems(coLivingNavItems, useCompanyModules);
+  const filteredBuildToRentItems = filterItems(buildToRentNavItems, useCompanyModules);
+  const filteredFlippingItems = filterItems(flippingNavItems, useCompanyModules);
+  const filteredComercialItems = filterItems(comercialNavItems, useCompanyModules);
+  const filteredAdminFincasItems = filterItems(adminFincasItems, useCompanyModules);
 
-  // Herramientas Horizontales
-  const filteredFinanzasItems = filterItems(finanzasNavItems);
-  const filteredAnalyticsItems = filterItems(analyticsNavItems);
-  const filteredOperacionesItems = filterItems(operacionesNavItems);
-  const filteredComunicacionesItems = filterItems(comunicacionesNavItems);
-  const filteredDocumentosLegalItems = filterItems(documentosLegalNavItems);
-  const filteredCrmMarketingItems = filterItems(crmMarketingNavItems);
-  const filteredAutomatizacionItems = filterItems(automatizacionNavItems);
-  const filteredInnovacionItems = filterItems(innovacionNavItems);
-  const filteredSoporteItems = filterItems(soporteNavItems);
+  // Herramientas Horizontales - Usar módulos de empresa seleccionada si hay una (Super Admin)
+  const filteredFinanzasItems = filterItems(finanzasNavItems, useCompanyModules);
+  const filteredAnalyticsItems = filterItems(analyticsNavItems, useCompanyModules);
+  const filteredOperacionesItems = filterItems(operacionesNavItems, useCompanyModules);
+  const filteredComunicacionesItems = filterItems(comunicacionesNavItems, useCompanyModules);
+  const filteredDocumentosLegalItems = filterItems(documentosLegalNavItems, useCompanyModules);
+  const filteredCrmMarketingItems = filterItems(crmMarketingNavItems, useCompanyModules);
+  const filteredAutomatizacionItems = filterItems(automatizacionNavItems, useCompanyModules);
+  const filteredInnovacionItems = filterItems(innovacionNavItems, useCompanyModules);
+  const filteredSoporteItems = filterItems(soporteNavItems, useCompanyModules);
 
   // Roles Específicos
   const filteredOperadorItems = filterItems(operadorNavItems);
@@ -1569,18 +1606,30 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             )}
 
             {/* VERTICALES DE NEGOCIO - Separador visual */}
+            {/* Mostrar para administrador siempre, o para super_admin cuando hay empresa seleccionada */}
             {(filteredAlquilerResidencialItems.length > 0 ||
               filteredStrItems.length > 0 ||
               filteredCoLivingItems.length > 0 ||
               filteredBuildToRentItems.length > 0 ||
               filteredFlippingItems.length > 0 ||
               filteredComercialItems.length > 0 ||
-              filteredAdminFincasItems.length > 0) && role === 'administrador' && (
+              filteredAdminFincasItems.length > 0) && 
+              (role === 'administrador' || (role === 'super_admin' && selectedCompany)) && (
               <div className="px-2 py-3 mb-2 border-t border-gray-800">
-                <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                <h3 className={cn(
+                  "text-[10px] font-bold uppercase tracking-wider",
+                  selectedCompany ? "text-emerald-400" : "text-gray-500"
+                )}>
                   📊 Verticales de Negocio
                 </h3>
-                {primaryVertical && (
+                {/* Mostrar empresa seleccionada para Super Admin */}
+                {role === 'super_admin' && selectedCompany && (
+                  <p className="text-[9px] text-emerald-500 mt-1">
+                    Empresa: {selectedCompany.nombre}
+                  </p>
+                )}
+                {/* Mostrar vertical principal para Administrador */}
+                {role === 'administrador' && primaryVertical && (
                   <p className="text-[9px] text-gray-600 mt-1">
                     Principal: {primaryVertical.replace('_', ' ').toUpperCase()}
                   </p>
@@ -1758,8 +1807,16 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               filteredOperacionesItems.length > 0 ||
               filteredComunicacionesItems.length > 0) && (
               <div className="px-2 py-3 mb-2 border-t border-gray-800">
-                <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                  🛠️ Herramientas Horizontales
+                <h3 className={cn(
+                  "text-[10px] font-bold uppercase tracking-wider",
+                  (role === 'super_admin' && selectedCompany) ? "text-emerald-400" : "text-gray-500"
+                )}>
+                  🛠️ Herramientas
+                  {role === 'super_admin' && selectedCompany && (
+                    <span className="text-emerald-500 normal-case font-normal ml-1">
+                      ({selectedCompany.nombre.substring(0, 12)}{selectedCompany.nombre.length > 12 ? '...' : ''})
+                    </span>
+                  )}
                 </h3>
               </div>
             )}

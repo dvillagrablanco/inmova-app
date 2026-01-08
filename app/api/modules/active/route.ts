@@ -13,10 +13,21 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
+    const { searchParams } = new URL(req.url);
+    const queryCompanyId = searchParams.get('companyId');
+    const userRole = (session.user as any).role;
+    
+    // Si es super_admin y se especifica un companyId, usar ese
+    // De lo contrario, usar el companyId de la sesión
+    let companyId = (session.user as any).companyId;
+    
+    if (queryCompanyId && userRole === 'super_admin') {
+      companyId = queryCompanyId;
+    }
+    
     const activeModules = await getActiveModulesForCompany(companyId);
 
-    return NextResponse.json({ activeModules });
+    return NextResponse.json({ activeModules, companyId });
   } catch (error: any) {
     logger.error('Error al obtener módulos activos:', error);
     return NextResponse.json(
