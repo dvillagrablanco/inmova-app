@@ -890,11 +890,10 @@ const administradorEmpresaItems = [
 
 // 5.2 SUPER ADMIN - GESTIÓN DE PLATAFORMA
 // ESTRUCTURA REORGANIZADA:
-// 1. NEGOCIO: Dashboard, Clientes B2B, Billing (Planes+Addons+Facturación+Cupones), Partners, Legal
+// 1. NEGOCIO: Dashboard, Clientes B2B (+ Config empresa seleccionada), Billing, Partners, Legal
 // 2. MONITOREO: Actividad, Alertas, Salud, Métricas, Reportes, Seguridad+Backup+Usuarios
 // 3. INTEGRACIONES DE INMOVA: Servicios Conectados (Stripe, AWS, etc.), API Docs
-// 4. SERVICIOS: Plantillas SMS, Firma Digital, OCR Import, Marketplace
-// 5. CONFIG EMPRESAS: Módulos, Integraciones Contables (para empresas), Portales, Personalización
+// 4. COMUNICACIONES: Plantillas SMS, Plantillas Email
 
 interface SidebarItem {
   name: string;
@@ -930,6 +929,11 @@ const superAdminPlatformItems: SidebarItem[] = [
     subItems: [
       { name: 'Lista de Clientes', href: '/admin/clientes' },
       { name: 'Comparar Empresas', href: '/admin/clientes/comparar' },
+      // Configuración de empresas (seleccionar empresa primero)
+      { name: 'Módulos Activos', href: '/admin/modulos' },
+      { name: 'Integraciones Contables', href: '/admin/integraciones-contables' },
+      { name: 'Portales Externos', href: '/admin/portales-externos' },
+      { name: 'Personalización', href: '/admin/personalizacion' },
     ],
   },
   {
@@ -1001,19 +1005,6 @@ const superAdminPlatformItems: SidebarItem[] = [
     subItems: [
       { name: 'Plantillas SMS', href: '/admin/plantillas-sms' },
       { name: 'Plantillas Email', href: '/admin/plantillas-email' },
-    ],
-  },
-  // ========== 5. CONFIGURACIÓN DE EMPRESAS CLIENTE ==========
-  {
-    name: 'Config. Empresas',
-    href: '/admin/modulos',
-    icon: Settings,
-    roles: ['super_admin'],
-    subItems: [
-      { name: 'Módulos', href: '/admin/modulos' },
-      { name: 'Integraciones Contables', href: '/admin/integraciones-contables' },
-      { name: 'Portales Externos', href: '/admin/portales-externos' },
-      { name: 'Personalización', href: '/admin/personalizacion' },
     ],
   },
 ];
