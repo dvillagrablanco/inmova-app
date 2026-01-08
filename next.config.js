@@ -89,6 +89,26 @@ const nextConfig = {
   // Cache headers for static assets
   async headers() {
     return [
+      // Landing pages - revalidar siempre para ver cambios rápido
+      {
+        source: '/landing/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
+      // Imágenes - cache largo
       {
         source: '/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif)',
         headers: [
