@@ -135,10 +135,11 @@ export function ContextualHelp({ page = 'dashboard' }: { page?: string }) {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 right-6 w-14 h-14 rounded-full shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 z-40"
+        className="fixed bottom-32 right-6 w-12 h-12 rounded-full shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 z-30"
         size="icon"
+        title="Ayuda"
       >
-        <HelpCircle className="w-6 h-6 text-white" />
+        <HelpCircle className="w-5 h-5 text-white" />
       </Button>
     );
   }
@@ -149,7 +150,7 @@ export function ContextualHelp({ page = 'dashboard' }: { page?: string }) {
         initial={{ opacity: 0, x: 100 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: 100 }}
-        className="fixed bottom-24 right-6 w-96 max-h-[600px] z-40"
+        className="fixed bottom-32 right-6 w-80 max-h-[500px] z-[60]"
       >
         <Card className="bg-white shadow-2xl border-2 border-blue-200">
           {/* Header */}

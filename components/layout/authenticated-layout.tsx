@@ -193,16 +193,18 @@ export function AuthenticatedLayout({
       {/* Floating Tour Button - Acceso rápido a tours (NO para superadmin) */}
       {session?.user?.role !== 'super_admin' && <FloatingTourButton />}
 
-      {/* Contextual Help - Ayuda específica según página */}
-      <ContextualHelp page={getPageForHelp()} />
+      {/* Contextual Help - Ayuda específica según página (NO para superadmin) */}
+      {session?.user?.role !== 'super_admin' && (
+        <ContextualHelp page={getPageForHelp()} />
+      )}
 
-      {/* Setup Wizard - Primera vez */}
-      {showSetupWizard && (
+      {/* Setup Wizard - Primera vez (NO para superadmin) */}
+      {showSetupWizard && session?.user?.role !== 'super_admin' && (
         <FirstTimeSetupWizard onComplete={handleCompleteSetup} onSkip={handleSkipSetup} />
       )}
 
-      {/* Onboarding Checklist - Hasta completar */}
-      {showChecklist && session?.user?.id && (
+      {/* Onboarding Checklist - Hasta completar (NO para superadmin) */}
+      {showChecklist && session?.user?.id && session?.user?.role !== 'super_admin' && (
         <OnboardingChecklist
           userId={session.user.id}
           isNewUser={isNewUser}
@@ -219,8 +221,8 @@ export function AuthenticatedLayout({
       {/* Shortcuts Help Dialog - Ayuda de atajos con ? */}
       <ShortcutsHelpDialog />
 
-      {/* Navigation Tutorial - Tutorial interactivo para nuevos usuarios */}
-      <NavigationTutorial />
+      {/* Navigation Tutorial - Tutorial interactivo (NO para superadmin) */}
+      {session?.user?.role !== 'super_admin' && <NavigationTutorial />}
     </div>
   );
 }

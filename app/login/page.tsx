@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Mail, Lock, AlertCircle, ArrowLeft, Building2, Loader2, Home } from 'lucide-react';
+import { Mail, Lock, AlertCircle, ArrowLeft, Building2, Loader2, Home, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { loginSchema, type LoginFormData } from '@/lib/form-schemas';
 import { AccessibleInputField } from '@/components/forms/AccessibleFormField';
@@ -15,6 +15,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -156,7 +157,7 @@ export default function LoginPage() {
                   )}
                 </div>
 
-                {/* Password field con mejor estilo */}
+                {/* Password field con toggle de visibilidad */}
                 <div>
                   <label htmlFor="password" className="block text-sm font-medium text-indigo-100 mb-2">
                     Contraseña
@@ -167,14 +168,26 @@ export default function LoginPage() {
                     </div>
                     <input
                       id="password"
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setValue('password', e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white/15 transition-all"
+                      className="w-full pl-10 pr-12 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white/15 transition-all"
                       required
                       autoComplete="current-password"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-indigo-300 hover:text-white transition-colors"
+                      aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" aria-hidden="true" />
+                      ) : (
+                        <Eye className="h-5 w-5" aria-hidden="true" />
+                      )}
+                    </button>
                   </div>
                   {errors.password && (
                     <p className="mt-1 text-sm text-red-300">{errors.password.message}</p>

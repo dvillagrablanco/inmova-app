@@ -119,6 +119,17 @@ function CompareCompaniesPageContent() {
     );
   }
 
+  // Función para obtener la clase de grid según el número de columnas
+  const getGridColsClass = (cols: number) => {
+    const gridClasses: Record<number, string> = {
+      2: 'grid-cols-2',
+      3: 'grid-cols-3',
+      4: 'grid-cols-4',
+      5: 'grid-cols-5',
+    };
+    return gridClasses[cols] || 'grid-cols-3';
+  };
+
   const ComparisonRow = ({
     label,
     icon,
@@ -131,7 +142,7 @@ function CompareCompaniesPageContent() {
     highlight?: boolean;
   }) => (
     <div
-      className={`grid grid-cols-${companies.length + 1} gap-4 border-b border-gray-200 py-3 ${
+      className={`grid ${getGridColsClass(companies.length + 1)} gap-4 border-b border-gray-200 py-3 ${
         highlight ? 'bg-indigo-50' : ''
       }`}
     >
@@ -171,7 +182,7 @@ function CompareCompaniesPageContent() {
 
             {/* Company Headers */}
             <div className="grid grid-cols-1 gap-4 mb-6">
-              <div className={`grid grid-cols-${companies.length + 1} gap-4`}>
+              <div className={`grid ${getGridColsClass(companies.length + 1)} gap-4`}>
                 <div></div>
                 {companies.map((company) => (
                   <Card key={company.id} className="border-t-4 border-t-indigo-600">

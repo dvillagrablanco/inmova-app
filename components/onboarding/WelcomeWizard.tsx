@@ -39,7 +39,7 @@ const WIZARD_STEPS: WizardStep[] = [
     id: 'welcome',
     title: '¡Bienvenido a tu nueva herramienta!',
     subtitle: 'Gestión inmobiliaria simplificada',
-    description: 'Vamos a configurar tu espacio en 3 sencillos pasos. Te tomará menos de 2 minutos.',
+    description: 'Vamos a configurar tu espacio en unos sencillos pasos. Te tomará menos de 2 minutos.',
     icon: Sparkles,
     benefits: [
       'Sin instalaciones complicadas',

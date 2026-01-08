@@ -265,19 +265,14 @@ const CORE_MODULES = [
 // ============================================================================
 
 // 1. INICIO - Dashboard Principal
+// NOTA: Para super_admin, el dashboard de plataforma está en superAdminPlatformItems
 const dashboardNavItems = [
   {
     name: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
-    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+    roles: ['administrador', 'gestor', 'operador'], // super_admin usa /admin/dashboard
     dataTour: 'dashboard-link',
-  },
-  {
-    name: 'Inicio',
-    href: '/dashboard',
-    icon: Home,
-    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
   },
 ];
 
