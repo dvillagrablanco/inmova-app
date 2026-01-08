@@ -230,7 +230,7 @@ export function PricingSection() {
           {plans.map((plan, i) => (
             <Card key={i} className={`group hover:shadow-2xl transition-all flex flex-col ${
               plan.popular 
-                ? 'border-indigo-500 border-2 shadow-xl relative scale-105' 
+                ? 'border-indigo-500 border-2 shadow-2xl relative ring-2 ring-indigo-500 ring-offset-2' 
                 : 'hover:border-indigo-300 border-2'
             }`}>
               {plan.popular && (

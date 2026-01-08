@@ -1,15 +1,28 @@
 import { chromium, Browser, Page } from '@playwright/test';
 
-const BASE_URL = 'https://inmovaapp.com';
+// Usar IP directa para evitar cache de Cloudflare
+const BASE_URL = 'http://157.180.119.236';
 
 async function checkLandingAlignment() {
   console.log('🔍 Verificando alineación en landing page...\n');
+  console.log('⏰ Timestamp:', new Date().toISOString());
   
   const browser: Browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
-    viewport: { width: 1920, height: 1080 }
+    viewport: { width: 1920, height: 1080 },
+    bypassCSP: true,
   });
   const page: Page = await context.newPage();
+  
+  // Forzar bypass de cache
+  await page.route('**/*', async (route) => {
+    const headers = {
+      ...route.request().headers(),
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+    };
+    await route.continue({ headers });
+  });
 
   try {
     // 1. Verificar sección de portales de acceso

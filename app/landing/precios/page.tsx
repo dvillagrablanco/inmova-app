@@ -100,7 +100,7 @@ export default function PreciosPage() {
           {planes.map((plan) => (
             <Card 
               key={plan.nombre}
-              className={`relative flex flex-col ${plan.destacado ? 'border-2 border-blue-500 shadow-xl scale-105' : 'border'}`}
+              className={`relative flex flex-col ${plan.destacado ? 'border-2 border-blue-500 shadow-2xl ring-2 ring-blue-500 ring-offset-2' : 'border'}`}
             >
               {plan.destacado && (
                 <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600">
