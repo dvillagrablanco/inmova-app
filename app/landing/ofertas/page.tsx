@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Navigation } from '@/components/landing/sections/Navigation';
 import { Footer } from '@/components/landing/sections/Footer';
@@ -129,9 +129,9 @@ export default function OfertasPage() {
       {/* Ofertas Grid */}
       <section className="pb-20 px-4">
         <div className="container mx-auto">
-          <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto auto-rows-fr">
             {ofertas.map((oferta) => (
-              <Card id={oferta.id} key={oferta.id} className="relative overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 hover:border-indigo-300 scroll-mt-24 h-full flex flex-col">
+              <Card id={oferta.id} key={oferta.id} className="relative overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 hover:border-indigo-300 scroll-mt-24 flex flex-col">
                 {/* Gradient Header */}
                 <div className={`bg-gradient-to-r ${oferta.gradient} p-6 text-white`}>
                   <div className="flex items-center gap-3 mb-4">
@@ -146,62 +146,60 @@ export default function OfertasPage() {
                   <p className="text-white/90 font-semibold">{oferta.subtitle}</p>
                 </div>
 
-                <CardContent className="p-6 flex-1 flex flex-col justify-between">
-                  <div>
-                    {/* Precio y Ahorro */}
-                    <div className="text-center py-4 border-b mb-4">
-                      <div className="flex items-center justify-center gap-4">
-                        <span className="text-2xl text-gray-400 line-through">{oferta.price.original}</span>
-                        <span className="text-4xl font-black text-gray-900">{oferta.price.discounted}</span>
-                      </div>
-                      <span className="text-gray-500">{oferta.price.period}</span>
-                      {oferta.savings && (
-                        <div className="mt-2">
-                          <Badge className="bg-green-100 text-green-700 border-green-300">
-                            🎁 {oferta.savings}
-                          </Badge>
-                        </div>
-                      )}
+                <CardContent className="p-6 flex-1">
+                  {/* Precio y Ahorro */}
+                  <div className="text-center py-4 border-b mb-4">
+                    <div className="flex items-center justify-center gap-4">
+                      <span className="text-2xl text-gray-400 line-through">{oferta.price.original}</span>
+                      <span className="text-4xl font-black text-gray-900">{oferta.price.discounted}</span>
                     </div>
-
-                    {/* Plan incluido */}
-                    {oferta.planName && (
-                      <div className="bg-indigo-50 rounded-lg p-3 mb-4 text-center">
-                        <p className="text-sm font-bold text-indigo-800">{oferta.planName}</p>
-                        <p className="text-xs text-indigo-600">{oferta.planFeatures}</p>
+                    <span className="text-gray-500">{oferta.price.period}</span>
+                    {oferta.savings && (
+                      <div className="mt-2">
+                        <Badge className="bg-green-100 text-green-700 border-green-300">
+                          🎁 {oferta.savings}
+                        </Badge>
                       </div>
                     )}
-
-                    {/* Descripción */}
-                    <p className="text-gray-600 mb-4 text-sm">{oferta.description}</p>
-
-                    {/* Beneficios */}
-                    <ul className="space-y-3 mb-6">
-                      {oferta.benefits.map((benefit, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-gray-700">{benefit}</span>
-                        </li>
-                      ))}
-                    </ul>
                   </div>
 
-                  {/* Validez y CTA - Alineados al final */}
-                  <div className="pt-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-                      <Clock className="h-4 w-4" />
-                      <span>Válido hasta: {oferta.validUntil}</span>
+                  {/* Plan incluido */}
+                  {oferta.planName && (
+                    <div className="bg-indigo-50 rounded-lg p-3 mb-4 text-center">
+                      <p className="text-sm font-bold text-indigo-800">{oferta.planName}</p>
+                      <p className="text-xs text-indigo-600">{oferta.planFeatures}</p>
                     </div>
+                  )}
 
-                    {/* CTA */}
-                    <Link href={oferta.ctaHref}>
-                      <Button className={`w-full bg-gradient-to-r ${oferta.gradient} text-white font-bold py-6 text-lg hover:opacity-90`}>
-                        {oferta.ctaText}
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                      </Button>
-                    </Link>
-                  </div>
+                  {/* Descripción */}
+                  <p className="text-gray-600 mb-4 text-sm">{oferta.description}</p>
+
+                  {/* Beneficios */}
+                  <ul className="space-y-3">
+                    {oferta.benefits.map((benefit, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-700">{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </CardContent>
+
+                {/* Validez y CTA - En CardFooter para alineación */}
+                <CardFooter className="flex-col mt-auto p-6 pt-0">
+                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-4 w-full">
+                    <Clock className="h-4 w-4" />
+                    <span>Válido hasta: {oferta.validUntil}</span>
+                  </div>
+
+                  {/* CTA */}
+                  <Link href={oferta.ctaHref} className="w-full">
+                    <Button className={`w-full bg-gradient-to-r ${oferta.gradient} text-white font-bold py-6 text-lg hover:opacity-90`}>
+                      {oferta.ctaText}
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                </CardFooter>
               </Card>
             ))}
           </div>

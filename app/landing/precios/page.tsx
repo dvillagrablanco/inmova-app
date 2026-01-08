@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, ArrowRight, Building2, Users, Briefcase, Crown } from 'lucide-react';
 
@@ -96,11 +96,11 @@ export default function PreciosPage() {
 
       {/* Planes */}
       <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-fr">
           {planes.map((plan) => (
             <Card 
               key={plan.nombre}
-              className={`relative h-full flex flex-col ${plan.destacado ? 'border-2 border-blue-500 shadow-xl scale-105' : 'border'}`}
+              className={`relative flex flex-col ${plan.destacado ? 'border-2 border-blue-500 shadow-xl scale-105' : 'border'}`}
             >
               {plan.destacado && (
                 <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600">
@@ -121,8 +121,8 @@ export default function PreciosPage() {
                   <p className="text-xs text-green-600 font-semibold mt-1">{plan.anual}</p>
                 )}
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col justify-between">
-                <ul className="space-y-3 mb-6">
+              <CardContent className="flex-1">
+                <ul className="space-y-3">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-start text-sm">
                       <CheckCircle2 className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
@@ -130,18 +130,18 @@ export default function PreciosPage() {
                     </li>
                   ))}
                 </ul>
-                <div className="pt-4">
-                  <Link href={plan.nombre === 'Enterprise' ? '/landing/contacto' : '/register'}>
-                    <Button 
-                      className={`w-full ${plan.destacado ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
-                      variant={plan.destacado ? 'default' : 'outline'}
-                    >
-                      {plan.cta}
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </Link>
-                </div>
               </CardContent>
+              <CardFooter className="mt-auto">
+                <Link href={plan.nombre === 'Enterprise' ? '/landing/contacto' : '/register'} className="w-full">
+                  <Button 
+                    className={`w-full ${plan.destacado ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+                    variant={plan.destacado ? 'default' : 'outline'}
+                  >
+                    {plan.cta}
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </CardFooter>
             </Card>
           ))}
         </div>

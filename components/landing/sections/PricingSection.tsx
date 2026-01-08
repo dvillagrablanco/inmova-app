@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Building2, Home, Hotel, Hammer, Shield, Briefcase, ArrowRight, Zap } from 'lucide-react';
 
@@ -226,9 +226,9 @@ export function PricingSection() {
         </div>
 
         {/* Plans Grid */}
-        <div className="grid md:grid-cols-4 gap-6 max-w-7xl mx-auto mb-16">
+        <div className="grid md:grid-cols-4 gap-6 max-w-7xl mx-auto mb-16 auto-rows-fr">
           {plans.map((plan, i) => (
-            <Card key={i} className={`group hover:shadow-2xl transition-all h-full flex flex-col ${
+            <Card key={i} className={`group hover:shadow-2xl transition-all flex flex-col ${
               plan.popular 
                 ? 'border-indigo-500 border-2 shadow-xl relative scale-105' 
                 : 'hover:border-indigo-300 border-2'
@@ -282,59 +282,57 @@ export function PricingSection() {
                 </div>
               </CardHeader>
 
-              <CardContent className="pt-0 flex-1 flex flex-col justify-between">
-                <div>
-                  {/* Límites */}
-                  <div className="mb-4 p-2 bg-gray-50 rounded-lg text-xs space-y-1">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">👤 Usuarios:</span>
-                      <span className="font-medium text-gray-800">{plan.limits.users}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">✍️ Firmas:</span>
-                      <span className="font-medium text-gray-800">{plan.limits.signatures}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">💾 Storage:</span>
-                      <span className="font-medium text-gray-800">{plan.limits.storage}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">🤖 IA:</span>
-                      <span className="font-medium text-gray-800">{plan.limits.ai}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">🔌 API:</span>
-                      <span className="font-medium text-gray-800">{plan.limits.api ? '✅' : '❌'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">💬 Soporte:</span>
-                      <span className="font-medium text-gray-800">{plan.limits.support}</span>
-                    </div>
+              <CardContent className="pt-0 flex-1">
+                {/* Límites */}
+                <div className="mb-4 p-2 bg-gray-50 rounded-lg text-xs space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">👤 Usuarios:</span>
+                    <span className="font-medium text-gray-800">{plan.limits.users}</span>
                   </div>
-
-                  {/* Features */}
-                  <ul className="space-y-2 mb-4">
-                    {plan.features.map((feature, j) => (
-                      <li key={j} className="flex items-start gap-2 text-sm">
-                        <CheckCircle className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                        <span className="text-gray-700">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">✍️ Firmas:</span>
+                    <span className="font-medium text-gray-800">{plan.limits.signatures}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">💾 Storage:</span>
+                    <span className="font-medium text-gray-800">{plan.limits.storage}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">🤖 IA:</span>
+                    <span className="font-medium text-gray-800">{plan.limits.ai}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">🔌 API:</span>
+                    <span className="font-medium text-gray-800">{plan.limits.api ? '✅' : '❌'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">💬 Soporte:</span>
+                    <span className="font-medium text-gray-800">{plan.limits.support}</span>
+                  </div>
                 </div>
 
-                {/* CTA - Alineado al final */}
-                <div className="pt-4">
-                  <Link href="/register" className="w-full block">
-                    <Button 
-                      className="w-full font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white"
-                    >
-                      Probar 30 días gratis
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </Link>
-                </div>
+                {/* Features */}
+                <ul className="space-y-2">
+                  {plan.features.map((feature, j) => (
+                    <li key={j} className="flex items-start gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span className="text-gray-700">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
               </CardContent>
+
+              {/* CTA - En CardFooter para alineación */}
+              <CardFooter className="mt-auto">
+                <Link href="/register" className="w-full block">
+                  <Button 
+                    className="w-full font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white"
+                  >
+                    Probar 30 días gratis
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </Link>
+              </CardFooter>
             </Card>
           ))}
         </div>
