@@ -8,7 +8,7 @@
  * - Precaching de assets críticos
  */
 
-const CACHE_VERSION = 'v2.0.0-20260108';
+const CACHE_VERSION = 'v3.0.1-20260108b';
 const CACHE_NAME = `inmova-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `inmova-runtime-${CACHE_VERSION}`;
 const IMAGES_CACHE = `inmova-images-${CACHE_VERSION}`;
@@ -61,8 +61,12 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames
           .filter((cacheName) => {
-            // Delete old cache versions
-            return cacheName.startsWith('inmova-') && cacheName !== CACHE_NAME;
+            // Delete ALL old caches including runtime and images
+            return cacheName.startsWith('inmova-') && 
+                   cacheName !== CACHE_NAME && 
+                   cacheName !== RUNTIME_CACHE && 
+                   cacheName !== IMAGES_CACHE && 
+                   cacheName !== API_CACHE;
           })
           .map((cacheName) => {
             console.log('[SW] Deleting old cache:', cacheName);
@@ -71,6 +75,7 @@ self.addEventListener('activate', (event) => {
       );
     }).then(() => {
       // Take control of all clients immediately
+      console.log('[SW] Taking control of clients');
       return self.clients.claim();
     })
   );
@@ -94,13 +99,14 @@ self.addEventListener('fetch', (event) => {
   if (request.destination === 'image') {
     strategy = CACHE_STRATEGIES.STALE_WHILE_REVALIDATE;
   } else if (request.destination === 'script' || request.destination === 'style') {
-    strategy = CACHE_STRATEGIES.CACHE_FIRST;
+    // Scripts y styles: network first para asegurar actualizaciones
+    strategy = CACHE_STRATEGIES.NETWORK_FIRST;
   } else if (url.pathname.startsWith('/api/')) {
     // API requests: network first with timeout
     strategy = CACHE_STRATEGIES.NETWORK_FIRST;
   } else if (url.pathname.startsWith('/_next/static/')) {
-    // Next.js static assets: cache first (immutable)
-    strategy = CACHE_STRATEGIES.CACHE_FIRST;
+    // Next.js static assets: network first para asegurar actualizaciones
+    strategy = CACHE_STRATEGIES.NETWORK_FIRST;
   }
 
   event.respondWith(handleRequest(request, strategy));
