@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import {
   Card,
   CardContent,
@@ -412,6 +413,7 @@ export default function AdminAddonsPage() {
   );
 
   return (
+    <AuthenticatedLayout>
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
@@ -622,5 +624,6 @@ export default function AdminAddonsPage() {
         </DialogContent>
       </Dialog>
     </div>
+    </AuthenticatedLayout>
   );
 }

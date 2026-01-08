@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { 
   Card, 
   CardContent, 
@@ -552,13 +553,16 @@ export default function AdminPlanesPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <AuthenticatedLayout>
+        <div className="flex items-center justify-center h-64">
+          <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
   return (
+    <AuthenticatedLayout>
     <div className="container mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -773,5 +777,6 @@ export default function AdminPlanesPage() {
         </DialogContent>
       </Dialog>
     </div>
+    </AuthenticatedLayout>
   );
 }
