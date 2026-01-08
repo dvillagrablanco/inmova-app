@@ -37,7 +37,7 @@ export function Navigation() {
             </Badge>
           </div>
 
-          {/* Desktop Menu */}
+          {/* Desktop Menu - Links */}
           <div className="hidden md:flex items-center gap-6">
             {menuItems.map((item) => (
               item.highlight ? (
@@ -59,20 +59,24 @@ export function Navigation() {
                 </a>
               )
             ))}
-            <Link href="/login">
-              <Button variant="outline" className="border-gray-300 text-gray-900 hover:bg-gray-100 hover:border-gray-400 font-semibold">
+          </div>
+
+          {/* Auth Buttons - SIEMPRE VISIBLES */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link href="/login" className="hidden sm:block">
+              <Button variant="outline" className="border-gray-300 text-gray-900 hover:bg-gray-100 hover:border-gray-400 font-semibold text-xs sm:text-sm px-2 sm:px-4">
                 Iniciar Sesión
               </Button>
             </Link>
             <Link href="/register">
-              <Button className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white shadow-lg shadow-indigo-500/50">
-                Comenzar Gratis
+              <Button className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white shadow-lg shadow-indigo-500/50 text-xs sm:text-sm px-3 sm:px-4">
+                <span className="sm:hidden">Empezar</span>
+                <span className="hidden sm:inline">Comenzar Gratis</span>
               </Button>
             </Link>
-          </div>
-
-          {/* Mobile Menu */}
-          <div className="md:hidden">
+            
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="text-gray-700 hover:text-indigo-600 hover:bg-indigo-50">
@@ -127,6 +131,7 @@ export function Navigation() {
                 </div>
               </SheetContent>
             </Sheet>
+            </div>
           </div>
         </div>
       </div>
