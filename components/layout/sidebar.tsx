@@ -894,13 +894,24 @@ const administradorEmpresaItems = [
 ];
 
 // 5.2 SUPER ADMIN - GESTIÓN DE PLATAFORMA
-// SIMPLIFICADO: 10 items (antes 18)
-// - Fusionado: Planes + Facturación B2B → Billing
-// - Fusionado: Actividad + Alertas + Salud + Métricas → Monitoreo
-// - Fusionado: Integraciones + Integraciones Contables → Integraciones
-// - Fusionado: Plantillas SMS + OCR + Firma Digital → Config Servicios
-// - Eliminado: Seguridad (ya en Compliance), Backup (acceso desde Settings)
-const superAdminPlatformItems = [
+// ESTRUCTURA ORGANIZADA: 14 items con submenús
+// - Billing: Planes + Facturación B2B
+// - Monitoreo: Actividad + Alertas + Salud Sistema + Métricas + Reportes
+// - Integraciones: Dashboard Integraciones + Integraciones Contables
+// - Servicios: Plantillas SMS + Firma Digital + OCR Import
+// - Seguridad: Seguridad + Backup
+// - Legal: Plantillas legales (independiente por importancia)
+// - Marketplace: Marketplace + Addons
+
+interface SidebarItem {
+  name: string;
+  href: string;
+  icon: any;
+  roles: string[];
+  subItems?: { name: string; href: string }[];
+}
+
+const superAdminPlatformItems: SidebarItem[] = [
   {
     name: 'Dashboard',
     href: '/admin/dashboard',
@@ -912,12 +923,20 @@ const superAdminPlatformItems = [
     href: '/admin/clientes',
     icon: Building2,
     roles: ['super_admin'],
+    subItems: [
+      { name: 'Lista de Clientes', href: '/admin/clientes' },
+      { name: 'Comparar Empresas', href: '/admin/clientes/comparar' },
+    ],
   },
   {
     name: 'Billing',
     href: '/admin/planes',
     icon: DollarSign,
     roles: ['super_admin'],
+    subItems: [
+      { name: 'Planes', href: '/admin/planes' },
+      { name: 'Facturación B2B', href: '/admin/facturacion-b2b' },
+    ],
   },
   {
     name: 'Cupones',
@@ -936,11 +955,36 @@ const superAdminPlatformItems = [
     href: '/dashboard/integrations',
     icon: Zap,
     roles: ['super_admin'],
+    subItems: [
+      { name: 'Dashboard', href: '/dashboard/integrations' },
+      { name: 'Contables', href: '/admin/integraciones-contables' },
+    ],
   },
   {
     name: 'Marketplace',
     href: '/admin/marketplace',
     icon: ShoppingCart,
+    roles: ['super_admin'],
+    subItems: [
+      { name: 'Servicios', href: '/admin/marketplace' },
+      { name: 'Addons', href: '/admin/addons' },
+    ],
+  },
+  {
+    name: 'Servicios',
+    href: '/admin/plantillas-sms',
+    icon: MessageSquare,
+    roles: ['super_admin'],
+    subItems: [
+      { name: 'Plantillas SMS', href: '/admin/plantillas-sms' },
+      { name: 'Firma Digital', href: '/admin/firma-digital' },
+      { name: 'OCR Import', href: '/admin/ocr-import' },
+    ],
+  },
+  {
+    name: 'Legal',
+    href: '/admin/legal',
+    icon: FileText,
     roles: ['super_admin'],
   },
   {
@@ -948,6 +992,13 @@ const superAdminPlatformItems = [
     href: '/admin/activity',
     icon: Activity,
     roles: ['super_admin'],
+    subItems: [
+      { name: 'Actividad', href: '/admin/activity' },
+      { name: 'Alertas', href: '/admin/alertas' },
+      { name: 'Salud Sistema', href: '/admin/salud-sistema' },
+      { name: 'Métricas de Uso', href: '/admin/metricas-uso' },
+      { name: 'Reportes', href: '/admin/reportes-programados' },
+    ],
   },
   {
     name: 'Portales',
@@ -960,6 +1011,10 @@ const superAdminPlatformItems = [
     href: '/admin/seguridad',
     icon: Shield,
     roles: ['super_admin'],
+    subItems: [
+      { name: 'General', href: '/admin/seguridad' },
+      { name: 'Backup', href: '/admin/backup-restore' },
+    ],
   },
   {
     name: 'API Docs',
@@ -1362,6 +1417,73 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     );
   };
 
+  // Componente para nav items con submenús (Super Admin)
+  const NavItemWithSubs = ({
+    item,
+  }: {
+    item: SidebarItem;
+  }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const isActive = pathname?.startsWith(item.href) ?? false;
+    const hasSubItems = item.subItems && item.subItems.length > 0;
+    
+    // Auto-expandir si algún subitem está activo
+    useEffect(() => {
+      if (hasSubItems && item.subItems?.some(sub => pathname?.startsWith(sub.href))) {
+        setIsExpanded(true);
+      }
+    }, [pathname, hasSubItems, item.subItems]);
+
+    if (!hasSubItems) {
+      return <NavItem item={item} showFavoriteButton={false} />;
+    }
+
+    return (
+      <div>
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className={cn(
+            'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm w-full',
+            isActive
+              ? 'bg-gray-800 text-white font-medium'
+              : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+          )}
+        >
+          <item.icon size={18} />
+          <span className="flex-1 text-left">{item.name}</span>
+          {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+        </button>
+        {isExpanded && (
+          <div className="ml-6 mt-1 space-y-1 border-l border-gray-700 pl-2">
+            {item.subItems?.map((subItem) => {
+              const isSubActive = pathname === subItem.href;
+              return (
+                <Link
+                  key={subItem.href}
+                  href={subItem.href}
+                  prefetch={true}
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    onNavigate?.();
+                  }}
+                  className={cn(
+                    'flex items-center gap-2 px-3 py-2 rounded-md transition-all duration-200 text-xs',
+                    isSubActive
+                      ? 'bg-white text-black font-medium'
+                      : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                  )}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-current opacity-50" />
+                  {subItem.name}
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <>
       {/* Mobile menu button - Fixed en la parte superior izquierda */}
@@ -1524,7 +1646,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   {expandedSections.superAdminPlatform && (
                     <div className="space-y-1 mt-1">
                       {filteredSuperAdminPlatformItems.map((item) => (
-                        <NavItem key={item.href} item={item} />
+                        <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                       ))}
                     </div>
                   )}
