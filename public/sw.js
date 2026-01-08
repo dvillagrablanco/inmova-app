@@ -8,7 +8,7 @@
  * - Precaching de assets críticos
  */
 
-const CACHE_VERSION = 'v1.0.0';
+const CACHE_VERSION = 'v2.0.0-20260108';
 const CACHE_NAME = `inmova-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `inmova-runtime-${CACHE_VERSION}`;
 const IMAGES_CACHE = `inmova-images-${CACHE_VERSION}`;
