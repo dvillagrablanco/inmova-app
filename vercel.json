@@ -8,6 +8,12 @@
       "memory": 1024
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/check-coupons",
+      "schedule": "0 9 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

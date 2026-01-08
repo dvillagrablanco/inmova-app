@@ -22,6 +22,7 @@ const subscribeSchema = z.object({
   planId: z.string().min(1),
   interval: z.enum(['monthly', 'annual']).default('monthly'),
   addOnIds: z.array(z.string()).optional(),
+  couponCode: z.string().optional(), // Código de cupón promocional
 });
 
 export async function POST(request: NextRequest) {
@@ -63,6 +64,119 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       );
     }
+
+    // ════════════════════════════════════════════════════════════════
+    // VALIDACIÓN DE CUPÓN PROMOCIONAL
+    // ════════════════════════════════════════════════════════════════
+    let promoCoupon = null;
+    let discountInfo = null;
+
+    if (validated.couponCode) {
+      promoCoupon = await prisma.promoCoupon.findUnique({
+        where: { codigo: validated.couponCode.toUpperCase() },
+        include: {
+          _count: { select: { usos: true } },
+          usos: {
+            where: { companyId: user.company.id },
+          },
+        },
+      });
+
+      if (!promoCoupon) {
+        return NextResponse.json(
+          { error: 'Cupón no encontrado' },
+          { status: 400 }
+        );
+      }
+
+      // Verificar estado del cupón
+      if (promoCoupon.estado !== 'ACTIVE' || !promoCoupon.activo) {
+        return NextResponse.json(
+          { error: 'Este cupón no está activo' },
+          { status: 400 }
+        );
+      }
+
+      // Verificar expiración
+      if (new Date(promoCoupon.fechaExpiracion) < new Date()) {
+        return NextResponse.json(
+          { error: 'Este cupón ha expirado' },
+          { status: 400 }
+        );
+      }
+
+      // Verificar si no ha empezado
+      if (new Date(promoCoupon.fechaInicio) > new Date()) {
+        return NextResponse.json(
+          { error: 'Este cupón aún no está disponible' },
+          { status: 400 }
+        );
+      }
+
+      // Verificar límite de usos totales
+      if (promoCoupon.usosMaximos && promoCoupon._count.usos >= promoCoupon.usosMaximos) {
+        return NextResponse.json(
+          { error: 'Este cupón ha alcanzado su límite de usos' },
+          { status: 400 }
+        );
+      }
+
+      // Verificar usos por usuario
+      if (promoCoupon.usos.length >= promoCoupon.usosPorUsuario) {
+        return NextResponse.json(
+          { error: 'Ya has utilizado este cupón' },
+          { status: 400 }
+        );
+      }
+
+      // Verificar plan permitido
+      if (promoCoupon.planesPermitidos.length > 0) {
+        if (!promoCoupon.planesPermitidos.includes(plan.tier)) {
+          return NextResponse.json(
+            { error: `Este cupón no es válido para el plan ${plan.nombre}. Planes válidos: ${promoCoupon.planesPermitidos.join(', ')}` },
+            { status: 400 }
+          );
+        }
+      }
+
+      // Calcular descuento
+      let descuentoMensual = 0;
+      let ahorroTotal = 0;
+
+      switch (promoCoupon.tipo) {
+        case 'PERCENTAGE':
+          descuentoMensual = (plan.precioMensual * promoCoupon.valor) / 100;
+          ahorroTotal = descuentoMensual * promoCoupon.duracionMeses;
+          break;
+        case 'FIXED_AMOUNT':
+          descuentoMensual = promoCoupon.valor;
+          ahorroTotal = descuentoMensual * promoCoupon.duracionMeses;
+          break;
+        case 'FREE_MONTHS':
+          descuentoMensual = plan.precioMensual;
+          ahorroTotal = plan.precioMensual * promoCoupon.valor; // valor = meses gratis
+          break;
+        case 'TRIAL_EXTENSION':
+          // Se maneja como días de prueba adicionales
+          break;
+      }
+
+      discountInfo = {
+        codigo: promoCoupon.codigo,
+        tipo: promoCoupon.tipo,
+        valor: promoCoupon.valor,
+        descuentoMensual: Math.round(descuentoMensual * 100) / 100,
+        ahorroTotal: Math.round(ahorroTotal * 100) / 100,
+        duracionMeses: promoCoupon.duracionMeses,
+        precioConDescuento: Math.round((plan.precioMensual - descuentoMensual) * 100) / 100,
+      };
+
+      console.log(`[Subscribe] Cupón ${promoCoupon.codigo} aplicado:`, discountInfo);
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // SINCRONIZACIÓN CON STRIPE
+    // ════════════════════════════════════════════════════════════════
 
     // Sincronizar plan con Stripe si no tiene precio
     let stripePriceId: string | undefined;
@@ -112,11 +226,19 @@ export async function POST(request: NextRequest) {
 
     // Construir URLs
     const baseUrl = process.env.NEXTAUTH_URL || 'https://inmovaapp.com';
-    const successUrl = `${baseUrl}/dashboard/billing?success=true&plan=${plan.tier}`;
+    const successUrl = `${baseUrl}/dashboard/billing?success=true&plan=${plan.tier}${promoCoupon ? `&coupon=${promoCoupon.codigo}` : ''}`;
     const cancelUrl = `${baseUrl}/dashboard/billing?canceled=true`;
 
-    // Crear sesión de checkout
-    const checkoutUrl = await stripeService.createCheckoutSession({
+    // Determinar días de prueba
+    let trialDays = 14; // Default
+    if (promoCoupon?.tipo === 'TRIAL_EXTENSION') {
+      trialDays = 14 + promoCoupon.valor; // Añadir días extras de prueba
+    } else if (promoCoupon?.tipo === 'FREE_MONTHS') {
+      trialDays = 14 + (promoCoupon.valor * 30); // Convertir meses gratis a días de prueba
+    }
+
+    // Crear sesión de checkout con cupón de Stripe si existe
+    const checkoutOptions: any = {
       customerId,
       priceId: stripePriceId,
       successUrl,
@@ -125,9 +247,18 @@ export async function POST(request: NextRequest) {
         companyId: user.company.id,
         planId: plan.id,
         userId: user.id,
+        promoCouponCode: promoCoupon?.codigo || null,
+        promoCouponId: promoCoupon?.id || null,
       },
-      trialDays: 14, // 14 días de prueba
-    });
+      trialDays,
+    };
+
+    // Si hay cupón de descuento porcentual, crear cupón en Stripe
+    if (promoCoupon && promoCoupon.tipo === 'PERCENTAGE' && promoCoupon.stripeCouponId) {
+      checkoutOptions.stripeCouponId = promoCoupon.stripeCouponId;
+    }
+
+    const checkoutUrl = await stripeService.createCheckoutSession(checkoutOptions);
 
     if (!checkoutUrl) {
       return NextResponse.json(
@@ -135,6 +266,11 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // ════════════════════════════════════════════════════════════════
+    // REGISTRAR USO DEL CUPÓN (pendiente de confirmación de pago)
+    // ════════════════════════════════════════════════════════════════
+    // El uso final se registra en el webhook de Stripe cuando el pago se confirma
 
     return NextResponse.json({
       success: true,
@@ -147,6 +283,7 @@ export async function POST(request: NextRequest) {
           : plan.precioMensual,
         interval: validated.interval,
       },
+      discount: discountInfo,
     });
   } catch (error: any) {
     console.error('[Subscribe API Error]:', error);

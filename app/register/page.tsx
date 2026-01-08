@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { OptimizedImage } from '@/components/ui/optimized-image';
@@ -21,6 +21,8 @@ import {
   TrendingUp,
   Zap,
   Loader2,
+  Tag,
+  Gift,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -36,10 +38,44 @@ import {
   AccessibleSelectField,
 } from '@/components/forms/AccessibleFormField';
 
+// Información de cupones disponibles
+const COUPON_INFO: Record<string, { nombre: string; descuento: string; plan: string; color: string }> = {
+  'STARTER26': {
+    nombre: '¡Empieza a €17/mes!',
+    descuento: '50% dto. 3 meses',
+    plan: 'Starter',
+    color: 'from-amber-500 to-orange-500',
+  },
+  'COLIVING26': {
+    nombre: 'Coliving Sin Complicaciones',
+    descuento: '1er mes GRATIS + 20% dto.',
+    plan: 'Professional',
+    color: 'from-green-500 to-emerald-500',
+  },
+  'SWITCH26': {
+    nombre: 'Cambia y Ahorra',
+    descuento: 'Igualamos precio + Upgrade',
+    plan: 'Cualquier plan',
+    color: 'from-indigo-500 to-violet-500',
+  },
+};
+
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [couponInfo, setCouponInfo] = useState<typeof COUPON_INFO[string] | null>(null);
+
+  // Detectar cupón de la URL
+  useEffect(() => {
+    const couponCode = searchParams.get('coupon')?.toUpperCase();
+    if (couponCode && COUPON_INFO[couponCode]) {
+      setAppliedCoupon(couponCode);
+      setCouponInfo(COUPON_INFO[couponCode]);
+    }
+  }, [searchParams]);
 
   const {
     handleSubmit,
@@ -267,6 +303,30 @@ export default function RegisterPage() {
                   <h2 className="text-3xl font-bold text-gray-900 mb-2">Crea tu cuenta</h2>
                   <p className="text-gray-600">Comienza tu prueba gratuita de 30 días hoy mismo</p>
                 </div>
+
+                {/* Banner de cupón aplicado */}
+                {appliedCoupon && couponInfo && (
+                  <div className={`mb-6 p-4 rounded-xl bg-gradient-to-r ${couponInfo.color} text-white`}>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/20 rounded-lg">
+                        <Gift className="h-6 w-6" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold">{couponInfo.nombre}</span>
+                          <Badge className="bg-white/30 text-white text-xs">
+                            {appliedCoupon}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-white/90">{couponInfo.descuento}</p>
+                      </div>
+                      <Tag className="h-5 w-5" />
+                    </div>
+                    <p className="text-xs mt-2 text-white/80">
+                      Plan recomendado: {couponInfo.plan}. El descuento se aplicará automáticamente.
+                    </p>
+                  </div>
+                )}
 
                 {error && (
                   <div

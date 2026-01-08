@@ -5171,6 +5171,105 @@ model CompanyAddOn {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// CUPONES PROMOCIONALES INMOVA (Descuentos en suscripciones)
+// ═══════════════════════════════════════════════════════════════
+
+enum PromoType {
+  PERCENTAGE       // Descuento porcentual
+  FIXED_AMOUNT     // Cantidad fija de descuento
+  FREE_MONTHS      // Meses gratis
+  TRIAL_EXTENSION  // Extensión de prueba
+}
+
+enum PromoStatus {
+  DRAFT      // Borrador (no activo)
+  ACTIVE     // Activo y utilizable
+  PAUSED     // Pausado temporalmente
+  EXPIRED    // Expirado por fecha
+  EXHAUSTED  // Agotado por usos
+}
+
+model PromoCoupon {
+  id          String      @id @default(cuid())
+  codigo      String      @unique // "STARTER26", "COLIVING26", etc.
+  nombre      String      // Nombre descriptivo
+  descripcion String?     @db.Text
+
+  // Tipo y valor
+  tipo        PromoType
+  valor       Float       // Porcentaje (ej: 50 para 50%) o meses gratis
+
+  // Vigencia
+  fechaInicio     DateTime
+  fechaExpiracion DateTime
+  
+  // Alertas de expiración
+  alertaEnviada7d   Boolean   @default(false) // Alerta 7 días antes
+  alertaEnviada3d   Boolean   @default(false) // Alerta 3 días antes
+  alertaEnviada1d   Boolean   @default(false) // Alerta 1 día antes
+  ultimaAlertaFecha DateTime?
+
+  // Límites de uso
+  usosMaximos      Int?      // Límite total de usos (null = ilimitado)
+  usosActuales     Int       @default(0)
+  usosPorUsuario   Int       @default(1) // Usos permitidos por usuario
+
+  // Duración del descuento
+  duracionMeses    Int       @default(1) // Cuántos meses aplica el descuento
+
+  // Restricciones por plan
+  planesPermitidos String[]  @default([]) // ["STARTER", "PROFESSIONAL", etc.] - vacío = todos
+  
+  // Stripe integration
+  stripeCouponId   String?   // ID del cupón en Stripe
+
+  // Estado
+  estado      PromoStatus @default(DRAFT)
+  activo      Boolean     @default(true)
+  destacado   Boolean     @default(false) // Para mostrar en landing
+
+  // Metadata
+  creadoPor   String?     // Admin que lo creó
+  notas       String?     @db.Text
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relaciones
+  usos        PromoCouponUsage[]
+
+  @@index([codigo])
+  @@index([estado])
+  @@index([fechaExpiracion])
+  @@map("promo_coupons")
+}
+
+model PromoCouponUsage {
+  id          String      @id @default(cuid())
+  couponId    String
+  coupon      PromoCoupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  
+  companyId   String
+  userId      String?     // Usuario que aplicó el cupón
+
+  // Detalles del descuento aplicado
+  planAplicado         String   // Plan al que se aplicó
+  descuentoAplicado    Float    // Monto o porcentaje aplicado
+  ahorroTotal          Float    // Ahorro calculado en €
+  duracionMesesRestante Int     @default(0) // Meses restantes con descuento
+
+  // Stripe
+  stripeSubscriptionId String?
+
+  aplicadoEn  DateTime    @default(now())
+
+  @@index([couponId])
+  @@index([companyId])
+  @@index([userId])
+  @@map("promo_coupon_usages")
+}
+
+// ═══════════════════════════════════════════════════════════════
 // PRECIOS EWOORKER (Planes de construcción B2B)
 // ═══════════════════════════════════════════════════════════════
 
