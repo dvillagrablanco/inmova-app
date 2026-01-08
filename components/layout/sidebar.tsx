@@ -992,15 +992,15 @@ const superAdminPlatformItems: SidebarItem[] = [
       { name: 'API Docs', href: '/api-docs' },
     ],
   },
-  // ========== 4. SERVICIOS QUE OFRECE INMOVA ==========
+  // ========== 4. COMUNICACIONES ==========
   {
-    name: 'Servicios',
+    name: 'Comunicaciones',
     href: '/admin/plantillas-sms',
     icon: MessageSquare,
     roles: ['super_admin'],
     subItems: [
       { name: 'Plantillas SMS', href: '/admin/plantillas-sms' },
-      { name: 'Marketplace', href: '/admin/marketplace' },
+      { name: 'Plantillas Email', href: '/admin/plantillas-email' },
     ],
   },
   // ========== 5. CONFIGURACIÓN DE EMPRESAS CLIENTE ==========
