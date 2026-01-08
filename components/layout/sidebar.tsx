@@ -1000,8 +1000,6 @@ const superAdminPlatformItems: SidebarItem[] = [
     roles: ['super_admin'],
     subItems: [
       { name: 'Plantillas SMS', href: '/admin/plantillas-sms' },
-      { name: 'Firma Digital', href: '/admin/firma-digital' },
-      { name: 'OCR Import', href: '/admin/ocr-import' },
       { name: 'Marketplace', href: '/admin/marketplace' },
     ],
   },
