@@ -420,37 +420,6 @@ function generateActions(
   }
 
   // ========================================
-  // CONTRATOS - LISTA
-  // ========================================
-  if (pathname === '/contratos') {
-    actions.push(
-      {
-        label: 'Nuevo Contrato',
-        icon: Plus,
-        onClick: () => router.push('/contratos/nuevo'),
-        variant: 'default',
-      },
-      {
-        label: 'Por Vencer',
-        icon: Clock,
-        onClick: () => {
-          // TODO: Filtrar por vencimiento
-        },
-        variant: 'outline',
-        badge: props.daysUntilExpiration ? `${props.daysUntilExpiration}` : undefined,
-      },
-      {
-        label: 'Exportar',
-        icon: Download,
-        onClick: () => {
-          // TODO: Exportar
-        },
-        variant: 'ghost',
-      }
-    );
-  }
-
-  // ========================================
   // CONTRATOS - DETALLES
   // ========================================
   if (pathname.startsWith('/contratos/') && props.contractId && pathname !== '/contratos/nuevo') {
