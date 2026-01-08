@@ -19,78 +19,87 @@ import {
 
 const ofertas = [
   {
-    id: 'flipping26',
-    code: 'FLIPPING26',
-    title: 'Adiós al Excel',
-    subtitle: '40% de descuento durante 6 meses',
-    description: 'Deja de perder dinero en tus reformas. Controla tu ROI en tiempo real. Ideal para inversores y house flippers.',
+    id: 'starter26',
+    code: 'STARTER26',
+    title: '¡Empieza a €17/mes!',
+    subtitle: 'Plan Starter al 50% durante 3 meses',
+    description: 'Perfecto para pequeños propietarios y house flippers. Gestión profesional de hasta 5 propiedades con todas las herramientas esenciales.',
     icon: <Sparkles className="h-8 w-8" />,
     gradient: 'from-amber-500 via-orange-500 to-red-500',
     price: {
-      original: '€49',
-      discounted: '€29',
-      period: '/mes'
+      original: '€35',
+      discounted: '€17',
+      period: '/mes (3 meses)'
     },
+    savings: 'Ahorras €54',
+    planName: 'Plan Starter',
+    planFeatures: '1-5 propiedades • 1 vertical • Contratos digitales',
     benefits: [
-      'Control de ROI en tiempo real',
-      'Gestión de reformas y costes',
-      'Análisis de rentabilidad',
-      'Comparativa de proyectos',
-      'Informes automatizados',
-      'Soporte prioritario 6 meses'
+      'Gestión completa de propiedades',
+      'Contratos digitales y firma online',
+      'Portal de inquilinos incluido',
+      'Cobros automáticos y recordatorios',
+      'Dashboard con métricas',
+      'Soporte por email'
     ],
     validUntil: '31 de Marzo 2026',
-    ctaText: 'Activar descuento',
-    ctaHref: '/register?coupon=FLIPPING26'
+    ctaText: 'Activar 50% dto.',
+    ctaHref: '/register?coupon=STARTER26&plan=starter'
   },
   {
-    id: 'roompro',
-    code: 'ROOMPRO26',
-    title: 'Revolución Coliving',
-    subtitle: '50% dto. primer mes + Migración gratis',
-    description: 'Gestiona tus espacios coliving de forma automática. Reparto de gastos, facturación y comunicación con inquilinos.',
+    id: 'coliving26',
+    code: 'COLIVING26',
+    title: 'Coliving Sin Complicaciones',
+    subtitle: 'Primer mes GRATIS + 20% dto. 6 meses',
+    description: 'El plan Professional perfecto para gestores de coliving. Prorrateo automático de suministros, contratos flexibles y portal de residentes.',
     icon: <TrendingUp className="h-8 w-8" />,
     gradient: 'from-green-500 via-emerald-500 to-teal-500',
     price: {
-      original: '€99',
-      discounted: '€49',
+      original: '€59',
+      discounted: '€0',
       period: 'primer mes'
     },
+    savings: 'Ahorras €130+',
+    planName: 'Plan Professional',
+    planFeatures: '6-25 propiedades • 3 verticales • IA incluida',
     benefits: [
-      'Reparto automático de gastos',
-      'Facturación de suministros',
-      'Portal del inquilino',
+      'Prorrateo automático de suministros',
+      'Facturación individual por habitación',
+      'Portal de residentes avanzado',
       'Migración de datos GRATIS',
-      'Room Rental PRO incluido',
-      'Onboarding personalizado'
+      'Contratos flexibles (1-12 meses)',
+      'Onboarding personalizado 1:1'
     ],
     validUntil: '31 de Marzo 2026',
-    ctaText: 'Activar oferta',
-    ctaHref: '/register?coupon=ROOMPRO26'
+    ctaText: 'Empezar GRATIS',
+    ctaHref: '/register?coupon=COLIVING26&plan=professional'
   },
   {
-    id: 'switch2026',
-    code: 'SWITCH2026',
+    id: 'switch26',
+    code: 'SWITCH26',
     title: 'Cambia y Ahorra',
-    subtitle: 'Igualamos tu precio + Upgrade gratis',
-    description: '¿Usas otra plataforma? Trae tu última factura y te damos INMOVA al mismo precio con el plan superior.',
+    subtitle: 'Igualamos precio + Plan superior incluido',
+    description: '¿Pagas por otra plataforma? Trae tu factura y te damos INMOVA al mismo precio pero con el plan superior. Más funcionalidades por el mismo dinero.',
     icon: <ArrowRightLeft className="h-8 w-8" />,
     gradient: 'from-indigo-500 via-purple-500 to-pink-500',
     price: {
-      original: 'Tu precio actual',
+      original: 'Tu precio',
       discounted: 'Igualado',
-      period: '1 año'
+      period: '12 meses'
     },
+    savings: 'Plan superior GRATIS',
+    planName: 'Upgrade garantizado',
+    planFeatures: '7 verticales • 15 módulos • Sin límites ocultos',
     benefits: [
-      'Igualamos el precio de tu competidor',
-      'Plan superior incluido',
+      'Igualamos tu precio actual 12 meses',
+      'Upgrade al plan superior gratis',
       'Migración completa de datos',
-      '7 verticales vs 1 de la competencia',
+      '7 verticales vs 1 de competencia',
       '15 módulos transversales',
-      'Soporte dedicado en la transición'
+      'Soporte dedicado en transición'
     ],
     validUntil: '31 de Marzo 2026',
-    ctaText: 'Solicitar cambio',
+    ctaText: 'Solicitar Cambio',
     ctaHref: '/landing/contacto?motivo=cambio-competencia'
   }
 ];
@@ -122,7 +131,7 @@ export default function OfertasPage() {
         <div className="container mx-auto">
           <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {ofertas.map((oferta) => (
-              <Card key={oferta.id} className="relative overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 hover:border-indigo-300">
+              <Card id={oferta.id} key={oferta.id} className="relative overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 hover:border-indigo-300 scroll-mt-24">
                 {/* Gradient Header */}
                 <div className={`bg-gradient-to-r ${oferta.gradient} p-6 text-white`}>
                   <div className="flex items-center gap-3 mb-4">
@@ -138,17 +147,32 @@ export default function OfertasPage() {
                 </div>
 
                 <CardContent className="p-6">
-                  {/* Precio */}
-                  <div className="text-center py-6 border-b mb-6">
+                  {/* Precio y Ahorro */}
+                  <div className="text-center py-4 border-b mb-4">
                     <div className="flex items-center justify-center gap-4">
                       <span className="text-2xl text-gray-400 line-through">{oferta.price.original}</span>
                       <span className="text-4xl font-black text-gray-900">{oferta.price.discounted}</span>
                     </div>
                     <span className="text-gray-500">{oferta.price.period}</span>
+                    {oferta.savings && (
+                      <div className="mt-2">
+                        <Badge className="bg-green-100 text-green-700 border-green-300">
+                          🎁 {oferta.savings}
+                        </Badge>
+                      </div>
+                    )}
                   </div>
 
+                  {/* Plan incluido */}
+                  {oferta.planName && (
+                    <div className="bg-indigo-50 rounded-lg p-3 mb-4 text-center">
+                      <p className="text-sm font-bold text-indigo-800">{oferta.planName}</p>
+                      <p className="text-xs text-indigo-600">{oferta.planFeatures}</p>
+                    </div>
+                  )}
+
                   {/* Descripción */}
-                  <p className="text-gray-600 mb-6">{oferta.description}</p>
+                  <p className="text-gray-600 mb-4 text-sm">{oferta.description}</p>
 
                   {/* Beneficios */}
                   <ul className="space-y-3 mb-6">
@@ -176,6 +200,59 @@ export default function OfertasPage() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Comparativa de Precios */}
+      <section className="py-16 px-4 bg-white">
+        <div className="container mx-auto max-w-4xl">
+          <h2 className="text-3xl font-bold text-center mb-4">
+            Precios Normales vs Ofertas
+          </h2>
+          <p className="text-gray-600 text-center mb-10">
+            Compara cuánto ahorras con nuestras promociones especiales
+          </p>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            <Card className="border-2 border-amber-200 bg-amber-50/50">
+              <CardContent className="p-6 text-center">
+                <h3 className="font-bold text-lg mb-2">Plan Starter</h3>
+                <p className="text-gray-500 text-sm mb-4">1-5 propiedades</p>
+                <div className="mb-4">
+                  <span className="text-gray-400 line-through text-xl">€35/mes</span>
+                  <div className="text-3xl font-black text-amber-600">€17/mes</div>
+                  <span className="text-sm text-amber-700">3 primeros meses</span>
+                </div>
+                <Badge className="bg-amber-200 text-amber-800">STARTER26</Badge>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-2 border-green-200 bg-green-50/50">
+              <CardContent className="p-6 text-center">
+                <h3 className="font-bold text-lg mb-2">Plan Professional</h3>
+                <p className="text-gray-500 text-sm mb-4">6-25 propiedades</p>
+                <div className="mb-4">
+                  <span className="text-gray-400 line-through text-xl">€59/mes</span>
+                  <div className="text-3xl font-black text-green-600">€0 1er mes</div>
+                  <span className="text-sm text-green-700">+ €47/mes (6 meses)</span>
+                </div>
+                <Badge className="bg-green-200 text-green-800">COLIVING26</Badge>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-2 border-indigo-200 bg-indigo-50/50">
+              <CardContent className="p-6 text-center">
+                <h3 className="font-bold text-lg mb-2">Migración</h3>
+                <p className="text-gray-500 text-sm mb-4">Desde competencia</p>
+                <div className="mb-4">
+                  <span className="text-gray-400 text-xl">Tu precio</span>
+                  <div className="text-3xl font-black text-indigo-600">Igualado</div>
+                  <span className="text-sm text-indigo-700">+ Plan superior gratis</span>
+                </div>
+                <Badge className="bg-indigo-200 text-indigo-800">SWITCH26</Badge>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
