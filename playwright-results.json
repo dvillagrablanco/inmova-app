@@ -1,7 +1,7 @@
 {
   "config": {
     "configFile": "/workspace/playwright.config.ts",
-    "rootDir": "/workspace/e2e",
+    "rootDir": "/workspace/__tests__/e2e",
     "forbidOnly": false,
     "fullyParallel": true,
     "globalSetup": null,
@@ -31,7 +31,10 @@
           "outputFile": "playwright-results.xml"
         }
       ],
-      ["list", null]
+      [
+        "list",
+        null
+      ]
     ],
     "reportSlowTests": {
       "max": 5,
@@ -46,9 +49,11 @@
         "metadata": {},
         "id": "chromium",
         "name": "chromium",
-        "testDir": "/workspace/e2e",
+        "testDir": "/workspace/__tests__/e2e",
         "testIgnore": [],
-        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
         "timeout": 30000
       },
       {
@@ -58,9 +63,11 @@
         "metadata": {},
         "id": "firefox",
         "name": "firefox",
-        "testDir": "/workspace/e2e",
+        "testDir": "/workspace/__tests__/e2e",
         "testIgnore": [],
-        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
         "timeout": 30000
       },
       {
@@ -70,9 +77,11 @@
         "metadata": {},
         "id": "webkit",
         "name": "webkit",
-        "testDir": "/workspace/e2e",
+        "testDir": "/workspace/__tests__/e2e",
         "testIgnore": [],
-        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
         "timeout": 30000
       },
       {
@@ -82,9 +91,11 @@
         "metadata": {},
         "id": "Mobile Chrome",
         "name": "Mobile Chrome",
-        "testDir": "/workspace/e2e",
+        "testDir": "/workspace/__tests__/e2e",
         "testIgnore": [],
-        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
         "timeout": 30000
       },
       {
@@ -94,9 +105,11 @@
         "metadata": {},
         "id": "Mobile Safari",
         "name": "Mobile Safari",
-        "testDir": "/workspace/e2e",
+        "testDir": "/workspace/__tests__/e2e",
         "testIgnore": [],
-        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
         "timeout": 30000
       },
       {
@@ -106,9 +119,11 @@
         "metadata": {},
         "id": "iPad",
         "name": "iPad",
-        "testDir": "/workspace/e2e",
+        "testDir": "/workspace/__tests__/e2e",
         "testIgnore": [],
-        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
         "timeout": 30000
       }
     ],
@@ -128,19 +143,13 @@
   "suites": [],
   "errors": [
     {
-      "message": "Error: Cannot find module '@axe-core/playwright'\nRequire stack:\n- /workspace/e2e/accessibility.spec.ts\n- /workspace/node_modules/playwright/lib/transform/transform.js\n- /workspace/node_modules/playwright/lib/common/configLoader.js\n- /workspace/node_modules/playwright/lib/program.js\n- /workspace/node_modules/playwright/cli.js",
-      "stack": "Error: Cannot find module '@axe-core/playwright'\nRequire stack:\n- /workspace/e2e/accessibility.spec.ts\n- /workspace/node_modules/playwright/lib/transform/transform.js\n- /workspace/node_modules/playwright/lib/common/configLoader.js\n- /workspace/node_modules/playwright/lib/program.js\n- /workspace/node_modules/playwright/cli.js\n    at Object.<anonymous> (/workspace/e2e/accessibility.spec.ts:9:1)",
-      "location": {
-        "file": "/workspace/e2e/accessibility.spec.ts",
-        "column": 1,
-        "line": 9
-      },
-      "snippet": "   at accessibility.spec.ts:9\n\n   7 |\n   8 | import { test, expect } from '@playwright/test';\n>  9 | import AxeBuilder from '@axe-core/playwright';\n     | ^\n  10 |\n  11 | const PAGES_TO_TEST = [\n  12 |   { path: '/landing', name: 'Landing Page' },"
+      "message": "Error: No tests found.\nMake sure that arguments are regular expressions matching test files.\nYou may need to escape symbols like \"$\" or \"*\" and quote the arguments.",
+      "stack": "Error: No tests found.\nMake sure that arguments are regular expressions matching test files.\nYou may need to escape symbols like \"$\" or \"*\" and quote the arguments."
     }
   ],
   "stats": {
-    "startTime": "2026-01-03T07:46:11.816Z",
-    "duration": 515.212,
+    "startTime": "2026-01-08T12:26:52.667Z",
+    "duration": 8289.029,
     "expected": 0,
     "skipped": 0,
     "unexpected": 0,
