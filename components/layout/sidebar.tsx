@@ -889,14 +889,12 @@ const administradorEmpresaItems = [
 ];
 
 // 5.2 SUPER ADMIN - GESTIÓN DE PLATAFORMA
-// ESTRUCTURA ORGANIZADA: 14 items con submenús
-// - Billing: Planes + Facturación B2B
-// - Monitoreo: Actividad + Alertas + Salud Sistema + Métricas + Reportes
-// - Integraciones: Dashboard Integraciones + Integraciones Contables
-// - Servicios: Plantillas SMS + Firma Digital + OCR Import
-// - Seguridad: Seguridad + Backup
-// - Legal: Plantillas legales (independiente por importancia)
-// - Marketplace: Marketplace + Addons
+// ESTRUCTURA REORGANIZADA:
+// 1. NEGOCIO: Dashboard, Clientes B2B, Billing (Planes+Addons+Facturación+Cupones), Partners, Legal
+// 2. MONITOREO: Actividad, Alertas, Salud, Métricas, Reportes, Seguridad+Backup+Usuarios
+// 3. INTEGRACIONES DE INMOVA: Servicios Conectados (Stripe, AWS, etc.), API Docs
+// 4. SERVICIOS: Plantillas SMS, Firma Digital, OCR Import, Marketplace
+// 5. CONFIG EMPRESAS: Módulos, Integraciones Contables (para empresas), Portales, Personalización
 
 interface SidebarItem {
   name: string;
@@ -906,7 +904,18 @@ interface SidebarItem {
   subItems?: { name: string; href: string }[];
 }
 
+// =====================================================
+// SUPER ADMIN - GESTIÓN DE LA PLATAFORMA INMOVA
+// =====================================================
+// Organización:
+// 1. NEGOCIO: Dashboard, Clientes, Billing, Partners
+// 2. MONITOREO: Actividad, Alertas, Salud, Métricas, Reportes, Seguridad
+// 3. INTEGRACIONES: Plataforma, API Docs
+// 4. SERVICIOS: SMS, Firma, OCR, Marketplace
+// 5. CONFIG EMPRESAS: Módulos, Integraciones Contables, Portales, Personalización
+
 const superAdminPlatformItems: SidebarItem[] = [
+  // ========== 1. GESTIÓN DEL NEGOCIO ==========
   {
     name: 'Dashboard',
     href: '/admin/dashboard',
@@ -930,14 +939,10 @@ const superAdminPlatformItems: SidebarItem[] = [
     roles: ['super_admin'],
     subItems: [
       { name: 'Planes', href: '/admin/planes' },
+      { name: 'Add-ons', href: '/admin/addons' },
       { name: 'Facturación B2B', href: '/admin/facturacion-b2b' },
+      { name: 'Cupones', href: '/admin/cupones' },
     ],
-  },
-  {
-    name: 'Cupones',
-    href: '/admin/cupones',
-    icon: Tag,
-    roles: ['super_admin'],
   },
   {
     name: 'Partners',
@@ -946,42 +951,12 @@ const superAdminPlatformItems: SidebarItem[] = [
     roles: ['super_admin'],
   },
   {
-    name: 'Integraciones',
-    href: '/dashboard/integrations',
-    icon: Zap,
-    roles: ['super_admin'],
-    subItems: [
-      { name: 'Dashboard', href: '/dashboard/integrations' },
-      { name: 'Contables', href: '/admin/integraciones-contables' },
-    ],
-  },
-  {
-    name: 'Marketplace',
-    href: '/admin/marketplace',
-    icon: ShoppingCart,
-    roles: ['super_admin'],
-    subItems: [
-      { name: 'Servicios', href: '/admin/marketplace' },
-      { name: 'Addons', href: '/admin/addons' },
-    ],
-  },
-  {
-    name: 'Servicios',
-    href: '/admin/plantillas-sms',
-    icon: MessageSquare,
-    roles: ['super_admin'],
-    subItems: [
-      { name: 'Plantillas SMS', href: '/admin/plantillas-sms' },
-      { name: 'Firma Digital', href: '/admin/firma-digital' },
-      { name: 'OCR Import', href: '/admin/ocr-import' },
-    ],
-  },
-  {
     name: 'Legal',
     href: '/admin/legal',
     icon: FileText,
     roles: ['super_admin'],
   },
+  // ========== 2. MONITOREO Y OPERACIONES ==========
   {
     name: 'Monitoreo',
     href: '/admin/activity',
@@ -996,12 +971,6 @@ const superAdminPlatformItems: SidebarItem[] = [
     ],
   },
   {
-    name: 'Portales',
-    href: '/admin/portales-externos',
-    icon: Share2,
-    roles: ['super_admin'],
-  },
-  {
     name: 'Seguridad',
     href: '/admin/seguridad',
     icon: Shield,
@@ -1009,13 +978,45 @@ const superAdminPlatformItems: SidebarItem[] = [
     subItems: [
       { name: 'General', href: '/admin/seguridad' },
       { name: 'Backup', href: '/admin/backup-restore' },
+      { name: 'Usuarios', href: '/admin/usuarios' },
     ],
   },
+  // ========== 3. INTEGRACIONES DE INMOVA ==========
   {
-    name: 'API Docs',
-    href: '/api-docs',
-    icon: Code,
+    name: 'Integraciones',
+    href: '/admin/integraciones',
+    icon: Zap,
     roles: ['super_admin'],
+    subItems: [
+      { name: 'Servicios Conectados', href: '/admin/integraciones' },
+      { name: 'API Docs', href: '/api-docs' },
+    ],
+  },
+  // ========== 4. SERVICIOS QUE OFRECE INMOVA ==========
+  {
+    name: 'Servicios',
+    href: '/admin/plantillas-sms',
+    icon: MessageSquare,
+    roles: ['super_admin'],
+    subItems: [
+      { name: 'Plantillas SMS', href: '/admin/plantillas-sms' },
+      { name: 'Firma Digital', href: '/admin/firma-digital' },
+      { name: 'OCR Import', href: '/admin/ocr-import' },
+      { name: 'Marketplace', href: '/admin/marketplace' },
+    ],
+  },
+  // ========== 5. CONFIGURACIÓN DE EMPRESAS CLIENTE ==========
+  {
+    name: 'Config. Empresas',
+    href: '/admin/modulos',
+    icon: Settings,
+    roles: ['super_admin'],
+    subItems: [
+      { name: 'Módulos', href: '/admin/modulos' },
+      { name: 'Integraciones Contables', href: '/admin/integraciones-contables' },
+      { name: 'Portales Externos', href: '/admin/portales-externos' },
+      { name: 'Personalización', href: '/admin/personalizacion' },
+    ],
   },
 ];
 
