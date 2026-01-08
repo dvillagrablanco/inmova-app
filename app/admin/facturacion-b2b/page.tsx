@@ -54,7 +54,28 @@ import {
   Calendar,
   Building,
   CreditCard,
+  Pencil,
+  Trash2,
+  MoreVertical,
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { DialogFooter } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import logger, { logError } from '@/lib/logger';
@@ -100,6 +121,15 @@ export default function B2BBillingDashboard() {
   const [selectedEstado, setSelectedEstado] = useState<string>('all');
   const [isGeneratingMonthly, setIsGeneratingMonthly] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [editForm, setEditForm] = useState({
+    notas: '',
+    terminosPago: '',
+    fechaVencimiento: '',
+  });
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Authentication and Authorization check
   useEffect(() => {
@@ -170,6 +200,99 @@ export default function B2BBillingDashboard() {
       toast.error('Error al generar facturas mensuales');
     } finally {
       setIsGeneratingMonthly(false);
+    }
+  };
+
+  const handleEditInvoice = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setEditForm({
+      notas: '',
+      terminosPago: '',
+      fechaVencimiento: invoice.fechaVencimiento.split('T')[0],
+    });
+    setShowEditDialog(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedInvoice) return;
+    
+    try {
+      setIsProcessing(true);
+      const res = await fetch(`/api/b2b-billing/invoices/${selectedInvoice.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm),
+      });
+
+      if (res.ok) {
+        toast.success('Factura actualizada correctamente');
+        setShowEditDialog(false);
+        loadData();
+      } else {
+        const error = await res.json();
+        toast.error(error.error || 'Error al actualizar factura');
+      }
+    } catch (error) {
+      logger.error('Error:', error);
+      toast.error('Error al actualizar factura');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDeleteInvoice = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedInvoice) return;
+    
+    try {
+      setIsProcessing(true);
+      const res = await fetch(`/api/b2b-billing/invoices/${selectedInvoice.id}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        toast.success('Factura cancelada correctamente');
+        setShowDeleteDialog(false);
+        loadData();
+      } else {
+        const error = await res.json();
+        toast.error(error.error || 'Error al cancelar factura');
+      }
+    } catch (error) {
+      logger.error('Error:', error);
+      toast.error('Error al cancelar factura');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleMarkAsPaid = async (invoice: Invoice) => {
+    try {
+      const res = await fetch(`/api/b2b-billing/payments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          invoiceId: invoice.id,
+          monto: invoice.total,
+          metodoPago: 'MANUAL',
+          referencia: `Pago manual - ${format(new Date(), 'dd/MM/yyyy')}`,
+        }),
+      });
+
+      if (res.ok) {
+        toast.success('Factura marcada como pagada');
+        loadData();
+      } else {
+        const error = await res.json();
+        toast.error(error.error || 'Error al marcar como pagada');
+      }
+    } catch (error) {
+      logger.error('Error:', error);
+      toast.error('Error al marcar como pagada');
     }
   };
 
@@ -400,26 +523,47 @@ export default function B2BBillingDashboard() {
                             </TableCell>
                             <TableCell>{getEstadoBadge(invoice.estado)}</TableCell>
                             <TableCell className="text-right">
-                              <div className="flex gap-1 justify-end">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() =>
-                                    router.push(`/admin/facturacion-b2b/${invoice.id}`)
-                                  }
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    toast.info('Funcionalidad de descarga disponible próximamente');
-                                  }}
-                                >
-                                  <Download className="w-4 h-4" />
-                                </Button>
-                              </div>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <MoreVertical className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    onClick={() => router.push(`/admin/facturacion-b2b/${invoice.id}`)}
+                                  >
+                                    <Eye className="w-4 h-4 mr-2" />
+                                    Ver Detalles
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => window.open(`/api/b2b-billing/invoices/${invoice.id}/pdf`, '_blank')}
+                                  >
+                                    <Download className="w-4 h-4 mr-2" />
+                                    Descargar PDF
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => handleEditInvoice(invoice)}>
+                                    <Pencil className="w-4 h-4 mr-2" />
+                                    Editar Factura
+                                  </DropdownMenuItem>
+                                  {invoice.estado === 'PENDIENTE' && (
+                                    <DropdownMenuItem onClick={() => handleMarkAsPaid(invoice)}>
+                                      <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                                      Marcar como Pagada
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={() => handleDeleteInvoice(invoice)}
+                                    className="text-red-600"
+                                    disabled={invoice.estado === 'CANCELADA'}
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Cancelar Factura
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -429,6 +573,79 @@ export default function B2BBillingDashboard() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Dialog de Edición */}
+            <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Editar Factura</DialogTitle>
+                  <DialogDescription>
+                    Editar factura {selectedInvoice?.numeroFactura}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fechaVencimiento">Fecha de Vencimiento</Label>
+                    <Input
+                      id="fechaVencimiento"
+                      type="date"
+                      value={editForm.fechaVencimiento}
+                      onChange={(e) => setEditForm({ ...editForm, fechaVencimiento: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="terminosPago">Términos de Pago</Label>
+                    <Input
+                      id="terminosPago"
+                      placeholder="Ej: Pago a 30 días"
+                      value={editForm.terminosPago}
+                      onChange={(e) => setEditForm({ ...editForm, terminosPago: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="notas">Notas</Label>
+                    <Textarea
+                      id="notas"
+                      placeholder="Notas adicionales..."
+                      value={editForm.notas}
+                      onChange={(e) => setEditForm({ ...editForm, notas: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleSaveEdit} disabled={isProcessing}>
+                    {isProcessing ? 'Guardando...' : 'Guardar Cambios'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            {/* Dialog de Confirmación de Eliminación */}
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Cancelar factura?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción cancelará la factura <strong>{selectedInvoice?.numeroFactura}</strong> 
+                    por un total de <strong>€{selectedInvoice?.total.toFixed(2)}</strong>.
+                    La factura quedará marcada como cancelada pero no se eliminará del sistema.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>No, mantener</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleConfirmDelete}
+                    className="bg-red-600 hover:bg-red-700"
+                    disabled={isProcessing}
+                  >
+                    {isProcessing ? 'Cancelando...' : 'Sí, cancelar factura'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </AuthenticatedLayout>
   );
