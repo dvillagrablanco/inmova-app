@@ -129,9 +129,9 @@ export default function OfertasPage() {
       {/* Ofertas Grid */}
       <section className="pb-20 px-4">
         <div className="container mx-auto">
-          <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto items-stretch">
+          <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {ofertas.map((oferta) => (
-              <Card id={oferta.id} key={oferta.id} className="relative overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 hover:border-indigo-300 scroll-mt-24 flex flex-col">
+              <Card id={oferta.id} key={oferta.id} className="relative overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 hover:border-indigo-300 scroll-mt-24 h-full flex flex-col">
                 {/* Gradient Header */}
                 <div className={`bg-gradient-to-r ${oferta.gradient} p-6 text-white`}>
                   <div className="flex items-center gap-3 mb-4">
@@ -146,46 +146,48 @@ export default function OfertasPage() {
                   <p className="text-white/90 font-semibold">{oferta.subtitle}</p>
                 </div>
 
-                <CardContent className="p-6 flex-grow flex flex-col">
-                  {/* Precio y Ahorro */}
-                  <div className="text-center py-4 border-b mb-4">
-                    <div className="flex items-center justify-center gap-4">
-                      <span className="text-2xl text-gray-400 line-through">{oferta.price.original}</span>
-                      <span className="text-4xl font-black text-gray-900">{oferta.price.discounted}</span>
+                <CardContent className="p-6 flex-1 flex flex-col justify-between">
+                  <div>
+                    {/* Precio y Ahorro */}
+                    <div className="text-center py-4 border-b mb-4">
+                      <div className="flex items-center justify-center gap-4">
+                        <span className="text-2xl text-gray-400 line-through">{oferta.price.original}</span>
+                        <span className="text-4xl font-black text-gray-900">{oferta.price.discounted}</span>
+                      </div>
+                      <span className="text-gray-500">{oferta.price.period}</span>
+                      {oferta.savings && (
+                        <div className="mt-2">
+                          <Badge className="bg-green-100 text-green-700 border-green-300">
+                            🎁 {oferta.savings}
+                          </Badge>
+                        </div>
+                      )}
                     </div>
-                    <span className="text-gray-500">{oferta.price.period}</span>
-                    {oferta.savings && (
-                      <div className="mt-2">
-                        <Badge className="bg-green-100 text-green-700 border-green-300">
-                          🎁 {oferta.savings}
-                        </Badge>
+
+                    {/* Plan incluido */}
+                    {oferta.planName && (
+                      <div className="bg-indigo-50 rounded-lg p-3 mb-4 text-center">
+                        <p className="text-sm font-bold text-indigo-800">{oferta.planName}</p>
+                        <p className="text-xs text-indigo-600">{oferta.planFeatures}</p>
                       </div>
                     )}
+
+                    {/* Descripción */}
+                    <p className="text-gray-600 mb-4 text-sm">{oferta.description}</p>
+
+                    {/* Beneficios */}
+                    <ul className="space-y-3 mb-6">
+                      {oferta.benefits.map((benefit, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-gray-700">{benefit}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
 
-                  {/* Plan incluido */}
-                  {oferta.planName && (
-                    <div className="bg-indigo-50 rounded-lg p-3 mb-4 text-center">
-                      <p className="text-sm font-bold text-indigo-800">{oferta.planName}</p>
-                      <p className="text-xs text-indigo-600">{oferta.planFeatures}</p>
-                    </div>
-                  )}
-
-                  {/* Descripción */}
-                  <p className="text-gray-600 mb-4 text-sm">{oferta.description}</p>
-
-                  {/* Beneficios */}
-                  <ul className="space-y-3 mb-6 flex-grow">
-                    {oferta.benefits.map((benefit, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-700">{benefit}</span>
-                      </li>
-                    ))}
-                  </ul>
-
                   {/* Validez y CTA - Alineados al final */}
-                  <div className="mt-auto">
+                  <div className="pt-4">
                     <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
                       <Clock className="h-4 w-4" />
                       <span>Válido hasta: {oferta.validUntil}</span>

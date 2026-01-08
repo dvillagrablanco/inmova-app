@@ -106,13 +106,13 @@ export function AccessPortalsSection() {
         </div>
 
         {/* Portals Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           {portals.map((portal) => {
             const Icon = portal.icon;
             return (
               <Card
                 key={portal.title}
-                className={`relative overflow-hidden border-2 ${portal.borderColor} hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group flex flex-col`}
+                className={`relative overflow-hidden border-2 ${portal.borderColor} hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group h-full flex flex-col`}
               >
                 {/* Badge si tiene */}
                 {portal.badge && (
@@ -126,19 +126,19 @@ export function AccessPortalsSection() {
                   className={`absolute inset-0 ${portal.bgColor} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
                 />
 
-                <CardHeader className="relative z-10">
+                <CardHeader className="relative z-10 min-h-[140px]">
                   <div
                     className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${portal.color} mb-4`}
                   >
                     <Icon className="h-6 w-6 text-white" />
                   </div>
-                  <CardTitle className="text-xl font-bold mb-2">{portal.title}</CardTitle>
-                  <CardDescription className="text-sm">{portal.description}</CardDescription>
+                  <CardTitle className="text-xl font-bold mb-2 line-clamp-2">{portal.title}</CardTitle>
+                  <CardDescription className="text-sm line-clamp-2">{portal.description}</CardDescription>
                 </CardHeader>
 
-                <CardContent className="relative z-10 flex-grow flex flex-col">
+                <CardContent className="relative z-10 flex-1 flex flex-col justify-between">
                   {/* Features List */}
-                  <ul className="space-y-2 flex-grow">
+                  <ul className="space-y-2">
                     {portal.features.map((feature, idx) => (
                       <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
                         <ArrowRight className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
@@ -148,7 +148,7 @@ export function AccessPortalsSection() {
                   </ul>
 
                   {/* CTA Button - Alineado al final */}
-                  <div className="mt-6">
+                  <div className="mt-6 pt-4">
                     <Link href={portal.link} className="block">
                       <Button
                         className={`w-full bg-gradient-to-r ${portal.color} hover:opacity-90 text-white shadow-lg group`}

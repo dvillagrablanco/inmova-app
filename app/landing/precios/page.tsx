@@ -96,11 +96,11 @@ export default function PreciosPage() {
 
       {/* Planes */}
       <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {planes.map((plan) => (
             <Card 
               key={plan.nombre}
-              className={`relative flex flex-col ${plan.destacado ? 'border-2 border-blue-500 shadow-xl scale-105' : 'border'}`}
+              className={`relative h-full flex flex-col ${plan.destacado ? 'border-2 border-blue-500 shadow-xl scale-105' : 'border'}`}
             >
               {plan.destacado && (
                 <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600">
@@ -121,8 +121,8 @@ export default function PreciosPage() {
                   <p className="text-xs text-green-600 font-semibold mt-1">{plan.anual}</p>
                 )}
               </CardHeader>
-              <CardContent className="flex-grow flex flex-col">
-                <ul className="space-y-3 mb-6 flex-grow">
+              <CardContent className="flex-1 flex flex-col justify-between">
+                <ul className="space-y-3 mb-6">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-start text-sm">
                       <CheckCircle2 className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
@@ -130,7 +130,7 @@ export default function PreciosPage() {
                     </li>
                   ))}
                 </ul>
-                <div className="mt-auto">
+                <div className="pt-4">
                   <Link href={plan.nombre === 'Enterprise' ? '/landing/contacto' : '/register'}>
                     <Button 
                       className={`w-full ${plan.destacado ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
