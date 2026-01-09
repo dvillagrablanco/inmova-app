@@ -6937,6 +6937,12 @@ DATABASE_URL="postgresql://placeholder@localhost:5432/placeholder" npm run build
 
 Antes de CADA deployment, verificar:
 
+#### 🔐 AUTENTICACIÓN (CRÍTICO - PRIMERO)
+- [ ] Ejecutar: `npx tsx scripts/verify-auth-before-deploy.ts` → DEBE PASAR
+- [ ] Ejecutar: `npm test -- auth-system.test.ts` → DEBE PASAR
+- [ ] Verificar que NO se modificó `lib/auth-options.ts` sin revisar
+- [ ] Si se modificó auth → Test manual de login OBLIGATORIO
+
 #### Código
 - [ ] Secrets NO están hardcodeados en archivos
 - [ ] `.env` files están en `.gitignore`
@@ -6951,12 +6957,13 @@ Antes de CADA deployment, verificar:
 - [ ] Backup de BD existe y es reciente (<24h)
 - [ ] Espacio en disco >20% libre
 
-#### Post-Deployment
+#### Post-Deployment (VERIFICACIÓN DE LOGIN OBLIGATORIA)
 - [ ] Health check retorna 200 OK
+- [ ] Health auth: `curl https://inmovaapp.com/api/health/auth` → status: healthy
 - [ ] Landing page carga (200 OK)
-- [ ] Login funciona
+- [ ] **Login funciona** → Test con admin@inmova.app
 - [ ] PM2 status = online (todas las instancias)
-- [ ] Logs no muestran errores críticos
+- [ ] Logs no muestran errores críticos (especialmente auth)
 
 ---
 
