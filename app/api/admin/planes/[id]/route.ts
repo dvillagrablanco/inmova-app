@@ -129,7 +129,11 @@ export async function PUT(
 
 /**
  * DELETE /api/admin/planes/[id]
- * Elimina un plan (solo si no tiene empresas asignadas)
+ * Elimina un plan
+ * 
+ * Query params:
+ * - force=true: Permite eliminar aunque tenga empresas asignadas
+ * - migrateTo=<planId>: ID del plan al que migrar las empresas (opcional)
  */
 export async function DELETE(
   request: NextRequest,
@@ -145,11 +149,18 @@ export async function DELETE(
       );
     }
 
-    // Verificar que no hay empresas usando este plan
+    const { searchParams } = new URL(request.url);
+    const force = searchParams.get('force') === 'true';
+    const migrateTo = searchParams.get('migrateTo');
+
+    // Verificar que el plan existe
     const plan = await prisma.subscriptionPlan.findUnique({
       where: { id: params.id },
       include: {
         _count: { select: { companies: true } },
+        companies: {
+          select: { id: true, name: true },
+        },
       },
     });
 
@@ -157,17 +168,52 @@ export async function DELETE(
       return NextResponse.json({ error: 'Plan no encontrado' }, { status: 404 });
     }
 
-    if (plan._count.companies > 0) {
+    const empresasAsignadas = plan._count.companies;
+
+    // Si tiene empresas y no es forzado, retornar error con información
+    if (empresasAsignadas > 0 && !force) {
       return NextResponse.json(
         { 
-          error: 'No se puede eliminar un plan con empresas asignadas',
-          empresasAsignadas: plan._count.companies,
+          error: 'Este plan tiene empresas asignadas',
+          empresasAsignadas,
+          empresas: plan.companies.slice(0, 10), // Primeras 10 empresas
+          requiresForce: true,
+          message: `Hay ${empresasAsignadas} empresa(s) usando este plan. ¿Deseas eliminarlo de todas formas?`,
         },
         { status: 400 }
       );
     }
 
-    // Eliminar
+    // Si hay empresas y es forzado, migrarlas o desvincularlas
+    if (empresasAsignadas > 0 && force) {
+      if (migrateTo) {
+        // Verificar que el plan destino existe
+        const targetPlan = await prisma.subscriptionPlan.findUnique({
+          where: { id: migrateTo },
+        });
+
+        if (!targetPlan) {
+          return NextResponse.json(
+            { error: 'Plan de destino no encontrado' },
+            { status: 400 }
+          );
+        }
+
+        // Migrar empresas al nuevo plan
+        await prisma.company.updateMany({
+          where: { subscriptionPlanId: params.id },
+          data: { subscriptionPlanId: migrateTo },
+        });
+      } else {
+        // Desvincular empresas (poner subscriptionPlanId a null)
+        await prisma.company.updateMany({
+          where: { subscriptionPlanId: params.id },
+          data: { subscriptionPlanId: null },
+        });
+      }
+    }
+
+    // Eliminar el plan
     await prisma.subscriptionPlan.delete({
       where: { id: params.id },
     });
@@ -175,6 +221,8 @@ export async function DELETE(
     return NextResponse.json({
       success: true,
       message: 'Plan eliminado correctamente',
+      empresasMigradas: empresasAsignadas,
+      migratedTo: migrateTo || null,
     });
 
   } catch (error: any) {
