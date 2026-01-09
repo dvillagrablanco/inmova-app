@@ -134,7 +134,11 @@ export default function LoginPage() {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
                 {/* Email field con mejor visibilidad */}
                 <div>
-                  <label htmlFor="email" className="block text-sm font-semibold text-white mb-2">
+                  <label 
+                    htmlFor="email" 
+                    className="block text-sm font-semibold mb-2"
+                    style={{ color: '#ffffff' }}
+                  >
                     Correo Electrónico
                   </label>
                   <div className="relative">
@@ -147,7 +151,11 @@ export default function LoginPage() {
                       placeholder="tu@correo.com"
                       value={email}
                       onChange={(e) => setValue('email', e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-slate-800/80 border-2 border-indigo-400/40 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:bg-slate-800 transition-all shadow-inner"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all"
+                      style={{ 
+                        backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                        border: '2px solid rgba(129, 140, 248, 0.5)',
+                      }}
                       required
                       autoComplete="email"
                     />
@@ -159,7 +167,11 @@ export default function LoginPage() {
 
                 {/* Password field con mejor visibilidad */}
                 <div>
-                  <label htmlFor="password" className="block text-sm font-semibold text-white mb-2">
+                  <label 
+                    htmlFor="password" 
+                    className="block text-sm font-semibold mb-2"
+                    style={{ color: '#ffffff' }}
+                  >
                     Contraseña
                   </label>
                   <div className="relative">
@@ -172,7 +184,11 @@ export default function LoginPage() {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setValue('password', e.target.value)}
-                      className="w-full pl-10 pr-12 py-3 bg-slate-800/80 border-2 border-indigo-400/40 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:bg-slate-800 transition-all shadow-inner"
+                      className="w-full pl-10 pr-12 py-3 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all"
+                      style={{ 
+                        backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                        border: '2px solid rgba(129, 140, 248, 0.5)',
+                      }}
                       required
                       autoComplete="current-password"
                     />
