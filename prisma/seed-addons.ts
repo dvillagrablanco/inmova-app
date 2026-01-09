@@ -1,22 +1,34 @@
 /**
- * Seed: Add-ons y Planes eWoorker
+ * Seed: Add-ons INMOVA y Planes eWoorker
  * 
- * Este script crea/actualiza:
- * 1. Add-ons disponibles para suscriptores de INMOVA
- * 2. Planes de suscripción de eWoorker (construcción B2B)
+ * ARQUITECTURA DE ADD-ONS PROPTECH:
  * 
- * Los add-ons mostrados en la landing DEBEN coincidir con esta configuración:
- * - Pack 10 Firmas: €15/mes
- * - Pack 10GB Storage: €5/mes
- * - Pack IA Avanzada: €10/mes (50K tokens)
- * - Pack 50 SMS: €8/mes
- * - White-label: €49/mes
- * - Acceso API: €29/mes
+ * 1. CATEGORÍA "USAGE" - Packs de consumo
+ *    Productos que se consumen y necesitan reposición
+ *    - Firmas digitales (Signaturit/DocuSign)
+ *    - SMS/WhatsApp notificaciones
+ *    - Storage adicional (S3)
+ *    - Tokens de IA
  * 
- * Planes eWoorker (construcción B2B):
- * - Obrero: €29/mes
- * - Capataz: €79/mes
- * - Constructor: €199/mes
+ * 2. CATEGORÍA "FEATURE" - Funcionalidades activables
+ *    Características que se activan/desactivan por mes
+ *    - Reportes avanzados
+ *    - Multi-idioma
+ *    - Integraciones con portales
+ *    - Publicación automática
+ * 
+ * 3. CATEGORÍA "PREMIUM" - Servicios premium
+ *    Servicios de alto valor añadido
+ *    - White-label
+ *    - API Access
+ *    - ESG & Sostenibilidad
+ *    - Pricing dinámico IA
+ *    - Tours virtuales 360°
+ *    - IoT & Smart Buildings
+ * 
+ * ALINEACIÓN CON LANDING PAGE:
+ * Los planes en /landing/precios muestran: Starter €35, Profesional €59, Business €129, Enterprise €299
+ * Los add-ons se muestran como extras opcionales para ampliar funcionalidades.
  * 
  * Ejecutar: npx tsx prisma/seed-addons.ts
  */
@@ -26,30 +38,70 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // ═══════════════════════════════════════════════════════════════
-// ADD-ONS INMOVA (Mejoras opcionales)
+// ADD-ONS INMOVA - Estrategia PropTech 2026
 // ═══════════════════════════════════════════════════════════════
 
 const ADDONS = [
+  // ══════════════════════════════════════════════════════════════
+  // CATEGORÍA: USAGE - Packs de Consumo
+  // Productos consumibles que se agotan con el uso
+  // ══════════════════════════════════════════════════════════════
+  
+  // --- FIRMAS DIGITALES ---
   {
     codigo: 'signatures_pack_10',
-    nombre: 'Pack 10 Firmas',
-    descripcion: 'Pack de 10 firmas digitales adicionales por mes. Ideal si excedes el límite de tu plan.',
+    nombre: 'Pack 10 Firmas Digitales',
+    descripcion: 'Pack de 10 firmas digitales con validez legal europea (eIDAS). Integración con Signaturit. Ideal para contratos de alquiler.',
     categoria: 'usage',
     precioMensual: 15,
-    precioAnual: 150, // 2 meses gratis
+    precioAnual: 150,
     unidades: 10,
     tipoUnidad: 'firmas',
     disponiblePara: ['STARTER', 'PROFESSIONAL', 'BUSINESS', 'ENTERPRISE'],
     incluidoEn: [],
-    margenPorcentaje: 33, // Costo: €10 (10 firmas × €1)
-    costoUnitario: 10,
+    margenPorcentaje: 40, // Costo real: ~€0.90/firma en Signaturit
+    costoUnitario: 9,
     destacado: true,
     orden: 1,
   },
   {
+    codigo: 'signatures_pack_50',
+    nombre: 'Pack 50 Firmas Digitales',
+    descripcion: 'Pack de 50 firmas digitales para gestoras con alto volumen de contratos. Ahorra 20% vs pack básico.',
+    categoria: 'usage',
+    precioMensual: 60,
+    precioAnual: 600,
+    unidades: 50,
+    tipoUnidad: 'firmas',
+    disponiblePara: ['PROFESSIONAL', 'BUSINESS', 'ENTERPRISE'],
+    incluidoEn: [],
+    margenPorcentaje: 47, // Costo: €0.65/firma por volumen
+    costoUnitario: 32.50,
+    destacado: false,
+    orden: 2,
+  },
+  {
+    codigo: 'signatures_pack_100',
+    nombre: 'Pack 100 Firmas Digitales',
+    descripcion: 'Pack empresarial de 100 firmas digitales. Máximo ahorro para grandes volúmenes.',
+    categoria: 'usage',
+    precioMensual: 100,
+    precioAnual: 1000,
+    unidades: 100,
+    tipoUnidad: 'firmas',
+    disponiblePara: ['BUSINESS', 'ENTERPRISE'],
+    incluidoEn: [],
+    margenPorcentaje: 50, // Costo: €0.50/firma por volumen
+    costoUnitario: 50,
+    destacado: false,
+    orden: 3,
+  },
+
+  // --- ALMACENAMIENTO ---
+  {
     codigo: 'storage_pack_10gb',
     nombre: 'Pack 10GB Storage',
-    descripcion: 'Almacenamiento adicional de 10GB para documentos, fotos y contratos.',
+    descripcion: 'Almacenamiento adicional de 10GB para documentos, fotos de propiedades y contratos.',
     categoria: 'usage',
     precioMensual: 5,
     precioAnual: 50,
@@ -57,15 +109,99 @@ const ADDONS = [
     tipoUnidad: 'GB',
     disponiblePara: ['STARTER', 'PROFESSIONAL', 'BUSINESS', 'ENTERPRISE'],
     incluidoEn: [],
-    margenPorcentaje: 95, // Costo: €0.23 (10GB × €0.023)
+    margenPorcentaje: 95, // Costo S3: €0.023/GB
     costoUnitario: 0.23,
     destacado: false,
-    orden: 2,
+    orden: 4,
   },
   {
+    codigo: 'storage_pack_50gb',
+    nombre: 'Pack 50GB Storage',
+    descripcion: 'Almacenamiento de 50GB para gestoras con muchas propiedades y documentación.',
+    categoria: 'usage',
+    precioMensual: 20,
+    precioAnual: 200,
+    unidades: 50,
+    tipoUnidad: 'GB',
+    disponiblePara: ['PROFESSIONAL', 'BUSINESS', 'ENTERPRISE'],
+    incluidoEn: [],
+    margenPorcentaje: 94, // Costo S3: €1.15
+    costoUnitario: 1.15,
+    destacado: false,
+    orden: 5,
+  },
+  {
+    codigo: 'storage_pack_100gb',
+    nombre: 'Pack 100GB Storage',
+    descripcion: 'Almacenamiento empresarial de 100GB. Incluye CDN para carga rápida de imágenes.',
+    categoria: 'usage',
+    precioMensual: 35,
+    precioAnual: 350,
+    unidades: 100,
+    tipoUnidad: 'GB',
+    disponiblePara: ['BUSINESS', 'ENTERPRISE'],
+    incluidoEn: [],
+    margenPorcentaje: 93, // Costo S3 + CDN: €2.30
+    costoUnitario: 2.30,
+    destacado: false,
+    orden: 6,
+  },
+
+  // --- SMS / WHATSAPP ---
+  {
+    codigo: 'sms_pack_100',
+    nombre: 'Pack 100 SMS/WhatsApp',
+    descripcion: 'Pack de 100 notificaciones SMS o WhatsApp para recordatorios de pago, alertas y comunicaciones.',
+    categoria: 'usage',
+    precioMensual: 10,
+    precioAnual: 100,
+    unidades: 100,
+    tipoUnidad: 'mensajes',
+    disponiblePara: ['STARTER', 'PROFESSIONAL', 'BUSINESS', 'ENTERPRISE'],
+    incluidoEn: [],
+    margenPorcentaje: 47, // Costo Twilio: ~€0.053/SMS
+    costoUnitario: 5.30,
+    destacado: true,
+    orden: 7,
+  },
+  {
+    codigo: 'sms_pack_500',
+    nombre: 'Pack 500 SMS/WhatsApp',
+    descripcion: 'Pack de 500 mensajes para gestoras con muchos inquilinos. Recordatorios automáticos.',
+    categoria: 'usage',
+    precioMensual: 40,
+    precioAnual: 400,
+    unidades: 500,
+    tipoUnidad: 'mensajes',
+    disponiblePara: ['PROFESSIONAL', 'BUSINESS', 'ENTERPRISE'],
+    incluidoEn: [],
+    margenPorcentaje: 52, // Costo con descuento: €0.038/SMS
+    costoUnitario: 19,
+    destacado: false,
+    orden: 8,
+  },
+  {
+    codigo: 'sms_pack_1000',
+    nombre: 'Pack 1000 SMS/WhatsApp',
+    descripcion: 'Pack empresarial de 1000 mensajes. Máximo ahorro para comunicación masiva.',
+    categoria: 'usage',
+    precioMensual: 70,
+    precioAnual: 700,
+    unidades: 1000,
+    tipoUnidad: 'mensajes',
+    disponiblePara: ['BUSINESS', 'ENTERPRISE'],
+    incluidoEn: [],
+    margenPorcentaje: 57, // Costo con descuento: €0.030/SMS
+    costoUnitario: 30,
+    destacado: false,
+    orden: 9,
+  },
+
+  // --- IA TOKENS ---
+  {
     codigo: 'ai_pack_50k',
-    nombre: 'Pack IA Avanzada',
-    descripcion: '50,000 tokens de IA adicionales por mes. Valoraciones automáticas, asistente inteligente y más.',
+    nombre: 'Pack IA Básico (50K tokens)',
+    descripcion: '50,000 tokens de IA para valoraciones automáticas, descripciones de propiedades y asistente virtual.',
     categoria: 'usage',
     precioMensual: 10,
     precioAnual: 100,
@@ -73,80 +209,133 @@ const ADDONS = [
     tipoUnidad: 'tokens',
     disponiblePara: ['STARTER', 'PROFESSIONAL', 'BUSINESS', 'ENTERPRISE'],
     incluidoEn: [],
-    margenPorcentaje: 97, // Costo: €0.25 (50K tokens × €0.005/1K)
-    costoUnitario: 0.25,
+    margenPorcentaje: 97, // Costo OpenAI: ~€0.30 (50K tokens gpt-3.5)
+    costoUnitario: 0.30,
     destacado: true,
-    orden: 3,
+    orden: 10,
   },
   {
-    codigo: 'sms_pack_50',
-    nombre: 'Pack 50 SMS',
-    descripcion: 'Pack de 50 notificaciones SMS para recordatorios de pago, alertas y comunicaciones urgentes.',
+    codigo: 'ai_pack_200k',
+    nombre: 'Pack IA Avanzado (200K tokens)',
+    descripcion: '200,000 tokens de IA. Incluye acceso a GPT-4 para análisis complejos y valoraciones premium.',
     categoria: 'usage',
-    precioMensual: 8,
-    precioAnual: 80,
-    unidades: 50,
-    tipoUnidad: 'sms',
-    disponiblePara: ['STARTER', 'PROFESSIONAL', 'BUSINESS', 'ENTERPRISE'],
+    precioMensual: 35,
+    precioAnual: 350,
+    unidades: 200000,
+    tipoUnidad: 'tokens',
+    disponiblePara: ['PROFESSIONAL', 'BUSINESS', 'ENTERPRISE'],
     incluidoEn: [],
-    margenPorcentaje: 53, // Costo: €3.75 (50 SMS × €0.075)
-    costoUnitario: 3.75,
+    margenPorcentaje: 91, // Costo mezcla GPT-3.5/4: ~€3
+    costoUnitario: 3,
     destacado: false,
-    orden: 4,
+    orden: 11,
   },
   {
-    codigo: 'whitelabel',
-    nombre: 'White-label',
-    descripcion: 'Tu marca, tu dominio. Elimina la marca INMOVA y personaliza completamente la plataforma.',
-    categoria: 'premium',
-    precioMensual: 49,
-    precioAnual: 490,
-    unidades: null,
-    tipoUnidad: null,
-    disponiblePara: ['PROFESSIONAL', 'BUSINESS'],
-    incluidoEn: ['ENTERPRISE'],
-    margenPorcentaje: 90, // Costo estimado: €5 (mantenimiento)
-    costoUnitario: 5,
-    destacado: true,
-    orden: 5,
+    codigo: 'ai_pack_500k',
+    nombre: 'Pack IA Enterprise (500K tokens)',
+    descripcion: '500,000 tokens con acceso GPT-4 ilimitado. Para gestoras que usan IA intensivamente.',
+    categoria: 'usage',
+    precioMensual: 75,
+    precioAnual: 750,
+    unidades: 500000,
+    tipoUnidad: 'tokens',
+    disponiblePara: ['BUSINESS', 'ENTERPRISE'],
+    incluidoEn: [],
+    margenPorcentaje: 87, // Costo GPT-4: ~€10
+    costoUnitario: 10,
+    destacado: false,
+    orden: 12,
   },
+
+  // ══════════════════════════════════════════════════════════════
+  // CATEGORÍA: FEATURE - Funcionalidades Activables
+  // Se pagan mensualmente y se pueden activar/desactivar
+  // ══════════════════════════════════════════════════════════════
+
   {
-    codigo: 'api_access',
-    nombre: 'Acceso API',
-    descripcion: 'Acceso completo a la API REST de INMOVA para integraciones personalizadas con tus sistemas.',
-    categoria: 'premium',
-    precioMensual: 29,
-    precioAnual: 290,
+    codigo: 'advanced_reports',
+    nombre: 'Reportes Avanzados',
+    descripcion: 'Informes financieros detallados, análisis de rentabilidad por propiedad, proyecciones y exportación a Excel/PDF.',
+    categoria: 'feature',
+    precioMensual: 15,
+    precioAnual: 150,
     unidades: null,
     tipoUnidad: null,
     disponiblePara: ['STARTER', 'PROFESSIONAL'],
     incluidoEn: ['BUSINESS', 'ENTERPRISE'],
-    margenPorcentaje: 100, // Costo: €0 (infraestructura ya cubierta)
+    margenPorcentaje: 100, // Sin costo adicional
     costoUnitario: 0,
     destacado: false,
-    orden: 6,
+    orden: 13,
   },
-  // Add-ons adicionales de valor (para planes superiores)
   {
-    codigo: 'esg_module',
-    nombre: 'Módulo ESG & Sostenibilidad',
-    descripcion: 'Huella de carbono, certificaciones verdes y reportes CSRD para compliance europeo.',
+    codigo: 'multi_language',
+    nombre: 'Multi-idioma',
+    descripcion: 'Interfaz en múltiples idiomas (ES, EN, FR, DE, PT). Portal de inquilinos traducido automáticamente.',
     categoria: 'feature',
-    precioMensual: 50,
-    precioAnual: 500,
+    precioMensual: 10,
+    precioAnual: 100,
     unidades: null,
     tipoUnidad: null,
-    disponiblePara: ['PROFESSIONAL', 'BUSINESS'],
-    incluidoEn: ['ENTERPRISE'],
-    margenPorcentaje: 80,
-    costoUnitario: 10,
+    disponiblePara: ['STARTER', 'PROFESSIONAL'],
+    incluidoEn: ['BUSINESS', 'ENTERPRISE'],
+    margenPorcentaje: 100,
+    costoUnitario: 0,
     destacado: false,
-    orden: 7,
+    orden: 14,
   },
   {
-    codigo: 'pricing_ia',
-    nombre: 'Pricing Dinámico IA',
-    descripcion: 'Optimización de precios para STR y Coliving con Machine Learning. +15-30% ingresos.',
+    codigo: 'portal_sync',
+    nombre: 'Publicación en Portales',
+    descripcion: 'Publicación automática en Idealista, Fotocasa, Habitaclia y pisos.com. Sincronización de disponibilidad.',
+    categoria: 'feature',
+    precioMensual: 25,
+    precioAnual: 250,
+    unidades: null,
+    tipoUnidad: null,
+    disponiblePara: ['STARTER', 'PROFESSIONAL', 'BUSINESS'],
+    incluidoEn: ['ENTERPRISE'],
+    margenPorcentaje: 80, // API fees de portales
+    costoUnitario: 5,
+    destacado: true,
+    orden: 15,
+  },
+  {
+    codigo: 'auto_reminders',
+    nombre: 'Recordatorios Automáticos',
+    descripcion: 'Sistema automático de recordatorios de pago, vencimiento de contratos y mantenimientos programados.',
+    categoria: 'feature',
+    precioMensual: 8,
+    precioAnual: 80,
+    unidades: null,
+    tipoUnidad: null,
+    disponiblePara: ['STARTER'],
+    incluidoEn: ['PROFESSIONAL', 'BUSINESS', 'ENTERPRISE'],
+    margenPorcentaje: 100,
+    costoUnitario: 0,
+    destacado: false,
+    orden: 16,
+  },
+  {
+    codigo: 'tenant_screening',
+    nombre: 'Screening de Inquilinos',
+    descripcion: 'Verificación de solvencia, historial de impagos y puntuación de riesgo para candidatos a inquilino.',
+    categoria: 'feature',
+    precioMensual: 20,
+    precioAnual: 200,
+    unidades: null,
+    tipoUnidad: null,
+    disponiblePara: ['STARTER', 'PROFESSIONAL', 'BUSINESS'],
+    incluidoEn: ['ENTERPRISE'],
+    margenPorcentaje: 60, // Costo de consultas a bases de datos
+    costoUnitario: 8,
+    destacado: false,
+    orden: 17,
+  },
+  {
+    codigo: 'accounting_integration',
+    nombre: 'Integración Contabilidad',
+    descripcion: 'Conexión directa con A3, Sage, Holded y sistemas de contabilidad. Exportación de asientos automática.',
     categoria: 'feature',
     precioMensual: 30,
     precioAnual: 300,
@@ -157,35 +346,163 @@ const ADDONS = [
     margenPorcentaje: 85,
     costoUnitario: 4.5,
     destacado: false,
-    orden: 8,
+    orden: 18,
+  },
+
+  // ══════════════════════════════════════════════════════════════
+  // CATEGORÍA: PREMIUM - Servicios de Alto Valor
+  // Módulos transversales que amplifican el valor de la plataforma
+  // ══════════════════════════════════════════════════════════════
+
+  {
+    codigo: 'whitelabel_basic',
+    nombre: 'White-Label Básico',
+    descripcion: 'Personaliza colores, logo y nombre de la plataforma. Elimina "Powered by INMOVA".',
+    categoria: 'premium',
+    precioMensual: 35,
+    precioAnual: 350,
+    unidades: null,
+    tipoUnidad: null,
+    disponiblePara: ['PROFESSIONAL', 'BUSINESS'],
+    incluidoEn: ['ENTERPRISE'],
+    margenPorcentaje: 95,
+    costoUnitario: 1.75,
+    destacado: true,
+    orden: 19,
   },
   {
-    codigo: 'tours_vr',
-    nombre: 'Tours Virtuales AR/VR',
-    descripcion: 'Tours 360°, realidad virtual y aumentada para tus propiedades. +40% conversión.',
-    categoria: 'feature',
-    precioMensual: 30,
-    precioAnual: 300,
+    codigo: 'whitelabel_full',
+    nombre: 'White-Label Completo',
+    descripcion: 'Tu dominio, tu app móvil, emails personalizados. Marca 100% tuya con soporte dedicado.',
+    categoria: 'premium',
+    precioMensual: 99,
+    precioAnual: 990,
+    unidades: null,
+    tipoUnidad: null,
+    disponiblePara: ['BUSINESS'],
+    incluidoEn: ['ENTERPRISE'],
+    margenPorcentaje: 85, // Costos de dominio, certificados, etc.
+    costoUnitario: 15,
+    destacado: false,
+    orden: 20,
+  },
+  {
+    codigo: 'api_access',
+    nombre: 'Acceso API REST',
+    descripcion: 'API completa para integraciones personalizadas. Documentación Swagger, webhooks y sandbox de pruebas.',
+    categoria: 'premium',
+    precioMensual: 49,
+    precioAnual: 490,
+    unidades: null,
+    tipoUnidad: null,
+    disponiblePara: ['PROFESSIONAL', 'BUSINESS'],
+    incluidoEn: ['ENTERPRISE'],
+    margenPorcentaje: 100,
+    costoUnitario: 0,
+    destacado: false,
+    orden: 21,
+  },
+  {
+    codigo: 'esg_module',
+    nombre: 'ESG & Sostenibilidad',
+    descripcion: 'Huella de carbono de propiedades, certificaciones verdes (LEED, BREEAM) y reportes CSRD para compliance europeo.',
+    categoria: 'premium',
+    precioMensual: 50,
+    precioAnual: 500,
     unidades: null,
     tipoUnidad: null,
     disponiblePara: ['PROFESSIONAL', 'BUSINESS'],
     incluidoEn: ['ENTERPRISE'],
     margenPorcentaje: 80,
-    costoUnitario: 6,
+    costoUnitario: 10,
     destacado: false,
-    orden: 9,
+    orden: 22,
+  },
+  {
+    codigo: 'pricing_ai',
+    nombre: 'Pricing Dinámico IA',
+    descripcion: 'Optimización de precios de alquiler con Machine Learning. Análisis de mercado, competencia y estacionalidad. +15-30% ingresos.',
+    categoria: 'premium',
+    precioMensual: 45,
+    precioAnual: 450,
+    unidades: null,
+    tipoUnidad: null,
+    disponiblePara: ['PROFESSIONAL', 'BUSINESS'],
+    incluidoEn: ['ENTERPRISE'],
+    margenPorcentaje: 85,
+    costoUnitario: 6.75,
+    destacado: true,
+    orden: 23,
+  },
+  {
+    codigo: 'tours_vr',
+    nombre: 'Tours Virtuales 360°',
+    descripcion: 'Crea tours virtuales 360° de tus propiedades. Integración con Matterport y Kuula. +40% conversión de visitas.',
+    categoria: 'premium',
+    precioMensual: 35,
+    precioAnual: 350,
+    unidades: null,
+    tipoUnidad: null,
+    disponiblePara: ['PROFESSIONAL', 'BUSINESS'],
+    incluidoEn: ['ENTERPRISE'],
+    margenPorcentaje: 80,
+    costoUnitario: 7,
+    destacado: false,
+    orden: 24,
+  },
+  {
+    codigo: 'iot_smart',
+    nombre: 'IoT & Smart Buildings',
+    descripcion: 'Integración con cerraduras inteligentes, termostatos, sensores de consumo. Automatización de check-in/out.',
+    categoria: 'premium',
+    precioMensual: 75,
+    precioAnual: 750,
+    unidades: null,
+    tipoUnidad: null,
+    disponiblePara: ['BUSINESS'],
+    incluidoEn: ['ENTERPRISE'],
+    margenPorcentaje: 70,
+    costoUnitario: 22.50,
+    destacado: false,
+    orden: 25,
+  },
+  {
+    codigo: 'marketplace_b2c',
+    nombre: 'Marketplace de Servicios',
+    descripcion: 'Ofrece servicios B2C a tus inquilinos: limpieza, wifi, seguros, mudanzas. Comisión del 12% por servicio.',
+    categoria: 'premium',
+    precioMensual: 0, // Basado en comisiones
+    precioAnual: 0,
+    unidades: null,
+    tipoUnidad: null,
+    disponiblePara: ['STARTER', 'PROFESSIONAL', 'BUSINESS'],
+    incluidoEn: ['ENTERPRISE'],
+    margenPorcentaje: null, // Variable por comisiones
+    costoUnitario: null,
+    destacado: false,
+    orden: 26,
+  },
+  {
+    codigo: 'dedicated_support',
+    nombre: 'Soporte Dedicado',
+    descripcion: 'Account manager personal, soporte prioritario 24/7, sesiones de formación mensuales y onboarding premium.',
+    categoria: 'premium',
+    precioMensual: 99,
+    precioAnual: 990,
+    unidades: null,
+    tipoUnidad: null,
+    disponiblePara: ['PROFESSIONAL', 'BUSINESS'],
+    incluidoEn: ['ENTERPRISE'],
+    margenPorcentaje: 50, // Costo de personal
+    costoUnitario: 49.50,
+    destacado: false,
+    orden: 27,
   },
 ];
 
 // ═══════════════════════════════════════════════════════════════
 // PLANES EWOORKER (Construcción B2B)
-// 
 // SINCRONIZADO CON: /app/ewoorker/landing/page.tsx
-//
-// Modelo de negocio freemium + comisión:
-// - Obrero: Gratis + 5% comisión (adquisición)
-// - Capataz: €49/mes + 2% comisión (conversión)
-// - Constructor: €149/mes + 0% comisión (retención premium)
 // ═══════════════════════════════════════════════════════════════
 
 const EWOORKER_PLANS = [
@@ -193,10 +510,10 @@ const EWOORKER_PLANS = [
     codigo: 'OBRERO',
     nombre: 'eWoorker Obrero',
     descripcion: 'Plan gratuito para empezar. Acceso básico al marketplace con comisión por obra cerrada.',
-    precioMensual: 0, // Gratuito - modelo freemium
+    precioMensual: 0,
     precioAnual: 0,
     maxOfertas: 3,
-    comisionEscrow: 5, // 5% por obra cerrada
+    comisionEscrow: 5,
     features: [
       'Perfil básico',
       'Ver obras públicas',
@@ -213,10 +530,10 @@ const EWOORKER_PLANS = [
     codigo: 'CAPATAZ',
     nombre: 'eWoorker Capataz',
     descripcion: 'El más popular. Ofertas ilimitadas, compliance completo y comisión reducida.',
-    precioMensual: 49, // €49/mes
+    precioMensual: 49,
     precioAnual: 490,
-    maxOfertas: -1, // Ilimitado
-    comisionEscrow: 2, // 2% por obra cerrada (reducido)
+    maxOfertas: -1,
+    comisionEscrow: 2,
     features: [
       'Todo de Obrero',
       'Ofertas ilimitadas',
@@ -235,10 +552,10 @@ const EWOORKER_PLANS = [
     codigo: 'CONSTRUCTOR',
     nombre: 'eWoorker Constructor',
     descripcion: 'Para constructoras serias. Sin comisiones, obras ilimitadas y account manager.',
-    precioMensual: 149, // €149/mes
+    precioMensual: 149,
     precioAnual: 1490,
-    maxOfertas: -1, // Ilimitado
-    comisionEscrow: 0, // 0% - SIN comisiones extra
+    maxOfertas: -1,
+    comisionEscrow: 0,
     features: [
       'Todo de Capataz',
       'Obras ilimitadas',
@@ -258,7 +575,11 @@ const EWOORKER_PLANS = [
 ];
 
 async function main() {
-  console.log('🌱 Seeding Add-ons y Planes eWoorker...\n');
+  console.log('');
+  console.log('═'.repeat(70));
+  console.log('🌱 SEED: Add-ons INMOVA + Planes eWoorker');
+  console.log('═'.repeat(70));
+  console.log('');
 
   // ═══════════════════════════════════════════════════════════════
   // SEED ADD-ONS
@@ -267,8 +588,10 @@ async function main() {
   console.log('📦 ADD-ONS INMOVA:');
   console.log('─'.repeat(70));
   
+  let usageCount = 0, featureCount = 0, premiumCount = 0;
+  
   for (const addon of ADDONS) {
-    const result = await prisma.addOn.upsert({
+    await prisma.addOn.upsert({
       where: { codigo: addon.codigo },
       update: {
         nombre: addon.nombre,
@@ -305,8 +628,14 @@ async function main() {
       },
     });
     
-    const margen = addon.margenPorcentaje ? `${addon.margenPorcentaje}%` : 'N/A';
-    console.log(`  ✅ ${addon.nombre}: €${addon.precioMensual}/mes (margen: ${margen})`);
+    const precio = addon.precioMensual === 0 ? 'Comisiones' : `€${addon.precioMensual}/mes`;
+    const margen = addon.margenPorcentaje ? `${addon.margenPorcentaje}%` : 'Variable';
+    const highlight = addon.destacado ? ' ⭐' : '';
+    console.log(`  ✅ ${addon.nombre}${highlight}: ${precio} (margen: ${margen})`);
+    
+    if (addon.categoria === 'usage') usageCount++;
+    else if (addon.categoria === 'feature') featureCount++;
+    else premiumCount++;
   }
 
   console.log('');
@@ -314,7 +643,7 @@ async function main() {
   console.log('─'.repeat(70));
   
   for (const plan of EWOORKER_PLANS) {
-    const result = await prisma.ewoorkerPlan.upsert({
+    await prisma.ewoorkerPlan.upsert({
       where: { codigo: plan.codigo },
       update: {
         nombre: plan.nombre,
@@ -348,41 +677,43 @@ async function main() {
     });
     
     const ofertas = plan.maxOfertas === -1 ? 'Ilimitadas' : `${plan.maxOfertas}/mes`;
-    console.log(`  ✅ ${plan.nombre}: €${plan.precioMensual}/mes | Ofertas: ${ofertas} | Escrow: ${plan.comisionEscrow}%`);
+    const highlight = plan.destacado ? ' ⭐' : '';
+    console.log(`  ✅ ${plan.nombre}${highlight}: €${plan.precioMensual}/mes | Escrow: ${plan.comisionEscrow}%`);
   }
+
+  // ═══════════════════════════════════════════════════════════════
+  // RESUMEN
+  // ═══════════════════════════════════════════════════════════════
 
   console.log('');
   console.log('═'.repeat(70));
   console.log('');
-  console.log('📊 RESUMEN DE PRECIOS:');
+  console.log('📊 RESUMEN:');
   console.log('');
-  console.log('ADD-ONS DESTACADOS:');
-  console.log('┌─────────────────────────────┬──────────┬─────────┬───────────┐');
-  console.log('│ Add-on                      │ Precio   │ Costo   │ Margen    │');
-  console.log('├─────────────────────────────┼──────────┼─────────┼───────────┤');
+  console.log(`  Add-ons totales: ${ADDONS.length}`);
+  console.log(`    - Packs de uso: ${usageCount}`);
+  console.log(`    - Funcionalidades: ${featureCount}`);
+  console.log(`    - Premium: ${premiumCount}`);
+  console.log(`  Planes eWoorker: ${EWOORKER_PLANS.length}`);
+  console.log('');
+  
+  // Tabla de precios destacados
+  console.log('💰 ADD-ONS DESTACADOS:');
+  console.log('┌─────────────────────────────────────┬──────────┬─────────┬─────────┐');
+  console.log('│ Add-on                              │ Precio   │ Costo   │ Margen  │');
+  console.log('├─────────────────────────────────────┼──────────┼─────────┼─────────┤');
   for (const addon of ADDONS.filter(a => a.destacado)) {
-    const nombre = addon.nombre.padEnd(27);
-    const precio = `€${addon.precioMensual}/mes`.padEnd(8);
-    const costo = `€${addon.costoUnitario}`.padEnd(7);
-    const margen = `${addon.margenPorcentaje}%`.padEnd(9);
+    const nombre = addon.nombre.substring(0, 35).padEnd(35);
+    const precio = `€${addon.precioMensual}`.padEnd(8);
+    const costo = `€${addon.costoUnitario || 0}`.padEnd(7);
+    const margen = addon.margenPorcentaje ? `${addon.margenPorcentaje}%`.padEnd(7) : 'N/A    ';
     console.log(`│ ${nombre} │ ${precio} │ ${costo} │ ${margen} │`);
   }
-  console.log('└─────────────────────────────┴──────────┴─────────┴───────────┘');
-  console.log('');
-  console.log('PLANES EWOORKER:');
-  console.log('┌─────────────────────────────┬──────────┬──────────┬───────────┐');
-  console.log('│ Plan                        │ Precio   │ Escrow   │ Split     │');
-  console.log('├─────────────────────────────┼──────────┼──────────┼───────────┤');
-  for (const plan of EWOORKER_PLANS) {
-    const nombre = plan.nombre.padEnd(27);
-    const precio = `€${plan.precioMensual}/mes`.padEnd(8);
-    const escrow = `${plan.comisionEscrow}%`.padEnd(8);
-    const split = `${plan.socioPercentage}/${plan.plataformaPercentage}`.padEnd(9);
-    console.log(`│ ${nombre} │ ${precio} │ ${escrow} │ ${split} │`);
-  }
-  console.log('└─────────────────────────────┴──────────┴──────────┴───────────┘');
+  console.log('└─────────────────────────────────────┴──────────┴─────────┴─────────┘');
+  
   console.log('');
   console.log('✅ Seed completado exitosamente');
+  console.log('');
 }
 
 main()

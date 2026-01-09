@@ -2,16 +2,15 @@
  * Configuración centralizada de precios y planes de suscripción INMOVA
  * Estrategia de Precios 2026 - ARQUITECTURA ACTUALIZADA
  * 
- * NUEVA ARQUITECTURA:
- * - 6 VERTICALES de negocio (modelos específicos)
- * - 6 MÓDULOS TRANSVERSALES (add-ons que amplifican valor)
- * - Pricing modular: vertical base + módulos opcionales
+ * SINCRONIZADO CON:
+ * - Landing page: /app/landing/precios/page.tsx
+ * - Seed de add-ons: /prisma/seed-addons.ts
+ * - Panel admin: /app/admin/addons/page.tsx
  * 
- * IMPORTANTE: Esta configuración debe estar sincronizada con:
- * - Stripe Price IDs (cuando se creen los productos en Stripe)
- * - Base de datos (tabla subscription_plans)
- * - Landing page (components/landing/sections/PricingSection.tsx)
- * - Plan de Negocio (PLAN_NEGOCIO_INMOVA_2026.md)
+ * ARQUITECTURA:
+ * - 4 PLANES principales (Starter, Profesional, Business, Enterprise)
+ * - 3 CATEGORÍAS de add-ons (usage, feature, premium)
+ * - Pricing modular: plan base + add-ons opcionales
  */
 
 export type PricingInterval = 'monthly' | 'annual';
@@ -26,18 +25,21 @@ export interface PricingFeature {
 export interface PricingPlan {
   id: string;
   name: string;
-  tier: 'basic' | 'professional' | 'business' | 'enterprise';
+  tier: 'starter' | 'professional' | 'business' | 'enterprise';
   description: string;
   
   // Precios
   monthlyPrice: number;
   annualPrice: number;
-  annualSavings: number; // En euros
+  annualSavings: number;
   
   // Límites
   maxProperties: number | 'unlimited';
   maxUsers: number | 'unlimited';
-  maxVerticals: number | 'all';
+  
+  // Incluidos
+  signaturesIncluded: number | 'unlimited';
+  storageIncluded: string;
   
   // Características
   features: PricingFeature[];
@@ -46,7 +48,7 @@ export interface PricingPlan {
   popular?: boolean;
   newFeature?: string;
   
-  // IDs de Stripe (a configurar después de crear en Stripe)
+  // IDs de Stripe
   stripePriceIdMonthly?: string;
   stripePriceIdAnnual?: string;
   
@@ -60,10 +62,15 @@ export interface AddOn {
   id: string;
   name: string;
   description: string;
+  category: 'usage' | 'feature' | 'premium';
   monthlyPrice: number;
+  annualPrice?: number;
+  units?: number;
+  unitType?: string;
   stripePriceId?: string;
-  availableFor: string[]; // Plan IDs
-  includedIn: string[]; // Plan IDs donde viene incluido
+  availableFor: string[];
+  includedIn: string[];
+  highlighted?: boolean;
 }
 
 export interface PromoCampaign {
@@ -74,7 +81,7 @@ export interface PromoCampaign {
   targetPlan: string;
   discountType: 'percentage' | 'fixed_amount';
   discountValue: number;
-  duration: number; // Meses
+  duration: number;
   maxUses?: number;
   validFrom: Date;
   validUntil: Date;
@@ -83,259 +90,403 @@ export interface PromoCampaign {
 }
 
 /**
- * PLANES DE SUSCRIPCIÓN - ESTRATEGIA 2025
- * Precios actualizados según documento "Estrategia de Precios y Lanzamiento INMOVA 2025"
+ * PLANES DE SUSCRIPCIÓN - INMOVA 2026
+ * Sincronizado con /app/landing/precios/page.tsx
  */
 export const PRICING_PLANS: Record<string, PricingPlan> = {
-  basic: {
-    id: 'basic',
-    name: 'Basic',
-    tier: 'basic',
-    description: 'Perfecto para inversores particulares que quieren dejar Excel',
+  starter: {
+    id: 'starter',
+    name: 'Starter',
+    tier: 'starter',
+    description: 'Perfecto para propietarios particulares',
     
-    monthlyPrice: 49,
-    annualPrice: 490,
-    annualSavings: 98,
+    monthlyPrice: 35,
+    annualPrice: 350,
+    annualSavings: 70, // 2 meses gratis
     
-    maxProperties: 20,
+    maxProperties: 5,
     maxUsers: 1,
-    maxVerticals: 1,
+    signaturesIncluded: 5,
+    storageIncluded: '2GB',
     
     features: [
-      { text: '✅ 1 Vertical de Negocio (a elegir)', included: true, highlight: true },
-      { text: 'Hasta 20 propiedades', included: true },
-      { text: '1 usuario', included: true },
-      { text: 'Funciones core del vertical elegido', included: true },
-      { text: 'Dashboard y reportes básicos', included: true },
-      { text: 'Integraciones básicas', included: true },
-      { text: 'Módulos Transversales (add-ons)', included: false, badge: 'OPCIONALES' },
-      { text: 'Construcción avanzada', included: false },
-      { text: 'Soporte email 48h', included: true },
+      { text: 'Hasta 5 propiedades', included: true },
+      { text: 'Gestión básica de inquilinos', included: true },
+      { text: 'Contratos simples', included: true },
+      { text: '5 firmas digitales/mes', included: true },
+      { text: '2GB almacenamiento', included: true },
+      { text: 'Soporte por email', included: true },
+      { text: 'Firma digital avanzada', included: false, badge: 'ADD-ON' },
+      { text: 'Reportes avanzados', included: false, badge: 'ADD-ON' },
     ],
     
-    cta: 'Ideal para inversores particulares y flippers',
-    targetAudience: ['Inversor Particular', 'Flipper', 'Landlord'],
-    killerFeature: 'Más barato que la competencia y con Flipping incluido'
+    cta: 'Empezar gratis',
+    targetAudience: ['Propietario Particular', 'Inversor Pequeño'],
+    killerFeature: 'El plan más económico con todo lo esencial'
   },
   
   professional: {
     id: 'professional',
-    name: 'Professional',
+    name: 'Profesional',
     tier: 'professional',
-    description: 'Para agencias y gestoras que necesitan múltiples verticales',
+    description: 'Para propietarios activos y pequeñas agencias',
     
-    monthlyPrice: 149,
-    annualPrice: 1490,
-    annualSavings: 298,
+    monthlyPrice: 59,
+    annualPrice: 590,
+    annualSavings: 118,
     
-    maxProperties: 100,
-    maxUsers: 5,
-    maxVerticals: 2,
+    maxProperties: 25,
+    maxUsers: 3,
+    signaturesIncluded: 20,
+    storageIncluded: '10GB',
     
     features: [
-      { text: '✅ 2 Verticales de Negocio (combina modelos)', included: true, highlight: true },
-      { text: 'Hasta 100 propiedades', included: true },
-      { 
-        text: '⭐ Funciones avanzadas por vertical', 
-        included: true, 
-        highlight: true,
-      },
-      { text: '5 usuarios incluidos', included: true },
-      { text: 'AI Assistant GPT-4 Standard', included: true },
-      { text: 'Dashboard avanzado + Analytics', included: true },
-      { text: 'Integraciones premium (OTAs, pagos)', included: true },
-      { text: '1 Módulo Transversal incluido', included: true, badge: 'GRATIS' },
-      { text: 'Marca Blanca: Colores + Dominio', included: true },
-      { text: 'Soporte chat prioritario', included: true },
+      { text: 'Hasta 25 propiedades', included: true },
+      { text: 'Gestión avanzada de inquilinos', included: true },
+      { text: '20 firmas digitales/mes', included: true, highlight: true },
+      { text: '10GB almacenamiento', included: true },
+      { text: 'Cobro automático de rentas', included: true },
+      { text: 'Informes financieros', included: true },
+      { text: 'Recordatorios automáticos', included: true },
+      { text: 'Soporte prioritario', included: true },
+      { text: 'White-label', included: false, badge: 'ADD-ON' },
+      { text: 'API Access', included: false, badge: 'ADD-ON' },
     ],
     
     popular: true,
-    newFeature: '2 Verticales + 1 Módulo Gratis',
-    cta: 'Perfecto para agencias y gestoras profesionales',
-    targetAudience: ['Agencia', 'Gestora', 'Coliving Manager'],
-    killerFeature: 'Multi-vertical: Combina Alquiler + STR o Flipping + Construcción'
+    newFeature: '20 firmas digitales incluidas',
+    cta: 'Probar 30 días gratis',
+    targetAudience: ['Propietario Activo', 'Pequeña Agencia', 'Gestor'],
+    killerFeature: 'El más popular - mejor relación calidad/precio'
   },
   
   business: {
     id: 'business',
     name: 'Business',
     tier: 'business',
-    description: 'Todo incluido para gestoras consolidadas y promotoras',
+    description: 'Para gestoras profesionales y agencias',
     
-    monthlyPrice: 349,
-    annualPrice: 3490,
-    annualSavings: 698,
+    monthlyPrice: 129,
+    annualPrice: 1290,
+    annualSavings: 258,
     
-    maxProperties: 'unlimited',
-    maxUsers: 15,
-    maxVerticals: 'all',
+    maxProperties: 100,
+    maxUsers: 10,
+    signaturesIncluded: 50,
+    storageIncluded: '50GB',
     
     features: [
-      { text: '✅ TODOS los 6 Verticales incluidos', included: true, highlight: true },
-      { text: '✅ Propiedades ilimitadas', included: true, highlight: true },
-      { text: '✅ 3 Módulos Transversales incluidos', included: true, highlight: true, badge: 'VALOR €180/MES' },
-      { text: '15 usuarios incluidos', included: true },
-      { text: 'AI Assistant GPT-4 Advanced (entrenable)', included: true },
-      { text: 'Construcción: Obra Nueva completa', included: true },
-      { text: 'White-label completo + App móvil', included: true },
-      { text: 'Migraciones de datos incluidas', included: true },
-      { text: 'Gestor de Cuenta Dedicado', included: true },
-      { text: 'Soporte prioritario 24/7', included: true },
+      { text: 'Hasta 100 propiedades', included: true },
+      { text: 'Multi-propietario', included: true },
+      { text: '50 firmas digitales/mes', included: true, highlight: true },
+      { text: '50GB almacenamiento', included: true },
+      { text: 'CRM integrado', included: true },
+      { text: 'API de integración', included: true },
+      { text: 'Los 7 verticales inmobiliarios', included: true, highlight: true },
+      { text: 'Reportes avanzados', included: true },
+      { text: 'Multi-idioma', included: true },
+      { text: 'Account manager dedicado', included: true },
     ],
     
-    newFeature: 'Todos los Verticales + 3 Módulos Gratis',
-    cta: 'Para promotoras y gestoras consolidadas',
-    targetAudience: ['Gestora Consolidada', 'Promotora', 'Multi-vertical'],
-    killerFeature: '6 verticales + 3 módulos transversales incluidos (€180 gratis/mes)'
+    newFeature: 'API + CRM + 7 verticales',
+    cta: 'Probar 30 días gratis',
+    targetAudience: ['Gestora Profesional', 'Agencia Mediana', 'Multi-propietario'],
+    killerFeature: '7 verticales inmobiliarios incluidos'
   },
   
   enterprise: {
     id: 'enterprise',
-    name: 'Enterprise+',
+    name: 'Enterprise',
     tier: 'enterprise',
-    description: 'Custom - SOCIMIs y Grandes Promotoras',
+    description: 'Para grandes empresas y SOCIMIs',
     
-    monthlyPrice: 0, // Custom
-    annualPrice: 0, // Custom
-    annualSavings: 0,
+    monthlyPrice: 299,
+    annualPrice: 2990,
+    annualSavings: 598,
     
     maxProperties: 'unlimited',
     maxUsers: 'unlimited',
-    maxVerticals: 'all',
+    signaturesIncluded: 'unlimited',
+    storageIncluded: 'Ilimitado',
     
     features: [
-      { text: 'Todos los módulos + desarrollos custom', included: true },
-      { text: 'Propiedades y usuarios ilimitados', included: true },
-      { text: 'Migración de datos garantizada', included: true },
-      { text: 'SLA 99.9%', included: true },
-      { text: 'Consultoría de Tokenización', included: true },
-      { text: 'Multi-región + Multi-moneda', included: true },
-      { text: 'Soporte 24/7 + Account Manager', included: true },
-      { text: 'Auditoría y cumplimiento normativo', included: true },
+      { text: 'Todo de Business incluido', included: true },
+      { text: 'Propiedades ilimitadas', included: true, highlight: true },
+      { text: 'Firmas digitales ilimitadas', included: true, highlight: true },
+      { text: 'Almacenamiento ilimitado', included: true },
+      { text: 'White-label completo', included: true },
+      { text: 'API ilimitada', included: true },
+      { text: 'SLA garantizado 99.9%', included: true },
+      { text: 'Integraciones personalizadas', included: true },
+      { text: 'Todos los add-ons incluidos', included: true, highlight: true, badge: 'PREMIUM' },
+      { text: 'Soporte 24/7 dedicado', included: true },
     ],
     
-    cta: 'SOCIMIs y grandes corporaciones',
-    targetAudience: ['SOCIMI', 'Gran Promotora', 'Ex-cliente Prinex/IESA'],
-    killerFeature: 'Migración garantizada + SLA 99.9% + Tokenización'
+    cta: 'Contactar ventas',
+    targetAudience: ['Gran Empresa', 'SOCIMI', 'Fondo de Inversión'],
+    killerFeature: 'Todo ilimitado + todos los add-ons incluidos'
   }
 };
 
 /**
- * MÓDULOS TRANSVERSALES DISPONIBLES
- * Estos módulos amplifican el valor de los verticales
+ * ADD-ONS DISPONIBLES
+ * Sincronizado con /prisma/seed-addons.ts
  */
 export const ADD_ONS: Record<string, AddOn> = {
-  esg: {
-    id: 'esg_sustainability',
-    name: 'ESG & Sostenibilidad',
-    description: 'Huella de carbono, certificaciones verdes, reportes CSRD. Compliance europeo.',
-    monthlyPrice: 50,
-    availableFor: ['basic', 'professional', 'business'],
+  // === PACKS DE USO ===
+  signatures_10: {
+    id: 'signatures_pack_10',
+    name: 'Pack 10 Firmas Digitales',
+    description: 'Pack de 10 firmas con validez legal europea (eIDAS)',
+    category: 'usage',
+    monthlyPrice: 15,
+    annualPrice: 150,
+    units: 10,
+    unitType: 'firmas',
+    availableFor: ['starter', 'professional', 'business', 'enterprise'],
+    includedIn: [],
+    highlighted: true,
+  },
+  signatures_50: {
+    id: 'signatures_pack_50',
+    name: 'Pack 50 Firmas Digitales',
+    description: 'Pack de 50 firmas para alto volumen de contratos',
+    category: 'usage',
+    monthlyPrice: 60,
+    annualPrice: 600,
+    units: 50,
+    unitType: 'firmas',
+    availableFor: ['professional', 'business', 'enterprise'],
+    includedIn: [],
+  },
+  sms_100: {
+    id: 'sms_pack_100',
+    name: 'Pack 100 SMS/WhatsApp',
+    description: 'Notificaciones SMS o WhatsApp para inquilinos',
+    category: 'usage',
+    monthlyPrice: 10,
+    annualPrice: 100,
+    units: 100,
+    unitType: 'mensajes',
+    availableFor: ['starter', 'professional', 'business', 'enterprise'],
+    includedIn: [],
+    highlighted: true,
+  },
+  sms_500: {
+    id: 'sms_pack_500',
+    name: 'Pack 500 SMS/WhatsApp',
+    description: 'Pack de mensajes para gestoras con muchos inquilinos',
+    category: 'usage',
+    monthlyPrice: 40,
+    annualPrice: 400,
+    units: 500,
+    unitType: 'mensajes',
+    availableFor: ['professional', 'business', 'enterprise'],
+    includedIn: [],
+  },
+  ai_50k: {
+    id: 'ai_pack_50k',
+    name: 'Pack IA Básico (50K tokens)',
+    description: 'Valoraciones automáticas y asistente virtual',
+    category: 'usage',
+    monthlyPrice: 10,
+    annualPrice: 100,
+    units: 50000,
+    unitType: 'tokens',
+    availableFor: ['starter', 'professional', 'business', 'enterprise'],
+    includedIn: [],
+    highlighted: true,
+  },
+  ai_200k: {
+    id: 'ai_pack_200k',
+    name: 'Pack IA Avanzado (200K tokens)',
+    description: 'Incluye acceso a GPT-4 para análisis complejos',
+    category: 'usage',
+    monthlyPrice: 35,
+    annualPrice: 350,
+    units: 200000,
+    unitType: 'tokens',
+    availableFor: ['professional', 'business', 'enterprise'],
+    includedIn: [],
+  },
+  storage_10gb: {
+    id: 'storage_pack_10gb',
+    name: 'Pack 10GB Storage',
+    description: 'Almacenamiento adicional para documentos y fotos',
+    category: 'usage',
+    monthlyPrice: 5,
+    annualPrice: 50,
+    units: 10,
+    unitType: 'GB',
+    availableFor: ['starter', 'professional', 'business', 'enterprise'],
+    includedIn: [],
+  },
+  storage_50gb: {
+    id: 'storage_pack_50gb',
+    name: 'Pack 50GB Storage',
+    description: 'Almacenamiento para gestoras con muchas propiedades',
+    category: 'usage',
+    monthlyPrice: 20,
+    annualPrice: 200,
+    units: 50,
+    unitType: 'GB',
+    availableFor: ['professional', 'business', 'enterprise'],
+    includedIn: [],
+  },
+  
+  // === FUNCIONALIDADES ===
+  advanced_reports: {
+    id: 'advanced_reports',
+    name: 'Reportes Avanzados',
+    description: 'Informes financieros detallados y proyecciones',
+    category: 'feature',
+    monthlyPrice: 15,
+    annualPrice: 150,
+    availableFor: ['starter', 'professional'],
+    includedIn: ['business', 'enterprise'],
+  },
+  portal_sync: {
+    id: 'portal_sync',
+    name: 'Publicación en Portales',
+    description: 'Publica en Idealista, Fotocasa, Habitaclia automáticamente',
+    category: 'feature',
+    monthlyPrice: 25,
+    annualPrice: 250,
+    availableFor: ['starter', 'professional', 'business'],
+    includedIn: ['enterprise'],
+    highlighted: true,
+  },
+  tenant_screening: {
+    id: 'tenant_screening',
+    name: 'Screening de Inquilinos',
+    description: 'Verificación de solvencia y puntuación de riesgo',
+    category: 'feature',
+    monthlyPrice: 20,
+    annualPrice: 200,
+    availableFor: ['starter', 'professional', 'business'],
     includedIn: ['enterprise'],
   },
-  marketplace: {
-    id: 'marketplace_b2c',
-    name: 'Marketplace de Servicios',
-    description: 'Monetiza con servicios B2C (limpieza, wifi, seguros). Comisión 12%.',
-    monthlyPrice: 0, // Basado en comisiones
-    availableFor: ['basic', 'professional', 'business'],
-    includedIn: ['enterprise'],
-  },
-  pricingIA: {
-    id: 'pricing_ai',
-    name: 'Pricing Dinámico IA',
-    description: 'Optimiza tarifas STR/Coliving con ML. +15-30% ingresos.',
+  accounting_integration: {
+    id: 'accounting_integration',
+    name: 'Integración Contabilidad',
+    description: 'Conexión con A3, Sage, Holded y más',
+    category: 'feature',
     monthlyPrice: 30,
-    availableFor: ['basic', 'professional', 'business'],
-    includedIn: ['enterprise'],
-  },
-  toursVR: {
-    id: 'tours_vr',
-    name: 'Tours Virtuales AR/VR',
-    description: 'Tours 360°, realidad virtual y aumentada. +40% conversión.',
-    monthlyPrice: 30,
-    availableFor: ['basic', 'professional', 'business'],
-    includedIn: ['enterprise'],
-  },
-  iot: {
-    id: 'iot_smart',
-    name: 'IoT & Edificios Inteligentes',
-    description: 'Integración con termostatos, cerraduras, sensores. Automatización total.',
-    monthlyPrice: 100,
+    annualPrice: 300,
     availableFor: ['professional', 'business'],
     includedIn: ['enterprise'],
   },
-  blockchain: {
-    id: 'blockchain_tokenization',
-    name: 'Blockchain & Tokenización',
-    description: 'Tokeniza propiedades, inversión fraccionada, smart contracts.',
-    monthlyPrice: 0, // Basado en comisiones
+  
+  // === PREMIUM ===
+  whitelabel_basic: {
+    id: 'whitelabel_basic',
+    name: 'White-Label Básico',
+    description: 'Tu marca, colores y logo personalizados',
+    category: 'premium',
+    monthlyPrice: 35,
+    annualPrice: 350,
+    availableFor: ['professional', 'business'],
+    includedIn: ['enterprise'],
+    highlighted: true,
+  },
+  whitelabel_full: {
+    id: 'whitelabel_full',
+    name: 'White-Label Completo',
+    description: 'Tu dominio, app móvil y emails personalizados',
+    category: 'premium',
+    monthlyPrice: 99,
+    annualPrice: 990,
     availableFor: ['business'],
     includedIn: ['enterprise'],
-  }
+  },
+  api_access: {
+    id: 'api_access',
+    name: 'Acceso API REST',
+    description: 'API completa para integraciones personalizadas',
+    category: 'premium',
+    monthlyPrice: 49,
+    annualPrice: 490,
+    availableFor: ['professional', 'business'],
+    includedIn: ['enterprise'],
+  },
+  pricing_ai: {
+    id: 'pricing_ai',
+    name: 'Pricing Dinámico IA',
+    description: 'Optimiza precios de alquiler con Machine Learning',
+    category: 'premium',
+    monthlyPrice: 45,
+    annualPrice: 450,
+    availableFor: ['professional', 'business'],
+    includedIn: ['enterprise'],
+    highlighted: true,
+  },
+  tours_vr: {
+    id: 'tours_vr',
+    name: 'Tours Virtuales 360°',
+    description: 'Tours interactivos con integración Matterport',
+    category: 'premium',
+    monthlyPrice: 35,
+    annualPrice: 350,
+    availableFor: ['professional', 'business'],
+    includedIn: ['enterprise'],
+  },
+  iot_smart: {
+    id: 'iot_smart',
+    name: 'IoT & Smart Buildings',
+    description: 'Integración con cerraduras, termostatos y sensores',
+    category: 'premium',
+    monthlyPrice: 75,
+    annualPrice: 750,
+    availableFor: ['business'],
+    includedIn: ['enterprise'],
+  },
 };
 
 /**
- * CAMPAÑAS PROMOCIONALES - ESTRATEGIA DE LANZAMIENTO 2025
- * Definidas en documento "Estrategia de Precios y Lanzamiento INMOVA 2025"
+ * CAMPAÑAS PROMOCIONALES
  */
 export const PROMO_CAMPAIGNS: Record<string, PromoCampaign> = {
-  flipping25: {
-    id: 'flipping25',
-    code: 'FLIPPING25',
-    name: 'Adiós al Excel',
-    description: 'Plan BASIC a €29/mes durante 6 meses',
-    targetPlan: 'basic',
+  starter2026: {
+    id: 'starter2026',
+    code: 'STARTER2026',
+    name: 'Oferta Lanzamiento 2026',
+    description: 'Plan Starter a €25/mes durante 6 meses',
+    targetPlan: 'starter',
     discountType: 'fixed_amount',
-    discountValue: 20, // €49 - €20 = €29
-    duration: 6, // 6 meses
-    maxUses: 500, // Limitar a primeros 500 usuarios
-    validFrom: new Date('2025-01-01'),
-    validUntil: new Date('2025-06-30'),
-    targetAudience: 'Inversores/Flippers',
-    message: 'Deja de perder dinero en tus reformas. Controla tu ROI en tiempo real.'
+    discountValue: 10,
+    duration: 6,
+    maxUses: 500,
+    validFrom: new Date('2026-01-01'),
+    validUntil: new Date('2026-06-30'),
+    targetAudience: 'Nuevos usuarios',
+    message: 'Empieza el año gestionando tus propiedades como un profesional'
   },
   
-  roompro: {
-    id: 'roompro',
-    code: 'ROOMPRO',
-    name: 'Revolución Coliving',
-    description: 'Plan PROFESSIONAL con Migración Gratuita + 50% dto. 1er mes',
+  switch2026: {
+    id: 'switch2026',
+    code: 'SWITCH2026',
+    name: 'Migración Competencia',
+    description: 'Igualamos precio de tu plataforma actual 1 año',
     targetPlan: 'professional',
     discountType: 'percentage',
-    discountValue: 50,
-    duration: 1, // Primer mes
-    validFrom: new Date('2025-01-01'),
-    validUntil: new Date('2025-06-30'),
-    targetAudience: 'Gestores de Habitaciones/Coliving',
-    message: '¿Harto de calcular facturas de luz a mano? INMOVA lo hace solo.'
-  },
-  
-  switch2025: {
-    id: 'switch2025',
-    code: 'SWITCH2025',
-    name: 'El Desafío Switch',
-    description: 'Igualamos precio de competencia 1 año + Upgrade gratis',
-    targetPlan: 'professional',
-    discountType: 'percentage',
-    discountValue: 0, // Variable según factura del cliente
-    duration: 12, // 1 año
-    validFrom: new Date('2025-01-01'),
-    validUntil: new Date('2025-12-31'),
-    targetAudience: 'Agencias usando otras plataformas',
-    message: 'Trae tu última factura. Te damos INMOVA al mismo precio durante 1 año con el plan superior gratis.'
+    discountValue: 0,
+    duration: 12,
+    validFrom: new Date('2026-01-01'),
+    validUntil: new Date('2026-12-31'),
+    targetAudience: 'Usuarios de otras plataformas',
+    message: 'Trae tu última factura y te igualamos el precio'
   }
 };
 
-/**
- * UTILIDADES
- */
+// ═══════════════════════════════════════════════════════════════
+// UTILIDADES
+// ═══════════════════════════════════════════════════════════════
 
 /**
  * Calcula el precio con descuento anual
  */
 export function calculateAnnualPrice(monthlyPrice: number): { annualPrice: number; savings: number } {
-  const annualPrice = monthlyPrice * 10; // 12 meses - 2 gratis = 10 meses
+  const annualPrice = monthlyPrice * 10; // 12 meses - 2 gratis
   const savings = monthlyPrice * 2;
   return { annualPrice, savings };
 }
@@ -358,8 +509,26 @@ export function getAllPlans(): PricingPlan[] {
  * Verifica si un add-on está incluido en un plan
  */
 export function isAddOnIncluded(addOnId: string, planId: string): boolean {
-  const addOn = ADD_ONS[addOnId];
+  const addOn = Object.values(ADD_ONS).find(a => a.id === addOnId);
   return addOn?.includedIn.includes(planId) || false;
+}
+
+/**
+ * Obtiene add-ons disponibles para un plan
+ */
+export function getAvailableAddOns(planId: string): AddOn[] {
+  return Object.values(ADD_ONS).filter(addon => 
+    addon.availableFor.includes(planId) && !addon.includedIn.includes(planId)
+  );
+}
+
+/**
+ * Obtiene add-ons incluidos en un plan
+ */
+export function getIncludedAddOns(planId: string): AddOn[] {
+  return Object.values(ADD_ONS).filter(addon => 
+    addon.includedIn.includes(planId)
+  );
 }
 
 /**
@@ -376,11 +545,11 @@ export function calculateTotalPrice(
   const basePrice = interval === 'annual' ? plan.annualPrice : plan.monthlyPrice;
   
   const addOnsPrice = addOnIds.reduce((total, addOnId) => {
-    const addOn = ADD_ONS[addOnId];
+    const addOn = Object.values(ADD_ONS).find(a => a.id === addOnId);
     if (!addOn || isAddOnIncluded(addOnId, planId)) return total;
     
     const addOnPrice = interval === 'annual' 
-      ? addOn.monthlyPrice * 10 // 2 meses gratis también
+      ? (addOn.annualPrice || addOn.monthlyPrice * 10)
       : addOn.monthlyPrice;
     
     return total + addOnPrice;
@@ -420,7 +589,7 @@ export function applyPromoCoupon(
  * Formatea precio para mostrar
  */
 export function formatPrice(price: number): string {
-  if (price === 0) return 'A medida';
+  if (price === 0) return 'Gratis';
   return `€${price.toLocaleString('es-ES')}`;
 }
 
@@ -430,4 +599,18 @@ export function formatPrice(price: number): string {
 export function getAnnualSavingsMessage(plan: PricingPlan): string {
   if (plan.annualSavings === 0) return '';
   return `Ahorra €${plan.annualSavings} (2 meses gratis)`;
+}
+
+/**
+ * Obtiene add-ons por categoría
+ */
+export function getAddOnsByCategory(category: 'usage' | 'feature' | 'premium'): AddOn[] {
+  return Object.values(ADD_ONS).filter(addon => addon.category === category);
+}
+
+/**
+ * Obtiene add-ons destacados
+ */
+export function getHighlightedAddOns(): AddOn[] {
+  return Object.values(ADD_ONS).filter(addon => addon.highlighted);
 }
