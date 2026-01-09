@@ -240,12 +240,14 @@ export default function PersonalizacionPage() {
 
   if (status === 'loading' || !session) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Cargando...</p>
+      <AuthenticatedLayout>
+        <div className="flex h-64 items-center justify-center">
+          <div className="text-center">
+            <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p>Cargando...</p>
+          </div>
         </div>
-      </div>
+      </AuthenticatedLayout>
     );
   }
 

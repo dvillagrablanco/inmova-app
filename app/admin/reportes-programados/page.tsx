@@ -406,12 +406,14 @@ export default function ReportesProgramadosPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <Clock className="h-8 w-8 animate-spin mx-auto text-indigo-600" />
-          <p className="mt-2 text-sm text-gray-600">Cargando reportes...</p>
+      <AuthenticatedLayout>
+        <div className="flex h-64 items-center justify-center">
+          <div className="text-center">
+            <Clock className="h-8 w-8 animate-spin mx-auto text-indigo-600" />
+            <p className="mt-2 text-sm text-gray-600">Cargando reportes...</p>
+          </div>
         </div>
-      </div>
+      </AuthenticatedLayout>
     );
   }
 

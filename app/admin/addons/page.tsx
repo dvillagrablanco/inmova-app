@@ -573,9 +573,32 @@ export default function AdminAddonsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(addon)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => openEditDialog(addon)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={async () => {
+                              if (confirm(`¿Eliminar el add-on "${addon.nombre}"?`)) {
+                                try {
+                                  const res = await fetch(`/api/addons/${addon.id}`, { method: 'DELETE' });
+                                  if (res.ok) {
+                                    toast.success('Add-on eliminado');
+                                    loadAddons();
+                                  } else {
+                                    toast.error('Error al eliminar');
+                                  }
+                                } catch {
+                                  toast.error('Error al eliminar');
+                                }
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );

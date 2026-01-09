@@ -105,12 +105,14 @@ export default function ActivityTimelinePage() {
 
   if (loading || status === 'loading') {
     return (
-      <div className="flex h-screen items-center justify-center bg-gradient-bg">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent"></div>
-          <p className="mt-4 text-gray-600">Cargando actividad...</p>
+      <AuthenticatedLayout>
+        <div className="flex h-64 items-center justify-center">
+          <div className="text-center">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent"></div>
+            <p className="mt-4 text-gray-600">Cargando actividad...</p>
+          </div>
         </div>
-      </div>
+      </AuthenticatedLayout>
     );
   }
 
