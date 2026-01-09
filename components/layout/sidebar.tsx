@@ -314,13 +314,6 @@ const alquilerResidencialItems = [
     dataTour: 'contratos-menu',
   },
   {
-    name: '📅 Media Estancia',
-    href: '/media-estancia',
-    icon: Calendar,
-    roles: ['super_admin', 'administrador', 'gestor'],
-    dataTour: 'media-estancia-menu',
-  },
-  {
     name: 'Candidatos',
     href: '/candidatos',
     icon: UserPlus,
