@@ -75,10 +75,13 @@ export async function GET(request: NextRequest) {
     const last90Days = subDays(now, 90);
 
     // ===== MÉTRICAS OVERVIEW (con cache corto) =====
+    // IMPORTANTE: Excluir empresas de prueba de todas las analíticas
+    const realCompanyFilter = { esEmpresaPrueba: false };
+    
     let overviewData = skipCache ? null : await getFromCache<any>(CACHE_KEYS.OVERVIEW);
     
     if (!overviewData) {
-      // Ejecutar todas las queries de overview en paralelo
+      // Ejecutar todas las queries de overview en paralelo (excluyendo empresas de prueba)
       const [
         totalCompanies,
         activeCompanies,
@@ -99,24 +102,24 @@ export async function GET(request: NextRequest) {
         activeContracts,
         occupiedUnits,
       ] = await Promise.all([
-        prisma.company.count(),
-        prisma.company.count({ where: { activo: true } }),
-        prisma.company.count({ where: { estadoCliente: 'prueba' } }),
-        prisma.company.count({ where: { estadoCliente: 'suspendido' } }),
-        prisma.company.count({ where: { createdAt: { gte: last30Days } } }),
-        prisma.company.count({ where: { createdAt: { gte: last90Days } } }),
-        prisma.company.count({ where: { estadoCliente: 'suspendido', updatedAt: { gte: last30Days } } }),
-        prisma.user.count(),
-        prisma.user.count({ where: { company: { activo: true } } }),
-        prisma.user.count({ where: { createdAt: { gte: last30Days } } }),
-        prisma.building.count(),
-        prisma.unit.count(),
-        prisma.building.count({ where: { createdAt: { gte: last30Days } } }),
-        prisma.tenant.count(),
-        prisma.tenant.count({ where: { contracts: { some: { estado: 'activo' } } } }),
-        prisma.contract.count(),
-        prisma.contract.count({ where: { estado: 'activo' } }),
-        prisma.unit.count({ where: { estado: 'ocupada' } }),
+        prisma.company.count({ where: realCompanyFilter }),
+        prisma.company.count({ where: { ...realCompanyFilter, activo: true } }),
+        prisma.company.count({ where: { ...realCompanyFilter, estadoCliente: 'prueba' } }),
+        prisma.company.count({ where: { ...realCompanyFilter, estadoCliente: 'suspendido' } }),
+        prisma.company.count({ where: { ...realCompanyFilter, createdAt: { gte: last30Days } } }),
+        prisma.company.count({ where: { ...realCompanyFilter, createdAt: { gte: last90Days } } }),
+        prisma.company.count({ where: { ...realCompanyFilter, estadoCliente: 'suspendido', updatedAt: { gte: last30Days } } }),
+        prisma.user.count({ where: { company: realCompanyFilter } }),
+        prisma.user.count({ where: { company: { ...realCompanyFilter, activo: true } } }),
+        prisma.user.count({ where: { company: realCompanyFilter, createdAt: { gte: last30Days } } }),
+        prisma.building.count({ where: { company: realCompanyFilter } }),
+        prisma.unit.count({ where: { building: { company: realCompanyFilter } } }),
+        prisma.building.count({ where: { company: realCompanyFilter, createdAt: { gte: last30Days } } }),
+        prisma.tenant.count({ where: { company: realCompanyFilter } }),
+        prisma.tenant.count({ where: { company: realCompanyFilter, contracts: { some: { estado: 'activo' } } } }),
+        prisma.contract.count({ where: { company: realCompanyFilter } }),
+        prisma.contract.count({ where: { company: realCompanyFilter, estado: 'activo' } }),
+        prisma.unit.count({ where: { building: { company: realCompanyFilter }, estado: 'ocupada' } }),
       ]);
 
       const churnRate = totalCompanies > 0 ? (churnedCompanies / totalCompanies) * 100 : 0;
@@ -154,6 +157,7 @@ export async function GET(request: NextRequest) {
       const [paymentsThisMonth, paymentsLastMonth, companiesWithPlans] = await Promise.all([
         prisma.payment.findMany({
           where: {
+            contract: { company: realCompanyFilter },
             fechaVencimiento: { gte: startOfCurrentMonth, lte: endOfMonth(now) },
             estado: 'pagado',
           },
@@ -161,13 +165,14 @@ export async function GET(request: NextRequest) {
         }),
         prisma.payment.findMany({
           where: {
+            contract: { company: realCompanyFilter },
             fechaVencimiento: { gte: startOfLastMonth, lte: endOfLastMonth },
             estado: 'pagado',
           },
           select: { monto: true },
         }),
         prisma.company.findMany({
-          where: { subscriptionPlanId: { not: null }, activo: true },
+          where: { ...realCompanyFilter, subscriptionPlanId: { not: null }, activo: true },
           include: { subscriptionPlan: { select: { precioMensual: true } } },
         }),
       ]);
@@ -201,7 +206,7 @@ export async function GET(request: NextRequest) {
     if (!historicalData) {
       historicalData = [];
       
-      // Ejecutar todas las queries históricas en paralelo (12 meses)
+      // Ejecutar todas las queries históricas en paralelo (12 meses) - excluyendo empresas de prueba
       const historicalPromises = [];
       for (let i = 11; i >= 0; i--) {
         const monthDate = subMonths(now, i);
@@ -210,11 +215,12 @@ export async function GET(request: NextRequest) {
         
         historicalPromises.push(
           Promise.all([
-            prisma.company.count({ where: { createdAt: { lte: monthEnd } } }),
-            prisma.user.count({ where: { createdAt: { lte: monthEnd } } }),
-            prisma.building.count({ where: { createdAt: { lte: monthEnd } } }),
+            prisma.company.count({ where: { ...realCompanyFilter, createdAt: { lte: monthEnd } } }),
+            prisma.user.count({ where: { company: realCompanyFilter, createdAt: { lte: monthEnd } } }),
+            prisma.building.count({ where: { company: realCompanyFilter, createdAt: { lte: monthEnd } } }),
             prisma.payment.aggregate({
               where: {
+                contract: { company: realCompanyFilter },
                 fechaVencimiento: { gte: monthStart, lte: monthEnd },
                 estado: 'pagado',
               },
@@ -239,28 +245,30 @@ export async function GET(request: NextRequest) {
       ? (overviewData.activeCompanies / (overviewData.activeCompanies + overviewData.trialCompanies)) * 100
       : 0;
 
-    // Planes de suscripción más populares (ejecutar en paralelo con otras queries)
+    // Planes de suscripción más populares (ejecutar en paralelo con otras queries) - excluyendo empresas de prueba
     const [subscriptionStats, recentActivity, topCompaniesByProperties, companiesNeedingAttention] = await Promise.all([
       prisma.company.groupBy({
         by: ['subscriptionPlanId'],
         _count: { id: true },
-        where: { subscriptionPlanId: { not: null } },
+        where: { ...realCompanyFilter, subscriptionPlanId: { not: null } },
       }),
       prisma.auditLog.findMany({
         take: 10,
         orderBy: { createdAt: 'desc' },
+        where: { company: realCompanyFilter },
         include: {
           user: { select: { name: true, email: true } },
           company: { select: { nombre: true } },
         },
       }),
       prisma.company.findMany({
+        where: realCompanyFilter,
         take: 5,
         orderBy: { buildings: { _count: 'desc' } },
         include: { _count: { select: { buildings: true, users: true, tenants: true } } },
       }),
       prisma.company.findMany({
-        where: { OR: [{ estadoCliente: 'suspendido' }] },
+        where: { ...realCompanyFilter, OR: [{ estadoCliente: 'suspendido' }] },
         take: 10,
         include: { _count: { select: { users: true, buildings: true } } },
       }),

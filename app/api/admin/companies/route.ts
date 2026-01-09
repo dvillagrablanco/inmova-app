@@ -18,6 +18,7 @@ const querySchema = z.object({
   status: z.enum(['activo', 'inactivo', 'prueba', 'suspendido', 'all']).optional(),
   sortBy: z.enum(['nombre', 'createdAt', 'estadoCliente', 'users']).default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
+  includeTest: z.coerce.boolean().default(true), // Por defecto mostrar todas las empresas para gestión
 });
 
 // GET /api/admin/companies - Lista empresas con paginación y filtros (solo super_admin)
@@ -55,11 +56,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { page, limit, search, status, sortBy, sortOrder } = queryResult.data;
+    const { page, limit, search, status, sortBy, sortOrder, includeTest } = queryResult.data;
     const skip = (page - 1) * limit;
 
     // Construir filtros
     const where: any = {};
+    
+    // Filtrar empresas de prueba si se especifica
+    if (!includeTest) {
+      where.esEmpresaPrueba = false;
+    }
     
     if (search) {
       where.OR = [
@@ -242,6 +248,7 @@ export async function POST(request: NextRequest) {
         subscriptionPlanId: data.subscriptionPlanId,
         parentCompanyId: data.parentCompanyId,
         activo: data.activo !== undefined ? data.activo : true,
+        esEmpresaPrueba: data.esEmpresaPrueba || false, // Marcar como empresa de prueba si se especifica
       },
       include: {
         subscriptionPlan: true,

@@ -66,8 +66,10 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
     const sevenDaysAgo = subDays(new Date(), 7);
 
-    // Construir filtros base
-    const baseWhere: any = {};
+    // Construir filtros base - Excluir empresas de prueba de las analíticas
+    const baseWhere: any = {
+      esEmpresaPrueba: false, // Excluir empresas ficticias/de prueba
+    };
     if (search) {
       baseWhere.OR = [
         { nombre: { contains: search, mode: 'insensitive' } },

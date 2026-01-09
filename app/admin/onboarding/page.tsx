@@ -98,175 +98,22 @@ interface OnboardingStats {
   thisWeekSignups: number;
 }
 
+// Pasos de onboarding alineados con la API
 const ONBOARDING_STEPS = [
-  { id: 'account', name: 'Cuenta Creada', description: 'Registro completado', icon: UserPlus },
-  { id: 'profile', name: 'Perfil Completo', description: 'Datos de empresa', icon: Building2 },
-  { id: 'firstUser', name: 'Primer Usuario', description: 'Usuario adicional creado', icon: Users },
-  {
-    id: 'firstBuilding',
-    name: 'Primera Propiedad',
-    description: 'Edificio/propiedad creada',
-    icon: Building2,
-  },
-  { id: 'firstTenant', name: 'Primer Inquilino', description: 'Inquilino registrado', icon: Users },
-  { id: 'firstContract', name: 'Primer Contrato', description: 'Contrato creado', icon: FileText },
-  {
-    id: 'payment',
-    name: 'Pago Configurado',
-    description: 'Método de pago añadido',
-    icon: CreditCard,
-  },
-  { id: 'activation', name: 'Cuenta Activada', description: 'Plan activo', icon: CheckCircle2 },
+  { id: 'profile', name: 'Perfil Completo', description: 'Datos de empresa (CIF, dirección, teléfono)', icon: Building2 },
+  { id: 'users', name: 'Usuarios Creados', description: 'Al menos 2 usuarios en el sistema', icon: Users },
+  { id: 'building', name: 'Primera Propiedad', description: 'Edificio/propiedad creada', icon: Building2 },
+  { id: 'unit', name: 'Primera Unidad', description: 'Unidad habitacional creada', icon: FileText },
+  { id: 'tenant', name: 'Primer Inquilino', description: 'Inquilino registrado', icon: Users },
+  { id: 'contract', name: 'Primer Contrato', description: 'Contrato creado', icon: FileText },
 ];
 
-// Datos de ejemplo
-const MOCK_COMPANIES: CompanyOnboarding[] = [
-  {
-    id: '1',
-    nombre: 'Inmobiliaria García',
-    email: 'info@inmobiliaria-garcia.com',
-    phone: '+34 612 345 678',
-    plan: 'Professional',
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    status: 'in_progress',
-    progress: 62,
-    assignedTo: 'María López',
-    lastActivity: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    steps: [
-      {
-        ...ONBOARDING_STEPS[0],
-        completed: true,
-        completedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-      },
-      {
-        ...ONBOARDING_STEPS[1],
-        completed: true,
-        completedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-      },
-      {
-        ...ONBOARDING_STEPS[2],
-        completed: true,
-        completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-      },
-      {
-        ...ONBOARDING_STEPS[3],
-        completed: true,
-        completedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-      },
-      {
-        ...ONBOARDING_STEPS[4],
-        completed: true,
-        completedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-      },
-      { ...ONBOARDING_STEPS[5], completed: false },
-      { ...ONBOARDING_STEPS[6], completed: false },
-      { ...ONBOARDING_STEPS[7], completed: false },
-    ],
-    metrics: {
-      usersCreated: 3,
-      buildingsAdded: 2,
-      tenantsAdded: 5,
-      firstPaymentReceived: false,
-    },
-  },
-  {
-    id: '2',
-    nombre: 'Gestiones Martínez SL',
-    email: 'contacto@gestiones-martinez.es',
-    plan: 'Starter',
-    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    status: 'stuck',
-    progress: 25,
-    lastActivity: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    steps: [
-      {
-        ...ONBOARDING_STEPS[0],
-        completed: true,
-        completedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-      },
-      {
-        ...ONBOARDING_STEPS[1],
-        completed: true,
-        completedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-      },
-      { ...ONBOARDING_STEPS[2], completed: false },
-      { ...ONBOARDING_STEPS[3], completed: false },
-      { ...ONBOARDING_STEPS[4], completed: false },
-      { ...ONBOARDING_STEPS[5], completed: false },
-      { ...ONBOARDING_STEPS[6], completed: false },
-      { ...ONBOARDING_STEPS[7], completed: false },
-    ],
-    metrics: {
-      usersCreated: 1,
-      buildingsAdded: 0,
-      tenantsAdded: 0,
-      firstPaymentReceived: false,
-    },
-  },
-  {
-    id: '3',
-    nombre: 'Alquileres Premium',
-    email: 'admin@alquileres-premium.com',
-    phone: '+34 698 765 432',
-    plan: 'Enterprise',
-    createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-    status: 'completed',
-    progress: 100,
-    assignedTo: 'Carlos Ruiz',
-    lastActivity: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    steps: ONBOARDING_STEPS.map((step, i) => ({
-      ...step,
-      completed: true,
-      completedAt: new Date(Date.now() - (14 - i * 2) * 24 * 60 * 60 * 1000).toISOString(),
-    })),
-    metrics: {
-      usersCreated: 8,
-      buildingsAdded: 12,
-      tenantsAdded: 45,
-      firstPaymentReceived: true,
-    },
-  },
-  {
-    id: '4',
-    nombre: 'Pisos Centro Madrid',
-    email: 'info@pisoscentromadrid.es',
-    plan: 'Professional',
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    status: 'in_progress',
-    progress: 12,
-    lastActivity: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-    steps: [
-      {
-        ...ONBOARDING_STEPS[0],
-        completed: true,
-        completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-      },
-      { ...ONBOARDING_STEPS[1], completed: false },
-      { ...ONBOARDING_STEPS[2], completed: false },
-      { ...ONBOARDING_STEPS[3], completed: false },
-      { ...ONBOARDING_STEPS[4], completed: false },
-      { ...ONBOARDING_STEPS[5], completed: false },
-      { ...ONBOARDING_STEPS[6], completed: false },
-      { ...ONBOARDING_STEPS[7], completed: false },
-    ],
-    metrics: {
-      usersCreated: 1,
-      buildingsAdded: 0,
-      tenantsAdded: 0,
-      firstPaymentReceived: false,
-    },
-  },
-];
-
-const MOCK_STATS: OnboardingStats = {
-  total: 45,
-  inProgress: 12,
-  completed: 28,
-  stuck: 3,
-  abandoned: 2,
-  avgCompletionDays: 8.5,
-  conversionRate: 62,
-  thisWeekSignups: 7,
+// Status mapping para la API
+const STATUS_MAP: Record<string, 'in_progress' | 'completed' | 'stuck' | 'abandoned'> = {
+  pending: 'stuck',
+  in_progress: 'in_progress',
+  completed: 'completed',
+  stalled: 'stuck',
 };
 
 const STATUS_CONFIG = {
@@ -307,30 +154,94 @@ export default function OnboardingTrackerPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      // En producción, esto se conectaría a una API real
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      let filtered = [...MOCK_COMPANIES];
-
+      // Construir query params
+      const params = new URLSearchParams();
+      params.set('page', '1');
+      params.set('limit', '50');
+      
+      // Mapear filtro de status
       if (statusFilter !== 'all') {
-        filtered = filtered.filter((c) => c.status === statusFilter);
+        const apiStatus = statusFilter === 'stuck' ? 'stalled' : statusFilter;
+        params.set('status', apiStatus);
       }
+      
+      if (searchTerm) {
+        params.set('search', searchTerm);
+      }
+
+      // Llamar a la API real
+      const response = await fetch(`/api/admin/onboarding?${params.toString()}`);
+      
+      if (!response.ok) {
+        throw new Error('Error al cargar datos');
+      }
+
+      const data = await response.json();
+      
+      // Transformar datos de la API al formato del componente
+      const transformedCompanies: CompanyOnboarding[] = data.companies.map((company: any) => {
+        const mappedStatus = STATUS_MAP[company.onboarding.status] || 'in_progress';
+        const stepsCompleted = company.onboarding.stepsCompleted || [];
+        
+        // Construir pasos basados en los completados (IDs coinciden con la API)
+        const steps: OnboardingStep[] = ONBOARDING_STEPS.map((step) => ({
+          ...step,
+          completed: stepsCompleted.includes(step.id),
+          completedAt: stepsCompleted.includes(step.id) 
+            ? company.onboarding.lastActivity 
+            : undefined,
+        }));
+
+        return {
+          id: company.id,
+          nombre: company.nombre,
+          email: company.emailContacto || '',
+          phone: company.telefonoContacto,
+          plan: company.plan,
+          createdAt: company.createdAt,
+          status: mappedStatus,
+          progress: company.onboarding.progress,
+          assignedTo: undefined,
+          lastActivity: company.onboarding.lastActivity,
+          steps,
+          metrics: {
+            usersCreated: company.metrics.users,
+            buildingsAdded: company.metrics.buildings,
+            tenantsAdded: company.metrics.tenants,
+            firstPaymentReceived: company.metrics.contracts > 0,
+          },
+        };
+      });
+
+      // Filtrar por plan si es necesario (la API no filtra por plan)
+      let filtered = transformedCompanies;
       if (planFilter !== 'all') {
         filtered = filtered.filter((c) => c.plan.toLowerCase() === planFilter.toLowerCase());
       }
-      if (searchTerm) {
-        filtered = filtered.filter(
-          (c) =>
-            c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            c.email.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
 
       setCompanies(filtered);
-      setStats(MOCK_STATS);
+      
+      // Calcular stats reales
+      const apiStats = data.stats;
+      const conversionRate = apiStats.total > 0 
+        ? Math.round((apiStats.completed / apiStats.total) * 100) 
+        : 0;
+      
+      setStats({
+        total: apiStats.total,
+        inProgress: apiStats.inProgress,
+        completed: apiStats.completed,
+        stuck: apiStats.stalled + apiStats.pending,
+        abandoned: 0, // La API no tiene este estado, podríamos agregarlo
+        avgCompletionDays: 0, // Calcular en backend si se necesita
+        conversionRate,
+        thisWeekSignups: 0, // Agregar en backend si se necesita
+      });
     } catch (error) {
       console.error('Error loading data:', error);
-      toast.error('Error al cargar los datos');
+      toast.error('Error al cargar los datos de onboarding');
+      setCompanies([]);
+      setStats(null);
     } finally {
       setLoading(false);
     }

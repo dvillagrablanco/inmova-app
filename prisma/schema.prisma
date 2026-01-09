@@ -1800,6 +1800,9 @@ model Company {
   emailContacto        String? // Email del contacto
   telefonoContacto     String? // Teléfono del contacto
   notasAdmin           String? @db.Text // Notas internas del super-admin
+  
+  // Marcador para empresas de prueba/demo (excluidas de analíticas)
+  esEmpresaPrueba      Boolean @default(false) // Si es true, se excluye de analíticas y reportes
 
   // Jerarquía de empresas (Grupos de empresas)
   parentCompanyId String? // ID de la empresa matriz (si es parte de un grupo)
