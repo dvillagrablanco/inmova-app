@@ -95,6 +95,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/contratos': 'contratos',
   '/pagos': 'pagos',
   '/mantenimiento': 'mantenimiento',
+  '/dashboard/servicios': 'servicios',
   '/calendario': 'calendario',
   '/chat': 'chat',
   '/bi': 'bi',
@@ -682,6 +683,12 @@ const operacionesNavItems = [
     href: '/visitas',
     icon: CalendarCheck,
     roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Servicios',
+    href: '/dashboard/servicios',
+    icon: ShoppingBag,
+    roles: ['super_admin', 'administrador', 'gestor', 'inquilino', 'propietario'],
   },
 ];
 
