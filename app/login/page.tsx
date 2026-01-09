@@ -132,14 +132,14 @@ export default function LoginPage() {
               )}
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
-                {/* Email field con mejor estilo */}
+                {/* Email field con mejor visibilidad */}
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-indigo-100 mb-2">
+                  <label htmlFor="email" className="block text-sm font-semibold text-white mb-2">
                     Correo Electrónico
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-indigo-300" aria-hidden="true" />
+                      <Mail className="h-5 w-5 text-indigo-200" aria-hidden="true" />
                     </div>
                     <input
                       id="email"
@@ -147,7 +147,7 @@ export default function LoginPage() {
                       placeholder="tu@correo.com"
                       value={email}
                       onChange={(e) => setValue('email', e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white/15 transition-all"
+                      className="w-full pl-10 pr-4 py-3 bg-slate-800/80 border-2 border-indigo-400/40 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:bg-slate-800 transition-all shadow-inner"
                       required
                       autoComplete="email"
                     />
@@ -157,14 +157,14 @@ export default function LoginPage() {
                   )}
                 </div>
 
-                {/* Password field con toggle de visibilidad */}
+                {/* Password field con mejor visibilidad */}
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-indigo-100 mb-2">
+                  <label htmlFor="password" className="block text-sm font-semibold text-white mb-2">
                     Contraseña
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-indigo-300" aria-hidden="true" />
+                      <Lock className="h-5 w-5 text-indigo-200" aria-hidden="true" />
                     </div>
                     <input
                       id="password"
@@ -172,14 +172,14 @@ export default function LoginPage() {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setValue('password', e.target.value)}
-                      className="w-full pl-10 pr-12 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white/15 transition-all"
+                      className="w-full pl-10 pr-12 py-3 bg-slate-800/80 border-2 border-indigo-400/40 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:bg-slate-800 transition-all shadow-inner"
                       required
                       autoComplete="current-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-indigo-300 hover:text-white transition-colors"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-indigo-200 hover:text-white transition-colors"
                       aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                     >
                       {showPassword ? (
