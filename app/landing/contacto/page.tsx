@@ -25,21 +25,43 @@ export default function ContactoPage() {
     e.preventDefault();
     setLoading(true);
 
-    // Simulación de envío
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          tipo: 'landing',
+          paginaOrigen: window.location.href,
+        }),
+      });
 
-    toast.success('Mensaje enviado correctamente', {
-      description: 'Nos pondremos en contacto contigo en menos de 24 horas.',
-    });
+      const data = await response.json();
 
-    setFormData({
-      nombre: '',
-      email: '',
-      telefono: '',
-      empresa: '',
-      mensaje: '',
-    });
-    setLoading(false);
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al enviar el mensaje');
+      }
+
+      toast.success('Mensaje enviado correctamente', {
+        description: 'Nos pondremos en contacto contigo en menos de 24 horas.',
+      });
+
+      setFormData({
+        nombre: '',
+        email: '',
+        telefono: '',
+        empresa: '',
+        mensaje: '',
+      });
+    } catch (error) {
+      toast.error('Error al enviar el mensaje', {
+        description: error instanceof Error ? error.message : 'Por favor, inténtalo de nuevo.',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
