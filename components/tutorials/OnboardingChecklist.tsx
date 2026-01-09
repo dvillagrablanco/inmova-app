@@ -152,14 +152,15 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
 
   if (isMinimized) {
     return (
-      <div className="fixed bottom-4 right-4 z-40">
+      // Posicionado en la izquierda para no solapar con chatbot
+      <div className="fixed bottom-4 left-4 z-40 lg:bottom-6 lg:left-6">
         <Button
           onClick={() => setIsMinimized(false)}
           className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-xl hover:shadow-2xl transition-all"
-          size="lg"
+          size="default"
         >
-          <Trophy className="w-5 h-5 mr-2" />
-          {completedCount}/{checklist.length} Pasos completados
+          <Trophy className="w-4 h-4 mr-2" />
+          {completedCount}/{checklist.length} Pasos
           <ChevronUp className="w-4 h-4 ml-2" />
         </Button>
       </div>
@@ -172,7 +173,8 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
         initial={{ opacity: 0, y: 20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 20, scale: 0.95 }}
-        className="fixed bottom-4 right-4 z-40 w-96"
+        // Posicionado en la izquierda para no solapar con chatbot
+        className="fixed bottom-4 left-4 z-40 w-80 lg:w-96 lg:bottom-6 lg:left-6 max-h-[80vh]"
       >
         <Card className="bg-white shadow-2xl border-2 border-indigo-200">
           {/* Header */}

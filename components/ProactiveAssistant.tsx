@@ -264,7 +264,8 @@ export default function ProactiveAssistant() {
         initial={{ opacity: 0, y: 50, scale: 0.9 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 50, scale: 0.9 }}
-        className="fixed bottom-6 left-6 z-40 max-w-md"
+        // Posicionado arriba del OnboardingChecklist cuando está en la izquierda
+        className="fixed bottom-32 left-6 z-30 max-w-sm hidden lg:block lg:bottom-36 lg:left-6"
       >
         <Card className={`shadow-2xl border-2 ${getBackgroundColor()}`}>
           <CardHeader className="pb-3">

@@ -25,18 +25,21 @@ export function FloatingTourButton() {
       <button
         onClick={() => setIsMinimized(false)}
         className={cn(
-          'fixed bottom-6 right-6 z-50',
-          'w-14 h-14 rounded-full',
+          // Posicionado arriba del chatbot (bottom-24 para dejar espacio)
+          'fixed bottom-24 right-6 z-40',
+          'w-12 h-12 rounded-full',
           'bg-gradient-to-br from-indigo-500 to-purple-600',
-          'text-white shadow-2xl',
+          'text-white shadow-xl',
           'hover:scale-110 active:scale-95',
           'transition-all duration-200',
           'flex items-center justify-center',
-          'lg:bottom-8 lg:right-8'
+          'lg:bottom-28 lg:right-8',
+          // Ocultar en móvil para evitar solapamiento con bottom nav
+          'hidden lg:flex'
         )}
         aria-label="Mostrar ayuda de tours"
       >
-        <HelpCircle size={24} />
+        <HelpCircle size={20} />
       </button>
     );
   }
@@ -44,12 +47,15 @@ export function FloatingTourButton() {
   return (
     <div
       className={cn(
-        'fixed bottom-6 right-6 z-50',
+        // Posicionado arriba del chatbot
+        'fixed bottom-24 right-6 z-40',
         'bg-white rounded-2xl shadow-2xl',
         'border border-gray-200',
         'p-4 max-w-xs',
-        'lg:bottom-8 lg:right-8',
-        'animate-in slide-in-from-bottom-4 fade-in duration-300'
+        'lg:bottom-28 lg:right-8',
+        'animate-in slide-in-from-bottom-4 fade-in duration-300',
+        // Ocultar en móvil
+        'hidden lg:block'
       )}
     >
       {/* Header */}

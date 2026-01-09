@@ -135,11 +135,12 @@ export function ContextualHelp({ page = 'dashboard' }: { page?: string }) {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-32 right-6 w-12 h-12 rounded-full shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 z-30"
+        // Posicionado arriba del tour button, solo visible en desktop
+        className="fixed bottom-40 right-6 w-10 h-10 rounded-full shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 z-30 hidden lg:flex lg:bottom-44 lg:right-8"
         size="icon"
-        title="Ayuda"
+        title="Ayuda contextual"
       >
-        <HelpCircle className="w-5 h-5 text-white" />
+        <HelpCircle className="w-4 h-4 text-white" />
       </Button>
     );
   }
@@ -150,7 +151,8 @@ export function ContextualHelp({ page = 'dashboard' }: { page?: string }) {
         initial={{ opacity: 0, x: 100 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: 100 }}
-        className="fixed bottom-32 right-6 w-80 max-h-[500px] z-[60]"
+        // Panel de ayuda posicionado en la derecha, encima de otros elementos
+        className="fixed bottom-24 right-6 w-80 max-h-[60vh] z-[60] hidden lg:block lg:bottom-28 lg:right-8"
       >
         <Card className="bg-white shadow-2xl border-2 border-blue-200">
           {/* Header */}
