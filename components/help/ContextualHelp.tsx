@@ -8,14 +8,14 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { 
-  HelpCircle, 
-  X, 
-  Video, 
-  BookOpen, 
+import {
+  HelpCircle,
+  X,
+  Video,
+  BookOpen,
   MessageCircle,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -30,41 +30,43 @@ interface HelpContent {
 const HELP_CONTENT: Record<string, HelpContent> = {
   dashboard: {
     title: 'Tu Panel Principal',
-    description: 'Aquí ves un resumen de todo lo importante: ingresos, propiedades ocupadas, pagos pendientes.',
+    description:
+      'Aquí ves un resumen de todo lo importante: ingresos, propiedades ocupadas, pagos pendientes.',
     quickTips: [
       'Las tarjetas de arriba muestran los números más importantes',
       'Los gráficos te ayudan a ver tendencias en el tiempo',
-      'Las alertas rojas requieren tu atención pronto'
+      'Las alertas rojas requieren tu atención pronto',
     ],
     commonQuestions: [
       {
         q: '¿Qué significa "Tasa de Ocupación"?',
-        a: 'Es el porcentaje de tus propiedades que están alquiladas. Ejemplo: si tienes 10 pisos y 8 están ocupados, tu tasa es 80%.'
+        a: 'Es el porcentaje de tus propiedades que están alquiladas. Ejemplo: si tienes 10 pisos y 8 están ocupados, tu tasa es 80%.',
       },
       {
         q: '¿Cómo actualizo los datos?',
-        a: 'Los datos se actualizan automáticamente cada vez que añades un pago, contrato o propiedad nueva.'
-      }
-    ]
+        a: 'Los datos se actualizan automáticamente cada vez que añades un pago, contrato o propiedad nueva.',
+      },
+    ],
   },
   edificios: {
     title: 'Tus Edificios y Propiedades',
-    description: 'Aquí guardas toda la información de tus inmuebles: direcciones, fotos, documentos.',
+    description:
+      'Aquí guardas toda la información de tus inmuebles: direcciones, fotos, documentos.',
     quickTips: [
       'Haz click en "Nuevo Edificio" para añadir tu primera propiedad',
       'Sube fotos para recordar detalles importantes',
-      'Los documentos se guardan de forma segura'
+      'Los documentos se guardan de forma segura',
     ],
     commonQuestions: [
       {
         q: '¿Puedo guardar varios edificios?',
-        a: 'Sí, sin límite. Puedes organizar por edificios o zonas geográficas.'
+        a: 'Sí, sin límite. Puedes organizar por edificios o zonas geográficas.',
       },
       {
         q: '¿Qué documentos puedo subir?',
-        a: 'Cualquier documento: escrituras, certificados, facturas, fotos, planos.'
-      }
-    ]
+        a: 'Cualquier documento: escrituras, certificados, facturas, fotos, planos.',
+      },
+    ],
   },
   inquilinos: {
     title: 'Tus Inquilinos',
@@ -72,18 +74,18 @@ const HELP_CONTENT: Record<string, HelpContent> = {
     quickTips: [
       'Añade inquilinos desde el botón "Nuevo Inquilino"',
       'Puedes enviarles mensajes directamente desde aquí',
-      'El historial de pagos te ayuda a llevar el control'
+      'El historial de pagos te ayuda a llevar el control',
     ],
     commonQuestions: [
       {
         q: '¿Cómo envío un mensaje a un inquilino?',
-        a: 'Click en su nombre, luego en el ícono de mensaje. El mensaje llega a su email.'
+        a: 'Click en su nombre, luego en el ícono de mensaje. El mensaje llega a su email.',
       },
       {
         q: '¿Se enteran de que uso esta app?',
-        a: 'Solo si tú quieres. Puedes mantener privado tu uso de la herramienta.'
-      }
-    ]
+        a: 'Solo si tú quieres. Puedes mantener privado tu uso de la herramienta.',
+      },
+    ],
   },
   contratos: {
     title: 'Contratos de Alquiler',
@@ -91,18 +93,18 @@ const HELP_CONTENT: Record<string, HelpContent> = {
     quickTips: [
       'Crea contratos desde plantillas predefinidas',
       'Los contratos próximos a vencer aparecen resaltados',
-      'Puedes firmar digitalmente sin impresiones'
+      'Puedes firmar digitalmente sin impresiones',
     ],
     commonQuestions: [
       {
         q: '¿Son válidos legalmente?',
-        a: 'Sí, la firma digital tiene la misma validez que la firma en papel según la ley española.'
+        a: 'Sí, la firma digital tiene la misma validez que la firma en papel según la ley española.',
       },
       {
         q: '¿Puedo editar un contrato después de crearlo?',
-        a: 'Depende. Si ya está firmado, necesitas crear un anexo. Si no está firmado, puedes editarlo libremente.'
-      }
-    ]
+        a: 'Depende. Si ya está firmado, necesitas crear un anexo. Si no está firmado, puedes editarlo libremente.',
+      },
+    ],
   },
   configuracion: {
     title: 'Configuración',
@@ -110,19 +112,19 @@ const HELP_CONTENT: Record<string, HelpContent> = {
     quickTips: [
       'Si eres nuevo, deja activada la "Ayuda Visual"',
       'Puedes activar/desactivar funciones que no uses',
-      'Los cambios se guardan automáticamente'
+      'Los cambios se guardan automáticamente',
     ],
     commonQuestions: [
       {
         q: '¿Qué es "Nivel de Experiencia"?',
-        a: 'Controla cuánta ayuda ves. "Principiante" muestra más ayuda, "Avanzado" muestra menos.'
+        a: 'Controla cuánta ayuda ves. "Principiante" muestra más ayuda, "Avanzado" muestra menos.',
       },
       {
         q: '¿Puedo desactivar funciones?',
-        a: 'Sí, en la pestaña "Módulos". Desactiva lo que no uses para simplificar el menú.'
-      }
-    ]
-  }
+        a: 'Sí, en la pestaña "Módulos". Desactiva lo que no uses para simplificar el menú.',
+      },
+    ],
+  },
 };
 
 export function ContextualHelp({ page = 'dashboard' }: { page?: string }) {
@@ -135,8 +137,8 @@ export function ContextualHelp({ page = 'dashboard' }: { page?: string }) {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        // Posicionado arriba del tour button, solo visible en desktop
-        className="fixed bottom-40 right-6 w-10 h-10 rounded-full shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 z-30 hidden lg:flex lg:bottom-44 lg:right-8"
+        // Posicionado arriba del tour button (bottom-[168px]), solo visible en desktop
+        className="fixed bottom-[168px] right-6 w-10 h-10 rounded-full shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 z-30 hidden lg:flex lg:right-8"
         size="icon"
         title="Ayuda contextual"
       >
@@ -151,8 +153,8 @@ export function ContextualHelp({ page = 'dashboard' }: { page?: string }) {
         initial={{ opacity: 0, x: 100 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: 100 }}
-        // Panel de ayuda posicionado en la derecha, encima de otros elementos
-        className="fixed bottom-24 right-6 w-80 max-h-[60vh] z-[60] hidden lg:block lg:bottom-28 lg:right-8"
+        // Panel de ayuda posicionado en la derecha (bottom-[220px] para no tapar otros elementos)
+        className="fixed bottom-[220px] right-6 w-80 max-h-[45vh] z-[60] hidden lg:block lg:right-8"
       >
         <Card className="bg-white shadow-2xl border-2 border-blue-200">
           {/* Header */}
@@ -235,9 +237,7 @@ export function ContextualHelp({ page = 'dashboard' }: { page?: string }) {
                           exit={{ height: 0, opacity: 0 }}
                           className="overflow-hidden"
                         >
-                          <div className="p-3 pt-0 text-sm text-gray-600 bg-gray-50">
-                            {item.a}
-                          </div>
+                          <div className="p-3 pt-0 text-sm text-gray-600 bg-gray-50">{item.a}</div>
                         </motion.div>
                       )}
                     </AnimatePresence>
