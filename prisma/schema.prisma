@@ -8867,6 +8867,10 @@ model DiscountCoupon {
   unidadesPermitidas String[] @default([]) // IDs de unidades específicas
   planesPermitidos   String[] @default([]) // IDs de planes de suscripción
 
+  // Stripe Integration - Sincronización automática
+  stripeCouponId        String? // ID del cupón en Stripe (coupon_xxx)
+  stripePromotionCodeId String? // ID del código promocional en Stripe (promo_xxx)
+
   // Estado
   estado CouponStatus @default(activo)
   activo Boolean      @default(true)
@@ -8883,6 +8887,7 @@ model DiscountCoupon {
   @@index([companyId])
   @@index([codigo])
   @@index([estado])
+  @@index([stripeCouponId])
   @@map("discount_coupons")
 }
 
