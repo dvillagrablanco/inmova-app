@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import {
   Building2,
@@ -38,6 +39,9 @@ import {
   ToggleLeft,
   ToggleRight,
   CreditCard,
+  FlaskConical,
+  Sparkles,
+  Filter,
 } from 'lucide-react';
 
 import { BackButton } from '@/components/ui/back-button';
@@ -78,6 +82,8 @@ export default function ClientesAdminPage() {
     setPlanFilter,
     categoryFilter,
     setCategoryFilter,
+    demoFilter,
+    setDemoFilter,
     sortBy,
     setSortBy,
     sortOrder,
@@ -112,7 +118,12 @@ export default function ClientesAdminPage() {
     subscriptionPlanId: '',
     estadoCliente: 'activo',
     parentCompanyId: '',
+    esEmpresaPrueba: false, // Empresa de demo
+    generarDatosEjemplo: false, // Generar datos de ejemplo automáticamente
   });
+  
+  // Filter for demo companies
+  const [showDemoOnly, setShowDemoOnly] = useState<boolean | null>(null); // null = all, true = demo only, false = real only
 
   // Authentication check
   if (status === 'loading') {
@@ -145,7 +156,28 @@ export default function ClientesAdminPage() {
 
     try {
       setCreating(true);
-      await createCompany(newCompany);
+      const createdCompany = await createCompany(newCompany);
+      
+      // Si es empresa de demo y se solicitó generar datos de ejemplo
+      if (newCompany.esEmpresaPrueba && newCompany.generarDatosEjemplo && createdCompany?.id) {
+        toast.info('Generando datos de ejemplo para la demo...');
+        try {
+          const res = await fetch('/api/admin/companies/generate-demo-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ companyId: createdCompany.id }),
+          });
+          if (res.ok) {
+            toast.success('Datos de ejemplo generados correctamente');
+            await fetchCompanies(); // Refrescar para ver los nuevos datos
+          } else {
+            toast.warning('Empresa creada, pero hubo un error generando datos de ejemplo');
+          }
+        } catch (e) {
+          toast.warning('Empresa creada, pero hubo un error generando datos de ejemplo');
+        }
+      }
+      
       setShowCreateDialog(false);
       setNewCompany({
         nombre: '',
@@ -156,6 +188,8 @@ export default function ClientesAdminPage() {
         subscriptionPlanId: '',
         estadoCliente: 'activo',
         parentCompanyId: '',
+        esEmpresaPrueba: false,
+        generarDatosEjemplo: false,
       });
     } catch (error) {
       // Error ya manejado en el hook
@@ -481,6 +515,55 @@ export default function ClientesAdminPage() {
                       placeholder="miempresa.inmova.app"
                     />
                   </div>
+                  
+                  {/* Sección de Empresa Demo */}
+                  <div className="border-t pt-4 mt-4">
+                    <div className="flex items-center gap-3 mb-4">
+                      <FlaskConical className="h-5 w-5 text-amber-600" />
+                      <h4 className="font-semibold text-amber-800">Opciones de Demo</h4>
+                    </div>
+                    
+                    <div className="space-y-4 bg-amber-50 p-4 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label htmlFor="esEmpresaPrueba" className="text-base">
+                            Empresa de Demo
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            Las empresas de demo no afectan a las estadísticas reales de la plataforma
+                          </p>
+                        </div>
+                        <Switch
+                          id="esEmpresaPrueba"
+                          checked={newCompany.esEmpresaPrueba}
+                          onCheckedChange={(checked) =>
+                            setNewCompany({ ...newCompany, esEmpresaPrueba: checked })
+                          }
+                        />
+                      </div>
+                      
+                      {newCompany.esEmpresaPrueba && (
+                        <div className="flex items-center justify-between border-t border-amber-200 pt-4">
+                          <div className="space-y-0.5">
+                            <Label htmlFor="generarDatosEjemplo" className="text-base flex items-center gap-2">
+                              <Sparkles className="h-4 w-4 text-amber-600" />
+                              Generar Datos de Ejemplo
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                              Crea automáticamente edificios, unidades, inquilinos y contratos de ejemplo
+                            </p>
+                          </div>
+                          <Switch
+                            id="generarDatosEjemplo"
+                            checked={newCompany.generarDatosEjemplo}
+                            onCheckedChange={(checked) =>
+                              setNewCompany({ ...newCompany, generarDatosEjemplo: checked })
+                            }
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <DialogFooter>
                   <Button
@@ -562,6 +645,8 @@ export default function ClientesAdminPage() {
             onPlanFilterChange={setPlanFilter}
             categoryFilter={categoryFilter}
             onCategoryFilterChange={setCategoryFilter}
+            demoFilter={demoFilter}
+            onDemoFilterChange={setDemoFilter}
             plans={plans}
             onRefresh={fetchCompanies}
           />

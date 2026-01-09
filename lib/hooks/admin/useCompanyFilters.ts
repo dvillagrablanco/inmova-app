@@ -6,6 +6,7 @@ export function useCompanyFilters(companies: CompanyData[]) {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [planFilter, setPlanFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [demoFilter, setDemoFilter] = useState<string>('all'); // 'all', 'real', 'demo'
   const [sortBy, setSortBy] = useState<string>('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
@@ -44,6 +45,13 @@ export function useCompanyFilters(companies: CompanyData[]) {
       filtered = filtered.filter(c => c.category === categoryFilter);
     }
 
+    // Demo filter - filter by esEmpresaPrueba
+    if (demoFilter === 'real') {
+      filtered = filtered.filter(c => !c.esEmpresaPrueba);
+    } else if (demoFilter === 'demo') {
+      filtered = filtered.filter(c => c.esEmpresaPrueba);
+    }
+
     // Sorting
     filtered.sort((a, b) => {
       let aVal: any, bVal: any;
@@ -78,7 +86,7 @@ export function useCompanyFilters(companies: CompanyData[]) {
     });
 
     return filtered;
-  }, [companies, searchQuery, statusFilter, planFilter, categoryFilter, sortBy, sortOrder]);
+  }, [companies, searchQuery, statusFilter, planFilter, categoryFilter, demoFilter, sortBy, sortOrder]);
 
   return {
     searchQuery,
@@ -89,6 +97,8 @@ export function useCompanyFilters(companies: CompanyData[]) {
     setPlanFilter,
     categoryFilter,
     setCategoryFilter,
+    demoFilter,
+    setDemoFilter,
     sortBy,
     setSortBy,
     sortOrder,

@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, Download, RefreshCw } from 'lucide-react';
+import { Search, Filter, Download, RefreshCw, FlaskConical } from 'lucide-react';
 import { SubscriptionPlan } from '@/lib/hooks/admin/useCompanies';
 
 interface FilterBarProps {
@@ -15,6 +15,8 @@ interface FilterBarProps {
   onPlanFilterChange: (value: string) => void;
   categoryFilter: string;
   onCategoryFilterChange: (value: string) => void;
+  demoFilter?: string;
+  onDemoFilterChange?: (value: string) => void;
   plans: SubscriptionPlan[];
   onRefresh: () => void;
   onExport?: () => void;
@@ -29,6 +31,8 @@ export function FilterBar({
   onPlanFilterChange,
   categoryFilter,
   onCategoryFilterChange,
+  demoFilter = 'all',
+  onDemoFilterChange,
   plans,
   onRefresh,
   onExport,
@@ -89,6 +93,21 @@ export function FilterBar({
           <SelectItem value="individual">Individual</SelectItem>
         </SelectContent>
       </Select>
+
+      {/* Demo Filter */}
+      {onDemoFilterChange && (
+        <Select value={demoFilter} onValueChange={onDemoFilterChange}>
+          <SelectTrigger className="w-full md:w-[160px]">
+            <FlaskConical className="h-4 w-4 mr-2 text-amber-600" />
+            <SelectValue placeholder="Tipo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas</SelectItem>
+            <SelectItem value="real">Solo Reales</SelectItem>
+            <SelectItem value="demo">Solo Demo</SelectItem>
+          </SelectContent>
+        </Select>
+      )}
 
       {/* Actions */}
       <div className="flex gap-2">

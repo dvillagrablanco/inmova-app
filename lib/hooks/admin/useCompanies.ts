@@ -12,6 +12,7 @@ export interface CompanyData {
   emailContacto: string | null;
   parentCompanyId?: string | null;
   category?: string | null;
+  esEmpresaPrueba: boolean; // Indica si es empresa de demo/prueba (excluida de analíticas)
   subscriptionPlan: {
     id: string;
     nombre: string;

@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Building2, Users, TrendingUp, Eye, Trash2, MoreVertical, LogIn, CreditCard, Pencil } from 'lucide-react';
+import { Building2, Users, TrendingUp, Eye, Trash2, MoreVertical, LogIn, CreditCard, Pencil, FlaskConical } from 'lucide-react';
 import { CompanyData } from '@/lib/hooks/admin/useCompanies';
 
 interface CompanyCardProps {
@@ -36,8 +36,10 @@ export function CompanyCard({
   onChangePlan,
   onLoginAs,
 }: CompanyCardProps) {
+  const isDemo = company.esEmpresaPrueba;
+  
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card className={`hover:shadow-lg transition-shadow ${isDemo ? 'border-amber-300 bg-amber-50/30' : ''}`}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3 flex-1">
@@ -47,6 +49,9 @@ export function CompanyCard({
             />
             <div className="flex-1">
               <CardTitle className="text-lg mb-1 flex items-center gap-2">
+                {isDemo && (
+                  <FlaskConical className="h-4 w-4 text-amber-600" />
+                )}
                 {company.nombre}
                 {company.parentCompanyId && (
                   <Badge variant="outline" className="text-xs">
@@ -55,10 +60,16 @@ export function CompanyCard({
                 )}
               </CardTitle>
               <div className="flex flex-wrap gap-2 mt-2">
+                {isDemo && (
+                  <Badge className="bg-amber-500 hover:bg-amber-600 text-white">
+                    <FlaskConical className="h-3 w-3 mr-1" />
+                    Demo
+                  </Badge>
+                )}
                 <Badge variant={company.activo ? 'default' : 'secondary'}>
                   {company.activo ? 'Activo' : 'Inactivo'}
                 </Badge>
-                {company.estadoCliente && (
+                {company.estadoCliente && !isDemo && (
                   <Badge variant="outline">{company.estadoCliente}</Badge>
                 )}
                 {company.category && (
