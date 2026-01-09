@@ -42,6 +42,11 @@ import {
   FlaskConical,
   Sparkles,
   Filter,
+  Home,
+  Briefcase,
+  Plane,
+  Store,
+  UserCircle,
 } from 'lucide-react';
 
 import { BackButton } from '@/components/ui/back-button';
@@ -120,7 +125,75 @@ export default function ClientesAdminPage() {
     parentCompanyId: '',
     esEmpresaPrueba: false, // Empresa de demo
     generarDatosEjemplo: false, // Generar datos de ejemplo automáticamente
+    escenarioDemo: 'gestor_residencial', // Escenario de demo por defecto
   });
+
+  // Escenarios de demo disponibles
+  const DEMO_SCENARIOS = [
+    { 
+      id: 'gestor_residencial', 
+      nombre: 'Gestor de Alquileres', 
+      descripcion: 'Gestores profesionales con múltiples edificios y contratos',
+      icon: Building2,
+      color: 'blue'
+    },
+    { 
+      id: 'propietario_particular', 
+      nombre: 'Propietario Particular', 
+      descripcion: 'Propietarios con 1-5 propiedades',
+      icon: Home,
+      color: 'green'
+    },
+    { 
+      id: 'agencia_inmobiliaria', 
+      nombre: 'Agencia Inmobiliaria', 
+      descripcion: 'Agencia con CRM, leads y cartera de propiedades',
+      icon: Briefcase,
+      color: 'purple'
+    },
+    { 
+      id: 'coliving', 
+      nombre: 'Operador Coliving', 
+      descripcion: 'Espacios coliving con habitaciones y comunidad',
+      icon: Users,
+      color: 'pink'
+    },
+    { 
+      id: 'alquiler_turistico', 
+      nombre: 'Alquiler Turístico', 
+      descripcion: 'Apartamentos turísticos con reservas y calendario',
+      icon: Plane,
+      color: 'orange'
+    },
+    { 
+      id: 'comercial_oficinas', 
+      nombre: 'Locales y Oficinas', 
+      descripcion: 'Espacios comerciales y oficinas',
+      icon: Store,
+      color: 'slate'
+    },
+    { 
+      id: 'comunidad_propietarios', 
+      nombre: 'Comunidad de Propietarios', 
+      descripcion: 'Administración de fincas y comunidades',
+      icon: Building2,
+      color: 'teal'
+    },
+    { 
+      id: 'inversor_inmobiliario', 
+      nombre: 'Inversor Inmobiliario', 
+      descripcion: 'Portfolio diversificado con análisis de rentabilidad',
+      icon: TrendingUp,
+      color: 'emerald'
+    },
+    { 
+      id: 'completo', 
+      nombre: 'Demo Completa', 
+      descripcion: 'Todos los módulos y tipos de propiedades',
+      icon: Sparkles,
+      color: 'indigo'
+    },
+  ];
   
   // Filter for demo companies
   const [showDemoOnly, setShowDemoOnly] = useState<boolean | null>(null); // null = all, true = demo only, false = real only
@@ -160,16 +233,21 @@ export default function ClientesAdminPage() {
       
       // Si es empresa de demo y se solicitó generar datos de ejemplo
       if (newCompany.esEmpresaPrueba && newCompany.generarDatosEjemplo && createdCompany?.id) {
-        toast.info('Generando datos de ejemplo para la demo...');
+        const selectedScenario = DEMO_SCENARIOS.find(s => s.id === newCompany.escenarioDemo);
+        toast.info(`Generando datos de ejemplo: ${selectedScenario?.nombre || 'Demo'}...`);
         try {
           const res = await fetch('/api/admin/companies/generate-demo-data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ companyId: createdCompany.id }),
+            body: JSON.stringify({ 
+              companyId: createdCompany.id,
+              scenario: newCompany.escenarioDemo 
+            }),
           });
           if (res.ok) {
-            toast.success('Datos de ejemplo generados correctamente');
-            await fetchCompanies(); // Refrescar para ver los nuevos datos
+            const result = await res.json();
+            toast.success(`Escenario "${result.scenario?.nombre}" generado: ${result.summary?.buildings} edificios, ${result.summary?.units} unidades, ${result.summary?.tenants} inquilinos`);
+            await fetchCompanies();
           } else {
             toast.warning('Empresa creada, pero hubo un error generando datos de ejemplo');
           }
@@ -190,6 +268,7 @@ export default function ClientesAdminPage() {
         parentCompanyId: '',
         esEmpresaPrueba: false,
         generarDatosEjemplo: false,
+        escenarioDemo: 'gestor_residencial',
       });
     } catch (error) {
       // Error ya manejado en el hook
@@ -543,24 +622,94 @@ export default function ClientesAdminPage() {
                       </div>
                       
                       {newCompany.esEmpresaPrueba && (
-                        <div className="flex items-center justify-between border-t border-amber-200 pt-4">
-                          <div className="space-y-0.5">
-                            <Label htmlFor="generarDatosEjemplo" className="text-base flex items-center gap-2">
-                              <Sparkles className="h-4 w-4 text-amber-600" />
-                              Generar Datos de Ejemplo
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                              Crea automáticamente edificios, unidades, inquilinos y contratos de ejemplo
-                            </p>
+                        <>
+                          <div className="flex items-center justify-between border-t border-amber-200 pt-4">
+                            <div className="space-y-0.5">
+                              <Label htmlFor="generarDatosEjemplo" className="text-base flex items-center gap-2">
+                                <Sparkles className="h-4 w-4 text-amber-600" />
+                                Generar Datos de Ejemplo
+                              </Label>
+                              <p className="text-sm text-muted-foreground">
+                                Crea automáticamente edificios, unidades, inquilinos y contratos de ejemplo
+                              </p>
+                            </div>
+                            <Switch
+                              id="generarDatosEjemplo"
+                              checked={newCompany.generarDatosEjemplo}
+                              onCheckedChange={(checked) =>
+                                setNewCompany({ ...newCompany, generarDatosEjemplo: checked })
+                              }
+                            />
                           </div>
-                          <Switch
-                            id="generarDatosEjemplo"
-                            checked={newCompany.generarDatosEjemplo}
-                            onCheckedChange={(checked) =>
-                              setNewCompany({ ...newCompany, generarDatosEjemplo: checked })
-                            }
-                          />
-                        </div>
+
+                          {/* Selector de Escenario de Demo */}
+                          {newCompany.generarDatosEjemplo && (
+                            <div className="border-t border-amber-200 pt-4 mt-4">
+                              <Label className="text-base font-medium mb-3 block">
+                                Escenario de Demo
+                              </Label>
+                              <p className="text-sm text-muted-foreground mb-4">
+                                Selecciona el tipo de cliente para generar datos específicos y relevantes
+                              </p>
+                              <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto">
+                                {DEMO_SCENARIOS.map((scenario) => {
+                                  const ScenarioIcon = scenario.icon;
+                                  const isSelected = newCompany.escenarioDemo === scenario.id;
+                                  
+                                  const colorClasses: Record<string, string> = {
+                                    blue: 'bg-blue-50 border-blue-300 ring-blue-500',
+                                    green: 'bg-green-50 border-green-300 ring-green-500',
+                                    purple: 'bg-purple-50 border-purple-300 ring-purple-500',
+                                    pink: 'bg-pink-50 border-pink-300 ring-pink-500',
+                                    orange: 'bg-orange-50 border-orange-300 ring-orange-500',
+                                    slate: 'bg-slate-50 border-slate-300 ring-slate-500',
+                                    teal: 'bg-teal-50 border-teal-300 ring-teal-500',
+                                    emerald: 'bg-emerald-50 border-emerald-300 ring-emerald-500',
+                                    indigo: 'bg-indigo-50 border-indigo-300 ring-indigo-500',
+                                  };
+                                  
+                                  const iconColorClasses: Record<string, string> = {
+                                    blue: 'text-blue-600',
+                                    green: 'text-green-600',
+                                    purple: 'text-purple-600',
+                                    pink: 'text-pink-600',
+                                    orange: 'text-orange-600',
+                                    slate: 'text-slate-600',
+                                    teal: 'text-teal-600',
+                                    emerald: 'text-emerald-600',
+                                    indigo: 'text-indigo-600',
+                                  };
+
+                                  return (
+                                    <div
+                                      key={scenario.id}
+                                      onClick={() => setNewCompany({ ...newCompany, escenarioDemo: scenario.id })}
+                                      className={`
+                                        flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer
+                                        transition-all duration-200 hover:shadow-md
+                                        ${isSelected 
+                                          ? `${colorClasses[scenario.color]} ring-2` 
+                                          : 'bg-white border-gray-200 hover:border-gray-300'
+                                        }
+                                      `}
+                                    >
+                                      <div className={`p-2 rounded-lg ${isSelected ? colorClasses[scenario.color] : 'bg-gray-100'}`}>
+                                        <ScenarioIcon className={`h-5 w-5 ${isSelected ? iconColorClasses[scenario.color] : 'text-gray-600'}`} />
+                                      </div>
+                                      <div className="flex-1">
+                                        <div className="font-medium text-sm">{scenario.nombre}</div>
+                                        <div className="text-xs text-gray-500">{scenario.descripcion}</div>
+                                      </div>
+                                      {isSelected && (
+                                        <div className={`h-2 w-2 rounded-full ${iconColorClasses[scenario.color].replace('text-', 'bg-')}`} />
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
