@@ -5,9 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 import {
   Users,
   Building2,
@@ -18,11 +20,24 @@ import {
   XCircle,
   ArrowLeft,
   AlertTriangle,
+  Search,
+  BarChart3,
+  RefreshCw,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
+
+// Interfaz para empresas disponibles
+interface CompanyOption {
+  id: string;
+  nombre: string;
+  activo: boolean;
+  estadoCliente: string | null;
+  subscriptionPlan: { nombre: string } | null;
+  _count: { users: number; buildings: number };
+}
 
 interface CompanyComparison {
   id: string;
@@ -68,6 +83,29 @@ function CompareCompaniesPageContent() {
   const { data: session, status } = useSession();
   const [companies, setCompanies] = useState<CompanyComparison[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Estados para el selector de empresas
+  const [showSelector, setShowSelector] = useState(false);
+  const [availableCompanies, setAvailableCompanies] = useState<CompanyOption[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
+  const [loadingCompanies, setLoadingCompanies] = useState(false);
+
+  // Cargar empresas disponibles
+  const loadAvailableCompanies = async () => {
+    try {
+      setLoadingCompanies(true);
+      const res = await fetch('/api/admin/companies?limit=100');
+      if (res.ok) {
+        const data = await res.json();
+        setAvailableCompanies(data.companies || []);
+      }
+    } catch (error) {
+      logger.error('Error cargando empresas:', error);
+    } finally {
+      setLoadingCompanies(false);
+    }
+  };
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -76,16 +114,43 @@ function CompareCompaniesPageContent() {
       if (session?.user?.role !== 'super_admin') {
         router.push('/unauthorized');
       } else {
-        const ids = searchParams?.get('ids')?.split(',') || [];
-        if (ids.length < 2 || ids.length > 4) {
-          toast.error('Debe seleccionar entre 2 y 4 empresas para comparar');
-          router.push('/admin/clientes');
-          return;
+        const ids = searchParams?.get('ids')?.split(',').filter(Boolean) || [];
+        if (ids.length >= 2 && ids.length <= 4) {
+          fetchComparison(ids);
+        } else {
+          // Mostrar selector si no hay IDs válidos
+          setShowSelector(true);
+          setLoading(false);
+          loadAvailableCompanies();
         }
-        fetchComparison(ids);
       }
     }
   }, [status, session, router, searchParams]);
+
+  const handleSelectCompany = (id: string, checked: boolean) => {
+    const newSelected = new Set(selectedIds);
+    if (checked && selectedIds.size < 4) {
+      newSelected.add(id);
+    } else if (!checked) {
+      newSelected.delete(id);
+    } else {
+      toast.error('Máximo 4 empresas para comparar');
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const handleCompare = () => {
+    if (selectedIds.size < 2) {
+      toast.error('Selecciona al menos 2 empresas');
+      return;
+    }
+    const idsParam = Array.from(selectedIds).join(',');
+    router.push(`/admin/clientes/comparar?ids=${idsParam}`);
+  };
+
+  const filteredCompanies = availableCompanies.filter(c =>
+    c.nombre.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const fetchComparison = async (companyIds: string[]) => {
     try {
@@ -110,12 +175,164 @@ function CompareCompaniesPageContent() {
 
   if (loading || status === 'loading') {
     return (
-      <div className="flex h-screen items-center justify-center bg-gradient-bg">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent"></div>
-          <p className="mt-4 text-gray-600">Cargando comparación...</p>
+      <AuthenticatedLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <RefreshCw className="h-8 w-8 animate-spin text-indigo-600 mx-auto" />
+            <p className="mt-4 text-gray-600">Cargando comparación...</p>
+          </div>
         </div>
-      </div>
+      </AuthenticatedLayout>
+    );
+  }
+
+  // Mostrar selector de empresas si no hay IDs
+  if (showSelector) {
+    return (
+      <AuthenticatedLayout>
+        <div className="container mx-auto py-6 space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/admin/clientes')}
+                className="mb-2"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Volver a Clientes
+              </Button>
+              <h1 className="text-3xl font-bold">Comparar Empresas</h1>
+              <p className="text-muted-foreground mt-1">
+                Selecciona entre 2 y 4 empresas para comparar sus métricas
+              </p>
+            </div>
+            <Button
+              onClick={handleCompare}
+              disabled={selectedIds.size < 2}
+              size="lg"
+              className="gap-2"
+            >
+              <BarChart3 className="h-5 w-5" />
+              Comparar ({selectedIds.size})
+            </Button>
+          </div>
+
+          {/* Buscador */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar empresas..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 max-w-md"
+            />
+          </div>
+
+          {/* Selección actual */}
+          {selectedIds.size > 0 && (
+            <Card className="bg-indigo-50 border-indigo-200">
+              <CardContent className="py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-indigo-600" />
+                    <span className="font-medium">
+                      {selectedIds.size} empresa{selectedIds.size !== 1 ? 's' : ''} seleccionada{selectedIds.size !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    {Array.from(selectedIds).map(id => {
+                      const company = availableCompanies.find(c => c.id === id);
+                      return company ? (
+                        <Badge key={id} variant="secondary" className="gap-1">
+                          {company.nombre}
+                          <button
+                            onClick={() => handleSelectCompany(id, false)}
+                            className="ml-1 hover:text-red-600"
+                          >
+                            ×
+                          </button>
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Lista de empresas */}
+          {loadingCompanies ? (
+            <div className="flex items-center justify-center h-40">
+              <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredCompanies.map((company) => (
+                <Card
+                  key={company.id}
+                  className={`cursor-pointer transition-all ${
+                    selectedIds.has(company.id)
+                      ? 'ring-2 ring-indigo-600 bg-indigo-50'
+                      : 'hover:shadow-md'
+                  }`}
+                  onClick={() => handleSelectCompany(company.id, !selectedIds.has(company.id))}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <Checkbox
+                          checked={selectedIds.has(company.id)}
+                          onCheckedChange={(checked) => handleSelectCompany(company.id, checked as boolean)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <div>
+                          <CardTitle className="text-lg">{company.nombre}</CardTitle>
+                          <div className="flex gap-2 mt-1">
+                            <Badge variant={company.activo ? 'default' : 'secondary'} className="text-xs">
+                              {company.activo ? 'Activa' : 'Inactiva'}
+                            </Badge>
+                            {company.subscriptionPlan && (
+                              <Badge variant="outline" className="text-xs">
+                                {company.subscriptionPlan.nombre}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <span>{company._count?.users || 0} usuarios</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                        <span>{company._count?.buildings || 0} edificios</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {filteredCompanies.length === 0 && !loadingCompanies && (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="font-semibold mb-2">No se encontraron empresas</h3>
+                <p className="text-muted-foreground">
+                  {searchQuery ? 'Intenta con otro término de búsqueda' : 'No hay empresas disponibles'}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
@@ -252,7 +469,7 @@ function CompareCompaniesPageContent() {
                     label="Usuarios"
                     icon={<Users className="h-4 w-4" />}
                     values={companies.map((c) => (
-                      <div>
+                      <div key={c.id}>
                         <div className="text-xl font-bold">{c.metrics.users}</div>
                         {c.limits.maxUsuarios && (
                           <div className="text-xs text-gray-500">
@@ -267,7 +484,7 @@ function CompareCompaniesPageContent() {
                     label="Edificios"
                     icon={<Building2 className="h-4 w-4" />}
                     values={companies.map((c) => (
-                      <div>
+                      <div key={c.id}>
                         <div className="text-xl font-bold">{c.metrics.buildings}</div>
                         {c.limits.maxEdificios && (
                           <div className="text-xs text-gray-500">
@@ -300,7 +517,7 @@ function CompareCompaniesPageContent() {
                     label="Tasa de Ocupación"
                     icon={<TrendingUp className="h-4 w-4" />}
                     values={companies.map((c) => (
-                      <div>
+                      <div key={c.id}>
                         <div className="text-xl font-bold">
                           {c.metrics.occupancyRate.toFixed(1)}%
                         </div>
@@ -319,7 +536,7 @@ function CompareCompaniesPageContent() {
                     label="Ingresos Mensuales"
                     icon={<DollarSign className="h-4 w-4" />}
                     values={companies.map((c) => (
-                      <div className="text-xl font-bold">
+                      <div key={c.id} className="text-xl font-bold">
                         €{c.metrics.monthlyRevenue.toLocaleString('es-ES')}
                       </div>
                     ))}
