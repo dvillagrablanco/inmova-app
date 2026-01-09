@@ -67,6 +67,11 @@ export interface AddOn {
   annualPrice?: number;
   units?: number;
   unitType?: string;
+  // Costos y márgenes
+  costPerUnit?: number;      // Costo unitario real (€)
+  marginPercentage?: number; // Margen de beneficio (%)
+  costSource?: string;       // Fuente del costo (ej: "Signaturit", "Twilio", "AWS S3")
+  // Stripe
   stripePriceId?: string;
   availableFor: string[];
   includedIn: string[];
@@ -231,9 +236,19 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
 /**
  * ADD-ONS DISPONIBLES
  * Sincronizado con /prisma/seed-addons.ts
+ * 
+ * COSTOS REALES POR PROVEEDOR:
+ * - Signaturit: €0.90/firma (volumen alto: €0.50-0.65)
+ * - Twilio SMS: €0.053/SMS España (volumen: €0.030-0.038)
+ * - AWS S3: €0.023/GB/mes + €0.09/GB transferencia
+ * - OpenAI GPT-3.5: €0.002/1K tokens, GPT-4: €0.03/1K tokens
+ * - Matterport: €30-50/tour
  */
 export const ADD_ONS: Record<string, AddOn> = {
-  // === PACKS DE USO ===
+  // ═══════════════════════════════════════════════════════════════
+  // PACKS DE USO - Consumibles
+  // ═══════════════════════════════════════════════════════════════
+  
   signatures_10: {
     id: 'signatures_pack_10',
     name: 'Pack 10 Firmas Digitales',
@@ -243,6 +258,9 @@ export const ADD_ONS: Record<string, AddOn> = {
     annualPrice: 150,
     units: 10,
     unitType: 'firmas',
+    costPerUnit: 9,           // 10 firmas × €0.90 = €9
+    marginPercentage: 40,     // (15-9)/15 = 40%
+    costSource: 'Signaturit',
     availableFor: ['starter', 'professional', 'business', 'enterprise'],
     includedIn: [],
     highlighted: true,
@@ -256,7 +274,25 @@ export const ADD_ONS: Record<string, AddOn> = {
     annualPrice: 600,
     units: 50,
     unitType: 'firmas',
+    costPerUnit: 32.50,       // 50 firmas × €0.65 = €32.50
+    marginPercentage: 46,     // (60-32.50)/60 = 46%
+    costSource: 'Signaturit (volumen)',
     availableFor: ['professional', 'business', 'enterprise'],
+    includedIn: [],
+  },
+  signatures_100: {
+    id: 'signatures_pack_100',
+    name: 'Pack 100 Firmas Digitales',
+    description: 'Pack empresarial de 100 firmas. Máximo ahorro.',
+    category: 'usage',
+    monthlyPrice: 100,
+    annualPrice: 1000,
+    units: 100,
+    unitType: 'firmas',
+    costPerUnit: 50,          // 100 firmas × €0.50 = €50
+    marginPercentage: 50,     // (100-50)/100 = 50%
+    costSource: 'Signaturit (enterprise)',
+    availableFor: ['business', 'enterprise'],
     includedIn: [],
   },
   sms_100: {
@@ -268,6 +304,9 @@ export const ADD_ONS: Record<string, AddOn> = {
     annualPrice: 100,
     units: 100,
     unitType: 'mensajes',
+    costPerUnit: 5.30,        // 100 SMS × €0.053 = €5.30
+    marginPercentage: 47,     // (10-5.30)/10 = 47%
+    costSource: 'Twilio',
     availableFor: ['starter', 'professional', 'business', 'enterprise'],
     includedIn: [],
     highlighted: true,
@@ -281,7 +320,25 @@ export const ADD_ONS: Record<string, AddOn> = {
     annualPrice: 400,
     units: 500,
     unitType: 'mensajes',
+    costPerUnit: 19,          // 500 SMS × €0.038 = €19
+    marginPercentage: 52,     // (40-19)/40 = 52%
+    costSource: 'Twilio (volumen)',
     availableFor: ['professional', 'business', 'enterprise'],
+    includedIn: [],
+  },
+  sms_1000: {
+    id: 'sms_pack_1000',
+    name: 'Pack 1000 SMS/WhatsApp',
+    description: 'Pack empresarial de 1000 mensajes',
+    category: 'usage',
+    monthlyPrice: 70,
+    annualPrice: 700,
+    units: 1000,
+    unitType: 'mensajes',
+    costPerUnit: 30,          // 1000 SMS × €0.030 = €30
+    marginPercentage: 57,     // (70-30)/70 = 57%
+    costSource: 'Twilio (enterprise)',
+    availableFor: ['business', 'enterprise'],
     includedIn: [],
   },
   ai_50k: {
@@ -293,6 +350,9 @@ export const ADD_ONS: Record<string, AddOn> = {
     annualPrice: 100,
     units: 50000,
     unitType: 'tokens',
+    costPerUnit: 0.30,        // 50K tokens GPT-3.5 × €0.006/1K = €0.30
+    marginPercentage: 97,     // (10-0.30)/10 = 97%
+    costSource: 'OpenAI GPT-3.5',
     availableFor: ['starter', 'professional', 'business', 'enterprise'],
     includedIn: [],
     highlighted: true,
@@ -306,7 +366,25 @@ export const ADD_ONS: Record<string, AddOn> = {
     annualPrice: 350,
     units: 200000,
     unitType: 'tokens',
+    costPerUnit: 3,           // Mix GPT-3.5/4: ~€3 por 200K
+    marginPercentage: 91,     // (35-3)/35 = 91%
+    costSource: 'OpenAI GPT-3.5/4 mix',
     availableFor: ['professional', 'business', 'enterprise'],
+    includedIn: [],
+  },
+  ai_500k: {
+    id: 'ai_pack_500k',
+    name: 'Pack IA Enterprise (500K tokens)',
+    description: 'Acceso GPT-4 ilimitado para uso intensivo',
+    category: 'usage',
+    monthlyPrice: 75,
+    annualPrice: 750,
+    units: 500000,
+    unitType: 'tokens',
+    costPerUnit: 10,          // 500K tokens GPT-4: ~€10
+    marginPercentage: 87,     // (75-10)/75 = 87%
+    costSource: 'OpenAI GPT-4',
+    availableFor: ['business', 'enterprise'],
     includedIn: [],
   },
   storage_10gb: {
@@ -318,6 +396,9 @@ export const ADD_ONS: Record<string, AddOn> = {
     annualPrice: 50,
     units: 10,
     unitType: 'GB',
+    costPerUnit: 0.23,        // 10GB × €0.023 = €0.23
+    marginPercentage: 95,     // (5-0.23)/5 = 95%
+    costSource: 'AWS S3',
     availableFor: ['starter', 'professional', 'business', 'enterprise'],
     includedIn: [],
   },
@@ -330,11 +411,32 @@ export const ADD_ONS: Record<string, AddOn> = {
     annualPrice: 200,
     units: 50,
     unitType: 'GB',
+    costPerUnit: 1.15,        // 50GB × €0.023 = €1.15
+    marginPercentage: 94,     // (20-1.15)/20 = 94%
+    costSource: 'AWS S3',
     availableFor: ['professional', 'business', 'enterprise'],
     includedIn: [],
   },
+  storage_100gb: {
+    id: 'storage_pack_100gb',
+    name: 'Pack 100GB Storage',
+    description: 'Almacenamiento empresarial con CDN incluido',
+    category: 'usage',
+    monthlyPrice: 35,
+    annualPrice: 350,
+    units: 100,
+    unitType: 'GB',
+    costPerUnit: 2.30,        // 100GB × €0.023 = €2.30
+    marginPercentage: 93,     // (35-2.30)/35 = 93%
+    costSource: 'AWS S3 + CloudFront',
+    availableFor: ['business', 'enterprise'],
+    includedIn: [],
+  },
   
-  // === FUNCIONALIDADES ===
+  // ═══════════════════════════════════════════════════════════════
+  // FUNCIONALIDADES - Features activables
+  // ═══════════════════════════════════════════════════════════════
+  
   advanced_reports: {
     id: 'advanced_reports',
     name: 'Reportes Avanzados',
@@ -342,6 +444,22 @@ export const ADD_ONS: Record<string, AddOn> = {
     category: 'feature',
     monthlyPrice: 15,
     annualPrice: 150,
+    costPerUnit: 0,           // Costo de desarrollo amortizado
+    marginPercentage: 100,    // Sin costo variable
+    costSource: 'Desarrollo interno',
+    availableFor: ['starter', 'professional'],
+    includedIn: ['business', 'enterprise'],
+  },
+  multi_language: {
+    id: 'multi_language',
+    name: 'Multi-idioma',
+    description: 'Interfaz en ES, EN, FR, DE, PT. Portal traducido.',
+    category: 'feature',
+    monthlyPrice: 10,
+    annualPrice: 100,
+    costPerUnit: 0,
+    marginPercentage: 100,
+    costSource: 'Desarrollo interno',
     availableFor: ['starter', 'professional'],
     includedIn: ['business', 'enterprise'],
   },
@@ -352,9 +470,25 @@ export const ADD_ONS: Record<string, AddOn> = {
     category: 'feature',
     monthlyPrice: 25,
     annualPrice: 250,
+    costPerUnit: 5,           // APIs de portales: ~€5/mes
+    marginPercentage: 80,     // (25-5)/25 = 80%
+    costSource: 'APIs Idealista/Fotocasa',
     availableFor: ['starter', 'professional', 'business'],
     includedIn: ['enterprise'],
     highlighted: true,
+  },
+  auto_reminders: {
+    id: 'auto_reminders',
+    name: 'Recordatorios Automáticos',
+    description: 'Recordatorios de pago, vencimientos y mantenimientos',
+    category: 'feature',
+    monthlyPrice: 8,
+    annualPrice: 80,
+    costPerUnit: 0,
+    marginPercentage: 100,
+    costSource: 'Desarrollo interno',
+    availableFor: ['starter'],
+    includedIn: ['professional', 'business', 'enterprise'],
   },
   tenant_screening: {
     id: 'tenant_screening',
@@ -363,6 +497,9 @@ export const ADD_ONS: Record<string, AddOn> = {
     category: 'feature',
     monthlyPrice: 20,
     annualPrice: 200,
+    costPerUnit: 8,           // Consultas a bureaus de crédito
+    marginPercentage: 60,     // (20-8)/20 = 60%
+    costSource: 'Experian/Equifax API',
     availableFor: ['starter', 'professional', 'business'],
     includedIn: ['enterprise'],
   },
@@ -373,11 +510,17 @@ export const ADD_ONS: Record<string, AddOn> = {
     category: 'feature',
     monthlyPrice: 30,
     annualPrice: 300,
+    costPerUnit: 4.50,        // APIs contables
+    marginPercentage: 85,     // (30-4.50)/30 = 85%
+    costSource: 'APIs A3/Sage/Holded',
     availableFor: ['professional', 'business'],
     includedIn: ['enterprise'],
   },
   
-  // === PREMIUM ===
+  // ═══════════════════════════════════════════════════════════════
+  // PREMIUM - Servicios de alto valor
+  // ═══════════════════════════════════════════════════════════════
+  
   whitelabel_basic: {
     id: 'whitelabel_basic',
     name: 'White-Label Básico',
@@ -385,6 +528,9 @@ export const ADD_ONS: Record<string, AddOn> = {
     category: 'premium',
     monthlyPrice: 35,
     annualPrice: 350,
+    costPerUnit: 1.75,        // Mantenimiento mínimo
+    marginPercentage: 95,     // (35-1.75)/35 = 95%
+    costSource: 'Infraestructura',
     availableFor: ['professional', 'business'],
     includedIn: ['enterprise'],
     highlighted: true,
@@ -396,6 +542,9 @@ export const ADD_ONS: Record<string, AddOn> = {
     category: 'premium',
     monthlyPrice: 99,
     annualPrice: 990,
+    costPerUnit: 15,          // Dominio, SSL, infraestructura dedicada
+    marginPercentage: 85,     // (99-15)/99 = 85%
+    costSource: 'Infra + dominios + SSL',
     availableFor: ['business'],
     includedIn: ['enterprise'],
   },
@@ -406,6 +555,22 @@ export const ADD_ONS: Record<string, AddOn> = {
     category: 'premium',
     monthlyPrice: 49,
     annualPrice: 490,
+    costPerUnit: 0,           // Sin costo variable
+    marginPercentage: 100,
+    costSource: 'Desarrollo interno',
+    availableFor: ['professional', 'business'],
+    includedIn: ['enterprise'],
+  },
+  esg_module: {
+    id: 'esg_module',
+    name: 'ESG & Sostenibilidad',
+    description: 'Huella de carbono, certificaciones verdes, CSRD',
+    category: 'premium',
+    monthlyPrice: 50,
+    annualPrice: 500,
+    costPerUnit: 10,          // APIs de certificación
+    marginPercentage: 80,     // (50-10)/50 = 80%
+    costSource: 'APIs ESG + desarrollo',
     availableFor: ['professional', 'business'],
     includedIn: ['enterprise'],
   },
@@ -416,6 +581,9 @@ export const ADD_ONS: Record<string, AddOn> = {
     category: 'premium',
     monthlyPrice: 45,
     annualPrice: 450,
+    costPerUnit: 6.75,        // ML compute + APIs mercado
+    marginPercentage: 85,     // (45-6.75)/45 = 85%
+    costSource: 'AWS ML + APIs mercado',
     availableFor: ['professional', 'business'],
     includedIn: ['enterprise'],
     highlighted: true,
@@ -427,6 +595,9 @@ export const ADD_ONS: Record<string, AddOn> = {
     category: 'premium',
     monthlyPrice: 35,
     annualPrice: 350,
+    costPerUnit: 7,           // Hosting de tours + Matterport API
+    marginPercentage: 80,     // (35-7)/35 = 80%
+    costSource: 'Matterport/Kuula API',
     availableFor: ['professional', 'business'],
     includedIn: ['enterprise'],
   },
@@ -437,7 +608,36 @@ export const ADD_ONS: Record<string, AddOn> = {
     category: 'premium',
     monthlyPrice: 75,
     annualPrice: 750,
+    costPerUnit: 22.50,       // APIs IoT + integraciones
+    marginPercentage: 70,     // (75-22.50)/75 = 70%
+    costSource: 'APIs TTLock/Nuki/Netatmo',
     availableFor: ['business'],
+    includedIn: ['enterprise'],
+  },
+  marketplace_b2c: {
+    id: 'marketplace_b2c',
+    name: 'Marketplace de Servicios',
+    description: 'Ofrece servicios a inquilinos: limpieza, wifi, seguros',
+    category: 'premium',
+    monthlyPrice: 0,          // Basado en comisiones (12%)
+    annualPrice: 0,
+    costPerUnit: 0,           // Variable por transacción
+    marginPercentage: 12,     // Comisión del 12% por servicio
+    costSource: 'Comisiones variables',
+    availableFor: ['starter', 'professional', 'business'],
+    includedIn: ['enterprise'],
+  },
+  dedicated_support: {
+    id: 'dedicated_support',
+    name: 'Soporte Dedicado',
+    description: 'Account manager, soporte 24/7, formación mensual',
+    category: 'premium',
+    monthlyPrice: 99,
+    annualPrice: 990,
+    costPerUnit: 49.50,       // Costo de personal
+    marginPercentage: 50,     // (99-49.50)/99 = 50%
+    costSource: 'Personal dedicado',
+    availableFor: ['professional', 'business'],
     includedIn: ['enterprise'],
   },
 };
