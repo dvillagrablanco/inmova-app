@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -43,13 +44,23 @@ interface OnboardingProgress {
 
 export default function SmartOnboardingWizard() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [progress, setProgress] = useState<OnboardingProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(true);
 
+  // Obtener el rol del usuario
+  const userRole = (session?.user as any)?.role;
+
   useEffect(() => {
+    // No cargar para superadmin
+    if (userRole === 'super_admin') {
+      setLoading(false);
+      setIsVisible(false);
+      return;
+    }
     loadProgress();
-  }, []);
+  }, [userRole]);
 
   const loadProgress = async () => {
     try {

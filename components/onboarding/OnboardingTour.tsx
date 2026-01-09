@@ -171,9 +171,13 @@ export function OnboardingTour({ role }: OnboardingTourProps) {
   // Determinar qué pasos mostrar según el rol
   const steps = role === 'TENANT' ? tenantSteps : ownerSteps;
 
+  // Obtener el rol del usuario de la sesión
+  const userRole = (session?.user as any)?.role;
+
   useEffect(() => {
     // Solo mostrar si el onboarding debe mostrarse y no estamos cargando
-    if (shouldShowOnboarding && !isLoading) {
+    // NO mostrar para superadministradores
+    if (shouldShowOnboarding && !isLoading && userRole !== 'super_admin') {
       // Delay para asegurar que el DOM está listo
       const timer = setTimeout(() => {
         setRun(true);
@@ -181,7 +185,7 @@ export function OnboardingTour({ role }: OnboardingTourProps) {
       
       return () => clearTimeout(timer);
     }
-  }, [shouldShowOnboarding, isLoading]);
+  }, [shouldShowOnboarding, isLoading, userRole]);
 
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { status, type } = data;
@@ -199,8 +203,8 @@ export function OnboardingTour({ role }: OnboardingTourProps) {
     }
   };
 
-  // No renderizar si no hay sesión
-  if (!session || isLoading) {
+  // No renderizar si no hay sesión o es superadmin
+  if (!session || isLoading || userRole === 'super_admin') {
     return null;
   }
 
