@@ -939,6 +939,25 @@ const administradorEmpresaItems = [
     icon: Upload,
     roles: ['administrador', 'super_admin'],
   },
+  // Herramientas operativas de empresa
+  {
+    name: 'OCR Import',
+    href: '/admin/ocr-import',
+    icon: Scan,
+    roles: ['administrador', 'super_admin'],
+  },
+  {
+    name: 'Firma Digital',
+    href: '/admin/firma-digital',
+    icon: FileSignature,
+    roles: ['administrador', 'super_admin'],
+  },
+  {
+    name: 'Plantillas Legales',
+    href: '/admin/legal',
+    icon: FileText,
+    roles: ['administrador', 'super_admin'],
+  },
   {
     name: 'Sugerencias',
     href: '/admin/sugerencias',
@@ -1093,18 +1112,17 @@ const superAdminPlatformItems: SidebarItem[] = [
     ],
   },
 
-  // ========== 9. HERRAMIENTAS ==========
+  // ========== 9. HERRAMIENTAS DE PLATAFORMA ==========
+  // Solo herramientas de mantenimiento global del SaaS
+  // Las herramientas operativas (OCR, Firma, Plantillas) están en Gestión de Empresa
   {
     name: 'Herramientas',
-    href: '/admin/importar',
+    href: '/admin/limpieza',
     icon: Wrench,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Importar Datos', href: '/admin/importar' },
-      { name: 'OCR Import', href: '/admin/ocr-import' },
-      { name: 'Firma Digital', href: '/admin/firma-digital' },
-      { name: 'Plantillas Legales', href: '/admin/legal' },
       { name: 'Limpieza de Datos', href: '/admin/limpieza' },
+      { name: 'Migración Masiva', href: '/admin/importar' },
     ],
   },
 
