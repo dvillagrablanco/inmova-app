@@ -955,7 +955,7 @@ const superAdminPlatformItems: SidebarItem[] = [
     roles: ['super_admin'],
   },
   {
-    name: 'Legal',
+    name: 'Plantillas Legales',
     href: '/admin/legal',
     icon: FileText,
     roles: ['super_admin'],
