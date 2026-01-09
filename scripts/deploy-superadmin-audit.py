@@ -19,7 +19,7 @@ from datetime import datetime
 # Server config
 SERVER = '157.180.119.236'
 USER = 'root'
-PASS = 'hBXxC6pZCQPBLPiGGUHkASiln+Su/BAVQAN6qQ+xjVo='
+PASS = 'hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo='
 PATH = '/opt/inmova-app'
 
 class Colors:
