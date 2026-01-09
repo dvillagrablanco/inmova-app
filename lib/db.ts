@@ -103,6 +103,24 @@ export const db = prisma; // Alias para compatibilidad
 export default prisma; // Default export para compatibilidad
 
 /**
+ * Función para obtener instancia de Prisma (lazy loading compatible)
+ * Usar en APIs con `const prisma = getPrismaClient()`
+ */
+export function getPrismaClient(): PrismaClient {
+  if (globalForPrisma.prisma) {
+    return globalForPrisma.prisma;
+  }
+  
+  // Crear nueva instancia si no existe
+  const client = createPrismaClient();
+  if (process.env.NODE_ENV !== 'production') {
+    globalForPrisma.prisma = client;
+  }
+  
+  return client;
+}
+
+/**
  * Función helper para testing
  */
 export async function disconnectDb() {
