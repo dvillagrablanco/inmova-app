@@ -1804,6 +1804,10 @@ model Company {
   // Marcador para empresas de prueba/demo (excluidas de analíticas)
   esEmpresaPrueba      Boolean @default(false) // Si es true, se excluye de analíticas y reportes
 
+  // Vertical de negocio
+  businessVertical     BusinessVertical? @default(alquiler_tradicional) // Tipo de negocio principal
+  verticals            String[]          @default([])          // Array de verticales si es mixto
+
   // Jerarquía de empresas (Grupos de empresas)
   parentCompanyId String? // ID de la empresa matriz (si es parte de un grupo)
   parentCompany   Company?  @relation("CompanyHierarchy", fields: [parentCompanyId], references: [id], onDelete: SetNull)
