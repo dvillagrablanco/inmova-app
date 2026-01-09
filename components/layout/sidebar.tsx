@@ -180,6 +180,18 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/economia-circular': 'economia_circular',
   '/auditoria': 'auditoria',
   '/seguridad-compliance': 'seguridad_compliance',
+  // Alquiler Comercial - Oficinas, Locales, Naves, Coworking
+  '/comercial': 'alquiler_comercial',
+  '/comercial/oficinas': 'alquiler_comercial',
+  '/comercial/locales': 'alquiler_comercial',
+  '/comercial/naves': 'alquiler_comercial',
+  '/comercial/coworking': 'alquiler_comercial',
+  '/comercial/contratos': 'alquiler_comercial',
+  '/comercial/leads': 'alquiler_comercial',
+  '/comercial/pagos': 'alquiler_comercial',
+  '/comercial/visitas': 'alquiler_comercial',
+  '/comercial/analytics': 'alquiler_comercial',
+  '/comercial/espacios': 'alquiler_comercial',
 };
 
 // Módulos core que siempre deben mostrarse (esCore: true)
