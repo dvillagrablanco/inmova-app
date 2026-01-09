@@ -117,8 +117,8 @@ export async function GET(request: NextRequest) {
         prisma.building.count({ where: { company: realCompanyFilter, createdAt: { gte: last30Days } } }),
         prisma.tenant.count({ where: { company: realCompanyFilter } }),
         prisma.tenant.count({ where: { company: realCompanyFilter, contracts: { some: { estado: 'activo' } } } }),
-        prisma.contract.count({ where: { company: realCompanyFilter } }),
-        prisma.contract.count({ where: { company: realCompanyFilter, estado: 'activo' } }),
+        prisma.contract.count({ where: { unit: { building: { company: realCompanyFilter } } } }),
+        prisma.contract.count({ where: { unit: { building: { company: realCompanyFilter } }, estado: 'activo' } }),
         prisma.unit.count({ where: { building: { company: realCompanyFilter }, estado: 'ocupada' } }),
       ]);
 
@@ -157,7 +157,7 @@ export async function GET(request: NextRequest) {
       const [paymentsThisMonth, paymentsLastMonth, companiesWithPlans] = await Promise.all([
         prisma.payment.findMany({
           where: {
-            contract: { company: realCompanyFilter },
+            contract: { unit: { building: { company: realCompanyFilter } } },
             fechaVencimiento: { gte: startOfCurrentMonth, lte: endOfMonth(now) },
             estado: 'pagado',
           },
@@ -165,7 +165,7 @@ export async function GET(request: NextRequest) {
         }),
         prisma.payment.findMany({
           where: {
-            contract: { company: realCompanyFilter },
+            contract: { unit: { building: { company: realCompanyFilter } } },
             fechaVencimiento: { gte: startOfLastMonth, lte: endOfLastMonth },
             estado: 'pagado',
           },
@@ -220,7 +220,7 @@ export async function GET(request: NextRequest) {
             prisma.building.count({ where: { company: realCompanyFilter, createdAt: { lte: monthEnd } } }),
             prisma.payment.aggregate({
               where: {
-                contract: { company: realCompanyFilter },
+                contract: { unit: { building: { company: realCompanyFilter } } },
                 fechaVencimiento: { gte: monthStart, lte: monthEnd },
                 estado: 'pagado',
               },
