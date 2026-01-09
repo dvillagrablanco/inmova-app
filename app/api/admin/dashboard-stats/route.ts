@@ -2,11 +2,47 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { subDays, subMonths, startOfMonth, endOfMonth, startOfDay, format } from 'date-fns';
+import { subDays, subMonths, startOfMonth, endOfMonth, format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import logger, { logError } from '@/lib/logger';
+import { isSuperAdmin } from '@/lib/admin-roles';
+import { getRedisClient } from '@/lib/redis';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+
+// Cache keys y TTLs
+const CACHE_KEYS = {
+  OVERVIEW: 'admin:dashboard:overview',
+  HISTORICAL: 'admin:dashboard:historical',
+  FINANCIAL: 'admin:dashboard:financial',
+};
+const CACHE_TTL = {
+  OVERVIEW: 60, // 1 minuto para métricas en tiempo real
+  HISTORICAL: 3600, // 1 hora para datos históricos (cambian poco)
+  FINANCIAL: 300, // 5 minutos para datos financieros
+};
+
+// Helper para cache
+async function getFromCache<T>(key: string): Promise<T | null> {
+  try {
+    const redis = getRedisClient();
+    if (!redis) return null;
+    const cached = await redis.get(key);
+    return cached ? JSON.parse(cached) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function setCache(key: string, data: any, ttl: number): Promise<void> {
+  try {
+    const redis = getRedisClient();
+    if (!redis) return;
+    await redis.setex(key, ttl, JSON.stringify(data));
+  } catch (error) {
+    logger.warn('Error setting cache:', error);
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,13 +55,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Solo super_admin puede acceder
-    if (session.user.role !== 'super_admin') {
+    // Usar helper centralizado de roles
+    if (!isSuperAdmin(session.user.role)) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 403 }
       );
     }
+
+    // Verificar si debemos saltar cache (query param ?fresh=true)
+    const { searchParams } = new URL(request.url);
+    const skipCache = searchParams.get('fresh') === 'true';
 
     const now = new Date();
     const startOfCurrentMonth = startOfMonth(now);
@@ -34,320 +74,55 @@ export async function GET(request: NextRequest) {
     const last30Days = subDays(now, 30);
     const last90Days = subDays(now, 90);
 
-    // ===== MÉTRICAS DE EMPRESAS =====
-    const totalCompanies = await prisma.company.count();
-    const activeCompanies = await prisma.company.count({
-      where: { activo: true },
-    });
-    const trialCompanies = await prisma.company.count({
-      where: { estadoCliente: 'prueba' },
-    });
-    const suspendedCompanies = await prisma.company.count({
-      where: { estadoCliente: 'suspendido' },
-    });
-
-    const newCompaniesLast30Days = await prisma.company.count({
-      where: {
-        createdAt: { gte: last30Days },
-      },
-    });
-
-    const newCompaniesLast90Days = await prisma.company.count({
-      where: {
-        createdAt: { gte: last90Days },
-      },
-    });
-
-    // Churn rate (empresas suspendidas en últimos 30 días)
-    const churnedCompanies = await prisma.company.count({
-      where: {
-        estadoCliente: 'suspendido',
-        updatedAt: { gte: last30Days },
-      },
-    });
-
-    const churnRate = totalCompanies > 0 ? (churnedCompanies / totalCompanies) * 100 : 0;
-
-    // ===== MÉTRICAS DE USUARIOS =====
-    const totalUsers = await prisma.user.count();
-    const activeUsers = await prisma.user.count({
-      where: {
-        company: {
-          activo: true,
-        },
-      },
-    });
-
-    const newUsersLast30Days = await prisma.user.count({
-      where: {
-        createdAt: { gte: last30Days },
-      },
-    });
-
-    // ===== MÉTRICAS DE PROPIEDADES =====
-    const totalBuildings = await prisma.building.count();
-    const totalUnits = await prisma.unit.count();
-
-    const newBuildingsLast30Days = await prisma.building.count({
-      where: {
-        createdAt: { gte: last30Days },
-      },
-    });
-
-    // Inquilinos totales
-    const totalTenants = await prisma.tenant.count();
-    const activeTenants = await prisma.tenant.count({
-      where: {
-        contracts: {
-          some: {
-            estado: 'activo',
-          },
-        },
-      },
-    });
-
-    // Contratos
-    const totalContracts = await prisma.contract.count();
-    const activeContracts = await prisma.contract.count({
-      where: { estado: 'activo' },
-    });
-
-    // ===== MÉTRICAS FINANCIERAS =====
-    // Ingresos del mes actual
-    const paymentsThisMonth = await prisma.payment.findMany({
-      where: {
-        fechaVencimiento: {
-          gte: startOfCurrentMonth,
-          lte: endOfMonth(now),
-        },
-        estado: 'pagado',
-      },
-      select: {
-        monto: true,
-      },
-    });
-
-    const monthlyRevenue = paymentsThisMonth.reduce(
-      (sum, payment) => sum + payment.monto,
-      0
-    );
-
-    // Ingresos del mes pasado
-    const paymentsLastMonth = await prisma.payment.findMany({
-      where: {
-        fechaVencimiento: {
-          gte: startOfLastMonth,
-          lte: endOfLastMonth,
-        },
-        estado: 'pagado',
-      },
-      select: {
-        monto: true,
-      },
-    });
-
-    const lastMonthRevenue = paymentsLastMonth.reduce(
-      (sum, payment) => sum + payment.monto,
-      0
-    );
-
-    // Crecimiento de ingresos
-    const revenueGrowth = lastMonthRevenue > 0
-      ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
-      : 0;
-
-    // MRR (Monthly Recurring Revenue) - Basado en planes de suscripción
-    const companiesWithPlans = await prisma.company.findMany({
-      where: {
-        subscriptionPlanId: { not: null },
-        activo: true,
-      },
-      include: {
-        subscriptionPlan: {
-          select: {
-            precioMensual: true,
-          },
-        },
-      },
-    });
-
-    const mrr = companiesWithPlans.reduce(
-      (sum, company) => sum + (company.subscriptionPlan?.precioMensual || 0),
-      0
-    );
-
-    const arr = mrr * 12; // Annual Recurring Revenue
-
-    // ===== MÉTRICAS DE OCUPACIÓN =====
-    const occupiedUnits = await prisma.unit.count({
-      where: {
-        estado: 'ocupada',
-      },
-    });
-    const occupancyRate = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
-
-    // ===== DATOS HISTÓRICOS PARA GRÁFICOS (últimos 12 meses) =====
-    const historicalData: Array<{
-      month: string;
-      companies: number;
-      users: number;
-      buildings: number;
-      revenue: number;
-    }> = [];
-    for (let i = 11; i >= 0; i--) {
-      const monthDate = subMonths(now, i);
-      const monthStart = startOfMonth(monthDate);
-      const monthEnd = endOfMonth(monthDate);
-
-      const [companiesCount, usersCount, buildingsCount, revenueData] = await Promise.all([
-        prisma.company.count({
-          where: {
-            createdAt: { lte: monthEnd },
-          },
-        }),
-        prisma.user.count({
-          where: {
-            createdAt: { lte: monthEnd },
-          },
-        }),
-        prisma.building.count({
-          where: {
-            createdAt: { lte: monthEnd },
-          },
-        }),
-        prisma.payment.findMany({
-          where: {
-            fechaVencimiento: {
-              gte: monthStart,
-              lte: monthEnd,
-            },
-            estado: 'pagado',
-          },
-          select: {
-            monto: true,
-          },
-        }),
+    // ===== MÉTRICAS OVERVIEW (con cache corto) =====
+    let overviewData = skipCache ? null : await getFromCache<any>(CACHE_KEYS.OVERVIEW);
+    
+    if (!overviewData) {
+      // Ejecutar todas las queries de overview en paralelo
+      const [
+        totalCompanies,
+        activeCompanies,
+        trialCompanies,
+        suspendedCompanies,
+        newCompaniesLast30Days,
+        newCompaniesLast90Days,
+        churnedCompanies,
+        totalUsers,
+        activeUsers,
+        newUsersLast30Days,
+        totalBuildings,
+        totalUnits,
+        newBuildingsLast30Days,
+        totalTenants,
+        activeTenants,
+        totalContracts,
+        activeContracts,
+        occupiedUnits,
+      ] = await Promise.all([
+        prisma.company.count(),
+        prisma.company.count({ where: { activo: true } }),
+        prisma.company.count({ where: { estadoCliente: 'prueba' } }),
+        prisma.company.count({ where: { estadoCliente: 'suspendido' } }),
+        prisma.company.count({ where: { createdAt: { gte: last30Days } } }),
+        prisma.company.count({ where: { createdAt: { gte: last90Days } } }),
+        prisma.company.count({ where: { estadoCliente: 'suspendido', updatedAt: { gte: last30Days } } }),
+        prisma.user.count(),
+        prisma.user.count({ where: { company: { activo: true } } }),
+        prisma.user.count({ where: { createdAt: { gte: last30Days } } }),
+        prisma.building.count(),
+        prisma.unit.count(),
+        prisma.building.count({ where: { createdAt: { gte: last30Days } } }),
+        prisma.tenant.count(),
+        prisma.tenant.count({ where: { contracts: { some: { estado: 'activo' } } } }),
+        prisma.contract.count(),
+        prisma.contract.count({ where: { estado: 'activo' } }),
+        prisma.unit.count({ where: { estado: 'ocupada' } }),
       ]);
 
-      const monthRevenue = revenueData.reduce((sum, p) => sum + p.monto, 0);
+      const churnRate = totalCompanies > 0 ? (churnedCompanies / totalCompanies) * 100 : 0;
+      const occupancyRate = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
 
-      historicalData.push({
-        month: format(monthDate, 'MMM yyyy', { locale: es }),
-        companies: companiesCount,
-        users: usersCount,
-        buildings: buildingsCount,
-        revenue: monthRevenue,
-      });
-    }
-
-    // ===== MÉTRICAS DE CONVERSIÓN =====
-    const trialToActiveRate = trialCompanies > 0
-      ? (activeCompanies / (activeCompanies + trialCompanies)) * 100
-      : 0;
-
-    // Planes de suscripción más populares
-    const subscriptionStats = await prisma.company.groupBy({
-      by: ['subscriptionPlanId'],
-      _count: {
-        id: true,
-      },
-      where: {
-        subscriptionPlanId: {
-          not: null,
-        },
-      },
-    });
-
-    // Obtener nombres de planes
-    const planIds = subscriptionStats
-      .map((s) => s.subscriptionPlanId)
-      .filter((id): id is string => id !== null);
-
-    const plans = await prisma.subscriptionPlan.findMany({
-      where: {
-        id: {
-          in: planIds,
-        },
-      },
-      select: {
-        id: true,
-        nombre: true,
-      },
-    });
-
-    const planMap = new Map(plans.map((p) => [p.id, p.nombre]));
-
-    const subscriptionBreakdown = subscriptionStats.map((stat) => ({
-      planId: stat.subscriptionPlanId,
-      planName: stat.subscriptionPlanId
-        ? planMap.get(stat.subscriptionPlanId) || 'Desconocido'
-        : 'Sin plan',
-      count: stat._count.id,
-    }));
-
-    // Actividad reciente (últimas acciones de audit log)
-    const recentActivity = await prisma.auditLog.findMany({
-      take: 10,
-      orderBy: {
-        createdAt: 'desc',
-      },
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-        company: {
-          select: {
-            nombre: true,
-          },
-        },
-      },
-    });
-
-    // Top 5 empresas por número de propiedades
-    const topCompaniesByProperties = await prisma.company.findMany({
-      take: 5,
-      orderBy: {
-        buildings: {
-          _count: 'desc',
-        },
-      },
-      include: {
-        _count: {
-          select: {
-            buildings: true,
-            users: true,
-            tenants: true,
-          },
-        },
-      },
-    });
-
-    // Empresas que requieren atención (límites alcanzados)
-    const companiesNeedingAttention = await prisma.company.findMany({
-      where: {
-        OR: [
-          {
-            estadoCliente: 'suspendido',
-          },
-          // Aquí podrías agregar más condiciones
-        ],
-      },
-      take: 10,
-      include: {
-        _count: {
-          select: {
-            users: true,
-            buildings: true,
-          },
-        },
-      },
-    });
-
-    return NextResponse.json({
-      overview: {
+      overviewData = {
         totalCompanies,
         activeCompanies,
         trialCompanies,
@@ -360,7 +135,6 @@ export async function GET(request: NextRequest) {
         activeTenants,
         totalContracts,
         activeContracts,
-        monthlyRevenue,
         occupancyRate,
         newCompaniesLast30Days,
         newCompaniesLast90Days,
@@ -368,19 +142,158 @@ export async function GET(request: NextRequest) {
         newBuildingsLast30Days,
         churnRate,
         churnedCompanies,
-      },
-      financial: {
+      };
+
+      await setCache(CACHE_KEYS.OVERVIEW, overviewData, CACHE_TTL.OVERVIEW);
+    }
+
+    // ===== MÉTRICAS FINANCIERAS (con cache medio) =====
+    let financialData = skipCache ? null : await getFromCache<any>(CACHE_KEYS.FINANCIAL);
+    
+    if (!financialData) {
+      const [paymentsThisMonth, paymentsLastMonth, companiesWithPlans] = await Promise.all([
+        prisma.payment.findMany({
+          where: {
+            fechaVencimiento: { gte: startOfCurrentMonth, lte: endOfMonth(now) },
+            estado: 'pagado',
+          },
+          select: { monto: true },
+        }),
+        prisma.payment.findMany({
+          where: {
+            fechaVencimiento: { gte: startOfLastMonth, lte: endOfLastMonth },
+            estado: 'pagado',
+          },
+          select: { monto: true },
+        }),
+        prisma.company.findMany({
+          where: { subscriptionPlanId: { not: null }, activo: true },
+          include: { subscriptionPlan: { select: { precioMensual: true } } },
+        }),
+      ]);
+
+      const monthlyRevenue = paymentsThisMonth.reduce((sum, p) => sum + p.monto, 0);
+      const lastMonthRevenue = paymentsLastMonth.reduce((sum, p) => sum + p.monto, 0);
+      const revenueGrowth = lastMonthRevenue > 0 
+        ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 
+        : 0;
+      const mrr = companiesWithPlans.reduce(
+        (sum, c) => sum + (c.subscriptionPlan?.precioMensual || 0), 0
+      );
+
+      financialData = {
         mrr,
-        arr,
+        arr: mrr * 12,
         monthlyRevenue,
         lastMonthRevenue,
         revenueGrowth,
-      },
+      };
+
+      await setCache(CACHE_KEYS.FINANCIAL, financialData, CACHE_TTL.FINANCIAL);
+    }
+
+    // Añadir monthlyRevenue a overview
+    overviewData.monthlyRevenue = financialData.monthlyRevenue;
+
+    // ===== DATOS HISTÓRICOS (con cache largo) =====
+    let historicalData = skipCache ? null : await getFromCache<any[]>(CACHE_KEYS.HISTORICAL);
+    
+    if (!historicalData) {
+      historicalData = [];
+      
+      // Ejecutar todas las queries históricas en paralelo (12 meses)
+      const historicalPromises = [];
+      for (let i = 11; i >= 0; i--) {
+        const monthDate = subMonths(now, i);
+        const monthStart = startOfMonth(monthDate);
+        const monthEnd = endOfMonth(monthDate);
+        
+        historicalPromises.push(
+          Promise.all([
+            prisma.company.count({ where: { createdAt: { lte: monthEnd } } }),
+            prisma.user.count({ where: { createdAt: { lte: monthEnd } } }),
+            prisma.building.count({ where: { createdAt: { lte: monthEnd } } }),
+            prisma.payment.aggregate({
+              where: {
+                fechaVencimiento: { gte: monthStart, lte: monthEnd },
+                estado: 'pagado',
+              },
+              _sum: { monto: true },
+            }),
+          ]).then(([companies, users, buildings, revenueAgg]) => ({
+            month: format(monthDate, 'MMM yyyy', { locale: es }),
+            companies,
+            users,
+            buildings,
+            revenue: revenueAgg._sum.monto || 0,
+          }))
+        );
+      }
+      
+      historicalData = await Promise.all(historicalPromises);
+      await setCache(CACHE_KEYS.HISTORICAL, historicalData, CACHE_TTL.HISTORICAL);
+    }
+
+    // ===== MÉTRICAS DE CONVERSIÓN =====
+    const trialToActiveRate = overviewData.trialCompanies > 0
+      ? (overviewData.activeCompanies / (overviewData.activeCompanies + overviewData.trialCompanies)) * 100
+      : 0;
+
+    // Planes de suscripción más populares (ejecutar en paralelo con otras queries)
+    const [subscriptionStats, recentActivity, topCompaniesByProperties, companiesNeedingAttention] = await Promise.all([
+      prisma.company.groupBy({
+        by: ['subscriptionPlanId'],
+        _count: { id: true },
+        where: { subscriptionPlanId: { not: null } },
+      }),
+      prisma.auditLog.findMany({
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: { select: { name: true, email: true } },
+          company: { select: { nombre: true } },
+        },
+      }),
+      prisma.company.findMany({
+        take: 5,
+        orderBy: { buildings: { _count: 'desc' } },
+        include: { _count: { select: { buildings: true, users: true, tenants: true } } },
+      }),
+      prisma.company.findMany({
+        where: { OR: [{ estadoCliente: 'suspendido' }] },
+        take: 10,
+        include: { _count: { select: { users: true, buildings: true } } },
+      }),
+    ]);
+
+    // Obtener nombres de planes
+    const planIds = subscriptionStats
+      .map((s) => s.subscriptionPlanId)
+      .filter((id): id is string => id !== null);
+
+    const plans = planIds.length > 0 ? await prisma.subscriptionPlan.findMany({
+      where: { id: { in: planIds } },
+      select: { id: true, nombre: true },
+    }) : [];
+
+    const planMap = new Map(plans.map((p) => [p.id, p.nombre]));
+
+    const subscriptionBreakdown = subscriptionStats.map((stat) => ({
+      planId: stat.subscriptionPlanId,
+      planName: stat.subscriptionPlanId
+        ? planMap.get(stat.subscriptionPlanId) || 'Desconocido'
+        : 'Sin plan',
+      count: stat._count.id,
+    }));
+
+    return NextResponse.json({
+      overview: overviewData,
+      financial: financialData,
       growth: {
-        newCompaniesLast30Days,
-        newCompaniesLast90Days,
-        newUsersLast30Days,
-        newBuildingsLast30Days,
+        newCompaniesLast30Days: overviewData.newCompaniesLast30Days,
+        newCompaniesLast90Days: overviewData.newCompaniesLast90Days,
+        newUsersLast30Days: overviewData.newUsersLast30Days,
+        newBuildingsLast30Days: overviewData.newBuildingsLast30Days,
         trialToActiveRate,
       },
       subscriptionBreakdown,
@@ -388,6 +301,11 @@ export async function GET(request: NextRequest) {
       recentActivity,
       topCompaniesByProperties,
       companiesNeedingAttention,
+      _cache: {
+        overview: !skipCache && !!overviewData,
+        financial: !skipCache && !!financialData,
+        historical: !skipCache && !!historicalData,
+      },
     });
   } catch (error) {
     logger.error('Error fetching admin dashboard stats:', error);

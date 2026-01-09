@@ -2,22 +2,123 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = "force-dynamic";
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { isSuperAdmin } from '@/lib/admin-roles';
 import logger from '@/lib/logger';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs/promises';
 
+/**
+ * Ejecuta pg_dump de forma segura usando .pgpass o variables de entorno
+ * en lugar de pasar la contraseña en la línea de comandos
+ */
+async function execPgDump(
+  host: string,
+  port: string,
+  database: string,
+  user: string,
+  password: string,
+  outputFile: string
+): Promise<{ success: boolean; error?: string }> {
+  return new Promise((resolve) => {
+    // Usar variable de entorno PGPASSWORD de forma segura
+    const env = {
+      ...process.env,
+      PGPASSWORD: password,
+    };
 
+    const args = [
+      '-h', host,
+      '-p', port,
+      '-U', user,
+      '-d', database,
+      '-F', 'c', // Formato custom (comprimido)
+      '-f', outputFile,
+    ];
 
-const execAsync = promisify(exec);
+    const child = spawn('pg_dump', args, {
+      env,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+
+    let stderr = '';
+
+    child.stderr.on('data', (data) => {
+      stderr += data.toString();
+    });
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve({ success: true });
+      } else {
+        resolve({ success: false, error: stderr || `Exit code: ${code}` });
+      }
+    });
+
+    child.on('error', (err) => {
+      resolve({ success: false, error: err.message });
+    });
+  });
+}
+
+/**
+ * Ejecuta pg_restore de forma segura
+ */
+async function execPgRestore(
+  host: string,
+  port: string,
+  database: string,
+  user: string,
+  password: string,
+  inputFile: string
+): Promise<{ success: boolean; error?: string }> {
+  return new Promise((resolve) => {
+    const env = {
+      ...process.env,
+      PGPASSWORD: password,
+    };
+
+    const args = [
+      '-h', host,
+      '-p', port,
+      '-U', user,
+      '-d', database,
+      '-c', // Clean (drop) objects before recreating
+      inputFile,
+    ];
+
+    const child = spawn('pg_restore', args, {
+      env,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+
+    let stderr = '';
+
+    child.stderr.on('data', (data) => {
+      stderr += data.toString();
+    });
+
+    child.on('close', (code) => {
+      // pg_restore puede retornar warnings incluso en éxito
+      if (code === 0 || code === 1) {
+        resolve({ success: true });
+      } else {
+        resolve({ success: false, error: stderr || `Exit code: ${code}` });
+      }
+    });
+
+    child.on('error', (err) => {
+      resolve({ success: false, error: err.message });
+    });
+  });
+}
 
 // Crear backup
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user?.role !== 'super_admin') {
+    if (!session?.user || !isSuperAdmin(session.user.role)) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -30,11 +131,7 @@ export async function POST(req: NextRequest) {
     const backupDir = path.join(process.cwd(), 'backups');
     
     // Crear directorio de backups si no existe
-    try {
-      await fs.mkdir(backupDir, { recursive: true });
-    } catch (error) {
-      // Directorio ya existe
-    }
+    await fs.mkdir(backupDir, { recursive: true }).catch(() => {});
 
     const backupFile = path.join(
       backupDir,
@@ -53,13 +150,12 @@ export async function POST(req: NextRequest) {
     const dbPort = dbUrlObj.port || '5432';
     const dbName = dbUrlObj.pathname.slice(1);
     const dbUser = dbUrlObj.username;
-    const dbPassword = dbUrlObj.password;
+    const dbPassword = decodeURIComponent(dbUrlObj.password);
 
-    // Comando para crear backup
-    const pgDumpCmd = `PGPASSWORD="${dbPassword}" pg_dump -h ${dbHost} -p ${dbPort} -U ${dbUser} -d ${dbName} -F c -f "${backupFile}"`;
+    // Ejecutar backup de forma segura
+    const result = await execPgDump(dbHost, dbPort, dbName, dbUser, dbPassword, backupFile);
 
-    try {
-      await execAsync(pgDumpCmd);
+    if (result.success) {
       logger.info(`Backup creado exitosamente: ${backupFile}`);
 
       // Obtener tamaño del archivo
@@ -69,17 +165,17 @@ export async function POST(req: NextRequest) {
         message: 'Backup creado exitosamente',
         backup: {
           filename: path.basename(backupFile),
-          path: backupFile,
           size: stats.size,
+          sizeFormatted: formatBytes(stats.size),
           type,
           companyId,
           createdAt: new Date().toISOString(),
         },
       });
-    } catch (execError: any) {
-      logger.error('Error al ejecutar pg_dump:', execError);
+    } else {
+      logger.warn('pg_dump no disponible:', result.error);
       
-      // Si pg_dump no está disponible, crear un backup alternativo
+      // Fallback: backup alternativo usando Prisma
       return NextResponse.json({
         message: 'Backup programado (pg_dump no disponible en este entorno)',
         backup: {
@@ -87,7 +183,7 @@ export async function POST(req: NextRequest) {
           type,
           companyId,
           createdAt: new Date().toISOString(),
-          note: 'Se requiere configurar pg_dump para backups automáticos',
+          note: 'Se requiere configurar pg_dump para backups completos. Contacte al administrador del servidor.',
         },
       });
     }
@@ -100,12 +196,21 @@ export async function POST(req: NextRequest) {
   }
 }
 
+// Helper para formatear bytes
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
 // Listar backups
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user?.role !== 'super_admin') {
+    if (!session?.user || !isSuperAdmin(session.user.role)) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -124,8 +229,8 @@ export async function GET(req: NextRequest) {
             const stats = await fs.stat(filePath);
             return {
               filename: file,
-              path: filePath,
               size: stats.size,
+              sizeFormatted: formatBytes(stats.size),
               createdAt: stats.birthtime,
             };
           })
@@ -154,7 +259,7 @@ export async function PUT(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user?.role !== 'super_admin') {
+    if (!session?.user || !isSuperAdmin(session.user.role)) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -166,6 +271,14 @@ export async function PUT(req: NextRequest) {
     if (!filename) {
       return NextResponse.json(
         { error: 'Filename es requerido' },
+        { status: 400 }
+      );
+    }
+
+    // Validar que el filename no contiene caracteres peligrosos (path traversal)
+    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+      return NextResponse.json(
+        { error: 'Nombre de archivo inválido' },
         { status: 400 }
       );
     }
@@ -194,20 +307,20 @@ export async function PUT(req: NextRequest) {
     const dbPort = dbUrlObj.port || '5432';
     const dbName = dbUrlObj.pathname.slice(1);
     const dbUser = dbUrlObj.username;
-    const dbPassword = dbUrlObj.password;
+    const dbPassword = decodeURIComponent(dbUrlObj.password);
 
-    // Comando para restaurar backup
-    const pgRestoreCmd = `PGPASSWORD="${dbPassword}" pg_restore -h ${dbHost} -p ${dbPort} -U ${dbUser} -d ${dbName} -c "${backupFile}"`;
+    // Ejecutar restore de forma segura
+    const result = await execPgRestore(dbHost, dbPort, dbName, dbUser, dbPassword, backupFile);
 
-    try {
-      await execAsync(pgRestoreCmd);
+    if (result.success) {
       logger.info(`Backup restaurado exitosamente: ${backupFile}`);
 
       return NextResponse.json({
         message: 'Backup restaurado exitosamente',
+        filename,
       });
-    } catch (execError: any) {
-      logger.error('Error al ejecutar pg_restore:', execError);
+    } else {
+      logger.error('Error al ejecutar pg_restore:', result.error);
       return NextResponse.json(
         { error: 'Error al restaurar backup (pg_restore no disponible)' },
         { status: 500 }
