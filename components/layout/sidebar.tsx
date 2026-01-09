@@ -73,9 +73,9 @@ import { Button } from '@/components/ui/button';
 import logger, { logError } from '@/lib/logger';
 import { safeLocalStorage } from '@/lib/safe-storage';
 import { toggleMobileMenu, closeMobileMenu } from '@/lib/mobile-menu';
-import { 
-  getInitialExpandedSections, 
-  getSectionName, 
+import {
+  getInitialExpandedSections,
+  getSectionName,
   getSectionOrder,
   type UserRole,
   type BusinessVertical,
@@ -124,6 +124,9 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/reportes-programados': 'admin_reportes_programados',
   '/admin/importar': 'admin_importar',
   '/admin/ocr-import': 'admin_ocr_import',
+  '/admin/system-logs': 'admin_logs',
+  '/admin/onboarding': 'admin_onboarding',
+  '/admin/notificaciones-masivas': 'admin_notificaciones',
   '/api-docs': 'api_docs',
   '/admin/configuracion': 'configuracion',
   '/admin/usuarios': 'usuarios',
@@ -962,38 +965,43 @@ interface SidebarItem {
 // =====================================================
 // SUPER ADMIN - GESTIÓN DE LA PLATAFORMA INMOVA
 // =====================================================
-// Organización:
-// 1. NEGOCIO: Dashboard, Clientes, Billing, Partners
-// 2. MONITOREO: Actividad, Alertas, Salud, Métricas, Reportes, Seguridad
-// 3. INTEGRACIONES: Plataforma, API Docs
-// 4. SERVICIOS: SMS, Firma, OCR, Marketplace
-// 5. CONFIG EMPRESAS: Módulos, Integraciones Contables, Portales, Personalización
+// Organización MEJORADA (Auditoría Ene 2026):
+// 1. OVERVIEW: Dashboard con acciones rápidas
+// 2. CLIENTES: Gestión, Onboarding, Comparador
+// 3. FACTURACIÓN: Planes, Add-ons, B2B, Cupones
+// 4. ECOSYSTEM: Partners, Marketplace, Integraciones
+// 5. MONITOREO: Actividad, Salud, Alertas, Logs
+// 6. SEGURIDAD: Alertas, Usuarios, Backup, Auditoría
+// 7. CONFIGURACIÓN: Módulos, White-label, Portales
+// 8. COMUNICACIONES: Email, SMS, Notificaciones Masivas
+// 9. HERRAMIENTAS: Import, OCR, Firma, Legal, Limpieza
+// 10. SOPORTE: Sugerencias, Aprobaciones
 
 const superAdminPlatformItems: SidebarItem[] = [
-  // ========== 1. GESTIÓN DEL NEGOCIO ==========
+  // ========== 1. OVERVIEW ==========
   {
     name: 'Dashboard',
     href: '/admin/dashboard',
     icon: LayoutDashboard,
     roles: ['super_admin'],
   },
+
+  // ========== 2. GESTIÓN DE CLIENTES ==========
   {
-    name: 'Clientes B2B',
+    name: 'Clientes',
     href: '/admin/clientes',
     icon: Building2,
     roles: ['super_admin'],
     subItems: [
       { name: 'Lista de Clientes', href: '/admin/clientes' },
       { name: 'Comparar Empresas', href: '/admin/clientes/comparar' },
-      // Configuración de empresas (seleccionar empresa primero)
-      { name: 'Módulos Activos', href: '/admin/modulos' },
-      { name: 'Integraciones Contables', href: '/admin/integraciones-contables' },
-      { name: 'Portales Externos', href: '/admin/portales-externos' },
-      { name: 'Personalización', href: '/admin/personalizacion' },
+      { name: 'Onboarding Tracker', href: '/admin/onboarding' },
     ],
   },
+
+  // ========== 3. FACTURACIÓN Y PLANES ==========
   {
-    name: 'Billing',
+    name: 'Facturación',
     href: '/admin/planes',
     icon: DollarSign,
     roles: ['super_admin'],
@@ -1004,13 +1012,23 @@ const superAdminPlatformItems: SidebarItem[] = [
       { name: 'Cupones', href: '/admin/cupones' },
     ],
   },
+
+  // ========== 4. ECOSYSTEM ==========
   {
-    name: 'Partners',
+    name: 'Ecosystem',
     href: '/admin/partners',
-    icon: Briefcase,
+    icon: Share2,
     roles: ['super_admin'],
+    subItems: [
+      { name: 'Partners', href: '/admin/partners' },
+      { name: 'Marketplace', href: '/admin/marketplace' },
+      { name: 'Integraciones', href: '/admin/integraciones' },
+      { name: 'Contasimple', href: '/admin/contasimple' },
+      { name: 'API Docs', href: '/api-docs' },
+    ],
   },
-  // ========== 2. MONITOREO Y OPERACIONES ==========
+
+  // ========== 5. MONITOREO ==========
   {
     name: 'Monitoreo',
     href: '/admin/activity',
@@ -1018,44 +1036,78 @@ const superAdminPlatformItems: SidebarItem[] = [
     roles: ['super_admin'],
     subItems: [
       { name: 'Actividad', href: '/admin/activity' },
-      { name: 'Alertas', href: '/admin/alertas' },
       { name: 'Salud Sistema', href: '/admin/salud-sistema' },
+      { name: 'Alertas', href: '/admin/alertas' },
       { name: 'Métricas de Uso', href: '/admin/metricas-uso' },
-      { name: 'Reportes', href: '/admin/reportes-programados' },
+      { name: 'Logs del Sistema', href: '/admin/system-logs' },
     ],
   },
+
+  // ========== 6. SEGURIDAD ==========
   {
     name: 'Seguridad',
     href: '/admin/seguridad',
     icon: Shield,
     roles: ['super_admin'],
     subItems: [
-      { name: 'General', href: '/admin/seguridad' },
-      { name: 'Backup', href: '/admin/backup-restore' },
-      { name: 'Usuarios', href: '/admin/usuarios' },
+      { name: 'Alertas de Seguridad', href: '/admin/seguridad' },
+      { name: 'Gestión de Usuarios', href: '/admin/usuarios' },
+      { name: 'Backup y Restore', href: '/admin/backup-restore' },
     ],
   },
-  // ========== 3. INTEGRACIONES DE INMOVA ==========
+
+  // ========== 7. CONFIGURACIÓN DE EMPRESAS ==========
   {
-    name: 'Integraciones',
-    href: '/admin/integraciones',
-    icon: Zap,
+    name: 'Configuración',
+    href: '/admin/modulos',
+    icon: Settings,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Servicios Conectados', href: '/admin/integraciones' },
-      { name: 'Contabilidad (Contasimple)', href: '/admin/contasimple' },
-      { name: 'API Docs', href: '/api-docs' },
+      { name: 'Módulos por Empresa', href: '/admin/modulos' },
+      { name: 'Personalización', href: '/admin/personalizacion' },
+      { name: 'Portales Externos', href: '/admin/portales-externos' },
+      { name: 'Integraciones Contables', href: '/admin/integraciones-contables' },
     ],
   },
-  // ========== 4. COMUNICACIONES ==========
+
+  // ========== 8. COMUNICACIONES ==========
   {
     name: 'Comunicaciones',
-    href: '/admin/plantillas-sms',
+    href: '/admin/plantillas-email',
     icon: MessageSquare,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Plantillas SMS', href: '/admin/plantillas-sms' },
       { name: 'Plantillas Email', href: '/admin/plantillas-email' },
+      { name: 'Plantillas SMS', href: '/admin/plantillas-sms' },
+      { name: 'Notificaciones Masivas', href: '/admin/notificaciones-masivas' },
+      { name: 'Reportes Programados', href: '/admin/reportes-programados' },
+    ],
+  },
+
+  // ========== 9. HERRAMIENTAS ==========
+  {
+    name: 'Herramientas',
+    href: '/admin/importar',
+    icon: Wrench,
+    roles: ['super_admin'],
+    subItems: [
+      { name: 'Importar Datos', href: '/admin/importar' },
+      { name: 'OCR Import', href: '/admin/ocr-import' },
+      { name: 'Firma Digital', href: '/admin/firma-digital' },
+      { name: 'Plantillas Legales', href: '/admin/legal' },
+      { name: 'Limpieza de Datos', href: '/admin/limpieza' },
+    ],
+  },
+
+  // ========== 10. SOPORTE ==========
+  {
+    name: 'Soporte',
+    href: '/admin/sugerencias',
+    icon: HeadphonesIcon,
+    roles: ['super_admin'],
+    subItems: [
+      { name: 'Sugerencias', href: '/admin/sugerencias' },
+      { name: 'Aprobaciones', href: '/admin/aprobaciones' },
     ],
   },
 ];
@@ -1078,10 +1130,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [primaryVertical, setPrimaryVertical] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  
+
   // Hook para empresa seleccionada (Super Admin)
   const { selectedCompany, selectCompany: handleCompanySelect } = useSelectedCompany();
-  
+
   // Módulos activos de la empresa seleccionada (para Super Admin)
   const [selectedCompanyModules, setSelectedCompanyModules] = useState<string[]>([]);
 
@@ -1108,19 +1160,19 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     try {
       // Intentar cargar preferencias del usuario desde localStorage
       const storedExpanded = safeLocalStorage.getItem('sidebar_expanded_sections');
-      
+
       if (storedExpanded) {
         // Usuario tiene preferencias guardadas
         setExpandedSections(JSON.parse(storedExpanded));
       } else {
         // Primera vez: usar configuración por defecto según rol
         const initialState = getInitialExpandedSections(
-          role as UserRole, 
+          role as UserRole,
           primaryVertical as BusinessVertical
         );
         setExpandedSections(initialState);
       }
-      
+
       setIsInitialized(true);
     } catch (error) {
       logger.error('Error initializing expanded sections:', error);
@@ -1184,15 +1236,15 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
         setSelectedCompanyModules([]);
         return;
       }
-      
+
       try {
         const res = await fetch(`/api/modules/active?companyId=${selectedCompany.id}`);
         if (res.ok) {
           const data = await res.json();
           setSelectedCompanyModules(data.activeModules || []);
-          logger.info('Módulos de empresa seleccionada cargados', { 
-            companyId: selectedCompany.id, 
-            modulesCount: data.activeModules?.length || 0 
+          logger.info('Módulos de empresa seleccionada cargados', {
+            companyId: selectedCompany.id,
+            modulesCount: data.activeModules?.length || 0,
           });
         }
       } catch (error) {
@@ -1277,9 +1329,13 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     // Determinar qué módulos usar para filtrar
     // Si es super_admin con empresa seleccionada y useSelectedCompanyModules es true,
     // usar los módulos de la empresa seleccionada
-    const modulesToCheck = (useSelectedCompanyModules && role === 'super_admin' && selectedCompany && selectedCompanyModules.length > 0)
-      ? selectedCompanyModules
-      : activeModules;
+    const modulesToCheck =
+      useSelectedCompanyModules &&
+      role === 'super_admin' &&
+      selectedCompany &&
+      selectedCompanyModules.length > 0
+        ? selectedCompanyModules
+        : activeModules;
 
     let filtered = items.filter((item) => {
       // Validación: item debe tener roles
@@ -1456,18 +1512,14 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   };
 
   // Componente para nav items con submenús (Super Admin)
-  const NavItemWithSubs = ({
-    item,
-  }: {
-    item: SidebarItem;
-  }) => {
+  const NavItemWithSubs = ({ item }: { item: SidebarItem }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const isActive = pathname?.startsWith(item.href) ?? false;
     const hasSubItems = item.subItems && item.subItems.length > 0;
-    
+
     // Auto-expandir si algún subitem está activo
     useEffect(() => {
-      if (hasSubItems && item.subItems?.some(sub => pathname?.startsWith(sub.href))) {
+      if (hasSubItems && item.subItems?.some((sub) => pathname?.startsWith(sub.href))) {
         setIsExpanded(true);
       }
     }, [pathname, hasSubItems, item.subItems]);
@@ -1550,12 +1602,12 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
       {/* Sidebar - Visible en desktop, toggle en mobile */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-[90] h-screen w-[85vw] max-w-[320px] sm:w-64 lg:w-64",
-          "bg-black text-white overflow-hidden transition-transform duration-300 ease-in-out",
+          'fixed top-0 left-0 z-[90] h-screen w-[85vw] max-w-[320px] sm:w-64 lg:w-64',
+          'bg-black text-white overflow-hidden transition-transform duration-300 ease-in-out',
           // Desktop: siempre visible
-          "lg:translate-x-0",
+          'lg:translate-x-0',
           // Mobile: toggle con menu
-          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
         style={{
           maxHeight: '100vh',
@@ -1705,14 +1757,14 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     Selecciona una empresa para configurar
                   </p>
                 </div>
-                
+
                 {/* Selector de Empresa */}
                 <div className="mb-4 px-2">
-                  <CompanySelector 
+                  <CompanySelector
                     onCompanyChange={(company) => {
                       // Auto-expandir la sección cuando se selecciona empresa
                       if (company) {
-                        setExpandedSections(prev => ({
+                        setExpandedSections((prev) => ({
                           ...prev,
                           administradorEmpresa: true,
                         }));
@@ -1728,7 +1780,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                       onClick={() => toggleSection('administradorEmpresa')}
                       className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-emerald-300 uppercase hover:text-white transition-colors"
                     >
-                      <span>⚙️ Configurar: {selectedCompany.nombre.substring(0, 15)}{selectedCompany.nombre.length > 15 ? '...' : ''}</span>
+                      <span>
+                        ⚙️ Configurar: {selectedCompany.nombre.substring(0, 15)}
+                        {selectedCompany.nombre.length > 15 ? '...' : ''}
+                      </span>
                       {expandedSections.administradorEmpresa ? (
                         <ChevronDown size={16} />
                       ) : (
@@ -1738,15 +1793,15 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     {expandedSections.administradorEmpresa && (
                       <div className="space-y-1 mt-1">
                         {filteredAdministradorEmpresaItems.map((item) => (
-                          <NavItem 
-                            key={item.href} 
+                          <NavItem
+                            key={item.href}
                             item={{
                               ...item,
                               // Parametrizar URL con companyId para Super Admin
-                              href: item.href.includes('?') 
+                              href: item.href.includes('?')
                                 ? `${item.href}&companyId=${selectedCompany.id}`
                                 : `${item.href}?companyId=${selectedCompany.id}`,
-                            }} 
+                            }}
                           />
                         ))}
                       </div>
@@ -1774,29 +1829,31 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               filteredFlippingItems.length > 0 ||
               filteredComercialItems.length > 0 ||
               filteredAlquilerComercialItems.length > 0 ||
-              filteredAdminFincasItems.length > 0) && 
+              filteredAdminFincasItems.length > 0) &&
               (role === 'administrador' || (role === 'super_admin' && selectedCompany)) && (
-              <div className="px-2 py-3 mb-2 border-t border-gray-800">
-                <h3 className={cn(
-                  "text-[10px] font-bold uppercase tracking-wider",
-                  selectedCompany ? "text-emerald-400" : "text-gray-500"
-                )}>
-                  📊 Verticales de Negocio
-                </h3>
-                {/* Mostrar empresa seleccionada para Super Admin */}
-                {role === 'super_admin' && selectedCompany && (
-                  <p className="text-[9px] text-emerald-500 mt-1">
-                    Empresa: {selectedCompany.nombre}
-                  </p>
-                )}
-                {/* Mostrar vertical principal para Administrador */}
-                {role === 'administrador' && primaryVertical && (
-                  <p className="text-[9px] text-gray-600 mt-1">
-                    Principal: {primaryVertical.replace('_', ' ').toUpperCase()}
-                  </p>
-                )}
-              </div>
-            )}
+                <div className="px-2 py-3 mb-2 border-t border-gray-800">
+                  <h3
+                    className={cn(
+                      'text-[10px] font-bold uppercase tracking-wider',
+                      selectedCompany ? 'text-emerald-400' : 'text-gray-500'
+                    )}
+                  >
+                    📊 Verticales de Negocio
+                  </h3>
+                  {/* Mostrar empresa seleccionada para Super Admin */}
+                  {role === 'super_admin' && selectedCompany && (
+                    <p className="text-[9px] text-emerald-500 mt-1">
+                      Empresa: {selectedCompany.nombre}
+                    </p>
+                  )}
+                  {/* Mostrar vertical principal para Administrador */}
+                  {role === 'administrador' && primaryVertical && (
+                    <p className="text-[9px] text-gray-600 mt-1">
+                      Principal: {primaryVertical.replace('_', ' ').toUpperCase()}
+                    </p>
+                  )}
+                </div>
+              )}
 
             {/* Alquiler Residencial Tradicional */}
             {filteredAlquilerResidencialItems.length > 0 && (
@@ -1992,14 +2049,17 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               filteredOperacionesItems.length > 0 ||
               filteredComunicacionesItems.length > 0) && (
               <div className="px-2 py-3 mb-2 border-t border-gray-800">
-                <h3 className={cn(
-                  "text-[10px] font-bold uppercase tracking-wider",
-                  (role === 'super_admin' && selectedCompany) ? "text-emerald-400" : "text-gray-500"
-                )}>
+                <h3
+                  className={cn(
+                    'text-[10px] font-bold uppercase tracking-wider',
+                    role === 'super_admin' && selectedCompany ? 'text-emerald-400' : 'text-gray-500'
+                  )}
+                >
                   🛠️ Herramientas
                   {role === 'super_admin' && selectedCompany && (
                     <span className="text-emerald-500 normal-case font-normal ml-1">
-                      ({selectedCompany.nombre.substring(0, 12)}{selectedCompany.nombre.length > 12 ? '...' : ''})
+                      ({selectedCompany.nombre.substring(0, 12)}
+                      {selectedCompany.nombre.length > 12 ? '...' : ''})
                     </span>
                   )}
                 </h3>

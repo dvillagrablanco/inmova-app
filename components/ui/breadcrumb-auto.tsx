@@ -15,6 +15,7 @@ import { Fragment } from 'react';
 
 // Mapa de traducciones de rutas
 const routeNames: Record<string, string> = {
+  // General
   dashboard: 'Dashboard',
   edificios: 'Edificios',
   unidades: 'Unidades',
@@ -35,6 +36,44 @@ const routeNames: Record<string, string> = {
   analytics: 'Análisis',
   nuevo: 'Nuevo',
   editar: 'Editar',
+
+  // Admin / Super Admin
+  admin: 'Administración',
+  clientes: 'Clientes',
+  comparar: 'Comparar',
+  planes: 'Planes',
+  addons: 'Add-ons',
+  'facturacion-b2b': 'Facturación B2B',
+  cupones: 'Cupones',
+  partners: 'Partners',
+  marketplace: 'Marketplace',
+  integraciones: 'Integraciones',
+  contasimple: 'Contasimple',
+  'integraciones-contables': 'Integraciones Contables',
+  activity: 'Actividad',
+  alertas: 'Alertas',
+  'salud-sistema': 'Salud del Sistema',
+  'metricas-uso': 'Métricas de Uso',
+  'system-logs': 'Logs del Sistema',
+  seguridad: 'Seguridad',
+  usuarios: 'Usuarios',
+  'backup-restore': 'Backup y Restauración',
+  modulos: 'Módulos',
+  personalizacion: 'Personalización',
+  'portales-externos': 'Portales Externos',
+  'plantillas-email': 'Plantillas Email',
+  'plantillas-sms': 'Plantillas SMS',
+  'notificaciones-masivas': 'Notificaciones Masivas',
+  'reportes-programados': 'Reportes Programados',
+  importar: 'Importar Datos',
+  'ocr-import': 'OCR Import',
+  'firma-digital': 'Firma Digital',
+  legal: 'Plantillas Legales',
+  limpieza: 'Limpieza de Datos',
+  sugerencias: 'Sugerencias',
+  aprobaciones: 'Aprobaciones',
+  onboarding: 'Onboarding',
+  'recuperar-contrasena': 'Recuperar Contraseña',
 };
 
 interface BreadcrumbAutoProps {
@@ -49,12 +88,12 @@ export function BreadcrumbAuto({
   className,
 }: BreadcrumbAutoProps) {
   const pathname = usePathname();
-  
+
   // Dividir el pathname en segmentos
   if (!pathname) return null;
-  
+
   const segments = pathname.split('/').filter(Boolean);
-  
+
   // Si estamos en la raíz, no mostrar breadcrumbs
   if (segments.length === 0) {
     return null;
@@ -74,22 +113,24 @@ export function BreadcrumbAuto({
   });
 
   // Limitar el número de items si es necesario
-  const displayItems = items.length > maxItems
-    ? [
-        ...items.slice(0, 1),
-        { href: '#', label: '...', isLast: false },
-        ...items.slice(-2),
-      ]
-    : items;
+  const displayItems =
+    items.length > maxItems
+      ? [...items.slice(0, 1), { href: '#', label: '...', isLast: false }, ...items.slice(-2)]
+      : items;
+
+  // Determinar el home link según la ruta actual
+  const isAdminRoute = segments[0] === 'admin';
+  const homeHref = isAdminRoute ? '/admin/dashboard' : '/dashboard';
+  const homeDisplay = isAdminRoute ? 'Admin' : homeLabel;
 
   return (
     <Breadcrumb className={className}>
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href="/dashboard" className="flex items-center gap-1">
+            <Link href={homeHref} className="flex items-center gap-1">
               <Home className="h-4 w-4" />
-              <span className="sr-only">{homeLabel}</span>
+              <span className="hidden sm:inline ml-1">{homeDisplay}</span>
             </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
