@@ -2,11 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { z } from 'zod';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-// GET /api/admin/companies - Lista todas las empresas (solo super_admin)
+// Roles permitidos para acceso admin
+const SUPER_ADMIN_ROLES = ['super_admin', 'SUPERADMIN'];
+
+// Schema de validación para query params
+const querySchema = z.object({
+  page: z.coerce.number().min(1).default(1),
+  limit: z.coerce.number().min(1).max(100).default(20),
+  search: z.string().optional(),
+  status: z.enum(['activo', 'inactivo', 'prueba', 'suspendido', 'all']).optional(),
+  sortBy: z.enum(['nombre', 'createdAt', 'estadoCliente', 'users']).default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+});
+
+// GET /api/admin/companies - Lista empresas con paginación y filtros (solo super_admin)
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -16,56 +30,122 @@ export async function GET(request: NextRequest) {
     }
 
     // Solo super_admin puede acceder
-    if (session.user.role !== 'super_admin') {
+    if (!SUPER_ADMIN_ROLES.includes(session.user.role)) {
       return NextResponse.json(
         { error: 'Acceso denegado. Se requiere rol super_admin' },
         { status: 403 }
       );
     }
 
-    const companies = await prisma.company.findMany({
-      include: {
-        subscriptionPlan: true,
-        parentCompany: {
-          select: {
-            id: true,
-            nombre: true,
-          },
-        },
-        childCompanies: {
-          select: {
-            id: true,
-            nombre: true,
-            estadoCliente: true,
-          },
-        },
-        users: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-          },
-        },
-        buildings: {
-          select: { id: true },
-        },
-        tenants: {
-          select: { id: true },
-        },
-        _count: {
-          select: {
-            users: true,
-            buildings: true,
-            tenants: true,
-            childCompanies: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
+    // Parsear y validar query params
+    const { searchParams } = new URL(request.url);
+    const queryResult = querySchema.safeParse({
+      page: searchParams.get('page'),
+      limit: searchParams.get('limit'),
+      search: searchParams.get('search'),
+      status: searchParams.get('status'),
+      sortBy: searchParams.get('sortBy'),
+      sortOrder: searchParams.get('sortOrder'),
     });
 
-    return NextResponse.json(companies);
+    if (!queryResult.success) {
+      return NextResponse.json(
+        { error: 'Parámetros inválidos', details: queryResult.error.errors },
+        { status: 400 }
+      );
+    }
+
+    const { page, limit, search, status, sortBy, sortOrder } = queryResult.data;
+    const skip = (page - 1) * limit;
+
+    // Construir filtros
+    const where: any = {};
+    
+    if (search) {
+      where.OR = [
+        { nombre: { contains: search, mode: 'insensitive' } },
+        { cif: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+        { contactoPrincipal: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (status && status !== 'all') {
+      if (status === 'activo') {
+        where.activo = true;
+      } else if (status === 'inactivo') {
+        where.activo = false;
+      } else {
+        where.estadoCliente = status;
+      }
+    }
+
+    // Construir ordenamiento
+    let orderBy: any = {};
+    if (sortBy === 'users') {
+      orderBy = { users: { _count: sortOrder } };
+    } else {
+      orderBy = { [sortBy]: sortOrder };
+    }
+
+    // Ejecutar queries en paralelo para mejor performance
+    const [companies, total] = await Promise.all([
+      prisma.company.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          subscriptionPlan: {
+            select: {
+              id: true,
+              nombre: true,
+              precioMensual: true,
+              tier: true,
+            },
+          },
+          parentCompany: {
+            select: {
+              id: true,
+              nombre: true,
+            },
+          },
+          childCompanies: {
+            select: {
+              id: true,
+              nombre: true,
+              estadoCliente: true,
+            },
+          },
+          _count: {
+            select: {
+              users: true,
+              buildings: true,
+              tenants: true,
+              childCompanies: true,
+            },
+          },
+        },
+        orderBy,
+      }),
+      prisma.company.count({ where }),
+    ]);
+
+    // Calcular metadata de paginación
+    const totalPages = Math.ceil(total / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+
+    return NextResponse.json({
+      companies,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNextPage,
+        hasPrevPage,
+      },
+    });
   } catch (error) {
     logger.error('Error fetching companies:', error);
     return NextResponse.json(
