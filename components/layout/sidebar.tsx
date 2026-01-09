@@ -691,10 +691,10 @@ const documentosLegalNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Plantillas',
-    href: '/plantillas',
+    name: 'Plantillas Legales',
+    href: '/plantillas-legales',
     icon: FileText,
-    roles: ['super_admin', 'administrador', 'gestor'],
+    roles: ['super_admin', 'administrador', 'gestor', 'propietario'],
   },
 ];
 
@@ -952,12 +952,6 @@ const superAdminPlatformItems: SidebarItem[] = [
     name: 'Partners',
     href: '/admin/partners',
     icon: Briefcase,
-    roles: ['super_admin'],
-  },
-  {
-    name: 'Plantillas Legales',
-    href: '/admin/legal',
-    icon: FileText,
     roles: ['super_admin'],
   },
   // ========== 2. MONITOREO Y OPERACIONES ==========
