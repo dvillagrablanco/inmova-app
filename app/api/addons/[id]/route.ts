@@ -24,6 +24,7 @@ export async function GET(
       where: { id },
       include: {
         suscripciones: {
+          where: { activo: true },
           include: {
             company: {
               select: { id: true, nombre: true },
@@ -42,7 +43,15 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: addon,
+      data: {
+        ...addon,
+        stripe: {
+          productId: addon.stripeProductId,
+          priceIdMonthly: addon.stripePriceIdMonthly,
+          priceIdAnnual: addon.stripePriceIdAnnual,
+          synced: !!addon.stripeProductId,
+        },
+      },
     });
   } catch (error: any) {
     console.error('[Add-ons GET Error]:', error);
@@ -56,6 +65,7 @@ export async function GET(
 /**
  * PUT /api/addons/[id]
  * Actualiza un add-on existente (solo admin)
+ * Sincroniza automáticamente con Stripe si cambian precios
  */
 export async function PUT(
   request: NextRequest,
@@ -70,7 +80,7 @@ export async function PUT(
     const { id } = params;
     const body = await request.json();
 
-    // Schema de validación para actualización (todos los campos opcionales)
+    // Schema de validación para actualización
     const schema = z.object({
       nombre: z.string().min(3).max(100).optional(),
       descripcion: z.string().min(10).optional(),
@@ -86,8 +96,7 @@ export async function PUT(
       destacado: z.boolean().optional(),
       activo: z.boolean().optional(),
       orden: z.number().optional(),
-      stripePriceIdMonthly: z.string().nullable().optional(),
-      stripePriceIdAnnual: z.string().nullable().optional(),
+      syncWithStripe: z.boolean().optional().default(true),
     });
 
     const validated = schema.parse(body);
@@ -95,7 +104,7 @@ export async function PUT(
     const { getPrismaClient } = await import('@/lib/db');
     const prisma = getPrismaClient();
 
-    // Verificar que el add-on existe
+    // Obtener add-on existente
     const existing = await prisma.addOn.findUnique({
       where: { id },
     });
@@ -107,11 +116,73 @@ export async function PUT(
       );
     }
 
+    // Detectar si cambiaron los precios
+    const preciosChanged = 
+      (validated.precioMensual !== undefined && validated.precioMensual !== existing.precioMensual) ||
+      (validated.precioAnual !== undefined && validated.precioAnual !== existing.precioAnual) ||
+      (validated.nombre !== undefined && validated.nombre !== existing.nombre) ||
+      (validated.descripcion !== undefined && validated.descripcion !== existing.descripcion);
+
     // Actualizar add-on
     const addon = await prisma.addOn.update({
       where: { id },
-      data: validated,
+      data: {
+        ...(validated.nombre && { nombre: validated.nombre }),
+        ...(validated.descripcion && { descripcion: validated.descripcion }),
+        ...(validated.categoria && { categoria: validated.categoria }),
+        ...(validated.precioMensual !== undefined && { precioMensual: validated.precioMensual }),
+        ...(validated.precioAnual !== undefined && { precioAnual: validated.precioAnual }),
+        ...(validated.unidades !== undefined && { unidades: validated.unidades }),
+        ...(validated.tipoUnidad !== undefined && { tipoUnidad: validated.tipoUnidad }),
+        ...(validated.disponiblePara && { disponiblePara: validated.disponiblePara }),
+        ...(validated.incluidoEn && { incluidoEn: validated.incluidoEn }),
+        ...(validated.margenPorcentaje !== undefined && { margenPorcentaje: validated.margenPorcentaje }),
+        ...(validated.costoUnitario !== undefined && { costoUnitario: validated.costoUnitario }),
+        ...(validated.destacado !== undefined && { destacado: validated.destacado }),
+        ...(validated.activo !== undefined && { activo: validated.activo }),
+        ...(validated.orden !== undefined && { orden: validated.orden }),
+      },
     });
+
+    // Sincronizar con Stripe si cambiaron precios o datos relevantes
+    let stripeSync = { synced: false, error: null as string | null, updated: false };
+    
+    if (validated.syncWithStripe !== false && preciosChanged) {
+      try {
+        const { syncAddOnToStripe } = await import('@/lib/stripe-subscription-service');
+        
+        const stripeIds = await syncAddOnToStripe({
+          id: addon.id,
+          codigo: addon.codigo,
+          nombre: addon.nombre,
+          descripcion: addon.descripcion,
+          precioMensual: addon.precioMensual,
+          precioAnual: addon.precioAnual || undefined,
+          categoria: addon.categoria,
+        });
+
+        if (stripeIds) {
+          // Actualizar con nuevos IDs de Stripe
+          await prisma.addOn.update({
+            where: { id: addon.id },
+            data: {
+              stripeProductId: stripeIds.productId,
+              stripePriceIdMonthly: stripeIds.priceIdMonthly,
+              stripePriceIdAnnual: stripeIds.priceIdAnnual,
+            },
+          });
+          stripeSync.synced = true;
+          stripeSync.updated = true;
+        } else {
+          stripeSync.error = 'Stripe no configurado';
+        }
+      } catch (stripeError: any) {
+        console.error('[Stripe Sync Error]:', stripeError);
+        stripeSync.error = stripeError.message;
+      }
+    } else if (existing.stripeProductId) {
+      stripeSync.synced = true; // Ya estaba sincronizado
+    }
 
     // Log de auditoría
     await prisma.auditLog.create({
@@ -121,8 +192,10 @@ export async function PUT(
         entityType: 'ADDON',
         entityId: addon.id,
         details: {
-          changes: Object.keys(validated),
+          changes: Object.keys(validated).filter(k => k !== 'syncWithStripe'),
           addonName: addon.nombre,
+          stripeSync,
+          preciosChanged,
         },
         ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
       },
@@ -131,7 +204,10 @@ export async function PUT(
     return NextResponse.json({
       success: true,
       data: addon,
-      message: 'Add-on actualizado correctamente',
+      stripe: stripeSync,
+      message: stripeSync.updated 
+        ? 'Add-on actualizado y sincronizado con Stripe'
+        : 'Add-on actualizado correctamente',
     });
   } catch (error: any) {
     console.error('[Add-ons PUT Error]:', error);
@@ -153,7 +229,7 @@ export async function PUT(
 /**
  * DELETE /api/addons/[id]
  * Elimina un add-on (solo admin)
- * Soft delete si tiene suscripciones activas
+ * Desactiva el producto en Stripe
  */
 export async function DELETE(
   request: NextRequest,
@@ -187,6 +263,24 @@ export async function DELETE(
       );
     }
 
+    // Desactivar producto en Stripe si existe
+    let stripeDeactivated = false;
+    if (addon.stripeProductId) {
+      try {
+        const { getStripe } = await import('@/lib/stripe-config');
+        const stripe = getStripe();
+        
+        if (stripe) {
+          await stripe.products.update(addon.stripeProductId, {
+            active: false,
+          });
+          stripeDeactivated = true;
+        }
+      } catch (stripeError: any) {
+        console.warn('[Stripe Deactivate Warning]:', stripeError.message);
+      }
+    }
+
     // Si tiene suscripciones activas, hacer soft delete
     if (addon.suscripciones.length > 0) {
       await prisma.addOn.update({
@@ -194,7 +288,6 @@ export async function DELETE(
         data: { activo: false },
       });
 
-      // Log de auditoría
       await prisma.auditLog.create({
         data: {
           userId: session.user.id,
@@ -205,6 +298,7 @@ export async function DELETE(
             addonName: addon.nombre,
             reason: 'Has active subscriptions',
             activeSubscriptions: addon.suscripciones.length,
+            stripeDeactivated,
           },
           ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
         },
@@ -214,6 +308,7 @@ export async function DELETE(
         success: true,
         message: `Add-on desactivado (tiene ${addon.suscripciones.length} suscripciones activas)`,
         softDelete: true,
+        stripeDeactivated,
       });
     }
 
@@ -222,7 +317,6 @@ export async function DELETE(
       where: { id },
     });
 
-    // Log de auditoría
     await prisma.auditLog.create({
       data: {
         userId: session.user.id,
@@ -231,6 +325,7 @@ export async function DELETE(
         entityId: id,
         details: {
           addonName: addon.nombre,
+          stripeDeactivated,
         },
         ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
       },
@@ -239,6 +334,7 @@ export async function DELETE(
     return NextResponse.json({
       success: true,
       message: 'Add-on eliminado correctamente',
+      stripeDeactivated,
     });
   } catch (error: any) {
     console.error('[Add-ons DELETE Error]:', error);

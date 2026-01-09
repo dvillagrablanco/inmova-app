@@ -61,6 +61,12 @@ export async function GET(request: NextRequest) {
       disponiblePara: addon.disponiblePara,
       incluidoEn: addon.incluidoEn,
       destacado: addon.destacado,
+      stripe: {
+        productId: addon.stripeProductId,
+        priceIdMonthly: addon.stripePriceIdMonthly,
+        priceIdAnnual: addon.stripePriceIdAnnual,
+        synced: !!addon.stripeProductId,
+      },
     }));
 
     return NextResponse.json({
@@ -79,14 +85,15 @@ export async function GET(request: NextRequest) {
       codigo: addon.id,
       nombre: addon.name,
       descripcion: addon.description,
-      categoria: 'feature',
+      categoria: addon.category || 'feature',
       precio: {
         mensual: addon.monthlyPrice,
-        anual: addon.monthlyPrice * 10,
+        anual: addon.annualPrice || addon.monthlyPrice * 10,
       },
       disponiblePara: addon.availableFor,
       incluidoEn: addon.includedIn,
-      destacado: false,
+      destacado: addon.highlighted || false,
+      stripe: { synced: false },
     }));
 
     return NextResponse.json({
@@ -101,11 +108,12 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/addons
  * Crear un nuevo add-on (solo admin)
+ * Sincroniza automáticamente con Stripe
  */
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || !['SUPERADMIN', 'ADMIN'].includes(session.user.role)) {
+    if (!session?.user || !['SUPERADMIN', 'ADMIN', 'super_admin'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -126,6 +134,7 @@ export async function POST(request: NextRequest) {
       margenPorcentaje: z.number().min(0).max(100).optional(),
       costoUnitario: z.number().min(0).optional(),
       destacado: z.boolean().optional(),
+      syncWithStripe: z.boolean().optional().default(true),
     });
 
     const validated = schema.parse(body);
@@ -154,9 +163,67 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Sincronizar con Stripe si está habilitado
+    let stripeSync = { synced: false, error: null as string | null };
+    
+    if (validated.syncWithStripe !== false) {
+      try {
+        const { syncAddOnToStripe } = await import('@/lib/stripe-subscription-service');
+        
+        const stripeIds = await syncAddOnToStripe({
+          id: addon.id,
+          codigo: addon.codigo,
+          nombre: addon.nombre,
+          descripcion: addon.descripcion,
+          precioMensual: addon.precioMensual,
+          precioAnual: addon.precioAnual || undefined,
+          categoria: addon.categoria,
+        });
+
+        if (stripeIds) {
+          // Actualizar con IDs de Stripe
+          await prisma.addOn.update({
+            where: { id: addon.id },
+            data: {
+              stripeProductId: stripeIds.productId,
+              stripePriceIdMonthly: stripeIds.priceIdMonthly,
+              stripePriceIdAnnual: stripeIds.priceIdAnnual,
+            },
+          });
+          stripeSync.synced = true;
+        } else {
+          stripeSync.error = 'Stripe no configurado o error de sincronización';
+        }
+      } catch (stripeError: any) {
+        console.error('[Stripe Sync Error]:', stripeError);
+        stripeSync.error = stripeError.message;
+      }
+    }
+
+    // Log de auditoría
+    await prisma.auditLog.create({
+      data: {
+        userId: session.user.id,
+        action: 'ADDON_CREATED',
+        entityType: 'ADDON',
+        entityId: addon.id,
+        details: {
+          codigo: addon.codigo,
+          nombre: addon.nombre,
+          precioMensual: addon.precioMensual,
+          stripeSync,
+        },
+        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+      },
+    });
+
     return NextResponse.json({
       success: true,
       data: addon,
+      stripe: stripeSync,
+      message: stripeSync.synced 
+        ? 'Add-on creado y sincronizado con Stripe'
+        : 'Add-on creado. Sincronización con Stripe pendiente.',
     }, { status: 201 });
   } catch (error: any) {
     console.error('[Add-ons POST Error]:', error);

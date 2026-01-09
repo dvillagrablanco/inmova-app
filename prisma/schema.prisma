@@ -5693,9 +5693,10 @@ model AddOn {
   precioMensual Float
   precioAnual   Float?
 
-  // Stripe
-  stripePriceIdMonthly String?
-  stripePriceIdAnnual  String?
+  // Stripe - Sincronización automática
+  stripeProductId      String? // ID del producto en Stripe
+  stripePriceIdMonthly String? // ID del precio mensual
+  stripePriceIdAnnual  String? // ID del precio anual
 
   // Lo que incluye
   unidades      Int?   // Ej: 10 firmas, 10 GB, 50K tokens
