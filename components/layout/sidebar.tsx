@@ -1114,15 +1114,14 @@ const superAdminPlatformItems: SidebarItem[] = [
 
   // ========== 9. HERRAMIENTAS DE PLATAFORMA ==========
   // Solo herramientas de mantenimiento global del SaaS
-  // Las herramientas operativas (OCR, Firma, Plantillas) están en Gestión de Empresa
+  // Las herramientas operativas (OCR, Firma, Plantillas, Importar) están en Gestión de Empresa
   {
-    name: 'Herramientas',
+    name: 'Mantenimiento',
     href: '/admin/limpieza',
     icon: Wrench,
     roles: ['super_admin'],
     subItems: [
       { name: 'Limpieza de Datos', href: '/admin/limpieza' },
-      { name: 'Migración Masiva', href: '/admin/importar' },
     ],
   },
 
