@@ -61,6 +61,9 @@ export async function GET(request: NextRequest) {
       disponiblePara: addon.disponiblePara,
       incluidoEn: addon.incluidoEn,
       destacado: addon.destacado,
+      // Costos y márgenes
+      costoUnitario: addon.costoUnitario,
+      margenPorcentaje: addon.margenPorcentaje,
       stripe: {
         productId: addon.stripeProductId,
         priceIdMonthly: addon.stripePriceIdMonthly,
