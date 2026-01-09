@@ -64,6 +64,7 @@ import {
   User,
   Loader2,
   Tag,
+  ShoppingBag,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -1032,20 +1033,40 @@ const superAdminPlatformItems: SidebarItem[] = [
     ],
   },
 
-  // ========== 4. ECOSYSTEM ==========
+  // ========== 4. PARTNERS (Prescriptores) ==========
+  // Partners son empresas que REFIEREN clientes a Inmova (bancos, aseguradoras, etc.)
+  // Ganan comisión por cada cliente que traen
   {
-    name: 'Ecosystem',
+    name: 'Partners',
     href: '/admin/partners',
     icon: Share2,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Partners', href: '/admin/partners' },
-      { name: 'Marketplace', href: '/admin/marketplace' },
-      { name: 'API Docs', href: '/api-docs' },
+      { name: 'Gestión de Partners', href: '/admin/partners' },
+      { name: 'Comisiones', href: '/admin/partners/comisiones' },
+      { name: 'Invitaciones', href: '/admin/partners/invitaciones' },
+      { name: 'Landings Personalizadas', href: '/admin/partners/landings' },
     ],
   },
 
-  // ========== 4.1 INTEGRACIONES ==========
+  // ========== 4.1 MARKETPLACE DE SERVICIOS ==========
+  // Marketplace son PROVEEDORES de servicios (limpieza, fontanería, etc.)
+  // Inmova gana comisión por intermediar servicios a los usuarios
+  {
+    name: 'Marketplace',
+    href: '/admin/marketplace',
+    icon: ShoppingBag,
+    roles: ['super_admin'],
+    subItems: [
+      { name: 'Proveedores', href: '/admin/marketplace/proveedores' },
+      { name: 'Servicios', href: '/admin/marketplace' },
+      { name: 'Categorías', href: '/admin/marketplace/categorias' },
+      { name: 'Reservas', href: '/admin/marketplace/reservas' },
+      { name: 'Comisiones', href: '/admin/marketplace/comisiones' },
+    ],
+  },
+
+  // ========== 4.2 INTEGRACIONES ==========
   {
     name: 'Integraciones',
     href: '/admin/integraciones',
@@ -1055,6 +1076,7 @@ const superAdminPlatformItems: SidebarItem[] = [
       { name: 'Servicios Conectados', href: '/admin/integraciones' },
       { name: 'Contabilidad (Contasimple)', href: '/admin/contasimple' },
       { name: 'Portales Inmobiliarios', href: '/admin/portales-externos' },
+      { name: 'API Docs', href: '/api-docs' },
     ],
   },
 
@@ -1120,9 +1142,7 @@ const superAdminPlatformItems: SidebarItem[] = [
     href: '/admin/limpieza',
     icon: Wrench,
     roles: ['super_admin'],
-    subItems: [
-      { name: 'Limpieza de Datos', href: '/admin/limpieza' },
-    ],
+    subItems: [{ name: 'Limpieza de Datos', href: '/admin/limpieza' }],
   },
 
   // ========== 10. SOPORTE ==========
