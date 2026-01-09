@@ -987,6 +987,7 @@ const superAdminPlatformItems: SidebarItem[] = [
     roles: ['super_admin'],
     subItems: [
       { name: 'Servicios Conectados', href: '/admin/integraciones' },
+      { name: 'Contabilidad (Contasimple)', href: '/admin/contasimple' },
       { name: 'API Docs', href: '/api-docs' },
     ],
   },
