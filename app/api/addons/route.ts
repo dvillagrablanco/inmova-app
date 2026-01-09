@@ -9,16 +9,18 @@ export const runtime = 'nodejs';
 /**
  * GET /api/addons
  * Lista los add-ons disponibles
- * 
+ *
  * Query params:
  * - categoria: filtrar por categoría (usage, feature, premium)
  * - plan: filtrar por plan disponible (STARTER, PROFESSIONAL, BUSINESS, ENTERPRISE)
+ * - vertical: filtrar por producto (inmova, ewoorker, all)
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const categoria = searchParams.get('categoria');
     const plan = searchParams.get('plan');
+    const vertical = searchParams.get('vertical') || 'all'; // inmova, ewoorker, all
 
     // Lazy load Prisma
     const { getPrismaClient } = await import('@/lib/db');
@@ -28,6 +30,11 @@ export async function GET(request: NextRequest) {
     const where: any = { activo: true };
     if (categoria) {
       where.categoria = categoria;
+    }
+
+    // Filtro por vertical
+    if (vertical && vertical !== 'all') {
+      where.vertical = vertical;
     }
 
     // Obtener add-ons
@@ -52,15 +59,20 @@ export async function GET(request: NextRequest) {
       nombre: addon.nombre,
       descripcion: addon.descripcion,
       categoria: addon.categoria,
+      vertical: addon.vertical || 'inmova', // inmova o ewoorker
       precio: {
         mensual: addon.precioMensual,
         anual: addon.precioAnual,
       },
+      precioMensual: addon.precioMensual,
+      precioAnual: addon.precioAnual,
       unidades: addon.unidades,
       tipoUnidad: addon.tipoUnidad,
       disponiblePara: addon.disponiblePara,
       incluidoEn: addon.incluidoEn,
       destacado: addon.destacado,
+      activo: addon.activo,
+      orden: addon.orden,
       // Costos y márgenes
       costoUnitario: addon.costoUnitario,
       margenPorcentaje: addon.margenPorcentaje,
@@ -168,11 +180,11 @@ export async function POST(request: NextRequest) {
 
     // Sincronizar con Stripe si está habilitado
     let stripeSync = { synced: false, error: null as string | null };
-    
+
     if (validated.syncWithStripe !== false) {
       try {
         const { syncAddOnToStripe } = await import('@/lib/stripe-subscription-service');
-        
+
         const stripeIds = await syncAddOnToStripe({
           id: addon.id,
           codigo: addon.codigo,
@@ -220,27 +232,36 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      data: addon,
-      stripe: stripeSync,
-      message: stripeSync.synced 
-        ? 'Add-on creado y sincronizado con Stripe'
-        : 'Add-on creado. Sincronización con Stripe pendiente.',
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        data: addon,
+        stripe: stripeSync,
+        message: stripeSync.synced
+          ? 'Add-on creado y sincronizado con Stripe'
+          : 'Add-on creado. Sincronización con Stripe pendiente.',
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     console.error('[Add-ons POST Error]:', error);
 
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        error: 'Datos inválidos',
-        details: error.errors,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Datos inválidos',
+          details: error.errors,
+        },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({
-      error: 'Error creando add-on',
-      message: error.message,
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Error creando add-on',
+        message: error.message,
+      },
+      { status: 500 }
+    );
   }
 }

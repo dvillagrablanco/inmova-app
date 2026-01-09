@@ -5714,6 +5714,9 @@ model AddOn {
   margenPorcentaje Float? // Margen de beneficio
   costoUnitario    Float? // Costo real para nosotros
 
+  // Vertical/Producto (para filtrar entre INMOVA y eWoorker)
+  vertical String @default("inmova") // "inmova" o "ewoorker"
+
   // Estado
   activo    Boolean  @default(true)
   destacado Boolean  @default(false)
@@ -5727,6 +5730,7 @@ model AddOn {
 
   @@index([categoria])
   @@index([activo])
+  @@index([vertical])
   @@map("addons")
 }
 

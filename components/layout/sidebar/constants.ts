@@ -32,6 +32,7 @@ export const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/dashboard': 'admin_dashboard',
   '/admin/clientes': 'gestion_clientes',
   '/admin/planes': 'admin_planes',
+  '/admin/ewoorker-planes': 'admin_ewoorker_planes',
   '/admin/facturacion-b2b': 'admin_facturacion_b2b',
   '/admin/personalizacion': 'admin_personalizacion',
   '/admin/activity': 'admin_activity',

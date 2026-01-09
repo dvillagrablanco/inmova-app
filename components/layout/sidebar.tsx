@@ -116,6 +116,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/dashboard': 'admin_dashboard',
   '/admin/clientes': 'gestion_clientes',
   '/admin/planes': 'admin_planes',
+  '/admin/ewoorker-planes': 'admin_ewoorker_planes',
   '/admin/cupones': 'admin_cupones',
   '/admin/facturacion-b2b': 'admin_facturacion_b2b',
   '/admin/personalizacion': 'admin_personalizacion',
@@ -1033,7 +1034,8 @@ const superAdminPlatformItems: SidebarItem[] = [
     icon: DollarSign,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Planes', href: '/admin/planes' },
+      { name: 'Planes INMOVA', href: '/admin/planes' },
+      { name: 'Planes eWoorker', href: '/admin/ewoorker-planes' },
       { name: 'Add-ons', href: '/admin/addons' },
       { name: 'Facturación B2B', href: '/admin/facturacion-b2b' },
       { name: 'Cupones', href: '/admin/cupones' },
