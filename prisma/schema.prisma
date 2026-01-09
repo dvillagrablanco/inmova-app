@@ -363,6 +363,7 @@ model User {
   setupProgress    String? // JSON string con las acciones completadas del onboarding
   resetToken       String?           @unique
   resetTokenExpiry DateTime?
+  recoveryEmail    String?           // Email alternativo para recuperación de contraseña
 
   // Multi-Factor Authentication (MFA)
   mfaEnabled       Boolean   @default(false)

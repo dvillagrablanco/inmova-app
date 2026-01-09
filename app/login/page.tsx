@@ -210,6 +210,16 @@ export default function LoginPage() {
                   )}
                 </div>
 
+                {/* Enlace olvidaste contraseña */}
+                <div className="text-right">
+                  <Link 
+                    href="/forgot-password" 
+                    className="text-sm text-indigo-300 hover:text-white transition-colors underline decoration-indigo-400/30 hover:decoration-white/50"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </Link>
+                </div>
+
                 {/* Botón mejorado */}
                 <Button
                   type="submit"

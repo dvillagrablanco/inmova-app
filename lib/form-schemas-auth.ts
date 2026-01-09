@@ -52,6 +52,7 @@ export const registerSchema = z
   .object({
     name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
     email: emailSchema,
+    recoveryEmail: z.string().email('Email de recuperación inválido').optional().or(z.literal('')),
     businessVertical: z.enum(businessVerticals, {
       errorMap: () => ({ message: 'Seleccione un tipo de negocio válido' }),
     }),
@@ -61,6 +62,10 @@ export const registerSchema = z
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Las contraseñas no coinciden',
     path: ['confirmPassword'],
+  })
+  .refine((data) => !data.recoveryEmail || data.recoveryEmail !== data.email, {
+    message: 'El email de recuperación debe ser diferente al email principal',
+    path: ['recoveryEmail'],
   });
 
 export type RegisterFormData = z.infer<typeof registerSchema>;

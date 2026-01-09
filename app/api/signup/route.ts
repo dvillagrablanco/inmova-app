@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
       name, 
       role, 
       businessVertical,
+      recoveryEmail, // Email alternativo para recuperación de contraseña
       // Zero-Touch Onboarding fields
       experienceLevel,
       techSavviness,
@@ -97,6 +98,9 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Validar que recoveryEmail sea diferente al email principal
+    const validRecoveryEmail = recoveryEmail && recoveryEmail !== email ? recoveryEmail : undefined;
+
     const user = await prisma.user.create({
       data: {
         email,
@@ -105,6 +109,7 @@ export async function POST(req: NextRequest) {
         role: userRole,
         companyId: company.id,
         businessVertical: userVertical,
+        recoveryEmail: validRecoveryEmail, // Email de recuperación
         // Zero-Touch Onboarding fields
         experienceLevel: userExperienceLevel,
         techSavviness: userTechSavviness,

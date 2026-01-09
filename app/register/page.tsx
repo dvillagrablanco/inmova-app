@@ -96,6 +96,7 @@ export default function RegisterPage() {
 
   const name = watch('name', '');
   const email = watch('email', '');
+  const recoveryEmail = watch('recoveryEmail', '');
   const businessVertical = watch('businessVertical', 'alquiler_tradicional');
   const password = watch('password', '');
   const confirmPassword = watch('confirmPassword', '');
@@ -111,6 +112,7 @@ export default function RegisterPage() {
         body: JSON.stringify({
           name: data.name,
           email: data.email,
+          recoveryEmail: data.recoveryEmail || undefined,
           password: data.password,
           role: 'gestor',
           businessVertical: data.businessVertical,
@@ -378,6 +380,18 @@ export default function RegisterPage() {
                     onChange={(val) => setValue('email', val)}
                     error={errors.email?.message}
                     required
+                  />
+
+                  <AccessibleInputField
+                    id="recoveryEmail-field"
+                    name="recoveryEmail"
+                    label="Email de Recuperación (Opcional)"
+                    type="email"
+                    placeholder="email-alternativo@gmail.com"
+                    value={recoveryEmail}
+                    onChange={(val) => setValue('recoveryEmail', val)}
+                    error={errors.recoveryEmail?.message}
+                    helpText="Email alternativo para recuperar tu contraseña si olvidas la principal. Recomendamos usar un email diferente."
                   />
 
                   <AccessibleInputField
