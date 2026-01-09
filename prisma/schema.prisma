@@ -11280,6 +11280,38 @@ model Partner {
   // Usuario asociado (si el partner tiene cuenta en Inmova)
   user User? @relation(fields: [email], references: [email])
 
+  // ═══════════════════════════════════════════════════════════════
+  // WHITE-LABEL COMPLETO - Sistema de Prescriptores
+  // ═══════════════════════════════════════════════════════════════
+  
+  // Slug único para landing personalizada (/p/[slug])
+  slug String? @unique
+  
+  // Branding completo
+  brandingConfig PartnerBranding?
+  
+  // Contenido de landing personalizada
+  landingContent PartnerLandingContent?
+  
+  // Servicios complementarios que ofrece el partner
+  serviciosComplementarios PartnerService[]
+  
+  // Promociones y ofertas especiales del partner
+  promociones PartnerPromotion[]
+  
+  // Banners y contenido visual
+  banners PartnerBanner[]
+  
+  // Analytics de la landing del partner
+  landingViews      Int       @default(0)
+  landingLeads      Int       @default(0)
+  ultimaVisita      DateTime?
+  
+  // Configuración de funcionalidades
+  featuresEnabled   Json      @default("{}") // Qué features muestra en su landing
+  
+  // ═══════════════════════════════════════════════════════════════
+
   // Relaciones
   clientes     PartnerClient[]
   invitaciones PartnerInvitation[]
@@ -11288,6 +11320,7 @@ model Partner {
   @@index([email])
   @@index([estado])
   @@index([tipo])
+  @@index([slug])
 }
 
 model PartnerClient {
@@ -11426,6 +11459,323 @@ enum PartnerInvitationStatus {
   ACCEPTED // Aceptada por el cliente
   EXPIRED // Expirada sin respuesta
   CANCELLED // Cancelada por el partner
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// SISTEMA DE PARTNERS PRESCRIPTORES - White Label y Servicios Complementarios
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Configuración completa de branding del partner
+ * Permite que la app "respire" el look&feel del partner
+ */
+model PartnerBranding {
+  id        String @id @default(cuid())
+  partnerId String @unique
+  partner   Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  // Identidad visual
+  logoUrl           String?  // Logo principal
+  logoUrlDark       String?  // Logo para fondos oscuros
+  faviconUrl        String?  // Favicon personalizado
+  bannerUrl         String?  // Banner principal de la landing
+
+  // Paleta de colores (hex)
+  colorPrimario     String   @default("#6366f1") // Indigo por defecto
+  colorSecundario   String   @default("#8b5cf6")
+  colorAccento      String   @default("#06b6d4")
+  colorFondo        String   @default("#ffffff")
+  colorFondoOscuro  String   @default("#0f172a")
+  colorTexto        String   @default("#1e293b")
+  colorTextoClaro   String   @default("#64748b")
+
+  // Tipografía
+  fuentePrincipal   String   @default("Inter")
+  fuenteSecundaria  String   @default("Inter")
+  
+  // Personalización de botones
+  botonEstilo       String   @default("rounded") // rounded, square, pill
+  botonAnimacion    Boolean  @default(true)
+
+  // Redes sociales
+  urlLinkedin       String?
+  urlTwitter        String?
+  urlInstagram      String?
+  urlFacebook       String?
+  urlYoutube        String?
+  urlWebsite        String?
+
+  // Información de contacto visible
+  emailContacto     String?
+  telefonoContacto  String?
+  direccion         String?
+
+  // Footer personalizado
+  textoFooter       String?  @db.Text
+  linksFooter       Json?    // [{label, url}]
+
+  // Configuración avanzada
+  cssPersonalizado  String?  @db.Text // CSS adicional
+  scriptsExtras     String?  @db.Text // Scripts de tracking, chat, etc.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/**
+ * Contenido de la landing page personalizada del partner
+ */
+model PartnerLandingContent {
+  id        String @id @default(cuid())
+  partnerId String @unique
+  partner   Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  // Hero Section
+  heroTitulo        String   @default("Gestiona tus propiedades con nosotros")
+  heroSubtitulo     String?  @db.Text
+  heroCTA           String   @default("Empezar gratis")
+  heroImagenUrl     String?
+  heroVideoUrl      String?  // Video de fondo opcional
+
+  // Propuesta de valor (texto personalizado)
+  propuestaValor    String?  @db.Text
+  
+  // Beneficios personalizados
+  beneficios        Json?    // [{icono, titulo, descripcion}]
+
+  // Testimonios del partner
+  testimonios       Json?    // [{nombre, cargo, empresa, texto, foto}]
+
+  // FAQ personalizado
+  faqItems          Json?    // [{pregunta, respuesta}]
+
+  // Sección "Sobre nosotros" del partner
+  sobreNosotros     String?  @db.Text
+  sobreNosotrosImg  String?
+
+  // Call to Actions personalizados
+  ctaPrincipal      String   @default("Solicitar demo")
+  ctaSecundario     String?
+  
+  // Textos legales
+  textoLegal        String?  @db.Text
+  politicaPrivacidad String?
+
+  // SEO
+  metaTitulo        String?
+  metaDescripcion   String?
+  metaKeywords      String?
+  ogImagen          String?
+
+  // Configuración
+  mostrarPrecios    Boolean  @default(true)
+  mostrarTestimonios Boolean @default(true)
+  mostrarFAQ        Boolean  @default(true)
+  mostrarServicios  Boolean  @default(true)
+  mostrarBanners    Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/**
+ * Servicios complementarios que el partner ofrece a sus clientes
+ * Permite al partner ofrecer valor añadido además de Inmova
+ */
+model PartnerService {
+  id        String @id @default(cuid())
+  partnerId String
+  partner   Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  // Información del servicio
+  nombre            String
+  slug              String
+  descripcionCorta  String   @db.VarChar(200)
+  descripcionLarga  String?  @db.Text
+  
+  // Visual
+  iconoUrl          String?
+  imagenUrl         String?
+  videoUrl          String?
+
+  // Categoría
+  categoria         PartnerServiceCategory @default(OTRO)
+
+  // Precios
+  precioDesde       Float?   // Precio desde X€
+  precioHasta       Float?   // Hasta X€ (para rangos)
+  precioTipo        String   @default("mensual") // mensual, anual, unico, consultar
+  moneda            String   @default("EUR")
+
+  // Comisión para Inmova (si aplica)
+  comisionInmova    Float    @default(0) // % que recibe Inmova por cada venta
+
+  // CTA
+  ctaTexto          String   @default("Solicitar información")
+  ctaUrl            String?  // URL externa o formulario interno
+  ctaTipo           String   @default("formulario") // formulario, url, whatsapp, email
+
+  // Estado
+  activo            Boolean  @default(true)
+  destacado         Boolean  @default(false) // Mostrar en posición destacada
+  orden             Int      @default(0)
+
+  // Estadísticas
+  vistas            Int      @default(0)
+  clicks            Int      @default(0)
+  conversiones      Int      @default(0)
+
+  // Leads generados por este servicio
+  leads             PartnerServiceLead[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([partnerId, slug])
+  @@index([partnerId])
+  @@index([categoria])
+  @@index([activo])
+}
+
+/**
+ * Categorías de servicios complementarios
+ */
+enum PartnerServiceCategory {
+  SEGUROS            // Seguros de hogar, impago, etc.
+  FINANCIACION       // Hipotecas, préstamos
+  LEGAL              // Abogados, contratos
+  REFORMAS           // Reformas, interiorismo
+  MANTENIMIENTO      // Limpieza, reparaciones
+  MUDANZAS           // Servicios de mudanza
+  ENERGIA            // Certificados energéticos, solar
+  VALORACION         // Tasaciones
+  FOTOGRAFIA         // Fotos, tours virtuales
+  HOME_STAGING       // Home staging
+  MARKETING          // Marketing inmobiliario
+  CONSULTORIA        // Asesoría fiscal, contable
+  TECNOLOGIA         // Software complementario
+  FORMACION          // Cursos, formación
+  OTRO               // Otros servicios
+}
+
+/**
+ * Leads generados por servicios complementarios
+ */
+model PartnerServiceLead {
+  id        String @id @default(cuid())
+  serviceId String
+  service   PartnerService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  // Datos del lead
+  nombre    String
+  email     String
+  telefono  String?
+  empresa   String?
+  mensaje   String?  @db.Text
+
+  // Origen
+  origen    String   @default("landing") // landing, email, whatsapp
+  
+  // Estado
+  estado    String   @default("nuevo") // nuevo, contactado, convertido, descartado
+  
+  // Seguimiento
+  notas     String?  @db.Text
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([serviceId])
+  @@index([estado])
+}
+
+/**
+ * Promociones y ofertas especiales del partner
+ */
+model PartnerPromotion {
+  id        String @id @default(cuid())
+  partnerId String
+  partner   Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  // Información de la promoción
+  titulo            String
+  descripcion       String   @db.Text
+  imagenUrl         String?
+
+  // Tipo de promoción
+  tipo              String   @default("descuento") // descuento, regalo, trial, bundle
+
+  // Valores
+  valorDescuento    Float?   // % o cantidad fija
+  tipoDescuento     String?  // porcentaje, fijo
+  codigoCupon       String?  // Código para aplicar
+
+  // Vigencia
+  fechaInicio       DateTime @default(now())
+  fechaFin          DateTime?
+  
+  // Límites
+  usosMaximos       Int?
+  usosActuales      Int      @default(0)
+
+  // Condiciones
+  condiciones       String?  @db.Text
+  
+  // Estado
+  activo            Boolean  @default(true)
+  destacado         Boolean  @default(false)
+
+  // CTA
+  ctaTexto          String   @default("Aprovechar oferta")
+  ctaUrl            String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([partnerId])
+  @@index([activo])
+  @@index([fechaFin])
+}
+
+/**
+ * Banners promocionales del partner
+ */
+model PartnerBanner {
+  id        String @id @default(cuid())
+  partnerId String
+  partner   Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  // Contenido
+  titulo            String?
+  subtitulo         String?
+  imagenUrl         String
+  imagenMobileUrl   String?  // Versión para móvil
+
+  // Enlace
+  enlaceUrl         String?
+  enlaceTarget      String   @default("_self") // _self, _blank
+
+  // Posición
+  posicion          String   @default("hero") // hero, lateral, footer, popup
+  
+  // Configuración
+  orden             Int      @default(0)
+  activo            Boolean  @default(true)
+
+  // Vigencia
+  fechaInicio       DateTime @default(now())
+  fechaFin          DateTime?
+
+  // Estadísticas
+  impresiones       Int      @default(0)
+  clicks            Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([partnerId])
+  @@index([posicion])
+  @@index([activo])
 }
 
 // ====================================
