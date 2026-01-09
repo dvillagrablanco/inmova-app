@@ -464,7 +464,7 @@ const flippingNavItems = [
   },
 ];
 
-// 2.6 COMERCIAL
+// 2.6 COMERCIAL (Servicios Profesionales)
 const comercialNavItems = [
   {
     name: 'Servicios Profesionales',
@@ -482,6 +482,57 @@ const comercialNavItems = [
     name: 'Facturación Comercial',
     href: '/professional/invoicing',
     icon: FileText,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+];
+
+// 2.6.1 ALQUILER COMERCIAL (Oficinas, Locales, Naves, Coworking)
+const alquilerComercialNavItems = [
+  {
+    name: 'Dashboard Comercial',
+    href: '/comercial',
+    icon: Building2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'tour-comercial-dashboard',
+  },
+  {
+    name: 'Oficinas',
+    href: '/comercial/oficinas',
+    icon: Building2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'tour-comercial-oficinas',
+  },
+  {
+    name: 'Locales',
+    href: '/comercial/locales',
+    icon: Star,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'tour-comercial-locales',
+  },
+  {
+    name: 'Naves Industriales',
+    href: '/comercial/naves',
+    icon: Package,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'tour-comercial-naves',
+  },
+  {
+    name: 'Coworking',
+    href: '/comercial/coworking',
+    icon: Users2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'tour-comercial-coworking',
+  },
+  {
+    name: 'Contratos Comerciales',
+    href: '/comercial/contratos',
+    icon: FileText,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Leads Comerciales',
+    href: '/comercial/leads',
+    icon: UserPlus,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];
@@ -1257,6 +1308,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const filteredBuildToRentItems = filterItems(buildToRentNavItems, useCompanyModules);
   const filteredFlippingItems = filterItems(flippingNavItems, useCompanyModules);
   const filteredComercialItems = filterItems(comercialNavItems, useCompanyModules);
+  const filteredAlquilerComercialItems = filterItems(alquilerComercialNavItems, useCompanyModules);
   const filteredAdminFincasItems = filterItems(adminFincasItems, useCompanyModules);
 
   // Herramientas Horizontales - Usar módulos de empresa seleccionada si hay una (Super Admin)
@@ -1287,6 +1339,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     ...buildToRentNavItems,
     ...flippingNavItems,
     ...comercialNavItems,
+    ...alquilerComercialNavItems,
     ...adminFincasItems,
     // Herramientas Horizontales
     ...finanzasNavItems,
@@ -1708,6 +1761,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               filteredBuildToRentItems.length > 0 ||
               filteredFlippingItems.length > 0 ||
               filteredComercialItems.length > 0 ||
+              filteredAlquilerComercialItems.length > 0 ||
               filteredAdminFincasItems.length > 0) && 
               (role === 'administrador' || (role === 'super_admin' && selectedCompany)) && (
               <div className="px-2 py-3 mb-2 border-t border-gray-800">
@@ -1848,14 +1902,14 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* Comercial */}
+            {/* Comercial (Servicios Profesionales) */}
             {filteredComercialItems.length > 0 && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('comercial')}
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
-                  <span>🏢 Comercial</span>
+                  <span>💼 Servicios Pro</span>
                   {expandedSections.comercial ? (
                     <ChevronDown size={16} />
                   ) : (
@@ -1865,6 +1919,30 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.comercial && (
                   <div className="space-y-1 mt-1">
                     {filteredComercialItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Alquiler Comercial - Oficinas, Locales, Naves, Coworking */}
+            {filteredAlquilerComercialItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('alquilerComercial')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>🏢 Alquiler Comercial</span>
+                  {expandedSections.alquilerComercial ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
+                </button>
+                {expandedSections.alquilerComercial && (
+                  <div className="space-y-1 mt-1">
+                    {filteredAlquilerComercialItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
                   </div>

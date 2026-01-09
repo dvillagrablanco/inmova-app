@@ -30,6 +30,7 @@ enum BusinessVertical {
   servicios_profesionales
   comunidades
   mixto
+  alquiler_comercial // Oficinas, locales, naves industriales, coworking
 }
 
 enum UIMode {
@@ -105,6 +106,9 @@ enum UnitType {
   local
   garaje
   trastero
+  oficina            // Espacios de oficina
+  nave_industrial    // Naves y almacenes
+  coworking_space    // Espacios flexibles de coworking
 }
 
 enum UnitStatus {
@@ -123,6 +127,79 @@ enum ContractType {
   residencial
   comercial
   temporal
+}
+
+// ==========================================
+// TIPOS ESPECÍFICOS PARA ALQUILER COMERCIAL
+// (Oficinas, Locales, Naves Industriales, Coworking)
+// ==========================================
+
+enum CommercialSpaceType {
+  oficina_privada       // Oficina cerrada individual
+  oficina_abierta       // Open space / planta diáfana
+  local_comercial       // Local a pie de calle
+  local_centro_comercial // Local en centro comercial
+  nave_industrial       // Nave logística/industrial
+  almacen               // Almacén/storage
+  coworking_hot_desk    // Puesto rotativo
+  coworking_dedicated   // Puesto fijo
+  coworking_office      // Oficina privada en coworking
+  sala_reuniones        // Sala de reuniones alquilable
+  showroom              // Espacio de exposición
+  taller                // Taller/workshop
+}
+
+enum CommercialLeaseType {
+  arrendamiento_local       // LAU Art. 29-35 - Uso distinto de vivienda
+  arrendamiento_industria   // Código Civil - Con bienes muebles
+  subarrendamiento          // Subalquiler autorizado
+  cesion_uso               // Cesión temporal de uso
+  coworking_membresia      // Membresía flexible
+  pop_up                   // Alquiler temporal/pop-up
+}
+
+enum CommercialLeaseStatus {
+  negociacion           // En fase de negociación
+  pendiente_firma       // Términos acordados, pendiente firma
+  activo                // Contrato en vigor
+  prorrogado            // Contrato prorrogado automáticamente
+  pre_vencimiento       // A menos de 6 meses del vencimiento
+  vencido               // Contrato finalizado
+  rescindido            // Terminación anticipada
+  litigio               // En disputa legal
+}
+
+enum RentEscalationType {
+  ipc                   // Según IPC publicado
+  ipc_mas_diferencial   // IPC + puntos adicionales
+  porcentaje_fijo       // % fijo anual
+  importe_fijo          // Cantidad fija anual
+  por_facturacion       // Según ventas del inquilino (retail)
+  mixto_fijo_variable   // Renta base + % sobre ventas
+  sin_revision          // Renta congelada
+}
+
+enum CommercialUsePermit {
+  comercial_minorista   // Retail/tiendas
+  comercial_mayorista   // Venta al por mayor
+  hosteleria            // Restauración/bares
+  oficinas              // Uso administrativo
+  industrial_ligero     // Industria ligera
+  industrial_pesado     // Industria pesada
+  logistico             // Almacenamiento/distribución
+  educativo             // Academias/centros formativos
+  sanitario             // Clínicas/consultorios
+  deportivo             // Gimnasios/centros deportivos
+  entretenimiento       // Ocio/espectáculos
+  mixto                 // Varios usos permitidos
+}
+
+enum CommonAreaMaintenanceType {
+  incluido_en_renta     // CAM incluido en renta mensual
+  proporcional_m2       // Según metros ocupados
+  proporcional_fijo     // Cuota fija mensual
+  variable_real         // Según gastos reales
+  triple_net            // Inquilino paga todo (NNN)
 }
 
 // ==========================================
@@ -505,6 +582,9 @@ model Building {
   // Administrador de Fincas
   communityManagement   CommunityManagement?
 
+  // 🏢 Alquiler Comercial - Oficinas, Locales, Naves en este edificio
+  commercialSpaces CommercialSpace[] @relation("BuildingCommercialSpaces")
+
   // Índices optimizados para consultas frecuentes
   @@index([companyId])
   @@index([tipo, companyId])
@@ -732,6 +812,499 @@ model Unit {
   @@index([buildingId, tipo, estado]) // Nuevo: búsqueda compuesta por edificio, tipo y estado
   @@index([rentaMensual, estado]) // Nuevo: búsqueda por rango de renta
   @@map("units")
+}
+
+// ==========================================
+// MÓDULO: ALQUILER COMERCIAL
+// Oficinas, Locales, Naves Industriales, Coworking
+// ==========================================
+
+model CommercialSpace {
+  id                      String                      @id @default(cuid())
+  companyId               String
+  buildingId              String?                     // Puede estar en un edificio existente
+  
+  // Información básica
+  nombre                  String                      // "Oficina 3A", "Local 12", etc.
+  referencia              String?                     // Referencia catastral o interna
+  tipo                    CommercialSpaceType
+  descripcion             String?                     @db.Text
+  
+  // Ubicación
+  direccion               String
+  ciudad                  String
+  codigoPostal            String
+  provincia               String
+  pais                    String                      @default("España")
+  planta                  Int?                        // Planta del edificio
+  puerta                  String?                     // Número o letra de puerta
+  latitud                 Float?
+  longitud                Float?
+  
+  // Superficie
+  superficieConstruida    Float                       // m² construidos
+  superficieUtil          Float                       // m² útiles
+  superficieComunes       Float?                      // m² de zonas comunes asignadas
+  alturaLibre             Float?                      // Altura libre en metros
+  
+  // Características físicas
+  fachada                 Boolean                     @default(false) // Tiene escaparate/fachada a calle
+  longitudFachada         Float?                      // Metros de fachada
+  accesoCargaDescarga     Boolean                     @default(false)
+  muelleCarga             Boolean                     @default(false)
+  alturaMuelleCarga       Float?                      // Altura del muelle en metros
+  cargaSuelo              Float?                      // kg/m² soportados
+  plantaDiafana           Boolean                     @default(false)
+  divisible               Boolean                     @default(false) // Se puede dividir
+  superficieMinimaDivision Float?                     // m² mínimos si es divisible
+  
+  // Instalaciones
+  potenciaElectrica       Float?                      // kW contratados/disponibles
+  potenciaMaximaDisponible Float?                     // kW máximos instalables
+  tipoCorreinte           String?                     // "Monofásica", "Trifásica", "Ambas"
+  aireAcondicionado       Boolean                     @default(false)
+  tipoClimatizacion       String?                     // "Central", "Split", "VRV", "Sin climatización"
+  calefaccion             Boolean                     @default(false)
+  tipoCalefaccion         String?                     // "Central", "Individual", "Bomba de calor"
+  ventilacion             String?                     // "Natural", "Forzada", "Extracción"
+  deteccionIncendios      Boolean                     @default(false)
+  extincionIncendios      String?                     // "Rociadores", "CO2", "Manual", "Sin sistema"
+  salidasEmergencia       Int?                        // Número de salidas de emergencia
+  ascensor                Boolean                     @default(false)
+  numeroAscensores        Int?
+  montacargas             Boolean                     @default(false)
+  capacidadMontacargas    Float?                      // kg
+  
+  // Accesibilidad
+  accesibleMinusvalidos   Boolean                     @default(false)
+  aseoAdaptado            Boolean                     @default(false)
+  rampaAcceso             Boolean                     @default(false)
+  
+  // Servicios del edificio
+  recepcion24h            Boolean                     @default(false)
+  vigilancia              Boolean                     @default(false)
+  controlAccesos          Boolean                     @default(false)
+  tipoControlAcceso       String?                     // "Tarjeta", "Huella", "Código", "App"
+  limpiezaIncluida        Boolean                     @default(false)
+  mantenimientoIncluido   Boolean                     @default(false)
+  
+  // Parking
+  plazasParking           Int?                        // Plazas incluidas
+  plazasParkingAdicionales Int?                       // Plazas disponibles adicionales
+  precioParkingMensual    Float?                      // €/plaza/mes
+  
+  // Telecomunicaciones
+  fibraOptica             Boolean                     @default(false)
+  operadoresFibra         String[]                    @default([])
+  cableado                String?                     // "Cat5e", "Cat6", "Cat6a", "Sin cableado"
+  rackServidores          Boolean                     @default(false)
+  
+  // Información comercial
+  estado                  UnitStatus                  @default(disponible)
+  rentaMensualBase        Float                       // Renta mensual sin CAM ni IVA
+  precioM2Mensual         Float?                      // €/m²/mes (calculado)
+  
+  // CAM (Common Area Maintenance)
+  camType                 CommonAreaMaintenanceType   @default(incluido_en_renta)
+  camMensual              Float?                      // Coste CAM mensual
+  camIncluye              String[]                    @default([]) // ["limpieza", "seguridad", "jardinería"]
+  
+  // Gastos adicionales estimados
+  ibiAnual                Float?                      // IBI anual
+  comunidadMensual        Float?                      // Gastos de comunidad
+  seguroEdificioAnual     Float?                      // Seguro estructura
+  
+  // Licencias y permisos
+  licenciaActividad       Boolean                     @default(false)
+  tiposActividadPermitida CommercialUsePermit[]       @default([])
+  restriccionesUso        String?                     @db.Text // Restricciones específicas
+  certificadoEnergetico   String?                     // Letra de certificación
+  añoCertificado          Int?
+  
+  // Marketing
+  destacado               Boolean                     @default(false)
+  disponibleDesde         DateTime?
+  imagenes                String[]                    @default([])
+  planos                  String[]                    @default([])
+  tourVirtual             String?
+  videoPromocional        String?
+  
+  // Metadata
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  
+  // Relaciones
+  company                 Company                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  building                Building?                   @relation("BuildingCommercialSpaces", fields: [buildingId], references: [id], onDelete: SetNull)
+  commercialLeases        CommercialLease[]
+  commercialInquiries     CommercialInquiry[]
+  commercialDocuments     CommercialDocument[]
+  commercialMaintenances  CommercialMaintenance[]
+  commercialVisits        CommercialVisit[]
+  
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([tipo, estado])
+  @@index([ciudad, tipo])
+  @@index([rentaMensualBase])
+  @@index([superficieUtil])
+  @@map("commercial_spaces")
+}
+
+model CommercialLease {
+  id                      String                      @id @default(cuid())
+  companyId               String
+  commercialSpaceId       String
+  
+  // Arrendatario (puede ser empresa o autónomo)
+  arrendatarioNombre      String                      // Razón social o nombre
+  arrendatarioCIF         String                      // CIF/NIF del arrendatario
+  arrendatarioTipo        String                      @default("empresa") // "empresa", "autonomo", "persona_fisica"
+  arrendatarioActividad   String?                     // Actividad económica/CNAE
+  arrendatarioContacto    String?                     // Persona de contacto
+  arrendatarioEmail       String
+  arrendatarioTelefono    String?
+  arrendatarioDireccion   String?                     // Domicilio fiscal si diferente
+  
+  // Tipo y estado del contrato
+  tipoContrato            CommercialLeaseType         @default(arrendamiento_local)
+  estado                  CommercialLeaseStatus       @default(negociacion)
+  
+  // Fechas
+  fechaInicio             DateTime
+  fechaFin                DateTime
+  duracionAnios           Int                         @default(5) // Duración pactada en años
+  fechaEntregaLlaves      DateTime?
+  
+  // Prórrogas
+  prorrogaAutomatica      Boolean                     @default(true)
+  duracionProrrogaAnios   Int                         @default(1) // Duración de cada prórroga
+  prorrogasMaximas        Int?                        // Límite de prórrogas (null = sin límite)
+  prorrogasRealizadas     Int                         @default(0)
+  preavisoNoRenovacion    Int                         @default(6) // Meses de preaviso
+  
+  // Renta
+  rentaMensualBase        Float                       // Renta base mensual (sin IVA)
+  rentaAnualBase          Float?                      // Renta anual (calculada)
+  ivaAplicable            Float                       @default(21) // % de IVA
+  
+  // Escalado de renta
+  escaladoTipo            RentEscalationType          @default(ipc)
+  escaladoValor           Float?                      // Valor adicional si aplica (diferencial, %)
+  fechaRevisionRenta      DateTime?                   // Próxima fecha de revisión
+  mesRevisionRenta        Int?                        // Mes del año para revisión (1-12)
+  
+  // Renta variable (para retail)
+  rentaVariableAplica     Boolean                     @default(false)
+  porcentajeVentas        Float?                      // % sobre ventas brutas
+  facturacionMinimaExenta Float?                      // Facturación por debajo de la cual no aplica variable
+  reporteVentasFrecuencia String?                     // "mensual", "trimestral", "anual"
+  
+  // Fianzas y garantías
+  mesesFianza             Int                         @default(2) // Meses de fianza legal
+  importeFianza           Float                       // Importe de la fianza
+  fianzaDepositada        Boolean                     @default(false)
+  fechaDepositoFianza     DateTime?
+  garantiaAdicionalTipo   String?                     // "aval_bancario", "deposito", "seguro_caución", "ninguna"
+  garantiaAdicionalMeses  Int?                        // Meses cubiertos por garantía adicional
+  garantiaAdicionalImporte Float?
+  
+  // CAM (Common Area Maintenance)
+  camIncluido             Boolean                     @default(false)
+  camMensual              Float?                      // Coste CAM si no incluido
+  camConceptos            String[]                    @default([])
+  
+  // Gastos
+  gastosRepercutibles     String[]                    @default([]) // IBI, comunidad, seguros, etc.
+  gastosNoRepercutibles   String[]                    @default([]) // A cargo del propietario
+  ibiRepercutido          Boolean                     @default(true)
+  comunidadRepercutida    Boolean                     @default(true)
+  seguroRepercutido       Boolean                     @default(false)
+  
+  // Período de carencia
+  carenciaAplica          Boolean                     @default(false)
+  carenciaMeses           Int?                        // Meses de carencia
+  carenciaTipo            String?                     // "total", "parcial"
+  carenciaPorcentaje      Float?                      // % de descuento si carencia parcial
+  
+  // Obra y acondicionamiento
+  obraInquilinoPermitida  Boolean                     @default(true)
+  obraRequiereAutorizacion Boolean                    @default(true)
+  aportacionPropietarioObra Float?                    // € que aporta propietario a obra
+  plazoObraMaximo         Int?                        // Días máximos para obras
+  obligacionDevolucionEstado String?                  // "original", "mejorado", "negociable"
+  
+  // Subarrendamiento y cesión
+  subarrendamientoPermitido Boolean                   @default(false)
+  cesionPermitida         Boolean                     @default(false)
+  derechoTanteoRetracto   Boolean                     @default(true) // Derecho de adquisición preferente
+  
+  // Uso
+  usoPermitido            CommercialUsePermit[]       @default([])
+  usoEspecifico           String?                     // Descripción detallada del uso acordado
+  cambioUsoPermitido      Boolean                     @default(false)
+  
+  // Seguros obligatorios
+  seguroRCObligatorio     Boolean                     @default(true)
+  seguroRCMinimoCobertura Float?                      // € mínimos de cobertura RC
+  seguroContenidoObligatorio Boolean                  @default(false)
+  
+  // Resolución anticipada
+  penalizacionResolucionAnticipada Float?             // Meses de renta como penalización
+  causasResolucionSinPenalizacion String[]            @default([])
+  
+  // Documentación
+  contratoFirmado         Boolean                     @default(false)
+  fechaFirma              DateTime?
+  contratoPath            String?                     // Path al PDF del contrato
+  anexos                  String[]                    @default([]) // Paths a documentos anexos
+  
+  // Pagos
+  diaPago                 Int                         @default(1) // Día del mes para pago
+  metodoPago              String                      @default("transferencia") // "transferencia", "domiciliacion", "cheque"
+  cuentaBancaria          String?                     // IBAN para pagos
+  
+  // Notas y observaciones
+  clausulasEspeciales     String?                     @db.Text
+  notasInternas           String?                     @db.Text
+  
+  // Metadata
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  
+  // Relaciones
+  company                 Company                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  commercialSpace         CommercialSpace             @relation(fields: [commercialSpaceId], references: [id], onDelete: Cascade)
+  commercialPayments      CommercialPayment[]
+  commercialDocuments     CommercialDocument[]
+  
+  @@index([companyId])
+  @@index([commercialSpaceId])
+  @@index([estado])
+  @@index([fechaFin])
+  @@index([arrendatarioCIF])
+  @@map("commercial_leases")
+}
+
+model CommercialPayment {
+  id                      String                      @id @default(cuid())
+  companyId               String
+  commercialLeaseId       String
+  
+  // Tipo de pago
+  concepto                String                      // "Renta", "CAM", "IBI", "Renta Variable", etc.
+  tipo                    String                      @default("renta") // "renta", "cam", "ibi", "comunidad", "variable", "regularizacion", "fianza", "otro"
+  
+  // Periodo
+  periodo                 String                      // "2026-01", formato año-mes
+  fechaVencimiento        DateTime
+  
+  // Importes
+  importeBase             Float                       // Importe sin IVA
+  ivaAplicado             Float                       @default(21)
+  importeIVA              Float                       // IVA calculado
+  importeTotal            Float                       // Total con IVA
+  importeRetencion        Float?                      // Retención IRPF si aplica
+  importeNeto             Float?                      // Importe final a pagar
+  
+  // Estado
+  estado                  PaymentStatus               @default(pendiente)
+  fechaPago               DateTime?
+  metodoPago              String?
+  referenciaPago          String?                     // Referencia bancaria
+  
+  // Facturación
+  facturaEmitida          Boolean                     @default(false)
+  numeroFactura           String?
+  fechaFactura            DateTime?
+  facturaPath             String?
+  
+  // Notas
+  notas                   String?                     @db.Text
+  
+  // Metadata
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  
+  // Relaciones
+  company                 Company                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  commercialLease         CommercialLease             @relation(fields: [commercialLeaseId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([commercialLeaseId])
+  @@index([estado])
+  @@index([periodo])
+  @@index([fechaVencimiento])
+  @@map("commercial_payments")
+}
+
+model CommercialInquiry {
+  id                      String                      @id @default(cuid())
+  companyId               String
+  commercialSpaceId       String
+  
+  // Datos del interesado
+  nombreEmpresa           String?
+  nombreContacto          String
+  email                   String
+  telefono                String?
+  cifNif                  String?
+  
+  // Interés
+  actividadPrevista       String?
+  superficieDeseada       Float?
+  presupuestoMensual      Float?
+  fechaDeseadaEntrada     DateTime?
+  
+  // Estado
+  estado                  String                      @default("nuevo") // "nuevo", "contactado", "visita_programada", "negociacion", "descartado", "convertido"
+  prioridad               String                      @default("media") // "baja", "media", "alta"
+  
+  // Seguimiento
+  fuenteLead              String?                     // "web", "idealista", "fotocasa", "referido", "otro"
+  notas                   String?                     @db.Text
+  proximoSeguimiento      DateTime?
+  asignadoA               String?                     // userId del gestor asignado
+  
+  // Metadata
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  
+  // Relaciones
+  company                 Company                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  commercialSpace         CommercialSpace             @relation(fields: [commercialSpaceId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([commercialSpaceId])
+  @@index([estado])
+  @@map("commercial_inquiries")
+}
+
+model CommercialDocument {
+  id                      String                      @id @default(cuid())
+  companyId               String
+  commercialSpaceId       String?
+  commercialLeaseId       String?
+  
+  // Documento
+  nombre                  String
+  tipo                    String                      // "contrato", "anexo", "licencia", "plano", "certificado", "factura", "seguro", "otro"
+  descripcion             String?
+  path                    String                      // URL o path del archivo
+  mimeType                String?
+  tamano                  Int?                        // Bytes
+  
+  // Vigencia (para documentos con fecha de expiración)
+  fechaEmision            DateTime?
+  fechaVencimiento        DateTime?
+  alertaVencimiento       Boolean                     @default(false)
+  diasAlerta              Int                         @default(30)
+  
+  // Metadata
+  subidoPor               String?
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  
+  // Relaciones
+  company                 Company                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  commercialSpace         CommercialSpace?            @relation(fields: [commercialSpaceId], references: [id], onDelete: Cascade)
+  commercialLease         CommercialLease?            @relation(fields: [commercialLeaseId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([commercialSpaceId])
+  @@index([commercialLeaseId])
+  @@index([tipo])
+  @@map("commercial_documents")
+}
+
+model CommercialMaintenance {
+  id                      String                      @id @default(cuid())
+  companyId               String
+  commercialSpaceId       String
+  
+  // Incidencia
+  titulo                  String
+  descripcion             String?                     @db.Text
+  tipo                    String                      // "averia", "mejora", "preventivo", "obligatorio"
+  categoria               String?                     // "electricidad", "fontaneria", "climatizacion", "estructural", "otro"
+  prioridad               MaintenancePriority         @default(media)
+  estado                  MaintenanceStatus           @default(pendiente)
+  
+  // Responsabilidad
+  responsable             String                      @default("propietario") // "propietario", "inquilino", "compartido"
+  
+  // Fechas
+  fechaReporte            DateTime                    @default(now())
+  fechaProgramada         DateTime?
+  fechaResolucion         DateTime?
+  
+  // Costes
+  presupuestoEstimado     Float?
+  costeReal               Float?
+  
+  // Proveedor
+  proveedorId             String?
+  proveedorNombre         String?
+  
+  // Seguimiento
+  reportadoPor            String?
+  asignadoA               String?
+  notas                   String?                     @db.Text
+  
+  // Metadata
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  
+  // Relaciones
+  company                 Company                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  commercialSpace         CommercialSpace             @relation(fields: [commercialSpaceId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([commercialSpaceId])
+  @@index([estado])
+  @@map("commercial_maintenances")
+}
+
+model CommercialVisit {
+  id                      String                      @id @default(cuid())
+  companyId               String
+  commercialSpaceId       String
+  
+  // Visitante
+  nombreContacto          String
+  empresa                 String?
+  email                   String?
+  telefono                String?
+  
+  // Visita
+  fechaHora               DateTime
+  duracionMinutos         Int                         @default(30)
+  tipo                    String                      @default("presencial") // "presencial", "virtual"
+  
+  // Estado
+  estado                  String                      @default("programada") // "programada", "realizada", "cancelada", "no_show"
+  
+  // Resultado
+  interes                 String?                     // "alto", "medio", "bajo", "sin_interes"
+  comentarios             String?                     @db.Text
+  siguientespasos         String?
+  
+  // Gestor
+  realizadaPor            String?                     // userId
+  
+  // Metadata
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  
+  // Relaciones
+  company                 Company                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  commercialSpace         CommercialSpace             @relation(fields: [commercialSpaceId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([commercialSpaceId])
+  @@index([fechaHora])
+  @@index([estado])
+  @@map("commercial_visits")
 }
 
 model Contract {
@@ -1529,6 +2102,15 @@ model Company {
 
   // Add-ons contratados
   addOns CompanyAddOn[]
+
+  // 🏢 ALQUILER COMERCIAL - Oficinas, Locales, Naves, Coworking
+  commercialSpaces       CommercialSpace[]
+  commercialLeases       CommercialLease[]
+  commercialPayments     CommercialPayment[]
+  commercialInquiries    CommercialInquiry[]
+  commercialDocuments    CommercialDocument[]
+  commercialMaintenances CommercialMaintenance[]
+  commercialVisits       CommercialVisit[]
 
   @@map("company")
 }
