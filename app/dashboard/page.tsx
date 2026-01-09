@@ -64,6 +64,7 @@ interface DashboardData {
   contractsExpiringSoon: any[];
   maintenanceRequests: any[];
   unidadesDisponibles: any[];
+  esEmpresaPrueba?: boolean; // Flag para mostrar generador de datos demo
 }
 
 const COLORS = ['#4F46E5', '#7C3AED', '#EC4899', '#8B5CF6', '#A78BFA']; // Indigo, Violet, Pink gradients
@@ -183,10 +184,10 @@ function DashboardPageContent() {
               </div>
             </div>
 
-            {/* Smart Onboarding Wizard - Sistema automatizado de configuraci\u00f3n inicial */}
+            {/* Smart Onboarding Wizard - Sistema automatizado de configuración inicial */}
             <SmartOnboardingWizard />
-            {/* Demo Data Generator - Generación automática de datos de prueba */}
-            {data?.kpis?.numeroPropiedades === 0 && <DemoDataGenerator />}
+            {/* Demo Data Generator - Solo visible para empresas de prueba/demo sin datos */}
+            {data?.esEmpresaPrueba && data?.kpis?.numeroPropiedades === 0 && <DemoDataGenerator />}
 
             {/* Vertical-Specific Widgets - Accesos rápidos personalizados por tipo de negocio */}
             <div data-tour="quick-actions">
