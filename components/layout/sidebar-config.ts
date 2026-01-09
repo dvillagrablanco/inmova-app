@@ -6,7 +6,7 @@
 import type { LucideIcon } from 'lucide-react';
 
 export type UserRole = 'super_admin' | 'administrador' | 'gestor' | 'operador' | 'soporte' | 'community_manager';
-export type BusinessVertical = 'alquiler_tradicional' | 'str_vacacional' | 'coliving' | 'room_rental' | 'construccion' | 'flipping' | 'servicios_profesionales' | 'comunidades' | 'mixto';
+export type BusinessVertical = 'alquiler_tradicional' | 'str_vacacional' | 'coliving' | 'room_rental' | 'construccion' | 'flipping' | 'servicios_profesionales' | 'comunidades' | 'mixto' | 'alquiler_comercial';
 
 export interface NavItem {
   name: string;
@@ -55,6 +55,7 @@ export const DEFAULT_EXPANDED_BY_ROLE: Record<UserRole, Record<string, boolean>>
     buildToRent: false,
     flipping: false,
     comercial: false,
+    alquilerComercial: false, // Nueva vertical: Oficinas, Locales, Naves
     adminFincas: false,
   },
   administrador: {
@@ -68,6 +69,7 @@ export const DEFAULT_EXPANDED_BY_ROLE: Record<UserRole, Record<string, boolean>>
     buildToRent: false,
     flipping: false,
     comercial: false,
+    alquilerComercial: false, // Nueva vertical: Oficinas, Locales, Naves
     adminFincas: false,
     operaciones: false,
     comunicaciones: false,
@@ -154,6 +156,7 @@ export const SECTION_ORDER_BY_ROLE: Record<UserRole, string[]> = {
     'buildToRent',
     'flipping',
     'comercial',
+    'alquilerComercial', // Nueva vertical: Oficinas, Locales, Naves
     'adminFincas',
     'operaciones', // Prioridad 5
     'comunicaciones',
@@ -258,6 +261,7 @@ export const VERTICAL_TO_SECTION: Record<BusinessVertical, string> = {
   servicios_profesionales: 'comercial',
   comunidades: 'adminFincas',
   mixto: 'alquilerResidencial', // Default
+  alquiler_comercial: 'alquilerComercial', // Oficinas, Locales, Naves, Coworking
 };
 
 /**

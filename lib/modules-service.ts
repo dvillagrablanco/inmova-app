@@ -699,6 +699,22 @@ export const MODULOS_CATALOGO = [
     esCore: false,
     orden: 89
   },
+
+  // ============================================
+  // ALQUILER COMERCIAL - Oficinas, Locales, Naves, Coworking
+  // ============================================
+  {
+    codigo: 'alquiler_comercial',
+    nombre: 'Alquiler Comercial',
+    descripcion: 'Gestión integral de oficinas, locales comerciales, naves industriales y espacios de coworking. Incluye contratos comerciales LAU, CAM, escalado de rentas, licencias de actividad y gestión de leads.',
+    categoria: 'vertical',
+    icono: 'Building2',
+    ruta: '/comercial',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 90
+  },
 ];
 
 /**
@@ -767,6 +783,18 @@ export const BUSINESS_MODEL_MODULES: Record<string, string[]> = {
     'valoraciones', 'galerias', 'tours_virtuales',
     'reportes', 'notificaciones', 'marketplace',
     'edificios', 'unidades', 'proveedores'
+  ],
+  // ALQUILER COMERCIAL - Oficinas, Locales, Naves, Coworking
+  ALQUILER_COMERCIAL: [
+    // Core
+    'dashboard', 'edificios', 'calendario', 'chat',
+    // Comercial Específicos
+    'alquiler_comercial', // Módulo principal de la vertical
+    'contratos', 'pagos', 'documentos',
+    'mantenimiento', 'proveedores', 'gastos',
+    'crm', 'valoraciones', 'galerias', 'tours_virtuales',
+    'reportes', 'analytics', 'bi', 'notificaciones',
+    'firma_digital', 'legal', 'portal_propietario'
   ]
 };
 
