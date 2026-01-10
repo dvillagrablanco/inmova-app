@@ -98,72 +98,60 @@ export default function AdminPartnersPage() {
   const loadPartners = async () => {
     try {
       setLoading(true);
-      // TODO: Fetch from API /api/admin/partners
-      const mockPartners: Partner[] = [
-        {
-          id: '1',
-          name: 'Banco Santander',
-          email: 'partners@santander.com',
-          phone: '+34 912 000 000',
-          company: 'Banco Santander',
-          website: 'https://santander.com',
-          type: 'BANK',
-          status: 'PENDING_APPROVAL',
-          referralCode: 'SANT2025',
-          totalClients: 0,
-          totalEarned: 0,
-          commissionRate: 25,
-          level: 'BRONZE',
-          createdAt: '2025-01-02T10:00:00Z',
-        },
-        {
-          id: '2',
-          name: 'Mapfre Seguros',
-          email: 'partners@mapfre.com',
-          phone: '+34 913 000 000',
-          company: 'Mapfre',
-          type: 'INSURANCE',
-          status: 'PENDING_APPROVAL',
-          referralCode: 'MAPFRE2025',
-          totalClients: 0,
-          totalEarned: 0,
-          commissionRate: 25,
-          level: 'BRONZE',
-          createdAt: '2025-01-02T11:00:00Z',
-        },
-        {
-          id: '3',
-          name: 'IE Business School',
-          email: 'partners@ie.edu',
-          phone: '+34 915 000 000',
-          company: 'IE Business School',
-          website: 'https://ie.edu',
-          type: 'BUSINESS_SCHOOL',
-          status: 'ACTIVE',
-          referralCode: 'IEBSCHOOL',
-          totalClients: 15,
-          totalEarned: 12500,
-          commissionRate: 25,
-          level: 'SILVER',
-          createdAt: '2024-11-15T09:00:00Z',
-        },
-      ];
-
-      setPartners(mockPartners);
+      const response = await fetch('/api/admin/partners');
+      
+      if (!response.ok) {
+        throw new Error('Error al cargar partners');
+      }
+      
+      const data = await response.json();
+      
+      // Mapear status del backend al frontend
+      const mappedPartners = (data.partners || []).map((p: any) => ({
+        ...p,
+        status: mapStatus(p.status),
+        type: mapType(p.type),
+      }));
+      
+      setPartners(mappedPartners);
     } catch (error) {
       console.error('Error loading partners:', error);
       toast.error('Error al cargar partners');
+      setPartners([]);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Mapear estados del backend al frontend
+  const mapStatus = (status: string): Partner['status'] => {
+    const statusMap: Record<string, Partner['status']> = {
+      PENDING: 'PENDING_APPROVAL',
+      ACTIVE: 'ACTIVE',
+      SUSPENDED: 'SUSPENDED',
+    };
+    return statusMap[status] || 'INACTIVE';
+  };
+
+  // Mapear tipos del backend al frontend
+  const mapType = (type: string): string => {
+    const typeMap: Record<string, string> = {
+      BANCO: 'BANK',
+      INMOBILIARIA: 'REAL_ESTATE',
+      CONSULTORA: 'LAW_FIRM',
+      ASOCIACION: 'BUSINESS_SCHOOL',
+      PLATAFORMA_MEMBRESIA: 'INSURANCE',
+      MULTIFAMILY_OFFICE: 'BANK',
+      OTRO: 'OTHER',
+    };
+    return typeMap[type] || type;
   };
 
   const handleAction = async () => {
     if (!selectedPartner || !actionType) return;
 
     try {
-      // TODO: Call API to approve/reject/suspend
-      let newStatus: Partner['status'] = selectedPartner.status;
+      let newStatus: string;
       let message = '';
 
       switch (actionType) {
@@ -172,27 +160,40 @@ export default function AdminPartnersPage() {
           message = 'Partner aprobado correctamente. Email de bienvenida enviado.';
           break;
         case 'reject':
-          newStatus = 'INACTIVE';
+          newStatus = 'SUSPENDED';
           message = 'Partner rechazado.';
           break;
         case 'suspend':
           newStatus = 'SUSPENDED';
           message = 'Partner suspendido.';
           break;
+        default:
+          return;
       }
 
-      setPartners(
-        partners.map((p) => (p.id === selectedPartner.id ? { ...p, status: newStatus } : p))
-      );
+      const response = await fetch(`/api/admin/partners/${selectedPartner.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          estado: newStatus,
+          notas: actionNotes || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al procesar acción');
+      }
 
       toast.success(message);
       setActionDialogOpen(false);
       setActionType(null);
       setActionNotes('');
       setSelectedPartner(null);
-    } catch (error) {
+      loadPartners(); // Recargar datos
+    } catch (error: any) {
       console.error('Error processing action:', error);
-      toast.error('Error al procesar acción');
+      toast.error(error.message || 'Error al procesar acción');
     }
   };
 
@@ -225,41 +226,72 @@ export default function AdminPartnersPage() {
 
   const handleSavePartner = async () => {
     try {
-      // TODO: Call API to create/update partner
-      const partnerData = {
-        ...formData,
-        commissionRate: parseFloat(formData.commissionRate),
+      const backendTypeMap: Record<string, string> = {
+        BANK: 'BANCO',
+        REAL_ESTATE: 'INMOBILIARIA',
+        LAW_FIRM: 'CONSULTORA',
+        BUSINESS_SCHOOL: 'ASOCIACION',
+        INSURANCE: 'PLATAFORMA_MEMBRESIA',
+        CONSTRUCTION: 'OTRO',
+        OTHER: 'OTRO',
       };
 
       if (editingPartner) {
-        // Update existing
-        setPartners(
-          partners.map((p) =>
-            p.id === editingPartner.id ? { ...p, ...partnerData } : p
-          )
-        );
+        // Update existing partner
+        const response = await fetch(`/api/admin/partners/${editingPartner.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombre: formData.name,
+            razonSocial: formData.company || formData.name,
+            tipo: backendTypeMap[formData.type] || 'OTRO',
+            contactoNombre: formData.name,
+            contactoEmail: formData.email,
+            contactoTelefono: formData.phone,
+            comisionPorcentaje: parseFloat(formData.commissionRate),
+            dominioPersonalizado: formData.website,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Error al actualizar');
+        }
+
         toast.success('Partner actualizado correctamente');
       } else {
-        // Create new
-        const newPartner: Partner = {
-          id: Date.now().toString(),
-          ...partnerData,
-          status: 'PENDING_APPROVAL',
-          referralCode: `PARTNER${Date.now()}`,
-          totalClients: 0,
-          totalEarned: 0,
-          level: 'BRONZE',
-          createdAt: new Date().toISOString(),
-        };
-        setPartners([...partners, newPartner]);
+        // Create new partner
+        const response = await fetch('/api/admin/partners', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombre: formData.name,
+            razonSocial: formData.company || formData.name,
+            cif: `B${Date.now().toString().slice(-8)}`, // CIF temporal si no se proporciona
+            tipo: backendTypeMap[formData.type] || 'OTRO',
+            contactoNombre: formData.name,
+            contactoEmail: formData.email,
+            contactoTelefono: formData.phone,
+            email: formData.email,
+            comisionPorcentaje: parseFloat(formData.commissionRate),
+            dominioPersonalizado: formData.website,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Error al crear');
+        }
+
         toast.success('Partner creado correctamente');
       }
 
       setCreateEditDialogOpen(false);
       setEditingPartner(null);
-    } catch (error) {
+      loadPartners(); // Recargar datos
+    } catch (error: any) {
       console.error('Error saving partner:', error);
-      toast.error('Error al guardar partner');
+      toast.error(error.message || 'Error al guardar partner');
     }
   };
 
@@ -267,14 +299,23 @@ export default function AdminPartnersPage() {
     if (!deletingPartner) return;
 
     try {
-      // TODO: Call API to delete partner
-      setPartners(partners.filter((p) => p.id !== deletingPartner.id));
-      toast.success('Partner eliminado correctamente');
+      const response = await fetch(`/api/admin/partners/${deletingPartner.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al eliminar');
+      }
+
+      const result = await response.json();
+      toast.success(result.message || 'Partner eliminado correctamente');
       setDeleteDialogOpen(false);
       setDeletingPartner(null);
-    } catch (error) {
+      loadPartners(); // Recargar datos
+    } catch (error: any) {
       console.error('Error deleting partner:', error);
-      toast.error('Error al eliminar partner');
+      toast.error(error.message || 'Error al eliminar partner');
     }
   };
 

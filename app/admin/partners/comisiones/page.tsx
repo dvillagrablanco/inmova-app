@@ -94,86 +94,79 @@ export default function PartnerComisionesPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Simular carga de datos - en producción conectar con API real
-      // const response = await fetch('/api/admin/partners/commissions');
-      // const data = await response.json();
+      const response = await fetch('/api/admin/partners/commissions');
       
-      // Datos de ejemplo
-      setStats({
-        totalPending: 2450.00,
-        totalApproved: 1890.00,
-        totalPaid: 15680.00,
-        totalThisMonth: 4340.00,
-        partnersActive: 12,
-        avgCommissionRate: 15,
+      if (!response.ok) {
+        throw new Error('Error al cargar comisiones');
+      }
+      
+      const data = await response.json();
+      
+      setStats(data.stats || {
+        totalPending: 0,
+        totalApproved: 0,
+        totalPaid: 0,
+        totalThisMonth: 0,
+        partnersActive: 0,
+        avgCommissionRate: 0,
       });
 
-      setCommissions([
-        {
-          id: '1',
-          partnerId: 'p1',
-          partnerName: 'Inmobiliaria García',
-          partnerEmail: 'contacto@inmobiliariagarcia.com',
-          clientCompanyId: 'c1',
-          clientCompanyName: 'PropTech Solutions SL',
-          planName: 'Business',
-          planPrice: 129,
-          commissionRate: 15,
-          commissionAmount: 19.35,
-          status: 'pending',
-          periodStart: '2026-01-01',
-          periodEnd: '2026-01-31',
-          createdAt: '2026-01-05',
-        },
-        {
-          id: '2',
-          partnerId: 'p2',
-          partnerName: 'Gestiones Inmobiliarias Plus',
-          partnerEmail: 'info@gestionesplus.es',
-          clientCompanyId: 'c2',
-          clientCompanyName: 'Alquileres Madrid',
-          planName: 'Profesional',
-          planPrice: 59,
-          commissionRate: 12,
-          commissionAmount: 7.08,
-          status: 'approved',
-          periodStart: '2026-01-01',
-          periodEnd: '2026-01-31',
-          createdAt: '2026-01-03',
-        },
-        {
-          id: '3',
-          partnerId: 'p1',
-          partnerName: 'Inmobiliaria García',
-          partnerEmail: 'contacto@inmobiliariagarcia.com',
-          clientCompanyId: 'c3',
-          clientCompanyName: 'Gestora BCN',
-          planName: 'Enterprise',
-          planPrice: 299,
-          commissionRate: 15,
-          commissionAmount: 44.85,
-          status: 'paid',
-          periodStart: '2025-12-01',
-          periodEnd: '2025-12-31',
-          createdAt: '2025-12-28',
-          paidAt: '2026-01-02',
-        },
-      ]);
+      setCommissions(data.commissions || []);
     } catch (error) {
+      console.error('Error loading commissions:', error);
       toast.error('Error al cargar comisiones');
+      setCommissions([]);
+      setStats({
+        totalPending: 0,
+        totalApproved: 0,
+        totalPaid: 0,
+        totalThisMonth: 0,
+        partnersActive: 0,
+        avgCommissionRate: 0,
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleApprove = async (id: string) => {
-    toast.success('Comisión aprobada');
-    loadData();
+    try {
+      const response = await fetch('/api/admin/partners/commissions', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action: 'approve' }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al aprobar');
+      }
+
+      toast.success('Comisión aprobada');
+      loadData();
+    } catch (error: any) {
+      toast.error(error.message || 'Error al aprobar comisión');
+    }
   };
 
   const handleMarkPaid = async (id: string) => {
-    toast.success('Comisión marcada como pagada');
-    loadData();
+    try {
+      const response = await fetch('/api/admin/partners/commissions', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action: 'pay' }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al marcar como pagada');
+      }
+
+      toast.success('Comisión marcada como pagada');
+      loadData();
+    } catch (error: any) {
+      toast.error(error.message || 'Error al marcar como pagada');
+    }
   };
 
   const getStatusBadge = (status: string) => {
