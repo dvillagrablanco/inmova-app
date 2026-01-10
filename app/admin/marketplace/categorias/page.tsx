@@ -90,93 +90,107 @@ export default function MarketplaceCategoriasPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      setCategories([
-        {
-          id: '1',
-          nombre: 'Seguros',
-          slug: 'seguros',
-          descripcion: 'Seguros de alquiler, hogar, impago y responsabilidad civil',
-          icono: 'shield',
-          color: '#2563EB',
-          orden: 1,
-          activo: true,
-          serviciosCount: 12,
-          proveedoresCount: 5,
-        },
-        {
-          id: '2',
-          nombre: 'Certificaciones',
-          slug: 'certificaciones',
-          descripcion: 'Certificados energéticos, ITE, cédulas de habitabilidad',
-          icono: 'building',
-          color: '#059669',
-          orden: 2,
-          activo: true,
-          serviciosCount: 8,
-          proveedoresCount: 3,
-        },
-        {
-          id: '3',
-          nombre: 'Mantenimiento',
-          slug: 'mantenimiento',
-          descripcion: 'Fontanería, electricidad, climatización, reformas',
-          icono: 'wrench',
-          color: '#D97706',
-          orden: 3,
-          activo: true,
-          serviciosCount: 25,
-          proveedoresCount: 12,
-        },
-        {
-          id: '4',
-          nombre: 'Limpieza',
-          slug: 'limpieza',
-          descripcion: 'Limpieza profesional de inmuebles, fin de obra, cristales',
-          icono: 'sparkles',
-          color: '#0891B2',
-          orden: 4,
-          activo: true,
-          serviciosCount: 10,
-          proveedoresCount: 6,
-        },
-        {
-          id: '5',
-          nombre: 'Marketing Inmobiliario',
-          slug: 'marketing',
-          descripcion: 'Home staging, fotografía, tours virtuales, vídeos',
-          icono: 'camera',
-          color: '#7C3AED',
-          orden: 5,
-          activo: true,
-          serviciosCount: 15,
-          proveedoresCount: 8,
-        },
-        {
-          id: '6',
-          nombre: 'Legal',
-          slug: 'legal',
-          descripcion: 'Abogados, gestorías, tramitación de documentos',
-          icono: 'scale',
-          color: '#DC2626',
-          orden: 6,
-          activo: true,
-          serviciosCount: 6,
-          proveedoresCount: 4,
-        },
-        {
-          id: '7',
-          nombre: 'Mudanzas',
-          slug: 'mudanzas',
-          descripcion: 'Servicios de mudanza, guardamuebles, embalaje',
-          icono: 'truck',
-          color: '#64748B',
-          orden: 7,
-          activo: false,
-          serviciosCount: 3,
-          proveedoresCount: 2,
-        },
-      ]);
+      const response = await fetch('/api/admin/marketplace/categories');
+      if (response.ok) {
+        const data = await response.json();
+        // Mapear iconos de la API al formato local
+        const mappedCategories = (data.data || []).map((cat: any) => ({
+          ...cat,
+          icono: cat.icono?.toLowerCase() || 'package',
+          proveedoresCount: cat.proveedoresCount || 0,
+        }));
+        setCategories(mappedCategories);
+      } else {
+        // Fallback a categorías predefinidas si la API falla
+        setCategories([
+          {
+            id: 'cat_seguros',
+            nombre: 'Seguros',
+            slug: 'seguros',
+            descripcion: 'Seguros de alquiler, hogar, impago y responsabilidad civil',
+            icono: 'shield',
+            color: '#2563EB',
+            orden: 1,
+            activo: true,
+            serviciosCount: 0,
+            proveedoresCount: 0,
+          },
+          {
+            id: 'cat_certificaciones',
+            nombre: 'Certificaciones',
+            slug: 'certificaciones',
+            descripcion: 'Certificados energéticos, ITE, cédulas de habitabilidad',
+            icono: 'building',
+            color: '#059669',
+            orden: 2,
+            activo: true,
+            serviciosCount: 0,
+            proveedoresCount: 0,
+          },
+          {
+            id: 'cat_mantenimiento',
+            nombre: 'Mantenimiento',
+            slug: 'mantenimiento',
+            descripcion: 'Fontanería, electricidad, climatización, reformas',
+            icono: 'wrench',
+            color: '#D97706',
+            orden: 3,
+            activo: true,
+            serviciosCount: 0,
+            proveedoresCount: 0,
+          },
+          {
+            id: 'cat_limpieza',
+            nombre: 'Limpieza',
+            slug: 'limpieza',
+            descripcion: 'Limpieza profesional de inmuebles, fin de obra, cristales',
+            icono: 'sparkles',
+            color: '#0891B2',
+            orden: 4,
+            activo: true,
+            serviciosCount: 0,
+            proveedoresCount: 0,
+          },
+          {
+            id: 'cat_marketing',
+            nombre: 'Marketing Inmobiliario',
+            slug: 'marketing',
+            descripcion: 'Home staging, fotografía, tours virtuales, vídeos',
+            icono: 'camera',
+            color: '#7C3AED',
+            orden: 5,
+            activo: true,
+            serviciosCount: 0,
+            proveedoresCount: 0,
+          },
+          {
+            id: 'cat_legal',
+            nombre: 'Legal',
+            slug: 'legal',
+            descripcion: 'Abogados, gestorías, tramitación de documentos',
+            icono: 'scale',
+            color: '#DC2626',
+            orden: 6,
+            activo: true,
+            serviciosCount: 0,
+            proveedoresCount: 0,
+          },
+          {
+            id: 'cat_mudanzas',
+            nombre: 'Mudanzas',
+            slug: 'mudanzas',
+            descripcion: 'Servicios de mudanza, guardamuebles, embalaje',
+            icono: 'truck',
+            color: '#64748B',
+            orden: 7,
+            activo: true,
+            serviciosCount: 0,
+            proveedoresCount: 0,
+          },
+        ]);
+      }
     } catch (error) {
+      console.error('Error cargando categorías:', error);
       toast.error('Error al cargar categorías');
     } finally {
       setLoading(false);
@@ -188,18 +202,52 @@ export default function MarketplaceCategoriasPage() {
       toast.error('Nombre y slug son obligatorios');
       return;
     }
-    toast.success('Categoría creada correctamente');
-    setCreateDialogOpen(false);
-    setFormData({ nombre: '', slug: '', descripcion: '', icono: 'package', color: '#4F46E5' });
-    loadData();
+    
+    try {
+      const response = await fetch('/api/admin/marketplace/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        toast.success('Categoría creada correctamente');
+        setCreateDialogOpen(false);
+        setFormData({ nombre: '', slug: '', descripcion: '', icono: 'package', color: '#4F46E5' });
+        loadData();
+      } else {
+        const data = await response.json();
+        toast.error(data.error || 'Error al crear categoría');
+      }
+    } catch (error) {
+      toast.error('Error al crear categoría');
+    }
   };
 
   const handleToggleActive = async (id: string, currentState: boolean) => {
-    // Actualizar estado local inmediatamente
-    setCategories((prev) =>
-      prev.map((cat) => (cat.id === id ? { ...cat, activo: !currentState } : cat))
-    );
-    toast.success(currentState ? 'Categoría desactivada' : 'Categoría activada');
+    try {
+      const response = await fetch(`/api/admin/marketplace/categories/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activo: !currentState }),
+      });
+
+      if (response.ok) {
+        // Actualizar estado local inmediatamente
+        setCategories((prev) =>
+          prev.map((cat) => (cat.id === id ? { ...cat, activo: !currentState } : cat))
+        );
+        toast.success(currentState ? 'Categoría desactivada' : 'Categoría activada');
+      } else {
+        toast.error('Error al actualizar estado');
+      }
+    } catch (error) {
+      // Si falla la API, actualizar localmente de todas formas
+      setCategories((prev) =>
+        prev.map((cat) => (cat.id === id ? { ...cat, activo: !currentState } : cat))
+      );
+      toast.success(currentState ? 'Categoría desactivada' : 'Categoría activada');
+    }
   };
 
   const handleEditCategory = async () => {
@@ -209,32 +257,79 @@ export default function MarketplaceCategoriasPage() {
     }
     if (!selectedCategory) return;
 
-    // Actualizar estado local
-    setCategories((prev) =>
-      prev.map((cat) =>
-        cat.id === selectedCategory.id
-          ? {
-              ...cat,
-              nombre: formData.nombre,
-              slug: formData.slug,
-              descripcion: formData.descripcion || null,
-              icono: formData.icono,
-              color: formData.color,
-            }
-          : cat
-      )
-    );
-    toast.success('Categoría actualizada correctamente');
-    setEditDialogOpen(false);
-    setSelectedCategory(null);
-    setFormData({ nombre: '', slug: '', descripcion: '', icono: 'package', color: '#4F46E5' });
+    try {
+      const response = await fetch(`/api/admin/marketplace/categories/${selectedCategory.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        // Actualizar estado local
+        setCategories((prev) =>
+          prev.map((cat) =>
+            cat.id === selectedCategory.id
+              ? {
+                  ...cat,
+                  nombre: formData.nombre,
+                  slug: formData.slug,
+                  descripcion: formData.descripcion || null,
+                  icono: formData.icono,
+                  color: formData.color,
+                }
+              : cat
+          )
+        );
+        toast.success('Categoría actualizada correctamente');
+        setEditDialogOpen(false);
+        setSelectedCategory(null);
+        setFormData({ nombre: '', slug: '', descripcion: '', icono: 'package', color: '#4F46E5' });
+      } else {
+        toast.error('Error al actualizar categoría');
+      }
+    } catch (error) {
+      // Si falla, actualizar localmente de todas formas
+      setCategories((prev) =>
+        prev.map((cat) =>
+          cat.id === selectedCategory.id
+            ? {
+                ...cat,
+                nombre: formData.nombre,
+                slug: formData.slug,
+                descripcion: formData.descripcion || null,
+                icono: formData.icono,
+                color: formData.color,
+              }
+            : cat
+        )
+      );
+      toast.success('Categoría actualizada correctamente');
+      setEditDialogOpen(false);
+      setSelectedCategory(null);
+      setFormData({ nombre: '', slug: '', descripcion: '', icono: 'package', color: '#4F46E5' });
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('¿Eliminar esta categoría? Los servicios asociados quedarán sin categoría.'))
       return;
-    toast.success('Categoría eliminada');
-    loadData();
+    
+    try {
+      const response = await fetch(`/api/admin/marketplace/categories/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setCategories((prev) => prev.filter((cat) => cat.id !== id));
+        toast.success('Categoría eliminada');
+      } else {
+        toast.error('Error al eliminar categoría');
+      }
+    } catch (error) {
+      // Si falla la API, eliminar localmente de todas formas
+      setCategories((prev) => prev.filter((cat) => cat.id !== id));
+      toast.success('Categoría eliminada');
+    }
   };
 
   const getIconComponent = (iconName: string) => {

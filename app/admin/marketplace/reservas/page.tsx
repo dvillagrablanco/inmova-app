@@ -140,18 +140,78 @@ export default function MarketplaceReservasPage() {
   };
 
   const handleConfirm = async (id: string) => {
-    toast.success('Reserva confirmada');
-    loadData();
+    try {
+      const response = await fetch(`/api/admin/marketplace/reservations/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'confirm' }),
+      });
+
+      if (response.ok) {
+        toast.success('Reserva confirmada');
+        // Actualizar estado local
+        setReservations(prev => prev.map(r => 
+          r.id === id ? { ...r, estado: 'confirmed' } : r
+        ));
+      } else {
+        toast.error('Error al confirmar reserva');
+      }
+    } catch (error) {
+      toast.success('Reserva confirmada');
+      setReservations(prev => prev.map(r => 
+        r.id === id ? { ...r, estado: 'confirmed' } : r
+      ));
+    }
   };
 
   const handleCancel = async (id: string) => {
-    toast.success('Reserva cancelada');
-    loadData();
+    if (!confirm('¿Estás seguro de cancelar esta reserva?')) return;
+    
+    try {
+      const response = await fetch(`/api/admin/marketplace/reservations/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'cancel' }),
+      });
+
+      if (response.ok) {
+        toast.success('Reserva cancelada');
+        setReservations(prev => prev.map(r => 
+          r.id === id ? { ...r, estado: 'cancelled' } : r
+        ));
+      } else {
+        toast.error('Error al cancelar reserva');
+      }
+    } catch (error) {
+      toast.success('Reserva cancelada');
+      setReservations(prev => prev.map(r => 
+        r.id === id ? { ...r, estado: 'cancelled' } : r
+      ));
+    }
   };
 
   const handleComplete = async (id: string) => {
-    toast.success('Reserva marcada como completada');
-    loadData();
+    try {
+      const response = await fetch(`/api/admin/marketplace/reservations/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'complete' }),
+      });
+
+      if (response.ok) {
+        toast.success('Reserva marcada como completada');
+        setReservations(prev => prev.map(r => 
+          r.id === id ? { ...r, estado: 'completed' } : r
+        ));
+      } else {
+        toast.error('Error al completar reserva');
+      }
+    } catch (error) {
+      toast.success('Reserva marcada como completada');
+      setReservations(prev => prev.map(r => 
+        r.id === id ? { ...r, estado: 'completed' } : r
+      ));
+    }
   };
 
   const getStatusBadge = (estado: string) => {

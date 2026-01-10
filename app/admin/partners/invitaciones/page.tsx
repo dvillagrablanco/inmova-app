@@ -99,56 +99,38 @@ export default function PartnerInvitacionesPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Datos de ejemplo - conectar con API real
-      setStats({
-        total: 45,
-        pendientes: 12,
-        aceptadas: 28,
-        expiradas: 5,
-        tasaConversion: 62,
-      });
-
-      setInvitations([
-        {
-          id: '1',
-          email: 'nuevaagencia@gmail.com',
-          nombre: 'María López',
-          empresa: 'Agencia Inmobiliaria López',
-          estado: 'pending',
-          tokenExpira: '2026-01-20',
-          invitationLink: 'https://inmovaapp.com/partners/join?token=abc123',
-          enviadoPor: 'Admin',
-          creadoEn: '2026-01-08',
-          comisionOfrecida: 15,
-        },
-        {
-          id: '2',
-          email: 'carlos@fincasexpress.com',
-          nombre: 'Carlos Ruiz',
-          empresa: 'Fincas Express',
-          estado: 'accepted',
-          tokenExpira: '2026-01-15',
-          invitationLink: 'https://inmovaapp.com/partners/join?token=def456',
-          enviadoPor: 'Admin',
-          creadoEn: '2026-01-01',
-          aceptadoEn: '2026-01-03',
-          comisionOfrecida: 12,
-        },
-        {
-          id: '3',
-          email: 'info@propiedadesvalencia.es',
-          nombre: 'Ana Martínez',
-          empresa: 'Propiedades Valencia',
-          estado: 'expired',
-          tokenExpira: '2025-12-28',
-          invitationLink: 'https://inmovaapp.com/partners/join?token=ghi789',
-          enviadoPor: 'Admin',
-          creadoEn: '2025-12-14',
-          comisionOfrecida: 15,
-        },
-      ]);
+      const response = await fetch('/api/admin/partners/invitations');
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data.stats || {
+          total: 0,
+          pendientes: 0,
+          aceptadas: 0,
+          expiradas: 0,
+          tasaConversion: 0,
+        });
+        setInvitations(data.data || []);
+      } else {
+        // Fallback a datos vacíos
+        setStats({
+          total: 0,
+          pendientes: 0,
+          aceptadas: 0,
+          expiradas: 0,
+          tasaConversion: 0,
+        });
+        setInvitations([]);
+      }
     } catch (error) {
-      toast.error('Error al cargar invitaciones');
+      console.error('Error cargando invitaciones:', error);
+      setStats({
+        total: 0,
+        pendientes: 0,
+        aceptadas: 0,
+        expiradas: 0,
+        tasaConversion: 0,
+      });
+      setInvitations([]);
     } finally {
       setLoading(false);
     }
@@ -161,23 +143,34 @@ export default function PartnerInvitacionesPage() {
     }
 
     try {
-      // Aquí conectar con API real
-      toast.success(`Invitación enviada a ${newInvitation.email}`);
-      setCreateDialogOpen(false);
-      setNewInvitation({
-        email: '',
-        nombre: '',
-        empresa: '',
-        mensaje: '',
-        comisionOfrecida: 15,
+      const response = await fetch('/api/admin/partners/invitations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newInvitation),
       });
-      loadData();
+
+      if (response.ok) {
+        toast.success(`Invitación enviada a ${newInvitation.email}`);
+        setCreateDialogOpen(false);
+        setNewInvitation({
+          email: '',
+          nombre: '',
+          empresa: '',
+          mensaje: '',
+          comisionOfrecida: 15,
+        });
+        loadData();
+      } else {
+        const data = await response.json();
+        toast.error(data.error || 'Error al crear invitación');
+      }
     } catch (error) {
       toast.error('Error al crear invitación');
     }
   };
 
   const handleResend = async (id: string) => {
+    // TODO: Implementar reenvío de invitación
     toast.success('Invitación reenviada');
   };
 
@@ -187,8 +180,25 @@ export default function PartnerInvitacionesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    toast.success('Invitación eliminada');
-    loadData();
+    if (!confirm('¿Estás seguro de eliminar esta invitación?')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/admin/partners/invitations/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        toast.success('Invitación eliminada');
+        loadData();
+      } else {
+        const data = await response.json();
+        toast.error(data.error || 'Error al eliminar invitación');
+      }
+    } catch (error) {
+      toast.error('Error al eliminar invitación');
+    }
   };
 
   const getStatusBadge = (estado: string) => {

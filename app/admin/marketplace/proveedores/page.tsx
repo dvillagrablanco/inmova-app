@@ -112,27 +112,92 @@ export default function MarketplaceProveedoresPage() {
       toast.error('Nombre, email y categoría son obligatorios');
       return;
     }
-    toast.success('Proveedor creado correctamente');
-    setCreateDialogOpen(false);
-    setFormData({
-      nombre: '',
-      email: '',
-      telefono: '',
-      website: '',
-      categoria: '',
-      descripcion: '',
-    });
-    loadData();
+    
+    try {
+      const response = await fetch('/api/admin/marketplace/providers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        toast.success('Proveedor creado correctamente');
+        setCreateDialogOpen(false);
+        setFormData({
+          nombre: '',
+          email: '',
+          telefono: '',
+          website: '',
+          categoria: '',
+          descripcion: '',
+        });
+        loadData();
+      } else {
+        const data = await response.json();
+        toast.error(data.error || 'Error al crear proveedor');
+      }
+    } catch (error) {
+      toast.error('Error al crear proveedor');
+    }
   };
 
   const handleApprove = async (id: string) => {
-    toast.success('Proveedor aprobado');
-    loadData();
+    try {
+      const response = await fetch(`/api/admin/marketplace/providers/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'approve' }),
+      });
+
+      if (response.ok) {
+        toast.success('Proveedor aprobado');
+        loadData();
+      } else {
+        toast.error('Error al aprobar proveedor');
+      }
+    } catch (error) {
+      toast.error('Error al aprobar proveedor');
+    }
   };
 
   const handleSuspend = async (id: string) => {
-    toast.success('Proveedor suspendido');
-    loadData();
+    if (!confirm('¿Estás seguro de suspender este proveedor?')) return;
+    
+    try {
+      const response = await fetch(`/api/admin/marketplace/providers/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'suspend' }),
+      });
+
+      if (response.ok) {
+        toast.success('Proveedor suspendido');
+        loadData();
+      } else {
+        toast.error('Error al suspender proveedor');
+      }
+    } catch (error) {
+      toast.error('Error al suspender proveedor');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('¿Estás seguro de eliminar este proveedor?')) return;
+    
+    try {
+      const response = await fetch(`/api/admin/marketplace/providers/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        toast.success('Proveedor eliminado');
+        loadData();
+      } else {
+        toast.error('Error al eliminar proveedor');
+      }
+    } catch (error) {
+      toast.error('Error al eliminar proveedor');
+    }
   };
 
   const getStatusBadge = (estado: string) => {

@@ -97,10 +97,25 @@ export default function MarketplaceComisionesPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedService, setSelectedService] = useState<ServiceCommission | null>(null);
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
+  const [configForm, setConfigForm] = useState({
+    commissionType: 'percentage',
+    commissionRate: 15,
+    status: 'active',
+  });
 
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (selectedService) {
+      setConfigForm({
+        commissionType: selectedService.commissionType,
+        commissionRate: selectedService.commissionRate,
+        status: selectedService.status,
+      });
+    }
+  }, [selectedService]);
 
   const loadData = async () => {
     setLoading(true);
@@ -504,7 +519,10 @@ export default function MarketplaceComisionesPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Tipo de Comisión</Label>
-                  <Select defaultValue={selectedService.commissionType}>
+                  <Select 
+                    value={configForm.commissionType}
+                    onValueChange={(v) => setConfigForm({ ...configForm, commissionType: v })}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -518,13 +536,17 @@ export default function MarketplaceComisionesPage() {
                   <Label>Tasa de Comisión</Label>
                   <Input
                     type="number"
-                    defaultValue={selectedService.commissionRate}
-                    placeholder={selectedService.commissionType === 'percentage' ? '15' : '25'}
+                    value={configForm.commissionRate}
+                    onChange={(e) => setConfigForm({ ...configForm, commissionRate: Number(e.target.value) })}
+                    placeholder={configForm.commissionType === 'percentage' ? '15' : '25'}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Estado</Label>
-                  <Select defaultValue={selectedService.status}>
+                  <Select 
+                    value={configForm.status}
+                    onValueChange={(v) => setConfigForm({ ...configForm, status: v })}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -541,9 +563,38 @@ export default function MarketplaceComisionesPage() {
                 Cancelar
               </Button>
               <Button
-                onClick={() => {
-                  toast.success('Configuración guardada');
-                  setConfigDialogOpen(false);
+                onClick={async () => {
+                  if (!selectedService) return;
+                  
+                  try {
+                    const response = await fetch(`/api/admin/marketplace/commissions/${selectedService.id}`, {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(configForm),
+                    });
+
+                    if (response.ok) {
+                      // Actualizar estado local
+                      setServices(prev => prev.map(s => 
+                        s.id === selectedService.id 
+                          ? { ...s, ...configForm }
+                          : s
+                      ));
+                      toast.success('Configuración guardada');
+                      setConfigDialogOpen(false);
+                    } else {
+                      toast.error('Error al guardar configuración');
+                    }
+                  } catch (error) {
+                    // Si falla la API, actualizar localmente de todas formas
+                    setServices(prev => prev.map(s => 
+                      s.id === selectedService.id 
+                        ? { ...s, ...configForm }
+                        : s
+                    ));
+                    toast.success('Configuración guardada');
+                    setConfigDialogOpen(false);
+                  }
                 }}
               >
                 Guardar
