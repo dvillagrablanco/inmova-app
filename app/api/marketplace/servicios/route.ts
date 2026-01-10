@@ -37,9 +37,9 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             nombre: true,
-            nombreEmpresa: true,
             telefono: true,
-            especialidad: true,
+            tipo: true,
+            rating: true,
           },
         },
       },

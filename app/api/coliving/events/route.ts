@@ -20,16 +20,10 @@ export async function GET(request: NextRequest) {
           companyId: session.user.companyId,
         },
         include: {
-          attendees: true,
-          organizer: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
+          asistentes: true,
         },
         orderBy: {
-          date: 'asc',
+          fecha: 'asc',
         },
       })
       .catch(() => []);
@@ -41,17 +35,17 @@ export async function GET(request: NextRequest) {
 
     const formattedEvents = events.map((event: any) => ({
       id: event.id,
-      title: event.title,
-      description: event.description || '',
-      date: event.date?.toISOString().split('T')[0] || '',
-      time: event.time || '',
-      location: event.location || '',
-      type: event.type || 'social',
-      organizer: event.organizer?.name || 'Anónimo',
-      attendees: event.attendees?.length || 0,
-      maxAttendees: event.maxAttendees || null,
-      points: event.points || 10,
-      isJoined: event.attendees?.some((a: any) => a.userId === session.user.id) || false,
+      title: event.titulo,
+      description: event.descripcion || '',
+      date: event.fecha?.toISOString().split('T')[0] || '',
+      time: event.fecha?.toISOString().split('T')[1]?.substring(0, 5) || '',
+      location: event.ubicacion || '',
+      type: event.tipo || 'social',
+      organizer: event.organizador || 'Anónimo',
+      attendees: event.asistentes?.length || 0,
+      maxAttendees: event.capacidad || null,
+      points: 10,
+      isJoined: event.asistentes?.some((a: any) => a.tenantId === session.user.id) || false,
     }));
 
     return NextResponse.json(formattedEvents);
@@ -74,15 +68,14 @@ export async function POST(request: NextRequest) {
     try {
       const event = await prisma.colivingEvent?.create({
         data: {
-          title: data.title,
-          description: data.description,
-          date: new Date(data.date),
-          time: data.time,
-          location: data.location,
-          type: data.type,
-          maxAttendees: data.maxAttendees || null,
-          points: 10,
-          organizerId: session.user.id,
+          titulo: data.title,
+          descripcion: data.description,
+          fecha: new Date(data.date),
+          duracion: data.duration || 60,
+          ubicacion: data.location,
+          tipo: data.type,
+          capacidad: data.maxAttendees || null,
+          organizador: session.user.id,
           companyId: session.user.companyId,
         },
       });

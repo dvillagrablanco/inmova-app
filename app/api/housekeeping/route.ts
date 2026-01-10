@@ -14,12 +14,21 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar tareas de housekeeping asociadas a las propiedades del usuario
+    // MaintenanceRequest no tiene companyId, filtramos a través de unit->building->company
     const tasks = await prisma.maintenanceRequest.findMany({
       where: {
-        companyId: session.user.companyId,
-        categoria: {
-          in: ['limpieza', 'housekeeping', 'checkout', 'checkin', 'deep_clean'],
+        unit: {
+          building: {
+            companyId: session.user.companyId,
+          },
         },
+        // Filtrar por título que contenga palabras clave de housekeeping
+        OR: [
+          { titulo: { contains: 'limpieza', mode: 'insensitive' } },
+          { titulo: { contains: 'housekeeping', mode: 'insensitive' } },
+          { titulo: { contains: 'checkout', mode: 'insensitive' } },
+          { titulo: { contains: 'checkin', mode: 'insensitive' } },
+        ],
       },
       include: {
         unit: {
@@ -38,10 +47,11 @@ export async function GET(request: NextRequest) {
       id: task.id,
       property: task.unit?.building?.nombre || 'Sin edificio',
       address: task.unit?.building?.direccion || 'Sin dirección',
-      type: task.categoria || 'checkout',
+      type: task.titulo?.toLowerCase().includes('checkout') ? 'checkout' : 
+            task.titulo?.toLowerCase().includes('checkin') ? 'checkin' : 'limpieza',
       status: task.estado?.toLowerCase() || 'pending',
       scheduledDate: task.fechaSolicitud?.toISOString() || new Date().toISOString(),
-      assignedTo: task.asignadoA || 'Sin asignar',
+      assignedTo: task.providerId || 'Sin asignar',
       estimatedDuration: 2,
       unitId: task.unitId,
       buildingId: task.unit?.buildingId,
@@ -67,13 +77,11 @@ export async function POST(request: NextRequest) {
       data: {
         titulo: `Tarea de limpieza - ${data.type}`,
         descripcion: `Tarea de ${data.type} programada`,
-        categoria: data.type,
-        estado: 'PENDIENTE',
-        prioridad: 'MEDIA',
+        estado: 'pendiente',
+        prioridad: 'media',
         fechaSolicitud: new Date(data.scheduledDate),
-        asignadoA: data.assignedTo,
+        providerId: data.assignedTo || null,
         unitId: data.unitId,
-        companyId: session.user.companyId,
       },
       include: {
         unit: {
