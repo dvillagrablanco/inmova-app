@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
 import { z } from 'zod';
 import logger, { logError } from '@/lib/logger';
-import { sendEmail } from '@/lib/email';
+import { sendEmail } from '@/lib/email-service';
 
 export const dynamic = 'force-dynamic';
 
