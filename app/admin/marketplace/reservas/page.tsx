@@ -93,7 +93,6 @@ export default function MarketplaceReservasPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      // TODO: Conectar con API real cuando existan reservas
       const response = await fetch('/api/admin/marketplace/reservations');
       if (response.ok) {
         const data = await response.json();

@@ -101,7 +101,6 @@ export default function SalesTeamPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      // TODO: Conectar con API real del equipo comercial
       const response = await fetch('/api/admin/sales-team');
       if (response.ok) {
         const data = await response.json();

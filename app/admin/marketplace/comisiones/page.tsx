@@ -120,8 +120,6 @@ export default function MarketplaceComisionesPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      // TODO: Conectar con API real cuando existan datos
-      // Por ahora mostrar estado vacío - sin datos ficticios
       const response = await fetch('/api/admin/marketplace/commissions');
       if (response.ok) {
         const data = await response.json();

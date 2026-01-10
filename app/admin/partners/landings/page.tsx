@@ -85,36 +85,54 @@ export default function PartnerLandingsPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Cargar partners reales con su configuración de branding
-      const response = await fetch('/api/admin/partners?status=all');
+      // Cargar partners y analytics en paralelo
+      const [partnersResponse, analyticsResponse] = await Promise.all([
+        fetch('/api/admin/partners?status=all'),
+        fetch('/api/admin/partners/landings/analytics'),
+      ]);
       
-      if (!response.ok) {
+      if (!partnersResponse.ok) {
         throw new Error('Error al cargar partners');
       }
       
-      const data = await response.json();
-      const partners = data.partners || [];
+      const partnersData = await partnersResponse.json();
+      const partners = partnersData.partners || [];
       
-      // Transformar partners a formato de landings
+      // Obtener analytics si está disponible
+      let analyticsMap: Record<string, { visitas: number; conversiones: number }> = {};
+      if (analyticsResponse.ok) {
+        const analyticsData = await analyticsResponse.json();
+        (analyticsData.analytics || []).forEach((a: any) => {
+          analyticsMap[a.partnerId] = {
+            visitas: a.visitas,
+            conversiones: a.conversiones,
+          };
+        });
+      }
+      
+      // Transformar partners a formato de landings con analytics reales
       const landingsData: PartnerLanding[] = partners
         .filter((p: any) => p.status === 'ACTIVE' || p.status === 'PENDING_APPROVAL')
-        .map((p: any) => ({
-          id: p.id,
-          partnerId: p.id,
-          partnerName: p.name,
-          slug: p.referralCode?.toLowerCase().replace(/\s+/g, '-') || p.id.substring(0, 8),
-          dominio: null,
-          titulo: p.company || p.name,
-          subtitulo: 'Powered by INMOVA',
-          logoUrl: null,
-          colorPrimario: '#4F46E5',
-          colorSecundario: '#818CF8',
-          estado: p.status === 'ACTIVE' ? 'published' : 'draft',
-          visitas: Math.floor(Math.random() * 1000), // TODO: Conectar con analytics real
-          conversiones: p.totalClients || 0,
-          createdAt: p.createdAt,
-          updatedAt: p.createdAt,
-        }));
+        .map((p: any) => {
+          const analytics = analyticsMap[p.id] || { visitas: 0, conversiones: p.totalClients || 0 };
+          return {
+            id: p.id,
+            partnerId: p.id,
+            partnerName: p.name,
+            slug: p.referralCode?.toLowerCase().replace(/\s+/g, '-') || p.id.substring(0, 8),
+            dominio: null,
+            titulo: p.company || p.name,
+            subtitulo: 'Powered by INMOVA',
+            logoUrl: null,
+            colorPrimario: '#4F46E5',
+            colorSecundario: '#818CF8',
+            estado: p.status === 'ACTIVE' ? 'published' : 'draft',
+            visitas: analytics.visitas,
+            conversiones: analytics.conversiones,
+            createdAt: p.createdAt,
+            updatedAt: p.createdAt,
+          };
+        });
       
       setLandings(landingsData);
       
