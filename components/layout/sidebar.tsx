@@ -1240,15 +1240,26 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     }
   }, [role, primaryVertical, isInitialized]);
 
-  // Persistir posición de scroll de forma segura
+  // Persistir posición de scroll de forma segura - mejorado para restaurar después de navegación
   useEffect(() => {
     try {
       const sidebar = document.querySelector('[data-sidebar-nav]');
       if (sidebar) {
-        const savedScroll = safeLocalStorage.getItem('sidebar_scroll_position');
-        if (savedScroll) {
-          sidebar.scrollTop = parseInt(savedScroll, 10);
-        }
+        // Restaurar scroll con un pequeño delay para asegurar que el DOM está listo
+        const restoreScroll = () => {
+          const savedScroll = safeLocalStorage.getItem('sidebar_scroll_position');
+          if (savedScroll) {
+            const scrollValue = parseInt(savedScroll, 10);
+            // Usar requestAnimationFrame para asegurar que el scroll se aplica después del render
+            requestAnimationFrame(() => {
+              sidebar.scrollTop = scrollValue;
+            });
+          }
+        };
+
+        // Restaurar inmediatamente y también después de un pequeño delay
+        restoreScroll();
+        const timeoutId = setTimeout(restoreScroll, 100);
 
         const handleScroll = () => {
           try {
@@ -1259,12 +1270,15 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
         };
 
         sidebar.addEventListener('scroll', handleScroll);
-        return () => sidebar.removeEventListener('scroll', handleScroll);
+        return () => {
+          sidebar.removeEventListener('scroll', handleScroll);
+          clearTimeout(timeoutId);
+        };
       }
     } catch (error) {
       logger.error('Error setting up scroll persistence:', error);
     }
-  }, []);
+  }, [pathname]); // Añadir pathname como dependencia para restaurar después de navegación
 
   // Cargar módulos activos de la empresa del usuario actual
   useEffect(() => {

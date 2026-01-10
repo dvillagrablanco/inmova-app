@@ -1,17 +1,19 @@
-import { ComingSoonPage } from '@/components/shared/ComingSoonPage';
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function PropiedadesNuevoPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // Redirigir a la página de crear que tiene el formulario completo
+    router.replace('/propiedades/crear');
+  }, [router]);
+
   return (
-    <ComingSoonPage
-      title="Nueva Propiedad"
-      description="Wizard de creación rápida de propiedades"
-      expectedFeatures={[
-        "Creación paso a paso (wizard)",
-        "Importación desde portales inmobiliarios",
-        "Sugerencias automáticas de precio",
-        "Generación de descripción con IA",
-        "Publicación multi-canal"
-      ]}
-    />
+    <div className="flex items-center justify-center h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+    </div>
   );
 }
