@@ -101,94 +101,44 @@ export default function SalesTeamPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      setStats({
-        totalVendedores: 8,
-        ventasMes: 45600,
-        metaGlobal: 60000,
-        progresoMeta: 76,
-        mejorVendedor: 'María González',
-        clientesNuevos: 32,
-      });
-
-      setSalesReps([
-        {
-          id: '1',
-          nombre: 'María González',
-          email: 'maria@inmovaapp.com',
-          telefono: '+34 666 111 222',
-          avatar: null,
-          rol: 'senior',
-          estado: 'active',
-          metaMensual: 10000,
-          ventasMes: 12500,
-          clientesCaptados: 8,
-          tasaConversion: 32,
-          comisionAcumulada: 1875,
-          fechaIngreso: '2024-06-15',
-        },
-        {
-          id: '2',
-          nombre: 'Carlos Ruiz',
-          email: 'carlos@inmovaapp.com',
-          telefono: '+34 666 333 444',
-          avatar: null,
-          rol: 'senior',
-          estado: 'active',
-          metaMensual: 10000,
-          ventasMes: 9800,
-          clientesCaptados: 6,
-          tasaConversion: 28,
-          comisionAcumulada: 1470,
-          fechaIngreso: '2024-08-20',
-        },
-        {
-          id: '3',
-          nombre: 'Ana Martínez',
-          email: 'ana@inmovaapp.com',
-          telefono: '+34 666 555 666',
-          avatar: null,
-          rol: 'junior',
-          estado: 'active',
-          metaMensual: 6000,
-          ventasMes: 7200,
-          clientesCaptados: 5,
-          tasaConversion: 25,
-          comisionAcumulada: 1080,
-          fechaIngreso: '2025-01-10',
-        },
-        {
-          id: '4',
-          nombre: 'Pedro López',
-          email: 'pedro@inmovaapp.com',
-          telefono: '+34 666 777 888',
-          avatar: null,
-          rol: 'manager',
-          estado: 'active',
-          metaMensual: 15000,
-          ventasMes: 16100,
-          clientesCaptados: 10,
-          tasaConversion: 40,
-          comisionAcumulada: 2415,
-          fechaIngreso: '2024-03-01',
-        },
-        {
-          id: '5',
-          nombre: 'Laura Sánchez',
-          email: 'laura@inmovaapp.com',
-          telefono: '+34 666 999 000',
-          avatar: null,
-          rol: 'junior',
-          estado: 'inactive',
-          metaMensual: 6000,
+      // TODO: Conectar con API real del equipo comercial
+      const response = await fetch('/api/admin/sales-team');
+      if (response.ok) {
+        const data = await response.json();
+        setStats(
+          data.stats || {
+            totalVendedores: 0,
+            ventasMes: 0,
+            metaGlobal: 0,
+            progresoMeta: 0,
+            mejorVendedor: '-',
+            clientesNuevos: 0,
+          }
+        );
+        setSalesReps(data.salesReps || []);
+      } else {
+        // Si no hay API, mostrar estado vacío
+        setStats({
+          totalVendedores: 0,
           ventasMes: 0,
-          clientesCaptados: 0,
-          tasaConversion: 0,
-          comisionAcumulada: 890,
-          fechaIngreso: '2025-09-01',
-        },
-      ]);
+          metaGlobal: 0,
+          progresoMeta: 0,
+          mejorVendedor: '-',
+          clientesNuevos: 0,
+        });
+        setSalesReps([]);
+      }
     } catch (error) {
-      toast.error('Error al cargar datos');
+      // En caso de error, mostrar estado vacío
+      setStats({
+        totalVendedores: 0,
+        ventasMes: 0,
+        metaGlobal: 0,
+        progresoMeta: 0,
+        mejorVendedor: '-',
+        clientesNuevos: 0,
+      });
+      setSalesReps([]);
     } finally {
       setLoading(false);
     }
@@ -208,9 +158,19 @@ export default function SalesTeamPage() {
   const getRolBadge = (rol: string) => {
     switch (rol) {
       case 'manager':
-        return <Badge className="bg-purple-100 text-purple-700"><Trophy className="w-3 h-3 mr-1" />Manager</Badge>;
+        return (
+          <Badge className="bg-purple-100 text-purple-700">
+            <Trophy className="w-3 h-3 mr-1" />
+            Manager
+          </Badge>
+        );
       case 'senior':
-        return <Badge className="bg-blue-100 text-blue-700"><Star className="w-3 h-3 mr-1" />Senior</Badge>;
+        return (
+          <Badge className="bg-blue-100 text-blue-700">
+            <Star className="w-3 h-3 mr-1" />
+            Senior
+          </Badge>
+        );
       case 'junior':
         return <Badge className="bg-gray-100 text-gray-700">Junior</Badge>;
       default:
@@ -225,7 +185,7 @@ export default function SalesTeamPage() {
     return 'bg-red-500';
   };
 
-  const activeReps = salesReps.filter(r => r.estado === 'active');
+  const activeReps = salesReps.filter((r) => r.estado === 'active');
 
   return (
     <AuthenticatedLayout>
@@ -246,9 +206,7 @@ export default function SalesTeamPage() {
             <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>Añadir Vendedor</DialogTitle>
-                <DialogDescription>
-                  Añade un nuevo miembro al equipo comercial
-                </DialogDescription>
+                <DialogDescription>Añade un nuevo miembro al equipo comercial</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
@@ -310,9 +268,7 @@ export default function SalesTeamPage() {
                 <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
                   Cancelar
                 </Button>
-                <Button onClick={handleCreateSalesRep}>
-                  Añadir Vendedor
-                </Button>
+                <Button onClick={handleCreateSalesRep}>Añadir Vendedor</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -399,7 +355,9 @@ export default function SalesTeamPage() {
             <CardContent>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>€{stats.ventasMes.toLocaleString()} de €{stats.metaGlobal.toLocaleString()}</span>
+                  <span>
+                    €{stats.ventasMes.toLocaleString()} de €{stats.metaGlobal.toLocaleString()}
+                  </span>
                   <span className="font-semibold">{stats.progresoMeta}%</span>
                 </div>
                 <Progress value={stats.progresoMeta} className="h-3" />
@@ -421,81 +379,110 @@ export default function SalesTeamPage() {
                 <CardTitle>Miembros del Equipo</CardTitle>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Vendedor</TableHead>
-                      <TableHead>Rol</TableHead>
-                      <TableHead>Contacto</TableHead>
-                      <TableHead className="text-right">Meta</TableHead>
-                      <TableHead className="text-right">Ventas</TableHead>
-                      <TableHead>Progreso</TableHead>
-                      <TableHead className="text-right">Conversión</TableHead>
-                      <TableHead className="text-right">Comisión</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {salesReps.map((rep) => {
-                      const progress = Math.round((rep.ventasMes / rep.metaMensual) * 100);
-                      return (
-                        <TableRow key={rep.id} className={rep.estado === 'inactive' ? 'opacity-50' : ''}>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <Avatar>
-                                <AvatarImage src={rep.avatar || undefined} />
-                                <AvatarFallback>{rep.nombre.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="font-medium">{rep.nombre}</p>
-                                <p className="text-xs text-gray-500">
-                                  Desde {format(new Date(rep.fechaIngreso), 'MMM yyyy', { locale: es })}
+                {salesReps.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Sin vendedores registrados
+                    </h3>
+                    <p className="text-gray-500 mb-4">
+                      Añade miembros al equipo comercial para gestionar las ventas.
+                    </p>
+                    <Button onClick={() => setCreateDialogOpen(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Añadir vendedor
+                    </Button>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Vendedor</TableHead>
+                        <TableHead>Rol</TableHead>
+                        <TableHead>Contacto</TableHead>
+                        <TableHead className="text-right">Meta</TableHead>
+                        <TableHead className="text-right">Ventas</TableHead>
+                        <TableHead>Progreso</TableHead>
+                        <TableHead className="text-right">Conversión</TableHead>
+                        <TableHead className="text-right">Comisión</TableHead>
+                        <TableHead className="text-right">Acciones</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {salesReps.map((rep) => {
+                        const progress = Math.round((rep.ventasMes / rep.metaMensual) * 100);
+                        return (
+                          <TableRow
+                            key={rep.id}
+                            className={rep.estado === 'inactive' ? 'opacity-50' : ''}
+                          >
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <Avatar>
+                                  <AvatarImage src={rep.avatar || undefined} />
+                                  <AvatarFallback>
+                                    {rep.nombre
+                                      .split(' ')
+                                      .map((n) => n[0])
+                                      .join('')}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-medium">{rep.nombre}</p>
+                                  <p className="text-xs text-gray-500">
+                                    Desde{' '}
+                                    {format(new Date(rep.fechaIngreso), 'MMM yyyy', { locale: es })}
+                                  </p>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{getRolBadge(rep.rol)}</TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                <p className="text-sm flex items-center gap-1">
+                                  <Mail className="w-3 h-3 text-gray-400" />
+                                  {rep.email}
+                                </p>
+                                <p className="text-sm flex items-center gap-1">
+                                  <Phone className="w-3 h-3 text-gray-400" />
+                                  {rep.telefono}
                                 </p>
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>{getRolBadge(rep.rol)}</TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              <p className="text-sm flex items-center gap-1">
-                                <Mail className="w-3 h-3 text-gray-400" />
-                                {rep.email}
-                              </p>
-                              <p className="text-sm flex items-center gap-1">
-                                <Phone className="w-3 h-3 text-gray-400" />
-                                {rep.telefono}
-                              </p>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">€{rep.metaMensual.toLocaleString()}</TableCell>
-                          <TableCell className="text-right font-semibold">€{rep.ventasMes.toLocaleString()}</TableCell>
-                          <TableCell>
-                            <div className="w-24">
-                              <div className="flex justify-between text-xs mb-1">
-                                <span>{progress}%</span>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              €{rep.metaMensual.toLocaleString()}
+                            </TableCell>
+                            <TableCell className="text-right font-semibold">
+                              €{rep.ventasMes.toLocaleString()}
+                            </TableCell>
+                            <TableCell>
+                              <div className="w-24">
+                                <div className="flex justify-between text-xs mb-1">
+                                  <span>{progress}%</span>
+                                </div>
+                                <Progress value={Math.min(progress, 100)} className="h-2" />
                               </div>
-                              <Progress value={Math.min(progress, 100)} className="h-2" />
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">{rep.tasaConversion}%</TableCell>
-                          <TableCell className="text-right text-green-600 font-semibold">
-                            €{rep.comisionAcumulada.toLocaleString()}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button variant="ghost" size="sm">
-                                <Eye className="w-4 h-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                <Pencil className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                            </TableCell>
+                            <TableCell className="text-right">{rep.tasaConversion}%</TableCell>
+                            <TableCell className="text-right text-green-600 font-semibold">
+                              €{rep.comisionAcumulada.toLocaleString()}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button variant="ghost" size="sm">
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm">
+                                  <Pencil className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -517,26 +504,41 @@ export default function SalesTeamPage() {
                       <div
                         key={rep.id}
                         className={`flex items-center gap-4 p-4 rounded-lg ${
-                          index === 0 ? 'bg-yellow-50 border border-yellow-200' :
-                          index === 1 ? 'bg-gray-50 border border-gray-200' :
-                          index === 2 ? 'bg-orange-50 border border-orange-200' :
-                          'bg-white border'
+                          index === 0
+                            ? 'bg-yellow-50 border border-yellow-200'
+                            : index === 1
+                              ? 'bg-gray-50 border border-gray-200'
+                              : index === 2
+                                ? 'bg-orange-50 border border-orange-200'
+                                : 'bg-white border'
                         }`}
                       >
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                          index === 0 ? 'bg-yellow-500 text-white' :
-                          index === 1 ? 'bg-gray-400 text-white' :
-                          index === 2 ? 'bg-orange-400 text-white' :
-                          'bg-gray-200 text-gray-600'
-                        }`}>
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                            index === 0
+                              ? 'bg-yellow-500 text-white'
+                              : index === 1
+                                ? 'bg-gray-400 text-white'
+                                : index === 2
+                                  ? 'bg-orange-400 text-white'
+                                  : 'bg-gray-200 text-gray-600'
+                          }`}
+                        >
                           {index + 1}
                         </div>
                         <Avatar>
-                          <AvatarFallback>{rep.nombre.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          <AvatarFallback>
+                            {rep.nombre
+                              .split(' ')
+                              .map((n) => n[0])
+                              .join('')}
+                          </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <p className="font-medium">{rep.nombre}</p>
-                          <p className="text-sm text-gray-500">{rep.clientesCaptados} clientes captados</p>
+                          <p className="text-sm text-gray-500">
+                            {rep.clientesCaptados} clientes captados
+                          </p>
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-lg">€{rep.ventasMes.toLocaleString()}</p>

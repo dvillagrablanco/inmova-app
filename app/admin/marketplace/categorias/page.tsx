@@ -195,18 +195,50 @@ export default function MarketplaceCategoriasPage() {
   };
 
   const handleToggleActive = async (id: string, currentState: boolean) => {
+    // Actualizar estado local inmediatamente
+    setCategories((prev) =>
+      prev.map((cat) => (cat.id === id ? { ...cat, activo: !currentState } : cat))
+    );
     toast.success(currentState ? 'Categoría desactivada' : 'Categoría activada');
-    loadData();
+  };
+
+  const handleEditCategory = async () => {
+    if (!formData.nombre || !formData.slug) {
+      toast.error('Nombre y slug son obligatorios');
+      return;
+    }
+    if (!selectedCategory) return;
+
+    // Actualizar estado local
+    setCategories((prev) =>
+      prev.map((cat) =>
+        cat.id === selectedCategory.id
+          ? {
+              ...cat,
+              nombre: formData.nombre,
+              slug: formData.slug,
+              descripcion: formData.descripcion || null,
+              icono: formData.icono,
+              color: formData.color,
+            }
+          : cat
+      )
+    );
+    toast.success('Categoría actualizada correctamente');
+    setEditDialogOpen(false);
+    setSelectedCategory(null);
+    setFormData({ nombre: '', slug: '', descripcion: '', icono: 'package', color: '#4F46E5' });
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar esta categoría? Los servicios asociados quedarán sin categoría.')) return;
+    if (!confirm('¿Eliminar esta categoría? Los servicios asociados quedarán sin categoría.'))
+      return;
     toast.success('Categoría eliminada');
     loadData();
   };
 
   const getIconComponent = (iconName: string) => {
-    const iconConfig = ICONOS.find(i => i.value === iconName);
+    const iconConfig = ICONOS.find((i) => i.value === iconName);
     return iconConfig?.icon || Package;
   };
 
@@ -217,7 +249,9 @@ export default function MarketplaceCategoriasPage() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Categorías del Marketplace</h1>
-            <p className="text-gray-600 mt-1">Organiza los servicios del marketplace por categorías</p>
+            <p className="text-gray-600 mt-1">
+              Organiza los servicios del marketplace por categorías
+            </p>
           </div>
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
@@ -239,11 +273,16 @@ export default function MarketplaceCategoriasPage() {
                   <Input
                     placeholder="Nombre de la categoría"
                     value={formData.nombre}
-                    onChange={(e) => setFormData({ 
-                      ...formData, 
-                      nombre: e.target.value,
-                      slug: e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-                    })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        nombre: e.target.value,
+                        slug: e.target.value
+                          .toLowerCase()
+                          .replace(/\s+/g, '-')
+                          .replace(/[^a-z0-9-]/g, ''),
+                      })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -271,8 +310,10 @@ export default function MarketplaceCategoriasPage() {
                       value={formData.icono}
                       onChange={(e) => setFormData({ ...formData, icono: e.target.value })}
                     >
-                      {ICONOS.map(i => (
-                        <option key={i.value} value={i.value}>{i.label}</option>
+                      {ICONOS.map((i) => (
+                        <option key={i.value} value={i.value}>
+                          {i.label}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -298,9 +339,7 @@ export default function MarketplaceCategoriasPage() {
                 <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
                   Cancelar
                 </Button>
-                <Button onClick={handleCreateCategory}>
-                  Crear Categoría
-                </Button>
+                <Button onClick={handleCreateCategory}>Crear Categoría</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -325,7 +364,7 @@ export default function MarketplaceCategoriasPage() {
                 <div>
                   <p className="text-sm text-gray-500">Activas</p>
                   <p className="text-2xl font-bold text-green-600">
-                    {categories.filter(c => c.activo).length}
+                    {categories.filter((c) => c.activo).length}
                   </p>
                 </div>
                 <Eye className="w-8 h-8 text-green-400" />
@@ -351,9 +390,7 @@ export default function MarketplaceCategoriasPage() {
         <Card>
           <CardHeader>
             <CardTitle>Listado de Categorías</CardTitle>
-            <CardDescription>
-              Arrastra para reordenar las categorías
-            </CardDescription>
+            <CardDescription>Arrastra para reordenar las categorías</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -369,89 +406,209 @@ export default function MarketplaceCategoriasPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {categories.sort((a, b) => a.orden - b.orden).map((category) => {
-                  const IconComponent = getIconComponent(category.icono);
-                  return (
-                    <TableRow key={category.id} className={!category.activo ? 'opacity-50' : ''}>
-                      <TableCell>
-                        <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="p-2 rounded-lg"
-                            style={{ backgroundColor: `${category.color}20` }}
-                          >
-                            <IconComponent
-                              className="w-5 h-5"
-                              style={{ color: category.color }}
+                {categories
+                  .sort((a, b) => a.orden - b.orden)
+                  .map((category) => {
+                    const IconComponent = getIconComponent(category.icono);
+                    return (
+                      <TableRow key={category.id} className={!category.activo ? 'opacity-50' : ''}>
+                        <TableCell>
+                          <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="p-2 rounded-lg"
+                              style={{ backgroundColor: `${category.color}20` }}
+                            >
+                              <IconComponent
+                                className="w-5 h-5"
+                                style={{ color: category.color }}
+                              />
+                            </div>
+                            <div>
+                              <p className="font-medium">{category.nombre}</p>
+                              {category.descripcion && (
+                                <p className="text-sm text-gray-500 line-clamp-1">
+                                  {category.descripcion}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <code className="text-sm bg-gray-100 px-2 py-1 rounded">
+                            {category.slug}
+                          </code>
+                        </TableCell>
+                        <TableCell className="text-right">{category.serviciosCount}</TableCell>
+                        <TableCell className="text-right">{category.proveedoresCount}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={category.activo}
+                              onCheckedChange={() =>
+                                handleToggleActive(category.id, category.activo)
+                              }
                             />
+                            <span className="text-sm">
+                              {category.activo ? 'Activa' : 'Inactiva'}
+                            </span>
                           </div>
-                          <div>
-                            <p className="font-medium">{category.nombre}</p>
-                            {category.descripcion && (
-                              <p className="text-sm text-gray-500 line-clamp-1">
-                                {category.descripcion}
-                              </p>
-                            )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedCategory(category);
+                                setFormData({
+                                  nombre: category.nombre,
+                                  slug: category.slug,
+                                  descripcion: category.descripcion || '',
+                                  icono: category.icono,
+                                  color: category.color,
+                                });
+                                setEditDialogOpen(true);
+                              }}
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(category.id)}
+                              className="text-red-600"
+                              disabled={category.serviciosCount > 0}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <code className="text-sm bg-gray-100 px-2 py-1 rounded">
-                          {category.slug}
-                        </code>
-                      </TableCell>
-                      <TableCell className="text-right">{category.serviciosCount}</TableCell>
-                      <TableCell className="text-right">{category.proveedoresCount}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={category.activo}
-                            onCheckedChange={() => handleToggleActive(category.id, category.activo)}
-                          />
-                          <span className="text-sm">
-                            {category.activo ? 'Activa' : 'Inactiva'}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedCategory(category);
-                              setFormData({
-                                nombre: category.nombre,
-                                slug: category.slug,
-                                descripcion: category.descripcion || '',
-                                icono: category.icono,
-                                color: category.color,
-                              });
-                              setEditDialogOpen(true);
-                            }}
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(category.id)}
-                            className="text-red-600"
-                            disabled={category.serviciosCount > 0}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
               </TableBody>
             </Table>
           </CardContent>
         </Card>
+
+        {/* Edit Dialog */}
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Editar Categoría</DialogTitle>
+              <DialogDescription>Modifica los datos de la categoría</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Nombre *</Label>
+                <Input
+                  placeholder="Nombre de la categoría"
+                  value={formData.nombre}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      nombre: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Slug (URL) *</Label>
+                <Input
+                  placeholder="nombre-categoria"
+                  value={formData.slug}
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Descripción</Label>
+                <Textarea
+                  placeholder="Descripción breve..."
+                  value={formData.descripcion}
+                  onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                  rows={2}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Icono</Label>
+                  <select
+                    className="w-full p-2 border rounded-md"
+                    value={formData.icono}
+                    onChange={(e) => setFormData({ ...formData, icono: e.target.value })}
+                  >
+                    {ICONOS.map((i) => (
+                      <option key={i.value} value={i.value}>
+                        {i.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Color</Label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={formData.color}
+                      onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                      className="w-10 h-10 rounded cursor-pointer"
+                    />
+                    <Input
+                      value={formData.color}
+                      onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+              </div>
+              {/* Preview */}
+              <div className="space-y-2">
+                <Label>Vista previa</Label>
+                <div className="p-4 bg-gray-50 rounded-lg flex items-center gap-3">
+                  <div
+                    className="p-2 rounded-lg"
+                    style={{ backgroundColor: `${formData.color}20` }}
+                  >
+                    {(() => {
+                      const IconComponent = getIconComponent(formData.icono);
+                      return (
+                        <IconComponent className="w-5 h-5" style={{ color: formData.color }} />
+                      );
+                    })()}
+                  </div>
+                  <div>
+                    <p className="font-medium">{formData.nombre || 'Nombre de categoría'}</p>
+                    <p className="text-sm text-gray-500">
+                      {formData.descripcion || 'Sin descripción'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setEditDialogOpen(false);
+                  setSelectedCategory(null);
+                  setFormData({
+                    nombre: '',
+                    slug: '',
+                    descripcion: '',
+                    icono: 'package',
+                    color: '#4F46E5',
+                  });
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button onClick={handleEditCategory}>Guardar Cambios</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AuthenticatedLayout>
   );

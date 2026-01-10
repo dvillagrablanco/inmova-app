@@ -93,92 +93,47 @@ export default function MarketplaceReservasPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      setStats({
-        total: 156,
-        pendientes: 12,
-        confirmadas: 28,
-        completadas: 108,
-        canceladas: 8,
-        ingresosMes: 18450,
-        comisionesMes: 2768,
-      });
-
-      setReservations([
-        {
-          id: '1',
-          servicio: 'Seguro de Alquiler Premium',
-          categoria: 'Seguros',
-          proveedor: 'Mapfre',
-          cliente: {
-            empresa: 'Gestiones Madrid SL',
-            contacto: 'Carlos Pérez',
-            email: 'carlos@gestionesmadrid.es',
-          },
-          propiedad: 'Calle Mayor 123, Madrid',
-          fechaSolicitud: '2026-01-08T10:30:00',
-          fechaServicio: null,
-          precio: 350,
-          comision: 52.50,
-          estado: 'pending',
-          notas: 'Cliente solicita cobertura extendida',
-        },
-        {
-          id: '2',
-          servicio: 'Certificado Energético',
-          categoria: 'Certificaciones',
-          proveedor: 'CertiHome',
-          cliente: {
-            empresa: 'Inmuebles BCN',
-            contacto: 'Ana García',
-            email: 'ana@inmueblesbn.com',
-          },
-          propiedad: 'Av. Diagonal 456, Barcelona',
-          fechaSolicitud: '2026-01-07T14:15:00',
-          fechaServicio: '2026-01-10T09:00:00',
-          precio: 120,
-          comision: 25,
-          estado: 'confirmed',
-          notas: null,
-        },
-        {
-          id: '3',
-          servicio: 'Limpieza Fin de Obra',
-          categoria: 'Limpieza',
-          proveedor: 'CleanPro',
-          cliente: {
-            empresa: 'Constructora Sur',
-            contacto: 'Miguel López',
-            email: 'miguel@construtorasur.es',
-          },
-          propiedad: 'C/ Nueva 78, Sevilla',
-          fechaSolicitud: '2026-01-05T09:00:00',
-          fechaServicio: '2026-01-06T08:00:00',
-          precio: 450,
-          comision: 45,
-          estado: 'completed',
-          notas: 'Piso de 120m², 3 habitaciones',
-        },
-        {
-          id: '4',
-          servicio: 'Home Staging Completo',
-          categoria: 'Marketing',
-          proveedor: 'StageIt',
-          cliente: {
-            empresa: 'Premium Homes',
-            contacto: 'Laura Martín',
-            email: 'laura@premiumhomes.es',
-          },
-          propiedad: 'Paseo Castellana 200, Madrid',
-          fechaSolicitud: '2026-01-04T16:00:00',
-          fechaServicio: null,
-          precio: 1200,
-          comision: 144,
-          estado: 'cancelled',
-          notas: 'Cliente canceló por venta anticipada',
-        },
-      ]);
+      // TODO: Conectar con API real cuando existan reservas
+      const response = await fetch('/api/admin/marketplace/reservations');
+      if (response.ok) {
+        const data = await response.json();
+        setStats(
+          data.stats || {
+            total: 0,
+            pendientes: 0,
+            confirmadas: 0,
+            completadas: 0,
+            canceladas: 0,
+            ingresosMes: 0,
+            comisionesMes: 0,
+          }
+        );
+        setReservations(data.reservations || []);
+      } else {
+        // Si no hay API, mostrar estado vacío
+        setStats({
+          total: 0,
+          pendientes: 0,
+          confirmadas: 0,
+          completadas: 0,
+          canceladas: 0,
+          ingresosMes: 0,
+          comisionesMes: 0,
+        });
+        setReservations([]);
+      }
     } catch (error) {
-      toast.error('Error al cargar reservas');
+      // En caso de error, mostrar estado vacío
+      setStats({
+        total: 0,
+        pendientes: 0,
+        confirmadas: 0,
+        completadas: 0,
+        canceladas: 0,
+        ingresosMes: 0,
+        comisionesMes: 0,
+      });
+      setReservations([]);
     } finally {
       setLoading(false);
     }
@@ -202,24 +157,50 @@ export default function MarketplaceReservasPage() {
   const getStatusBadge = (estado: string) => {
     switch (estado) {
       case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-700"><Clock className="w-3 h-3 mr-1" />Pendiente</Badge>;
+        return (
+          <Badge className="bg-yellow-100 text-yellow-700">
+            <Clock className="w-3 h-3 mr-1" />
+            Pendiente
+          </Badge>
+        );
       case 'confirmed':
-        return <Badge className="bg-blue-100 text-blue-700"><CheckCircle2 className="w-3 h-3 mr-1" />Confirmada</Badge>;
+        return (
+          <Badge className="bg-blue-100 text-blue-700">
+            <CheckCircle2 className="w-3 h-3 mr-1" />
+            Confirmada
+          </Badge>
+        );
       case 'completed':
-        return <Badge className="bg-green-100 text-green-700"><CheckCircle2 className="w-3 h-3 mr-1" />Completada</Badge>;
+        return (
+          <Badge className="bg-green-100 text-green-700">
+            <CheckCircle2 className="w-3 h-3 mr-1" />
+            Completada
+          </Badge>
+        );
       case 'cancelled':
-        return <Badge className="bg-red-100 text-red-700"><XCircle className="w-3 h-3 mr-1" />Cancelada</Badge>;
+        return (
+          <Badge className="bg-red-100 text-red-700">
+            <XCircle className="w-3 h-3 mr-1" />
+            Cancelada
+          </Badge>
+        );
       case 'disputed':
-        return <Badge className="bg-orange-100 text-orange-700"><AlertCircle className="w-3 h-3 mr-1" />En Disputa</Badge>;
+        return (
+          <Badge className="bg-orange-100 text-orange-700">
+            <AlertCircle className="w-3 h-3 mr-1" />
+            En Disputa
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{estado}</Badge>;
     }
   };
 
-  const filteredReservations = reservations.filter(r => {
-    const matchesSearch = r.servicio.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         r.proveedor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         r.cliente.empresa.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredReservations = reservations.filter((r) => {
+    const matchesSearch =
+      r.servicio.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.proveedor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.cliente.empresa.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || r.estado === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -281,7 +262,9 @@ export default function MarketplaceReservasPage() {
             <Card>
               <CardContent className="pt-6">
                 <p className="text-xs text-gray-500">Comisiones</p>
-                <p className="text-xl font-bold text-purple-600">€{stats.comisionesMes.toLocaleString()}</p>
+                <p className="text-xl font-bold text-purple-600">
+                  €{stats.comisionesMes.toLocaleString()}
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -322,105 +305,122 @@ export default function MarketplaceReservasPage() {
             <CardTitle>Listado de Reservas</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Servicio</TableHead>
-                  <TableHead>Proveedor</TableHead>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Fecha Solicitud</TableHead>
-                  <TableHead>Fecha Servicio</TableHead>
-                  <TableHead className="text-right">Precio</TableHead>
-                  <TableHead className="text-right">Comisión</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredReservations.map((reservation) => (
-                  <TableRow key={reservation.id}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{reservation.servicio}</p>
-                        <p className="text-sm text-gray-500">{reservation.categoria}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>{reservation.proveedor}</TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium flex items-center gap-1">
-                          <Building2 className="w-3 h-3 text-gray-400" />
-                          {reservation.cliente.empresa}
-                        </p>
-                        <p className="text-sm text-gray-500 flex items-center gap-1">
-                          <User className="w-3 h-3 text-gray-400" />
-                          {reservation.cliente.contacto}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm">
-                        {format(new Date(reservation.fechaSolicitud), 'dd MMM yyyy HH:mm', { locale: es })}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {reservation.fechaServicio ? (
+            {filteredReservations.length === 0 ? (
+              <div className="text-center py-12">
+                <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Sin reservas</h3>
+                <p className="text-gray-500">
+                  Las reservas aparecerán aquí cuando los clientes soliciten servicios del
+                  marketplace.
+                </p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Servicio</TableHead>
+                    <TableHead>Proveedor</TableHead>
+                    <TableHead>Cliente</TableHead>
+                    <TableHead>Fecha Solicitud</TableHead>
+                    <TableHead>Fecha Servicio</TableHead>
+                    <TableHead className="text-right">Precio</TableHead>
+                    <TableHead className="text-right">Comisión</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredReservations.map((reservation) => (
+                    <TableRow key={reservation.id}>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{reservation.servicio}</p>
+                          <p className="text-sm text-gray-500">{reservation.categoria}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>{reservation.proveedor}</TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium flex items-center gap-1">
+                            <Building2 className="w-3 h-3 text-gray-400" />
+                            {reservation.cliente.empresa}
+                          </p>
+                          <p className="text-sm text-gray-500 flex items-center gap-1">
+                            <User className="w-3 h-3 text-gray-400" />
+                            {reservation.cliente.contacto}
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
                         <span className="text-sm">
-                          {format(new Date(reservation.fechaServicio), 'dd MMM yyyy', { locale: es })}
+                          {format(new Date(reservation.fechaSolicitud), 'dd MMM yyyy HH:mm', {
+                            locale: es,
+                          })}
                         </span>
-                      ) : (
-                        <span className="text-sm text-gray-400">Por definir</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">€{reservation.precio.toFixed(2)}</TableCell>
-                    <TableCell className="text-right text-green-600">€{reservation.comision.toFixed(2)}</TableCell>
-                    <TableCell>{getStatusBadge(reservation.estado)}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedReservation(reservation);
-                            setDetailsDialogOpen(true);
-                          }}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        {reservation.estado === 'pending' && (
-                          <>
+                      </TableCell>
+                      <TableCell>
+                        {reservation.fechaServicio ? (
+                          <span className="text-sm">
+                            {format(new Date(reservation.fechaServicio), 'dd MMM yyyy', {
+                              locale: es,
+                            })}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-gray-400">Por definir</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">€{reservation.precio.toFixed(2)}</TableCell>
+                      <TableCell className="text-right text-green-600">
+                        €{reservation.comision.toFixed(2)}
+                      </TableCell>
+                      <TableCell>{getStatusBadge(reservation.estado)}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedReservation(reservation);
+                              setDetailsDialogOpen(true);
+                            }}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          {reservation.estado === 'pending' && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleConfirm(reservation.id)}
+                              >
+                                Confirmar
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleCancel(reservation.id)}
+                                className="text-red-600"
+                              >
+                                Cancelar
+                              </Button>
+                            </>
+                          )}
+                          {reservation.estado === 'confirmed' && (
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleConfirm(reservation.id)}
+                              onClick={() => handleComplete(reservation.id)}
                             >
-                              Confirmar
+                              Completar
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleCancel(reservation.id)}
-                              className="text-red-600"
-                            >
-                              Cancelar
-                            </Button>
-                          </>
-                        )}
-                        {reservation.estado === 'confirmed' && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleComplete(reservation.id)}
-                          >
-                            Completar
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
 
@@ -462,7 +462,9 @@ export default function MarketplaceReservasPage() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Comisión</p>
-                    <p className="font-medium text-green-600">€{selectedReservation.comision.toFixed(2)}</p>
+                    <p className="font-medium text-green-600">
+                      €{selectedReservation.comision.toFixed(2)}
+                    </p>
                   </div>
                 </div>
                 {selectedReservation.notas && (

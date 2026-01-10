@@ -105,106 +105,48 @@ export default function MarketplaceComisionesPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Datos de ejemplo - conectar con API real
-      setStats({
-        totalCommissionsThisMonth: 2340.50,
-        totalCommissionsAllTime: 28560.00,
-        pendingCommissions: 890.00,
-        activeProviders: 15,
-        avgCommissionRate: 12,
-        transactionsThisMonth: 87,
-      });
-
-      setServices([
-        {
-          id: '1',
-          serviceName: 'Seguro de Alquiler',
-          serviceCategory: 'Seguros',
-          providerName: 'Mapfre',
-          providerEmail: 'partners@mapfre.es',
-          commissionType: 'percentage',
-          commissionRate: 15,
-          totalTransactions: 45,
-          totalRevenue: 12500,
-          totalCommissions: 1875,
-          status: 'active',
-        },
-        {
-          id: '2',
-          serviceName: 'Certificado Energético',
-          serviceCategory: 'Certificaciones',
-          providerName: 'CertiHome',
-          providerEmail: 'colaboradores@certihome.es',
-          commissionType: 'fixed',
-          commissionRate: 25,
-          minimumCommission: 25,
-          totalTransactions: 120,
-          totalRevenue: 14400,
-          totalCommissions: 3000,
-          status: 'active',
-        },
-        {
-          id: '3',
-          serviceName: 'Limpieza Profesional',
-          serviceCategory: 'Mantenimiento',
-          providerName: 'CleanPro',
-          providerEmail: 'comercial@cleanpro.com',
-          commissionType: 'percentage',
-          commissionRate: 10,
-          totalTransactions: 89,
-          totalRevenue: 8900,
-          totalCommissions: 890,
-          status: 'active',
-        },
-        {
-          id: '4',
-          serviceName: 'Home Staging',
-          serviceCategory: 'Marketing',
-          providerName: 'StageIt',
-          providerEmail: 'info@stageit.es',
-          commissionType: 'percentage',
-          commissionRate: 12,
-          totalTransactions: 23,
-          totalRevenue: 11500,
-          totalCommissions: 1380,
-          status: 'paused',
-        },
-      ]);
-
-      setTransactions([
-        {
-          id: 't1',
-          serviceName: 'Seguro de Alquiler',
-          providerName: 'Mapfre',
-          clientCompany: 'Gestiones Madrid SL',
-          transactionAmount: 350,
-          commissionAmount: 52.50,
-          status: 'pending',
-          date: '2026-01-08',
-        },
-        {
-          id: 't2',
-          serviceName: 'Certificado Energético',
-          providerName: 'CertiHome',
-          clientCompany: 'Inmuebles BCN',
-          transactionAmount: 120,
-          commissionAmount: 25,
-          status: 'processed',
-          date: '2026-01-07',
-        },
-        {
-          id: 't3',
-          serviceName: 'Limpieza Profesional',
-          providerName: 'CleanPro',
-          clientCompany: 'Alquileres Sur',
-          transactionAmount: 180,
-          commissionAmount: 18,
-          status: 'paid',
-          date: '2026-01-05',
-        },
-      ]);
+      // TODO: Conectar con API real cuando existan datos
+      // Por ahora mostrar estado vacío - sin datos ficticios
+      const response = await fetch('/api/admin/marketplace/commissions');
+      if (response.ok) {
+        const data = await response.json();
+        setStats(
+          data.stats || {
+            totalCommissionsThisMonth: 0,
+            totalCommissionsAllTime: 0,
+            pendingCommissions: 0,
+            activeProviders: 0,
+            avgCommissionRate: 0,
+            transactionsThisMonth: 0,
+          }
+        );
+        setServices(data.services || []);
+        setTransactions(data.transactions || []);
+      } else {
+        // Si no hay API aún, mostrar estado vacío
+        setStats({
+          totalCommissionsThisMonth: 0,
+          totalCommissionsAllTime: 0,
+          pendingCommissions: 0,
+          activeProviders: 0,
+          avgCommissionRate: 0,
+          transactionsThisMonth: 0,
+        });
+        setServices([]);
+        setTransactions([]);
+      }
     } catch (error) {
-      toast.error('Error al cargar datos de comisiones');
+      // En caso de error, mostrar estado vacío
+      setStats({
+        totalCommissionsThisMonth: 0,
+        totalCommissionsAllTime: 0,
+        pendingCommissions: 0,
+        activeProviders: 0,
+        avgCommissionRate: 0,
+        transactionsThisMonth: 0,
+      });
+      setServices([]);
+      setTransactions([]);
     } finally {
       setLoading(false);
     }
@@ -213,23 +155,49 @@ export default function MarketplaceComisionesPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge className="bg-green-100 text-green-700"><CheckCircle2 className="w-3 h-3 mr-1" />Activo</Badge>;
+        return (
+          <Badge className="bg-green-100 text-green-700">
+            <CheckCircle2 className="w-3 h-3 mr-1" />
+            Activo
+          </Badge>
+        );
       case 'paused':
-        return <Badge className="bg-yellow-100 text-yellow-700"><Clock className="w-3 h-3 mr-1" />Pausado</Badge>;
+        return (
+          <Badge className="bg-yellow-100 text-yellow-700">
+            <Clock className="w-3 h-3 mr-1" />
+            Pausado
+          </Badge>
+        );
       case 'pending':
-        return <Badge className="bg-blue-100 text-blue-700"><Clock className="w-3 h-3 mr-1" />Pendiente</Badge>;
+        return (
+          <Badge className="bg-blue-100 text-blue-700">
+            <Clock className="w-3 h-3 mr-1" />
+            Pendiente
+          </Badge>
+        );
       case 'processed':
-        return <Badge className="bg-purple-100 text-purple-700"><CheckCircle2 className="w-3 h-3 mr-1" />Procesado</Badge>;
+        return (
+          <Badge className="bg-purple-100 text-purple-700">
+            <CheckCircle2 className="w-3 h-3 mr-1" />
+            Procesado
+          </Badge>
+        );
       case 'paid':
-        return <Badge className="bg-green-100 text-green-700"><Euro className="w-3 h-3 mr-1" />Pagado</Badge>;
+        return (
+          <Badge className="bg-green-100 text-green-700">
+            <Euro className="w-3 h-3 mr-1" />
+            Pagado
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
   };
 
-  const filteredServices = services.filter(s => {
-    const matchesSearch = s.serviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         s.providerName.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredServices = services.filter((s) => {
+    const matchesSearch =
+      s.serviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.providerName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || s.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -241,7 +209,9 @@ export default function MarketplaceComisionesPage() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Comisiones del Marketplace</h1>
-            <p className="text-gray-600 mt-1">Gestiona las comisiones de servicios del marketplace</p>
+            <p className="text-gray-600 mt-1">
+              Gestiona las comisiones de servicios del marketplace
+            </p>
           </div>
           <Button onClick={() => toast.info('Exportando informe...')}>
             <Download className="w-4 h-4 mr-2" />
@@ -257,7 +227,9 @@ export default function MarketplaceComisionesPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Este Mes</p>
-                    <p className="text-xl font-bold text-green-600">€{stats.totalCommissionsThisMonth.toFixed(2)}</p>
+                    <p className="text-xl font-bold text-green-600">
+                      €{stats.totalCommissionsThisMonth.toFixed(2)}
+                    </p>
                   </div>
                   <TrendingUp className="w-6 h-6 text-green-400" />
                 </div>
@@ -281,7 +253,9 @@ export default function MarketplaceComisionesPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500">Pendiente</p>
-                    <p className="text-xl font-bold text-yellow-600">€{stats.pendingCommissions.toFixed(2)}</p>
+                    <p className="text-xl font-bold text-yellow-600">
+                      €{stats.pendingCommissions.toFixed(2)}
+                    </p>
                   </div>
                   <Clock className="w-6 h-6 text-yellow-400" />
                 </div>
@@ -369,67 +343,82 @@ export default function MarketplaceComisionesPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Servicio</TableHead>
-                      <TableHead>Proveedor</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead className="text-right">Comisión</TableHead>
-                      <TableHead className="text-right">Transacciones</TableHead>
-                      <TableHead className="text-right">Ingresos</TableHead>
-                      <TableHead className="text-right">Comisiones</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredServices.map((service) => (
-                      <TableRow key={service.id}>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium">{service.serviceName}</p>
-                            <p className="text-sm text-gray-500">{service.serviceCategory}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium">{service.providerName}</p>
-                            <p className="text-sm text-gray-500">{service.providerEmail}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {service.commissionType === 'percentage' ? 'Porcentaje' : 'Fijo'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right font-semibold">
-                          {service.commissionType === 'percentage' 
-                            ? `${service.commissionRate}%` 
-                            : `€${service.commissionRate}`}
-                        </TableCell>
-                        <TableCell className="text-right">{service.totalTransactions}</TableCell>
-                        <TableCell className="text-right">€{service.totalRevenue.toFixed(2)}</TableCell>
-                        <TableCell className="text-right font-semibold text-green-600">
-                          €{service.totalCommissions.toFixed(2)}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(service.status)}</TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedService(service);
-                              setConfigDialogOpen(true);
-                            }}
-                          >
-                            <Settings className="w-4 h-4" />
-                          </Button>
-                        </TableCell>
+                {filteredServices.length === 0 ? (
+                  <div className="text-center py-12">
+                    <ShoppingBag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Sin comisiones configuradas
+                    </h3>
+                    <p className="text-gray-500">
+                      Las comisiones se generarán automáticamente cuando los proveedores del
+                      marketplace realicen ventas.
+                    </p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Servicio</TableHead>
+                        <TableHead>Proveedor</TableHead>
+                        <TableHead>Tipo</TableHead>
+                        <TableHead className="text-right">Comisión</TableHead>
+                        <TableHead className="text-right">Transacciones</TableHead>
+                        <TableHead className="text-right">Ingresos</TableHead>
+                        <TableHead className="text-right">Comisiones</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead className="text-right">Acciones</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredServices.map((service) => (
+                        <TableRow key={service.id}>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{service.serviceName}</p>
+                              <p className="text-sm text-gray-500">{service.serviceCategory}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{service.providerName}</p>
+                              <p className="text-sm text-gray-500">{service.providerEmail}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">
+                              {service.commissionType === 'percentage' ? 'Porcentaje' : 'Fijo'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right font-semibold">
+                            {service.commissionType === 'percentage'
+                              ? `${service.commissionRate}%`
+                              : `€${service.commissionRate}`}
+                          </TableCell>
+                          <TableCell className="text-right">{service.totalTransactions}</TableCell>
+                          <TableCell className="text-right">
+                            €{service.totalRevenue.toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-right font-semibold text-green-600">
+                            €{service.totalCommissions.toFixed(2)}
+                          </TableCell>
+                          <TableCell>{getStatusBadge(service.status)}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedService(service);
+                                setConfigDialogOpen(true);
+                              }}
+                            >
+                              <Settings className="w-4 h-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -444,41 +433,53 @@ export default function MarketplaceComisionesPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Fecha</TableHead>
-                      <TableHead>Servicio</TableHead>
-                      <TableHead>Proveedor</TableHead>
-                      <TableHead>Cliente</TableHead>
-                      <TableHead className="text-right">Importe</TableHead>
-                      <TableHead className="text-right">Comisión</TableHead>
-                      <TableHead>Estado</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {transactions.map((tx) => (
-                      <TableRow key={tx.id}>
-                        <TableCell>
-                          {format(new Date(tx.date), 'dd MMM yyyy', { locale: es })}
-                        </TableCell>
-                        <TableCell className="font-medium">{tx.serviceName}</TableCell>
-                        <TableCell>{tx.providerName}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Building2 className="w-4 h-4 text-gray-400" />
-                            {tx.clientCompany}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">€{tx.transactionAmount.toFixed(2)}</TableCell>
-                        <TableCell className="text-right font-semibold text-green-600">
-                          €{tx.commissionAmount.toFixed(2)}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(tx.status)}</TableCell>
+                {transactions.length === 0 ? (
+                  <div className="text-center py-12">
+                    <TrendingUp className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Sin transacciones</h3>
+                    <p className="text-gray-500">
+                      Las transacciones aparecerán aquí cuando se realicen ventas en el marketplace.
+                    </p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Fecha</TableHead>
+                        <TableHead>Servicio</TableHead>
+                        <TableHead>Proveedor</TableHead>
+                        <TableHead>Cliente</TableHead>
+                        <TableHead className="text-right">Importe</TableHead>
+                        <TableHead className="text-right">Comisión</TableHead>
+                        <TableHead>Estado</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {transactions.map((tx) => (
+                        <TableRow key={tx.id}>
+                          <TableCell>
+                            {format(new Date(tx.date), 'dd MMM yyyy', { locale: es })}
+                          </TableCell>
+                          <TableCell className="font-medium">{tx.serviceName}</TableCell>
+                          <TableCell>{tx.providerName}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Building2 className="w-4 h-4 text-gray-400" />
+                              {tx.clientCompany}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            €{tx.transactionAmount.toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-right font-semibold text-green-600">
+                            €{tx.commissionAmount.toFixed(2)}
+                          </TableCell>
+                          <TableCell>{getStatusBadge(tx.status)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -489,9 +490,7 @@ export default function MarketplaceComisionesPage() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Configurar Comisión</DialogTitle>
-              <DialogDescription>
-                Ajusta la tarifa de comisión para este servicio
-              </DialogDescription>
+              <DialogDescription>Ajusta la tarifa de comisión para este servicio</DialogDescription>
             </DialogHeader>
             {selectedService && (
               <div className="space-y-4 py-4">
@@ -541,10 +540,12 @@ export default function MarketplaceComisionesPage() {
               <Button variant="outline" onClick={() => setConfigDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button onClick={() => {
-                toast.success('Configuración guardada');
-                setConfigDialogOpen(false);
-              }}>
+              <Button
+                onClick={() => {
+                  toast.success('Configuración guardada');
+                  setConfigDialogOpen(false);
+                }}
+              >
                 Guardar
               </Button>
             </DialogFooter>
