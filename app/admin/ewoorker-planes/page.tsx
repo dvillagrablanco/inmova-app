@@ -132,6 +132,7 @@ export default function AdminEwoorkerPlanesPage() {
       socioPercentage: 50,
       plataformaPercentage: 50,
       destacado: false,
+      activo: true,
     });
     setNewFeature('');
   };
@@ -156,6 +157,7 @@ export default function AdminEwoorkerPlanesPage() {
       socioPercentage: plan.socioPercentage,
       plataformaPercentage: plan.plataformaPercentage,
       destacado: plan.destacado,
+      activo: plan.activo !== false,
     });
     setShowEditDialog(true);
   };
@@ -354,13 +356,25 @@ export default function AdminEwoorkerPlanesPage() {
         </div>
       </div>
 
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="destacado"
-          checked={formData.destacado}
-          onCheckedChange={(v) => setFormData({ ...formData, destacado: v })}
-        />
-        <Label htmlFor="destacado">Plan destacado (MÁS POPULAR)</Label>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="destacado"
+            checked={formData.destacado}
+            onCheckedChange={(v) => setFormData({ ...formData, destacado: v })}
+          />
+          <Label htmlFor="destacado">Plan destacado (MÁS POPULAR)</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="activo"
+            checked={formData.activo}
+            onCheckedChange={(v) => setFormData({ ...formData, activo: v })}
+          />
+          <Label htmlFor="activo" className={formData.activo ? 'text-green-600' : 'text-red-600'}>
+            {formData.activo ? 'Activo' : 'Inactivo'}
+          </Label>
+        </div>
       </div>
     </div>
   );

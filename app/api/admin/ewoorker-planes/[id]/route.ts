@@ -104,20 +104,34 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       data: validated,
     });
 
-    // Log de auditoría
-    await prisma.auditLog.create({
-      data: {
-        userId: session.user.id,
-        action: 'EWOORKER_PLAN_UPDATED',
-        entityType: 'EWOORKER_PLAN',
-        entityId: plan.id,
-        details: {
-          codigo: plan.codigo,
-          changes: validated,
-        },
-        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-      },
-    });
+    // Log de auditoría (solo si hay companyId)
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { companyId: true },
+      });
+      
+      if (user?.companyId) {
+        await prisma.auditLog.create({
+          data: {
+            companyId: user.companyId,
+            userId: session.user.id,
+            action: 'PLATFORM_SETTINGS_UPDATED',
+            entityType: 'EWOORKER_PLAN',
+            entityId: plan.id,
+            entityName: plan.nombre,
+            changes: JSON.stringify({
+              action: 'updated',
+              codigo: plan.codigo,
+              changes: validated,
+            }),
+            ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          },
+        });
+      }
+    } catch (auditError) {
+      console.warn('[Audit Log Warning]:', auditError);
+    }
 
     return NextResponse.json({
       success: true,
@@ -177,20 +191,34 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       where: { id: params.id },
     });
 
-    // Log de auditoría
-    await prisma.auditLog.create({
-      data: {
-        userId: session.user.id,
-        action: 'EWOORKER_PLAN_DELETED',
-        entityType: 'EWOORKER_PLAN',
-        entityId: params.id,
-        details: {
-          codigo: existing.codigo,
-          nombre: existing.nombre,
-        },
-        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-      },
-    });
+    // Log de auditoría (solo si hay companyId)
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { companyId: true },
+      });
+      
+      if (user?.companyId) {
+        await prisma.auditLog.create({
+          data: {
+            companyId: user.companyId,
+            userId: session.user.id,
+            action: 'PLATFORM_SETTINGS_UPDATED',
+            entityType: 'EWOORKER_PLAN',
+            entityId: params.id,
+            entityName: existing.nombre,
+            changes: JSON.stringify({
+              action: 'deleted',
+              codigo: existing.codigo,
+              nombre: existing.nombre,
+            }),
+            ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          },
+        });
+      }
+    } catch (auditError) {
+      console.warn('[Audit Log Warning]:', auditError);
+    }
 
     return NextResponse.json({
       success: true,

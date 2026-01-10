@@ -114,22 +114,35 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Log de auditoría
-    await prisma.auditLog.create({
-      data: {
-        userId: session.user.id,
-        action: 'ADDONS_STRIPE_SYNC',
-        entityType: 'SYSTEM',
-        entityId: 'stripe-sync',
-        details: {
-          total: results.total,
-          synced: results.synced,
-          failed: results.failed,
-          skipped: results.skipped,
-        },
-        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-      },
-    });
+    // Log de auditoría (solo si hay companyId)
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { companyId: true },
+      });
+      
+      if (user?.companyId) {
+        await prisma.auditLog.create({
+          data: {
+            companyId: user.companyId,
+            userId: session.user.id,
+            action: 'PLATFORM_SETTINGS_UPDATED',
+            entityType: 'SYSTEM',
+            entityId: 'stripe-sync',
+            entityName: 'Stripe Add-ons Sync',
+            changes: JSON.stringify({
+              total: results.total,
+              synced: results.synced,
+              failed: results.failed,
+              skipped: results.skipped,
+            }),
+            ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          },
+        });
+      }
+    } catch (auditError) {
+      console.warn('[Audit Log Warning]:', auditError);
+    }
 
     return NextResponse.json({
       success: true,

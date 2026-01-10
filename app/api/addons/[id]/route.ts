@@ -184,22 +184,36 @@ export async function PUT(
       stripeSync.synced = true; // Ya estaba sincronizado
     }
 
-    // Log de auditoría
-    await prisma.auditLog.create({
-      data: {
-        userId: session.user.id,
-        action: 'ADDON_UPDATED',
-        entityType: 'ADDON',
-        entityId: addon.id,
-        details: {
-          changes: Object.keys(validated).filter(k => k !== 'syncWithStripe'),
-          addonName: addon.nombre,
-          stripeSync,
-          preciosChanged,
-        },
-        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-      },
-    });
+    // Log de auditoría (solo si hay companyId)
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { companyId: true },
+      });
+      
+      if (user?.companyId) {
+        await prisma.auditLog.create({
+          data: {
+            companyId: user.companyId,
+            userId: session.user.id,
+            action: 'PLATFORM_SETTINGS_UPDATED',
+            entityType: 'ADDON',
+            entityId: addon.id,
+            entityName: addon.nombre,
+            changes: JSON.stringify({
+              changes: Object.keys(validated).filter(k => k !== 'syncWithStripe'),
+              addonName: addon.nombre,
+              stripeSync,
+              preciosChanged,
+            }),
+            ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          },
+        });
+      }
+    } catch (auditError) {
+      // No fallar si el audit log no se puede crear
+      console.warn('[Audit Log Warning]:', auditError);
+    }
 
     return NextResponse.json({
       success: true,
@@ -288,21 +302,36 @@ export async function DELETE(
         data: { activo: false },
       });
 
-      await prisma.auditLog.create({
-        data: {
-          userId: session.user.id,
-          action: 'ADDON_DEACTIVATED',
-          entityType: 'ADDON',
-          entityId: addon.id,
-          details: {
-            addonName: addon.nombre,
-            reason: 'Has active subscriptions',
-            activeSubscriptions: addon.suscripciones.length,
-            stripeDeactivated,
-          },
-          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-        },
-      });
+      // Log de auditoría (solo si hay companyId)
+      try {
+        const user = await prisma.user.findUnique({
+          where: { id: session.user.id },
+          select: { companyId: true },
+        });
+        
+        if (user?.companyId) {
+          await prisma.auditLog.create({
+            data: {
+              companyId: user.companyId,
+              userId: session.user.id,
+              action: 'PLATFORM_SETTINGS_UPDATED',
+              entityType: 'ADDON',
+              entityId: addon.id,
+              entityName: addon.nombre,
+              changes: JSON.stringify({
+                action: 'deactivated',
+                addonName: addon.nombre,
+                reason: 'Has active subscriptions',
+                activeSubscriptions: addon.suscripciones.length,
+                stripeDeactivated,
+              }),
+              ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+            },
+          });
+        }
+      } catch (auditError) {
+        console.warn('[Audit Log Warning]:', auditError);
+      }
 
       return NextResponse.json({
         success: true,
@@ -317,19 +346,34 @@ export async function DELETE(
       where: { id },
     });
 
-    await prisma.auditLog.create({
-      data: {
-        userId: session.user.id,
-        action: 'ADDON_DELETED',
-        entityType: 'ADDON',
-        entityId: id,
-        details: {
-          addonName: addon.nombre,
-          stripeDeactivated,
-        },
-        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-      },
-    });
+    // Log de auditoría (solo si hay companyId)
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { companyId: true },
+      });
+      
+      if (user?.companyId) {
+        await prisma.auditLog.create({
+          data: {
+            companyId: user.companyId,
+            userId: session.user.id,
+            action: 'PLATFORM_SETTINGS_UPDATED',
+            entityType: 'ADDON',
+            entityId: id,
+            entityName: addon.nombre,
+            changes: JSON.stringify({
+              action: 'deleted',
+              addonName: addon.nombre,
+              stripeDeactivated,
+            }),
+            ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          },
+        });
+      }
+    } catch (auditError) {
+      console.warn('[Audit Log Warning]:', auditError);
+    }
 
     return NextResponse.json({
       success: true,

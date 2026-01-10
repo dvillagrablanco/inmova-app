@@ -215,22 +215,36 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Log de auditoría
-    await prisma.auditLog.create({
-      data: {
-        userId: session.user.id,
-        action: 'ADDON_CREATED',
-        entityType: 'ADDON',
-        entityId: addon.id,
-        details: {
-          codigo: addon.codigo,
-          nombre: addon.nombre,
-          precioMensual: addon.precioMensual,
-          stripeSync,
-        },
-        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-      },
-    });
+    // Log de auditoría (solo si hay companyId)
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { companyId: true },
+      });
+      
+      if (user?.companyId) {
+        await prisma.auditLog.create({
+          data: {
+            companyId: user.companyId,
+            userId: session.user.id,
+            action: 'PLATFORM_SETTINGS_UPDATED',
+            entityType: 'ADDON',
+            entityId: addon.id,
+            entityName: addon.nombre,
+            changes: JSON.stringify({
+              action: 'created',
+              codigo: addon.codigo,
+              nombre: addon.nombre,
+              precioMensual: addon.precioMensual,
+              stripeSync,
+            }),
+            ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          },
+        });
+      }
+    } catch (auditError) {
+      console.warn('[Audit Log Warning]:', auditError);
+    }
 
     return NextResponse.json(
       {

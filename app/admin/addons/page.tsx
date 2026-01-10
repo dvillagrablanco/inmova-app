@@ -114,6 +114,7 @@ export default function AdminAddonsPage() {
     margenPorcentaje: 0,
     costoUnitario: 0,
     destacado: false,
+    activo: true,
     vertical: 'inmova' as 'inmova' | 'ewoorker',
   });
 
@@ -168,6 +169,7 @@ export default function AdminAddonsPage() {
       margenPorcentaje: 0,
       costoUnitario: 0,
       destacado: false,
+      activo: true,
       vertical: activeTab,
     });
   };
@@ -196,6 +198,7 @@ export default function AdminAddonsPage() {
       margenPorcentaje: addon.margenPorcentaje || 0,
       costoUnitario: addon.costoUnitario || 0,
       destacado: addon.destacado,
+      activo: addon.activo !== false,
       vertical: isEwoorker ? 'ewoorker' : 'inmova',
     });
     setShowEditDialog(true);
@@ -435,13 +438,25 @@ export default function AdminAddonsPage() {
         </div>
       </div>
 
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="destacado"
-          checked={formData.destacado}
-          onCheckedChange={(v) => setFormData({ ...formData, destacado: v })}
-        />
-        <Label htmlFor="destacado">Destacar este add-on</Label>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="destacado"
+            checked={formData.destacado}
+            onCheckedChange={(v) => setFormData({ ...formData, destacado: v })}
+          />
+          <Label htmlFor="destacado">Destacar este add-on</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="activo"
+            checked={formData.activo}
+            onCheckedChange={(v) => setFormData({ ...formData, activo: v })}
+          />
+          <Label htmlFor="activo" className={formData.activo ? 'text-green-600' : 'text-red-600'}>
+            {formData.activo ? 'Activo' : 'Inactivo'}
+          </Label>
+        </div>
       </div>
     </div>
   );
