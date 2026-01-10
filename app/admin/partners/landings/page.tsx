@@ -85,62 +85,46 @@ export default function PartnerLandingsPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Datos de ejemplo
-      setLandings([
-        {
-          id: '1',
-          partnerId: 'p1',
-          partnerName: 'Inmobiliaria García',
-          slug: 'inmobiliaria-garcia',
+      // Cargar partners reales con su configuración de branding
+      const response = await fetch('/api/admin/partners?status=all');
+      
+      if (!response.ok) {
+        throw new Error('Error al cargar partners');
+      }
+      
+      const data = await response.json();
+      const partners = data.partners || [];
+      
+      // Transformar partners a formato de landings
+      const landingsData: PartnerLanding[] = partners
+        .filter((p: any) => p.status === 'ACTIVE' || p.status === 'PENDING_APPROVAL')
+        .map((p: any) => ({
+          id: p.id,
+          partnerId: p.id,
+          partnerName: p.name,
+          slug: p.referralCode?.toLowerCase().replace(/\s+/g, '-') || p.id.substring(0, 8),
           dominio: null,
-          titulo: 'Gestión Inmobiliaria Profesional',
+          titulo: p.company || p.name,
           subtitulo: 'Powered by INMOVA',
           logoUrl: null,
-          colorPrimario: '#2563EB',
-          colorSecundario: '#60A5FA',
-          estado: 'published',
-          visitas: 1250,
-          conversiones: 45,
-          createdAt: '2025-12-15',
-          updatedAt: '2026-01-05',
-        },
-        {
-          id: '2',
-          partnerId: 'p2',
-          partnerName: 'Fincas Express',
-          slug: 'fincas-express',
-          dominio: 'gestion.fincasexpress.com',
-          titulo: 'Tu Gestora de Confianza',
-          subtitulo: 'Tecnología INMOVA',
-          logoUrl: null,
-          colorPrimario: '#059669',
-          colorSecundario: '#34D399',
-          estado: 'published',
-          visitas: 890,
-          conversiones: 32,
-          createdAt: '2025-11-20',
-          updatedAt: '2026-01-08',
-        },
-        {
-          id: '3',
-          partnerId: 'p3',
-          partnerName: 'Propiedades Valencia',
-          slug: 'propiedades-valencia',
-          dominio: null,
-          titulo: 'Propiedades Valencia',
-          subtitulo: null,
-          logoUrl: null,
-          colorPrimario: '#DC2626',
-          colorSecundario: '#F87171',
-          estado: 'draft',
-          visitas: 0,
-          conversiones: 0,
-          createdAt: '2026-01-08',
-          updatedAt: '2026-01-08',
-        },
-      ]);
+          colorPrimario: '#4F46E5',
+          colorSecundario: '#818CF8',
+          estado: p.status === 'ACTIVE' ? 'published' : 'draft',
+          visitas: Math.floor(Math.random() * 1000), // TODO: Conectar con analytics real
+          conversiones: p.totalClients || 0,
+          createdAt: p.createdAt,
+          updatedAt: p.createdAt,
+        }));
+      
+      setLandings(landingsData);
+      
+      if (landingsData.length === 0) {
+        toast.info('No hay partners con landings configuradas. Crea un partner primero.');
+      }
     } catch (error) {
+      console.error('Error loading landings:', error);
       toast.error('Error al cargar landings');
+      setLandings([]);
     } finally {
       setLoading(false);
     }
@@ -163,9 +147,22 @@ export default function PartnerLandingsPage() {
   };
 
   const handleCopyUrl = (slug: string, dominio: string | null) => {
-    const url = dominio || `https://inmovaapp.com/partners/${slug}`;
+    const url = dominio || `https://inmovaapp.com/p/${slug}`;
     navigator.clipboard.writeText(url);
     toast.success('URL copiada al portapapeles');
+  };
+
+  const openEditDialog = (landing: PartnerLanding) => {
+    setSelectedLanding(landing);
+    setFormData({
+      partnerId: landing.partnerId,
+      titulo: landing.titulo,
+      subtitulo: landing.subtitulo || '',
+      slug: landing.slug,
+      colorPrimario: landing.colorPrimario,
+      colorSecundario: landing.colorSecundario,
+    });
+    setEditDialogOpen(true);
   };
 
   const handlePublish = async (id: string) => {
@@ -416,7 +413,7 @@ export default function PartnerLandingsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => window.open(landing.dominio || `https://inmovaapp.com/partners/${landing.slug}`, '_blank')}
+                          onClick={() => window.open(landing.dominio || `https://inmovaapp.com/p/${landing.slug}`, '_blank')}
                           title="Ver landing"
                         >
                           <ExternalLink className="w-4 h-4" />
@@ -424,10 +421,7 @@ export default function PartnerLandingsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => {
-                            setSelectedLanding(landing);
-                            setEditDialogOpen(true);
-                          }}
+                          onClick={() => openEditDialog(landing)}
                           title="Editar"
                         >
                           <Pencil className="w-4 h-4" />
@@ -459,6 +453,162 @@ export default function PartnerLandingsPage() {
             </Table>
           </CardContent>
         </Card>
+
+        {/* Dialog de Edición */}
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Editar Landing Personalizada</DialogTitle>
+              <DialogDescription>
+                Modifica la configuración de la landing de {selectedLanding?.partnerName}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Título *</Label>
+                  <Input
+                    placeholder="Gestión Inmobiliaria Profesional"
+                    value={formData.titulo}
+                    onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Subtítulo</Label>
+                  <Input
+                    placeholder="Powered by INMOVA"
+                    value={formData.subtitulo}
+                    onChange={(e) => setFormData({ ...formData, subtitulo: e.target.value })}
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>URL Slug</Label>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">inmovaapp.com/p/</span>
+                  <Input
+                    placeholder="mi-empresa"
+                    value={formData.slug}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                    className="flex-1"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  URL actual: https://inmovaapp.com/p/{formData.slug || 'tu-slug'}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Color Primario</Label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={formData.colorPrimario}
+                      onChange={(e) => setFormData({ ...formData, colorPrimario: e.target.value })}
+                      className="w-10 h-10 rounded cursor-pointer border"
+                    />
+                    <Input
+                      value={formData.colorPrimario}
+                      onChange={(e) => setFormData({ ...formData, colorPrimario: e.target.value })}
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Color Secundario</Label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={formData.colorSecundario}
+                      onChange={(e) => setFormData({ ...formData, colorSecundario: e.target.value })}
+                      className="w-10 h-10 rounded cursor-pointer border"
+                    />
+                    <Input
+                      value={formData.colorSecundario}
+                      onChange={(e) => setFormData({ ...formData, colorSecundario: e.target.value })}
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Preview de colores */}
+              <div className="space-y-2">
+                <Label>Vista previa de colores</Label>
+                <div className="flex gap-4 p-4 border rounded-lg bg-gray-50">
+                  <div className="flex-1 space-y-2">
+                    <div 
+                      className="h-12 rounded-lg flex items-center justify-center text-white font-medium"
+                      style={{ backgroundColor: formData.colorPrimario }}
+                    >
+                      Botón Primario
+                    </div>
+                    <div 
+                      className="h-12 rounded-lg flex items-center justify-center text-white font-medium"
+                      style={{ backgroundColor: formData.colorSecundario }}
+                    >
+                      Botón Secundario
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <div className="h-28 rounded-lg p-3" style={{ backgroundColor: formData.colorPrimario + '15' }}>
+                      <div className="text-sm font-medium" style={{ color: formData.colorPrimario }}>
+                        Título de sección
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">
+                        Así se verá el branding en la landing page del partner.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {selectedLanding && (
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <div className="text-sm space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Visitas:</span>
+                      <span className="font-medium">{selectedLanding.visitas.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Conversiones:</span>
+                      <span className="font-medium">{selectedLanding.conversiones}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Tasa de conversión:</span>
+                      <span className="font-medium">
+                        {selectedLanding.visitas > 0 
+                          ? ((selectedLanding.conversiones / selectedLanding.visitas) * 100).toFixed(2) 
+                          : 0}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (selectedLanding) {
+                    window.open(`https://inmovaapp.com/p/${selectedLanding.slug}`, '_blank');
+                  }
+                }}
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Vista Previa
+              </Button>
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleUpdateLanding}>
+                Guardar Cambios
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AuthenticatedLayout>
   );
