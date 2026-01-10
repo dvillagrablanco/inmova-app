@@ -27,8 +27,6 @@ export async function GET(request: NextRequest) {
         name: true,
         email: true,
         role: true,
-        phone: true,
-        avatarUrl: true,
         createdAt: true,
         company: {
           select: {
@@ -48,8 +46,8 @@ export async function GET(request: NextRequest) {
       id: user.id,
       nombreCompleto: user.name,
       email: user.email,
-      telefono: user.phone,
-      foto: user.avatarUrl,
+      telefono: null, // Campo no disponible en esquema actual
+      foto: null, // Campo no disponible en esquema actual
       empresa: user.company?.nombre,
       rol: user.role,
       fechaAlta: user.createdAt,
@@ -62,9 +60,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(salesRepData);
   } catch (error) {
     logger.error('Error fetching sales representative:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener representante' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener representante' }, { status: 500 });
   }
 }

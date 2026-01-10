@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     // Intentar obtener dispositivos reales de la BD
     // Nota: Si no existe el modelo IoTDevice, retornamos array vacío
     let devices: any[] = [];
-    
+
     try {
       // Verificar si existe el modelo en Prisma
       if ((prisma as any).ioTDevice) {
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
               select: { id: true, nombre: true },
             },
             unit: {
-              select: { id: true, nombre: true },
+              select: { id: true, numero: true },
             },
           },
           orderBy: { updatedAt: 'desc' },
@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
       buildingId: device.buildingId,
       buildingName: device.building?.nombre || '',
       unitId: device.unitId,
-      unitName: device.unit?.nombre,
+      unitName: device.unit?.numero ? `Unidad ${device.unit.numero}` : undefined,
       battery: device.batteryLevel,
       lastUpdate: device.updatedAt?.toISOString() || new Date().toISOString(),
       currentValue: device.lastReading,
@@ -109,10 +109,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error fetching IoT devices:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener dispositivos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener dispositivos' }, { status: 500 });
   }
 }
 
@@ -153,7 +150,7 @@ export async function POST(request: NextRequest) {
               select: { id: true, nombre: true },
             },
             unit: {
-              select: { id: true, nombre: true },
+              select: { id: true, numero: true },
             },
           },
         });
@@ -181,9 +178,6 @@ export async function POST(request: NextRequest) {
     }
 
     logger.error('Error creating IoT device:', error);
-    return NextResponse.json(
-      { error: 'Error al crear dispositivo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear dispositivo' }, { status: 500 });
   }
 }

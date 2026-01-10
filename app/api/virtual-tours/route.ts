@@ -72,8 +72,8 @@ export async function GET(request: NextRequest) {
         unit: {
           select: {
             id: true,
-            nombre: true,
-            direccion: true,
+            numero: true,
+            buildingId: true,
           },
         },
         building: {
@@ -89,21 +89,26 @@ export async function GET(request: NextRequest) {
 
     // Calcular analytics generales
     const totalViews = tours.reduce((sum, t) => sum + t.vistas, 0);
-    const avgDuration = tours.length > 0
-      ? tours.reduce((sum, t) => sum + (t.tiempoPromedio || 0), 0) / tours.filter(t => t.tiempoPromedio).length
-      : 0;
+    const avgDuration =
+      tours.length > 0
+        ? tours.reduce((sum, t) => sum + (t.tiempoPromedio || 0), 0) /
+          tours.filter((t) => t.tiempoPromedio).length
+        : 0;
 
     // Transformar datos al formato esperado por el frontend
-    const formattedTours = tours.map(tour => ({
+    const formattedTours = tours.map((tour) => ({
       id: tour.id,
       propertyId: tour.unitId || tour.buildingId || '',
-      propertyName: tour.unit?.nombre || tour.building?.nombre || tour.titulo,
+      propertyName: tour.unit?.numero
+        ? `Unidad ${tour.unit.numero}`
+        : tour.building?.nombre || tour.titulo,
       type: tour.tipo as '360' | 'video' | 'ar' | 'vr',
       status: tour.estado as 'draft' | 'published' | 'archived',
       createdAt: tour.createdAt.toISOString().split('T')[0],
       views: tour.vistas,
       avgDuration: tour.tiempoPromedio || 0,
-      conversionRate: tour.vistas > 0 ? Math.round((tour.compartido / tour.vistas) * 100 * 10) / 10 : 0,
+      conversionRate:
+        tour.vistas > 0 ? Math.round((tour.compartido / tour.vistas) * 100 * 10) / 10 : 0,
       thumbnail: tour.urlThumbnail || '/images/tours/default.jpg',
       url: tour.urlPrincipal,
       features: tour.escenas ? [`${(tour.escenas as any[]).length} Escenas`] : [],
@@ -114,26 +119,34 @@ export async function GET(request: NextRequest) {
     // Analytics resumen
     const analytics = {
       totalViews,
-      avgEngagement: tours.length > 0 ? Math.round(avgDuration / 60 * 100) / 100 : 0,
+      avgEngagement: tours.length > 0 ? Math.round((avgDuration / 60) * 100) / 100 : 0,
       totalConversions: tours.reduce((sum, t) => sum + t.compartido, 0),
-      avgConversionRate: tours.length > 0
-        ? Math.round((tours.reduce((sum, t) => sum + (t.vistas > 0 ? (t.compartido / t.vistas) * 100 : 0), 0) / tours.length) * 10) / 10
-        : 0,
+      avgConversionRate:
+        tours.length > 0
+          ? Math.round(
+              (tours.reduce(
+                (sum, t) => sum + (t.vistas > 0 ? (t.compartido / t.vistas) * 100 : 0),
+                0
+              ) /
+                tours.length) *
+                10
+            ) / 10
+          : 0,
       viewsBySource: [
         { source: 'Portal Inmobiliario', views: Math.round(totalViews * 0.45) },
         { source: 'Web Propia', views: Math.round(totalViews * 0.25) },
-        { source: 'Redes Sociales', views: Math.round(totalViews * 0.20) },
-        { source: 'Email Marketing', views: Math.round(totalViews * 0.10) },
+        { source: 'Redes Sociales', views: Math.round(totalViews * 0.2) },
+        { source: 'Email Marketing', views: Math.round(totalViews * 0.1) },
       ],
       viewsOverTime: generateViewsTimeline(tours),
       topProperties: formattedTours
-        .filter(t => t.status === 'published')
+        .filter((t) => t.status === 'published')
         .sort((a, b) => b.views - a.views)
         .slice(0, 5)
-        .map(t => ({
+        .map((t) => ({
           name: t.propertyName,
           views: t.views,
-          conversions: Math.round(t.views * t.conversionRate / 100),
+          conversions: Math.round((t.views * t.conversionRate) / 100),
         })),
     };
 
@@ -144,10 +157,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error fetching virtual tours:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener tours virtuales' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener tours virtuales' }, { status: 500 });
   }
 }
 
@@ -182,7 +192,7 @@ export async function POST(request: NextRequest) {
       },
       include: {
         unit: {
-          select: { id: true, nombre: true },
+          select: { id: true, numero: true },
         },
         building: {
           select: { id: true, nombre: true },
@@ -202,10 +212,7 @@ export async function POST(request: NextRequest) {
     }
 
     logger.error('Error creating virtual tour:', error);
-    return NextResponse.json(
-      { error: 'Error al crear tour virtual' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear tour virtual' }, { status: 500 });
   }
 }
 
@@ -213,21 +220,21 @@ export async function POST(request: NextRequest) {
 function generateViewsTimeline(tours: any[]) {
   const now = new Date();
   const timeline = [];
-  
+
   for (let i = 7; i >= 0; i--) {
     const date = new Date(now);
     date.setDate(date.getDate() - i);
     const dateStr = date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
-    
+
     // Simular distribución basada en tours existentes
     const baseViews = tours.reduce((sum, t) => sum + t.vistas, 0) / 8;
     const variance = Math.random() * 0.4 - 0.2; // ±20%
-    
+
     timeline.push({
       date: dateStr,
       views: Math.round(baseViews * (1 + variance)),
     });
   }
-  
+
   return timeline;
 }

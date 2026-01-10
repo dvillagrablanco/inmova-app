@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       },
       include: {
         unit: {
-          select: { id: true, nombre: true, direccion: true },
+          select: { id: true, numero: true },
         },
         building: {
           select: { id: true, nombre: true, direccion: true },
@@ -55,15 +55,16 @@ export async function GET(request: NextRequest) {
     // Transformar al formato esperado
     const formattedTokens = tokens.map((token) => ({
       id: token.id,
-      name: token.unit?.nombre || token.building?.nombre || token.nombre,
+      name: token.unit?.numero
+        ? `Unidad ${token.unit.numero}`
+        : token.building?.nombre || token.nombre,
       totalValue: token.valorPropiedad,
-      tokenized: token.valorActual || (token.totalSupply * token.precioPorToken),
+      tokenized: token.valorActual || token.totalSupply * token.precioPorToken,
       tokensIssued: token.totalSupply,
       tokenPrice: token.precioPorToken,
       investors: token._count.holders,
-      annualYield: token.rentaDistribuida > 0
-        ? (token.rentaDistribuida / token.valorPropiedad) * 100
-        : 0,
+      annualYield:
+        token.rentaDistribuida > 0 ? (token.rentaDistribuida / token.valorPropiedad) * 100 : 0,
       status: token.estado === 'active' ? 'active' : 'pending',
       contractAddress: token.contractAddress,
       blockchain: token.blockchain,
@@ -75,13 +76,14 @@ export async function GET(request: NextRequest) {
     // Calcular estadísticas generales
     const stats = {
       totalTokenizedValue: formattedTokens
-        .filter(t => t.status === 'active')
+        .filter((t) => t.status === 'active')
         .reduce((sum, t) => sum + t.tokenized, 0),
       totalInvestors: formattedTokens.reduce((sum, t) => sum + t.investors, 0),
-      averageYield: formattedTokens.length > 0
-        ? formattedTokens.reduce((sum, t) => sum + t.annualYield, 0) / formattedTokens.length
-        : 0,
-      activeProperties: formattedTokens.filter(t => t.status === 'active').length,
+      averageYield:
+        formattedTokens.length > 0
+          ? formattedTokens.reduce((sum, t) => sum + t.annualYield, 0) / formattedTokens.length
+          : 0,
+      activeProperties: formattedTokens.filter((t) => t.status === 'active').length,
     };
 
     return NextResponse.json({
@@ -90,9 +92,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error fetching blockchain tokens:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener tokens' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener tokens' }, { status: 500 });
   }
 }

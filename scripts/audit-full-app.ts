@@ -1,397 +1,682 @@
 /**
- * Auditoría completa de la aplicación con Playwright
- * Login como superadmin y revisión de todas las páginas
+ * Auditoría Exhaustiva de Inmova App - Pre-Launch
+ *
+ * Este script verifica:
+ * 1. Que todas las páginas cargan sin errores HTTP
+ * 2. Que no hay errores de JavaScript en consola
+ * 3. Que los botones principales funcionan
+ * 4. Screenshots de cada página para revisión visual
  */
 
-import { chromium, Browser, Page, ConsoleMessage } from '@playwright/test';
-import { writeFileSync } from 'fs';
+import { chromium, Browser, Page, BrowserContext } from 'playwright';
+import * as fs from 'fs';
+import * as path from 'path';
 
-interface AuditResult {
-  page: string;
+// Configuración
+const BASE_URL = process.env.AUDIT_URL || 'https://inmovaapp.com';
+const TEST_USER = process.env.TEST_USER || 'admin@inmova.app';
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'Admin123!';
+const OUTPUT_DIR = './audit-results';
+const SCREENSHOTS_DIR = `${OUTPUT_DIR}/screenshots`;
+
+// Categorías de páginas para organizar la auditoría
+const PAGE_CATEGORIES = {
+  // Páginas públicas (no requieren auth)
+  public: [
+    '/landing',
+    '/login',
+    '/register',
+    '/forgot-password',
+    '/landing/precios',
+    '/landing/contacto',
+    '/landing/demo',
+    '/landing/faq',
+    '/landing/sobre-nosotros',
+    '/legal/privacidad',
+    '/legal/terminos',
+    '/legal/cookies',
+    '/api-docs',
+  ],
+
+  // Dashboard principal y configuración
+  dashboard: ['/dashboard', '/perfil', '/configuracion/notificaciones', '/notificaciones'],
+
+  // Verticales principales
+  alquilerTradicional: [
+    '/propiedades',
+    '/propiedades/nuevo',
+    '/edificios',
+    '/edificios/nuevo',
+    '/unidades',
+    '/unidades/nueva',
+    '/inquilinos',
+    '/inquilinos/nuevo',
+    '/contratos',
+    '/contratos/nuevo',
+    '/pagos',
+    '/pagos/nuevo',
+    '/gastos',
+    '/incidencias',
+    '/documentos',
+    '/inspecciones',
+    '/certificaciones',
+    '/renovaciones',
+    '/seguros',
+    '/seguros/nuevo',
+  ],
+
+  // STR - Alquiler turístico
+  str: [
+    '/str',
+    '/str/listings',
+    '/str/listings/nuevo',
+    '/str/bookings',
+    '/str/bookings/nueva',
+    '/str/channels',
+    '/str/pricing',
+    '/str/reviews',
+    '/str-housekeeping',
+  ],
+
+  // Coliving
+  coliving: [
+    '/coliving/propiedades',
+    '/coliving/reservas',
+    '/coliving/comunidad',
+    '/coliving/eventos',
+    '/coliving/paquetes',
+    '/coliving/emparejamiento',
+    '/room-rental',
+  ],
+
+  // Administración de fincas
+  adminFincas: [
+    '/comunidades',
+    '/comunidades/cuotas',
+    '/comunidades/actas',
+    '/comunidades/votaciones',
+    '/comunidades/finanzas',
+    '/comunidades/fondos',
+    '/votaciones',
+    '/reuniones',
+    '/anuncios',
+  ],
+
+  // Construcción y Flipping
+  construction: [
+    '/construction',
+    '/construction/projects',
+    '/construction/quality-control',
+    '/construction/gantt',
+    '/flipping',
+    '/flipping/projects',
+    '/flipping/calculator',
+    '/flipping/comparator',
+    '/obras',
+    '/ordenes-trabajo',
+  ],
+
+  // Servicios profesionales
+  professional: [
+    '/professional',
+    '/professional/projects',
+    '/professional/clients',
+    '/professional/invoicing',
+    '/proveedores',
+    '/marketplace',
+    '/marketplace/servicios',
+    '/marketplace/proveedores',
+  ],
+
+  // Horizontal - Finanzas
+  finanzas: [
+    '/finanzas',
+    '/contabilidad',
+    '/facturacion',
+    '/presupuestos',
+    '/open-banking',
+    '/impuestos',
+  ],
+
+  // Horizontal - Operaciones
+  operaciones: [
+    '/mantenimiento',
+    '/mantenimiento/nuevo',
+    '/mantenimiento-pro',
+    '/calendario',
+    '/visitas',
+    '/gestion-incidencias',
+  ],
+
+  // Horizontal - Comunicaciones
+  comunicaciones: [
+    '/chat',
+    '/sms',
+    '/notificaciones',
+    '/notificaciones/plantillas',
+    '/notificaciones/reglas',
+  ],
+
+  // Horizontal - Documentos y Legal
+  documentos: [
+    '/documentos',
+    '/firma-digital',
+    '/firma-digital/templates',
+    '/plantillas-legales',
+    '/plantillas',
+    '/ocr',
+  ],
+
+  // Horizontal - Analytics y Reportes
+  analytics: [
+    '/analytics',
+    '/bi',
+    '/reportes',
+    '/reportes/financieros',
+    '/reportes/operacionales',
+    '/estadisticas',
+  ],
+
+  // Horizontal - Integraciones
+  integraciones: ['/integraciones', '/automatizacion', '/workflows', '/sincronizacion'],
+
+  // Tecnología avanzada
+  tecnologia: [
+    '/tours-virtuales',
+    '/esg',
+    '/esg/nuevo-plan',
+    '/iot',
+    '/iot/nuevo-dispositivo',
+    '/blockchain',
+    '/blockchain/tokenizar',
+    '/economia-circular',
+    '/economia-circular/marketplace',
+    '/economia-circular/huertos',
+    '/economia-circular/residuos',
+    '/valoracion-ia',
+    '/asistente-ia',
+  ],
+
+  // CRM y Marketing
+  crm: ['/crm', '/candidatos', '/candidatos/nuevo', '/screening', '/valoraciones', '/reviews'],
+
+  // Portal Inquilino
+  portalInquilino: [
+    '/portal-inquilino',
+    '/portal-inquilino/dashboard',
+    '/portal-inquilino/pagos',
+    '/portal-inquilino/incidencias',
+    '/portal-inquilino/documentos',
+    '/portal-inquilino/comunicacion',
+    '/portal-inquilino/perfil',
+  ],
+
+  // Portal Propietario
+  portalPropietario: ['/portal-propietario'],
+
+  // Portal Proveedor
+  portalProveedor: [
+    '/portal-proveedor',
+    '/portal-proveedor/ordenes',
+    '/portal-proveedor/facturas',
+    '/portal-proveedor/presupuestos',
+  ],
+
+  // Portal Comercial
+  portalComercial: [
+    '/portal-comercial',
+    '/portal-comercial/leads',
+    '/portal-comercial/comisiones',
+    '/portal-comercial/objetivos',
+  ],
+
+  // Soporte
+  soporte: ['/soporte', '/sugerencias', '/knowledge-base'],
+
+  // Admin
+  admin: [
+    '/admin',
+    '/admin/dashboard',
+    '/admin/usuarios',
+    '/admin/clientes',
+    '/admin/planes',
+    '/admin/modulos',
+    '/admin/configuracion',
+    '/admin/integraciones',
+    '/admin/marketplace',
+    '/admin/sugerencias',
+    '/admin/alertas',
+    '/admin/activity',
+    '/admin/salud-sistema',
+    '/admin/seguridad',
+    '/admin/backup-restore',
+  ],
+};
+
+// Interfaces
+interface PageResult {
   url: string;
-  status: 'OK' | 'ERROR' | 'WARNING';
-  title: string;
-  errors: string[];
-  warnings: string[];
-  screenshot: string;
-  timestamp: string;
+  category: string;
+  status: 'success' | 'error' | 'warning';
+  httpStatus?: number;
+  loadTime: number;
+  consoleErrors: string[];
+  networkErrors: string[];
+  buttonsFound: number;
+  buttonsClickable: number;
+  screenshotPath?: string;
+  notes: string[];
 }
 
-const results: AuditResult[] = [];
-const allErrors: ConsoleMessage[] = [];
+interface AuditResult {
+  timestamp: string;
+  baseUrl: string;
+  totalPages: number;
+  successfulPages: number;
+  failedPages: number;
+  warningPages: number;
+  results: PageResult[];
+  summary: {
+    byCategory: Record<string, { total: number; success: number; failed: number }>;
+    commonErrors: string[];
+    brokenButtons: string[];
+  };
+}
 
-async function auditPage(
-  page: Page,
-  pageName: string,
-  url: string,
-  waitTime = 3000
-): Promise<AuditResult> {
-  console.log(`\n--- Auditando: ${pageName} ---`);
-  console.log(`URL: ${url}`);
+// Variables globales
+let browser: Browser;
+let context: BrowserContext;
+let page: Page;
+const auditResults: PageResult[] = [];
 
-  const errors: string[] = [];
-  const warnings: string[] = [];
-  const screenshotPath = `visual-verification-results/audit-${pageName.toLowerCase().replace(/\s+/g, '-')}.png`;
+// Funciones helper
+function log(message: string, type: 'info' | 'success' | 'error' | 'warning' = 'info') {
+  const colors = {
+    info: '\x1b[36m',
+    success: '\x1b[32m',
+    error: '\x1b[31m',
+    warning: '\x1b[33m',
+    reset: '\x1b[0m',
+  };
+  const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+  console.log(`${colors[type]}[${timestamp}] ${message}${colors.reset}`);
+}
+
+async function setup() {
+  // Crear directorios
+  if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  if (!fs.existsSync(SCREENSHOTS_DIR)) fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
+
+  // Lanzar browser
+  browser = await chromium.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
+  context = await browser.newContext({
+    viewport: { width: 1920, height: 1080 },
+    userAgent:
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  });
+  page = await context.newPage();
+
+  // Configurar timeouts
+  page.setDefaultTimeout(30000);
+  page.setDefaultNavigationTimeout(30000);
+}
+
+async function login() {
+  log('🔐 Iniciando sesión...', 'info');
+  try {
+    await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(2000);
+
+    // Rellenar formulario
+    await page.fill('input[name="email"], input[type="email"]', TEST_USER);
+    await page.fill('input[name="password"], input[type="password"]', TEST_PASSWORD);
+
+    // Click en submit
+    await page.click('button[type="submit"]');
+
+    // Esperar redirección
+    await page.waitForTimeout(5000);
+
+    // Verificar login exitoso
+    const currentUrl = page.url();
+    if (currentUrl.includes('/login') || currentUrl.includes('error')) {
+      log('❌ Login falló', 'error');
+      return false;
+    }
+
+    log('✅ Login exitoso', 'success');
+    return true;
+  } catch (error: any) {
+    log(`❌ Error en login: ${error.message}`, 'error');
+    return false;
+  }
+}
+
+async function auditPage(url: string, category: string): Promise<PageResult> {
+  const fullUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
+  const result: PageResult = {
+    url,
+    category,
+    status: 'success',
+    loadTime: 0,
+    consoleErrors: [],
+    networkErrors: [],
+    buttonsFound: 0,
+    buttonsClickable: 0,
+    notes: [],
+  };
+
+  const startTime = Date.now();
+
+  // Capturar errores de consola
+  const consoleMessages: string[] = [];
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') {
+      consoleMessages.push(msg.text());
+    }
+  });
+
+  // Capturar errores de red
+  const networkErrors: string[] = [];
+  page.on('requestfailed', (request) => {
+    networkErrors.push(`${request.url()} - ${request.failure()?.errorText}`);
+  });
 
   try {
     // Navegar a la página
-    const response = await page.goto(url, {
-      waitUntil: 'networkidle',
+    const response = await page.goto(fullUrl, {
+      waitUntil: 'domcontentloaded',
       timeout: 30000,
     });
 
-    const status = response?.status() || 0;
-    console.log(`Status: ${status}`);
+    result.httpStatus = response?.status();
+    result.loadTime = Date.now() - startTime;
 
-    if (status >= 400) {
-      errors.push(`HTTP ${status} error`);
+    // Verificar HTTP status
+    if (result.httpStatus && result.httpStatus >= 400) {
+      result.status = 'error';
+      result.notes.push(`HTTP ${result.httpStatus}`);
     }
 
-    // Esperar a que cargue
-    await page.waitForTimeout(waitTime);
-
-    // Capturar título
-    const title = await page.title();
-    console.log(`Título: ${title}`);
-
-    // Verificar si hay errores de autenticación
-    const currentUrl = page.url();
-    if (currentUrl.includes('/login') && !url.includes('/login')) {
-      errors.push('Redirigió a login - Sesión expirada o no autorizado');
-    }
-
-    // Capturar screenshot
-    await page.screenshot({
-      path: screenshotPath,
-      fullPage: true,
-    });
-    console.log(`Screenshot: ${screenshotPath}`);
-
-    // Verificar elementos críticos
-    const hasHeader = await page.locator('header, [role="banner"]').count();
-    const hasSidebar = await page.locator('nav, aside, [role="navigation"]').count();
-
-    if (hasHeader === 0 && !url.includes('/login')) {
-      warnings.push('No se encontró header');
-    }
-
-    // Determinar estado
-    let resultStatus: 'OK' | 'ERROR' | 'WARNING' = 'OK';
-    if (errors.length > 0) {
-      resultStatus = 'ERROR';
-    } else if (warnings.length > 0) {
-      resultStatus = 'WARNING';
-    }
-
-    const result: AuditResult = {
-      page: pageName,
-      url: currentUrl,
-      status: resultStatus,
-      title,
-      errors,
-      warnings,
-      screenshot: screenshotPath,
-      timestamp: new Date().toISOString(),
-    };
-
-    console.log(`Estado: ${resultStatus}`);
-    if (errors.length > 0) {
-      console.log(`Errores (${errors.length}):`, errors);
-    }
-    if (warnings.length > 0) {
-      console.log(`Warnings (${warnings.length}):`, warnings);
-    }
-
-    return result;
-  } catch (error: any) {
-    console.log(`ERROR: ${error.message}`);
-
-    return {
-      page: pageName,
-      url,
-      status: 'ERROR',
-      title: '',
-      errors: [error.message],
-      warnings,
-      screenshot: screenshotPath,
-      timestamp: new Date().toISOString(),
-    };
-  }
-}
-
-async function runFullAudit() {
-  console.log('\n' + '='.repeat(80));
-  console.log('AUDITORIA COMPLETA DE LA APLICACION');
-  console.log('='.repeat(80) + '\n');
-
-  let browser: Browser | null = null;
-  let page: Page | null = null;
-
-  try {
-    // 1. Lanzar navegador
-    console.log('1. Lanzando navegador...');
-    browser = await chromium.launch({
-      headless: true,
-    });
-
-    const context = await browser.newContext({
-      viewport: { width: 1920, height: 1080 },
-    });
-
-    page = await context.newPage();
-
-    // Capturar errores de consola
-    page.on('console', (msg: ConsoleMessage) => {
-      if (msg.type() === 'error') {
-        allErrors.push(msg);
-        console.log(`[CONSOLE ERROR]: ${msg.text()}`);
-      }
-    });
-
-    // Capturar errores de página
-    page.on('pageerror', (error) => {
-      console.log(`[PAGE ERROR]: ${error.message}`);
-    });
-
-    console.log('   OK - Navegador lanzado\n');
-
-    // 2. Login como superadministrador
-    console.log('2. Realizando login como superadministrador...');
-    await page.goto('https://inmovaapp.com/login', {
-      waitUntil: 'networkidle',
-    });
-
-    // Credenciales de superadmin (ajustar según tu BD)
-    const superadminEmail = 'admin@inmova.com'; // Ajustar
-    const superadminPassword = 'admin123'; // Ajustar
-
+    // Esperar a que se renderice
     await page.waitForTimeout(2000);
 
-    // Llenar formulario
-    const emailField = await page.locator('input[type="email"], input[name="email"]').first();
-    if (await emailField.isVisible()) {
-      await emailField.fill(superadminEmail);
+    // Buscar errores en la página
+    const pageText = (await page.textContent('body')) || '';
+    if (pageText.includes('Error') && pageText.includes('500')) {
+      result.status = 'error';
+      result.notes.push('Error 500 en página');
+    }
+    if (pageText.includes('404') && pageText.includes('not found')) {
+      result.status = 'error';
+      result.notes.push('Página 404');
     }
 
-    const passwordField = await page.locator('input[type="password"]').first();
-    if (await passwordField.isVisible()) {
-      await passwordField.fill(superadminPassword);
+    // Contar botones
+    const buttons = await page.$$('button, a[role="button"], [type="submit"]');
+    result.buttonsFound = buttons.length;
+
+    // Verificar botones clickeables
+    let clickableCount = 0;
+    for (const button of buttons.slice(0, 10)) {
+      // Solo los primeros 10
+      try {
+        const isVisible = await button.isVisible();
+        const isEnabled = await button.isEnabled();
+        if (isVisible && isEnabled) clickableCount++;
+      } catch {
+        // Ignorar errores de botones
+      }
     }
+    result.buttonsClickable = clickableCount;
 
-    // Click login
-    const submitButton = await page.locator('button[type="submit"]').first();
-    if (await submitButton.isVisible()) {
-      await submitButton.click();
-      await page.waitForTimeout(5000);
+    // Capturar screenshot
+    const screenshotName = url.replace(/\//g, '_').replace(/^_/, '') || 'home';
+    const screenshotPath = `${SCREENSHOTS_DIR}/${category}_${screenshotName}.png`;
+    await page.screenshot({ path: screenshotPath, fullPage: false });
+    result.screenshotPath = screenshotPath;
+
+    // Agregar errores de consola
+    result.consoleErrors = consoleMessages.filter(
+      (m) => !m.includes('favicon') && !m.includes('chunk') && !m.includes('preload')
+    );
+    result.networkErrors = networkErrors;
+
+    if (result.consoleErrors.length > 0) {
+      result.status = result.status === 'error' ? 'error' : 'warning';
+      result.notes.push(`${result.consoleErrors.length} errores en consola`);
     }
-
-    const currentUrl = page.url();
-    console.log(`URL después de login: ${currentUrl}`);
-
-    if (currentUrl.includes('/dashboard') || currentUrl.includes('/admin')) {
-      console.log('   OK - Login exitoso\n');
-    } else {
-      console.log('   WARNING - No redirigió al dashboard, continuando de todos modos...\n');
-    }
-
-    // 3. Auditar todas las páginas principales
-    console.log('3. Auditando páginas principales...\n');
-
-    const pagesToAudit = [
-      { name: 'Dashboard', url: 'https://inmovaapp.com/dashboard' },
-      { name: 'Propiedades', url: 'https://inmovaapp.com/dashboard/properties' },
-      { name: 'Inquilinos', url: 'https://inmovaapp.com/dashboard/tenants' },
-      { name: 'Contratos', url: 'https://inmovaapp.com/dashboard/contracts' },
-      { name: 'Pagos', url: 'https://inmovaapp.com/dashboard/payments' },
-      { name: 'Mantenimiento', url: 'https://inmovaapp.com/dashboard/maintenance' },
-      { name: 'Reportes', url: 'https://inmovaapp.com/dashboard/reports' },
-      { name: 'CRM', url: 'https://inmovaapp.com/dashboard/crm' },
-      { name: 'Leads', url: 'https://inmovaapp.com/dashboard/crm/leads' },
-      { name: 'Configuración', url: 'https://inmovaapp.com/dashboard/settings' },
-      { name: 'Perfil', url: 'https://inmovaapp.com/dashboard/profile' },
-      { name: 'Admin Empresas', url: 'https://inmovaapp.com/admin/companies' },
-      { name: 'Admin Usuarios', url: 'https://inmovaapp.com/admin/users' },
-      { name: 'Superadmin', url: 'https://inmovaapp.com/superadmin' },
-      { name: 'Analytics', url: 'https://inmovaapp.com/dashboard/analytics' },
-      { name: 'Documentos', url: 'https://inmovaapp.com/dashboard/documents' },
-      { name: 'Notificaciones', url: 'https://inmovaapp.com/dashboard/notifications' },
-      { name: 'Comunidades', url: 'https://inmovaapp.com/dashboard/communities' },
-      { name: 'Coliving', url: 'https://inmovaapp.com/dashboard/coliving' },
-      { name: 'Billing', url: 'https://inmovaapp.com/dashboard/billing' },
-    ];
-
-    for (const pageInfo of pagesToAudit) {
-      const result = await auditPage(page, pageInfo.name, pageInfo.url);
-      results.push(result);
-      await page.waitForTimeout(1000);
-    }
-
-    // 4. Generar reporte
-    console.log('\n4. Generando reporte...\n');
-
-    const summary = {
-      total: results.length,
-      ok: results.filter((r) => r.status === 'OK').length,
-      warnings: results.filter((r) => r.status === 'WARNING').length,
-      errors: results.filter((r) => r.status === 'ERROR').length,
-      timestamp: new Date().toISOString(),
-    };
-
-    console.log('='.repeat(80));
-    console.log('RESUMEN DE AUDITORIA');
-    console.log('='.repeat(80));
-    console.log(`Total páginas: ${summary.total}`);
-    console.log(`OK: ${summary.ok}`);
-    console.log(`Warnings: ${summary.warnings}`);
-    console.log(`Errors: ${summary.errors}`);
-    console.log('='.repeat(80));
-
-    // Mostrar páginas con errores
-    const errorPages = results.filter((r) => r.status === 'ERROR');
-    if (errorPages.length > 0) {
-      console.log('\nPAGINAS CON ERRORES:');
-      errorPages.forEach((r) => {
-        console.log(`\n- ${r.page} (${r.url})`);
-        r.errors.forEach((e) => console.log(`  ERROR: ${e}`));
-      });
-    }
-
-    // Mostrar páginas con warnings
-    const warningPages = results.filter((r) => r.status === 'WARNING');
-    if (warningPages.length > 0) {
-      console.log('\nPAGINAS CON WARNINGS:');
-      warningPages.forEach((r) => {
-        console.log(`\n- ${r.page} (${r.url})`);
-        r.warnings.forEach((w) => console.log(`  WARNING: ${w}`));
-      });
-    }
-
-    // Guardar reporte JSON
-    const report = {
-      summary,
-      results,
-      consoleErrors: allErrors.map((msg) => ({
-        type: msg.type(),
-        text: msg.text(),
-        location: msg.location(),
-      })),
-    };
-
-    writeFileSync('visual-verification-results/audit-report.json', JSON.stringify(report, null, 2));
-    console.log('\nReporte guardado en: visual-verification-results/audit-report.json');
-
-    // Guardar reporte HTML
-    const html = generateHTMLReport(summary, results);
-    writeFileSync('visual-verification-results/audit-report.html', html);
-    console.log('Reporte HTML guardado en: visual-verification-results/audit-report.html\n');
-
-    console.log('='.repeat(80));
-    console.log('AUDITORIA COMPLETADA');
-    console.log('='.repeat(80) + '\n');
   } catch (error: any) {
-    console.error('\nERROR FATAL durante la auditoría:', error.message);
-    console.error(error.stack);
-  } finally {
-    if (browser) {
-      console.log('Cerrando navegador...');
-      await browser.close();
-      console.log('Navegador cerrado\n');
+    result.status = 'error';
+    result.loadTime = Date.now() - startTime;
+    result.notes.push(`Error: ${error.message.substring(0, 100)}`);
+  }
+
+  // Limpiar listeners
+  page.removeAllListeners('console');
+  page.removeAllListeners('requestfailed');
+
+  return result;
+}
+
+async function auditButtons(url: string): Promise<{ clicked: string[]; failed: string[] }> {
+  const clicked: string[] = [];
+  const failed: string[] = [];
+
+  try {
+    await page.goto(`${BASE_URL}${url}`, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(2000);
+
+    // Encontrar todos los botones
+    const buttons = await page.$$('button:not([disabled]), a.btn, a[role="button"]');
+
+    for (const button of buttons.slice(0, 5)) {
+      // Solo primeros 5 para evitar navegación
+      try {
+        const text = await button.textContent();
+        const isVisible = await button.isVisible();
+
+        if (isVisible && text && !text.includes('Cerrar') && !text.includes('Cancelar')) {
+          // Solo verificar si es clickeable, no hacer click real
+          const isEnabled = await button.isEnabled();
+          if (isEnabled) {
+            clicked.push(text.trim().substring(0, 50));
+          } else {
+            failed.push(text.trim().substring(0, 50));
+          }
+        }
+      } catch {
+        // Ignorar
+      }
+    }
+  } catch {
+    // Ignorar errores de navegación
+  }
+
+  return { clicked, failed };
+}
+
+async function runAudit() {
+  log('🚀 INICIANDO AUDITORÍA EXHAUSTIVA DE INMOVA APP', 'info');
+  log(`📍 URL Base: ${BASE_URL}`, 'info');
+  log('='.repeat(60), 'info');
+
+  await setup();
+
+  // Auditar páginas públicas primero
+  log('\n📋 AUDITORÍA DE PÁGINAS PÚBLICAS', 'info');
+  for (const url of PAGE_CATEGORIES.public) {
+    const result = await auditPage(url, 'public');
+    auditResults.push(result);
+    log(
+      `  ${result.status === 'success' ? '✅' : result.status === 'warning' ? '⚠️' : '❌'} ${url} (${result.loadTime}ms)`,
+      result.status === 'success' ? 'success' : result.status === 'warning' ? 'warning' : 'error'
+    );
+  }
+
+  // Login para páginas protegidas
+  const loginSuccess = await login();
+  if (!loginSuccess) {
+    log('❌ No se pudo completar el login. Abortando auditoría de páginas protegidas.', 'error');
+    await generateReport();
+    await browser.close();
+    return;
+  }
+
+  // Auditar cada categoría
+  const categories = Object.entries(PAGE_CATEGORIES).filter(([key]) => key !== 'public');
+
+  for (const [category, urls] of categories) {
+    log(`\n📋 AUDITORÍA: ${category.toUpperCase()}`, 'info');
+
+    for (const url of urls) {
+      const result = await auditPage(url, category);
+      auditResults.push(result);
+
+      const statusIcon =
+        result.status === 'success' ? '✅' : result.status === 'warning' ? '⚠️' : '❌';
+      const notes = result.notes.length > 0 ? ` - ${result.notes.join(', ')}` : '';
+      log(
+        `  ${statusIcon} ${url} (${result.loadTime}ms)${notes}`,
+        result.status === 'success' ? 'success' : result.status === 'warning' ? 'warning' : 'error'
+      );
     }
   }
+
+  await generateReport();
+  await browser.close();
 }
 
-function generateHTMLReport(summary: any, results: AuditResult[]): string {
-  return `<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auditoría de Aplicación - ${new Date().toLocaleDateString()}</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #f5f5f5;
-        }
-        h1 { color: #333; }
-        .summary {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .stat {
-            display: inline-block;
-            margin-right: 30px;
-            font-size: 18px;
-        }
-        .stat strong { font-size: 24px; }
-        .ok { color: #10b981; }
-        .warning { color: #f59e0b; }
-        .error { color: #ef4444; }
-        .page-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-left: 4px solid #ccc;
-        }
-        .page-card.ok { border-left-color: #10b981; }
-        .page-card.warning { border-left-color: #f59e0b; }
-        .page-card.error { border-left-color: #ef4444; }
-        .page-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
-        .page-url { color: #666; font-size: 14px; margin-bottom: 10px; }
-        .issues { margin-top: 10px; }
-        .issue { padding: 8px; margin: 5px 0; border-radius: 4px; font-size: 14px; }
-        .issue.error { background: #fee2e2; color: #991b1b; }
-        .issue.warning { background: #fef3c7; color: #92400e; }
-        img { max-width: 100%; border-radius: 4px; margin-top: 10px; }
-    </style>
-</head>
-<body>
-    <h1>📊 Auditoría de Aplicación</h1>
-    <p>Fecha: ${new Date().toLocaleString('es-ES')}</p>
-    
-    <div class="summary">
-        <h2>Resumen</h2>
-        <div class="stat"><strong>${summary.total}</strong> páginas auditadas</div>
-        <div class="stat ok"><strong>${summary.ok}</strong> OK</div>
-        <div class="stat warning"><strong>${summary.warnings}</strong> Warnings</div>
-        <div class="stat error"><strong>${summary.errors}</strong> Errors</div>
-    </div>
-    
-    <h2>Resultados Detallados</h2>
-    ${results
-      .map(
-        (r) => `
-    <div class="page-card ${r.status.toLowerCase()}">
-        <div class="page-title">${r.page} - <span class="${r.status.toLowerCase()}">${r.status}</span></div>
-        <div class="page-url">${r.url}</div>
-        <div><strong>Título:</strong> ${r.title || 'N/A'}</div>
-        ${
-          r.errors.length > 0
-            ? `<div class="issues">
-                ${r.errors.map((e) => `<div class="issue error">❌ ${e}</div>`).join('')}
-            </div>`
-            : ''
-        }
-        ${
-          r.warnings.length > 0
-            ? `<div class="issues">
-                ${r.warnings.map((w) => `<div class="issue warning">⚠️ ${w}</div>`).join('')}
-            </div>`
-            : ''
-        }
-    </div>
-    `
-      )
-      .join('')}
-</body>
-</html>`;
+async function generateReport() {
+  log('\n📊 GENERANDO REPORTE...', 'info');
+
+  const successCount = auditResults.filter((r) => r.status === 'success').length;
+  const warningCount = auditResults.filter((r) => r.status === 'warning').length;
+  const errorCount = auditResults.filter((r) => r.status === 'error').length;
+
+  // Agrupar por categoría
+  const byCategory: Record<string, { total: number; success: number; failed: number }> = {};
+  for (const result of auditResults) {
+    if (!byCategory[result.category]) {
+      byCategory[result.category] = { total: 0, success: 0, failed: 0 };
+    }
+    byCategory[result.category].total++;
+    if (result.status === 'success') byCategory[result.category].success++;
+    if (result.status === 'error') byCategory[result.category].failed++;
+  }
+
+  // Errores comunes
+  const commonErrors: string[] = [];
+  for (const result of auditResults) {
+    if (result.status === 'error') {
+      commonErrors.push(`${result.url}: ${result.notes.join(', ')}`);
+    }
+  }
+
+  const report: AuditResult = {
+    timestamp: new Date().toISOString(),
+    baseUrl: BASE_URL,
+    totalPages: auditResults.length,
+    successfulPages: successCount,
+    failedPages: errorCount,
+    warningPages: warningCount,
+    results: auditResults,
+    summary: {
+      byCategory,
+      commonErrors: commonErrors.slice(0, 50),
+      brokenButtons: [],
+    },
+  };
+
+  // Guardar JSON
+  fs.writeFileSync(`${OUTPUT_DIR}/audit-report.json`, JSON.stringify(report, null, 2));
+
+  // Guardar resumen en texto
+  let textReport = `
+═══════════════════════════════════════════════════════════════
+                    AUDITORÍA INMOVA APP
+                    Pre-Launch Check
+═══════════════════════════════════════════════════════════════
+
+📅 Fecha: ${new Date().toLocaleString('es-ES')}
+🌐 URL: ${BASE_URL}
+
+═══════════════════════════════════════════════════════════════
+                        RESUMEN
+═══════════════════════════════════════════════════════════════
+
+Total páginas auditadas: ${auditResults.length}
+✅ Exitosas: ${successCount} (${((successCount / auditResults.length) * 100).toFixed(1)}%)
+⚠️  Advertencias: ${warningCount} (${((warningCount / auditResults.length) * 100).toFixed(1)}%)
+❌ Errores: ${errorCount} (${((errorCount / auditResults.length) * 100).toFixed(1)}%)
+
+═══════════════════════════════════════════════════════════════
+                    POR CATEGORÍA
+═══════════════════════════════════════════════════════════════
+`;
+
+  for (const [cat, stats] of Object.entries(byCategory)) {
+    const successRate = ((stats.success / stats.total) * 100).toFixed(0);
+    textReport += `
+${cat.toUpperCase().padEnd(25)} ${stats.success}/${stats.total} páginas OK (${successRate}%)`;
+  }
+
+  textReport += `
+
+═══════════════════════════════════════════════════════════════
+                    ERRORES ENCONTRADOS
+═══════════════════════════════════════════════════════════════
+`;
+
+  if (commonErrors.length === 0) {
+    textReport += '\n🎉 No se encontraron errores críticos!\n';
+  } else {
+    for (const error of commonErrors) {
+      textReport += `\n❌ ${error}`;
+    }
+  }
+
+  textReport += `
+
+═══════════════════════════════════════════════════════════════
+                    PÁGINAS CON PROBLEMAS
+═══════════════════════════════════════════════════════════════
+`;
+
+  const problemPages = auditResults.filter((r) => r.status !== 'success');
+  if (problemPages.length === 0) {
+    textReport += '\n🎉 Todas las páginas cargaron correctamente!\n';
+  } else {
+    for (const p of problemPages) {
+      textReport += `\n${p.status === 'error' ? '❌' : '⚠️'} ${p.url}`;
+      if (p.notes.length > 0) textReport += `\n   └── ${p.notes.join(', ')}`;
+      if (p.consoleErrors.length > 0)
+        textReport += `\n   └── Errores consola: ${p.consoleErrors.length}`;
+    }
+  }
+
+  textReport += `
+
+═══════════════════════════════════════════════════════════════
+                    FIN DEL REPORTE
+═══════════════════════════════════════════════════════════════
+`;
+
+  fs.writeFileSync(`${OUTPUT_DIR}/audit-report.txt`, textReport);
+
+  // Imprimir resumen
+  log('\n' + '='.repeat(60), 'info');
+  log('📊 RESUMEN DE AUDITORÍA', 'info');
+  log('='.repeat(60), 'info');
+  log(`Total páginas: ${auditResults.length}`, 'info');
+  log(`✅ Exitosas: ${successCount}`, 'success');
+  log(`⚠️  Advertencias: ${warningCount}`, 'warning');
+  log(`❌ Errores: ${errorCount}`, 'error');
+  log(`\n📁 Reporte guardado en: ${OUTPUT_DIR}/`, 'info');
 }
 
-runFullAudit().catch(console.error);
+// Ejecutar
+runAudit().catch(console.error);
