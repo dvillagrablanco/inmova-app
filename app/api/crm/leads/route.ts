@@ -5,18 +5,14 @@ export const dynamic = 'force-dynamic';
  *
  * GET:  Listar leads con filtros
  * POST: Crear nuevo lead
+ * 
+ * CORREGIDO: Mapea campos del frontend (inglés) a campos del modelo Lead (español)
  */
 
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { CRMService } from '@/lib/crm-service';
-import type {
-  CRMLeadStatus,
-  CRMLeadSource,
-  CRMLeadPriority,
-  CompanySize,
-} from '@/types/prisma-types';
 
 export async function GET(request: Request) {
   try {
@@ -27,66 +23,54 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
 
-    // Filtros
+    // Filtros - mapear a campos del modelo Lead
     const filters: any = {};
 
-    // Status (múltiple)
-    const statusParam = searchParams.get('status');
+    // Estado (status en inglés → estado en español)
+    const statusParam = searchParams.get('status') || searchParams.get('estado');
     if (statusParam) {
-      filters.status = statusParam.split(',') as CRMLeadStatus[];
+      filters.estado = statusParam.split(',');
     }
 
-    // Source (múltiple)
-    const sourceParam = searchParams.get('source');
+    // Fuente (source en inglés → fuente en español)
+    const sourceParam = searchParams.get('source') || searchParams.get('fuente');
     if (sourceParam) {
-      filters.source = sourceParam.split(',') as CRMLeadSource[];
+      filters.fuente = sourceParam.split(',');
     }
 
-    // Priority (múltiple)
-    const priorityParam = searchParams.get('priority');
+    // Urgencia (priority en inglés → urgencia en español)
+    const priorityParam = searchParams.get('priority') || searchParams.get('urgencia');
     if (priorityParam) {
-      filters.priority = priorityParam.split(',') as CRMLeadPriority[];
+      filters.urgencia = priorityParam.split(',');
     }
 
-    // Owner
-    const ownerId = searchParams.get('ownerId');
+    // Asignado (ownerId en inglés → asignadoA en español)
+    const ownerId = searchParams.get('ownerId') || searchParams.get('asignadoA');
     if (ownerId) {
-      filters.ownerId = ownerId;
+      filters.asignadoA = ownerId;
     }
 
-    // Tags
-    const tagsParam = searchParams.get('tags');
-    if (tagsParam) {
-      filters.tags = tagsParam.split(',');
-    }
-
-    // Score range
-    const minScore = searchParams.get('minScore');
+    // Puntuación (score en inglés → puntuacion en español)
+    const minScore = searchParams.get('minScore') || searchParams.get('minPuntuacion');
     if (minScore) {
-      filters.minScore = parseInt(minScore);
+      filters.minPuntuacion = parseInt(minScore);
     }
 
-    const maxScore = searchParams.get('maxScore');
+    const maxScore = searchParams.get('maxScore') || searchParams.get('maxPuntuacion');
     if (maxScore) {
-      filters.maxScore = parseInt(maxScore);
+      filters.maxPuntuacion = parseInt(maxScore);
     }
 
-    // City (múltiple)
-    const cityParam = searchParams.get('city');
+    // Ciudad
+    const cityParam = searchParams.get('city') || searchParams.get('ciudad');
     if (cityParam) {
-      filters.city = cityParam.split(',');
+      filters.ciudad = cityParam.split(',');
     }
 
-    // Industry (múltiple)
-    const industryParam = searchParams.get('industry');
-    if (industryParam) {
-      filters.industry = industryParam.split(',');
-    }
-
-    // Company size (múltiple)
-    const companySizeParam = searchParams.get('companySize');
-    if (companySizeParam) {
-      filters.companySize = companySizeParam.split(',') as CompanySize[];
+    // Temperatura
+    const temperaturaParam = searchParams.get('temperatura');
+    if (temperaturaParam) {
+      filters.temperatura = temperaturaParam.split(',');
     }
 
     // Paginación
@@ -95,7 +79,41 @@ export async function GET(request: Request) {
 
     const result = await CRMService.listLeads(session.user.companyId, filters, page, limit);
 
-    return NextResponse.json(result);
+    // Mapear respuesta a formato esperado por el frontend
+    const mappedLeads = result.leads.map((lead: any) => ({
+      id: lead.id,
+      // Campos en inglés para el frontend
+      firstName: lead.nombre,
+      lastName: lead.apellidos || '',
+      name: `${lead.nombre} ${lead.apellidos || ''}`.trim(),
+      email: lead.email,
+      phone: lead.telefono,
+      companyName: lead.empresa,
+      jobTitle: lead.cargo,
+      city: lead.ciudad,
+      country: lead.pais,
+      source: lead.fuente,
+      status: lead.estado,
+      priority: lead.urgencia,
+      score: lead.puntuacion,
+      temperature: lead.temperatura,
+      budget: lead.presupuestoMensual,
+      notes: lead.notas,
+      ownerId: lead.asignadoA,
+      owner: lead.asignadoUsuario,
+      lastContactDate: lead.ultimoContacto,
+      nextFollowUpDate: lead.proximoSeguimiento,
+      createdAt: lead.createdAt,
+      updatedAt: lead.updatedAt,
+    }));
+
+    return NextResponse.json({
+      leads: mappedLeads,
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
+      totalPages: result.totalPages,
+    });
   } catch (error: any) {
     console.error('Error listing leads:', error);
     return NextResponse.json(
@@ -114,40 +132,84 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
+    // Mapear campos del frontend (inglés) a campos del modelo (español)
+    const nombre = body.nombre || body.firstName || body.name?.split(' ')[0];
+    const apellidos = body.apellidos || body.lastName || body.name?.split(' ').slice(1).join(' ');
+
     // Validación básica
-    if (!body.firstName || !body.lastName || !body.companyName) {
+    if (!nombre) {
       return NextResponse.json(
-        { error: 'Faltan campos requeridos: firstName, lastName, companyName' },
+        { error: 'Faltan campos requeridos: nombre o firstName' },
         { status: 400 }
       );
     }
 
-    if (!body.email && !body.linkedInUrl) {
+    const email = body.email;
+    if (!email) {
       return NextResponse.json(
-        { error: 'Se requiere al menos email o linkedInUrl' },
+        { error: 'Se requiere email' },
         { status: 400 }
       );
     }
 
     const lead = await CRMService.createLead({
       companyId: session.user.companyId,
-      ...body,
+      nombre,
+      apellidos,
+      email,
+      telefono: body.telefono || body.phone,
+      empresa: body.empresa || body.companyName,
+      cargo: body.cargo || body.jobTitle,
+      ciudad: body.ciudad || body.city,
+      pais: body.pais || body.country,
+      fuente: body.fuente || body.source || 'web',
+      asignadoA: body.asignadoA || body.ownerId,
+      notas: body.notas || body.notes,
+      urgencia: body.urgencia || body.priority,
+      presupuestoMensual: body.presupuestoMensual || body.budget,
     });
 
     // Log activity
-    await CRMService.logActivity(
-      session.user.companyId,
-      lead.id,
-      null,
-      'note',
-      'Lead creado',
-      `Lead creado manualmente por ${session.user.nombre || session.user.email}`,
-      undefined,
-      undefined,
-      session.user.id
-    );
+    if (session.user.id) {
+      await CRMService.logActivity(
+        session.user.companyId,
+        lead.id,
+        null,
+        'nota',
+        'Lead creado',
+        `Lead creado manualmente por ${session.user.nombre || session.user.email}`,
+        undefined,
+        undefined,
+        session.user.id
+      );
+    }
 
-    return NextResponse.json(lead, { status: 201 });
+    // Mapear respuesta a formato del frontend
+    const mappedLead = {
+      id: lead.id,
+      firstName: lead.nombre,
+      lastName: lead.apellidos || '',
+      name: `${lead.nombre} ${lead.apellidos || ''}`.trim(),
+      email: lead.email,
+      phone: lead.telefono,
+      companyName: lead.empresa,
+      jobTitle: lead.cargo,
+      city: lead.ciudad,
+      country: lead.pais,
+      source: lead.fuente,
+      status: lead.estado,
+      priority: lead.urgencia,
+      score: lead.puntuacion,
+      temperature: lead.temperatura,
+      budget: lead.presupuestoMensual,
+      notes: lead.notas,
+      ownerId: lead.asignadoA,
+      owner: lead.asignadoUsuario,
+      createdAt: lead.createdAt,
+      updatedAt: lead.updatedAt,
+    };
+
+    return NextResponse.json(mappedLead, { status: 201 });
   } catch (error: any) {
     console.error('Error creating lead:', error);
     return NextResponse.json(

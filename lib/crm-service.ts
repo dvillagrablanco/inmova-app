@@ -1,100 +1,65 @@
 /**
  * 📊 CRM Service - Gestión Completa de Leads y Deals
  *
- * Funcionalidades:
- * - CRUD de leads con validación
- * - Lead scoring automático
- * - Gestión de pipeline y deals
- * - Activity tracking
- * - Task management
- * - Email templates
+ * CORREGIDO: Usa los campos correctos del modelo Lead en español
+ * según prisma/schema.prisma
+ *
+ * Campos del modelo Lead:
+ * - nombre, apellidos, email, telefono, empresa, cargo
+ * - ciudad, pais, fuente, estado, puntuacion, temperatura
+ * - presupuestoMensual, notas, urgencia
+ * - asignadoA, ultimoContacto, proximoSeguimiento
  */
 
-import type {
-  CRMLeadStatus,
-  CRMLeadSource,
-  CRMLeadPriority,
-  DealStage,
-  CompanySize,
-} from '@prisma/client';
 import { prisma } from '@/lib/db';
 
 // ============================================================================
-// TIPOS
+// TIPOS - Adaptados al modelo Lead real
 // ============================================================================
 
 export interface CreateLeadInput {
   companyId: string;
-  firstName: string;
-  lastName: string;
+  nombre: string;
+  apellidos?: string;
   email: string;
-  phone?: string;
-  jobTitle?: string;
-  companyName: string;
-  companyWebsite?: string;
-  companySize?: CompanySize;
-  industry?: string;
-  companyLinkedIn?: string;
-  city?: string;
-  region?: string;
-  country?: string;
-  source: CRMLeadSource;
-  ownerId?: string;
-  notes?: string;
-  tags?: string[];
-  linkedInUrl?: string;
-  linkedInProfile?: any;
-  priority?: CRMLeadPriority;
+  telefono?: string;
+  empresa?: string;
+  cargo?: string;
+  ciudad?: string;
+  pais?: string;
+  fuente: string;
+  asignadoA?: string;
+  notas?: string;
+  urgencia?: string;
+  presupuestoMensual?: number;
 }
 
 export interface UpdateLeadInput {
-  firstName?: string;
-  lastName?: string;
+  nombre?: string;
+  apellidos?: string;
   email?: string;
-  phone?: string;
-  jobTitle?: string;
-  companyName?: string;
-  companyWebsite?: string;
-  companySize?: CompanySize;
-  industry?: string;
-  status?: CRMLeadStatus;
-  priority?: CRMLeadPriority;
-  ownerId?: string;
-  notes?: string;
-  tags?: string[];
-  budget?: number;
-  authority?: boolean;
-  need?: string;
-  timeline?: string;
-  nextFollowUpDate?: Date;
-}
-
-export interface CreateDealInput {
-  companyId: string;
-  leadId?: string;
-  title: string;
-  description?: string;
-  value: number;
-  currency?: string;
-  stage?: DealStage;
-  probability?: number;
-  expectedCloseDate?: Date;
-  ownerId?: string;
-  notes?: string;
+  telefono?: string;
+  empresa?: string;
+  cargo?: string;
+  ciudad?: string;
+  estado?: string;
+  urgencia?: string;
+  asignadoA?: string;
+  notas?: string;
+  presupuestoMensual?: number;
+  proximoSeguimiento?: Date;
+  temperatura?: string;
 }
 
 export interface LeadFilters {
-  status?: CRMLeadStatus[];
-  source?: CRMLeadSource[];
-  priority?: CRMLeadPriority[];
-  ownerId?: string;
-  tags?: string[];
-  minScore?: number;
-  maxScore?: number;
-  hasOpenDeals?: boolean;
-  city?: string[];
-  industry?: string[];
-  companySize?: CompanySize[];
+  estado?: string[];
+  fuente?: string[];
+  urgencia?: string[];
+  asignadoA?: string;
+  minPuntuacion?: number;
+  maxPuntuacion?: number;
+  ciudad?: string[];
+  temperatura?: string[];
 }
 
 // ============================================================================
@@ -102,76 +67,48 @@ export interface LeadFilters {
 // ============================================================================
 
 export interface LeadScoringFactors {
-  // Datos de la empresa (40 puntos)
-  hasCompanyWebsite: boolean; // +5
-  hasCompanyLinkedIn: boolean; // +5
-  hasIndustry: boolean; // +5
-  companySize?: CompanySize; // +10-25
-
-  // Datos del contacto (30 puntos)
-  hasPhone: boolean; // +5
-  hasJobTitle: boolean; // +5
-  isDecisionMaker: boolean; // +20
-
-  // Engagement (20 puntos)
-  emailsOpened: number; // +1 por email
-  emailsClicked: number; // +2 por click
-  callsMade: number; // +5 por llamada
-  meetingsHeld: number; // +10 por reunión (max 20)
-
-  // Calificación BANT (10 puntos)
-  hasBudget: boolean; // +3
-  hasAuthority: boolean; // +3
-  hasNeed: boolean; // +2
-  hasTimeline: boolean; // +2
+  hasEmail: boolean;
+  hasTelefono: boolean;
+  hasEmpresa: boolean;
+  hasCargo: boolean;
+  hasCiudad: boolean;
+  hasPresupuesto: boolean;
+  contactosRealizados: number;
+  urgencia?: string;
 }
 
 export function calculateLeadScore(factors: LeadScoringFactors): number {
   let score = 0;
 
-  // Datos de la empresa (40 puntos)
-  if (factors.hasCompanyWebsite) score += 5;
-  if (factors.hasCompanyLinkedIn) score += 5;
-  if (factors.hasIndustry) score += 5;
+  // Datos de contacto (40 puntos)
+  if (factors.hasEmail) score += 15;
+  if (factors.hasTelefono) score += 15;
+  if (factors.hasCiudad) score += 10;
 
-  // Tamaño de empresa
-  switch (factors.companySize) {
-    case 'solopreneur':
-      score += 5;
-      break;
-    case 'micro':
-      score += 10;
-      break;
-    case 'small':
-      score += 15;
-      break;
-    case 'medium':
-      score += 20;
-      break;
-    case 'large':
-    case 'enterprise':
-      score += 25;
-      break;
-  }
-
-  // Datos del contacto (30 puntos)
-  if (factors.hasPhone) score += 5;
-  if (factors.hasJobTitle) score += 5;
-  if (factors.isDecisionMaker) score += 20;
+  // Datos de empresa (30 puntos)
+  if (factors.hasEmpresa) score += 15;
+  if (factors.hasCargo) score += 15;
 
   // Engagement (20 puntos)
-  score += Math.min(factors.emailsOpened, 5); // Max 5
-  score += Math.min(factors.emailsClicked * 2, 10); // Max 10
-  score += Math.min(factors.callsMade * 5, 5); // Max 5 (1 llamada)
-  score += Math.min(factors.meetingsHeld * 10, 20); // Max 20 (2 reuniones)
+  score += Math.min(factors.contactosRealizados * 5, 20);
 
-  // Calificación BANT (10 puntos)
-  if (factors.hasBudget) score += 3;
-  if (factors.hasAuthority) score += 3;
-  if (factors.hasNeed) score += 2;
-  if (factors.hasTimeline) score += 2;
+  // Urgencia (10 puntos)
+  if (factors.urgencia === 'alta') score += 10;
+  else if (factors.urgencia === 'media') score += 5;
 
-  return Math.min(score, 100); // Cap at 100
+  // Presupuesto (10 puntos adicionales si tiene)
+  if (factors.hasPresupuesto) score += 10;
+
+  return Math.min(score, 100);
+}
+
+/**
+ * Determina la temperatura del lead basado en su puntuación
+ */
+export function determinarTemperatura(puntuacion: number): 'caliente' | 'tibio' | 'frio' {
+  if (puntuacion >= 70) return 'caliente';
+  if (puntuacion >= 40) return 'tibio';
+  return 'frio';
 }
 
 // ============================================================================
@@ -184,7 +121,7 @@ export class CRMService {
    */
   static async createLead(input: CreateLeadInput) {
     // Validar si ya existe
-    const existing = await prisma.crmLead.findFirst({
+    const existing = await prisma.lead.findFirst({
       where: {
         companyId: input.companyId,
         email: input.email,
@@ -195,35 +132,42 @@ export class CRMService {
       throw new Error(`Ya existe un lead con el email ${input.email}`);
     }
 
-    // Calcular score inicial
-    const score = calculateLeadScore({
-      hasCompanyWebsite: !!input.companyWebsite,
-      hasCompanyLinkedIn: !!input.companyLinkedIn,
-      hasIndustry: !!input.industry,
-      companySize: input.companySize,
-      hasPhone: !!input.phone,
-      hasJobTitle: !!input.jobTitle,
-      isDecisionMaker: false, // Se actualiza manualmente
-      emailsOpened: 0,
-      emailsClicked: 0,
-      callsMade: 0,
-      meetingsHeld: 0,
-      hasBudget: false,
-      hasAuthority: false,
-      hasNeed: false,
-      hasTimeline: false,
+    // Calcular puntuación inicial
+    const puntuacion = calculateLeadScore({
+      hasEmail: !!input.email,
+      hasTelefono: !!input.telefono,
+      hasEmpresa: !!input.empresa,
+      hasCargo: !!input.cargo,
+      hasCiudad: !!input.ciudad,
+      hasPresupuesto: !!input.presupuestoMensual,
+      contactosRealizados: 0,
+      urgencia: input.urgencia,
     });
 
-    const lead = await prisma.crmLead.create({
+    const temperatura = determinarTemperatura(puntuacion);
+
+    const lead = await prisma.lead.create({
       data: {
-        ...input,
-        country: input.country || 'ES',
-        score,
-        status: 'new',
-        priority: input.priority || 'medium',
+        companyId: input.companyId,
+        nombre: input.nombre,
+        apellidos: input.apellidos,
+        email: input.email,
+        telefono: input.telefono,
+        empresa: input.empresa,
+        cargo: input.cargo,
+        ciudad: input.ciudad,
+        pais: input.pais || 'España',
+        fuente: input.fuente,
+        asignadoA: input.asignadoA,
+        notas: input.notas,
+        urgencia: input.urgencia || 'media',
+        presupuestoMensual: input.presupuestoMensual,
+        puntuacion,
+        temperatura,
+        estado: 'nuevo',
       },
       include: {
-        owner: {
+        asignadoUsuario: {
           select: {
             id: true,
             nombre: true,
@@ -240,44 +184,31 @@ export class CRMService {
    * Obtener lead por ID
    */
   static async getLead(leadId: string, companyId: string) {
-    const lead = await prisma.crmLead.findFirst({
+    const lead = await prisma.lead.findFirst({
       where: {
         id: leadId,
         companyId,
       },
       include: {
-        owner: {
+        asignadoUsuario: {
           select: {
             id: true,
             nombre: true,
             email: true,
           },
         },
-        activities: {
+        actividades: {
           orderBy: {
-            activityDate: 'desc',
+            fecha: 'desc',
           },
           take: 50,
           include: {
-            user: {
+            usuario: {
               select: {
                 id: true,
                 nombre: true,
               },
             },
-          },
-        },
-        deals: {
-          orderBy: {
-            createdAt: 'desc',
-          },
-        },
-        tasks: {
-          where: {
-            completed: false,
-          },
-          orderBy: {
-            dueDate: 'asc',
           },
         },
       },
@@ -298,69 +229,52 @@ export class CRMService {
       companyId,
     };
 
-    if (filters.status?.length) {
-      where.status = { in: filters.status };
+    if (filters.estado?.length) {
+      where.estado = { in: filters.estado };
     }
 
-    if (filters.source?.length) {
-      where.source = { in: filters.source };
+    if (filters.fuente?.length) {
+      where.fuente = { in: filters.fuente };
     }
 
-    if (filters.priority?.length) {
-      where.priority = { in: filters.priority };
+    if (filters.urgencia?.length) {
+      where.urgencia = { in: filters.urgencia };
     }
 
-    if (filters.ownerId) {
-      where.ownerId = filters.ownerId;
+    if (filters.asignadoA) {
+      where.asignadoA = filters.asignadoA;
     }
 
-    if (filters.tags?.length) {
-      where.tags = {
-        hasSome: filters.tags,
-      };
+    if (filters.minPuntuacion !== undefined || filters.maxPuntuacion !== undefined) {
+      where.puntuacion = {};
+      if (filters.minPuntuacion !== undefined) where.puntuacion.gte = filters.minPuntuacion;
+      if (filters.maxPuntuacion !== undefined) where.puntuacion.lte = filters.maxPuntuacion;
     }
 
-    if (filters.minScore !== undefined || filters.maxScore !== undefined) {
-      where.score = {};
-      if (filters.minScore !== undefined) where.score.gte = filters.minScore;
-      if (filters.maxScore !== undefined) where.score.lte = filters.maxScore;
+    if (filters.ciudad?.length) {
+      where.ciudad = { in: filters.ciudad };
     }
 
-    if (filters.city?.length) {
-      where.city = { in: filters.city };
-    }
-
-    if (filters.industry?.length) {
-      where.industry = { in: filters.industry };
-    }
-
-    if (filters.companySize?.length) {
-      where.companySize = { in: filters.companySize };
+    if (filters.temperatura?.length) {
+      where.temperatura = { in: filters.temperatura };
     }
 
     const [leads, total] = await Promise.all([
-      prisma.crmLead.findMany({
+      prisma.lead.findMany({
         where,
         include: {
-          owner: {
+          asignadoUsuario: {
             select: {
               id: true,
               nombre: true,
             },
           },
-          deals: {
-            where: {
-              stage: {
-                notIn: ['closed_won', 'closed_lost'],
-              },
-            },
-          },
         },
-        orderBy: [{ priority: 'desc' }, { score: 'desc' }, { createdAt: 'desc' }],
+        orderBy: [{ urgencia: 'desc' }, { puntuacion: 'desc' }, { createdAt: 'desc' }],
         skip: (page - 1) * limit,
         take: limit,
       }),
-      prisma.crmLead.count({ where }),
+      prisma.lead.count({ where }),
     ]);
 
     return {
@@ -376,8 +290,7 @@ export class CRMService {
    * Actualizar lead
    */
   static async updateLead(leadId: string, companyId: string, input: UpdateLeadInput) {
-    // Verificar que existe
-    const existing = await prisma.crmLead.findFirst({
+    const existing = await prisma.lead.findFirst({
       where: {
         id: leadId,
         companyId,
@@ -388,49 +301,33 @@ export class CRMService {
       throw new Error('Lead no encontrado');
     }
 
-    // Recalcular score si cambió algo relevante
-    let newScore = existing.score;
-    if (
-      input.companyWebsite !== undefined ||
-      input.companySize !== undefined ||
-      input.phone !== undefined ||
-      input.jobTitle !== undefined ||
-      input.authority !== undefined ||
-      input.budget !== undefined ||
-      input.need !== undefined ||
-      input.timeline !== undefined
-    ) {
-      const updated = { ...existing, ...input };
-      newScore = calculateLeadScore({
-        hasCompanyWebsite: !!updated.companyWebsite,
-        hasCompanyLinkedIn: !!updated.companyLinkedIn,
-        hasIndustry: !!updated.industry,
-        companySize: updated.companySize,
-        hasPhone: !!updated.phone,
-        hasJobTitle: !!updated.jobTitle,
-        isDecisionMaker: !!updated.authority,
-        emailsOpened: updated.emailsOpened,
-        emailsClicked: updated.emailsClicked,
-        callsMade: updated.callsMade,
-        meetingsHeld: updated.meetingsHeld,
-        hasBudget: !!updated.budget,
-        hasAuthority: !!updated.authority,
-        hasNeed: !!updated.need,
-        hasTimeline: !!updated.timeline,
-      });
-    }
+    // Recalcular puntuación si cambió algo relevante
+    const updated = { ...existing, ...input };
+    const newPuntuacion = calculateLeadScore({
+      hasEmail: !!updated.email,
+      hasTelefono: !!updated.telefono,
+      hasEmpresa: !!updated.empresa,
+      hasCargo: !!updated.cargo,
+      hasCiudad: !!updated.ciudad,
+      hasPresupuesto: !!updated.presupuestoMensual,
+      contactosRealizados: updated.numeroContactos,
+      urgencia: updated.urgencia ?? undefined,
+    });
 
-    const lead = await prisma.crmLead.update({
+    const newTemperatura = determinarTemperatura(newPuntuacion);
+
+    const lead = await prisma.lead.update({
       where: {
         id: leadId,
       },
       data: {
         ...input,
-        score: newScore,
+        puntuacion: newPuntuacion,
+        temperatura: newTemperatura,
         updatedAt: new Date(),
       },
       include: {
-        owner: {
+        asignadoUsuario: {
           select: {
             id: true,
             nombre: true,
@@ -446,8 +343,8 @@ export class CRMService {
   /**
    * Cambiar estado del lead
    */
-  static async updateLeadStatus(leadId: string, companyId: string, status: CRMLeadStatus) {
-    const lead = await prisma.crmLead.findFirst({
+  static async updateLeadStatus(leadId: string, companyId: string, estado: string) {
+    const lead = await prisma.lead.findFirst({
       where: {
         id: leadId,
         companyId,
@@ -458,22 +355,14 @@ export class CRMService {
       throw new Error('Lead no encontrado');
     }
 
-    const updates: any = { status };
+    const updates: any = { estado };
 
     // Auto-actualizar fechas
-    if (status === 'contacted' && !lead.firstContactDate) {
-      updates.firstContactDate = new Date();
+    if (['contactado', 'calificado', 'propuesta', 'negociacion'].includes(estado)) {
+      updates.ultimoContacto = new Date();
     }
 
-    if (['contacted', 'qualified', 'negotiation'].includes(status)) {
-      updates.lastContactDate = new Date();
-    }
-
-    if (status === 'won') {
-      updates.convertedAt = new Date();
-    }
-
-    return await prisma.crmLead.update({
+    return await prisma.lead.update({
       where: { id: leadId },
       data: updates,
     });
@@ -483,7 +372,7 @@ export class CRMService {
    * Eliminar lead
    */
   static async deleteLead(leadId: string, companyId: string) {
-    const lead = await prisma.crmLead.findFirst({
+    const lead = await prisma.lead.findFirst({
       where: {
         id: leadId,
         companyId,
@@ -494,139 +383,11 @@ export class CRMService {
       throw new Error('Lead no encontrado');
     }
 
-    await prisma.crmLead.delete({
+    await prisma.lead.delete({
       where: { id: leadId },
     });
 
     return { success: true };
-  }
-
-  // ============================================================================
-  // DEAL MANAGEMENT
-  // ============================================================================
-
-  /**
-   * Crear nuevo deal
-   */
-  static async createDeal(input: CreateDealInput) {
-    const deal = await prisma.deal.create({
-      data: {
-        ...input,
-        currency: input.currency || 'EUR',
-        stage: input.stage || 'prospecting',
-        probability: input.probability || 10,
-      },
-      include: {
-        lead: true,
-        owner: {
-          select: {
-            id: true,
-            nombre: true,
-            email: true,
-          },
-        },
-      },
-    });
-
-    // Si hay lead asociado, actualizar su estado
-    if (input.leadId) {
-      await prisma.crmLead.update({
-        where: { id: input.leadId },
-        data: {
-          status: 'qualified',
-        },
-      });
-    }
-
-    return deal;
-  }
-
-  /**
-   * Actualizar stage del deal
-   */
-  static async updateDealStage(dealId: string, companyId: string, stage: DealStage) {
-    const deal = await prisma.deal.findFirst({
-      where: {
-        id: dealId,
-        companyId,
-      },
-    });
-
-    if (!deal) {
-      throw new Error('Deal no encontrado');
-    }
-
-    const updates: any = { stage };
-
-    // Auto-ajustar probabilidad según stage
-    const probabilityByStage: Record<DealStage, number> = {
-      prospecting: 10,
-      qualification: 25,
-      proposal: 50,
-      negotiation: 75,
-      closed_won: 100,
-      closed_lost: 0,
-    };
-
-    updates.probability = probabilityByStage[stage];
-
-    // Si se cierra, guardar fecha
-    if (stage === 'closed_won' || stage === 'closed_lost') {
-      updates.closedDate = new Date();
-
-      // Actualizar lead si existe
-      if (deal.leadId) {
-        await prisma.crmLead.update({
-          where: { id: deal.leadId },
-          data: {
-            status: stage === 'closed_won' ? 'won' : 'lost',
-            convertedAt: stage === 'closed_won' ? new Date() : undefined,
-          },
-        });
-      }
-    }
-
-    return await prisma.deal.update({
-      where: { id: dealId },
-      data: updates,
-    });
-  }
-
-  /**
-   * Listar deals
-   */
-  static async listDeals(companyId: string, stage?: DealStage, page = 1, limit = 50) {
-    const where: any = { companyId };
-    if (stage) {
-      where.stage = stage;
-    }
-
-    const [deals, total] = await Promise.all([
-      prisma.deal.findMany({
-        where,
-        include: {
-          lead: true,
-          owner: {
-            select: {
-              id: true,
-              nombre: true,
-            },
-          },
-        },
-        orderBy: [{ expectedCloseDate: 'asc' }, { createdAt: 'desc' }],
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      prisma.deal.count({ where }),
-    ]);
-
-    return {
-      deals,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
   }
 
   // ============================================================================
@@ -639,180 +400,42 @@ export class CRMService {
   static async logActivity(
     companyId: string,
     leadId: string | null,
-    dealId: string | null,
-    type: string,
-    subject: string,
-    description?: string,
-    outcome?: string,
-    duration?: number,
-    performedBy?: string,
-    metadata?: any
+    _dealId: string | null,
+    tipo: string,
+    titulo: string,
+    descripcion?: string,
+    resultado?: string,
+    duracion?: number,
+    creadoPor?: string,
+    _metadata?: any
   ) {
-    const activity = await prisma.cRMActivity.create({
+    if (!leadId || !creadoPor) {
+      throw new Error('Se requiere leadId y creadoPor');
+    }
+
+    const activity = await prisma.leadActivity.create({
       data: {
-        companyId,
         leadId,
-        dealId,
-        type,
-        subject,
-        description,
-        outcome,
-        duration,
-        performedBy,
-        metadata,
-        activityDate: new Date(),
+        tipo,
+        titulo,
+        descripcion,
+        resultado,
+        duracion,
+        creadoPor,
+        fecha: new Date(),
       },
     });
 
-    // Actualizar engagement metrics si es un lead
-    if (leadId) {
-      const updates: any = {};
-
-      switch (type) {
-        case 'email':
-          updates.emailsSent = { increment: 1 };
-          if (outcome === 'opened') {
-            updates.emailsOpened = { increment: 1 };
-          }
-          if (outcome === 'clicked') {
-            updates.emailsClicked = { increment: 1 };
-          }
-          break;
-        case 'call':
-          updates.callsMade = { increment: 1 };
-          break;
-        case 'meeting':
-          updates.meetingsHeld = { increment: 1 };
-          break;
-      }
-
-      if (Object.keys(updates).length > 0) {
-        updates.lastContactDate = new Date();
-
-        const lead = await prisma.crmLead.update({
-          where: { id: leadId },
-          data: updates,
-        });
-
-        // Recalcular score
-        const newScore = calculateLeadScore({
-          hasCompanyWebsite: !!lead.companyWebsite,
-          hasCompanyLinkedIn: !!lead.companyLinkedIn,
-          hasIndustry: !!lead.industry,
-          companySize: lead.companySize,
-          hasPhone: !!lead.phone,
-          hasJobTitle: !!lead.jobTitle,
-          isDecisionMaker: !!lead.authority,
-          emailsOpened: lead.emailsOpened,
-          emailsClicked: lead.emailsClicked,
-          callsMade: lead.callsMade,
-          meetingsHeld: lead.meetingsHeld,
-          hasBudget: !!lead.budget,
-          hasAuthority: !!lead.authority,
-          hasNeed: !!lead.need,
-          hasTimeline: !!lead.timeline,
-        });
-
-        await prisma.crmLead.update({
-          where: { id: leadId },
-          data: { score: newScore },
-        });
-      }
-    }
+    // Actualizar contador de contactos y última fecha
+    await prisma.lead.update({
+      where: { id: leadId },
+      data: {
+        numeroContactos: { increment: 1 },
+        ultimoContacto: new Date(),
+      },
+    });
 
     return activity;
-  }
-
-  // ============================================================================
-  // TASK MANAGEMENT
-  // ============================================================================
-
-  /**
-   * Crear tarea
-   */
-  static async createTask(
-    companyId: string,
-    leadId: string | null,
-    title: string,
-    type: string,
-    dueDate: Date,
-    assignedTo?: string,
-    description?: string,
-    priority: CRMLeadPriority = 'medium'
-  ) {
-    return await prisma.cRMTask.create({
-      data: {
-        companyId,
-        leadId,
-        title,
-        description,
-        type,
-        priority,
-        dueDate,
-        assignedTo,
-      },
-      include: {
-        lead: true,
-        user: {
-          select: {
-            id: true,
-            nombre: true,
-          },
-        },
-      },
-    });
-  }
-
-  /**
-   * Marcar tarea como completada
-   */
-  static async completeTask(taskId: string, companyId: string) {
-    const task = await prisma.cRMTask.findFirst({
-      where: {
-        id: taskId,
-        companyId,
-      },
-    });
-
-    if (!task) {
-      throw new Error('Tarea no encontrada');
-    }
-
-    return await prisma.cRMTask.update({
-      where: { id: taskId },
-      data: {
-        completed: true,
-        completedAt: new Date(),
-      },
-    });
-  }
-
-  /**
-   * Listar tareas pendientes
-   */
-  static async listTasks(companyId: string, assignedTo?: string, completed = false) {
-    const where: any = {
-      companyId,
-      completed,
-    };
-
-    if (assignedTo) {
-      where.assignedTo = assignedTo;
-    }
-
-    return await prisma.cRMTask.findMany({
-      where,
-      include: {
-        lead: true,
-        user: {
-          select: {
-            id: true,
-            nombre: true,
-          },
-        },
-      },
-      orderBy: [{ priority: 'desc' }, { dueDate: 'asc' }],
-    });
   }
 
   // ============================================================================
@@ -826,87 +449,55 @@ export class CRMService {
     try {
       const where: any = { companyId };
       if (userId) {
-        where.ownerId = userId;
+        where.asignadoA = userId;
       }
 
       const [
         totalLeads,
-        newLeads,
-        qualifiedLeads,
-        wonLeads,
-        totalDeals,
-        openDeals,
-        wonDeals,
-        totalDealValue,
-        wonDealValue,
-        activitiesThisMonth,
-        tasksOverdue,
+        nuevos,
+        contactados,
+        calificados,
+        ganados,
+        perdidos,
       ] = await Promise.all([
-        prisma.crmLead.count({ where }).catch(() => 0),
-        prisma.crmLead.count({ where: { ...where, status: 'new' } }).catch(() => 0),
-      prisma.crmLead.count({ where: { ...where, status: 'qualified' } }).catch(() => 0),
-      prisma.crmLead.count({ where: { ...where, status: 'won' } }).catch(() => 0),
-      prisma.deal.count({ where }).catch(() => 0),
-      prisma.deal.count({
-        where: {
-          ...where,
-          stage: { notIn: ['closed_won', 'closed_lost'] },
-        },
-      }).catch(() => 0),
-      prisma.deal.count({ where: { ...where, stage: 'closed_won' } }).catch(() => 0),
-      prisma.deal.aggregate({
-        where,
-        _sum: { value: true },
-      }).catch(() => ({ _sum: { value: 0 } })),
-      prisma.deal.aggregate({
-        where: { ...where, stage: 'closed_won' },
-        _sum: { value: true },
-      }).catch(() => ({ _sum: { value: 0 } })),
-      prisma.cRMActivity.count({
-        where: {
-          companyId,
-          activityDate: {
-            gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-          },
-        },
-      }).catch(() => 0),
-      prisma.cRMTask.count({
-        where: {
-          companyId,
-          completed: false,
-          dueDate: { lt: new Date() },
-        },
-      }).catch(() => 0),
-    ]);
+        prisma.lead.count({ where }).catch(() => 0),
+        prisma.lead.count({ where: { ...where, estado: 'nuevo' } }).catch(() => 0),
+        prisma.lead.count({ where: { ...where, estado: 'contactado' } }).catch(() => 0),
+        prisma.lead.count({ where: { ...where, estado: 'calificado' } }).catch(() => 0),
+        prisma.lead.count({ where: { ...where, estado: 'ganado' } }).catch(() => 0),
+        prisma.lead.count({ where: { ...where, estado: 'perdido' } }).catch(() => 0),
+      ]);
 
-    const winRate = wonLeads + (totalLeads - wonLeads) > 0 ? (wonLeads / totalLeads) * 100 : 0;
+      const winRate = totalLeads > 0 ? (ganados / totalLeads) * 100 : 0;
 
-    return {
-      leads: {
-        total: totalLeads,
-        new: newLeads,
-        qualified: qualifiedLeads,
-        won: wonLeads,
-        winRate: Math.round(winRate),
-      },
-      deals: {
-        total: totalDeals,
-        open: openDeals,
-        won: wonDeals,
-        totalValue: totalDealValue._sum.value || 0,
-        wonValue: wonDealValue._sum.value || 0,
-      },
-      activities: {
-        thisMonth: activitiesThisMonth,
-      },
-      tasks: {
-        overdue: tasksOverdue,
-      },
-    };
+      return {
+        leads: {
+          total: totalLeads,
+          nuevos,
+          contactados,
+          calificados,
+          ganados,
+          perdidos,
+          winRate: Math.round(winRate),
+        },
+        deals: {
+          total: 0,
+          open: 0,
+          won: 0,
+          totalValue: 0,
+          wonValue: 0,
+        },
+        activities: {
+          thisMonth: 0,
+        },
+        tasks: {
+          overdue: 0,
+        },
+      };
     } catch (error: any) {
       console.error('Error getting CRM stats:', error);
       return {
-        leads: { total: 0, new: 0, qualified: 0, won: 0, winRate: 0 },
+        leads: { total: 0, nuevos: 0, contactados: 0, calificados: 0, ganados: 0, perdidos: 0, winRate: 0 },
         deals: { total: 0, open: 0, won: 0, totalValue: 0, wonValue: 0 },
         activities: { thisMonth: 0 },
         tasks: { overdue: 0 },
@@ -921,45 +512,35 @@ export default CRMService;
 // ALIASES Y FUNCIONES HELPER PARA COMPATIBILIDAD
 // ============================================================================
 
-/**
- * Alias para calculateLeadScore (nombre alternativo)
- */
 export const calculateLeadScoring = calculateLeadScore;
 
 /**
- * Determina la temperatura del lead basado en su score y actividad
+ * Calcula la probabilidad de cierre basado en la puntuación
  */
-export function determinarTemperatura(score: number): 'hot' | 'warm' | 'cold' {
-  if (score >= 70) return 'hot';
-  if (score >= 40) return 'warm';
-  return 'cold';
-}
+export function calculateProbabilidadCierre(puntuacion: number, estado?: string): number {
+  let probability = puntuacion;
 
-/**
- * Calcula la probabilidad de cierre basado en el score y otros factores
- */
-export function calculateProbabilidadCierre(score: number, stage?: string): number {
-  let probability = score; // Empezar con el score
-
-  // Ajustar según la etapa del deal
-  if (stage) {
-    switch (stage) {
-      case 'prospecting':
+  if (estado) {
+    switch (estado) {
+      case 'nuevo':
         probability *= 0.3;
         break;
-      case 'qualification':
+      case 'contactado':
         probability *= 0.5;
         break;
-      case 'proposal':
+      case 'calificado':
         probability *= 0.7;
         break;
-      case 'negotiation':
-        probability *= 0.85;
+      case 'propuesta':
+        probability *= 0.8;
         break;
-      case 'closed_won':
+      case 'negociacion':
+        probability *= 0.9;
+        break;
+      case 'ganado':
         probability = 100;
         break;
-      case 'closed_lost':
+      case 'perdido':
         probability = 0;
         break;
       default:
@@ -967,6 +548,5 @@ export function calculateProbabilidadCierre(score: number, stage?: string): numb
     }
   }
 
-  // Asegurar que esté entre 0 y 100
   return Math.min(100, Math.max(0, probability));
 }
