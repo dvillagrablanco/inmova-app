@@ -907,10 +907,9 @@ const operadorNavItems = [
 // ============================================================================
 
 // 5.1 ADMINISTRADOR - GESTIÓN DE EMPRESA
-// SIMPLIFICADO: 7 items (antes 9)
-// - Eliminado: Legal (ya está en Documentos y Legal)
-// - Fusionado: Módulos + Personalización → Configuración
+// Incluye configuración, usuarios, módulos, integraciones y herramientas
 const administradorEmpresaItems = [
+  // === CONFIGURACIÓN BÁSICA ===
   {
     name: 'Configuración',
     href: '/admin/configuracion',
@@ -935,6 +934,26 @@ const administradorEmpresaItems = [
     icon: Palette,
     roles: ['administrador', 'super_admin'],
   },
+  // === INTEGRACIONES DE TERCEROS ===
+  {
+    name: 'Integraciones',
+    href: '/integraciones',
+    icon: Code,
+    roles: ['administrador', 'super_admin'],
+  },
+  {
+    name: 'Contabilidad',
+    href: '/admin/integraciones-contables',
+    icon: Euro,
+    roles: ['administrador', 'super_admin'],
+  },
+  {
+    name: 'Portales Inmobiliarios',
+    href: '/admin/portales-inmobiliarios',
+    icon: Share2,
+    roles: ['administrador', 'super_admin'],
+  },
+  // === HERRAMIENTAS ===
   {
     name: 'Aprobaciones',
     href: '/admin/aprobaciones',
@@ -947,7 +966,6 @@ const administradorEmpresaItems = [
     icon: Upload,
     roles: ['administrador', 'super_admin'],
   },
-  // Herramientas operativas de empresa
   {
     name: 'OCR Import',
     href: '/admin/ocr-import',
