@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +19,7 @@ import {
   Wallet,
   ArrowUpDown,
   Info,
+  Plus,
 } from 'lucide-react';
 import {
   PieChart,
@@ -32,112 +34,141 @@ import {
   Legend,
   ResponsiveContainer,
 } from '@/components/ui/lazy-charts-extended';
+import { toast } from 'sonner';
 
 const COLORS = ['#4F46E5', '#7C3AED', '#EC4899', '#F59E0B', '#10B981'];
 
+interface TokenizedProperty {
+  id: string;
+  name: string;
+  totalValue: number;
+  tokenized: number;
+  tokensIssued: number;
+  tokenPrice: number;
+  investors: number;
+  annualYield: number;
+  status: 'active' | 'pending';
+  contractAddress?: string;
+  blockchain?: string;
+  symbol?: string;
+}
+
+interface Transaction {
+  id: string;
+  type: string;
+  from: string;
+  to: string;
+  amount: number;
+  value: number;
+  timestamp: string;
+  hash?: string;
+  tokenName?: string;
+  tokenSymbol?: string;
+}
+
 export default function BlockchainPage() {
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [tokenizedProperties, setTokenizedProperties] = useState<TokenizedProperty[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [stats, setStats] = useState({
+    totalTokenizedValue: 0,
+    totalInvestors: 0,
+    averageYield: 0,
+    activeProperties: 0,
+  });
 
-  const tokenizedProperties = [
-    {
-      id: 'p1',
-      name: 'Edificio Centro - C/ Mayor 45',
-      totalValue: 2500000,
-      tokenized: 1500000,
-      tokensIssued: 15000,
-      tokenPrice: 100,
-      investors: 234,
-      annualYield: 6.5,
-      status: 'active',
-    },
-    {
-      id: 'p2',
-      name: 'Apartamentos Playa Mar',
-      totalValue: 1800000,
-      tokenized: 1800000,
-      tokensIssued: 18000,
-      tokenPrice: 100,
-      investors: 187,
-      annualYield: 7.2,
-      status: 'active',
-    },
-    {
-      id: 'p3',
-      name: 'Oficinas Business Park',
-      totalValue: 3500000,
-      tokenized: 0,
-      tokensIssued: 0,
-      tokenPrice: 100,
-      investors: 0,
-      annualYield: 0,
-      status: 'pending',
-    },
-  ];
+  useEffect(() => {
+    if (status === 'authenticated') {
+      loadData();
+    }
+  }, [status]);
 
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      
+      // Cargar tokens de propiedades
+      const tokensRes = await fetch('/api/blockchain/tokens');
+      if (tokensRes.ok) {
+        const tokensData = await tokensRes.json();
+        if (tokensData.tokens && tokensData.tokens.length > 0) {
+          setTokenizedProperties(tokensData.tokens);
+          setStats(tokensData.stats);
+        } else {
+          setTokenizedProperties([]);
+        }
+      }
+      
+      // Cargar transacciones
+      const txRes = await fetch('/api/blockchain/transactions');
+      if (txRes.ok) {
+        const txData = await txRes.json();
+        setTransactions(txData.transactions || []);
+      }
+    } catch (error) {
+      console.error('Error loading blockchain data:', error);
+      toast.error('Error al cargar datos de blockchain');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Smart contracts (por ahora estáticos hasta tener modelo en BD)
   const smartContracts = [
     {
       id: 'sc1',
       name: 'Distribución Automática de Rentas',
       description: 'Reparto mensual de rentas a holders de tokens',
-      propertyId: 'p1',
-      status: 'active',
-      lastExecution: '2025-12-01',
-      totalDistributed: 45000,
+      status: 'template',
+      lastExecution: null,
+      totalDistributed: 0,
     },
     {
       id: 'sc2',
       name: 'Venta Fraccionada',
       description: 'Permite compra/venta de tokens en marketplace',
-      propertyId: 'p1',
-      status: 'active',
-      lastExecution: '2025-12-25',
+      status: 'template',
+      lastExecution: null,
       totalDistributed: 0,
     },
     {
       id: 'sc3',
       name: 'Votación Gobernanza',
       description: 'Sistema de votación para decisiones sobre la propiedad',
-      propertyId: 'p2',
-      status: 'active',
-      lastExecution: '2025-12-15',
+      status: 'template',
+      lastExecution: null,
       totalDistributed: 0,
     },
   ];
 
-  const transactions = [
-    {
-      id: 'tx1',
-      type: 'purchase',
-      from: '0x1234...5678',
-      to: '0xabcd...efgh',
-      amount: 50,
-      value: 5000,
-      timestamp: '2025-12-25 10:30',
-      hash: '0x9876...4321',
-    },
-    {
-      id: 'tx2',
-      type: 'distribution',
-      from: 'Smart Contract',
-      to: '0x2345...6789',
-      amount: 0,
-      value: 125,
-      timestamp: '2025-12-01 00:00',
-      hash: '0x8765...3210',
-    },
-  ];
-
-  const totalValue = tokenizedProperties.reduce((sum, p) => sum + p.tokenized, 0);
-  const totalInvestors = tokenizedProperties.reduce((sum, p) => sum + p.investors, 0);
-  const avgYield = tokenizedProperties.length > 0
-    ? tokenizedProperties.reduce((sum, p) => sum + p.annualYield, 0) / tokenizedProperties.length
-    : 0;
+  const totalValue = stats.totalTokenizedValue;
+  const totalInvestors = stats.totalInvestors;
+  const avgYield = stats.averageYield;
 
   const distributionData = tokenizedProperties.filter(p => p.tokenized > 0).map(p => ({
     name: p.name,
     value: p.tokenized,
   }));
+
+  if (status === 'unauthenticated') {
+    router.push('/login');
+    return null;
+  }
+
+  if (loading) {
+    return (
+      <AuthenticatedLayout>
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Cargando datos blockchain...</p>
+          </div>
+        </div>
+      </AuthenticatedLayout>
+    );
+  }
 
   return (
     <AuthenticatedLayout>
@@ -216,6 +247,21 @@ export default function BlockchainPage() {
               </TabsList>
 
               <TabsContent value="properties" className="space-y-4">
+                {tokenizedProperties.length === 0 ? (
+                  <Card>
+                    <CardContent className="flex flex-col items-center justify-center py-12">
+                      <Coins className="h-16 w-16 text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No hay propiedades tokenizadas</h3>
+                      <p className="text-muted-foreground text-center mb-4">
+                        Tokeniza tu primera propiedad para permitir inversión fraccionada
+                      </p>
+                      <Button onClick={() => router.push('/blockchain/tokenizar')}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Tokenizar Propiedad
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {tokenizedProperties.map((property) => (
                     <Card key={property.id} className="hover:shadow-lg transition-shadow">
@@ -300,7 +346,9 @@ export default function BlockchainPage() {
                     </Card>
                   ))}
                 </div>
+                )}
 
+                {tokenizedProperties.length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Distribución del Capital Tokenizado</CardTitle>
@@ -327,6 +375,7 @@ export default function BlockchainPage() {
                     </ResponsiveContainer>
                   </CardContent>
                 </Card>
+                )}
               </TabsContent>
 
               <TabsContent value="contracts" className="space-y-4">
@@ -394,6 +443,15 @@ export default function BlockchainPage() {
                     <CardTitle>Historial de Transacciones</CardTitle>
                   </CardHeader>
                   <CardContent>
+                    {transactions.length === 0 ? (
+                      <div className="text-center py-12">
+                        <ArrowUpDown className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold mb-2">No hay transacciones</h3>
+                        <p className="text-muted-foreground">
+                          Las transacciones aparecerán aquí cuando haya actividad en tus tokens
+                        </p>
+                      </div>
+                    ) : (
                     <div className="space-y-3">
                       {transactions.map((tx) => (
                         <div key={tx.id} className="flex items-center gap-4 p-4 border rounded-lg">
@@ -439,6 +497,7 @@ export default function BlockchainPage() {
                         </div>
                       ))}
                     </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>

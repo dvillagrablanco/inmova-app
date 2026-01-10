@@ -93,142 +93,69 @@ export default function IoTPage() {
     try {
       setLoading(true);
       
-      // Mock data
-      setDevices([
-        {
-          id: 'd1',
-          name: 'Termostato Nest - Salón',
-          type: 'thermostat',
-          status: 'online',
-          location: 'Planta 3 - Apt 3A',
-          buildingId: 'b1',
-          buildingName: 'Edificio Centro',
-          currentValue: 21.5,
-          unit: '°C',
-          lastUpdate: new Date().toISOString(),
-        },
-        {
-          id: 'd2',
-          name: 'Cerradura Yale - Puerta Principal',
-          type: 'lock',
-          status: 'online',
-          location: 'Entrada',
-          buildingId: 'b1',
-          buildingName: 'Edificio Centro',
-          battery: 85,
-          lastUpdate: new Date(Date.now() - 120000).toISOString(),
-        },
-        {
-          id: 'd3',
-          name: 'Sensor Consumo Eléctrico',
-          type: 'meter',
-          status: 'online',
-          location: 'Cuadro General',
-          buildingId: 'b1',
-          buildingName: 'Edificio Centro',
-          currentValue: 2.4,
-          unit: 'kW',
-          lastUpdate: new Date().toISOString(),
-        },
-        {
-          id: 'd4',
-          name: 'Detector Fugas Agua',
-          type: 'sensor',
-          status: 'warning',
-          location: 'Baño Principal',
-          buildingId: 'b2',
-          buildingName: 'Chalet Las Lomas',
-          battery: 15,
-          lastUpdate: new Date(Date.now() - 3600000).toISOString(),
-        },
-        {
-          id: 'd5',
-          name: 'Termostato Ecobee - Dormitorio',
-          type: 'thermostat',
-          status: 'online',
-          location: 'Dormitorio Principal',
-          buildingId: 'b2',
-          buildingName: 'Chalet Las Lomas',
-          currentValue: 19.2,
-          unit: '°C',
-          lastUpdate: new Date().toISOString(),
-        },
-        {
-          id: 'd6',
-          name: 'Luces Inteligentes Philips Hue',
-          type: 'light',
-          status: 'offline',
-          location: 'Salón',
-          buildingId: 'b3',
-          buildingName: 'Apartamento Playa',
-          lastUpdate: new Date(Date.now() - 7200000).toISOString(),
-        },
-      ]);
-
-      setAutomations([
-        {
-          id: 'a1',
-          name: 'Apagar calefacción cuando no hay inquilinos',
-          trigger: 'Ausencia detectada > 2 horas',
-          action: 'Ajustar termostato a 16°C',
-          enabled: true,
-          lastTriggered: '2025-12-25 18:30',
-        },
-        {
-          id: 'a2',
-          name: 'Alerta consumo anómalo',
-          trigger: 'Consumo > 5kW durante 1 hora',
-          action: 'Enviar notificación',
-          enabled: true,
-        },
-        {
-          id: 'a3',
-          name: 'Check-in automático',
-          trigger: 'Reserva confirmada',
-          action: 'Enviar código cerradura temporal',
-          enabled: true,
-          lastTriggered: '2025-12-24 14:00',
-        },
-        {
-          id: 'a4',
-          name: 'Modo ahorro energético nocturno',
-          trigger: 'Todos los días a las 23:00',
-          action: 'Reducir temperatura 2°C',
-          enabled: false,
-        },
-      ]);
-
-      setAlerts([
-        {
-          id: 'al1',
-          type: 'warning',
-          message: 'Batería baja en detector de fugas',
-          deviceId: 'd4',
-          deviceName: 'Detector Fugas Agua',
-          timestamp: new Date(Date.now() - 1800000).toISOString(),
-          resolved: false,
-        },
-        {
-          id: 'al2',
-          type: 'error',
-          message: 'Dispositivo sin conexión',
-          deviceId: 'd6',
-          deviceName: 'Luces Inteligentes Philips Hue',
-          timestamp: new Date(Date.now() - 7200000).toISOString(),
-          resolved: false,
-        },
-        {
-          id: 'al3',
-          type: 'info',
-          message: 'Consumo reducido en 15% esta semana',
-          deviceId: 'd3',
-          deviceName: 'Sensor Consumo Eléctrico',
-          timestamp: new Date(Date.now() - 3600000).toISOString(),
-          resolved: true,
-        },
-      ]);
+      // Cargar dispositivos reales desde la API
+      const response = await fetch('/api/iot/devices');
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        if (data.devices && data.devices.length > 0) {
+          setDevices(data.devices);
+          
+          // Generar alertas basadas en dispositivos
+          const generatedAlerts: Alert[] = [];
+          data.devices.forEach((device: IoTDevice) => {
+            if (device.battery !== undefined && device.battery < 20) {
+              generatedAlerts.push({
+                id: `al_${device.id}_battery`,
+                type: 'warning',
+                message: `Batería baja en ${device.name}`,
+                deviceId: device.id,
+                deviceName: device.name,
+                timestamp: new Date().toISOString(),
+                resolved: false,
+              });
+            }
+            if (device.status === 'offline') {
+              generatedAlerts.push({
+                id: `al_${device.id}_offline`,
+                type: 'error',
+                message: 'Dispositivo sin conexión',
+                deviceId: device.id,
+                deviceName: device.name,
+                timestamp: device.lastUpdate,
+                resolved: false,
+              });
+            }
+          });
+          setAlerts(generatedAlerts);
+        } else {
+          // No hay dispositivos, mostrar estado vacío
+          setDevices([]);
+          setAlerts([]);
+        }
+      } else {
+        throw new Error('Error al cargar dispositivos');
+      }
+      
+      // Cargar automatizaciones (si hay API)
+      try {
+        const autoResponse = await fetch('/api/iot/automations');
+        if (autoResponse.ok) {
+          const autoData = await autoResponse.json();
+          setAutomations(autoData.automations || []);
+        } else {
+          setAutomations([]);
+        }
+      } catch {
+        setAutomations([]);
+      }
     } catch (error) {
+      console.error('Error loading IoT data:', error);
       toast.error('Error al cargar dispositivos IoT');
+      setDevices([]);
+      setAutomations([]);
+      setAlerts([]);
     } finally {
       setLoading(false);
     }

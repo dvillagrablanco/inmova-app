@@ -81,95 +81,38 @@ export default function ToursVirtualesPage() {
     try {
       setLoading(true);
       
-      // Mock data
-      setTours([
-        {
-          id: 't1',
-          propertyId: 'p1',
-          propertyName: 'Ático Centro - C/ Mayor 45',
-          type: '360',
-          status: 'published',
-          createdAt: '2025-01-15',
-          views: 1247,
-          avgDuration: 185,
-          conversionRate: 12.5,
-          thumbnail: '/images/tours/atico-centro.jpg',
-          url: 'https://tours.inmova.app/atico-centro',
-          features: ['Home Staging Virtual', 'Medición Habitaciones', '12 Escenas'],
-        },
-        {
-          id: 't2',
-          propertyId: 'p2',
-          propertyName: 'Casa Chalet - Urbanización Las Lomas',
-          type: 'vr',
-          status: 'published',
-          createdAt: '2025-01-20',
-          views: 856,
-          avgDuration: 245,
-          conversionRate: 18.3,
-          thumbnail: '/images/tours/chalet.jpg',
-          url: 'https://tours.inmova.app/chalet-lomas',
-          features: ['VR Immersive', 'Recorrido Exterior', 'Vista Piscina'],
-        },
-        {
-          id: 't3',
-          propertyId: 'p3',
-          propertyName: 'Apartamento Playa',
-          type: '360',
-          status: 'published',
-          createdAt: '2025-01-10',
-          views: 2134,
-          avgDuration: 156,
-          conversionRate: 15.2,
-          thumbnail: '/images/tours/apartamento-playa.jpg',
-          url: 'https://tours.inmova.app/playa',
-          features: ['Vista 360°', 'Tour Nocturno', 'Vistas al Mar'],
-        },
-        {
-          id: 't4',
-          propertyId: 'p4',
-          propertyName: 'Loft Moderno',
-          type: 'ar',
-          status: 'draft',
-          createdAt: '2025-01-25',
-          views: 0,
-          avgDuration: 0,
-          conversionRate: 0,
-          thumbnail: '/images/tours/loft.jpg',
-          url: '',
-          features: ['AR Furniture', 'Reforma Virtual', 'Antes/Después'],
-        },
-      ]);
-
-      setAnalytics({
-        totalViews: 4237,
-        avgEngagement: 68.5,
-        totalConversions: 612,
-        avgConversionRate: 14.4,
-        viewsBySource: [
-          { source: 'Portal Inmobiliario 1', views: 1842 },
-          { source: 'Portal Inmobiliario 2', views: 1325 },
-          { source: 'Web Propia', views: 680 },
-          { source: 'Redes Sociales', views: 390 },
-        ],
-        viewsOverTime: [
-          { date: '15 Ene', views: 245 },
-          { date: '16 Ene', views: 312 },
-          { date: '17 Ene', views: 428 },
-          { date: '18 Ene', views: 567 },
-          { date: '19 Ene', views: 634 },
-          { date: '20 Ene', views: 712 },
-          { date: '21 Ene', views: 798 },
-          { date: '22 Ene', views: 541 },
-        ],
-        topProperties: [
-          { name: 'Apartamento Playa', views: 2134, conversions: 324 },
-          { name: 'Ático Centro', views: 1247, conversions: 156 },
-          { name: 'Casa Chalet', views: 856, conversions: 157 },
-        ],
-      });
+      // Cargar datos reales desde la API
+      const response = await fetch('/api/virtual-tours');
+      
+      if (!response.ok) {
+        throw new Error('Error al cargar tours');
+      }
+      
+      const data = await response.json();
+      
+      // Si hay tours reales, usarlos
+      if (data.tours && data.tours.length > 0) {
+        setTours(data.tours);
+        setAnalytics(data.analytics);
+      } else {
+        // Si no hay tours, mostrar estado vacío
+        setTours([]);
+        setAnalytics({
+          totalViews: 0,
+          avgEngagement: 0,
+          totalConversions: 0,
+          avgConversionRate: 0,
+          viewsBySource: [],
+          viewsOverTime: [],
+          topProperties: [],
+        });
+      }
     } catch (error) {
+      console.error('Error loading tours:', error);
       toast.error('Error al cargar tours virtuales');
+      // Estado vacío en caso de error
+      setTours([]);
+      setAnalytics(null);
     } finally {
       setLoading(false);
     }

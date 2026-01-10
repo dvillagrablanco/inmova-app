@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
 import { z } from 'zod';
 import logger, { logError } from '@/lib/logger';
+import { sendEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
@@ -131,9 +132,11 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Crear notificaciones y enviar emails a superadmins
     await Promise.all(
-      superAdmins.map((admin) =>
-        prisma.notification.create({
+      superAdmins.map(async (admin) => {
+        // Crear notificación en la plataforma
+        await prisma.notification.create({
           data: {
             companyId: user.companyId,
             userId: admin.id,
@@ -144,8 +147,45 @@ export async function POST(request: NextRequest) {
             entityId: suggestion.id,
             entityType: 'suggestion',
           },
-        })
-      )
+        });
+
+        // Enviar email al superadmin
+        try {
+          await sendEmail({
+            to: admin.email,
+            subject: `💡 Nueva Sugerencia: ${validatedData.titulo}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #4F46E5;">Nueva Sugerencia Recibida</h2>
+                
+                <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <p><strong>Remitente:</strong> ${user.name} (${user.email})</p>
+                  <p><strong>Empresa:</strong> ${(suggestion as any).company?.nombre || 'N/A'}</p>
+                  <p><strong>Categoría:</strong> ${validatedData.categoria}</p>
+                  <p><strong>Prioridad:</strong> ${validatedData.prioridad}</p>
+                </div>
+                
+                <h3 style="color: #1f2937;">${validatedData.titulo}</h3>
+                <p style="color: #4b5563; line-height: 1.6;">${validatedData.descripcion}</p>
+                
+                ${validatedData.urlOrigen ? `<p style="color: #6b7280; font-size: 12px;">Página de origen: ${validatedData.urlOrigen}</p>` : ''}
+                ${validatedData.navegador ? `<p style="color: #6b7280; font-size: 12px;">Navegador: ${validatedData.navegador}</p>` : ''}
+                
+                <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+                
+                <p style="color: #6b7280; font-size: 14px;">
+                  <a href="${process.env.NEXTAUTH_URL}/admin/sugerencias/${suggestion.id}" style="color: #4F46E5; text-decoration: none;">
+                    Ver sugerencia en el panel de administración →
+                  </a>
+                </p>
+              </div>
+            `,
+          });
+        } catch (emailError) {
+          logger.warn('Error al enviar email de sugerencia:', emailError);
+          // No fallamos la operación si el email falla
+        }
+      })
     );
 
     return NextResponse.json(suggestion, { status: 201 });
