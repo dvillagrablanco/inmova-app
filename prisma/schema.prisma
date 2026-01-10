@@ -414,9 +414,10 @@ model User {
   suggestions Suggestion[]
 
   // CRM - Leads
-  leadsAsignados  Lead[]
-  actividadesLead LeadActivity[]
-  documentosLead  LeadDocument[]
+  leadsAsignados   Lead[]
+  actividadesLead  LeadActivity[]
+  documentosLead   LeadDocument[]
+  citasAsignadas   Appointment[]
 
   // Push Notifications
   pushSubscriptions PushSubscription[]
@@ -9190,8 +9191,9 @@ model Lead {
   updatedAt DateTime @updatedAt
 
   // Relaciones
-  actividades LeadActivity[]
-  documentos  LeadDocument[]
+  actividades  LeadActivity[]
+  documentos   LeadDocument[]
+  appointments Appointment[]
 
   @@index([companyId])
   @@index([estado])
@@ -9248,6 +9250,65 @@ model LeadDocument {
 
   @@index([leadId])
   @@map("lead_documents")
+}
+
+// Citas/Appointments del Lead (integración con Retell AI)
+model Appointment {
+  id     String @id @default(cuid())
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  // Información de la cita
+  titulo      String
+  descripcion String? @db.Text
+  tipo        String  @default("visita") // "visita", "llamada", "demo", "reunion_online"
+
+  // Fecha y hora
+  fechaInicio DateTime
+  fechaFin    DateTime
+  duracion    Int      @default(30) // Duración en minutos
+  zonaHoraria String   @default("Europe/Madrid")
+
+  // Estado
+  estado String @default("programada") // "programada", "confirmada", "completada", "cancelada", "no_asistio"
+
+  // Ubicación (para visitas presenciales)
+  ubicacion        String?
+  direccion        String?
+  coordenadas      Json? // { lat: number, lng: number }
+  esVirtual        Boolean @default(false)
+  enlaceReunion    String? // URL para reuniones virtuales
+
+  // Asignación
+  asignadoA       String?
+  asignadoUsuario User?   @relation(fields: [asignadoA], references: [id], onDelete: SetNull)
+
+  // Recordatorios
+  recordatorioEnviado Boolean   @default(false)
+  recordatorioFecha   DateTime?
+
+  // Notas y seguimiento
+  notas          String? @db.Text
+  notasInternas  String? @db.Text
+  resultado      String? // Resultado de la cita
+  proximosPasos  String? @db.Text
+
+  // Origen (Retell AI, manual, etc.)
+  origen           String  @default("manual") // "manual", "retell_ai", "chatbot", "web"
+  retellCallId     String? // ID de la llamada de Retell si aplica
+  conversacionJson Json?   // Transcript de la conversación si aplica
+
+  // Metadata
+  creadoPor String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([leadId])
+  @@index([fechaInicio])
+  @@index([estado])
+  @@index([asignadoA])
+  @@index([retellCallId])
+  @@map("appointments")
 }
 
 // ===========================
