@@ -591,7 +591,7 @@ export default function ClientesAdminPage() {
                       onChange={(e) =>
                         setNewCompany({ ...newCompany, dominioPersonalizado: e.target.value })
                       }
-                      placeholder="miempresa.inmova.app"
+                      placeholder="miempresa.inmovaapp.com"
                     />
                   </div>
                   
