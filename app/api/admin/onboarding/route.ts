@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
             where: { building: { companyId: company.id } },
           }),
           prisma.contract.count({
-            where: { companyId: company.id },
+            where: { unit: { building: { companyId: company.id } } },
           }),
           prisma.auditLog.findFirst({
             where: { companyId: company.id },
