@@ -320,7 +320,7 @@ export class CRMLeadImporter {
       return false;
     }
 
-    const existing = await prisma.cRMLead.findFirst({
+    const existing = await prisma.crmLead.findFirst({
       where: {
         AND: [
           { companyId },

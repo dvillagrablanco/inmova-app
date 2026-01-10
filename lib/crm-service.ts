@@ -184,7 +184,7 @@ export class CRMService {
    */
   static async createLead(input: CreateLeadInput) {
     // Validar si ya existe
-    const existing = await prisma.cRMLead.findFirst({
+    const existing = await prisma.crmLead.findFirst({
       where: {
         companyId: input.companyId,
         email: input.email,
@@ -214,7 +214,7 @@ export class CRMService {
       hasTimeline: false,
     });
 
-    const lead = await prisma.cRMLead.create({
+    const lead = await prisma.crmLead.create({
       data: {
         ...input,
         country: input.country || 'ES',
@@ -240,7 +240,7 @@ export class CRMService {
    * Obtener lead por ID
    */
   static async getLead(leadId: string, companyId: string) {
-    const lead = await prisma.cRMLead.findFirst({
+    const lead = await prisma.crmLead.findFirst({
       where: {
         id: leadId,
         companyId,
@@ -339,7 +339,7 @@ export class CRMService {
     }
 
     const [leads, total] = await Promise.all([
-      prisma.cRMLead.findMany({
+      prisma.crmLead.findMany({
         where,
         include: {
           owner: {
@@ -360,7 +360,7 @@ export class CRMService {
         skip: (page - 1) * limit,
         take: limit,
       }),
-      prisma.cRMLead.count({ where }),
+      prisma.crmLead.count({ where }),
     ]);
 
     return {
@@ -377,7 +377,7 @@ export class CRMService {
    */
   static async updateLead(leadId: string, companyId: string, input: UpdateLeadInput) {
     // Verificar que existe
-    const existing = await prisma.cRMLead.findFirst({
+    const existing = await prisma.crmLead.findFirst({
       where: {
         id: leadId,
         companyId,
@@ -420,7 +420,7 @@ export class CRMService {
       });
     }
 
-    const lead = await prisma.cRMLead.update({
+    const lead = await prisma.crmLead.update({
       where: {
         id: leadId,
       },
@@ -447,7 +447,7 @@ export class CRMService {
    * Cambiar estado del lead
    */
   static async updateLeadStatus(leadId: string, companyId: string, status: CRMLeadStatus) {
-    const lead = await prisma.cRMLead.findFirst({
+    const lead = await prisma.crmLead.findFirst({
       where: {
         id: leadId,
         companyId,
@@ -473,7 +473,7 @@ export class CRMService {
       updates.convertedAt = new Date();
     }
 
-    return await prisma.cRMLead.update({
+    return await prisma.crmLead.update({
       where: { id: leadId },
       data: updates,
     });
@@ -483,7 +483,7 @@ export class CRMService {
    * Eliminar lead
    */
   static async deleteLead(leadId: string, companyId: string) {
-    const lead = await prisma.cRMLead.findFirst({
+    const lead = await prisma.crmLead.findFirst({
       where: {
         id: leadId,
         companyId,
@@ -494,7 +494,7 @@ export class CRMService {
       throw new Error('Lead no encontrado');
     }
 
-    await prisma.cRMLead.delete({
+    await prisma.crmLead.delete({
       where: { id: leadId },
     });
 
@@ -530,7 +530,7 @@ export class CRMService {
 
     // Si hay lead asociado, actualizar su estado
     if (input.leadId) {
-      await prisma.cRMLead.update({
+      await prisma.crmLead.update({
         where: { id: input.leadId },
         data: {
           status: 'qualified',
@@ -576,7 +576,7 @@ export class CRMService {
 
       // Actualizar lead si existe
       if (deal.leadId) {
-        await prisma.cRMLead.update({
+        await prisma.crmLead.update({
           where: { id: deal.leadId },
           data: {
             status: stage === 'closed_won' ? 'won' : 'lost',
@@ -689,7 +689,7 @@ export class CRMService {
       if (Object.keys(updates).length > 0) {
         updates.lastContactDate = new Date();
 
-        const lead = await prisma.cRMLead.update({
+        const lead = await prisma.crmLead.update({
           where: { id: leadId },
           data: updates,
         });
@@ -713,7 +713,7 @@ export class CRMService {
           hasTimeline: !!lead.timeline,
         });
 
-        await prisma.cRMLead.update({
+        await prisma.crmLead.update({
           where: { id: leadId },
           data: { score: newScore },
         });
@@ -842,10 +842,10 @@ export class CRMService {
         activitiesThisMonth,
         tasksOverdue,
       ] = await Promise.all([
-        prisma.cRMLead.count({ where }).catch(() => 0),
-        prisma.cRMLead.count({ where: { ...where, status: 'new' } }).catch(() => 0),
-      prisma.cRMLead.count({ where: { ...where, status: 'qualified' } }).catch(() => 0),
-      prisma.cRMLead.count({ where: { ...where, status: 'won' } }).catch(() => 0),
+        prisma.crmLead.count({ where }).catch(() => 0),
+        prisma.crmLead.count({ where: { ...where, status: 'new' } }).catch(() => 0),
+      prisma.crmLead.count({ where: { ...where, status: 'qualified' } }).catch(() => 0),
+      prisma.crmLead.count({ where: { ...where, status: 'won' } }).catch(() => 0),
       prisma.deal.count({ where }).catch(() => 0),
       prisma.deal.count({
         where: {
