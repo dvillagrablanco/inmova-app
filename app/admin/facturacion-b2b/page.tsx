@@ -130,6 +130,18 @@ export default function B2BBillingDashboard() {
     fechaVencimiento: '',
   });
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Estado para crear nueva factura
+  const [companies, setCompanies] = useState<{ id: string; nombre: string; email: string }[]>([]);
+  const [createForm, setCreateForm] = useState({
+    companyId: '',
+    concepto: '',
+    subtotal: '',
+    descuento: '0',
+    impuestos: '21',
+    notas: '',
+    fechaVencimiento: '',
+  });
 
   // Authentication and Authorization check
   useEffect(() => {
@@ -143,8 +155,21 @@ export default function B2BBillingDashboard() {
   useEffect(() => {
     if (status === 'authenticated' && session?.user?.role === 'super_admin') {
       loadData();
+      loadCompanies();
     }
   }, [status, session]);
+
+  const loadCompanies = async () => {
+    try {
+      const res = await fetch('/api/admin/companies?limit=500&includeTest=false');
+      if (res.ok) {
+        const data = await res.json();
+        setCompanies(data.companies || []);
+      }
+    } catch (error) {
+      logger.error('Error loading companies:', error);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -270,6 +295,61 @@ export default function B2BBillingDashboard() {
     }
   };
 
+  const handleCreateManualInvoice = async () => {
+    if (!createForm.companyId || !createForm.concepto || !createForm.subtotal) {
+      toast.error('Empresa, concepto y subtotal son obligatorios');
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      const subtotal = parseFloat(createForm.subtotal);
+      const descuento = parseFloat(createForm.descuento || '0');
+      const impuestosPorcentaje = parseFloat(createForm.impuestos || '21');
+      const impuestos = (subtotal - descuento) * (impuestosPorcentaje / 100);
+      const total = subtotal - descuento + impuestos;
+
+      const res = await fetch('/api/b2b-billing/invoices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-manual',
+          companyId: createForm.companyId,
+          concepto: createForm.concepto,
+          subtotal,
+          descuento,
+          impuestos,
+          total,
+          notas: createForm.notas,
+          fechaVencimiento: createForm.fechaVencimiento || undefined,
+        }),
+      });
+
+      if (res.ok) {
+        toast.success('Factura creada correctamente');
+        setShowCreateDialog(false);
+        setCreateForm({
+          companyId: '',
+          concepto: '',
+          subtotal: '',
+          descuento: '0',
+          impuestos: '21',
+          notas: '',
+          fechaVencimiento: '',
+        });
+        loadData();
+      } else {
+        const error = await res.json();
+        toast.error(error.error || 'Error al crear factura');
+      }
+    } catch (error) {
+      logger.error('Error creating invoice:', error);
+      toast.error('Error al crear factura');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleMarkAsPaid = async (invoice: Invoice) => {
     try {
       const res = await fetch(`/api/b2b-billing/payments`, {
@@ -369,11 +449,142 @@ export default function B2BBillingDashboard() {
                       Nueva Factura
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="max-w-lg">
                     <DialogHeader>
                       <DialogTitle>Crear Factura Manual</DialogTitle>
-                      <DialogDescription>Funcionalidad disponible próximamente</DialogDescription>
+                      <DialogDescription>
+                        Crea una factura manual para un cliente. Se sincronizará con Contasimple si está habilitado.
+                      </DialogDescription>
                     </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="company">Empresa *</Label>
+                        <Select
+                          value={createForm.companyId}
+                          onValueChange={(v) => setCreateForm({ ...createForm, companyId: v })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar empresa" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {companies.map((c) => (
+                              <SelectItem key={c.id} value={c.id}>
+                                {c.nombre}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="concepto">Concepto *</Label>
+                        <Input
+                          id="concepto"
+                          placeholder="Ej: Suscripción mensual Plan Business"
+                          value={createForm.concepto}
+                          onChange={(e) => setCreateForm({ ...createForm, concepto: e.target.value })}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="subtotal">Subtotal (€) *</Label>
+                          <Input
+                            id="subtotal"
+                            type="number"
+                            step="0.01"
+                            placeholder="129.00"
+                            value={createForm.subtotal}
+                            onChange={(e) => setCreateForm({ ...createForm, subtotal: e.target.value })}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="descuento">Descuento (€)</Label>
+                          <Input
+                            id="descuento"
+                            type="number"
+                            step="0.01"
+                            value={createForm.descuento}
+                            onChange={(e) => setCreateForm({ ...createForm, descuento: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="impuestos">IVA (%)</Label>
+                          <Select
+                            value={createForm.impuestos}
+                            onValueChange={(v) => setCreateForm({ ...createForm, impuestos: v })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="0">0% (Exento)</SelectItem>
+                              <SelectItem value="4">4% (Superreducido)</SelectItem>
+                              <SelectItem value="10">10% (Reducido)</SelectItem>
+                              <SelectItem value="21">21% (General)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="fechaVencimiento">Vencimiento</Label>
+                          <Input
+                            id="fechaVencimiento"
+                            type="date"
+                            value={createForm.fechaVencimiento}
+                            onChange={(e) => setCreateForm({ ...createForm, fechaVencimiento: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="notas">Notas</Label>
+                        <Textarea
+                          id="notas"
+                          placeholder="Notas adicionales..."
+                          value={createForm.notas}
+                          onChange={(e) => setCreateForm({ ...createForm, notas: e.target.value })}
+                        />
+                      </div>
+                      {createForm.subtotal && (
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="text-sm space-y-1">
+                            <div className="flex justify-between">
+                              <span>Subtotal:</span>
+                              <span>€{parseFloat(createForm.subtotal || '0').toFixed(2)}</span>
+                            </div>
+                            {parseFloat(createForm.descuento) > 0 && (
+                              <div className="flex justify-between text-red-600">
+                                <span>Descuento:</span>
+                                <span>-€{parseFloat(createForm.descuento).toFixed(2)}</span>
+                              </div>
+                            )}
+                            <div className="flex justify-between">
+                              <span>IVA ({createForm.impuestos}%):</span>
+                              <span>
+                                €{((parseFloat(createForm.subtotal || '0') - parseFloat(createForm.descuento || '0')) * parseFloat(createForm.impuestos) / 100).toFixed(2)}
+                              </span>
+                            </div>
+                            <div className="flex justify-between font-bold border-t pt-1">
+                              <span>Total:</span>
+                              <span>
+                                €{(
+                                  parseFloat(createForm.subtotal || '0') -
+                                  parseFloat(createForm.descuento || '0') +
+                                  (parseFloat(createForm.subtotal || '0') - parseFloat(createForm.descuento || '0')) * parseFloat(createForm.impuestos) / 100
+                                ).toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                        Cancelar
+                      </Button>
+                      <Button onClick={handleCreateManualInvoice} disabled={isProcessing}>
+                        {isProcessing ? 'Creando...' : 'Crear Factura'}
+                      </Button>
+                    </DialogFooter>
                   </DialogContent>
                 </Dialog>
               </div>

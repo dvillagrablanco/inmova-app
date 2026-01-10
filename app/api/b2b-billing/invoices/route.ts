@@ -124,7 +124,67 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(results);
     }
 
-    // Crear factura manual
+    // Crear factura manual simplificada
+    if (action === 'create-manual') {
+      const { companyId, concepto, subtotal, descuento, impuestos, total, notas, fechaVencimiento } = body;
+
+      if (!companyId || !concepto || !subtotal) {
+        return NextResponse.json(
+          { error: 'Empresa, concepto y subtotal son obligatorios' },
+          { status: 400 }
+        );
+      }
+
+      // Generar número de factura
+      const lastInvoice = await prisma.b2BInvoice.findFirst({
+        orderBy: { numeroFactura: 'desc' },
+        select: { numeroFactura: true },
+      });
+
+      const currentYear = new Date().getFullYear();
+      let nextNumber = 1;
+      if (lastInvoice?.numeroFactura) {
+        const match = lastInvoice.numeroFactura.match(/INM-(\d+)-(\d+)/);
+        if (match && parseInt(match[1]) === currentYear) {
+          nextNumber = parseInt(match[2]) + 1;
+        }
+      }
+      const numeroFactura = `INM-${currentYear}-${String(nextNumber).padStart(5, '0')}`;
+
+      const fechaEmision = new Date();
+      const vencimiento = fechaVencimiento 
+        ? new Date(fechaVencimiento) 
+        : new Date(fechaEmision.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 días por defecto
+
+      const periodo = `${fechaEmision.getFullYear()}-${String(fechaEmision.getMonth() + 1).padStart(2, '0')}`;
+
+      const invoice = await prisma.b2BInvoice.create({
+        data: {
+          numeroFactura,
+          companyId,
+          periodo,
+          subtotal: parseFloat(subtotal),
+          descuento: parseFloat(descuento || '0'),
+          impuestos: parseFloat(impuestos || '0'),
+          total: parseFloat(total || subtotal),
+          estado: 'PENDIENTE',
+          fechaEmision,
+          fechaVencimiento: vencimiento,
+          notas: notas || concepto,
+          conceptos: [{ descripcion: concepto, cantidad: 1, precioUnitario: parseFloat(subtotal) }],
+        },
+        include: {
+          company: {
+            select: { id: true, nombre: true, email: true },
+          },
+        },
+      });
+
+      logger.info(`Factura manual creada: ${numeroFactura} para ${invoice.company.nombre}`);
+      return NextResponse.json(invoice, { status: 201 });
+    }
+
+    // Crear factura con conceptos (formato legacy)
     const { companyId, periodo, subscriptionPlanId, conceptos, descuento, notas } = body;
 
     if (!companyId || !periodo || !conceptos || conceptos.length === 0) {
