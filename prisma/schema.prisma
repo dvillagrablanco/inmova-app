@@ -9194,6 +9194,7 @@ model Lead {
   actividades  LeadActivity[]
   documentos   LeadDocument[]
   appointments Appointment[]
+  llamadas     RetellCall[]
 
   @@index([companyId])
   @@index([estado])
@@ -9298,6 +9299,9 @@ model Appointment {
   retellCallId     String? // ID de la llamada de Retell si aplica
   conversacionJson Json?   // Transcript de la conversación si aplica
 
+  // Relaciones
+  retellCalls RetellCall[]
+
   // Metadata
   creadoPor String?
   createdAt DateTime @default(now())
@@ -9309,6 +9313,69 @@ model Appointment {
   @@index([asignadoA])
   @@index([retellCallId])
   @@map("appointments")
+}
+
+// Llamadas de Retell AI
+model RetellCall {
+  id String @id @default(cuid())
+
+  // Identificadores de Retell
+  retellCallId   String  @unique // ID de la llamada en Retell
+  retellAgentId  String? // ID del agente en Retell
+
+  // Información del contacto
+  fromNumber     String? // Número que llama
+  toNumber       String? // Número que recibe
+  leadId         String? // Lead asociado si existe
+  lead           Lead?   @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  // Estado y duración
+  status         String  @default("in_progress") // "in_progress", "ended", "error", "voicemail"
+  direction      String  @default("inbound") // "inbound", "outbound"
+  duracionSegundos Int?
+  
+  // Grabación
+  recordingUrl   String? @db.Text
+  recordingDuration Int? // Duración de la grabación en segundos
+
+  // Transcripción
+  transcript     Json?   // Array de mensajes [{role, content, timestamp}]
+  transcriptText String? @db.Text // Texto plano de la transcripción
+  
+  // Resumen generado por IA
+  resumen        String? @db.Text
+  sentimiento    String? // "positivo", "neutral", "negativo"
+  intencion      String? // "agendar_cita", "consulta", "queja", "otro"
+  
+  // Datos extraídos
+  datosExtraidos Json?   // { nombre, email, telefono, numPropiedades, etc. }
+  accionesRealizadas Json? // Array de acciones ejecutadas durante la llamada
+  
+  // Resultado
+  resultado      String? // "cita_agendada", "lead_cualificado", "no_interesado", "callback", etc.
+  appointmentId  String? // Si se agendó una cita
+  appointment    Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  // Costos (si Retell proporciona esta info)
+  costoMinutos   Float?
+  costoTotal     Float?
+
+  // Metadata
+  metadata       Json?
+  errorMessage   String? @db.Text
+
+  // Timestamps
+  startedAt      DateTime @default(now())
+  endedAt        DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([retellCallId])
+  @@index([fromNumber])
+  @@index([leadId])
+  @@index([status])
+  @@index([startedAt])
+  @@map("retell_calls")
 }
 
 // ===========================
