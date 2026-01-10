@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
@@ -22,7 +22,7 @@ import {
   ArrowLeft,
   Hotel,
   TrendingUp,
-  DollarSign,
+  Euro,
   Calendar,
   Star,
   Users,
@@ -86,15 +86,7 @@ export default function STRDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState('month'); // 'month', 'quarter', 'year'
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-    } else if (status === 'authenticated') {
-      loadDashboardStats();
-    }
-  }, [status, router, selectedPeriod]);
-
-  const loadDashboardStats = async () => {
+  const loadDashboardStats = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/str/dashboard?period=${selectedPeriod}`);
@@ -107,7 +99,15 @@ export default function STRDashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedPeriod]);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    } else if (status === 'authenticated') {
+      loadDashboardStats();
+    }
+  }, [status, router, loadDashboardStats]);
 
   if (status === 'loading' || loading) {
     return (
@@ -198,7 +198,7 @@ export default function STRDashboardPage() {
           <Card className="shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Ingresos Este Mes</CardTitle>
-              <DollarSign className="h-4 w-4 text-pink-600" />
+              <Euro className="h-4 w-4 text-pink-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">€{stats.revenueThisMonth.toLocaleString()}</div>
@@ -360,7 +360,7 @@ export default function STRDashboardPage() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Button
-                className="gradient-primary text-white h-auto py-4 justify-start"
+                className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white h-auto py-4 justify-start"
                 onClick={() => router.push('/str/listings/nuevo')}
               >
                 <Hotel className="h-5 w-5 mr-2" />
@@ -371,7 +371,7 @@ export default function STRDashboardPage() {
               </Button>
 
               <Button
-                className="gradient-primary text-white h-auto py-4 justify-start"
+                className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white h-auto py-4 justify-start"
                 onClick={() => router.push('/str/bookings/nueva')}
               >
                 <Calendar className="h-5 w-5 mr-2" />
@@ -382,7 +382,7 @@ export default function STRDashboardPage() {
               </Button>
 
               <Button
-                className="gradient-primary text-white h-auto py-4 justify-start"
+                className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white h-auto py-4 justify-start"
                 onClick={() => router.push('/str/channels')}
               >
                 <Activity className="h-5 w-5 mr-2" />

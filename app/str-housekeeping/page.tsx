@@ -1,9 +1,28 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -25,41 +44,20 @@ import {
   Filter,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useState } from 'react';
+import { toast } from 'sonner';
 
-// Mock data para tareas de limpieza
-const mockTasks = [
-  {
-    id: '1',
-    property: 'Apartamento Centro Madrid',
-    address: 'Calle Gran Vía 45, 2ºA',
-    type: 'checkout',
-    status: 'pending',
-    scheduledDate: new Date(),
-    assignedTo: 'María García',
-    estimatedDuration: 2,
-  },
-  {
-    id: '2',
-    property: 'Piso Salamanca',
-    address: 'Calle Serrano 120, 4ºB',
-    type: 'checkin',
-    status: 'in_progress',
-    scheduledDate: new Date(),
-    assignedTo: 'Juan López',
-    estimatedDuration: 1.5,
-  },
-  {
-    id: '3',
-    property: 'Estudio Malasaña',
-    address: 'Calle Fuencarral 78, 1º',
-    type: 'deep_clean',
-    status: 'completed',
-    scheduledDate: new Date(Date.now() - 86400000),
-    assignedTo: 'Ana Martínez',
-    estimatedDuration: 3,
-  },
-];
+interface HousekeepingTask {
+  id: string;
+  property: string;
+  address: string;
+  type: string;
+  status: string;
+  scheduledDate: string;
+  assignedTo: string;
+  estimatedDuration: number;
+  unitId?: string;
+  buildingId?: string;
+}
 
 const statusConfig = {
   pending: { label: 'Pendiente', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
@@ -76,14 +74,118 @@ const typeConfig = {
 };
 
 export default function STRHousekeepingPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('today');
+  const [tasks, setTasks] = useState<HousekeepingTask[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [properties, setProperties] = useState<any[]>([]);
+
+  const [form, setForm] = useState({
+    unitId: '',
+    type: 'checkout',
+    scheduledDate: '',
+    assignedTo: '',
+    estimatedDuration: 2,
+  });
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      fetchTasks();
+      fetchProperties();
+    }
+  }, [status]);
+
+  const fetchTasks = async () => {
+    try {
+      const response = await fetch('/api/housekeeping');
+      if (response.ok) {
+        const data = await response.json();
+        setTasks(data);
+      }
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchProperties = async () => {
+    try {
+      const response = await fetch('/api/units');
+      if (response.ok) {
+        const data = await response.json();
+        setProperties(data);
+      }
+    } catch (error) {
+      console.error('Error fetching properties:', error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.unitId || !form.scheduledDate || !form.assignedTo) {
+      toast.error('Completa los campos obligatorios');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/housekeeping', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+
+      if (response.ok) {
+        toast.success('Tarea creada exitosamente');
+        setOpenDialog(false);
+        setForm({
+          unitId: '',
+          type: 'checkout',
+          scheduledDate: '',
+          assignedTo: '',
+          estimatedDuration: 2,
+        });
+        fetchTasks();
+      } else {
+        toast.error('Error al crear tarea');
+      }
+    } catch (error) {
+      toast.error('Error al crear tarea');
+    }
+  };
 
   const stats = {
-    pendingToday: 3,
-    inProgress: 1,
-    completedToday: 5,
-    totalWeek: 24,
+    pendingToday: tasks.filter(
+      (t) =>
+        t.status === 'pending' &&
+        new Date(t.scheduledDate).toDateString() === new Date().toDateString()
+    ).length,
+    inProgress: tasks.filter((t) => t.status === 'in_progress').length,
+    completedToday: tasks.filter(
+      (t) =>
+        t.status === 'completed' &&
+        new Date(t.scheduledDate).toDateString() === new Date().toDateString()
+    ).length,
+    totalWeek: tasks.length,
   };
+
+  if (status === 'loading' || loading) {
+    return (
+      <AuthenticatedLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </AuthenticatedLayout>
+    );
+  }
 
   return (
     <AuthenticatedLayout>
@@ -120,10 +222,87 @@ export default function STRHousekeepingPage() {
               <Filter className="mr-2 h-4 w-4" />
               Filtrar
             </Button>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Nueva Tarea
-            </Button>
+            <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nueva Tarea
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Nueva Tarea de Limpieza</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <Label>Propiedad *</Label>
+                    <Select
+                      value={form.unitId}
+                      onValueChange={(v) => setForm({ ...form, unitId: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona propiedad" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {properties.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.building?.nombre} - {p.numero}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Tipo de Tarea</Label>
+                    <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="checkout">Check-out</SelectItem>
+                        <SelectItem value="checkin">Check-in</SelectItem>
+                        <SelectItem value="deep_clean">Limpieza Profunda</SelectItem>
+                        <SelectItem value="maintenance">Mantenimiento</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Fecha Programada *</Label>
+                    <Input
+                      type="datetime-local"
+                      value={form.scheduledDate}
+                      onChange={(e) => setForm({ ...form, scheduledDate: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Asignado a *</Label>
+                    <Input
+                      value={form.assignedTo}
+                      onChange={(e) => setForm({ ...form, assignedTo: e.target.value })}
+                      placeholder="Nombre del responsable"
+                    />
+                  </div>
+                  <div>
+                    <Label>Duración Estimada (horas)</Label>
+                    <Input
+                      type="number"
+                      min="0.5"
+                      step="0.5"
+                      value={form.estimatedDuration}
+                      onChange={(e) =>
+                        setForm({ ...form, estimatedDuration: parseFloat(e.target.value) })
+                      }
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => setOpenDialog(false)}>
+                      Cancelar
+                    </Button>
+                    <Button type="submit">Crear Tarea</Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
@@ -188,50 +367,64 @@ export default function STRHousekeepingPage() {
               </TabsList>
               <TabsContent value={activeTab} className="mt-4">
                 <div className="space-y-4">
-                  {mockTasks.map((task) => {
-                    const statusInfo = statusConfig[task.status as keyof typeof statusConfig];
-                    const typeInfo = typeConfig[task.type as keyof typeof typeConfig];
-                    const StatusIcon = statusInfo.icon;
+                  {tasks.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Sparkles className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <p className="text-muted-foreground">No hay tareas de limpieza programadas</p>
+                      <Button className="mt-4" onClick={() => setOpenDialog(true)}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Crear Primera Tarea
+                      </Button>
+                    </div>
+                  ) : (
+                    tasks.map((task) => {
+                      const statusInfo =
+                        statusConfig[task.status as keyof typeof statusConfig] ||
+                        statusConfig.pending;
+                      const typeInfo =
+                        typeConfig[task.type as keyof typeof typeConfig] || typeConfig.checkout;
+                      const StatusIcon = statusInfo.icon;
 
-                    return (
-                      <div
-                        key={task.id}
-                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex items-start gap-4">
-                          <div className="p-2 bg-indigo-100 rounded-lg">
-                            <Sparkles className="h-5 w-5 text-indigo-600" />
+                      return (
+                        <div
+                          key={task.id}
+                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex items-start gap-4">
+                            <div className="p-2 bg-indigo-100 rounded-lg">
+                              <Sparkles className="h-5 w-5 text-indigo-600" />
+                            </div>
+                            <div>
+                              <h3 className="font-medium">{task.property}</h3>
+                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                <MapPin className="h-3 w-3" />
+                                {task.address}
+                              </div>
+                              <div className="flex items-center gap-2 mt-2">
+                                <Badge className={typeInfo.color}>{typeInfo.label}</Badge>
+                                <Badge className={statusInfo.color}>
+                                  <StatusIcon className="h-3 w-3 mr-1" />
+                                  {statusInfo.label}
+                                </Badge>
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <h3 className="font-medium">{task.property}</h3>
-                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                              <MapPin className="h-3 w-3" />
-                              {task.address}
+                          <div className="text-right">
+                            <div className="flex items-center gap-1 text-sm">
+                              <User className="h-3 w-3" />
+                              {task.assignedTo}
                             </div>
-                            <div className="flex items-center gap-2 mt-2">
-                              <Badge className={typeInfo.color}>{typeInfo.label}</Badge>
-                              <Badge className={statusInfo.color}>
-                                <StatusIcon className="h-3 w-3 mr-1" />
-                                {statusInfo.label}
-                              </Badge>
+                            <div className="text-sm text-muted-foreground mt-1">
+                              {task.estimatedDuration}h estimadas
                             </div>
+                            <Button variant="outline" size="sm" className="mt-2">
+                              Ver Detalles
+                            </Button>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="flex items-center gap-1 text-sm">
-                            <User className="h-3 w-3" />
-                            {task.assignedTo}
-                          </div>
-                          <div className="text-sm text-muted-foreground mt-1">
-                            {task.estimatedDuration}h estimadas
-                          </div>
-                          <Button variant="outline" size="sm" className="mt-2">
-                            Ver Detalles
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
