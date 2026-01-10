@@ -110,7 +110,9 @@ export default function ComunidadSocialPage() {
                   <CardDescription>Feed de actividades y grupos de interés</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full">Ver Feed</Button>
+                  <Button className="w-full" onClick={() => router.push('/community')}>
+                    Ver Feed
+                  </Button>
                 </CardContent>
               </Card>
               <Card>
@@ -122,7 +124,7 @@ export default function ComunidadSocialPage() {
                   <CardDescription>Servicios entre vecinos</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full" variant="outline">
+                  <Button className="w-full" variant="outline" onClick={() => router.push('/marketplace')}>
                     Ver Servicios
                   </Button>
                 </CardContent>
@@ -136,7 +138,7 @@ export default function ComunidadSocialPage() {
                   <CardDescription>Yoga, cata de vinos, cine al aire libre</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full" variant="outline">
+                  <Button className="w-full" variant="outline" onClick={() => router.push('/coliving/eventos')}>
                     Ver Eventos
                   </Button>
                 </CardContent>
@@ -149,8 +151,11 @@ export default function ComunidadSocialPage() {
                   </CardTitle>
                   <CardDescription>Niveles, badges y ranking de edificios</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-3">
                   <Badge>TU NIVEL: NOVATO</Badge>
+                  <p className="text-xs text-muted-foreground">
+                    Participa en eventos y actividades para subir de nivel
+                  </p>
                 </CardContent>
               </Card>
             </div>

@@ -422,9 +422,8 @@ const coLivingNavItems = [
   },
 ];
 
-// 2.4 BUILD-TO-RENT / CONSTRUCCIÓN
-// SIMPLIFICADO: 4 items (antes 5)
-// - Fusionado: Gantt dentro de Proyectos
+// 2.4 CONSTRUCCIÓN (antes BUILD-TO-RENT)
+// Incluye ewoorker como subplataforma marketplace
 const buildToRentNavItems = [
   {
     name: 'Proyectos',
@@ -439,15 +438,15 @@ const buildToRentNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Proveedores',
-    href: '/proveedores',
-    icon: Package,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
     name: 'Órdenes de Trabajo',
     href: '/ordenes-trabajo',
     icon: ClipboardList,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'eWoorker (Marketplace)',
+    href: '/ewoorker',
+    icon: Package,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];
@@ -1992,14 +1991,14 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* Build-to-Rent / Construcción */}
+            {/* Construcción (antes Build-to-Rent) */}
             {filteredBuildToRentItems.length > 0 && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('buildToRent')}
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
-                  <span>🏗️ Build-to-Rent</span>
+                  <span>🏗️ Construcción</span>
                   {expandedSections.buildToRent ? (
                     <ChevronDown size={16} />
                   ) : (

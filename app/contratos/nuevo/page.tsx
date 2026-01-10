@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
-import { FileText, Home, ArrowLeft, Save } from 'lucide-react';
+import { FileText, Home, ArrowLeft, Save, Upload, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ButtonWithLoading } from '@/components/ui/button-with-loading';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
@@ -31,6 +31,7 @@ import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
 import { BackButton } from '@/components/ui/back-button';
 import { MobileFormWizard, FormStep } from '@/components/ui/mobile-form-wizard';
+import { Badge } from '@/components/ui/badge';
 
 interface Unit {
   id: string;
@@ -44,12 +45,22 @@ interface Tenant {
   email: string;
 }
 
+interface UploadedDocument {
+  id: string;
+  name: string;
+  type: string;
+  url?: string;
+  uploading?: boolean;
+  progress?: number;
+}
+
 export default function NuevoContratoPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const [isLoading, setIsLoading] = useState(false);
   const [units, setUnits] = useState<Unit[]>([]);
   const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [documents, setDocuments] = useState<UploadedDocument[]>([]);
   const [formData, setFormData] = useState({
     unitId: '',
     tenantId: '',
@@ -59,6 +70,67 @@ export default function NuevoContratoPage() {
     deposito: '0',
     tipo: 'residencial',
   });
+
+  const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const docId = `doc-${Date.now()}-${i}`;
+      
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`${file.name} es demasiado grande (máximo 10MB)`);
+        continue;
+      }
+
+      setDocuments(prev => [...prev, {
+        id: docId,
+        name: file.name,
+        type: file.type,
+        uploading: true,
+        progress: 0
+      }]);
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'contracts');
+        formData.append('entityType', 'contract');
+
+        const progressInterval = setInterval(() => {
+          setDocuments(prev => prev.map(d => 
+            d.id === docId ? { ...d, progress: Math.min((d.progress || 0) + 20, 90) } : d
+          ));
+        }, 200);
+
+        const response = await fetch('/api/upload/private', {
+          method: 'POST',
+          body: formData,
+        });
+
+        clearInterval(progressInterval);
+
+        if (response.ok) {
+          const data = await response.json();
+          setDocuments(prev => prev.map(d => 
+            d.id === docId ? { ...d, uploading: false, progress: 100, url: data.url || data.key } : d
+          ));
+          toast.success(`${file.name} subido correctamente`);
+        } else {
+          throw new Error('Error al subir');
+        }
+      } catch (error) {
+        setDocuments(prev => prev.filter(d => d.id !== docId));
+        toast.error(`Error al subir ${file.name}`);
+      }
+    }
+    e.target.value = '';
+  };
+
+  const removeDocument = (docId: string) => {
+    setDocuments(prev => prev.filter(d => d.id !== docId));
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -327,6 +399,65 @@ export default function NuevoContratoPage() {
                             onChange={handleChange}
                             required
                           />
+                        </div>
+
+                        {/* Carga de Documentos */}
+                        <div className="space-y-3 pt-4 border-t">
+                          <Label className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Documentos del Contrato
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            Sube el contrato firmado, anexos, documentos de identidad, etc.
+                          </p>
+                          
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-primary/50 transition-colors">
+                            <label htmlFor="contract-doc-upload" className="cursor-pointer">
+                              <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                              <p className="text-sm text-gray-600">
+                                <span className="font-medium text-primary">Click para subir</span> o arrastra archivos
+                              </p>
+                              <p className="text-xs text-gray-500 mt-1">PDF, JPG, PNG (máx. 10MB)</p>
+                              <input
+                                id="contract-doc-upload"
+                                type="file"
+                                className="hidden"
+                                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                                multiple
+                                onChange={handleDocumentUpload}
+                              />
+                            </label>
+                          </div>
+
+                          {documents.length > 0 && (
+                            <div className="space-y-2">
+                              {documents.map((doc) => (
+                                <div key={doc.id} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+                                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                                    <FileText className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                                    <span className="text-sm truncate">{doc.name}</span>
+                                    {doc.uploading ? (
+                                      <Badge variant="secondary" className="text-xs">
+                                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                        {doc.progress}%
+                                      </Badge>
+                                    ) : (
+                                      <Badge variant="outline" className="text-xs text-green-600">✓</Badge>
+                                    )}
+                                  </div>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => removeDocument(doc.id)}
+                                    disabled={doc.uploading}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
 
                         {/* Resumen */}

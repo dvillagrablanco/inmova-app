@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
-import { UserPlus, Home, ArrowLeft, Save } from 'lucide-react';
+import { UserPlus, Home, ArrowLeft, Save, Upload, FileText, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
+import { Badge } from '@/components/ui/badge';
 
 interface Unit {
   id: string;
@@ -35,11 +36,21 @@ interface Unit {
   building: { nombre: string };
 }
 
+interface UploadedDocument {
+  id: string;
+  name: string;
+  type: string;
+  url?: string;
+  uploading?: boolean;
+  progress?: number;
+}
+
 export default function NuevoCandidatoPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const [isLoading, setIsLoading] = useState(false);
   const [units, setUnits] = useState<Unit[]>([]);
+  const [documents, setDocuments] = useState<UploadedDocument[]>([]);
   const [formData, setFormData] = useState({
     unitId: '',
     nombreCompleto: '',
@@ -51,6 +62,67 @@ export default function NuevoCandidatoPage() {
     ingresosMensuales: '0',
     notas: '',
   });
+
+  const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const docId = `doc-${Date.now()}-${i}`;
+      
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`${file.name} es demasiado grande (máximo 10MB)`);
+        continue;
+      }
+
+      setDocuments(prev => [...prev, {
+        id: docId,
+        name: file.name,
+        type: file.type,
+        uploading: true,
+        progress: 0
+      }]);
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'candidates');
+        formData.append('entityType', 'candidate');
+
+        const progressInterval = setInterval(() => {
+          setDocuments(prev => prev.map(d => 
+            d.id === docId ? { ...d, progress: Math.min((d.progress || 0) + 20, 90) } : d
+          ));
+        }, 200);
+
+        const response = await fetch('/api/upload/private', {
+          method: 'POST',
+          body: formData,
+        });
+
+        clearInterval(progressInterval);
+
+        if (response.ok) {
+          const data = await response.json();
+          setDocuments(prev => prev.map(d => 
+            d.id === docId ? { ...d, uploading: false, progress: 100, url: data.url || data.key } : d
+          ));
+          toast.success(`${file.name} subido correctamente`);
+        } else {
+          throw new Error('Error al subir');
+        }
+      } catch (error) {
+        setDocuments(prev => prev.filter(d => d.id !== docId));
+        toast.error(`Error al subir ${file.name}`);
+      }
+    }
+    e.target.value = '';
+  };
+
+  const removeDocument = (docId: string) => {
+    setDocuments(prev => prev.filter(d => d.id !== docId));
+  };
 
   useEffect(() => {
     const fetchUnits = async () => {
@@ -303,6 +375,65 @@ export default function NuevoCandidatoPage() {
                         placeholder="Cualquier información adicional relevante sobre el candidato"
                         rows={4}
                       />
+                    </div>
+
+                    {/* Carga de Documentos */}
+                    <div className="space-y-3 md:col-span-2 pt-4 border-t">
+                      <Label className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Documentos del Candidato
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Sube documentos como DNI, nóminas, referencias, contrato de trabajo, etc.
+                      </p>
+                      
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                        <label htmlFor="candidate-doc-upload" className="cursor-pointer">
+                          <Upload className="mx-auto h-10 w-10 text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-600">
+                            <span className="font-medium text-primary">Click para subir</span> o arrastra archivos
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">PDF, JPG, PNG, DOC (máx. 10MB)</p>
+                          <input
+                            id="candidate-doc-upload"
+                            type="file"
+                            className="hidden"
+                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                            multiple
+                            onChange={handleDocumentUpload}
+                          />
+                        </label>
+                      </div>
+
+                      {documents.length > 0 && (
+                        <div className="space-y-2">
+                          {documents.map((doc) => (
+                            <div key={doc.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <FileText className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                                <span className="text-sm truncate">{doc.name}</span>
+                                {doc.uploading ? (
+                                  <Badge variant="secondary" className="text-xs">
+                                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                    {doc.progress}%
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="text-xs text-green-600">✓ Subido</Badge>
+                                )}
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeDocument(doc.id)}
+                                disabled={doc.uploading}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
 

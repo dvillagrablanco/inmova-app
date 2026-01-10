@@ -21,6 +21,9 @@ import {
   AlertCircle,
   CheckCircle,
   Info,
+  Trash2,
+  History,
+  Clock,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -88,9 +91,46 @@ interface CalculatorResults {
 
 const COLORS = ['#4F46E5', '#7C3AED', '#EC4899', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#6366F1'];
 
+interface HistoryEntry {
+  id: string;
+  date: string;
+  purchasePrice: number;
+  salePrice: number;
+  roi: number;
+  netProfit: number;
+}
+
+const DEFAULT_DATA: CalculatorData = {
+  purchasePrice: 150000,
+  closingCosts: 3000,
+  inspectionCosts: 500,
+  structuralWork: 5000,
+  electrical: 3000,
+  plumbing: 2500,
+  flooring: 4000,
+  painting: 2000,
+  kitchen: 8000,
+  bathrooms: 6000,
+  exterior: 3000,
+  landscaping: 1500,
+  contingency: 3000,
+  estimatedSalePrice: 220000,
+  sellingCosts: 2000,
+  agentCommission: 6,
+  downPayment: 30000,
+  loanAmount: 120000,
+  interestRate: 6.5,
+  loanTerm: 12,
+  renovationTime: 4,
+  holdingTime: 6,
+};
+
 export default function FlippingCalculatorPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
   
   const [data, setData] = useState<CalculatorData>({
     purchasePrice: 150000,
@@ -170,6 +210,45 @@ export default function FlippingCalculatorPage() {
     setData({ ...data, [field]: value });
   };
 
+  const resetData = () => {
+    setData(DEFAULT_DATA);
+    toast.success('Datos reiniciados');
+  };
+
+  const saveToHistory = () => {
+    const entry: HistoryEntry = {
+      id: Date.now().toString(),
+      date: new Date().toLocaleDateString('es-ES', { 
+        day: '2-digit', 
+        month: 'short', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      purchasePrice: data.purchasePrice,
+      salePrice: data.estimatedSalePrice,
+      roi: results.roi,
+      netProfit: results.netProfit,
+    };
+    setHistory(prev => [entry, ...prev].slice(0, 10)); // Max 10 entries
+    toast.success('Análisis guardado en historial');
+  };
+
+  const loadFromHistory = (entry: HistoryEntry) => {
+    setData(prev => ({
+      ...prev,
+      purchasePrice: entry.purchasePrice,
+      estimatedSalePrice: entry.salePrice,
+    }));
+    setShowHistory(false);
+    toast.info('Datos cargados del historial');
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    toast.success('Historial borrado');
+  };
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-ES', {
       style: 'currency',
@@ -237,15 +316,75 @@ export default function FlippingCalculatorPage() {
                   Calcula la rentabilidad de tu proyecto de flipping inmobiliario
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button variant="outline" onClick={() => router.push('/flipping')}>
                   Volver a Proyectos
+                </Button>
+                <Button variant="outline" onClick={resetData}>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Limpiar Datos
+                </Button>
+                <Button variant="outline" onClick={() => setShowHistory(!showHistory)}>
+                  <History className="h-4 w-4 mr-2" />
+                  Historial ({history.length})
+                </Button>
+                <Button variant="outline" onClick={saveToHistory}>
+                  <Clock className="h-4 w-4 mr-2" />
+                  Guardar Análisis
                 </Button>
                 <Button onClick={saveProject}>
                   Guardar Proyecto
                 </Button>
               </div>
             </div>
+
+            {/* Panel de Historial */}
+            {showHistory && (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <History className="h-5 w-5" />
+                    Historial de Análisis
+                  </CardTitle>
+                  {history.length > 0 && (
+                    <Button variant="ghost" size="sm" onClick={clearHistory}>
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Borrar Todo
+                    </Button>
+                  )}
+                </CardHeader>
+                <CardContent>
+                  {history.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-4">
+                      No hay análisis guardados. Usa "Guardar Análisis" para almacenar tus cálculos.
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {history.map((entry) => (
+                        <div
+                          key={entry.id}
+                          className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted cursor-pointer"
+                          onClick={() => loadFromHistory(entry)}
+                        >
+                          <div>
+                            <p className="font-medium">{formatCurrency(entry.purchasePrice)} → {formatCurrency(entry.salePrice)}</p>
+                            <p className="text-xs text-muted-foreground">{entry.date}</p>
+                          </div>
+                          <div className="text-right">
+                            <Badge variant={entry.roi >= 20 ? 'default' : entry.roi >= 10 ? 'secondary' : 'destructive'}>
+                              ROI: {entry.roi.toFixed(1)}%
+                            </Badge>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {entry.netProfit >= 0 ? '+' : ''}{formatCurrency(entry.netProfit)}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Resultados Principales */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
