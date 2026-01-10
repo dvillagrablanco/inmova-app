@@ -41,7 +41,9 @@ ESTILO:
 
 HERRAMIENTAS DISPONIBLES:
 - Puedes consultar disponibilidad de horas para agendar citas
-- Puedes crear citas directamente en el sistema`;
+- Puedes crear citas directamente en el sistema
+- Puedes actualizar el estado del lead (interesado, no interesado, etc.)
+- Puedes guardar notas importantes de la conversación`;
 
 // Definición de herramientas (Function Calling)
 const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
@@ -111,6 +113,76 @@ const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
           },
         },
         required: ['nombre', 'fecha', 'hora'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'updateLeadStatus',
+      description: 'Actualiza el estado del lead en el CRM. Usa esta función cuando el lead exprese claramente su nivel de interés o cuando la conversación llegue a una conclusión.',
+      parameters: {
+        type: 'object',
+        properties: {
+          telefono: {
+            type: 'string',
+            description: 'Número de teléfono del lead (identificador principal)',
+          },
+          email: {
+            type: 'string',
+            description: 'Email del lead (identificador alternativo)',
+          },
+          status: {
+            type: 'string',
+            enum: ['nuevo', 'contactado', 'calificado', 'propuesta', 'negociacion', 'ganado', 'perdido'],
+            description: 'Nuevo estado del lead',
+          },
+          temperatura: {
+            type: 'string',
+            enum: ['frio', 'tibio', 'caliente'],
+            description: 'Temperatura del lead según su nivel de interés',
+          },
+          motivoPerdida: {
+            type: 'string',
+            description: 'Si el estado es "perdido", indica el motivo (ej: "no tiene presupuesto", "usa otra herramienta")',
+          },
+        },
+        required: ['status'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'createNote',
+      description: 'Guarda una nota importante sobre la conversación con el lead. Usa esta función para registrar información relevante como necesidades, objeciones, datos de contacto adicionales, etc.',
+      parameters: {
+        type: 'object',
+        properties: {
+          telefono: {
+            type: 'string',
+            description: 'Número de teléfono del lead',
+          },
+          email: {
+            type: 'string',
+            description: 'Email del lead',
+          },
+          titulo: {
+            type: 'string',
+            description: 'Título breve de la nota',
+          },
+          contenido: {
+            type: 'string',
+            description: 'Contenido detallado de la nota',
+          },
+          tipo: {
+            type: 'string',
+            enum: ['llamada', 'nota', 'objecion', 'necesidad', 'dato_contacto'],
+            description: 'Tipo de nota',
+            default: 'llamada',
+          },
+        },
+        required: ['contenido'],
       },
     },
   },
@@ -340,6 +412,182 @@ async function bookAppointment(params: {
   }
 }
 
+// Función para actualizar estado del lead
+async function updateLeadStatus(params: {
+  telefono?: string;
+  email?: string;
+  status: string;
+  temperatura?: string;
+  motivoPerdida?: string;
+  retellCallId?: string;
+}): Promise<string> {
+  const { getPrismaClient } = await import('@/lib/db');
+  const prisma = getPrismaClient();
+
+  try {
+    // Buscar el lead por teléfono o email
+    let lead = null;
+
+    if (params.telefono) {
+      lead = await prisma.lead.findFirst({
+        where: { telefono: params.telefono },
+      });
+    }
+
+    if (!lead && params.email) {
+      lead = await prisma.lead.findFirst({
+        where: { email: params.email },
+      });
+    }
+
+    if (!lead) {
+      return 'No he encontrado el lead en el sistema. ¿Podrías confirmarme tus datos de contacto?';
+    }
+
+    // Actualizar el lead
+    const updateData: Record<string, unknown> = {
+      estado: params.status,
+      ultimoContacto: new Date(),
+    };
+
+    if (params.temperatura) {
+      updateData.temperatura = params.temperatura;
+    }
+
+    if (params.status === 'perdido' && params.motivoPerdida) {
+      updateData.motivoPerdida = params.motivoPerdida;
+    }
+
+    await prisma.lead.update({
+      where: { id: lead.id },
+      data: updateData,
+    });
+
+    // Registrar actividad
+    const systemUser = await prisma.user.findFirst({
+      where: { role: 'SUPERADMIN' },
+      select: { id: true },
+    });
+
+    if (systemUser) {
+      await prisma.leadActivity.create({
+        data: {
+          leadId: lead.id,
+          tipo: 'nota',
+          titulo: `Estado actualizado a: ${params.status}`,
+          descripcion: `Carmen (Retell AI) actualizó el estado del lead${params.temperatura ? `. Temperatura: ${params.temperatura}` : ''}${params.motivoPerdida ? `. Motivo: ${params.motivoPerdida}` : ''}`,
+          fecha: new Date(),
+          creadoPor: systemUser.id,
+        },
+      });
+    }
+
+    const statusMessages: Record<string, string> = {
+      nuevo: 'He registrado tu interés inicial.',
+      contactado: 'Perfecto, he actualizado tu perfil.',
+      calificado: '¡Genial! Veo que tienes un proyecto interesante.',
+      propuesta: 'Te prepararemos una propuesta personalizada.',
+      negociacion: 'Estamos avanzando bien en la conversación.',
+      ganado: '¡Bienvenido a Inmova! Nos alegra tenerte.',
+      perdido: 'Entiendo, gracias por tu tiempo. Si cambias de opinión, aquí estaremos.',
+    };
+
+    return statusMessages[params.status] || 'Estado actualizado correctamente.';
+  } catch (error) {
+    console.error('[Retell Webhook] Error updating lead status:', error);
+    return 'He tenido un problema al actualizar tus datos. No te preocupes, lo anotaré manualmente.';
+  }
+}
+
+// Función para crear nota en el lead
+async function createNote(params: {
+  telefono?: string;
+  email?: string;
+  titulo?: string;
+  contenido: string;
+  tipo?: string;
+  retellCallId?: string;
+}): Promise<string> {
+  const { getPrismaClient } = await import('@/lib/db');
+  const prisma = getPrismaClient();
+
+  try {
+    // Buscar el lead
+    let lead = null;
+
+    if (params.telefono) {
+      lead = await prisma.lead.findFirst({
+        where: { telefono: params.telefono },
+      });
+    }
+
+    if (!lead && params.email) {
+      lead = await prisma.lead.findFirst({
+        where: { email: params.email },
+      });
+    }
+
+    // Si no encontramos el lead, crear uno temporal con los datos disponibles
+    if (!lead) {
+      const defaultCompany = await prisma.company.findFirst({
+        where: { activa: true },
+        select: { id: true },
+      });
+
+      if (!defaultCompany) {
+        return 'Nota guardada en el registro de la llamada.';
+      }
+
+      lead = await prisma.lead.create({
+        data: {
+          companyId: defaultCompany.id,
+          nombre: 'Lead desde llamada',
+          email: params.email || 'pendiente@retell.ai',
+          telefono: params.telefono,
+          fuente: 'retell_ai',
+          origenDetalle: 'Llamada telefónica con Carmen (Retell AI)',
+          estado: 'nuevo',
+          temperatura: 'tibio',
+        },
+      });
+    }
+
+    // Buscar usuario del sistema
+    const systemUser = await prisma.user.findFirst({
+      where: { role: 'SUPERADMIN' },
+      select: { id: true },
+    });
+
+    if (!systemUser) {
+      // Actualizar notas del lead directamente si no hay usuario
+      await prisma.lead.update({
+        where: { id: lead.id },
+        data: {
+          notas: `${lead.notas || ''}\n\n[${new Date().toLocaleString('es-ES')}] ${params.contenido}`.trim(),
+        },
+      });
+      return 'Anotado.';
+    }
+
+    // Crear actividad/nota
+    await prisma.leadActivity.create({
+      data: {
+        leadId: lead.id,
+        tipo: params.tipo || 'llamada',
+        titulo: params.titulo || 'Nota de llamada (Retell AI)',
+        descripcion: params.contenido,
+        fecha: new Date(),
+        creadoPor: systemUser.id,
+      },
+    });
+
+    return 'Anotado, gracias por la información.';
+  } catch (error) {
+    console.error('[Retell Webhook] Error creating note:', error);
+    return 'De acuerdo, lo tengo en cuenta.';
+  }
+}
+
 // Handler principal del webhook
 export async function POST(request: NextRequest) {
   try {
@@ -427,6 +675,18 @@ export async function POST(request: NextRequest) {
               retellCallId: call_id,
             });
             break;
+          case 'updateLeadStatus':
+            result = await updateLeadStatus({
+              ...functionArgs,
+              retellCallId: call_id,
+            });
+            break;
+          case 'createNote':
+            result = await createNote({
+              ...functionArgs,
+              retellCallId: call_id,
+            });
+            break;
           default:
             result = 'Función no reconocida';
         }
@@ -480,7 +740,12 @@ export async function GET() {
   return NextResponse.json({
     status: 'active',
     agent: 'Carmen - Asistente de Ventas Inmova',
-    capabilities: ['checkAvailability', 'bookAppointment'],
-    version: '1.0.0',
+    capabilities: [
+      'checkAvailability',
+      'bookAppointment', 
+      'updateLeadStatus',
+      'createNote',
+    ],
+    version: '1.1.0',
   });
 }

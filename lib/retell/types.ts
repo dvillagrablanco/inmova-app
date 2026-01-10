@@ -88,3 +88,48 @@ export interface BookAppointmentData {
   notas?: string;
   retellCallId?: string;
 }
+
+// Datos para actualizar estado del lead
+export interface UpdateLeadStatusData {
+  telefono?: string;
+  email?: string;
+  status: 'nuevo' | 'contactado' | 'calificado' | 'propuesta' | 'negociacion' | 'ganado' | 'perdido';
+  temperatura?: 'frio' | 'tibio' | 'caliente';
+  motivoPerdida?: string;
+  retellCallId?: string;
+}
+
+// Datos para crear nota
+export interface CreateNoteData {
+  telefono?: string;
+  email?: string;
+  titulo?: string;
+  contenido: string;
+  tipo?: 'llamada' | 'nota' | 'objecion' | 'necesidad' | 'dato_contacto';
+  retellCallId?: string;
+}
+
+// Estados del lead en el CRM
+export type LeadStatus = 
+  | 'nuevo'
+  | 'contactado'
+  | 'calificado'
+  | 'propuesta'
+  | 'negociacion'
+  | 'ganado'
+  | 'perdido';
+
+// Temperatura del lead
+export type LeadTemperature = 'frio' | 'tibio' | 'caliente';
+
+// Tipos de actividad/nota
+export type NoteType = 
+  | 'llamada'
+  | 'nota'
+  | 'objecion'
+  | 'necesidad'
+  | 'dato_contacto'
+  | 'email'
+  | 'reunion'
+  | 'whatsapp'
+  | 'demo';
