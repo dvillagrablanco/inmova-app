@@ -221,11 +221,13 @@ export default function SuperAdminDashboardPage() {
           </Button>
         </div>
 
-        {/* Quick Actions - Acciones Rápidas */}
+        {/* Quick Actions - Acciones Rápidas Mejoradas */}
         <Card className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border-none shadow-sm">
           <CardContent className="py-4">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="text-sm font-medium text-gray-700 mr-2">Acciones rápidas:</span>
+              <span className="text-sm font-medium text-gray-700 mr-2">⚡ Acciones rápidas:</span>
+              
+              {/* Gestión */}
               <Button
                 size="sm"
                 variant="outline"
@@ -233,16 +235,7 @@ export default function SuperAdminDashboardPage() {
                 onClick={() => router.push('/admin/clientes')}
               >
                 <Building2 className="h-4 w-4 mr-2" />
-                Nuevo Cliente
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="bg-white hover:bg-indigo-50"
-                onClick={() => router.push('/admin/alertas')}
-              >
-                <AlertTriangle className="h-4 w-4 mr-2" />
-                Ver Alertas ({companiesNeedingAttention?.length || 0})
+                Clientes
               </Button>
               <Button
                 size="sm"
@@ -253,23 +246,66 @@ export default function SuperAdminDashboardPage() {
                 <UserPlus className="h-4 w-4 mr-2" />
                 Onboarding
               </Button>
+              
+              {/* Comercial */}
               <Button
                 size="sm"
                 variant="outline"
-                className="bg-white hover:bg-indigo-50"
-                onClick={() => router.push('/admin/system-logs')}
+                className="bg-white hover:bg-emerald-50 border-emerald-200"
+                onClick={() => router.push('/admin/sales-team')}
               >
-                <Activity className="h-4 w-4 mr-2" />
-                Logs
+                <TrendingUp className="h-4 w-4 mr-2 text-emerald-600" />
+                Equipo Ventas
               </Button>
               <Button
                 size="sm"
                 variant="outline"
-                className="bg-white hover:bg-indigo-50"
+                className="bg-white hover:bg-emerald-50 border-emerald-200"
+                onClick={() => router.push('/red-agentes')}
+              >
+                <Users className="h-4 w-4 mr-2 text-emerald-600" />
+                Red Agentes
+              </Button>
+
+              {/* Separador visual */}
+              <div className="h-6 w-px bg-gray-300 mx-1" />
+              
+              {/* Monitoreo */}
+              <Button
+                size="sm"
+                variant="outline"
+                className="bg-white hover:bg-amber-50 border-amber-200"
+                onClick={() => router.push('/admin/alertas')}
+              >
+                <AlertTriangle className="h-4 w-4 mr-2 text-amber-600" />
+                Alertas ({companiesNeedingAttention?.length || 0})
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="bg-white hover:bg-blue-50 border-blue-200"
+                onClick={() => router.push('/admin/integraciones')}
+              >
+                <Activity className="h-4 w-4 mr-2 text-blue-600" />
+                Integraciones
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="bg-white hover:bg-green-50 border-green-200"
                 onClick={() => router.push('/admin/salud-sistema')}
               >
-                <CheckCircle className="h-4 w-4 mr-2" />
+                <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
                 Salud Sistema
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="bg-white hover:bg-gray-50"
+                onClick={() => router.push('/admin/system-logs')}
+              >
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Logs
               </Button>
             </div>
           </CardContent>

@@ -1035,9 +1035,9 @@ const superAdminPlatformItems: SidebarItem[] = [
     subItems: [
       { name: 'Planes INMOVA', href: '/admin/planes' },
       { name: 'Planes eWoorker', href: '/admin/ewoorker-planes' },
-      { name: 'Add-ons', href: '/admin/addons' },
+      { name: 'Add-ons y Extras', href: '/admin/addons' },
       { name: 'Facturación B2B', href: '/admin/facturacion-b2b' },
-      { name: 'Cupones', href: '/admin/cupones' },
+      { name: 'Cupones y Descuentos', href: '/admin/cupones' },
     ],
   },
 
@@ -1153,7 +1153,20 @@ const superAdminPlatformItems: SidebarItem[] = [
     subItems: [{ name: 'Limpieza de Datos', href: '/admin/limpieza' }],
   },
 
-  // ========== 10. SOPORTE ==========
+  // ========== 10. VENTAS Y COMERCIAL ==========
+  {
+    name: 'Ventas',
+    href: '/admin/sales-team',
+    icon: TrendingUp,
+    roles: ['super_admin'],
+    subItems: [
+      { name: 'Equipo de Ventas', href: '/admin/sales-team' },
+      { name: 'Red de Agentes', href: '/red-agentes' },
+      { name: 'Comisiones Agentes', href: '/red-agentes/comisiones' },
+    ],
+  },
+
+  // ========== 11. SOPORTE ==========
   {
     name: 'Soporte',
     href: '/admin/sugerencias',
