@@ -91,6 +91,7 @@ export default function AdminEwoorkerPlanesPage() {
     socioPercentage: 50,
     plataformaPercentage: 50,
     destacado: false,
+    activo: true,
   });
 
   const [newFeature, setNewFeature] = useState('');
