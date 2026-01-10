@@ -9186,6 +9186,19 @@ model Lead {
   mensajeInicial      String?  @db.Text
   preguntasFrecuentes String[] // Preguntas que hizo durante la conversación
 
+  // ========== OUTBOUND / CAPTACIÓN PROACTIVA ==========
+  // Datos de LinkedIn/PhantomBuster/Clay
+  linkedinUrl         String?  @unique // URL del perfil de LinkedIn
+  enrichmentData      Json?    // Datos enriquecidos de Clay/PhantomBuster
+  enrichmentSource    String?  // "phantombuster", "clay", "apollo", "manual"
+  
+  // Estado del proceso outbound
+  outboundStatus      String?  @default("NEW") // "NEW", "CONTACTED", "QUALIFIED", "REJECTED", "INCOMPLETE", "SCHEDULED"
+  outboundCallScheduledAt DateTime? // Fecha/hora programada para llamada
+  outboundCallAttempts    Int      @default(0) // Número de intentos de llamada
+  outboundLastAttemptAt   DateTime? // Última fecha de intento
+  outboundNotes           String?  @db.Text // Notas específicas del proceso outbound
+
   // Metadata
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -9200,6 +9213,8 @@ model Lead {
   @@index([estado])
   @@index([etapa])
   @@index([fuente])
+  @@index([linkedinUrl])
+  @@index([outboundStatus])
   @@index([temperatura])
   @@index([asignadoA])
   @@index([email])
