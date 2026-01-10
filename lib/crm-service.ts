@@ -170,7 +170,7 @@ export class CRMService {
         asignadoUsuario: {
           select: {
             id: true,
-            nombre: true,
+            name: true,
             email: true,
           },
         },
@@ -193,7 +193,7 @@ export class CRMService {
         asignadoUsuario: {
           select: {
             id: true,
-            nombre: true,
+            name: true,
             email: true,
           },
         },
@@ -206,7 +206,7 @@ export class CRMService {
             usuario: {
               select: {
                 id: true,
-                nombre: true,
+                name: true,
               },
             },
           },
@@ -266,7 +266,7 @@ export class CRMService {
           asignadoUsuario: {
             select: {
               id: true,
-              nombre: true,
+              name: true,
             },
           },
         },
@@ -330,7 +330,7 @@ export class CRMService {
         asignadoUsuario: {
           select: {
             id: true,
-            nombre: true,
+            name: true,
             email: true,
           },
         },
