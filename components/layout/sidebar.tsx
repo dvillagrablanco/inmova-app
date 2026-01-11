@@ -978,6 +978,21 @@ const administradorEmpresaItems = [
     icon: MessageCircle,
     roles: ['administrador', 'super_admin'],
   },
+  // === GESTIÓN FISCAL ===
+  {
+    name: 'Impuestos',
+    href: '/admin/impuestos',
+    icon: Euro,
+    roles: ['administrador', 'super_admin'],
+    badge: '💰',
+    subItems: [
+      { name: '📊 Resumen Fiscal', href: '/admin/impuestos' },
+      { name: '📋 Obligaciones', href: '/admin/impuestos?tab=obligaciones' },
+      { name: '🏠 IBI Inmuebles', href: '/admin/impuestos?tab=inmuebles' },
+      { name: '📅 Calendario', href: '/admin/impuestos?tab=calendario' },
+      { name: '🧮 Calculadora', href: '/admin/impuestos?tab=modelos' },
+    ],
+  },
 ];
 
 // 5.2 SUPER ADMIN - GESTIÓN DE PLATAFORMA
