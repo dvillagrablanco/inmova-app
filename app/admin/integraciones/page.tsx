@@ -15,6 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { 
   CheckCircle2, 
   XCircle,
+  AlertCircle,
   Settings,
   RefreshCw,
   ExternalLink,
@@ -359,11 +360,11 @@ export default function IntegracionesUnificadasPage() {
               )}
             </div>
           </div>
-          <Badge variant={integration.status === 'connected' ? 'default' : 'secondary'}>
+          <Badge variant={integration.status === 'connected' ? 'default' : 'outline'} className={integration.status === 'connected' ? 'bg-green-500' : 'text-amber-600 border-amber-400'}>
             {integration.status === 'connected' ? (
-              <><CheckCircle2 className="h-3 w-3 mr-1" /> Configurado</>
+              <><CheckCircle2 className="h-3 w-3 mr-1" /> Integrado</>
             ) : (
-              <><XCircle className="h-3 w-3 mr-1" /> No configurado</>
+              <><AlertCircle className="h-3 w-3 mr-1" /> Pendiente</>
             )}
           </Badge>
         </div>
@@ -592,11 +593,11 @@ export default function IntegracionesUnificadasPage() {
                         <Badge variant="outline">
                           {integration.mode === 'live' ? '🟢 Live' : '🟡 Test'}
                         </Badge>
-                        <Badge variant={integration.status === 'connected' ? 'default' : 'secondary'}>
+                        <Badge variant={integration.status === 'connected' ? 'default' : 'outline'} className={integration.status === 'connected' ? 'bg-green-500' : 'text-amber-600 border-amber-400'}>
                           {integration.status === 'connected' ? (
-                            <><CheckCircle2 className="h-3 w-3 mr-1" /> Configurado</>
+                            <><CheckCircle2 className="h-3 w-3 mr-1" /> Integrado</>
                           ) : (
-                            <><XCircle className="h-3 w-3 mr-1" /> No configurado</>
+                            <><AlertCircle className="h-3 w-3 mr-1" /> Pendiente</>
                           )}
                         </Badge>
                       </div>
@@ -647,11 +648,11 @@ export default function IntegracionesUnificadasPage() {
                         {integration.compliance?.map((c: string) => (
                           <Badge key={c} variant="outline" className="text-xs">{c}</Badge>
                         ))}
-                        <Badge variant={integration.status === 'connected' ? 'default' : 'secondary'}>
+                        <Badge variant={integration.status === 'connected' ? 'default' : 'outline'} className={integration.status === 'connected' ? 'bg-green-500' : 'text-amber-600 border-amber-400'}>
                           {integration.status === 'connected' ? (
-                            <><CheckCircle2 className="h-3 w-3 mr-1" /> Configurado</>
+                            <><CheckCircle2 className="h-3 w-3 mr-1" /> Integrado</>
                           ) : (
-                            <><XCircle className="h-3 w-3 mr-1" /> No configurado</>
+                            <><AlertCircle className="h-3 w-3 mr-1" /> Pendiente</>
                           )}
                         </Badge>
                       </div>

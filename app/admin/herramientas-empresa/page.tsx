@@ -15,6 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { 
   CheckCircle2, 
   XCircle,
+  AlertCircle,
   Settings,
   RefreshCw,
   ExternalLink,
@@ -252,8 +253,12 @@ export default function HerramientasEmpresaPage() {
               <p className="text-sm text-muted-foreground">{integration.description}</p>
             </div>
           </div>
-          <Badge variant={integration.status === 'connected' ? 'default' : 'secondary'}>
-            {integration.status === 'connected' ? 'Conectado' : 'No conectado'}
+          <Badge variant={integration.status === 'connected' ? 'default' : 'outline'} className={integration.status === 'connected' ? 'bg-green-500' : 'text-amber-600 border-amber-400'}>
+            {integration.status === 'connected' ? (
+              <><CheckCircle2 className="h-3 w-3 mr-1" /> Integrado</>
+            ) : (
+              <><AlertCircle className="h-3 w-3 mr-1" /> Pendiente</>
+            )}
           </Badge>
         </div>
         
