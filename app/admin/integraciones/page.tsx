@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -125,39 +126,43 @@ export default function IntegracionesUnificadasPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="container mx-auto py-6 px-4 max-w-7xl">
-        <div className="flex items-center gap-4 mb-6">
-          <Skeleton className="h-16 w-16 rounded-xl" />
-          <div>
-            <Skeleton className="h-8 w-64 mb-2" />
-            <Skeleton className="h-4 w-96" />
+      <AuthenticatedLayout>
+        <div className="container mx-auto py-6 px-4 max-w-7xl">
+          <div className="flex items-center gap-4 mb-6">
+            <Skeleton className="h-16 w-16 rounded-xl" />
+            <div>
+              <Skeleton className="h-8 w-64 mb-2" />
+              <Skeleton className="h-4 w-96" />
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <Skeleton key={i} className="h-32" />
+            ))}
           </div>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          {[1, 2, 3, 4, 5, 6].map(i => (
-            <Skeleton key={i} className="h-32" />
-          ))}
-        </div>
-      </div>
+      </AuthenticatedLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto py-6 px-4 max-w-7xl">
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-red-600">
-              <AlertCircle className="h-5 w-5" />
-              <p>Error: {error}</p>
-            </div>
-            <Button onClick={refreshData} className="mt-4" variant="outline">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Reintentar
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <AuthenticatedLayout>
+        <div className="container mx-auto py-6 px-4 max-w-7xl">
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 text-red-600">
+                <AlertCircle className="h-5 w-5" />
+                <p>Error: {error}</p>
+              </div>
+              <Button onClick={refreshData} className="mt-4" variant="outline">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Reintentar
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
@@ -388,24 +393,25 @@ export default function IntegracionesUnificadasPage() {
   );
 
   return (
-    <div className="container mx-auto py-6 px-4 max-w-7xl">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <Zap className="h-8 w-8 text-white" />
+    <AuthenticatedLayout>
+      <div className="container mx-auto py-6 px-4 max-w-7xl">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                <Zap className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold">Integraciones de Plataforma</h1>
+                <p className="text-muted-foreground">Gestión centralizada de todas las integraciones de Inmova</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold">Integraciones de Plataforma</h1>
-              <p className="text-muted-foreground">Gestión centralizada de todas las integraciones de Inmova</p>
-            </div>
+            <Button onClick={refreshData} variant="outline" disabled={loading}>
+              {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+              Actualizar
+            </Button>
           </div>
-          <Button onClick={refreshData} variant="outline" disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-            Actualizar
-          </Button>
-        </div>
 
         {/* Resumen */}
         {data?.resumen && (
@@ -672,6 +678,7 @@ export default function IntegracionesUnificadasPage() {
           </section>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </AuthenticatedLayout>
   );
 }

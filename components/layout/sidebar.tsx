@@ -2407,8 +2407,8 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             )}
 
             {/* ADMINISTRACIÓN DE EMPRESA (Solo para Administrador - NO Super Admin) */}
-            {/* Super Admin tiene su sección de gestión de empresas arriba con selector */}
-            {filteredAdministradorEmpresaItems.length > 0 && role === 'administrador' && (
+            {/* Gestión de Empresa - Visible para administrador y super_admin */}
+            {filteredAdministradorEmpresaItems.length > 0 && (role === 'administrador' || role === 'super_admin') && (
               <>
                 <div className="px-2 py-3 mb-2 border-t border-gray-800">
                   <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">

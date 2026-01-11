@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,7 +43,11 @@ export default function HerramientasEmpresaPage() {
   }, [status, router]);
 
   if (status === 'loading') {
-    return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
+    return (
+      <AuthenticatedLayout>
+        <div className="flex items-center justify-center min-h-screen">Cargando...</div>
+      </AuthenticatedLayout>
+    );
   }
 
   // ============================================
@@ -303,19 +308,20 @@ export default function HerramientasEmpresaPage() {
   );
 
   return (
-    <div className="container mx-auto py-6 px-4 max-w-6xl">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-4">
-          <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center">
-            <Wrench className="h-8 w-8 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold">Herramientas e Integraciones</h1>
-            <p className="text-muted-foreground">Conecta tus herramientas de terceros y activa servicios compartidos</p>
+    <AuthenticatedLayout>
+      <div className="container mx-auto py-6 px-4 max-w-6xl">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center gap-4">
+            <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center">
+              <Wrench className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">Herramientas e Integraciones</h1>
+              <p className="text-muted-foreground">Conecta tus herramientas de terceros y activa servicios compartidos</p>
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Tabs principales */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -450,6 +456,7 @@ export default function HerramientasEmpresaPage() {
           </section>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </AuthenticatedLayout>
   );
 }
