@@ -1,492 +1,588 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Check,
-  X,
-  ExternalLink,
+import { Separator } from '@/components/ui/separator';
+import { 
+  CheckCircle2, 
+  XCircle,
   Settings,
   RefreshCw,
-  AlertCircle,
-  CheckCircle2,
-  Link as LinkIcon,
-  Unlink,
-  CreditCard,
-  Mail,
+  ExternalLink,
+  Euro,
   MessageSquare,
+  Phone,
+  Mail,
+  BarChart3,
+  MousePointer2,
+  Instagram,
+  Facebook,
+  Linkedin,
+  Twitter,
   Cloud,
   Database,
+  HardDrive,
+  Brain,
+  Bug,
+  CreditCard,
   FileSignature,
-  Bot,
+  Building2,
+  Smartphone,
   Shield,
-  Eye,
-  EyeOff,
+  Users,
+  Zap
 } from 'lucide-react';
-import { toast } from 'sonner';
 
-interface PlatformIntegration {
-  id: string;
-  name: string;
-  description: string;
-  category: 'payments' | 'email' | 'sms' | 'storage' | 'database' | 'signature' | 'ai' | 'monitoring';
-  status: 'connected' | 'disconnected' | 'error' | 'not_configured';
-  icon: any;
-  envVars: string[];
-  docsUrl: string;
-  required: boolean;
-}
-
-const PLATFORM_INTEGRATIONS: PlatformIntegration[] = [
-  // Pagos
-  {
-    id: 'stripe',
-    name: 'Stripe',
-    description: 'Procesamiento de pagos y suscripciones para clientes de Inmova',
-    category: 'payments',
-    status: 'not_configured',
-    icon: CreditCard,
-    envVars: ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY'],
-    docsUrl: 'https://stripe.com/docs',
-    required: true,
-  },
-  // Email
-  {
-    id: 'smtp',
-    name: 'SMTP (Gmail/SendGrid)',
-    description: 'Envío de emails transaccionales desde la plataforma',
-    category: 'email',
-    status: 'not_configured',
-    icon: Mail,
-    envVars: ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASSWORD'],
-    docsUrl: 'https://nodemailer.com/about/',
-    required: true,
-  },
-  // SMS
-  {
-    id: 'twilio',
-    name: 'Twilio',
-    description: 'Envío de SMS y WhatsApp para notificaciones',
-    category: 'sms',
-    status: 'not_configured',
-    icon: MessageSquare,
-    envVars: ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_PHONE_NUMBER'],
-    docsUrl: 'https://www.twilio.com/docs',
-    required: false,
-  },
-  // Storage
-  {
-    id: 'aws_s3',
-    name: 'AWS S3',
-    description: 'Almacenamiento de archivos y documentos',
-    category: 'storage',
-    status: 'not_configured',
-    icon: Cloud,
-    envVars: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_REGION', 'AWS_BUCKET'],
-    docsUrl: 'https://docs.aws.amazon.com/s3/',
-    required: true,
-  },
-  // Database
-  {
-    id: 'postgresql',
-    name: 'PostgreSQL',
-    description: 'Base de datos principal de la plataforma',
-    category: 'database',
-    status: 'not_configured',
-    icon: Database,
-    envVars: ['DATABASE_URL'],
-    docsUrl: 'https://www.prisma.io/docs',
-    required: true,
-  },
-  // Firma Digital
-  {
-    id: 'signaturit',
-    name: 'Signaturit',
-    description: 'Firma digital de contratos con validez legal',
-    category: 'signature',
-    status: 'not_configured',
-    icon: FileSignature,
-    envVars: ['SIGNATURIT_API_KEY', 'SIGNATURIT_ENVIRONMENT'],
-    docsUrl: 'https://docs.signaturit.com/',
-    required: false,
-  },
-  // IA
-  {
-    id: 'anthropic',
-    name: 'Anthropic Claude',
-    description: 'IA para asistencia, valoraciones y análisis',
-    category: 'ai',
-    status: 'not_configured',
-    icon: Bot,
-    envVars: ['ANTHROPIC_API_KEY'],
-    docsUrl: 'https://docs.anthropic.com/',
-    required: false,
-  },
-  // Monitoring
-  {
-    id: 'sentry',
-    name: 'Sentry',
-    description: 'Monitoreo de errores y performance',
-    category: 'monitoring',
-    status: 'not_configured',
-    icon: Shield,
-    envVars: ['SENTRY_DSN', 'SENTRY_AUTH_TOKEN'],
-    docsUrl: 'https://docs.sentry.io/',
-    required: false,
-  },
-];
-
-const categoryLabels: Record<string, string> = {
-  payments: 'Pagos',
-  email: 'Email',
-  sms: 'SMS',
-  storage: 'Almacenamiento',
-  database: 'Base de Datos',
-  signature: 'Firma Digital',
-  ai: 'Inteligencia Artificial',
-  monitoring: 'Monitoreo',
-};
-
-const categoryIcons: Record<string, any> = {
-  payments: CreditCard,
-  email: Mail,
-  sms: MessageSquare,
-  storage: Cloud,
-  database: Database,
-  signature: FileSignature,
-  ai: Bot,
-  monitoring: Shield,
-};
-
-export default function AdminIntegracionesPage() {
-  const { data: session, status: sessionStatus } = useSession();
+export default function IntegracionesUnificadasPage() {
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const [integrations, setIntegrations] = useState<PlatformIntegration[]>(PLATFORM_INTEGRATIONS);
-  const [loading, setLoading] = useState(true);
-  const [selectedIntegration, setSelectedIntegration] = useState<PlatformIntegration | null>(null);
-  const [showConfigDialog, setShowConfigDialog] = useState(false);
-  const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
+  const [activeTab, setActiveTab] = useState('plataforma');
 
   useEffect(() => {
-    if (sessionStatus === 'unauthenticated') {
+    if (status === 'unauthenticated') {
       router.push('/login');
     }
-  }, [sessionStatus, router]);
-
-  useEffect(() => {
-    checkIntegrationStatus();
-  }, []);
-
-  async function checkIntegrationStatus() {
-    try {
-      setLoading(true);
-      const res = await fetch('/api/admin/integraciones/status');
-      if (res.ok) {
-        const data = await res.json();
-        // Actualizar estado de integraciones basado en respuesta
-        setIntegrations(prev => prev.map(integration => ({
-          ...integration,
-          status: data[integration.id]?.status || 'not_configured',
-        })));
-      }
-    } catch (error) {
-      console.error('Error checking integration status:', error);
-    } finally {
-      setLoading(false);
+    const allowedRoles = ['super_admin', 'SUPER_ADMIN', 'superadmin', 'admin', 'ADMIN'];
+    const userRole = session?.user?.role?.toLowerCase();
+    if (status === 'authenticated' && userRole && !allowedRoles.map(r => r.toLowerCase()).includes(userRole)) {
+      router.push('/unauthorized');
     }
+  }, [status, session, router]);
+
+  if (status === 'loading') {
+    return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
   }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'connected':
-        return <Badge className="bg-green-100 text-green-800">Conectado</Badge>;
-      case 'error':
-        return <Badge className="bg-red-100 text-red-800">Error</Badge>;
-      case 'disconnected':
-        return <Badge className="bg-yellow-100 text-yellow-800">Desconectado</Badge>;
-      default:
-        return <Badge variant="outline">No configurado</Badge>;
-    }
+  // ============================================
+  // INTEGRACIONES DE PLATAFORMA (solo Inmova)
+  // ============================================
+  const plataformaIntegrations = {
+    contabilidad: [
+      { 
+        id: 'contasimple', 
+        name: 'Contasimple', 
+        description: 'Contabilidad de Inmova',
+        icon: Euro, 
+        color: 'from-blue-500 to-blue-600',
+        status: 'connected',
+        config: { apiKey: 'cs_live_••••••••', companyId: 'inmova-2024' }
+      },
+    ],
+    comunicacion: [
+      { 
+        id: 'crisp', 
+        name: 'Crisp', 
+        description: 'Chat en vivo y soporte',
+        icon: MessageSquare, 
+        color: 'from-purple-500 to-purple-600',
+        status: 'connected',
+      },
+      { 
+        id: 'twilio', 
+        name: 'Twilio', 
+        description: 'SMS y llamadas',
+        icon: Phone, 
+        color: 'from-red-500 to-red-600',
+        status: 'connected',
+      },
+      { 
+        id: 'sendgrid', 
+        name: 'SendGrid', 
+        description: 'Email transaccional',
+        icon: Mail, 
+        color: 'from-blue-400 to-blue-500',
+        status: 'connected',
+      },
+      { 
+        id: 'gmail', 
+        name: 'Gmail SMTP', 
+        description: 'Email de respaldo',
+        icon: Mail, 
+        color: 'from-red-400 to-red-500',
+        status: 'connected',
+      },
+    ],
+    analytics: [
+      { 
+        id: 'ga4', 
+        name: 'Google Analytics 4', 
+        description: 'Análisis de tráfico',
+        icon: BarChart3, 
+        color: 'from-orange-500 to-yellow-500',
+        status: 'connected',
+      },
+      { 
+        id: 'hotjar', 
+        name: 'Hotjar', 
+        description: 'Mapas de calor',
+        icon: MousePointer2, 
+        color: 'from-red-500 to-pink-500',
+        status: 'connected',
+      },
+    ],
+    social: [
+      { id: 'facebook', name: 'Facebook', icon: Facebook, color: 'from-blue-600 to-blue-700', status: 'connected' },
+      { id: 'instagram', name: 'Instagram', icon: Instagram, color: 'from-pink-500 to-purple-600', status: 'connected' },
+      { id: 'linkedin', name: 'LinkedIn', icon: Linkedin, color: 'from-blue-700 to-blue-800', status: 'connected' },
+      { id: 'twitter', name: 'X (Twitter)', icon: Twitter, color: 'from-gray-700 to-black', status: 'disconnected' },
+    ],
+    infraestructura: [
+      { 
+        id: 'aws', 
+        name: 'AWS S3', 
+        description: 'Almacenamiento de archivos',
+        icon: Cloud, 
+        color: 'from-orange-500 to-amber-500',
+        status: 'connected',
+        stats: { files: '12,456', storage: '45.2 GB' }
+      },
+      { 
+        id: 'postgresql', 
+        name: 'PostgreSQL', 
+        description: 'Base de datos principal',
+        icon: Database, 
+        color: 'from-blue-600 to-blue-700',
+        status: 'connected',
+        stats: { tables: 47, records: '1.2M' }
+      },
+    ],
+    ia: [
+      { 
+        id: 'claude', 
+        name: 'Anthropic Claude', 
+        description: 'IA para valoraciones y asistente',
+        icon: Brain, 
+        color: 'from-purple-500 to-pink-500',
+        status: 'connected',
+        stats: { queries: 234, cost: '€45.20' }
+      },
+    ],
+    monitoreo: [
+      { 
+        id: 'sentry', 
+        name: 'Sentry', 
+        description: 'Tracking de errores',
+        icon: Bug, 
+        color: 'from-violet-500 to-purple-600',
+        status: 'connected',
+        stats: { errors: 7, crashFree: '99.8%' }
+      },
+    ],
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'connected':
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
-      case 'error':
-        return <AlertCircle className="h-5 w-5 text-red-500" />;
-      default:
-        return <X className="h-5 w-5 text-gray-400" />;
-    }
+  // ============================================
+  // INTEGRACIONES COMPARTIDAS (config Inmova + uso empresas)
+  // ============================================
+  const compartidaIntegrations = {
+    pagos: [
+      { 
+        id: 'stripe', 
+        name: 'Stripe', 
+        description: 'Tarjetas de crédito/débito',
+        icon: CreditCard, 
+        color: 'from-purple-500 to-indigo-600',
+        status: 'connected',
+        mode: 'live',
+        inmovaConfig: { publishableKey: 'pk_live_••••', secretKey: 'sk_live_••••', webhookSecret: 'whsec_••••' },
+        empresasUsando: 45,
+        stats: { transactions: 1234, volume: '€45,230' }
+      },
+      { 
+        id: 'gocardless', 
+        name: 'GoCardless', 
+        description: 'Domiciliación SEPA',
+        icon: Building2, 
+        color: 'from-cyan-500 to-blue-600',
+        status: 'connected',
+        mode: 'live',
+        inmovaConfig: { accessToken: 'live_••••', webhookSecret: '••••' },
+        empresasUsando: 28,
+        stats: { transactions: 456, volume: '€89,340' }
+      },
+      { 
+        id: 'redsys', 
+        name: 'Redsys', 
+        description: 'TPV Virtual y Bizum',
+        icon: Smartphone, 
+        color: 'from-red-500 to-orange-500',
+        status: 'connected',
+        mode: 'live',
+        inmovaConfig: { merchantCode: '999008881', terminal: '001', encryptionKey: '••••' },
+        empresasUsando: 32,
+        stats: { transactions: 890, volume: '€34,560' }
+      },
+    ],
+    firma: [
+      { 
+        id: 'docusign', 
+        name: 'DocuSign', 
+        description: 'Firma electrónica avanzada',
+        icon: FileSignature, 
+        color: 'from-yellow-500 to-amber-600',
+        status: 'connected',
+        compliance: ['eIDAS', 'ESIGN'],
+        inmovaConfig: { integrationKey: 'xxxx-xxxx', accountId: 'xxxx-xxxx' },
+        empresasUsando: 38,
+        stats: { envelopes: 567, signed: 523 }
+      },
+      { 
+        id: 'signaturit', 
+        name: 'Signaturit', 
+        description: 'Firma cualificada España/UE',
+        icon: Shield, 
+        color: 'from-blue-500 to-blue-600',
+        status: 'connected',
+        compliance: ['eIDAS QES', 'LOPD'],
+        inmovaConfig: { apiToken: '••••' },
+        empresasUsando: 22,
+        stats: { envelopes: 234, signed: 210 }
+      },
+    ],
   };
 
-  const openConfigDialog = (integration: PlatformIntegration) => {
-    setSelectedIntegration(integration);
-    setShowConfigDialog(true);
-  };
-
-  const toggleSecretVisibility = (varName: string) => {
-    setShowSecrets(prev => ({ ...prev, [varName]: !prev[varName] }));
-  };
-
-  // Agrupar integraciones por categoría
-  const groupedIntegrations = integrations.reduce((acc, integration) => {
-    if (!acc[integration.category]) {
-      acc[integration.category] = [];
-    }
-    acc[integration.category].push(integration);
-    return acc;
-  }, {} as Record<string, PlatformIntegration[]>);
-
-  // Estadísticas
-  const stats = {
-    total: integrations.length,
-    connected: integrations.filter(i => i.status === 'connected').length,
-    required: integrations.filter(i => i.required).length,
-    requiredConnected: integrations.filter(i => i.required && i.status === 'connected').length,
-  };
-
-  if (sessionStatus === 'loading' || loading) {
-    return (
-      <AuthenticatedLayout>
-        <div className="flex items-center justify-center h-64">
-          <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      </AuthenticatedLayout>
-    );
-  }
-
-  return (
-    <AuthenticatedLayout>
-      <div className="container mx-auto py-8 px-4">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">Integraciones de la Plataforma</h1>
-            <p className="text-muted-foreground">
-              Configuración de servicios externos conectados a Inmova
-            </p>
+  const IntegrationCard = ({ integration, showEmpresasUsando = false }: { integration: any; showEmpresasUsando?: boolean }) => (
+    <Card className="hover:shadow-md transition-shadow">
+      <CardContent className="pt-4">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${integration.color} flex items-center justify-center`}>
+              <integration.icon className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h4 className="font-medium">{integration.name}</h4>
+              {integration.description && (
+                <p className="text-sm text-muted-foreground">{integration.description}</p>
+              )}
+            </div>
           </div>
-          <Button variant="outline" onClick={checkIntegrationStatus}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Verificar Estado
-          </Button>
+          <Badge variant={integration.status === 'connected' ? 'default' : 'secondary'}>
+            {integration.status === 'connected' ? (
+              <><CheckCircle2 className="h-3 w-3 mr-1" /> Activo</>
+            ) : (
+              <><XCircle className="h-3 w-3 mr-1" /> Inactivo</>
+            )}
+          </Badge>
         </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-full bg-blue-100">
-                  <LinkIcon className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Total</p>
-                  <p className="text-2xl font-bold">{stats.total}</p>
-                </div>
+        
+        {integration.stats && (
+          <div className="mt-3 flex gap-4 text-sm">
+            {Object.entries(integration.stats).map(([key, value]) => (
+              <div key={key}>
+                <span className="text-muted-foreground capitalize">{key}: </span>
+                <span className="font-medium">{value as string}</span>
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-full bg-green-100">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Conectadas</p>
-                  <p className="text-2xl font-bold">{stats.connected}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-full bg-amber-100">
-                  <AlertCircle className="h-5 w-5 text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Requeridas</p>
-                  <p className="text-2xl font-bold">{stats.requiredConnected}/{stats.required}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-full bg-purple-100">
-                  <Settings className="h-5 w-5 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Pendientes</p>
-                  <p className="text-2xl font-bold">{stats.total - stats.connected}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Alerta si faltan integraciones requeridas */}
-        {stats.requiredConnected < stats.required && (
-          <Alert className="mb-6 border-amber-200 bg-amber-50">
-            <AlertCircle className="h-4 w-4 text-amber-600" />
-            <AlertDescription className="text-amber-800">
-              Hay {stats.required - stats.requiredConnected} integraciones requeridas sin configurar. 
-              Configúralas para que la plataforma funcione correctamente.
-            </AlertDescription>
-          </Alert>
+            ))}
+          </div>
         )}
 
-        {/* Integraciones por categoría */}
-        <div className="space-y-6">
-          {Object.entries(groupedIntegrations).map(([category, categoryIntegrations]) => {
-            const CategoryIcon = categoryIcons[category] || Settings;
-            return (
-              <Card key={category}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CategoryIcon className="h-5 w-5" />
-                    {categoryLabels[category] || category}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {categoryIntegrations.map((integration) => {
-                      const Icon = integration.icon;
-                      return (
-                        <div
-                          key={integration.id}
-                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className="p-2 rounded-lg bg-muted">
-                              <Icon className="h-6 w-6" />
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-medium">{integration.name}</h3>
-                                {integration.required && (
-                                  <Badge variant="outline" className="text-xs">Requerido</Badge>
-                                )}
-                              </div>
-                              <p className="text-sm text-muted-foreground">{integration.description}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            {getStatusIcon(integration.status)}
-                            {getStatusBadge(integration.status)}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => openConfigDialog(integration)}
-                            >
-                              <Settings className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => window.open(integration.docsUrl, '_blank')}
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+        {showEmpresasUsando && integration.empresasUsando && (
+          <div className="mt-3 flex items-center gap-2 text-sm">
+            <Users className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">{integration.empresasUsando} empresas usando</span>
+          </div>
+        )}
+
+        <div className="mt-3 flex gap-2">
+          <Button size="sm" variant="outline">
+            <Settings className="h-4 w-4 mr-1" />
+            Configurar
+          </Button>
+          <Button size="sm" variant="ghost">
+            <ExternalLink className="h-4 w-4" />
+          </Button>
         </div>
+      </CardContent>
+    </Card>
+  );
 
-        {/* Dialog de configuración */}
-        <Dialog open={showConfigDialog} onOpenChange={setShowConfigDialog}>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                {selectedIntegration && (
-                  <>
-                    <selectedIntegration.icon className="h-5 w-5" />
-                    Configurar {selectedIntegration.name}
-                  </>
-                )}
-              </DialogTitle>
-              <DialogDescription>
-                Variables de entorno requeridas para esta integración.
-                Configúralas en el archivo .env.production del servidor.
-              </DialogDescription>
-            </DialogHeader>
-
-            {selectedIntegration && (
-              <div className="space-y-4">
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Estas variables deben configurarse directamente en el servidor.
-                    Por seguridad, no se pueden editar desde aquí.
-                  </AlertDescription>
-                </Alert>
-
-                <div className="space-y-3">
-                  <Label>Variables de Entorno</Label>
-                  {selectedIntegration.envVars.map((envVar) => (
-                    <div key={envVar} className="flex items-center gap-2">
-                      <div className="flex-1 p-2 bg-muted rounded font-mono text-sm">
-                        {envVar}
-                      </div>
-                      <Badge variant={process.env[envVar] ? 'default' : 'outline'}>
-                        {process.env[envVar] ? 'Configurada' : 'Pendiente'}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => window.open(selectedIntegration.docsUrl, '_blank')}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Ver Documentación
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowConfigDialog(false)}>
-                Cerrar
-              </Button>
-              <Button onClick={checkIntegrationStatus}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Verificar
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+  return (
+    <div className="container mx-auto py-6 px-4 max-w-7xl">
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex items-center gap-4">
+          <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+            <Zap className="h-8 w-8 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">Integraciones de Plataforma</h1>
+            <p className="text-muted-foreground">Gestión centralizada de todas las integraciones de Inmova</p>
+          </div>
+        </div>
       </div>
-    </AuthenticatedLayout>
+
+      {/* Tabs principales */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsTrigger value="plataforma">🏢 Solo Inmova</TabsTrigger>
+          <TabsTrigger value="compartidas">🤝 Compartidas</TabsTrigger>
+        </TabsList>
+
+        {/* ========================================== */}
+        {/* TAB: INTEGRACIONES DE PLATAFORMA (INMOVA) */}
+        {/* ========================================== */}
+        <TabsContent value="plataforma" className="space-y-8">
+          <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950">
+            <CardContent className="pt-4">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                <strong>ℹ️ Integraciones de Plataforma:</strong> Son usadas exclusivamente por Inmova para operar la plataforma SaaS. 
+                Las empresas clientes no tienen acceso a estas configuraciones.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Contabilidad */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Euro className="h-5 w-5" /> Contabilidad
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {plataformaIntegrations.contabilidad.map(i => <IntegrationCard key={i.id} integration={i} />)}
+            </div>
+          </section>
+
+          <Separator />
+
+          {/* Comunicación */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" /> Comunicación
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {plataformaIntegrations.comunicacion.map(i => <IntegrationCard key={i.id} integration={i} />)}
+            </div>
+          </section>
+
+          <Separator />
+
+          {/* Analytics */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" /> Analytics
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {plataformaIntegrations.analytics.map(i => <IntegrationCard key={i.id} integration={i} />)}
+            </div>
+          </section>
+
+          <Separator />
+
+          {/* Redes Sociales */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Instagram className="h-5 w-5" /> Redes Sociales
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {plataformaIntegrations.social.map(i => <IntegrationCard key={i.id} integration={i} />)}
+            </div>
+          </section>
+
+          <Separator />
+
+          {/* Infraestructura */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Cloud className="h-5 w-5" /> Infraestructura
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {plataformaIntegrations.infraestructura.map(i => <IntegrationCard key={i.id} integration={i} />)}
+            </div>
+          </section>
+
+          <Separator />
+
+          {/* IA */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Brain className="h-5 w-5" /> Inteligencia Artificial
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {plataformaIntegrations.ia.map(i => <IntegrationCard key={i.id} integration={i} />)}
+            </div>
+          </section>
+
+          <Separator />
+
+          {/* Monitoreo */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Bug className="h-5 w-5" /> Monitoreo
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {plataformaIntegrations.monitoreo.map(i => <IntegrationCard key={i.id} integration={i} />)}
+            </div>
+          </section>
+        </TabsContent>
+
+        {/* ========================================== */}
+        {/* TAB: INTEGRACIONES COMPARTIDAS */}
+        {/* ========================================== */}
+        <TabsContent value="compartidas" className="space-y-8">
+          <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950">
+            <CardContent className="pt-4">
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                <strong>ℹ️ Integraciones Compartidas:</strong> Configuradas por Inmova a nivel de plataforma, pero usadas por las empresas clientes. 
+                Aquí gestionas las credenciales maestras. Las empresas activan/desactivan desde su panel.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Pagos */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <CreditCard className="h-5 w-5" /> Pasarelas de Pago
+            </h2>
+            <p className="text-muted-foreground mb-4">
+              Las empresas usan estas pasarelas para cobrar a sus inquilinos. La configuración es de Inmova.
+            </p>
+
+            <div className="space-y-6">
+              {compartidaIntegrations.pagos.map(integration => (
+                <Card key={integration.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className={`h-12 w-12 rounded-lg bg-gradient-to-br ${integration.color} flex items-center justify-center`}>
+                          <integration.icon className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <CardTitle>{integration.name}</CardTitle>
+                          <CardDescription>{integration.description}</CardDescription>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">{integration.mode === 'live' ? '🟢 Live' : '🟡 Test'}</Badge>
+                        <Badge><CheckCircle2 className="h-3 w-3 mr-1" /> Activo</Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-6 md:grid-cols-2">
+                      {/* Config de Inmova */}
+                      <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+                        <h4 className="font-medium flex items-center gap-2">
+                          <Settings className="h-4 w-4" /> Configuración de Inmova
+                        </h4>
+                        {Object.entries(integration.inmovaConfig).map(([key, value]) => (
+                          <div key={key} className="space-y-1">
+                            <Label className="text-xs capitalize">{key.replace(/([A-Z])/g, ' $1')}</Label>
+                            <Input type="password" defaultValue={value as string} className="h-8 text-sm" />
+                          </div>
+                        ))}
+                        <Button size="sm">
+                          <RefreshCw className="h-4 w-4 mr-1" /> Probar
+                        </Button>
+                      </div>
+
+                      {/* Stats y empresas */}
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
+                          {Object.entries(integration.stats).map(([key, value]) => (
+                            <div key={key} className="p-3 border rounded-lg">
+                              <p className="text-xs text-muted-foreground capitalize">{key}</p>
+                              <p className="text-lg font-bold">{value as string}</p>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="p-3 border rounded-lg flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">Empresas usando</span>
+                          </div>
+                          <Badge variant="secondary">{integration.empresasUsando}</Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+
+          <Separator />
+
+          {/* Firma Digital */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <FileSignature className="h-5 w-5" /> Firma Digital
+            </h2>
+            <p className="text-muted-foreground mb-4">
+              Las empresas envían documentos a firmar usando las credenciales de Inmova. Ideal para contratos de arrendamiento.
+            </p>
+
+            <div className="space-y-6">
+              {compartidaIntegrations.firma.map(integration => (
+                <Card key={integration.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className={`h-12 w-12 rounded-lg bg-gradient-to-br ${integration.color} flex items-center justify-center`}>
+                          <integration.icon className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <CardTitle>{integration.name}</CardTitle>
+                          <CardDescription>{integration.description}</CardDescription>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {integration.compliance.map(c => (
+                          <Badge key={c} variant="outline" className="text-xs">{c}</Badge>
+                        ))}
+                        <Badge><CheckCircle2 className="h-3 w-3 mr-1" /> Activo</Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-6 md:grid-cols-2">
+                      {/* Config de Inmova */}
+                      <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+                        <h4 className="font-medium flex items-center gap-2">
+                          <Settings className="h-4 w-4" /> Configuración de Inmova
+                        </h4>
+                        {Object.entries(integration.inmovaConfig).map(([key, value]) => (
+                          <div key={key} className="space-y-1">
+                            <Label className="text-xs capitalize">{key.replace(/([A-Z])/g, ' $1')}</Label>
+                            <Input type="password" defaultValue={value as string} className="h-8 text-sm" />
+                          </div>
+                        ))}
+                        <Button size="sm">
+                          <RefreshCw className="h-4 w-4 mr-1" /> Probar
+                        </Button>
+                      </div>
+
+                      {/* Stats y empresas */}
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
+                          {Object.entries(integration.stats).map(([key, value]) => (
+                            <div key={key} className="p-3 border rounded-lg">
+                              <p className="text-xs text-muted-foreground capitalize">{key}</p>
+                              <p className="text-lg font-bold">{value as string}</p>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="p-3 border rounded-lg flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">Empresas usando</span>
+                          </div>
+                          <Badge variant="secondary">{integration.empresasUsando}</Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }

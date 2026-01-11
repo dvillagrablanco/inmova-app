@@ -65,6 +65,7 @@ import {
   Loader2,
   Tag,
   ShoppingBag,
+  Wrench,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -934,47 +935,16 @@ const administradorEmpresaItems = [
     icon: Palette,
     roles: ['administrador', 'super_admin'],
   },
-  // === INTEGRACIONES DE EMPRESA (para clientes de Inmova) ===
+  // === HERRAMIENTAS E INTEGRACIONES DE EMPRESA ===
   {
-    name: 'Mis Integraciones',
-    href: '/integraciones',
-    icon: Code,
+    name: 'Herramientas e Integraciones',
+    href: '/admin/herramientas-empresa',
+    icon: Wrench,
     roles: ['administrador', 'super_admin'],
-  },
-  {
-    name: 'Contabilidad',
-    href: '/admin/integraciones-contables',
-    icon: Euro,
-    roles: ['administrador', 'super_admin'],
-    // Contasimple, Holded, A3, Zucchetti, Alegra, Sage
-  },
-  {
-    name: 'Banca (Open Banking)',
-    href: '/admin/integraciones-banca',
-    icon: CreditCard,
-    roles: ['administrador', 'super_admin'],
-    // OpenBanking, Plaid
-  },
-  {
-    name: 'Portales Inmobiliarios',
-    href: '/admin/portales-inmobiliarios',
-    icon: Share2,
-    roles: ['administrador', 'super_admin'],
-    // Idealista, Pisos.com, Fotocasa, Habitaclia, yaencontre
-  },
-  {
-    name: 'Pagos',
-    href: '/admin/integraciones-pagos',
-    icon: DollarSign,
-    roles: ['administrador', 'super_admin'],
-    // Stripe, GoCardless, Redsys (usa config de Inmova)
-  },
-  {
-    name: 'Firma Digital',
-    href: '/admin/firma-digital',
-    icon: FileSignature,
-    roles: ['administrador', 'super_admin'],
-    // DocuSign, Signaturit (usa config de Inmova)
+    subItems: [
+      { name: '🔧 Mis Integraciones', href: '/admin/herramientas-empresa?tab=propias' },
+      { name: '🤝 Servicios Inmova', href: '/admin/herramientas-empresa?tab=compartidas' },
+    ],
   },
   // === HERRAMIENTAS ===
   {
@@ -1109,32 +1079,16 @@ const superAdminPlatformItems: SidebarItem[] = [
     ],
   },
 
-  // ========== 4.2 INTEGRACIONES DE PLATAFORMA INMOVA ==========
-  // Integraciones que usa INMOVA como plataforma (no las empresas clientes)
+  // ========== 4.2 INTEGRACIONES (PLATAFORMA + COMPARTIDAS) ==========
+  // Una sola página unificada con todas las integraciones
   {
-    name: 'Integraciones Plataforma',
-    href: '/admin/integraciones-plataforma',
+    name: 'Integraciones',
+    href: '/admin/integraciones',
     icon: Code,
     roles: ['super_admin'],
     subItems: [
-      { name: '📊 Contabilidad (Contasimple)', href: '/admin/integraciones-plataforma/contabilidad' },
-      { name: '💬 Comunicación (Crisp, Twilio, Email)', href: '/admin/integraciones-plataforma/comunicacion' },
-      { name: '📈 Analytics (GA4, Hotjar)', href: '/admin/integraciones-plataforma/analytics' },
-      { name: '📱 Redes Sociales', href: '/admin/integraciones-plataforma/social' },
-      { name: '☁️ Infraestructura (AWS, DB)', href: '/admin/integraciones-plataforma/infraestructura' },
-      { name: '🤖 IA (Claude)', href: '/admin/integraciones-plataforma/ia' },
-      { name: '🔍 Monitoreo (Sentry)', href: '/admin/integraciones-plataforma/monitoreo' },
-    ],
-  },
-  // Integraciones COMPARTIDAS (config de Inmova, uso por empresas)
-  {
-    name: 'Integraciones Compartidas',
-    href: '/admin/integraciones-compartidas',
-    icon: Share2,
-    roles: ['super_admin'],
-    subItems: [
-      { name: '💳 Pagos (Stripe, GoCardless, Redsys)', href: '/admin/integraciones-compartidas/pagos' },
-      { name: '✍️ Firma Digital (DocuSign, Signaturit)', href: '/admin/integraciones-compartidas/firma' },
+      { name: '🏢 Solo Inmova (Plataforma)', href: '/admin/integraciones?tab=plataforma' },
+      { name: '🤝 Compartidas (Pagos, Firma)', href: '/admin/integraciones?tab=compartidas' },
     ],
   },
   // Documentación API
