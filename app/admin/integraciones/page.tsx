@@ -40,7 +40,6 @@ import {
   Shield,
   Users,
   Zap,
-  AlertCircle,
   Loader2
 } from 'lucide-react';
 
