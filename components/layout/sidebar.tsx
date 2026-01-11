@@ -1095,13 +1095,14 @@ const superAdminPlatformItems: SidebarItem[] = [
   // ========== 4.2 INTEGRACIONES ==========
   {
     name: 'Integraciones',
-    href: '/admin/integraciones',
+    href: '/integraciones',
     icon: Code,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Servicios Conectados', href: '/admin/integraciones' },
-      { name: 'Contabilidad (Contasimple)', href: '/admin/contasimple' },
-      { name: 'Portales Inmobiliarios', href: '/admin/portales-externos' },
+      { name: 'Centro de Integraciones', href: '/integraciones' },
+      { name: 'Contabilidad', href: '/admin/integraciones-contables' },
+      { name: 'Portales Inmobiliarios', href: '/admin/portales-inmobiliarios' },
+      { name: 'Servicios Plataforma', href: '/admin/integraciones' },
       { name: 'API Docs', href: '/api-docs' },
     ],
   },
