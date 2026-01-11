@@ -1,8 +1,3 @@
-/**
- * API para verificar el estado de las integraciones de la plataforma
- * Solo accesible para super_admin
- */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
@@ -10,95 +5,195 @@ import { authOptions } from '@/lib/auth-options';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-interface IntegrationStatus {
-  status: 'connected' | 'disconnected' | 'error' | 'not_configured';
-  lastChecked: string;
-  details?: string;
+// Función para verificar si una variable de entorno está configurada (no vacía y no placeholder)
+function isConfigured(envVar: string | undefined): boolean {
+  if (!envVar) return false;
+  if (envVar.includes('placeholder') || envVar.includes('dummy') || envVar.includes('xxxx')) return false;
+  if (envVar.length < 5) return false;
+  return true;
 }
 
-export async function GET(req: NextRequest) {
+// Función para enmascarar un valor
+function maskValue(value: string | undefined): string {
+  if (!value) return '';
+  if (value.length <= 8) return '••••••••';
+  return value.substring(0, 4) + '••••••••' + value.substring(value.length - 4);
+}
+
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || session.user?.role !== 'super_admin') {
+    // Solo super_admin puede ver el estado completo
+    const allowedRoles = ['super_admin', 'SUPER_ADMIN', 'superadmin', 'admin', 'ADMIN'];
+    const userRole = session?.user?.role?.toLowerCase();
+    
+    if (!session || !userRole || !allowedRoles.includes(userRole)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const statuses: Record<string, IntegrationStatus> = {};
-
-    // Verificar Stripe
-    statuses.stripe = {
-      status: process.env.STRIPE_SECRET_KEY ? 'connected' : 'not_configured',
-      lastChecked: new Date().toISOString(),
+    // ============================================
+    // INTEGRACIONES DE PLATAFORMA (Solo Inmova)
+    // ============================================
+    const plataforma = {
+      contabilidad: {
+        contasimple: {
+          configured: isConfigured(process.env.CONTASIMPLE_API_KEY),
+          masked: maskValue(process.env.CONTASIMPLE_API_KEY),
+        },
+      },
+      comunicacion: {
+        crisp: {
+          configured: isConfigured(process.env.CRISP_WEBSITE_ID),
+          websiteId: maskValue(process.env.CRISP_WEBSITE_ID),
+        },
+        twilio: {
+          configured: isConfigured(process.env.TWILIO_ACCOUNT_SID) && isConfigured(process.env.TWILIO_AUTH_TOKEN),
+          accountSid: maskValue(process.env.TWILIO_ACCOUNT_SID),
+          phoneNumber: process.env.TWILIO_PHONE_NUMBER || '',
+        },
+        sendgrid: {
+          configured: isConfigured(process.env.SENDGRID_API_KEY),
+          masked: maskValue(process.env.SENDGRID_API_KEY),
+        },
+        gmail: {
+          configured: isConfigured(process.env.SMTP_HOST) && isConfigured(process.env.SMTP_USER),
+          host: process.env.SMTP_HOST || '',
+          user: process.env.SMTP_USER || '',
+          from: process.env.SMTP_FROM || '',
+        },
+      },
+      analytics: {
+        ga4: {
+          configured: isConfigured(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID),
+          measurementId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || '',
+        },
+        hotjar: {
+          configured: isConfigured(process.env.NEXT_PUBLIC_HOTJAR_ID),
+          siteId: process.env.NEXT_PUBLIC_HOTJAR_ID || '',
+        },
+      },
+      social: {
+        facebook: {
+          configured: isConfigured(process.env.FACEBOOK_ACCESS_TOKEN),
+        },
+        instagram: {
+          configured: isConfigured(process.env.INSTAGRAM_ACCESS_TOKEN),
+        },
+        linkedin: {
+          configured: isConfigured(process.env.LINKEDIN_ACCESS_TOKEN),
+        },
+        twitter: {
+          configured: isConfigured(process.env.TWITTER_API_KEY),
+        },
+      },
+      infraestructura: {
+        aws: {
+          configured: isConfigured(process.env.AWS_ACCESS_KEY_ID) && isConfigured(process.env.AWS_SECRET_ACCESS_KEY),
+          region: process.env.AWS_REGION || '',
+          bucket: process.env.AWS_BUCKET_NAME || process.env.AWS_S3_BUCKET || '',
+        },
+        postgresql: {
+          configured: isConfigured(process.env.DATABASE_URL) && !process.env.DATABASE_URL?.includes('dummy'),
+          host: process.env.DATABASE_URL ? 'Configurado' : '',
+        },
+      },
+      ia: {
+        claude: {
+          configured: isConfigured(process.env.ANTHROPIC_API_KEY),
+          masked: maskValue(process.env.ANTHROPIC_API_KEY),
+        },
+      },
+      monitoreo: {
+        sentry: {
+          configured: isConfigured(process.env.SENTRY_DSN) || isConfigured(process.env.NEXT_PUBLIC_SENTRY_DSN),
+          dsn: maskValue(process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN),
+        },
+      },
     };
 
-    // Verificar SMTP
-    statuses.smtp = {
-      status: process.env.SMTP_HOST && process.env.SMTP_USER ? 'connected' : 'not_configured',
-      lastChecked: new Date().toISOString(),
+    // ============================================
+    // INTEGRACIONES COMPARTIDAS
+    // ============================================
+    const compartidas = {
+      pagos: {
+        stripe: {
+          configured: isConfigured(process.env.STRIPE_SECRET_KEY),
+          mode: process.env.STRIPE_SECRET_KEY?.startsWith('sk_live') ? 'live' : 'test',
+          publishableKey: maskValue(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY),
+          secretKey: maskValue(process.env.STRIPE_SECRET_KEY),
+          webhookSecret: isConfigured(process.env.STRIPE_WEBHOOK_SECRET) ? 'Configurado' : 'No configurado',
+        },
+        gocardless: {
+          configured: isConfigured(process.env.GOCARDLESS_ACCESS_TOKEN),
+          mode: process.env.GOCARDLESS_ENVIRONMENT || 'sandbox',
+          accessToken: maskValue(process.env.GOCARDLESS_ACCESS_TOKEN),
+        },
+        redsys: {
+          configured: isConfigured(process.env.REDSYS_MERCHANT_CODE),
+          merchantCode: process.env.REDSYS_MERCHANT_CODE || '',
+          terminal: process.env.REDSYS_TERMINAL || '',
+          mode: process.env.REDSYS_ENVIRONMENT || 'test',
+        },
+      },
+      firma: {
+        docusign: {
+          configured: isConfigured(process.env.DOCUSIGN_INTEGRATION_KEY),
+          integrationKey: maskValue(process.env.DOCUSIGN_INTEGRATION_KEY),
+          accountId: maskValue(process.env.DOCUSIGN_ACCOUNT_ID),
+          environment: process.env.DOCUSIGN_ENVIRONMENT || 'demo',
+        },
+        signaturit: {
+          configured: isConfigured(process.env.SIGNATURIT_API_KEY),
+          apiKey: maskValue(process.env.SIGNATURIT_API_KEY),
+          environment: process.env.SIGNATURIT_ENVIRONMENT || 'sandbox',
+        },
+      },
     };
 
-    // Verificar Twilio
-    statuses.twilio = {
-      status: process.env.TWILIO_ACCOUNT_SID ? 'connected' : 'not_configured',
-      lastChecked: new Date().toISOString(),
-    };
-
-    // Verificar AWS S3
-    statuses.aws_s3 = {
-      status: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_BUCKET ? 'connected' : 'not_configured',
-      lastChecked: new Date().toISOString(),
-    };
-
-    // Verificar PostgreSQL - siempre intentar conectar
-    try {
-      const { prisma } = await import('@/lib/db');
-      await prisma.$queryRaw`SELECT 1`;
-      statuses.postgresql = {
-        status: 'connected',
-        lastChecked: new Date().toISOString(),
-        details: 'Base de datos conectada correctamente',
+    // Resumen
+    const countConfigured = (obj: any): { configured: number; total: number } => {
+      let configured = 0;
+      let total = 0;
+      
+      const check = (o: any) => {
+        for (const key in o) {
+          if (typeof o[key] === 'object' && o[key] !== null) {
+            if ('configured' in o[key]) {
+              total++;
+              if (o[key].configured) configured++;
+            } else {
+              check(o[key]);
+            }
+          }
+        }
       };
-    } catch (error: any) {
-      const dbUrl = process.env.DATABASE_URL;
-      if (!dbUrl || dbUrl.includes('dummy-build-host') || dbUrl.includes('placeholder')) {
-        statuses.postgresql = {
-          status: 'not_configured',
-          lastChecked: new Date().toISOString(),
-          details: 'DATABASE_URL no configurada',
-        };
-      } else {
-        statuses.postgresql = {
-          status: 'error',
-          lastChecked: new Date().toISOString(),
-          details: error.message?.substring(0, 100) || 'Error de conexión',
-        };
-      }
-    }
-
-    // Verificar Signaturit
-    statuses.signaturit = {
-      status: process.env.SIGNATURIT_API_KEY ? 'connected' : 'not_configured',
-      lastChecked: new Date().toISOString(),
+      
+      check(obj);
+      return { configured, total };
     };
 
-    // Verificar Anthropic
-    statuses.anthropic = {
-      status: process.env.ANTHROPIC_API_KEY ? 'connected' : 'not_configured',
-      lastChecked: new Date().toISOString(),
-    };
+    const plataformaStats = countConfigured(plataforma);
+    const compartidasStats = countConfigured(compartidas);
 
-    // Verificar Sentry
-    statuses.sentry = {
-      status: process.env.SENTRY_DSN ? 'connected' : 'not_configured',
-      lastChecked: new Date().toISOString(),
-    };
-
-    return NextResponse.json(statuses);
+    return NextResponse.json({
+      success: true,
+      plataforma,
+      compartidas,
+      resumen: {
+        plataforma: plataformaStats,
+        compartidas: compartidasStats,
+        total: {
+          configured: plataformaStats.configured + compartidasStats.configured,
+          total: plataformaStats.total + compartidasStats.total,
+        },
+      },
+      timestamp: new Date().toISOString(),
+    });
   } catch (error: any) {
-    console.error('Error verificando integraciones:', error);
+    console.error('[API Error]:', error);
     return NextResponse.json(
-      { error: 'Error verificando integraciones' },
+      { error: 'Error obteniendo estado de integraciones' },
       { status: 500 }
     );
   }
