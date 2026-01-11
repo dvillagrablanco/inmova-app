@@ -66,6 +66,7 @@ import {
   Tag,
   ShoppingBag,
   Bot,
+  Brain,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -1158,36 +1159,23 @@ const superAdminPlatformItems: SidebarItem[] = [
     ],
   },
 
-  // ========== 8.5 CONTENIDO Y DISEÑO ==========
-  // Herramientas para crear contenido visual y marketing
+  // ========== 8.5 INTELIGENCIA ARTIFICIAL ==========
+  // Sistema de Agentes de IA especializados para gestión inmobiliaria
   {
-    name: 'Canva Studio',
-    href: '/admin/canva',
-    icon: Palette,
-    roles: ['super_admin'],
-    badge: '✨',
-    subItems: [
-      { name: '🎨 Crear Diseño', href: '/admin/canva?action=create' },
-      { name: '📁 Mis Diseños', href: '/admin/canva?tab=designs' },
-      { name: '📐 Plantillas', href: '/admin/canva?tab=templates' },
-      { name: '🎯 Kit de Marca', href: '/admin/canva?tab=brand' },
-    ],
-  },
-
-  // ========== 8.6 COMMUNITY MANAGER IA ==========
-  // Agente de IA para gestión de redes sociales y blog
-  {
-    name: 'Community Manager',
-    href: '/admin/community-manager',
+    name: 'Inteligencia Artificial',
+    href: '/admin/ai-agents',
     icon: Bot,
     roles: ['super_admin'],
-    badge: '🤖',
+    badge: '🧠',
     subItems: [
-      { name: '📊 Dashboard', href: '/admin/community-manager' },
-      { name: '📅 Calendario', href: '/admin/community-manager?tab=calendar' },
-      { name: '📝 Blog', href: '/admin/community-manager?tab=blog' },
-      { name: '🌐 Cuentas', href: '/admin/community-manager?tab=accounts' },
-      { name: '⚙️ Configuración', href: '/admin/community-manager?tab=settings' },
+      { name: '🤖 Dashboard Agentes', href: '/admin/ai-agents' },
+      { name: '📊 Community Manager', href: '/admin/community-manager' },
+      { name: '🎨 Canva Studio', href: '/admin/canva' },
+      { name: '🔧 Soporte Técnico IA', href: '/admin/ai-agents?agent=technical_support' },
+      { name: '💼 Gestión Comercial IA', href: '/admin/ai-agents?agent=commercial_management' },
+      { name: '📈 Análisis Financiero IA', href: '/admin/ai-agents?agent=financial_analysis' },
+      { name: '⚖️ Legal IA', href: '/admin/ai-agents?agent=legal_compliance' },
+      { name: '👥 Atención al Cliente IA', href: '/admin/ai-agents?agent=customer_service' },
     ],
   },
 
