@@ -196,7 +196,11 @@ export default function IntegracionesPlataformaPage() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
-    } else if (session?.user?.role !== 'super_admin') {
+    }
+    // Permitir super_admin y variantes
+    const allowedRoles = ['super_admin', 'SUPER_ADMIN', 'superadmin', 'admin', 'ADMIN'];
+    const userRole = session?.user?.role?.toLowerCase();
+    if (status === 'authenticated' && userRole && !allowedRoles.map(r => r.toLowerCase()).includes(userRole)) {
       router.push('/unauthorized');
     }
   }, [status, session, router]);
