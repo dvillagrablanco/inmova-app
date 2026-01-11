@@ -150,6 +150,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/str-advanced/legal': 'str_advanced',
   '/flipping/projects': 'flipping_projects',
   '/construction/projects': 'construction_projects',
+  '/construccion/proyectos': 'construccion_projects',
   '/professional/projects': 'professional_projects',
   '/anuncios': 'anuncios',
   '/votaciones': 'votaciones',
@@ -269,6 +270,7 @@ const CORE_MODULES = [
   // Verticales - siempre visibles según rol
   'flipping_projects',
   'construction_projects',
+  'construccion_projects',
   'professional_projects',
   'str_listings',
   'str_bookings',
@@ -479,6 +481,17 @@ const flippingNavItems = [
     name: 'Análisis Mercado',
     href: '/flipping/comparator',
     icon: BarChart2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+];
+
+// 2.5.1 CONSTRUCCIÓN
+// Gestión de proyectos de construcción, reformas y rehabilitaciones
+const construccionNavItems = [
+  {
+    name: 'Proyectos',
+    href: '/construccion/proyectos',
+    icon: HardHat,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];
@@ -1508,6 +1521,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const filteredCoLivingItems = filterItems(coLivingNavItems, useCompanyModules);
   const filteredBuildToRentItems = filterItems(buildToRentNavItems, useCompanyModules);
   const filteredFlippingItems = filterItems(flippingNavItems, useCompanyModules);
+  const filteredConstruccionItems = filterItems(construccionNavItems, useCompanyModules);
   const filteredComercialItems = filterItems(comercialNavItems, useCompanyModules);
   const filteredAlquilerComercialItems = filterItems(alquilerComercialNavItems, useCompanyModules);
   const filteredAdminFincasItems = filterItems(adminFincasItems, useCompanyModules);
@@ -1539,6 +1553,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     ...coLivingNavItems,
     ...buildToRentNavItems,
     ...flippingNavItems,
+    ...construccionNavItems,
     ...comercialNavItems,
     ...alquilerComercialNavItems,
     ...adminFincasItems,
@@ -2097,6 +2112,30 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.flipping && (
                   <div className="space-y-1 mt-1">
                     {filteredFlippingItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Construcción */}
+            {filteredConstruccionItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('construccion')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>🏗️ Construcción</span>
+                  {expandedSections.construccion ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
+                </button>
+                {expandedSections.construccion && (
+                  <div className="space-y-1 mt-1">
+                    {filteredConstruccionItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
                   </div>

@@ -11,88 +11,117 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
-import { GanttChart, GanttTask } from '@/components/projects/gantt-chart';
+import { GanttChart, GanttProject, GanttTask } from '@/components/projects/gantt-chart';
 import { format, addDays, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 import {
-  Home,
+  Building2,
   Plus,
   Search,
+  Filter,
   LayoutGrid,
   List,
   Calendar,
   Euro,
   Clock,
   CheckCircle2,
-  TrendingUp,
+  AlertTriangle,
+  MoreHorizontal,
   Edit,
   Trash2,
+  Eye,
   RefreshCw,
+  HardHat,
+  Hammer,
+  Wrench,
+  Ruler,
+  TrendingUp,
+  Users,
+  FileText,
   MapPin,
-  Percent,
-  DollarSign,
-  ArrowUpRight,
-  ArrowDownRight,
+  ArrowRight,
 } from 'lucide-react';
 
 // Tipos
-interface FlippingProject {
+interface ConstructionProject {
   id: string;
   name: string;
   description?: string;
   address: string;
-  status: 'busqueda' | 'negociacion' | 'comprado' | 'reforma' | 'venta' | 'vendido' | 'cancelado';
+  type: 'obra_nueva' | 'reforma_integral' | 'reforma_parcial' | 'rehabilitacion' | 'ampliacion';
+  status: 'planificacion' | 'en_curso' | 'pausado' | 'finalizado' | 'cancelado';
   startDate: string;
   endDate: string;
-  purchasePrice: number;
-  renovationBudget: number;
-  renovationSpent: number;
-  targetSalePrice: number;
-  actualSalePrice?: number;
-  currentValue: number;
-  squareMeters: number;
+  budget: number;
+  spent: number;
   progress: number;
+  client?: string;
+  contractor?: string;
   tasks: GanttTask[];
   createdAt: string;
+  updatedAt: string;
 }
 
-// Colores y etiquetas
+// Colores por estado
 const statusColors: Record<string, { bg: string; text: string }> = {
-  busqueda: { bg: 'bg-purple-100', text: 'text-purple-700' },
-  negociacion: { bg: 'bg-amber-100', text: 'text-amber-700' },
-  comprado: { bg: 'bg-blue-100', text: 'text-blue-700' },
-  reforma: { bg: 'bg-orange-100', text: 'text-orange-700' },
-  venta: { bg: 'bg-cyan-100', text: 'text-cyan-700' },
-  vendido: { bg: 'bg-green-100', text: 'text-green-700' },
-  cancelado: { bg: 'bg-gray-100', text: 'text-gray-500' },
+  planificacion: { bg: 'bg-blue-100', text: 'text-blue-700' },
+  en_curso: { bg: 'bg-green-100', text: 'text-green-700' },
+  pausado: { bg: 'bg-amber-100', text: 'text-amber-700' },
+  finalizado: { bg: 'bg-gray-100', text: 'text-gray-700' },
+  cancelado: { bg: 'bg-red-100', text: 'text-red-700' },
 };
 
 const statusLabels: Record<string, string> = {
-  busqueda: 'Búsqueda',
-  negociacion: 'Negociación',
-  comprado: 'Comprado',
-  reforma: 'En Reforma',
-  venta: 'En Venta',
-  vendido: 'Vendido',
+  planificacion: 'Planificación',
+  en_curso: 'En Curso',
+  pausado: 'Pausado',
+  finalizado: 'Finalizado',
   cancelado: 'Cancelado',
 };
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(amount);
+const typeLabels: Record<string, string> = {
+  obra_nueva: 'Obra Nueva',
+  reforma_integral: 'Reforma Integral',
+  reforma_parcial: 'Reforma Parcial',
+  rehabilitacion: 'Rehabilitación',
+  ampliacion: 'Ampliación',
 };
+
+// Formato de moneda
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount);
+};
+
+// Skeleton
+function ProjectsSkeleton() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {[1, 2, 3].map((i) => (
+        <Card key={i}>
+          <CardContent className="pt-6">
+            <Skeleton className="h-40 w-full" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
 
 // Estado vacío
 function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
   return (
     <Card>
       <CardContent className="pt-12 pb-12 text-center">
-        <Home className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-        <h3 className="text-lg font-semibold mb-2">Sin proyectos de flipping</h3>
+        <HardHat className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+        <h3 className="text-lg font-semibold mb-2">Sin proyectos de construcción</h3>
         <p className="text-muted-foreground mb-4 max-w-md mx-auto">
-          Crea tu primer proyecto de house flipping para gestionar compra, reforma y venta con diagrama de Gantt y cálculo de ROI.
+          Crea tu primer proyecto de construcción para gestionar obras, reformas y rehabilitaciones con diagrama de Gantt.
         </p>
         <Button onClick={onCreateNew}>
           <Plus className="h-4 w-4 mr-2" />
@@ -103,40 +132,44 @@ function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
   );
 }
 
-export default function FlippingProjectsPage() {
+export default function ConstruccionProyectosPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   
   const [isLoading, setIsLoading] = useState(true);
-  const [projects, setProjects] = useState<FlippingProject[]>([]);
-  const [selectedProject, setSelectedProject] = useState<FlippingProject | null>(null);
+  const [projects, setProjects] = useState<ConstructionProject[]>([]);
+  const [selectedProject, setSelectedProject] = useState<ConstructionProject | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'gantt'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   
+  // Dialog states
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
-  const [editingProject, setEditingProject] = useState<FlippingProject | null>(null);
+  const [editingProject, setEditingProject] = useState<ConstructionProject | null>(null);
   
+  // Form state
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     address: '',
-    status: 'busqueda' as FlippingProject['status'],
+    type: 'reforma_integral' as ConstructionProject['type'],
+    status: 'planificacion' as ConstructionProject['status'],
     startDate: format(new Date(), 'yyyy-MM-dd'),
-    endDate: format(addDays(new Date(), 180), 'yyyy-MM-dd'),
-    purchasePrice: '',
-    renovationBudget: '',
-    targetSalePrice: '',
-    squareMeters: '',
+    endDate: format(addDays(new Date(), 90), 'yyyy-MM-dd'),
+    budget: '',
+    client: '',
+    contractor: '',
   });
 
+  // Verificar autenticación
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
     }
   }, [status, router]);
 
+  // Cargar datos
   useEffect(() => {
     if (status === 'authenticated') {
       loadProjects();
@@ -146,7 +179,7 @@ export default function FlippingProjectsPage() {
   const loadProjects = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/proyectos/flipping');
+      const res = await fetch('/api/proyectos/construccion');
       if (res.ok) {
         const data = await res.json();
         setProjects(data.projects || []);
@@ -158,6 +191,7 @@ export default function FlippingProjectsPage() {
     }
   };
 
+  // Filtrar proyectos
   const filteredProjects = projects.filter(project => {
     const matchesSearch = !searchQuery || 
       project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -166,28 +200,16 @@ export default function FlippingProjectsPage() {
     return matchesSearch && matchesStatus;
   });
 
-  // Calcular ROI
-  const calculateROI = (project: FlippingProject) => {
-    const totalInvestment = project.purchasePrice + project.renovationSpent;
-    const salePrice = project.actualSalePrice || project.targetSalePrice;
-    if (totalInvestment === 0) return 0;
-    return ((salePrice - totalInvestment) / totalInvestment) * 100;
-  };
-
   // Estadísticas
   const stats = {
     total: projects.length,
-    enReforma: projects.filter(p => p.status === 'reforma').length,
-    vendidos: projects.filter(p => p.status === 'vendido').length,
-    inversionTotal: projects.reduce((sum, p) => sum + p.purchasePrice + p.renovationSpent, 0),
-    ventasTotal: projects
-      .filter(p => p.status === 'vendido')
-      .reduce((sum, p) => sum + (p.actualSalePrice || 0), 0),
-    roiPromedio: projects.length > 0 
-      ? projects.reduce((sum, p) => sum + calculateROI(p), 0) / projects.length
-      : 0,
+    enCurso: projects.filter(p => p.status === 'en_curso').length,
+    finalizados: projects.filter(p => p.status === 'finalizado').length,
+    presupuestoTotal: projects.reduce((sum, p) => sum + p.budget, 0),
+    gastoTotal: projects.reduce((sum, p) => sum + p.spent, 0),
   };
 
+  // Crear proyecto
   const handleCreateProject = async () => {
     if (!formData.name || !formData.address || !formData.startDate || !formData.endDate) {
       toast.error('Completa los campos obligatorios');
@@ -195,15 +217,12 @@ export default function FlippingProjectsPage() {
     }
 
     try {
-      const res = await fetch('/api/proyectos/flipping', {
+      const res = await fetch('/api/proyectos/construccion', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          purchasePrice: parseFloat(formData.purchasePrice) || 0,
-          renovationBudget: parseFloat(formData.renovationBudget) || 0,
-          targetSalePrice: parseFloat(formData.targetSalePrice) || 0,
-          squareMeters: parseFloat(formData.squareMeters) || 0,
+          budget: parseFloat(formData.budget) || 0,
         }),
       });
 
@@ -213,113 +232,138 @@ export default function FlippingProjectsPage() {
         resetForm();
         loadProjects();
       } else {
-        toast.error('Error al guardar');
+        toast.error('Error al guardar proyecto');
       }
     } catch (error) {
       toast.error('Error de conexión');
     }
   };
 
+  // Eliminar proyecto
   const handleDeleteProject = async (projectId: string) => {
-    if (!confirm('¿Eliminar este proyecto?')) return;
+    if (!confirm('¿Estás seguro de eliminar este proyecto?')) return;
+
     try {
-      const res = await fetch(`/api/proyectos/flipping?id=${projectId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/proyectos/construccion?id=${projectId}`, {
+        method: 'DELETE',
+      });
+
       if (res.ok) {
         toast.success('Proyecto eliminado');
         loadProjects();
+      } else {
+        toast.error('Error al eliminar');
       }
     } catch (error) {
-      toast.error('Error');
+      toast.error('Error de conexión');
     }
   };
 
-  const handleTaskCreate = async (projectId: string, task: Omit<GanttTask, 'id'>) => {
-    try {
-      const res = await fetch(`/api/proyectos/flipping/tasks?projectId=${projectId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(task),
-      });
-      if (res.ok) {
-        toast.success('Tarea creada');
-        loadProjects();
-      }
-    } catch (error) {
-      toast.error('Error');
-    }
-  };
-
+  // Actualizar tarea del proyecto
   const handleTaskUpdate = async (projectId: string, taskId: string, updates: Partial<GanttTask>) => {
     try {
-      const res = await fetch(`/api/proyectos/flipping/tasks?projectId=${projectId}&taskId=${taskId}`, {
+      const res = await fetch(`/api/proyectos/construccion/tasks?projectId=${projectId}&taskId=${taskId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
       });
+
       if (res.ok) {
         toast.success('Tarea actualizada');
         loadProjects();
       }
     } catch (error) {
-      toast.error('Error');
+      toast.error('Error al actualizar tarea');
     }
   };
 
+  // Crear tarea
+  const handleTaskCreate = async (projectId: string, task: Omit<GanttTask, 'id'>) => {
+    try {
+      const res = await fetch(`/api/proyectos/construccion/tasks?projectId=${projectId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(task),
+      });
+
+      if (res.ok) {
+        toast.success('Tarea creada');
+        loadProjects();
+      }
+    } catch (error) {
+      toast.error('Error al crear tarea');
+    }
+  };
+
+  // Eliminar tarea
   const handleTaskDelete = async (projectId: string, taskId: string) => {
     try {
-      const res = await fetch(`/api/proyectos/flipping/tasks?projectId=${projectId}&taskId=${taskId}`, {
+      const res = await fetch(`/api/proyectos/construccion/tasks?projectId=${projectId}&taskId=${taskId}`, {
         method: 'DELETE',
       });
+
       if (res.ok) {
         toast.success('Tarea eliminada');
         loadProjects();
       }
     } catch (error) {
-      toast.error('Error');
+      toast.error('Error al eliminar tarea');
     }
   };
 
+  // Reset form
   const resetForm = () => {
     setFormData({
       name: '',
       description: '',
       address: '',
-      status: 'busqueda',
+      type: 'reforma_integral',
+      status: 'planificacion',
       startDate: format(new Date(), 'yyyy-MM-dd'),
-      endDate: format(addDays(new Date(), 180), 'yyyy-MM-dd'),
-      purchasePrice: '',
-      renovationBudget: '',
-      targetSalePrice: '',
-      squareMeters: '',
+      endDate: format(addDays(new Date(), 90), 'yyyy-MM-dd'),
+      budget: '',
+      client: '',
+      contractor: '',
     });
     setEditingProject(null);
   };
 
-  const openEditDialog = (project: FlippingProject) => {
+  // Abrir diálogo de edición
+  const openEditDialog = (project: ConstructionProject) => {
     setEditingProject(project);
     setFormData({
       name: project.name,
       description: project.description || '',
       address: project.address,
+      type: project.type,
       status: project.status,
       startDate: project.startDate,
       endDate: project.endDate,
-      purchasePrice: String(project.purchasePrice),
-      renovationBudget: String(project.renovationBudget),
-      targetSalePrice: String(project.targetSalePrice),
-      squareMeters: String(project.squareMeters),
+      budget: String(project.budget),
+      client: project.client || '',
+      contractor: project.contractor || '',
     });
     setShowCreateDialog(true);
+  };
+
+  // Ver detalles con Gantt
+  const openDetailView = (project: ConstructionProject) => {
+    setSelectedProject(project);
+    setShowDetailDialog(true);
   };
 
   if (status === 'loading' || isLoading) {
     return (
       <AuthenticatedLayout>
         <div className="container mx-auto py-6 px-4 max-w-7xl">
-          <Skeleton className="h-16 w-64 mb-8" />
-          <div className="grid gap-4 md:grid-cols-3">
-            {[1, 2, 3].map((i) => <Card key={i}><CardContent className="pt-6"><Skeleton className="h-40" /></CardContent></Card>)}
+          <div className="flex items-center gap-4 mb-8">
+            <Skeleton className="h-16 w-16 rounded-xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="h-4 w-96" />
+            </div>
           </div>
+          <ProjectsSkeleton />
         </div>
       </AuthenticatedLayout>
     );
@@ -331,12 +375,12 @@ export default function FlippingProjectsPage() {
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center">
-              <TrendingUp className="h-8 w-8 text-white" />
+            <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 flex items-center justify-center">
+              <HardHat className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">House Flipping</h1>
-              <p className="text-muted-foreground">Gestión de proyectos de compra-reforma-venta</p>
+              <h1 className="text-3xl font-bold">Construcción</h1>
+              <p className="text-muted-foreground">Gestión de obras y reformas con diagrama de Gantt</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -345,8 +389,11 @@ export default function FlippingProjectsPage() {
               Actualizar
             </Button>
             <Button 
-              className="bg-gradient-to-r from-emerald-500 to-teal-500"
-              onClick={() => { resetForm(); setShowCreateDialog(true); }}
+              className="bg-gradient-to-r from-amber-500 to-orange-500"
+              onClick={() => {
+                resetForm();
+                setShowCreateDialog(true);
+              }}
             >
               <Plus className="h-4 w-4 mr-2" />
               Nuevo Proyecto
@@ -360,64 +407,68 @@ export default function FlippingProjectsPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total</p>
+                  <p className="text-sm text-muted-foreground">Total Proyectos</p>
                   <p className="text-2xl font-bold">{stats.total}</p>
                 </div>
-                <Home className="h-8 w-8 text-emerald-500" />
+                <Building2 className="h-8 w-8 text-amber-500" />
               </div>
             </CardContent>
           </Card>
+          
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">En Reforma</p>
-                  <p className="text-2xl font-bold text-orange-600">{stats.enReforma}</p>
+                  <p className="text-sm text-muted-foreground">En Curso</p>
+                  <p className="text-2xl font-bold text-green-600">{stats.enCurso}</p>
                 </div>
-                <Clock className="h-8 w-8 text-orange-500" />
+                <Hammer className="h-8 w-8 text-green-500" />
               </div>
             </CardContent>
           </Card>
+          
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Vendidos</p>
-                  <p className="text-2xl font-bold text-green-600">{stats.vendidos}</p>
+                  <p className="text-sm text-muted-foreground">Finalizados</p>
+                  <p className="text-2xl font-bold">{stats.finalizados}</p>
                 </div>
-                <CheckCircle2 className="h-8 w-8 text-green-500" />
+                <CheckCircle2 className="h-8 w-8 text-blue-500" />
               </div>
             </CardContent>
           </Card>
+          
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Invertido</p>
+                  <p className="text-sm text-muted-foreground">Presupuesto</p>
                   <p className="text-2xl font-bold">
-                    {stats.inversionTotal > 0 ? formatCurrency(stats.inversionTotal) : '-'}
+                    {stats.presupuestoTotal > 0 ? formatCurrency(stats.presupuestoTotal) : '-'}
                   </p>
                 </div>
-                <Euro className="h-8 w-8 text-blue-500" />
+                <Euro className="h-8 w-8 text-emerald-500" />
               </div>
             </CardContent>
           </Card>
+          
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">ROI Medio</p>
-                  <p className={`text-2xl font-bold ${stats.roiPromedio >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {stats.roiPromedio > 0 ? `${stats.roiPromedio.toFixed(1)}%` : '-'}
+                  <p className="text-sm text-muted-foreground">Gastado</p>
+                  <p className="text-2xl font-bold text-amber-600">
+                    {stats.gastoTotal > 0 ? formatCurrency(stats.gastoTotal) : '-'}
                   </p>
                 </div>
-                <Percent className="h-8 w-8 text-violet-500" />
+                <TrendingUp className="h-8 w-8 text-amber-500" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Filtros */}
+        {/* Filtros y búsqueda */}
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6">
           <div className="flex gap-2 flex-wrap">
             <div className="relative">
@@ -435,36 +486,53 @@ export default function FlippingProjectsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
-                {Object.entries(statusLabels).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>{label}</SelectItem>
-                ))}
+                <SelectItem value="planificacion">Planificación</SelectItem>
+                <SelectItem value="en_curso">En Curso</SelectItem>
+                <SelectItem value="pausado">Pausado</SelectItem>
+                <SelectItem value="finalizado">Finalizado</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="flex gap-1 border rounded-lg p-1">
-            <Button variant={viewMode === 'grid' ? 'secondary' : 'ghost'} size="icon" className="h-8 w-8" onClick={() => setViewMode('grid')}>
+            <Button
+              variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setViewMode('grid')}
+            >
               <LayoutGrid className="h-4 w-4" />
             </Button>
-            <Button variant={viewMode === 'list' ? 'secondary' : 'ghost'} size="icon" className="h-8 w-8" onClick={() => setViewMode('list')}>
+            <Button
+              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setViewMode('list')}
+            >
               <List className="h-4 w-4" />
             </Button>
-            <Button variant={viewMode === 'gantt' ? 'secondary' : 'ghost'} size="icon" className="h-8 w-8" onClick={() => setViewMode('gantt')}>
+            <Button
+              variant={viewMode === 'gantt' ? 'secondary' : 'ghost'}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setViewMode('gantt')}
+            >
               <Calendar className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        {/* Proyectos */}
+        {/* Lista de proyectos */}
         {projects.length === 0 ? (
           <EmptyState onCreateNew={() => setShowCreateDialog(true)} />
         ) : filteredProjects.length === 0 ? (
           <Card>
             <CardContent className="pt-12 pb-12 text-center">
               <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <p className="text-muted-foreground">No se encontraron proyectos</p>
+              <p className="text-muted-foreground">No se encontraron proyectos con ese filtro</p>
             </CardContent>
           </Card>
         ) : viewMode === 'gantt' ? (
+          // Vista Gantt - todos los proyectos
           <div className="space-y-6">
             {filteredProjects.map((project) => (
               <Card key={project.id}>
@@ -477,8 +545,8 @@ export default function FlippingProjectsPage() {
                       startDate: project.startDate,
                       endDate: project.endDate,
                       tasks: project.tasks || [],
-                      budget: project.renovationBudget,
-                      actualSpent: project.renovationSpent,
+                      budget: project.budget,
+                      actualSpent: project.spent,
                     }}
                     onTaskCreate={(task) => handleTaskCreate(project.id, task)}
                     onTaskUpdate={(taskId, updates) => handleTaskUpdate(project.id, taskId, updates)}
@@ -490,13 +558,11 @@ export default function FlippingProjectsPage() {
             ))}
           </div>
         ) : viewMode === 'grid' ? (
+          // Vista Grid
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredProjects.map((project) => {
               const statusColor = statusColors[project.status];
-              const roi = calculateROI(project);
-              const renovationUsage = project.renovationBudget > 0 
-                ? (project.renovationSpent / project.renovationBudget) * 100 
-                : 0;
+              const budgetUsage = project.budget > 0 ? (project.spent / project.budget) * 100 : 0;
               
               return (
                 <Card key={project.id} className="hover:shadow-lg transition-shadow">
@@ -515,57 +581,57 @@ export default function FlippingProjectsPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {/* ROI */}
-                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                      <span className="text-sm font-medium">ROI Estimado</span>
-                      <span className={`text-lg font-bold flex items-center gap-1 ${roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {roi >= 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
-                        {roi.toFixed(1)}%
+                    <div className="flex items-center justify-between text-sm">
+                      <Badge variant="outline">{typeLabels[project.type]}</Badge>
+                      <span className="text-muted-foreground">
+                        {format(parseISO(project.startDate), 'dd/MM/yy')} - {format(parseISO(project.endDate), 'dd/MM/yy')}
                       </span>
                     </div>
                     
-                    {/* Financiero */}
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="p-2 bg-muted/30 rounded">
-                        <p className="text-xs text-muted-foreground">Compra</p>
-                        <p className="font-semibold">{formatCurrency(project.purchasePrice)}</p>
-                      </div>
-                      <div className="p-2 bg-muted/30 rounded">
-                        <p className="text-xs text-muted-foreground">Venta Objetivo</p>
-                        <p className="font-semibold">{formatCurrency(project.targetSalePrice)}</p>
-                      </div>
-                    </div>
-                    
-                    {/* Reforma */}
-                    {project.renovationBudget > 0 && (
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Reforma</span>
-                          <span>{formatCurrency(project.renovationSpent)} / {formatCurrency(project.renovationBudget)}</span>
-                        </div>
-                        <Progress value={Math.min(renovationUsage, 100)} className={`h-2 ${renovationUsage > 100 ? '[&>div]:bg-red-500' : ''}`} />
-                      </div>
-                    )}
-                    
-                    {/* Progreso */}
                     <div className="space-y-1">
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Progreso</span>
-                        <span>{project.progress}%</span>
+                        <span className="font-medium">{project.progress}%</span>
                       </div>
                       <Progress value={project.progress} className="h-2" />
                     </div>
                     
-                    {/* Acciones */}
+                    {project.budget > 0 && (
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Presupuesto</span>
+                          <span className="font-medium">{formatCurrency(project.spent)} / {formatCurrency(project.budget)}</span>
+                        </div>
+                        <Progress 
+                          value={Math.min(budgetUsage, 100)} 
+                          className={`h-2 ${budgetUsage > 100 ? '[&>div]:bg-red-500' : ''}`}
+                        />
+                      </div>
+                    )}
+                    
                     <div className="flex gap-2 pt-2">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSelectedProject(project); setShowDetailDialog(true); }}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => openDetailView(project)}
+                      >
                         <Calendar className="h-4 w-4 mr-1" />
                         Gantt
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => openEditDialog(project)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openEditDialog(project)}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="sm" className="text-destructive" onClick={() => handleDeleteProject(project.id)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-destructive"
+                        onClick={() => handleDeleteProject(project.id)}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -581,30 +647,44 @@ export default function FlippingProjectsPage() {
               <div className="divide-y">
                 {filteredProjects.map((project) => {
                   const statusColor = statusColors[project.status];
-                  const roi = calculateROI(project);
                   
                   return (
                     <div key={project.id} className="p-4 flex items-center gap-4 hover:bg-muted/50">
-                      <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center flex-shrink-0">
-                        <Home className="h-6 w-6 text-white" />
+                      <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center flex-shrink-0">
+                        <HardHat className="h-6 w-6 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{project.name}</span>
-                          <Badge className={`${statusColor.bg} ${statusColor.text}`}>{statusLabels[project.status]}</Badge>
+                          <Badge className={`${statusColor.bg} ${statusColor.text}`}>
+                            {statusLabels[project.status]}
+                          </Badge>
+                          <Badge variant="outline">{typeLabels[project.type]}</Badge>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{project.address}</span>
-                          <span>{formatCurrency(project.purchasePrice)} → {formatCurrency(project.targetSalePrice)}</span>
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {project.address}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {format(parseISO(project.startDate), 'dd/MM/yy')} - {format(parseISO(project.endDate), 'dd/MM/yy')}
+                          </span>
+                          {project.budget > 0 && (
+                            <span className="flex items-center gap-1">
+                              <Euro className="h-3 w-3" />
+                              {formatCurrency(project.budget)}
+                            </span>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="text-right">
-                          <p className={`font-bold ${roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>{roi.toFixed(1)}% ROI</p>
+                          <p className="font-medium">{project.progress}%</p>
                           <Progress value={project.progress} className="w-24 h-2" />
                         </div>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" onClick={() => { setSelectedProject(project); setShowDetailDialog(true); }}>
+                          <Button variant="ghost" size="icon" onClick={() => openDetailView(project)}>
                             <Calendar className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="icon" onClick={() => openEditDialog(project)}>
@@ -623,85 +703,156 @@ export default function FlippingProjectsPage() {
           </Card>
         )}
 
-        {/* Dialog Crear/Editar */}
+        {/* Dialog: Crear/Editar Proyecto */}
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>{editingProject ? 'Editar Proyecto' : 'Nuevo Proyecto de Flipping'}</DialogTitle>
-              <DialogDescription>Define los datos del proyecto de compra-reforma-venta</DialogDescription>
+              <DialogTitle>
+                {editingProject ? 'Editar Proyecto' : 'Nuevo Proyecto de Construcción'}
+              </DialogTitle>
+              <DialogDescription>
+                {editingProject ? 'Modifica los detalles del proyecto' : 'Crea un nuevo proyecto de obra o reforma'}
+              </DialogDescription>
             </DialogHeader>
+            
             <div className="grid gap-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Nombre *</Label>
-                  <Input placeholder="Ej: Piso Salamanca" value={formData.name} onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} />
+                  <Label>Nombre del proyecto *</Label>
+                  <Input
+                    placeholder="Ej: Reforma piso Calle Mayor"
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label>Estado</Label>
-                  <Select value={formData.status} onValueChange={(v: any) => setFormData(prev => ({ ...prev, status: v }))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                  <Label>Tipo de obra *</Label>
+                  <Select
+                    value={formData.type}
+                    onValueChange={(v: any) => setFormData(prev => ({ ...prev, type: v }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(statusLabels).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
+                      {Object.entries(typeLabels).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>{label}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
+              
               <div className="space-y-2">
                 <Label>Dirección *</Label>
-                <Input placeholder="Calle, número, ciudad" value={formData.address} onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))} />
+                <Input
+                  placeholder="Ej: Calle Mayor 123, 28001 Madrid"
+                  value={formData.address}
+                  onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                />
               </div>
+              
               <div className="space-y-2">
                 <Label>Descripción</Label>
-                <Textarea placeholder="Detalles del proyecto..." value={formData.description} onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))} rows={2} />
+                <Textarea
+                  placeholder="Descripción del proyecto..."
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  rows={2}
+                />
               </div>
+              
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label>Fecha inicio *</Label>
-                  <Input type="date" value={formData.startDate} onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))} />
+                  <Input
+                    type="date"
+                    value={formData.startDate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Fecha fin *</Label>
-                  <Input type="date" value={formData.endDate} onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))} />
+                  <Input
+                    type="date"
+                    value={formData.endDate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label>Superficie (m²)</Label>
-                  <Input type="number" placeholder="0" value={formData.squareMeters} onChange={(e) => setFormData(prev => ({ ...prev, squareMeters: e.target.value }))} />
+                  <Label>Estado</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(v: any) => setFormData(prev => ({ ...prev, status: v }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(statusLabels).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>{label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
+              
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label>Precio compra (€)</Label>
-                  <Input type="number" placeholder="0" value={formData.purchasePrice} onChange={(e) => setFormData(prev => ({ ...prev, purchasePrice: e.target.value }))} />
+                  <Label>Presupuesto (€)</Label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={formData.budget}
+                    onChange={(e) => setFormData(prev => ({ ...prev, budget: e.target.value }))}
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label>Presupuesto reforma (€)</Label>
-                  <Input type="number" placeholder="0" value={formData.renovationBudget} onChange={(e) => setFormData(prev => ({ ...prev, renovationBudget: e.target.value }))} />
+                  <Label>Cliente</Label>
+                  <Input
+                    placeholder="Nombre del cliente"
+                    value={formData.client}
+                    onChange={(e) => setFormData(prev => ({ ...prev, client: e.target.value }))}
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label>Precio venta objetivo (€)</Label>
-                  <Input type="number" placeholder="0" value={formData.targetSalePrice} onChange={(e) => setFormData(prev => ({ ...prev, targetSalePrice: e.target.value }))} />
+                  <Label>Contratista</Label>
+                  <Input
+                    placeholder="Empresa constructora"
+                    value={formData.contractor}
+                    onChange={(e) => setFormData(prev => ({ ...prev, contractor: e.target.value }))}
+                  />
                 </div>
               </div>
             </div>
+            
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancelar</Button>
-              <Button className="bg-gradient-to-r from-emerald-500 to-teal-500" onClick={handleCreateProject}>
-                {editingProject ? 'Guardar' : 'Crear'}
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                Cancelar
+              </Button>
+              <Button 
+                className="bg-gradient-to-r from-amber-500 to-orange-500"
+                onClick={handleCreateProject}
+              >
+                {editingProject ? 'Guardar Cambios' : 'Crear Proyecto'}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* Dialog Gantt */}
+        {/* Dialog: Detalle con Gantt */}
         <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
           <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Home className="h-5 w-5 text-emerald-500" />
+                <HardHat className="h-5 w-5 text-amber-500" />
                 {selectedProject?.name}
               </DialogTitle>
-              <DialogDescription>{selectedProject?.address}</DialogDescription>
+              <DialogDescription>
+                {selectedProject?.address} • {selectedProject && typeLabels[selectedProject.type]}
+              </DialogDescription>
             </DialogHeader>
+            
             {selectedProject && (
               <GanttChart
                 project={{
@@ -711,8 +862,8 @@ export default function FlippingProjectsPage() {
                   startDate: selectedProject.startDate,
                   endDate: selectedProject.endDate,
                   tasks: selectedProject.tasks || [],
-                  budget: selectedProject.renovationBudget,
-                  actualSpent: selectedProject.renovationSpent,
+                  budget: selectedProject.budget,
+                  actualSpent: selectedProject.spent,
                 }}
                 onTaskCreate={(task) => handleTaskCreate(selectedProject.id, task)}
                 onTaskUpdate={(taskId, updates) => handleTaskUpdate(selectedProject.id, taskId, updates)}
@@ -720,8 +871,11 @@ export default function FlippingProjectsPage() {
                 showCosts
               />
             )}
+            
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowDetailDialog(false)}>Cerrar</Button>
+              <Button variant="outline" onClick={() => setShowDetailDialog(false)}>
+                Cerrar
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
