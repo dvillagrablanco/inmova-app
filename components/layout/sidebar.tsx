@@ -67,6 +67,7 @@ import {
   ShoppingBag,
   Bot,
   Brain,
+  Calculator,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -704,6 +705,23 @@ const operacionesNavItems = [
     href: '/dashboard/servicios',
     icon: ShoppingBag,
     roles: ['super_admin', 'administrador', 'gestor', 'inquilino', 'propietario'],
+  },
+];
+
+// 3.3.1 HERRAMIENTAS DE INVERSIÓN (NUEVO - Basado en ZONA3)
+// Calculadoras, contratos y recursos para inversores
+const herramientasInversionNavItems = [
+  {
+    name: 'Herramientas',
+    href: '/dashboard/herramientas',
+    icon: Calculator,
+    roles: ['super_admin', 'administrador', 'gestor', 'propietario'],
+    badge: 'Nuevo',
+    subItems: [
+      { name: '📊 Calculadora Rentabilidad', href: '/dashboard/herramientas?tool=rental-yield' },
+      { name: '🏦 Calculadora Hipoteca', href: '/dashboard/herramientas?tool=mortgage' },
+      { name: '💰 Gastos Compraventa', href: '/dashboard/herramientas?tool=transaction-costs' },
+    ],
   },
 ];
 
@@ -1530,6 +1548,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const filteredFinanzasItems = filterItems(finanzasNavItems, useCompanyModules);
   const filteredAnalyticsItems = filterItems(analyticsNavItems, useCompanyModules);
   const filteredOperacionesItems = filterItems(operacionesNavItems, useCompanyModules);
+  const filteredHerramientasInversionItems = filterItems(herramientasInversionNavItems, useCompanyModules);
   const filteredComunicacionesItems = filterItems(comunicacionesNavItems, useCompanyModules);
   const filteredDocumentosLegalItems = filterItems(documentosLegalNavItems, useCompanyModules);
   const filteredCrmMarketingItems = filterItems(crmMarketingNavItems, useCompanyModules);
@@ -1561,6 +1580,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     ...finanzasNavItems,
     ...analyticsNavItems,
     ...operacionesNavItems,
+    ...herramientasInversionNavItems,
     ...comunicacionesNavItems,
     ...documentosLegalNavItems,
     ...crmMarketingNavItems,
@@ -2303,6 +2323,30 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.operaciones && (
                   <div className="space-y-1 mt-1">
                     {filteredOperacionesItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Herramientas de Inversión (NUEVO) */}
+            {filteredHerramientasInversionItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('herramientasInversion')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>🧮 Inversión</span>
+                  {expandedSections.herramientasInversion ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
+                </button>
+                {expandedSections.herramientasInversion && (
+                  <div className="space-y-1 mt-1">
+                    {filteredHerramientasInversionItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
                   </div>

@@ -42,6 +42,7 @@ export const DEFAULT_EXPANDED_BY_ROLE: Record<UserRole, Record<string, boolean>>
     finanzas: false,
     analytics: false,
     operaciones: false,
+    herramientasInversion: true, // NUEVO: Calculadoras y herramientas de inversión
     comunicaciones: false,
     documentosLegal: false,
     crmMarketing: false,
@@ -63,6 +64,7 @@ export const DEFAULT_EXPANDED_BY_ROLE: Record<UserRole, Record<string, boolean>>
     dashboard: true,
     analytics: true, // CRÍTICO: Toma de decisiones
     finanzas: true, // CRÍTICO: Flujo de caja
+    herramientasInversion: true, // NUEVO: Calculadoras y herramientas de inversión
     alquilerResidencial: true, // Se ajusta dinámicamente según vertical
     str: false,
     coLiving: false,
