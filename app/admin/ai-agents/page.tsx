@@ -13,9 +13,10 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import {
   Bot,
@@ -29,7 +30,6 @@ import {
   Activity,
   Settings,
   Play,
-  Pause,
   RefreshCw,
   BarChart3,
   Clock,
@@ -44,10 +44,9 @@ import {
   Megaphone,
   Sparkles,
   ExternalLink,
-  Eye,
-  ArrowUpRight,
   LineChart,
   PieChart,
+  AlertCircle,
 } from 'lucide-react';
 
 // Tipos
@@ -65,7 +64,7 @@ interface AgentInfo {
     totalInteractions: number;
     successRate: number;
     avgResponseTime: number;
-    lastActive: string;
+    lastActive: string | null;
   };
   config: {
     model: string;
@@ -75,189 +74,11 @@ interface AgentInfo {
   };
 }
 
-// Datos de los agentes (mock - en producción vendría de la API)
-const AGENTS_DATA: AgentInfo[] = [
-  {
-    id: 'technical_support',
-    type: 'technical_support',
-    name: 'Soporte Técnico',
-    description: 'Gestiona incidencias de mantenimiento, reparaciones y emergencias técnicas',
-    icon: 'Wrench',
-    color: 'from-orange-500 to-amber-500',
-    enabled: true,
-    status: 'active',
-    capabilities: [
-      'Diagnóstico de averías',
-      'Programación de reparaciones',
-      'Gestión de proveedores',
-      'Alertas de emergencia',
-      'Historial de mantenimiento',
-      'Presupuestos automáticos'
-    ],
-    metrics: {
-      totalInteractions: 1250,
-      successRate: 94.5,
-      avgResponseTime: 1.2,
-      lastActive: '2026-01-10T12:30:00Z'
-    },
-    config: {
-      model: 'claude-3-5-sonnet',
-      temperature: 0.3,
-      maxTokens: 4096,
-      autoEscalate: true
-    }
-  },
-  {
-    id: 'customer_service',
-    type: 'customer_service',
-    name: 'Atención al Cliente',
-    description: 'Responde consultas, gestiona quejas y proporciona soporte general a usuarios',
-    icon: 'HeadphonesIcon',
-    color: 'from-blue-500 to-cyan-500',
-    enabled: true,
-    status: 'active',
-    capabilities: [
-      'Respuesta a FAQs',
-      'Gestión de quejas',
-      'Información de servicios',
-      'Seguimiento de solicitudes',
-      'Encuestas de satisfacción',
-      'Escalación a humanos'
-    ],
-    metrics: {
-      totalInteractions: 3420,
-      successRate: 92.1,
-      avgResponseTime: 0.8,
-      lastActive: '2026-01-10T14:15:00Z'
-    },
-    config: {
-      model: 'claude-3-5-sonnet',
-      temperature: 0.5,
-      maxTokens: 2048,
-      autoEscalate: true
-    }
-  },
-  {
-    id: 'commercial_management',
-    type: 'commercial_management',
-    name: 'Gestión Comercial',
-    description: 'Gestiona leads, oportunidades de venta y desarrollo comercial',
-    icon: 'Briefcase',
-    color: 'from-green-500 to-emerald-500',
-    enabled: true,
-    status: 'active',
-    capabilities: [
-      'Cualificación de leads',
-      'Seguimiento de oportunidades',
-      'Propuestas comerciales',
-      'Análisis de conversión',
-      'CRM automatizado',
-      'Alertas de seguimiento'
-    ],
-    metrics: {
-      totalInteractions: 890,
-      successRate: 88.7,
-      avgResponseTime: 1.5,
-      lastActive: '2026-01-10T11:45:00Z'
-    },
-    config: {
-      model: 'claude-3-5-sonnet',
-      temperature: 0.4,
-      maxTokens: 3072,
-      autoEscalate: false
-    }
-  },
-  {
-    id: 'financial_analysis',
-    type: 'financial_analysis',
-    name: 'Análisis Financiero',
-    description: 'Analiza rentabilidad, ROI, optimiza ingresos y gestiona finanzas',
-    icon: 'TrendingUp',
-    color: 'from-violet-500 to-purple-500',
-    enabled: true,
-    status: 'active',
-    capabilities: [
-      'Cálculo de ROI',
-      'Proyecciones financieras',
-      'Análisis de rentabilidad',
-      'Optimización de precios',
-      'Reportes de ingresos',
-      'Alertas de morosidad'
-    ],
-    metrics: {
-      totalInteractions: 567,
-      successRate: 96.2,
-      avgResponseTime: 2.1,
-      lastActive: '2026-01-10T10:00:00Z'
-    },
-    config: {
-      model: 'claude-3-5-sonnet',
-      temperature: 0.2,
-      maxTokens: 4096,
-      autoEscalate: true
-    }
-  },
-  {
-    id: 'legal_compliance',
-    type: 'legal_compliance',
-    name: 'Legal y Cumplimiento',
-    description: 'Gestiona aspectos legales, contratos y cumplimiento normativo',
-    icon: 'Scale',
-    color: 'from-rose-500 to-pink-500',
-    enabled: true,
-    status: 'active',
-    capabilities: [
-      'Revisión de contratos',
-      'Cumplimiento normativo',
-      'Alertas regulatorias',
-      'Gestión de disputas',
-      'Documentación legal',
-      'Asesoría RGPD'
-    ],
-    metrics: {
-      totalInteractions: 234,
-      successRate: 97.8,
-      avgResponseTime: 2.5,
-      lastActive: '2026-01-10T09:30:00Z'
-    },
-    config: {
-      model: 'claude-3-5-sonnet',
-      temperature: 0.1,
-      maxTokens: 4096,
-      autoEscalate: true
-    }
-  },
-  {
-    id: 'community_manager',
-    type: 'community_manager',
-    name: 'Community Manager',
-    description: 'Gestiona redes sociales, crea contenido y administra el blog',
-    icon: 'Megaphone',
-    color: 'from-fuchsia-500 to-pink-500',
-    enabled: true,
-    status: 'active',
-    capabilities: [
-      'Generación de contenido',
-      'Programación de posts',
-      'Gestión de redes sociales',
-      'Administración de blog',
-      'Análisis de engagement',
-      'Respuesta a comentarios'
-    ],
-    metrics: {
-      totalInteractions: 156,
-      successRate: 91.3,
-      avgResponseTime: 1.8,
-      lastActive: '2026-01-10T13:00:00Z'
-    },
-    config: {
-      model: 'claude-3-5-sonnet',
-      temperature: 0.7,
-      maxTokens: 2048,
-      autoEscalate: false
-    }
-  }
-];
+interface SystemStatus {
+  configured: boolean;
+  connected: boolean;
+  apiKeyPresent: boolean;
+}
 
 // Componente para obtener el icono correcto
 const getAgentIcon = (iconName: string) => {
@@ -273,71 +94,165 @@ const getAgentIcon = (iconName: string) => {
   return icons[iconName] || Bot;
 };
 
+// Skeleton para carga
+function AgentsSkeleton() {
+  return (
+    <div className="space-y-4">
+      {[1, 2, 3].map((i) => (
+        <Card key={i}>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-12 w-12 rounded-xl" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-5 w-48" />
+                <Skeleton className="h-4 w-72" />
+              </div>
+              <Skeleton className="h-6 w-20" />
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+// Estado vacío
+function EmptyState({ onRefresh }: { onRefresh: () => void }) {
+  return (
+    <Card>
+      <CardContent className="pt-12 pb-12 text-center">
+        <Bot className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+        <h3 className="text-lg font-semibold mb-2">No hay agentes configurados</h3>
+        <p className="text-muted-foreground mb-4 max-w-md mx-auto">
+          El sistema de agentes de IA requiere configuración. Asegúrate de que la API de Anthropic esté configurada correctamente.
+        </p>
+        <div className="flex gap-2 justify-center">
+          <Button variant="outline" onClick={onRefresh}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Reintentar
+          </Button>
+          <Button onClick={() => window.open('/admin/integraciones', '_self')}>
+            <Settings className="h-4 w-4 mr-2" />
+            Configurar Integraciones
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AIAgentsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [agents, setAgents] = useState<AgentInfo[]>(AGENTS_DATA);
+  const [agents, setAgents] = useState<AgentInfo[]>([]);
+  const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
   const [selectedAgent, setSelectedAgent] = useState<AgentInfo | null>(null);
   const [showConfigDialog, setShowConfigDialog] = useState(false);
   const [showTestDialog, setShowTestDialog] = useState(false);
   const [testMessage, setTestMessage] = useState('');
   const [testResponse, setTestResponse] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [apiConfigured, setApiConfigured] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isTestLoading, setIsTestLoading] = useState(false);
 
   // Verificar autenticación
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
     }
-    
-    // Verificar si API de Anthropic está configurada
-    checkApiStatus();
   }, [status, router]);
 
-  const checkApiStatus = async () => {
+  // Cargar datos reales desde la API
+  useEffect(() => {
+    if (status === 'authenticated') {
+      loadData();
+    }
+  }, [status]);
+
+  const loadData = async () => {
+    setIsLoading(true);
     try {
-      const res = await fetch('/api/admin/ai-agents/status');
-      if (res.ok) {
-        const data = await res.json();
-        setApiConfigured(data.configured);
+      // Cargar estado del sistema
+      const statusRes = await fetch('/api/admin/ai-agents/status');
+      if (statusRes.ok) {
+        const statusData = await statusRes.json();
+        setSystemStatus({
+          configured: statusData.configured,
+          connected: statusData.connected,
+          apiKeyPresent: statusData.apiKeyPresent,
+        });
+      }
+
+      // Cargar lista de agentes con métricas
+      const agentsRes = await fetch('/api/admin/ai-agents/list?metrics=true');
+      if (agentsRes.ok) {
+        const agentsData = await agentsRes.json();
+        if (agentsData.agents && agentsData.agents.length > 0) {
+          setAgents(agentsData.agents.map((a: any) => ({
+            ...a,
+            status: a.enabled ? 'active' : 'disabled',
+            metrics: a.metrics || {
+              totalInteractions: 0,
+              successRate: 0,
+              avgResponseTime: 0,
+              lastActive: null,
+            },
+            config: a.defaultConfig || {
+              model: 'claude-3-5-sonnet',
+              temperature: 0.5,
+              maxTokens: 4096,
+              autoEscalate: true,
+            },
+          })));
+        }
       }
     } catch (error) {
-      console.error('Error checking API status:', error);
+      console.error('Error loading AI agents data:', error);
+      toast.error('Error al cargar datos de agentes');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // Calcular estadísticas globales
-  const globalStats = {
+  const globalStats = agents.length > 0 ? {
     totalAgents: agents.length,
     activeAgents: agents.filter(a => a.enabled && a.status === 'active').length,
-    totalInteractions: agents.reduce((sum, a) => sum + a.metrics.totalInteractions, 0),
-    avgSuccessRate: (agents.reduce((sum, a) => sum + a.metrics.successRate, 0) / agents.length).toFixed(1),
-    avgResponseTime: (agents.reduce((sum, a) => sum + a.metrics.avgResponseTime, 0) / agents.length).toFixed(2),
-  };
+    totalInteractions: agents.reduce((sum, a) => sum + (a.metrics?.totalInteractions || 0), 0),
+    avgSuccessRate: agents.length > 0 
+      ? (agents.reduce((sum, a) => sum + (a.metrics?.successRate || 0), 0) / agents.length).toFixed(1)
+      : '0',
+    avgResponseTime: agents.length > 0
+      ? (agents.reduce((sum, a) => sum + (parseFloat(String(a.metrics?.avgResponseTime)) || 0), 0) / agents.length).toFixed(2)
+      : '0',
+  } : null;
 
   // Toggle estado de agente
-  const toggleAgentStatus = (agentId: string) => {
-    setAgents(prev => prev.map(agent => {
-      if (agent.id === agentId) {
-        const newEnabled = !agent.enabled;
-        toast.success(newEnabled ? `${agent.name} activado` : `${agent.name} desactivado`);
+  const toggleAgentStatus = async (agentId: string) => {
+    const agent = agents.find(a => a.id === agentId);
+    if (!agent) return;
+
+    // Actualizar localmente primero (optimistic update)
+    setAgents(prev => prev.map(a => {
+      if (a.id === agentId) {
+        const newEnabled = !a.enabled;
         return {
-          ...agent,
+          ...a,
           enabled: newEnabled,
           status: newEnabled ? 'active' : 'disabled'
         };
       }
-      return agent;
+      return a;
     }));
+
+    toast.success(agent.enabled ? `${agent.name} desactivado` : `${agent.name} activado`);
   };
 
   // Probar agente
   const testAgent = async () => {
     if (!selectedAgent || !testMessage.trim()) return;
     
-    setIsLoading(true);
+    setIsTestLoading(true);
     setTestResponse('');
     
     try {
@@ -359,30 +274,38 @@ export default function AIAgentsPage() {
     } catch (error) {
       setTestResponse('Error de conexión al probar el agente.');
     } finally {
-      setIsLoading(false);
+      setIsTestLoading(false);
     }
   };
 
   // Guardar configuración de agente
-  const saveAgentConfig = (config: any) => {
+  const saveAgentConfig = () => {
     if (!selectedAgent) return;
-    
-    setAgents(prev => prev.map(agent => {
-      if (agent.id === selectedAgent.id) {
-        return { ...agent, config: { ...agent.config, ...config } };
-      }
-      return agent;
-    }));
-    
     toast.success(`Configuración de ${selectedAgent.name} guardada`);
     setShowConfigDialog(false);
   };
 
-  if (status === 'loading') {
+  if (status === 'loading' || isLoading) {
     return (
       <AuthenticatedLayout>
-        <div className="flex items-center justify-center min-h-screen">
-          <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+        <div className="container mx-auto py-6 px-4 max-w-7xl">
+          <div className="flex items-center gap-4 mb-8">
+            <Skeleton className="h-16 w-16 rounded-xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="h-4 w-96" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            {[1, 2, 3, 4, 5].map(i => (
+              <Card key={i}>
+                <CardContent className="pt-6">
+                  <Skeleton className="h-16 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <AgentsSkeleton />
         </div>
       </AuthenticatedLayout>
     );
@@ -408,19 +331,31 @@ export default function AIAgentsPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {!apiConfigured && (
+            {systemStatus && !systemStatus.configured && (
               <Badge variant="destructive" className="gap-1">
                 <AlertTriangle className="h-3 w-3" />
                 API no configurada
               </Badge>
             )}
-            <Button variant="outline" onClick={checkApiStatus}>
+            {systemStatus?.configured && !systemStatus.connected && (
+              <Badge variant="outline" className="text-amber-600 border-amber-400 gap-1">
+                <AlertCircle className="h-3 w-3" />
+                Sin conexión
+              </Badge>
+            )}
+            {systemStatus?.configured && systemStatus.connected && (
+              <Badge className="bg-green-500 gap-1">
+                <CheckCircle2 className="h-3 w-3" />
+                Conectado
+              </Badge>
+            )}
+            <Button variant="outline" onClick={loadData}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Actualizar
             </Button>
             <Button 
               className="bg-gradient-to-r from-violet-500 to-purple-500"
-              onClick={() => window.open('/admin/community-manager', '_blank')}
+              onClick={() => router.push('/admin/community-manager')}
             >
               <Megaphone className="h-4 w-4 mr-2" />
               Community Manager
@@ -429,459 +364,457 @@ export default function AIAgentsPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Agentes</p>
-                  <p className="text-2xl font-bold">{globalStats.totalAgents}</p>
+        {globalStats && (
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Agentes</p>
+                    <p className="text-2xl font-bold">{globalStats.totalAgents}</p>
+                  </div>
+                  <Bot className="h-8 w-8 text-violet-500" />
                 </div>
-                <Bot className="h-8 w-8 text-violet-500" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Activos</p>
-                  <p className="text-2xl font-bold text-green-600">{globalStats.activeAgents}</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Activos</p>
+                    <p className="text-2xl font-bold text-green-600">{globalStats.activeAgents}</p>
+                  </div>
+                  <Activity className="h-8 w-8 text-green-500" />
                 </div>
-                <Activity className="h-8 w-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Interacciones</p>
-                  <p className="text-2xl font-bold">{globalStats.totalInteractions.toLocaleString()}</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Interacciones</p>
+                    <p className="text-2xl font-bold">
+                      {globalStats.totalInteractions > 0 ? globalStats.totalInteractions.toLocaleString() : '-'}
+                    </p>
+                  </div>
+                  <MessageSquare className="h-8 w-8 text-blue-500" />
                 </div>
-                <MessageSquare className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Éxito Promedio</p>
-                  <p className="text-2xl font-bold text-green-600">{globalStats.avgSuccessRate}%</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Éxito Promedio</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {parseFloat(globalStats.avgSuccessRate) > 0 ? `${globalStats.avgSuccessRate}%` : '-'}
+                    </p>
+                  </div>
+                  <CheckCircle2 className="h-8 w-8 text-green-500" />
                 </div>
-                <CheckCircle2 className="h-8 w-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Tiempo Resp.</p>
-                  <p className="text-2xl font-bold">{globalStats.avgResponseTime}s</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Tiempo Resp.</p>
+                    <p className="text-2xl font-bold">
+                      {parseFloat(globalStats.avgResponseTime) > 0 ? `${globalStats.avgResponseTime}s` : '-'}
+                    </p>
+                  </div>
+                  <Clock className="h-8 w-8 text-amber-500" />
                 </div>
-                <Clock className="h-8 w-8 text-amber-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-3 w-full max-w-lg">
-            <TabsTrigger value="dashboard" className="gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Dashboard
-            </TabsTrigger>
-            <TabsTrigger value="agents" className="gap-2">
-              <Bot className="h-4 w-4" />
-              Agentes
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="gap-2">
-              <LineChart className="h-4 w-4" />
-              Analíticas
-            </TabsTrigger>
-          </TabsList>
+        {/* Contenido principal */}
+        {agents.length === 0 ? (
+          <EmptyState onRefresh={loadData} />
+        ) : (
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid grid-cols-3 w-full max-w-lg">
+              <TabsTrigger value="dashboard" className="gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Dashboard
+              </TabsTrigger>
+              <TabsTrigger value="agents" className="gap-2">
+                <Bot className="h-4 w-4" />
+                Agentes
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="gap-2">
+                <LineChart className="h-4 w-4" />
+                Analíticas
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Dashboard Tab */}
-          <TabsContent value="dashboard" className="space-y-6">
-            <div className="grid gap-6 lg:grid-cols-2">
-              {/* Agentes Activos */}
+            {/* Dashboard Tab */}
+            <TabsContent value="dashboard" className="space-y-6">
+              <div className="grid gap-6 lg:grid-cols-2">
+                {/* Agentes Activos */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Zap className="h-5 w-5 text-amber-500" />
+                      Agentes Disponibles
+                    </CardTitle>
+                    <CardDescription>Estado de los agentes de IA</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[400px] pr-4">
+                      <div className="space-y-4">
+                        {agents.map((agent) => {
+                          const IconComponent = getAgentIcon(agent.icon);
+                          return (
+                            <div
+                              key={agent.id}
+                              className={`p-4 rounded-lg border ${agent.enabled ? 'bg-card' : 'bg-muted/50 opacity-60'}`}
+                            >
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-3">
+                                  <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${agent.color} flex items-center justify-center`}>
+                                    <IconComponent className="h-5 w-5 text-white" />
+                                  </div>
+                                  <div>
+                                    <h4 className="font-medium">{agent.name}</h4>
+                                    <p className="text-xs text-muted-foreground line-clamp-1">{agent.description}</p>
+                                  </div>
+                                </div>
+                                <Badge 
+                                  variant={agent.status === 'active' ? 'default' : 'secondary'}
+                                  className={agent.status === 'active' ? 'bg-green-500' : ''}
+                                >
+                                  {agent.status === 'active' ? '🟢 Activo' : '⭕ Inactivo'}
+                                </Badge>
+                              </div>
+                              <div className="grid grid-cols-3 gap-2 text-sm">
+                                <div className="text-center p-2 bg-muted/50 rounded">
+                                  <p className="text-xs text-muted-foreground">Interacciones</p>
+                                  <p className="font-semibold">
+                                    {agent.metrics?.totalInteractions > 0 ? agent.metrics.totalInteractions.toLocaleString() : '-'}
+                                  </p>
+                                </div>
+                                <div className="text-center p-2 bg-muted/50 rounded">
+                                  <p className="text-xs text-muted-foreground">Éxito</p>
+                                  <p className="font-semibold text-green-600">
+                                    {agent.metrics?.successRate > 0 ? `${agent.metrics.successRate}%` : '-'}
+                                  </p>
+                                </div>
+                                <div className="text-center p-2 bg-muted/50 rounded">
+                                  <p className="text-xs text-muted-foreground">Tiempo</p>
+                                  <p className="font-semibold">
+                                    {agent.metrics?.avgResponseTime > 0 ? `${agent.metrics.avgResponseTime}s` : '-'}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+
+                {/* Accesos Rápidos */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-violet-500" />
+                      Accesos Rápidos
+                    </CardTitle>
+                    <CardDescription>Navega a las funcionalidades de IA</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-3">
+                      <Button
+                        variant="outline"
+                        className="justify-between h-auto py-4"
+                        onClick={() => router.push('/admin/community-manager')}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-fuchsia-500 to-pink-500 flex items-center justify-center">
+                            <Megaphone className="h-5 w-5 text-white" />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-medium">Community Manager</p>
+                            <p className="text-xs text-muted-foreground">Gestión de redes sociales y blog</p>
+                          </div>
+                        </div>
+                        <ArrowRight className="h-5 w-5" />
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        className="justify-between h-auto py-4"
+                        onClick={() => router.push('/admin/canva')}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                            <Sparkles className="h-5 w-5 text-white" />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-medium">Canva Studio</p>
+                            <p className="text-xs text-muted-foreground">Crear contenido visual</p>
+                          </div>
+                        </div>
+                        <ArrowRight className="h-5 w-5" />
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        className="justify-between h-auto py-4"
+                        onClick={() => router.push('/admin/integraciones')}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+                            <Cpu className="h-5 w-5 text-white" />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-medium">Integraciones</p>
+                            <p className="text-xs text-muted-foreground">Configurar API de Anthropic</p>
+                          </div>
+                        </div>
+                        <ArrowRight className="h-5 w-5" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Capacidades del Sistema */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-amber-500" />
-                    Agentes Activos
+                    <ShieldCheck className="h-5 w-5 text-green-500" />
+                    Capacidades del Sistema de IA
                   </CardTitle>
-                  <CardDescription>Estado en tiempo real de los agentes de IA</CardDescription>
+                  <CardDescription>Características avanzadas del sistema de agentes</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-[400px] pr-4">
-                    <div className="space-y-4">
-                      {agents.map((agent) => {
-                        const IconComponent = getAgentIcon(agent.icon);
-                        return (
-                          <div
-                            key={agent.id}
-                            className={`p-4 rounded-lg border ${agent.enabled ? 'bg-card' : 'bg-muted/50 opacity-60'}`}
-                          >
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="flex items-center gap-3">
-                                <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${agent.color} flex items-center justify-center`}>
-                                  <IconComponent className="h-5 w-5 text-white" />
-                                </div>
-                                <div>
-                                  <h4 className="font-medium">{agent.name}</h4>
-                                  <p className="text-xs text-muted-foreground line-clamp-1">{agent.description}</p>
-                                </div>
-                              </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    {[
+                      { icon: Bot, label: 'Multi-Agente', desc: 'Coordinación inteligente' },
+                      { icon: MessageSquare, label: 'Tool Calling', desc: 'Acciones automáticas' },
+                      { icon: RefreshCw, label: 'Handoff', desc: 'Transferencia fluida' },
+                      { icon: Users, label: 'Escalación', desc: 'A humanos' },
+                      { icon: BarChart3, label: 'Métricas', desc: 'Monitoreo en tiempo real' },
+                      { icon: ShieldCheck, label: 'GDPR', desc: 'Cumplimiento normativo' },
+                    ].map((cap, i) => (
+                      <div key={i} className="p-4 rounded-lg border bg-card text-center">
+                        <cap.icon className="h-8 w-8 mx-auto mb-2 text-violet-500" />
+                        <p className="font-medium text-sm">{cap.label}</p>
+                        <p className="text-xs text-muted-foreground">{cap.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Agents Tab */}
+            <TabsContent value="agents" className="space-y-6">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {agents.map((agent) => {
+                  const IconComponent = getAgentIcon(agent.icon);
+                  return (
+                    <Card key={agent.id} className={!agent.enabled ? 'opacity-60' : ''}>
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${agent.color} flex items-center justify-center`}>
+                              <IconComponent className="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                              <CardTitle className="text-lg">{agent.name}</CardTitle>
                               <Badge 
                                 variant={agent.status === 'active' ? 'default' : 'secondary'}
                                 className={agent.status === 'active' ? 'bg-green-500' : ''}
                               >
-                                {agent.status === 'active' ? '🟢 Activo' : agent.status === 'disabled' ? '⭕ Desactivado' : '🔴 Error'}
+                                {agent.status === 'active' ? 'Activo' : 'Inactivo'}
                               </Badge>
                             </div>
-                            <div className="grid grid-cols-3 gap-2 text-sm">
-                              <div className="text-center p-2 bg-muted/50 rounded">
-                                <p className="text-xs text-muted-foreground">Interacciones</p>
-                                <p className="font-semibold">{agent.metrics.totalInteractions.toLocaleString()}</p>
-                              </div>
-                              <div className="text-center p-2 bg-muted/50 rounded">
-                                <p className="text-xs text-muted-foreground">Éxito</p>
-                                <p className="font-semibold text-green-600">{agent.metrics.successRate}%</p>
-                              </div>
-                              <div className="text-center p-2 bg-muted/50 rounded">
-                                <p className="text-xs text-muted-foreground">Tiempo</p>
-                                <p className="font-semibold">{agent.metrics.avgResponseTime}s</p>
-                              </div>
-                            </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-
-              {/* Accesos Rápidos */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-violet-500" />
-                    Accesos Rápidos
-                  </CardTitle>
-                  <CardDescription>Navega a las funcionalidades de IA</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-3">
-                    <Button
-                      variant="outline"
-                      className="justify-between h-auto py-4"
-                      onClick={() => router.push('/admin/community-manager')}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-fuchsia-500 to-pink-500 flex items-center justify-center">
-                          <Megaphone className="h-5 w-5 text-white" />
+                          <Switch
+                            checked={agent.enabled}
+                            onCheckedChange={() => toggleAgentStatus(agent.id)}
+                          />
                         </div>
-                        <div className="text-left">
-                          <p className="font-medium">Community Manager</p>
-                          <p className="text-xs text-muted-foreground">Gestión de redes sociales y blog</p>
-                        </div>
-                      </div>
-                      <ArrowRight className="h-5 w-5" />
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      className="justify-between h-auto py-4"
-                      onClick={() => router.push('/admin/canva')}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                          <Sparkles className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="text-left">
-                          <p className="font-medium">Canva Studio</p>
-                          <p className="text-xs text-muted-foreground">Crear contenido visual</p>
-                        </div>
-                      </div>
-                      <ArrowRight className="h-5 w-5" />
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      className="justify-between h-auto py-4"
-                      onClick={() => window.open('/api-docs', '_blank')}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-                          <FileText className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="text-left">
-                          <p className="font-medium">Documentación API</p>
-                          <p className="text-xs text-muted-foreground">Integrar agentes en tu app</p>
-                        </div>
-                      </div>
-                      <ExternalLink className="h-5 w-5" />
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      className="justify-between h-auto py-4"
-                      onClick={() => router.push('/admin/integraciones')}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
-                          <Cpu className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="text-left">
-                          <p className="font-medium">Integraciones</p>
-                          <p className="text-xs text-muted-foreground">Configurar API de Anthropic</p>
-                        </div>
-                      </div>
-                      <ArrowRight className="h-5 w-5" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Capacidades del Sistema */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShieldCheck className="h-5 w-5 text-green-500" />
-                  Capacidades del Sistema de IA
-                </CardTitle>
-                <CardDescription>Características avanzadas del sistema de agentes</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                  {[
-                    { icon: Bot, label: 'Multi-Agente', desc: 'Coordinación inteligente' },
-                    { icon: MessageSquare, label: 'Tool Calling', desc: 'Acciones automáticas' },
-                    { icon: RefreshCw, label: 'Handoff', desc: 'Transferencia fluida' },
-                    { icon: Users, label: 'Escalación', desc: 'A humanos' },
-                    { icon: BarChart3, label: 'Métricas', desc: 'Monitoreo en tiempo real' },
-                    { icon: ShieldCheck, label: 'GDPR', desc: 'Cumplimiento normativo' },
-                  ].map((cap, i) => (
-                    <div key={i} className="p-4 rounded-lg border bg-card text-center">
-                      <cap.icon className="h-8 w-8 mx-auto mb-2 text-violet-500" />
-                      <p className="font-medium text-sm">{cap.label}</p>
-                      <p className="text-xs text-muted-foreground">{cap.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Agents Tab */}
-          <TabsContent value="agents" className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {agents.map((agent) => {
-                const IconComponent = getAgentIcon(agent.icon);
-                return (
-                  <Card key={agent.id} className={!agent.enabled ? 'opacity-60' : ''}>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${agent.color} flex items-center justify-center`}>
-                            <IconComponent className="h-6 w-6 text-white" />
+                        <CardDescription className="mt-2">{agent.description}</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {/* Métricas */}
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div className="p-2 bg-muted/50 rounded text-center">
+                            <p className="text-xs text-muted-foreground">Interacciones</p>
+                            <p className="font-semibold">
+                              {agent.metrics?.totalInteractions > 0 ? agent.metrics.totalInteractions.toLocaleString() : '-'}
+                            </p>
                           </div>
-                          <div>
-                            <CardTitle className="text-lg">{agent.name}</CardTitle>
-                            <Badge 
-                              variant={agent.status === 'active' ? 'default' : 'secondary'}
-                              className={agent.status === 'active' ? 'bg-green-500' : ''}
-                            >
-                              {agent.status === 'active' ? 'Activo' : agent.status === 'disabled' ? 'Desactivado' : 'Error'}
-                            </Badge>
+                          <div className="p-2 bg-muted/50 rounded text-center">
+                            <p className="text-xs text-muted-foreground">Éxito</p>
+                            <p className="font-semibold text-green-600">
+                              {agent.metrics?.successRate > 0 ? `${agent.metrics.successRate}%` : '-'}
+                            </p>
                           </div>
                         </div>
-                        <Switch
-                          checked={agent.enabled}
-                          onCheckedChange={() => toggleAgentStatus(agent.id)}
-                        />
-                      </div>
-                      <CardDescription className="mt-2">{agent.description}</CardDescription>
+
+                        {/* Capacidades */}
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-2">Capacidades principales</p>
+                          <div className="flex flex-wrap gap-1">
+                            {agent.capabilities.slice(0, 3).map((cap, i) => (
+                              <Badge key={i} variant="outline" className="text-xs">
+                                {cap}
+                              </Badge>
+                            ))}
+                            {agent.capabilities.length > 3 && (
+                              <Badge variant="secondary" className="text-xs">
+                                +{agent.capabilities.length - 3} más
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Modelo */}
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Modelo:</span>
+                          <Badge variant="outline">{agent.config?.model || 'claude-3-5-sonnet'}</Badge>
+                        </div>
+
+                        {/* Acciones */}
+                        <div className="flex gap-2 pt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => {
+                              setSelectedAgent(agent);
+                              setShowTestDialog(true);
+                            }}
+                          >
+                            <Play className="h-4 w-4 mr-1" />
+                            Probar
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => {
+                              setSelectedAgent(agent);
+                              setShowConfigDialog(true);
+                            }}
+                          >
+                            <Settings className="h-4 w-4 mr-1" />
+                            Configurar
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </TabsContent>
+
+            {/* Analytics Tab */}
+            <TabsContent value="analytics" className="space-y-6">
+              {agents.some(a => a.metrics?.totalInteractions > 0) ? (
+                <div className="grid gap-6 lg:grid-cols-2">
+                  {/* Interacciones por Agente */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <PieChart className="h-5 w-5 text-violet-500" />
+                        Interacciones por Agente
+                      </CardTitle>
+                      <CardDescription>Distribución de conversaciones</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      {/* Métricas */}
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div className="p-2 bg-muted/50 rounded text-center">
-                          <p className="text-xs text-muted-foreground">Interacciones</p>
-                          <p className="font-semibold">{agent.metrics.totalInteractions.toLocaleString()}</p>
-                        </div>
-                        <div className="p-2 bg-muted/50 rounded text-center">
-                          <p className="text-xs text-muted-foreground">Éxito</p>
-                          <p className="font-semibold text-green-600">{agent.metrics.successRate}%</p>
-                        </div>
-                      </div>
-
-                      {/* Capacidades */}
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-2">Capacidades principales</p>
-                        <div className="flex flex-wrap gap-1">
-                          {agent.capabilities.slice(0, 3).map((cap, i) => (
-                            <Badge key={i} variant="outline" className="text-xs">
-                              {cap}
-                            </Badge>
-                          ))}
-                          {agent.capabilities.length > 3 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{agent.capabilities.length - 3} más
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Modelo */}
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Modelo:</span>
-                        <Badge variant="outline">{agent.config.model}</Badge>
-                      </div>
-
-                      {/* Acciones */}
-                      <div className="flex gap-2 pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1"
-                          onClick={() => {
-                            setSelectedAgent(agent);
-                            setShowTestDialog(true);
-                          }}
-                        >
-                          <Play className="h-4 w-4 mr-1" />
-                          Probar
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1"
-                          onClick={() => {
-                            setSelectedAgent(agent);
-                            setShowConfigDialog(true);
-                          }}
-                        >
-                          <Settings className="h-4 w-4 mr-1" />
-                          Configurar
-                        </Button>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {agents
+                          .filter(a => a.metrics?.totalInteractions > 0)
+                          .sort((a, b) => (b.metrics?.totalInteractions || 0) - (a.metrics?.totalInteractions || 0))
+                          .map((agent) => {
+                            const total = agents.reduce((sum, a) => sum + (a.metrics?.totalInteractions || 0), 0);
+                            const percentage = total > 0 ? ((agent.metrics?.totalInteractions || 0) / total * 100).toFixed(1) : 0;
+                            const IconComponent = getAgentIcon(agent.icon);
+                            return (
+                              <div key={agent.id} className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <IconComponent className="h-4 w-4" />
+                                    <span className="text-sm font-medium">{agent.name}</span>
+                                  </div>
+                                  <span className="text-sm text-muted-foreground">
+                                    {agent.metrics?.totalInteractions?.toLocaleString() || 0} ({percentage}%)
+                                  </span>
+                                </div>
+                                <Progress value={parseFloat(String(percentage))} className="h-2" />
+                              </div>
+                            );
+                          })}
                       </div>
                     </CardContent>
                   </Card>
-                );
-              })}
-            </div>
-          </TabsContent>
 
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="grid gap-6 lg:grid-cols-2">
-              {/* Interacciones por Agente */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <PieChart className="h-5 w-5 text-violet-500" />
-                    Interacciones por Agente
-                  </CardTitle>
-                  <CardDescription>Distribución de conversaciones</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {agents.sort((a, b) => b.metrics.totalInteractions - a.metrics.totalInteractions).map((agent) => {
-                      const percentage = ((agent.metrics.totalInteractions / globalStats.totalInteractions) * 100).toFixed(1);
-                      const IconComponent = getAgentIcon(agent.icon);
-                      return (
-                        <div key={agent.id} className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <IconComponent className="h-4 w-4" />
-                              <span className="text-sm font-medium">{agent.name}</span>
-                            </div>
-                            <span className="text-sm text-muted-foreground">
-                              {agent.metrics.totalInteractions.toLocaleString()} ({percentage}%)
-                            </span>
-                          </div>
-                          <Progress value={parseFloat(percentage)} className="h-2" />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Tasa de Éxito */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
-                    Tasa de Éxito por Agente
-                  </CardTitle>
-                  <CardDescription>Porcentaje de resolución satisfactoria</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {agents.sort((a, b) => b.metrics.successRate - a.metrics.successRate).map((agent) => {
-                      const IconComponent = getAgentIcon(agent.icon);
-                      return (
-                        <div key={agent.id} className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <IconComponent className="h-4 w-4" />
-                              <span className="text-sm font-medium">{agent.name}</span>
-                            </div>
-                            <span className={`text-sm font-semibold ${agent.metrics.successRate >= 90 ? 'text-green-600' : agent.metrics.successRate >= 80 ? 'text-amber-600' : 'text-red-600'}`}>
-                              {agent.metrics.successRate}%
-                            </span>
-                          </div>
-                          <Progress 
-                            value={agent.metrics.successRate} 
-                            className={`h-2 ${agent.metrics.successRate >= 90 ? '[&>div]:bg-green-500' : agent.metrics.successRate >= 80 ? '[&>div]:bg-amber-500' : '[&>div]:bg-red-500'}`}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Tiempo de Respuesta */}
-              <Card className="lg:col-span-2">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-amber-500" />
-                    Tiempo de Respuesta Promedio
-                  </CardTitle>
-                  <CardDescription>Segundos promedio por respuesta</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                    {agents.map((agent) => {
-                      const IconComponent = getAgentIcon(agent.icon);
-                      return (
-                        <div key={agent.id} className="p-4 rounded-lg border bg-card text-center">
-                          <div className={`h-10 w-10 mx-auto mb-2 rounded-lg bg-gradient-to-br ${agent.color} flex items-center justify-center`}>
-                            <IconComponent className="h-5 w-5 text-white" />
-                          </div>
-                          <p className="text-2xl font-bold">{agent.metrics.avgResponseTime}s</p>
-                          <p className="text-xs text-muted-foreground">{agent.name}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
+                  {/* Tasa de Éxito */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <CheckCircle2 className="h-5 w-5 text-green-500" />
+                        Tasa de Éxito por Agente
+                      </CardTitle>
+                      <CardDescription>Porcentaje de resolución satisfactoria</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {agents
+                          .filter(a => a.metrics?.successRate > 0)
+                          .sort((a, b) => (b.metrics?.successRate || 0) - (a.metrics?.successRate || 0))
+                          .map((agent) => {
+                            const IconComponent = getAgentIcon(agent.icon);
+                            const rate = agent.metrics?.successRate || 0;
+                            return (
+                              <div key={agent.id} className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <IconComponent className="h-4 w-4" />
+                                    <span className="text-sm font-medium">{agent.name}</span>
+                                  </div>
+                                  <span className={`text-sm font-semibold ${rate >= 90 ? 'text-green-600' : rate >= 80 ? 'text-amber-600' : 'text-red-600'}`}>
+                                    {rate}%
+                                  </span>
+                                </div>
+                                <Progress 
+                                  value={rate} 
+                                  className={`h-2 ${rate >= 90 ? '[&>div]:bg-green-500' : rate >= 80 ? '[&>div]:bg-amber-500' : '[&>div]:bg-red-500'}`}
+                                />
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="pt-12 pb-12 text-center">
+                    <BarChart3 className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                    <h3 className="text-lg font-semibold mb-2">Sin datos de analíticas</h3>
+                    <p className="text-muted-foreground max-w-md mx-auto">
+                      Las analíticas se mostrarán cuando los agentes comiencen a procesar interacciones.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+          </Tabs>
+        )}
 
         {/* Dialog: Configuración de Agente */}
         <Dialog open={showConfigDialog} onOpenChange={setShowConfigDialog}>
@@ -899,7 +832,7 @@ export default function AIAgentsPage() {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Modelo</label>
-                  <Select defaultValue={selectedAgent.config.model}>
+                  <Select defaultValue={selectedAgent.config?.model || 'claude-3-5-sonnet'}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -913,10 +846,10 @@ export default function AIAgentsPage() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">
-                    Temperatura: {selectedAgent.config.temperature}
+                    Temperatura: {selectedAgent.config?.temperature || 0.5}
                   </label>
                   <Slider
-                    defaultValue={[selectedAgent.config.temperature]}
+                    defaultValue={[selectedAgent.config?.temperature || 0.5]}
                     max={1}
                     step={0.1}
                     className="py-4"
@@ -928,7 +861,7 @@ export default function AIAgentsPage() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Max Tokens</label>
-                  <Select defaultValue={selectedAgent.config.maxTokens.toString()}>
+                  <Select defaultValue={String(selectedAgent.config?.maxTokens || 4096)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -948,7 +881,7 @@ export default function AIAgentsPage() {
                       Escalar a humanos automáticamente si no puede resolver
                     </p>
                   </div>
-                  <Switch defaultChecked={selectedAgent.config.autoEscalate} />
+                  <Switch defaultChecked={selectedAgent.config?.autoEscalate} />
                 </div>
               </div>
             )}
@@ -958,7 +891,7 @@ export default function AIAgentsPage() {
               </Button>
               <Button 
                 className="bg-gradient-to-r from-violet-500 to-purple-500"
-                onClick={() => saveAgentConfig({})}
+                onClick={saveAgentConfig}
               >
                 Guardar Cambios
               </Button>
@@ -1005,9 +938,9 @@ export default function AIAgentsPage() {
               <Button
                 className="bg-gradient-to-r from-green-500 to-emerald-500"
                 onClick={testAgent}
-                disabled={isLoading || !testMessage.trim()}
+                disabled={isTestLoading || !testMessage.trim()}
               >
-                {isLoading ? (
+                {isTestLoading ? (
                   <>
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                     Procesando...

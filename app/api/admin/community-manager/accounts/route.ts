@@ -6,8 +6,8 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 /**
- * GET /api/admin/community-manager/posts
- * Obtiene los posts programados/publicados
+ * GET /api/admin/community-manager/accounts
+ * Obtiene las cuentas de redes sociales conectadas
  */
 export async function GET(request: NextRequest) {
   try {
@@ -22,27 +22,27 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
-    // TODO: Obtener posts reales de la base de datos
-    // Por ahora, retornamos array vacío
+    // TODO: Obtener cuentas reales de la base de datos
+    // Por ahora, retornamos array vacío indicando que no hay cuentas conectadas
+    // Las cuentas se conectarán mediante OAuth con cada plataforma
     
     return NextResponse.json({
       success: true,
-      posts: [],
-      total: 0,
-      message: 'No hay publicaciones. Crea tu primera publicación.',
+      accounts: [],
+      message: 'No hay cuentas de redes sociales conectadas. Conecta tus cuentas para comenzar.',
     });
   } catch (error: any) {
-    console.error('[Community Manager Posts Error]:', error);
+    console.error('[Community Manager Accounts Error]:', error);
     return NextResponse.json(
-      { error: 'Error al obtener publicaciones' },
+      { error: 'Error al obtener cuentas' },
       { status: 500 }
     );
   }
 }
 
 /**
- * POST /api/admin/community-manager/posts
- * Crear una nueva publicación
+ * POST /api/admin/community-manager/accounts
+ * Conectar una nueva cuenta de red social
  */
 export async function POST(request: NextRequest) {
   try {
@@ -58,36 +58,30 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { content, platforms, status, scheduledDate, mediaUrl } = body;
+    const { platform, accessToken, refreshToken } = body;
 
-    if (!content || !platforms || platforms.length === 0) {
+    if (!platform || !accessToken) {
       return NextResponse.json(
-        { error: 'Contenido y al menos una plataforma son requeridos' },
+        { error: 'Plataforma y token de acceso son requeridos' },
         { status: 400 }
       );
     }
 
-    // TODO: Guardar en base de datos y programar publicación
-    const newPost = {
-      id: `post_${Date.now()}`,
-      content,
-      platforms,
-      status: status || 'scheduled',
-      scheduledDate: scheduledDate || new Date().toISOString(),
-      mediaUrl,
-      createdAt: new Date().toISOString(),
-      createdBy: session.user.id,
-    };
-
+    // TODO: Implementar conexión real con cada plataforma:
+    // - Instagram: Meta Graph API
+    // - Facebook: Meta Graph API
+    // - LinkedIn: LinkedIn API
+    // - Twitter/X: Twitter API v2
+    
     return NextResponse.json({
       success: true,
-      post: newPost,
-      message: status === 'draft' ? 'Borrador guardado' : 'Publicación programada correctamente',
+      message: 'Cuenta conectada correctamente',
+      // account: newAccount
     });
   } catch (error: any) {
-    console.error('[Community Manager Create Post Error]:', error);
+    console.error('[Community Manager Connect Account Error]:', error);
     return NextResponse.json(
-      { error: 'Error al crear publicación' },
+      { error: 'Error al conectar cuenta' },
       { status: 500 }
     );
   }

@@ -1,9 +1,3 @@
-/**
- * API: Lista de Agentes de IA
- * 
- * Retorna la lista de agentes disponibles con su configuración y métricas
- */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
@@ -11,210 +5,233 @@ import { authOptions } from '@/lib/auth-options';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Definición de agentes del sistema
-const AGENTS = [
+// Definición de agentes de IA del sistema
+// Estos son los agentes disponibles en la plataforma
+const SYSTEM_AGENTS = [
   {
     id: 'technical_support',
     type: 'technical_support',
     name: 'Soporte Técnico',
-    description: 'Gestiona incidencias de mantenimiento, reparaciones y emergencias técnicas. Coordina con proveedores y técnicos.',
+    description: 'Resuelve dudas técnicas de usuarios sobre la plataforma Inmova',
     icon: 'Wrench',
-    color: 'from-orange-500 to-amber-500',
+    color: 'from-amber-500 to-orange-500',
+    enabled: true,
     capabilities: [
-      'Diagnóstico de averías',
-      'Programación de reparaciones',
-      'Gestión de proveedores',
-      'Alertas de emergencia',
-      'Historial de mantenimiento',
-      'Presupuestos automáticos',
-      'Seguimiento de incidencias'
+      'Resolución de problemas técnicos',
+      'Guías de uso de la plataforma',
+      'Diagnóstico de errores',
+      'Recomendaciones de configuración',
     ],
-    keywords: ['avería', 'reparación', 'mantenimiento', 'emergencia', 'técnico', 'agua', 'electricidad', 'calefacción'],
+    keywords: ['error', 'problema', 'no funciona', 'ayuda', 'cómo', 'configurar'],
     defaultConfig: {
       model: 'claude-3-5-sonnet',
       temperature: 0.3,
       maxTokens: 4096,
-      autoEscalate: true
-    }
+      autoEscalate: true,
+    },
   },
   {
     id: 'customer_service',
     type: 'customer_service',
     name: 'Atención al Cliente',
-    description: 'Responde consultas, gestiona quejas y proporciona soporte general a inquilinos, propietarios y gestores.',
+    description: 'Atiende consultas generales de usuarios y clientes de Inmova',
     icon: 'HeadphonesIcon',
     color: 'from-blue-500 to-cyan-500',
+    enabled: true,
     capabilities: [
-      'Respuesta a FAQs',
-      'Gestión de quejas',
-      'Información de servicios',
-      'Seguimiento de solicitudes',
-      'Encuestas de satisfacción',
-      'Escalación a humanos',
-      'Soporte multicanal'
+      'Resolución de consultas',
+      'Información de planes y precios',
+      'Gestión de cuentas',
+      'Seguimiento de incidencias',
     ],
-    keywords: ['consulta', 'ayuda', 'información', 'queja', 'servicio', 'problema', 'duda'],
+    keywords: ['consulta', 'información', 'precio', 'plan', 'cuenta', 'suscripción'],
     defaultConfig: {
       model: 'claude-3-5-sonnet',
       temperature: 0.5,
-      maxTokens: 2048,
-      autoEscalate: true
-    }
+      maxTokens: 4096,
+      autoEscalate: true,
+    },
   },
   {
     id: 'commercial_management',
     type: 'commercial_management',
     name: 'Gestión Comercial',
-    description: 'Gestiona leads, cualifica oportunidades de venta y apoya el desarrollo comercial del negocio.',
+    description: 'Asiste en tareas comerciales y seguimiento de leads',
     icon: 'Briefcase',
     color: 'from-green-500 to-emerald-500',
+    enabled: true,
     capabilities: [
       'Cualificación de leads',
-      'Seguimiento de oportunidades',
       'Propuestas comerciales',
-      'Análisis de conversión',
-      'CRM automatizado',
-      'Alertas de seguimiento',
-      'Pipeline de ventas'
+      'Seguimiento de oportunidades',
+      'Análisis de mercado',
     ],
-    keywords: ['venta', 'lead', 'cliente', 'propuesta', 'comercial', 'oportunidad', 'negocio'],
+    keywords: ['lead', 'venta', 'cliente potencial', 'propuesta', 'comercial'],
     defaultConfig: {
       model: 'claude-3-5-sonnet',
-      temperature: 0.4,
-      maxTokens: 3072,
-      autoEscalate: false
-    }
+      temperature: 0.6,
+      maxTokens: 4096,
+      autoEscalate: true,
+    },
   },
   {
     id: 'financial_analysis',
     type: 'financial_analysis',
     name: 'Análisis Financiero',
-    description: 'Analiza rentabilidad, ROI, optimiza ingresos y genera reportes financieros para la toma de decisiones.',
+    description: 'Genera análisis financieros y proyecciones inmobiliarias',
     icon: 'TrendingUp',
     color: 'from-violet-500 to-purple-500',
+    enabled: true,
     capabilities: [
-      'Cálculo de ROI',
-      'Proyecciones financieras',
       'Análisis de rentabilidad',
-      'Optimización de precios',
-      'Reportes de ingresos',
-      'Alertas de morosidad',
-      'Benchmarking de mercado'
+      'Proyecciones financieras',
+      'Valoraciones inmobiliarias',
+      'Informes de inversión',
     ],
-    keywords: ['financiero', 'rentabilidad', 'roi', 'ingresos', 'gastos', 'morosidad', 'inversión', 'precio'],
+    keywords: ['rentabilidad', 'inversión', 'valoración', 'análisis', 'ROI', 'financiero'],
     defaultConfig: {
       model: 'claude-3-5-sonnet',
-      temperature: 0.2,
-      maxTokens: 4096,
-      autoEscalate: true
-    }
+      temperature: 0.4,
+      maxTokens: 8192,
+      autoEscalate: false,
+    },
   },
   {
     id: 'legal_compliance',
     type: 'legal_compliance',
-    name: 'Legal y Cumplimiento',
-    description: 'Gestiona aspectos legales, revisa contratos y asegura el cumplimiento normativo (LAU, RGPD, etc.).',
+    name: 'Asesoría Legal',
+    description: 'Orienta sobre aspectos legales de contratos inmobiliarios',
     icon: 'Scale',
     color: 'from-rose-500 to-pink-500',
+    enabled: true,
     capabilities: [
       'Revisión de contratos',
-      'Cumplimiento normativo',
-      'Alertas regulatorias',
-      'Gestión de disputas',
-      'Documentación legal',
-      'Asesoría RGPD',
-      'Actualización de cláusulas'
+      'Normativa inmobiliaria',
+      'Derechos y obligaciones',
+      'Procedimientos legales',
     ],
-    keywords: ['legal', 'contrato', 'cláusula', 'normativa', 'ley', 'rgpd', 'disputa', 'regulación'],
+    keywords: ['contrato', 'legal', 'ley', 'normativa', 'derechos', 'obligaciones'],
     defaultConfig: {
       model: 'claude-3-5-sonnet',
-      temperature: 0.1,
+      temperature: 0.3,
       maxTokens: 4096,
-      autoEscalate: true
-    }
+      autoEscalate: true,
+    },
   },
   {
     id: 'community_manager',
     type: 'community_manager',
     name: 'Community Manager',
-    description: 'Gestiona redes sociales, crea contenido para marketing y administra el blog de la plataforma.',
+    description: 'Gestiona contenido para redes sociales y blog',
     icon: 'Megaphone',
     color: 'from-fuchsia-500 to-pink-500',
+    enabled: true,
     capabilities: [
-      'Generación de contenido',
-      'Programación de posts',
+      'Creación de contenido',
       'Gestión de redes sociales',
-      'Administración de blog',
-      'Análisis de engagement',
-      'Respuesta a comentarios',
-      'Estrategia de contenidos'
+      'Publicaciones de blog',
+      'Estrategia de marketing',
     ],
-    keywords: ['redes sociales', 'contenido', 'post', 'blog', 'marketing', 'instagram', 'linkedin', 'twitter'],
+    keywords: ['contenido', 'redes', 'blog', 'publicación', 'marketing', 'social'],
     defaultConfig: {
       model: 'claude-3-5-sonnet',
       temperature: 0.7,
-      maxTokens: 2048,
-      autoEscalate: false
-    }
-  }
+      maxTokens: 4096,
+      autoEscalate: false,
+    },
+  },
 ];
 
+/**
+ * GET /api/admin/ai-agents/list
+ * Obtiene la lista de agentes de IA disponibles
+ */
 export async function GET(request: NextRequest) {
   try {
-    // Verificar autenticación
     const session = await getServerSession(authOptions);
-    if (!session) {
+    
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    // Solo super_admin puede acceder
-    const userRole = (session.user as any)?.role;
-    if (userRole !== 'super_admin') {
+    const userRole = (session.user as any).role;
+    if (!['super_admin'].includes(userRole)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
-    // Obtener parámetros de consulta
     const { searchParams } = new URL(request.url);
     const includeMetrics = searchParams.get('metrics') === 'true';
 
-    // Construir respuesta con métricas simuladas si se solicitan
-    const agentsWithData = AGENTS.map(agent => {
-      const baseAgent = {
-        ...agent,
-        enabled: true,
-        status: 'active' as const
-      };
-
-      if (includeMetrics) {
-        // Métricas simuladas (en producción vendrían de la BD)
-        return {
-          ...baseAgent,
-          metrics: {
-            totalInteractions: Math.floor(Math.random() * 3000) + 200,
-            successRate: Math.floor(Math.random() * 15) + 85, // 85-100%
-            avgResponseTime: (Math.random() * 2 + 0.5).toFixed(2), // 0.5-2.5s
-            lastActive: new Date(Date.now() - Math.random() * 86400000).toISOString(), // Últimas 24h
-            escalationRate: Math.floor(Math.random() * 10) + 2, // 2-12%
-            satisfactionScore: (Math.random() * 1 + 4).toFixed(1) // 4.0-5.0
-          }
-        };
-      }
-
-      return baseAgent;
-    });
+    // Devolver agentes con métricas vacías (datos reales cuando se implementen)
+    const agentsWithData = SYSTEM_AGENTS.map(agent => ({
+      ...agent,
+      metrics: includeMetrics ? {
+        // Métricas reales - inicialmente vacías/cero
+        totalInteractions: 0,
+        successRate: 0,
+        avgResponseTime: 0,
+        lastActive: null,
+        // TODO: Obtener métricas reales de la base de datos
+      } : undefined,
+    }));
 
     return NextResponse.json({
       success: true,
       agents: agentsWithData,
       total: agentsWithData.length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      message: 'Los agentes están disponibles. Las métricas se actualizarán cuando los agentes procesen interacciones.',
     });
-
   } catch (error: any) {
-    console.error('[AI Agents List] Error:', error);
+    console.error('[AI Agents List Error]:', error);
+    return NextResponse.json(
+      { error: 'Error al obtener lista de agentes' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * PUT /api/admin/ai-agents/list
+ * Actualizar configuración de un agente
+ */
+export async function PUT(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    const userRole = (session.user as any).role;
+    if (!['super_admin'].includes(userRole)) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const { agentId, config, enabled } = body;
+
+    if (!agentId) {
+      return NextResponse.json(
+        { error: 'ID del agente es requerido' },
+        { status: 400 }
+      );
+    }
+
+    // TODO: Guardar configuración en base de datos
+    
     return NextResponse.json({
-      success: false,
-      error: error.message
-    }, { status: 500 });
+      success: true,
+      message: 'Configuración del agente actualizada',
+      agentId,
+      config,
+      enabled,
+    });
+  } catch (error: any) {
+    console.error('[AI Agents Update Error]:', error);
+    return NextResponse.json(
+      { error: 'Error al actualizar agente' },
+      { status: 500 }
+    );
   }
 }

@@ -10,10 +10,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { toast } from 'sonner';
 import { 
   Palette,
   Plus,
@@ -46,13 +48,34 @@ import {
   List,
   Search,
   Filter,
-  MoreHorizontal,
-  CheckCircle2,
+  RefreshCw,
   AlertCircle,
-  RefreshCw
+  CheckCircle2,
 } from 'lucide-react';
 
-// Tipos de plantillas para PropTech
+// Tipos
+interface CanvaDesign {
+  id: string;
+  name: string;
+  category: string;
+  thumbnail?: string;
+  dimensions: string;
+  createdAt: string;
+  updatedAt: string;
+  status: 'draft' | 'published';
+}
+
+interface Template {
+  id: string;
+  name: string;
+  category: string;
+  platform?: string;
+  dimensions: string;
+  description: string;
+  popular?: boolean;
+}
+
+// Categorías de plantillas para PropTech
 const TEMPLATE_CATEGORIES = [
   { id: 'social', name: 'Redes Sociales', icon: Share2, description: 'Posts para Instagram, Facebook, LinkedIn y X' },
   { id: 'presentations', name: 'Presentaciones', icon: Presentation, description: 'Slides para inversores y clientes' },
@@ -61,16 +84,14 @@ const TEMPLATE_CATEGORIES = [
   { id: 'reports', name: 'Informes', icon: FileImage, description: 'Reportes visuales y dashboards' },
 ];
 
-// Plantillas predefinidas para PropTech
-const TEMPLATES = [
-  // Redes Sociales
+// Plantillas disponibles (estas son las plantillas base del sistema)
+const AVAILABLE_TEMPLATES: Template[] = [
   { 
     id: 'instagram-property', 
     name: 'Propiedad Destacada - Instagram', 
     category: 'social',
     platform: 'instagram',
     dimensions: '1080x1080',
-    thumbnail: '/templates/instagram-property.jpg',
     description: 'Plantilla para destacar propiedades en Instagram',
     popular: true,
   },
@@ -80,255 +101,225 @@ const TEMPLATES = [
     category: 'social',
     platform: 'instagram',
     dimensions: '1080x1920',
-    thumbnail: '/templates/instagram-story.jpg',
     description: 'Historia vertical para anunciar nuevos inmuebles',
     popular: true,
   },
   { 
-    id: 'facebook-cover', 
-    name: 'Portada Facebook - Inmobiliaria', 
+    id: 'facebook-post', 
+    name: 'Post Facebook - Propiedades', 
     category: 'social',
     platform: 'facebook',
-    dimensions: '820x312',
-    thumbnail: '/templates/facebook-cover.jpg',
-    description: 'Portada profesional para página de empresa',
+    dimensions: '1200x630',
+    description: 'Post optimizado para Facebook',
   },
   { 
     id: 'linkedin-post', 
-    name: 'Post LinkedIn - Logro/Noticia', 
+    name: 'Post LinkedIn - Profesional', 
     category: 'social',
     platform: 'linkedin',
     dimensions: '1200x627',
-    thumbnail: '/templates/linkedin-post.jpg',
-    description: 'Post profesional para logros y noticias',
-    popular: true,
+    description: 'Diseño profesional para LinkedIn',
   },
   { 
-    id: 'twitter-post', 
-    name: 'Post X/Twitter - Promoción', 
-    category: 'social',
-    platform: 'twitter',
-    dimensions: '1200x675',
-    thumbnail: '/templates/twitter-post.jpg',
-    description: 'Post promocional para X',
-  },
-  // Presentaciones
-  { 
-    id: 'investor-deck', 
-    name: 'Presentación Inversores', 
+    id: 'investor-pitch', 
+    name: 'Presentación para Inversores', 
     category: 'presentations',
-    platform: 'presentation',
     dimensions: '1920x1080',
-    thumbnail: '/templates/investor-deck.jpg',
     description: 'Deck profesional para reuniones con inversores',
     popular: true,
   },
   { 
-    id: 'client-proposal', 
-    name: 'Propuesta Cliente', 
-    category: 'presentations',
-    platform: 'presentation',
-    dimensions: '1920x1080',
-    thumbnail: '/templates/client-proposal.jpg',
-    description: 'Presentación de servicios para clientes potenciales',
-  },
-  { 
-    id: 'property-portfolio', 
-    name: 'Portfolio de Propiedades', 
-    category: 'presentations',
-    platform: 'presentation',
-    dimensions: '1920x1080',
-    thumbnail: '/templates/property-portfolio.jpg',
-    description: 'Catálogo visual de propiedades disponibles',
-  },
-  // Propiedades
-  { 
-    id: 'property-card', 
-    name: 'Ficha de Propiedad', 
+    id: 'property-brochure', 
+    name: 'Dossier de Propiedad', 
     category: 'properties',
-    platform: 'print',
     dimensions: 'A4',
-    thumbnail: '/templates/property-card.jpg',
-    description: 'Ficha detallada para impresión o digital',
+    description: 'Dossier completo con información del inmueble',
     popular: true,
   },
   { 
-    id: 'property-flyer', 
-    name: 'Flyer Propiedad', 
-    category: 'properties',
-    platform: 'print',
-    dimensions: 'A5',
-    thumbnail: '/templates/property-flyer.jpg',
-    description: 'Flyer promocional para open houses',
-  },
-  { 
-    id: 'sold-announcement', 
-    name: 'Anuncio Vendido/Alquilado', 
-    category: 'properties',
-    platform: 'social',
+    id: 'open-house', 
+    name: 'Jornada de Puertas Abiertas', 
+    category: 'marketing',
     dimensions: '1080x1080',
-    thumbnail: '/templates/sold-announcement.jpg',
-    description: 'Celebrar cierres de operaciones',
-  },
-  // Marketing
-  { 
-    id: 'promo-banner', 
-    name: 'Banner Promocional', 
-    category: 'marketing',
-    platform: 'web',
-    dimensions: '1200x628',
-    thumbnail: '/templates/promo-banner.jpg',
-    description: 'Banner para campañas publicitarias',
+    description: 'Anuncio para open house',
   },
   { 
-    id: 'email-header', 
-    name: 'Cabecera Email Marketing', 
-    category: 'marketing',
-    platform: 'email',
-    dimensions: '600x200',
-    thumbnail: '/templates/email-header.jpg',
-    description: 'Header para newsletters y emails',
-  },
-  { 
-    id: 'testimonial', 
-    name: 'Testimonio Cliente', 
-    category: 'marketing',
-    platform: 'social',
-    dimensions: '1080x1080',
-    thumbnail: '/templates/testimonial.jpg',
-    description: 'Compartir reseñas y testimonios',
-  },
-  // Informes
-  { 
-    id: 'market-report', 
-    name: 'Informe de Mercado', 
+    id: 'monthly-report', 
+    name: 'Informe Mensual', 
     category: 'reports',
-    platform: 'print',
     dimensions: 'A4',
-    thumbnail: '/templates/market-report.jpg',
-    description: 'Análisis visual del mercado inmobiliario',
-  },
-  { 
-    id: 'monthly-stats', 
-    name: 'Estadísticas Mensuales', 
-    category: 'reports',
-    platform: 'presentation',
-    dimensions: '1920x1080',
-    thumbnail: '/templates/monthly-stats.jpg',
-    description: 'Resumen visual de métricas mensuales',
+    description: 'Reporte visual de rendimiento',
   },
 ];
 
-// Diseños de ejemplo (simulados)
-const SAMPLE_DESIGNS = [
-  { id: '1', name: 'Post Instagram - Ático Barcelona', template: 'instagram-property', createdAt: '2026-01-10', status: 'published', views: 234, thumbnail: '/designs/design-1.jpg' },
-  { id: '2', name: 'Presentación Q1 2026', template: 'investor-deck', createdAt: '2026-01-08', status: 'draft', views: 0, thumbnail: '/designs/design-2.jpg' },
-  { id: '3', name: 'LinkedIn - Nuevo Proyecto', template: 'linkedin-post', createdAt: '2026-01-05', status: 'published', views: 567, thumbnail: '/designs/design-3.jpg' },
-  { id: '4', name: 'Ficha - Piso Madrid Centro', template: 'property-card', createdAt: '2026-01-03', status: 'published', views: 123, thumbnail: '/designs/design-4.jpg' },
-];
+// Iconos de plataforma
+const platformIcons: Record<string, any> = {
+  instagram: Instagram,
+  facebook: Facebook,
+  linkedin: Linkedin,
+  twitter: Twitter,
+};
+
+// Skeleton para carga
+function CanvaSkeleton() {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <Card key={i}>
+          <CardContent className="p-0">
+            <Skeleton className="h-40 w-full rounded-t-lg" />
+            <div className="p-4 space-y-2">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+// Estado vacío para diseños
+function EmptyDesigns({ onCreateNew }: { onCreateNew: () => void }) {
+  return (
+    <Card>
+      <CardContent className="pt-12 pb-12 text-center">
+        <Palette className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+        <h3 className="text-lg font-semibold mb-2">Sin diseños creados</h3>
+        <p className="text-muted-foreground mb-4 max-w-md mx-auto">
+          Aún no has creado ningún diseño. Usa las plantillas o crea uno desde cero.
+        </p>
+        <Button onClick={onCreateNew}>
+          <Plus className="h-4 w-4 mr-2" />
+          Crear Primer Diseño
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function CanvaStudioPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  
   const [activeTab, setActiveTab] = useState('templates');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [isConnected, setIsConnected] = useState(false);
+  
+  const [isLoading, setIsLoading] = useState(true);
+  const [canvaStatus, setCanvaStatus] = useState<'connected' | 'disconnected' | 'unknown'>('unknown');
+  const [designs, setDesigns] = useState<CanvaDesign[]>([]);
+  
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<typeof TEMPLATES[0] | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [newDesignName, setNewDesignName] = useState('');
 
+  // Verificar autenticación
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
     }
-    const allowedRoles = ['super_admin', 'SUPER_ADMIN', 'superadmin', 'admin', 'ADMIN'];
-    const userRole = session?.user?.role?.toLowerCase();
-    if (status === 'authenticated' && userRole && !allowedRoles.map(r => r.toLowerCase()).includes(userRole)) {
-      router.push('/unauthorized');
-    }
-  }, [status, session, router]);
+  }, [status, router]);
 
-  // Verificar conexión con Canva
+  // Cargar datos
   useEffect(() => {
-    const checkCanvaConnection = async () => {
-      try {
-        const res = await fetch('/api/admin/canva/status');
-        if (res.ok) {
-          const data = await res.json();
-          setIsConnected(data.connected);
-        }
-      } catch (error) {
-        setIsConnected(false);
-      }
-    };
     if (status === 'authenticated') {
-      checkCanvaConnection();
+      loadData();
     }
   }, [status]);
 
-  const filteredTemplates = TEMPLATES.filter(template => {
-    const matchesCategory = !selectedCategory || template.category === selectedCategory;
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      // Verificar estado de conexión con Canva
+      const statusRes = await fetch('/api/admin/canva/status');
+      if (statusRes.ok) {
+        const data = await statusRes.json();
+        setCanvaStatus(data.connected ? 'connected' : 'disconnected');
+      }
+
+      // Cargar diseños del usuario
+      const designsRes = await fetch('/api/admin/canva/designs');
+      if (designsRes.ok) {
+        const data = await designsRes.json();
+        setDesigns(data.designs || []);
+      }
+    } catch (error) {
+      console.error('Error loading Canva data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Filtrar plantillas
+  const filteredTemplates = AVAILABLE_TEMPLATES.filter(template => {
+    const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
     const matchesSearch = !searchQuery || 
       template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       template.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
-  const handleConnectCanva = () => {
-    // Redirigir a OAuth de Canva
-    window.open('/api/admin/canva/auth', '_blank');
-  };
+  // Crear nuevo diseño
+  const createDesign = async () => {
+    if (!newDesignName.trim()) {
+      toast.error('Introduce un nombre para el diseño');
+      return;
+    }
 
-  const handleCreateDesign = async () => {
-    if (!selectedTemplate || !newDesignName) return;
-    
     try {
       const res = await fetch('/api/admin/canva/designs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: newDesignName,
-          templateId: selectedTemplate.id,
-          dimensions: selectedTemplate.dimensions,
+          templateId: selectedTemplate?.id,
+          category: selectedTemplate?.category || 'custom',
+          dimensions: selectedTemplate?.dimensions || '1080x1080',
         }),
       });
-      
+
       if (res.ok) {
-        const data = await res.json();
-        // Abrir editor de Canva
-        if (data.editUrl) {
-          window.open(data.editUrl, '_blank');
-        }
+        toast.success('Diseño creado correctamente');
         setShowCreateDialog(false);
         setNewDesignName('');
         setSelectedTemplate(null);
+        loadData();
+      } else {
+        toast.error('Error al crear diseño');
       }
     } catch (error) {
-      console.error('Error creating design:', error);
+      toast.error('Error de conexión');
     }
   };
 
-  const getPlatformIcon = (platform: string) => {
-    switch (platform) {
-      case 'instagram': return <Instagram className="h-4 w-4" />;
-      case 'facebook': return <Facebook className="h-4 w-4" />;
-      case 'linkedin': return <Linkedin className="h-4 w-4" />;
-      case 'twitter': return <Twitter className="h-4 w-4" />;
-      case 'presentation': return <Presentation className="h-4 w-4" />;
-      case 'print': return <FileImage className="h-4 w-4" />;
-      case 'web': return <LayoutTemplate className="h-4 w-4" />;
-      case 'email': return <FileImage className="h-4 w-4" />;
-      default: return <ImageIcon className="h-4 w-4" />;
-    }
+  // Conectar con Canva
+  const connectCanva = () => {
+    // TODO: Implementar OAuth con Canva Connect API
+    toast.info('La integración con Canva Connect API está en desarrollo. Por ahora puedes usar las plantillas locales.');
   };
 
-  if (status === 'loading') {
+  // Estadísticas
+  const stats = {
+    totalDesigns: designs.length,
+    published: designs.filter(d => d.status === 'published').length,
+    drafts: designs.filter(d => d.status === 'draft').length,
+    templates: AVAILABLE_TEMPLATES.length,
+  };
+
+  if (status === 'loading' || isLoading) {
     return (
       <AuthenticatedLayout>
-        <div className="flex items-center justify-center min-h-screen">
-          <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="container mx-auto py-6 px-4 max-w-7xl">
+          <div className="flex items-center gap-4 mb-8">
+            <Skeleton className="h-16 w-16 rounded-xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="h-4 w-96" />
+            </div>
+          </div>
+          <CanvaSkeleton />
         </div>
       </AuthenticatedLayout>
     );
@@ -338,506 +329,472 @@ export default function CanvaStudioPage() {
     <AuthenticatedLayout>
       <div className="container mx-auto py-6 px-4 max-w-7xl">
         {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 flex items-center justify-center">
-                <Palette className="h-8 w-8 text-white" />
-              </div>
-              <div>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+          <div className="flex items-center gap-4">
+            <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 flex items-center justify-center">
+              <Palette className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
                 <h1 className="text-3xl font-bold">Canva Studio</h1>
-                <p className="text-muted-foreground">Crea contenido visual profesional para marketing y presentaciones</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              {isConnected ? (
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                  <CheckCircle2 className="h-3 w-3 mr-1" /> Conectado con Canva
+                <Badge 
+                  variant={canvaStatus === 'connected' ? 'default' : 'secondary'}
+                  className={canvaStatus === 'connected' ? 'bg-green-500' : ''}
+                >
+                  {canvaStatus === 'connected' ? '✓ Conectado' : '⚠️ Local'}
                 </Badge>
-              ) : (
-                <Button onClick={handleConnectCanva} variant="outline">
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Conectar Canva
-                </Button>
-              )}
-              <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-                <DialogTrigger asChild>
-                  <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nuevo Diseño
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Crear Nuevo Diseño</DialogTitle>
-                    <DialogDescription>
-                      Selecciona una plantilla y personalízala con el editor de Canva
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label>Nombre del diseño</Label>
-                      <Input 
-                        placeholder="Ej: Post Instagram - Nuevo Piso Barcelona"
-                        value={newDesignName}
-                        onChange={(e) => setNewDesignName(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Plantilla base</Label>
-                      <Select 
-                        value={selectedTemplate?.id || ''} 
-                        onValueChange={(v) => setSelectedTemplate(TEMPLATES.find(t => t.id === v) || null)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona una plantilla" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {TEMPLATE_CATEGORIES.map(cat => (
-                            <div key={cat.id}>
-                              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">{cat.name}</div>
-                              {TEMPLATES.filter(t => t.category === cat.id).map(template => (
-                                <SelectItem key={template.id} value={template.id}>
-                                  <div className="flex items-center gap-2">
-                                    {getPlatformIcon(template.platform)}
-                                    <span>{template.name}</span>
-                                    <span className="text-xs text-muted-foreground">({template.dimensions})</span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </div>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    {selectedTemplate && (
-                      <div className="p-4 bg-muted rounded-lg">
-                        <p className="text-sm font-medium">{selectedTemplate.name}</p>
-                        <p className="text-xs text-muted-foreground">{selectedTemplate.description}</p>
-                        <div className="flex gap-2 mt-2">
-                          <Badge variant="outline">{selectedTemplate.dimensions}</Badge>
-                          <Badge variant="outline">{selectedTemplate.platform}</Badge>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-                      Cancelar
-                    </Button>
-                    <Button 
-                      onClick={handleCreateDesign}
-                      disabled={!selectedTemplate || !newDesignName}
-                      className="bg-gradient-to-r from-purple-500 to-pink-500"
-                    >
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Crear y Editar en Canva
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              </div>
+              <p className="text-muted-foreground">Crea contenido visual profesional para Inmova</p>
             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={loadData}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Actualizar
+            </Button>
+            {canvaStatus !== 'connected' && (
+              <Button variant="outline" onClick={connectCanva}>
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Conectar Canva
+              </Button>
+            )}
+            <Button 
+              className="bg-gradient-to-r from-purple-500 to-pink-500"
+              onClick={() => setShowCreateDialog(true)}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Nuevo Diseño
+            </Button>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-4 mb-6">
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Diseños Creados</p>
-                  <p className="text-2xl font-bold">{SAMPLE_DESIGNS.length}</p>
+                  <p className="text-sm text-muted-foreground">Mis Diseños</p>
+                  <p className="text-2xl font-bold">{stats.totalDesigns}</p>
                 </div>
-                <div className="h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
-                  <ImageIcon className="h-6 w-6 text-purple-600" />
-                </div>
+                <FolderOpen className="h-8 w-8 text-purple-500" />
               </div>
             </CardContent>
           </Card>
+          
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Publicados</p>
-                  <p className="text-2xl font-bold">{SAMPLE_DESIGNS.filter(d => d.status === 'published').length}</p>
+                  <p className="text-2xl font-bold text-green-600">{stats.published}</p>
                 </div>
-                <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                  <Share2 className="h-6 w-6 text-green-600" />
-                </div>
+                <CheckCircle2 className="h-8 w-8 text-green-500" />
               </div>
             </CardContent>
           </Card>
+          
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Visualizaciones</p>
-                  <p className="text-2xl font-bold">{SAMPLE_DESIGNS.reduce((sum, d) => sum + d.views, 0)}</p>
+                  <p className="text-sm text-muted-foreground">Borradores</p>
+                  <p className="text-2xl font-bold text-amber-600">{stats.drafts}</p>
                 </div>
-                <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                  <Eye className="h-6 w-6 text-blue-600" />
-                </div>
+                <Edit className="h-8 w-8 text-amber-500" />
               </div>
             </CardContent>
           </Card>
+          
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Plantillas</p>
-                  <p className="text-2xl font-bold">{TEMPLATES.length}</p>
+                  <p className="text-2xl font-bold">{stats.templates}</p>
                 </div>
-                <div className="h-12 w-12 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
-                  <LayoutTemplate className="h-6 w-6 text-orange-600" />
-                </div>
+                <LayoutTemplate className="h-8 w-8 text-blue-500" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Content Tabs */}
+        {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="flex items-center justify-between">
-            <TabsList>
-              <TabsTrigger value="templates">
-                <LayoutTemplate className="h-4 w-4 mr-2" />
-                Plantillas
-              </TabsTrigger>
-              <TabsTrigger value="designs">
-                <FolderOpen className="h-4 w-4 mr-2" />
-                Mis Diseños
-              </TabsTrigger>
-              <TabsTrigger value="brand">
-                <Palette className="h-4 w-4 mr-2" />
-                Marca
-              </TabsTrigger>
-            </TabsList>
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input 
-                  placeholder="Buscar..." 
-                  className="pl-9 w-64"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <Button 
-                variant="outline" 
-                size="icon"
-                onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-              >
-                {viewMode === 'grid' ? <List className="h-4 w-4" /> : <Grid3X3 className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
+          <TabsList className="grid grid-cols-3 w-full max-w-md">
+            <TabsTrigger value="templates" className="gap-2">
+              <LayoutTemplate className="h-4 w-4" />
+              Plantillas
+            </TabsTrigger>
+            <TabsTrigger value="designs" className="gap-2">
+              <FolderOpen className="h-4 w-4" />
+              Mis Diseños
+            </TabsTrigger>
+            <TabsTrigger value="brand" className="gap-2">
+              <Sparkles className="h-4 w-4" />
+              Marca
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Plantillas Tab */}
+          {/* Templates Tab */}
           <TabsContent value="templates" className="space-y-6">
-            {/* Categorías */}
-            <div className="flex flex-wrap gap-2">
-              <Button 
-                variant={selectedCategory === null ? 'default' : 'outline'} 
-                size="sm"
-                onClick={() => setSelectedCategory(null)}
-              >
-                Todas
-              </Button>
-              {TEMPLATE_CATEGORIES.map(cat => (
-                <Button 
-                  key={cat.id}
-                  variant={selectedCategory === cat.id ? 'default' : 'outline'} 
+            {/* Filtros */}
+            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  variant={selectedCategory === 'all' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setSelectedCategory(cat.id)}
+                  onClick={() => setSelectedCategory('all')}
                 >
-                  <cat.icon className="h-4 w-4 mr-2" />
-                  {cat.name}
+                  Todas
                 </Button>
-              ))}
+                {TEMPLATE_CATEGORIES.map((cat) => (
+                  <Button
+                    key={cat.id}
+                    variant={selectedCategory === cat.id ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedCategory(cat.id)}
+                  >
+                    <cat.icon className="h-4 w-4 mr-1" />
+                    {cat.name}
+                  </Button>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <div className="relative">
+                  <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar plantillas..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 w-64"
+                  />
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                >
+                  {viewMode === 'grid' ? <List className="h-4 w-4" /> : <Grid3X3 className="h-4 w-4" />}
+                </Button>
+              </div>
             </div>
 
-            {/* Plantillas Populares */}
-            {!selectedCategory && (
-              <>
-                <div>
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-yellow-500" />
-                    Plantillas Populares
-                  </h3>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    {TEMPLATES.filter(t => t.popular).map(template => (
-                      <Card key={template.id} className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-purple-300">
-                        <CardContent className="p-0">
-                          <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-t-lg flex items-center justify-center relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10" />
-                            {getPlatformIcon(template.platform)}
-                            <span className="absolute bottom-2 right-2 text-xs bg-black/50 text-white px-2 py-1 rounded">
-                              {template.dimensions}
-                            </span>
-                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                              <Button size="sm" variant="secondary" onClick={() => {
-                                setSelectedTemplate(template);
-                                setShowCreateDialog(true);
-                              }}>
-                                <Plus className="h-4 w-4 mr-1" />
-                                Usar
-                              </Button>
-                            </div>
+            {/* Lista de plantillas */}
+            {filteredTemplates.length > 0 ? (
+              <div className={viewMode === 'grid' 
+                ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'
+                : 'space-y-4'
+              }>
+                {filteredTemplates.map((template) => {
+                  const PlatformIcon = template.platform ? platformIcons[template.platform] : null;
+                  
+                  return viewMode === 'grid' ? (
+                    <Card 
+                      key={template.id}
+                      className="cursor-pointer hover:shadow-lg transition-shadow group"
+                      onClick={() => {
+                        setSelectedTemplate(template);
+                        setShowCreateDialog(true);
+                      }}
+                    >
+                      <CardContent className="p-0">
+                        <div className="h-40 bg-gradient-to-br from-purple-100 to-pink-100 rounded-t-lg flex items-center justify-center">
+                          <ImageIcon className="h-12 w-12 text-purple-300" />
+                        </div>
+                        <div className="p-4">
+                          <div className="flex items-center gap-2 mb-1">
+                            {PlatformIcon && <PlatformIcon className="h-4 w-4 text-muted-foreground" />}
+                            <h4 className="font-medium text-sm line-clamp-1">{template.name}</h4>
+                            {template.popular && (
+                              <Badge variant="secondary" className="text-xs">Popular</Badge>
+                            )}
                           </div>
-                          <div className="p-3">
-                            <p className="font-medium text-sm truncate">{template.name}</p>
-                            <p className="text-xs text-muted-foreground truncate">{template.description}</p>
+                          <p className="text-xs text-muted-foreground">{template.dimensions}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <Card 
+                      key={template.id}
+                      className="cursor-pointer hover:shadow-lg transition-shadow"
+                      onClick={() => {
+                        setSelectedTemplate(template);
+                        setShowCreateDialog(true);
+                      }}
+                    >
+                      <CardContent className="p-4 flex items-center gap-4">
+                        <div className="h-16 w-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <ImageIcon className="h-8 w-8 text-purple-300" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            {PlatformIcon && <PlatformIcon className="h-4 w-4 text-muted-foreground" />}
+                            <h4 className="font-medium">{template.name}</h4>
+                            {template.popular && (
+                              <Badge variant="secondary">Popular</Badge>
+                            )}
                           </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-                <Separator />
-              </>
+                          <p className="text-sm text-muted-foreground">{template.description}</p>
+                          <p className="text-xs text-muted-foreground">{template.dimensions}</p>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          Usar
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="pt-12 pb-12 text-center">
+                  <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                  <p className="text-muted-foreground">No se encontraron plantillas con ese filtro</p>
+                </CardContent>
+              </Card>
             )}
+          </TabsContent>
 
-            {/* Todas las Plantillas */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">
-                {selectedCategory ? TEMPLATE_CATEGORIES.find(c => c.id === selectedCategory)?.name : 'Todas las Plantillas'}
-              </h3>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {filteredTemplates.map(template => (
-                  <Card key={template.id} className="group hover:shadow-lg transition-all cursor-pointer">
+          {/* Designs Tab */}
+          <TabsContent value="designs" className="space-y-6">
+            {designs.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {designs.map((design) => (
+                  <Card key={design.id} className="group">
                     <CardContent className="p-0">
-                      <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-t-lg flex items-center justify-center relative overflow-hidden">
-                        {getPlatformIcon(template.platform)}
-                        <span className="absolute bottom-2 right-2 text-xs bg-black/50 text-white px-2 py-1 rounded">
-                          {template.dimensions}
-                        </span>
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                          <Button size="sm" variant="secondary" onClick={() => {
-                            setSelectedTemplate(template);
-                            setShowCreateDialog(true);
-                          }}>
-                            <Plus className="h-4 w-4 mr-1" />
-                            Usar
+                      <div className="h-40 bg-gradient-to-br from-gray-100 to-gray-200 rounded-t-lg flex items-center justify-center relative">
+                        {design.thumbnail ? (
+                          <img src={design.thumbnail} alt={design.name} className="w-full h-full object-cover rounded-t-lg" />
+                        ) : (
+                          <ImageIcon className="h-12 w-12 text-gray-300" />
+                        )}
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-t-lg flex items-center justify-center gap-2">
+                          <Button size="icon" variant="secondary">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="secondary">
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="destructive">
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
-                      <div className="p-3">
-                        <div className="flex items-center gap-2 mb-1">
-                          {getPlatformIcon(template.platform)}
-                          <p className="font-medium text-sm truncate">{template.name}</p>
+                      <div className="p-4">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-medium text-sm line-clamp-1">{design.name}</h4>
+                          <Badge variant={design.status === 'published' ? 'default' : 'secondary'}>
+                            {design.status === 'published' ? '✓' : '📝'}
+                          </Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground truncate">{template.description}</p>
+                        <p className="text-xs text-muted-foreground">{design.dimensions}</p>
                       </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
-            </div>
-          </TabsContent>
-
-          {/* Mis Diseños Tab */}
-          <TabsContent value="designs" className="space-y-6">
-            {SAMPLE_DESIGNS.length === 0 ? (
-              <Card className="border-dashed">
-                <CardContent className="py-12 text-center">
-                  <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No hay diseños todavía</h3>
-                  <p className="text-muted-foreground mb-4">Crea tu primer diseño usando una de nuestras plantillas</p>
-                  <Button onClick={() => setActiveTab('templates')}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Explorar Plantillas
-                  </Button>
-                </CardContent>
-              </Card>
             ) : (
-              <div className={viewMode === 'grid' ? 'grid gap-4 md:grid-cols-2 lg:grid-cols-4' : 'space-y-4'}>
-                {SAMPLE_DESIGNS.map(design => (
-                  <Card key={design.id} className="group hover:shadow-lg transition-all">
-                    {viewMode === 'grid' ? (
-                      <CardContent className="p-0">
-                        <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-t-lg flex items-center justify-center relative overflow-hidden">
-                          <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                          <Badge 
-                            variant={design.status === 'published' ? 'default' : 'secondary'}
-                            className="absolute top-2 right-2"
-                          >
-                            {design.status === 'published' ? 'Publicado' : 'Borrador'}
-                          </Badge>
-                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                            <Button size="icon" variant="secondary">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button size="icon" variant="secondary">
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button size="icon" variant="secondary">
-                              <Share2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="p-3">
-                          <p className="font-medium text-sm truncate">{design.name}</p>
-                          <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {design.createdAt}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Eye className="h-3 w-3" />
-                              {design.views}
-                            </span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    ) : (
-                      <CardContent className="flex items-center justify-between py-4">
-                        <div className="flex items-center gap-4">
-                          <div className="h-16 w-24 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded flex items-center justify-center">
-                            <ImageIcon className="h-6 w-6 text-muted-foreground" />
-                          </div>
-                          <div>
-                            <p className="font-medium">{design.name}</p>
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                {design.createdAt}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Eye className="h-3 w-3" />
-                                {design.views} vistas
-                              </span>
-                              <Badge variant={design.status === 'published' ? 'default' : 'secondary'}>
-                                {design.status === 'published' ? 'Publicado' : 'Borrador'}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button size="sm" variant="outline">
-                            <Edit className="h-4 w-4 mr-1" />
-                            Editar
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <Download className="h-4 w-4 mr-1" />
-                            Descargar
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <Share2 className="h-4 w-4 mr-1" />
-                            Compartir
-                          </Button>
-                        </div>
-                      </CardContent>
-                    )}
-                  </Card>
-                ))}
-              </div>
+              <EmptyDesigns onCreateNew={() => setShowCreateDialog(true)} />
             )}
           </TabsContent>
 
-          {/* Marca Tab */}
+          {/* Brand Tab */}
           <TabsContent value="brand" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Palette className="h-5 w-5" />
+                  <Sparkles className="h-5 w-5 text-purple-500" />
                   Kit de Marca Inmova
                 </CardTitle>
                 <CardDescription>
-                  Gestiona los elementos de tu marca para mantener consistencia en todos los diseños
+                  Elementos visuales de la marca para tus diseños
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Logo */}
-                <div>
-                  <h4 className="font-medium mb-3">Logo</h4>
-                  <div className="flex gap-4">
-                    <div className="h-24 w-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-2xl">
-                      IN
-                    </div>
-                    <div className="h-24 w-24 bg-white border rounded-lg flex items-center justify-center text-indigo-600 font-bold text-2xl">
-                      IN
-                    </div>
-                    <div className="h-24 w-24 bg-gray-900 rounded-lg flex items-center justify-center text-white font-bold text-2xl">
-                      IN
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Colores */}
-                <div>
-                  <h4 className="font-medium mb-3">Colores de Marca</h4>
-                  <div className="flex flex-wrap gap-3">
-                    <div className="text-center">
-                      <div className="h-16 w-16 rounded-lg bg-indigo-600" />
-                      <p className="text-xs mt-1">#4F46E5</p>
-                      <p className="text-xs text-muted-foreground">Principal</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="h-16 w-16 rounded-lg bg-purple-600" />
-                      <p className="text-xs mt-1">#9333EA</p>
-                      <p className="text-xs text-muted-foreground">Secundario</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="h-16 w-16 rounded-lg bg-emerald-500" />
-                      <p className="text-xs mt-1">#10B981</p>
-                      <p className="text-xs text-muted-foreground">Éxito</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="h-16 w-16 rounded-lg bg-amber-500" />
-                      <p className="text-xs mt-1">#F59E0B</p>
-                      <p className="text-xs text-muted-foreground">Alerta</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="h-16 w-16 rounded-lg bg-gray-900" />
-                      <p className="text-xs mt-1">#111827</p>
-                      <p className="text-xs text-muted-foreground">Texto</p>
+              <CardContent>
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Colores */}
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">Colores de Marca</h4>
+                    <div className="grid grid-cols-4 gap-2">
+                      <div className="space-y-1">
+                        <div className="h-12 w-full rounded-lg bg-violet-600"></div>
+                        <p className="text-xs text-center">#7C3AED</p>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="h-12 w-full rounded-lg bg-purple-500"></div>
+                        <p className="text-xs text-center">#A855F7</p>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="h-12 w-full rounded-lg bg-fuchsia-500"></div>
+                        <p className="text-xs text-center">#D946EF</p>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="h-12 w-full rounded-lg bg-slate-900"></div>
+                        <p className="text-xs text-center">#0F172A</p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <Separator />
+                  {/* Tipografía */}
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">Tipografía</h4>
+                    <div className="space-y-2">
+                      <div className="p-3 border rounded-lg">
+                        <p className="text-2xl font-bold">Inter Bold</p>
+                        <p className="text-xs text-muted-foreground">Títulos principales</p>
+                      </div>
+                      <div className="p-3 border rounded-lg">
+                        <p className="text-lg">Inter Regular</p>
+                        <p className="text-xs text-muted-foreground">Texto de cuerpo</p>
+                      </div>
+                    </div>
+                  </div>
 
-                {/* Tipografía */}
-                <div>
-                  <h4 className="font-medium mb-3">Tipografía</h4>
-                  <div className="space-y-3">
-                    <div className="p-4 border rounded-lg">
-                      <p className="text-2xl font-bold">Inter Bold</p>
-                      <p className="text-sm text-muted-foreground">Títulos y encabezados</p>
+                  {/* Logo */}
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">Logo</h4>
+                    <div className="flex gap-4">
+                      <div className="p-4 border rounded-lg bg-white flex items-center justify-center">
+                        <div className="h-12 w-12 bg-gradient-to-br from-violet-600 to-purple-500 rounded-lg flex items-center justify-center">
+                          <span className="text-white font-bold text-xl">i</span>
+                        </div>
+                      </div>
+                      <div className="p-4 border rounded-lg bg-slate-900 flex items-center justify-center">
+                        <div className="h-12 w-12 bg-white rounded-lg flex items-center justify-center">
+                          <span className="text-violet-600 font-bold text-xl">i</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="p-4 border rounded-lg">
-                      <p className="text-lg">Inter Regular</p>
-                      <p className="text-sm text-muted-foreground">Texto de cuerpo</p>
-                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Usa el logo en fondos claros u oscuros según el contexto
+                    </p>
+                  </div>
+
+                  {/* Estilo Visual */}
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">Estilo Visual</h4>
+                    <ul className="text-sm space-y-2 text-muted-foreground">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        Diseños limpios y modernos
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        Gradientes sutiles de violeta a púrpura
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        Fotografías de alta calidad de propiedades
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        Iconografía simple y consistente
+                      </li>
+                    </ul>
                   </div>
                 </div>
               </CardContent>
-              <CardFooter>
-                <Button variant="outline">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Editar Kit de Marca
-                </Button>
-              </CardFooter>
             </Card>
           </TabsContent>
         </Tabs>
 
-        {/* Quick Actions */}
-        <div className="fixed bottom-6 right-6">
-          <div className="flex flex-col gap-2">
-            <Button 
-              size="lg" 
-              className="rounded-full shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-              onClick={() => setShowCreateDialog(true)}
-            >
-              <Sparkles className="h-5 w-5 mr-2" />
-              Crear con IA
-            </Button>
-          </div>
-        </div>
+        {/* Dialog: Crear Diseño */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-purple-500" />
+                {selectedTemplate ? `Crear desde: ${selectedTemplate.name}` : 'Nuevo Diseño'}
+              </DialogTitle>
+              <DialogDescription>
+                {selectedTemplate 
+                  ? `Basado en la plantilla "${selectedTemplate.name}" (${selectedTemplate.dimensions})`
+                  : 'Crea un diseño personalizado desde cero'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Nombre del Diseño</Label>
+                <Input
+                  placeholder="Ej: Post Instagram - Propiedad Madrid"
+                  value={newDesignName}
+                  onChange={(e) => setNewDesignName(e.target.value)}
+                />
+              </div>
+
+              {!selectedTemplate && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Categoría</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona categoría" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TEMPLATE_CATEGORIES.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Dimensiones</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona tamaño" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1080x1080">1080x1080 (Instagram Post)</SelectItem>
+                        <SelectItem value="1080x1920">1080x1920 (Instagram Story)</SelectItem>
+                        <SelectItem value="1200x630">1200x630 (Facebook/LinkedIn)</SelectItem>
+                        <SelectItem value="1920x1080">1920x1080 (Presentación)</SelectItem>
+                        <SelectItem value="A4">A4 (Documento)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
+              {selectedTemplate && (
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="h-16 w-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center">
+                      <ImageIcon className="h-8 w-8 text-purple-300" />
+                    </div>
+                    <div>
+                      <p className="font-medium">{selectedTemplate.name}</p>
+                      <p className="text-sm text-muted-foreground">{selectedTemplate.description}</p>
+                      <p className="text-xs text-muted-foreground">{selectedTemplate.dimensions}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowCreateDialog(false);
+                  setSelectedTemplate(null);
+                  setNewDesignName('');
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                className="bg-gradient-to-r from-purple-500 to-pink-500"
+                onClick={createDesign}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Crear Diseño
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AuthenticatedLayout>
   );

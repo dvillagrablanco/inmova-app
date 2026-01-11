@@ -5,47 +5,49 @@ import { authOptions } from '@/lib/auth-options';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+/**
+ * GET /api/admin/canva/status
+ * Verifica el estado de conexión con Canva
+ */
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    // Solo super_admin puede ver el estado
-    const allowedRoles = ['super_admin', 'SUPER_ADMIN', 'superadmin', 'admin', 'ADMIN'];
-    const userRole = session?.user?.role?.toLowerCase();
-    
-    if (!session || !userRole || !allowedRoles.includes(userRole)) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    if (!session?.user) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    // Verificar si Canva está configurado
+    const userRole = (session.user as any).role;
+    if (!['super_admin', 'administrador'].includes(userRole)) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    }
+
+    // Verificar si hay credenciales de Canva configuradas
     const canvaClientId = process.env.CANVA_CLIENT_ID;
     const canvaClientSecret = process.env.CANVA_CLIENT_SECRET;
-    const canvaAccessToken = process.env.CANVA_ACCESS_TOKEN;
+    
+    const isConfigured = Boolean(
+      canvaClientId && 
+      canvaClientSecret && 
+      canvaClientId.length > 10 && 
+      !canvaClientId.includes('placeholder')
+    );
 
-    const configured = Boolean(canvaClientId && canvaClientSecret);
-    const connected = Boolean(canvaAccessToken);
-
+    // TODO: Verificar token de acceso válido si está configurado
+    // Por ahora, indicamos que no está conectado hasta que se configure
+    
     return NextResponse.json({
-      configured,
-      connected,
-      clientId: canvaClientId ? 'Configurado' : 'No configurado',
-      features: {
-        createDesigns: connected,
-        exportDesigns: connected,
-        brandKit: connected,
-        templates: true, // Plantillas locales siempre disponibles
-      },
-      pricing: {
-        plan: 'Canva Pro',
-        cost: '€11.99/mes',
-        features: ['Acceso API completo', 'Kit de marca', 'Plantillas premium'],
-      },
-      documentation: 'https://www.canva.dev/docs/connect/',
+      success: true,
+      configured: isConfigured,
+      connected: false, // Se actualizará cuando se implemente OAuth
+      message: isConfigured 
+        ? 'Canva configurado. Inicia sesión para conectar tu cuenta.'
+        : 'Canva no configurado. Añade las credenciales en el panel de integraciones.',
     });
   } catch (error: any) {
     console.error('[Canva Status Error]:', error);
     return NextResponse.json(
-      { error: 'Error obteniendo estado de Canva' },
+      { error: 'Error al verificar estado de Canva' },
       { status: 500 }
     );
   }

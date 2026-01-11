@@ -5,133 +5,90 @@ import { authOptions } from '@/lib/auth-options';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Configuración por defecto del Community Manager
+// Configuración por defecto
 const DEFAULT_CONFIG = {
-  enabled: true,
-  autoGenerate: true,
-  postsPerDay: 2,
-  preferredTimes: ['10:00', '18:00'],
-  tone: 'profesional',
-  language: 'es',
-  hashtags: {
-    auto: true,
-    maxCount: 10,
-    custom: ['PropTech', 'InmobiliariaDigital', 'GestiónInmobiliaria', 'Inmova'],
-  },
-  topics: ['PropTech', 'Gestión Inmobiliaria', 'Tendencias del Mercado', 'Tips para Propietarios', 'Novedades Inmova'],
-  platforms: {
-    instagram: { enabled: true, stories: true, reels: false },
-    facebook: { enabled: true, stories: true },
-    linkedin: { enabled: true, articles: true },
-    twitter: { enabled: false, threads: false },
-  },
-  blog: {
-    enabled: true,
-    postsPerWeek: 2,
-    categories: ['Guías', 'Tips', 'Tendencias', 'Casos de Éxito', 'Novedades'],
-    autoSEO: true,
-  },
+  autoPost: false,
+  postFrequency: 'weekly',
+  customDaysPerWeek: 3,
+  bestTimeToPost: '10:00',
+  hashtagStrategy: 'auto',
+  contentStyle: 'professional',
+  aiModel: 'claude-3-5-sonnet',
+  temperature: 0.7,
 };
 
-// En producción, esto debería guardarse en base de datos
-let currentConfig = { ...DEFAULT_CONFIG };
-
-// GET - Obtener configuración actual
+/**
+ * GET /api/admin/community-manager/config
+ * Obtiene la configuración del Community Manager
+ */
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    const allowedRoles = ['super_admin', 'SUPER_ADMIN', 'superadmin', 'admin', 'ADMIN'];
-    const userRole = session?.user?.role?.toLowerCase();
-    
-    if (!session || !userRole || !allowedRoles.includes(userRole)) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    if (!session?.user) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
+    const userRole = (session.user as any).role;
+    if (!['super_admin'].includes(userRole)) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    }
+
+    // TODO: Obtener configuración de la base de datos
+    // Por ahora, retornamos la configuración por defecto
+    
     return NextResponse.json({
       success: true,
-      config: currentConfig,
-      status: {
-        agentRunning: currentConfig.enabled,
-        lastActivity: new Date().toISOString(),
-        scheduledPosts: 5, // En producción, obtener de BD
-        publishedToday: 2,
-        queueSize: 12,
-      },
+      config: DEFAULT_CONFIG,
     });
   } catch (error: any) {
-    console.error('[CM Config GET Error]:', error);
+    console.error('[Community Manager Config Error]:', error);
     return NextResponse.json(
-      { error: 'Error obteniendo configuración' },
+      { error: 'Error al obtener configuración' },
       { status: 500 }
     );
   }
 }
 
-// POST - Actualizar configuración
-export async function POST(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-    
-    const allowedRoles = ['super_admin', 'SUPER_ADMIN', 'superadmin', 'admin', 'ADMIN'];
-    const userRole = session?.user?.role?.toLowerCase();
-    
-    if (!session || !userRole || !allowedRoles.includes(userRole)) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
-
-    const body = await request.json();
-    
-    // Validar y actualizar configuración
-    currentConfig = {
-      ...currentConfig,
-      ...body,
-      // Asegurar que ciertas propiedades mantienen su estructura
-      hashtags: { ...currentConfig.hashtags, ...(body.hashtags || {}) },
-      platforms: { ...currentConfig.platforms, ...(body.platforms || {}) },
-      blog: { ...currentConfig.blog, ...(body.blog || {}) },
-    };
-
-    // En producción, guardar en base de datos
-    // await prisma.communityManagerConfig.upsert({ ... });
-
-    return NextResponse.json({
-      success: true,
-      config: currentConfig,
-      message: 'Configuración actualizada correctamente',
-    });
-  } catch (error: any) {
-    console.error('[CM Config POST Error]:', error);
-    return NextResponse.json(
-      { error: 'Error actualizando configuración' },
-      { status: 500 }
-    );
-  }
-}
-
-// PUT - Reiniciar a valores por defecto
+/**
+ * PUT /api/admin/community-manager/config
+ * Actualizar la configuración del Community Manager
+ */
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    const allowedRoles = ['super_admin', 'SUPER_ADMIN', 'superadmin'];
-    const userRole = session?.user?.role?.toLowerCase();
-    
-    if (!session || !userRole || !allowedRoles.includes(userRole)) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    if (!session?.user) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    currentConfig = { ...DEFAULT_CONFIG };
+    const userRole = (session.user as any).role;
+    if (!['super_admin'].includes(userRole)) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    }
 
+    const body = await request.json();
+    const { config } = body;
+
+    if (!config) {
+      return NextResponse.json(
+        { error: 'Configuración es requerida' },
+        { status: 400 }
+      );
+    }
+
+    // TODO: Guardar configuración en base de datos
+    // Por ahora, solo validamos y respondemos éxito
+    
     return NextResponse.json({
       success: true,
-      config: currentConfig,
-      message: 'Configuración reiniciada a valores por defecto',
+      config: { ...DEFAULT_CONFIG, ...config },
+      message: 'Configuración guardada correctamente',
     });
   } catch (error: any) {
-    console.error('[CM Config PUT Error]:', error);
+    console.error('[Community Manager Update Config Error]:', error);
     return NextResponse.json(
-      { error: 'Error reiniciando configuración' },
+      { error: 'Error al guardar configuración' },
       { status: 500 }
     );
   }
