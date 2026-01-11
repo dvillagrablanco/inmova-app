@@ -65,7 +65,6 @@ import {
   Loader2,
   Tag,
   ShoppingBag,
-  Wrench,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
