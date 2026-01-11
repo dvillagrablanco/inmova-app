@@ -65,6 +65,7 @@ import {
   Loader2,
   Tag,
   ShoppingBag,
+  Bot,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -1170,6 +1171,23 @@ const superAdminPlatformItems: SidebarItem[] = [
       { name: '📁 Mis Diseños', href: '/admin/canva?tab=designs' },
       { name: '📐 Plantillas', href: '/admin/canva?tab=templates' },
       { name: '🎯 Kit de Marca', href: '/admin/canva?tab=brand' },
+    ],
+  },
+
+  // ========== 8.6 COMMUNITY MANAGER IA ==========
+  // Agente de IA para gestión de redes sociales y blog
+  {
+    name: 'Community Manager',
+    href: '/admin/community-manager',
+    icon: Bot,
+    roles: ['super_admin'],
+    badge: '🤖',
+    subItems: [
+      { name: '📊 Dashboard', href: '/admin/community-manager' },
+      { name: '📅 Calendario', href: '/admin/community-manager?tab=calendar' },
+      { name: '📝 Blog', href: '/admin/community-manager?tab=blog' },
+      { name: '🌐 Cuentas', href: '/admin/community-manager?tab=accounts' },
+      { name: '⚙️ Configuración', href: '/admin/community-manager?tab=settings' },
     ],
   },
 
