@@ -990,6 +990,7 @@ interface SidebarItem {
   href: string;
   icon: any;
   roles: string[];
+  badge?: string;
   subItems?: { name: string; href: string }[];
 }
 
@@ -1153,6 +1154,22 @@ const superAdminPlatformItems: SidebarItem[] = [
       { name: 'Plantillas SMS', href: '/admin/plantillas-sms' },
       { name: 'Notificaciones Masivas', href: '/admin/notificaciones-masivas' },
       { name: 'Reportes Programados', href: '/admin/reportes-programados' },
+    ],
+  },
+
+  // ========== 8.5 CONTENIDO Y DISEÑO ==========
+  // Herramientas para crear contenido visual y marketing
+  {
+    name: 'Canva Studio',
+    href: '/admin/canva',
+    icon: Palette,
+    roles: ['super_admin'],
+    badge: '✨',
+    subItems: [
+      { name: '🎨 Crear Diseño', href: '/admin/canva?action=create' },
+      { name: '📁 Mis Diseños', href: '/admin/canva?tab=designs' },
+      { name: '📐 Plantillas', href: '/admin/canva?tab=templates' },
+      { name: '🎯 Kit de Marca', href: '/admin/canva?tab=brand' },
     ],
   },
 
