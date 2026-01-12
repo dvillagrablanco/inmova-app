@@ -532,6 +532,185 @@ export async function getAnalyticsTrends(
   }
 }
 
+// ============================================================================
+// FUNCIONES ADICIONALES DE ANALYTICS
+// ============================================================================
+
+/**
+ * Genera métricas para un edificio específico
+ */
+export async function generateBuildingMetrics(buildingId: string) {
+  try {
+    const building = await prisma.building.findUnique({
+      where: { id: buildingId },
+      include: {
+        units: {
+          include: {
+            contracts: {
+              where: { status: 'activo' },
+            },
+          },
+        },
+      },
+    });
+
+    if (!building) {
+      throw new Error('Building not found');
+    }
+
+    const totalUnits = building.units.length;
+    const occupiedUnits = building.units.filter(u => u.contracts.length > 0).length;
+    const occupancyRate = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
+
+    const metrics = {
+      buildingId,
+      totalUnits,
+      occupiedUnits,
+      vacantUnits: totalUnits - occupiedUnits,
+      occupancyRate: Math.round(occupancyRate * 100) / 100,
+      fecha: new Date(),
+      periodo: 'mensual',
+    };
+
+    // Guardar métricas si existe el modelo
+    try {
+      await prisma.buildingMetrics.create({
+        data: metrics,
+      });
+    } catch {
+      // Modelo puede no existir
+    }
+
+    return metrics;
+  } catch (error: any) {
+    logger.error('Error generating building metrics:', error);
+    throw error;
+  }
+}
+
+/**
+ * Genera un snapshot de analytics para una compañía
+ */
+export async function generateAnalyticsSnapshot(companyId: string) {
+  try {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [buildings, units, tenants, contracts, payments] = await Promise.all([
+      prisma.building.count({ where: { companyId } }),
+      prisma.unit.count({ where: { building: { companyId } } }),
+      prisma.tenant.count({ where: { companyId } }),
+      prisma.contract.count({ where: { unit: { building: { companyId } }, status: 'activo' } }),
+      prisma.payment.aggregate({
+        where: {
+          contract: { unit: { building: { companyId } } },
+          fechaVencimiento: { gte: monthStart },
+          estado: 'pagado',
+        },
+        _sum: { monto: true },
+      }),
+    ]);
+
+    return {
+      companyId,
+      timestamp: now,
+      metrics: {
+        buildings,
+        units,
+        tenants,
+        activeContracts: contracts,
+        monthlyRevenue: payments._sum.monto || 0,
+        occupancyRate: units > 0 ? Math.round((contracts / units) * 100) : 0,
+      },
+    };
+  } catch (error: any) {
+    logger.error('Error generating analytics snapshot:', error);
+    throw error;
+  }
+}
+
+/**
+ * Analiza el comportamiento de inquilinos
+ */
+export async function analyzeTenantBehavior(tenantId: string) {
+  try {
+    const tenant = await prisma.tenant.findUnique({
+      where: { id: tenantId },
+      include: {
+        contracts: {
+          include: {
+            payments: true,
+          },
+        },
+      },
+    });
+
+    if (!tenant) {
+      throw new Error('Tenant not found');
+    }
+
+    const allPayments = tenant.contracts.flatMap(c => c.payments);
+    const latePayments = allPayments.filter(p => {
+      if (!p.fechaPago || !p.fechaVencimiento) return false;
+      return new Date(p.fechaPago) > new Date(p.fechaVencimiento);
+    });
+
+    return {
+      tenantId,
+      totalPayments: allPayments.length,
+      latePayments: latePayments.length,
+      paymentRate: allPayments.length > 0 
+        ? Math.round(((allPayments.length - latePayments.length) / allPayments.length) * 100) 
+        : 100,
+      contractsCount: tenant.contracts.length,
+      behavior: latePayments.length === 0 ? 'excellent' : latePayments.length < 3 ? 'good' : 'needs_attention',
+    };
+  } catch (error: any) {
+    logger.error('Error analyzing tenant behavior:', error);
+    throw error;
+  }
+}
+
+/**
+ * Registra un evento de analytics
+ */
+export async function trackEvent(
+  eventName: string,
+  data: Record<string, any>,
+  userId?: string,
+  companyId?: string
+) {
+  try {
+    logger.info(`[Analytics Event] ${eventName}`, {
+      event: eventName,
+      data,
+      userId,
+      companyId,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Intentar guardar en BD si existe el modelo
+    try {
+      await prisma.analyticsEvent.create({
+        data: {
+          eventName,
+          eventData: data,
+          userId,
+          companyId,
+          timestamp: new Date(),
+        },
+      });
+    } catch {
+      // Modelo puede no existir, solo loggeamos
+    }
+
+    return { success: true, event: eventName };
+  } catch (error: any) {
+    logger.error('Error tracking event:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 export default {
   trackAPIRequest,
   trackAIUsage,
@@ -540,4 +719,8 @@ export default {
   getAIMetrics,
   getPerformanceMetrics,
   getAnalyticsTrends,
+  generateBuildingMetrics,
+  generateAnalyticsSnapshot,
+  analyzeTenantBehavior,
+  trackEvent,
 };

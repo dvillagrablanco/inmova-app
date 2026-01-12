@@ -486,7 +486,58 @@ export async function saveMatches(
   }
 }
 
+/**
+ * Obtiene matches existentes para un inquilino
+ */
+export async function getTenantMatches(
+  tenantId: string,
+  companyId: string,
+  options?: {
+    limit?: number;
+    minScore?: number;
+    status?: string;
+  }
+): Promise<PropertyMatch[]> {
+  try {
+    const matches = await prisma.tenantPropertyMatch.findMany({
+      where: {
+        tenantId,
+        companyId,
+        ...(options?.minScore && { matchScore: { gte: options.minScore } }),
+        ...(options?.status && { status: options.status }),
+      },
+      orderBy: { matchScore: 'desc' },
+      take: options?.limit || 10,
+      include: {
+        unit: {
+          include: {
+            building: true,
+          },
+        },
+      },
+    });
+
+    return matches.map(m => ({
+      unitId: m.unitId,
+      tenantId: m.tenantId,
+      matchScore: m.matchScore,
+      locationScore: m.locationScore || 0,
+      priceScore: m.priceScore || 0,
+      featuresScore: m.featuresScore || 0,
+      sizeScore: m.sizeScore || 0,
+      availabilityScore: m.availabilityScore || 0,
+      pros: m.pros as string[],
+      cons: m.cons as string[],
+      aiRecommendation: m.aiRecommendation || undefined,
+    }));
+  } catch (error: any) {
+    logger.error('Error getting tenant matches:', error);
+    return [];
+  }
+}
+
 export default {
   findBestMatches,
   saveMatches,
+  getTenantMatches,
 };

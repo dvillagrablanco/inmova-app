@@ -77,6 +77,12 @@ export async function closeRedisClient(): Promise<void> {
 }
 
 /**
+ * Get Redis client instance
+ * Export como 'redis' para compatibilidad con código existente
+ */
+export const redis = getRedisClient();
+
+/**
  * Get Redis client (alias)
  */
 export default getRedisClient;
