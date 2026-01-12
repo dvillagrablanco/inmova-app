@@ -41,9 +41,82 @@ import {
   Image as ImageIcon,
   Eye,
   Settings,
+  Sparkles,
+  Check,
+  Wand2,
 } from 'lucide-react';
 import { useBranding } from '@/lib/hooks/useBranding';
 import logger, { logError } from '@/lib/logger';
+
+// Presets de colores predefinidos para facilitar la personalización
+const COLOR_PRESETS = [
+  {
+    name: 'Profesional Azul',
+    description: 'Transmite confianza y seriedad',
+    colors: {
+      primaryColor: '#2563eb',
+      secondaryColor: '#1e40af',
+      accentColor: '#3b82f6',
+      backgroundColor: '#ffffff',
+      textColor: '#1f2937',
+    },
+  },
+  {
+    name: 'Moderno Verde',
+    description: 'Ideal para inmobiliarias sostenibles',
+    colors: {
+      primaryColor: '#059669',
+      secondaryColor: '#047857',
+      accentColor: '#10b981',
+      backgroundColor: '#ffffff',
+      textColor: '#1f2937',
+    },
+  },
+  {
+    name: 'Elegante Púrpura',
+    description: 'Estilo premium y sofisticado',
+    colors: {
+      primaryColor: '#7c3aed',
+      secondaryColor: '#6d28d9',
+      accentColor: '#8b5cf6',
+      backgroundColor: '#ffffff',
+      textColor: '#1f2937',
+    },
+  },
+  {
+    name: 'Cálido Naranja',
+    description: 'Cercano y amigable',
+    colors: {
+      primaryColor: '#ea580c',
+      secondaryColor: '#c2410c',
+      accentColor: '#f97316',
+      backgroundColor: '#ffffff',
+      textColor: '#1f2937',
+    },
+  },
+  {
+    name: 'Oscuro Elegante',
+    description: 'Moderno y minimalista',
+    colors: {
+      primaryColor: '#18181b',
+      secondaryColor: '#27272a',
+      accentColor: '#a1a1aa',
+      backgroundColor: '#fafafa',
+      textColor: '#18181b',
+    },
+  },
+  {
+    name: 'Rojo Corporativo',
+    description: 'Energía y dinamismo',
+    colors: {
+      primaryColor: '#dc2626',
+      secondaryColor: '#b91c1c',
+      accentColor: '#ef4444',
+      backgroundColor: '#ffffff',
+      textColor: '#1f2937',
+    },
+  },
+];
 
 interface BrandingFormData {
   // Identidad
@@ -450,12 +523,76 @@ export default function PersonalizacionPage() {
 
             {/* TAB: Colores */}
             <TabsContent value="colores" className="space-y-6">
+              {/* Presets de Colores - Para usuarios no expertos */}
+              <Card className="border-2 border-dashed border-primary/30 bg-primary/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Wand2 className="h-5 w-5 text-primary" />
+                    Estilos Predefinidos
+                  </CardTitle>
+                  <CardDescription>
+                    Selecciona un estilo predefinido para aplicar automáticamente una paleta de colores profesional
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                    {COLOR_PRESETS.map((preset) => {
+                      const isSelected = formData.primaryColor === preset.colors.primaryColor;
+                      return (
+                        <button
+                          key={preset.name}
+                          type="button"
+                          onClick={() => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              ...preset.colors,
+                            }));
+                            toast.success(`Estilo "${preset.name}" aplicado`);
+                          }}
+                          className={`relative p-3 rounded-lg border-2 transition-all hover:scale-105 ${
+                            isSelected
+                              ? 'border-primary ring-2 ring-primary/30'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          {isSelected && (
+                            <div className="absolute -top-2 -right-2 h-5 w-5 bg-primary rounded-full flex items-center justify-center">
+                              <Check className="h-3 w-3 text-white" />
+                            </div>
+                          )}
+                          <div className="flex gap-1 mb-2">
+                            <div
+                              className="h-6 w-6 rounded-full border"
+                              style={{ backgroundColor: preset.colors.primaryColor }}
+                            />
+                            <div
+                              className="h-6 w-6 rounded-full border"
+                              style={{ backgroundColor: preset.colors.secondaryColor }}
+                            />
+                            <div
+                              className="h-6 w-6 rounded-full border"
+                              style={{ backgroundColor: preset.colors.accentColor }}
+                            />
+                          </div>
+                          <p className="text-xs font-medium text-center">{preset.name}</p>
+                          <p className="text-[10px] text-muted-foreground text-center mt-1">
+                            {preset.description}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
-                  <CardTitle>Paleta de Colores</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Palette className="h-5 w-5" />
+                    Personalización Avanzada
+                  </CardTitle>
                   <CardDescription>
-                    Personaliza los colores de tu aplicación. Los cambios se aplicarán en toda la
-                    interfaz.
+                    Ajusta los colores manualmente si prefieres un control más preciso
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

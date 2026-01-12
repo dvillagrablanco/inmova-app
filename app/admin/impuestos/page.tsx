@@ -144,36 +144,65 @@ function EmptyState({ message, onAction, actionLabel }: { message: string; onAct
   );
 }
 
-// Lista de modelos tributarios (referencia estática)
+// Lista de modelos tributarios (referencia estática) - Filtrados por tipo de persona
 const MODELOS_TRIBUTARIOS: ModeloTributario[] = [
+  // === MODELOS PARA PERSONA FÍSICA ===
   {
     codigo: '100',
     nombre: 'IRPF - Declaración anual',
-    descripcion: 'Impuesto sobre la Renta de las Personas Físicas',
-    periodicidad: 'Anual',
+    descripcion: 'Impuesto sobre la Renta de las Personas Físicas. Obligatorio si tienes ingresos por alquiler.',
+    periodicidad: 'Anual (abril-junio)',
     tipoPersona: 'fisica',
     urlAEAT: 'https://sede.agenciatributaria.gob.es/Sede/procedimientoini/GI34.shtml',
   },
   {
+    codigo: '130',
+    nombre: 'IRPF - Pago fraccionado',
+    descripcion: 'Pago fraccionado del IRPF para arrendadores en estimación directa',
+    periodicidad: 'Trimestral',
+    tipoPersona: 'fisica',
+    urlAEAT: 'https://sede.agenciatributaria.gob.es/Sede/procedimientoini/GI00.shtml',
+  },
+  
+  // === MODELOS PARA PERSONA JURÍDICA ===
+  {
+    codigo: '200',
+    nombre: 'Impuesto de Sociedades',
+    descripcion: 'Declaración anual del Impuesto sobre Sociedades. Obligatorio para empresas.',
+    periodicidad: 'Anual (julio)',
+    tipoPersona: 'juridica',
+    urlAEAT: 'https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G414.shtml',
+  },
+  {
+    codigo: '202',
+    nombre: 'IS - Pago fraccionado',
+    descripcion: 'Pagos fraccionados del Impuesto de Sociedades',
+    periodicidad: 'Trimestral',
+    tipoPersona: 'juridica',
+    urlAEAT: 'https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G417.shtml',
+  },
+  
+  // === MODELOS COMUNES (AMBOS) ===
+  {
     codigo: '115',
     nombre: 'IRPF - Retenciones alquileres',
-    descripcion: 'Retenciones sobre rendimientos de arrendamientos',
+    descripcion: 'Retenciones sobre rendimientos de arrendamientos de inmuebles urbanos',
     periodicidad: 'Trimestral',
     tipoPersona: 'ambos',
     urlAEAT: 'https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G604.shtml',
   },
   {
-    codigo: '200',
-    nombre: 'Impuesto de Sociedades',
-    descripcion: 'Declaración anual del Impuesto sobre Sociedades',
-    periodicidad: 'Anual',
-    tipoPersona: 'juridica',
-    urlAEAT: 'https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G414.shtml',
+    codigo: '180',
+    nombre: 'Resumen anual retenciones',
+    descripcion: 'Declaración informativa de retenciones sobre alquileres',
+    periodicidad: 'Anual (enero)',
+    tipoPersona: 'ambos',
+    urlAEAT: 'https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G604.shtml',
   },
   {
     codigo: '303',
     nombre: 'IVA - Autoliquidación',
-    descripcion: 'Impuesto sobre el Valor Añadido',
+    descripcion: 'Impuesto sobre el Valor Añadido. Solo si alquilas locales comerciales o plazas de garaje.',
     periodicidad: 'Trimestral',
     tipoPersona: 'ambos',
     urlAEAT: 'https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G411.shtml',
@@ -181,16 +210,16 @@ const MODELOS_TRIBUTARIOS: ModeloTributario[] = [
   {
     codigo: '347',
     nombre: 'Operaciones con terceros',
-    descripcion: 'Declaración anual de operaciones con terceras personas',
-    periodicidad: 'Anual',
+    descripcion: 'Declaración anual si tienes operaciones >3.005,06€ con un mismo tercero',
+    periodicidad: 'Anual (febrero)',
     tipoPersona: 'ambos',
     urlAEAT: 'https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G604.shtml',
   },
   {
     codigo: '390',
     nombre: 'IVA - Resumen anual',
-    descripcion: 'Declaración-resumen anual del IVA',
-    periodicidad: 'Anual',
+    descripcion: 'Declaración-resumen anual del IVA. Solo si presentas modelo 303.',
+    periodicidad: 'Anual (enero)',
     tipoPersona: 'ambos',
     urlAEAT: 'https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G417.shtml',
   },
@@ -801,13 +830,39 @@ export default function ImpuestosPage() {
 
           {/* Tab: Modelos */}
           <TabsContent value="modelos" className="space-y-6">
+            {/* Información sobre el tipo de perfil */}
+            <Card className={tipoPersona === 'fisica' ? 'border-blue-200 bg-blue-50' : 'border-purple-200 bg-purple-50'}>
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-3">
+                  {tipoPersona === 'fisica' ? (
+                    <User className="h-6 w-6 text-blue-600" />
+                  ) : (
+                    <Briefcase className="h-6 w-6 text-purple-600" />
+                  )}
+                  <div>
+                    <h4 className={`font-medium ${tipoPersona === 'fisica' ? 'text-blue-900' : 'text-purple-900'}`}>
+                      Mostrando modelos para: {tipoPersona === 'fisica' ? 'Persona Física' : 'Persona Jurídica'}
+                    </h4>
+                    <p className={`text-sm ${tipoPersona === 'fisica' ? 'text-blue-700' : 'text-purple-700'}`}>
+                      {tipoPersona === 'fisica' 
+                        ? 'Autónomos, particulares y profesionales que alquilan inmuebles' 
+                        : 'Sociedades limitadas, anónimas y otras entidades mercantiles'}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileSpreadsheet className="h-5 w-5 text-blue-500" />
                   Modelos Tributarios
                 </CardTitle>
-                <CardDescription>Referencia de modelos aplicables para {tipoPersona === 'fisica' ? 'persona física' : 'persona jurídica'}</CardDescription>
+                <CardDescription>
+                  {MODELOS_TRIBUTARIOS.filter(m => m.tipoPersona === 'ambos' || m.tipoPersona === tipoPersona).length} modelos 
+                  aplicables para tu perfil fiscal
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -816,16 +871,42 @@ export default function ImpuestosPage() {
                     .map((modelo) => (
                       <div
                         key={modelo.codigo}
-                        className="flex items-center justify-between p-4 rounded-lg border"
+                        className="flex items-center justify-between p-4 rounded-lg border hover:bg-gray-50 transition-colors"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                          <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${
+                            modelo.tipoPersona === 'fisica' 
+                              ? 'bg-gradient-to-br from-blue-500 to-blue-600' 
+                              : modelo.tipoPersona === 'juridica'
+                                ? 'bg-gradient-to-br from-purple-500 to-purple-600'
+                                : 'bg-gradient-to-br from-emerald-500 to-teal-500'
+                          }`}>
                             <span className="text-white font-bold text-sm">{modelo.codigo}</span>
                           </div>
                           <div>
-                            <h4 className="font-semibold">{modelo.nombre}</h4>
-                            <p className="text-sm text-muted-foreground">{modelo.descripcion}</p>
-                            <Badge variant="outline" className="mt-1">{modelo.periodicidad}</Badge>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-semibold">{modelo.nombre}</h4>
+                              {modelo.tipoPersona === 'fisica' && (
+                                <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                                  <User className="h-3 w-3 mr-1" /> Solo P. Física
+                                </Badge>
+                              )}
+                              {modelo.tipoPersona === 'juridica' && (
+                                <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
+                                  <Briefcase className="h-3 w-3 mr-1" /> Solo Sociedades
+                                </Badge>
+                              )}
+                              {modelo.tipoPersona === 'ambos' && (
+                                <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
+                                  ✓ Ambos
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground max-w-xl">{modelo.descripcion}</p>
+                            <Badge variant="outline" className="mt-1">
+                              <CalendarIcon className="h-3 w-3 mr-1" />
+                              {modelo.periodicidad}
+                            </Badge>
                           </div>
                         </div>
                         <Button

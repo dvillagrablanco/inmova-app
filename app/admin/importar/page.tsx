@@ -171,15 +171,28 @@ export default function ImportarPage() {
     return null;
   }
 
+  // Formatos de archivo soportados
+  const SUPPORTED_FORMATS = ['.csv', '.xlsx', '.xls', '.json', '.xml'];
+  
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      if (!selectedFile.name.endsWith('.csv')) {
-        toast.error('Por favor selecciona un archivo CSV');
+      const fileName = selectedFile.name.toLowerCase();
+      const isSupported = SUPPORTED_FORMATS.some(format => fileName.endsWith(format));
+      
+      if (!isSupported) {
+        toast.error(`Formato no soportado. Usa: ${SUPPORTED_FORMATS.join(', ')}`);
         return;
       }
       setFile(selectedFile);
       setCurrentStep('validate');
+      
+      // Mensaje de información según el formato
+      if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+        toast.info('Archivo Excel detectado. Se convertirá automáticamente.');
+      } else if (fileName.endsWith('.json')) {
+        toast.info('Archivo JSON detectado. Asegúrate de que sigue el esquema esperado.');
+      }
     }
   };
 
@@ -427,6 +440,9 @@ export default function ImportarPage() {
             <Upload className="h-5 w-5" />
             Subir Archivo
           </CardTitle>
+          <CardDescription>
+            Formatos soportados: CSV, Excel (.xlsx, .xls), JSON, XML
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -434,14 +450,20 @@ export default function ImportarPage() {
               <Input
                 id="file"
                 type="file"
-                accept=".csv"
+                accept=".csv,.xlsx,.xls,.json,.xml"
                 onChange={handleFileChange}
                 className="hidden"
               />
               <label htmlFor="file" className="cursor-pointer">
                 <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-sm font-medium">Click para seleccionar archivo CSV</p>
-                <p className="text-xs text-muted-foreground mt-1">o arrastra y suelta aquí</p>
+                <p className="text-sm font-medium">Click para seleccionar archivo</p>
+                <p className="text-xs text-muted-foreground mt-1">CSV, Excel, JSON o XML</p>
+                <div className="flex justify-center gap-2 mt-3">
+                  <Badge variant="outline" className="text-xs">📄 CSV</Badge>
+                  <Badge variant="outline" className="text-xs">📊 Excel</Badge>
+                  <Badge variant="outline" className="text-xs">📋 JSON</Badge>
+                  <Badge variant="outline" className="text-xs">📁 XML</Badge>
+                </div>
               </label>
             </div>
             {file && (
@@ -465,6 +487,33 @@ export default function ImportarPage() {
                 </Button>
               </div>
             )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Opción OCR para documentos escaneados */}
+      <Card className="border-amber-200 bg-amber-50">
+        <CardContent className="pt-4">
+          <div className="flex items-start gap-3">
+            <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+              <Eye className="h-5 w-5 text-amber-600" />
+            </div>
+            <div className="flex-1">
+              <h4 className="font-medium text-amber-900">¿Tienes documentos escaneados o en PDF?</h4>
+              <p className="text-sm text-amber-700 mt-1">
+                Usa nuestro sistema OCR para extraer datos automáticamente de documentos escaneados, 
+                contratos en PDF o imágenes de facturas.
+              </p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-3 border-amber-300 hover:bg-amber-100"
+                onClick={() => window.location.href = '/admin/ocr-import'}
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Ir a importación con OCR
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

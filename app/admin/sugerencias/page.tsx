@@ -36,7 +36,18 @@ import {
   Clock,
   Eye,
   MessageSquare,
+  Trash2,
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { PageHeader } from '@/components/ui/page-header';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -73,6 +84,11 @@ export default function SugerenciasAdminPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [respuesta, setRespuesta] = useState('');
   const [sending, setSending] = useState(false);
+  
+  // Estado para eliminar
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [suggestionToDelete, setSuggestionToDelete] = useState<Suggestion | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Filtros
   const [estadoFilter, setEstadoFilter] = useState<string>('all');
@@ -180,6 +196,37 @@ export default function SugerenciasAdminPage() {
     };
     const Icon = icons[categoria] || AlertTriangle;
     return <Icon className="h-4 w-4" />;
+  };
+
+  // Función para eliminar sugerencia
+  const handleDeleteSuggestion = async () => {
+    if (!suggestionToDelete) return;
+
+    setDeleting(true);
+    try {
+      const response = await fetch(`/api/suggestions/${suggestionToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Error al eliminar sugerencia');
+
+      toast.success('Sugerencia eliminada correctamente');
+      setDeleteDialogOpen(false);
+      setSuggestionToDelete(null);
+      fetchSuggestions();
+    } catch (error: any) {
+      logger.error('Error:', error);
+      toast.error('Error al eliminar', {
+        description: error.message,
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const openDeleteDialog = (suggestion: Suggestion) => {
+    setSuggestionToDelete(suggestion);
+    setDeleteDialogOpen(true);
   };
 
   if (loading) {
@@ -309,20 +356,53 @@ export default function SugerenciasAdminPage() {
                           </div>
                         </div>
 
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleOpenDialog(suggestion)}
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          Ver Detalles
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenDialog(suggestion)}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ver Detalles
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openDeleteDialog(suggestion)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
                 ))
               )}
             </div>
+
+            {/* Dialog de Confirmación de Eliminación */}
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Eliminar esta sugerencia?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Estás a punto de eliminar la sugerencia "{suggestionToDelete?.titulo}". 
+                    Esta acción no se puede deshacer.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteSuggestion}
+                    disabled={deleting}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    {deleting ? 'Eliminando...' : 'Eliminar'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
 
             {/* Dialog de Detalles */}
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
