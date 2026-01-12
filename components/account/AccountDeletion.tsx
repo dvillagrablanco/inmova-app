@@ -223,11 +223,17 @@ export function AccountDeletion() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Motivo de baja */}
+              {/* Motivo de baja - Requerido para mejorar el servicio */}
               <div className="space-y-2">
-                <Label htmlFor="reason">¿Por qué te vas? (opcional)</Label>
+                <Label htmlFor="reason" className="flex items-center gap-1">
+                  ¿Por qué te vas?
+                  <span className="text-red-500">*</span>
+                </Label>
+                <p className="text-xs text-gray-500 mb-2">
+                  Tu respuesta nos ayuda a mejorar la plataforma para todos los usuarios
+                </p>
                 <Select value={reason} onValueChange={setReason}>
-                  <SelectTrigger>
+                  <SelectTrigger className={!reason ? 'border-orange-300' : ''}>
                     <SelectValue placeholder="Selecciona un motivo" />
                   </SelectTrigger>
                   <SelectContent>
@@ -242,12 +248,15 @@ export function AccountDeletion() {
 
               {/* Feedback adicional */}
               <div className="space-y-2">
-                <Label htmlFor="feedback">¿Algo que podamos mejorar? (opcional)</Label>
+                <Label htmlFor="feedback">¿Algo más que podamos mejorar? (opcional)</Label>
+                <p className="text-xs text-gray-500 mb-2">
+                  Tu feedback es muy valioso y será revisado por nuestro equipo
+                </p>
                 <Textarea
                   id="feedback"
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
-                  placeholder="Tu opinión nos ayuda a mejorar..."
+                  placeholder="Cuéntanos qué podríamos hacer mejor..."
                   rows={3}
                 />
               </div>
@@ -255,7 +264,13 @@ export function AccountDeletion() {
               <Button
                 variant="destructive"
                 className="w-full"
-                onClick={() => setShowConfirmDialog(true)}
+                onClick={() => {
+                  if (!reason) {
+                    toast.error('Por favor, selecciona un motivo para continuar');
+                    return;
+                  }
+                  setShowConfirmDialog(true);
+                }}
               >
                 <AlertTriangle className="w-4 h-4 mr-2" />
                 Solicitar baja de cuenta

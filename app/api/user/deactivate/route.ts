@@ -8,6 +8,73 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Mapeo de códigos de motivo a texto legible
+const REASON_LABELS: Record<string, string> = {
+  not_using: 'Ya no usa la aplicación',
+  too_expensive: 'Precio demasiado alto',
+  found_alternative: 'Encontró otra alternativa',
+  missing_features: 'Faltan funciones necesarias',
+  too_complicated: 'Demasiado complicada de usar',
+  temporary: 'Baja temporal',
+  other: 'Otro motivo',
+};
+
+/**
+ * Notifica a todos los super administradores sobre una baja de usuario
+ */
+async function notifySuperAdmins(
+  user: { id: string; email: string; name: string; companyId: string },
+  companyName: string,
+  reason: string | null,
+  feedback: string | null
+) {
+  try {
+    // Buscar todos los super_admin activos
+    const superAdmins = await prisma.user.findMany({
+      where: {
+        role: 'super_admin',
+        activo: true,
+      },
+      select: {
+        id: true,
+        companyId: true,
+      },
+    });
+
+    if (superAdmins.length === 0) {
+      logger.warn('No super admins found to notify about user deactivation');
+      return;
+    }
+
+    const reasonText = reason ? (REASON_LABELS[reason] || reason) : 'No especificado';
+    const feedbackText = feedback ? `\n\nComentario del usuario: "${feedback}"` : '';
+
+    // Crear notificación para cada super_admin
+    const notifications = superAdmins.map((admin) => ({
+      companyId: admin.companyId,
+      userId: admin.id,
+      tipo: 'alerta_sistema' as const,
+      titulo: `⚠️ Baja de usuario: ${user.name}`,
+      mensaje: `El usuario ${user.name} (${user.email}) de la empresa "${companyName}" se ha dado de baja.\n\n📋 Motivo: ${reasonText}${feedbackText}\n\n💡 Esta información puede ser útil para mejorar la plataforma.`,
+      prioridad: 'medio' as const,
+      entityId: user.id,
+      entityType: 'USER_DEACTIVATION',
+    }));
+
+    await prisma.notification.createMany({
+      data: notifications,
+    });
+
+    logger.info('Super admins notified about user deactivation', {
+      userId: user.id,
+      notifiedCount: superAdmins.length,
+    });
+  } catch (error) {
+    // No fallar la baja si falla la notificación
+    logger.error('Error notifying super admins about deactivation:', error);
+  }
+}
+
 /**
  * POST /api/user/deactivate
  * Permite a cualquier usuario darse de baja de la aplicación
@@ -98,9 +165,12 @@ export async function POST(request: NextRequest) {
         entityId: user.id,
         details: {
           reason: reason || 'No especificado',
+          reasonLabel: reason ? (REASON_LABELS[reason] || reason) : 'No especificado',
           feedback: feedback || null,
           email: user.email,
+          userName: user.name,
           companyId: user.companyId,
+          companyName: user.company?.nombre || 'Empresa desconocida',
           deactivatedAt: new Date().toISOString(),
         },
       },
@@ -124,6 +194,14 @@ export async function POST(request: NextRequest) {
     await prisma.pushSubscription.deleteMany({
       where: { userId: user.id },
     });
+
+    // 🔔 Notificar a los super administradores sobre la baja
+    await notifySuperAdmins(
+      { id: user.id, email: user.email, name: user.name, companyId: user.companyId },
+      user.company?.nombre || 'Empresa desconocida',
+      reason,
+      feedback
+    );
 
     logger.info('User deactivated successfully', {
       userId: user.id,
