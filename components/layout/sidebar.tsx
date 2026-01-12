@@ -219,6 +219,47 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/comercial/visitas': 'alquiler_comercial',
   '/comercial/analytics': 'alquiler_comercial',
   '/comercial/espacios': 'alquiler_comercial',
+  // Student Housing
+  '/student-housing': 'student_housing',
+  '/student-housing/dashboard': 'student_housing',
+  '/student-housing/residentes': 'student_housing',
+  '/student-housing/habitaciones': 'student_housing',
+  '/student-housing/aplicaciones': 'student_housing',
+  '/student-housing/actividades': 'student_housing',
+  '/student-housing/pagos': 'student_housing',
+  '/student-housing/mantenimiento': 'student_housing',
+  // Viajes Corporativos
+  '/viajes-corporativos': 'viajes_corporativos',
+  '/viajes-corporativos/dashboard': 'viajes_corporativos',
+  '/viajes-corporativos/bookings': 'viajes_corporativos',
+  '/viajes-corporativos/guests': 'viajes_corporativos',
+  '/viajes-corporativos/expense-reports': 'viajes_corporativos',
+  '/viajes-corporativos/policies': 'viajes_corporativos',
+  // Vivienda Social
+  '/vivienda-social': 'vivienda_social',
+  '/vivienda-social/dashboard': 'vivienda_social',
+  '/vivienda-social/applications': 'vivienda_social',
+  '/vivienda-social/eligibility': 'vivienda_social',
+  '/vivienda-social/compliance': 'vivienda_social',
+  '/vivienda-social/reporting': 'vivienda_social',
+  // Real Estate Developer
+  '/real-estate-developer': 'real_estate_developer',
+  '/real-estate-developer/dashboard': 'real_estate_developer',
+  '/real-estate-developer/projects': 'real_estate_developer',
+  '/real-estate-developer/sales': 'real_estate_developer',
+  '/real-estate-developer/marketing': 'real_estate_developer',
+  '/real-estate-developer/commercial': 'real_estate_developer',
+  // Workspace
+  '/workspace': 'workspace',
+  '/workspace/dashboard': 'workspace',
+  '/workspace/coworking': 'workspace',
+  '/workspace/booking': 'workspace',
+  '/workspace/members': 'workspace',
+  // Warehouse
+  '/warehouse': 'warehouse',
+  '/warehouse/inventory': 'warehouse',
+  '/warehouse/locations': 'warehouse',
+  '/warehouse/movements': 'warehouse',
 };
 
 // Módulos core que siempre deben mostrarse (esCore: true)
@@ -292,6 +333,12 @@ const CORE_MODULES = [
   'construccion_dashboard',
   'ewoorker',
   'professional_projects',
+  'student_housing',
+  'viajes_corporativos',
+  'vivienda_social',
+  'real_estate_developer',
+  'workspace',
+  'warehouse',
   'str_listings',
   'str_bookings',
   'str_channels',
@@ -716,6 +763,210 @@ const adminFincasItems = [
     name: 'Finanzas',
     href: '/comunidades/finanzas',
     icon: Euro,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+];
+
+// 2.8 STUDENT HOUSING - Residencias de estudiantes
+const studentHousingNavItems = [
+  {
+    name: 'Dashboard',
+    href: '/student-housing/dashboard',
+    icon: LayoutDashboard,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Residentes',
+    href: '/student-housing/residentes',
+    icon: Users,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Habitaciones',
+    href: '/student-housing/habitaciones',
+    icon: Home,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Aplicaciones',
+    href: '/student-housing/aplicaciones',
+    icon: FileText,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Actividades',
+    href: '/student-housing/actividades',
+    icon: Calendar,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Pagos',
+    href: '/student-housing/pagos',
+    icon: CreditCard,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Mantenimiento',
+    href: '/student-housing/mantenimiento',
+    icon: Wrench,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+];
+
+// 2.9 VIAJES CORPORATIVOS - Corporate Travel Management
+const viajesCorporativosNavItems = [
+  {
+    name: 'Dashboard',
+    href: '/viajes-corporativos/dashboard',
+    icon: LayoutDashboard,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Reservas',
+    href: '/viajes-corporativos/bookings',
+    icon: Calendar,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Huéspedes',
+    href: '/viajes-corporativos/guests',
+    icon: Users,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Informes Gastos',
+    href: '/viajes-corporativos/expense-reports',
+    icon: FileBarChart,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Políticas',
+    href: '/viajes-corporativos/policies',
+    icon: Shield,
+    roles: ['super_admin', 'administrador'],
+  },
+];
+
+// 2.10 VIVIENDA SOCIAL - Social Housing Management
+const viviendaSocialNavItems = [
+  {
+    name: 'Dashboard',
+    href: '/vivienda-social/dashboard',
+    icon: LayoutDashboard,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Solicitudes',
+    href: '/vivienda-social/applications',
+    icon: FileText,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Elegibilidad',
+    href: '/vivienda-social/eligibility',
+    icon: CheckSquare,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Compliance',
+    href: '/vivienda-social/compliance',
+    icon: Shield,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Reportes',
+    href: '/vivienda-social/reporting',
+    icon: FileBarChart,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+];
+
+// 2.11 REAL ESTATE DEVELOPER - Promotores Inmobiliarios
+const realEstateDeveloperNavItems = [
+  {
+    name: 'Dashboard',
+    href: '/real-estate-developer/dashboard',
+    icon: LayoutDashboard,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Proyectos',
+    href: '/real-estate-developer/projects',
+    icon: Folder,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Ventas',
+    href: '/real-estate-developer/sales',
+    icon: TrendingUp,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Marketing',
+    href: '/real-estate-developer/marketing',
+    icon: Megaphone,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Comercial',
+    href: '/real-estate-developer/commercial',
+    icon: Building2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+];
+
+// 2.12 WORKSPACE - Gestión de Espacios de Trabajo
+const workspaceNavItems = [
+  {
+    name: 'Dashboard',
+    href: '/workspace/dashboard',
+    icon: LayoutDashboard,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Coworking',
+    href: '/workspace/coworking',
+    icon: Users2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Reservas',
+    href: '/workspace/booking',
+    icon: Calendar,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Miembros',
+    href: '/workspace/members',
+    icon: Users,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+];
+
+// 2.13 WAREHOUSE - Gestión de Almacenes
+const warehouseNavItems = [
+  {
+    name: 'Dashboard',
+    href: '/warehouse',
+    icon: LayoutDashboard,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Inventario',
+    href: '/warehouse/inventory',
+    icon: Package,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Ubicaciones',
+    href: '/warehouse/locations',
+    icon: MapPin,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Movimientos',
+    href: '/warehouse/movements',
+    icon: TrendingUp,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];
@@ -1646,6 +1897,12 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const filteredComercialItems = filterItems(comercialNavItems, useCompanyModules);
   const filteredAlquilerComercialItems = filterItems(alquilerComercialNavItems, useCompanyModules);
   const filteredAdminFincasItems = filterItems(adminFincasItems, useCompanyModules);
+  const filteredStudentHousingItems = filterItems(studentHousingNavItems, useCompanyModules);
+  const filteredViajesCorporativosItems = filterItems(viajesCorporativosNavItems, useCompanyModules);
+  const filteredViviendaSocialItems = filterItems(viviendaSocialNavItems, useCompanyModules);
+  const filteredRealEstateDeveloperItems = filterItems(realEstateDeveloperNavItems, useCompanyModules);
+  const filteredWorkspaceItems = filterItems(workspaceNavItems, useCompanyModules);
+  const filteredWarehouseItems = filterItems(warehouseNavItems, useCompanyModules);
 
   // Herramientas Horizontales - Usar módulos de empresa seleccionada si hay una (Super Admin)
   const filteredFinanzasItems = filterItems(finanzasNavItems, useCompanyModules);
@@ -2355,6 +2612,150 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.adminFincas && (
                   <div className="space-y-1 mt-1">
                     {filteredAdminFincasItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Student Housing */}
+            {filteredStudentHousingItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('studentHousing')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>🎓 Student Housing</span>
+                  {expandedSections.studentHousing ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
+                </button>
+                {expandedSections.studentHousing && (
+                  <div className="space-y-1 mt-1">
+                    {filteredStudentHousingItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Viajes Corporativos */}
+            {filteredViajesCorporativosItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('viajesCorporativos')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>✈️ Viajes Corporativos</span>
+                  {expandedSections.viajesCorporativos ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
+                </button>
+                {expandedSections.viajesCorporativos && (
+                  <div className="space-y-1 mt-1">
+                    {filteredViajesCorporativosItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Vivienda Social */}
+            {filteredViviendaSocialItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('viviendaSocial')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>🏘️ Vivienda Social</span>
+                  {expandedSections.viviendaSocial ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
+                </button>
+                {expandedSections.viviendaSocial && (
+                  <div className="space-y-1 mt-1">
+                    {filteredViviendaSocialItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Real Estate Developer */}
+            {filteredRealEstateDeveloperItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('realEstateDeveloper')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>🏗️ Promotoras</span>
+                  {expandedSections.realEstateDeveloper ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
+                </button>
+                {expandedSections.realEstateDeveloper && (
+                  <div className="space-y-1 mt-1">
+                    {filteredRealEstateDeveloperItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Workspace */}
+            {filteredWorkspaceItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('workspace')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>🖥️ Workspace</span>
+                  {expandedSections.workspace ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
+                </button>
+                {expandedSections.workspace && (
+                  <div className="space-y-1 mt-1">
+                    {filteredWorkspaceItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Warehouse */}
+            {filteredWarehouseItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('warehouse')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>📦 Warehouse</span>
+                  {expandedSections.warehouse ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
+                </button>
+                {expandedSections.warehouse && (
+                  <div className="space-y-1 mt-1">
+                    {filteredWarehouseItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
                   </div>
