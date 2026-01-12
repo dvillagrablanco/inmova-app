@@ -134,6 +134,7 @@ export async function generateDemoData(
             tipo: 'residencial',
             anoConstructor: buildingData.ano_construccion,
             numeroUnidades: Math.floor(Math.random() * 10) + 5,
+            isDemo: true, // Marcar como datos de demostración
           },
         });
         generatedData.buildings.push(building);
@@ -160,6 +161,7 @@ export async function generateDemoData(
               banos: Math.floor(Math.random() * 2) + 1,
               rentaMensual: Math.floor(Math.random() * 500) + 500,
               estado: DEMO_UNIT_STATUSES[Math.floor(Math.random() * DEMO_UNIT_STATUSES.length)] as any,
+              isDemo: true, // Marcar como datos de demostración
             },
           });
           generatedData.units.push(unit);
@@ -182,6 +184,7 @@ export async function generateDemoData(
             nacionalidad: 'Española',
             estadoCivil: 'soltero',
             situacionLaboral: 'empleado',
+            isDemo: true, // Marcar como datos de demostración
           },
         });
         generatedData.tenants.push(tenant);
@@ -209,6 +212,7 @@ export async function generateDemoData(
             deposito: unit.precio_renta * 2,
             estado: 'activo',
             tipo: 'residencial',
+            isDemo: true, // Marcar como datos de demostración
           },
         });
         generatedData.contracts.push(contract);

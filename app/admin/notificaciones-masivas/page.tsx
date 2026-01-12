@@ -139,48 +139,7 @@ const AUDIENCE_SEGMENTS: AudienceSegment[] = [
   },
 ];
 
-const MOCK_CAMPAIGNS: NotificationCampaign[] = [
-  {
-    id: '1',
-    title: 'Nuevas Funcionalidades de IA',
-    message: 'Descubre las nuevas herramientas de valoración con IA...',
-    type: 'email',
-    status: 'sent',
-    targetAudience: 'Todos los Clientes',
-    recipientCount: 156,
-    sentCount: 152,
-    openRate: 45.2,
-    clickRate: 12.8,
-    sentAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    createdBy: 'Admin',
-  },
-  {
-    id: '2',
-    title: 'Recordatorio de Renovación',
-    message: 'Tu suscripción vence pronto. Renueva ahora y obtén...',
-    type: 'email',
-    status: 'scheduled',
-    targetAudience: 'Suscripción por Vencer',
-    recipientCount: 12,
-    scheduledAt: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    createdBy: 'Admin',
-  },
-  {
-    id: '3',
-    title: 'Actualización de Mantenimiento',
-    message: 'Mantenimiento programado para el día...',
-    type: 'in_app',
-    status: 'sent',
-    targetAudience: 'Clientes Activos',
-    recipientCount: 89,
-    sentCount: 89,
-    sentAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
-    createdBy: 'Sistema',
-  },
-];
+// No mock data - cargar datos reales desde la API
 
 const STATUS_CONFIG = {
   draft: { label: 'Borrador', color: 'bg-gray-100 text-gray-800' },
@@ -225,11 +184,19 @@ export default function MassNotificationsPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setCampaigns(MOCK_CAMPAIGNS);
+      // Cargar datos reales desde la API (sin datos demo)
+      const response = await fetch('/api/admin/notification-campaigns');
+      if (response.ok) {
+        const data = await response.json();
+        setCampaigns(data.campaigns || []);
+      } else {
+        // Si no hay datos o API no disponible, mostrar lista vacía
+        setCampaigns([]);
+      }
     } catch (error) {
       console.error('Error loading data:', error);
-      toast.error('Error al cargar los datos');
+      // En caso de error, mostrar lista vacía (no mock data)
+      setCampaigns([]);
     } finally {
       setLoading(false);
     }

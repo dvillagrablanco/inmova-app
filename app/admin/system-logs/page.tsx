@@ -99,107 +99,15 @@ const LOG_SOURCES = [
   { value: 'system', label: 'Sistema' },
 ];
 
-// Datos de ejemplo para demostración
-const MOCK_LOGS: LogEntry[] = [
-  {
-    id: '1',
-    timestamp: new Date().toISOString(),
-    level: 'info',
-    source: 'auth',
-    message: 'Usuario admin@inmova.app inició sesión correctamente',
-    userId: 'user_123',
-    userName: 'Admin User',
-    metadata: { ip: '192.168.1.1', userAgent: 'Chrome/120' },
-  },
-  {
-    id: '2',
-    timestamp: subHours(new Date(), 1).toISOString(),
-    level: 'warn',
-    source: 'payment',
-    message: 'Intento de pago fallido - Tarjeta rechazada',
-    userId: 'user_456',
-    userName: 'Juan García',
-    companyId: 'comp_789',
-    companyName: 'Inmobiliaria García',
-    metadata: { stripeError: 'card_declined', amount: 149 },
-  },
-  {
-    id: '3',
-    timestamp: subHours(new Date(), 2).toISOString(),
-    level: 'error',
-    source: 'api',
-    message: 'Error interno en /api/properties - TypeError: Cannot read properties of undefined',
-    metadata: { endpoint: '/api/properties', method: 'POST' },
-    stackTrace:
-      'TypeError: Cannot read properties of undefined (reading "id")\n    at getProperty (/app/api/properties/route.ts:45:20)',
-  },
-  {
-    id: '4',
-    timestamp: subHours(new Date(), 3).toISOString(),
-    level: 'info',
-    source: 'cron',
-    message: 'Cron job "check-subscriptions" completado exitosamente',
-    metadata: { duration: '2.3s', processed: 150 },
-  },
-  {
-    id: '5',
-    timestamp: subHours(new Date(), 5).toISOString(),
-    level: 'debug',
-    source: 'database',
-    message: 'Query ejecutada: SELECT * FROM companies WHERE activo = true',
-    metadata: { duration: '45ms', rows: 23 },
-  },
-  {
-    id: '6',
-    timestamp: subDays(new Date(), 1).toISOString(),
-    level: 'info',
-    source: 'email',
-    message: 'Email enviado exitosamente a cliente@example.com',
-    metadata: { template: 'welcome_email', to: 'cliente@example.com' },
-  },
-  {
-    id: '7',
-    timestamp: subDays(new Date(), 1).toISOString(),
-    level: 'warn',
-    source: 'system',
-    message: 'Uso de memoria alto detectado: 85%',
-    metadata: { memoryUsage: '85%', threshold: '80%' },
-  },
-  {
-    id: '8',
-    timestamp: subDays(new Date(), 2).toISOString(),
-    level: 'error',
-    source: 'webhook',
-    message: 'Webhook de Stripe falló - Firma inválida',
-    metadata: { webhookId: 'wh_123', event: 'payment_intent.succeeded' },
-  },
-];
-
-const MOCK_STATS: LogStats = {
-  total: 15234,
-  errors: 127,
-  warnings: 543,
-  info: 12890,
-  debug: 1674,
-  bySource: {
-    api: 8500,
-    auth: 2100,
-    database: 1800,
-    payment: 980,
-    email: 654,
-    cron: 450,
-    webhook: 320,
-    integration: 230,
-    system: 200,
-  },
-  byHour: [
-    { hour: '00:00', count: 450 },
-    { hour: '04:00', count: 230 },
-    { hour: '08:00', count: 890 },
-    { hour: '12:00', count: 1200 },
-    { hour: '16:00', count: 980 },
-    { hour: '20:00', count: 650 },
-  ],
+// Estadísticas vacías por defecto (sin datos demo)
+const EMPTY_STATS: LogStats = {
+  total: 0,
+  errors: 0,
+  warnings: 0,
+  info: 0,
+  debug: 0,
+  bySource: {},
+  byHour: [],
 };
 
 export default function SystemLogsPage() {
@@ -239,25 +147,28 @@ export default function SystemLogsPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      // En producción, esto se conectaría a una API real
-      // const response = await fetch(`/api/admin/logs?level=${levelFilter}&source=${sourceFilter}&timeRange=${timeRange}&page=${page}&limit=${pageSize}`);
-      // const data = await response.json();
-
-      // Simular carga con datos de ejemplo
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      let filteredLogs = [...MOCK_LOGS];
-
-      // Aplicar filtros
-      if (levelFilter !== 'all') {
-        filteredLogs = filteredLogs.filter((log) => log.level === levelFilter);
+      // Cargar datos reales desde la API (sin datos demo)
+      const queryParams = new URLSearchParams({
+        level: levelFilter,
+        source: sourceFilter,
+        page: page.toString(),
+        limit: pageSize.toString(),
+      });
+      
+      const response = await fetch(`/api/admin/system-logs?${queryParams}`);
+      
+      if (!response.ok) {
+        throw new Error('Error al cargar logs');
       }
-      if (sourceFilter !== 'all') {
-        filteredLogs = filteredLogs.filter((log) => log.source === sourceFilter);
-      }
+      
+      const data = await response.json();
+
+      let filteredLogs = data.logs || [];
+
+      // Aplicar filtro de búsqueda en cliente
       if (searchTerm) {
         filteredLogs = filteredLogs.filter(
-          (log) =>
+          (log: LogEntry) =>
             log.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
             log.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             log.companyName?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -265,10 +176,13 @@ export default function SystemLogsPage() {
       }
 
       setLogs(filteredLogs);
-      setStats(MOCK_STATS);
-      setTotalPages(Math.ceil(filteredLogs.length / pageSize));
+      setStats(data.stats || EMPTY_STATS);
+      setTotalPages(data.pagination?.totalPages || 1);
     } catch (error) {
       console.error('Error loading logs:', error);
+      // En caso de error, mostrar datos vacíos (no mock data)
+      setLogs([]);
+      setStats(EMPTY_STATS);
       toast.error('Error al cargar los logs');
     } finally {
       setLoading(false);

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
 import logger from '@/lib/logger';
 import { cacheGetOrSet, CacheTTL } from '@/lib/cache';
+import { paymentFilterWithCompany, expenseFilterWithCompany } from '@/lib/demo-data-filter';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,11 +36,10 @@ export async function GET() {
         twelveMonthsAgo.setDate(1); // Primer día del mes
 
         // Get payments - OPTIMIZADO: Solo últimos 12 meses, solo campos necesarios
+        // IMPORTANTE: Excluir datos de demostración de las estadísticas
         const payments = await prisma.payment.findMany({
           where: {
-            contract: {
-              unit: { building: { companyId } },
-            },
+            ...paymentFilterWithCompany(companyId),
             estado: 'pagado',
             fechaVencimiento: {
               gte: twelveMonthsAgo,
@@ -53,12 +53,10 @@ export async function GET() {
         });
 
         // Get expenses - OPTIMIZADO: Solo últimos 12 meses, solo campos necesarios
+        // IMPORTANTE: Excluir datos de demostración de las estadísticas
         const expenses = await prisma.expense.findMany({
           where: {
-            OR: [
-              { building: { companyId } },
-              { unit: { building: { companyId } } },
-            ],
+            ...expenseFilterWithCompany(companyId),
             fecha: {
               gte: twelveMonthsAgo,
             },

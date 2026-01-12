@@ -448,6 +448,90 @@ function getDateRange(startDate: Date, endDate: Date): Date[] {
   return dates;
 }
 
+/**
+ * Obtiene tendencias analíticas para una empresa
+ * IMPORTANTE: Excluye datos de demostración de las estadísticas
+ */
+export async function getAnalyticsTrends(
+  companyId: string,
+  months: number = 12
+): Promise<{ companyId: string; trends: any[]; months: number }> {
+  try {
+    const now = new Date();
+    const trends: any[] = [];
+    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+    // Filtro para excluir datos demo
+    const excludeDemoFilter = {
+      isDemo: false,
+    };
+
+    for (let i = months - 1; i >= 0; i--) {
+      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
+
+      // Contar datos del mes excluyendo demos
+      const [buildings, units, tenants, contracts, payments] = await Promise.all([
+        prisma.building.count({
+          where: {
+            companyId,
+            ...excludeDemoFilter,
+            createdAt: { lte: monthEnd },
+          },
+        }),
+        prisma.unit.count({
+          where: {
+            building: { companyId, ...excludeDemoFilter },
+            ...excludeDemoFilter,
+            createdAt: { lte: monthEnd },
+          },
+        }),
+        prisma.tenant.count({
+          where: {
+            companyId,
+            ...excludeDemoFilter,
+            createdAt: { lte: monthEnd },
+          },
+        }),
+        prisma.contract.count({
+          where: {
+            unit: { building: { companyId, ...excludeDemoFilter }, ...excludeDemoFilter },
+            ...excludeDemoFilter,
+            createdAt: { lte: monthEnd },
+          },
+        }),
+        prisma.payment.aggregate({
+          where: {
+            contract: {
+              unit: { building: { companyId, ...excludeDemoFilter }, ...excludeDemoFilter },
+              ...excludeDemoFilter,
+            },
+            ...excludeDemoFilter,
+            fechaVencimiento: { gte: monthStart, lte: monthEnd },
+            estado: 'pagado',
+          },
+          _sum: { monto: true },
+        }),
+      ]);
+
+      trends.push({
+        month: monthNames[monthStart.getMonth()],
+        year: monthStart.getFullYear(),
+        buildings,
+        units,
+        tenants,
+        contracts,
+        revenue: payments._sum.monto || 0,
+      });
+    }
+
+    return { companyId, trends, months };
+  } catch (error: any) {
+    logger.error('Error getting analytics trends:', error);
+    throw error;
+  }
+}
+
 export default {
   trackAPIRequest,
   trackAIUsage,
@@ -455,4 +539,5 @@ export default {
   getUsageMetrics,
   getAIMetrics,
   getPerformanceMetrics,
+  getAnalyticsTrends,
 };

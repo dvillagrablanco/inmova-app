@@ -510,6 +510,7 @@ model Building {
   longitud              Float?
   imagenes              String[]     @default([])
   etiquetas             String[]     @default([])
+  isDemo                Boolean      @default(false) // Marca datos de demostración - excluir de estadísticas
   createdAt             DateTime     @default(now())
   updatedAt             DateTime     @updatedAt
 
@@ -618,6 +619,7 @@ model Tenant {
   notas                 String?           @db.Text
   // Integraciones de Contabilidad
   contasimpleCustomerId String?
+  isDemo                Boolean           @default(false) // Marca datos de demostración - excluir de estadísticas
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
 
@@ -741,6 +743,7 @@ model Unit {
   imagenes          String[]   @default([])
   tourVirtual       String?
   planos            String[]   @default([])
+  isDemo            Boolean    @default(false) // Marca datos de demostración - excluir de estadísticas
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 
@@ -1329,6 +1332,7 @@ model Contract {
   contractPdfPath      String?
   legalTemplateId      String?
   contasimpleInvoiceId String?
+  isDemo               Boolean        @default(false) // Marca datos de demostración - excluir de estadísticas
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
 
@@ -1437,6 +1441,7 @@ model Payment {
   stripeNetAmount       Float?
 
   contasimplePaymentId String?
+  isDemo               Boolean  @default(false) // Marca datos de demostración - excluir de estadísticas
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
@@ -1532,6 +1537,7 @@ model MaintenanceRequest {
   comentarios        String?             @db.Text
   requiereAprobacion Boolean             @default(false)
   estadoAprobacion   ApprovalStatus?     @default(pendiente)
+  isDemo             Boolean             @default(false) // Marca datos de demostración - excluir de estadísticas
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
 
@@ -1617,6 +1623,7 @@ model Expense {
   requiereAprobacion   Boolean         @default(false)
   estadoAprobacion     ApprovalStatus? @default(pendiente)
   contasimpleExpenseId String?
+  isDemo               Boolean         @default(false) // Marca datos de demostración - excluir de estadísticas
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
 

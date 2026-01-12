@@ -28,58 +28,7 @@ interface Suggestion {
   category: string;
 }
 
-const MOCK_SUGGESTIONS: Suggestion[] = [
-  {
-    id: '1',
-    type: 'opportunity',
-    title: 'Activa pagos recurrentes',
-    description: 'Tienes 8 contratos activos sin pagos automatizados. Actívalos para reducir morosidad en un 40%.',
-    action: '/contratos',
-    actionLabel: 'Configurar ahora',
-    priority: 'high',
-    category: 'payments'
-  },
-  {
-    id: '2',
-    type: 'warning',
-    title: 'Contratos próximos a vencer',
-    description: '3 contratos vencen en los próximos 30 días. Contacta a tus inquilinos para renovación.',
-    action: '/contratos?filter=expiring',
-    actionLabel: 'Ver contratos',
-    priority: 'high',
-    category: 'contracts'
-  },
-  {
-    id: '3',
-    type: 'optimization',
-    title: 'Completa datos de edificios',
-    description: '5 edificios no tienen fotos. Añade imágenes para mejorar tu presentación profesional.',
-    action: '/edificios',
-    actionLabel: 'Añadir fotos',
-    priority: 'medium',
-    category: 'buildings'
-  },
-  {
-    id: '4',
-    type: 'opportunity',
-    title: 'Programa mantenimiento preventivo',
-    description: 'Evita averías costosas. Configura revisiones automáticas de ascensores y calderas.',
-    action: '/mantenimiento-preventivo',
-    actionLabel: 'Configurar',
-    priority: 'medium',
-    category: 'maintenance'
-  },
-  {
-    id: '5',
-    type: 'optimization',
-    title: 'Integra tu contabilidad',
-    description: 'Sincroniza con Sage, Holded o A3 y ahorra 10h/mes en gestión contable.',
-    action: '/contabilidad',
-    actionLabel: 'Ver integraciones',
-    priority: 'low',
-    category: 'accounting'
-  }
-];
+// Sugerencias se cargan desde la API, no hay datos mock
 
 export default function ProactiveSuggestions() {
   const router = useRouter();
@@ -88,21 +37,40 @@ export default function ProactiveSuggestions() {
   const [isWidgetVisible, setIsWidgetVisible] = useState(true);
 
   useEffect(() => {
-    // En producción, esto vendría de la API
-    // Por ahora usamos sugerencias mock
-    const stored = localStorage.getItem('dismissed_suggestions');
-    const dismissedIds = stored ? JSON.parse(stored) : [];
-    setDismissed(dismissedIds);
+    const loadSuggestions = async () => {
+      // Cargar sugerencias descartadas del localStorage
+      const stored = localStorage.getItem('dismissed_suggestions');
+      const dismissedIds = stored ? JSON.parse(stored) : [];
+      setDismissed(dismissedIds);
+      
+      // Check if widget was hidden
+      const widgetHidden = localStorage.getItem('suggestions_widget_hidden');
+      if (widgetHidden === 'true') {
+        setIsWidgetVisible(false);
+        return;
+      }
+      
+      try {
+        // Cargar sugerencias reales desde la API
+        const response = await fetch('/api/ai/suggestions');
+        if (response.ok) {
+          const data = await response.json();
+          const apiSuggestions = data.suggestions || [];
+          // Filtrar las sugerencias descartadas
+          const filtered = apiSuggestions.filter((s: Suggestion) => !dismissedIds.includes(s.id));
+          setSuggestions(filtered);
+        } else {
+          // Si la API no está disponible, mostrar lista vacía
+          setSuggestions([]);
+        }
+      } catch (error) {
+        console.error('Error loading suggestions:', error);
+        // En caso de error, mostrar lista vacía (no mock data)
+        setSuggestions([]);
+      }
+    };
     
-    // Check if widget was hidden
-    const widgetHidden = localStorage.getItem('suggestions_widget_hidden');
-    if (widgetHidden === 'true') {
-      setIsWidgetVisible(false);
-      return;
-    }
-    
-    const filtered = MOCK_SUGGESTIONS.filter(s => !dismissedIds.includes(s.id));
-    setSuggestions(filtered);
+    loadSuggestions();
   }, []);
 
   const handleDismiss = (id: string) => {
