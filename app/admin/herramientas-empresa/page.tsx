@@ -31,6 +31,7 @@ import {
   Building2,
   Globe
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function HerramientasEmpresaPage() {
   const { data: session, status } = useSession();
