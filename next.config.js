@@ -149,7 +149,7 @@ const nextConfig = {
   swcMinify: true,
 
   // Output configuration (Sprint 3)
-  output: 'standalone', // Para Docker deployment
+  // output: 'standalone', // DISABLED: Causa problemas con prerender-manifest.json
   
   // Modularize imports (reduce bundle size)
   modularizeImports: {
