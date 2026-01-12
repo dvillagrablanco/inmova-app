@@ -1608,35 +1608,100 @@ select[aria-invalid='true']:focus {
 }
 
 /* ========================================
-   FLOATING CHAT BUTTONS - MOBILE LAYOUT
+   FLOATING CHAT BUTTONS - LAYOUT
    WhatsApp, Chatbot Inmova, Crisp Chat
-   Alineados horizontalmente en móvil
+   Posicionados sin solapamiento
    ======================================== */
 
-/* Crisp Chat - Mover a la derecha en móvil */
+/* === DESKTOP LAYOUT (768px+) === */
+@media (min-width: 768px) {
+  /* Crisp Chat - Posición inferior derecha */
+  .crisp-client .crisp-1brjxns,
+  .crisp-client .cc-1brjxns,
+  .crisp-client[data-website-id] > div > div,
+  .crisp-client .crisp-kquevr,
+  .crisp-client .cc-kquevr,
+  .crisp-client .crisp-1m5fbvw {
+    bottom: 24px !important;
+    right: 24px !important;
+    z-index: 9999 !important;
+  }
+
+  /* Chatbot Inmova - Posición encima de Crisp */
+  .inmova-chatbot-button,
+  [class*="IntelligentChatbot"] button,
+  .fixed.bottom-4.right-4.z-50 {
+    bottom: 100px !important;
+    right: 24px !important;
+  }
+
+  /* WhatsApp Button - Posición más arriba */
+  .whatsapp-button,
+  [aria-label*="WhatsApp"],
+  a[href*="wa.me"] {
+    bottom: 176px !important;
+    right: 24px !important;
+  }
+
+  /* Contenedor de botones flotantes - stack vertical */
+  .floating-buttons-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 16px;
+    z-index: 50;
+  }
+}
+
+/* === MOBILE LAYOUT (< 768px) === */
 @media (max-width: 767px) {
-  /* Contenedor principal de Crisp */
+  /* Crisp Chat - Inferior derecha */
   .crisp-client .crisp-1brjxns,
   .crisp-client .cc-1brjxns,
   .crisp-client[data-website-id] > div > div {
-    bottom: 24px !important;
-    right: 24px !important;
+    bottom: 80px !important;
+    right: 16px !important;
   }
   
   /* Botón flotante de Crisp */
   .crisp-client .crisp-kquevr,
   .crisp-client .cc-kquevr,
   .crisp-client .crisp-1m5fbvw {
-    bottom: 24px !important;
-    right: 24px !important;
+    bottom: 80px !important;
+    right: 16px !important;
+    width: 48px !important;
+    height: 48px !important;
   }
   
   /* Ventana de chat de Crisp en móvil */
   .crisp-client .crisp-1rf4xdh {
-    bottom: 90px !important;
-    right: 16px !important;
-    left: 16px !important;
-    width: calc(100% - 32px) !important;
+    bottom: 140px !important;
+    right: 8px !important;
+    left: 8px !important;
+    width: calc(100% - 16px) !important;
     max-width: none !important;
+    max-height: 60vh !important;
+  }
+
+  /* Chatbot Inmova en móvil - arriba del nav */
+  .inmova-chatbot-button,
+  [class*="IntelligentChatbot"] button,
+  .fixed.bottom-4.right-4.z-50 {
+    bottom: 80px !important;
+    right: 76px !important;
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  /* WhatsApp en móvil */
+  .whatsapp-button,
+  [aria-label*="WhatsApp"],
+  a[href*="wa.me"] {
+    bottom: 80px !important;
+    right: 136px !important;
+    width: 48px !important;
+    height: 48px !important;
   }
 }
