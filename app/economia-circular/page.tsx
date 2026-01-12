@@ -110,7 +110,7 @@ export default function EconomiaCircularPage() {
                   <CardDescription>Intercambio de muebles y electrodomésticos</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full">Ver Marketplace</Button>
+                  <Button className="w-full" onClick={() => router.push('/economia-circular/marketplace')}>Ver Marketplace</Button>
                 </CardContent>
               </Card>
               <Card>
@@ -122,7 +122,7 @@ export default function EconomiaCircularPage() {
                   <CardDescription>Parcelas compartidas en azoteas</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full" variant="outline">
+                  <Button className="w-full" variant="outline" onClick={() => router.push('/economia-circular/huertos')}>
                     Reservar Parcela
                   </Button>
                 </CardContent>
@@ -136,7 +136,7 @@ export default function EconomiaCircularPage() {
                   <CardDescription>Métricas y gamificación del reciclaje</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full" variant="outline">
+                  <Button className="w-full" variant="outline" onClick={() => router.push('/economia-circular/residuos')}>
                     Ver Estadísticas
                   </Button>
                 </CardContent>

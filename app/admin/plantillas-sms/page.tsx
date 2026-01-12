@@ -35,6 +35,8 @@ import {
   Save,
   Search,
   Filter,
+  Sparkles,
+  Wand2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
@@ -110,6 +112,8 @@ export default function PlantillasSMSPage() {
     anticipacionDias: 0,
     horaEnvio: '10:00',
   });
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -253,6 +257,50 @@ export default function PlantillasSMSPage() {
     }));
   };
 
+  const generateWithAI = async () => {
+    if (!formData.tipo) {
+      toast.error('Selecciona un tipo de SMS primero');
+      return;
+    }
+
+    setIsGeneratingAI(true);
+    setAiSuggestions([]);
+
+    try {
+      const response = await fetch('/api/sms/templates/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tipo: formData.tipo,
+          descripcion: formData.descripcion || formData.nombre,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAiSuggestions(data.suggestions || []);
+        if (data.aiGenerated) {
+          toast.success('Plantillas generadas con IA');
+        } else {
+          toast.success('Sugerencias de plantillas cargadas');
+        }
+      } else {
+        toast.error('Error al generar plantillas');
+      }
+    } catch (error) {
+      logger.error('Error generating AI templates:', error);
+      toast.error('Error al conectar con el servicio de IA');
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
+
+  const useSuggestion = (suggestion: string) => {
+    setFormData(prev => ({ ...prev, mensaje: suggestion }));
+    setAiSuggestions([]);
+    toast.success('Plantilla aplicada');
+  };
+
   // Filtrar plantillas
   const plantillasFiltradas = plantillas.filter((plantilla) => {
     // Filtro por búsqueda (nombre o descripción)
@@ -359,14 +407,36 @@ export default function PlantillasSMSPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="mensaje">Mensaje *</Label>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="mensaje">Mensaje *</Label>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={generateWithAI}
+                          disabled={isGeneratingAI}
+                          className="gap-2"
+                        >
+                          {isGeneratingAI ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                              Generando...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-4 h-4" />
+                              Generar con IA
+                            </>
+                          )}
+                        </Button>
+                      </div>
                       <Textarea
                         id="mensaje"
                         value={formData.mensaje}
                         onChange={(e) =>
                           setFormData((prev) => ({ ...prev, mensaje: e.target.value }))
                         }
-                        placeholder="Escribe tu mensaje aquí..."
+                        placeholder="Escribe tu mensaje aquí o genera uno con IA..."
                         rows={5}
                         required
                       />
@@ -374,6 +444,30 @@ export default function PlantillasSMSPage() {
                         Longitud: {formData.mensaje.length} caracteres | SMS:{' '}
                         {Math.ceil(formData.mensaje.length / 160)}
                       </p>
+
+                      {/* Sugerencias de IA */}
+                      {aiSuggestions.length > 0 && (
+                        <div className="space-y-2 p-3 bg-muted rounded-lg">
+                          <Label className="flex items-center gap-2">
+                            <Wand2 className="w-4 h-4 text-purple-500" />
+                            Sugerencias de plantilla
+                          </Label>
+                          <div className="space-y-2">
+                            {aiSuggestions.map((suggestion, idx) => (
+                              <div
+                                key={idx}
+                                className="p-2 bg-background rounded border cursor-pointer hover:border-primary transition-colors"
+                                onClick={() => useSuggestion(suggestion)}
+                              >
+                                <p className="text-sm">{suggestion}</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {suggestion.length} caracteres - Click para usar
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="space-y-2">

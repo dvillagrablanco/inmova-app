@@ -249,7 +249,7 @@ export default function KnowledgeBasePage() {
 
             {/* Header */}
             <div className="space-y-4">
-              <BackButton href="/dashboard" label="Volver al Dashboard" />
+              <BackButton href="/soporte" label="Volver a Soporte" />
               <div className="flex items-center gap-4">
                 <div className="h-16 w-16 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
                   <BookOpen className="h-8 w-8 text-white" />

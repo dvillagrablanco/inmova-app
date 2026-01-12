@@ -157,7 +157,27 @@ export default function CRMPage() {
       
       if (res.ok) {
         const data = await res.json();
-        setLeads(data);
+        // Mapear respuesta de la API a formato esperado por la página
+        const leadsArray = Array.isArray(data) ? data : (data.leads || []);
+        const mappedLeads = leadsArray.map((lead: any) => ({
+          id: lead.id,
+          nombreCompleto: lead.name || lead.nombreCompleto || `${lead.firstName || ''} ${lead.lastName || ''}`.trim(),
+          email: lead.email,
+          telefono: lead.phone || lead.telefono,
+          empresa: lead.companyName || lead.empresa,
+          estado: lead.status || lead.estado || 'nuevo',
+          etapa: lead.etapa || lead.status || lead.estado || 'prospecto',
+          scoring: lead.score || lead.scoring || 0,
+          probabilidadCierre: lead.probabilidadCierre || Math.min(100, (lead.score || 0) * 1.5),
+          fuente: lead.source || lead.fuente || 'web',
+          presupuestoMensual: lead.budget || lead.presupuestoMensual,
+          urgencia: lead.priority || lead.urgencia,
+          verticalesInteres: lead.verticalesInteres || [],
+          notas: lead.notes || lead.notas,
+          createdAt: lead.createdAt,
+          updatedAt: lead.updatedAt,
+        }));
+        setLeads(mappedLeads);
       } else {
         toast.error('Error al cargar los leads');
       }

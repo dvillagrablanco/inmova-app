@@ -118,37 +118,34 @@ export default function PortalComercialPage() {
   const progresoObjetivos = stats.objetivos.progreso || 0;
 
   return (
-    <div className="min-h-screen bg-gradient-bg">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold gradient-text">Portal Comercial</h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                Bienvenido, {salesRepData?.nombreCompleto || session?.user?.name}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link href="/portal-comercial/leads">
-                <Button variant="outline">
-                  <Users className="mr-2 h-4 w-4" />
-                  Mis Leads
-                </Button>
-              </Link>
-              <Link href="/portal-comercial/comisiones">
-                <Button variant="outline">
-                  <DollarSign className="mr-2 h-4 w-4" />
-                  Comisiones
-                </Button>
-              </Link>
-            </div>
+    <AuthenticatedLayout>
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold gradient-text">Portal Comercial</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Bienvenido, {salesRepData?.nombreCompleto || session?.user?.name}
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href="/portal-comercial/leads">
+              <Button variant="outline">
+                <Users className="mr-2 h-4 w-4" />
+                Mis Leads
+              </Button>
+            </Link>
+            <Link href="/portal-comercial/comisiones">
+              <Button variant="outline">
+                <DollarSign className="mr-2 h-4 w-4" />
+                Comisiones
+              </Button>
+            </Link>
           </div>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        {/* Main Content */}
+        <div className="space-y-8">
         {/* KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="card-hover">
@@ -355,7 +352,8 @@ export default function PortalComercialPage() {
             )}
           </CardContent>
         </Card>
-      </main>
-    </div>
+        </div>
+      </div>
+    </AuthenticatedLayout>
   );
 }

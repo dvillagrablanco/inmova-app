@@ -267,34 +267,38 @@ function PagosPage() {
               </div>
               
               {/* View Mode + Quick Actions */}
-              <div className="flex gap-2">
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="flex-1 sm:flex-none"
-                >
-                  Lista
-                </Button>
-                <Button
-                  variant={viewMode === 'calendar' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('calendar')}
-                  className="flex-1 sm:flex-none"
-                >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  Calendario
-                </Button>
-                <Button
-                  variant={viewMode === 'stripe' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('stripe')}
-                  className="flex-1 sm:flex-none"
-                >
-                  <TrendingUp className="mr-2 h-4 w-4" />
-                  Stripe
-                </Button>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                {/* Botones de vista */}
+                <div className="flex rounded-lg border overflow-hidden">
+                  <Button
+                    variant={viewMode === 'list' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('list')}
+                    className="rounded-none border-0"
+                  >
+                    Lista
+                  </Button>
+                  <Button
+                    variant={viewMode === 'calendar' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('calendar')}
+                    className="rounded-none border-0 border-l"
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Calendario
+                  </Button>
+                  <Button
+                    variant={viewMode === 'stripe' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('stripe')}
+                    className="rounded-none border-0 border-l"
+                  >
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    Stripe
+                  </Button>
+                </div>
                 
+                {/* Acciones rápidas */}
                 <ContextualQuickActions
                   pendingPayments={payments.filter(p => p.estado === 'pendiente').length}
                   overduePayments={payments.filter(p => {
