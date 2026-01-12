@@ -382,17 +382,23 @@ export default function RegisterPage() {
                     required
                   />
 
-                  <AccessibleInputField
-                    id="recoveryEmail-field"
-                    name="recoveryEmail"
-                    label="Email de Recuperación (Opcional)"
-                    type="email"
-                    placeholder="email-alternativo@gmail.com"
-                    value={recoveryEmail}
-                    onChange={(val) => setValue('recoveryEmail', val)}
-                    error={errors.recoveryEmail?.message}
-                    helpText="Email alternativo para recuperar tu contraseña si olvidas la principal. Recomendamos usar un email diferente."
-                  />
+                  {/* Email de Recuperación con estilo destacado */}
+                  <div className="relative">
+                    <div className="absolute -left-2 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 to-orange-500 rounded-full" />
+                    <div className="pl-3">
+                      <AccessibleInputField
+                        id="recoveryEmail-field"
+                        name="recoveryEmail"
+                        label="📧 Email de Recuperación"
+                        type="email"
+                        placeholder="email-alternativo@gmail.com"
+                        value={recoveryEmail}
+                        onChange={(val) => setValue('recoveryEmail', val)}
+                        error={errors.recoveryEmail?.message}
+                        helpText="⚠️ Recomendado: Si olvidas tu contraseña, te enviaremos un enlace a este email. Usa uno diferente al principal (ej: Gmail personal)."
+                      />
+                    </div>
+                  </div>
 
                   <AccessibleInputField
                     id="password-field"

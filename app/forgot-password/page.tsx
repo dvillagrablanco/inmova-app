@@ -1,32 +1,31 @@
 'use client';
 
+/**
+ * Página de Recuperación de Contraseña
+ * 
+ * Permite al usuario solicitar un enlace de recuperación
+ * enviado a su email principal o de recuperación.
+ */
+
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-import { z } from 'zod';
-import { 
-  Mail, 
-  AlertCircle, 
-  Building2, 
-  Loader2, 
-  Home, 
-  CheckCircle,
-  ArrowLeft,
-  Shield
-} from 'lucide-react';
+import { Mail, ArrowLeft, Building2, Loader2, CheckCircle, Home, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { z } from 'zod';
 
 const forgotPasswordSchema = z.object({
-  email: z.string().email('Por favor, introduce un email válido'),
+  email: z.string().min(1, 'El email es requerido').email('Email inválido'),
 });
 
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 export default function ForgotPasswordPage() {
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState('');
 
   const {
     register,
@@ -35,33 +34,30 @@ export default function ForgotPasswordPage() {
     watch,
   } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
-    mode: 'onBlur',
   });
 
   const email = watch('email', '');
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
-    setError('');
     setIsLoading(true);
+    setError('');
 
     try {
       const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: data.email }),
       });
 
       const result = await response.json();
 
-      if (!response.ok && result.error) {
-        setError(result.error);
+      if (response.ok) {
+        setIsSuccess(true);
       } else {
-        setSuccess(true);
+        setError(result.error || 'Error al procesar la solicitud');
       }
     } catch (err) {
-      setError('Error al procesar la solicitud. Por favor, intenta de nuevo.');
+      setError('Error de conexión. Por favor, intenta de nuevo.');
     } finally {
       setIsLoading(false);
     }
@@ -75,7 +71,7 @@ export default function ForgotPasswordPage() {
         <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-purple-500/10 to-transparent rounded-full blur-3xl" />
       </div>
 
-      {/* Header minimalista */}
+      {/* Header */}
       <nav className="fixed top-0 w-full bg-black/20 backdrop-blur-md border-b border-white/10 z-50">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
@@ -94,156 +90,131 @@ export default function ForgotPasswordPage() {
 
       <div className="flex items-center justify-center min-h-screen p-4 pt-20 relative z-10">
         <div className="w-full max-w-md">
-          {/* Logo y título */}
-          <div className="text-center mb-8 animate-fade-in">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/50 mb-6 relative group">
+          {/* Logo */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/50 mb-6">
               <Building2 className="w-10 h-10 text-white" />
             </div>
-
-            <h1 className="text-4xl font-bold mb-2">
-              <span className="bg-gradient-to-r from-white via-indigo-200 to-purple-200 bg-clip-text text-transparent">
-                INMOVA
-              </span>
-            </h1>
-            <p className="text-indigo-200/70 text-sm font-medium tracking-wide">
+            <h1 className="text-3xl font-bold text-white mb-2">
               Recuperar Contraseña
+            </h1>
+            <p className="text-gray-400">
+              Te enviaremos un enlace para restablecer tu contraseña
             </p>
           </div>
 
-          {/* Card del formulario */}
-          <div className="relative group animate-fade-in">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-300" />
-            
-            <div className="relative bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20">
-              {success ? (
-                // Mensaje de éxito
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/20 mb-6">
+          {/* Card */}
+          <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-2xl">
+            <CardContent className="p-6">
+              {isSuccess ? (
+                // Estado de éxito
+                <div className="text-center py-6">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/20 mb-4">
                     <CheckCircle className="w-8 h-8 text-green-400" />
                   </div>
-                  <h2 className="text-2xl font-bold text-white mb-4">
-                    ¡Revisa tu correo!
-                  </h2>
-                  <p className="text-indigo-200/70 mb-6">
-                    Si el email existe en nuestro sistema, recibirás un enlace para restablecer tu contraseña.
+                  <h3 className="text-xl font-semibold text-white mb-2">
+                    ¡Revisa tu email!
+                  </h3>
+                  <p className="text-gray-300 mb-4">
+                    Si <span className="font-medium text-white">{email}</span> está registrado,
+                    recibirás un enlace para restablecer tu contraseña.
                   </p>
-                  <div className="bg-indigo-500/10 border border-indigo-400/20 rounded-xl p-4 mb-6">
-                    <p className="text-sm text-indigo-200">
-                      <Shield className="inline-block w-4 h-4 mr-1" />
-                      El enlace expirará en <strong>1 hora</strong> por seguridad.
-                    </p>
-                  </div>
-                  <Link href="/login">
-                    <Button className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
-                      <ArrowLeft className="w-4 h-4 mr-2" />
-                      Volver al inicio de sesión
+                  <p className="text-sm text-gray-400 mb-6">
+                    También hemos enviado el enlace a tu email de recuperación si lo configuraste.
+                  </p>
+                  <div className="space-y-3">
+                    <Button
+                      variant="outline"
+                      className="w-full bg-white/5 border-white/20 text-white hover:bg-white/10"
+                      onClick={() => {
+                        setIsSuccess(false);
+                        setError('');
+                      }}
+                    >
+                      Enviar de nuevo
                     </Button>
-                  </Link>
+                    <Link href="/login">
+                      <Button className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
+                        Volver al Login
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               ) : (
                 // Formulario
-                <>
-                  <h2 className="text-2xl font-bold text-white mb-2">
-                    ¿Olvidaste tu contraseña?
-                  </h2>
-                  <p className="text-indigo-200/70 mb-6 text-sm">
-                    No te preocupes. Introduce tu email y te enviaremos un enlace para restablecerla.
-                  </p>
-
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                  {/* Error general */}
                   {error && (
-                    <div
-                      role="alert"
-                      className="mb-6 p-4 bg-red-500/10 backdrop-blur-sm border border-red-500/20 rounded-xl flex items-center gap-3 text-red-200 animate-shake"
-                    >
-                      <AlertCircle size={20} className="text-red-400 flex-shrink-0" />
-                      <span className="text-sm">{error}</span>
+                    <div className="flex items-start gap-3 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
+                      <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-red-300">{error}</p>
                     </div>
                   )}
 
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
-                    <div>
-                      <label 
-                        htmlFor="email" 
-                        className="block text-sm font-semibold mb-2"
-                        style={{ color: '#ffffff' }}
-                      >
-                        Correo Electrónico
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <Mail className="h-5 w-5 text-indigo-200" />
-                        </div>
-                        <input
-                          id="email"
-                          type="email"
-                          {...register('email')}
-                          placeholder="tu@correo.com"
-                          className="w-full pl-10 pr-4 py-3 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all placeholder-slate-400"
-                          style={{ 
-                            backgroundColor: 'rgba(30, 41, 59, 0.9)',
-                            border: '2px solid rgba(129, 140, 248, 0.5)',
-                          }}
-                          autoComplete="email"
-                        />
-                      </div>
-                      {errors.email && (
-                        <p className="mt-1 text-sm text-red-300">{errors.email.message}</p>
-                      )}
-                      <p className="mt-2 text-xs text-indigo-200/50">
-                        También puedes usar tu email de recuperación si configuraste uno.
-                      </p>
+                  {/* Campo Email */}
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="text-sm font-medium text-gray-200">
+                      Email
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <input
+                        {...register('email')}
+                        type="email"
+                        id="email"
+                        placeholder="tu@email.com"
+                        className="w-full pl-10 pr-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        disabled={isLoading}
+                      />
                     </div>
-
-                    <Button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full relative group mt-6 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white py-3 rounded-xl font-semibold shadow-lg shadow-indigo-500/50 hover:shadow-indigo-600/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isLoading && (
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin inline-block" />
-                      )}
-                      {isLoading ? 'Enviando...' : 'Enviar enlace de recuperación'}
-                    </Button>
-                  </form>
-
-                  <div className="mt-6 pt-6 border-t border-white/10">
-                    <p className="text-center text-sm text-indigo-200/70">
-                      ¿Recordaste tu contraseña?{' '}
-                      <Link 
-                        href="/login" 
-                        className="font-semibold text-indigo-300 hover:text-white transition-colors underline decoration-indigo-400/30 hover:decoration-white/50"
-                      >
-                        Volver al inicio de sesión
-                      </Link>
+                    {errors.email && (
+                      <p className="text-sm text-red-400">{errors.email.message}</p>
+                    )}
+                    <p className="text-xs text-gray-400">
+                      Puedes usar tu email principal o el email de recuperación que configuraste.
                     </p>
                   </div>
-                </>
-              )}
-            </div>
-          </div>
 
-          {/* Footer */}
-          <div className="mt-8 text-center">
-            <p className="text-indigo-200/50 text-xs">
-              © 2026 INMOVA. Sistema seguro de recuperación de contraseña.
+                  {/* Botón Submit */}
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-300 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 disabled:opacity-50"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                        Enviando...
+                      </>
+                    ) : (
+                      'Enviar enlace de recuperación'
+                    )}
+                  </Button>
+
+                  {/* Volver al login */}
+                  <Link
+                    href="/login"
+                    className="flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Volver al inicio de sesión
+                  </Link>
+                </form>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Info adicional */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-400">
+              ¿No tienes cuenta?{' '}
+              <Link href="/register" className="text-indigo-400 hover:text-indigo-300 font-medium">
+                Regístrate aquí
+              </Link>
             </p>
           </div>
         </div>
       </div>
-
-      <style jsx global>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          75% { transform: translateX(5px); }
-        }
-        .animate-fade-in { animation: fade-in 0.6s ease-out; }
-        .animate-shake { animation: shake 0.4s ease-in-out; }
-      `}</style>
     </div>
   );
 }
