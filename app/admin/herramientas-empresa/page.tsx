@@ -31,6 +31,7 @@ import {
   Building2,
   Globe
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function HerramientasEmpresaPage() {
   const { data: session, status } = useSession();
@@ -166,6 +167,63 @@ export default function HerramientasEmpresaPage() {
         status: 'disconnected',
       },
     ],
+    // Plataformas de Media Estancia - Más utilizadas en España
+    mediaEstancia: [
+      { 
+        id: 'spotahome', 
+        name: 'Spotahome', 
+        description: 'Líder en alquiler media estancia',
+        icon: Globe, 
+        color: 'from-teal-500 to-teal-600',
+        status: 'disconnected',
+        url: 'https://www.spotahome.com',
+      },
+      { 
+        id: 'housinganywhere', 
+        name: 'HousingAnywhere', 
+        description: 'Plataforma internacional de estancias',
+        icon: Globe, 
+        color: 'from-blue-400 to-blue-500',
+        status: 'disconnected',
+        url: 'https://housinganywhere.com',
+      },
+      { 
+        id: 'uniplaces', 
+        name: 'Uniplaces', 
+        description: 'Especializado en estudiantes',
+        icon: Globe, 
+        color: 'from-green-400 to-green-500',
+        status: 'disconnected',
+        url: 'https://www.uniplaces.com',
+      },
+      { 
+        id: 'habitoom', 
+        name: 'Habitoom', 
+        description: 'Habitaciones para profesionales',
+        icon: Globe, 
+        color: 'from-purple-400 to-purple-500',
+        status: 'disconnected',
+        url: 'https://www.habitoom.com',
+      },
+      { 
+        id: 'badi', 
+        name: 'Badi', 
+        description: 'Habitaciones y coliving España',
+        icon: Globe, 
+        color: 'from-pink-500 to-pink-600',
+        status: 'disconnected',
+        url: 'https://badi.com',
+      },
+      { 
+        id: 'ukio', 
+        name: 'Ukio', 
+        description: 'Alquiler flexible premium',
+        icon: Globe, 
+        color: 'from-gray-700 to-gray-800',
+        status: 'disconnected',
+        url: 'https://www.stayukio.com',
+      },
+    ],
   };
 
   // ============================================
@@ -224,7 +282,6 @@ export default function HerramientasEmpresaPage() {
         enabled: true,
         compliance: ['eIDAS', 'ESIGN'],
         configuredByInmova: true,
-        usage: { sent: 45, signed: 42 },
       },
       { 
         id: 'signaturit', 
@@ -235,25 +292,37 @@ export default function HerramientasEmpresaPage() {
         enabled: false,
         compliance: ['eIDAS QES'],
         configuredByInmova: true,
-        usage: { sent: 0, signed: 0 },
       },
     ],
   };
 
+  const handleConnect = (integration: any) => {
+    toast.info(`Configurando ${integration.name}...`, {
+      description: integration.url 
+        ? `Se abrirá la página de ${integration.name} para conectar tu cuenta`
+        : 'Completa la configuración en el siguiente paso'
+    });
+    
+    // Si tiene URL, abrir en nueva ventana
+    if (integration.url) {
+      window.open(integration.url, '_blank');
+    }
+  };
+
   const IntegrationCardPropia = ({ integration }: { integration: any }) => (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="pt-4">
-        <div className="flex items-start justify-between mb-3">
+    <Card className="hover:shadow-md transition-shadow h-full flex flex-col">
+      <CardContent className="pt-4 flex-1 flex flex-col">
+        <div className="flex items-start justify-between mb-3 flex-1">
           <div className="flex items-center gap-3">
-            <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${integration.color} flex items-center justify-center`}>
+            <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${integration.color} flex items-center justify-center flex-shrink-0`}>
               <integration.icon className="h-5 w-5 text-white" />
             </div>
-            <div>
-              <h4 className="font-medium">{integration.name}</h4>
-              <p className="text-sm text-muted-foreground">{integration.description}</p>
+            <div className="min-w-0">
+              <h4 className="font-medium truncate">{integration.name}</h4>
+              <p className="text-sm text-muted-foreground line-clamp-2">{integration.description}</p>
             </div>
           </div>
-          <Badge variant={integration.status === 'connected' ? 'default' : 'outline'} className={integration.status === 'connected' ? 'bg-green-500' : 'text-amber-600 border-amber-400'}>
+          <Badge variant={integration.status === 'connected' ? 'default' : 'outline'} className={`flex-shrink-0 ml-2 ${integration.status === 'connected' ? 'bg-green-500' : 'text-amber-600 border-amber-400'}`}>
             {integration.status === 'connected' ? (
               <><CheckCircle2 className="h-3 w-3 mr-1" /> Integrado</>
             ) : (
@@ -262,7 +331,12 @@ export default function HerramientasEmpresaPage() {
           </Badge>
         </div>
         
-        <Button size="sm" className="w-full" variant={integration.status === 'connected' ? 'outline' : 'default'}>
+        <Button 
+          size="sm" 
+          className="w-full mt-auto" 
+          variant={integration.status === 'connected' ? 'outline' : 'default'}
+          onClick={() => handleConnect(integration)}
+        >
           {integration.status === 'connected' ? (
             <><Settings className="h-4 w-4 mr-2" /> Configurar</>
           ) : (
@@ -273,44 +347,86 @@ export default function HerramientasEmpresaPage() {
     </Card>
   );
 
-  const IntegrationCardCompartida = ({ integration, type }: { integration: any; type: 'pagos' | 'firma' }) => (
-    <Card className={`hover:shadow-md transition-shadow ${integration.enabled ? '' : 'opacity-60'}`}>
-      <CardContent className="pt-4">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${integration.color} flex items-center justify-center`}>
-              <integration.icon className="h-5 w-5 text-white" />
+  const [enabledServices, setEnabledServices] = useState<Record<string, boolean>>({
+    stripe: true,
+    gocardless: true,
+    bizum: false,
+    tpv: false,
+    docusign: true,
+    signaturit: false,
+  });
+
+  const handleToggleService = (serviceId: string, enabled: boolean) => {
+    setEnabledServices(prev => ({ ...prev, [serviceId]: enabled }));
+    
+    if (enabled) {
+      toast.success(`Servicio activado`, {
+        description: `El servicio se ha habilitado correctamente`
+      });
+    } else {
+      toast.info(`Servicio desactivado`, {
+        description: `El servicio ya no estará disponible para tus usuarios`
+      });
+    }
+  };
+
+  const IntegrationCardCompartida = ({ integration, type }: { integration: any; type: 'pagos' | 'firma' }) => {
+    const isEnabled = enabledServices[integration.id] ?? integration.enabled;
+    
+    return (
+      <Card className={`hover:shadow-md transition-shadow h-full flex flex-col ${isEnabled ? '' : 'opacity-70'}`}>
+        <CardContent className="pt-4 flex-1 flex flex-col">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${integration.color} flex items-center justify-center flex-shrink-0`}>
+                <integration.icon className="h-5 w-5 text-white" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="font-medium truncate">{integration.name}</h4>
+                <p className="text-sm text-muted-foreground line-clamp-2">{integration.description}</p>
+              </div>
             </div>
-            <div>
-              <h4 className="font-medium">{integration.name}</h4>
-              <p className="text-sm text-muted-foreground">{integration.description}</p>
+            <Switch 
+              checked={isEnabled} 
+              onCheckedChange={(checked) => handleToggleService(integration.id, checked)}
+              className="flex-shrink-0 ml-2"
+            />
+          </div>
+
+          {type === 'pagos' && integration.fee && (
+            <div className="text-sm text-muted-foreground mb-2 p-2 bg-gray-50 rounded">
+              💰 Comisión: <span className="font-medium">{integration.fee}</span>
             </div>
-          </div>
-          <Switch checked={integration.enabled} />
-        </div>
+          )}
 
-        {type === 'pagos' && integration.fee && (
-          <div className="text-sm text-muted-foreground mb-2">
-            Comisión: <span className="font-medium">{integration.fee}</span>
-          </div>
-        )}
+          {type === 'firma' && integration.usage && (
+            <div className="flex gap-4 text-sm mb-2 p-2 bg-gray-50 rounded">
+              <span>📤 Enviados: <strong>{integration.usage.sent}</strong></span>
+              <span>✅ Firmados: <strong>{integration.usage.signed}</strong></span>
+            </div>
+          )}
 
-        {type === 'firma' && integration.usage && (
-          <div className="flex gap-4 text-sm mb-2">
-            <span>Enviados: <strong>{integration.usage.sent}</strong></span>
-            <span>Firmados: <strong>{integration.usage.signed}</strong></span>
+          <div className="mt-auto pt-3 space-y-2">
+            {integration.configuredByInmova && (
+              <div className="text-xs text-muted-foreground flex items-center gap-1">
+                <Shield className="h-3 w-3" />
+                Configurado por Inmova
+              </div>
+            )}
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="w-full"
+              onClick={() => toast.info(`Ver configuración de ${integration.name}`)}
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Ver detalles
+            </Button>
           </div>
-        )}
-
-        {integration.configuredByInmova && (
-          <div className="text-xs text-muted-foreground flex items-center gap-1">
-            <Shield className="h-3 w-3" />
-            Configurado por Inmova
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <AuthenticatedLayout>
@@ -390,6 +506,21 @@ export default function HerramientasEmpresaPage() {
               {integracionesPropias.portales.map(i => <IntegrationCardPropia key={i.id} integration={i} />)}
             </div>
           </section>
+
+          <Separator />
+
+          {/* Plataformas de Media Estancia */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Building2 className="h-5 w-5" /> Plataformas de Media Estancia
+            </h2>
+            <p className="text-muted-foreground mb-4">
+              Conecta con las plataformas de alquiler temporal más populares en España (1-11 meses).
+            </p>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {integracionesPropias.mediaEstancia.map(i => <IntegrationCardPropia key={i.id} integration={i} />)}
+            </div>
+          </section>
         </TabsContent>
 
         {/* ========================================== */}
@@ -432,28 +563,28 @@ export default function HerramientasEmpresaPage() {
               {integracionesCompartidas.firma.map(i => <IntegrationCardCompartida key={i.id} integration={i} type="firma" />)}
             </div>
 
-            {/* Estadísticas de uso */}
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle className="text-lg">Tu uso de Firma Digital</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 md:grid-cols-4">
-                  <div className="p-4 border rounded-lg text-center">
-                    <p className="text-2xl font-bold">45</p>
-                    <p className="text-sm text-muted-foreground">Documentos enviados</p>
+            {/* Aviso sobre estadísticas */}
+            <Card className="mt-6 border-blue-200 bg-blue-50">
+              <CardContent className="pt-4">
+                <div className="flex items-start gap-3">
+                  <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                    <FileSignature className="h-5 w-5 text-blue-600" />
                   </div>
-                  <div className="p-4 border rounded-lg text-center">
-                    <p className="text-2xl font-bold text-green-600">42</p>
-                    <p className="text-sm text-muted-foreground">Firmados</p>
-                  </div>
-                  <div className="p-4 border rounded-lg text-center">
-                    <p className="text-2xl font-bold text-yellow-600">3</p>
-                    <p className="text-sm text-muted-foreground">Pendientes</p>
-                  </div>
-                  <div className="p-4 border rounded-lg text-center">
-                    <p className="text-2xl font-bold">93%</p>
-                    <p className="text-sm text-muted-foreground">Tasa de firma</p>
+                  <div>
+                    <h4 className="font-medium text-blue-900">Estadísticas de Firma Digital</h4>
+                    <p className="text-sm text-blue-700 mt-1">
+                      Las estadísticas de uso se mostrarán aquí una vez que comiences a enviar documentos para firmar.
+                      Activa un servicio de firma y envía tu primer documento para ver las métricas.
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-3"
+                      onClick={() => window.location.href = '/admin/firma-digital'}
+                    >
+                      <FileSignature className="h-4 w-4 mr-2" />
+                      Ir a Firma Digital
+                    </Button>
                   </div>
                 </div>
               </CardContent>

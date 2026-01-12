@@ -998,12 +998,6 @@ const administradorEmpresaItems = [
     roles: ['administrador', 'super_admin'],
   },
   {
-    name: 'Plantillas Legales',
-    href: '/admin/legal',
-    icon: FileText,
-    roles: ['administrador', 'super_admin'],
-  },
-  {
     name: 'Sugerencias',
     href: '/admin/sugerencias',
     icon: MessageCircle,
