@@ -997,12 +997,6 @@ const administradorEmpresaItems = [
     icon: Scan,
     roles: ['administrador', 'super_admin'],
   },
-  {
-    name: 'Plantillas Legales',
-    href: '/admin/legal',
-    icon: FileText,
-    roles: ['administrador', 'super_admin'],
-  },
   // === GESTIÓN FISCAL ===
   {
     name: 'Impuestos',
