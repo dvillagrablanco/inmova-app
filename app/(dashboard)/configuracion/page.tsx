@@ -2,14 +2,15 @@
 
 /**
  * PÁGINA: Configuración
- * Gestión de preferencias, módulos y tours - VERSIÓN SIMPLIFICADA
+ * Gestión de preferencias, módulos, tours y cuenta - VERSIÓN SIMPLIFICADA
  */
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SimplifiedPreferences } from '@/components/preferences/SimplifiedPreferences';
 import { SimplifiedModuleManager } from '@/components/modules/SimplifiedModuleManager';
 import { ToursList } from '@/components/tours/ToursList';
-import { Settings, Sparkles, Video } from 'lucide-react';
+import { AccountDeletion } from '@/components/account/AccountDeletion';
+import { Settings, Sparkles, Video, UserCog } from 'lucide-react';
 
 export default function ConfiguracionPage() {
   return (
@@ -22,7 +23,7 @@ export default function ConfiguracionPage() {
       </div>
 
       <Tabs defaultValue="preferencias" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 max-w-2xl">
+        <TabsList className="grid w-full grid-cols-4 max-w-3xl">
           <TabsTrigger value="preferencias" className="flex items-center gap-2">
             <Settings size={16} />
             Mi Experiencia
@@ -34,6 +35,10 @@ export default function ConfiguracionPage() {
           <TabsTrigger value="tours" className="flex items-center gap-2">
             <Video size={16} />
             Tutoriales
+          </TabsTrigger>
+          <TabsTrigger value="cuenta" className="flex items-center gap-2">
+            <UserCog size={16} />
+            Mi Cuenta
           </TabsTrigger>
         </TabsList>
 
@@ -47,6 +52,10 @@ export default function ConfiguracionPage() {
 
         <TabsContent value="tours" className="mt-6">
           <ToursList />
+        </TabsContent>
+
+        <TabsContent value="cuenta" className="mt-6">
+          <AccountDeletion />
         </TabsContent>
       </Tabs>
     </div>
