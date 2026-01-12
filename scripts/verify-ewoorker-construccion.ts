@@ -37,10 +37,12 @@ const CONSTRUCCION_PAGES: PageCheck[] = [
 async function login(page: Page): Promise<boolean> {
   try {
     console.log('🔐 Iniciando sesión...');
-    await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle', timeout: 30000 });
+    await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(2000); // Esperar a que cargue el JS
     
-    await page.fill('input[name="email"]', TEST_USER);
-    await page.fill('input[name="password"]', TEST_PASSWORD);
+    // Los inputs usan id en lugar de name
+    await page.fill('#email', TEST_USER);
+    await page.fill('#password', TEST_PASSWORD);
     await page.click('button[type="submit"]');
     
     // Esperar a que se complete el login
