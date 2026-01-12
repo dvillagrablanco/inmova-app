@@ -4,7 +4,7 @@
  */
 import Redis from 'ioredis';
 
-let redis: Redis | null = null;
+let redisClient: Redis | null = null;
 
 /**
  * Get or create Redis client
@@ -18,13 +18,13 @@ export function getRedisClient(): Redis | null {
   }
 
   // Si ya existe la conexión, retornarla
-  if (redis) {
-    return redis;
+  if (redisClient) {
+    return redisClient;
   }
 
   try {
     // Crear nueva conexión
-    redis = new Redis(process.env.REDIS_URL || {
+    redisClient = new Redis(process.env.REDIS_URL || {
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
       password: process.env.REDIS_PASSWORD,
@@ -39,25 +39,25 @@ export function getRedisClient(): Redis | null {
     });
 
     // Event listeners para debugging
-    redis.on('connect', () => {
+    redisClient.on('connect', () => {
       console.log('[Redis] Conectado exitosamente');
     });
 
-    redis.on('error', (error) => {
+    redisClient.on('error', (error) => {
       console.error('[Redis] Error:', error);
     });
 
-    redis.on('ready', () => {
+    redisClient.on('ready', () => {
       console.log('[Redis] Listo para usar');
     });
 
     // Conectar
-    redis.connect().catch((error) => {
+    redisClient.connect().catch((error) => {
       console.error('[Redis] Error al conectar:', error);
-      redis = null;
+      redisClient = null;
     });
 
-    return redis;
+    return redisClient;
   } catch (error) {
     console.error('[Redis] Error al inicializar:', error);
     return null;
@@ -69,9 +69,9 @@ export function getRedisClient(): Redis | null {
  * Usar en cleanup/shutdown
  */
 export async function closeRedisClient(): Promise<void> {
-  if (redis) {
-    await redis.quit();
-    redis = null;
+  if (redisClient) {
+    await redisClient.quit();
+    redisClient = null;
     console.log('[Redis] Conexión cerrada');
   }
 }
