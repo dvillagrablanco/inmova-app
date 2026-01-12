@@ -98,61 +98,17 @@ export default function VisitasPage() {
   const loadVisits = async () => {
     try {
       setLoading(true);
-      // TODO: Fetch from API
-      // const response = await fetch('/api/visits');
-      // const data = await response.json();
-
-      // Mock data
-      const mockVisits: Visit[] = [
-        {
-          id: '1',
-          propertyAddress: 'Calle Mayor 123, Madrid',
-          propertyId: 'prop_1',
-          visitorName: 'Juan García',
-          visitorPhone: '+34 600 000 001',
-          visitorEmail: 'juan@example.com',
-          scheduledDate: '2025-01-05',
-          scheduledTime: '10:00',
-          status: 'scheduled',
-          notes: 'Interesado en alquilar',
-          agentName: 'María López',
-          createdAt: '2025-01-02T10:00:00Z',
-        },
-        {
-          id: '2',
-          propertyAddress: 'Av. Libertad 45, Barcelona',
-          propertyId: 'prop_2',
-          visitorName: 'Ana Martínez',
-          visitorPhone: '+34 600 000 002',
-          visitorEmail: 'ana@example.com',
-          scheduledDate: '2025-01-05',
-          scheduledTime: '16:00',
-          status: 'confirmed',
-          notes: 'Primera visita',
-          agentName: 'Carlos Ruiz',
-          createdAt: '2025-01-02T11:00:00Z',
-        },
-        {
-          id: '3',
-          propertyAddress: 'Plaza España 8, Valencia',
-          propertyId: 'prop_3',
-          visitorName: 'Pedro Sánchez',
-          visitorPhone: '+34 600 000 003',
-          visitorEmail: 'pedro@example.com',
-          scheduledDate: '2025-01-04',
-          scheduledTime: '11:00',
-          status: 'completed',
-          notes: 'Cliente corporativo',
-          feedback: 'Muy interesado, quiere hacer segunda visita',
-          agentName: 'María López',
-          createdAt: '2025-01-01T09:00:00Z',
-        },
-      ];
-
-      setVisits(mockVisits);
+      const response = await fetch('/api/visits');
+      if (response.ok) {
+        const data = await response.json();
+        setVisits(Array.isArray(data) ? data : (data.visits || []));
+      } else {
+        setVisits([]);
+      }
     } catch (error) {
       console.error('Error loading visits:', error);
       toast.error('Error al cargar visitas');
+      setVisits([]);
     } finally {
       setLoading(false);
     }

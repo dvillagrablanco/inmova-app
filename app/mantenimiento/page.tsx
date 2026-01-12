@@ -459,9 +459,9 @@ function MantenimientoPage() {
               
               {/* Quick Actions */}
               <ContextualQuickActions
-                pendingMaintenanceRequests={statsReq.pendientes}
-                urgentMaintenanceRequests={statsReq.urgentes}
-                upcomingMaintenanceTasks={statsSched.proximos}
+                pendingMaintenanceRequests={statsRequests.pendientes}
+                urgentMaintenanceRequests={statsRequests.alta}
+                upcomingMaintenanceTasks={statsSchedules.proximos30}
               />
             </div>
 

@@ -170,7 +170,8 @@ export default function FacturacionPage() {
   const totalPending = pendingInvoices.reduce((sum, inv) => sum + inv.total, 0);
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <AuthenticatedLayout>
+      <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold">Facturación y Suscripción</h1>
@@ -316,7 +317,100 @@ export default function FacturacionPage() {
           </Tabs>
         </CardContent>
       </Card>
-    </div>
+
+      {/* Integraciones Contables */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5" />
+            Integraciones Contables
+          </CardTitle>
+          <CardDescription>Conecta tu sistema contable para sincronización automática</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-3 gap-4">
+            {/* Contasimple */}
+            <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
+              <CardContent className="pt-6 text-center">
+                <div className="w-12 h-12 mx-auto mb-3 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-blue-600" />
+                </div>
+                <h3 className="font-semibold">Contasimple</h3>
+                <p className="text-sm text-muted-foreground mt-1">Contabilidad para autónomos y pymes</p>
+                <Badge variant="outline" className="mt-2">Popular en España</Badge>
+              </CardContent>
+            </Card>
+
+            {/* Holded */}
+            <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
+              <CardContent className="pt-6 text-center">
+                <div className="w-12 h-12 mx-auto mb-3 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-purple-600" />
+                </div>
+                <h3 className="font-semibold">Holded</h3>
+                <p className="text-sm text-muted-foreground mt-1">ERP y contabilidad todo en uno</p>
+                <Badge variant="outline" className="mt-2">ERP Completo</Badge>
+              </CardContent>
+            </Card>
+
+            {/* A3 Software */}
+            <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
+              <CardContent className="pt-6 text-center">
+                <div className="w-12 h-12 mx-auto mb-3 bg-green-100 rounded-lg flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-green-600" />
+                </div>
+                <h3 className="font-semibold">A3 Software</h3>
+                <p className="text-sm text-muted-foreground mt-1">Software de gestión empresarial</p>
+                <Badge variant="outline" className="mt-2">Profesional</Badge>
+              </CardContent>
+            </Card>
+
+            {/* Sage */}
+            <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
+              <CardContent className="pt-6 text-center">
+                <div className="w-12 h-12 mx-auto mb-3 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-orange-600" />
+                </div>
+                <h3 className="font-semibold">Sage</h3>
+                <p className="text-sm text-muted-foreground mt-1">Soluciones contables empresariales</p>
+                <Badge variant="outline" className="mt-2">Enterprise</Badge>
+              </CardContent>
+            </Card>
+
+            {/* QuickBooks */}
+            <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
+              <CardContent className="pt-6 text-center">
+                <div className="w-12 h-12 mx-auto mb-3 bg-teal-100 rounded-lg flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-teal-600" />
+                </div>
+                <h3 className="font-semibold">QuickBooks</h3>
+                <p className="text-sm text-muted-foreground mt-1">Contabilidad en la nube</p>
+                <Badge variant="outline" className="mt-2">Internacional</Badge>
+              </CardContent>
+            </Card>
+
+            {/* Xero */}
+            <Card className="border-2 hover:border-primary transition-colors cursor-pointer">
+              <CardContent className="pt-6 text-center">
+                <div className="w-12 h-12 mx-auto mb-3 bg-cyan-100 rounded-lg flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-cyan-600" />
+                </div>
+                <h3 className="font-semibold">Xero</h3>
+                <p className="text-sm text-muted-foreground mt-1">Contabilidad cloud global</p>
+                <Badge variant="outline" className="mt-2">Global</Badge>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="mt-4 p-4 bg-muted rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              <strong>¿No ves tu software contable?</strong> Contacta con nuestro equipo de soporte para solicitar una nueva integración.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+      </div>
+    </AuthenticatedLayout>
   );
 }
 

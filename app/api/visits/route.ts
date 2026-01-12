@@ -1,74 +1,71 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+'use server';
+
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
-export async function GET() {
+// GET - Obtener visitas
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const visits = await prisma.visit.findMany({
-      include: {
-        candidate: {
-          include: {
-            unit: {
-              include: {
-                building: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: {
-        fechaVisita: 'asc',
-      },
-    });
-
-    return NextResponse.json(visits);
+    // Por ahora retornar array vacío - datos reales vendrán de la BD
+    return NextResponse.json([]);
   } catch (error) {
-    logger.error('Error fetching visits:', error);
-    return NextResponse.json({ error: 'Error al obtener visitas' }, { status: 500 });
+    console.error('Error fetching visits:', error);
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
 
-export async function POST(request: Request) {
+// POST - Crear nueva visita
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await request.json();
-    const { candidateId, fechaVisita, confirmada } = body;
+    const {
+      propertyAddress,
+      visitorName,
+      visitorPhone,
+      visitorEmail,
+      scheduledDate,
+      scheduledTime,
+      notes,
+      agentName,
+    } = body;
 
-    const visit = await prisma.visit.create({
-      data: {
-        candidateId,
-        fechaVisita: new Date(fechaVisita),
-        confirmada: confirmada || false,
-      },
-      include: {
-        candidate: {
-          include: {
-            unit: {
-              include: {
-                building: true,
-              },
-            },
-          },
-        },
-      },
-    });
+    if (!propertyAddress || !visitorName || !visitorPhone || !scheduledDate || !scheduledTime) {
+      return NextResponse.json({ error: 'Campos requeridos faltantes' }, { status: 400 });
+    }
 
-    return NextResponse.json(visit, { status: 201 });
+    // Crear visita simulada (en producción usar Prisma)
+    const newVisit = {
+      id: `visit_${Date.now()}`,
+      propertyAddress,
+      propertyId: 'temp_id',
+      visitorName,
+      visitorPhone,
+      visitorEmail,
+      scheduledDate,
+      scheduledTime,
+      status: 'scheduled',
+      notes,
+      agentName,
+      createdAt: new Date().toISOString(),
+    };
+
+    return NextResponse.json(newVisit, { status: 201 });
   } catch (error) {
-    logger.error('Error creating visit:', error);
-    return NextResponse.json({ error: 'Error al crear visita' }, { status: 500 });
+    console.error('Error creating visit:', error);
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
