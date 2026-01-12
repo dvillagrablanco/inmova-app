@@ -57,7 +57,7 @@ export async function GET(
 
     // 3. Verificar permisos (por ahora permitir acceso con autenticación)
     // TODO: Implementar lógica de permisos más granular
-    const canAccess = session.user.role === 'SUPERADMIN' || session.user.role === 'ADMIN';
+    const canAccess = session.user.role === 'super_admin' || session.user.role === 'administrador';
 
     if (!canAccess && document.tenantId !== session.user.id) {
       // Verificar si tiene acceso por contrato o propiedad

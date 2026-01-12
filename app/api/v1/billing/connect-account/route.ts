@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Solo admins pueden crear cuenta Connect
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPERADMIN') {
+    if (session.user.role !== 'administrador' && session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 

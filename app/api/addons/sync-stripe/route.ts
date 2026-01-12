@@ -15,7 +15,7 @@ export const runtime = 'nodejs';
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || !['SUPERADMIN', 'super_admin'].includes(session.user.role)) {
+    if (!session?.user || !['super_admin'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || !['SUPERADMIN', 'super_admin', 'ADMIN'].includes(session.user.role)) {
+    if (!session?.user || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 

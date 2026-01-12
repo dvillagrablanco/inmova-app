@@ -23,7 +23,7 @@ export async function GET(
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPERADMIN') {
+    if (session.user.role !== 'administrador' && session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 

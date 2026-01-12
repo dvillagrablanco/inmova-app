@@ -14,7 +14,7 @@ export async function GET() {
     const session = await getServerSession(authOptions);
 
     // Solo admins pueden ver el health check detallado
-    if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'SUPERADMIN')) {
+    if (!session || (session.user.role !== 'administrador' && session.user.role !== 'super_admin')) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

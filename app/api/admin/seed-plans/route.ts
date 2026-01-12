@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Solo superadmin puede ejecutar seed
-    if (session.user.role !== 'SUPERADMIN') {
+    if (session.user.role !== 'super_admin') {
       return NextResponse.json(
         { error: 'Permisos insuficientes' },
         { status: 403 }

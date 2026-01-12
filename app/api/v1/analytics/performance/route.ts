@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Solo admins pueden ver métricas de performance
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPERADMIN') {
+    if (session.user.role !== 'administrador' && session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'Permisos insuficientes' }, { status: 403 });
     }
 

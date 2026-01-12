@@ -73,7 +73,7 @@ export async function PUT(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || !['SUPERADMIN', 'ADMIN', 'super_admin'].includes(session.user.role)) {
+    if (!session?.user || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -251,7 +251,7 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || !['SUPERADMIN', 'ADMIN', 'super_admin'].includes(session.user.role)) {
+    if (!session?.user || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 

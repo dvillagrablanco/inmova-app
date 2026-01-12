@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Solo SUPERADMIN
-    if (session.user.role !== 'SUPERADMIN') {
+    if (session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 

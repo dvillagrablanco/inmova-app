@@ -19,7 +19,7 @@ const providerSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'SUPERADMIN') {
+    if (!session || session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'SUPERADMIN') {
+    if (!session || session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 

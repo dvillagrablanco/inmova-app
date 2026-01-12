@@ -66,7 +66,7 @@ export async function POST(
     }
 
     // 3. Verificar permisos
-    if (contract.ownerId !== session.user.id && session.user.role !== 'SUPERADMIN') {
+    if (contract.ownerId !== session.user.id && session.user.role !== 'super_admin') {
       return NextResponse.json(
         { error: 'No tienes permiso para firmar este contrato' },
         { status: 403 }

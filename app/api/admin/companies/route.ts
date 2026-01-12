@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 // Roles permitidos para acceso admin
-const SUPER_ADMIN_ROLES = ['super_admin', 'SUPERADMIN'];
+const SUPER_ADMIN_ROLES = ['super_admin'];
 
 // Schema de validación para query params
 const querySchema = z.object({

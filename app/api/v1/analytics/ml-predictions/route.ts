@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Only ADMIN/SUPERADMIN
-    if (!['ADMIN', 'SUPERADMIN'].includes(session.user.role)) {
+    if (!['administrador', 'super_admin'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Permisos insuficientes' }, { status: 403 });
     }
 

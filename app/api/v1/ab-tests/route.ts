@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Solo admins pueden ver tests
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPERADMIN') {
+    if (session.user.role !== 'administrador' && session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPERADMIN') {
+    if (session.user.role !== 'administrador' && session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 

@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
     
     // Solo super_admin puede ver el estado completo
-    const allowedRoles = ['super_admin', 'SUPER_ADMIN', 'superadmin', 'admin', 'ADMIN'];
+    const allowedRoles = ['super_admin', 'SUPER_ADMIN', 'superadmin', 'admin', 'administrador'];
     const userRole = session?.user?.role?.toLowerCase();
     
     if (!session || !userRole || !allowedRoles.includes(userRole)) {

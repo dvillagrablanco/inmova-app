@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    const allowedRoles = ['super_admin', 'SUPER_ADMIN', 'superadmin', 'admin', 'ADMIN'];
+    const allowedRoles = ['super_admin', 'SUPER_ADMIN', 'superadmin', 'admin', 'administrador'];
     const userRole = session?.user?.role?.toLowerCase();
     
     if (!session || !userRole || !allowedRoles.includes(userRole)) {
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    const allowedRoles = ['super_admin', 'SUPER_ADMIN', 'superadmin', 'admin', 'ADMIN'];
+    const allowedRoles = ['super_admin', 'SUPER_ADMIN', 'superadmin', 'admin', 'administrador'];
     const userRole = session?.user?.role?.toLowerCase();
     
     if (!session || !userRole || !allowedRoles.includes(userRole)) {
