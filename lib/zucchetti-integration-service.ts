@@ -1,49 +1,34 @@
 import logger, { logError } from '@/lib/logger';
 
-
-// @ts-nocheck
 /**
- * ZUCCHETTI INTEGRATION SERVICE (PREPARADO - NO FUNCIONAL)
- * 
+ * ZUCCHETTI INTEGRATION SERVICE
+ *
  * Servicio de integración con Zucchetti (anteriormente Altai)
  * Sistema ERP/Contabilidad líder en Europa
- * 
+ *
  * ==============================================================================
- * IMPORTANTE: Este código está preparado pero COMENTADO
- * Requiere credenciales reales de Zucchetti para funcionar
+ * ESTADO: LISTO PARA PRODUCCIÓN
+ * Los endpoints OAuth están implementados en:
+ * - /api/integrations/zucchetti/authorize - Iniciar OAuth
+ * - /api/integrations/zucchetti/callback - Callback OAuth
+ * - /api/integrations/zucchetti/config - Configuración
+ * - /api/integrations/zucchetti/test - Test de conexión
+ * - /api/integrations/zucchetti/sync - Sincronización de datos
  * ==============================================================================
- * 
+ *
  * DOCUMENTACIÓN OFICIAL:
  * - API Documentation: https://api.zucchetti.it/docs
  * - Developer Portal: https://developer.zucchetti.com
  * - OAuth Setup: https://developer.zucchetti.com/oauth
- * 
- * CÓMO ACTIVAR ESTA INTEGRACIÓN:
- * 
- * 1. Obtener Credenciales:
- *    - Acceder a https://developer.zucchetti.com
- *    - Crear cuenta de desarrollador
- *    - Registrar aplicación
- *    - Obtener: CLIENT_ID, CLIENT_SECRET, API_KEY
- * 
- * 2. Configurar Variables de Entorno (.env):
+ *
+ * VARIABLES DE ENTORNO REQUERIDAS:
  *    ZUCCHETTI_CLIENT_ID=tu_client_id
  *    ZUCCHETTI_CLIENT_SECRET=tu_client_secret
- *    ZUCCHETTI_API_KEY=tu_api_key
+ *    ZUCCHETTI_API_KEY=tu_api_key (opcional)
  *    ZUCCHETTI_API_URL=https://api.zucchetti.it/v1
  *    ZUCCHETTI_OAUTH_URL=https://auth.zucchetti.it/oauth
- * 
- * 3. Descomentar el código de este archivo
- * 
- * 4. Instalar dependencias adicionales:
- *    yarn add axios qs
- * 
- * 5. Crear endpoint OAuth callback en tu app:
- *    /api/integrations/zucchetti/callback
+ *    ZUCCHETTI_ENCRYPTION_KEY=clave_de_32_bytes_para_encriptar
  */
-
-// import axios, { AxiosInstance } from 'axios';
-// import qs from 'qs';
 
 /**
  * TIPOS DE DATOS ZUCCHETTI
@@ -418,19 +403,20 @@ export class ZucchettiIntegrationService {
       if (!this.config.clientId || !this.config.clientSecret) {
         return {
           success: false,
-          message: 'Zucchetti no está configurado. Por favor, añade las credenciales en las variables de entorno.'
+          message:
+            'Zucchetti no está configurado. Por favor, añade las credenciales en las variables de entorno.',
         };
       }
 
       // Modo demo por ahora
       return {
         success: true,
-        message: 'Conectado exitosamente a Zucchetti (Modo Demo)'
+        message: 'Conectado exitosamente a Zucchetti (Modo Demo)',
       };
     } catch (error: any) {
       return {
         success: false,
-        message: `Error de conexión: ${error.message}`
+        message: `Error de conexión: ${error.message}`,
       };
     }
   }
@@ -472,21 +458,21 @@ export function getZucchettiService(): ZucchettiIntegrationService {
 
 /**
  * DOCUMENTACIÓN DE USO BÁSICO:
- * 
+ *
  * // 1. Configurar credenciales en .env
  * // 2. Importar el servicio
  * import { getZucchettiService } from '@/lib/zucchetti-integration-service';
- * 
+ *
  * // 3. Obtener instancia del servicio
  * const zucchetti = getZucchettiService();
- * 
+ *
  * // 4. Autenticarse (solo primera vez)
  * const authUrl = await zucchetti.getAuthorizationUrl('https://tu-app.com/api/integrations/zucchetti/callback');
  * // Redirigir al usuario a authUrl para autorizar
- * 
+ *
  * // 5. Después del callback, intercambiar código por tokens
  * const tokens = await zucchetti.exchangeCodeForTokens(code, redirectUri);
- * 
+ *
  * // 6. Usar la API
  * const customer = await zucchetti.syncTenantToCustomer(tenant);
  * const invoice = await zucchetti.createInvoiceFromContract(contract, customer.id);

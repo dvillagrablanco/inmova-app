@@ -1841,6 +1841,16 @@ model Company {
   contasimpleAuthKey    String? // Credenciales del cliente para su propia contabilidad
   contasimpleCustomerId String? // ID del cliente en Contasimple de Inmova (para facturación B2B)
 
+  // Zucchetti - Integración contable ERP
+  zucchettiEnabled       Boolean  @default(false)
+  zucchettiAccessToken   String?  @db.Text // Token de acceso OAuth (encriptado)
+  zucchettiRefreshToken  String?  @db.Text // Token de refresco OAuth (encriptado)
+  zucchettiTokenExpiry   DateTime? // Fecha de expiración del token
+  zucchettiCompanyId     String?  // ID de la empresa en Zucchetti
+  zucchettiLastSync      DateTime? // Última sincronización exitosa
+  zucchettiSyncErrors    Int      @default(0) // Contador de errores consecutivos
+  zucchettiWebhookSecret String?  // Secret para validar webhooks de Zucchetti
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
