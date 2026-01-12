@@ -152,6 +152,23 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/flipping/projects': 'flipping_projects',
   '/construction/projects': 'construction_projects',
   '/construccion/proyectos': 'construccion_projects',
+  '/construccion': 'construccion_dashboard',
+  // eWoorker - Marketplace de Trabajadores
+  '/ewoorker': 'ewoorker',
+  '/ewoorker/dashboard': 'ewoorker',
+  '/ewoorker/panel': 'ewoorker',
+  '/ewoorker/trabajadores': 'ewoorker',
+  '/ewoorker/asignaciones': 'ewoorker',
+  '/ewoorker/obras': 'ewoorker',
+  '/ewoorker/contratos': 'ewoorker',
+  '/ewoorker/pagos': 'ewoorker',
+  '/ewoorker/analytics': 'ewoorker',
+  '/ewoorker/empresas': 'ewoorker',
+  '/ewoorker/compliance': 'ewoorker',
+  '/ewoorker/leaderboard': 'ewoorker',
+  '/ewoorker/admin-socio': 'ewoorker',
+  '/ewoorker/perfil': 'ewoorker',
+  '/ewoorker/landing': 'ewoorker',
   '/professional/projects': 'professional_projects',
   '/anuncios': 'anuncios',
   '/votaciones': 'votaciones',
@@ -272,6 +289,8 @@ const CORE_MODULES = [
   'flipping_projects',
   'construction_projects',
   'construccion_projects',
+  'construccion_dashboard',
+  'ewoorker',
   'professional_projects',
   'str_listings',
   'str_bookings',
@@ -490,10 +509,105 @@ const flippingNavItems = [
 // Gestión de proyectos de construcción, reformas y rehabilitaciones
 const construccionNavItems = [
   {
+    name: 'Dashboard',
+    href: '/construccion',
+    icon: LayoutDashboard,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Proyectos',
     href: '/construccion/proyectos',
     icon: HardHat,
     roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Órdenes de Trabajo',
+    href: '/ordenes-trabajo',
+    icon: ClipboardList,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Control de Calidad',
+    href: '/construction/quality-control',
+    icon: CheckSquare,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+];
+
+// 2.5.2 EWOORKER - Plataforma de Trabajadores
+// Marketplace de profesionales para obras y mantenimiento
+const ewoorkerNavItems = [
+  {
+    name: 'Dashboard',
+    href: '/ewoorker/dashboard',
+    icon: LayoutDashboard,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Panel eWoorker',
+    href: '/ewoorker/panel',
+    icon: Users,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Trabajadores',
+    href: '/ewoorker/trabajadores',
+    icon: Users2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Asignaciones',
+    href: '/ewoorker/asignaciones',
+    icon: ClipboardList,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Obras',
+    href: '/ewoorker/obras',
+    icon: HardHat,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Contratos',
+    href: '/ewoorker/contratos',
+    icon: FileText,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Pagos',
+    href: '/ewoorker/pagos',
+    icon: DollarSign,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Analytics',
+    href: '/ewoorker/analytics',
+    icon: BarChart2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Empresas',
+    href: '/ewoorker/empresas',
+    icon: Building2,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Compliance',
+    href: '/ewoorker/compliance',
+    icon: Shield,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Leaderboard',
+    href: '/ewoorker/leaderboard',
+    icon: TrendingUp,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Admin Socio',
+    href: '/ewoorker/admin-socio',
+    icon: Settings,
+    roles: ['super_admin'],
   },
 ];
 
@@ -1528,6 +1642,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const filteredBuildToRentItems = filterItems(buildToRentNavItems, useCompanyModules);
   const filteredFlippingItems = filterItems(flippingNavItems, useCompanyModules);
   const filteredConstruccionItems = filterItems(construccionNavItems, useCompanyModules);
+  const filteredEwoorkerItems = filterItems(ewoorkerNavItems, useCompanyModules);
   const filteredComercialItems = filterItems(comercialNavItems, useCompanyModules);
   const filteredAlquilerComercialItems = filterItems(alquilerComercialNavItems, useCompanyModules);
   const filteredAdminFincasItems = filterItems(adminFincasItems, useCompanyModules);
@@ -2144,6 +2259,30 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.construccion && (
                   <div className="space-y-1 mt-1">
                     {filteredConstruccionItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* eWoorker - Marketplace de Trabajadores */}
+            {filteredEwoorkerItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('ewoorker')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>👷 eWoorker</span>
+                  {expandedSections.ewoorker ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
+                </button>
+                {expandedSections.ewoorker && (
+                  <div className="space-y-1 mt-1">
+                    {filteredEwoorkerItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
                   </div>
