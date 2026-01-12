@@ -13,13 +13,13 @@ const SUPER_ADMIN_ROLES = ['super_admin'];
 
 // Schema de validación para query params
 const querySchema = z.object({
-  page: z.coerce.number().min(1).default(1),
-  limit: z.coerce.number().min(1).max(100).default(20),
-  search: z.string().optional(),
-  status: z.enum(['activo', 'inactivo', 'prueba', 'suspendido', 'all']).optional(),
-  sortBy: z.enum(['nombre', 'createdAt', 'estadoCliente', 'users']).default('createdAt'),
-  sortOrder: z.enum(['asc', 'desc']).default('desc'),
-  includeTest: z.coerce.boolean().default(true), // Por defecto mostrar todas las empresas para gestión
+  page: z.preprocess((val) => val === null || val === '' ? 1 : Number(val), z.number().min(1).default(1)),
+  limit: z.preprocess((val) => val === null || val === '' ? 20 : Number(val), z.number().min(1).max(100).default(20)),
+  search: z.string().optional().nullable().transform(val => val ?? undefined),
+  status: z.enum(['activo', 'inactivo', 'prueba', 'suspendido', 'all']).optional().nullable().transform(val => val ?? undefined),
+  sortBy: z.preprocess((val) => val === null || val === '' ? 'createdAt' : val, z.enum(['nombre', 'createdAt', 'estadoCliente', 'users']).default('createdAt')),
+  sortOrder: z.preprocess((val) => val === null || val === '' ? 'desc' : val, z.enum(['asc', 'desc']).default('desc')),
+  includeTest: z.preprocess((val) => val === null || val === '' ? true : val === 'true', z.boolean().default(true)),
 });
 
 // GET /api/admin/companies - Lista empresas con paginación y filtros (solo super_admin)

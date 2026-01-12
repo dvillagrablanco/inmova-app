@@ -1,0 +1,242 @@
+{
+  "timestamp": "2026-01-12T17:11:53.164Z",
+  "baseUrl": "https://inmovaapp.com",
+  "summary": {
+    "success": 18,
+    "warning": 0,
+    "error": 5
+  },
+  "results": [
+    {
+      "page": "Admin Dashboard",
+      "status": "success",
+      "message": "OK",
+      "details": {
+        "httpStatus": 200,
+        "buttons": 60,
+        "cards": 12
+      },
+      "screenshot": "verify-admin-dashboard.png"
+    },
+    {
+      "page": "Clientes",
+      "status": "error",
+      "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/admin/clientes\", waiting until \"networkidle\"\n",
+      "details": {}
+    },
+    {
+      "page": "Planes",
+      "status": "success",
+      "message": "OK",
+      "details": {
+        "httpStatus": 200,
+        "buttons": 59,
+        "cards": 6
+      },
+      "screenshot": "verify-planes.png"
+    },
+    {
+      "page": "Addons",
+      "status": "success",
+      "message": "OK",
+      "details": {
+        "httpStatus": 200,
+        "buttons": 111,
+        "cards": 5
+      },
+      "screenshot": "verify-addons.png"
+    },
+    {
+      "page": "Marketplace Categorías",
+      "status": "success",
+      "message": "OK",
+      "details": {
+        "httpStatus": 200,
+        "buttons": 72,
+        "tables": 1
+      },
+      "screenshot": "verify-marketplace-categor-as.png"
+    },
+    {
+      "page": "Marketplace Proveedores",
+      "status": "success",
+      "message": "OK",
+      "details": {
+        "httpStatus": 200,
+        "buttons": 50,
+        "tables": 0
+      },
+      "screenshot": "verify-marketplace-proveedores.png"
+    },
+    {
+      "page": "Marketplace Reservas",
+      "status": "success",
+      "message": "OK",
+      "details": {
+        "httpStatus": 200,
+        "tables": 0
+      },
+      "screenshot": "verify-marketplace-reservas.png"
+    },
+    {
+      "page": "Marketplace Comisiones",
+      "status": "success",
+      "message": "OK",
+      "details": {
+        "httpStatus": 200,
+        "tables": 0
+      },
+      "screenshot": "verify-marketplace-comisiones.png"
+    },
+    {
+      "page": "Partners Invitaciones",
+      "status": "error",
+      "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/admin/partners/invitaciones\", waiting until \"networkidle\"\n",
+      "details": {}
+    },
+    {
+      "page": "eWoorker Planes",
+      "status": "success",
+      "message": "OK",
+      "details": {
+        "httpStatus": 200,
+        "buttons": 55,
+        "cards": 6
+      },
+      "screenshot": "verify-ewoorker-planes.png"
+    },
+    {
+      "page": "Integraciones",
+      "status": "success",
+      "message": "OK",
+      "details": {
+        "httpStatus": 200,
+        "cards": 19
+      },
+      "screenshot": "verify-integraciones.png"
+    },
+    {
+      "page": "Cupones Promocionales",
+      "status": "success",
+      "message": "OK",
+      "details": {
+        "httpStatus": 200,
+        "buttons": 77,
+        "tables": 1
+      },
+      "screenshot": "verify-cupones-promocionales.png"
+    },
+    {
+      "page": "Dashboard Principal",
+      "status": "error",
+      "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/dashboard\", waiting until \"networkidle\"\n",
+      "details": {}
+    },
+    {
+      "page": "Toggle Functionality (Marketplace Categories)",
+      "status": "success",
+      "message": "Toggle funcionando correctamente",
+      "details": {
+        "switchesFound": 20,
+        "initialState": "closed",
+        "errorToastFound": false
+      }
+    },
+    {
+      "page": "Health Check",
+      "status": "success",
+      "message": "OK",
+      "details": {
+        "httpStatus": 200,
+        "hasData": true
+      }
+    },
+    {
+      "page": "Dashboard API",
+      "status": "success",
+      "message": "OK",
+      "details": {
+        "httpStatus": 200,
+        "hasData": true
+      }
+    },
+    {
+      "page": "Admin Dashboard Stats",
+      "status": "success",
+      "message": "OK",
+      "details": {
+        "httpStatus": 200,
+        "hasData": true
+      }
+    },
+    {
+      "page": "Planes API",
+      "status": "success",
+      "message": "OK",
+      "details": {
+        "httpStatus": 200,
+        "hasData": true
+      }
+    },
+    {
+      "page": "Addons API",
+      "status": "success",
+      "message": "OK",
+      "details": {
+        "httpStatus": 200,
+        "hasData": true
+      }
+    },
+    {
+      "page": "Integración Zucchetti",
+      "status": "error",
+      "message": "HTTP 404",
+      "details": {
+        "httpStatus": 404
+      }
+    },
+    {
+      "page": "Alertas",
+      "status": "success",
+      "message": "OK",
+      "details": {
+        "httpStatus": 200,
+        "cards": 5
+      },
+      "screenshot": "verify-alertas.png"
+    },
+    {
+      "page": "Onboarding",
+      "status": "error",
+      "message": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/admin/onboarding\", waiting until \"networkidle\"\n",
+      "details": {}
+    },
+    {
+      "page": "Firma Digital",
+      "status": "success",
+      "message": "OK",
+      "details": {
+        "httpStatus": 200,
+        "buttons": 49
+      },
+      "screenshot": "verify-firma-digital.png"
+    }
+  ],
+  "consoleErrors": [
+    "Error fetching unread count: TypeError: Failed to fetch\n    at https://inmovaapp.com/_next/static/chunks/73686-d2d9c1696fb1c4cd.js:1:13066\n    at https://inmovaapp.com/_next/static/chunks/73686-d2d9c1696fb1c4cd.js:1:14056\n    at aW (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:73245)\n    at oe (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:84686)\n    at e (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:85828)\n    at e (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:86114)\n    at e (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:86114)\n    at e (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:86114)\n    at e (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:85815)\n    at e (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:86114)",
+    "Error loading notifications: TypeError: Failed to fetch\n    at f (https://inmovaapp.com/_next/static/chunks/73686-d2d9c1696fb1c4cd.js:1:8131)\n    at https://inmovaapp.com/_next/static/chunks/73686-d2d9c1696fb1c4cd.js:1:8030\n    at aW (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:73245)\n    at oe (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:84686)\n    at e (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:85828)\n    at e (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:86114)\n    at e (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:86114)\n    at e (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:86114)\n    at e (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:85815)\n    at e (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:86114)",
+    "Failed to fetch RSC payload for https://inmovaapp.com/perfil. Falling back to browser navigation. TypeError: Failed to fetch\n    at f (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:45578)\n    at https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:59129\n    at Object.u [as task] (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:31933)\n    at c.s (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:32638)\n    at c.enqueue (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:32063)\n    at s (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:59092)\n    at i (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:58632)\n    at a (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:65458)\n    at f (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:75300)\n    at Object.action (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:2:7102)",
+    "Error fetching dashboard data: {message: Failed to fetch, name: TypeError, stack: TypeError: Failed to fetch\n    at e (https://inmov…p.com/_next/static/chunks/app/dashboard/page-8aee}",
+    "Failed to fetch RSC payload for https://inmovaapp.com/configuracion. Falling back to browser navigation. TypeError: Failed to fetch\n    at f (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:45578)\n    at https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:59129\n    at Object.u [as task] (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:31933)\n    at c.s (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:32638)\n    at c.enqueue (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:32063)\n    at s (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:59092)\n    at i (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:58632)\n    at a (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:65458)\n    at f (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:75300)\n    at Object.action (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:2:7102)",
+    "Failed to load resource: the server responded with a status of 400 ()",
+    "Error 400: al cargar clientes {stack: Error: Error 400: al cargar clientes\n    at l (htt…/admin/clientes/page-cc09d7633869d2df.js:1:12441), context: useCompanies.fetchCompanies}",
+    "Failed to load resource: the server responded with a status of 500 ()",
+    "Failed to load resource: the server responded with a status of 405 ()",
+    "Failed to load resource: the server responded with a status of 500 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to fetch RSC payload for https://inmovaapp.com/legal/privacy. Falling back to browser navigation. TypeError: Failed to fetch\n    at f (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:45578)\n    at https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:59129\n    at Object.u [as task] (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:31933)\n    at c.s (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:32638)\n    at c.enqueue (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:32063)\n    at s (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:59092)\n    at i (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:58632)\n    at a (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:65458)\n    at f (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:75300)\n    at Object.action (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:2:7102)",
+    "Failed to fetch RSC payload for https://inmovaapp.com/legal/cookies. Falling back to browser navigation. TypeError: Failed to fetch\n    at f (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:45578)\n    at https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:59129\n    at Object.u [as task] (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:31933)\n    at c.s (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:32638)\n    at c.enqueue (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:32063)\n    at s (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:59092)\n    at i (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:58632)\n    at a (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:65458)\n    at f (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:75300)\n    at Object.action (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:2:7102)",
+    "Failed to load resource: the server responded with a status of 400 ()",
+    "Error loading data: Error: Error al cargar datos\n    at J (https://inmovaapp.com/_next/static/chunks/app/admin/onboarding/page-e47f231ed7dc638a.js:1:2256)"
+  ]
+}

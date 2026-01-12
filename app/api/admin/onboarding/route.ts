@@ -22,10 +22,10 @@ const ONBOARDING_STEPS = [
 
 // Schema de validación para query params
 const querySchema = z.object({
-  page: z.coerce.number().min(1).default(1),
-  limit: z.coerce.number().min(1).max(100).default(20),
-  status: z.enum(['all', 'pending', 'in_progress', 'completed', 'stalled']).default('all'),
-  search: z.string().optional(),
+  page: z.preprocess((val) => val === null || val === '' ? 1 : Number(val), z.number().min(1).default(1)),
+  limit: z.preprocess((val) => val === null || val === '' ? 20 : Number(val), z.number().min(1).max(100).default(20)),
+  status: z.preprocess((val) => val === null || val === '' ? 'all' : val, z.enum(['all', 'pending', 'in_progress', 'completed', 'stalled']).default('all')),
+  search: z.string().optional().nullable().transform(val => val ?? undefined),
 });
 
 /**
