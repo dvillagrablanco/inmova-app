@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key-partners';
 // POST /api/partners/login - Login de Partner

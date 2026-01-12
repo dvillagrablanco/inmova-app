@@ -6,6 +6,7 @@ import Stripe from 'stripe';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   // Check if Stripe is configured

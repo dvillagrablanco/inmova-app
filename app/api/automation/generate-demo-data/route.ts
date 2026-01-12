@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Datos de ejemplo para generación automática
 const DEMO_DATA = {

@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 const STATUS_LABELS: Record<string, string> = {
   PROSPECTO: 'Prospecto',
   EN_ANALISIS: 'En Análisis',

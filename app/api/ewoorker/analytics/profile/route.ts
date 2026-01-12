@@ -11,6 +11,7 @@ import { prisma } from '@/lib/db';
 import { ewoorkerAnalytics } from '@/lib/ewoorker-analytics-service';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   try {

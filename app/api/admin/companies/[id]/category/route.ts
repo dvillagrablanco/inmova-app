@@ -6,6 +6,7 @@ import logger from '@/lib/logger';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const updateCategorySchema = z.object({
   category: z.enum(['enterprise', 'pyme', 'startup', 'trial', 'premium', 'standard']),

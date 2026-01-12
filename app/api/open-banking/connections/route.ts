@@ -6,6 +6,7 @@ import { conectarCuentaBancaria, sincronizarTransacciones } from '@/lib/open-ban
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   try {

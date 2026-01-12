@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // PUT /api/owners/[id]/buildings/[buildingId] - Actualizar asignación de edificio
 export async function PUT(

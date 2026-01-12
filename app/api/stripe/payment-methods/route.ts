@@ -6,6 +6,7 @@ import { stripe } from '@/lib/stripe-config';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   try {

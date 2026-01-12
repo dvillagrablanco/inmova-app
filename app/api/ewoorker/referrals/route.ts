@@ -13,6 +13,7 @@ import { ewoorkerReferral } from '@/lib/ewoorker-referral-service';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const sendInvitationSchema = z.object({
   email: z.string().email(),

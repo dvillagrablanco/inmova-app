@@ -7,6 +7,7 @@ import { addDays } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // GET /api/morosidad/predicciones - Listar predicciones
 export async function GET(request: NextRequest) {

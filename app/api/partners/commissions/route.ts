@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 import jwt from 'jsonwebtoken';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key-partners';
 // Función para verificar el token

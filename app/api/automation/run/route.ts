@@ -14,6 +14,7 @@ import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 
 // Token de seguridad para proteger este endpoint

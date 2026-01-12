@@ -14,6 +14,7 @@ import { z } from 'zod';
 import { requirePermission } from '@/lib/permissions';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * GET /api/providers/[id]

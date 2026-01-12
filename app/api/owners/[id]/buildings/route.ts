@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // POST /api/owners/[id]/buildings - Asignar edificio a propietario
 export async function POST(

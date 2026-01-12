@@ -3,6 +3,7 @@ import logger from '@/lib/logger';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Función para obtener la comisión según el número de clientes
 function getCommissionRate(clientCount: number): number {

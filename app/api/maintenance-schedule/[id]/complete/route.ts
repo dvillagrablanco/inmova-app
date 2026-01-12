@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 function calculateNextDate(currentDate: Date, frecuencia: string): Date {
   const nextDate = new Date(currentDate);

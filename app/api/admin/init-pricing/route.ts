@@ -15,6 +15,7 @@ import { PRICING_PLANS, PROMO_CAMPAIGNS } from '@/lib/pricing-config';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const MAIN_COMPANY_ID = 'sistema';
 const CREATED_BY = 'sistema';

@@ -12,6 +12,7 @@ import { createB2BInvoice, generateMonthlyInvoices } from '@/lib/b2b-billing-ser
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   try {

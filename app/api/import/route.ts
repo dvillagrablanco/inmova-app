@@ -6,6 +6,7 @@ import Papa from 'papaparse';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // POST /api/import?type=buildings|units|tenants
 export async function POST(request: Request) {

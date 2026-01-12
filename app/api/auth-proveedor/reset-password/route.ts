@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // POST /api/auth-proveedor/reset-password - Restablecer contraseña
 export async function POST(req: NextRequest) {

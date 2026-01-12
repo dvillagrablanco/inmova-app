@@ -4,6 +4,7 @@ import { requireAuth, requirePermission, forbiddenResponse } from '@/lib/permiss
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 interface PropertyReport {
   id: string;

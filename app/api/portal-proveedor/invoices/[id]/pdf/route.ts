@@ -5,6 +5,7 @@ import { generateInvoicePDF } from '@/lib/invoice-pdf';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // GET /api/portal-proveedor/invoices/[id]/pdf - Generar PDF de factura
 export async function GET(

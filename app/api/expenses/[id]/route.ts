@@ -12,6 +12,7 @@ import { expenseUpdateSchema } from '@/lib/validations';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * GET /api/expenses/[id]

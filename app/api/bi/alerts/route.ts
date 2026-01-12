@@ -6,6 +6,7 @@ import { checkIntelligentAlerts } from '@/lib/bi-service';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // GET /api/bi/alerts - Obtener alertas
 export async function GET(req: NextRequest) {

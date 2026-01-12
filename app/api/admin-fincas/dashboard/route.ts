@@ -6,6 +6,7 @@ import { prisma } from '@/lib/db';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 /**
  * GET /api/admin-fincas/dashboard
  * Obtiene métricas del dashboard del administrador de fincas

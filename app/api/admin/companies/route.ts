@@ -6,6 +6,7 @@ import { z } from 'zod';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Roles permitidos para acceso admin
 const SUPER_ADMIN_ROLES = ['super_admin', 'SUPERADMIN'];

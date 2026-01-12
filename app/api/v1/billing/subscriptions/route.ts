@@ -13,6 +13,7 @@ import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const createSubscriptionSchema = z.object({
   planId: z.enum(['STARTER', 'PROFESSIONAL', 'ENTERPRISE']),

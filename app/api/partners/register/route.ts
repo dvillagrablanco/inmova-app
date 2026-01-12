@@ -4,6 +4,7 @@ import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const registerSchema = z.object({
   nombre: z.string().min(2, 'Nombre mínimo 2 caracteres'),

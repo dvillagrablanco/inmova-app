@@ -16,6 +16,7 @@ import {
 } from '@/lib/b2b-billing-service';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   try {

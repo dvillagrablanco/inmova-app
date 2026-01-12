@@ -17,6 +17,7 @@ import { es } from 'date-fns/locale';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * POST: Ejecutar acciones de notificación

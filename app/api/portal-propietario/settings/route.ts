@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * GET /api/portal-propietario/settings

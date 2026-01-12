@@ -13,6 +13,7 @@ import {
 } from '@/lib/query-optimizer';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * GET /api/room-rental/rooms/[id]

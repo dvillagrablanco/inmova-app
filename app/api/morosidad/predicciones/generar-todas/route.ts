@@ -7,6 +7,7 @@ import { addDays } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // POST /api/morosidad/predicciones/generar-todas - Generar predicciones para todos los inquilinos
 export async function POST(request: NextRequest) {

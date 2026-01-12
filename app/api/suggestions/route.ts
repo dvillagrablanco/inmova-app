@@ -6,6 +6,7 @@ import logger, { logError } from '@/lib/logger';
 import { sendEmail } from '@/lib/email-service';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 
 const createSuggestionSchema = z.object({

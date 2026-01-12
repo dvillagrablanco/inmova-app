@@ -6,6 +6,7 @@ import { prisma } from '@/lib/db';
 import { subDays, startOfDay } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * API para obtener estadísticas consolidadas de todos los portales externos

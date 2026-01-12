@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // GET /api/owners - Listar propietarios de la empresa
 export async function GET(req: NextRequest) {

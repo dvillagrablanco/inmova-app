@@ -6,6 +6,7 @@ import { cacheGetOrSet, CacheTTL } from '@/lib/cache';
 import { paymentFilterWithCompany, expenseFilterWithCompany } from '@/lib/demo-data-filter';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * OPTIMIZADO - Semana 2: Query Optimization

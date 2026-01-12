@@ -6,6 +6,7 @@ import { AIValuationService } from '@/lib/ai-valuation-service';
 import { ValuationCacheService } from '@/lib/valuation-cache-service';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * GET /api/properties/[id]/valuation

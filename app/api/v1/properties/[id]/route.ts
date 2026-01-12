@@ -12,6 +12,7 @@ import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const updatePropertySchema = z.object({
   address: z.string().min(5).optional(),

@@ -13,6 +13,7 @@ import { indexProperty } from '@/lib/semantic-search-service';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 export async function POST(

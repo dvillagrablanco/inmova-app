@@ -11,6 +11,7 @@ import { addDays, differenceInDays, startOfDay } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 interface Alert {
   id: string;

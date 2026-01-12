@@ -9,6 +9,7 @@ import { getPaginationParams, buildPaginationResponse } from '@/lib/pagination-h
 import { selectBuildingMinimal, selectTenantMinimal, selectContractMinimal } from '@/lib/query-optimizer';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   try {

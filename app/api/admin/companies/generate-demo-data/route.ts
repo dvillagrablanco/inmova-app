@@ -13,6 +13,7 @@ import {
 } from '@/lib/demo-scenarios';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const requestSchema = z.object({
   companyId: z.string().min(1),

@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 // import { suggestProviderForService } from '@/lib/marketplace-service';
 
 // GET /api/marketplace/quotes - Obtener cotizaciones

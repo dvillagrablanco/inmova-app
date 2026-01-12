@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // PATCH /api/incidencias/[id] - Actualizar incidencia
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {

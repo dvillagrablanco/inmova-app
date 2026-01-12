@@ -13,6 +13,7 @@ import {
 } from '@/lib/csv-export-helpers';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * Endpoint de Exportación CSV Mejorado

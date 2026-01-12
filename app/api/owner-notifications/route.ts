@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // GET /api/owner-notifications - Obtener notificaciones del propietario autenticado
 export async function GET(req: NextRequest) {

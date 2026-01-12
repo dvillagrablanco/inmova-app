@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // GET /api/espacios-comunes/[id] - Obtener espacio común por ID
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {

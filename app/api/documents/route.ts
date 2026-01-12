@@ -6,6 +6,7 @@ import { uploadFile, deleteFile } from '@/lib/s3';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);

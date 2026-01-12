@@ -18,6 +18,7 @@ import {
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * GET: Obtener contrato específico

@@ -6,6 +6,7 @@ import { bankinterService } from '@/lib/bankinter-integration-service';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * GET /api/open-banking/bankinter/callback

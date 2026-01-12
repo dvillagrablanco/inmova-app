@@ -5,6 +5,7 @@ import { z } from 'zod';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 
 const updateSuggestionSchema = z.object({

@@ -11,6 +11,7 @@ import { ewoorkerVerification } from '@/lib/ewoorker-verification-service';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * GET: Verificar elegibilidad para verificación exprés

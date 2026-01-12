@@ -12,6 +12,7 @@ import { registerInvoicePayment } from '@/lib/b2b-billing-service';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {

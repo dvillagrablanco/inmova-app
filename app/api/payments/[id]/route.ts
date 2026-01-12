@@ -11,6 +11,7 @@ import { invalidatePaymentsCache, invalidateDashboardCache } from '@/lib/api-cac
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Schema de validación para actualización de pago
 const paymentUpdateSchema = z.object({

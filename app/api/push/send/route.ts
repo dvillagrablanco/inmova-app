@@ -6,6 +6,7 @@ import logger from '@/lib/logger';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * POST /api/push/send

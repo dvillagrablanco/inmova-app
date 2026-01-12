@@ -27,6 +27,7 @@ import { differenceInMonths } from 'date-fns';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * GET: Listar contratos de media estancia

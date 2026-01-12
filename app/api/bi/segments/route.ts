@@ -6,6 +6,7 @@ import { segmentTenantsByBehavior } from '@/lib/bi-service';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // GET /api/bi/segments - Obtener segmentos
 export async function GET(req: NextRequest) {

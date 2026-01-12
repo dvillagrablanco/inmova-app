@@ -9,6 +9,7 @@ import { getRedisClient } from '@/lib/redis';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Cache keys y TTLs
 const CACHE_KEYS = {

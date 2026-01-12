@@ -6,6 +6,7 @@ import { addDays, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * Procesa y notifica sobre tareas de mantenimiento preventivo próximas

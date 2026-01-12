@@ -11,6 +11,7 @@ import logger, { logError } from '@/lib/logger';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Schema de validación para crear usuario
 const createUserSchema = z.object({

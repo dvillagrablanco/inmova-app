@@ -12,6 +12,7 @@ import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const createApiKeySchema = z.object({
   name: z.string().min(3).max(100),

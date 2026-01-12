@@ -11,6 +11,7 @@ import { uploadFile } from '@/lib/s3';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // POST /api/maintenance/[id]/photos - Subir fotos de mantenimiento
 export async function POST(

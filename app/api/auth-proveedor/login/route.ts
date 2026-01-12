@@ -5,6 +5,7 @@ import logger from '@/lib/logger';
 import { generateProviderToken, setProviderAuthCookie } from '@/lib/provider-auth';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // POST /api/auth-proveedor/login - Login para proveedores
 export async function POST(req: NextRequest) {

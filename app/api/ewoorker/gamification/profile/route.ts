@@ -12,6 +12,7 @@ import { prisma } from '@/lib/db';
 import { ewoorkerGamification } from '@/lib/ewoorker-gamification-service';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * GET: Obtener perfil de gamificación

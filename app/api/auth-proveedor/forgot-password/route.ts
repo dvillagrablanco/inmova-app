@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // POST /api/auth-proveedor/forgot-password - Solicitar recuperación de contraseña
 export async function POST(req: NextRequest) {

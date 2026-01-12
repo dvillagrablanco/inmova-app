@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Base de conocimientos simplificada (en producción vendría de la BD)
 const KNOWLEDGE_BASE: Record<string, any> = {

@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 /**
  * GET /api/admin-fincas/communities
  * Obtiene todas las comunidades gestionadas por el administrador de fincas

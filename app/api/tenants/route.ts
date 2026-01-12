@@ -5,6 +5,7 @@ import logger, { logError } from '@/lib/logger';
 import { tenantCreateSchema } from '@/lib/validations';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   try {

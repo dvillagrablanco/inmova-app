@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * API para crear tickets de soporte con resolución automática mediante IA

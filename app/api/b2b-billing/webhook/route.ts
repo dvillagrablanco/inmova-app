@@ -10,6 +10,7 @@ import Stripe from 'stripe';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Initialize Stripe only if API key is available
 const getStripe = () => {

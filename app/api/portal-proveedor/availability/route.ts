@@ -4,6 +4,7 @@ import { requireProviderAuth } from '@/lib/provider-auth';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // GET /api/portal-proveedor/availability - Obtener disponibilidad del proveedor
 export async function GET(req: NextRequest) {

@@ -8,6 +8,7 @@ import { subDays } from 'date-fns';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Pasos de onboarding estándar
 const ONBOARDING_STEPS = [

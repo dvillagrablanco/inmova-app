@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // GET /api/owners/[id] - Obtener propietario específico
 export async function GET(

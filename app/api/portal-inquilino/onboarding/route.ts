@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // GET - Obtener el estado del onboarding
 export async function GET(request: NextRequest) {

@@ -4,6 +4,7 @@ import { calculateLeadScoring, calculateProbabilidadCierre, determinarTemperatur
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Endpoint público para capturar leads desde la landing page y chatbot
 export async function POST(req: NextRequest) {

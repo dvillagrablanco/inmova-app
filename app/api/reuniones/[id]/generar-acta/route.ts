@@ -7,6 +7,7 @@ import { es } from 'date-fns/locale';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // POST /api/reuniones/[id]/generar-acta - Generar PDF del acta
 export async function POST(

@@ -5,6 +5,7 @@ import logger from '@/lib/logger';
 import { generateOwnerToken, setOwnerAuthCookie } from '@/lib/owner-auth';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // POST /api/auth-propietario/login - Login para propietarios
 export async function POST(req: NextRequest) {

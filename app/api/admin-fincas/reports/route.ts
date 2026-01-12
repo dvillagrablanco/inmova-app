@@ -6,6 +6,7 @@ import { prisma } from '@/lib/db';
 import { startOfQuarter, endOfQuarter, startOfYear, endOfYear } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 /**
  * GET /api/admin-fincas/reports
  * Obtiene informes generados

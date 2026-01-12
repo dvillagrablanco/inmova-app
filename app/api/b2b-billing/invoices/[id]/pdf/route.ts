@@ -11,6 +11,7 @@ import { generateB2BInvoicePDFBuffer } from '@/lib/b2b-invoice-pdf';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 interface RouteParams {
   params: {

@@ -4,6 +4,7 @@ import { requireProviderAuth } from '@/lib/provider-auth';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // POST /api/portal-proveedor/work-orders/[id]/accept - Aceptar orden de trabajo
 export async function POST(

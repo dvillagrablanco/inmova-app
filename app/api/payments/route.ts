@@ -8,6 +8,7 @@ import { cachedPayments, invalidatePaymentsCache, invalidateDashboardCache } fro
 import { withPaymentRateLimit } from '@/lib/rate-limiting';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   return withPaymentRateLimit(req, async () => {

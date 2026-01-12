@@ -6,6 +6,7 @@ import { prisma } from '@/lib/db';
 import { addMonths } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 /**
  * GET /api/admin-fincas/invoices
  * Obtiene todas las facturas de comunidades

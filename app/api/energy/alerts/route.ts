@@ -6,6 +6,7 @@ import logger, { logError } from '@/lib/logger';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // GET /api/energy/alerts - Obtener alertas de energía
 export async function GET(req: NextRequest) {

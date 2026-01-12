@@ -8,6 +8,7 @@ import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Verificar que tenemos DATABASE_URL
 if (!process.env.DATABASE_URL) {

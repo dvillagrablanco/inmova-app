@@ -7,6 +7,7 @@ import { invalidateBuildingsCache, invalidateDashboardCache } from '@/lib/api-ca
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Schema de validación para actualizar edificio
 const buildingUpdateSchema = z.object({

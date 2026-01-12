@@ -7,6 +7,7 @@ import { scheduleOnboardingEmailSequence } from '@/lib/onboarding-email-service'
 import { scheduleOnboardingEmails } from '@/lib/email-triggers-service';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   try {
