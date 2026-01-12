@@ -985,12 +985,6 @@ const administradorEmpresaItems = [
     icon: FileText,
     roles: ['administrador', 'super_admin'],
   },
-  {
-    name: 'Sugerencias',
-    href: '/admin/sugerencias',
-    icon: MessageCircle,
-    roles: ['administrador', 'super_admin'],
-  },
   // === GESTIÓN FISCAL ===
   {
     name: 'Impuestos',

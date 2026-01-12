@@ -185,7 +185,7 @@ export default function ESGPage() {
             </div>
 
             {/* KPI Cards */}
-            {metrics && (
+            {metrics && metrics.carbonFootprint > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card className="border-l-4 border-l-green-500">
                   <CardHeader className="pb-3">
@@ -197,10 +197,6 @@ export default function ESGPage() {
                   <CardContent>
                     <div className="text-2xl font-bold">{(metrics.carbonFootprint / 1000).toFixed(2)}</div>
                     <p className="text-xs text-muted-foreground">toneladas CO₂</p>
-                    <div className="flex items-center gap-1 mt-2">
-                      <TrendingDown className="h-3 w-3 text-green-600" />
-                      <span className="text-xs text-green-600">-12% vs mes anterior</span>
-                    </div>
                   </CardContent>
                 </Card>
 
@@ -214,13 +210,15 @@ export default function ESGPage() {
                   <CardContent>
                     <div className="text-2xl font-bold">{metrics.energyConsumption.toLocaleString()}</div>
                     <p className="text-xs text-muted-foreground">kWh</p>
-                    <div className="mt-2">
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="text-muted-foreground">Renovable</span>
-                        <span className="font-medium">{metrics.renewableEnergyRate}%</span>
+                    {metrics.renewableEnergyRate > 0 && (
+                      <div className="mt-2">
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-muted-foreground">Renovable</span>
+                          <span className="font-medium">{metrics.renewableEnergyRate}%</span>
+                        </div>
+                        <Progress value={metrics.renewableEnergyRate} className="h-1" />
                       </div>
-                      <Progress value={metrics.renewableEnergyRate} className="h-1" />
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -234,10 +232,6 @@ export default function ESGPage() {
                   <CardContent>
                     <div className="text-2xl font-bold">{metrics.waterConsumption}</div>
                     <p className="text-xs text-muted-foreground">m³</p>
-                    <div className="flex items-center gap-1 mt-2">
-                      <TrendingDown className="h-3 w-3 text-blue-600" />
-                      <span className="text-xs text-blue-600">-8% vs mes anterior</span>
-                    </div>
                   </CardContent>
                 </Card>
 
@@ -259,6 +253,20 @@ export default function ESGPage() {
                   </CardContent>
                 </Card>
               </div>
+            ) : (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Leaf className="h-16 w-16 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Sin datos ESG registrados</h3>
+                  <p className="text-muted-foreground text-center mb-4">
+                    Comienza registrando métricas de sostenibilidad para tus propiedades
+                  </p>
+                  <Button onClick={() => router.push('/esg/nuevo-plan')}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Registrar Métricas
+                  </Button>
+                </CardContent>
+              </Card>
             )}
 
             {/* Tabs */}

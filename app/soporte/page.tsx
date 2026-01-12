@@ -62,32 +62,7 @@ const faqItems = [
   },
 ];
 
-const tutorialVideos = [
-  {
-    id: 1,
-    title: 'Primeros pasos con Inmova',
-    duration: '5:32',
-    thumbnail: '/tutorials/getting-started.jpg',
-  },
-  {
-    id: 2,
-    title: 'Gestión de propiedades',
-    duration: '8:15',
-    thumbnail: '/tutorials/properties.jpg',
-  },
-  {
-    id: 3,
-    title: 'Configuración de pagos',
-    duration: '6:45',
-    thumbnail: '/tutorials/payments.jpg',
-  },
-  {
-    id: 4,
-    title: 'Generación de contratos con IA',
-    duration: '4:20',
-    thumbnail: '/tutorials/ai-contracts.jpg',
-  },
-];
+// Tutoriales eliminados - funcionalidad en desarrollo
 
 const documentationSections = [
   { title: 'Guía de inicio rápido', icon: Book, url: '/docs/quickstart' },
@@ -221,7 +196,7 @@ export default function SoportePage() {
 
         {/* Tabs */}
         <Tabs defaultValue="faq" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="faq">
               <HelpCircle className="h-4 w-4 mr-2" />
               FAQ
@@ -229,10 +204,6 @@ export default function SoportePage() {
             <TabsTrigger value="docs">
               <FileText className="h-4 w-4 mr-2" />
               Documentación
-            </TabsTrigger>
-            <TabsTrigger value="tutorials">
-              <Video className="h-4 w-4 mr-2" />
-              Tutoriales
             </TabsTrigger>
           </TabsList>
 
@@ -326,30 +297,6 @@ export default function SoportePage() {
             </div>
           </TabsContent>
 
-          {/* Tutorials Tab */}
-          <TabsContent value="tutorials" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {tutorialVideos.map((video) => (
-                <Card key={video.id} className="cursor-pointer hover:shadow-lg transition-shadow">
-                  <CardContent className="pt-6">
-                    <div className="aspect-video bg-gradient-to-br from-purple-100 to-blue-100 rounded-lg flex items-center justify-center mb-4">
-                      <Video className="h-16 w-16 text-purple-300" />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-semibold">{video.title}</h3>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                          <Clock className="h-4 w-4" />
-                          {video.duration}
-                        </div>
-                      </div>
-                      <Button size="sm">Ver</Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
         </Tabs>
 
         {/* Still need help */}
