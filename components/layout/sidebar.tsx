@@ -2384,14 +2384,14 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 </div>
               )}
 
-            {/* Alquiler Residencial Tradicional */}
+            {/* 1. ALQUILERES LARGA Y MEDIA ESTANCIA */}
             {filteredAlquilerResidencialItems.length > 0 && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('alquilerResidencial')}
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
-                  <span>🏘️ Alquiler Residencial</span>
+                  <span>🏠 Alquileres Larga/Media Estancia</span>
                   {expandedSections.alquilerResidencial ? (
                     <ChevronDown size={16} />
                   ) : (
@@ -2408,14 +2408,14 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* STR - Short Term Rentals */}
+            {/* 2. ALQUILER TURÍSTICO CORTA ESTANCIA (STR) */}
             {filteredStrItems.length > 0 && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('str')}
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
-                  <span>🏖️ STR / Airbnb</span>
+                  <span>🏖️ Alquiler Turístico (STR)</span>
                   {expandedSections.str ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                 </button>
                 {expandedSections.str && (
@@ -2428,14 +2428,14 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* Co-Living */}
-            {filteredCoLivingItems.length > 0 && (
+            {/* 4. COLIVING / ALQUILER POR HABITACIONES / STUDENT HOUSING */}
+            {(filteredCoLivingItems.length > 0 || filteredStudentHousingItems.length > 0) && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('coLiving')}
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
-                  <span>🏘️ Co-Living</span>
+                  <span>🛏️ Coliving / Habitaciones</span>
                   {expandedSections.coLiving ? (
                     <ChevronDown size={16} />
                   ) : (
@@ -2447,28 +2447,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     {filteredCoLivingItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Construcción (antes Build-to-Rent) */}
-            {filteredBuildToRentItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('buildToRent')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🏗️ Construcción</span>
-                  {expandedSections.buildToRent ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.buildToRent && (
-                  <div className="space-y-1 mt-1">
-                    {filteredBuildToRentItems.map((item) => (
+                    {filteredStudentHousingItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
                   </div>
@@ -2476,38 +2455,14 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* House Flipping */}
-            {filteredFlippingItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('flipping')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🔨 House Flipping</span>
-                  {expandedSections.flipping ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.flipping && (
-                  <div className="space-y-1 mt-1">
-                    {filteredFlippingItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Construcción */}
-            {filteredConstruccionItems.length > 0 && (
+            {/* 5. CONSTRUCCIÓN / FLIPPING */}
+            {(filteredBuildToRentItems.length > 0 || filteredFlippingItems.length > 0 || filteredConstruccionItems.length > 0) && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('construccion')}
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
-                  <span>🏗️ Construcción</span>
+                  <span>🏗️ Construcción / Flipping</span>
                   {expandedSections.construccion ? (
                     <ChevronDown size={16} />
                   ) : (
@@ -2519,28 +2474,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     {filteredConstruccionItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* eWoorker - Marketplace de Trabajadores */}
-            {filteredEwoorkerItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('ewoorker')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>👷 eWoorker</span>
-                  {expandedSections.ewoorker ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.ewoorker && (
-                  <div className="space-y-1 mt-1">
-                    {filteredEwoorkerItems.map((item) => (
+                    {filteredBuildToRentItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                    {filteredFlippingItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
                   </div>
@@ -2548,14 +2485,14 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* Comercial (Servicios Profesionales) */}
-            {filteredComercialItems.length > 0 && (
+            {/* 3. INMUEBLES COMERCIALES Y OFICINAS (fusiona Comercial + Alquiler Comercial) */}
+            {(filteredComercialItems.length > 0 || filteredAlquilerComercialItems.length > 0) && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('comercial')}
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
-                  <span>💼 Servicios Pro</span>
+                  <span>🏢 Inmuebles Comerciales</span>
                   {expandedSections.comercial ? (
                     <ChevronDown size={16} />
                   ) : (
@@ -2567,27 +2504,6 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     {filteredComercialItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Alquiler Comercial - Oficinas, Locales, Naves, Coworking */}
-            {filteredAlquilerComercialItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('alquilerComercial')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🏢 Alquiler Comercial</span>
-                  {expandedSections.alquilerComercial ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.alquilerComercial && (
-                  <div className="space-y-1 mt-1">
                     {filteredAlquilerComercialItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
@@ -2596,14 +2512,14 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* Administrador de Fincas */}
+            {/* 6. COMUNIDADES DE PROPIETARIOS */}
             {filteredAdminFincasItems.length > 0 && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('adminFincas')}
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
-                  <span>🏢 Admin de Fincas</span>
+                  <span>🏘️ Comunidades Propietarios</span>
                   {expandedSections.adminFincas ? (
                     <ChevronDown size={16} />
                   ) : (
@@ -2620,62 +2536,18 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* Student Housing */}
-            {filteredStudentHousingItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('studentHousing')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🎓 Student Housing</span>
-                  {expandedSections.studentHousing ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.studentHousing && (
-                  <div className="space-y-1 mt-1">
-                    {filteredStudentHousingItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            {/* Student Housing ya fusionado con Coliving arriba */}
 
-            {/* Viajes Corporativos */}
-            {filteredViajesCorporativosItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('viajesCorporativos')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>✈️ Viajes Corporativos</span>
-                  {expandedSections.viajesCorporativos ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.viajesCorporativos && (
-                  <div className="space-y-1 mt-1">
-                    {filteredViajesCorporativosItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            {/* Viajes Corporativos - ELIMINADO (No es PropTech) */}
 
-            {/* Vivienda Social */}
+            {/* 7. VIVIENDA SOCIAL / RESIDENCIAS */}
             {filteredViviendaSocialItems.length > 0 && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('viviendaSocial')}
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
-                  <span>🏘️ Vivienda Social</span>
+                  <span>🏛️ Vivienda Social / Residencias</span>
                   {expandedSections.viviendaSocial ? (
                     <ChevronDown size={16} />
                   ) : (
@@ -2692,77 +2564,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* Real Estate Developer */}
-            {filteredRealEstateDeveloperItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('realEstateDeveloper')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🏗️ Promotoras</span>
-                  {expandedSections.realEstateDeveloper ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.realEstateDeveloper && (
-                  <div className="space-y-1 mt-1">
-                    {filteredRealEstateDeveloperItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            {/* Real Estate Developer - ELIMINADO (fusionado con Construcción) */}
 
-            {/* Workspace */}
-            {filteredWorkspaceItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('workspace')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🖥️ Workspace</span>
-                  {expandedSections.workspace ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.workspace && (
-                  <div className="space-y-1 mt-1">
-                    {filteredWorkspaceItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            {/* Workspace - ELIMINADO (No es PropTech principal) */}
 
-            {/* Warehouse */}
-            {filteredWarehouseItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('warehouse')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>📦 Warehouse</span>
-                  {expandedSections.warehouse ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.warehouse && (
-                  <div className="space-y-1 mt-1">
-                    {filteredWarehouseItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            {/* Warehouse - ELIMINADO (No es PropTech) */}
 
             {/* HERRAMIENTAS HORIZONTALES - Separador visual */}
             {(filteredFinanzasItems.length > 0 ||
@@ -2931,14 +2737,14 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* CRM y Marketing */}
+            {/* CRM INMOBILIARIO (Herramienta Horizontal) */}
             {filteredCrmMarketingItems.length > 0 && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('crmMarketing')}
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
-                  <span>👥 CRM y Marketing</span>
+                  <span>📇 CRM Inmobiliario</span>
                   {expandedSections.crmMarketing ? (
                     <ChevronDown size={16} />
                   ) : (
