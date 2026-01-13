@@ -51,8 +51,14 @@ export async function POST(req: NextRequest) {
       }
 
       if (company.subscriptionPlan) {
+        const planTier = company.subscriptionPlan.tier?.toLowerCase();
         const modulosIncluidos = (company.subscriptionPlan.modulosIncluidos as string[]) || [];
-        if (!modulosIncluidos.includes(moduloCodigo)) {
+        
+        // Los planes empresarial, enterprise, premium o personalizado tienen acceso a todos los módulos
+        const tieneAccesoTotal = ['empresarial', 'enterprise', 'premium', 'personalizado', 'business'].includes(planTier) ||
+          modulosIncluidos.includes('*');
+        
+        if (!tieneAccesoTotal && !modulosIncluidos.includes(moduloCodigo)) {
           return NextResponse.json(
             {
               error: 'Módulo no incluido en el plan',

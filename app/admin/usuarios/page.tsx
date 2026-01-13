@@ -594,7 +594,7 @@ export default function UsersPage() {
                         </SelectContent>
                       </Select>
                     </div>
-                    {isSuperAdmin && !editingUser && (
+                    {isSuperAdmin && (
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <Label htmlFor="companyId">Empresa</Label>
@@ -605,17 +605,23 @@ export default function UsersPage() {
                           onValueChange={(value) => setFormData({ ...formData, companyId: value })}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar empresa (opcional)" />
+                            <SelectValue placeholder="Seleccionar empresa" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="no-company">
                               Sin empresa (solo para Super Admin)
                             </SelectItem>
-                            {companies.map((company) => (
-                              <SelectItem key={company.id} value={company.id}>
-                                {company.nombre}
+                            {companies.length === 0 ? (
+                              <SelectItem value="" disabled>
+                                Cargando empresas...
                               </SelectItem>
-                            ))}
+                            ) : (
+                              companies.map((company) => (
+                                <SelectItem key={company.id} value={company.id}>
+                                  {company.nombre}
+                                </SelectItem>
+                              ))
+                            )}
                           </SelectContent>
                         </Select>
                         <p className="text-xs text-muted-foreground mt-1.5">
