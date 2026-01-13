@@ -1263,9 +1263,9 @@ const herramientasInversionNavItems = [
     roles: ['super_admin', 'administrador', 'gestor', 'propietario'],
     badge: 'Nuevo',
     subItems: [
-      { name: '📊 Calculadora Rentabilidad', href: '/dashboard/herramientas?tool=rental-yield' },
-      { name: '🏦 Calculadora Hipoteca', href: '/dashboard/herramientas?tool=mortgage' },
-      { name: '💰 Gastos Compraventa', href: '/dashboard/herramientas?tool=transaction-costs' },
+      { name: 'Calculadora Rentabilidad', href: '/dashboard/herramientas?tool=rental-yield', icon: Calculator },
+      { name: 'Calculadora Hipoteca', href: '/dashboard/herramientas?tool=mortgage', icon: Building2 },
+      { name: 'Gastos Compraventa', href: '/dashboard/herramientas?tool=transaction-costs', icon: DollarSign },
     ],
   },
 ];
@@ -1593,8 +1593,8 @@ const administradorEmpresaItems = [
     icon: Wrench,
     roles: ['administrador', 'super_admin'],
     subItems: [
-      { name: '🔧 Mis Integraciones', href: '/admin/herramientas-empresa?tab=propias' },
-      { name: '🤝 Servicios Inmova', href: '/admin/herramientas-empresa?tab=compartidas' },
+      { name: 'Mis Integraciones', href: '/admin/herramientas-empresa?tab=propias', icon: Wrench },
+      { name: 'Servicios Inmova', href: '/admin/herramientas-empresa?tab=compartidas', icon: Share2 },
     ],
   },
   // === HERRAMIENTAS ===
@@ -1624,11 +1624,11 @@ const administradorEmpresaItems = [
     roles: ['administrador', 'super_admin'],
     badge: '💰',
     subItems: [
-      { name: '📊 Resumen Fiscal', href: '/admin/impuestos' },
-      { name: '📋 Obligaciones', href: '/admin/impuestos?tab=obligaciones' },
-      { name: '🏠 IBI Inmuebles', href: '/admin/impuestos?tab=inmuebles' },
-      { name: '📅 Calendario', href: '/admin/impuestos?tab=calendario' },
-      { name: '🧮 Calculadora', href: '/admin/impuestos?tab=modelos' },
+      { name: 'Resumen Fiscal', href: '/admin/impuestos', icon: FileBarChart },
+      { name: 'Obligaciones', href: '/admin/impuestos?tab=obligaciones', icon: FileText },
+      { name: 'IBI Inmuebles', href: '/admin/impuestos?tab=inmuebles', icon: Home },
+      { name: 'Calendario', href: '/admin/impuestos?tab=calendario', icon: Calendar },
+      { name: 'Calculadora', href: '/admin/impuestos?tab=modelos', icon: Calculator },
     ],
   },
 ];
