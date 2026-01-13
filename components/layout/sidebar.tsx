@@ -2381,8 +2381,8 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 </div>
               )}
 
-            {/* 1. LIVING RESIDENCIAL (Larga + Media + Coliving + Student Housing) */}
-            {(filteredAlquilerResidencialItems.length > 0 || filteredCoLivingItems.length > 0 || filteredStudentHousingItems.length > 0 || filteredWorkspaceItems.length > 0) && (
+            {/* 1. LIVING RESIDENCIAL (Alquiler + Coliving + Student Housing) */}
+            {(filteredAlquilerResidencialItems.length > 0 || filteredCoLivingItems.length > 0 || filteredStudentHousingItems.length > 0) && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('alquilerResidencial')}
@@ -2397,20 +2397,22 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 </button>
                 {expandedSections.alquilerResidencial && (
                   <div className="space-y-1 mt-1">
-                    {/* Larga y Media Estancia */}
+                    {/* Alquiler Tradicional */}
                     {filteredAlquilerResidencialItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
-                    {/* Coliving */}
+                    {/* Coliving / Habitaciones */}
+                    {filteredCoLivingItems.length > 0 && (
+                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">Coliving</div>
+                    )}
                     {filteredCoLivingItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
                     {/* Student Housing */}
+                    {filteredStudentHousingItems.length > 0 && (
+                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">Student Housing</div>
+                    )}
                     {filteredStudentHousingItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
-                    ))}
-                    {/* Workspace (dentro de Living) */}
-                    {filteredWorkspaceItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
                   </div>
@@ -2438,9 +2440,9 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* Coliving, Student Housing y Workspace ya fusionados en Living Residencial */}
+            {/* Coliving y Student Housing en Living Residencial, Workspace en Comercial */}
 
-            {/* 5. CONSTRUCCIÓN / PROMOCIÓN (incluye eWoorker B2B, Flipping, Real Estate Developer) */}
+            {/* 4. CONSTRUCCIÓN / PROMOCIÓN */}
             {(filteredBuildToRentItems.length > 0 || filteredFlippingItems.length > 0 || filteredConstruccionItems.length > 0 || filteredEwoorkerItems.length > 0 || filteredRealEstateDeveloperItems.length > 0) && (
               <div className="mb-4">
                 <button
@@ -2456,18 +2458,34 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 </button>
                 {expandedSections.construccion && (
                   <div className="space-y-1 mt-1">
+                    {/* Proyectos de Obra */}
+                    {filteredConstruccionItems.length > 0 && (
+                      <div className="ml-2 mt-1 mb-1 text-[9px] text-gray-500 uppercase">Obra Nueva / Reformas</div>
+                    )}
                     {filteredConstruccionItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
                     {filteredBuildToRentItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
+                    {/* Flipping */}
+                    {filteredFlippingItems.length > 0 && (
+                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">House Flipping</div>
+                    )}
                     {filteredFlippingItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
+                    {/* Promociones Inmobiliarias */}
+                    {filteredRealEstateDeveloperItems.length > 0 && (
+                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">Promociones</div>
+                    )}
                     {filteredRealEstateDeveloperItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
+                    {/* eWoorker - Marketplace B2B */}
+                    {filteredEwoorkerItems.length > 0 && (
+                      <div className="ml-2 mt-2 mb-1 text-[9px] text-amber-500 uppercase">🔧 eWoorker (B2B)</div>
+                    )}
                     {filteredEwoorkerItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
@@ -2476,14 +2494,14 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* 3. COMERCIAL - OFICINAS Y LOCALES */}
-            {(filteredComercialItems.length > 0 || filteredAlquilerComercialItems.length > 0) && (
+            {/* 3. INMUEBLES COMERCIALES (Oficinas + Locales + Naves/Logística + Workspace) */}
+            {(filteredComercialItems.length > 0 || filteredAlquilerComercialItems.length > 0 || filteredWarehouseItems.length > 0 || filteredWorkspaceItems.length > 0) && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('comercial')}
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
-                  <span>🏢 Comercial - Oficinas/Locales</span>
+                  <span>🏢 Inmuebles Comerciales</span>
                   {expandedSections.comercial ? (
                     <ChevronDown size={16} />
                   ) : (
@@ -2492,34 +2510,26 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 </button>
                 {expandedSections.comercial && (
                   <div className="space-y-1 mt-1">
+                    {/* Servicios Profesionales */}
                     {filteredComercialItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
+                    {/* Oficinas, Locales, Naves */}
                     {filteredAlquilerComercialItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* 4. LOGÍSTICA INDUSTRIAL - WAREHOUSE Y NAVES */}
-            {filteredWarehouseItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('logistica')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🏭 Logística Industrial</span>
-                  {expandedSections.logistica ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.logistica && (
-                  <div className="space-y-1 mt-1">
+                    {/* Naves y Logística */}
+                    {filteredWarehouseItems.length > 0 && (
+                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">Logística / Almacenes</div>
+                    )}
                     {filteredWarehouseItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                    {/* Workspace / Coworking */}
+                    {filteredWorkspaceItems.length > 0 && (
+                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">Workspace</div>
+                    )}
+                    {filteredWorkspaceItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
                   </div>
@@ -2569,7 +2579,6 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* Student Housing, Workspace → fusionados en Living Residencial */}
             {/* Viajes Corporativos - ELIMINADO (No es PropTech) */}
 
             {/* 7. VIVIENDA SOCIAL / RESIDENCIAS */}
@@ -2596,8 +2605,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* Real Estate Developer, eWoorker → fusionados en Construcción/Promoción */}
-            {/* Warehouse → ahora en Logística Industrial (vertical independiente) */}
+            {/* Estructura simplificada:
+                - Living: Alquiler + Coliving + Student Housing
+                - Comercial: Oficinas + Locales + Naves + Logística + Workspace
+                - Construcción: Obra + Flipping + Promociones + eWoorker */}
 
             {/* HERRAMIENTAS HORIZONTALES - Separador visual */}
             {(filteredFinanzasItems.length > 0 ||
