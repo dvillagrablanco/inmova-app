@@ -19,6 +19,7 @@ const CRITICAL_PAGES = [
   // Auth requerida (verificamos que no den 500)
   { path: '/dashboard', name: 'Dashboard', requiresAuth: true },
   { path: '/admin/clientes', name: 'Admin Clientes', requiresAuth: true },
+  { path: '/admin/usuarios', name: 'Admin Usuarios', requiresAuth: true },
   { path: '/admin/planes', name: 'Admin Planes', requiresAuth: true },
 ];
 

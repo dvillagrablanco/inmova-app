@@ -4150,6 +4150,85 @@ export async function POST(request: NextRequest) {
 
 ## 🧪 TESTING AUTOMATIZADO (QA)
 
+### ⚠️ REGLA CRÍTICA: Tests Obligatorios Pre-Deployment
+
+**NUNCA deployar sin ejecutar tests.**
+
+```bash
+# ANTES de cada deployment (OBLIGATORIO)
+npm run test:critical
+
+# ANTES de cada commit a main
+npm run test:smoke
+```
+
+#### 📋 Checklist Pre-Deployment (OBLIGATORIO)
+
+Antes de CADA deployment, ejecutar:
+
+```bash
+# 1. Tests de Smoke (páginas cargan)
+npm run test:smoke
+
+# 2. Tests de Contrato API (formato correcto)
+npm run test:api-contract
+
+# 3. Verificar schema BD
+npm run verify:schema
+
+# 4. Check pre-deployment completo
+npm run test:pre-deploy
+```
+
+#### 🔴 Tests Críticos que NUNCA pueden fallar
+
+| Test | Comando | Previene |
+|------|---------|----------|
+| Páginas cargan | `npm run test:smoke` | Error 404 |
+| APIs formato correcto | `npm run test:api-contract` | "Cannot read undefined" |
+| Schema sincronizado | `npm run verify:schema` | "Column not exist" |
+| CRUD funciona | `npm run test:e2e` | Errores de formulario |
+
+#### 📁 Estructura de Tests
+
+```
+__tests__/
+├── smoke/                    # Tests rápidos (OBLIGATORIO pre-deploy)
+│   └── critical-pages.test.ts
+├── api/                      # Contract tests
+│   └── contract-tests.test.ts
+├── e2e/                      # Tests E2E (Playwright)
+│   ├── company-crud.spec.ts
+│   └── user-management.spec.ts
+└── schema/                   # BD tests
+    └── sync.test.ts
+```
+
+#### 🚀 Flujo de Deployment con Tests
+
+```
+1. Desarrollar feature
+       ↓
+2. npm run test:smoke (DEBE PASAR)
+       ↓
+3. npm run test:api-contract (DEBE PASAR)
+       ↓
+4. git commit
+       ↓
+5. npm run test:pre-deploy (DEBE PASAR)
+       ↓
+6. Deploy a producción
+```
+
+#### ⚠️ Al Crear Nueva Funcionalidad
+
+1. **Nueva página**: Añadir a `CRITICAL_PAGES` en `critical-pages.test.ts`
+2. **Nueva API**: Añadir test de contrato en `contract-tests.test.ts`
+3. **Nuevo campo BD**: Añadir a `CRITICAL_COLUMNS` en `verify-schema-sync.ts`
+4. **Nuevo flujo CRUD**: Añadir test E2E en `__tests__/e2e/`
+
+---
+
 ### 1. Tests Unitarios con Jest/Vitest
 
 #### Test de Funciones Puras
