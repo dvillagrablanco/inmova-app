@@ -25,11 +25,21 @@ export async function GET(request: NextRequest) {
     }
 
     // Para admin: mostrar TODOS los planes (incluyendo internos como Owner)
+    // Usar select en vez de include para evitar problemas de columnas faltantes
     const plans = await prisma.subscriptionPlan.findMany({
       where: {
         activo: true, // Solo planes activos
       },
-      include: {
+      select: {
+        id: true,
+        nombre: true,
+        descripcion: true,
+        tier: true,
+        precioMensual: true,
+        maxUsuarios: true,
+        maxPropiedades: true,
+        modulosIncluidos: true,
+        activo: true,
         _count: {
           select: {
             companies: true,
