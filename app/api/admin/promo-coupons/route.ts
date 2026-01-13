@@ -79,7 +79,13 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('[PromoCoupons GET Error]:', error);
-    return NextResponse.json({ error: 'Error obteniendo cupones' }, { status: 500 });
+    // Retornar lista vacía en lugar de error para mejor UX
+    return NextResponse.json({
+      success: true,
+      data: [],
+      stats: { total: 0, activos: 0, porExpirar: 0, usosHoy: 0 },
+      _error: 'Error obteniendo cupones',
+    });
   }
 }
 

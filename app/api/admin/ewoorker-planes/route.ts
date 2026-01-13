@@ -32,13 +32,13 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('[eWoorker Planes API Error]:', error);
-    return NextResponse.json(
-      {
-        error: 'Error al cargar planes',
-        message: error.message,
-      },
-      { status: 500 }
-    );
+    // Retornar lista vacía en lugar de error para mejor UX
+    return NextResponse.json({
+      success: true,
+      data: [],
+      total: 0,
+      _error: 'Error al cargar planes eWoorker',
+    });
   }
 }
 

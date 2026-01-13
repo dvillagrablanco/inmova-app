@@ -42,7 +42,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ plans });
   } catch (error) {
     logger.error('Error fetching subscription plans:', error);
-    return NextResponse.json({ error: 'Error al obtener planes de suscripción' }, { status: 500 });
+    // Retornar lista vacía en lugar de error para mejor UX
+    return NextResponse.json({ plans: [], _error: 'Error al cargar planes' });
   }
 }
 

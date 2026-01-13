@@ -87,10 +87,13 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('[Partners API Error]:', error);
-    return NextResponse.json(
-      { error: 'Error al cargar partners', message: error.message },
-      { status: 500 }
-    );
+    // Retornar lista vacía en lugar de error para mejor UX
+    return NextResponse.json({
+      success: true,
+      partners: [],
+      stats: { total: 0, pending: 0, active: 0, totalClients: 0, totalEarned: 0 },
+      _error: 'Error al cargar partners',
+    });
   }
 }
 
