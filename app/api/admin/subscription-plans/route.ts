@@ -24,9 +24,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Para admin: mostrar TODOS los planes (incluyendo internos)
+    // Los planes internos son solo para uso de la plataforma (ej: Owner gratuito)
     const plans = await prisma.subscriptionPlan.findMany({
       where: {
         activo: true, // Solo planes activos
+        // NO filtramos esInterno - admin ve todo
       },
       include: {
         _count: {
@@ -35,7 +38,10 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: { precioMensual: 'asc' },
+      orderBy: [
+        { esInterno: 'asc' }, // Planes normales primero, internos después
+        { precioMensual: 'asc' },
+      ],
     });
 
     // Devolver en formato esperado por el hook useCompanies

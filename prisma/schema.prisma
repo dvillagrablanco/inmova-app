@@ -5703,6 +5703,7 @@ model SubscriptionPlan {
   // ═══════════════════════════════════════════════════════════════
 
   activo    Boolean  @default(true)
+  esInterno Boolean  @default(false) // Planes internos no visibles en landing ni seleccionables por usuarios externos
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

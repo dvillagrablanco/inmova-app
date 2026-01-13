@@ -11,10 +11,12 @@ export const runtime = 'nodejs';
  */
 export async function GET(request: NextRequest) {
   try {
-    // Obtener solo planes activos, ordenados por precio
+    // Obtener solo planes activos y NO internos, ordenados por precio
+    // Planes internos (como Owner) no se muestran en landing ni registro
     const planes = await prisma.subscriptionPlan.findMany({
       where: {
-        activo: true
+        activo: true,
+        esInterno: false, // Excluir planes internos/ocultos
       },
       select: {
         id: true,

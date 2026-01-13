@@ -13,6 +13,26 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 const PLANES_DATA = [
+  // Plan interno gratuito para empresas del owner
+  {
+    nombre: 'Owner',
+    descripcion: 'Plan interno gratuito para empresas del propietario de la plataforma. Todas las funcionalidades sin límites.',
+    tier: 'premium',
+    precioMensual: 0,
+    maxUsuarios: 999,
+    maxPropiedades: 9999,
+    modulosIncluidos: [
+      'Todas las funcionalidades',
+      'Sin límites',
+      'Soporte prioritario',
+    ],
+    activo: true,
+    esInterno: true, // ← NO visible en landing ni registro
+    signaturesIncludedMonth: 9999,
+    storageIncludedGB: 1000,
+    aiTokensIncludedMonth: 10000000,
+    smsIncludedMonth: 10000,
+  },
   {
     nombre: 'Básico',
     descripcion: 'Plan inicial para pequeñas inmobiliarias o propietarios individuales',
@@ -28,6 +48,7 @@ const PLANES_DATA = [
       'Notificaciones por email',
     ],
     activo: true,
+    esInterno: false,
     signaturesIncludedMonth: 10,
     storageIncludedGB: 5,
     aiTokensIncludedMonth: 10000,
@@ -52,6 +73,7 @@ const PLANES_DATA = [
       'Soporte prioritario 24h',
     ],
     activo: true,
+    esInterno: false,
     signaturesIncludedMonth: 50,
     storageIncludedGB: 25,
     aiTokensIncludedMonth: 50000,
@@ -77,6 +99,7 @@ const PLANES_DATA = [
       'SLA 99.9%',
     ],
     activo: true,
+    esInterno: false,
     signaturesIncludedMonth: 200,
     storageIncludedGB: 100,
     aiTokensIncludedMonth: 200000,
@@ -103,6 +126,7 @@ const PLANES_DATA = [
       'Capacitación ilimitada',
     ],
     activo: true,
+    esInterno: false,
     signaturesIncludedMonth: null,
     storageIncludedGB: 500,
     aiTokensIncludedMonth: 1000000,
@@ -130,20 +154,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 2. Verificar planes existentes
+    // 2. Verificar planes existentes (usar nombre en vez de tier porque Owner y Premium comparten tier)
     const existingPlans = await prisma.subscriptionPlan.findMany({
       select: { tier: true, nombre: true },
     });
 
-    const existingTiers = new Set(existingPlans.map(p => p.tier));
+    const existingNames = new Set(existingPlans.map(p => p.nombre));
     
     let created = 0;
     let skipped = 0;
     const results = [];
 
-    // 3. Crear solo los planes que no existen
+    // 3. Crear solo los planes que no existen (verificar por nombre)
     for (const planData of PLANES_DATA) {
-      if (existingTiers.has(planData.tier)) {
+      if (existingNames.has(planData.nombre)) {
         skipped++;
         results.push({
           nombre: planData.nombre,
