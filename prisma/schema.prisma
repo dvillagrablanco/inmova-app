@@ -106,9 +106,9 @@ enum UnitType {
   local
   garaje
   trastero
-  oficina            // Espacios de oficina
-  nave_industrial    // Naves y almacenes
-  coworking_space    // Espacios flexibles de coworking
+  oficina // Espacios de oficina
+  nave_industrial // Naves y almacenes
+  coworking_space // Espacios flexibles de coworking
 }
 
 enum UnitStatus {
@@ -135,71 +135,71 @@ enum ContractType {
 // ==========================================
 
 enum CommercialSpaceType {
-  oficina_privada       // Oficina cerrada individual
-  oficina_abierta       // Open space / planta diáfana
-  local_comercial       // Local a pie de calle
+  oficina_privada // Oficina cerrada individual
+  oficina_abierta // Open space / planta diáfana
+  local_comercial // Local a pie de calle
   local_centro_comercial // Local en centro comercial
-  nave_industrial       // Nave logística/industrial
-  almacen               // Almacén/storage
-  coworking_hot_desk    // Puesto rotativo
-  coworking_dedicated   // Puesto fijo
-  coworking_office      // Oficina privada en coworking
-  sala_reuniones        // Sala de reuniones alquilable
-  showroom              // Espacio de exposición
-  taller                // Taller/workshop
+  nave_industrial // Nave logística/industrial
+  almacen // Almacén/storage
+  coworking_hot_desk // Puesto rotativo
+  coworking_dedicated // Puesto fijo
+  coworking_office // Oficina privada en coworking
+  sala_reuniones // Sala de reuniones alquilable
+  showroom // Espacio de exposición
+  taller // Taller/workshop
 }
 
 enum CommercialLeaseType {
-  arrendamiento_local       // LAU Art. 29-35 - Uso distinto de vivienda
-  arrendamiento_industria   // Código Civil - Con bienes muebles
-  subarrendamiento          // Subalquiler autorizado
-  cesion_uso               // Cesión temporal de uso
-  coworking_membresia      // Membresía flexible
-  pop_up                   // Alquiler temporal/pop-up
+  arrendamiento_local // LAU Art. 29-35 - Uso distinto de vivienda
+  arrendamiento_industria // Código Civil - Con bienes muebles
+  subarrendamiento // Subalquiler autorizado
+  cesion_uso // Cesión temporal de uso
+  coworking_membresia // Membresía flexible
+  pop_up // Alquiler temporal/pop-up
 }
 
 enum CommercialLeaseStatus {
-  negociacion           // En fase de negociación
-  pendiente_firma       // Términos acordados, pendiente firma
-  activo                // Contrato en vigor
-  prorrogado            // Contrato prorrogado automáticamente
-  pre_vencimiento       // A menos de 6 meses del vencimiento
-  vencido               // Contrato finalizado
-  rescindido            // Terminación anticipada
-  litigio               // En disputa legal
+  negociacion // En fase de negociación
+  pendiente_firma // Términos acordados, pendiente firma
+  activo // Contrato en vigor
+  prorrogado // Contrato prorrogado automáticamente
+  pre_vencimiento // A menos de 6 meses del vencimiento
+  vencido // Contrato finalizado
+  rescindido // Terminación anticipada
+  litigio // En disputa legal
 }
 
 enum RentEscalationType {
-  ipc                   // Según IPC publicado
-  ipc_mas_diferencial   // IPC + puntos adicionales
-  porcentaje_fijo       // % fijo anual
-  importe_fijo          // Cantidad fija anual
-  por_facturacion       // Según ventas del inquilino (retail)
-  mixto_fijo_variable   // Renta base + % sobre ventas
-  sin_revision          // Renta congelada
+  ipc // Según IPC publicado
+  ipc_mas_diferencial // IPC + puntos adicionales
+  porcentaje_fijo // % fijo anual
+  importe_fijo // Cantidad fija anual
+  por_facturacion // Según ventas del inquilino (retail)
+  mixto_fijo_variable // Renta base + % sobre ventas
+  sin_revision // Renta congelada
 }
 
 enum CommercialUsePermit {
-  comercial_minorista   // Retail/tiendas
-  comercial_mayorista   // Venta al por mayor
-  hosteleria            // Restauración/bares
-  oficinas              // Uso administrativo
-  industrial_ligero     // Industria ligera
-  industrial_pesado     // Industria pesada
-  logistico             // Almacenamiento/distribución
-  educativo             // Academias/centros formativos
-  sanitario             // Clínicas/consultorios
-  deportivo             // Gimnasios/centros deportivos
-  entretenimiento       // Ocio/espectáculos
-  mixto                 // Varios usos permitidos
+  comercial_minorista // Retail/tiendas
+  comercial_mayorista // Venta al por mayor
+  hosteleria // Restauración/bares
+  oficinas // Uso administrativo
+  industrial_ligero // Industria ligera
+  industrial_pesado // Industria pesada
+  logistico // Almacenamiento/distribución
+  educativo // Academias/centros formativos
+  sanitario // Clínicas/consultorios
+  deportivo // Gimnasios/centros deportivos
+  entretenimiento // Ocio/espectáculos
+  mixto // Varios usos permitidos
 }
 
 enum CommonAreaMaintenanceType {
-  incluido_en_renta     // CAM incluido en renta mensual
-  proporcional_m2       // Según metros ocupados
-  proporcional_fijo     // Cuota fija mensual
-  variable_real         // Según gastos reales
-  triple_net            // Inquilino paga todo (NNN)
+  incluido_en_renta // CAM incluido en renta mensual
+  proporcional_m2 // Según metros ocupados
+  proporcional_fijo // Cuota fija mensual
+  variable_real // Según gastos reales
+  triple_net // Inquilino paga todo (NNN)
 }
 
 // ==========================================
@@ -207,28 +207,28 @@ enum CommonAreaMaintenanceType {
 // ==========================================
 
 enum TipoArrendamiento {
-  vivienda_habitual     // LAU Art. 2 - Duración mínima 5 años (7 si empresa)
-  temporada             // LAU Art. 3.2 - Media estancia (1-11 meses)
-  vacacional            // Turístico (< 1 mes) - Regulación autonómica
-  habitacion            // Alquiler de habitación en piso compartido
+  vivienda_habitual // LAU Art. 2 - Duración mínima 5 años (7 si empresa)
+  temporada // LAU Art. 3.2 - Media estancia (1-11 meses)
+  vacacional // Turístico (< 1 mes) - Regulación autonómica
+  habitacion // Alquiler de habitación en piso compartido
 }
 
 enum MotivoTemporalidad {
-  trabajo               // Desplazamiento laboral temporal
-  estudios              // Curso académico, máster, Erasmus
-  tratamiento_medico    // Tratamiento médico prolongado
-  proyecto_profesional  // Proyecto con duración definida
-  transicion            // Entre compra/venta de vivienda
-  turismo_extendido     // Estancia turística larga (1-3 meses)
-  otro                  // Otros motivos justificados
+  trabajo // Desplazamiento laboral temporal
+  estudios // Curso académico, máster, Erasmus
+  tratamiento_medico // Tratamiento médico prolongado
+  proyecto_profesional // Proyecto con duración definida
+  transicion // Entre compra/venta de vivienda
+  turismo_extendido // Estancia turística larga (1-3 meses)
+  otro // Otros motivos justificados
 }
 
 enum EstadoInventario {
-  pendiente             // Inventario no realizado
-  entrada_completado    // Inventario de entrada realizado
-  salida_completado     // Inventario de salida realizado
-  comparado             // Ambos inventarios comparados
-  con_incidencias       // Hay diferencias detectadas
+  pendiente // Inventario no realizado
+  entrada_completado // Inventario de entrada realizado
+  salida_completado // Inventario de salida realizado
+  comparado // Ambos inventarios comparados
+  con_incidencias // Hay diferencias detectadas
 }
 
 enum PaymentStatus {
@@ -363,7 +363,7 @@ model User {
   setupProgress    String? // JSON string con las acciones completadas del onboarding
   resetToken       String?           @unique
   resetTokenExpiry DateTime?
-  recoveryEmail    String?           // Email alternativo para recuperación de contraseña
+  recoveryEmail    String? // Email alternativo para recuperación de contraseña
 
   // Multi-Factor Authentication (MFA)
   mfaEnabled       Boolean   @default(false)
@@ -480,6 +480,10 @@ model User {
 
   // eWoorker Chat
   ewoorkerConversacionesParticipante EwoorkerParticipanteConversacion[]
+
+  // 📄 ONBOARDING DOCUMENTAL CON IA
+  documentImportBatches      DocumentImportBatch[]
+  onboardingDocumentSessions OnboardingDocumentSession[]
 
   @@index([email])
   @@index([companyId])
@@ -702,14 +706,14 @@ model Tenant {
   announcementConfirmations AnnouncementConfirmation[]
 
   // B2C Gamificación y Referidos
-  gamificationPoints      Int                    @default(0)
-  gamificationLevel       Int                    @default(1)
-  gamificationAchievements Json                  @default("[]")
-  loginStreak             Int                    @default(0)
-  lastLoginDate           DateTime?
-  gamificationLogs        TenantGamificationLog[]
-  referralsEnviados       TenantReferral[]       @relation("TenantReferrer")
-  referralRecibido        TenantReferral?        @relation("TenantReferred")
+  gamificationPoints       Int                     @default(0)
+  gamificationLevel        Int                     @default(1)
+  gamificationAchievements Json                    @default("[]")
+  loginStreak              Int                     @default(0)
+  lastLoginDate            DateTime?
+  gamificationLogs         TenantGamificationLog[]
+  referralsEnviados        TenantReferral[]        @relation("TenantReferrer")
+  referralRecibido         TenantReferral?         @relation("TenantReferred")
 
   // Índices optimizados para consultas frecuentes
   @@index([companyId])
@@ -824,128 +828,128 @@ model Unit {
 // ==========================================
 
 model CommercialSpace {
-  id                      String                      @id @default(cuid())
-  companyId               String
-  buildingId              String?                     // Puede estar en un edificio existente
-  
+  id         String  @id @default(cuid())
+  companyId  String
+  buildingId String? // Puede estar en un edificio existente
+
   // Información básica
-  nombre                  String                      // "Oficina 3A", "Local 12", etc.
-  referencia              String?                     // Referencia catastral o interna
-  tipo                    CommercialSpaceType
-  descripcion             String?                     @db.Text
-  
+  nombre      String // "Oficina 3A", "Local 12", etc.
+  referencia  String? // Referencia catastral o interna
+  tipo        CommercialSpaceType
+  descripcion String?             @db.Text
+
   // Ubicación
-  direccion               String
-  ciudad                  String
-  codigoPostal            String
-  provincia               String
-  pais                    String                      @default("España")
-  planta                  Int?                        // Planta del edificio
-  puerta                  String?                     // Número o letra de puerta
-  latitud                 Float?
-  longitud                Float?
-  
+  direccion    String
+  ciudad       String
+  codigoPostal String
+  provincia    String
+  pais         String  @default("España")
+  planta       Int? // Planta del edificio
+  puerta       String? // Número o letra de puerta
+  latitud      Float?
+  longitud     Float?
+
   // Superficie
-  superficieConstruida    Float                       // m² construidos
-  superficieUtil          Float                       // m² útiles
-  superficieComunes       Float?                      // m² de zonas comunes asignadas
-  alturaLibre             Float?                      // Altura libre en metros
-  
+  superficieConstruida Float // m² construidos
+  superficieUtil       Float // m² útiles
+  superficieComunes    Float? // m² de zonas comunes asignadas
+  alturaLibre          Float? // Altura libre en metros
+
   // Características físicas
-  fachada                 Boolean                     @default(false) // Tiene escaparate/fachada a calle
-  longitudFachada         Float?                      // Metros de fachada
-  accesoCargaDescarga     Boolean                     @default(false)
-  muelleCarga             Boolean                     @default(false)
-  alturaMuelleCarga       Float?                      // Altura del muelle en metros
-  cargaSuelo              Float?                      // kg/m² soportados
-  plantaDiafana           Boolean                     @default(false)
-  divisible               Boolean                     @default(false) // Se puede dividir
-  superficieMinimaDivision Float?                     // m² mínimos si es divisible
-  
+  fachada                  Boolean @default(false) // Tiene escaparate/fachada a calle
+  longitudFachada          Float? // Metros de fachada
+  accesoCargaDescarga      Boolean @default(false)
+  muelleCarga              Boolean @default(false)
+  alturaMuelleCarga        Float? // Altura del muelle en metros
+  cargaSuelo               Float? // kg/m² soportados
+  plantaDiafana            Boolean @default(false)
+  divisible                Boolean @default(false) // Se puede dividir
+  superficieMinimaDivision Float? // m² mínimos si es divisible
+
   // Instalaciones
-  potenciaElectrica       Float?                      // kW contratados/disponibles
-  potenciaMaximaDisponible Float?                     // kW máximos instalables
-  tipoCorreinte           String?                     // "Monofásica", "Trifásica", "Ambas"
-  aireAcondicionado       Boolean                     @default(false)
-  tipoClimatizacion       String?                     // "Central", "Split", "VRV", "Sin climatización"
-  calefaccion             Boolean                     @default(false)
-  tipoCalefaccion         String?                     // "Central", "Individual", "Bomba de calor"
-  ventilacion             String?                     // "Natural", "Forzada", "Extracción"
-  deteccionIncendios      Boolean                     @default(false)
-  extincionIncendios      String?                     // "Rociadores", "CO2", "Manual", "Sin sistema"
-  salidasEmergencia       Int?                        // Número de salidas de emergencia
-  ascensor                Boolean                     @default(false)
-  numeroAscensores        Int?
-  montacargas             Boolean                     @default(false)
-  capacidadMontacargas    Float?                      // kg
-  
+  potenciaElectrica        Float? // kW contratados/disponibles
+  potenciaMaximaDisponible Float? // kW máximos instalables
+  tipoCorreinte            String? // "Monofásica", "Trifásica", "Ambas"
+  aireAcondicionado        Boolean @default(false)
+  tipoClimatizacion        String? // "Central", "Split", "VRV", "Sin climatización"
+  calefaccion              Boolean @default(false)
+  tipoCalefaccion          String? // "Central", "Individual", "Bomba de calor"
+  ventilacion              String? // "Natural", "Forzada", "Extracción"
+  deteccionIncendios       Boolean @default(false)
+  extincionIncendios       String? // "Rociadores", "CO2", "Manual", "Sin sistema"
+  salidasEmergencia        Int? // Número de salidas de emergencia
+  ascensor                 Boolean @default(false)
+  numeroAscensores         Int?
+  montacargas              Boolean @default(false)
+  capacidadMontacargas     Float? // kg
+
   // Accesibilidad
-  accesibleMinusvalidos   Boolean                     @default(false)
-  aseoAdaptado            Boolean                     @default(false)
-  rampaAcceso             Boolean                     @default(false)
-  
+  accesibleMinusvalidos Boolean @default(false)
+  aseoAdaptado          Boolean @default(false)
+  rampaAcceso           Boolean @default(false)
+
   // Servicios del edificio
-  recepcion24h            Boolean                     @default(false)
-  vigilancia              Boolean                     @default(false)
-  controlAccesos          Boolean                     @default(false)
-  tipoControlAcceso       String?                     // "Tarjeta", "Huella", "Código", "App"
-  limpiezaIncluida        Boolean                     @default(false)
-  mantenimientoIncluido   Boolean                     @default(false)
-  
+  recepcion24h          Boolean @default(false)
+  vigilancia            Boolean @default(false)
+  controlAccesos        Boolean @default(false)
+  tipoControlAcceso     String? // "Tarjeta", "Huella", "Código", "App"
+  limpiezaIncluida      Boolean @default(false)
+  mantenimientoIncluido Boolean @default(false)
+
   // Parking
-  plazasParking           Int?                        // Plazas incluidas
-  plazasParkingAdicionales Int?                       // Plazas disponibles adicionales
-  precioParkingMensual    Float?                      // €/plaza/mes
-  
+  plazasParking            Int? // Plazas incluidas
+  plazasParkingAdicionales Int? // Plazas disponibles adicionales
+  precioParkingMensual     Float? // €/plaza/mes
+
   // Telecomunicaciones
-  fibraOptica             Boolean                     @default(false)
-  operadoresFibra         String[]                    @default([])
-  cableado                String?                     // "Cat5e", "Cat6", "Cat6a", "Sin cableado"
-  rackServidores          Boolean                     @default(false)
-  
+  fibraOptica     Boolean  @default(false)
+  operadoresFibra String[] @default([])
+  cableado        String? // "Cat5e", "Cat6", "Cat6a", "Sin cableado"
+  rackServidores  Boolean  @default(false)
+
   // Información comercial
-  estado                  UnitStatus                  @default(disponible)
-  rentaMensualBase        Float                       // Renta mensual sin CAM ni IVA
-  precioM2Mensual         Float?                      // €/m²/mes (calculado)
-  
+  estado           UnitStatus @default(disponible)
+  rentaMensualBase Float // Renta mensual sin CAM ni IVA
+  precioM2Mensual  Float? // €/m²/mes (calculado)
+
   // CAM (Common Area Maintenance)
-  camType                 CommonAreaMaintenanceType   @default(incluido_en_renta)
-  camMensual              Float?                      // Coste CAM mensual
-  camIncluye              String[]                    @default([]) // ["limpieza", "seguridad", "jardinería"]
-  
+  camType    CommonAreaMaintenanceType @default(incluido_en_renta)
+  camMensual Float? // Coste CAM mensual
+  camIncluye String[]                  @default([]) // ["limpieza", "seguridad", "jardinería"]
+
   // Gastos adicionales estimados
-  ibiAnual                Float?                      // IBI anual
-  comunidadMensual        Float?                      // Gastos de comunidad
-  seguroEdificioAnual     Float?                      // Seguro estructura
-  
+  ibiAnual            Float? // IBI anual
+  comunidadMensual    Float? // Gastos de comunidad
+  seguroEdificioAnual Float? // Seguro estructura
+
   // Licencias y permisos
-  licenciaActividad       Boolean                     @default(false)
-  tiposActividadPermitida CommercialUsePermit[]       @default([])
-  restriccionesUso        String?                     @db.Text // Restricciones específicas
-  certificadoEnergetico   String?                     // Letra de certificación
-  añoCertificado          Int?
-  
+  licenciaActividad       Boolean               @default(false)
+  tiposActividadPermitida CommercialUsePermit[] @default([])
+  restriccionesUso        String?               @db.Text // Restricciones específicas
+  certificadoEnergetico   String? // Letra de certificación
+  añoCertificado         Int?
+
   // Marketing
-  destacado               Boolean                     @default(false)
-  disponibleDesde         DateTime?
-  imagenes                String[]                    @default([])
-  planos                  String[]                    @default([])
-  tourVirtual             String?
-  videoPromocional        String?
-  
+  destacado        Boolean   @default(false)
+  disponibleDesde  DateTime?
+  imagenes         String[]  @default([])
+  planos           String[]  @default([])
+  tourVirtual      String?
+  videoPromocional String?
+
   // Metadata
-  createdAt               DateTime                    @default(now())
-  updatedAt               DateTime                    @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relaciones
-  company                 Company                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  building                Building?                   @relation("BuildingCommercialSpaces", fields: [buildingId], references: [id], onDelete: SetNull)
-  commercialLeases        CommercialLease[]
-  commercialInquiries     CommercialInquiry[]
-  commercialDocuments     CommercialDocument[]
-  commercialMaintenances  CommercialMaintenance[]
-  commercialVisits        CommercialVisit[]
-  
+  company                Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  building               Building?               @relation("BuildingCommercialSpaces", fields: [buildingId], references: [id], onDelete: SetNull)
+  commercialLeases       CommercialLease[]
+  commercialInquiries    CommercialInquiry[]
+  commercialDocuments    CommercialDocument[]
+  commercialMaintenances CommercialMaintenance[]
+  commercialVisits       CommercialVisit[]
+
   @@index([companyId])
   @@index([buildingId])
   @@index([tipo, estado])
@@ -956,132 +960,132 @@ model CommercialSpace {
 }
 
 model CommercialLease {
-  id                      String                      @id @default(cuid())
-  companyId               String
-  commercialSpaceId       String
-  
+  id                String @id @default(cuid())
+  companyId         String
+  commercialSpaceId String
+
   // Arrendatario (puede ser empresa o autónomo)
-  arrendatarioNombre      String                      // Razón social o nombre
-  arrendatarioCIF         String                      // CIF/NIF del arrendatario
-  arrendatarioTipo        String                      @default("empresa") // "empresa", "autonomo", "persona_fisica"
-  arrendatarioActividad   String?                     // Actividad económica/CNAE
-  arrendatarioContacto    String?                     // Persona de contacto
-  arrendatarioEmail       String
-  arrendatarioTelefono    String?
-  arrendatarioDireccion   String?                     // Domicilio fiscal si diferente
-  
+  arrendatarioNombre    String // Razón social o nombre
+  arrendatarioCIF       String // CIF/NIF del arrendatario
+  arrendatarioTipo      String  @default("empresa") // "empresa", "autonomo", "persona_fisica"
+  arrendatarioActividad String? // Actividad económica/CNAE
+  arrendatarioContacto  String? // Persona de contacto
+  arrendatarioEmail     String
+  arrendatarioTelefono  String?
+  arrendatarioDireccion String? // Domicilio fiscal si diferente
+
   // Tipo y estado del contrato
-  tipoContrato            CommercialLeaseType         @default(arrendamiento_local)
-  estado                  CommercialLeaseStatus       @default(negociacion)
-  
+  tipoContrato CommercialLeaseType   @default(arrendamiento_local)
+  estado       CommercialLeaseStatus @default(negociacion)
+
   // Fechas
-  fechaInicio             DateTime
-  fechaFin                DateTime
-  duracionAnios           Int                         @default(5) // Duración pactada en años
-  fechaEntregaLlaves      DateTime?
-  
+  fechaInicio        DateTime
+  fechaFin           DateTime
+  duracionAnios      Int       @default(5) // Duración pactada en años
+  fechaEntregaLlaves DateTime?
+
   // Prórrogas
-  prorrogaAutomatica      Boolean                     @default(true)
-  duracionProrrogaAnios   Int                         @default(1) // Duración de cada prórroga
-  prorrogasMaximas        Int?                        // Límite de prórrogas (null = sin límite)
-  prorrogasRealizadas     Int                         @default(0)
-  preavisoNoRenovacion    Int                         @default(6) // Meses de preaviso
-  
+  prorrogaAutomatica    Boolean @default(true)
+  duracionProrrogaAnios Int     @default(1) // Duración de cada prórroga
+  prorrogasMaximas      Int? // Límite de prórrogas (null = sin límite)
+  prorrogasRealizadas   Int     @default(0)
+  preavisoNoRenovacion  Int     @default(6) // Meses de preaviso
+
   // Renta
-  rentaMensualBase        Float                       // Renta base mensual (sin IVA)
-  rentaAnualBase          Float?                      // Renta anual (calculada)
-  ivaAplicable            Float                       @default(21) // % de IVA
-  
+  rentaMensualBase Float // Renta base mensual (sin IVA)
+  rentaAnualBase   Float? // Renta anual (calculada)
+  ivaAplicable     Float  @default(21) // % de IVA
+
   // Escalado de renta
-  escaladoTipo            RentEscalationType          @default(ipc)
-  escaladoValor           Float?                      // Valor adicional si aplica (diferencial, %)
-  fechaRevisionRenta      DateTime?                   // Próxima fecha de revisión
-  mesRevisionRenta        Int?                        // Mes del año para revisión (1-12)
-  
+  escaladoTipo       RentEscalationType @default(ipc)
+  escaladoValor      Float? // Valor adicional si aplica (diferencial, %)
+  fechaRevisionRenta DateTime? // Próxima fecha de revisión
+  mesRevisionRenta   Int? // Mes del año para revisión (1-12)
+
   // Renta variable (para retail)
-  rentaVariableAplica     Boolean                     @default(false)
-  porcentajeVentas        Float?                      // % sobre ventas brutas
-  facturacionMinimaExenta Float?                      // Facturación por debajo de la cual no aplica variable
-  reporteVentasFrecuencia String?                     // "mensual", "trimestral", "anual"
-  
+  rentaVariableAplica     Boolean @default(false)
+  porcentajeVentas        Float? // % sobre ventas brutas
+  facturacionMinimaExenta Float? // Facturación por debajo de la cual no aplica variable
+  reporteVentasFrecuencia String? // "mensual", "trimestral", "anual"
+
   // Fianzas y garantías
-  mesesFianza             Int                         @default(2) // Meses de fianza legal
-  importeFianza           Float                       // Importe de la fianza
-  fianzaDepositada        Boolean                     @default(false)
-  fechaDepositoFianza     DateTime?
-  garantiaAdicionalTipo   String?                     // "aval_bancario", "deposito", "seguro_caución", "ninguna"
-  garantiaAdicionalMeses  Int?                        // Meses cubiertos por garantía adicional
+  mesesFianza              Int       @default(2) // Meses de fianza legal
+  importeFianza            Float // Importe de la fianza
+  fianzaDepositada         Boolean   @default(false)
+  fechaDepositoFianza      DateTime?
+  garantiaAdicionalTipo    String? // "aval_bancario", "deposito", "seguro_caución", "ninguna"
+  garantiaAdicionalMeses   Int? // Meses cubiertos por garantía adicional
   garantiaAdicionalImporte Float?
-  
+
   // CAM (Common Area Maintenance)
-  camIncluido             Boolean                     @default(false)
-  camMensual              Float?                      // Coste CAM si no incluido
-  camConceptos            String[]                    @default([])
-  
+  camIncluido  Boolean  @default(false)
+  camMensual   Float? // Coste CAM si no incluido
+  camConceptos String[] @default([])
+
   // Gastos
-  gastosRepercutibles     String[]                    @default([]) // IBI, comunidad, seguros, etc.
-  gastosNoRepercutibles   String[]                    @default([]) // A cargo del propietario
-  ibiRepercutido          Boolean                     @default(true)
-  comunidadRepercutida    Boolean                     @default(true)
-  seguroRepercutido       Boolean                     @default(false)
-  
+  gastosRepercutibles   String[] @default([]) // IBI, comunidad, seguros, etc.
+  gastosNoRepercutibles String[] @default([]) // A cargo del propietario
+  ibiRepercutido        Boolean  @default(true)
+  comunidadRepercutida  Boolean  @default(true)
+  seguroRepercutido     Boolean  @default(false)
+
   // Período de carencia
-  carenciaAplica          Boolean                     @default(false)
-  carenciaMeses           Int?                        // Meses de carencia
-  carenciaTipo            String?                     // "total", "parcial"
-  carenciaPorcentaje      Float?                      // % de descuento si carencia parcial
-  
+  carenciaAplica     Boolean @default(false)
+  carenciaMeses      Int? // Meses de carencia
+  carenciaTipo       String? // "total", "parcial"
+  carenciaPorcentaje Float? // % de descuento si carencia parcial
+
   // Obra y acondicionamiento
-  obraInquilinoPermitida  Boolean                     @default(true)
-  obraRequiereAutorizacion Boolean                    @default(true)
-  aportacionPropietarioObra Float?                    // € que aporta propietario a obra
-  plazoObraMaximo         Int?                        // Días máximos para obras
-  obligacionDevolucionEstado String?                  // "original", "mejorado", "negociable"
-  
+  obraInquilinoPermitida     Boolean @default(true)
+  obraRequiereAutorizacion   Boolean @default(true)
+  aportacionPropietarioObra  Float? // € que aporta propietario a obra
+  plazoObraMaximo            Int? // Días máximos para obras
+  obligacionDevolucionEstado String? // "original", "mejorado", "negociable"
+
   // Subarrendamiento y cesión
-  subarrendamientoPermitido Boolean                   @default(false)
-  cesionPermitida         Boolean                     @default(false)
-  derechoTanteoRetracto   Boolean                     @default(true) // Derecho de adquisición preferente
-  
+  subarrendamientoPermitido Boolean @default(false)
+  cesionPermitida           Boolean @default(false)
+  derechoTanteoRetracto     Boolean @default(true) // Derecho de adquisición preferente
+
   // Uso
-  usoPermitido            CommercialUsePermit[]       @default([])
-  usoEspecifico           String?                     // Descripción detallada del uso acordado
-  cambioUsoPermitido      Boolean                     @default(false)
-  
+  usoPermitido       CommercialUsePermit[] @default([])
+  usoEspecifico      String? // Descripción detallada del uso acordado
+  cambioUsoPermitido Boolean               @default(false)
+
   // Seguros obligatorios
-  seguroRCObligatorio     Boolean                     @default(true)
-  seguroRCMinimoCobertura Float?                      // € mínimos de cobertura RC
-  seguroContenidoObligatorio Boolean                  @default(false)
-  
+  seguroRCObligatorio        Boolean @default(true)
+  seguroRCMinimoCobertura    Float? // € mínimos de cobertura RC
+  seguroContenidoObligatorio Boolean @default(false)
+
   // Resolución anticipada
-  penalizacionResolucionAnticipada Float?             // Meses de renta como penalización
-  causasResolucionSinPenalizacion String[]            @default([])
-  
+  penalizacionResolucionAnticipada Float? // Meses de renta como penalización
+  causasResolucionSinPenalizacion  String[] @default([])
+
   // Documentación
-  contratoFirmado         Boolean                     @default(false)
-  fechaFirma              DateTime?
-  contratoPath            String?                     // Path al PDF del contrato
-  anexos                  String[]                    @default([]) // Paths a documentos anexos
-  
+  contratoFirmado Boolean   @default(false)
+  fechaFirma      DateTime?
+  contratoPath    String? // Path al PDF del contrato
+  anexos          String[]  @default([]) // Paths a documentos anexos
+
   // Pagos
-  diaPago                 Int                         @default(1) // Día del mes para pago
-  metodoPago              String                      @default("transferencia") // "transferencia", "domiciliacion", "cheque"
-  cuentaBancaria          String?                     // IBAN para pagos
-  
+  diaPago        Int     @default(1) // Día del mes para pago
+  metodoPago     String  @default("transferencia") // "transferencia", "domiciliacion", "cheque"
+  cuentaBancaria String? // IBAN para pagos
+
   // Notas y observaciones
-  clausulasEspeciales     String?                     @db.Text
-  notasInternas           String?                     @db.Text
-  
+  clausulasEspeciales String? @db.Text
+  notasInternas       String? @db.Text
+
   // Metadata
-  createdAt               DateTime                    @default(now())
-  updatedAt               DateTime                    @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relaciones
-  company                 Company                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  commercialSpace         CommercialSpace             @relation(fields: [commercialSpaceId], references: [id], onDelete: Cascade)
-  commercialPayments      CommercialPayment[]
-  commercialDocuments     CommercialDocument[]
-  
+  company             Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  commercialSpace     CommercialSpace      @relation(fields: [commercialSpaceId], references: [id], onDelete: Cascade)
+  commercialPayments  CommercialPayment[]
+  commercialDocuments CommercialDocument[]
+
   @@index([companyId])
   @@index([commercialSpaceId])
   @@index([estado])
@@ -1091,49 +1095,49 @@ model CommercialLease {
 }
 
 model CommercialPayment {
-  id                      String                      @id @default(cuid())
-  companyId               String
-  commercialLeaseId       String
-  
+  id                String @id @default(cuid())
+  companyId         String
+  commercialLeaseId String
+
   // Tipo de pago
-  concepto                String                      // "Renta", "CAM", "IBI", "Renta Variable", etc.
-  tipo                    String                      @default("renta") // "renta", "cam", "ibi", "comunidad", "variable", "regularizacion", "fianza", "otro"
-  
+  concepto String // "Renta", "CAM", "IBI", "Renta Variable", etc.
+  tipo     String @default("renta") // "renta", "cam", "ibi", "comunidad", "variable", "regularizacion", "fianza", "otro"
+
   // Periodo
-  periodo                 String                      // "2026-01", formato año-mes
-  fechaVencimiento        DateTime
-  
+  periodo          String // "2026-01", formato año-mes
+  fechaVencimiento DateTime
+
   // Importes
-  importeBase             Float                       // Importe sin IVA
-  ivaAplicado             Float                       @default(21)
-  importeIVA              Float                       // IVA calculado
-  importeTotal            Float                       // Total con IVA
-  importeRetencion        Float?                      // Retención IRPF si aplica
-  importeNeto             Float?                      // Importe final a pagar
-  
+  importeBase      Float // Importe sin IVA
+  ivaAplicado      Float  @default(21)
+  importeIVA       Float // IVA calculado
+  importeTotal     Float // Total con IVA
+  importeRetencion Float? // Retención IRPF si aplica
+  importeNeto      Float? // Importe final a pagar
+
   // Estado
-  estado                  PaymentStatus               @default(pendiente)
-  fechaPago               DateTime?
-  metodoPago              String?
-  referenciaPago          String?                     // Referencia bancaria
-  
+  estado         PaymentStatus @default(pendiente)
+  fechaPago      DateTime?
+  metodoPago     String?
+  referenciaPago String? // Referencia bancaria
+
   // Facturación
-  facturaEmitida          Boolean                     @default(false)
-  numeroFactura           String?
-  fechaFactura            DateTime?
-  facturaPath             String?
-  
+  facturaEmitida Boolean   @default(false)
+  numeroFactura  String?
+  fechaFactura   DateTime?
+  facturaPath    String?
+
   // Notas
-  notas                   String?                     @db.Text
-  
+  notas String? @db.Text
+
   // Metadata
-  createdAt               DateTime                    @default(now())
-  updatedAt               DateTime                    @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relaciones
-  company                 Company                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  commercialLease         CommercialLease             @relation(fields: [commercialLeaseId], references: [id], onDelete: Cascade)
-  
+  company         Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  commercialLease CommercialLease @relation(fields: [commercialLeaseId], references: [id], onDelete: Cascade)
+
   @@index([companyId])
   @@index([commercialLeaseId])
   @@index([estado])
@@ -1143,41 +1147,41 @@ model CommercialPayment {
 }
 
 model CommercialInquiry {
-  id                      String                      @id @default(cuid())
-  companyId               String
-  commercialSpaceId       String
-  
+  id                String @id @default(cuid())
+  companyId         String
+  commercialSpaceId String
+
   // Datos del interesado
-  nombreEmpresa           String?
-  nombreContacto          String
-  email                   String
-  telefono                String?
-  cifNif                  String?
-  
+  nombreEmpresa  String?
+  nombreContacto String
+  email          String
+  telefono       String?
+  cifNif         String?
+
   // Interés
-  actividadPrevista       String?
-  superficieDeseada       Float?
-  presupuestoMensual      Float?
-  fechaDeseadaEntrada     DateTime?
-  
+  actividadPrevista   String?
+  superficieDeseada   Float?
+  presupuestoMensual  Float?
+  fechaDeseadaEntrada DateTime?
+
   // Estado
-  estado                  String                      @default("nuevo") // "nuevo", "contactado", "visita_programada", "negociacion", "descartado", "convertido"
-  prioridad               String                      @default("media") // "baja", "media", "alta"
-  
+  estado    String @default("nuevo") // "nuevo", "contactado", "visita_programada", "negociacion", "descartado", "convertido"
+  prioridad String @default("media") // "baja", "media", "alta"
+
   // Seguimiento
-  fuenteLead              String?                     // "web", "idealista", "fotocasa", "referido", "otro"
-  notas                   String?                     @db.Text
-  proximoSeguimiento      DateTime?
-  asignadoA               String?                     // userId del gestor asignado
-  
+  fuenteLead         String? // "web", "idealista", "fotocasa", "referido", "otro"
+  notas              String?   @db.Text
+  proximoSeguimiento DateTime?
+  asignadoA          String? // userId del gestor asignado
+
   // Metadata
-  createdAt               DateTime                    @default(now())
-  updatedAt               DateTime                    @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relaciones
-  company                 Company                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  commercialSpace         CommercialSpace             @relation(fields: [commercialSpaceId], references: [id], onDelete: Cascade)
-  
+  company         Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  commercialSpace CommercialSpace @relation(fields: [commercialSpaceId], references: [id], onDelete: Cascade)
+
   @@index([companyId])
   @@index([commercialSpaceId])
   @@index([estado])
@@ -1185,35 +1189,35 @@ model CommercialInquiry {
 }
 
 model CommercialDocument {
-  id                      String                      @id @default(cuid())
-  companyId               String
-  commercialSpaceId       String?
-  commercialLeaseId       String?
-  
+  id                String  @id @default(cuid())
+  companyId         String
+  commercialSpaceId String?
+  commercialLeaseId String?
+
   // Documento
-  nombre                  String
-  tipo                    String                      // "contrato", "anexo", "licencia", "plano", "certificado", "factura", "seguro", "otro"
-  descripcion             String?
-  path                    String                      // URL o path del archivo
-  mimeType                String?
-  tamano                  Int?                        // Bytes
-  
+  nombre      String
+  tipo        String // "contrato", "anexo", "licencia", "plano", "certificado", "factura", "seguro", "otro"
+  descripcion String?
+  path        String // URL o path del archivo
+  mimeType    String?
+  tamano      Int? // Bytes
+
   // Vigencia (para documentos con fecha de expiración)
-  fechaEmision            DateTime?
-  fechaVencimiento        DateTime?
-  alertaVencimiento       Boolean                     @default(false)
-  diasAlerta              Int                         @default(30)
-  
+  fechaEmision      DateTime?
+  fechaVencimiento  DateTime?
+  alertaVencimiento Boolean   @default(false)
+  diasAlerta        Int       @default(30)
+
   // Metadata
-  subidoPor               String?
-  createdAt               DateTime                    @default(now())
-  updatedAt               DateTime                    @updatedAt
-  
+  subidoPor String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relaciones
-  company                 Company                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  commercialSpace         CommercialSpace?            @relation(fields: [commercialSpaceId], references: [id], onDelete: Cascade)
-  commercialLease         CommercialLease?            @relation(fields: [commercialLeaseId], references: [id], onDelete: Cascade)
-  
+  company         Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  commercialSpace CommercialSpace? @relation(fields: [commercialSpaceId], references: [id], onDelete: Cascade)
+  commercialLease CommercialLease? @relation(fields: [commercialLeaseId], references: [id], onDelete: Cascade)
+
   @@index([companyId])
   @@index([commercialSpaceId])
   @@index([commercialLeaseId])
@@ -1222,47 +1226,47 @@ model CommercialDocument {
 }
 
 model CommercialMaintenance {
-  id                      String                      @id @default(cuid())
-  companyId               String
-  commercialSpaceId       String
-  
+  id                String @id @default(cuid())
+  companyId         String
+  commercialSpaceId String
+
   // Incidencia
-  titulo                  String
-  descripcion             String?                     @db.Text
-  tipo                    String                      // "averia", "mejora", "preventivo", "obligatorio"
-  categoria               String?                     // "electricidad", "fontaneria", "climatizacion", "estructural", "otro"
-  prioridad               MaintenancePriority         @default(media)
-  estado                  MaintenanceStatus           @default(pendiente)
-  
+  titulo      String
+  descripcion String?             @db.Text
+  tipo        String // "averia", "mejora", "preventivo", "obligatorio"
+  categoria   String? // "electricidad", "fontaneria", "climatizacion", "estructural", "otro"
+  prioridad   MaintenancePriority @default(media)
+  estado      MaintenanceStatus   @default(pendiente)
+
   // Responsabilidad
-  responsable             String                      @default("propietario") // "propietario", "inquilino", "compartido"
-  
+  responsable String @default("propietario") // "propietario", "inquilino", "compartido"
+
   // Fechas
-  fechaReporte            DateTime                    @default(now())
-  fechaProgramada         DateTime?
-  fechaResolucion         DateTime?
-  
+  fechaReporte    DateTime  @default(now())
+  fechaProgramada DateTime?
+  fechaResolucion DateTime?
+
   // Costes
-  presupuestoEstimado     Float?
-  costeReal               Float?
-  
+  presupuestoEstimado Float?
+  costeReal           Float?
+
   // Proveedor
-  proveedorId             String?
-  proveedorNombre         String?
-  
+  proveedorId     String?
+  proveedorNombre String?
+
   // Seguimiento
-  reportadoPor            String?
-  asignadoA               String?
-  notas                   String?                     @db.Text
-  
+  reportadoPor String?
+  asignadoA    String?
+  notas        String? @db.Text
+
   // Metadata
-  createdAt               DateTime                    @default(now())
-  updatedAt               DateTime                    @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relaciones
-  company                 Company                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  commercialSpace         CommercialSpace             @relation(fields: [commercialSpaceId], references: [id], onDelete: Cascade)
-  
+  company         Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  commercialSpace CommercialSpace @relation(fields: [commercialSpaceId], references: [id], onDelete: Cascade)
+
   @@index([companyId])
   @@index([commercialSpaceId])
   @@index([estado])
@@ -1270,40 +1274,40 @@ model CommercialMaintenance {
 }
 
 model CommercialVisit {
-  id                      String                      @id @default(cuid())
-  companyId               String
-  commercialSpaceId       String
-  
+  id                String @id @default(cuid())
+  companyId         String
+  commercialSpaceId String
+
   // Visitante
-  nombreContacto          String
-  empresa                 String?
-  email                   String?
-  telefono                String?
-  
+  nombreContacto String
+  empresa        String?
+  email          String?
+  telefono       String?
+
   // Visita
-  fechaHora               DateTime
-  duracionMinutos         Int                         @default(30)
-  tipo                    String                      @default("presencial") // "presencial", "virtual"
-  
+  fechaHora       DateTime
+  duracionMinutos Int      @default(30)
+  tipo            String   @default("presencial") // "presencial", "virtual"
+
   // Estado
-  estado                  String                      @default("programada") // "programada", "realizada", "cancelada", "no_show"
-  
+  estado String @default("programada") // "programada", "realizada", "cancelada", "no_show"
+
   // Resultado
-  interes                 String?                     // "alto", "medio", "bajo", "sin_interes"
-  comentarios             String?                     @db.Text
-  siguientespasos         String?
-  
+  interes         String? // "alto", "medio", "bajo", "sin_interes"
+  comentarios     String? @db.Text
+  siguientespasos String?
+
   // Gestor
-  realizadaPor            String?                     // userId
-  
+  realizadaPor String? // userId
+
   // Metadata
-  createdAt               DateTime                    @default(now())
-  updatedAt               DateTime                    @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relaciones
-  company                 Company                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  commercialSpace         CommercialSpace             @relation(fields: [commercialSpaceId], references: [id], onDelete: Cascade)
-  
+  company         Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  commercialSpace CommercialSpace @relation(fields: [commercialSpaceId], references: [id], onDelete: Cascade)
+
   @@index([companyId])
   @@index([commercialSpaceId])
   @@index([fechaHora])
@@ -1339,49 +1343,49 @@ model Contract {
   // ==========================================
   // CAMPOS ESPECÍFICOS PARA MEDIA ESTANCIA
   // ==========================================
-  
+
   // Tipo de arrendamiento según LAU
-  tipoArrendamiento      TipoArrendamiento?   // vivienda_habitual, temporada, vacacional, habitacion
-  motivoTemporalidad     MotivoTemporalidad?  // trabajo, estudios, tratamiento_medico, etc.
-  descripcionMotivo      String?              @db.Text // Descripción detallada del motivo
-  
+  tipoArrendamiento  TipoArrendamiento? // vivienda_habitual, temporada, vacacional, habitacion
+  motivoTemporalidad MotivoTemporalidad? // trabajo, estudios, tratamiento_medico, etc.
+  descripcionMotivo  String?             @db.Text // Descripción detallada del motivo
+
   // Duración y prorrateo
-  duracionMesesPrevista  Int?                 // Duración prevista en meses (para alertas)
-  prorrateable           Boolean              @default(false) // Si se puede prorratear por días
-  diasProrrateoInicio    Int?                 // Días a prorratear al inicio del contrato
-  diasProrrateoFin       Int?                 // Días a prorratear al final del contrato
-  importeProrrateoInicio Float?               // Importe calculado del prorrateo inicial
-  importeProrrateoFin    Float?               // Importe calculado del prorrateo final
-  
+  duracionMesesPrevista  Int? // Duración prevista en meses (para alertas)
+  prorrateable           Boolean @default(false) // Si se puede prorratear por días
+  diasProrrateoInicio    Int? // Días a prorratear al inicio del contrato
+  diasProrrateoFin       Int? // Días a prorratear al final del contrato
+  importeProrrateoInicio Float? // Importe calculado del prorrateo inicial
+  importeProrrateoFin    Float? // Importe calculado del prorrateo final
+
   // Servicios incluidos (para media estancia todo incluido)
-  serviciosIncluidos     Json?                // {"wifi": true, "agua": true, "luz": true, "gas": true, "limpieza": false}
-  depositoSuministros    Float?               // Fianza adicional para suministros
-  limiteConsumoLuz       Float?               // Límite mensual en € (exceso a cargo inquilino)
-  limiteConsumoAgua      Float?               // Límite mensual en €
-  limiteConsumoGas       Float?               // Límite mensual en €
-  
+  serviciosIncluidos  Json? // {"wifi": true, "agua": true, "luz": true, "gas": true, "limpieza": false}
+  depositoSuministros Float? // Fianza adicional para suministros
+  limiteConsumoLuz    Float? // Límite mensual en € (exceso a cargo inquilino)
+  limiteConsumoAgua   Float? // Límite mensual en €
+  limiteConsumoGas    Float? // Límite mensual en €
+
   // Inventario de entrada/salida
-  estadoInventario       EstadoInventario?    @default(pendiente)
-  inventarioEntrada      Json?                // Array de items con estado, fotos, observaciones
-  inventarioSalida       Json?                // Array de items con estado, fotos, observaciones
-  fotosEntrada           String[]             @default([]) // URLs de fotos de entrada
-  fotosSalida            String[]             @default([]) // URLs de fotos de salida
+  estadoInventario       EstadoInventario? @default(pendiente)
+  inventarioEntrada      Json? // Array de items con estado, fotos, observaciones
+  inventarioSalida       Json? // Array de items con estado, fotos, observaciones
+  fotosEntrada           String[]          @default([]) // URLs de fotos de entrada
+  fotosSalida            String[]          @default([]) // URLs de fotos de salida
   fechaInventarioEntrada DateTime?
   fechaInventarioSalida  DateTime?
-  incidenciasInventario  Json?                // Diferencias detectadas entre entrada y salida
-  importeIncidencias     Float?               // Importe total de daños/incidencias
-  
+  incidenciasInventario  Json? // Diferencias detectadas entre entrada y salida
+  importeIncidencias     Float? // Importe total de daños/incidencias
+
   // Condiciones específicas media estancia
-  penalizacionDesistimiento Float?            // % de penalización por desistimiento anticipado
-  diasPreaviso              Int?              @default(30) // Días de preaviso para no renovación
-  renovacionPorPeriodoIgual Boolean           @default(false) // Si se renueva por mismo período
-  maximasProrrogas          Int?              // Número máximo de prórrogas permitidas
-  prorrogasRealizadas       Int               @default(0) // Contador de prórrogas
-  
+  penalizacionDesistimiento Float? // % de penalización por desistimiento anticipado
+  diasPreaviso              Int?    @default(30) // Días de preaviso para no renovación
+  renovacionPorPeriodoIgual Boolean @default(false) // Si se renueva por mismo período
+  maximasProrrogas          Int? // Número máximo de prórrogas permitidas
+  prorrogasRealizadas       Int     @default(0) // Contador de prórrogas
+
   // Documentación específica
-  documentoMotivoPath    String?              // Path al documento que justifica la temporalidad
-  checklistEntradaPath   String?              // PDF del checklist de entrada firmado
-  checklistSalidaPath    String?              // PDF del checklist de salida firmado
+  documentoMotivoPath  String? // Path al documento que justifica la temporalidad
+  checklistEntradaPath String? // PDF del checklist de entrada firmado
+  checklistSalidaPath  String? // PDF del checklist de salida firmado
 
   unit                  Unit                  @relation(fields: [unitId], references: [id], onDelete: Cascade)
   tenant                Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -1807,13 +1811,13 @@ model Company {
   emailContacto        String? // Email del contacto
   telefonoContacto     String? // Teléfono del contacto
   notasAdmin           String? @db.Text // Notas internas del super-admin
-  
+
   // Marcador para empresas de prueba/demo (excluidas de analíticas)
-  esEmpresaPrueba      Boolean @default(false) // Si es true, se excluye de analíticas y reportes
+  esEmpresaPrueba Boolean @default(false) // Si es true, se excluye de analíticas y reportes
 
   // Vertical de negocio
-  businessVertical     BusinessVertical? @default(alquiler_tradicional) // Tipo de negocio principal
-  verticals            String[]          @default([])          // Array de verticales si es mixto
+  businessVertical BusinessVertical? @default(alquiler_tradicional) // Tipo de negocio principal
+  verticals        String[]          @default([]) // Array de verticales si es mixto
 
   // Jerarquía de empresas (Grupos de empresas)
   parentCompanyId String? // ID de la empresa matriz (si es parte de un grupo)
@@ -1842,14 +1846,14 @@ model Company {
   contasimpleCustomerId String? // ID del cliente en Contasimple de Inmova (para facturación B2B)
 
   // Zucchetti - Integración contable ERP
-  zucchettiEnabled       Boolean  @default(false)
-  zucchettiAccessToken   String?  @db.Text // Token de acceso OAuth (encriptado)
-  zucchettiRefreshToken  String?  @db.Text // Token de refresco OAuth (encriptado)
+  zucchettiEnabled       Boolean   @default(false)
+  zucchettiAccessToken   String?   @db.Text // Token de acceso OAuth (encriptado)
+  zucchettiRefreshToken  String?   @db.Text // Token de refresco OAuth (encriptado)
   zucchettiTokenExpiry   DateTime? // Fecha de expiración del token
-  zucchettiCompanyId     String?  // ID de la empresa en Zucchetti
+  zucchettiCompanyId     String? // ID de la empresa en Zucchetti
   zucchettiLastSync      DateTime? // Última sincronización exitosa
-  zucchettiSyncErrors    Int      @default(0) // Contador de errores consecutivos
-  zucchettiWebhookSecret String?  // Secret para validar webhooks de Zucchetti
+  zucchettiSyncErrors    Int       @default(0) // Contador de errores consecutivos
+  zucchettiWebhookSecret String? // Secret para validar webhooks de Zucchetti
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -2136,6 +2140,11 @@ model Company {
   commercialDocuments    CommercialDocument[]
   commercialMaintenances CommercialMaintenance[]
   commercialVisits       CommercialVisit[]
+
+  // 📄 ONBOARDING DOCUMENTAL CON IA
+  documentImportBatches      DocumentImportBatch[]
+  documentImports            DocumentImport[]
+  onboardingDocumentSessions OnboardingDocumentSession?
 
   @@map("company")
 }
@@ -5708,10 +5717,10 @@ model SubscriptionPlan {
 // ═══════════════════════════════════════════════════════════════
 
 model AddOn {
-  id          String  @id @default(cuid())
-  codigo      String  @unique // "signatures_pack", "storage_pack", "ai_pack", etc.
+  id          String @id @default(cuid())
+  codigo      String @unique // "signatures_pack", "storage_pack", "ai_pack", etc.
   nombre      String // "Pack 10 Firmas", "Pack 10GB Storage", etc.
-  descripcion String  @db.Text
+  descripcion String @db.Text
   categoria   String // "usage", "feature", "premium"
 
   // Precios
@@ -5724,8 +5733,8 @@ model AddOn {
   stripePriceIdAnnual  String? // ID del precio anual
 
   // Lo que incluye
-  unidades      Int?   // Ej: 10 firmas, 10 GB, 50K tokens
-  tipoUnidad    String? // "firmas", "GB", "tokens", "sms"
+  unidades   Int? // Ej: 10 firmas, 10 GB, 50K tokens
+  tipoUnidad String? // "firmas", "GB", "tokens", "sms"
 
   // Disponibilidad por plan
   disponiblePara Json // ["STARTER", "PROFESSIONAL", "BUSINESS", "ENTERPRISE"]
@@ -5739,9 +5748,9 @@ model AddOn {
   vertical String @default("inmova") // "inmova" o "ewoorker"
 
   // Estado
-  activo    Boolean  @default(true)
-  destacado Boolean  @default(false)
-  orden     Int      @default(0)
+  activo    Boolean @default(true)
+  destacado Boolean @default(false)
+  orden     Int     @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -5787,34 +5796,34 @@ model CompanyAddOn {
 // ═══════════════════════════════════════════════════════════════
 
 enum PromoType {
-  PERCENTAGE       // Descuento porcentual
-  FIXED_AMOUNT     // Cantidad fija de descuento
-  FREE_MONTHS      // Meses gratis
-  TRIAL_EXTENSION  // Extensión de prueba
+  PERCENTAGE // Descuento porcentual
+  FIXED_AMOUNT // Cantidad fija de descuento
+  FREE_MONTHS // Meses gratis
+  TRIAL_EXTENSION // Extensión de prueba
 }
 
 enum PromoStatus {
-  DRAFT      // Borrador (no activo)
-  ACTIVE     // Activo y utilizable
-  PAUSED     // Pausado temporalmente
-  EXPIRED    // Expirado por fecha
-  EXHAUSTED  // Agotado por usos
+  DRAFT // Borrador (no activo)
+  ACTIVE // Activo y utilizable
+  PAUSED // Pausado temporalmente
+  EXPIRED // Expirado por fecha
+  EXHAUSTED // Agotado por usos
 }
 
 model PromoCoupon {
-  id          String      @id @default(cuid())
-  codigo      String      @unique // "STARTER26", "COLIVING26", etc.
-  nombre      String      // Nombre descriptivo
-  descripcion String?     @db.Text
+  id          String  @id @default(cuid())
+  codigo      String  @unique // "STARTER26", "COLIVING26", etc.
+  nombre      String // Nombre descriptivo
+  descripcion String? @db.Text
 
   // Tipo y valor
-  tipo        PromoType
-  valor       Float       // Porcentaje (ej: 50 para 50%) o meses gratis
+  tipo  PromoType
+  valor Float // Porcentaje (ej: 50 para 50%) o meses gratis
 
   // Vigencia
   fechaInicio     DateTime
   fechaExpiracion DateTime
-  
+
   // Alertas de expiración
   alertaEnviada7d   Boolean   @default(false) // Alerta 7 días antes
   alertaEnviada3d   Boolean   @default(false) // Alerta 3 días antes
@@ -5822,33 +5831,33 @@ model PromoCoupon {
   ultimaAlertaFecha DateTime?
 
   // Límites de uso
-  usosMaximos      Int?      // Límite total de usos (null = ilimitado)
-  usosActuales     Int       @default(0)
-  usosPorUsuario   Int       @default(1) // Usos permitidos por usuario
+  usosMaximos    Int? // Límite total de usos (null = ilimitado)
+  usosActuales   Int  @default(0)
+  usosPorUsuario Int  @default(1) // Usos permitidos por usuario
 
   // Duración del descuento
-  duracionMeses    Int       @default(1) // Cuántos meses aplica el descuento
+  duracionMeses Int @default(1) // Cuántos meses aplica el descuento
 
   // Restricciones por plan
-  planesPermitidos String[]  @default([]) // ["STARTER", "PROFESSIONAL", etc.] - vacío = todos
-  
+  planesPermitidos String[] @default([]) // ["STARTER", "PROFESSIONAL", etc.] - vacío = todos
+
   // Stripe integration
-  stripeCouponId   String?   // ID del cupón en Stripe
+  stripeCouponId String? // ID del cupón en Stripe
 
   // Estado
-  estado      PromoStatus @default(DRAFT)
-  activo      Boolean     @default(true)
-  destacado   Boolean     @default(false) // Para mostrar en landing
+  estado    PromoStatus @default(DRAFT)
+  activo    Boolean     @default(true)
+  destacado Boolean     @default(false) // Para mostrar en landing
 
   // Metadata
-  creadoPor   String?     // Admin que lo creó
-  notas       String?     @db.Text
+  creadoPor String? // Admin que lo creó
+  notas     String? @db.Text
 
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relaciones
-  usos        PromoCouponUsage[]
+  usos PromoCouponUsage[]
 
   @@index([codigo])
   @@index([estado])
@@ -5857,23 +5866,23 @@ model PromoCoupon {
 }
 
 model PromoCouponUsage {
-  id          String      @id @default(cuid())
-  couponId    String
-  coupon      PromoCoupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
-  
-  companyId   String
-  userId      String?     // Usuario que aplicó el cupón
+  id       String      @id @default(cuid())
+  couponId String
+  coupon   PromoCoupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+
+  companyId String
+  userId    String? // Usuario que aplicó el cupón
 
   // Detalles del descuento aplicado
-  planAplicado         String   // Plan al que se aplicó
-  descuentoAplicado    Float    // Monto o porcentaje aplicado
-  ahorroTotal          Float    // Ahorro calculado en €
-  duracionMesesRestante Int     @default(0) // Meses restantes con descuento
+  planAplicado          String // Plan al que se aplicó
+  descuentoAplicado     Float // Monto o porcentaje aplicado
+  ahorroTotal           Float // Ahorro calculado en €
+  duracionMesesRestante Int    @default(0) // Meses restantes con descuento
 
   // Stripe
   stripeSubscriptionId String?
 
-  aplicadoEn  DateTime    @default(now())
+  aplicadoEn DateTime @default(now())
 
   @@index([couponId])
   @@index([companyId])
@@ -5892,28 +5901,28 @@ model EwoorkerPlan {
   descripcion String @db.Text
 
   // Precios
-  precioMensual   Float
-  precioAnual     Float?
-  
+  precioMensual Float
+  precioAnual   Float?
+
   // Stripe
   stripePriceIdMonthly String?
   stripePriceIdAnnual  String?
 
   // Límites
-  maxOfertas      Int     @default(-1) // -1 = ilimitado
-  comisionEscrow  Float   @default(5)  // % comisión en pagos escrow
-  
+  maxOfertas     Int   @default(-1) // -1 = ilimitado
+  comisionEscrow Float @default(5) // % comisión en pagos escrow
+
   // Features incluidas
   features Json // Array de strings con las características
 
   // Revenue split (para socios fundadores)
-  socioPercentage     Float @default(50)
+  socioPercentage      Float @default(50)
   plataformaPercentage Float @default(50)
 
   // Estado
-  activo    Boolean  @default(true)
-  destacado Boolean  @default(false)
-  orden     Int      @default(0)
+  activo    Boolean @default(true)
+  destacado Boolean @default(false)
+  orden     Int     @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -11311,33 +11320,33 @@ model Partner {
   // ═══════════════════════════════════════════════════════════════
   // WHITE-LABEL COMPLETO - Sistema de Prescriptores
   // ═══════════════════════════════════════════════════════════════
-  
+
   // Slug único para landing personalizada (/p/[slug])
   slug String? @unique
-  
+
   // Branding completo
   brandingConfig PartnerBranding?
-  
+
   // Contenido de landing personalizada
   landingContent PartnerLandingContent?
-  
+
   // Servicios complementarios que ofrece el partner
   serviciosComplementarios PartnerService[]
-  
+
   // Promociones y ofertas especiales del partner
   promociones PartnerPromotion[]
-  
+
   // Banners y contenido visual
   banners PartnerBanner[]
-  
+
   // Analytics de la landing del partner
-  landingViews      Int       @default(0)
-  landingLeads      Int       @default(0)
-  ultimaVisita      DateTime?
-  
+  landingViews Int       @default(0)
+  landingLeads Int       @default(0)
+  ultimaVisita DateTime?
+
   // Configuración de funcionalidades
-  featuresEnabled   Json      @default("{}") // Qué features muestra en su landing
-  
+  featuresEnabled Json @default("{}") // Qué features muestra en su landing
+
   // ═══════════════════════════════════════════════════════════════
 
   // Relaciones
@@ -11498,53 +11507,53 @@ enum PartnerInvitationStatus {
  * Permite que la app "respire" el look&feel del partner
  */
 model PartnerBranding {
-  id        String @id @default(cuid())
-  partnerId String @unique
+  id        String  @id @default(cuid())
+  partnerId String  @unique
   partner   Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
 
   // Identidad visual
-  logoUrl           String?  // Logo principal
-  logoUrlDark       String?  // Logo para fondos oscuros
-  faviconUrl        String?  // Favicon personalizado
-  bannerUrl         String?  // Banner principal de la landing
+  logoUrl     String? // Logo principal
+  logoUrlDark String? // Logo para fondos oscuros
+  faviconUrl  String? // Favicon personalizado
+  bannerUrl   String? // Banner principal de la landing
 
   // Paleta de colores (hex)
-  colorPrimario     String   @default("#6366f1") // Indigo por defecto
-  colorSecundario   String   @default("#8b5cf6")
-  colorAccento      String   @default("#06b6d4")
-  colorFondo        String   @default("#ffffff")
-  colorFondoOscuro  String   @default("#0f172a")
-  colorTexto        String   @default("#1e293b")
-  colorTextoClaro   String   @default("#64748b")
+  colorPrimario    String @default("#6366f1") // Indigo por defecto
+  colorSecundario  String @default("#8b5cf6")
+  colorAccento     String @default("#06b6d4")
+  colorFondo       String @default("#ffffff")
+  colorFondoOscuro String @default("#0f172a")
+  colorTexto       String @default("#1e293b")
+  colorTextoClaro  String @default("#64748b")
 
   // Tipografía
-  fuentePrincipal   String   @default("Inter")
-  fuenteSecundaria  String   @default("Inter")
-  
+  fuentePrincipal  String @default("Inter")
+  fuenteSecundaria String @default("Inter")
+
   // Personalización de botones
-  botonEstilo       String   @default("rounded") // rounded, square, pill
-  botonAnimacion    Boolean  @default(true)
+  botonEstilo    String  @default("rounded") // rounded, square, pill
+  botonAnimacion Boolean @default(true)
 
   // Redes sociales
-  urlLinkedin       String?
-  urlTwitter        String?
-  urlInstagram      String?
-  urlFacebook       String?
-  urlYoutube        String?
-  urlWebsite        String?
+  urlLinkedin  String?
+  urlTwitter   String?
+  urlInstagram String?
+  urlFacebook  String?
+  urlYoutube   String?
+  urlWebsite   String?
 
   // Información de contacto visible
-  emailContacto     String?
-  telefonoContacto  String?
-  direccion         String?
+  emailContacto    String?
+  telefonoContacto String?
+  direccion        String?
 
   // Footer personalizado
-  textoFooter       String?  @db.Text
-  linksFooter       Json?    // [{label, url}]
+  textoFooter String? @db.Text
+  linksFooter Json? // [{label, url}]
 
   // Configuración avanzada
-  cssPersonalizado  String?  @db.Text // CSS adicional
-  scriptsExtras     String?  @db.Text // Scripts de tracking, chat, etc.
+  cssPersonalizado String? @db.Text // CSS adicional
+  scriptsExtras    String? @db.Text // Scripts de tracking, chat, etc.
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -11554,53 +11563,53 @@ model PartnerBranding {
  * Contenido de la landing page personalizada del partner
  */
 model PartnerLandingContent {
-  id        String @id @default(cuid())
-  partnerId String @unique
+  id        String  @id @default(cuid())
+  partnerId String  @unique
   partner   Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
 
   // Hero Section
-  heroTitulo        String   @default("Gestiona tus propiedades con nosotros")
-  heroSubtitulo     String?  @db.Text
-  heroCTA           String   @default("Empezar gratis")
-  heroImagenUrl     String?
-  heroVideoUrl      String?  // Video de fondo opcional
+  heroTitulo    String  @default("Gestiona tus propiedades con nosotros")
+  heroSubtitulo String? @db.Text
+  heroCTA       String  @default("Empezar gratis")
+  heroImagenUrl String?
+  heroVideoUrl  String? // Video de fondo opcional
 
   // Propuesta de valor (texto personalizado)
-  propuestaValor    String?  @db.Text
-  
+  propuestaValor String? @db.Text
+
   // Beneficios personalizados
-  beneficios        Json?    // [{icono, titulo, descripcion}]
+  beneficios Json? // [{icono, titulo, descripcion}]
 
   // Testimonios del partner
-  testimonios       Json?    // [{nombre, cargo, empresa, texto, foto}]
+  testimonios Json? // [{nombre, cargo, empresa, texto, foto}]
 
   // FAQ personalizado
-  faqItems          Json?    // [{pregunta, respuesta}]
+  faqItems Json? // [{pregunta, respuesta}]
 
   // Sección "Sobre nosotros" del partner
-  sobreNosotros     String?  @db.Text
-  sobreNosotrosImg  String?
+  sobreNosotros    String? @db.Text
+  sobreNosotrosImg String?
 
   // Call to Actions personalizados
-  ctaPrincipal      String   @default("Solicitar demo")
-  ctaSecundario     String?
-  
+  ctaPrincipal  String  @default("Solicitar demo")
+  ctaSecundario String?
+
   // Textos legales
-  textoLegal        String?  @db.Text
+  textoLegal         String? @db.Text
   politicaPrivacidad String?
 
   // SEO
-  metaTitulo        String?
-  metaDescripcion   String?
-  metaKeywords      String?
-  ogImagen          String?
+  metaTitulo      String?
+  metaDescripcion String?
+  metaKeywords    String?
+  ogImagen        String?
 
   // Configuración
-  mostrarPrecios    Boolean  @default(true)
+  mostrarPrecios     Boolean @default(true)
   mostrarTestimonios Boolean @default(true)
-  mostrarFAQ        Boolean  @default(true)
-  mostrarServicios  Boolean  @default(true)
-  mostrarBanners    Boolean  @default(true)
+  mostrarFAQ         Boolean @default(true)
+  mostrarServicios   Boolean @default(true)
+  mostrarBanners     Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -11611,50 +11620,50 @@ model PartnerLandingContent {
  * Permite al partner ofrecer valor añadido además de Inmova
  */
 model PartnerService {
-  id        String @id @default(cuid())
+  id        String  @id @default(cuid())
   partnerId String
   partner   Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
 
   // Información del servicio
-  nombre            String
-  slug              String
-  descripcionCorta  String   @db.VarChar(200)
-  descripcionLarga  String?  @db.Text
-  
+  nombre           String
+  slug             String
+  descripcionCorta String  @db.VarChar(200)
+  descripcionLarga String? @db.Text
+
   // Visual
-  iconoUrl          String?
-  imagenUrl         String?
-  videoUrl          String?
+  iconoUrl  String?
+  imagenUrl String?
+  videoUrl  String?
 
   // Categoría
-  categoria         PartnerServiceCategory @default(OTRO)
+  categoria PartnerServiceCategory @default(OTRO)
 
   // Precios
-  precioDesde       Float?   // Precio desde X€
-  precioHasta       Float?   // Hasta X€ (para rangos)
-  precioTipo        String   @default("mensual") // mensual, anual, unico, consultar
-  moneda            String   @default("EUR")
+  precioDesde Float? // Precio desde X€
+  precioHasta Float? // Hasta X€ (para rangos)
+  precioTipo  String @default("mensual") // mensual, anual, unico, consultar
+  moneda      String @default("EUR")
 
   // Comisión para Inmova (si aplica)
-  comisionInmova    Float    @default(0) // % que recibe Inmova por cada venta
+  comisionInmova Float @default(0) // % que recibe Inmova por cada venta
 
   // CTA
-  ctaTexto          String   @default("Solicitar información")
-  ctaUrl            String?  // URL externa o formulario interno
-  ctaTipo           String   @default("formulario") // formulario, url, whatsapp, email
+  ctaTexto String  @default("Solicitar información")
+  ctaUrl   String? // URL externa o formulario interno
+  ctaTipo  String  @default("formulario") // formulario, url, whatsapp, email
 
   // Estado
-  activo            Boolean  @default(true)
-  destacado         Boolean  @default(false) // Mostrar en posición destacada
-  orden             Int      @default(0)
+  activo    Boolean @default(true)
+  destacado Boolean @default(false) // Mostrar en posición destacada
+  orden     Int     @default(0)
 
   // Estadísticas
-  vistas            Int      @default(0)
-  clicks            Int      @default(0)
-  conversiones      Int      @default(0)
+  vistas       Int @default(0)
+  clicks       Int @default(0)
+  conversiones Int @default(0)
 
   // Leads generados por este servicio
-  leads             PartnerServiceLead[]
+  leads PartnerServiceLead[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -11669,47 +11678,47 @@ model PartnerService {
  * Categorías de servicios complementarios
  */
 enum PartnerServiceCategory {
-  SEGUROS            // Seguros de hogar, impago, etc.
-  FINANCIACION       // Hipotecas, préstamos
-  LEGAL              // Abogados, contratos
-  REFORMAS           // Reformas, interiorismo
-  MANTENIMIENTO      // Limpieza, reparaciones
-  MUDANZAS           // Servicios de mudanza
-  ENERGIA            // Certificados energéticos, solar
-  VALORACION         // Tasaciones
-  FOTOGRAFIA         // Fotos, tours virtuales
-  HOME_STAGING       // Home staging
-  MARKETING          // Marketing inmobiliario
-  CONSULTORIA        // Asesoría fiscal, contable
-  TECNOLOGIA         // Software complementario
-  FORMACION          // Cursos, formación
-  OTRO               // Otros servicios
+  SEGUROS // Seguros de hogar, impago, etc.
+  FINANCIACION // Hipotecas, préstamos
+  LEGAL // Abogados, contratos
+  REFORMAS // Reformas, interiorismo
+  MANTENIMIENTO // Limpieza, reparaciones
+  MUDANZAS // Servicios de mudanza
+  ENERGIA // Certificados energéticos, solar
+  VALORACION // Tasaciones
+  FOTOGRAFIA // Fotos, tours virtuales
+  HOME_STAGING // Home staging
+  MARKETING // Marketing inmobiliario
+  CONSULTORIA // Asesoría fiscal, contable
+  TECNOLOGIA // Software complementario
+  FORMACION // Cursos, formación
+  OTRO // Otros servicios
 }
 
 /**
  * Leads generados por servicios complementarios
  */
 model PartnerServiceLead {
-  id        String @id @default(cuid())
+  id        String         @id @default(cuid())
   serviceId String
   service   PartnerService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
   // Datos del lead
-  nombre    String
-  email     String
-  telefono  String?
-  empresa   String?
-  mensaje   String?  @db.Text
+  nombre   String
+  email    String
+  telefono String?
+  empresa  String?
+  mensaje  String? @db.Text
 
   // Origen
-  origen    String   @default("landing") // landing, email, whatsapp
-  
+  origen String @default("landing") // landing, email, whatsapp
+
   // Estado
-  estado    String   @default("nuevo") // nuevo, contactado, convertido, descartado
-  
+  estado String @default("nuevo") // nuevo, contactado, convertido, descartado
+
   // Seguimiento
-  notas     String?  @db.Text
-  
+  notas String? @db.Text
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -11721,41 +11730,41 @@ model PartnerServiceLead {
  * Promociones y ofertas especiales del partner
  */
 model PartnerPromotion {
-  id        String @id @default(cuid())
+  id        String  @id @default(cuid())
   partnerId String
   partner   Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
 
   // Información de la promoción
-  titulo            String
-  descripcion       String   @db.Text
-  imagenUrl         String?
+  titulo      String
+  descripcion String  @db.Text
+  imagenUrl   String?
 
   // Tipo de promoción
-  tipo              String   @default("descuento") // descuento, regalo, trial, bundle
+  tipo String @default("descuento") // descuento, regalo, trial, bundle
 
   // Valores
-  valorDescuento    Float?   // % o cantidad fija
-  tipoDescuento     String?  // porcentaje, fijo
-  codigoCupon       String?  // Código para aplicar
+  valorDescuento Float? // % o cantidad fija
+  tipoDescuento  String? // porcentaje, fijo
+  codigoCupon    String? // Código para aplicar
 
   // Vigencia
-  fechaInicio       DateTime @default(now())
-  fechaFin          DateTime?
-  
+  fechaInicio DateTime  @default(now())
+  fechaFin    DateTime?
+
   // Límites
-  usosMaximos       Int?
-  usosActuales      Int      @default(0)
+  usosMaximos  Int?
+  usosActuales Int  @default(0)
 
   // Condiciones
-  condiciones       String?  @db.Text
-  
+  condiciones String? @db.Text
+
   // Estado
-  activo            Boolean  @default(true)
-  destacado         Boolean  @default(false)
+  activo    Boolean @default(true)
+  destacado Boolean @default(false)
 
   // CTA
-  ctaTexto          String   @default("Aprovechar oferta")
-  ctaUrl            String?
+  ctaTexto String  @default("Aprovechar oferta")
+  ctaUrl   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -11769,34 +11778,34 @@ model PartnerPromotion {
  * Banners promocionales del partner
  */
 model PartnerBanner {
-  id        String @id @default(cuid())
+  id        String  @id @default(cuid())
   partnerId String
   partner   Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
 
   // Contenido
-  titulo            String?
-  subtitulo         String?
-  imagenUrl         String
-  imagenMobileUrl   String?  // Versión para móvil
+  titulo          String?
+  subtitulo       String?
+  imagenUrl       String
+  imagenMobileUrl String? // Versión para móvil
 
   // Enlace
-  enlaceUrl         String?
-  enlaceTarget      String   @default("_self") // _self, _blank
+  enlaceUrl    String?
+  enlaceTarget String  @default("_self") // _self, _blank
 
   // Posición
-  posicion          String   @default("hero") // hero, lateral, footer, popup
-  
+  posicion String @default("hero") // hero, lateral, footer, popup
+
   // Configuración
-  orden             Int      @default(0)
-  activo            Boolean  @default(true)
+  orden  Int     @default(0)
+  activo Boolean @default(true)
 
   // Vigencia
-  fechaInicio       DateTime @default(now())
-  fechaFin          DateTime?
+  fechaInicio DateTime  @default(now())
+  fechaFin    DateTime?
 
   // Estadísticas
-  impresiones       Int      @default(0)
-  clicks            Int      @default(0)
+  impresiones Int @default(0)
+  clicks      Int @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -13096,31 +13105,31 @@ model EwoorkerPerfilEmpresa {
   tasaCumplimientoPlazos Float @default(100) // %
 
   // Estado de cuenta
-  disponible         Boolean   @default(true)
-  verificado         Boolean   @default(false)
-  fechaVerificacion  DateTime?
-  destacado          Boolean   @default(false)
-  motivoSuspension   String?   @db.Text
-  notificacionesActivas Boolean @default(true)
+  disponible            Boolean   @default(true)
+  verificado            Boolean   @default(false)
+  fechaVerificacion     DateTime?
+  destacado             Boolean   @default(false)
+  motivoSuspension      String?   @db.Text
+  notificacionesActivas Boolean   @default(true)
 
   // Portfolio
   portfolioFotos      String[] @default([])
   certificadosCalidad String[] @default([])
 
   // Campos adicionales perfil
-  descripcion         String?  @db.Text
-  telefono            String?
-  web                 String?
-  logoUrl             String?
-  cif                 String?
-  direccion           String?
-  codigoPostal        String?
-  tipoUsuario         String?  // CONTRATISTA, SUBCONTRATISTA, AMBOS
-  especialidadPrincipal String?
+  descripcion               String?  @db.Text
+  telefono                  String?
+  web                       String?
+  logoUrl                   String?
+  cif                       String?
+  direccion                 String?
+  codigoPostal              String?
+  tipoUsuario               String? // CONTRATISTA, SUBCONTRATISTA, AMBOS
+  especialidadPrincipal     String?
   especialidadesSecundarias String[] @default([])
-  tarifaMediaHora     Float?
-  rating              Float    @default(0)
-  activo              Boolean  @default(true)
+  tarifaMediaHora           Float?
+  rating                    Float    @default(0)
+  activo                    Boolean  @default(true)
 
   // Campos de onboarding
   onboardingWelcomeCompletedAt       DateTime?
@@ -13134,10 +13143,10 @@ model EwoorkerPerfilEmpresa {
   onboardingCompletedAt              DateTime?
 
   // Campos de gamificación (Sprint 3)
-  gamificationPoints       Int      @default(0)
-  gamificationLevel        Int      @default(1)
-  gamificationAchievements Json     @default("[]") // Array de IDs de logros
-  loginStreak              Int      @default(0)
+  gamificationPoints       Int       @default(0)
+  gamificationLevel        Int       @default(1)
+  gamificationAchievements Json      @default("[]") // Array de IDs de logros
+  loginStreak              Int       @default(0)
   lastLoginDate            DateTime?
 
   // Timestamps
@@ -13147,21 +13156,21 @@ model EwoorkerPerfilEmpresa {
 
   // Relaciones ewoorker
   documentos                  EwoorkerDocumento[]
-  obrasPublicadas             EwoorkerObra[]          @relation("ObraConstructor")
+  obrasPublicadas             EwoorkerObra[]                     @relation("ObraConstructor")
   ofertasEnviadas             EwoorkerOferta[]
-  contratosComoConstructor    EwoorkerContrato[]      @relation("ContratoConstructor")
-  contratosComoSubcontratista EwoorkerContrato[]      @relation("ContratoSubcontratista")
-  reviewsRecibidas            EwoorkerReview[]        @relation("ReviewsRecibidas")
-  reviewsEscritas             EwoorkerReview[]        @relation("ReviewsEscritas")
+  contratosComoConstructor    EwoorkerContrato[]                 @relation("ContratoConstructor")
+  contratosComoSubcontratista EwoorkerContrato[]                 @relation("ContratoSubcontratista")
+  reviewsRecibidas            EwoorkerReview[]                   @relation("ReviewsRecibidas")
+  reviewsEscritas             EwoorkerReview[]                   @relation("ReviewsEscritas")
   pagosRecibidos              EwoorkerPago[]
-  certificaciones             EwoorkerCertificacion[] @relation("CertificacionesEmpresa")
+  certificaciones             EwoorkerCertificacion[]            @relation("CertificacionesEmpresa")
   suscripciones               EwoorkerSuscripcion[]
-  trabajadores                EwoorkerTrabajador[]    // Trabajadores de la empresa (modelo ewoorker original)
+  trabajadores                EwoorkerTrabajador[] // Trabajadores de la empresa (modelo ewoorker original)
   verificacionSolicitudes     EwoorkerVerificacionSolicitud[]
   conversacionesParticipante  EwoorkerParticipanteConversacion[]
   puntosLog                   EwoorkerPuntosLog[]
-  referralsEnviados           EwoorkerReferral[] @relation("ReferralsEnviados")
-  referralRecibido            EwoorkerReferral?  @relation("ReferralRecibido")
+  referralsEnviados           EwoorkerReferral[]                 @relation("ReferralsEnviados")
+  referralRecibido            EwoorkerReferral?                  @relation("ReferralRecibido")
 
   @@index([tipoEmpresa])
   @@index([planActual])
@@ -13230,13 +13239,13 @@ model EwoorkerTrabajador {
   perfilEmpresa   EwoorkerPerfilEmpresa @relation(fields: [perfilEmpresaId], references: [id], onDelete: Cascade)
 
   // Datos del trabajador
-  nombre             String
-  apellidos          String?
-  especialidad       String // 'Electricista', 'Soldador', 'Albañil', etc.
+  nombre                    String
+  apellidos                 String?
+  especialidad              String // 'Electricista', 'Soldador', 'Albañil', etc.
   especialidadesSecundarias String[] @default([])
-  experienciaAnios   Int?
-  descripcion        String? @db.Text
-  fotoUrl            String?
+  experienciaAnios          Int?
+  descripcion               String?  @db.Text
+  fotoUrl                   String?
 
   // Disponibilidad (core del modelo ewoorker)
   disponible         Boolean   @default(true)
@@ -13245,31 +13254,31 @@ model EwoorkerTrabajador {
   motivoNoDisponible String?
 
   // Tarifa
-  tarifaHora         Float?
-  tarifaDia          Float?
+  tarifaHora Float?
+  tarifaDia  Float?
 
   // Certificaciones del trabajador
-  tienePRL           Boolean   @default(false)
-  fechaCaducidadPRL  DateTime?
-  tieneReconocimientoMedico Boolean @default(false)
-  fechaReconocimientoMedico DateTime?
-  certificacionesAdicionales String[] @default([])
+  tienePRL                   Boolean   @default(false)
+  fechaCaducidadPRL          DateTime?
+  tieneReconocimientoMedico  Boolean   @default(false)
+  fechaReconocimientoMedico  DateTime?
+  certificacionesAdicionales String[]  @default([])
 
   // Métricas individuales
-  rating             Float     @default(0)
-  totalReviews       Int       @default(0)
-  trabajosCompletados Int      @default(0)
-  tasaPuntualidad    Float     @default(100) // %
+  rating              Float @default(0)
+  totalReviews        Int   @default(0)
+  trabajosCompletados Int   @default(0)
+  tasaPuntualidad     Float @default(100) // %
 
   // Estado
-  activo             Boolean   @default(true)
-  verificado         Boolean   @default(false)
+  activo     Boolean @default(true)
+  verificado Boolean @default(false)
 
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relaciones
-  asignaciones       EwoorkerAsignacionTrabajador[]
+  asignaciones EwoorkerAsignacionTrabajador[]
 
   @@index([perfilEmpresaId, disponible])
   @@index([especialidad, disponible])
@@ -13279,11 +13288,11 @@ model EwoorkerTrabajador {
 
 // Asignación de trabajadores a contratos/obras
 model EwoorkerAsignacionTrabajador {
-  id              String              @id @default(cuid())
-  trabajadorId    String
-  trabajador      EwoorkerTrabajador  @relation(fields: [trabajadorId], references: [id], onDelete: Cascade)
-  contratoId      String
-  contrato        EwoorkerContrato    @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+  id           String             @id @default(cuid())
+  trabajadorId String
+  trabajador   EwoorkerTrabajador @relation(fields: [trabajadorId], references: [id], onDelete: Cascade)
+  contratoId   String
+  contrato     EwoorkerContrato   @relation(fields: [contratoId], references: [id], onDelete: Cascade)
 
   // Período de asignación
   fechaInicio     DateTime
@@ -13291,16 +13300,16 @@ model EwoorkerAsignacionTrabajador {
   horasTrabajadas Float?
 
   // Estado
-  estado          String    @default("asignado") // asignado, en_curso, completado, cancelado
+  estado String @default("asignado") // asignado, en_curso, completado, cancelado
 
   // Valoración del trabajo
-  valoracion      Int? // 1-5
-  comentario      String? @db.Text
+  valoracion Int? // 1-5
+  comentario String? @db.Text
 
-  notas           String? @db.Text
+  notas String? @db.Text
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([trabajadorId])
   @@index([contratoId])
@@ -13390,7 +13399,7 @@ model EwoorkerObra {
   contrato             EwoorkerContrato?
   libroSubcontratacion EwoorkerLibroSubcontratacion?
   conversaciones       EwoorkerConversacion[]
-  especialidad         String @default("General")
+  especialidad         String                        @default("General")
 
   @@index([companyId])
   @@index([perfilConstructorId])
@@ -13527,18 +13536,18 @@ model EwoorkerContrato {
   updatedAt DateTime @updatedAt
 
   // Relaciones
-  hitos                       EwoorkerHitoContrato[]
-  partesTrabajo               EwoorkerParteTrabajo[]
-  certificacionesContrato     EwoorkerCertificacion[] @relation("CertificacionesContrato")
-  pagos                       EwoorkerPago[]
-  incidencias                 EwoorkerIncidencia[]
-  changeOrders                EwoorkerChangeOrder[]
-  fichajes                    EwoorkerFichaje[]
-  mensajes                    EwoorkerMensajeObra[]
-  reviews                     EwoorkerReview[]
-  asignacionesTrabajadores    EwoorkerAsignacionTrabajador[] // Trabajadores asignados al contrato
-  conversaciones              EwoorkerConversacion[]
-  montoTotal                  Float @default(0)
+  hitos                    EwoorkerHitoContrato[]
+  partesTrabajo            EwoorkerParteTrabajo[]
+  certificacionesContrato  EwoorkerCertificacion[]        @relation("CertificacionesContrato")
+  pagos                    EwoorkerPago[]
+  incidencias              EwoorkerIncidencia[]
+  changeOrders             EwoorkerChangeOrder[]
+  fichajes                 EwoorkerFichaje[]
+  mensajes                 EwoorkerMensajeObra[]
+  reviews                  EwoorkerReview[]
+  asignacionesTrabajadores EwoorkerAsignacionTrabajador[] // Trabajadores asignados al contrato
+  conversaciones           EwoorkerConversacion[]
+  montoTotal               Float                          @default(0)
 
   @@index([obraId])
   @@index([constructorId])
@@ -14156,9 +14165,9 @@ model EwoorkerMetricaSocio {
 
 // Suscripciones de empresas en eWoorker
 model EwoorkerSuscripcion {
-  id               String                @id @default(cuid())
-  perfilEmpresaId  String
-  perfilEmpresa    EwoorkerPerfilEmpresa @relation(fields: [perfilEmpresaId], references: [id])
+  id              String                @id @default(cuid())
+  perfilEmpresaId String
+  perfilEmpresa   EwoorkerPerfilEmpresa @relation(fields: [perfilEmpresaId], references: [id])
 
   // Stripe
   stripeSubscriptionId String  @unique
@@ -14167,15 +14176,15 @@ model EwoorkerSuscripcion {
 
   // Plan
   plan   String // 'OBRERO', 'CAPATAZ', 'CONSTRUCTOR'
-  precio Int    // En céntimos
+  precio Int // En céntimos
 
   // Estado
   estado EwoorkerEstadoSuscripcion @default(PENDIENTE)
 
   // Fechas
-  fechaInicio       DateTime
-  fechaProximoPago  DateTime?
-  fechaCancelacion  DateTime?
+  fechaInicio      DateTime
+  fechaProximoPago DateTime?
+  fechaCancelacion DateTime?
 
   // Metadata
   metadata Json?
@@ -14239,25 +14248,25 @@ model EwoorkerLogSocio {
 
 // Solicitud de verificación exprés (€29)
 model EwoorkerVerificacionSolicitud {
-  id                    String    @id @default(cuid())
-  perfilEmpresaId       String
-  perfilEmpresa         EwoorkerPerfilEmpresa @relation(fields: [perfilEmpresaId], references: [id], onDelete: Cascade)
-  
-  tipo                  String    @default("EXPRESS") // STANDARD, EXPRESS
-  status                String    @default("PENDING") // PENDING, PAID, IN_REVIEW, APPROVED, REJECTED, REFUNDED
-  monto                 Float     @default(29)
-  
+  id              String                @id @default(cuid())
+  perfilEmpresaId String
+  perfilEmpresa   EwoorkerPerfilEmpresa @relation(fields: [perfilEmpresaId], references: [id], onDelete: Cascade)
+
+  tipo   String @default("EXPRESS") // STANDARD, EXPRESS
+  status String @default("PENDING") // PENDING, PAID, IN_REVIEW, APPROVED, REJECTED, REFUNDED
+  monto  Float  @default(29)
+
   stripePaymentIntentId String?
-  
-  solicitadoPorId       String?
-  paidAt                DateTime?
-  reviewedAt            DateTime?
-  reviewedById          String?
-  rejectionReason       String?   @db.Text
-  
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-  
+
+  solicitadoPorId String?
+  paidAt          DateTime?
+  reviewedAt      DateTime?
+  reviewedById    String?
+  rejectionReason String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([perfilEmpresaId])
   @@index([status])
   @@index([tipo])
@@ -14266,20 +14275,20 @@ model EwoorkerVerificacionSolicitud {
 
 // Conversaciones de chat entre empresas
 model EwoorkerConversacion {
-  id                String    @id @default(cuid())
-  
-  tipo              String    // OBRA, CONTRATO, DIRECTO
-  obraId            String?
-  obra              EwoorkerObra? @relation(fields: [obraId], references: [id], onDelete: SetNull)
-  contratoId        String?
-  contrato          EwoorkerContrato? @relation(fields: [contratoId], references: [id], onDelete: SetNull)
-  
-  participantes     EwoorkerParticipanteConversacion[]
-  mensajes          EwoorkerMensajeChat[]
-  
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
+  id String @id @default(cuid())
+
+  tipo       String // OBRA, CONTRATO, DIRECTO
+  obraId     String?
+  obra       EwoorkerObra?     @relation(fields: [obraId], references: [id], onDelete: SetNull)
+  contratoId String?
+  contrato   EwoorkerContrato? @relation(fields: [contratoId], references: [id], onDelete: SetNull)
+
+  participantes EwoorkerParticipanteConversacion[]
+  mensajes      EwoorkerMensajeChat[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([tipo])
   @@index([obraId])
   @@index([contratoId])
@@ -14289,20 +14298,20 @@ model EwoorkerConversacion {
 
 // Participantes de conversación
 model EwoorkerParticipanteConversacion {
-  id                String    @id @default(cuid())
-  conversacionId    String
-  conversacion      EwoorkerConversacion @relation(fields: [conversacionId], references: [id], onDelete: Cascade)
-  perfilEmpresaId   String
-  perfilEmpresa     EwoorkerPerfilEmpresa @relation(fields: [perfilEmpresaId], references: [id], onDelete: Cascade)
-  userId            String?
-  user              User? @relation(fields: [userId], references: [id], onDelete: SetNull)
-  
-  lastReadAt        DateTime?
-  
-  createdAt         DateTime  @default(now())
-  
-  mensajesEnviados  EwoorkerMensajeChat[]
-  
+  id              String                @id @default(cuid())
+  conversacionId  String
+  conversacion    EwoorkerConversacion  @relation(fields: [conversacionId], references: [id], onDelete: Cascade)
+  perfilEmpresaId String
+  perfilEmpresa   EwoorkerPerfilEmpresa @relation(fields: [perfilEmpresaId], references: [id], onDelete: Cascade)
+  userId          String?
+  user            User?                 @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  lastReadAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  mensajesEnviados EwoorkerMensajeChat[]
+
   @@unique([conversacionId, perfilEmpresaId])
   @@index([perfilEmpresaId])
   @@map("ewoorker_participante_conversacion")
@@ -14310,22 +14319,22 @@ model EwoorkerParticipanteConversacion {
 
 // Mensajes de chat
 model EwoorkerMensajeChat {
-  id                String    @id @default(cuid())
-  conversacionId    String
-  conversacion      EwoorkerConversacion @relation(fields: [conversacionId], references: [id], onDelete: Cascade)
-  remitenteId       String
-  remitente         EwoorkerParticipanteConversacion @relation(fields: [remitenteId], references: [id], onDelete: Cascade)
-  
-  contenido         String    @db.Text
-  tipo              String    @default("TEXT") // TEXT, FILE, IMAGE, SYSTEM
-  archivoUrl        String?
-  archivoNombre     String?
-  
-  leido             Boolean   @default(false)
-  leidoAt           DateTime?
-  
-  createdAt         DateTime  @default(now())
-  
+  id             String                           @id @default(cuid())
+  conversacionId String
+  conversacion   EwoorkerConversacion             @relation(fields: [conversacionId], references: [id], onDelete: Cascade)
+  remitenteId    String
+  remitente      EwoorkerParticipanteConversacion @relation(fields: [remitenteId], references: [id], onDelete: Cascade)
+
+  contenido     String  @db.Text
+  tipo          String  @default("TEXT") // TEXT, FILE, IMAGE, SYSTEM
+  archivoUrl    String?
+  archivoNombre String?
+
+  leido   Boolean   @default(false)
+  leidoAt DateTime?
+
+  createdAt DateTime @default(now())
+
   @@index([conversacionId, createdAt])
   @@index([remitenteId])
   @@index([leido])
@@ -14341,7 +14350,7 @@ model EwoorkerPuntosLog {
   action     String // Acción que generó los puntos (PUBLISH_OBRA, SIGN_CONTRACT, etc.)
   points     Int // Puntos añadidos (positivos o negativos)
   totalAfter Int // Total de puntos después de esta transacción
-  metadata   Json @default("{}") // Datos adicionales
+  metadata   Json   @default("{}") // Datos adicionales
 
   createdAt DateTime @default(now())
 
@@ -14353,27 +14362,27 @@ model EwoorkerPuntosLog {
 
 // Sistema de Referidos (Sprint 3)
 model EwoorkerReferral {
-  id                  String                @id @default(cuid())
-  code                String                @unique // Código único de referido
-  referrerEmpresaId   String
-  referrerEmpresa     EwoorkerPerfilEmpresa @relation("ReferralsEnviados", fields: [referrerEmpresaId], references: [id], onDelete: Cascade)
+  id                String                @id @default(cuid())
+  code              String                @unique // Código único de referido
+  referrerEmpresaId String
+  referrerEmpresa   EwoorkerPerfilEmpresa @relation("ReferralsEnviados", fields: [referrerEmpresaId], references: [id], onDelete: Cascade)
 
   // Referido (opcional hasta que se use)
-  referredEmail       String?
-  referredEmpresaId   String?               @unique
-  referredEmpresa     EwoorkerPerfilEmpresa? @relation("ReferralRecibido", fields: [referredEmpresaId], references: [id], onDelete: SetNull)
+  referredEmail     String?
+  referredEmpresaId String?                @unique
+  referredEmpresa   EwoorkerPerfilEmpresa? @relation("ReferralRecibido", fields: [referredEmpresaId], references: [id], onDelete: SetNull)
 
   // Estado
-  status              String                @default("pending") // pending, registered, verified, expired, cancelled
-  rewardGiven         Boolean               @default(false)
+  status      String  @default("pending") // pending, registered, verified, expired, cancelled
+  rewardGiven Boolean @default(false)
 
   // Fechas
-  expiresAt           DateTime
-  usedAt              DateTime?
-  verifiedAt          DateTime?
+  expiresAt  DateTime
+  usedAt     DateTime?
+  verifiedAt DateTime?
 
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([referrerEmpresaId])
   @@index([code])
@@ -14387,13 +14396,13 @@ model EwoorkerReferral {
 // =========================================================
 
 model TenantGamificationLog {
-  id        String   @id @default(cuid())
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   action     String // Acción que generó los puntos
-  points     Int    // Puntos añadidos
-  totalAfter Int    // Total después de la transacción
+  points     Int // Puntos añadidos
+  totalAfter Int // Total después de la transacción
   metadata   Json   @default("{}")
 
   createdAt DateTime @default(now())
@@ -14405,26 +14414,26 @@ model TenantGamificationLog {
 }
 
 model TenantReferral {
-  id           String  @id @default(cuid())
-  code         String  @unique // Código único
-  referrerId   String
-  referrer     Tenant  @relation("TenantReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  id         String @id @default(cuid())
+  code       String @unique // Código único
+  referrerId String
+  referrer   Tenant @relation("TenantReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
 
   // Referido
-  referredEmail    String?
-  referredId       String?  @unique
-  referred         Tenant?  @relation("TenantReferred", fields: [referredId], references: [id], onDelete: SetNull)
+  referredEmail String?
+  referredId    String? @unique
+  referred      Tenant? @relation("TenantReferred", fields: [referredId], references: [id], onDelete: SetNull)
 
   // Estado: pending, registered, verified, expired
-  status       String   @default("pending")
-  rewardGiven  Boolean  @default(false)
+  status      String  @default("pending")
+  rewardGiven Boolean @default(false)
 
-  expiresAt    DateTime
-  usedAt       DateTime?
-  verifiedAt   DateTime?
+  expiresAt  DateTime
+  usedAt     DateTime?
+  verifiedAt DateTime?
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([referrerId])
   @@index([code])
@@ -15458,4 +15467,275 @@ model UserOnboardingProgress {
   @@index([userId])
   @@index([isCompleted])
   @@map("user_onboarding_progress")
+}
+
+// ============================================================================
+// SISTEMA DE ONBOARDING DOCUMENTAL CON IA
+// Importación inteligente de documentos para auto-parametrización
+// ============================================================================
+
+enum DocumentImportStatus {
+  pending // En cola de procesamiento
+  processing // Siendo procesado
+  analyzing // Análisis de IA en progreso
+  awaiting_review // Pendiente de revisión manual
+  approved // Aprobado y aplicado
+  rejected // Rechazado por el usuario
+  failed // Error en procesamiento
+  partial // Parcialmente procesado
+}
+
+enum DocumentImportCategory {
+  escritura_propiedad // Escrituras de compraventa
+  contrato_alquiler // Contratos de arrendamiento
+  dni_nie // Documentos de identidad
+  factura // Facturas de proveedores
+  seguro // Pólizas de seguros
+  certificado_energetico // Certificados energéticos
+  acta_comunidad // Actas de comunidades
+  recibo_pago // Recibos y comprobantes
+  nota_simple // Notas simples del registro
+  ite_iee // Inspección técnica de edificios
+  licencia // Licencias y permisos
+  fianza // Justificantes de fianza
+  inventario // Inventarios de inmuebles
+  foto_inmueble // Fotografías de propiedades
+  plano // Planos y croquis
+  otro // Otros documentos
+}
+
+enum ExtractedDataType {
+  company_info // Datos de la empresa (CIF, nombre, dirección)
+  property_info // Datos de propiedad (dirección, superficie, referencia catastral)
+  tenant_info // Datos de inquilino (nombre, DNI, contacto)
+  contract_info // Datos de contrato (fechas, importes, condiciones)
+  financial_info // Datos financieros (importes, fechas de pago)
+  insurance_info // Datos de seguros (póliza, coberturas, vencimiento)
+  energy_info // Datos energéticos (calificación, consumos)
+  community_info // Datos de comunidad (cuotas, acuerdos)
+  provider_info // Datos de proveedores (nombre, CIF, servicios)
+  maintenance_info // Datos de mantenimiento (fechas ITE, revisiones)
+}
+
+model DocumentImportBatch {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Información del batch
+  name        String?
+  description String?
+
+  // Estadísticas
+  totalFiles      Int @default(0)
+  processedFiles  Int @default(0)
+  successfulFiles Int @default(0)
+  failedFiles     Int @default(0)
+  pendingReview   Int @default(0)
+
+  // Estado general
+  status   DocumentImportStatus @default(pending)
+  progress Float                @default(0) // 0-100
+
+  // Configuración
+  autoApprove         Boolean @default(false) // Auto-aprobar datos con alta confianza
+  confidenceThreshold Float   @default(0.8) // Umbral de confianza (0-1)
+
+  // Resultados
+  extractedEntities Json? // Resumen de entidades extraídas
+  appliedChanges    Json? // Cambios aplicados al sistema
+  errors            Json? // Errores encontrados
+
+  // Timestamps
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  documents DocumentImport[]
+
+  @@index([companyId])
+  @@index([userId])
+  @@index([status])
+  @@map("document_import_batches")
+}
+
+model DocumentImport {
+  id        String              @id @default(cuid())
+  batchId   String
+  batch     DocumentImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  companyId String
+  company   Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Archivo original
+  originalFilename String
+  mimeType         String
+  fileSize         Int
+  s3Key            String
+  checksum         String? // SHA256 para detectar duplicados
+
+  // Clasificación (detectada por IA)
+  detectedCategory   DocumentImportCategory?
+  categoryConfidence Float? // Confianza en la clasificación
+
+  // Estado del procesamiento
+  status          DocumentImportStatus @default(pending)
+  processingStage String? // Etapa actual: "uploading", "ocr", "ai_analysis", "validation", "review"
+
+  // OCR y extracción de texto
+  ocrText       String? @db.Text
+  ocrConfidence Float?
+  ocrLanguage   String?
+  pageCount     Int?
+
+  // Validación de propiedad
+  ownershipValidated Boolean  @default(false)
+  detectedCIF        String? // CIF detectado en el documento
+  matchesCompanyCIF  Boolean? // Si coincide con el CIF de la empresa
+  ownershipNotes     String? // Notas sobre la validación
+
+  // Errores
+  errorMessage String?
+  errorDetails Json?
+
+  // Timestamps
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  analyses      AIDocumentAnalysis[]
+  extractedData ExtractedDocumentData[]
+
+  @@index([batchId])
+  @@index([companyId])
+  @@index([status])
+  @@index([detectedCategory])
+  @@map("document_imports")
+}
+
+model AIDocumentAnalysis {
+  id         String         @id @default(cuid())
+  documentId String
+  document   DocumentImport @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  // Modelo y versión de IA usado
+  aiModel       String  @default("claude-3-5-sonnet-20241022")
+  aiVersion     String?
+  promptVersion String? // Para tracking de mejoras en prompts
+
+  // Resultados del análisis
+  summary       String? @db.Text // Resumen del documento
+  documentType  String? // Tipo específico detectado
+  keyEntities   Json? // Entidades clave extraídas
+  relationships Json? // Relaciones entre entidades
+
+  // Confianza global
+  overallConfidence Float?
+
+  // Flags de alerta
+  hasWarnings        Boolean  @default(false)
+  warnings           Json? // Lista de advertencias
+  hasSensitiveData   Boolean  @default(false)
+  sensitiveDataTypes String[] // Tipos de datos sensibles detectados
+
+  // Sugerencias de parametrización
+  suggestedActions Json? // Acciones sugeridas (crear propiedad, actualizar inquilino, etc.)
+
+  // Métricas de procesamiento
+  processingTimeMs Int?
+  tokensUsed       Int?
+  estimatedCost    Float? // Coste estimado de la llamada a la IA
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  @@index([documentId])
+  @@map("ai_document_analyses")
+}
+
+model ExtractedDocumentData {
+  id         String         @id @default(cuid())
+  documentId String
+  document   DocumentImport @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  // Tipo de dato extraído
+  dataType ExtractedDataType
+
+  // Campo específico extraído
+  fieldName  String // Ej: "tenant_name", "monthly_rent", "property_address"
+  fieldValue String @db.Text // Valor extraído
+
+  // Confianza y validación
+  confidence  Float // 0-1
+  isValidated Boolean   @default(false)
+  validatedBy String? // userId que validó
+  validatedAt DateTime?
+
+  // Corrección manual
+  originalValue String? @db.Text // Valor original si fue corregido
+  wasCorrected  Boolean @default(false)
+
+  // Mapeo a entidad del sistema
+  targetEntity   String? // Ej: "Property", "Tenant", "Contract"
+  targetEntityId String? // ID de la entidad si ya existe
+  targetField    String? // Campo de la entidad destino
+
+  // Estado de aplicación
+  wasApplied Boolean   @default(false)
+  appliedAt  DateTime?
+
+  // Ubicación en documento
+  pageNumber  Int?
+  boundingBox Json? // Coordenadas en el documento
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([documentId])
+  @@index([dataType])
+  @@index([fieldName])
+  @@index([wasApplied])
+  @@map("extracted_document_data")
+}
+
+model OnboardingDocumentSession {
+  id        String  @id @default(cuid())
+  companyId String  @unique
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Estado del onboarding documental
+  isActive     Boolean @default(true)
+  currentPhase String  @default("upload") // "upload", "processing", "review", "applying", "complete"
+
+  // Resumen de lo importado
+  totalDocuments  Int @default(0)
+  propertiesFound Int @default(0)
+  tenantsFound    Int @default(0)
+  contractsFound  Int @default(0)
+
+  // Entidades creadas/actualizadas
+  entitiesCreated Json? // { properties: [], tenants: [], contracts: [] }
+  entitiesUpdated Json?
+
+  // Datos pendientes de revisión
+  pendingReviewData Json? // Datos que necesitan confirmación manual
+
+  // Configuración del usuario
+  preferences Json? // Preferencias de parametrización
+
+  // Timestamps
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+  lastActivityAt DateTime  @default(now())
+
+  @@index([companyId])
+  @@index([userId])
+  @@index([isActive])
+  @@map("onboarding_document_sessions")
 }
