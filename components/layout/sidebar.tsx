@@ -2477,8 +2477,25 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   };
 
   // Componente para nav items con submenús (Super Admin)
-  const NavItemWithSubs = ({ item }: { item: SidebarItem }) => {
+  // Ahora acepta companyId opcional para parametrizar URLs
+  const NavItemWithSubs = ({ 
+    item, 
+    companyId 
+  }: { 
+    item: SidebarItem; 
+    companyId?: string;
+  }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+    
+    // Función para añadir companyId a URLs
+    const appendCompanyId = (href: string): string => {
+      if (!companyId) return href;
+      return href.includes('?')
+        ? `${href}&companyId=${companyId}`
+        : `${href}?companyId=${companyId}`;
+    };
+    
+    const itemHref = appendCompanyId(item.href);
     const isActive = pathname?.startsWith(item.href) ?? false;
     const hasSubItems = item.subItems && item.subItems.length > 0;
 
@@ -2490,7 +2507,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     }, [pathname, hasSubItems, item.subItems]);
 
     if (!hasSubItems) {
-      return <NavItem item={item} showFavoriteButton={false} />;
+      return <NavItem item={{ ...item, href: itemHref }} showFavoriteButton={false} />;
     }
 
     return (
@@ -2511,11 +2528,12 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
         {isExpanded && (
           <div className="ml-6 mt-1 space-y-1 border-l border-gray-700 pl-2">
             {item.subItems?.map((subItem) => {
-              const isSubActive = pathname === subItem.href;
+              const subItemHref = appendCompanyId(subItem.href);
+              const isSubActive = pathname === subItem.href || pathname?.startsWith(subItem.href);
               return (
                 <Link
                   key={subItem.href}
-                  href={subItem.href}
+                  href={subItemHref}
                   prefetch={true}
                   onClick={() => {
                     setIsMobileMenuOpen(false);
@@ -2758,15 +2776,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     {expandedSections.administradorEmpresa && (
                       <div className="space-y-1 mt-1">
                         {filteredAdministradorEmpresaItems.map((item) => (
-                          <NavItem
+                          <NavItemWithSubs
                             key={item.href}
-                            item={{
-                              ...item,
-                              // Parametrizar URL con companyId para Super Admin
-                              href: item.href.includes('?')
-                                ? `${item.href}&companyId=${selectedCompany.id}`
-                                : `${item.href}?companyId=${selectedCompany.id}`,
-                            }}
+                            item={item as SidebarItem}
+                            companyId={selectedCompany.id}
                           />
                         ))}
                       </div>
@@ -3158,7 +3171,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.herramientasInversion && (
                   <div className="space-y-1 mt-1">
                     {filteredHerramientasInversionItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -3362,7 +3375,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   {expandedSections.administradorEmpresa && (
                     <div className="space-y-1 mt-1">
                       {filteredAdministradorEmpresaItems.map((item) => (
-                        <NavItem key={item.href} item={item} />
+                        <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                       ))}
                     </div>
                   )}
