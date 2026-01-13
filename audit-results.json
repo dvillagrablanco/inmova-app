@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-13T13:57:38.590Z",
+  "timestamp": "2026-01-13T14:11:17.388Z",
   "summary": {
     "okCount": 57,
     "warningCount": 0,
@@ -28,7 +28,7 @@
       "page": "Lista de Clientes",
       "path": "/admin/clientes",
       "status": "OK",
-      "loadTime": 205,
+      "loadTime": 213,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -44,7 +44,7 @@
       "page": "Comparar Empresas",
       "path": "/admin/clientes/comparar",
       "status": "OK",
-      "loadTime": 205,
+      "loadTime": 278,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -60,7 +60,7 @@
       "page": "Onboarding Tracker",
       "path": "/admin/onboarding",
       "status": "OK",
-      "loadTime": 226,
+      "loadTime": 228,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -76,7 +76,7 @@
       "page": "Planes INMOVA",
       "path": "/admin/planes",
       "status": "OK",
-      "loadTime": 217,
+      "loadTime": 227,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -95,7 +95,7 @@
       "page": "Planes eWoorker",
       "path": "/admin/ewoorker-planes",
       "status": "OK",
-      "loadTime": 226,
+      "loadTime": 225,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -114,7 +114,7 @@
       "page": "Add-ons y Extras",
       "path": "/admin/addons",
       "status": "OK",
-      "loadTime": 206,
+      "loadTime": 235,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -134,7 +134,7 @@
       "page": "Facturación B2B",
       "path": "/admin/facturacion-b2b",
       "status": "OK",
-      "loadTime": 225,
+      "loadTime": 226,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -150,7 +150,7 @@
       "page": "Cupones",
       "path": "/admin/cupones",
       "status": "OK",
-      "loadTime": 210,
+      "loadTime": 224,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -170,7 +170,7 @@
       "page": "Gestión Partners",
       "path": "/admin/partners",
       "status": "OK",
-      "loadTime": 219,
+      "loadTime": 226,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -189,7 +189,7 @@
       "page": "Comisiones Partners",
       "path": "/admin/partners/comisiones",
       "status": "OK",
-      "loadTime": 213,
+      "loadTime": 228,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -208,7 +208,7 @@
       "page": "Invitaciones Partners",
       "path": "/admin/partners/invitaciones",
       "status": "OK",
-      "loadTime": 224,
+      "loadTime": 230,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -227,7 +227,7 @@
       "page": "Landings Partners",
       "path": "/admin/partners/landings",
       "status": "OK",
-      "loadTime": 226,
+      "loadTime": 240,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -246,7 +246,7 @@
       "page": "Marketplace Servicios",
       "path": "/admin/marketplace",
       "status": "OK",
-      "loadTime": 234,
+      "loadTime": 232,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -267,7 +267,7 @@
       "page": "Proveedores",
       "path": "/admin/marketplace/proveedores",
       "status": "OK",
-      "loadTime": 229,
+      "loadTime": 232,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -287,7 +287,7 @@
       "page": "Categorías",
       "path": "/admin/marketplace/categorias",
       "status": "OK",
-      "loadTime": 231,
+      "loadTime": 227,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -304,7 +304,7 @@
       "page": "Reservas Marketplace",
       "path": "/admin/marketplace/reservas",
       "status": "OK",
-      "loadTime": 220,
+      "loadTime": 228,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -323,7 +323,7 @@
       "page": "Comisiones Marketplace",
       "path": "/admin/marketplace/comisiones",
       "status": "OK",
-      "loadTime": 223,
+      "loadTime": 233,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -343,7 +343,7 @@
       "page": "Integraciones",
       "path": "/admin/integraciones",
       "status": "OK",
-      "loadTime": 220,
+      "loadTime": 227,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -359,7 +359,7 @@
       "page": "API Docs",
       "path": "/api-docs",
       "status": "OK",
-      "loadTime": 487,
+      "loadTime": 437,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -377,7 +377,7 @@
       "page": "Webhooks",
       "path": "/admin/webhooks",
       "status": "OK",
-      "loadTime": 204,
+      "loadTime": 205,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -396,7 +396,7 @@
       "page": "Actividad",
       "path": "/admin/activity",
       "status": "OK",
-      "loadTime": 253,
+      "loadTime": 227,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -412,7 +412,7 @@
       "page": "Health Sistema",
       "path": "/admin/health",
       "status": "OK",
-      "loadTime": 216,
+      "loadTime": 242,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -431,7 +431,7 @@
       "page": "Alertas Seguridad",
       "path": "/admin/seguridad/alertas",
       "status": "OK",
-      "loadTime": 217,
+      "loadTime": 220,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -452,7 +452,7 @@
       "page": "Logs Sistema",
       "path": "/admin/logs",
       "status": "OK",
-      "loadTime": 225,
+      "loadTime": 207,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -472,7 +472,7 @@
       "page": "Community Manager",
       "path": "/admin/community-manager",
       "status": "OK",
-      "loadTime": 214,
+      "loadTime": 233,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -488,7 +488,7 @@
       "page": "Agentes IA",
       "path": "/admin/ai-agents",
       "status": "OK",
-      "loadTime": 220,
+      "loadTime": 227,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -504,7 +504,7 @@
       "page": "Sugerencias",
       "path": "/admin/sugerencias",
       "status": "OK",
-      "loadTime": 215,
+      "loadTime": 234,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -520,7 +520,7 @@
       "page": "Aprobaciones",
       "path": "/admin/aprobaciones",
       "status": "OK",
-      "loadTime": 222,
+      "loadTime": 224,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -536,7 +536,7 @@
       "page": "Equipo Ventas",
       "path": "/admin/sales-team",
       "status": "OK",
-      "loadTime": 221,
+      "loadTime": 228,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -556,7 +556,7 @@
       "page": "Configuración Empresa",
       "path": "/admin/configuracion",
       "status": "OK",
-      "loadTime": 202,
+      "loadTime": 226,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -588,7 +588,7 @@
       "page": "Módulos Empresa",
       "path": "/admin/modulos",
       "status": "OK",
-      "loadTime": 211,
+      "loadTime": 213,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -604,7 +604,7 @@
       "page": "Dashboard Alquiler",
       "path": "/traditional-rental",
       "status": "OK",
-      "loadTime": 242,
+      "loadTime": 227,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -625,7 +625,7 @@
       "page": "Propiedades",
       "path": "/propiedades",
       "status": "OK",
-      "loadTime": 212,
+      "loadTime": 214,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -641,7 +641,7 @@
       "page": "Edificios",
       "path": "/edificios",
       "status": "OK",
-      "loadTime": 228,
+      "loadTime": 215,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -657,7 +657,7 @@
       "page": "Unidades",
       "path": "/unidades",
       "status": "OK",
-      "loadTime": 214,
+      "loadTime": 222,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -689,7 +689,7 @@
       "page": "Contratos",
       "path": "/contratos",
       "status": "OK",
-      "loadTime": 218,
+      "loadTime": 221,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -705,7 +705,7 @@
       "page": "Dashboard STR",
       "path": "/str",
       "status": "OK",
-      "loadTime": 216,
+      "loadTime": 213,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -721,7 +721,7 @@
       "page": "Reservas STR",
       "path": "/str/bookings",
       "status": "OK",
-      "loadTime": 205,
+      "loadTime": 207,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -737,7 +737,7 @@
       "page": "Room Rental",
       "path": "/room-rental",
       "status": "OK",
-      "loadTime": 218,
+      "loadTime": 229,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -753,7 +753,7 @@
       "page": "Coliving Propiedades",
       "path": "/coliving/propiedades",
       "status": "OK",
-      "loadTime": 202,
+      "loadTime": 204,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -769,7 +769,7 @@
       "page": "Dashboard Comercial",
       "path": "/comercial",
       "status": "OK",
-      "loadTime": 223,
+      "loadTime": 217,
       "hasContent": true,
       "buttons": [
         "Configurar",
@@ -784,7 +784,7 @@
       "page": "Comunidades",
       "path": "/comunidades",
       "status": "OK",
-      "loadTime": 203,
+      "loadTime": 204,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -800,7 +800,7 @@
       "page": "Dashboard Construcción",
       "path": "/construccion",
       "status": "OK",
-      "loadTime": 209,
+      "loadTime": 208,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -816,7 +816,7 @@
       "page": "eWoorker",
       "path": "/ewoorker",
       "status": "OK",
-      "loadTime": 204,
+      "loadTime": 210,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -838,7 +838,7 @@
       "page": "Pagos",
       "path": "/pagos",
       "status": "OK",
-      "loadTime": 214,
+      "loadTime": 215,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -854,7 +854,7 @@
       "page": "Gastos",
       "path": "/gastos",
       "status": "OK",
-      "loadTime": 230,
+      "loadTime": 219,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -889,7 +889,7 @@
       "page": "CRM",
       "path": "/crm",
       "status": "OK",
-      "loadTime": 227,
+      "loadTime": 232,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -905,7 +905,7 @@
       "page": "Leads",
       "path": "/leads",
       "status": "OK",
-      "loadTime": 223,
+      "loadTime": 211,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -921,7 +921,7 @@
       "page": "Documentos",
       "path": "/documentos",
       "status": "OK",
-      "loadTime": 225,
+      "loadTime": 223,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -937,7 +937,7 @@
       "page": "Firma Digital",
       "path": "/firma-digital",
       "status": "OK",
-      "loadTime": 206,
+      "loadTime": 209,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -953,7 +953,7 @@
       "page": "Calendario",
       "path": "/calendario",
       "status": "OK",
-      "loadTime": 232,
+      "loadTime": 239,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -969,7 +969,7 @@
       "page": "Mantenimiento",
       "path": "/mantenimiento",
       "status": "OK",
-      "loadTime": 221,
+      "loadTime": 229,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -985,7 +985,7 @@
       "page": "Comunicaciones",
       "path": "/comunicaciones",
       "status": "OK",
-      "loadTime": 219,
+      "loadTime": 228,
       "hasContent": true,
       "buttons": [
         "Iniciar Sesión",
@@ -1002,15 +1002,15 @@
     "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
     "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
     "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
-    "Error checking autoplay: TypeError: Failed to fetch\n    at http://157.180.119.236/_next/static/chunks/67154-e02b56585cf1a5bb.js:1:4538\n    at http://157.180.119.236/_next/static/chunks/67154-e02b56585cf1a5bb.js:1:4678\n    at aW (http://157.180.119.236/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:73245)\n    at oe (http://157.180.119.236/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:84686)\n    at e (http://157.180.119.236/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:85828)\n    at e (http://157.180.119.236/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:86114)\n    at e (http://157.180.119.236/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:85815)\n    at e (http://157.180.119.236/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:85815)\n    at e (http://157.180.119.236/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:86114)\n    at e (http://157.180.119.236/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:85815)",
     "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
     "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
     "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
     "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
     "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
-    "Error 401: Unauthorized {stack: Error: Error 401: Unauthorized\n    at o (http://15…/admin/clientes/page-4b41d5b743b4f93c.js:1:12836), context: useCompanies.fetchPlans}",
     "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
     "Error 401: Unauthorized {stack: Error: Error 401: Unauthorized\n    at l (http://15…/admin/clientes/page-4b41d5b743b4f93c.js:1:12441), context: useCompanies.fetchCompanies}",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Error 401: Unauthorized {stack: Error: Error 401: Unauthorized\n    at o (http://15…/admin/clientes/page-4b41d5b743b4f93c.js:1:12836), context: useCompanies.fetchPlans}",
     "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
     "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
     "Failed to load resource: the server responded with a status of 401 (Unauthorized)",

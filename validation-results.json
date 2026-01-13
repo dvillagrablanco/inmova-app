@@ -1,0 +1,74 @@
+[
+  {
+    "page": "/admin/dashboard",
+    "check": "Dashboard carga correctamente",
+    "passed": false,
+    "details": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"http://157.180.119.236/admin/dashboard\", waiting until \"networkidle\"\n"
+  },
+  {
+    "page": "/admin/clientes",
+    "check": "Página carga correctamente",
+    "passed": false,
+    "details": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"http://157.180.119.236/admin/clientes\", waiting until \"networkidle\"\n"
+  },
+  {
+    "page": "/admin/planes",
+    "check": "Página carga correctamente",
+    "passed": false,
+    "details": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"http://157.180.119.236/admin/planes\", waiting until \"networkidle\"\n"
+  },
+  {
+    "page": "/dashboard/edificios",
+    "check": "Edificios visibles",
+    "passed": true,
+    "details": "Edificios encontrados"
+  },
+  {
+    "page": "/dashboard/edificios",
+    "check": "Cards de edificios",
+    "passed": false,
+    "details": "0 cards encontradas"
+  },
+  {
+    "page": "/dashboard/inquilinos",
+    "check": "Inquilinos visibles",
+    "passed": true,
+    "details": "Inquilinos encontrados"
+  },
+  {
+    "page": "/dashboard/contratos",
+    "check": "Página de contratos carga",
+    "passed": true,
+    "details": "Contenido encontrado"
+  },
+  {
+    "page": "/dashboard/pagos",
+    "check": "Página de pagos carga",
+    "passed": true,
+    "details": "Contenido de pagos encontrado"
+  },
+  {
+    "page": "/dashboard/mantenimiento",
+    "check": "Página de mantenimiento carga",
+    "passed": true,
+    "details": "Contenido encontrado"
+  },
+  {
+    "page": "/admin/clientes",
+    "check": "Botón \"Nuevo Cliente\" presente",
+    "passed": false,
+    "details": "page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"http://157.180.119.236/admin/clientes\", waiting until \"networkidle\"\n"
+  },
+  {
+    "page": "/dashboard/edificios",
+    "check": "Botón \"Nuevo Edificio\" presente",
+    "passed": false,
+    "details": "Botón no encontrado"
+  },
+  {
+    "page": "/dashboard/inquilinos",
+    "check": "Botón \"Nuevo Inquilino\" presente",
+    "passed": false,
+    "details": "Botón no encontrado"
+  }
+]
