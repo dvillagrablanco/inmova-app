@@ -57,6 +57,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 // ============================================================================
 // TIPOS
@@ -300,34 +301,39 @@ export default function DocumentReviewPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-gray-600">Cargando datos...</p>
+      <AuthenticatedLayout>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mx-auto mb-4" />
+            <p className="text-gray-600">Cargando datos...</p>
+          </div>
         </div>
-      </div>
+      </AuthenticatedLayout>
     );
   }
 
   if (!batchData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardContent className="pt-6 text-center">
-            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Error</h2>
-            <p className="text-gray-600 mb-4">No se pudieron cargar los datos</p>
-            <Button onClick={() => router.push('/onboarding/documents')}>
-              Volver
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <AuthenticatedLayout>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <Card className="max-w-md">
+            <CardContent className="pt-6 text-center">
+              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold mb-2">Error</h2>
+              <p className="text-gray-600 mb-4">No se pudieron cargar los datos</p>
+              <Button onClick={() => router.push('/onboarding/documents')}>
+                Volver
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <AuthenticatedLayout>
+      <div className="bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -688,7 +694,8 @@ export default function DocumentReviewPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </AuthenticatedLayout>
   );
 }
 
