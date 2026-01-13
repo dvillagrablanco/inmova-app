@@ -1857,8 +1857,18 @@ interface SidebarItem {
 // 9. HERRAMIENTAS: Import, OCR, Firma, Legal, Limpieza
 // 10. SOPORTE: Sugerencias, Aprobaciones
 
+// ============================================================================
+// SIDEBAR SUPER ADMIN - ESTRUCTURA SIMPLIFICADA (Ene 2026)
+// ============================================================================
+// Fusiones realizadas para mejorar UX:
+// - Partners + Ventas → "Comercial B2B"
+// - Monitoreo + Seguridad → "Sistema"
+// - Integraciones + API Docs → "Integraciones"
+// - IA simplificada (menos submenús)
+// ============================================================================
+
 const superAdminPlatformItems: SidebarItem[] = [
-  // ========== 1. OVERVIEW ==========
+  // ========== 1. DASHBOARD ==========
   {
     name: 'Dashboard',
     href: '/admin/dashboard',
@@ -1866,53 +1876,50 @@ const superAdminPlatformItems: SidebarItem[] = [
     roles: ['super_admin'],
   },
 
-  // ========== 2. GESTIÓN DE CLIENTES ==========
+  // ========== 2. CLIENTES (Gestión de Empresas B2B) ==========
   {
     name: 'Clientes',
     href: '/admin/clientes',
     icon: Building2,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Lista de Clientes', href: '/admin/clientes' },
-      { name: 'Comparar Empresas', href: '/admin/clientes/comparar' },
-      { name: 'Onboarding Tracker', href: '/admin/onboarding' },
+      { name: 'Empresas', href: '/admin/clientes' },
+      { name: 'Comparar', href: '/admin/clientes/comparar' },
+      { name: 'Onboarding', href: '/admin/onboarding' },
     ],
   },
 
-  // ========== 3. FACTURACIÓN Y PLANES ==========
+  // ========== 3. FACTURACIÓN ==========
   {
     name: 'Facturación',
     href: '/admin/planes',
     icon: DollarSign,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Planes INMOVA', href: '/admin/planes' },
-      { name: 'Planes eWoorker', href: '/admin/ewoorker-planes' },
-      { name: 'Add-ons y Extras', href: '/admin/addons' },
-      { name: 'Facturación B2B', href: '/admin/facturacion-b2b' },
-      { name: 'Cupones y Descuentos', href: '/admin/cupones' },
+      { name: 'Planes', href: '/admin/planes' },
+      { name: 'Add-ons', href: '/admin/addons' },
+      { name: 'B2B', href: '/admin/facturacion-b2b' },
+      { name: 'Cupones', href: '/admin/cupones' },
     ],
   },
 
-  // ========== 4. PARTNERS (Prescriptores) ==========
-  // Partners son empresas que REFIEREN clientes a Inmova (bancos, aseguradoras, etc.)
-  // Ganan comisión por cada cliente que traen
+  // ========== 4. COMERCIAL B2B (FUSIÓN: Partners + Ventas) ==========
+  // Unifica toda la gestión comercial: partners, ventas, agentes, comisiones
   {
-    name: 'Partners',
+    name: 'Comercial B2B',
     href: '/admin/partners',
-    icon: Share2,
+    icon: TrendingUp,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Gestión de Partners', href: '/admin/partners' },
+      { name: 'Partners', href: '/admin/partners' },
+      { name: 'Equipo Ventas', href: '/admin/sales-team' },
+      { name: 'Red Agentes', href: '/red-agentes' },
       { name: 'Comisiones', href: '/admin/partners/comisiones' },
       { name: 'Invitaciones', href: '/admin/partners/invitaciones' },
-      { name: 'Landings Personalizadas', href: '/admin/partners/landings' },
     ],
   },
 
-  // ========== 4.1 MARKETPLACE DE SERVICIOS ==========
-  // Marketplace son PROVEEDORES de servicios (limpieza, fontanería, etc.)
-  // Inmova gana comisión por intermediar servicios a los usuarios
+  // ========== 5. MARKETPLACE ==========
   {
     name: 'Marketplace',
     href: '/admin/marketplace',
@@ -1922,130 +1929,78 @@ const superAdminPlatformItems: SidebarItem[] = [
       { name: 'Proveedores', href: '/admin/marketplace/proveedores' },
       { name: 'Servicios', href: '/admin/marketplace' },
       { name: 'Categorías', href: '/admin/marketplace/categorias' },
-      { name: 'Reservas', href: '/admin/marketplace/reservas' },
-      { name: 'Comisiones', href: '/admin/marketplace/comisiones' },
     ],
   },
 
-  // ========== 4.2 INTEGRACIONES (PLATAFORMA + COMPARTIDAS) ==========
-  // Una sola página unificada con todas las integraciones
+  // ========== 6. INTEGRACIONES (FUSIÓN: Integraciones + API Docs) ==========
   {
     name: 'Integraciones',
     href: '/admin/integraciones',
     icon: Code,
     roles: ['super_admin'],
     subItems: [
-      { name: '🏢 Solo Inmova (Plataforma)', href: '/admin/integraciones?tab=plataforma' },
-      { name: '🤝 Compartidas (Pagos, Firma)', href: '/admin/integraciones?tab=compartidas' },
-    ],
-  },
-  // Documentación API
-  {
-    name: 'API & Docs',
-    href: '/api-docs',
-    icon: BookOpen,
-    roles: ['super_admin'],
-    subItems: [
-      { name: 'Documentación API', href: '/api-docs' },
+      { name: 'Todas', href: '/admin/integraciones' },
+      { name: 'API Docs', href: '/api-docs' },
       { name: 'Webhooks', href: '/admin/webhooks' },
     ],
   },
 
-  // ========== 5. MONITOREO ==========
+  // ========== 7. SISTEMA (FUSIÓN: Monitoreo + Seguridad) ==========
+  // Panel unificado de administración del sistema
   {
-    name: 'Monitoreo',
+    name: 'Sistema',
     href: '/admin/activity',
     icon: Activity,
     roles: ['super_admin'],
     subItems: [
       { name: 'Actividad', href: '/admin/activity' },
-      { name: 'Salud Sistema', href: '/admin/salud-sistema' },
+      { name: 'Salud', href: '/admin/salud-sistema' },
       { name: 'Alertas', href: '/admin/alertas' },
-      { name: 'Métricas de Uso', href: '/admin/metricas-uso' },
-      { name: 'Logs del Sistema', href: '/admin/system-logs' },
+      { name: 'Usuarios', href: '/admin/usuarios' },
+      { name: 'Seguridad', href: '/admin/seguridad' },
+      { name: 'Logs', href: '/admin/system-logs' },
+      { name: 'Backup', href: '/admin/backup-restore' },
     ],
   },
 
-  // ========== 6. SEGURIDAD ==========
-  {
-    name: 'Seguridad',
-    href: '/admin/seguridad',
-    icon: Shield,
-    roles: ['super_admin'],
-    subItems: [
-      { name: 'Alertas de Seguridad', href: '/admin/seguridad' },
-      { name: 'Gestión de Usuarios', href: '/admin/usuarios' },
-      { name: 'Backup y Restore', href: '/admin/backup-restore' },
-    ],
-  },
-
-  // ========== 7. CONFIGURACIÓN DE EMPRESAS ==========
+  // ========== 8. CONFIGURACIÓN ==========
   {
     name: 'Configuración',
     href: '/admin/modulos',
     icon: Settings,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Módulos por Empresa', href: '/admin/modulos' },
+      { name: 'Módulos', href: '/admin/modulos' },
       { name: 'Personalización', href: '/admin/personalizacion' },
+      { name: 'Mantenimiento', href: '/admin/limpieza' },
     ],
   },
 
-  // ========== 8. COMUNICACIONES ==========
+  // ========== 9. COMUNICACIONES ==========
   {
     name: 'Comunicaciones',
     href: '/admin/plantillas-email',
     icon: MessageSquare,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Plantillas Email', href: '/admin/plantillas-email' },
-      { name: 'Plantillas SMS', href: '/admin/plantillas-sms' },
-      { name: 'Notificaciones Masivas', href: '/admin/notificaciones-masivas' },
-      { name: 'Reportes Programados', href: '/admin/reportes-programados' },
+      { name: 'Email', href: '/admin/plantillas-email' },
+      { name: 'SMS', href: '/admin/plantillas-sms' },
+      { name: 'Masivas', href: '/admin/notificaciones-masivas' },
+      { name: 'Reportes', href: '/admin/reportes-programados' },
     ],
   },
 
-  // ========== 8.5 INTELIGENCIA ARTIFICIAL ==========
-  // Sistema de Agentes de IA especializados para gestión inmobiliaria
+  // ========== 10. INTELIGENCIA ARTIFICIAL (SIMPLIFICADA) ==========
   {
-    name: 'Inteligencia Artificial',
+    name: 'IA',
     href: '/admin/ai-agents',
     icon: Bot,
     roles: ['super_admin'],
-    badge: '🧠',
+    badge: 'IA',
     subItems: [
-      { name: '🤖 Dashboard Agentes', href: '/admin/ai-agents' },
-      { name: '📊 Community Manager', href: '/admin/community-manager' },
-      { name: '🎨 Canva Studio', href: '/admin/canva' },
-      { name: '🔧 Soporte Técnico IA', href: '/admin/ai-agents?agent=technical_support' },
-      { name: '💼 Gestión Comercial IA', href: '/admin/ai-agents?agent=commercial_management' },
-      { name: '📈 Análisis Financiero IA', href: '/admin/ai-agents?agent=financial_analysis' },
-      { name: '⚖️ Legal IA', href: '/admin/ai-agents?agent=legal_compliance' },
-      { name: '👥 Atención al Cliente IA', href: '/admin/ai-agents?agent=customer_service' },
-    ],
-  },
-
-  // ========== 9. HERRAMIENTAS DE PLATAFORMA ==========
-  // Solo herramientas de mantenimiento global del SaaS
-  // Las herramientas operativas (OCR, Firma, Plantillas, Importar) están en Gestión de Empresa
-  {
-    name: 'Mantenimiento',
-    href: '/admin/limpieza',
-    icon: Wrench,
-    roles: ['super_admin'],
-    subItems: [{ name: 'Limpieza de Datos', href: '/admin/limpieza' }],
-  },
-
-  // ========== 10. VENTAS Y COMERCIAL ==========
-  {
-    name: 'Ventas',
-    href: '/admin/sales-team',
-    icon: TrendingUp,
-    roles: ['super_admin'],
-    subItems: [
-      { name: 'Equipo de Ventas', href: '/admin/sales-team' },
-      { name: 'Red de Agentes', href: '/red-agentes' },
-      { name: 'Comisiones Agentes', href: '/red-agentes/comisiones' },
+      { name: 'Agentes IA', href: '/admin/ai-agents' },
+      { name: 'Community Manager', href: '/admin/community-manager' },
+      { name: 'Canva Studio', href: '/admin/canva' },
     ],
   },
 
