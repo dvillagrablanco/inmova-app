@@ -369,11 +369,7 @@ const dashboardNavItems = [
 // 2. VERTICALES DE NEGOCIO - Agrupadas por modelo de negocio
 
 // 2.1 ALQUILER RESIDENCIAL (Tradicional + Media Estancia)
-// SIMPLIFICADO: 9 items esenciales (antes eran 18)
-// - Fusionado: Edificios + Unidades + Garajes → Propiedades
-// - Fusionado: Candidatos + Screening → Candidatos
-// - Movido: Seguros → Documentos y Legal
-// - Media Estancia: Solo dashboard, sub-páginas accesibles internamente
+// AMPLIADO: Incluye screening, verificación, garantías, edificios, unidades
 const alquilerResidencialItems = [
   {
     name: 'Dashboard Alquiler',
@@ -388,6 +384,18 @@ const alquilerResidencialItems = [
     icon: Building2,
     roles: ['super_admin', 'administrador', 'gestor'],
     dataTour: 'propiedades-menu',
+  },
+  {
+    name: 'Edificios',
+    href: '/edificios',
+    icon: Building2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Unidades',
+    href: '/unidades',
+    icon: Home,
+    roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
     name: 'Inquilinos',
@@ -410,15 +418,57 @@ const alquilerResidencialItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Screening',
+    href: '/screening',
+    icon: UserCheck,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Verificación Inquilinos',
+    href: '/verificacion-inquilinos',
+    icon: Shield,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Garantías',
+    href: '/alquiler-tradicional/warranties',
+    icon: Shield,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Gestión Garantías',
+    href: '/warranty-management',
+    icon: Shield,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Renovaciones Contratos',
+    href: '/renovaciones-contratos',
+    icon: FileText,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Valoraciones IA',
     href: '/valoraciones',
     icon: Sparkles,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Valoración IA',
+    href: '/valoracion-ia',
+    icon: Brain,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Inspecciones',
     href: '/inspecciones',
     icon: ClipboardList,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Inspección Digital',
+    href: '/inspeccion-digital',
+    icon: Scan,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -430,9 +480,7 @@ const alquilerResidencialItems = [
 ];
 
 // 2.2 STR - SHORT TERM RENTALS (Airbnb, Booking, etc.)
-// SIMPLIFICADO: 6 items (antes 8)
-// - Fusionado: Channel Manager + Pricing → Revenue Management
-// - Eliminado: STR Avanzado (accesible desde dashboard)
+// AMPLIADO: Incluye pricing, setup wizard y funciones avanzadas
 const strNavItems = [
   {
     name: 'Dashboard STR',
@@ -459,6 +507,12 @@ const strNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Pricing Dinámico',
+    href: '/str/pricing',
+    icon: DollarSign,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Reviews',
     href: '/str/reviews',
     icon: Star,
@@ -470,9 +524,22 @@ const strNavItems = [
     icon: ClipboardList,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
+  {
+    name: 'Setup Wizard',
+    href: '/str/setup-wizard',
+    icon: Settings,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Integraciones',
+    href: '/str/settings/integrations',
+    icon: Share2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
 ];
 
 // 2.3 CO-LIVING / ALQUILER POR HABITACIONES
+// AMPLIADO: Incluye todas las páginas de coliving disponibles
 const coLivingNavItems = [
   {
     name: 'Room Rental',
@@ -481,10 +548,46 @@ const coLivingNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Propiedades Coliving',
+    href: '/coliving/propiedades',
+    icon: Building2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Comunidad Social',
     href: '/comunidad-social',
     icon: Users2,
     roles: ['super_admin', 'administrador', 'gestor', 'community_manager'],
+  },
+  {
+    name: 'Gestión Comunidad',
+    href: '/coliving/comunidad',
+    icon: Users,
+    roles: ['super_admin', 'administrador', 'gestor', 'community_manager'],
+  },
+  {
+    name: 'Emparejamiento',
+    href: '/coliving/emparejamiento',
+    icon: UserCheck,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Eventos',
+    href: '/coliving/eventos',
+    icon: Calendar,
+    roles: ['super_admin', 'administrador', 'gestor', 'community_manager'],
+  },
+  {
+    name: 'Paquetes Servicios',
+    href: '/coliving/paquetes',
+    icon: Package,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Reservas',
+    href: '/coliving/reservas',
+    icon: CalendarCheck,
+    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
   },
   {
     name: 'Reservas Espacios Comunes',
@@ -524,8 +627,7 @@ const buildToRentNavItems = [
 ];
 
 // 2.5 HOUSE FLIPPING
-// SIMPLIFICADO: 4 items (antes 5)
-// - Fusionado: Timeline dentro de Proyectos
+// AMPLIADO: Incluye timeline de proyectos
 const flippingNavItems = [
   {
     name: 'Dashboard',
@@ -537,6 +639,12 @@ const flippingNavItems = [
     name: 'Proyectos',
     href: '/flipping/projects',
     icon: Folder,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Timeline',
+    href: '/flipping/timeline',
+    icon: Clock,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -555,6 +663,7 @@ const flippingNavItems = [
 
 // 2.5.1 CONSTRUCCIÓN
 // Gestión de proyectos de construcción, reformas y rehabilitaciones
+// AMPLIADO: Incluye Gantt, licitaciones, obras y proyectos de renovación
 const construccionNavItems = [
   {
     name: 'Dashboard',
@@ -566,6 +675,30 @@ const construccionNavItems = [
     name: 'Proyectos',
     href: '/construccion/proyectos',
     icon: HardHat,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Diagrama Gantt',
+    href: '/construction/gantt',
+    icon: BarChart2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Obras',
+    href: '/obras',
+    icon: Building2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Licitaciones',
+    href: '/licitaciones',
+    icon: FileText,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Proyectos Renovación',
+    href: '/proyectos-renovacion',
+    icon: Wrench,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -682,6 +815,7 @@ const comercialNavItems = [
 ];
 
 // 2.6.1 ALQUILER COMERCIAL (Oficinas, Locales, Naves, Coworking)
+// AMPLIADO: Incluye garajes, salas reuniones, retail, hospitality
 const alquilerComercialNavItems = [
   {
     name: 'Dashboard Comercial',
@@ -719,6 +853,36 @@ const alquilerComercialNavItems = [
     dataTour: 'tour-comercial-coworking',
   },
   {
+    name: 'Espacios Coworking',
+    href: '/espacios-coworking',
+    icon: Users2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Garajes y Trasteros',
+    href: '/garajes-trasteros',
+    icon: Car,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Salas de Reuniones',
+    href: '/salas-reuniones',
+    icon: Users2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Retail',
+    href: '/retail',
+    icon: ShoppingBag,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Hospitality',
+    href: '/hospitality',
+    icon: Hotel,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Contratos Comerciales',
     href: '/comercial/contratos',
     icon: FileText,
@@ -733,13 +897,48 @@ const alquilerComercialNavItems = [
 ];
 
 // 2.7 ADMINISTRADOR DE FINCAS / COMUNIDADES
-// SIMPLIFICADO: 5 items (antes 7)
-// - Fusionado: Cuotas + Fondos + Finanzas → Finanzas Comunidad
+// AMPLIADO: Incluye todas las sub-páginas de comunidades
 const adminFincasItems = [
   {
     name: 'Comunidades',
     href: '/comunidades',
     icon: Building2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Cuotas',
+    href: '/comunidades/cuotas',
+    icon: Euro,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Fondos Reserva',
+    href: '/comunidades/fondos',
+    icon: DollarSign,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Actas',
+    href: '/comunidades/actas',
+    icon: FileText,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Cumplimiento',
+    href: '/comunidades/cumplimiento',
+    icon: Shield,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Portal Presidente',
+    href: '/comunidades/presidente',
+    icon: User,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Renovaciones',
+    href: '/comunidades/renovaciones',
+    icon: Wrench,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -977,9 +1176,14 @@ const warehouseNavItems = [
 // ============================================================================
 
 // 3.1 FINANZAS Y CONTABILIDAD
-// SIMPLIFICADO: 5 items (antes 6)
-// - Fusionado: Contabilidad dentro de Gastos
+// AMPLIADO: Incluye contabilidad, BI, estadísticas, finanzas, presupuestos
 const finanzasNavItems = [
+  {
+    name: 'Panel Finanzas',
+    href: '/finanzas',
+    icon: Euro,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
   {
     name: 'Pagos',
     href: '/pagos',
@@ -994,8 +1198,26 @@ const finanzasNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Contabilidad',
+    href: '/contabilidad',
+    icon: FileBarChart,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'BI / Business Intelligence',
+    href: '/bi',
+    icon: BarChart2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Estadísticas',
+    href: '/estadisticas',
+    icon: TrendingUp,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Presupuestos',
-    href: '/dashboard/budgets',
+    href: '/presupuestos',
     icon: DollarSign,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
@@ -1014,8 +1236,7 @@ const finanzasNavItems = [
 ];
 
 // 3.2 ANALYTICS E INTELIGENCIA
-// SIMPLIFICADO: 3 items (antes 5)
-// - Fusionado: Dashboard Adaptativo + Analytics + BI → Analytics
+// AMPLIADO: Incluye reportes financieros, operacionales y informes
 const analyticsNavItems = [
   {
     name: 'Analytics',
@@ -1030,6 +1251,24 @@ const analyticsNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Reportes Financieros',
+    href: '/reportes/financieros',
+    icon: Euro,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Reportes Operacionales',
+    href: '/reportes/operacionales',
+    icon: ClipboardList,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Informes',
+    href: '/informes',
+    icon: FileText,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Asistente IA',
     href: '/asistente-ia',
     icon: Sparkles,
@@ -1038,9 +1277,7 @@ const analyticsNavItems = [
 ];
 
 // 3.3 OPERACIONES Y MANTENIMIENTO
-// SIMPLIFICADO: 4 items (antes 6)
-// - Eliminado: Mantenimiento Preventivo (duplicado)
-// - Fusionado: Tareas + Incidencias conceptualmente
+// AMPLIADO: Incluye todas las páginas de operaciones disponibles
 const operacionesNavItems = [
   {
     name: 'Mantenimiento',
@@ -1049,10 +1286,34 @@ const operacionesNavItems = [
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
   },
   {
+    name: 'Mantenimiento Pro',
+    href: '/mantenimiento-pro',
+    icon: Wrench,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Incidencias',
     href: '/incidencias',
     icon: AlertCircle,
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
+  {
+    name: 'Gestión Incidencias',
+    href: '/gestion-incidencias',
+    icon: AlertCircle,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Tareas',
+    href: '/tareas',
+    icon: CheckSquare,
+    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
+  {
+    name: 'Planificación',
+    href: '/planificacion',
+    icon: Calendar,
+    roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
     name: 'Calendario',
@@ -1064,6 +1325,24 @@ const operacionesNavItems = [
     name: 'Visitas',
     href: '/visitas',
     icon: CalendarCheck,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Servicios Limpieza',
+    href: '/servicios-limpieza',
+    icon: ClipboardList,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Servicios Concierge',
+    href: '/servicios-concierge',
+    icon: HeadphonesIcon,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Guardias',
+    href: '/guardias',
+    icon: Shield,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -1092,8 +1371,7 @@ const herramientasInversionNavItems = [
 ];
 
 // 3.4 COMUNICACIONES
-// SIMPLIFICADO: 4 items (antes 5)
-// - Eliminado: Publicaciones (duplicado de Redes Sociales)
+// AMPLIADO: Incluye historial, plantillas y reglas de notificaciones
 const comunicacionesNavItems = [
   {
     name: 'Chat',
@@ -1106,6 +1384,24 @@ const comunicacionesNavItems = [
     href: '/notificaciones',
     icon: Bell,
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
+  {
+    name: 'Historial Notificaciones',
+    href: '/notificaciones/historial',
+    icon: Clock,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Plantillas Notificaciones',
+    href: '/notificaciones/plantillas',
+    icon: FileText,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Reglas Notificaciones',
+    href: '/notificaciones/reglas',
+    icon: Settings,
+    roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
     name: 'SMS',
@@ -1122,14 +1418,24 @@ const comunicacionesNavItems = [
 ];
 
 // 3.5 DOCUMENTOS Y LEGAL
-// SIMPLIFICADO: 6 items (antes 8)
-// - Fusionado: Legal + Seguridad → Compliance
-// - Fusionado: OCR dentro de Documentos
+// AMPLIADO: Incluye OCR, templates firma digital, seguridad compliance
 const documentosLegalNavItems = [
   {
     name: 'Documentos',
     href: '/documentos',
     icon: Folder,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'OCR',
+    href: '/ocr',
+    icon: Scan,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Plantillas',
+    href: '/plantillas',
+    icon: FileText,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -1139,8 +1445,20 @@ const documentosLegalNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Templates Firma',
+    href: '/firma-digital/templates',
+    icon: FileText,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Compliance',
     href: '/legal',
+    icon: Shield,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Seguridad Compliance',
+    href: '/seguridad-compliance',
     icon: Shield,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
@@ -1165,9 +1483,7 @@ const documentosLegalNavItems = [
 ];
 
 // 3.6 CRM Y MARKETING
-// SIMPLIFICADO: 5 items (antes 7)
-// - Fusionado: Referidos + Cupones → Promociones
-// - Fusionado: Galerías + Tours → Contenido Visual
+// AMPLIADO: Incluye promociones, subastas, reviews, red de agentes
 const crmMarketingNavItems = [
   {
     name: 'CRM',
@@ -1183,8 +1499,56 @@ const crmMarketingNavItems = [
   },
   {
     name: 'Promociones',
+    href: '/promociones',
+    icon: Tag,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Referidos',
     href: '/dashboard/referrals',
     icon: Package,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Subastas',
+    href: '/subastas',
+    icon: TrendingUp,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Reviews',
+    href: '/reviews',
+    icon: Star,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Red de Agentes',
+    href: '/red-agentes',
+    icon: Users2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Dashboard Agentes',
+    href: '/red-agentes/dashboard',
+    icon: LayoutDashboard,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Lista Agentes',
+    href: '/red-agentes/agentes',
+    icon: Users,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Formación Agentes',
+    href: '/red-agentes/formacion',
+    icon: BookOpen,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Zonas Agentes',
+    href: '/red-agentes/zonas',
+    icon: MapPin,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -1199,17 +1563,46 @@ const crmMarketingNavItems = [
     icon: Eye,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
+  {
+    name: 'Galerías',
+    href: '/galerias',
+    icon: Eye,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
 ];
 
 // 3.7 AUTOMATIZACIÓN Y WORKFLOWS
-// SIMPLIFICADO: 2 items (antes 3)
-// - Fusionado: Automatización + Workflows
+// AMPLIADO: Incluye panel de automatización, sincronización
 const automatizacionNavItems = [
+  {
+    name: 'Panel Automatización',
+    href: '/automatizacion',
+    icon: Zap,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Resumen Automatización',
+    href: '/automatizacion/resumen',
+    icon: BarChart2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
   {
     name: 'Workflows',
     href: '/workflows',
     icon: Zap,
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
+  {
+    name: 'Sincronización',
+    href: '/sincronizacion',
+    icon: Share2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Sincronización Avanzada',
+    href: '/sincronizacion-avanzada',
+    icon: Share2,
+    roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
     name: 'Recordatorios',
@@ -1220,11 +1613,30 @@ const automatizacionNavItems = [
 ];
 
 // 3.8 INNOVACIÓN Y SOSTENIBILIDAD
+// AMPLIADO: Incluye energía, puntos carga EV, huerto urbano, instalaciones deportivas
 const innovacionNavItems = [
   {
     name: 'ESG & Sostenibilidad',
     href: '/esg',
     icon: Sparkles,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Energía',
+    href: '/energia',
+    icon: Zap,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Energía Solar',
+    href: '/energia-solar',
+    icon: Zap,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Puntos de Carga EV',
+    href: '/puntos-carga',
+    icon: Zap,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -1242,6 +1654,30 @@ const innovacionNavItems = [
   {
     name: 'Economía Circular',
     href: '/economia-circular',
+    icon: Activity,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Huertos Urbanos',
+    href: '/economia-circular/huertos',
+    icon: Activity,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Gestión Residuos',
+    href: '/economia-circular/residuos',
+    icon: Activity,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Huerto Urbano',
+    href: '/huerto-urbano',
+    icon: Activity,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Instalaciones Deportivas',
+    href: '/instalaciones-deportivas',
     icon: Activity,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
