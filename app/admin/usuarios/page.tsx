@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 import {
+  Plus,
   Edit,
   Trash2,
   Shield,
@@ -116,7 +117,6 @@ export default function UsersPage() {
     }
   };
 
-
   const validatePassword = (password: string): string | null => {
     if (password.length < 8) {
       return 'La contraseña debe tener al menos 8 caracteres';
@@ -139,43 +139,71 @@ export default function UsersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isSaving || !editingUser) return;
+    if (isSaving) return;
 
     try {
-      // Validar contraseña si se proporciona
+      // Validar contraseña si se proporciona o si es nuevo usuario
       if (formData.password) {
         const passwordError = validatePassword(formData.password);
         if (passwordError) {
           toast.error(passwordError);
           return;
         }
+      } else if (!editingUser) {
+        toast.error('La contraseña es requerida para crear un usuario');
+        return;
       }
 
       setIsSaving(true);
 
-      // Solo actualización de usuario
-      const updateData: any = {
-        name: formData.name,
-        role: formData.role,
-      };
-      if (formData.password) {
-        updateData.password = formData.password;
-      }
+      if (editingUser) {
+        // Actualizar usuario existente
+        const updateData: any = {
+          name: formData.name,
+          role: formData.role,
+        };
+        if (formData.password) {
+          updateData.password = formData.password;
+        }
 
-      const res = await fetch(`/api/users/${editingUser.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updateData),
-      });
+        const res = await fetch(`/api/users/${editingUser.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updateData),
+        });
 
-      if (res.ok) {
-        toast.success('Usuario actualizado correctamente');
-        fetchUsers();
-        setShowDialog(false);
-        resetForm();
+        if (res.ok) {
+          toast.success('Usuario actualizado correctamente');
+          fetchUsers();
+          setShowDialog(false);
+          resetForm();
+        } else {
+          const error = await res.json();
+          toast.error(error.error || 'Error al actualizar usuario');
+        }
       } else {
-        const error = await res.json();
-        toast.error(error.error || 'Error al actualizar usuario');
+        // Crear nuevo usuario (automáticamente en la empresa del admin actual)
+        const res = await fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email,
+            name: formData.name,
+            password: formData.password,
+            role: formData.role,
+            // No enviamos companyId - la API usará la empresa del usuario actual
+          }),
+        });
+
+        if (res.ok) {
+          toast.success('Usuario creado correctamente');
+          fetchUsers();
+          setShowDialog(false);
+          resetForm();
+        } else {
+          const error = await res.json();
+          toast.error(error.error || 'Error al crear usuario');
+        }
       }
     } catch (error) {
       logger.error('Error:', error);
@@ -233,6 +261,12 @@ export default function UsersPage() {
     }
   };
 
+  const openCreateDialog = () => {
+    setEditingUser(null);
+    resetForm();
+    setShowDialog(true);
+  };
+
   const openEditDialog = (user: User) => {
     setEditingUser(user);
     setFormData({
@@ -265,6 +299,7 @@ export default function UsersPage() {
   };
 
   const isSuperAdmin = (session?.user as any)?.role === 'super_admin';
+  const currentUserCompany = (session?.user as any)?.company?.nombre || 'tu empresa';
 
   const columns = [
     {
@@ -420,12 +455,15 @@ export default function UsersPage() {
                     ? 'Visualiza y gestiona los usuarios de todas las empresas' 
                     : 'Administra los usuarios de tu empresa'}
                 </p>
-                {isSuperAdmin && (
-                  <p className="text-xs text-amber-600 mt-1">
-                    💡 Para crear usuarios, accede a la gestión de cada empresa específica
-                  </p>
-                )}
               </div>
+              <Button
+                size="lg"
+                onClick={openCreateDialog}
+                className="shadow-md hover:shadow-lg transition-all"
+              >
+                <Plus className="mr-2 h-5 w-5" />
+                Nuevo Usuario
+              </Button>
             </div>
 
             {/* Stats */}
@@ -465,14 +503,18 @@ export default function UsersPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Usuarios</CardTitle>
-                <CardDescription>Lista de todos los usuarios de la empresa</CardDescription>
+                <CardDescription>
+                  {isSuperAdmin 
+                    ? 'Lista de todos los usuarios del sistema'
+                    : 'Lista de todos los usuarios de tu empresa'}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <DataTable data={users} columns={columns} />
               </CardContent>
             </Card>
 
-            {/* Dialog de Edición */}
+            {/* Dialog de Crear/Editar Usuario */}
             <Dialog
               open={showDialog}
               onOpenChange={(open) => {
@@ -482,22 +524,41 @@ export default function UsersPage() {
             >
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Editar Usuario</DialogTitle>
+                  <DialogTitle>{editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}</DialogTitle>
                   <DialogDescription>
-                    Actualiza la información del usuario
+                    {editingUser 
+                      ? 'Actualiza la información del usuario'
+                      : `El nuevo usuario será creado en ${currentUserCompany}`}
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
                   <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label>Email</Label>
-                      <Input
-                        value={formData.email}
-                        disabled
-                        className="bg-muted"
-                      />
-                      <p className="text-xs text-muted-foreground">El email no se puede modificar</p>
-                    </div>
+                    {!editingUser ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="email">Email</Label>
+                          <InfoTooltip content="El email será utilizado para iniciar sesión y recibir notificaciones del sistema." />
+                        </div>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          required
+                          placeholder="usuario@ejemplo.com"
+                        />
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Label>Email</Label>
+                        <Input
+                          value={formData.email}
+                          disabled
+                          className="bg-muted"
+                        />
+                        <p className="text-xs text-muted-foreground">El email no se puede modificar</p>
+                      </div>
+                    )}
                     <div className="space-y-2">
                       <Label htmlFor="name">Nombre</Label>
                       <Input
@@ -512,8 +573,8 @@ export default function UsersPage() {
                       <PasswordGenerator
                         value={formData.password}
                         onChange={(password) => setFormData({ ...formData, password })}
-                        label="Nueva contraseña (dejar vacío para no cambiar)"
-                        required={false}
+                        label={editingUser ? 'Nueva contraseña (dejar vacío para no cambiar)' : 'Contraseña'}
+                        required={!editingUser}
                       />
                     </div>
                     <div className="space-y-2">
@@ -557,8 +618,10 @@ export default function UsersPage() {
                           <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
                           Guardando...
                         </>
-                      ) : (
+                      ) : editingUser ? (
                         'Actualizar'
+                      ) : (
+                        'Crear Usuario'
                       )}
                     </Button>
                   </DialogFooter>
