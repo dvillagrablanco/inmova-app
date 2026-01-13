@@ -1713,7 +1713,6 @@ const superAdminPlatformItems: SidebarItem[] = [
       { name: 'Actividad', href: '/admin/activity', icon: Activity },
       { name: 'Salud', href: '/admin/salud-sistema', icon: CheckSquare },
       { name: 'Alertas', href: '/admin/alertas', icon: Bell },
-      { name: 'Usuarios', href: '/admin/usuarios', icon: Users },
       { name: 'Seguridad', href: '/admin/seguridad', icon: Shield },
       { name: 'Logs', href: '/admin/system-logs', icon: FileText },
       { name: 'Backup', href: '/admin/backup-restore', icon: Upload },
