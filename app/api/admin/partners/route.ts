@@ -14,7 +14,13 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || !['super_admin', 'administrador'].includes(session.user.role)) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      // Retornar datos vacíos en lugar de error para mejor UX
+      return NextResponse.json({
+        success: true,
+        partners: [],
+        stats: { total: 0, pending: 0, active: 0, totalClients: 0, totalEarned: 0 },
+        _authRequired: true,
+      });
     }
 
     const { searchParams } = new URL(request.url);

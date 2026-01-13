@@ -34,7 +34,13 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== 'super_admin') {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      // Retornar datos vacíos en lugar de error para mejor UX
+      return NextResponse.json({
+        success: true,
+        data: [],
+        stats: { total: 0, activos: 0, porExpirar: 0, usosHoy: 0 },
+        _authRequired: true,
+      });
     }
 
     const { searchParams } = new URL(request.url);

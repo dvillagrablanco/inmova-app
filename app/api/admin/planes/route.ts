@@ -47,10 +47,12 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.role || !ADMIN_ROLES.includes(session.user.role)) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 403 }
-      );
+      // Retornar datos vacíos en lugar de error para mejor UX
+      return NextResponse.json({
+        planes: [],
+        total: 0,
+        _authRequired: true,
+      });
     }
 
     const planes = await prisma.subscriptionPlan.findMany({
