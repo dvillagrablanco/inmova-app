@@ -126,6 +126,8 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/personalizacion': 'admin_personalizacion',
   '/admin/activity': 'admin_activity',
   '/admin/alertas': 'admin_alertas',
+  '/admin/calls': 'admin_calls',
+  '/admin/outbound': 'admin_outbound',
   '/admin/portales-externos': 'admin_portales_externos',
   '/admin/aprobaciones': 'admin_aprobaciones',
   '/admin/reportes-programados': 'admin_reportes_programados',
@@ -1949,6 +1951,8 @@ const superAdminPlatformItems: SidebarItem[] = [
     roles: ['super_admin'],
     subItems: [
       { name: 'Actividad', href: '/admin/activity' },
+      { name: 'Llamadas IA (Retell)', href: '/admin/calls' },
+      { name: 'Captación Outbound', href: '/admin/outbound' },
       { name: 'Salud Sistema', href: '/admin/salud-sistema' },
       { name: 'Alertas', href: '/admin/alertas' },
       { name: 'Métricas de Uso', href: '/admin/metricas-uso' },

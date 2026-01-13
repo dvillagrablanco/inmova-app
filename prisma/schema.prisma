@@ -414,9 +414,10 @@ model User {
   suggestions Suggestion[]
 
   // CRM - Leads
-  leadsAsignados  Lead[]
-  actividadesLead LeadActivity[]
-  documentosLead  LeadDocument[]
+  leadsAsignados   Lead[]
+  actividadesLead  LeadActivity[]
+  documentosLead   LeadDocument[]
+  citasAsignadas   Appointment[]
 
   // Push Notifications
   pushSubscriptions PushSubscription[]
@@ -9212,18 +9213,35 @@ model Lead {
   mensajeInicial      String?  @db.Text
   preguntasFrecuentes String[] // Preguntas que hizo durante la conversación
 
+  // ========== OUTBOUND / CAPTACIÓN PROACTIVA ==========
+  // Datos de LinkedIn/PhantomBuster/Clay
+  linkedinUrl         String?  @unique // URL del perfil de LinkedIn
+  enrichmentData      Json?    // Datos enriquecidos de Clay/PhantomBuster
+  enrichmentSource    String?  // "phantombuster", "clay", "apollo", "manual"
+  
+  // Estado del proceso outbound
+  outboundStatus      String?  @default("NEW") // "NEW", "CONTACTED", "QUALIFIED", "REJECTED", "INCOMPLETE", "SCHEDULED"
+  outboundCallScheduledAt DateTime? // Fecha/hora programada para llamada
+  outboundCallAttempts    Int      @default(0) // Número de intentos de llamada
+  outboundLastAttemptAt   DateTime? // Última fecha de intento
+  outboundNotes           String?  @db.Text // Notas específicas del proceso outbound
+
   // Metadata
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relaciones
-  actividades LeadActivity[]
-  documentos  LeadDocument[]
+  actividades  LeadActivity[]
+  documentos   LeadDocument[]
+  appointments Appointment[]
+  llamadas     RetellCall[]
 
   @@index([companyId])
   @@index([estado])
   @@index([etapa])
   @@index([fuente])
+  @@index([linkedinUrl])
+  @@index([outboundStatus])
   @@index([temperatura])
   @@index([asignadoA])
   @@index([email])
@@ -9275,6 +9293,131 @@ model LeadDocument {
 
   @@index([leadId])
   @@map("lead_documents")
+}
+
+// Citas/Appointments del Lead (integración con Retell AI)
+model Appointment {
+  id     String @id @default(cuid())
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  // Información de la cita
+  titulo      String
+  descripcion String? @db.Text
+  tipo        String  @default("visita") // "visita", "llamada", "demo", "reunion_online"
+
+  // Fecha y hora
+  fechaInicio DateTime
+  fechaFin    DateTime
+  duracion    Int      @default(30) // Duración en minutos
+  zonaHoraria String   @default("Europe/Madrid")
+
+  // Estado
+  estado String @default("programada") // "programada", "confirmada", "completada", "cancelada", "no_asistio"
+
+  // Ubicación (para visitas presenciales)
+  ubicacion        String?
+  direccion        String?
+  coordenadas      Json? // { lat: number, lng: number }
+  esVirtual        Boolean @default(false)
+  enlaceReunion    String? // URL para reuniones virtuales
+
+  // Asignación
+  asignadoA       String?
+  asignadoUsuario User?   @relation(fields: [asignadoA], references: [id], onDelete: SetNull)
+
+  // Recordatorios
+  recordatorioEnviado Boolean   @default(false)
+  recordatorioFecha   DateTime?
+
+  // Notas y seguimiento
+  notas          String? @db.Text
+  notasInternas  String? @db.Text
+  resultado      String? // Resultado de la cita
+  proximosPasos  String? @db.Text
+
+  // Origen (Retell AI, manual, etc.)
+  origen           String  @default("manual") // "manual", "retell_ai", "chatbot", "web"
+  retellCallId     String? // ID de la llamada de Retell si aplica
+  conversacionJson Json?   // Transcript de la conversación si aplica
+
+  // Relaciones
+  retellCalls RetellCall[]
+
+  // Metadata
+  creadoPor String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([leadId])
+  @@index([fechaInicio])
+  @@index([estado])
+  @@index([asignadoA])
+  @@index([retellCallId])
+  @@map("appointments")
+}
+
+// Llamadas de Retell AI
+model RetellCall {
+  id String @id @default(cuid())
+
+  // Identificadores de Retell
+  retellCallId   String  @unique // ID de la llamada en Retell
+  retellAgentId  String? // ID del agente en Retell
+
+  // Información del contacto
+  fromNumber     String? // Número que llama
+  toNumber       String? // Número que recibe
+  leadId         String? // Lead asociado si existe
+  lead           Lead?   @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  // Estado y duración
+  status         String  @default("in_progress") // "in_progress", "ended", "error", "voicemail"
+  direction      String  @default("inbound") // "inbound", "outbound"
+  duracionSegundos Int?
+  
+  // Grabación
+  recordingUrl   String? @db.Text
+  recordingDuration Int? // Duración de la grabación en segundos
+
+  // Transcripción
+  transcript     Json?   // Array de mensajes [{role, content, timestamp}]
+  transcriptText String? @db.Text // Texto plano de la transcripción
+  
+  // Resumen generado por IA
+  resumen        String? @db.Text
+  sentimiento    String? // "positivo", "neutral", "negativo"
+  intencion      String? // "agendar_cita", "consulta", "queja", "otro"
+  
+  // Datos extraídos
+  datosExtraidos Json?   // { nombre, email, telefono, numPropiedades, etc. }
+  accionesRealizadas Json? // Array de acciones ejecutadas durante la llamada
+  
+  // Resultado
+  resultado      String? // "cita_agendada", "lead_cualificado", "no_interesado", "callback", etc.
+  appointmentId  String? // Si se agendó una cita
+  appointment    Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  // Costos (si Retell proporciona esta info)
+  costoMinutos   Float?
+  costoTotal     Float?
+
+  // Metadata
+  metadata       Json?
+  errorMessage   String? @db.Text
+
+  // Timestamps
+  startedAt      DateTime @default(now())
+  endedAt        DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([retellCallId])
+  @@index([fromNumber])
+  @@index([leadId])
+  @@index([status])
+  @@index([startedAt])
+  @@map("retell_calls")
 }
 
 // ===========================

@@ -170,8 +170,23 @@ export default function PartnerInvitacionesPage() {
   };
 
   const handleResend = async (id: string) => {
-    // TODO: Implementar reenvío de invitación
-    toast.success('Invitación reenviada');
+    try {
+      const response = await fetch(`/api/admin/partners/invitations/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'resend' }),
+      });
+
+      if (response.ok) {
+        toast.success('Invitación reenviada correctamente');
+      } else {
+        const data = await response.json();
+        toast.error(data.error || 'Error al reenviar invitación');
+      }
+    } catch (error) {
+      console.error('Error reenviando invitación:', error);
+      toast.error('Error al reenviar invitación');
+    }
   };
 
   const handleCopyLink = (link: string) => {

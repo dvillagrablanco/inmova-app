@@ -96,6 +96,85 @@ export async function PUT(
   }
 }
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || session.user.role !== 'SUPERADMIN') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { action } = body;
+
+    const { getPrismaClient } = await import('@/lib/db');
+    const prisma = getPrismaClient();
+
+    const invitation = await prisma.partner.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!invitation) {
+      return NextResponse.json({ error: 'Invitación no encontrada' }, { status: 404 });
+    }
+
+    // Manejar acción de reenviar
+    if (action === 'resend') {
+      // Solo permitir reenviar si está en estado PENDING
+      if (invitation.status !== 'PENDING') {
+        return NextResponse.json(
+          { error: 'Solo se pueden reenviar invitaciones pendientes' },
+          { status: 400 }
+        );
+      }
+
+      // Actualizar updatedAt para registrar el reenvío
+      await prisma.partner.update({
+        where: { id: params.id },
+        data: {
+          updatedAt: new Date(),
+        },
+      });
+
+      // Enviar email de invitación
+      try {
+        const { sendEmail } = await import('@/lib/email-service');
+        await sendEmail({
+          to: invitation.email,
+          subject: 'Recordatorio: Invitación al programa de Partners de INMOVA',
+          template: 'partner-invitation-reminder',
+          data: {
+            nombre: invitation.contactName || invitation.companyName,
+            empresa: invitation.companyName,
+            invitationLink: `https://inmovaapp.com/partners/join?token=${invitation.id}`,
+            comision: invitation.commissionRate || 15,
+          },
+        });
+      } catch (emailError) {
+        console.warn('[Partner Invitation] No se pudo enviar el email:', emailError);
+        // Continuar aunque falle el email
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: 'Invitación reenviada correctamente',
+        data: {
+          id: invitation.id,
+          email: invitation.email,
+          resentAt: new Date().toISOString(),
+        },
+      });
+    }
+
+    return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
+  } catch (error: any) {
+    console.error('[Partner Invitation PATCH Error]:', error);
+    return NextResponse.json({ error: 'Error procesando solicitud' }, { status: 500 });
+  }
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }

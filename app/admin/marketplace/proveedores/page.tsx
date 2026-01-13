@@ -90,7 +90,6 @@ export default function MarketplaceProveedoresPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      // TODO: Conectar con API real cuando existan proveedores
       const response = await fetch('/api/admin/marketplace/providers');
       if (response.ok) {
         const data = await response.json();
