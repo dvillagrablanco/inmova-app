@@ -153,14 +153,141 @@ function DashboardPageContent() {
     );
   }
 
-  if (!session || !data || !data.kpis) {
+  // Estado vacío elegante - cuando no hay datos reales
+  const isEmptyState = !data || !data.kpis || (
+    data.kpis.numeroPropiedades === 0 && 
+    data.kpis.ingresosTotalesMensuales === 0 &&
+    data.kpis.tasaOcupacion === 0
+  );
+
+  if (!session) {
     return (
       <AuthenticatedLayout>
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
-            <p className="text-gray-600">No hay datos disponibles</p>
+            <p className="text-gray-600">Cargando sesión...</p>
           </div>
         </div>
+      </AuthenticatedLayout>
+    );
+  }
+
+  if (isEmptyState) {
+    return (
+      <AuthenticatedLayout maxWidth="7xl">
+        <div className="max-w-4xl mx-auto py-12">
+          {/* Header de bienvenida */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mb-6 shadow-lg">
+              <Building2 className="w-10 h-10 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-3">
+              ¡Bienvenido a Inmova, {session?.user?.name || 'Usuario'}!
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Tu plataforma de gestión inmobiliaria está lista. Comienza añadiendo tus propiedades para ver métricas y análisis en tiempo real.
+            </p>
+          </div>
+
+          {/* Pasos para comenzar */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Primeros pasos</h2>
+            <div className="grid gap-4 md:grid-cols-3">
+              <Link 
+                href="/edificios/nuevo-wizard"
+                className="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl hover:from-indigo-50 hover:to-purple-50 transition-all border border-gray-200 hover:border-indigo-200"
+              >
+                <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-200 transition-colors">
+                  <Building2 className="w-6 h-6 text-indigo-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">1. Añadir Edificio</h3>
+                <p className="text-sm text-gray-600">Registra tu primer edificio o propiedad para comenzar</p>
+              </Link>
+
+              <Link 
+                href="/unidades/nuevo"
+                className="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl hover:from-indigo-50 hover:to-purple-50 transition-all border border-gray-200 hover:border-indigo-200"
+              >
+                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-purple-200 transition-colors">
+                  <Home className="w-6 h-6 text-purple-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">2. Crear Unidades</h3>
+                <p className="text-sm text-gray-600">Define las unidades, pisos o locales de tu propiedad</p>
+              </Link>
+
+              <Link 
+                href="/inquilinos/nuevo"
+                className="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl hover:from-indigo-50 hover:to-purple-50 transition-all border border-gray-200 hover:border-indigo-200"
+              >
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-200 transition-colors">
+                  <TrendingUp className="w-6 h-6 text-emerald-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">3. Gestionar Inquilinos</h3>
+                <p className="text-sm text-gray-600">Añade inquilinos y crea contratos de alquiler</p>
+              </Link>
+            </div>
+          </div>
+
+          {/* KPIs vacíos con estilo */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+              <div className="flex items-center gap-3 mb-2">
+                <TrendingUp className="w-5 h-5 text-gray-400" />
+                <span className="text-sm text-gray-500">Ingresos</span>
+              </div>
+              <p className="text-2xl font-bold text-gray-300">€0</p>
+            </div>
+            <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+              <div className="flex items-center gap-3 mb-2">
+                <Building2 className="w-5 h-5 text-gray-400" />
+                <span className="text-sm text-gray-500">Propiedades</span>
+              </div>
+              <p className="text-2xl font-bold text-gray-300">0</p>
+            </div>
+            <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+              <div className="flex items-center gap-3 mb-2">
+                <Percent className="w-5 h-5 text-gray-400" />
+                <span className="text-sm text-gray-500">Ocupación</span>
+              </div>
+              <p className="text-2xl font-bold text-gray-300">0%</p>
+            </div>
+            <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+              <div className="flex items-center gap-3 mb-2">
+                <AlertTriangle className="w-5 h-5 text-gray-400" />
+                <span className="text-sm text-gray-500">Morosidad</span>
+              </div>
+              <p className="text-2xl font-bold text-gray-300">0%</p>
+            </div>
+          </div>
+
+          {/* Recursos adicionales */}
+          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-8 border border-indigo-100">
+            <h3 className="font-semibold text-gray-900 mb-4">¿Necesitas ayuda?</h3>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                href="/knowledge-base"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-200"
+              >
+                📚 Base de conocimientos
+              </Link>
+              <Link 
+                href="/soporte"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-200"
+              >
+                💬 Soporte técnico
+              </Link>
+              <Link 
+                href="/landing/demo"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-200"
+              >
+                🎥 Ver demo
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Chatbot de soporte */}
+        <IntelligentSupportChatbot />
       </AuthenticatedLayout>
     );
   }
