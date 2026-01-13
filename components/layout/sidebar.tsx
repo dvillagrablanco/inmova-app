@@ -2663,7 +2663,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.favorites && (
                   <div className="space-y-1 mt-1">
                     {favoriteItems.map((item) => (
-                      <NavItem key={item.href} item={item} showFavoriteButton={false} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -2687,7 +2687,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.dashboard && (
                   <div className="space-y-1 mt-1">
                     {filteredDashboardItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -2848,21 +2848,21 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   <div className="space-y-1 mt-1">
                     {/* Alquiler Tradicional */}
                     {filteredAlquilerResidencialItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {/* Coliving / Habitaciones */}
                     {filteredCoLivingItems.length > 0 && (
                       <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">Coliving</div>
                     )}
                     {filteredCoLivingItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {/* Student Housing */}
                     {filteredStudentHousingItems.length > 0 && (
                       <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">Student Housing</div>
                     )}
                     {filteredStudentHousingItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -2882,7 +2882,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.str && (
                   <div className="space-y-1 mt-1">
                     {filteredStrItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -2912,31 +2912,31 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                       <div className="ml-2 mt-1 mb-1 text-[9px] text-gray-500 uppercase">Obra Nueva / Reformas</div>
                     )}
                     {filteredConstruccionItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {filteredBuildToRentItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {/* Flipping */}
                     {filteredFlippingItems.length > 0 && (
                       <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">House Flipping</div>
                     )}
                     {filteredFlippingItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {/* Promociones Inmobiliarias */}
                     {filteredRealEstateDeveloperItems.length > 0 && (
                       <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">Promociones</div>
                     )}
                     {filteredRealEstateDeveloperItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {/* eWoorker - Marketplace B2B */}
                     {filteredEwoorkerItems.length > 0 && (
                       <div className="ml-2 mt-2 mb-1 text-[9px] text-amber-500 uppercase">🔧 eWoorker (B2B)</div>
                     )}
                     {filteredEwoorkerItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -2961,25 +2961,25 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   <div className="space-y-1 mt-1">
                     {/* Servicios Profesionales */}
                     {filteredComercialItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {/* Oficinas, Locales, Naves */}
                     {filteredAlquilerComercialItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {/* Naves y Logística */}
                     {filteredWarehouseItems.length > 0 && (
                       <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">Logística / Almacenes</div>
                     )}
                     {filteredWarehouseItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {/* Workspace / Coworking */}
                     {filteredWorkspaceItems.length > 0 && (
                       <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">Workspace</div>
                     )}
                     {filteredWorkspaceItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -3021,7 +3021,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.adminFincas && (
                   <div className="space-y-1 mt-1">
                     {filteredAdminFincasItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -3047,7 +3047,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.viviendaSocial && (
                   <div className="space-y-1 mt-1">
                     {filteredViviendaSocialItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -3099,7 +3099,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.finanzas && (
                   <div className="space-y-1 mt-1">
                     {filteredFinanzasItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -3123,7 +3123,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.analytics && (
                   <div className="space-y-1 mt-1">
                     {filteredAnalyticsItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -3147,7 +3147,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.operaciones && (
                   <div className="space-y-1 mt-1">
                     {filteredOperacionesItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -3195,7 +3195,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.comunicaciones && (
                   <div className="space-y-1 mt-1">
                     {filteredComunicacionesItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -3219,7 +3219,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.documentosLegal && (
                   <div className="space-y-1 mt-1">
                     {filteredDocumentosLegalItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -3243,7 +3243,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.crmMarketing && (
                   <div className="space-y-1 mt-1">
                     {filteredCrmMarketingItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -3267,7 +3267,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.automatizacion && (
                   <div className="space-y-1 mt-1">
                     {filteredAutomatizacionItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -3291,7 +3291,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.innovacion && (
                   <div className="space-y-1 mt-1">
                     {filteredInnovacionItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -3315,7 +3315,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.soporte && (
                   <div className="space-y-1 mt-1">
                     {filteredSoporteItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
@@ -3344,7 +3344,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.operador && (
                   <div className="space-y-1 mt-1">
                     {filteredOperadorItems.map((item) => (
-                      <NavItem key={item.href} item={item} />
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
                 )}
