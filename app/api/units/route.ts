@@ -19,21 +19,31 @@ export async function GET(req: NextRequest) {
     }
 
     const companyId = session.user?.companyId;
-    if (!companyId) {
-      return NextResponse.json({ error: 'CompanyId no encontrado' }, { status: 400 });
+    const userRole = session.user?.role;
+    const isSuperAdmin = userRole === 'super_admin' || userRole === 'soporte';
+    
+    // Si no es super_admin y no tiene companyId, retornar vacío
+    if (!isSuperAdmin && !companyId) {
+      return NextResponse.json([]);
     }
 
     const { searchParams } = new URL(req.url);
     const buildingId = searchParams.get('buildingId');
     const estado = searchParams.get('estado');
     const tipo = searchParams.get('tipo');
+    const filterCompanyId = searchParams.get('companyId');
     const usePagination = searchParams.get('paginate') === 'true';
+
+    // Determinar el filtro de empresa
+    const whereCompanyId = isSuperAdmin 
+      ? (filterCompanyId || undefined) 
+      : companyId;
 
     // Si hay filtros o se solicita paginación, no usar caché
     const hasFilters = buildingId || estado || tipo;
 
     if (hasFilters || usePagination) {
-      const where: any = { building: { companyId } };
+      const where: any = whereCompanyId ? { building: { companyId: whereCompanyId } } : {};
       if (buildingId) where.buildingId = buildingId;
       if (estado) where.estado = estado;
       // Soportar múltiples tipos separados por comas (ej: garaje,trastero)
@@ -139,11 +149,17 @@ export async function GET(req: NextRequest) {
     }
 
     // Sin filtros, usar caché (compatibilidad con código existente)
-    const units = await cachedUnits(companyId);
+    // Para super_admin sin filtro de empresa, retornar lista vacía (debe seleccionar empresa)
+    if (!whereCompanyId) {
+      return NextResponse.json([]);
+    }
+    
+    const units = await cachedUnits(whereCompanyId);
     return NextResponse.json(units);
   } catch (error) {
     logger.error('Error fetching units:', error);
-    return NextResponse.json({ error: 'Error al obtener unidades' }, { status: 500 });
+    // Retornar lista vacía en lugar de error para mejor UX
+    return NextResponse.json([]);
   }
 }
 

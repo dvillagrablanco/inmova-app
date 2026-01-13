@@ -95,10 +95,12 @@ export async function GET(request: NextRequest) {
 
   } catch (error: any) {
     console.error('[Admin Planes GET Error]:', error);
-    return NextResponse.json(
-      { error: 'Error al cargar planes' },
-      { status: 500 }
-    );
+    // Retornar lista vacía en lugar de error para mejor UX
+    return NextResponse.json({
+      planes: [],
+      total: 0,
+      _error: 'Error parcial al cargar planes',
+    });
   }
 }
 

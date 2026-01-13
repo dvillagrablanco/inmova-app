@@ -12,31 +12,58 @@ export async function GET(req: NextRequest) {
   try {
     const user = await requireAuth();
     const companyId = user.companyId;
+    const isSuperAdmin = user.role === 'super_admin' || user.role === 'soporte';
 
     // Obtener parámetros de paginación
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const skip = (page - 1) * limit;
+    const filterCompanyId = searchParams.get('companyId');
+
+    // Determinar el filtro de empresa
+    // Super_admin puede ver todos o filtrar por empresa específica
+    // Usuarios normales solo ven su empresa
+    const whereCompanyId = isSuperAdmin 
+      ? (filterCompanyId || undefined) 
+      : companyId;
+
+    // Si el usuario no es super_admin y no tiene companyId, retornar vacío
+    if (!isSuperAdmin && !companyId) {
+      return NextResponse.json([]);
+    }
 
     // Si no hay paginación solicitada (página 1 con limit 10 o sin params), usar cache
     const usePagination = searchParams.has('page') || searchParams.has('limit');
     
-    if (!usePagination) {
+    if (!usePagination && whereCompanyId) {
       // Usar datos cacheados para vista completa (por compatibilidad)
-      const buildingsWithMetrics = await cachedBuildings(companyId);
+      const buildingsWithMetrics = await cachedBuildings(whereCompanyId);
       return NextResponse.json(buildingsWithMetrics);
+    }
+    
+    // Si es super_admin sin filtro, mostrar mensaje informativo
+    if (isSuperAdmin && !whereCompanyId && !usePagination) {
+      return NextResponse.json([]);
     }
 
     // Paginación: consulta directa sin cache
+    const whereClause = whereCompanyId ? { companyId: whereCompanyId } : {};
+    
     const [buildings, total] = await Promise.all([
       prisma.building.findMany({
-        where: { companyId },
+        where: whereClause,
         include: {
           units: {
             select: {
               id: true,
               estado: true,
+            },
+          },
+          company: {
+            select: {
+              id: true,
+              nombre: true,
             },
           },
         },
@@ -45,7 +72,7 @@ export async function GET(req: NextRequest) {
         take: limit,
       }),
       prisma.building.count({
-        where: { companyId },
+        where: whereClause,
       }),
     ]);
 
@@ -66,6 +93,7 @@ export async function GET(req: NextRequest) {
         anoConstructor: building.anoConstructor,
         numeroUnidades: building.numeroUnidades,
         companyId: building.companyId,
+        company: (building as any).company,
         createdAt: building.createdAt,
         updatedAt: building.updatedAt,
         totalUnidades: totalUnits,

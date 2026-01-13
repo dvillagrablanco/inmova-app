@@ -22,8 +22,12 @@ export async function GET(req: NextRequest) {
     }
 
     const companyId = session.user?.companyId;
-    if (!companyId) {
-      return NextResponse.json({ error: 'CompanyId no encontrado' }, { status: 400 });
+    const userRole = session.user?.role;
+    const isSuperAdmin = userRole === 'super_admin' || userRole === 'soporte';
+
+    // Si el usuario no es super_admin y no tiene companyId, retornar vacío
+    if (!isSuperAdmin && !companyId) {
+      return NextResponse.json([]);
     }
 
     // Obtener parámetros de paginación
@@ -31,30 +35,50 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '15');
     const skip = (page - 1) * limit;
+    const filterCompanyId = searchParams.get('companyId');
 
-    // Si no hay paginación solicitada, usar cache
+    // Determinar el filtro de empresa
+    const whereCompanyId = isSuperAdmin 
+      ? (filterCompanyId || undefined) 
+      : companyId;
+
+    // Construir where clause
+    const whereClause = whereCompanyId ? {
+      unit: {
+        building: {
+          companyId: whereCompanyId,
+        },
+      },
+    } : {};
+
+    // Si no hay paginación solicitada, usar cache si tiene companyId
     const usePagination = searchParams.has('page') || searchParams.has('limit');
 
-    if (!usePagination) {
+    if (!usePagination && whereCompanyId) {
       // Usar datos cacheados
-      const contractsWithExpiration = await cachedContracts(companyId);
+      const contractsWithExpiration = await cachedContracts(whereCompanyId);
       return NextResponse.json(contractsWithExpiration);
+    }
+
+    // Si es super_admin sin filtro y sin paginación, retornar lista vacía
+    if (isSuperAdmin && !whereCompanyId && !usePagination) {
+      return NextResponse.json([]);
     }
 
     // Paginación activada: consulta directa
     const [contracts, total] = await Promise.all([
       prisma.contract.findMany({
-        where: {
-          unit: {
-            building: {
-              companyId,
-            },
-          },
-        },
+        where: whereClause,
         include: {
           unit: {
             include: {
-              building: true,
+              building: {
+                include: {
+                  company: {
+                    select: { id: true, nombre: true },
+                  },
+                },
+              },
             },
           },
           tenant: true,
@@ -64,13 +88,7 @@ export async function GET(req: NextRequest) {
         take: limit,
       }),
       prisma.contract.count({
-        where: {
-          unit: {
-            building: {
-              companyId,
-            },
-          },
-        },
+        where: whereClause,
       }),
     ]);
 

@@ -10,19 +10,33 @@ export const runtime = 'nodejs';
 export async function GET(req: NextRequest) {
   try {
     const user = await requireAuth();
+    const isSuperAdmin = user.role === 'super_admin' || user.role === 'soporte';
 
     // Obtener parámetros de paginación
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
+    const filterCompanyId = searchParams.get('companyId');
+
+    // Determinar el filtro de empresa
+    const whereCompanyId = isSuperAdmin 
+      ? (filterCompanyId || undefined) 
+      : user.companyId;
+
+    // Si el usuario no es super_admin y no tiene companyId, retornar vacío
+    if (!isSuperAdmin && !user.companyId) {
+      return NextResponse.json([]);
+    }
+
+    const whereClause = whereCompanyId ? { companyId: whereCompanyId } : {};
 
     // Si no hay paginación solicitada, devolver todos (compatibilidad)
     const usePagination = searchParams.has('page') || searchParams.has('limit');
 
     if (!usePagination) {
       const tenants = await prisma.tenant.findMany({
-        where: { companyId: user.companyId },
+        where: whereClause,
         include: {
           units: {
             include: {
@@ -32,8 +46,12 @@ export async function GET(req: NextRequest) {
           contracts: {
             where: { estado: 'activo' },
           },
+          company: {
+            select: { id: true, nombre: true },
+          },
         },
         orderBy: { createdAt: 'desc' },
+        take: isSuperAdmin && !whereCompanyId ? 100 : undefined, // Limitar si ve todos
       });
       return NextResponse.json(tenants);
     }
@@ -41,7 +59,7 @@ export async function GET(req: NextRequest) {
     // Paginación activada
     const [tenants, total] = await Promise.all([
       prisma.tenant.findMany({
-        where: { companyId: user.companyId },
+        where: whereClause,
         include: {
           units: {
             include: {
@@ -51,13 +69,16 @@ export async function GET(req: NextRequest) {
           contracts: {
             where: { estado: 'activo' },
           },
+          company: {
+            select: { id: true, nombre: true },
+          },
         },
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
       }),
       prisma.tenant.count({
-        where: { companyId: user.companyId },
+        where: whereClause,
       }),
     ]);
 

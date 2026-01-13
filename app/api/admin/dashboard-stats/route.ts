@@ -318,9 +318,52 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error fetching admin dashboard stats:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener estadísticas' },
-      { status: 500 }
-    );
+    // En caso de error, retornar datos por defecto en lugar de error 500
+    // Esto permite que el dashboard se renderice aunque haya problemas de BD
+    return NextResponse.json({
+      overview: {
+        totalCompanies: 0,
+        activeCompanies: 0,
+        trialCompanies: 0,
+        suspendedCompanies: 0,
+        totalUsers: 0,
+        activeUsers: 0,
+        totalBuildings: 0,
+        totalUnits: 0,
+        totalTenants: 0,
+        activeTenants: 0,
+        totalContracts: 0,
+        activeContracts: 0,
+        occupancyRate: 0,
+        newCompaniesLast30Days: 0,
+        newCompaniesLast90Days: 0,
+        newUsersLast30Days: 0,
+        newBuildingsLast30Days: 0,
+        churnRate: 0,
+        churnedCompanies: 0,
+        monthlyRevenue: 0,
+      },
+      financial: {
+        mrr: 0,
+        arr: 0,
+        monthlyRevenue: 0,
+        lastMonthRevenue: 0,
+        revenueGrowth: 0,
+      },
+      growth: {
+        newCompaniesLast30Days: 0,
+        newCompaniesLast90Days: 0,
+        newUsersLast30Days: 0,
+        newBuildingsLast30Days: 0,
+        trialToActiveRate: 0,
+      },
+      subscriptionBreakdown: [],
+      historicalData: [],
+      recentActivity: [],
+      topCompaniesByProperties: [],
+      companiesNeedingAttention: [],
+      _error: 'Error parcial al obtener estadísticas',
+      _cache: { overview: false, financial: false, historical: false },
+    });
   }
 }
