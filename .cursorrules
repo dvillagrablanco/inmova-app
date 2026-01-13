@@ -55,6 +55,16 @@ Cursor Settings → AI → Temperature → 0.3
 Espero que esto resuelva tu problema. ¡Déjame saber si necesitas algo más!
 ```
 
+### 🕵️ PROTOCOLO DE VERIFICACIÓN (NO CONFÍES, VERIFICA)
+
+1. **Prohibido el Optimismo:** Nunca asumas que tu código funciona solo porque la sintaxis es correcta. Asume siempre que puede fallar en tiempo de ejecución.
+
+2. **Verificación de Importaciones:** Antes de dar por finalizada una tarea, verifica que no has importado componentes que no existen o rutas relativas rotas (`../../`).
+
+3. **UI Check:** Si modificas elementos interactivos (botones, inputs), pregúntate: "¿He tapado este elemento con otro div? ¿Tiene `pointer-events: none`? ¿Está el `onClick` bien vinculado?".
+
+4. **Si no puedes probarlo tú:** Si no puedes ejecutar el código, PÍDEME que lo pruebe y dime exactamente qué buscar (ej: "Por favor, abre la consola del navegador y dime si aparece el error X"). No digas "Ya está arreglado", di "He aplicado una posible solución, verifícala".
+
 ### 🔄 Continuidad de Contexto entre Sesiones
 
 **AL INICIAR UNA NUEVA SESIÓN/CHAT:**
