@@ -259,7 +259,7 @@ export default function ComplianceLandingPage() {
       <footer className="bg-gray-900 text-white py-8 px-4">
         <div className="container mx-auto max-w-6xl text-center">
           <p className="text-gray-400">
-            © {new Date().getFullYear()} eWoorker by INMOVA. Todos los derechos reservados.
+            © 2026 eWoorker by INMOVA. Todos los derechos reservados.
           </p>
           <div className="mt-4 flex justify-center gap-6 text-sm">
             <Link href="/landing/legal/privacidad" className="text-gray-400 hover:text-white">

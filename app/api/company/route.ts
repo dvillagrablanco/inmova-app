@@ -8,7 +8,8 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 // GET - Obtener información de la empresa del usuario
-export async function GET() {
+// Para super_admin: acepta ?companyId= para obtener empresa seleccionada
+export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -16,7 +17,20 @@ export async function GET() {
     }
 
     const user = session.user as any;
-    const companyId = user.companyId;
+    
+    // Para super_admin: permitir seleccionar empresa vía query param
+    let companyId = user.companyId;
+    if (user.role === 'super_admin') {
+      const { searchParams } = new URL(req.url);
+      const selectedCompanyId = searchParams.get('companyId');
+      if (selectedCompanyId) {
+        companyId = selectedCompanyId;
+      }
+    }
+
+    if (!companyId) {
+      return NextResponse.json({ error: 'No hay empresa asociada' }, { status: 404 });
+    }
 
     const company = await prisma.company.findUnique({
       where: { id: companyId },
@@ -34,6 +48,7 @@ export async function GET() {
 }
 
 // PATCH - Actualizar información de la empresa (solo administradores)
+// Para super_admin: acepta ?companyId= para actualizar empresa seleccionada
 export async function PATCH(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -49,7 +64,20 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const companyId = user.companyId;
+    // Para super_admin: permitir actualizar empresa seleccionada vía query param
+    let companyId = user.companyId;
+    if (user.role === 'super_admin') {
+      const { searchParams } = new URL(req.url);
+      const selectedCompanyId = searchParams.get('companyId');
+      if (selectedCompanyId) {
+        companyId = selectedCompanyId;
+      }
+    }
+
+    if (!companyId) {
+      return NextResponse.json({ error: 'No hay empresa para actualizar' }, { status: 400 });
+    }
+
     const body = await req.json();
 
     const company = await prisma.company.update({

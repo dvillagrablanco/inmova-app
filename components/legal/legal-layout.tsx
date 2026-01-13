@@ -82,8 +82,8 @@ export function LegalLayout({ children, title, lastUpdated }: LegalLayoutProps) 
       {/* Footer */}
       <footer className="bg-white border-t mt-12">
         <div className="max-w-4xl mx-auto px-4 py-6">
-          <p className="text-sm text-gray-500 text-center">
-            © {new Date().getFullYear()} Inmova App. Todos los derechos reservados.
+          <p className="text-sm text-gray-500 text-center" suppressHydrationWarning>
+            © 2026 Inmova App. Todos los derechos reservados.
           </p>
         </div>
       </footer>

@@ -200,7 +200,7 @@ export default function EwoorkerLoginPage() {
       {/* Footer */}
       <footer className="bg-white border-t border-orange-200 py-4">
         <div className="max-w-7xl mx-auto px-4 text-center text-sm text-gray-600">
-          <p>© {new Date().getFullYear()} eWoorker by Inmova. Todos los derechos reservados.</p>
+          <p suppressHydrationWarning>© 2026 eWoorker by Inmova. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>

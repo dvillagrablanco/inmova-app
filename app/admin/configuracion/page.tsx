@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import { useSelectedCompany } from '@/lib/hooks/admin/useSelectedCompany';
 
 import {
   Building2,
@@ -15,6 +16,7 @@ import {
   Globe,
   MapPin,
   FileText,
+  AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ButtonWithLoading } from '@/components/ui/button-with-loading';
@@ -22,6 +24,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -58,6 +61,7 @@ export default function ConfiguracionPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const { isAdmin } = usePermissions();
+  const { selectedCompany } = useSelectedCompany();
   const [company, setCompany] = useState<Company | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -70,6 +74,8 @@ export default function ConfiguracionPage() {
     ciudad: '',
     codigoPostal: '',
   });
+
+  const isSuperAdmin = (session?.user as any)?.role === 'super_admin';
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -86,7 +92,12 @@ export default function ConfiguracionPage() {
   useEffect(() => {
     const fetchCompany = async () => {
       try {
-        const response = await fetch('/api/company');
+        // Para super_admin: usar empresa seleccionada si existe
+        const companyIdParam = isSuperAdmin && selectedCompany?.id 
+          ? `?companyId=${selectedCompany.id}` 
+          : '';
+        
+        const response = await fetch(`/api/company${companyIdParam}`);
         if (response.ok) {
           const data = await response.json();
           setCompany(data);
@@ -111,7 +122,7 @@ export default function ConfiguracionPage() {
     if (status === 'authenticated' && isAdmin) {
       fetchCompany();
     }
-  }, [status, isAdmin]);
+  }, [status, isAdmin, isSuperAdmin, selectedCompany?.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,7 +135,12 @@ export default function ConfiguracionPage() {
     setIsSaving(true);
 
     try {
-      const response = await fetch('/api/company', {
+      // Para super_admin: usar empresa seleccionada si existe
+      const companyIdParam = isSuperAdmin && selectedCompany?.id 
+        ? `?companyId=${selectedCompany.id}` 
+        : '';
+      
+      const response = await fetch(`/api/company${companyIdParam}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -194,11 +210,25 @@ export default function ConfiguracionPage() {
               </Breadcrumb>
             </div>
 
+            {/* Indicador de empresa seleccionada para super_admin */}
+            {isSuperAdmin && selectedCompany && (
+              <Alert className="border-blue-200 bg-blue-50">
+                <AlertCircle className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-blue-800">
+                  Configurando empresa: <strong>{selectedCompany.nombre}</strong>
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Header Section */}
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">Configuración de Empresa</h1>
-                <p className="text-muted-foreground">Gestiona la información de tu empresa</p>
+                <p className="text-muted-foreground">
+                  {isSuperAdmin && selectedCompany 
+                    ? `Configurando: ${selectedCompany.nombre}`
+                    : 'Gestiona la información de tu empresa'}
+                </p>
               </div>
             </div>
 
