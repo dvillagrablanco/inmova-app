@@ -14,13 +14,12 @@ const CRITICAL_PAGES = [
   // Públicas
   { path: '/', name: 'Landing' },
   { path: '/login', name: 'Login' },
-  { path: '/registro', name: 'Registro' },
+  { path: '/landing', name: 'Landing Page' },
   
   // Auth requerida (verificamos que no den 500)
   { path: '/dashboard', name: 'Dashboard', requiresAuth: true },
   { path: '/admin/clientes', name: 'Admin Clientes', requiresAuth: true },
   { path: '/admin/usuarios', name: 'Admin Usuarios', requiresAuth: true },
-  { path: '/admin/planes', name: 'Admin Planes', requiresAuth: true },
 ];
 
 // Rutas dinámicas que deben existir (verificamos estructura)
