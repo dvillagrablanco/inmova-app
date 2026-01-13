@@ -225,32 +225,42 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Crear empresa
+    // Crear empresa - limpiar campos vacíos
+    const companyData: any = {
+      nombre: data.nombre,
+      cif: data.cif || null,
+      direccion: data.direccion || null,
+      telefono: data.telefono || null,
+      email: data.email || null,
+      logoUrl: data.logoUrl || null,
+      codigoPostal: data.codigoPostal || null,
+      ciudad: data.ciudad || null,
+      pais: data.pais || 'España',
+      dominioPersonalizado: data.dominioPersonalizado || null,
+      estadoCliente: data.estadoCliente || 'activo',
+      contactoPrincipal: data.contactoPrincipal || null,
+      emailContacto: data.emailContacto || null,
+      telefonoContacto: data.telefonoContacto || null,
+      notasAdmin: data.notasAdmin || null,
+      maxUsuarios: data.maxUsuarios || 5,
+      maxPropiedades: data.maxPropiedades || 10,
+      maxEdificios: data.maxEdificios || 5,
+      activo: data.activo !== undefined ? data.activo : true,
+      esEmpresaPrueba: data.esEmpresaPrueba || false,
+    };
+
+    // Solo añadir subscriptionPlanId si tiene valor
+    if (data.subscriptionPlanId && data.subscriptionPlanId.trim() !== '') {
+      companyData.subscriptionPlanId = data.subscriptionPlanId;
+    }
+
+    // Solo añadir parentCompanyId si tiene valor válido (no vacío)
+    if (data.parentCompanyId && data.parentCompanyId.trim() !== '') {
+      companyData.parentCompanyId = data.parentCompanyId;
+    }
+
     const company = await prisma.company.create({
-      data: {
-        nombre: data.nombre,
-        cif: data.cif,
-        direccion: data.direccion,
-        telefono: data.telefono,
-        email: data.email,
-        logoUrl: data.logoUrl,
-        codigoPostal: data.codigoPostal,
-        ciudad: data.ciudad,
-        pais: data.pais || 'España',
-        dominioPersonalizado: data.dominioPersonalizado,
-        estadoCliente: data.estadoCliente || 'activo',
-        contactoPrincipal: data.contactoPrincipal,
-        emailContacto: data.emailContacto,
-        telefonoContacto: data.telefonoContacto,
-        notasAdmin: data.notasAdmin,
-        maxUsuarios: data.maxUsuarios || 5,
-        maxPropiedades: data.maxPropiedades || 10,
-        maxEdificios: data.maxEdificios || 5,
-        subscriptionPlanId: data.subscriptionPlanId,
-        parentCompanyId: data.parentCompanyId,
-        activo: data.activo !== undefined ? data.activo : true,
-        esEmpresaPrueba: data.esEmpresaPrueba || false, // Marcar como empresa de prueba si se especifica
-      },
+      data: companyData,
       include: {
         subscriptionPlan: true,
         parentCompany: {
