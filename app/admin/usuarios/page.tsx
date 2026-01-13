@@ -121,10 +121,14 @@ export default function UsersPage() {
 
   const fetchCompanies = async () => {
     try {
-      const res = await fetch('/api/admin/companies');
+      const res = await fetch('/api/admin/companies?limit=100');
       if (res.ok) {
         const data = await res.json();
-        setCompanies(data.map((c: any) => ({ id: c.id, nombre: c.nombre })));
+        // La API devuelve { companies: [...], pagination: {...} }
+        const companiesList = data.companies || data;
+        if (Array.isArray(companiesList)) {
+          setCompanies(companiesList.map((c: any) => ({ id: c.id, nombre: c.nombre })));
+        }
       }
     } catch (error) {
       logger.error('Error loading companies:', error);

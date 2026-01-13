@@ -190,6 +190,21 @@ export default function ModulosAdminPage() {
     return companyModule?.activo || false;
   }
 
+  // Verificar si el plan actual tiene acceso total a todos los módulos
+  function hasTotalAccess(): boolean {
+    if (!currentPlan) return false;
+    const tier = currentPlan.tier?.toLowerCase();
+    return ['empresarial', 'enterprise', 'premium', 'personalizado', 'business'].includes(tier) ||
+      currentPlan.modulosIncluidos?.includes('*');
+  }
+
+  // Verificar si un módulo está incluido en el plan actual
+  function isModuleIncludedInPlan(codigo: string): boolean {
+    if (!currentPlan) return false;
+    if (hasTotalAccess()) return true;
+    return currentPlan.modulosIncluidos?.includes(codigo) || false;
+  }
+
   function getModulosByCategoria(categoria: string) {
     return modulos.filter((m) => m.categoria === categoria);
   }
@@ -260,6 +275,14 @@ export default function ModulosAdminPage() {
                     <CardDescription>
                       Información de tu suscripción y opciones de mejora
                     </CardDescription>
+                    {hasTotalAccess() && (
+                      <div className="mt-2 flex items-center gap-2 text-green-600">
+                        <CheckCircle className="h-4 w-4" />
+                        <span className="text-sm font-medium">
+                          Tu plan incluye acceso a TODOS los módulos disponibles
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <Badge
                     className={`text-lg px-4 py-2 ${
@@ -382,7 +405,11 @@ export default function ModulosAdminPage() {
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         {modulosCategoria.map((modulo) => {
                           const activo = isModuleActive(modulo.codigo);
+                          const incluidoEnPlan = isModuleIncludedInPlan(modulo.codigo);
+                          const tieneAccesoTotal = hasTotalAccess();
                           const isDisabled = modulo.esCore || updating === modulo.codigo;
+                          // Permitir activar si está incluido en el plan o si tiene acceso total
+                          const canToggle = !modulo.esCore && (incluidoEnPlan || tieneAccesoTotal);
 
                           return (
                             <div
@@ -390,7 +417,9 @@ export default function ModulosAdminPage() {
                               className={`p-4 border rounded-lg transition-all ${
                                 activo
                                   ? 'bg-green-50 border-green-200'
-                                  : 'bg-gray-50 border-gray-200'
+                                  : incluidoEnPlan || tieneAccesoTotal
+                                    ? 'bg-gray-50 border-gray-200'
+                                    : 'bg-orange-50 border-orange-200 opacity-75'
                               }`}
                             >
                               <div className="flex items-start justify-between gap-4">
@@ -407,6 +436,18 @@ export default function ModulosAdminPage() {
                                       <Badge variant="default" className="text-xs bg-green-600">
                                         <CheckCircle className="h-3 w-3 mr-1" />
                                         Activo
+                                      </Badge>
+                                    )}
+                                    {!incluidoEnPlan && !tieneAccesoTotal && !modulo.esCore && (
+                                      <Badge variant="outline" className="text-xs text-orange-600 border-orange-300">
+                                        <AlertCircle className="h-3 w-3 mr-1" />
+                                        Requiere upgrade
+                                      </Badge>
+                                    )}
+                                    {tieneAccesoTotal && !modulo.esCore && (
+                                      <Badge variant="outline" className="text-xs text-blue-600 border-blue-300">
+                                        <Star className="h-3 w-3 mr-1" />
+                                        Incluido en tu plan
                                       </Badge>
                                     )}
                                   </div>
@@ -433,14 +474,14 @@ export default function ModulosAdminPage() {
                                 <div className="flex flex-col items-center gap-2 flex-shrink-0">
                                   <Switch
                                     checked={activo}
-                                    disabled={isDisabled}
+                                    disabled={isDisabled || !canToggle}
                                     onCheckedChange={(checked) =>
                                       toggleModule(modulo.codigo, checked)
                                     }
                                     className="data-[state=checked]:bg-green-600"
                                   />
                                   <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
-                                    {activo ? 'Activo' : 'Inactivo'}
+                                    {activo ? 'Activo' : canToggle ? 'Inactivo' : 'Bloqueado'}
                                   </span>
                                 </div>
                               </div>
