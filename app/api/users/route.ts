@@ -21,7 +21,8 @@ const createUserSchema = z.object({
   role: z.enum(['administrador', 'gestor', 'operador', 'super_admin'], {
     message: 'Rol inválido',
   }),
-  companyId: z.string().uuid().optional(),
+  // companyId puede ser un UUID válido, null (sin empresa) o undefined
+  companyId: z.string().uuid().nullish(),
 });
 
 export async function GET() {
