@@ -50,6 +50,7 @@ import { InfoTooltip } from '@/components/ui/info-tooltip';
 import { PasswordGenerator } from '@/components/ui/password-generator';
 import { toast } from 'sonner';
 import { usePermissions } from '@/lib/hooks/usePermissions';
+import { useSelectedCompany } from '@/lib/hooks/admin/useSelectedCompany';
 import logger, { logError } from '@/lib/logger';
 
 interface User {
@@ -69,6 +70,7 @@ export default function UsersPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const { isAdmin } = usePermissions();
+  const { selectedCompany } = useSelectedCompany();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -182,17 +184,25 @@ export default function UsersPage() {
           toast.error(error.error || 'Error al actualizar usuario');
         }
       } else {
-        // Crear nuevo usuario (automáticamente en la empresa del admin actual)
+        // Crear nuevo usuario
+        // Si es super_admin y tiene empresa seleccionada, usar esa
+        // Si no, la API usará la empresa del usuario actual
+        const createData: any = {
+          email: formData.email,
+          name: formData.name,
+          password: formData.password,
+          role: formData.role,
+        };
+        
+        // Si es super_admin y tiene empresa seleccionada, enviarla
+        if (isSuperAdmin && selectedCompany?.id) {
+          createData.companyId = selectedCompany.id;
+        }
+
         const res = await fetch('/api/users', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: formData.email,
-            name: formData.name,
-            password: formData.password,
-            role: formData.role,
-            // No enviamos companyId - la API usará la empresa del usuario actual
-          }),
+          body: JSON.stringify(createData),
         });
 
         if (res.ok) {
@@ -299,7 +309,10 @@ export default function UsersPage() {
   };
 
   const isSuperAdmin = (session?.user as any)?.role === 'super_admin';
-  const currentUserCompany = (session?.user as any)?.company?.nombre || 'tu empresa';
+  // Para super_admin: usar empresa seleccionada, para admin: usar su empresa
+  const targetCompanyName = isSuperAdmin 
+    ? (selectedCompany?.nombre || 'Sin empresa seleccionada')
+    : ((session?.user as any)?.company?.nombre || 'tu empresa');
 
   const columns = [
     {
@@ -455,10 +468,21 @@ export default function UsersPage() {
                     ? 'Visualiza y gestiona los usuarios de todas las empresas' 
                     : 'Administra los usuarios de tu empresa'}
                 </p>
+                {isSuperAdmin && selectedCompany && (
+                  <p className="text-sm text-primary mt-1">
+                    📍 Empresa seleccionada: <strong>{selectedCompany.nombre}</strong>
+                  </p>
+                )}
+                {isSuperAdmin && !selectedCompany && (
+                  <p className="text-sm text-amber-600 mt-1">
+                    ⚠️ Selecciona una empresa en el menú lateral para crear usuarios
+                  </p>
+                )}
               </div>
               <Button
                 size="lg"
                 onClick={openCreateDialog}
+                disabled={isSuperAdmin && !selectedCompany}
                 className="shadow-md hover:shadow-lg transition-all"
               >
                 <Plus className="mr-2 h-5 w-5" />
@@ -528,7 +552,16 @@ export default function UsersPage() {
                   <DialogDescription>
                     {editingUser 
                       ? 'Actualiza la información del usuario'
-                      : `El nuevo usuario será creado en ${currentUserCompany}`}
+                      : (
+                        <>
+                          El nuevo usuario será creado en <strong>{targetCompanyName}</strong>
+                          {isSuperAdmin && !selectedCompany && (
+                            <span className="block text-amber-600 mt-1">
+                              ⚠️ Selecciona una empresa en el menú lateral antes de crear usuarios
+                            </span>
+                          )}
+                        </>
+                      )}
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
