@@ -293,7 +293,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json(company, { status: 201 });
+    return NextResponse.json({ company }, { status: 201 });
   } catch (error) {
     logger.error('Error creating company:', error);
     return NextResponse.json(
