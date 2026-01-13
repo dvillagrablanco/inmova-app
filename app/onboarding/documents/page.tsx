@@ -9,6 +9,7 @@
  */
 
 import { DocumentOnboardingWizard } from '@/components/onboarding/DocumentOnboardingWizard';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { useRouter } from 'next/navigation';
 
 export default function DocumentOnboardingPage() {
@@ -23,9 +24,11 @@ export default function DocumentOnboardingPage() {
   };
 
   return (
-    <DocumentOnboardingWizard
-      onComplete={handleComplete}
-      onSkip={handleSkip}
-    />
+    <AuthenticatedLayout maxWidth="6xl">
+      <DocumentOnboardingWizard
+        onComplete={handleComplete}
+        onSkip={handleSkip}
+      />
+    </AuthenticatedLayout>
   );
 }
