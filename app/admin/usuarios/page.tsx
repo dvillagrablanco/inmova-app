@@ -6,7 +6,6 @@ import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 import {
-  Plus,
   Edit,
   Trash2,
   Shield,
@@ -70,7 +69,6 @@ export default function UsersPage() {
   const { data: session, status } = useSession() || {};
   const { isAdmin } = usePermissions();
   const [users, setUsers] = useState<User[]>([]);
-  const [companies, setCompanies] = useState<Array<{ id: string; nombre: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
@@ -82,7 +80,6 @@ export default function UsersPage() {
     name: '',
     password: '',
     role: 'gestor',
-    companyId: 'no-company',
   });
 
   useEffect(() => {
@@ -119,28 +116,6 @@ export default function UsersPage() {
     }
   };
 
-  const fetchCompanies = async () => {
-    try {
-      const res = await fetch('/api/admin/companies?limit=100');
-      if (res.ok) {
-        const data = await res.json();
-        // La API devuelve { companies: [...], pagination: {...} }
-        const companiesList = data.companies || data;
-        if (Array.isArray(companiesList)) {
-          setCompanies(companiesList.map((c: any) => ({ id: c.id, nombre: c.nombre })));
-        }
-      }
-    } catch (error) {
-      logger.error('Error loading companies:', error);
-    }
-  };
-
-  useEffect(() => {
-    const userRole = (session?.user as any)?.role;
-    if (status === 'authenticated' && userRole === 'super_admin') {
-      fetchCompanies();
-    }
-  }, [status, session]);
 
   const validatePassword = (password: string): string | null => {
     if (password.length < 8) {
@@ -164,7 +139,7 @@ export default function UsersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isSaving) return;
+    if (isSaving || !editingUser) return;
 
     try {
       // Validar contraseña si se proporciona
@@ -174,58 +149,33 @@ export default function UsersPage() {
           toast.error(passwordError);
           return;
         }
-      } else if (!editingUser) {
-        toast.error('La contraseña es requerida para crear un usuario');
-        return;
       }
 
       setIsSaving(true);
 
-      if (editingUser) {
-        // Actualizar usuario
-        const updateData: any = {
-          name: formData.name,
-          role: formData.role,
-        };
-        if (formData.password) {
-          updateData.password = formData.password;
-        }
+      // Solo actualización de usuario
+      const updateData: any = {
+        name: formData.name,
+        role: formData.role,
+      };
+      if (formData.password) {
+        updateData.password = formData.password;
+      }
 
-        const res = await fetch(`/api/users/${editingUser.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updateData),
-        });
+      const res = await fetch(`/api/users/${editingUser.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData),
+      });
 
-        if (res.ok) {
-          toast.success('Usuario actualizado correctamente');
-          fetchUsers();
-          setShowDialog(false);
-          resetForm();
-        } else {
-          const error = await res.json();
-          toast.error(error.error || 'Error al actualizar usuario');
-        }
+      if (res.ok) {
+        toast.success('Usuario actualizado correctamente');
+        fetchUsers();
+        setShowDialog(false);
+        resetForm();
       } else {
-        // Crear usuario
-        const res = await fetch('/api/users', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...formData,
-            companyId: formData.companyId === 'no-company' ? null : formData.companyId,
-          }),
-        });
-
-        if (res.ok) {
-          toast.success('Usuario creado correctamente');
-          fetchUsers();
-          setShowDialog(false);
-          resetForm();
-        } else {
-          const error = await res.json();
-          toast.error(error.error || 'Error al crear usuario');
-        }
+        const error = await res.json();
+        toast.error(error.error || 'Error al actualizar usuario');
       }
     } catch (error) {
       logger.error('Error:', error);
@@ -290,7 +240,6 @@ export default function UsersPage() {
       name: user.name,
       password: '',
       role: user.role,
-      companyId: user.company?.id || 'no-company',
     });
     setShowDialog(true);
   };
@@ -302,7 +251,6 @@ export default function UsersPage() {
       name: '',
       password: '',
       role: 'gestor',
-      companyId: 'no-company',
     });
   };
 
@@ -467,16 +415,17 @@ export default function UsersPage() {
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">Gestión de Usuarios</h1>
-                <p className="text-muted-foreground">Administra los usuarios de tu empresa</p>
+                <p className="text-muted-foreground">
+                  {isSuperAdmin 
+                    ? 'Visualiza y gestiona los usuarios de todas las empresas' 
+                    : 'Administra los usuarios de tu empresa'}
+                </p>
+                {isSuperAdmin && (
+                  <p className="text-xs text-amber-600 mt-1">
+                    💡 Para crear usuarios, accede a la gestión de cada empresa específica
+                  </p>
+                )}
               </div>
-              <Button
-                size="lg"
-                onClick={() => setShowDialog(true)}
-                className="shadow-md hover:shadow-lg transition-all"
-              >
-                <Plus className="mr-2 h-5 w-5" />
-                Nuevo Usuario
-              </Button>
             </div>
 
             {/* Stats */}
@@ -523,7 +472,7 @@ export default function UsersPage() {
               </CardContent>
             </Card>
 
-            {/* Dialog */}
+            {/* Dialog de Edición */}
             <Dialog
               open={showDialog}
               onOpenChange={(open) => {
@@ -533,31 +482,22 @@ export default function UsersPage() {
             >
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>{editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}</DialogTitle>
+                  <DialogTitle>Editar Usuario</DialogTitle>
                   <DialogDescription>
-                    {editingUser
-                      ? 'Actualiza la información del usuario'
-                      : 'Crea un nuevo usuario para tu empresa'}
+                    Actualiza la información del usuario
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
                   <div className="space-y-4 py-4">
-                    {!editingUser && (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Label htmlFor="email">Email</Label>
-                          <InfoTooltip content="El email será utilizado para iniciar sesión y recibir notificaciones del sistema." />
-                        </div>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          required
-                          placeholder="usuario@ejemplo.com"
-                        />
-                      </div>
-                    )}
+                    <div className="space-y-2">
+                      <Label>Email</Label>
+                      <Input
+                        value={formData.email}
+                        disabled
+                        className="bg-muted"
+                      />
+                      <p className="text-xs text-muted-foreground">El email no se puede modificar</p>
+                    </div>
                     <div className="space-y-2">
                       <Label htmlFor="name">Nombre</Label>
                       <Input
@@ -572,8 +512,8 @@ export default function UsersPage() {
                       <PasswordGenerator
                         value={formData.password}
                         onChange={(password) => setFormData({ ...formData, password })}
-                        label={`Contraseña${editingUser ? ' (dejar vacío para no cambiar)' : ''}`}
-                        required={!editingUser}
+                        label="Nueva contraseña (dejar vacío para no cambiar)"
+                        required={false}
                       />
                     </div>
                     <div className="space-y-2">
@@ -598,41 +538,6 @@ export default function UsersPage() {
                         </SelectContent>
                       </Select>
                     </div>
-                    {isSuperAdmin && (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Label htmlFor="companyId">Empresa</Label>
-                          <InfoTooltip content="Asigna el usuario a una empresa específica. Solo usuarios Super Admin pueden no tener empresa asignada." />
-                        </div>
-                        <Select
-                          value={formData.companyId}
-                          onValueChange={(value) => setFormData({ ...formData, companyId: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar empresa" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="no-company">
-                              Sin empresa (solo para Super Admin)
-                            </SelectItem>
-                            {companies.length === 0 ? (
-                              <SelectItem value="" disabled>
-                                Cargando empresas...
-                              </SelectItem>
-                            ) : (
-                              companies.map((company) => (
-                                <SelectItem key={company.id} value={company.id}>
-                                  {company.nombre}
-                                </SelectItem>
-                              ))
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <p className="text-xs text-muted-foreground mt-1.5">
-                          💡 Los usuarios de empresa solo verán los datos de su empresa asignada
-                        </p>
-                      </div>
-                    )}
                   </div>
                   <DialogFooter>
                     <Button
@@ -652,10 +557,8 @@ export default function UsersPage() {
                           <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
                           Guardando...
                         </>
-                      ) : editingUser ? (
-                        'Actualizar'
                       ) : (
-                        'Crear'
+                        'Actualizar'
                       )}
                     </Button>
                   </DialogFooter>
