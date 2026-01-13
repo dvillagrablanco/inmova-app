@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import { PageHeader, PageContainer } from '@/components/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,8 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Lightbulb, Bug, Plus, ArrowLeft, Send } from 'lucide-react';
-import { PageHeader } from '@/components/ui/page-header';
+import { Lightbulb, Bug, Plus, ArrowLeft, Send, MessageSquarePlus } from 'lucide-react';
 import logger, { logError } from '@/lib/logger';
 
 export default function SugerenciasPage() {
@@ -109,19 +109,20 @@ export default function SugerenciasPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto">
-            <PageHeader
-              title="💡 Buzón de Sugerencias"
-              description="Comparte tus ideas para mejorar la plataforma"
-              actions={
-                <Button variant="outline" onClick={() => router.back()}>
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Volver
-                </Button>
-              }
-            />
+      <PageContainer maxWidth="4xl">
+        <PageHeader
+          title="Buzón de Sugerencias"
+          description="Comparte tus ideas para mejorar la plataforma"
+          icon={MessageSquarePlus}
+          breadcrumbs={[
+            { label: 'Soporte', href: '/soporte' },
+            { label: 'Sugerencias' },
+          ]}
+          showBackButton
+          gradient
+        />
 
-            <div className="grid gap-6 mt-6">
+        <div className="grid gap-4 sm:gap-6">
               <Card>
                 <CardHeader>
                   <CardTitle>Envía tu Sugerencia</CardTitle>
@@ -219,48 +220,52 @@ export default function SugerenciasPage() {
                       </p>
                     </div>
 
-                    <div className="flex justify-end gap-3">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => router.back()}
-                        disabled={loading}
-                      >
-                        Cancelar
-                      </Button>
-                      <Button type="submit" disabled={loading}>
-                        {loading ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                            Enviando...
-                          </>
-                        ) : (
-                          <>
-                            <Send className="h-4 w-4 mr-2" />
-                            Enviar Sugerencia
-                          </>
-                        )}
-                      </Button>
+                    {/* Botones sticky en móvil */}
+                    <div className="sticky bottom-20 sm:bottom-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 -mx-4 sm:mx-0 sm:p-0 sm:bg-transparent sm:backdrop-blur-none border-t sm:border-0 mt-4">
+                      <div className="flex flex-col sm:flex-row justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => router.back()}
+                          disabled={loading}
+                          className="w-full sm:w-auto"
+                        >
+                          Cancelar
+                        </Button>
+                        <Button type="submit" disabled={loading} className="w-full sm:w-auto">
+                          {loading ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Enviando...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="h-4 w-4 mr-2" />
+                              Enviar Sugerencia
+                            </>
+                          )}
+                        </Button>
+                      </div>
                     </div>
                   </form>
                 </CardContent>
               </Card>
 
-              <Card className="bg-blue-50 border-blue-200">
-                <CardHeader>
-                  <CardTitle className="text-blue-900">👋 ¿Cómo funciona?</CardTitle>
+              <Card className="bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800">
+                <CardHeader className="pb-2 sm:pb-4">
+                  <CardTitle className="text-base sm:text-lg text-blue-900 dark:text-blue-100">👋 ¿Cómo funciona?</CardTitle>
                 </CardHeader>
-                <CardContent className="text-blue-800">
-                  <ol className="list-decimal list-inside space-y-2">
-                    <li>Completa el formulario con tu sugerencia o reporte</li>
-                    <li>Nuestro equipo recibirá una notificación inmediata</li>
+                <CardContent className="text-sm sm:text-base text-blue-800 dark:text-blue-200">
+                  <ol className="list-decimal list-inside space-y-1.5 sm:space-y-2">
+                    <li>Completa el formulario con tu sugerencia</li>
+                    <li>Nuestro equipo recibirá una notificación</li>
                     <li>Revisaremos tu sugerencia y te responderemos</li>
-                    <li>Recibirás notificaciones sobre el estado de tu sugerencia</li>
+                    <li>Recibirás notificaciones sobre el estado</li>
                   </ol>
                 </CardContent>
               </Card>
             </div>
-          </div>
-        </AuthenticatedLayout>
+      </PageContainer>
+    </AuthenticatedLayout>
   );
 }

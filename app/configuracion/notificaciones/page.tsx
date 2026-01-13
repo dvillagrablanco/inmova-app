@@ -17,9 +17,10 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import { Bell, Mail, MessageSquare, AlertCircle, CheckCircle, Save } from 'lucide-react';
+import { Bell, Mail, MessageSquare, AlertCircle, CheckCircle, Save, Settings } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import { PageHeader, PageContainer } from '@/components/layout/page-header';
 import logger, { logError } from '@/lib/logger';
 
 interface NotificationPreferences {
@@ -191,27 +192,34 @@ export default function ConfiguracionNotificacionesPage() {
   if (status === 'loading' || loading) {
     return (
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto">
-              <Skeleton className="h-10 w-96" />
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <Skeleton key={i} className="h-48" />
-                ))}
-              </div>
-            </div>
-          </AuthenticatedLayout>
+        <PageContainer maxWidth="4xl">
+          <Skeleton className="h-10 w-full max-w-xs mb-4" />
+          <Skeleton className="h-8 w-full max-w-md mb-2" />
+          <Skeleton className="h-5 w-full max-w-lg mb-6" />
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <Skeleton key={i} className="h-48 w-full" />
+            ))}
+          </div>
+        </PageContainer>
+      </AuthenticatedLayout>
     );
   }
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold">Configuración de Notificaciones</h1>
-              <p className="text-muted-foreground mt-2">
-                Personaliza cómo y cuándo quieres recibir notificaciones sobre tu actividad.
-              </p>
-            </div>
+      <PageContainer maxWidth="4xl">
+        <PageHeader
+          title="Notificaciones"
+          description="Personaliza cómo y cuándo quieres recibir notificaciones sobre tu actividad"
+          icon={Bell}
+          breadcrumbs={[
+            { label: 'Configuración', href: '/configuracion' },
+            { label: 'Notificaciones' },
+          ]}
+          showBackButton
+          gradient
+        />
 
             {/* Notificaciones Push */}
             <Card>
@@ -531,25 +539,37 @@ export default function ConfiguracionNotificacionesPage() {
               </CardContent>
             </Card>
 
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={fetchPreferences} disabled={saving}>
-                Cancelar
-              </Button>
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? (
-                  <>
-                    <span className="animate-spin mr-2">⧖</span>
-                    Guardando...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4 mr-2" />
-                    Guardar Cambios
-                  </>
-                )}
-              </Button>
-            </div>
+        {/* Botones de acción sticky en móvil */}
+        <div className="sticky bottom-20 sm:bottom-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 -mx-4 sm:mx-0 sm:p-0 sm:bg-transparent sm:backdrop-blur-none border-t sm:border-0">
+          <div className="flex flex-col sm:flex-row justify-end gap-2">
+            <Button 
+              variant="outline" 
+              onClick={fetchPreferences} 
+              disabled={saving}
+              className="w-full sm:w-auto"
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleSave} 
+              disabled={saving}
+              className="w-full sm:w-auto"
+            >
+              {saving ? (
+                <>
+                  <span className="animate-spin mr-2">⧖</span>
+                  Guardando...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Guardar Cambios
+                </>
+              )}
+            </Button>
           </div>
-        </AuthenticatedLayout>
+        </div>
+      </PageContainer>
+    </AuthenticatedLayout>
   );
 }

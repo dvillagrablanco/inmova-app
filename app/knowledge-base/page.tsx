@@ -10,14 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -52,6 +44,7 @@ import {
 } from '@/lib/knowledge-base';
 import Link from 'next/link';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import { PageHeader, PageContainer } from '@/components/layout/page-header';
 import { BackButton } from '@/components/ui/back-button';
 import { cn } from '@/lib/utils';
 
@@ -231,124 +224,110 @@ export default function KnowledgeBasePage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Breadcrumb */}
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/dashboard">
-                    <Home className="h-4 w-4" />
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Base de Conocimientos</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+      <PageContainer maxWidth="7xl">
+        <PageHeader
+          title="Base de Conocimientos"
+          description="Encuentra guías, tutoriales y respuestas a tus preguntas"
+          icon={BookOpen}
+          breadcrumbs={[
+            { label: 'Soporte', href: '/soporte' },
+            { label: 'Conocimientos' },
+          ]}
+          showBackButton
+          gradient
+        />
 
-            {/* Header */}
+        {/* Barra de búsqueda y filtros */}
+        <Card>
+          <CardContent className="p-4 sm:pt-6 sm:p-6">
             <div className="space-y-4">
-              <BackButton href="/soporte" label="Volver a Soporte" />
-              <div className="flex items-center gap-4">
-                <div className="h-16 w-16 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                  <BookOpen className="h-8 w-8 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h1 className="text-3xl font-bold tracking-tight gradient-text">
-                    Base de Conocimientos
-                  </h1>
-                  <p className="text-muted-foreground mt-1">
-                    Encuentra guías, tutoriales y respuestas a tus preguntas
-                  </p>
-                </div>
+              {/* Búsqueda */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar artículos..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 h-11 sm:h-12 text-base"
+                />
               </div>
-            </div>
 
-            {/* Barra de búsqueda y filtros */}
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  {/* Búsqueda */}
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input
-                      placeholder="Buscar artículos, preguntas frecuentes..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 h-12 text-base"
-                    />
-                  </div>
-
-                  {/* Filtros */}
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Filter className="h-4 w-4" />
-                      <span>Filtros:</span>
-                    </div>
-                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                      <SelectTrigger className="w-[200px]">
-                        <SelectValue placeholder="Categoría" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todas las categorías</SelectItem>
-                        {categories.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
-                      <SelectTrigger className="w-[200px]">
-                        <SelectValue placeholder="Dificultad" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todas las dificultades</SelectItem>
-                        <SelectItem value="beginner">Principiante</SelectItem>
-                        <SelectItem value="intermediate">Intermedio</SelectItem>
-                        <SelectItem value="advanced">Avanzado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {hasActiveFilters && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={clearFilters}
-                        className="gap-2"
-                      >
-                        <X className="h-4 w-4" />
-                        Limpiar filtros
-                      </Button>
-                    )}
-                  </div>
-
-                  {/* Indicador de resultados */}
-                  {hasActiveFilters && (
-                    <div className="text-sm text-muted-foreground">
-                      Mostrando {filteredArticles.length} artículos y {filteredFAQs.length} FAQs
-                    </div>
-                  )}
+              {/* Filtros - Stack vertical en móvil */}
+              <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2 sm:gap-3">
+                <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+                  <Filter className="h-4 w-4" />
+                  <span>Filtros:</span>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3">
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="Categoría" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas</SelectItem>
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
+                    <SelectTrigger className="w-full sm:w-[160px]">
+                      <SelectValue placeholder="Dificultad" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas</SelectItem>
+                      <SelectItem value="beginner">Principiante</SelectItem>
+                      <SelectItem value="intermediate">Intermedio</SelectItem>
+                      <SelectItem value="advanced">Avanzado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {hasActiveFilters && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearFilters}
+                    className="gap-2 w-full sm:w-auto"
+                  >
+                    <X className="h-4 w-4" />
+                    Limpiar
+                  </Button>
+                )}
+              </div>
 
-            {/* Contenido con Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="articles" className="gap-2">
-                  <FileText className="h-4 w-4" />
-                  Artículos ({filteredArticles.length})
-                </TabsTrigger>
-                <TabsTrigger value="faqs" className="gap-2">
-                  <HelpCircle className="h-4 w-4" />
-                  FAQs ({filteredFAQs.length})
-                </TabsTrigger>
-                <TabsTrigger value="favorites" className="gap-2">
-                  <Star className="h-4 w-4" />
-                  Favoritos ({favorites.size})
-                </TabsTrigger>
-              </TabsList>
+              {/* Indicador de resultados */}
+              {hasActiveFilters && (
+                <div className="text-xs sm:text-sm text-muted-foreground">
+                  {filteredArticles.length} artículos • {filteredFAQs.length} FAQs
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Contenido con Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-3 h-auto p-1">
+            <TabsTrigger value="articles" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 px-2 sm:px-4">
+              <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Artículos</span>
+              <span className="sm:hidden">Art.</span>
+              <span className="text-muted-foreground">({filteredArticles.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="faqs" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 px-2 sm:px-4">
+              <HelpCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span>FAQs</span>
+              <span className="text-muted-foreground">({filteredFAQs.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="favorites" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 px-2 sm:px-4">
+              <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Favoritos</span>
+              <span className="sm:hidden">Fav.</span>
+              <span className="text-muted-foreground">({favorites.size})</span>
+            </TabsTrigger>
+          </TabsList>
 
               {/* Artículos */}
               <TabsContent value="articles" className="space-y-4">
@@ -507,7 +486,7 @@ export default function KnowledgeBasePage() {
                 </div>
               </div>
             )}
-          </div>
-        </AuthenticatedLayout>
+      </PageContainer>
+    </AuthenticatedLayout>
   );
 }

@@ -7,9 +7,11 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Check, Sparkles, Zap, Rocket } from 'lucide-react';
+import { Loader2, Check, Sparkles, Zap, Rocket, Palette } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import { PageHeader, PageContainer } from '@/components/layout/page-header';
 
 /**
  * PÁGINA DE CONFIGURACIÓN DE MODO UI
@@ -72,22 +74,28 @@ export default function UIModePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
+      <AuthenticatedLayout>
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
   return (
-    <div className="container mx-auto max-w-4xl py-8 px-4">
-      <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Modo de Interfaz</h1>
-          <p className="text-muted-foreground mt-2">
-            Personaliza cómo se muestra INMOVA según tu nivel de experiencia
-          </p>
-        </div>
+    <AuthenticatedLayout>
+      <PageContainer maxWidth="4xl">
+        <PageHeader
+          title="Modo de Interfaz"
+          description="Personaliza cómo se muestra INMOVA según tu nivel de experiencia"
+          icon={Palette}
+          breadcrumbs={[
+            { label: 'Configuración', href: '/configuracion' },
+            { label: 'Modo de Interfaz' },
+          ]}
+          showBackButton
+          gradient
+        />
 
         {/* Selector de Modo */}
         <Card>
@@ -181,42 +189,52 @@ export default function UIModePage() {
               </Card>
             </RadioGroup>
 
-            {/* Botón Guardar */}
-            <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => router.back()}>
-                Cancelar
-              </Button>
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Guardando...
-                  </>
-                ) : (
-                  <>
-                    <Check className="mr-2 h-4 w-4" />
-                    Guardar Cambios
-                  </>
-                )}
-              </Button>
+            {/* Botón Guardar - Sticky en móvil */}
+            <div className="sticky bottom-20 sm:bottom-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 -mx-4 sm:mx-0 sm:p-0 sm:bg-transparent sm:backdrop-blur-none border-t sm:border-0 mt-4">
+              <div className="flex flex-col sm:flex-row justify-end gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => router.back()}
+                  className="w-full sm:w-auto"
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={handleSave} 
+                  disabled={saving}
+                  className="w-full sm:w-auto"
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="mr-2 h-4 w-4" />
+                      Guardar Cambios
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Info Adicional */}
-        <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="p-6">
-            <h3 className="font-semibold text-blue-900 mb-2">
+        <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
+          <CardContent className="p-4 sm:p-6">
+            <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
               💡 ¿No sabes qué modo elegir?
             </h3>
-            <p className="text-sm text-blue-800">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
               Empieza con el <strong>Modo Estándar</strong>. Es el balance perfecto entre
               funcionalidad y simplicidad. Puedes cambiarlo en cualquier momento según
               tu experiencia evolucione.
             </p>
           </CardContent>
         </Card>
-      </div>
-    </div>
+      </PageContainer>
+    </AuthenticatedLayout>
   );
 }
