@@ -2428,8 +2428,8 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* 4. COLIVING / ALQUILER POR HABITACIONES / STUDENT HOUSING */}
-            {(filteredCoLivingItems.length > 0 || filteredStudentHousingItems.length > 0) && (
+            {/* 4. COLIVING / ALQUILER POR HABITACIONES / STUDENT HOUSING (incluye Workspace) */}
+            {(filteredCoLivingItems.length > 0 || filteredStudentHousingItems.length > 0 || filteredWorkspaceItems.length > 0) && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('coLiving')}
@@ -2450,19 +2450,22 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     {filteredStudentHousingItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
+                    {filteredWorkspaceItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
                   </div>
                 )}
               </div>
             )}
 
-            {/* 5. CONSTRUCCIÓN / FLIPPING */}
-            {(filteredBuildToRentItems.length > 0 || filteredFlippingItems.length > 0 || filteredConstruccionItems.length > 0) && (
+            {/* 5. CONSTRUCCIÓN / PROMOCIÓN (incluye eWoorker B2B, Flipping, Real Estate Developer) */}
+            {(filteredBuildToRentItems.length > 0 || filteredFlippingItems.length > 0 || filteredConstruccionItems.length > 0 || filteredEwoorkerItems.length > 0 || filteredRealEstateDeveloperItems.length > 0) && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('construccion')}
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
-                  <span>🏗️ Construcción / Flipping</span>
+                  <span>🏗️ Construcción / Promoción</span>
                   {expandedSections.construccion ? (
                     <ChevronDown size={16} />
                   ) : (
@@ -2480,13 +2483,19 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     {filteredFlippingItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
+                    {filteredRealEstateDeveloperItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                    {filteredEwoorkerItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
                   </div>
                 )}
               </div>
             )}
 
-            {/* 3. INMUEBLES COMERCIALES Y OFICINAS (fusiona Comercial + Alquiler Comercial) */}
-            {(filteredComercialItems.length > 0 || filteredAlquilerComercialItems.length > 0) && (
+            {/* 3. INMUEBLES COMERCIALES Y OFICINAS (incluye Warehouse como activo comercial) */}
+            {(filteredComercialItems.length > 0 || filteredAlquilerComercialItems.length > 0 || filteredWarehouseItems.length > 0) && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('comercial')}
@@ -2505,6 +2514,9 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                       <NavItem key={item.href} item={item} />
                     ))}
                     {filteredAlquilerComercialItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                    {filteredWarehouseItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
                   </div>
@@ -2536,8 +2548,8 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* Student Housing ya fusionado con Coliving arriba */}
-
+            {/* Student Housing → fusionado con Coliving */}
+            {/* Workspace → fusionado con Coliving */}
             {/* Viajes Corporativos - ELIMINADO (No es PropTech) */}
 
             {/* 7. VIVIENDA SOCIAL / RESIDENCIAS */}
@@ -2564,11 +2576,9 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* Real Estate Developer - ELIMINADO (fusionado con Construcción) */}
-
-            {/* Workspace - ELIMINADO (No es PropTech principal) */}
-
-            {/* Warehouse - ELIMINADO (No es PropTech) */}
+            {/* Real Estate Developer → fusionado con Construcción/Promoción */}
+            {/* eWoorker → fusionado con Construcción/Promoción (B2B marketplace) */}
+            {/* Warehouse → fusionado con Inmuebles Comerciales (activo comercial) */}
 
             {/* HERRAMIENTAS HORIZONTALES - Separador visual */}
             {(filteredFinanzasItems.length > 0 ||
