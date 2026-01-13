@@ -99,9 +99,11 @@ export function useCompanies() {
       }
 
       const data = await res.json();
-      toast.success(`Empresa "${data.company.nombre}" creada exitosamente`);
+      // La API puede devolver { company: ... } o directamente el objeto company
+      const company = data.company || data;
+      toast.success(`Empresa "${company.nombre}" creada exitosamente`);
       await fetchCompanies();
-      return data.company;
+      return company;
     } catch (error) {
       logError(error as Error, { context: 'useCompanies.createCompany' });
       toast.error((error as Error).message);

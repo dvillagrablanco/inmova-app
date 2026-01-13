@@ -114,6 +114,8 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/notificaciones': 'notificaciones',
   '/incidencias': 'incidencias',
   '/ocr': 'ocr',
+  '/onboarding/documents': 'ia_documental',
+  '/onboarding/review': 'ia_documental',
   '/redes-sociales': 'redes_sociales',
   '/dashboard/social-media': 'redes_sociales',
   '/propiedades': 'gestion_inmobiliaria',
@@ -281,6 +283,7 @@ const CORE_MODULES = [
   'notificaciones',
   'incidencias',
   'ocr',
+  'ia_documental',
   'documentos',
   'reportes',
   'bi',
@@ -1418,8 +1421,15 @@ const comunicacionesNavItems = [
 ];
 
 // 3.5 DOCUMENTOS Y LEGAL
-// AMPLIADO: Incluye OCR, templates firma digital, seguridad compliance
+// AMPLIADO: Incluye OCR, IA Documental, templates firma digital, seguridad compliance
 const documentosLegalNavItems = [
+  {
+    name: 'IA Documental',
+    href: '/onboarding/documents',
+    icon: Bot,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    badge: 'IA',
+  },
   {
     name: 'Documentos',
     href: '/documentos',
