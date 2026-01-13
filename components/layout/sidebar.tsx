@@ -1640,13 +1640,20 @@ const administradorEmpresaItems = [
 // 3. INTEGRACIONES DE INMOVA: Servicios Conectados (Stripe, AWS, etc.), API Docs
 // 4. COMUNICACIONES: Plantillas SMS, Plantillas Email
 
+interface SubItem {
+  name: string;
+  href: string;
+  icon?: any; // Icono opcional para subItems
+}
+
 interface SidebarItem {
   name: string;
   href: string;
   icon: any;
   roles: string[];
   badge?: string;
-  subItems?: { name: string; href: string }[];
+  subItems?: SubItem[];
+  dataTour?: string;
 }
 
 // =====================================================
@@ -1690,9 +1697,9 @@ const superAdminPlatformItems: SidebarItem[] = [
     icon: Building2,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Empresas', href: '/admin/clientes' },
-      { name: 'Comparar', href: '/admin/clientes/comparar' },
-      { name: 'Onboarding', href: '/admin/onboarding' },
+      { name: 'Empresas', href: '/admin/clientes', icon: Building2 },
+      { name: 'Comparar', href: '/admin/clientes/comparar', icon: BarChart2 },
+      { name: 'Onboarding', href: '/admin/onboarding', icon: UserPlus },
     ],
   },
 
@@ -1703,26 +1710,25 @@ const superAdminPlatformItems: SidebarItem[] = [
     icon: DollarSign,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Planes', href: '/admin/planes' },
-      { name: 'Add-ons', href: '/admin/addons' },
-      { name: 'B2B', href: '/admin/facturacion-b2b' },
-      { name: 'Cupones', href: '/admin/cupones' },
+      { name: 'Planes', href: '/admin/planes', icon: Package },
+      { name: 'Add-ons', href: '/admin/addons', icon: Zap },
+      { name: 'B2B', href: '/admin/facturacion-b2b', icon: FileText },
+      { name: 'Cupones', href: '/admin/cupones', icon: Tag },
     ],
   },
 
   // ========== 4. COMERCIAL B2B (FUSIÓN: Partners + Ventas) ==========
-  // Unifica toda la gestión comercial: partners, ventas, agentes, comisiones
   {
     name: 'Comercial B2B',
     href: '/admin/partners',
     icon: TrendingUp,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Partners', href: '/admin/partners' },
-      { name: 'Equipo Ventas', href: '/admin/sales-team' },
-      { name: 'Red Agentes', href: '/red-agentes' },
-      { name: 'Comisiones', href: '/admin/partners/comisiones' },
-      { name: 'Invitaciones', href: '/admin/partners/invitaciones' },
+      { name: 'Partners', href: '/admin/partners', icon: Share2 },
+      { name: 'Equipo Ventas', href: '/admin/sales-team', icon: Users },
+      { name: 'Red Agentes', href: '/red-agentes', icon: Users2 },
+      { name: 'Comisiones', href: '/admin/partners/comisiones', icon: DollarSign },
+      { name: 'Invitaciones', href: '/admin/partners/invitaciones', icon: UserPlus },
     ],
   },
 
@@ -1733,9 +1739,9 @@ const superAdminPlatformItems: SidebarItem[] = [
     icon: ShoppingBag,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Proveedores', href: '/admin/marketplace/proveedores' },
-      { name: 'Servicios', href: '/admin/marketplace' },
-      { name: 'Categorías', href: '/admin/marketplace/categorias' },
+      { name: 'Proveedores', href: '/admin/marketplace/proveedores', icon: Users },
+      { name: 'Servicios', href: '/admin/marketplace', icon: ShoppingCart },
+      { name: 'Categorías', href: '/admin/marketplace/categorias', icon: Folder },
     ],
   },
 
@@ -1746,27 +1752,26 @@ const superAdminPlatformItems: SidebarItem[] = [
     icon: Code,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Todas', href: '/admin/integraciones' },
-      { name: 'API Docs', href: '/api-docs' },
-      { name: 'Webhooks', href: '/admin/webhooks' },
+      { name: 'Todas', href: '/admin/integraciones', icon: Code },
+      { name: 'API Docs', href: '/api-docs', icon: BookOpen },
+      { name: 'Webhooks', href: '/admin/webhooks', icon: Zap },
     ],
   },
 
   // ========== 7. SISTEMA (FUSIÓN: Monitoreo + Seguridad) ==========
-  // Panel unificado de administración del sistema
   {
     name: 'Sistema',
     href: '/admin/activity',
     icon: Activity,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Actividad', href: '/admin/activity' },
-      { name: 'Salud', href: '/admin/salud-sistema' },
-      { name: 'Alertas', href: '/admin/alertas' },
-      { name: 'Usuarios', href: '/admin/usuarios' },
-      { name: 'Seguridad', href: '/admin/seguridad' },
-      { name: 'Logs', href: '/admin/system-logs' },
-      { name: 'Backup', href: '/admin/backup-restore' },
+      { name: 'Actividad', href: '/admin/activity', icon: Activity },
+      { name: 'Salud', href: '/admin/salud-sistema', icon: CheckSquare },
+      { name: 'Alertas', href: '/admin/alertas', icon: Bell },
+      { name: 'Usuarios', href: '/admin/usuarios', icon: Users },
+      { name: 'Seguridad', href: '/admin/seguridad', icon: Shield },
+      { name: 'Logs', href: '/admin/system-logs', icon: FileText },
+      { name: 'Backup', href: '/admin/backup-restore', icon: Upload },
     ],
   },
 
@@ -1777,9 +1782,9 @@ const superAdminPlatformItems: SidebarItem[] = [
     icon: Settings,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Módulos', href: '/admin/modulos' },
-      { name: 'Personalización', href: '/admin/personalizacion' },
-      { name: 'Mantenimiento', href: '/admin/limpieza' },
+      { name: 'Módulos', href: '/admin/modulos', icon: Package },
+      { name: 'Personalización', href: '/admin/personalizacion', icon: Palette },
+      { name: 'Mantenimiento', href: '/admin/limpieza', icon: Wrench },
     ],
   },
 
@@ -1790,10 +1795,10 @@ const superAdminPlatformItems: SidebarItem[] = [
     icon: MessageSquare,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Email', href: '/admin/plantillas-email' },
-      { name: 'SMS', href: '/admin/plantillas-sms' },
-      { name: 'Masivas', href: '/admin/notificaciones-masivas' },
-      { name: 'Reportes', href: '/admin/reportes-programados' },
+      { name: 'Email', href: '/admin/plantillas-email', icon: FileText },
+      { name: 'SMS', href: '/admin/plantillas-sms', icon: MessageCircle },
+      { name: 'Masivas', href: '/admin/notificaciones-masivas', icon: Bell },
+      { name: 'Reportes', href: '/admin/reportes-programados', icon: FileBarChart },
     ],
   },
 
@@ -1805,9 +1810,9 @@ const superAdminPlatformItems: SidebarItem[] = [
     roles: ['super_admin'],
     badge: 'IA',
     subItems: [
-      { name: 'Agentes IA', href: '/admin/ai-agents' },
-      { name: 'Community Manager', href: '/admin/community-manager' },
-      { name: 'Canva Studio', href: '/admin/canva' },
+      { name: 'Agentes IA', href: '/admin/ai-agents', icon: Bot },
+      { name: 'Community Manager', href: '/admin/community-manager', icon: Users2 },
+      { name: 'Canva Studio', href: '/admin/canva', icon: Palette },
     ],
   },
 
@@ -1818,8 +1823,8 @@ const superAdminPlatformItems: SidebarItem[] = [
     icon: HeadphonesIcon,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Sugerencias', href: '/admin/sugerencias' },
-      { name: 'Aprobaciones', href: '/admin/aprobaciones' },
+      { name: 'Sugerencias', href: '/admin/sugerencias', icon: MessageSquare },
+      { name: 'Aprobaciones', href: '/admin/aprobaciones', icon: CheckSquare },
     ],
   },
 ];
@@ -2318,7 +2323,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                       : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                   )}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-current opacity-50" />
+                  {subItem.icon ? (
+                    <subItem.icon size={14} className="opacity-70" />
+                  ) : (
+                    <span className="w-1.5 h-1.5 rounded-full bg-current opacity-50" />
+                  )}
                   {subItem.name}
                 </Link>
               );
