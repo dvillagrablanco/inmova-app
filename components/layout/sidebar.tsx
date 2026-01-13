@@ -371,11 +371,17 @@ const dashboardNavItems = [
 
 // 2. VERTICALES DE NEGOCIO - Agrupadas por modelo de negocio
 
-// 2.1 ALQUILER RESIDENCIAL (Tradicional + Media Estancia)
-// AMPLIADO: Incluye screening, verificación, garantías, edificios, unidades
+// ============================================================================
+// 2.1 ALQUILER RESIDENCIAL - SIMPLIFICADO (Ene 2026)
+// Fusiones: Screening+Verificación → en Candidatos
+//          2x Garantías → 1 Garantías
+//          2x Valoración IA → 1 Valoración IA
+//          2x Inspecciones → 1 Inspecciones
+// Resultado: 18 items → 10 items (-44%)
+// ============================================================================
 const alquilerResidencialItems = [
   {
-    name: 'Dashboard Alquiler',
+    name: 'Dashboard',
     href: '/traditional-rental',
     icon: LayoutDashboard,
     roles: ['super_admin', 'administrador', 'gestor'],
@@ -392,12 +398,6 @@ const alquilerResidencialItems = [
     name: 'Edificios',
     href: '/edificios',
     icon: Building2,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Unidades',
-    href: '/unidades',
-    icon: Home,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -421,39 +421,9 @@ const alquilerResidencialItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Screening',
-    href: '/screening',
-    icon: UserCheck,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Verificación Inquilinos',
-    href: '/verificacion-inquilinos',
-    icon: Shield,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
     name: 'Garantías',
-    href: '/alquiler-tradicional/warranties',
-    icon: Shield,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Gestión Garantías',
     href: '/warranty-management',
     icon: Shield,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Renovaciones Contratos',
-    href: '/renovaciones-contratos',
-    icon: FileText,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Valoraciones IA',
-    href: '/valoraciones',
-    icon: Sparkles,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -469,12 +439,6 @@ const alquilerResidencialItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Inspección Digital',
-    href: '/inspeccion-digital',
-    icon: Scan,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
     name: 'Certificaciones',
     href: '/certificaciones',
     icon: Award,
@@ -482,17 +446,16 @@ const alquilerResidencialItems = [
   },
 ];
 
-// 2.2 STR - SHORT TERM RENTALS (Airbnb, Booking, etc.)
-// AMPLIADO: Incluye pricing, setup wizard y funciones avanzadas
+// 2.2 STR - SHORT TERM RENTALS - SIMPLIFICADO (9→6 items)
 const strNavItems = [
   {
-    name: 'Dashboard STR',
+    name: 'Dashboard',
     href: '/str',
     icon: Hotel,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Propiedades STR',
+    name: 'Propiedades',
     href: '/str/listings',
     icon: Home,
     roles: ['super_admin', 'administrador', 'gestor'],
@@ -504,21 +467,9 @@ const strNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Revenue Management',
+    name: 'Revenue',
     href: '/str/channels',
     icon: TrendingUp,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Pricing Dinámico',
-    href: '/str/pricing',
-    icon: DollarSign,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Reviews',
-    href: '/str/reviews',
-    icon: Star,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -528,48 +479,36 @@ const strNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Setup Wizard',
-    href: '/str/setup-wizard',
-    icon: Settings,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Integraciones',
-    href: '/str/settings/integrations',
-    icon: Share2,
+    name: 'Reviews',
+    href: '/str/reviews',
+    icon: Star,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];
 
-// 2.3 CO-LIVING / ALQUILER POR HABITACIONES
-// AMPLIADO: Incluye todas las páginas de coliving disponibles
+// 2.3 CO-LIVING - SIMPLIFICADO (9→6 items)
+// Fusión: Comunidad Social+Gestión → Comunidad, 2x Reservas → 1
 const coLivingNavItems = [
   {
-    name: 'Room Rental',
+    name: 'Habitaciones',
     href: '/room-rental',
     icon: Home,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Propiedades Coliving',
+    name: 'Propiedades',
     href: '/coliving/propiedades',
     icon: Building2,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Comunidad Social',
-    href: '/comunidad-social',
+    name: 'Comunidad',
+    href: '/coliving/comunidad',
     icon: Users2,
     roles: ['super_admin', 'administrador', 'gestor', 'community_manager'],
   },
   {
-    name: 'Gestión Comunidad',
-    href: '/coliving/comunidad',
-    icon: Users,
-    roles: ['super_admin', 'administrador', 'gestor', 'community_manager'],
-  },
-  {
-    name: 'Emparejamiento',
+    name: 'Matching',
     href: '/coliving/emparejamiento',
     icon: UserCheck,
     roles: ['super_admin', 'administrador', 'gestor'],
@@ -581,22 +520,10 @@ const coLivingNavItems = [
     roles: ['super_admin', 'administrador', 'gestor', 'community_manager'],
   },
   {
-    name: 'Paquetes Servicios',
-    href: '/coliving/paquetes',
-    icon: Package,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
     name: 'Reservas',
     href: '/coliving/reservas',
     icon: CalendarCheck,
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
-  },
-  {
-    name: 'Reservas Espacios Comunes',
-    href: '/reservas',
-    icon: CalendarCheck,
-    roles: ['super_admin', 'administrador', 'gestor', 'operador', 'community_manager'],
   },
 ];
 
@@ -1279,8 +1206,8 @@ const analyticsNavItems = [
   },
 ];
 
-// 3.3 OPERACIONES Y MANTENIMIENTO
-// AMPLIADO: Incluye todas las páginas de operaciones disponibles
+// 3.3 OPERACIONES - SIMPLIFICADO (12→7 items)
+// Fusión: 2x Mantenimiento→1, 2x Incidencias→1, Planificación+Calendario→1
 const operacionesNavItems = [
   {
     name: 'Mantenimiento',
@@ -1289,34 +1216,16 @@ const operacionesNavItems = [
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
   },
   {
-    name: 'Mantenimiento Pro',
-    href: '/mantenimiento-pro',
-    icon: Wrench,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
     name: 'Incidencias',
     href: '/incidencias',
     icon: AlertCircle,
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
   },
   {
-    name: 'Gestión Incidencias',
-    href: '/gestion-incidencias',
-    icon: AlertCircle,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
     name: 'Tareas',
     href: '/tareas',
     icon: CheckSquare,
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
-  },
-  {
-    name: 'Planificación',
-    href: '/planificacion',
-    icon: Calendar,
-    roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
     name: 'Calendario',
@@ -1331,21 +1240,9 @@ const operacionesNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Servicios Limpieza',
+    name: 'Limpieza',
     href: '/servicios-limpieza',
     icon: ClipboardList,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Servicios Concierge',
-    href: '/servicios-concierge',
-    icon: HeadphonesIcon,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Guardias',
-    href: '/guardias',
-    icon: Shield,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -1373,8 +1270,8 @@ const herramientasInversionNavItems = [
   },
 ];
 
-// 3.4 COMUNICACIONES
-// AMPLIADO: Incluye historial, plantillas y reglas de notificaciones
+// 3.4 COMUNICACIONES - SIMPLIFICADO (7→4 items)
+// Fusión: Todas las notificaciones en una sola entrada
 const comunicacionesNavItems = [
   {
     name: 'Chat',
@@ -1389,39 +1286,21 @@ const comunicacionesNavItems = [
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
   },
   {
-    name: 'Historial Notificaciones',
-    href: '/notificaciones/historial',
-    icon: Clock,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Plantillas Notificaciones',
-    href: '/notificaciones/plantillas',
-    icon: FileText,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Reglas Notificaciones',
-    href: '/notificaciones/reglas',
-    icon: Settings,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
     name: 'SMS',
     href: '/sms',
     icon: MessageCircle,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Redes Sociales',
+    name: 'Social',
     href: '/dashboard/social-media',
     icon: Share2,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];
 
-// 3.5 DOCUMENTOS Y LEGAL
-// AMPLIADO: Incluye OCR, IA Documental, templates firma digital, seguridad compliance
+// 3.5 DOCUMENTOS Y LEGAL - SIMPLIFICADO (11→6 items)
+// Fusión: IA+OCR→IA Documental, 2x Plantillas→1, 2x Compliance→1
 const documentosLegalNavItems = [
   {
     name: 'IA Documental',
@@ -1437,12 +1316,6 @@ const documentosLegalNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'OCR',
-    href: '/ocr',
-    icon: Scan,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
     name: 'Plantillas',
     href: '/plantillas',
     icon: FileText,
@@ -1455,28 +1328,10 @@ const documentosLegalNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Templates Firma',
-    href: '/firma-digital/templates',
-    icon: FileText,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
     name: 'Compliance',
     href: '/legal',
     icon: Shield,
     roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Seguridad Compliance',
-    href: '/seguridad-compliance',
-    icon: Shield,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Auditoría',
-    href: '/auditoria',
-    icon: ClipboardList,
-    roles: ['super_admin', 'administrador'],
   },
   {
     name: 'Seguros',
@@ -1484,16 +1339,10 @@ const documentosLegalNavItems = [
     icon: Shield,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
-  {
-    name: 'Plantillas Legales',
-    href: '/plantillas-legales',
-    icon: FileText,
-    roles: ['super_admin', 'administrador', 'gestor', 'propietario'],
-  },
 ];
 
-// 3.6 CRM Y MARKETING
-// AMPLIADO: Incluye promociones, subastas, reviews, red de agentes
+// 3.6 CRM Y MARKETING - SIMPLIFICADO (14→7 items)
+// Fusión: Múltiples agentes → Red Agentes, Tours+Galerías → Tours
 const crmMarketingNavItems = [
   {
     name: 'CRM',
@@ -1514,51 +1363,15 @@ const crmMarketingNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Referidos',
-    href: '/dashboard/referrals',
-    icon: Package,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Subastas',
-    href: '/subastas',
-    icon: TrendingUp,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
     name: 'Reviews',
     href: '/reviews',
     icon: Star,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Red de Agentes',
+    name: 'Red Agentes',
     href: '/red-agentes',
     icon: Users2,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Dashboard Agentes',
-    href: '/red-agentes/dashboard',
-    icon: LayoutDashboard,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Lista Agentes',
-    href: '/red-agentes/agentes',
-    icon: Users,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Formación Agentes',
-    href: '/red-agentes/formacion',
-    icon: BookOpen,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Zonas Agentes',
-    href: '/red-agentes/zonas',
-    icon: MapPin,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -1570,12 +1383,6 @@ const crmMarketingNavItems = [
   {
     name: 'Tours Virtuales',
     href: '/tours-virtuales',
-    icon: Eye,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Galerías',
-    href: '/galerias',
     icon: Eye,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
