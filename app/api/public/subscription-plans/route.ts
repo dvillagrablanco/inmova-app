@@ -11,16 +11,12 @@ export const runtime = 'nodejs';
  */
 export async function GET(request: NextRequest) {
   try {
-    // Obtener solo planes activos, ordenados por precio
-    // Filtrar planes internos (Owner) si existe la columna esInterno
+    // Obtener solo planes activos y públicos (no internos), ordenados por precio
+    // Los planes con esInterno=true (como Owner) no se muestran en landing
     const planes = await prisma.subscriptionPlan.findMany({
       where: {
         activo: true,
-        // Excluir planes internos si la columna existe
-        // Si no existe, mostrar todos los planes activos excepto Owner
-        OR: [
-          { nombre: { not: 'Owner' } }, // Excluir Owner por nombre como fallback
-        ],
+        esInterno: false, // Excluir planes internos (Owner)
       },
       select: {
         id: true,
@@ -32,11 +28,6 @@ export async function GET(request: NextRequest) {
         maxPropiedades: true,
         modulosIncluidos: true,
         activo: true,
-        // Las siguientes columnas son opcionales - pueden no existir en todas las BDs
-        // signaturesIncludedMonth: true,
-        // storageIncludedGB: true,
-        // aiTokensIncludedMonth: true,
-        // smsIncludedMonth: true,
       },
       orderBy: {
         precioMensual: 'asc'
