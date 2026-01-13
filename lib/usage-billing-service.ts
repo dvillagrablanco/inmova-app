@@ -16,19 +16,35 @@ import Stripe from 'stripe';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
 import nodemailer from 'nodemailer';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-11-20.acacia',
-});
+// Lazy initialization to avoid build-time errors
+let stripeInstance: Stripe | null = null;
+function getStripe(): Stripe {
+  if (!stripeInstance) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY not configured');
+    }
+    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2024-11-20.acacia',
+    });
+  }
+  return stripeInstance;
+}
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-});
+let transporterInstance: nodemailer.Transporter | null = null;
+function getTransporter(): nodemailer.Transporter {
+  if (!transporterInstance) {
+    transporterInstance = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    });
+  }
+  return transporterInstance;
+}
 
 // ═══════════════════════════════════════════════════════════════
 // TIPOS
@@ -201,6 +217,8 @@ async function createStripeInvoice(
     throw new Error('Company has no Stripe customer ID');
   }
   
+  const stripe = getStripe();
+  
   // Crear invoice items en Stripe
   for (const item of invoice.items) {
     await stripe.invoiceItems.create({
@@ -347,6 +365,7 @@ async function sendOverageInvoiceEmail(
   `;
   
   try {
+    const transporter = getTransporter();
     await transporter.sendMail({
       from: process.env.SMTP_FROM || 'noreply@inmova.app',
       to: contactEmail,

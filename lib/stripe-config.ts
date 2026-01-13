@@ -27,8 +27,9 @@ export function getStripe(): Stripe | null {
   }
 }
 
-// Export legacy stripe for backward compatibility (will be null if not configured)
-export const stripe = getStripe();
+// Export legacy stripe getter for backward compatibility
+// Use getStripe() instead for proper lazy initialization
+export const stripe: Stripe | null = null; // Deprecated: use getStripe()
 
 export const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY || '';
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';

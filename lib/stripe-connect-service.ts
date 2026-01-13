@@ -11,9 +11,20 @@ import Stripe from 'stripe';
 import { prisma } from './db';
 import logger from './logger';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
-});
+// Lazy initialization to avoid build-time errors
+let stripeInstance: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!stripeInstance) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY not configured');
+    }
+    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2024-12-18.acacia',
+    });
+  }
+  return stripeInstance;
+}
 
 // ============================================================================
 // TIPOS
@@ -81,7 +92,7 @@ export async function createConnectAccount(companyId: string): Promise<{
     }
 
     // Crear cuenta Connect
-    const account = await stripe.accounts.create({
+    const account = await getStripe().accounts.create({
       type: 'express', // Express for simplicity (Standard for more control)
       country: 'ES',
       email: company.contactEmail || undefined,
@@ -97,7 +108,7 @@ export async function createConnectAccount(companyId: string): Promise<{
     });
 
     // Crear link de onboarding
-    const accountLink = await stripe.accountLinks.create({
+    const accountLink = await getStripe().accountLinks.create({
       account: account.id,
       refresh_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings/billing?refresh=true`,
       return_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings/billing?success=true`,
@@ -135,7 +146,7 @@ export async function getConnectAccountStatus(accountId: string): Promise<{
   payouts_enabled: boolean;
   requirements: any;
 }> {
-  const account = await stripe.accounts.retrieve(accountId);
+  const account = await getStripe().accounts.retrieve(accountId);
 
   return {
     charges_enabled: account.charges_enabled,
@@ -173,7 +184,7 @@ export async function createSubscription(
     // Crear o obtener customer
     let customerId = company.stripeCustomerId;
     if (!customerId) {
-      const customer = await stripe.customers.create({
+      const customer = await getStripe().customers.create({
         email: company.contactEmail || undefined,
         name: company.name,
         metadata: {
@@ -190,23 +201,23 @@ export async function createSubscription(
     }
 
     // Attach payment method
-    await stripe.paymentMethods.attach(paymentMethodId, {
+    await getStripe().paymentMethods.attach(paymentMethodId, {
       customer: customerId,
     });
 
     // Set as default
-    await stripe.customers.update(customerId, {
+    await getStripe().customers.update(customerId, {
       invoice_settings: {
         default_payment_method: paymentMethodId,
       },
     });
 
     // Crear o obtener producto y precio
-    const product = await stripe.products.create({
+    const product = await getStripe().products.create({
       name: `Inmova ${plan.name}`,
     });
 
-    const price = await stripe.prices.create({
+    const price = await getStripe().prices.create({
       product: product.id,
       unit_amount: plan.price * 100, // Centavos
       currency: 'eur',
@@ -216,7 +227,7 @@ export async function createSubscription(
     });
 
     // Crear subscripción
-    const subscription = await stripe.subscriptions.create({
+    const subscription = await getStripe().subscriptions.create({
       customer: customerId,
       items: [{ price: price.id }],
       payment_behavior: 'default_incomplete',
@@ -275,9 +286,9 @@ export async function cancelSubscription(
     }
 
     if (immediately) {
-      await stripe.subscriptions.cancel(subscription.stripeSubscriptionId);
+      await getStripe().subscriptions.cancel(subscription.stripeSubscriptionId);
     } else {
-      await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+      await getStripe().subscriptions.update(subscription.stripeSubscriptionId, {
         cancel_at_period_end: true,
       });
     }
@@ -326,16 +337,16 @@ export async function updateSubscriptionPlan(
     }
 
     // Obtener subscripción de Stripe
-    const stripeSubscription = await stripe.subscriptions.retrieve(
+    const stripeSubscription = await getStripe().subscriptions.retrieve(
       subscription.stripeSubscriptionId
     );
 
     // Crear nuevo precio si no existe
-    const product = await stripe.products.create({
+    const product = await getStripe().products.create({
       name: `Inmova ${newPlan.name}`,
     });
 
-    const newPrice = await stripe.prices.create({
+    const newPrice = await getStripe().prices.create({
       product: product.id,
       unit_amount: newPlan.price * 100,
       currency: 'eur',
@@ -345,7 +356,7 @@ export async function updateSubscriptionPlan(
     });
 
     // Actualizar subscripción
-    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+    await getStripe().subscriptions.update(subscription.stripeSubscriptionId, {
       items: [
         {
           id: stripeSubscription.items.data[0].id,
@@ -393,7 +404,7 @@ export async function createPaymentWithFee(data: {
   try {
     const platformFeeAmount = Math.round((data.amount * data.platformFeePercentage) / 100);
 
-    const paymentIntent = await stripe.paymentIntents.create({
+    const paymentIntent = await getStripe().paymentIntents.create({
       amount: Math.round(data.amount * 100), // Centavos
       currency: data.currency,
       application_fee_amount: platformFeeAmount * 100, // Comisión de Inmova

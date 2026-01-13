@@ -18,9 +18,20 @@ import { prisma } from './db';
 import logger from './logger';
 import { Stripe } from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
-});
+// Lazy initialization to avoid build-time errors
+let stripeInstance: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!stripeInstance) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY not configured');
+    }
+    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2023-10-16',
+    });
+  }
+  return stripeInstance;
+}
 
 // ============================================================================
 // TIPOS
@@ -417,7 +428,7 @@ export async function processServicePayment(bookingId: string): Promise<string> 
     }
 
     // Crear Payment Intent
-    const paymentIntent = await stripe.paymentIntents.create({
+    const paymentIntent = await getStripe().paymentIntents.create({
       amount: Math.round(booking.totalPrice * 100), // centavos
       currency: 'eur',
       metadata: {

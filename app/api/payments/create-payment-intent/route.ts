@@ -7,16 +7,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
-import Stripe from 'stripe';
+import { getStripe } from '@/lib/stripe-config';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-
-// Inicializar Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-11-20.acacia',
-});
 
 // Validación
 const paymentSchema = z.object({
@@ -52,7 +47,16 @@ export async function POST(req: NextRequest) {
 
     const { amount, currency, description, contractId, propertyId, metadata } = validation.data;
 
-    // 3. Crear Payment Intent en Stripe
+    // 3. Obtener cliente Stripe
+    const stripe = getStripe();
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Stripe no está configurado' },
+        { status: 503 }
+      );
+    }
+
+    // 4. Crear Payment Intent en Stripe
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount), // Stripe espera centavos
       currency,

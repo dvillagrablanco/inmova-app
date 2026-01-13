@@ -24,9 +24,20 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-11-20.acacia',
-});
+// Lazy initialization to avoid build-time errors
+let stripeInstance: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!stripeInstance) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY not configured');
+    }
+    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2024-11-20.acacia',
+    });
+  }
+  return stripeInstance;
+}
 
 // Webhook secret (obtener de Stripe Dashboard)
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
@@ -48,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     try {
       if (webhookSecret) {
-        event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+        event = getStripe().webhooks.constructEvent(body, signature, webhookSecret);
       } else {
         // En desarrollo sin webhook secret
         console.warn('[Stripe Webhook] No webhook secret configured');
