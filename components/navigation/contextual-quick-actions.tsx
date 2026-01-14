@@ -133,19 +133,19 @@ function generateActions(
       {
         label: 'Nueva Propiedad',
         icon: Plus,
-        onClick: () => router.push('/propiedades/crear'),
+        onClick: () => router.push('/dashboard/properties'),
         variant: 'default',
       },
       {
         label: 'Nuevo Inquilino',
         icon: UserPlus,
-        onClick: () => router.push('/inquilinos/nuevo'),
+        onClick: () => router.push('/dashboard/tenants'),
         variant: 'outline',
       },
       {
         label: 'Registrar Pago',
         icon: DollarSign,
-        onClick: () => router.push('/pagos/nuevo'),
+        onClick: () => router.push('/dashboard/payments'),
         variant: 'outline',
         badge: props.pendingPayments ? `${props.pendingPayments}` : undefined,
       }

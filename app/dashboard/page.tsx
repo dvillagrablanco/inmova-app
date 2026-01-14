@@ -194,7 +194,7 @@ function DashboardPageContent() {
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Primeros pasos</h2>
             <div className="grid gap-4 md:grid-cols-3">
               <Link 
-                href="/edificios/nuevo-wizard"
+                href="/dashboard/properties"
                 className="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl hover:from-indigo-50 hover:to-purple-50 transition-all border border-gray-200 hover:border-indigo-200"
               >
                 <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-200 transition-colors">
@@ -205,7 +205,7 @@ function DashboardPageContent() {
               </Link>
 
               <Link 
-                href="/unidades/nuevo"
+                href="/dashboard/properties"
                 className="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl hover:from-indigo-50 hover:to-purple-50 transition-all border border-gray-200 hover:border-indigo-200"
               >
                 <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-purple-200 transition-colors">
@@ -216,7 +216,7 @@ function DashboardPageContent() {
               </Link>
 
               <Link 
-                href="/inquilinos/nuevo"
+                href="/dashboard/tenants"
                 className="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl hover:from-indigo-50 hover:to-purple-50 transition-all border border-gray-200 hover:border-indigo-200"
               >
                 <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-200 transition-colors">
@@ -523,7 +523,7 @@ function DashboardPageContent() {
                 <FileText size={20} />
                 Pagos Pendientes
               </h2>
-              <Link href="/pagos" className="text-sm text-blue-600 hover:underline">
+              <Link href="/dashboard/payments" className="text-sm text-blue-600 hover:underline">
                 Ver todos
               </Link>
             </div>
@@ -566,7 +566,7 @@ function DashboardPageContent() {
                 <FileText size={20} />
                 Contratos por Vencer
               </h2>
-              <Link href="/contratos" className="text-sm text-blue-600 hover:underline">
+              <Link href="/dashboard/contracts" className="text-sm text-blue-600 hover:underline">
                 Ver todos
               </Link>
             </div>
@@ -603,7 +603,7 @@ function DashboardPageContent() {
                 <Wrench size={20} />
                 Mantenimiento Activo
               </h2>
-              <Link href="/mantenimiento" className="text-sm text-blue-600 hover:underline">
+              <Link href="/dashboard/maintenance" className="text-sm text-blue-600 hover:underline">
                 Ver todos
               </Link>
             </div>
