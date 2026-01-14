@@ -1,14 +1,10 @@
 'use client';
 
 import { ReactNode, useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Sidebar } from './sidebar';
 import { Header } from './header';
 import { BottomNavigation } from './bottom-navigation';
-import { TourAutoStarter } from '@/components/tours/TourAutoStarter';
-import { FloatingTourButton } from '@/components/tours/FloatingTourButton';
-import { ContextualHelp } from '@/components/help/ContextualHelp';
-import { OnboardingChecklist } from '@/components/tutorials/OnboardingChecklist';
-import { FirstTimeSetupWizard } from '@/components/tutorials/FirstTimeSetupWizard';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useIsMobile } from '@/lib/hooks/useMediaQuery';
@@ -17,7 +13,33 @@ import { SkipLink } from '@/components/accessibility/SkipLink';
 import { CommandPalette } from '@/components/navigation/command-palette';
 import { GlobalShortcuts } from '@/components/navigation/global-shortcuts';
 import { ShortcutsHelpDialog } from '@/components/navigation/shortcuts-help-dialog';
-import { NavigationTutorial } from '@/components/navigation/navigation-tutorial';
+
+// Dynamic imports for client-side only components to avoid hydration mismatch and build errors
+const TourAutoStarter = dynamic(
+  () => import('@/components/tours/TourAutoStarter').then((mod) => mod.TourAutoStarter),
+  { ssr: false }
+);
+const FloatingTourButton = dynamic(
+  () => import('@/components/tours/FloatingTourButton').then((mod) => mod.FloatingTourButton),
+  { ssr: false }
+);
+const ContextualHelp = dynamic(
+  () => import('@/components/help/ContextualHelp').then((mod) => mod.ContextualHelp),
+  { ssr: false }
+);
+const OnboardingChecklist = dynamic(
+  () => import('@/components/tutorials/OnboardingChecklist').then((mod) => mod.OnboardingChecklist),
+  { ssr: false }
+);
+const FirstTimeSetupWizard = dynamic(
+  () =>
+    import('@/components/tutorials/FirstTimeSetupWizard').then((mod) => mod.FirstTimeSetupWizard),
+  { ssr: false }
+);
+const NavigationTutorial = dynamic(
+  () => import('@/components/navigation/navigation-tutorial').then((mod) => mod.NavigationTutorial),
+  { ssr: false }
+);
 
 /**
  * Layout autenticado con navegación optimizada para mobile-first
@@ -56,16 +78,13 @@ export function AuthenticatedLayout({
   // Redirección para socios de eWoorker: solo pueden acceder a rutas de eWoorker
   useEffect(() => {
     if (status === 'loading') return;
-    
+
     if (session?.user?.role === 'socio_ewoorker') {
       // Rutas permitidas para socios de eWoorker
-      const allowedPaths = [
-        '/ewoorker',
-        '/api/ewoorker',
-      ];
-      
-      const isAllowedPath = allowedPaths.some(path => pathname?.startsWith(path));
-      
+      const allowedPaths = ['/ewoorker', '/api/ewoorker'];
+
+      const isAllowedPath = allowedPaths.some((path) => pathname?.startsWith(path));
+
       if (!isAllowedPath && pathname) {
         // Redirigir al panel del socio
         router.replace('/ewoorker/admin-socio');
@@ -194,9 +213,7 @@ export function AuthenticatedLayout({
       {session?.user?.role !== 'super_admin' && <FloatingTourButton />}
 
       {/* Contextual Help - Ayuda específica según página (NO para superadmin) */}
-      {session?.user?.role !== 'super_admin' && (
-        <ContextualHelp page={getPageForHelp()} />
-      )}
+      {session?.user?.role !== 'super_admin' && <ContextualHelp page={getPageForHelp()} />}
 
       {/* Setup Wizard - Primera vez (NO para superadmin) */}
       {showSetupWizard && session?.user?.role !== 'super_admin' && (
