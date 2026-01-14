@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { format } from 'date-fns';
@@ -19,6 +19,11 @@ import {
   Trash2,
   Download,
   RefreshCw,
+  Upload,
+  Paperclip,
+  Eye,
+  Loader2,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -73,6 +78,14 @@ interface Contract {
   }>;
 }
 
+interface Document {
+  id: string;
+  nombre: string;
+  tipo: string;
+  cloudStoragePath: string;
+  fechaSubida: string;
+}
+
 function ContratoDetailContent() {
   const router = useRouter();
   const params = useParams();
@@ -84,6 +97,13 @@ function ContratoDetailContent() {
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Estados para documentos y drag & drop
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const contractId = params?.id as string;
 
@@ -126,6 +146,148 @@ function ContratoDetailContent() {
       fetchContract();
     }
   }, [status, contractId]);
+
+  // Cargar documentos del contrato
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      if (!contractId) return;
+      
+      setLoadingDocs(true);
+      try {
+        const response = await fetch(`/api/documents?contractId=${contractId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setDocuments(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        console.error('Error fetching documents:', error);
+      } finally {
+        setLoadingDocs(false);
+      }
+    };
+
+    if (status === 'authenticated' && contractId) {
+      fetchDocuments();
+    }
+  }, [status, contractId]);
+
+  // Manejar drag events
+  const handleDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  }, []);
+
+  // Manejar drop
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      await uploadFiles(e.dataTransfer.files);
+    }
+  }, [contractId]);
+
+  // Manejar selección de archivos
+  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      await uploadFiles(e.target.files);
+    }
+  }, [contractId]);
+
+  // Subir archivos
+  const uploadFiles = async (fileList: FileList) => {
+    if (!contractId) return;
+    
+    setUploading(true);
+    
+    try {
+      for (const file of Array.from(fileList)) {
+        // Validar tipo de archivo
+        const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png'];
+        if (!allowedTypes.includes(file.type)) {
+          toast.error(`Tipo de archivo no permitido: ${file.name}`);
+          continue;
+        }
+        
+        // Validar tamaño (max 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error(`Archivo demasiado grande: ${file.name} (máx. 10MB)`);
+          continue;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('nombre', file.name.replace(/\.[^/.]+$/, ''));
+        formData.append('tipo', 'contrato');
+        formData.append('contractId', contractId);
+
+        const response = await fetch('/api/documents', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (response.ok) {
+          const newDoc = await response.json();
+          setDocuments(prev => [newDoc, ...prev]);
+          toast.success(`Documento "${file.name}" subido correctamente`);
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          toast.error(errorData.error || `Error subiendo ${file.name}`);
+        }
+      }
+    } catch (error) {
+      console.error('Error uploading files:', error);
+      toast.error('Error al subir los archivos');
+    } finally {
+      setUploading(false);
+      // Limpiar input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  // Descargar documento
+  const handleDownloadDocument = async (documentId: string) => {
+    try {
+      const response = await fetch(`/api/documents/${documentId}/download`);
+      if (response.ok) {
+        const data = await response.json();
+        window.open(data.url, '_blank');
+      } else {
+        toast.error('Error al descargar documento');
+      }
+    } catch (error) {
+      toast.error('Error al descargar documento');
+    }
+  };
+
+  // Eliminar documento
+  const handleDeleteDocument = async (documentId: string) => {
+    if (!confirm('¿Estás seguro de eliminar este documento?')) return;
+    
+    try {
+      const response = await fetch(`/api/documents/${documentId}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        setDocuments(prev => prev.filter(d => d.id !== documentId));
+        toast.success('Documento eliminado');
+      } else {
+        toast.error('Error al eliminar documento');
+      }
+    } catch (error) {
+      toast.error('Error al eliminar documento');
+    }
+  };
 
   const handleDelete = async () => {
     if (!contract) return;
@@ -509,6 +671,130 @@ function ContratoDetailContent() {
             </CardContent>
           </Card>
         )}
+
+        {/* Documentos del contrato - Drag & Drop */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Paperclip className="h-5 w-5" />
+              Documentos del Contrato
+            </CardTitle>
+            <CardDescription>
+              Arrastra archivos aquí o haz clic para subir documentos asociados a este contrato
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Zona de Drag & Drop */}
+            <div
+              className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-all ${
+                dragActive
+                  ? 'border-primary bg-primary/5 scale-[1.02]'
+                  : 'border-muted-foreground/25 hover:border-primary/50'
+              }`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                onChange={handleFileSelect}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                disabled={uploading}
+              />
+              
+              <div className="flex flex-col items-center gap-2">
+                {uploading ? (
+                  <>
+                    <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                    <p className="text-sm font-medium">Subiendo documentos...</p>
+                  </>
+                ) : (
+                  <>
+                    <div className={`p-3 rounded-full ${dragActive ? 'bg-primary/10' : 'bg-muted'}`}>
+                      <Upload className={`h-8 w-8 ${dragActive ? 'text-primary' : 'text-muted-foreground'}`} />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {dragActive ? '¡Suelta para subir!' : 'Arrastra y suelta archivos aquí'}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        PDF, Word, JPG, PNG • Máx. 10MB por archivo
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="mt-2"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Seleccionar archivos
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Lista de documentos */}
+            {loadingDocs ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : documents.length > 0 ? (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-muted-foreground">
+                  Documentos adjuntos ({documents.length})
+                </h4>
+                <div className="space-y-2">
+                  {documents.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="p-2 rounded bg-muted">
+                        <FileText className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{doc.nombre}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(doc.fechaSubida), 'dd MMM yyyy', { locale: es })}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDownloadDocument(doc.id)}
+                          title="Descargar"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteDocument(doc.id)}
+                          className="text-destructive hover:text-destructive"
+                          title="Eliminar"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-4 text-sm text-muted-foreground">
+                No hay documentos adjuntos a este contrato
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Metadatos */}
         <Card>
