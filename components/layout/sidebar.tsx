@@ -11,16 +11,29 @@ export function Sidebar() {
   if (session?.user) {
     // Construct a UserProfile-like object from session data if available
     // In a real app, this might come from a useUserProfile hook
+    const userRole = (session.user as any).role;
+
+    // Configuración optimizada para administradores
+    const isAdmin = userRole === 'super_admin' || userRole === 'admin';
+
     const userProfile: UserProfile = {
-      uiMode: (session.user as any).uiMode || 'standard',
-      experienceLevel: (session.user as any).experienceLevel || 'intermedio',
-      techSavviness: (session.user as any).techSavviness || 'medio',
+      uiMode: isAdmin ? 'advanced' : (session.user as any).uiMode || 'standard',
+      experienceLevel: isAdmin ? 'avanzado' : (session.user as any).experienceLevel || 'intermedio',
+      techSavviness: isAdmin ? 'alto' : (session.user as any).techSavviness || 'medio',
       // Determine vertical from user role or company type
       // Default to general for now
     };
 
     // Determine vertical (simplified logic)
-    const vertical = 'general'; // Could be dynamic based on user profile
+    // Si es admin, usar la vertical completa 'admin_complete'
+    let vertical = 'general';
+
+    if (isAdmin) {
+      vertical = 'admin_complete';
+    } else {
+      // Aquí podría ir lógica para otras verticales según company type
+      // Por ahora mantenemos 'general' para otros roles
+    }
 
     return (
       <div className="hidden lg:flex flex-col w-64 border-r bg-background h-full fixed left-0 top-0 bottom-0 z-30">

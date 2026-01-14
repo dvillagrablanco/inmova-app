@@ -31,7 +31,28 @@ export interface ModuleVisibility {
  * Módulos disponibles por vertical de negocio
  */
 export const MODULES_BY_VERTICAL = {
+  // Perfil completo para administradores
+  admin_complete: [
+    { id: 'dashboard', name: 'Dashboard', priority: 0, complexity: 'low' },
+    { id: 'admin', name: 'Panel Admin', priority: 1, complexity: 'high' },
+    { id: 'edificios', name: 'Propiedades', priority: 2, complexity: 'low' },
+    { id: 'contratos', name: 'Contratos', priority: 3, complexity: 'medium' },
+    { id: 'inquilinos', name: 'Inquilinos', priority: 4, complexity: 'low' },
+    { id: 'pagos', name: 'Pagos', priority: 5, complexity: 'medium' },
+    { id: 'mantenimiento', name: 'Mantenimiento', priority: 6, complexity: 'medium' },
+    { id: 'crm', name: 'CRM & Leads', priority: 7, complexity: 'medium' },
+    { id: 'coliving', name: 'Coliving', priority: 8, complexity: 'high' },
+    { id: 'str', name: 'Alquiler Vacacional', priority: 9, complexity: 'high' },
+    { id: 'flipping', name: 'Inversiones', priority: 10, complexity: 'high' },
+    { id: 'partners', name: 'Partners', priority: 11, complexity: 'medium' },
+    { id: 'documentos', name: 'Documentos', priority: 12, complexity: 'low' },
+    { id: 'reportes', name: 'Reportes', priority: 13, complexity: 'medium' },
+    { id: 'usuarios', name: 'Usuarios', priority: 14, complexity: 'high' },
+    { id: 'configuracion', name: 'Configuración', priority: 99, complexity: 'high' },
+  ],
+
   alquiler_tradicional: [
+    { id: 'dashboard', name: 'Dashboard', priority: 0, complexity: 'low' },
     { id: 'edificios', name: 'Propiedades', priority: 1, complexity: 'low' },
     { id: 'contratos', name: 'Contratos', priority: 2, complexity: 'medium' },
     { id: 'inquilinos', name: 'Inquilinos', priority: 3, complexity: 'low' },
@@ -45,6 +66,7 @@ export const MODULES_BY_VERTICAL = {
   ],
 
   room_rental: [
+    { id: 'dashboard', name: 'Dashboard', priority: 0, complexity: 'low' },
     { id: 'edificios', name: 'Propiedades', priority: 1, complexity: 'low' },
     { id: 'room-rental', name: 'Habitaciones', priority: 2, complexity: 'medium' },
     { id: 'inquilinos', name: 'Inquilinos', priority: 3, complexity: 'low' },
@@ -56,6 +78,7 @@ export const MODULES_BY_VERTICAL = {
   ],
 
   str: [
+    { id: 'dashboard', name: 'Dashboard', priority: 0, complexity: 'low' },
     { id: 'str', name: 'Channel Manager', priority: 1, complexity: 'high' },
     { id: 'edificios', name: 'Propiedades', priority: 2, complexity: 'low' },
     { id: 'reservas', name: 'Reservas', priority: 3, complexity: 'medium' },
@@ -66,6 +89,7 @@ export const MODULES_BY_VERTICAL = {
   ],
 
   flipping: [
+    { id: 'dashboard', name: 'Dashboard', priority: 0, complexity: 'low' },
     { id: 'flipping', name: 'Proyectos', priority: 1, complexity: 'high' },
     { id: 'edificios', name: 'Propiedades', priority: 2, complexity: 'low' },
     { id: 'presupuesto', name: 'Presupuestos', priority: 3, complexity: 'high' },
@@ -76,12 +100,14 @@ export const MODULES_BY_VERTICAL = {
   ],
 
   general: [
+    { id: 'dashboard', name: 'Dashboard', priority: 0, complexity: 'low' },
     { id: 'edificios', name: 'Propiedades', priority: 1, complexity: 'low' },
     { id: 'contratos', name: 'Contratos', priority: 2, complexity: 'medium' },
     { id: 'inquilinos', name: 'Inquilinos', priority: 3, complexity: 'low' },
     { id: 'pagos', name: 'Pagos', priority: 4, complexity: 'medium' },
     { id: 'mantenimiento', name: 'Mantenimiento', priority: 5, complexity: 'medium' },
     { id: 'documentos', name: 'Documentos', priority: 6, complexity: 'low' },
+    { id: 'configuracion', name: 'Configuración', priority: 7, complexity: 'medium' },
   ],
 };
 
