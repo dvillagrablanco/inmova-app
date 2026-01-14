@@ -1,6 +1,6 @@
 /**
  * UI MODE SERVICE - Sistema de Modos Adaptativos de Interfaz
- * 
+ *
  * Este servicio gestiona la adaptación de la interfaz según:
  * - experienceLevel: principiante, intermedio, avanzado
  * - techSavviness: bajo, medio, alto
@@ -41,9 +41,9 @@ export const MODULES_BY_VERTICAL = {
     { id: 'documentos', name: 'Documentos', priority: 7, complexity: 'low' },
     { id: 'integrations', name: 'Integraciones', priority: 9, complexity: 'medium' },
     { id: 'tools', name: 'Herramientas', priority: 10, complexity: 'low' },
-    { id: 'admin/ai-agents', name: 'Agentes IA', priority: 11, complexity: 'high' }
+    { id: 'admin/ai-agents', name: 'Agentes IA', priority: 11, complexity: 'high' },
   ],
-  
+
   room_rental: [
     { id: 'edificios', name: 'Propiedades', priority: 1, complexity: 'low' },
     { id: 'room-rental', name: 'Habitaciones', priority: 2, complexity: 'medium' },
@@ -54,7 +54,7 @@ export const MODULES_BY_VERTICAL = {
     { id: 'normas', name: 'Normas Coliving', priority: 7, complexity: 'medium' },
     { id: 'analytics', name: 'Analytics', priority: 8, complexity: 'high' },
   ],
-  
+
   str: [
     { id: 'str', name: 'Channel Manager', priority: 1, complexity: 'high' },
     { id: 'edificios', name: 'Propiedades', priority: 2, complexity: 'low' },
@@ -64,7 +64,7 @@ export const MODULES_BY_VERTICAL = {
     { id: 'analytics', name: 'Analytics STR', priority: 6, complexity: 'high' },
     { id: 'reviews', name: 'Reseñas', priority: 7, complexity: 'low' },
   ],
-  
+
   flipping: [
     { id: 'flipping', name: 'Proyectos', priority: 1, complexity: 'high' },
     { id: 'edificios', name: 'Propiedades', priority: 2, complexity: 'low' },
@@ -74,7 +74,7 @@ export const MODULES_BY_VERTICAL = {
     { id: 'roi-calculator', name: 'Calculadora ROI', priority: 6, complexity: 'high' },
     { id: 'analytics', name: 'Analytics', priority: 7, complexity: 'high' },
   ],
-  
+
   general: [
     { id: 'edificios', name: 'Propiedades', priority: 1, complexity: 'low' },
     { id: 'contratos', name: 'Contratos', priority: 2, complexity: 'medium' },
@@ -89,7 +89,7 @@ export const MODULES_BY_VERTICAL = {
  * Determina el modo UI recomendado automáticamente según el perfil del usuario
  */
 export function getRecommendedUIMode(profile: UserProfile): UIMode {
-  const { experienceLevel, techSavviness, portfolioSize } = profile;
+  const { experienceLevel, techSavviness, portfolioSize } = profile || {};
 
   // Principiantes o tech savviness bajo -> Simple
   if (experienceLevel === 'principiante' || techSavviness === 'bajo') {
@@ -117,16 +117,20 @@ export function getVisibleModules(
   profile: UserProfile
 ): ModuleVisibility[] {
   const modules = MODULES_BY_VERTICAL[vertical] || MODULES_BY_VERTICAL.general;
-  const { uiMode, preferredModules = [], hiddenModules = [] } = profile;
+  const { uiMode, preferredModules = [], hiddenModules = [] } = profile || {};
+
+  // FIX: Asegurar que sean arrays para evitar 'includes is not a function' si son null
+  const safePreferred = Array.isArray(preferredModules) ? preferredModules : [];
+  const safeHidden = Array.isArray(hiddenModules) ? hiddenModules : [];
 
   return modules.map((module) => {
     // Si está explícitamente oculto por el usuario
-    if (hiddenModules.includes(module.id)) {
+    if (safeHidden.includes(module.id)) {
       return { ...module, visible: false, reason: 'hidden_by_user' };
     }
 
     // Si está explícitamente preferido por el usuario
-    if (preferredModules.includes(module.id)) {
+    if (safePreferred.includes(module.id)) {
       return { ...module, visible: true, featured: true, reason: 'preferred' };
     }
 
@@ -155,20 +159,17 @@ export function getVisibleModules(
  * Determina si se deben mostrar tooltips de ayuda
  */
 export function shouldShowTooltips(profile: UserProfile): boolean {
-  const { experienceLevel, techSavviness } = profile;
-  
-  return (
-    experienceLevel === 'principiante' ||
-    techSavviness === 'bajo' ||
-    profile.uiMode === 'simple'
-  );
+  if (!profile) return false;
+  const { experienceLevel, techSavviness, uiMode } = profile;
+
+  return experienceLevel === 'principiante' || techSavviness === 'bajo' || uiMode === 'simple';
 }
 
 /**
  * Determina si se deben mostrar campos avanzados en formularios
  */
 export function shouldShowAdvancedFields(profile: UserProfile): boolean {
-  return profile.uiMode === 'advanced';
+  return profile?.uiMode === 'advanced';
 }
 
 /**
@@ -177,11 +178,9 @@ export function shouldShowAdvancedFields(profile: UserProfile): boolean {
  * - standard: Métricas principales + algunos gráficos
  * - detailed: Todo el detalle, gráficos avanzados
  */
-export function getDashboardDetailLevel(
-  profile: UserProfile
-): 'basic' | 'standard' | 'detailed' {
-  if (profile.uiMode === 'simple') return 'basic';
-  if (profile.uiMode === 'advanced') return 'detailed';
+export function getDashboardDetailLevel(profile: UserProfile): 'basic' | 'standard' | 'detailed' {
+  if (profile?.uiMode === 'simple') return 'basic';
+  if (profile?.uiMode === 'advanced') return 'detailed';
   return 'standard';
 }
 
@@ -205,18 +204,14 @@ export function getVisibleFormFields(
   allFields: FormFieldConfig[],
   profile: UserProfile
 ): FormFieldConfig[] {
-  if (profile.uiMode === 'simple') {
+  if (profile?.uiMode === 'simple') {
     // Solo campos obligatorios y de baja complejidad
-    return allFields.filter(
-      (field) => field.required || field.complexity === 'low'
-    );
+    return allFields.filter((field) => field.required || field.complexity === 'low');
   }
 
-  if (profile.uiMode === 'standard') {
+  if (profile?.uiMode === 'standard') {
     // Obligatorios + baja y media complejidad
-    return allFields.filter(
-      (field) => field.required || field.complexity !== 'high'
-    );
+    return allFields.filter((field) => field.required || field.complexity !== 'high');
   }
 
   // Modo Advanced: Todos los campos
@@ -226,10 +221,7 @@ export function getVisibleFormFields(
 /**
  * Obtiene mensajes contextuales según el perfil
  */
-export function getContextualMessage(
-  context: string,
-  profile: UserProfile
-): string | null {
+export function getContextualMessage(context: string, profile: UserProfile): string | null {
   if (!shouldShowTooltips(profile)) return null;
 
   const messages: Record<string, string> = {
@@ -257,12 +249,12 @@ export function getVisibleTableColumns(
   allColumns: TableColumnConfig[],
   profile: UserProfile
 ): TableColumnConfig[] {
-  if (profile.uiMode === 'simple') {
+  if (profile?.uiMode === 'simple') {
     // Solo las 4 columnas más importantes
     return allColumns.filter((col) => col.priority <= 4);
   }
 
-  if (profile.uiMode === 'standard') {
+  if (profile?.uiMode === 'standard') {
     // Top 7 columnas
     return allColumns.filter((col) => col.priority <= 7);
   }
