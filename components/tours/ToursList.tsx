@@ -42,8 +42,9 @@ export function ToursList() {
       const data = await response.json();
 
       if (data.success) {
-        setTours(data.tours);
-        setCompletedTours(data.completedTours || 0);
+        setTours(data.tours || []);
+        // FIX: Usar array vacío en lugar de 0 para evitar 'includes is not a function'
+        setCompletedTours(Array.isArray(data.completedTours) ? data.completedTours : []);
         setProgress(data.progress || 0);
       }
     } catch (error) {

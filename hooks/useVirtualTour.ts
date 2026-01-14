@@ -37,7 +37,8 @@ export function useVirtualTour() {
       if (availableData.success) {
         setAvailableTours(availableData.tours || []);
         setProgress(availableData.progress || 0);
-        setCompletedTours(availableData.completedTours || 0);
+        // FIX: Usar array vacío en lugar de 0 para evitar 'includes is not a function'
+        setCompletedTours(Array.isArray(availableData.completedTours) ? availableData.completedTours : []);
       }
 
       // Obtener siguiente tour
@@ -72,7 +73,8 @@ export function useVirtualTour() {
       const data = await response.json();
 
       if (data.success) {
-        setCompletedTours(data.completedTours);
+        // FIX: Asegurar que siempre sea un array
+        setCompletedTours(Array.isArray(data.completedTours) ? data.completedTours : []);
         await fetchTours(); // Refrescar
         return true;
       }
@@ -98,7 +100,8 @@ export function useVirtualTour() {
       const data = await response.json();
 
       if (data.success) {
-        setCompletedTours(data.completedTours);
+        // FIX: Asegurar que siempre sea un array
+        setCompletedTours(Array.isArray(data.completedTours) ? data.completedTours : []);
         await fetchTours();
         return true;
       }

@@ -102,7 +102,8 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
         const response = await fetch('/api/onboarding/checklist');
         if (response.ok) {
           const data = await response.json();
-          if (data.checklist) {
+          // FIX: Verificar que data.checklist sea un array antes de usar includes
+          if (data.checklist && Array.isArray(data.checklist)) {
             setChecklist(prev =>
               prev.map(item => ({
                 ...item,
