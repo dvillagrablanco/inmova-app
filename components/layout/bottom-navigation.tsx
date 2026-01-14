@@ -3,8 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { Home, Building2, Users, CreditCard, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/lib/hooks/useMediaQuery';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Sheet,
   SheetContent,
@@ -37,15 +36,39 @@ const mainNavItems: NavItem[] = [
 export function BottomNavigation() {
   const pathname = usePathname();
   const router = useRouter();
-  const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Detectar móvil de forma segura para SSR
+  useEffect(() => {
+    setMounted(true);
+    
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    // Check inicial
+    checkMobile();
+    
+    // Listener para cambios de tamaño
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Durante SSR, no renderizar (evitar hydration mismatch)
+  // En cliente móvil, mostrar
+  if (!mounted) {
+    return null;
+  }
 
   // No mostrar en desktop o en páginas de autenticación
   if (
     !isMobile ||
-    pathname.startsWith('/login') ||
-    pathname.startsWith('/signup') ||
-    pathname === '/'
+    pathname?.startsWith('/login') ||
+    pathname?.startsWith('/signup') ||
+    pathname === '/' ||
+    pathname === '/landing'
   ) {
     return null;
   }

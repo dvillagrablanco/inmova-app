@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Joyride, { Step, CallBackProps, STATUS, EVENTS } from 'react-joyride';
 import { useSession } from 'next-auth/react';
 import { useOnboarding } from '@/hooks/useOnboarding';
@@ -167,44 +167,86 @@ export function OnboardingTour({ role }: OnboardingTourProps) {
   const { data: session } = useSession();
   const { shouldShowOnboarding, markOnboardingAsSeen, isLoading } = useOnboarding();
   const [run, setRun] = useState(false);
+  
+  // Refs para prevenir loops y múltiples ejecuciones
+  const hasStartedRef = useRef(false);
+  const hasFinishedRef = useRef(false);
+  const mountedRef = useRef(true);
 
   // Determinar qué pasos mostrar según el rol
   const steps = role === 'TENANT' ? tenantSteps : ownerSteps;
 
   // Obtener el rol del usuario de la sesión
   const userRole = (session?.user as any)?.role;
+  
+  // Lista de roles que no deben ver el onboarding
+  const excludedRoles = ['super_admin', 'SUPER_ADMIN', 'superadmin', 'administrador', 'ADMIN', 'admin'];
+
+  // Cleanup al desmontar
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
+    // Evitar iniciar múltiples veces
+    if (hasStartedRef.current || hasFinishedRef.current) {
+      return;
+    }
+    
+    // Verificar si el rol está excluido
+    const isExcludedRole = excludedRoles.includes(userRole || '');
+    
     // Solo mostrar si el onboarding debe mostrarse y no estamos cargando
-    // NO mostrar para superadministradores
-    if (shouldShowOnboarding && !isLoading && userRole !== 'super_admin') {
+    // NO mostrar para roles excluidos
+    if (shouldShowOnboarding && !isLoading && !isExcludedRole) {
+      hasStartedRef.current = true;
+      
       // Delay para asegurar que el DOM está listo
       const timer = setTimeout(() => {
-        setRun(true);
-      }, 1000);
+        if (mountedRef.current && !hasFinishedRef.current) {
+          setRun(true);
+        }
+      }, 1500);
       
       return () => clearTimeout(timer);
     }
   }, [shouldShowOnboarding, isLoading, userRole]);
 
-  const handleJoyrideCallback = (data: CallBackProps) => {
+  // Callback memoizado para evitar re-renders
+  const handleJoyrideCallback = useCallback((data: CallBackProps) => {
     const { status, type } = data;
     const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
 
     // Si el tour se completó o se saltó
     if (finishedStatuses.includes(status)) {
+      // Prevenir múltiples llamadas
+      if (hasFinishedRef.current) {
+        return;
+      }
+      hasFinishedRef.current = true;
+      
       setRun(false);
+      
+      // Marcar como visto inmediatamente
       markOnboardingAsSeen();
+      
+      console.log('[OnboardingTour] Tour finalizado, marcado como visto');
     }
 
     // Log para debugging (solo en dev)
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Onboarding]', { type, status });
+      console.log('[OnboardingTour]', { type, status });
     }
-  };
+  }, [markOnboardingAsSeen]);
 
-  // No renderizar si no hay sesión o es superadmin
-  if (!session || isLoading || userRole === 'super_admin') {
+  // Verificar si el rol está excluido
+  const isExcludedRole = excludedRoles.includes(userRole || '');
+
+  // No renderizar si no hay sesión, está cargando, es rol excluido, o ya terminó
+  if (!session || isLoading || isExcludedRole || hasFinishedRef.current) {
     return null;
   }
 
