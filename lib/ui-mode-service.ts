@@ -31,24 +31,74 @@ export interface ModuleVisibility {
  * Módulos disponibles por vertical de negocio
  */
 export const MODULES_BY_VERTICAL = {
-  // Perfil completo para administradores
+  // Perfil completo para administradores - TODOS los módulos principales desplegados
   admin_complete: [
+    // Sección Principal
     { id: 'dashboard', name: 'Dashboard', priority: 0, complexity: 'low' },
     { id: 'admin', name: 'Panel Admin', priority: 1, complexity: 'high' },
+    
+    // Gestión de Propiedades
     { id: 'edificios', name: 'Propiedades', priority: 2, complexity: 'low' },
-    { id: 'contratos', name: 'Contratos', priority: 3, complexity: 'medium' },
-    { id: 'inquilinos', name: 'Inquilinos', priority: 4, complexity: 'low' },
-    { id: 'pagos', name: 'Pagos', priority: 5, complexity: 'medium' },
-    { id: 'mantenimiento', name: 'Mantenimiento', priority: 6, complexity: 'medium' },
-    { id: 'crm', name: 'CRM & Leads', priority: 7, complexity: 'medium' },
-    { id: 'coliving', name: 'Coliving', priority: 8, complexity: 'high' },
-    { id: 'str', name: 'Alquiler Vacacional', priority: 9, complexity: 'high' },
-    { id: 'flipping', name: 'Inversiones', priority: 10, complexity: 'high' },
-    { id: 'partners', name: 'Partners', priority: 11, complexity: 'medium' },
-    { id: 'documentos', name: 'Documentos', priority: 12, complexity: 'low' },
-    { id: 'reportes', name: 'Reportes', priority: 13, complexity: 'medium' },
-    { id: 'usuarios', name: 'Usuarios', priority: 14, complexity: 'high' },
-    { id: 'configuracion', name: 'Configuración', priority: 99, complexity: 'high' },
+    { id: 'unidades', name: 'Unidades', priority: 3, complexity: 'low' },
+    { id: 'propiedades', name: 'Mis Propiedades', priority: 4, complexity: 'low' },
+    
+    // Gestión de Inquilinos y Contratos
+    { id: 'inquilinos', name: 'Inquilinos', priority: 5, complexity: 'low' },
+    { id: 'contratos', name: 'Contratos', priority: 6, complexity: 'medium' },
+    
+    // Finanzas
+    { id: 'pagos', name: 'Pagos', priority: 7, complexity: 'medium' },
+    { id: 'gastos', name: 'Gastos', priority: 8, complexity: 'medium' },
+    { id: 'finanzas', name: 'Finanzas', priority: 9, complexity: 'medium' },
+    { id: 'facturacion', name: 'Facturación', priority: 10, complexity: 'medium' },
+    { id: 'contabilidad', name: 'Contabilidad', priority: 11, complexity: 'high' },
+    
+    // Operaciones
+    { id: 'mantenimiento', name: 'Mantenimiento', priority: 12, complexity: 'medium' },
+    { id: 'incidencias', name: 'Incidencias', priority: 13, complexity: 'medium' },
+    { id: 'tareas', name: 'Tareas', priority: 14, complexity: 'low' },
+    { id: 'calendario', name: 'Calendario', priority: 15, complexity: 'low' },
+    { id: 'visitas', name: 'Visitas', priority: 16, complexity: 'low' },
+    
+    // CRM y Marketing
+    { id: 'crm', name: 'CRM & Leads', priority: 17, complexity: 'medium' },
+    { id: 'leads', name: 'Leads', priority: 18, complexity: 'medium' },
+    { id: 'comunicaciones', name: 'Comunicaciones', priority: 19, complexity: 'medium' },
+    
+    // Verticales
+    { id: 'coliving', name: 'Coliving', priority: 20, complexity: 'high' },
+    { id: 'str', name: 'Alquiler Vacacional', priority: 21, complexity: 'high' },
+    { id: 'flipping', name: 'Inversiones', priority: 22, complexity: 'high' },
+    { id: 'comunidades', name: 'Comunidades', priority: 23, complexity: 'medium' },
+    
+    // Partners y Red
+    { id: 'partners', name: 'Partners', priority: 24, complexity: 'medium' },
+    { id: 'proveedores', name: 'Proveedores', priority: 25, complexity: 'medium' },
+    
+    // Documentos y Legal
+    { id: 'documentos', name: 'Documentos', priority: 26, complexity: 'low' },
+    { id: 'firma-digital', name: 'Firma Digital', priority: 27, complexity: 'medium' },
+    { id: 'plantillas-legales', name: 'Plantillas Legales', priority: 28, complexity: 'medium' },
+    
+    // Reportes y Analytics
+    { id: 'reportes', name: 'Reportes', priority: 29, complexity: 'medium' },
+    { id: 'analytics', name: 'Analytics', priority: 30, complexity: 'high' },
+    { id: 'bi', name: 'Business Intelligence', priority: 31, complexity: 'high' },
+    
+    // Usuarios y Configuración
+    { id: 'usuarios', name: 'Usuarios', priority: 32, complexity: 'high' },
+    { id: 'configuracion', name: 'Configuración', priority: 33, complexity: 'high' },
+    
+    // Herramientas Avanzadas
+    { id: 'automatizacion', name: 'Automatización', priority: 34, complexity: 'high' },
+    { id: 'integraciones', name: 'Integraciones', priority: 35, complexity: 'high' },
+    { id: 'workflows', name: 'Workflows', priority: 36, complexity: 'high' },
+    { id: 'valoracion-ia', name: 'Valoración IA', priority: 37, complexity: 'high' },
+    
+    // Soporte
+    { id: 'soporte', name: 'Soporte', priority: 38, complexity: 'low' },
+    { id: 'knowledge-base', name: 'Base de Conocimientos', priority: 39, complexity: 'low' },
+    { id: 'notificaciones', name: 'Notificaciones', priority: 40, complexity: 'low' },
   ],
 
   alquiler_tradicional: [
@@ -142,10 +192,17 @@ export function getVisibleModules(
   vertical: keyof typeof MODULES_BY_VERTICAL,
   profile: UserProfile
 ): ModuleVisibility[] {
-  const modules = MODULES_BY_VERTICAL[vertical] || MODULES_BY_VERTICAL.general;
-  const { uiMode, preferredModules = [], hiddenModules = [] } = profile || {};
+  // FIX: Manejo seguro de vertical para evitar errores con undefined
+  const safeVertical = vertical && typeof vertical === 'string' && vertical in MODULES_BY_VERTICAL 
+    ? vertical 
+    : 'general';
+  const modules = MODULES_BY_VERTICAL[safeVertical] || MODULES_BY_VERTICAL.general;
+  
+  // FIX: Manejo seguro de profile para evitar 'cannot read properties of undefined'
+  const safeProfile = profile || { uiMode: 'standard' as const };
+  const { uiMode = 'standard', preferredModules, hiddenModules } = safeProfile;
 
-  // FIX: Asegurar que sean arrays para evitar 'includes is not a function' si son null
+  // FIX: Asegurar que sean arrays para evitar 'includes is not a function' si son null/undefined
   const safePreferred = Array.isArray(preferredModules) ? preferredModules : [];
   const safeHidden = Array.isArray(hiddenModules) ? hiddenModules : [];
 

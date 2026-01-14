@@ -27,7 +27,32 @@ import {
   Star,
   Settings,
   Grid,
-  Bot
+  Bot,
+  LayoutDashboard,
+  Shield,
+  Layers,
+  Receipt,
+  Wallet,
+  BookOpen,
+  FileCheck,
+  Target,
+  Bell,
+  HelpCircle,
+  Zap,
+  Link2,
+  GitBranch,
+  Brain,
+  ClipboardList,
+  Megaphone,
+  DollarSign,
+  PieChart,
+  UserCog,
+  Building,
+  Truck,
+  PenTool,
+  ScrollText,
+  LifeBuoy,
+  Boxes
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -39,23 +64,82 @@ import {
 } from '@/components/ui/tooltip';
 
 const MODULE_ICONS: Record<string, any> = {
+  // Sección Principal
+  dashboard: LayoutDashboard,
+  admin: Shield,
+  
+  // Gestión de Propiedades
   edificios: Building2,
-  contratos: FileText,
+  unidades: Layers,
+  propiedades: Building,
+  
+  // Inquilinos y Contratos
   inquilinos: Users,
+  contratos: FileText,
+  
+  // Finanzas
   pagos: CreditCard,
+  gastos: Receipt,
+  finanzas: Wallet,
+  facturacion: DollarSign,
+  contabilidad: Calculator,
+  
+  // Operaciones
   mantenimiento: Wrench,
-  analytics: BarChart3,
-  documentos: FileStack,
+  incidencias: ClipboardList,
+  tareas: FileCheck,
+  calendario: Calendar,
+  visitas: Calendar,
+  
+  // CRM y Marketing
+  crm: Target,
+  leads: Target,
+  comunicaciones: MessageSquare,
   comunicacion: MessageSquare,
+  
+  // Verticales
+  coliving: Boxes,
+  str: TrendingUp,
+  flipping: Building2,
+  comunidades: Users,
+  
+  // Partners
+  partners: Building2,
+  proveedores: Truck,
+  
+  // Documentos y Legal
+  documentos: FileStack,
+  'firma-digital': PenTool,
+  'plantillas-legales': ScrollText,
+  
+  // Reportes y Analytics
+  reportes: PieChart,
+  analytics: BarChart3,
+  bi: BarChart3,
+  
+  // Usuarios y Config
+  usuarios: UserCog,
+  configuracion: Settings,
+  
+  // Herramientas Avanzadas
+  automatizacion: Zap,
+  integraciones: Link2,
+  workflows: GitBranch,
+  'valoracion-ia': Brain,
+  
+  // Soporte
+  soporte: LifeBuoy,
+  'knowledge-base': BookOpen,
+  notificaciones: Bell,
+  
+  // Otros módulos existentes
   'room-rental': Home,
   proration: Calculator,
   limpieza: Sparkles,
   normas: FileText,
-  str: TrendingUp,
   reservas: Calendar,
   pricing: TrendingUp,
   reviews: Star,
-  flipping: Building2,
   presupuesto: Calculator,
   contratistas: Users,
   timeline: Calendar,
@@ -103,12 +187,21 @@ export function AdaptiveSidebar({
   collapsed = false,
   className,
 }: AdaptiveSidebarProps) {
-  const pathname = usePathname();
+  const pathname = usePathname() || '';
+  
+  // FIX: Asegurar valores por defecto para userProfile
+  const safeUserProfile = userProfile || {
+    uiMode: 'standard' as const,
+    experienceLevel: 'intermedio' as const,
+    techSavviness: 'medio' as const,
+    preferredModules: [],
+    hiddenModules: [],
+  };
   
   // Obtener módulos visibles según el perfil
   const visibleModules = useMemo(
-    () => getVisibleModules(vertical, userProfile),
-    [vertical, userProfile]
+    () => getVisibleModules(vertical, safeUserProfile),
+    [vertical, safeUserProfile]
   );
 
   // Separar módulos featured del resto
@@ -117,7 +210,8 @@ export function AdaptiveSidebar({
 
   const renderModuleLink = (module: any) => {
     const Icon = MODULE_ICONS[module.id] || Building2;
-    const isActive = pathname.startsWith(`/${module.id}`);
+    // FIX: Manejar pathname null/undefined
+    const isActive = pathname && typeof pathname === 'string' ? pathname.startsWith(`/${module.id}`) : false;
     const url = `/${module.id}`;
 
     const linkContent = (
@@ -143,7 +237,7 @@ export function AdaptiveSidebar({
     );
 
     // Si está colapsado o el usuario es principiante, mostrar tooltip
-    if (collapsed || userProfile.experienceLevel === 'principiante') {
+    if (collapsed || safeUserProfile.experienceLevel === 'principiante') {
       return (
         <TooltipProvider key={module.id}>
           <Tooltip>
@@ -179,9 +273,9 @@ export function AdaptiveSidebar({
             Tus Módulos
           </h2>
           <p className="text-xs text-muted-foreground mt-1">
-            {userProfile.uiMode === 'simple' && 'Vista simplificada'}
-            {userProfile.uiMode === 'standard' && 'Vista estándar'}
-            {userProfile.uiMode === 'advanced' && 'Vista avanzada'}
+            {safeUserProfile.uiMode === 'simple' && 'Vista simplificada'}
+            {safeUserProfile.uiMode === 'standard' && 'Vista estándar'}
+            {safeUserProfile.uiMode === 'advanced' && 'Vista avanzada'}
           </p>
         </div>
       )}
@@ -238,7 +332,7 @@ export function AdaptiveSidebar({
       )}
 
       {/* Botón para ver todos los módulos (si está en modo Simple) */}
-      {userProfile.uiMode === 'simple' && !collapsed && (
+      {safeUserProfile.uiMode === 'simple' && !collapsed && (
         <div className="mt-auto px-3 pb-4">
           <Link
             href="/configuracion?tab=modules"

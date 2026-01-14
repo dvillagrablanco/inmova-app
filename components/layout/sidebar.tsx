@@ -11,17 +11,23 @@ export function Sidebar() {
   if (session?.user) {
     // Construct a UserProfile-like object from session data if available
     // In a real app, this might come from a useUserProfile hook
-    const userRole = (session.user as any).role;
+    const userRole = (session.user as any).role || '';
 
     // Configuración optimizada para administradores
-    const isAdmin = userRole === 'super_admin' || userRole === 'admin';
+    // FIX: Incluir 'administrador' que es el rol usado en el sistema
+    const isAdmin = ['super_admin', 'admin', 'administrador', 'ADMIN', 'SUPERADMIN'].includes(userRole);
 
     const userProfile: UserProfile = {
       uiMode: isAdmin ? 'advanced' : (session.user as any).uiMode || 'standard',
       experienceLevel: isAdmin ? 'avanzado' : (session.user as any).experienceLevel || 'intermedio',
       techSavviness: isAdmin ? 'alto' : (session.user as any).techSavviness || 'medio',
-      // Determine vertical from user role or company type
-      // Default to general for now
+      // FIX: Inicializar arrays vacíos para evitar 'includes is not a function'
+      preferredModules: Array.isArray((session.user as any).preferredModules) 
+        ? (session.user as any).preferredModules 
+        : [],
+      hiddenModules: Array.isArray((session.user as any).hiddenModules) 
+        ? (session.user as any).hiddenModules 
+        : [],
     };
 
     // Determine vertical (simplified logic)
