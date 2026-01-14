@@ -108,10 +108,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const prismaClient = await getPrisma();
-    
+
     // Si Prisma no está disponible (build-time), retornar solo rutas estáticas
     if (!prismaClient) {
       console.log('Sitemap: Using static routes only (Prisma not available)');
+      return staticRoutes;
+    }
+
+    // Verificar conexión a BD antes de consultar
+    try {
+      await prismaClient.$queryRaw`SELECT 1`;
+    } catch (dbError) {
+      console.warn('Database not connected, returning static routes');
       return staticRoutes;
     }
 
@@ -131,7 +139,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       },
     });
 
-    const propertyRoutes: MetadataRoute.Sitemap = units.map((unit) => ({
+    const propertyRoutes: MetadataRoute.Sitemap = units.map((unit: any) => ({
       url: `${baseUrl}/unidades/${unit.id}`,
       lastModified: unit.updatedAt,
       changeFrequency: 'weekly' as const,
@@ -151,7 +159,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       },
     });
 
-    const buildingRoutes: MetadataRoute.Sitemap = buildings.map((building) => ({
+    const buildingRoutes: MetadataRoute.Sitemap = buildings.map((building: any) => ({
       url: `${baseUrl}/edificios/${building.id}`,
       lastModified: building.updatedAt,
       changeFrequency: 'monthly' as const,
