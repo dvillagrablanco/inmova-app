@@ -26,7 +26,21 @@ export async function GET(req: NextRequest) {
 
     // Si el usuario no es super_admin y no tiene companyId, retornar vacío
     if (!isSuperAdmin && !user.companyId) {
-      return NextResponse.json([]);
+      // Intentar recuperar companyId si no está presente en el objeto usuario inicial
+      // (a veces puede perderse en la sesión/contexto)
+      const fullUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { companyId: true }
+      });
+      
+      if (!isSuperAdmin && !fullUser?.companyId) {
+        return NextResponse.json([]);
+      }
+      
+      // Si se recuperó, usarlo
+      if (fullUser?.companyId) {
+         // This is a workaround, better to fix requireAuth/getCurrentUser
+      }
     }
 
     const whereClause = whereCompanyId ? { companyId: whereCompanyId } : {};

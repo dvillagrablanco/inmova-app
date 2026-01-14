@@ -1,5 +1,10 @@
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import NewItemPlaceholder from '@/components/ui/new-item-placeholder';
 
 export default function NewContractPage() {
-  return <NewItemPlaceholder title="Crear Nuevo Contrato" />;
+  return (
+    <AuthenticatedLayout>
+      <NewItemPlaceholder title="Crear Nuevo Contrato" />
+    </AuthenticatedLayout>
+  );
 }

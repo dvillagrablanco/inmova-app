@@ -6,9 +6,12 @@ export const metadata: Metadata = {
   description: 'Gestión de contratos de alquiler',
 };
 
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 export default function ContractsPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <AuthenticatedLayout>
+      <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Contratos</h1>
         <p className="text-gray-600 mt-2">
@@ -18,5 +21,6 @@ export default function ContractsPage() {
 
       <ContractsDataTable />
     </div>
+    </AuthenticatedLayout>
   );
 }
