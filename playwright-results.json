@@ -10,7 +10,9 @@
     "grep": {},
     "grepInvert": null,
     "maxFailures": 0,
-    "metadata": {},
+    "metadata": {
+      "actualWorkers": 2
+    },
     "preserveOutput": "always",
     "reporter": [
       [
@@ -46,7 +48,9 @@
         "outputDir": "/workspace/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 2
+        },
         "id": "chromium",
         "name": "chromium",
         "testDir": "/workspace/__tests__/e2e",
@@ -60,7 +64,9 @@
         "outputDir": "/workspace/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 2
+        },
         "id": "firefox",
         "name": "firefox",
         "testDir": "/workspace/__tests__/e2e",
@@ -74,7 +80,9 @@
         "outputDir": "/workspace/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 2
+        },
         "id": "webkit",
         "name": "webkit",
         "testDir": "/workspace/__tests__/e2e",
@@ -88,7 +96,9 @@
         "outputDir": "/workspace/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 2
+        },
         "id": "Mobile Chrome",
         "name": "Mobile Chrome",
         "testDir": "/workspace/__tests__/e2e",
@@ -102,7 +112,9 @@
         "outputDir": "/workspace/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 2
+        },
         "id": "Mobile Safari",
         "name": "Mobile Safari",
         "testDir": "/workspace/__tests__/e2e",
@@ -116,7 +128,9 @@
         "outputDir": "/workspace/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 2
+        },
         "id": "iPad",
         "name": "iPad",
         "testDir": "/workspace/__tests__/e2e",
@@ -140,19 +154,412 @@
       "timeout": 120000
     }
   },
-  "suites": [],
-  "errors": [
+  "suites": [
     {
-      "message": "Error: No tests found.\nMake sure that arguments are regular expressions matching test files.\nYou may need to escape symbols like \"$\" or \"*\" and quote the arguments.",
-      "stack": "Error: No tests found.\nMake sure that arguments are regular expressions matching test files.\nYou may need to escape symbols like \"$\" or \"*\" and quote the arguments."
+      "title": "mobile-floating-buttons.spec.ts",
+      "file": "mobile-floating-buttons.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Mobile Floating Buttons",
+          "file": "mobile-floating-buttons.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should display floating buttons correctly positioned on mobile",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 14521,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.whatsapp-button') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.whatsapp-button') to be visible\u001b[22m\n\n    at /workspace/__tests__/e2e/mobile-floating-buttons.spec.ts:27:16",
+                        "location": {
+                          "file": "/workspace/__tests__/e2e/mobile-floating-buttons.spec.ts",
+                          "column": 16,
+                          "line": 27
+                        },
+                        "snippet": "  25 |     // We will focus on our controlled buttons first\n  26 |     \n> 27 |     await page.waitForSelector(whatsappSelector, { state: 'visible', timeout: 10000 });\n     |                ^\n  28 |     await page.waitForSelector(chatbotSelector, { state: 'visible', timeout: 10000 });\n  29 |\n  30 |     const whatsappBox = await page.locator(whatsappSelector).boundingBox();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/workspace/__tests__/e2e/mobile-floating-buttons.spec.ts",
+                            "column": 16,
+                            "line": 27
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.whatsapp-button') to be visible\u001b[22m\n\n\n  25 |     // We will focus on our controlled buttons first\n  26 |     \n> 27 |     await page.waitForSelector(whatsappSelector, { state: 'visible', timeout: 10000 });\n     |                ^\n  28 |     await page.waitForSelector(chatbotSelector, { state: 'visible', timeout: 10000 });\n  29 |\n  30 |     const whatsappBox = await page.locator(whatsappSelector).boundingBox();\n    at /workspace/__tests__/e2e/mobile-floating-buttons.spec.ts:27:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-14T14:50:21.588Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/workspace/test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/workspace/test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/workspace/test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/workspace/__tests__/e2e/mobile-floating-buttons.spec.ts",
+                        "column": 16,
+                        "line": 27
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "37dd9e2c7eb1b35d3fc4-20c433fdeb840802363a",
+              "file": "mobile-floating-buttons.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "should display floating buttons correctly positioned on mobile",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 14729,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.whatsapp-button') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.whatsapp-button') to be visible\u001b[22m\n\n    at /workspace/__tests__/e2e/mobile-floating-buttons.spec.ts:27:16",
+                        "location": {
+                          "file": "/workspace/__tests__/e2e/mobile-floating-buttons.spec.ts",
+                          "column": 16,
+                          "line": 27
+                        },
+                        "snippet": "  25 |     // We will focus on our controlled buttons first\n  26 |     \n> 27 |     await page.waitForSelector(whatsappSelector, { state: 'visible', timeout: 10000 });\n     |                ^\n  28 |     await page.waitForSelector(chatbotSelector, { state: 'visible', timeout: 10000 });\n  29 |\n  30 |     const whatsappBox = await page.locator(whatsappSelector).boundingBox();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/workspace/__tests__/e2e/mobile-floating-buttons.spec.ts",
+                            "column": 16,
+                            "line": 27
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.whatsapp-button') to be visible\u001b[22m\n\n\n  25 |     // We will focus on our controlled buttons first\n  26 |     \n> 27 |     await page.waitForSelector(whatsappSelector, { state: 'visible', timeout: 10000 });\n     |                ^\n  28 |     await page.waitForSelector(chatbotSelector, { state: 'visible', timeout: 10000 });\n  29 |\n  30 |     const whatsappBox = await page.locator(whatsappSelector).boundingBox();\n    at /workspace/__tests__/e2e/mobile-floating-buttons.spec.ts:27:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-14T14:50:21.544Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/workspace/test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-firefox/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/workspace/test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-firefox/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/workspace/test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-firefox/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/workspace/__tests__/e2e/mobile-floating-buttons.spec.ts",
+                        "column": 16,
+                        "line": 27
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "37dd9e2c7eb1b35d3fc4-1aafab97efe51e0654b5",
+              "file": "mobile-floating-buttons.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "should display floating buttons correctly positioned on mobile",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 2,
+                      "error": {
+                        "message": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     sudo npx playwright install-deps                 ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     sudo apt-get install libxslt1.1\\                 ║\n║         libwoff1\\                                    ║\n║         libevent-2.1-7t64\\                           ║\n║         libgstreamer-plugins-base1.0-0\\              ║\n║         libgstreamer-gl1.0-0\\                        ║\n║         libgstreamer-plugins-bad1.0-0\\               ║\n║         libavif16\\                                   ║\n║         libharfbuzz-icu0\\                            ║\n║         libhyphen0\\                                  ║\n║         libmanette-0.2-0                             ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝",
+                        "stack": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     sudo npx playwright install-deps                 ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     sudo apt-get install libxslt1.1\\                 ║\n║         libwoff1\\                                    ║\n║         libevent-2.1-7t64\\                           ║\n║         libgstreamer-plugins-base1.0-0\\              ║\n║         libgstreamer-gl1.0-0\\                        ║\n║         libgstreamer-plugins-bad1.0-0\\               ║\n║         libavif16\\                                   ║\n║         libharfbuzz-icu0\\                            ║\n║         libhyphen0\\                                  ║\n║         libmanette-0.2-0                             ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     sudo npx playwright install-deps                 ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     sudo apt-get install libxslt1.1\\                 ║\n║         libwoff1\\                                    ║\n║         libevent-2.1-7t64\\                           ║\n║         libgstreamer-plugins-base1.0-0\\              ║\n║         libgstreamer-gl1.0-0\\                        ║\n║         libgstreamer-plugins-bad1.0-0\\               ║\n║         libavif16\\                                   ║\n║         libharfbuzz-icu0\\                            ║\n║         libhyphen0\\                                  ║\n║         libmanette-0.2-0                             ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-14T14:50:36.922Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "37dd9e2c7eb1b35d3fc4-96e5ac131f4f099b722f",
+              "file": "mobile-floating-buttons.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "should display floating buttons correctly positioned on mobile",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 12338,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.whatsapp-button') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.whatsapp-button') to be visible\u001b[22m\n\n    at /workspace/__tests__/e2e/mobile-floating-buttons.spec.ts:27:16",
+                        "location": {
+                          "file": "/workspace/__tests__/e2e/mobile-floating-buttons.spec.ts",
+                          "column": 16,
+                          "line": 27
+                        },
+                        "snippet": "  25 |     // We will focus on our controlled buttons first\n  26 |     \n> 27 |     await page.waitForSelector(whatsappSelector, { state: 'visible', timeout: 10000 });\n     |                ^\n  28 |     await page.waitForSelector(chatbotSelector, { state: 'visible', timeout: 10000 });\n  29 |\n  30 |     const whatsappBox = await page.locator(whatsappSelector).boundingBox();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/workspace/__tests__/e2e/mobile-floating-buttons.spec.ts",
+                            "column": 16,
+                            "line": 27
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.whatsapp-button') to be visible\u001b[22m\n\n\n  25 |     // We will focus on our controlled buttons first\n  26 |     \n> 27 |     await page.waitForSelector(whatsappSelector, { state: 'visible', timeout: 10000 });\n     |                ^\n  28 |     await page.waitForSelector(chatbotSelector, { state: 'visible', timeout: 10000 });\n  29 |\n  30 |     const whatsappBox = await page.locator(whatsappSelector).boundingBox();\n    at /workspace/__tests__/e2e/mobile-floating-buttons.spec.ts:27:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-14T14:50:37.511Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/workspace/test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-Mobile-Chrome/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/workspace/test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-Mobile-Chrome/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/workspace/test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-Mobile-Chrome/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/workspace/__tests__/e2e/mobile-floating-buttons.spec.ts",
+                        "column": 16,
+                        "line": 27
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "37dd9e2c7eb1b35d3fc4-a9a846f7997939a294d8",
+              "file": "mobile-floating-buttons.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "should display floating buttons correctly positioned on mobile",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 2,
+                      "error": {
+                        "message": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     sudo npx playwright install-deps                 ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     sudo apt-get install libxslt1.1\\                 ║\n║         libwoff1\\                                    ║\n║         libevent-2.1-7t64\\                           ║\n║         libgstreamer-plugins-base1.0-0\\              ║\n║         libgstreamer-gl1.0-0\\                        ║\n║         libgstreamer-plugins-bad1.0-0\\               ║\n║         libavif16\\                                   ║\n║         libharfbuzz-icu0\\                            ║\n║         libhyphen0\\                                  ║\n║         libmanette-0.2-0                             ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝",
+                        "stack": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     sudo npx playwright install-deps                 ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     sudo apt-get install libxslt1.1\\                 ║\n║         libwoff1\\                                    ║\n║         libevent-2.1-7t64\\                           ║\n║         libgstreamer-plugins-base1.0-0\\              ║\n║         libgstreamer-gl1.0-0\\                        ║\n║         libgstreamer-plugins-bad1.0-0\\               ║\n║         libavif16\\                                   ║\n║         libharfbuzz-icu0\\                            ║\n║         libhyphen0\\                                  ║\n║         libmanette-0.2-0                             ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     sudo npx playwright install-deps                 ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     sudo apt-get install libxslt1.1\\                 ║\n║         libwoff1\\                                    ║\n║         libevent-2.1-7t64\\                           ║\n║         libgstreamer-plugins-base1.0-0\\              ║\n║         libgstreamer-gl1.0-0\\                        ║\n║         libgstreamer-plugins-bad1.0-0\\               ║\n║         libavif16\\                                   ║\n║         libharfbuzz-icu0\\                            ║\n║         libhyphen0\\                                  ║\n║         libmanette-0.2-0                             ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-14T14:50:39.135Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "37dd9e2c7eb1b35d3fc4-da8f696b41ded173864b",
+              "file": "mobile-floating-buttons.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "should display floating buttons correctly positioned on mobile",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "iPad",
+                  "projectName": "iPad",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 11699,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.whatsapp-button') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.whatsapp-button') to be visible\u001b[22m\n\n    at /workspace/__tests__/e2e/mobile-floating-buttons.spec.ts:27:16",
+                        "location": {
+                          "file": "/workspace/__tests__/e2e/mobile-floating-buttons.spec.ts",
+                          "column": 16,
+                          "line": 27
+                        },
+                        "snippet": "  25 |     // We will focus on our controlled buttons first\n  26 |     \n> 27 |     await page.waitForSelector(whatsappSelector, { state: 'visible', timeout: 10000 });\n     |                ^\n  28 |     await page.waitForSelector(chatbotSelector, { state: 'visible', timeout: 10000 });\n  29 |\n  30 |     const whatsappBox = await page.locator(whatsappSelector).boundingBox();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/workspace/__tests__/e2e/mobile-floating-buttons.spec.ts",
+                            "column": 16,
+                            "line": 27
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.whatsapp-button') to be visible\u001b[22m\n\n\n  25 |     // We will focus on our controlled buttons first\n  26 |     \n> 27 |     await page.waitForSelector(whatsappSelector, { state: 'visible', timeout: 10000 });\n     |                ^\n  28 |     await page.waitForSelector(chatbotSelector, { state: 'visible', timeout: 10000 });\n  29 |\n  30 |     const whatsappBox = await page.locator(whatsappSelector).boundingBox();\n    at /workspace/__tests__/e2e/mobile-floating-buttons.spec.ts:27:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-14T14:50:39.765Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/workspace/test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-iPad/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/workspace/test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-iPad/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/workspace/test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-iPad/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/workspace/__tests__/e2e/mobile-floating-buttons.spec.ts",
+                        "column": 16,
+                        "line": 27
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "37dd9e2c7eb1b35d3fc4-f4f822299a803c06abf0",
+              "file": "mobile-floating-buttons.spec.ts",
+              "line": 9,
+              "column": 7
+            }
+          ]
+        }
+      ]
     }
   ],
+  "errors": [],
   "stats": {
-    "startTime": "2026-01-12T16:25:14.207Z",
-    "duration": 3472.6760000000004,
+    "startTime": "2026-01-14T14:50:13.750Z",
+    "duration": 37857.01,
     "expected": 0,
     "skipped": 0,
-    "unexpected": 0,
+    "unexpected": 6,
     "flaky": 0
   }
 }

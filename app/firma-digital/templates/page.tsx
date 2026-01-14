@@ -31,9 +31,18 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-import logger, { logError } from '@/lib/logger';
-import { LoadingState } from '@/components/ui/loading-state';
-import { format } from 'date-fns';
+// Eliminado import recursivo de LoadingState si existiera
+import { Loader2 } from 'lucide-react'; // Usar icono directo para loading simple
+
+// Componente simple de loading para evitar recursión
+function SimpleLoading() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[400px]">
+      <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+      <p className="text-muted-foreground">Cargando templates...</p>
+    </div>
+  );
+}
 import { es } from 'date-fns/locale';
 
 interface ContractTemplate {
@@ -92,8 +101,8 @@ export default function TemplatesPage() {
   if (loading || status === 'loading') {
     return (
       <AuthenticatedLayout>
-            <LoadingState message="Cargando templates..." />
-          </AuthenticatedLayout>
+        <SimpleLoading />
+      </AuthenticatedLayout>
     );
   }
 

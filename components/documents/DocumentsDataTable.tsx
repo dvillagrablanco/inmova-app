@@ -7,15 +7,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Plus, FileText, Search, Upload, Folder } from 'lucide-react';
+import { Plus, FileText, Search, Upload, Folder, Sparkles, Loader2 } from 'lucide-react';
 import { Document } from '@/types/documents';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDate } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
+import { toast } from 'sonner';
 
 export function DocumentsDataTable() {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 500);
+  const [analyzingDocId, setAnalyzingDocId] = useState<string | null>(null);
 
   // Note: API filtering is by ID, not generic search text yet.
   // We'll implement client-side filtering for now as the endpoint returns all docs.
@@ -25,6 +27,35 @@ export function DocumentsDataTable() {
     doc.nombre.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
     doc.tipo.toLowerCase().includes(debouncedSearch.toLowerCase())
   ) || [];
+
+  const handleAnalyzeDocument = async (docId: string) => {
+    setAnalyzingDocId(docId);
+    toast.info('Iniciando análisis inteligente...');
+    
+    try {
+      const formData = new FormData();
+      formData.append('documentId', docId);
+      
+      const response = await fetch('/api/ai/documents/analyze', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) throw new Error('Error en análisis');
+      
+      const result = await response.json();
+      toast.success(`Documento analizado: ${result.classification.specificType} (${Math.round(result.classification.confidence * 100)}%)`);
+      
+      // Aquí podríamos mostrar un modal con los resultados
+      console.log('Analysis Result:', result);
+      
+    } catch (error) {
+      console.error(error);
+      toast.error('Error al analizar el documento');
+    } finally {
+      setAnalyzingDocId(null);
+    }
+  };
 
   const columns = [
     {
@@ -73,11 +104,26 @@ export function DocumentsDataTable() {
     },
     {
       key: 'actions',
-      header: '',
+      header: 'Acciones',
       render: (item: Document) => (
-        <Button variant="ghost" size="sm" onClick={() => window.open(`/api/documents/${item.id}/download`, '_blank')}>
-          Descargar
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => handleAnalyzeDocument(item.id)}
+            disabled={analyzingDocId === item.id}
+            title="Analizar con IA"
+          >
+            {analyzingDocId === item.id ? (
+              <Loader2 className="h-4 w-4 animate-spin text-purple-600" />
+            ) : (
+              <Sparkles className="h-4 w-4 text-purple-600" />
+            )}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => window.open(`/api/documents/${item.id}/download`, '_blank')}>
+            Descargar
+          </Button>
+        </div>
       ),
     },
   ];

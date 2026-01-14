@@ -1,2 +1,226 @@
-<testsuites id="" name="" tests="0" failures="0" skipped="0" errors="0" time="3.4726760000000003">
+<testsuites id="" name="" tests="6" failures="6" skipped="0" errors="0" time="37.85701">
+<testsuite name="mobile-floating-buttons.spec.ts" timestamp="2026-01-14T14:50:20.999Z" hostname="chromium" tests="1" failures="1" skipped="0" time="14.521" errors="0">
+<testcase name="Mobile Floating Buttons › should display floating buttons correctly positioned on mobile" classname="mobile-floating-buttons.spec.ts" time="14.521">
+<failure message="mobile-floating-buttons.spec.ts:9:7 should display floating buttons correctly positioned on mobile" type="FAILURE">
+<![CDATA[  [chromium] › mobile-floating-buttons.spec.ts:9:7 › Mobile Floating Buttons › should display floating buttons correctly positioned on mobile 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('.whatsapp-button') to be visible
+
+
+      25 |     // We will focus on our controlled buttons first
+      26 |     
+    > 27 |     await page.waitForSelector(whatsappSelector, { state: 'visible', timeout: 10000 });
+         |                ^
+      28 |     await page.waitForSelector(chatbotSelector, { state: 'visible', timeout: 10000 });
+      29 |
+      30 |     const whatsappBox = await page.locator(whatsappSelector).boundingBox();
+        at /workspace/__tests__/e2e/mobile-floating-buttons.spec.ts:27:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-chromium/video.webm]]
+
+[[ATTACHMENT|test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="mobile-floating-buttons.spec.ts" timestamp="2026-01-14T14:50:20.999Z" hostname="firefox" tests="1" failures="1" skipped="0" time="14.729" errors="0">
+<testcase name="Mobile Floating Buttons › should display floating buttons correctly positioned on mobile" classname="mobile-floating-buttons.spec.ts" time="14.729">
+<failure message="mobile-floating-buttons.spec.ts:9:7 should display floating buttons correctly positioned on mobile" type="FAILURE">
+<![CDATA[  [firefox] › mobile-floating-buttons.spec.ts:9:7 › Mobile Floating Buttons › should display floating buttons correctly positioned on mobile 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('.whatsapp-button') to be visible
+
+
+      25 |     // We will focus on our controlled buttons first
+      26 |     
+    > 27 |     await page.waitForSelector(whatsappSelector, { state: 'visible', timeout: 10000 });
+         |                ^
+      28 |     await page.waitForSelector(chatbotSelector, { state: 'visible', timeout: 10000 });
+      29 |
+      30 |     const whatsappBox = await page.locator(whatsappSelector).boundingBox();
+        at /workspace/__tests__/e2e/mobile-floating-buttons.spec.ts:27:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-firefox/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-firefox/video.webm]]
+
+[[ATTACHMENT|test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-firefox/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="mobile-floating-buttons.spec.ts" timestamp="2026-01-14T14:50:20.999Z" hostname="webkit" tests="1" failures="1" skipped="0" time="0.002" errors="0">
+<testcase name="Mobile Floating Buttons › should display floating buttons correctly positioned on mobile" classname="mobile-floating-buttons.spec.ts" time="0.002">
+<failure message="mobile-floating-buttons.spec.ts:9:7 should display floating buttons correctly positioned on mobile" type="FAILURE">
+<![CDATA[  [webkit] › mobile-floating-buttons.spec.ts:9:7 › Mobile Floating Buttons › should display floating buttons correctly positioned on mobile 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libxslt1.1\                 ║
+    ║         libwoff1\                                    ║
+    ║         libevent-2.1-7t64\                           ║
+    ║         libgstreamer-plugins-base1.0-0\              ║
+    ║         libgstreamer-gl1.0-0\                        ║
+    ║         libgstreamer-plugins-bad1.0-0\               ║
+    ║         libavif16\                                   ║
+    ║         libharfbuzz-icu0\                            ║
+    ║         libhyphen0\                                  ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+</testsuite>
+<testsuite name="mobile-floating-buttons.spec.ts" timestamp="2026-01-14T14:50:20.999Z" hostname="Mobile Chrome" tests="1" failures="1" skipped="0" time="12.338" errors="0">
+<testcase name="Mobile Floating Buttons › should display floating buttons correctly positioned on mobile" classname="mobile-floating-buttons.spec.ts" time="12.338">
+<failure message="mobile-floating-buttons.spec.ts:9:7 should display floating buttons correctly positioned on mobile" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › mobile-floating-buttons.spec.ts:9:7 › Mobile Floating Buttons › should display floating buttons correctly positioned on mobile 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('.whatsapp-button') to be visible
+
+
+      25 |     // We will focus on our controlled buttons first
+      26 |     
+    > 27 |     await page.waitForSelector(whatsappSelector, { state: 'visible', timeout: 10000 });
+         |                ^
+      28 |     await page.waitForSelector(chatbotSelector, { state: 'visible', timeout: 10000 });
+      29 |
+      30 |     const whatsappBox = await page.locator(whatsappSelector).boundingBox();
+        at /workspace/__tests__/e2e/mobile-floating-buttons.spec.ts:27:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-Mobile-Chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-Mobile-Chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-Mobile-Chrome/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-Mobile-Chrome/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-Mobile-Chrome/video.webm]]
+
+[[ATTACHMENT|test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-Mobile-Chrome/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="mobile-floating-buttons.spec.ts" timestamp="2026-01-14T14:50:20.999Z" hostname="Mobile Safari" tests="1" failures="1" skipped="0" time="0.002" errors="0">
+<testcase name="Mobile Floating Buttons › should display floating buttons correctly positioned on mobile" classname="mobile-floating-buttons.spec.ts" time="0.002">
+<failure message="mobile-floating-buttons.spec.ts:9:7 should display floating buttons correctly positioned on mobile" type="FAILURE">
+<![CDATA[  [Mobile Safari] › mobile-floating-buttons.spec.ts:9:7 › Mobile Floating Buttons › should display floating buttons correctly positioned on mobile 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     sudo npx playwright install-deps                 ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     sudo apt-get install libxslt1.1\                 ║
+    ║         libwoff1\                                    ║
+    ║         libevent-2.1-7t64\                           ║
+    ║         libgstreamer-plugins-base1.0-0\              ║
+    ║         libgstreamer-gl1.0-0\                        ║
+    ║         libgstreamer-plugins-bad1.0-0\               ║
+    ║         libavif16\                                   ║
+    ║         libharfbuzz-icu0\                            ║
+    ║         libhyphen0\                                  ║
+    ║         libmanette-0.2-0                             ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+]]>
+</failure>
+</testcase>
+</testsuite>
+<testsuite name="mobile-floating-buttons.spec.ts" timestamp="2026-01-14T14:50:20.999Z" hostname="iPad" tests="1" failures="1" skipped="0" time="11.699" errors="0">
+<testcase name="Mobile Floating Buttons › should display floating buttons correctly positioned on mobile" classname="mobile-floating-buttons.spec.ts" time="11.699">
+<failure message="mobile-floating-buttons.spec.ts:9:7 should display floating buttons correctly positioned on mobile" type="FAILURE">
+<![CDATA[  [iPad] › mobile-floating-buttons.spec.ts:9:7 › Mobile Floating Buttons › should display floating buttons correctly positioned on mobile 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('.whatsapp-button') to be visible
+
+
+      25 |     // We will focus on our controlled buttons first
+      26 |     
+    > 27 |     await page.waitForSelector(whatsappSelector, { state: 'visible', timeout: 10000 });
+         |                ^
+      28 |     await page.waitForSelector(chatbotSelector, { state: 'visible', timeout: 10000 });
+      29 |
+      30 |     const whatsappBox = await page.locator(whatsappSelector).boundingBox();
+        at /workspace/__tests__/e2e/mobile-floating-buttons.spec.ts:27:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-iPad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-iPad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-iPad/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-iPad/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-iPad/video.webm]]
+
+[[ATTACHMENT|test-results/mobile-floating-buttons-Mo-7dc09-rectly-positioned-on-mobile-iPad/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
 </testsuites>

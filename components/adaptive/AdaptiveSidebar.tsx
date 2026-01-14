@@ -25,6 +25,9 @@ import {
   Calendar,
   TrendingUp,
   Star,
+  Settings,
+  Grid,
+  Bot
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -57,6 +60,9 @@ const MODULE_ICONS: Record<string, any> = {
   contratistas: Users,
   timeline: Calendar,
   'roi-calculator': Calculator,
+  integrations: Grid,
+  tools: Settings,
+  'admin/ai-agents': Bot,
 };
 
 interface AdaptiveSidebarProps {

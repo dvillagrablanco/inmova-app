@@ -39,7 +39,9 @@ export const MODULES_BY_VERTICAL = {
     { id: 'mantenimiento', name: 'Mantenimiento', priority: 5, complexity: 'medium' },
     { id: 'analytics', name: 'Analytics', priority: 6, complexity: 'high' },
     { id: 'documentos', name: 'Documentos', priority: 7, complexity: 'low' },
-    { id: 'comunicacion', name: 'Comunicación', priority: 8, complexity: 'medium' },
+    { id: 'integrations', name: 'Integraciones', priority: 9, complexity: 'medium' },
+    { id: 'tools', name: 'Herramientas', priority: 10, complexity: 'low' },
+    { id: 'admin/ai-agents', name: 'Agentes IA', priority: 11, complexity: 'high' }
   ],
   
   room_rental: [

@@ -313,7 +313,7 @@ export function LandingChatbot() {
       {/* WhatsApp Floating Button - Posición ajustada para no solapar con cookie banner */}
       <button
         onClick={openWhatsApp}
-        className="fixed bottom-24 right-6 z-[9999] p-4 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-200 group"
+        className="whatsapp-button fixed bottom-24 right-6 z-[9999] p-4 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-200 group"
         aria-label="Contactar por WhatsApp"
         style={{ boxShadow: '0 0 20px rgba(34, 197, 94, 0.5)' }}
       >
@@ -339,7 +339,7 @@ export function LandingChatbot() {
       {/* Chatbot Widget Button - Encima del WhatsApp */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-40 right-6 z-[9998] p-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-200 ${
+        className={`inmova-chatbot-button fixed bottom-40 right-6 z-[9998] p-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-200 ${
           isOpen ? 'rotate-90' : ''
         }`}
         aria-label={isOpen ? 'Cerrar chat' : 'Abrir chat'}
