@@ -177,9 +177,20 @@ export default function ProactiveAssistant() {
 
   useEffect(() => {
     // Cargar sugerencias descartadas del localStorage
-    const dismissed = localStorage.getItem('dismissedSuggestions');
-    if (dismissed) {
-      setDismissedSuggestions(new Set(JSON.parse(dismissed)));
+    // FIX: Añadir validación para evitar errores si el localStorage tiene datos inválidos
+    try {
+      const dismissed = localStorage.getItem('dismissedSuggestions');
+      if (dismissed) {
+        const parsed = JSON.parse(dismissed);
+        // Asegurar que es un array antes de crear el Set
+        if (Array.isArray(parsed)) {
+          setDismissedSuggestions(new Set(parsed));
+        }
+      }
+    } catch (error) {
+      console.error('[ProactiveAssistant] Error parsing dismissedSuggestions:', error);
+      // Limpiar el localStorage corrupto
+      localStorage.removeItem('dismissedSuggestions');
     }
   }, []);
 

@@ -49,13 +49,19 @@ export function ModuleQuickGuide({
     }
 
     // Cargar pasos completados
+    // FIX: Validar que es un array antes de crear el Set
     const completed = localStorage.getItem(completedKey);
     if (completed) {
       try {
         const completedArray = JSON.parse(completed);
-        setCompletedSteps(new Set(completedArray));
+        // Asegurar que es un array antes de crear el Set
+        if (Array.isArray(completedArray)) {
+          setCompletedSteps(new Set(completedArray));
+        }
       } catch (e) {
         logger.error('Error loading completed steps:', e);
+        // Limpiar localStorage corrupto
+        localStorage.removeItem(completedKey);
       }
     }
   }, [storageKey, completedKey]);
