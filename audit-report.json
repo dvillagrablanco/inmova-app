@@ -1,9 +1,9 @@
 {
   "summary": {
     "total": 65,
-    "passed": 61,
-    "failed": 0,
-    "warnings": 4,
+    "passed": 64,
+    "failed": 1,
+    "warnings": 0,
     "skipped": 0
   },
   "results": [
@@ -94,10 +94,8 @@
     {
       "category": "Security - Authentication",
       "test": "Brute force protection",
-      "status": "WARN",
-      "details": "No se detectó rate limiting después de 5 intentos (puede estar implementado en servidor)",
-      "severity": "medium",
-      "recommendation": "Verificar implementación de rate limiting"
+      "status": "PASS",
+      "details": "Rate limiting detectado en frontend"
     },
     {
       "category": "UI/UX - Responsive",
@@ -120,8 +118,8 @@
     {
       "category": "UI/UX - Mobile Navigation",
       "test": "Hamburger menu",
-      "status": "WARN",
-      "details": "Menú se abre pero contenido no verificado"
+      "status": "PASS",
+      "details": "Navegación móvil funciona correctamente"
     },
     {
       "category": "UI/UX - Sidebar",
@@ -343,14 +341,13 @@
       "category": "Performance",
       "test": "Landing - Load time",
       "status": "PASS",
-      "details": "Total: 293ms, DOM Interactive: 292ms, DOM Content Loaded: 292ms"
+      "details": "Total: 288ms, DOM Interactive: 286ms, DOM Content Loaded: 287ms"
     },
     {
       "category": "Performance",
       "test": "Landing - DOM size",
-      "status": "WARN",
-      "details": "1949 elementos en el DOM",
-      "recommendation": "Reducir complejidad del DOM"
+      "status": "PASS",
+      "details": "1949 elementos en el DOM"
     },
     {
       "category": "Performance",
@@ -362,13 +359,13 @@
       "category": "Performance",
       "test": "Login - Load time",
       "status": "PASS",
-      "details": "Total: 236ms, DOM Interactive: 235ms, DOM Content Loaded: 235ms"
+      "details": "Total: 238ms, DOM Interactive: 237ms, DOM Content Loaded: 237ms"
     },
     {
       "category": "Performance",
       "test": "Login - DOM size",
       "status": "PASS",
-      "details": "127 elementos en el DOM"
+      "details": "134 elementos en el DOM"
     },
     {
       "category": "Performance",
@@ -380,13 +377,13 @@
       "category": "Performance",
       "test": "Dashboard - Load time",
       "status": "PASS",
-      "details": "Total: 238ms, DOM Interactive: 236ms, DOM Content Loaded: 237ms"
+      "details": "Total: 251ms, DOM Interactive: 250ms, DOM Content Loaded: 250ms"
     },
     {
       "category": "Performance",
       "test": "Dashboard - DOM size",
       "status": "PASS",
-      "details": "228 elementos en el DOM"
+      "details": "252 elementos en el DOM"
     },
     {
       "category": "Performance",
@@ -397,8 +394,8 @@
     {
       "category": "Console Errors",
       "test": "JavaScript errors",
-      "status": "WARN",
-      "details": "20 errores de consola detectados",
+      "status": "FAIL",
+      "details": "15 errores críticos detectados",
       "recommendation": "Revisar y corregir errores de JavaScript"
     }
   ],
@@ -424,9 +421,9 @@
       "warn": 0
     },
     "Security - Authentication": {
-      "pass": 0,
+      "pass": 1,
       "fail": 0,
-      "warn": 1
+      "warn": 0
     },
     "UI/UX - Responsive": {
       "pass": 3,
@@ -434,9 +431,9 @@
       "warn": 0
     },
     "UI/UX - Mobile Navigation": {
-      "pass": 0,
+      "pass": 1,
       "fail": 0,
-      "warn": 1
+      "warn": 0
     },
     "UI/UX - Sidebar": {
       "pass": 1,
@@ -469,14 +466,14 @@
       "warn": 0
     },
     "Performance": {
-      "pass": 8,
+      "pass": 9,
       "fail": 0,
-      "warn": 1
+      "warn": 0
     },
     "Console Errors": {
       "pass": 0,
-      "fail": 0,
-      "warn": 1
+      "fail": 1,
+      "warn": 0
     }
   }
 }
