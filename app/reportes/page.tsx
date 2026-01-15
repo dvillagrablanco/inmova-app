@@ -99,21 +99,60 @@ function ReportesPageContent() {
       if (status !== 'authenticated') return;
 
       setIsLoading(true);
+      
+      // Timeout de 10 segundos para evitar bloqueos largos
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
       try {
-        const response = await fetch(`/api/reports?tipo=${tipoReporte}&periodo=${periodo}`);
+        const response = await fetch(
+          `/api/reports?tipo=${tipoReporte}&periodo=${periodo}`,
+          { signal: controller.signal }
+        );
+        clearTimeout(timeoutId);
+        
         if (response.ok) {
           const data = await response.json();
 
           if (tipoReporte === 'global') {
-            setGlobalData(data.global);
+            setGlobalData(data.global || {
+              ingresosBrutos: 0,
+              gastos: 0,
+              ingresosNetos: 0,
+              rentabilidadBruta: 0,
+              rentabilidadNeta: 0,
+              roi: 0,
+              unidades: 0,
+              unidadesOcupadas: 0,
+              tasaOcupacion: 0,
+            });
           } else if (tipoReporte === 'por_propiedad') {
             setPropertyData(data.reportes || []);
           } else if (tipoReporte === 'flujo_caja') {
             setFlujoCaja(data.flujoCaja || []);
           }
         }
-      } catch (error) {
-        logger.error('Error fetching reportes:', error);
+      } catch (error: any) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+          logger.warn('Reportes fetch timeout - mostrando datos vacíos');
+        } else {
+          logger.error('Error fetching reportes:', error);
+        }
+        // Mostrar datos vacíos en caso de error
+        if (tipoReporte === 'global') {
+          setGlobalData({
+            ingresosBrutos: 0,
+            gastos: 0,
+            ingresosNetos: 0,
+            rentabilidadBruta: 0,
+            rentabilidadNeta: 0,
+            roi: 0,
+            unidades: 0,
+            unidadesOcupadas: 0,
+            tasaOcupacion: 0,
+          });
+        }
       } finally {
         setIsLoading(false);
       }

@@ -214,7 +214,7 @@ export function HeroSectionSegmentado() {
                 >
                   <Building2 className="h-5 w-5 mr-1 md:mr-2 inline" />
                   Construcción
-                  <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                  <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">
                     B2B
                   </span>
                 </TabsTrigger>

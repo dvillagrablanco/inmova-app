@@ -1,17 +1,17 @@
 {
   "summary": {
     "total": 65,
-    "passed": 48,
+    "passed": 59,
     "failed": 1,
-    "warnings": 16,
+    "warnings": 5,
     "skipped": 0
   },
   "results": [
     {
       "category": "Security - Access Control",
       "test": "Protected route /dashboard",
-      "status": "WARN",
-      "details": "Error al acceder: TimeoutError: page.goto: Timeout 15000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/dashboard\", waiting until \"networkidle\"\n"
+      "status": "PASS",
+      "details": "Redirige correctamente a login/unauthorized"
     },
     {
       "category": "Security - Access Control",
@@ -28,32 +28,32 @@
     {
       "category": "Security - Access Control",
       "test": "Protected route /admin/configuracion",
-      "status": "WARN",
-      "details": "Error al acceder: TimeoutError: page.goto: Timeout 15000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/admin/configuracion\", waiting until \"networkidle\"\n"
+      "status": "PASS",
+      "details": "Redirige correctamente a login/unauthorized"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /edificios",
-      "status": "WARN",
-      "details": "Error al acceder: TimeoutError: page.goto: Timeout 15000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/edificios\", waiting until \"networkidle\"\n"
+      "status": "PASS",
+      "details": "Redirige correctamente a login/unauthorized"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /inquilinos",
-      "status": "WARN",
-      "details": "Error al acceder: TimeoutError: page.goto: Timeout 15000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/inquilinos\", waiting until \"networkidle\"\n"
+      "status": "PASS",
+      "details": "Redirige correctamente a login/unauthorized"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /contratos",
-      "status": "WARN",
-      "details": "Error al acceder: TimeoutError: page.goto: Timeout 15000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/contratos\", waiting until \"networkidle\"\n"
+      "status": "PASS",
+      "details": "Redirige correctamente a login/unauthorized"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /pagos",
-      "status": "WARN",
-      "details": "Error al acceder: TimeoutError: page.goto: Timeout 15000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/pagos\", waiting until \"networkidle\"\n"
+      "status": "PASS",
+      "details": "Redirige correctamente a login/unauthorized"
     },
     {
       "category": "Security - Cryptography",
@@ -70,34 +70,26 @@
     {
       "category": "Security - Headers",
       "test": "Header x-frame-options",
-      "status": "WARN",
-      "details": "Header faltante o incorrecto",
-      "severity": "medium",
-      "recommendation": "Configurar header x-frame-options"
+      "status": "PASS",
+      "details": "Configurado: DENY"
     },
     {
       "category": "Security - Headers",
       "test": "Header x-content-type-options",
-      "status": "WARN",
-      "details": "Header faltante o incorrecto",
-      "severity": "medium",
-      "recommendation": "Configurar header x-content-type-options"
+      "status": "PASS",
+      "details": "Configurado: nosniff"
     },
     {
       "category": "Security - Headers",
       "test": "Header x-xss-protection",
-      "status": "WARN",
-      "details": "Header faltante o incorrecto",
-      "severity": "medium",
-      "recommendation": "Configurar header x-xss-protection"
+      "status": "PASS",
+      "details": "Configurado: 1; mode=block"
     },
     {
       "category": "Security - Headers",
       "test": "Header strict-transport-security",
-      "status": "WARN",
-      "details": "Header faltante o incorrecto",
-      "severity": "medium",
-      "recommendation": "Configurar header strict-transport-security"
+      "status": "PASS",
+      "details": "Configurado: max-age=31536000; includeSubDomains"
     },
     {
       "category": "Security - Authentication",
@@ -135,7 +127,7 @@
       "category": "UI/UX - Sidebar",
       "test": "Sidebar visibility",
       "status": "PASS",
-      "details": "Sidebar visible con 33 elementos de navegación"
+      "details": "Sidebar visible con 41 elementos de navegación"
     },
     {
       "category": "Pages",
@@ -262,13 +254,13 @@
       "category": "Navigation - Buttons",
       "test": "Button clickability",
       "status": "PASS",
-      "details": "19 de 41 botones son clickeables y visibles"
+      "details": "10 de 10 botones son clickeables y visibles"
     },
     {
       "category": "Navigation - Links",
       "test": "Link validity",
       "status": "PASS",
-      "details": "11 enlaces válidos encontrados"
+      "details": "28 enlaces válidos encontrados"
     },
     {
       "category": "Navigation - Dropdowns",
@@ -328,19 +320,19 @@
       "category": "Accessibility",
       "test": "Dashboard - Images alt text",
       "status": "PASS",
-      "details": "1/1 imágenes tienen texto alternativo"
+      "details": "0/0 imágenes tienen texto alternativo"
     },
     {
       "category": "Accessibility",
       "test": "Dashboard - Form labels",
       "status": "PASS",
-      "details": "1/1 campos tienen etiquetas"
+      "details": "0/0 campos tienen etiquetas"
     },
     {
       "category": "Accessibility",
       "test": "Dashboard - Text size",
-      "status": "WARN",
-      "details": "3 elementos con texto pequeño"
+      "status": "PASS",
+      "details": "Todo el texto tiene tamaño legible"
     },
     {
       "category": "Accessibility",
@@ -352,7 +344,7 @@
       "category": "Performance",
       "test": "Landing - Load time",
       "status": "PASS",
-      "details": "Total: 1311ms, DOM Interactive: 346ms, DOM Content Loaded: 346ms"
+      "details": "Total: 1251ms, DOM Interactive: 298ms, DOM Content Loaded: 299ms"
     },
     {
       "category": "Performance",
@@ -365,13 +357,13 @@
       "category": "Performance",
       "test": "Landing - Resources",
       "status": "PASS",
-      "details": "48 recursos, 0 grandes (>500KB), 0 lentos (>1s)"
+      "details": "55 recursos, 0 grandes (>500KB), 0 lentos (>1s)"
     },
     {
       "category": "Performance",
       "test": "Login - Load time",
       "status": "PASS",
-      "details": "Total: 1218ms, DOM Interactive: 254ms, DOM Content Loaded: 255ms"
+      "details": "Total: 1181ms, DOM Interactive: 237ms, DOM Content Loaded: 237ms"
     },
     {
       "category": "Performance",
@@ -383,39 +375,39 @@
       "category": "Performance",
       "test": "Login - Resources",
       "status": "PASS",
-      "details": "45 recursos, 0 grandes (>500KB), 0 lentos (>1s)"
+      "details": "44 recursos, 0 grandes (>500KB), 0 lentos (>1s)"
     },
     {
       "category": "Performance",
       "test": "Dashboard - Load time",
       "status": "PASS",
-      "details": "Total: 2022ms, DOM Interactive: 256ms, DOM Content Loaded: 257ms"
+      "details": "Total: 2549ms, DOM Interactive: 242ms, DOM Content Loaded: 242ms"
     },
     {
       "category": "Performance",
       "test": "Dashboard - DOM size",
       "status": "PASS",
-      "details": "520 elementos en el DOM"
+      "details": "605 elementos en el DOM"
     },
     {
       "category": "Performance",
       "test": "Dashboard - Resources",
       "status": "PASS",
-      "details": "85 recursos, 0 grandes (>500KB), 0 lentos (>1s)"
+      "details": "165 recursos, 0 grandes (>500KB), 0 lentos (>1s)"
     },
     {
       "category": "Console Errors",
       "test": "JavaScript errors",
       "status": "WARN",
-      "details": "45 errores de consola detectados",
+      "details": "42 errores de consola detectados",
       "recommendation": "Revisar y corregir errores de JavaScript"
     }
   ],
   "byCategory": {
     "Security - Access Control": {
-      "pass": 2,
+      "pass": 8,
       "fail": 0,
-      "warn": 6
+      "warn": 0
     },
     "Security - Cryptography": {
       "pass": 1,
@@ -428,9 +420,9 @@
       "warn": 0
     },
     "Security - Headers": {
-      "pass": 0,
+      "pass": 4,
       "fail": 0,
-      "warn": 4
+      "warn": 0
     },
     "Security - Authentication": {
       "pass": 0,
@@ -473,9 +465,9 @@
       "warn": 0
     },
     "Accessibility": {
-      "pass": 10,
+      "pass": 11,
       "fail": 0,
-      "warn": 2
+      "warn": 1
     },
     "Performance": {
       "pass": 8,

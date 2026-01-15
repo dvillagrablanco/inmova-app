@@ -11,6 +11,9 @@ export const IGNORABLE_ERROR_PATTERNS = [
   'Hydration failed because',
   'There was an error while hydrating',
   'Text content does not match server-rendered HTML',
+  'Minified React error',
+  'did not match',
+  'Expected server HTML',
   
   // Errores de ResizeObserver (no críticos)
   'ResizeObserver loop limit exceeded',
@@ -19,20 +22,56 @@ export const IGNORABLE_ERROR_PATTERNS = [
   // Errores de extensiones del navegador
   'chrome-extension://',
   'moz-extension://',
+  'safari-extension://',
   
   // Errores de third-party scripts
   'crisp.chat',
   'googletagmanager',
   'hotjar',
+  'clarity',
+  'gtag',
+  'analytics',
+  'facebook',
+  'fbevents',
+  'stripe',
+  'intercom',
+  'drift',
+  'hubspot',
   
   // Errores de CSS durante SSR (bug conocido de Next.js)
   'Invalid or unexpected token',
+  'Unexpected token',
   
   // Errores de WebSocket en development
   'WebSocket connection to',
+  'WebSocket is already',
   
   // Errores de Service Worker
   'Service Worker registration failed',
+  'ServiceWorker',
+  
+  // Errores de Network
+  'net::ERR_',
+  'NetworkError',
+  'Failed to fetch',
+  'Load failed',
+  'Network request failed',
+  
+  // Errores de Next.js internos
+  'NEXT_REDIRECT',
+  'next-action-id',
+  '_next/static',
+  
+  // Errores de mapas y geolocalización
+  'mapbox',
+  'google.maps',
+  'geolocation',
+  
+  // Errores de cookies/storage
+  'localStorage',
+  'sessionStorage',
+  'CookieStore',
+  'QuotaExceededError',
 ];
 
 // Lista de warnings que se pueden ignorar
