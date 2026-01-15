@@ -1,8 +1,8 @@
 {
   "summary": {
     "total": 65,
-    "passed": 64,
-    "failed": 1,
+    "passed": 65,
+    "failed": 0,
     "warnings": 0,
     "skipped": 0
   },
@@ -341,7 +341,7 @@
       "category": "Performance",
       "test": "Landing - Load time",
       "status": "PASS",
-      "details": "Total: 288ms, DOM Interactive: 286ms, DOM Content Loaded: 287ms"
+      "details": "Total: 312ms, DOM Interactive: 311ms, DOM Content Loaded: 311ms"
     },
     {
       "category": "Performance",
@@ -359,13 +359,13 @@
       "category": "Performance",
       "test": "Login - Load time",
       "status": "PASS",
-      "details": "Total: 238ms, DOM Interactive: 237ms, DOM Content Loaded: 237ms"
+      "details": "Total: 219ms, DOM Interactive: 219ms, DOM Content Loaded: 219ms"
     },
     {
       "category": "Performance",
       "test": "Login - DOM size",
       "status": "PASS",
-      "details": "134 elementos en el DOM"
+      "details": "127 elementos en el DOM"
     },
     {
       "category": "Performance",
@@ -377,13 +377,13 @@
       "category": "Performance",
       "test": "Dashboard - Load time",
       "status": "PASS",
-      "details": "Total: 251ms, DOM Interactive: 250ms, DOM Content Loaded: 250ms"
+      "details": "Total: 230ms, DOM Interactive: 229ms, DOM Content Loaded: 229ms"
     },
     {
       "category": "Performance",
       "test": "Dashboard - DOM size",
       "status": "PASS",
-      "details": "252 elementos en el DOM"
+      "details": "228 elementos en el DOM"
     },
     {
       "category": "Performance",
@@ -394,9 +394,8 @@
     {
       "category": "Console Errors",
       "test": "JavaScript errors",
-      "status": "FAIL",
-      "details": "15 errores críticos detectados",
-      "recommendation": "Revisar y corregir errores de JavaScript"
+      "status": "PASS",
+      "details": "3 errores menores (aceptable)"
     }
   ],
   "byCategory": {
@@ -471,8 +470,8 @@
       "warn": 0
     },
     "Console Errors": {
-      "pass": 0,
-      "fail": 1,
+      "pass": 1,
+      "fail": 0,
       "warn": 0
     }
   }

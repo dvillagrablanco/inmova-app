@@ -119,7 +119,7 @@ export const TOUR_DASHBOARD: VirtualTour = {
   ],
   estimatedDuration: 90,
   priority: 100,
-  repeatable: true,
+  repeatable: false, // CAMBIADO: No repetir automáticamente
   autoStart: true
 };
 

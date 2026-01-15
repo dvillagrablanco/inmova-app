@@ -5,7 +5,7 @@
  * Detecta cuando el usuario entra a una página y lanza el tour correspondiente
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { useVirtualTour } from '@/hooks/useVirtualTour';
 import { VirtualTourPlayer } from './VirtualTourPlayer';
@@ -20,11 +20,42 @@ const ROUTE_TO_TOUR_MAP: Record<string, string> = {
   '/coliving': 'tour-coliving'
 };
 
+// Key para persistir tours saltados en sessionStorage
+const SKIPPED_TOURS_KEY = 'inmova-skipped-tours';
+
+// Obtener tours saltados de sessionStorage
+function getSkippedTours(): string[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = sessionStorage.getItem(SKIPPED_TOURS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+// Guardar tour saltado en sessionStorage
+function markTourAsSkipped(tourId: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const skipped = getSkippedTours();
+    if (!skipped.includes(tourId)) {
+      skipped.push(tourId);
+      sessionStorage.setItem(SKIPPED_TOURS_KEY, JSON.stringify(skipped));
+    }
+  } catch {
+    // Ignorar errores de storage
+  }
+}
+
 export function TourAutoStarter() {
   const pathname = usePathname();
   const { availableTours, completeTour, isTourCompleted } = useVirtualTour();
   const [activeTour, setActiveTour] = useState<any>(null);
   const [autoplayEnabled, setAutoplayEnabled] = useState(true);
+  
+  // Ref para evitar mostrar el mismo tour múltiples veces
+  const shownToursRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     // Verificar si autoplay está habilitado en preferencias
@@ -33,7 +64,7 @@ export function TourAutoStarter() {
         const response = await fetch('/api/preferences');
         const data = await response.json();
         if (data.success) {
-          setAutoplayEnabled(data.preferences.autoplayTours);
+          setAutoplayEnabled(data.preferences?.autoplayTours ?? true);
         }
       } catch (error) {
         console.error('Error checking autoplay:', error);
@@ -47,11 +78,16 @@ export function TourAutoStarter() {
     if (!autoplayEnabled) return;
 
     // Obtener el tour correspondiente a esta ruta
-    const tourId = ROUTE_TO_TOUR_MAP[pathname];
+    const tourId = ROUTE_TO_TOUR_MAP[pathname || ''];
     if (!tourId) return;
 
-    // Verificar si ya fue completado
+    // Verificar si ya fue completado o mostrado en esta sesión
     if (isTourCompleted(tourId)) return;
+    if (shownToursRef.current.has(tourId)) return;
+    
+    // Verificar si fue saltado en esta sesión
+    const skippedTours = getSkippedTours();
+    if (skippedTours.includes(tourId)) return;
 
     // Buscar el tour en la lista de disponibles
     const tour = availableTours.find(t => t.id === tourId);
@@ -60,10 +96,13 @@ export function TourAutoStarter() {
     // Verificar si tiene autoStart habilitado
     if (!tour.autoStart) return;
 
+    // Marcar como mostrado para evitar repeticiones
+    shownToursRef.current.add(tourId);
+
     // Esperar un poco antes de iniciar (para que la página cargue)
     const timer = setTimeout(() => {
       setActiveTour(tour);
-    }, 1000);
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, [pathname, availableTours, autoplayEnabled, isTourCompleted]);
@@ -75,7 +114,14 @@ export function TourAutoStarter() {
     setActiveTour(null);
   };
 
-  const handleTourSkip = () => {
+  // CORREGIDO: Marcar el tour como completado también cuando se salta
+  const handleTourSkip = async () => {
+    if (activeTour) {
+      // Marcar como saltado en sessionStorage (para esta sesión)
+      markTourAsSkipped(activeTour.id);
+      // También marcar como completado en el backend
+      await completeTour(activeTour.id);
+    }
     setActiveTour(null);
   };
 
