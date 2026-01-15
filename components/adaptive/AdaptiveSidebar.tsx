@@ -261,84 +261,96 @@ export function AdaptiveSidebar({
   return (
     <aside
       className={cn(
-        'flex flex-col gap-4 border-r bg-background',
+        'flex flex-col border-r bg-background overflow-hidden',
         collapsed ? 'w-16' : 'w-64',
         className
       )}
     >
-      {/* Header del Sidebar */}
+      {/* Header del Sidebar con Logo */}
       {!collapsed && (
-        <div className="px-3 py-4">
-          <h2 className="text-lg font-semibold tracking-tight">
-            Tus Módulos
-          </h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            {safeUserProfile.uiMode === 'simple' && 'Vista simplificada'}
-            {safeUserProfile.uiMode === 'standard' && 'Vista estándar'}
-            {safeUserProfile.uiMode === 'advanced' && 'Vista avanzada'}
-          </p>
+        <div className="px-4 py-4 border-b bg-gradient-to-r from-indigo-50 to-violet-50">
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <div className="relative">
+              <Building2 className="h-7 w-7 text-indigo-600" />
+              <div className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-green-500 rounded-full" />
+            </div>
+            <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+              INMOVA
+            </span>
+          </Link>
         </div>
       )}
 
-      {/* Módulos Destacados */}
-      {featuredModules.length > 0 && (
-        <div className="px-3">
-          {!collapsed && (
-            <p className="text-xs font-medium text-muted-foreground mb-2 px-3">
-              DESTACADOS
+      {/* Contenido scrolleable */}
+      <div className="flex-1 overflow-y-auto py-2">
+        {/* Módulos Destacados */}
+        {featuredModules.length > 0 && (
+          <div className="px-3 mb-2">
+            {!collapsed && (
+              <p className="text-xs font-semibold text-indigo-600 mb-2 px-3 uppercase tracking-wider">
+                ⭐ Destacados
+              </p>
+            )}
+            <nav className="space-y-0.5">
+              {featuredModules.map((module) => (
+                <React.Fragment key={module.id}>
+                  {renderModuleLink(module)}
+                </React.Fragment>
+              ))}
+            </nav>
+          </div>
+        )}
+
+        {/* Separador */}
+        {featuredModules.length > 0 && regularModules.length > 0 && (
+          <Separator className="mx-4 my-3" />
+        )}
+
+        {/* Módulos Regulares */}
+        {regularModules.length > 0 && (
+          <div className="px-3">
+            {!collapsed && (
+              <p className="text-xs font-semibold text-muted-foreground mb-2 px-3 uppercase tracking-wider">
+                📋 Todos los módulos
+              </p>
+            )}
+            <nav className="space-y-0.5">
+              {regularModules.map((module) => (
+                <React.Fragment key={module.id}>
+                  {renderModuleLink(module)}
+                </React.Fragment>
+              ))}
+            </nav>
+          </div>
+        )}
+
+        {/* Mensaje si no hay módulos visibles */}
+        {visibleModules.filter((m) => m.visible).length === 0 && !collapsed && (
+          <div className="px-6 py-8 text-center text-sm text-muted-foreground">
+            <p>No hay módulos disponibles</p>
+            <p className="mt-2 text-xs">
+              Contacta con soporte para activar módulos
             </p>
-          )}
-          <nav className="space-y-1">
-            {featuredModules.map((module) => (
-              <React.Fragment key={module.id}>
-                {renderModuleLink(module)}
-              </React.Fragment>
-            ))}
-          </nav>
-        </div>
-      )}
+          </div>
+        )}
+      </div>
 
-      {/* Separador */}
-      {featuredModules.length > 0 && regularModules.length > 0 && (
-        <Separator className="mx-3" />
-      )}
-
-      {/* Módulos Regulares */}
-      {regularModules.length > 0 && (
-        <div className="px-3">
-          {!collapsed && featuredModules.length > 0 && (
-            <p className="text-xs font-medium text-muted-foreground mb-2 px-3">
-              TODOS LOS MÓDULOS
-            </p>
-          )}
-          <nav className="space-y-1">
-            {regularModules.map((module) => (
-              <React.Fragment key={module.id}>
-                {renderModuleLink(module)}
-              </React.Fragment>
-            ))}
-          </nav>
-        </div>
-      )}
-
-      {/* Mensaje si no hay módulos visibles */}
-      {visibleModules.filter((m) => m.visible).length === 0 && !collapsed && (
-        <div className="px-6 py-8 text-center text-sm text-muted-foreground">
-          <p>No hay módulos disponibles</p>
-          <p className="mt-2 text-xs">
-            Contacta con soporte para activar módulos
-          </p>
-        </div>
-      )}
-
-      {/* Botón para ver todos los módulos (si está en modo Simple) */}
-      {safeUserProfile.uiMode === 'simple' && !collapsed && (
-        <div className="mt-auto px-3 pb-4">
+      {/* Footer del sidebar */}
+      {!collapsed && (
+        <div className="border-t bg-gray-50/50 px-4 py-3 space-y-2">
           <Link
-            href="/configuracion?tab=modules"
-            className="text-xs text-primary hover:underline flex items-center gap-2"
+            href="/configuracion"
+            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            <span>Ver todos los módulos disponibles</span>
+            <Settings className="h-3.5 w-3.5" />
+            <span>Configuración</span>
+          </Link>
+          <Link
+            href="/soporte"
+            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <LifeBuoy className="h-3.5 w-3.5" />
+            <span>Ayuda y soporte</span>
           </Link>
         </div>
       )}

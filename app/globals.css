@@ -1755,3 +1755,45 @@ label {
     height: 48px !important;
   }
 }
+
+/* ========================================
+   FIX: LANDING HEADER SIEMPRE VISIBLE
+   Prevenir que elementos de terceros
+   (Crisp, widgets, overlays) cubran el header
+   ======================================== */
+
+/* Asegurar que el header de landing siempre esté encima */
+nav[class*="fixed"][class*="z-[9999]"] {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 9999 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Proteger botones dentro del header de landing */
+nav[class*="fixed"][class*="z-[9999]"] button,
+nav[class*="fixed"][class*="z-[9999]"] a {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Asegurar que Crisp no cubra el header */
+.crisp-client,
+.crisp-client * {
+  z-index: 9998 !important;
+}
+
+/* Evitar que elementos flotantes cubran la parte superior */
+.crisp-client .crisp-1brjxns,
+.crisp-client .cc-1brjxns,
+.crisp-client[data-website-id] > div > div {
+  max-height: calc(100vh - 80px) !important;
+  top: auto !important;
+}

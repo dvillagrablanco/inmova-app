@@ -217,23 +217,24 @@ export function getVisibleModules(
       return { ...module, visible: true, featured: true, reason: 'preferred' };
     }
 
-    // En modo Simple: Solo mostrar módulos de baja complejidad o alta prioridad
+    // En modo Simple: Mostrar módulos esenciales (más permisivo)
     if (uiMode === 'simple') {
-      if (module.complexity === 'low' || module.priority <= 4) {
+      if (module.complexity === 'low' || module.complexity === 'medium' || module.priority <= 8) {
         return { ...module, visible: true };
       }
       return { ...module, visible: false, reason: 'simple_mode' };
     }
 
-    // En modo Standard: Mostrar todo excepto alta complejidad
+    // En modo Standard: Mostrar la mayoría de módulos (más permisivo)
     if (uiMode === 'standard') {
-      if (module.complexity !== 'high' || module.priority <= 6) {
+      // Mostrar todo hasta prioridad 20 o complejidad baja/media
+      if (module.complexity !== 'high' || module.priority <= 20) {
         return { ...module, visible: true };
       }
       return { ...module, visible: false, reason: 'standard_mode' };
     }
 
-    // En modo Advanced: Mostrar todo
+    // En modo Advanced: Mostrar absolutamente todo
     return { ...module, visible: true };
   });
 }
