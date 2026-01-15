@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 import { Providers } from '@/components/providers';
 import { Toaster } from '@/components/ui/toaster';
 import { CookieConsentBanner } from '@/components/legal/cookie-consent-banner';
+import { SkipLink } from '@/components/accessibility/SkipLink';
 import './globals.css';
 import Script from 'next/script';
 import { GA_MEASUREMENT_ID } from '@/lib/analytics';
@@ -160,6 +161,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={inter.className}>
         <Providers>
+          {/* WCAG 2.1 AA - Skip Link for keyboard navigation */}
+          <SkipLink />
           {children}
           <Toaster />
           <CookieConsentBanner />

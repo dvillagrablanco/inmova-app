@@ -1,38 +1,38 @@
+'use client';
+
 /**
- * Skip Link Component
+ * SkipLink Component - WCAG 2.1 AA Required
  * 
- * Componente de accesibilidad WCAG 2.1 AA
- * Permite a usuarios de teclado/screen readers saltar la navegación
- * y ir directo al contenido principal
+ * Permite a usuarios de teclado saltar navegación y ir directamente al contenido principal.
+ * Es invisible hasta que recibe foco con Tab.
  */
-
-import Link from 'next/link';
-
 export function SkipLink() {
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const main = document.querySelector('main') || document.querySelector('#main-content');
+    if (main) {
+      main.setAttribute('tabindex', '-1');
+      main.focus();
+      main.removeAttribute('tabindex');
+    }
+  };
+
   return (
-    <Link
+    <a
       href="#main-content"
-      className="sr-only focus:not-sr-only focus:absolute focus:z-[9999] focus:top-4 focus:left-4 focus:px-6 focus:py-3 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:shadow-xl focus:outline-none focus:ring-4 focus:ring-primary/50 font-semibold"
+      onClick={handleClick}
+      className="
+        sr-only focus:not-sr-only
+        focus:fixed focus:top-4 focus:left-4 focus:z-[100]
+        focus:px-4 focus:py-2
+        focus:bg-primary focus:text-primary-foreground
+        focus:rounded-md focus:shadow-lg
+        focus:ring-4 focus:ring-primary/50
+        focus:outline-none
+        transition-all
+      "
     >
       Saltar al contenido principal
-    </Link>
+    </a>
   );
 }
-
-/**
- * Uso en Layout:
- * 
- * export default function RootLayout({ children }) {
- *   return (
- *     <html>
- *       <body>
- *         <SkipLink />
- *         <nav>...</nav>
- *         <main id="main-content">
- *           {children}
- *         </main>
- *       </body>
- *     </html>
- *   );
- * }
- */
