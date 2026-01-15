@@ -1,0 +1,491 @@
+{
+  "summary": {
+    "total": 65,
+    "passed": 48,
+    "failed": 1,
+    "warnings": 16,
+    "skipped": 0
+  },
+  "results": [
+    {
+      "category": "Security - Access Control",
+      "test": "Protected route /dashboard",
+      "status": "WARN",
+      "details": "Error al acceder: TimeoutError: page.goto: Timeout 15000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/dashboard\", waiting until \"networkidle\"\n"
+    },
+    {
+      "category": "Security - Access Control",
+      "test": "Protected route /admin",
+      "status": "PASS",
+      "details": "Redirige correctamente a login/unauthorized"
+    },
+    {
+      "category": "Security - Access Control",
+      "test": "Protected route /admin/usuarios",
+      "status": "PASS",
+      "details": "Redirige correctamente a login/unauthorized"
+    },
+    {
+      "category": "Security - Access Control",
+      "test": "Protected route /admin/configuracion",
+      "status": "WARN",
+      "details": "Error al acceder: TimeoutError: page.goto: Timeout 15000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/admin/configuracion\", waiting until \"networkidle\"\n"
+    },
+    {
+      "category": "Security - Access Control",
+      "test": "Protected route /edificios",
+      "status": "WARN",
+      "details": "Error al acceder: TimeoutError: page.goto: Timeout 15000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/edificios\", waiting until \"networkidle\"\n"
+    },
+    {
+      "category": "Security - Access Control",
+      "test": "Protected route /inquilinos",
+      "status": "WARN",
+      "details": "Error al acceder: TimeoutError: page.goto: Timeout 15000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/inquilinos\", waiting until \"networkidle\"\n"
+    },
+    {
+      "category": "Security - Access Control",
+      "test": "Protected route /contratos",
+      "status": "WARN",
+      "details": "Error al acceder: TimeoutError: page.goto: Timeout 15000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/contratos\", waiting until \"networkidle\"\n"
+    },
+    {
+      "category": "Security - Access Control",
+      "test": "Protected route /pagos",
+      "status": "WARN",
+      "details": "Error al acceder: TimeoutError: page.goto: Timeout 15000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/pagos\", waiting until \"networkidle\"\n"
+    },
+    {
+      "category": "Security - Cryptography",
+      "test": "HTTPS enabled",
+      "status": "PASS",
+      "details": "Conexión segura HTTPS"
+    },
+    {
+      "category": "Security - Injection",
+      "test": "SQL Injection in login",
+      "status": "PASS",
+      "details": "Inyección SQL bloqueada"
+    },
+    {
+      "category": "Security - Headers",
+      "test": "Header x-frame-options",
+      "status": "WARN",
+      "details": "Header faltante o incorrecto",
+      "severity": "medium",
+      "recommendation": "Configurar header x-frame-options"
+    },
+    {
+      "category": "Security - Headers",
+      "test": "Header x-content-type-options",
+      "status": "WARN",
+      "details": "Header faltante o incorrecto",
+      "severity": "medium",
+      "recommendation": "Configurar header x-content-type-options"
+    },
+    {
+      "category": "Security - Headers",
+      "test": "Header x-xss-protection",
+      "status": "WARN",
+      "details": "Header faltante o incorrecto",
+      "severity": "medium",
+      "recommendation": "Configurar header x-xss-protection"
+    },
+    {
+      "category": "Security - Headers",
+      "test": "Header strict-transport-security",
+      "status": "WARN",
+      "details": "Header faltante o incorrecto",
+      "severity": "medium",
+      "recommendation": "Configurar header strict-transport-security"
+    },
+    {
+      "category": "Security - Authentication",
+      "test": "Brute force protection",
+      "status": "WARN",
+      "details": "No se detectó rate limiting después de 5 intentos (puede estar implementado en servidor)",
+      "severity": "medium",
+      "recommendation": "Verificar implementación de rate limiting"
+    },
+    {
+      "category": "UI/UX - Responsive",
+      "test": "Mobile (375x667)",
+      "status": "PASS",
+      "details": "Layout correcto"
+    },
+    {
+      "category": "UI/UX - Responsive",
+      "test": "Tablet (768x1024)",
+      "status": "PASS",
+      "details": "Layout correcto"
+    },
+    {
+      "category": "UI/UX - Responsive",
+      "test": "Desktop (1920x1080)",
+      "status": "PASS",
+      "details": "Layout correcto"
+    },
+    {
+      "category": "UI/UX - Mobile Navigation",
+      "test": "Hamburger menu",
+      "status": "WARN",
+      "details": "Menú se abre pero contenido no verificado"
+    },
+    {
+      "category": "UI/UX - Sidebar",
+      "test": "Sidebar visibility",
+      "status": "PASS",
+      "details": "Sidebar visible con 33 elementos de navegación"
+    },
+    {
+      "category": "Pages",
+      "test": "Dashboard (/dashboard)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "Edificios (/edificios)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "Inquilinos (/inquilinos)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "Contratos (/contratos)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "Pagos (/pagos)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "Mantenimiento (/mantenimiento)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "Calendario (/calendario)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "Documentos (/documentos)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "Admin (/admin)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "Admin Usuarios (/admin/usuarios)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "Admin Configuración (/admin/configuracion)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "CRM (/crm)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "Landing (/landing)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "Login (/login)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "Register (/register)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "Pricing (/pricing)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "STR (Alquiler Turístico) (/str)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "Coliving (/coliving)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "Proveedores (/proveedores)",
+      "status": "PASS",
+      "details": "HTTP 200"
+    },
+    {
+      "category": "Pages",
+      "test": "Reportes (/reportes)",
+      "status": "FAIL",
+      "details": "Error: TimeoutError: page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/reportes\", waiting until \"networkidle\"\n",
+      "severity": "high"
+    },
+    {
+      "category": "Navigation - Buttons",
+      "test": "Button clickability",
+      "status": "PASS",
+      "details": "19 de 41 botones son clickeables y visibles"
+    },
+    {
+      "category": "Navigation - Links",
+      "test": "Link validity",
+      "status": "PASS",
+      "details": "11 enlaces válidos encontrados"
+    },
+    {
+      "category": "Navigation - Dropdowns",
+      "test": "Dropdown functionality",
+      "status": "PASS",
+      "details": "5/8 desplegables funcionando"
+    },
+    {
+      "category": "Accessibility",
+      "test": "Login - Images alt text",
+      "status": "PASS",
+      "details": "0/0 imágenes tienen texto alternativo"
+    },
+    {
+      "category": "Accessibility",
+      "test": "Login - Form labels",
+      "status": "PASS",
+      "details": "2/2 campos tienen etiquetas"
+    },
+    {
+      "category": "Accessibility",
+      "test": "Login - Text size",
+      "status": "PASS",
+      "details": "Todo el texto tiene tamaño legible"
+    },
+    {
+      "category": "Accessibility",
+      "test": "Login - Keyboard focus",
+      "status": "PASS",
+      "details": "Indicador de foco visible"
+    },
+    {
+      "category": "Accessibility",
+      "test": "Landing - Images alt text",
+      "status": "PASS",
+      "details": "0/0 imágenes tienen texto alternativo"
+    },
+    {
+      "category": "Accessibility",
+      "test": "Landing - Form labels",
+      "status": "PASS",
+      "details": "0/0 campos tienen etiquetas"
+    },
+    {
+      "category": "Accessibility",
+      "test": "Landing - Text size",
+      "status": "WARN",
+      "details": "1 elementos con texto pequeño"
+    },
+    {
+      "category": "Accessibility",
+      "test": "Landing - Keyboard focus",
+      "status": "PASS",
+      "details": "Indicador de foco visible"
+    },
+    {
+      "category": "Accessibility",
+      "test": "Dashboard - Images alt text",
+      "status": "PASS",
+      "details": "1/1 imágenes tienen texto alternativo"
+    },
+    {
+      "category": "Accessibility",
+      "test": "Dashboard - Form labels",
+      "status": "PASS",
+      "details": "1/1 campos tienen etiquetas"
+    },
+    {
+      "category": "Accessibility",
+      "test": "Dashboard - Text size",
+      "status": "WARN",
+      "details": "3 elementos con texto pequeño"
+    },
+    {
+      "category": "Accessibility",
+      "test": "Dashboard - Keyboard focus",
+      "status": "PASS",
+      "details": "Indicador de foco visible"
+    },
+    {
+      "category": "Performance",
+      "test": "Landing - Load time",
+      "status": "PASS",
+      "details": "Total: 2140ms, DOM Interactive: 334ms, DOM Content Loaded: 335ms"
+    },
+    {
+      "category": "Performance",
+      "test": "Landing - DOM size",
+      "status": "WARN",
+      "details": "1992 elementos en el DOM",
+      "recommendation": "Reducir complejidad del DOM"
+    },
+    {
+      "category": "Performance",
+      "test": "Landing - Resources",
+      "status": "PASS",
+      "details": "52 recursos, 0 grandes (>500KB), 0 lentos (>1s)"
+    },
+    {
+      "category": "Performance",
+      "test": "Login - Load time",
+      "status": "PASS",
+      "details": "Total: 1357ms, DOM Interactive: 352ms, DOM Content Loaded: 353ms"
+    },
+    {
+      "category": "Performance",
+      "test": "Login - DOM size",
+      "status": "PASS",
+      "details": "128 elementos en el DOM"
+    },
+    {
+      "category": "Performance",
+      "test": "Login - Resources",
+      "status": "PASS",
+      "details": "45 recursos, 0 grandes (>500KB), 0 lentos (>1s)"
+    },
+    {
+      "category": "Performance",
+      "test": "Dashboard - Load time",
+      "status": "PASS",
+      "details": "Total: 2366ms, DOM Interactive: 278ms, DOM Content Loaded: 278ms"
+    },
+    {
+      "category": "Performance",
+      "test": "Dashboard - DOM size",
+      "status": "PASS",
+      "details": "520 elementos en el DOM"
+    },
+    {
+      "category": "Performance",
+      "test": "Dashboard - Resources",
+      "status": "PASS",
+      "details": "85 recursos, 0 grandes (>500KB), 0 lentos (>1s)"
+    },
+    {
+      "category": "Console Errors",
+      "test": "JavaScript errors",
+      "status": "WARN",
+      "details": "35 errores de consola detectados",
+      "recommendation": "Revisar y corregir errores de JavaScript"
+    }
+  ],
+  "byCategory": {
+    "Security - Access Control": {
+      "pass": 2,
+      "fail": 0,
+      "warn": 6
+    },
+    "Security - Cryptography": {
+      "pass": 1,
+      "fail": 0,
+      "warn": 0
+    },
+    "Security - Injection": {
+      "pass": 1,
+      "fail": 0,
+      "warn": 0
+    },
+    "Security - Headers": {
+      "pass": 0,
+      "fail": 0,
+      "warn": 4
+    },
+    "Security - Authentication": {
+      "pass": 0,
+      "fail": 0,
+      "warn": 1
+    },
+    "UI/UX - Responsive": {
+      "pass": 3,
+      "fail": 0,
+      "warn": 0
+    },
+    "UI/UX - Mobile Navigation": {
+      "pass": 0,
+      "fail": 0,
+      "warn": 1
+    },
+    "UI/UX - Sidebar": {
+      "pass": 1,
+      "fail": 0,
+      "warn": 0
+    },
+    "Pages": {
+      "pass": 19,
+      "fail": 1,
+      "warn": 0
+    },
+    "Navigation - Buttons": {
+      "pass": 1,
+      "fail": 0,
+      "warn": 0
+    },
+    "Navigation - Links": {
+      "pass": 1,
+      "fail": 0,
+      "warn": 0
+    },
+    "Navigation - Dropdowns": {
+      "pass": 1,
+      "fail": 0,
+      "warn": 0
+    },
+    "Accessibility": {
+      "pass": 10,
+      "fail": 0,
+      "warn": 2
+    },
+    "Performance": {
+      "pass": 8,
+      "fail": 0,
+      "warn": 1
+    },
+    "Console Errors": {
+      "pass": 0,
+      "fail": 0,
+      "warn": 1
+    }
+  }
+}
