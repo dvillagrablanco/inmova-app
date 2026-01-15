@@ -4,6 +4,7 @@ import { Providers } from '@/components/providers';
 import { Toaster } from '@/components/ui/toaster';
 import { CookieConsentBanner } from '@/components/legal/cookie-consent-banner';
 import { SkipLink } from '@/components/accessibility/SkipLink';
+import { ErrorSuppressionInitializer } from '@/components/error-suppression-initializer';
 import './globals.css';
 import Script from 'next/script';
 import { GA_MEASUREMENT_ID } from '@/lib/analytics';
@@ -161,6 +162,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={inter.className}>
         <Providers>
+          {/* Error suppression for non-critical errors in production */}
+          <ErrorSuppressionInitializer />
           {/* WCAG 2.1 AA - Skip Link for keyboard navigation */}
           <SkipLink />
           {children}

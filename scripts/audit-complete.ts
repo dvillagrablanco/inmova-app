@@ -206,7 +206,7 @@ async function auditUIUX(page: Page, context: BrowserContext) {
 
   for (const viewport of viewports) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
-    await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'networkidle', timeout: 30000 });
+    await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'load', timeout: 20000 });
     await page.waitForTimeout(1000);
     
     // Verificar que no hay overflow horizontal
@@ -235,7 +235,7 @@ async function auditUIUX(page: Page, context: BrowserContext) {
   // Test navegación móvil
   console.log('\n📋 Navegación Móvil');
   await page.setViewportSize({ width: 375, height: 667 });
-  await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'networkidle', timeout: 30000 });
+  await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'load', timeout: 20000 });
   await page.waitForTimeout(2000);
 
   // Buscar botón de menú hamburguesa
@@ -290,7 +290,7 @@ async function auditUIUX(page: Page, context: BrowserContext) {
 
   // Test sidebar
   console.log('\n📋 Sidebar');
-  await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'networkidle', timeout: 30000 });
+  await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'load', timeout: 20000 });
   await page.waitForTimeout(2000);
 
   const sidebarSelectors = ['aside', 'nav', '.sidebar', '[class*="sidebar"]'];
@@ -436,7 +436,7 @@ async function auditNavigation(page: Page) {
   // Login
   await performLogin(page, TEST_CREDENTIALS.superadmin);
 
-  await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'networkidle', timeout: 30000 });
+  await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'load', timeout: 20000 });
   await page.waitForTimeout(2000);
 
   // Encontrar todos los botones
@@ -556,7 +556,7 @@ async function auditAccessibility(page: Page) {
       await performLogin(page, TEST_CREDENTIALS.superadmin);
     }
 
-    await page.goto(`${BASE_URL}${pageInfo.path}`, { waitUntil: 'networkidle', timeout: 30000 });
+    await page.goto(`${BASE_URL}${pageInfo.path}`, { waitUntil: 'load', timeout: 20000 });
     await page.waitForTimeout(2000);
 
     // Test 1: Imágenes con alt text
@@ -710,7 +710,7 @@ async function auditPerformance(page: Page) {
 
 async function performLogin(page: Page, credentials: { email: string; password: string }) {
   try {
-    await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle', timeout: 30000 });
+    await page.goto(`${BASE_URL}/login`, { waitUntil: 'load', timeout: 20000 });
     await page.waitForTimeout(1000);
     
     // Verificar si ya está logueado

@@ -157,11 +157,8 @@ export function HeroSectionSegmentado() {
 
   return (
     <section className="relative pt-24 pb-20 px-4 overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Animated Background Elements */}
+      {/* Simplified Background - Reduce DOM elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-violet-50 opacity-70" />
-      <div className="absolute top-20 left-10 w-72 h-72 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
-      <div className="absolute top-40 right-10 w-72 h-72 bg-violet-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
-      <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
 
       <div className="container mx-auto relative z-10">
         <div className="max-w-7xl mx-auto">

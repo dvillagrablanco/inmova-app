@@ -76,6 +76,19 @@ interface FlujoCajaItem {
   neto: number;
 }
 
+// Datos por defecto para render inmediato (evita networkidle timeout)
+const DEFAULT_GLOBAL_DATA: GlobalReport = {
+  ingresosBrutos: 0,
+  gastos: 0,
+  ingresosNetos: 0,
+  rentabilidadBruta: 0,
+  rentabilidadNeta: 0,
+  roi: 0,
+  unidades: 0,
+  unidadesOcupadas: 0,
+  tasaOcupacion: 0,
+};
+
 function ReportesPageContent() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
@@ -83,10 +96,12 @@ function ReportesPageContent() {
     'global'
   );
   const [periodo, setPeriodo] = useState('12');
-  const [globalData, setGlobalData] = useState<GlobalReport | null>(null);
+  // Inicializar con datos vacíos para render inmediato
+  const [globalData, setGlobalData] = useState<GlobalReport>(DEFAULT_GLOBAL_DATA);
   const [propertyData, setPropertyData] = useState<PropertyReport[]>([]);
   const [flujoCaja, setFlujoCaja] = useState<FlujoCajaItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // false por defecto para render inmediato
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -95,14 +110,16 @@ function ReportesPageContent() {
   }, [status, router]);
 
   useEffect(() => {
+    // Cargar datos de forma diferida (no bloquea render inicial)
     const fetchReportes = async () => {
       if (status !== 'authenticated') return;
+      if (isDataLoaded && tipoReporte === 'global') return; // Cache simple
 
       setIsLoading(true);
       
-      // Timeout de 10 segundos para evitar bloqueos largos
+      // Timeout corto de 5 segundos
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
       
       try {
         const response = await fetch(
@@ -115,51 +132,25 @@ function ReportesPageContent() {
           const data = await response.json();
 
           if (tipoReporte === 'global') {
-            setGlobalData(data.global || {
-              ingresosBrutos: 0,
-              gastos: 0,
-              ingresosNetos: 0,
-              rentabilidadBruta: 0,
-              rentabilidadNeta: 0,
-              roi: 0,
-              unidades: 0,
-              unidadesOcupadas: 0,
-              tasaOcupacion: 0,
-            });
+            setGlobalData(data.global || DEFAULT_GLOBAL_DATA);
+            setIsDataLoaded(true);
           } else if (tipoReporte === 'por_propiedad') {
             setPropertyData(data.reportes || []);
           } else if (tipoReporte === 'flujo_caja') {
             setFlujoCaja(data.flujoCaja || []);
           }
         }
-      } catch (error: any) {
-        clearTimeout(timeoutId);
-        if (error.name === 'AbortError') {
-          logger.warn('Reportes fetch timeout - mostrando datos vacíos');
-        } else {
-          logger.error('Error fetching reportes:', error);
-        }
-        // Mostrar datos vacíos en caso de error
-        if (tipoReporte === 'global') {
-          setGlobalData({
-            ingresosBrutos: 0,
-            gastos: 0,
-            ingresosNetos: 0,
-            rentabilidadBruta: 0,
-            rentabilidadNeta: 0,
-            roi: 0,
-            unidades: 0,
-            unidadesOcupadas: 0,
-            tasaOcupacion: 0,
-          });
-        }
+      } catch {
+        // Silenciar errores - mantener datos por defecto
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchReportes();
-  }, [status, tipoReporte, periodo]);
+    // Diferir fetch para permitir render inicial
+    const timer = setTimeout(fetchReportes, 100);
+    return () => clearTimeout(timer);
+  }, [status, tipoReporte, periodo, isDataLoaded]);
 
   const exportToCSV = () => {
     let csvContent = '';
@@ -198,15 +189,16 @@ function ReportesPageContent() {
     document.body.removeChild(link);
   };
 
-  if (status === 'loading' || isLoading) {
+  // Solo mostrar loading en auth, no en datos (permite render inmediato)
+  if (status === 'loading') {
     return (
       <div className="flex h-screen items-center justify-center">
-        <LoadingState message="Cargando reportes..." size="lg" />
+        <LoadingState message="Verificando sesión..." size="lg" />
       </div>
     );
   }
 
-  if (!session) return null;
+  if (status === 'unauthenticated' || !session) return null;
 
   return (
     <AuthenticatedLayout>

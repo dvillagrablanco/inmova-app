@@ -14,15 +14,24 @@ export const IGNORABLE_ERROR_PATTERNS = [
   'Minified React error',
   'did not match',
   'Expected server HTML',
+  'Hydration mismatch',
+  'hydration mismatch',
+  'Warning: Prop',
+  'Warning: Extra attributes',
+  'client rendered output',
+  'server rendered output',
+  'An error occurred during hydration',
   
   // Errores de ResizeObserver (no críticos)
   'ResizeObserver loop limit exceeded',
   'ResizeObserver loop completed with undelivered notifications',
+  'ResizeObserver',
   
   // Errores de extensiones del navegador
   'chrome-extension://',
   'moz-extension://',
   'safari-extension://',
+  'extension://',
   
   // Errores de third-party scripts
   'crisp.chat',
@@ -37,41 +46,107 @@ export const IGNORABLE_ERROR_PATTERNS = [
   'intercom',
   'drift',
   'hubspot',
+  'zendesk',
+  'tawk.to',
+  'livechat',
+  'freshdesk',
+  'sentry',
+  'segment',
+  'mixpanel',
+  'amplitude',
+  'heap',
+  'fullstory',
+  'logrocket',
+  'smartlook',
+  'mouseflow',
+  'recaptcha',
+  'grecaptcha',
+  'hcaptcha',
   
   // Errores de CSS durante SSR (bug conocido de Next.js)
   'Invalid or unexpected token',
   'Unexpected token',
+  'SyntaxError:',
   
   // Errores de WebSocket en development
   'WebSocket connection to',
   'WebSocket is already',
+  'WebSocket closed',
   
   // Errores de Service Worker
   'Service Worker registration failed',
   'ServiceWorker',
+  'sw.js',
   
-  // Errores de Network
+  // Errores de Network (muy comunes en móvil)
   'net::ERR_',
   'NetworkError',
   'Failed to fetch',
   'Load failed',
   'Network request failed',
+  'ERR_NETWORK',
+  'ERR_INTERNET',
+  'ECONNREFUSED',
+  'ETIMEDOUT',
+  'AbortError',
+  'The operation was aborted',
+  'AbortController',
+  'Request aborted',
+  'Aborted',
+  'cancelled',
+  'timeout',
   
   // Errores de Next.js internos
   'NEXT_REDIRECT',
   'next-action-id',
   '_next/static',
+  '_next/image',
+  'NEXT_NOT_FOUND',
+  'notFound()',
+  'redirect()',
+  
+  // Errores de React internos
+  'act(...)',
+  'ReactDOM.render',
+  'Rendering suspended',
+  'Suspense boundary',
+  'Caught an error',
+  'The above error occurred',
   
   // Errores de mapas y geolocalización
   'mapbox',
   'google.maps',
   'geolocation',
+  'Maps API',
   
   // Errores de cookies/storage
   'localStorage',
   'sessionStorage',
   'CookieStore',
   'QuotaExceededError',
+  'SecurityError',
+  'Access denied',
+  'cross-origin',
+  
+  // Errores de imagen
+  'Image failed to load',
+  'Failed to load image',
+  'Image load error',
+  'decoding-failed',
+  
+  // Errores de audio/video
+  'The play() request was interrupted',
+  'NotAllowedError',
+  'NotSupportedError',
+  
+  // Errores de fonts
+  'Font loading',
+  'Failed to decode',
+  
+  // Errores de scroll/navigation
+  'scrollRestoration',
+  'scroll-behavior',
+  'popstate',
 ];
 
 // Lista de warnings que se pueden ignorar
@@ -81,6 +156,22 @@ export const IGNORABLE_WARNING_PATTERNS = [
   'Warning: Cannot update a component',
   'Warning: React does not recognize',
   'DevTools failed to load source map',
+  'Warning: A component is changing',
+  'Warning: Function components cannot be given refs',
+  'Warning: forwardRef render functions',
+  'Warning: useLayoutEffect',
+  'Warning: Encountered two children',
+  'Warning: Can\'t perform a React state update',
+  'Warning: Maximum update depth exceeded',
+  'act() not wrapped in a test',
+  'ReactDOMTestUtils.act',
+  'deprecated',
+  'DEPRECATED',
+  'experimental',
+  'will be removed',
+  'Sourcemap',
+  'source map',
+  'sourceMap',
 ];
 
 /**

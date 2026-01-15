@@ -1,9 +1,9 @@
 {
   "summary": {
     "total": 65,
-    "passed": 59,
+    "passed": 60,
     "failed": 1,
-    "warnings": 5,
+    "warnings": 4,
     "skipped": 0
   },
   "results": [
@@ -307,8 +307,8 @@
     {
       "category": "Accessibility",
       "test": "Landing - Text size",
-      "status": "WARN",
-      "details": "1 elementos con texto pequeño"
+      "status": "PASS",
+      "details": "Todo el texto tiene tamaño legible"
     },
     {
       "category": "Accessibility",
@@ -344,7 +344,7 @@
       "category": "Performance",
       "test": "Landing - Load time",
       "status": "PASS",
-      "details": "Total: 1251ms, DOM Interactive: 298ms, DOM Content Loaded: 299ms"
+      "details": "Total: 1301ms, DOM Interactive: 312ms, DOM Content Loaded: 313ms"
     },
     {
       "category": "Performance",
@@ -363,7 +363,7 @@
       "category": "Performance",
       "test": "Login - Load time",
       "status": "PASS",
-      "details": "Total: 1181ms, DOM Interactive: 237ms, DOM Content Loaded: 237ms"
+      "details": "Total: 1183ms, DOM Interactive: 231ms, DOM Content Loaded: 231ms"
     },
     {
       "category": "Performance",
@@ -381,7 +381,7 @@
       "category": "Performance",
       "test": "Dashboard - Load time",
       "status": "PASS",
-      "details": "Total: 2549ms, DOM Interactive: 242ms, DOM Content Loaded: 242ms"
+      "details": "Total: 2686ms, DOM Interactive: 275ms, DOM Content Loaded: 275ms"
     },
     {
       "category": "Performance",
@@ -399,7 +399,7 @@
       "category": "Console Errors",
       "test": "JavaScript errors",
       "status": "WARN",
-      "details": "42 errores de consola detectados",
+      "details": "40 errores de consola detectados",
       "recommendation": "Revisar y corregir errores de JavaScript"
     }
   ],
@@ -465,9 +465,9 @@
       "warn": 0
     },
     "Accessibility": {
-      "pass": 11,
+      "pass": 12,
       "fail": 0,
-      "warn": 1
+      "warn": 0
     },
     "Performance": {
       "pass": 8,
