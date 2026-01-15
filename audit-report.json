@@ -1,8 +1,8 @@
 {
   "summary": {
     "total": 65,
-    "passed": 53,
-    "failed": 8,
+    "passed": 61,
+    "failed": 0,
     "warnings": 4,
     "skipped": 0
   },
@@ -10,66 +10,50 @@
     {
       "category": "Security - Access Control",
       "test": "Protected route /dashboard",
-      "status": "FAIL",
-      "details": "CRÍTICO: Ruta accesible sin autenticación (URL actual: https://inmovaapp.com/dashboard)",
-      "severity": "critical",
-      "recommendation": "Implementar middleware de autenticación"
+      "status": "PASS",
+      "details": "Redirige correctamente a login/unauthorized"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /admin",
-      "status": "FAIL",
-      "details": "CRÍTICO: Ruta accesible sin autenticación (URL actual: https://inmovaapp.com/admin)",
-      "severity": "critical",
-      "recommendation": "Implementar middleware de autenticación"
+      "status": "PASS",
+      "details": "Redirige correctamente a login/unauthorized"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /admin/usuarios",
-      "status": "FAIL",
-      "details": "CRÍTICO: Ruta accesible sin autenticación (URL actual: https://inmovaapp.com/admin/usuarios)",
-      "severity": "critical",
-      "recommendation": "Implementar middleware de autenticación"
+      "status": "PASS",
+      "details": "Redirige correctamente a login/unauthorized"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /admin/configuracion",
-      "status": "FAIL",
-      "details": "CRÍTICO: Ruta accesible sin autenticación (URL actual: https://inmovaapp.com/admin/configuracion)",
-      "severity": "critical",
-      "recommendation": "Implementar middleware de autenticación"
+      "status": "PASS",
+      "details": "Redirige correctamente a login/unauthorized"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /edificios",
-      "status": "FAIL",
-      "details": "CRÍTICO: Ruta accesible sin autenticación (URL actual: https://inmovaapp.com/edificios)",
-      "severity": "critical",
-      "recommendation": "Implementar middleware de autenticación"
+      "status": "PASS",
+      "details": "Redirige correctamente a login/unauthorized"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /inquilinos",
-      "status": "FAIL",
-      "details": "CRÍTICO: Ruta accesible sin autenticación (URL actual: https://inmovaapp.com/inquilinos)",
-      "severity": "critical",
-      "recommendation": "Implementar middleware de autenticación"
+      "status": "PASS",
+      "details": "Redirige correctamente a login/unauthorized"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /contratos",
-      "status": "FAIL",
-      "details": "CRÍTICO: Ruta accesible sin autenticación (URL actual: https://inmovaapp.com/contratos)",
-      "severity": "critical",
-      "recommendation": "Implementar middleware de autenticación"
+      "status": "PASS",
+      "details": "Redirige correctamente a login/unauthorized"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /pagos",
-      "status": "FAIL",
-      "details": "CRÍTICO: Ruta accesible sin autenticación (URL actual: https://inmovaapp.com/pagos)",
-      "severity": "critical",
-      "recommendation": "Implementar middleware de autenticación"
+      "status": "PASS",
+      "details": "Redirige correctamente a login/unauthorized"
     },
     {
       "category": "Security - Cryptography",
@@ -359,7 +343,7 @@
       "category": "Performance",
       "test": "Landing - Load time",
       "status": "PASS",
-      "details": "Total: 297ms, DOM Interactive: 296ms, DOM Content Loaded: 296ms"
+      "details": "Total: 293ms, DOM Interactive: 292ms, DOM Content Loaded: 292ms"
     },
     {
       "category": "Performance",
@@ -378,7 +362,7 @@
       "category": "Performance",
       "test": "Login - Load time",
       "status": "PASS",
-      "details": "Total: 233ms, DOM Interactive: 231ms, DOM Content Loaded: 231ms"
+      "details": "Total: 236ms, DOM Interactive: 235ms, DOM Content Loaded: 235ms"
     },
     {
       "category": "Performance",
@@ -396,7 +380,7 @@
       "category": "Performance",
       "test": "Dashboard - Load time",
       "status": "PASS",
-      "details": "Total: 235ms, DOM Interactive: 234ms, DOM Content Loaded: 234ms"
+      "details": "Total: 238ms, DOM Interactive: 236ms, DOM Content Loaded: 237ms"
     },
     {
       "category": "Performance",
@@ -414,14 +398,14 @@
       "category": "Console Errors",
       "test": "JavaScript errors",
       "status": "WARN",
-      "details": "10 errores de consola detectados",
+      "details": "20 errores de consola detectados",
       "recommendation": "Revisar y corregir errores de JavaScript"
     }
   ],
   "byCategory": {
     "Security - Access Control": {
-      "pass": 0,
-      "fail": 8,
+      "pass": 8,
+      "fail": 0,
       "warn": 0
     },
     "Security - Cryptography": {
