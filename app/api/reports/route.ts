@@ -56,8 +56,10 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const tipo = searchParams.get('tipo') || 'global'; // global, por_propiedad, flujo_caja
     const periodo = searchParams.get('periodo') || '12'; // meses
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100); // Max 100 properties
+    const offset = parseInt(searchParams.get('offset') || '0');
 
-    const meses = parseInt(periodo);
+    const meses = Math.min(parseInt(periodo), 24); // Max 24 meses para evitar queries lentas
     const now = new Date();
     const fechaInicio = new Date(now);
     fechaInicio.setMonth(fechaInicio.getMonth() - meses);
@@ -125,6 +127,7 @@ export async function GET(request: Request) {
         LEFT JOIN building_income bi ON bi.building_id = bs.id
         LEFT JOIN building_expenses be ON be.building_id = bs.id
         ORDER BY bs.nombre
+        LIMIT ${limit} OFFSET ${offset}
       `;
 
       // Calcular métricas adicionales
