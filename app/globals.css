@@ -1578,6 +1578,56 @@ select[aria-invalid='true']:focus {
 }
 
 /* ========================================
+   ACCESIBILIDAD - TAMAÑO MÍNIMO DE FUENTE (12px)
+   WCAG 1.4.4 - Resize Text
+   ======================================== */
+
+/* Tamaño mínimo global de fuente para mejorar legibilidad */
+body {
+  font-size: max(14px, 0.875rem);
+  line-height: 1.5;
+}
+
+/* Asegurar que ningún texto sea menor a 12px */
+p, span, div, li, td, th, label, small, .text-xs, .text-sm {
+  font-size: max(12px, inherit) !important;
+}
+
+/* Excepciones para badges y tags pequeños pero accesibles */
+.badge, .tag, [class*="badge"], [class*="tag"] {
+  font-size: max(11px, 0.6875rem) !important;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+/* Placeholder text también debe ser legible */
+::placeholder {
+  font-size: max(14px, inherit);
+  opacity: 0.7;
+}
+
+/* Asegurar contraste en texto muted */
+.text-muted, .text-muted-foreground, [class*="muted"] {
+  opacity: 0.8;
+}
+
+/* Mejorar legibilidad en modo oscuro */
+.dark p, .dark span, .dark div, .dark li {
+  letter-spacing: 0.01em;
+}
+
+/* Tamaño mínimo para etiquetas de formulario */
+label {
+  font-size: max(14px, 0.875rem) !important;
+  font-weight: 500;
+}
+
+/* Helper text bajo inputs */
+.helper-text, .form-text, [class*="helper"], [class*="description"] {
+  font-size: max(12px, 0.75rem) !important;
+}
+
+/* ========================================
    ANIMACIONES BLOB PARA HERO SECTION
    ======================================== */
 @keyframes blob {

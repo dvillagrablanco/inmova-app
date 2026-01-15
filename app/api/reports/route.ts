@@ -6,6 +6,27 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Cache simple para reportes (evita queries repetidas)
+const reportCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+
+function getCachedReport(key: string) {
+  const cached = reportCache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+  return null;
+}
+
+function setCachedReport(key: string, data: any) {
+  reportCache.set(key, { data, timestamp: Date.now() });
+  // Limpiar cache viejo
+  if (reportCache.size > 100) {
+    const oldest = [...reportCache.entries()].sort((a, b) => a[1].timestamp - b[1].timestamp)[0];
+    if (oldest) reportCache.delete(oldest[0]);
+  }
+}
+
 interface PropertyReport {
   id: string;
   nombre: string;
@@ -40,6 +61,14 @@ export async function GET(request: Request) {
     const now = new Date();
     const fechaInicio = new Date(now);
     fechaInicio.setMonth(fechaInicio.getMonth() - meses);
+
+    // Verificar cache
+    const cacheKey = `${companyId}-${tipo}-${periodo}`;
+    const cachedData = getCachedReport(cacheKey);
+    if (cachedData) {
+      logger.info('[Reports] Returning cached data', { cacheKey });
+      return NextResponse.json(cachedData);
+    }
 
     if (tipo === 'por_propiedad') {
       // Optimización: Usar agregaciones SQL nativas
@@ -120,7 +149,9 @@ export async function GET(request: Request) {
         };
       });
 
-      return NextResponse.json({ reportes: reportesConMetricas, periodo: meses });
+      const response = { reportes: reportesConMetricas, periodo: meses };
+      setCachedReport(cacheKey, response);
+      return NextResponse.json(response);
     }
 
     if (tipo === 'flujo_caja') {
@@ -179,7 +210,9 @@ export async function GET(request: Request) {
         neto: Math.round((item.ingresos - item.gastos) * 100) / 100,
       }));
 
-      return NextResponse.json({ flujoCaja, periodo: meses });
+      const response = { flujoCaja, periodo: meses };
+      setCachedReport(cacheKey, response);
+      return NextResponse.json(response);
     }
 
     // Reporte global (por defecto) - Optimizado con agregaciones SQL
@@ -235,7 +268,7 @@ export async function GET(request: Request) {
       ? (stats.unidadesOcupadas / stats.unidades) * 100 
       : 0;
 
-    return NextResponse.json({
+    const response = {
       global: {
         ingresosBrutos: Math.round(stats.ingresosBrutos * 100) / 100,
         gastos: Math.round(stats.gastos * 100) / 100,
@@ -248,7 +281,9 @@ export async function GET(request: Request) {
         tasaOcupacion: Math.round(tasaOcupacion * 10) / 10,
       },
       periodo: meses,
-    });
+    };
+    setCachedReport(cacheKey, response);
+    return NextResponse.json(response);
   } catch (error: any) {
     logger.error('Error al generar reportes:', error);
     if (error.message === 'No autenticado') {

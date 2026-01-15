@@ -13,10 +13,15 @@ interface RateLimitConfig {
 
 // Rate limits por tipo de operación - SEGURIDAD BALANCEADA
 export const RATE_LIMITS = {
-  // Auth endpoints - estricto para prevenir brute force
+  // Auth endpoints - MUY estricto para prevenir brute force
   auth: {
     interval: 5 * 60 * 1000, // 5 minutos
-    uniqueTokenPerInterval: 10, // ✅ 10 intentos cada 5 minutos (anti brute-force)
+    uniqueTokenPerInterval: 5, // ✅ 5 intentos cada 5 minutos (anti brute-force agresivo)
+  },
+  // Login específico - aún más estricto
+  login: {
+    interval: 15 * 60 * 1000, // 15 minutos
+    uniqueTokenPerInterval: 5, // ✅ 5 intentos cada 15 minutos
   },
   // Payment endpoints - moderado
   payment: {
@@ -82,7 +87,11 @@ function getRateLimitType(pathname: string, method?: string): keyof typeof RATE_
   if (pathname.startsWith('/admin/') || pathname.startsWith('/api/admin/')) {
     return 'admin';
   }
-  if (pathname.includes('/auth') || pathname.includes('/login') || pathname.includes('/register')) {
+  // Login específico - muy estricto
+  if (pathname.includes('/login') || pathname.includes('/signin') || pathname.includes('/api/auth/callback')) {
+    return 'login';
+  }
+  if (pathname.includes('/auth') || pathname.includes('/register')) {
     return 'auth';
   }
   if (
