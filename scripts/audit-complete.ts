@@ -65,7 +65,7 @@ async function auditSecurity(page: Page) {
 
   for (const route of protectedRoutes) {
     try {
-      const response = await page.goto(`${BASE_URL}${route}`, { waitUntil: 'networkidle', timeout: 15000 });
+      const response = await page.goto(`${BASE_URL}${route}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
       const currentUrl = page.url();
       const isRedirectedToLogin = currentUrl.includes('/login') || currentUrl.includes('/unauthorized');
       
@@ -106,7 +106,7 @@ async function auditSecurity(page: Page) {
   console.log('\n📋 A03:2021 - Injection');
   
   // Test SQL Injection en login
-  await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded', timeout: 15000 });
   await page.fill('input[id="email"]', "admin@test.com' OR '1'='1");
   await page.fill('input[id="password"]', "password' OR '1'='1");
   await page.click('button[type="submit"]');
@@ -127,7 +127,7 @@ async function auditSecurity(page: Page) {
   console.log('\n📋 A05:2021 - Security Misconfiguration');
   
   // Verificar headers de seguridad
-  const response = await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle' });
+  const response = await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded', timeout: 15000 });
   const headers = response?.headers() || {};
   
   const securityHeaders = [
@@ -157,7 +157,7 @@ async function auditSecurity(page: Page) {
   // Test brute force protection
   let failedAttempts = 0;
   for (let i = 0; i < 5; i++) {
-    await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded', timeout: 15000 });
     await page.fill('input[id="email"]', 'bruteforce@test.com');
     await page.fill('input[id="password"]', `wrongpassword${i}`);
     await page.click('button[type="submit"]');
@@ -366,8 +366,8 @@ async function auditPages(page: Page) {
       console.log(`   Testing: ${pageInfo.name} (${pageInfo.path})`);
       
       const response = await page.goto(`${BASE_URL}${pageInfo.path}`, { 
-        waitUntil: 'networkidle', 
-        timeout: 30000 
+        waitUntil: 'domcontentloaded', 
+        timeout: 15000 
       });
       
       const statusCode = response?.status() || 0;
@@ -650,7 +650,7 @@ async function auditPerformance(page: Page) {
     }
 
     const startTime = Date.now();
-    await page.goto(`${BASE_URL}${pageInfo.path}`, { waitUntil: 'networkidle', timeout: 60000 });
+    await page.goto(`${BASE_URL}${pageInfo.path}`, { waitUntil: 'domcontentloaded', timeout: 20000 });
     const loadTime = Date.now() - startTime;
 
     // Obtener métricas de rendimiento

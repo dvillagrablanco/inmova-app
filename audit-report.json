@@ -344,13 +344,13 @@
       "category": "Performance",
       "test": "Landing - Load time",
       "status": "PASS",
-      "details": "Total: 1301ms, DOM Interactive: 312ms, DOM Content Loaded: 313ms"
+      "details": "Total: 1303ms, DOM Interactive: 348ms, DOM Content Loaded: 349ms"
     },
     {
       "category": "Performance",
       "test": "Landing - DOM size",
       "status": "WARN",
-      "details": "1962 elementos en el DOM",
+      "details": "1959 elementos en el DOM",
       "recommendation": "Reducir complejidad del DOM"
     },
     {
@@ -363,7 +363,7 @@
       "category": "Performance",
       "test": "Login - Load time",
       "status": "PASS",
-      "details": "Total: 1183ms, DOM Interactive: 231ms, DOM Content Loaded: 231ms"
+      "details": "Total: 1212ms, DOM Interactive: 265ms, DOM Content Loaded: 265ms"
     },
     {
       "category": "Performance",
@@ -381,13 +381,13 @@
       "category": "Performance",
       "test": "Dashboard - Load time",
       "status": "PASS",
-      "details": "Total: 2686ms, DOM Interactive: 275ms, DOM Content Loaded: 275ms"
+      "details": "Total: 2762ms, DOM Interactive: 259ms, DOM Content Loaded: 260ms"
     },
     {
       "category": "Performance",
       "test": "Dashboard - DOM size",
       "status": "PASS",
-      "details": "605 elementos en el DOM"
+      "details": "606 elementos en el DOM"
     },
     {
       "category": "Performance",
@@ -399,7 +399,7 @@
       "category": "Console Errors",
       "test": "JavaScript errors",
       "status": "WARN",
-      "details": "40 errores de consola detectados",
+      "details": "18 errores de consola detectados",
       "recommendation": "Revisar y corregir errores de JavaScript"
     }
   ],
