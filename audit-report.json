@@ -1,8 +1,8 @@
 {
   "summary": {
     "total": 65,
-    "passed": 60,
-    "failed": 1,
+    "passed": 53,
+    "failed": 8,
     "warnings": 4,
     "skipped": 0
   },
@@ -10,50 +10,66 @@
     {
       "category": "Security - Access Control",
       "test": "Protected route /dashboard",
-      "status": "PASS",
-      "details": "Redirige correctamente a login/unauthorized"
+      "status": "FAIL",
+      "details": "CRÍTICO: Ruta accesible sin autenticación (URL actual: https://inmovaapp.com/dashboard)",
+      "severity": "critical",
+      "recommendation": "Implementar middleware de autenticación"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /admin",
-      "status": "PASS",
-      "details": "Redirige correctamente a login/unauthorized"
+      "status": "FAIL",
+      "details": "CRÍTICO: Ruta accesible sin autenticación (URL actual: https://inmovaapp.com/admin)",
+      "severity": "critical",
+      "recommendation": "Implementar middleware de autenticación"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /admin/usuarios",
-      "status": "PASS",
-      "details": "Redirige correctamente a login/unauthorized"
+      "status": "FAIL",
+      "details": "CRÍTICO: Ruta accesible sin autenticación (URL actual: https://inmovaapp.com/admin/usuarios)",
+      "severity": "critical",
+      "recommendation": "Implementar middleware de autenticación"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /admin/configuracion",
-      "status": "PASS",
-      "details": "Redirige correctamente a login/unauthorized"
+      "status": "FAIL",
+      "details": "CRÍTICO: Ruta accesible sin autenticación (URL actual: https://inmovaapp.com/admin/configuracion)",
+      "severity": "critical",
+      "recommendation": "Implementar middleware de autenticación"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /edificios",
-      "status": "PASS",
-      "details": "Redirige correctamente a login/unauthorized"
+      "status": "FAIL",
+      "details": "CRÍTICO: Ruta accesible sin autenticación (URL actual: https://inmovaapp.com/edificios)",
+      "severity": "critical",
+      "recommendation": "Implementar middleware de autenticación"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /inquilinos",
-      "status": "PASS",
-      "details": "Redirige correctamente a login/unauthorized"
+      "status": "FAIL",
+      "details": "CRÍTICO: Ruta accesible sin autenticación (URL actual: https://inmovaapp.com/inquilinos)",
+      "severity": "critical",
+      "recommendation": "Implementar middleware de autenticación"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /contratos",
-      "status": "PASS",
-      "details": "Redirige correctamente a login/unauthorized"
+      "status": "FAIL",
+      "details": "CRÍTICO: Ruta accesible sin autenticación (URL actual: https://inmovaapp.com/contratos)",
+      "severity": "critical",
+      "recommendation": "Implementar middleware de autenticación"
     },
     {
       "category": "Security - Access Control",
       "test": "Protected route /pagos",
-      "status": "PASS",
-      "details": "Redirige correctamente a login/unauthorized"
+      "status": "FAIL",
+      "details": "CRÍTICO: Ruta accesible sin autenticación (URL actual: https://inmovaapp.com/pagos)",
+      "severity": "critical",
+      "recommendation": "Implementar middleware de autenticación"
     },
     {
       "category": "Security - Cryptography",
@@ -246,9 +262,8 @@
     {
       "category": "Pages",
       "test": "Reportes (/reportes)",
-      "status": "FAIL",
-      "details": "Error: TimeoutError: page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://inmovaapp.com/reportes\", waiting until \"networkidle\"\n",
-      "severity": "high"
+      "status": "PASS",
+      "details": "HTTP 200"
     },
     {
       "category": "Navigation - Buttons",
@@ -344,69 +359,69 @@
       "category": "Performance",
       "test": "Landing - Load time",
       "status": "PASS",
-      "details": "Total: 1303ms, DOM Interactive: 348ms, DOM Content Loaded: 349ms"
+      "details": "Total: 297ms, DOM Interactive: 296ms, DOM Content Loaded: 296ms"
     },
     {
       "category": "Performance",
       "test": "Landing - DOM size",
       "status": "WARN",
-      "details": "1959 elementos en el DOM",
+      "details": "1949 elementos en el DOM",
       "recommendation": "Reducir complejidad del DOM"
     },
     {
       "category": "Performance",
       "test": "Landing - Resources",
       "status": "PASS",
-      "details": "55 recursos, 0 grandes (>500KB), 0 lentos (>1s)"
+      "details": "39 recursos, 0 grandes (>500KB), 0 lentos (>1s)"
     },
     {
       "category": "Performance",
       "test": "Login - Load time",
       "status": "PASS",
-      "details": "Total: 1212ms, DOM Interactive: 265ms, DOM Content Loaded: 265ms"
+      "details": "Total: 233ms, DOM Interactive: 231ms, DOM Content Loaded: 231ms"
     },
     {
       "category": "Performance",
       "test": "Login - DOM size",
       "status": "PASS",
-      "details": "128 elementos en el DOM"
+      "details": "127 elementos en el DOM"
     },
     {
       "category": "Performance",
       "test": "Login - Resources",
       "status": "PASS",
-      "details": "44 recursos, 0 grandes (>500KB), 0 lentos (>1s)"
+      "details": "28 recursos, 0 grandes (>500KB), 0 lentos (>1s)"
     },
     {
       "category": "Performance",
       "test": "Dashboard - Load time",
       "status": "PASS",
-      "details": "Total: 2762ms, DOM Interactive: 259ms, DOM Content Loaded: 260ms"
+      "details": "Total: 235ms, DOM Interactive: 234ms, DOM Content Loaded: 234ms"
     },
     {
       "category": "Performance",
       "test": "Dashboard - DOM size",
       "status": "PASS",
-      "details": "606 elementos en el DOM"
+      "details": "228 elementos en el DOM"
     },
     {
       "category": "Performance",
       "test": "Dashboard - Resources",
       "status": "PASS",
-      "details": "165 recursos, 0 grandes (>500KB), 0 lentos (>1s)"
+      "details": "51 recursos, 0 grandes (>500KB), 0 lentos (>1s)"
     },
     {
       "category": "Console Errors",
       "test": "JavaScript errors",
       "status": "WARN",
-      "details": "18 errores de consola detectados",
+      "details": "10 errores de consola detectados",
       "recommendation": "Revisar y corregir errores de JavaScript"
     }
   ],
   "byCategory": {
     "Security - Access Control": {
-      "pass": 8,
-      "fail": 0,
+      "pass": 0,
+      "fail": 8,
       "warn": 0
     },
     "Security - Cryptography": {
@@ -445,8 +460,8 @@
       "warn": 0
     },
     "Pages": {
-      "pass": 19,
-      "fail": 1,
+      "pass": 20,
+      "fail": 0,
       "warn": 0
     },
     "Navigation - Buttons": {

@@ -66,18 +66,31 @@ async function auditSecurity(page: Page) {
   for (const route of protectedRoutes) {
     try {
       const response = await page.goto(`${BASE_URL}${route}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+      
+      // Esperar a que el redirect cliente ocurra (NextAuth hace redirect del lado cliente)
+      await page.waitForTimeout(2000);
+      
+      // Verificar la URL actual después de posible redirect
       const currentUrl = page.url();
       const isRedirectedToLogin = currentUrl.includes('/login') || currentUrl.includes('/unauthorized');
+      
+      // También verificar si la página muestra contenido de login
+      let hasLoginContent = false;
+      try {
+        hasLoginContent = await page.locator('input[id="email"], input[type="password"]').first().isVisible({ timeout: 1000 });
+      } catch {}
+      
+      const isProtected = isRedirectedToLogin || hasLoginContent;
       
       addResult({
         category: 'Security - Access Control',
         test: `Protected route ${route}`,
-        status: isRedirectedToLogin ? 'PASS' : 'FAIL',
-        details: isRedirectedToLogin 
+        status: isProtected ? 'PASS' : 'FAIL',
+        details: isProtected 
           ? `Redirige correctamente a login/unauthorized`
           : `CRÍTICO: Ruta accesible sin autenticación (URL actual: ${currentUrl})`,
-        severity: isRedirectedToLogin ? undefined : 'critical',
-        recommendation: isRedirectedToLogin ? undefined : 'Implementar middleware de autenticación',
+        severity: isProtected ? undefined : 'critical',
+        recommendation: isProtected ? undefined : 'Implementar middleware de autenticación',
       });
     } catch (error) {
       addResult({
