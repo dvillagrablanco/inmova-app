@@ -55,6 +55,7 @@ import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import logger, { logError } from '@/lib/logger';
 import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
 import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Tenant {
   id: string;
@@ -607,6 +608,13 @@ function InquilinosPageContent() {
             ? `Se eliminará a ${tenantToDelete.nombreCompleto} y todos sus datos asociados. Esta acción no se puede deshacer.`
             : undefined
         }
+      />
+
+      {/* Asistente IA de Documentos */}
+      <AIDocumentAssistant 
+        context="inquilinos"
+        variant="floating"
+        position="bottom-right"
       />
     </AuthenticatedLayout>
   );

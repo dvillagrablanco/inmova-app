@@ -57,6 +57,7 @@ import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
 import logger, { logError } from '@/lib/logger';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Document {
   id: string;
@@ -784,6 +785,13 @@ export default function DocumentosPage() {
       </DialogContent>
         </Dialog>
       )}
+
+      {/* Asistente IA de Documentos */}
+      <AIDocumentAssistant 
+        context="documentos"
+        variant="floating"
+        position="bottom-right"
+      />
     </AuthenticatedLayout>
   );
 }

@@ -57,6 +57,7 @@ import { toast } from 'sonner';
 import Image from 'next/image';
 import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
 import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Property {
   id: string;
@@ -824,6 +825,13 @@ export default function PropiedadesPage() {
             )}
           </>
         )}
+
+        {/* Asistente IA de Documentos */}
+        <AIDocumentAssistant 
+          context="propiedades"
+          variant="floating"
+          position="bottom-right"
+        />
       </div>
     </AuthenticatedLayout>
   );

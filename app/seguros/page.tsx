@@ -81,6 +81,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { format, addDays, differenceInDays, isPast, isBefore } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Insurance {
   id: string;
@@ -680,6 +681,13 @@ export default function SegurosPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Asistente IA de Documentos */}
+        <AIDocumentAssistant 
+          context="seguros"
+          variant="floating"
+          position="bottom-right"
+        />
       </div>
     </AuthenticatedLayout>
   );
