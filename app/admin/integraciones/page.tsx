@@ -386,53 +386,83 @@ export default function IntegracionesUnificadasPage() {
     return configUrls[integrationId] || `/dashboard/integrations/${integrationId}`;
   };
 
-  const IntegrationCard = ({ integration }: { integration: any }) => (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="pt-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${integration.color} flex items-center justify-center`}>
-              <integration.icon className="h-5 w-5 text-white" />
+  const IntegrationCard = ({ integration }: { integration: any }) => {
+    // Tarjeta especial para Claude/IA
+    const isClaudeIntegration = integration.id === 'claude';
+    
+    return (
+      <Card className={`hover:shadow-md transition-shadow ${isClaudeIntegration && integration.status === 'connected' ? 'border-violet-200 bg-violet-50/50' : ''}`}>
+        <CardContent className="pt-4">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${integration.color} flex items-center justify-center`}>
+                <integration.icon className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h4 className="font-medium">{integration.name}</h4>
+                {integration.description && (
+                  <p className="text-sm text-muted-foreground">{integration.description}</p>
+                )}
+              </div>
             </div>
-            <div>
-              <h4 className="font-medium">{integration.name}</h4>
-              {integration.description && (
-                <p className="text-sm text-muted-foreground">{integration.description}</p>
+            <Badge variant={integration.status === 'connected' ? 'default' : 'outline'} className={integration.status === 'connected' ? 'bg-green-500' : 'text-amber-600 border-amber-400'}>
+              {integration.status === 'connected' ? (
+                <><CheckCircle2 className="h-3 w-3 mr-1" /> Integrado</>
+              ) : (
+                <><AlertCircle className="h-3 w-3 mr-1" /> Pendiente</>
               )}
+            </Badge>
+          </div>
+          
+          {integration.details && integration.status === 'connected' && (
+            <div className="mt-3 text-sm space-y-1">
+              {Object.entries(integration.details).map(([key, value]) => {
+                if (key === 'configured' || !value) return null;
+                return (
+                  <div key={key} className="flex justify-between text-muted-foreground">
+                    <span className="capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span>
+                    <span className="font-mono text-xs">{String(value)}</span>
+                  </div>
+                );
+              })}
             </div>
-          </div>
-          <Badge variant={integration.status === 'connected' ? 'default' : 'outline'} className={integration.status === 'connected' ? 'bg-green-500' : 'text-amber-600 border-amber-400'}>
-            {integration.status === 'connected' ? (
-              <><CheckCircle2 className="h-3 w-3 mr-1" /> Integrado</>
-            ) : (
-              <><AlertCircle className="h-3 w-3 mr-1" /> Pendiente</>
-            )}
-          </Badge>
-        </div>
-        
-        {integration.details && integration.status === 'connected' && (
-          <div className="mt-3 text-sm space-y-1">
-            {Object.entries(integration.details).map(([key, value]) => {
-              if (key === 'configured' || !value) return null;
-              return (
-                <div key={key} className="flex justify-between text-muted-foreground">
-                  <span className="capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span>
-                  <span className="font-mono text-xs">{String(value)}</span>
-                </div>
-              );
-            })}
-          </div>
-        )}
+          )}
 
-        <div className="mt-3 flex gap-2">
-          <Button size="sm" variant="outline" onClick={() => router.push(getConfigUrl(integration.id))}>
-            <Settings className="h-4 w-4 mr-1" />
-            Configurar
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
+          {/* Sección especial para Claude */}
+          {isClaudeIntegration && integration.status === 'connected' && (
+            <div className="mt-3 p-3 rounded-lg bg-violet-100 border border-violet-200">
+              <div className="flex items-center gap-2 mb-2">
+                <Brain className="h-4 w-4 text-violet-600" />
+                <span className="text-sm font-medium text-violet-700">Sistema de Agentes de IA</span>
+              </div>
+              <p className="text-xs text-violet-600 mb-2">6 agentes especializados activos usando Claude 3.5 Sonnet</p>
+              <Button 
+                size="sm" 
+                className="w-full bg-violet-600 hover:bg-violet-700"
+                onClick={() => router.push('/admin/ai-agents')}
+              >
+                <Brain className="h-4 w-4 mr-1" />
+                Gestionar Agentes de IA
+              </Button>
+            </div>
+          )}
+
+          <div className="mt-3 flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => router.push(getConfigUrl(integration.id))}>
+              <Settings className="h-4 w-4 mr-1" />
+              Configurar
+            </Button>
+            {isClaudeIntegration && (
+              <Button size="sm" variant="outline" onClick={() => router.push('/admin/ai-agents')}>
+                <Brain className="h-4 w-4 mr-1" />
+                Ver Agentes
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <AuthenticatedLayout>

@@ -363,6 +363,69 @@ export default function AIAgentsPage() {
           </div>
         </div>
 
+        {/* Conexión con Anthropic Claude */}
+        <Card className={`mb-6 ${systemStatus?.configured && systemStatus?.connected ? 'border-green-200 bg-green-50' : 'border-amber-200 bg-amber-50'}`}>
+          <CardContent className="pt-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                  <Brain className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-lg">Integración con Anthropic Claude</h3>
+                    {systemStatus?.configured && systemStatus?.connected ? (
+                      <Badge className="bg-green-500">
+                        <CheckCircle2 className="h-3 w-3 mr-1" />
+                        Conectado
+                      </Badge>
+                    ) : systemStatus?.configured ? (
+                      <Badge variant="outline" className="text-amber-600 border-amber-400">
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        Sin conexión
+                      </Badge>
+                    ) : (
+                      <Badge variant="destructive">
+                        <AlertTriangle className="h-3 w-3 mr-1" />
+                        No configurado
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {systemStatus?.configured && systemStatus?.connected 
+                      ? 'Los agentes de IA están usando Claude 3.5 Sonnet para procesar solicitudes'
+                      : 'Configura la API de Anthropic para activar los agentes de IA'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline"
+                  onClick={() => router.push('/admin/integraciones-plataforma/ia')}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Configurar Claude
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => router.push('/admin/integraciones')}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Ver Integraciones
+                </Button>
+              </div>
+            </div>
+            {systemStatus?.apiKeyPresent && (
+              <div className="mt-4 pt-4 border-t border-green-200">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Modelo activo:</span>
+                  <Badge variant="outline">Claude 3.5 Sonnet</Badge>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Stats Cards */}
         {globalStats && (
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">

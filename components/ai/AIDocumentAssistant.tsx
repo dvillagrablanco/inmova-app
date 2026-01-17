@@ -378,13 +378,37 @@ export function AIDocumentAssistant({
             </div>
             <div>
               <span>Asistente IA de Documentos</span>
-              <Badge variant="outline" className="ml-2 text-xs">
-                Claude 3.5
-              </Badge>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge 
+                      variant="outline" 
+                      className="ml-2 text-xs cursor-pointer hover:bg-violet-50"
+                      onClick={() => window.open('/admin/integraciones-plataforma/ia', '_blank')}
+                    >
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Anthropic Claude
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Powered by Anthropic Claude 3.5 Sonnet</p>
+                    <p className="text-xs text-muted-foreground">Clic para configurar</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </SheetTitle>
-          <SheetDescription>
-            Sube documentos para clasificación automática, extracción de datos y validación con IA
+          <SheetDescription className="flex items-center justify-between">
+            <span>Sube documentos para clasificación automática, extracción de datos y validación con IA</span>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-6 text-xs"
+              onClick={() => window.open('/admin/ai-agents', '_blank')}
+            >
+              <ExternalLink className="h-3 w-3 mr-1" />
+              Ver Agentes
+            </Button>
           </SheetDescription>
         </SheetHeader>
 

@@ -150,6 +150,53 @@ export default function IAPlataformaPage() {
           </CardContent>
         </Card>
 
+        {/* Agentes de IA - Acceso directo */}
+        <Card className="border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center">
+                  <Brain className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <CardTitle>Sistema de Agentes de IA</CardTitle>
+                  <CardDescription>6 agentes especializados usando Claude</CardDescription>
+                </div>
+              </div>
+              <Badge className="bg-green-500">
+                <CheckCircle2 className="h-3 w-3 mr-1" />
+                Activo
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-2 md:grid-cols-3 mb-4">
+              <div className="p-3 bg-white rounded-lg border text-center">
+                <p className="text-2xl font-bold text-violet-600">6</p>
+                <p className="text-xs text-muted-foreground">Agentes</p>
+              </div>
+              <div className="p-3 bg-white rounded-lg border text-center">
+                <p className="text-2xl font-bold text-green-600">95%</p>
+                <p className="text-xs text-muted-foreground">Tasa de éxito</p>
+              </div>
+              <div className="p-3 bg-white rounded-lg border text-center">
+                <p className="text-2xl font-bold text-blue-600">1.2s</p>
+                <p className="text-xs text-muted-foreground">Tiempo respuesta</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button className="flex-1" onClick={() => window.location.href = '/admin/ai-agents'}>
+                <Brain className="h-4 w-4 mr-2" />
+                Gestionar Agentes de IA
+              </Button>
+              <Button variant="outline" onClick={() => window.location.href = '/admin/community-manager'}>
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Community Manager
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Funcionalidades IA */}
         <Card>
           <CardHeader>
@@ -223,6 +270,37 @@ export default function IAPlataformaPage() {
                 </div>
               </div>
               <Switch />
+            </div>
+
+            <div className="flex items-center justify-between p-4 border rounded-lg border-violet-200 bg-violet-50">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-violet-100 flex items-center justify-center">
+                  <Brain className="h-5 w-5 text-violet-600" />
+                </div>
+                <div>
+                  <p className="font-medium">Sistema Multi-Agente</p>
+                  <p className="text-sm text-muted-foreground">6 agentes especializados para diferentes tareas</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" onClick={() => window.location.href = '/admin/ai-agents'}>
+                  Gestionar
+                </Button>
+                <Switch defaultChecked />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-cyan-100 flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-cyan-600" />
+                </div>
+                <div>
+                  <p className="font-medium">Análisis de Documentos</p>
+                  <p className="text-sm text-muted-foreground">Clasificación automática y extracción de datos</p>
+                </div>
+              </div>
+              <Switch defaultChecked />
             </div>
           </CardContent>
         </Card>
