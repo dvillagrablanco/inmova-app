@@ -65,6 +65,18 @@ const financeModules: FinanceModule[] = [
     available: true,
   },
   {
+    id: 'open-banking',
+    title: 'Open Banking',
+    description: 'Conecta tus cuentas bancarias para sincronización automática',
+    icon: <Building className="h-6 w-6" />,
+    href: '/open-banking',
+    stats: {
+      label: 'Cuentas',
+      value: '3',
+    },
+    available: true,
+  },
+  {
     id: 'cobros',
     title: 'Gestión de Cobros',
     description: 'Controla pagos de alquileres, cuotas y recibos pendientes',
@@ -86,6 +98,18 @@ const financeModules: FinanceModule[] = [
       label: 'Este mes',
       value: '23',
       trend: 'up',
+    },
+    available: true,
+  },
+  {
+    id: 'contabilidad',
+    title: 'Integraciones Contables',
+    description: 'Conecta con Contasimple, Holded, a3ERP y más herramientas contables',
+    icon: <FileText className="h-6 w-6" />,
+    href: '/contabilidad/integraciones',
+    stats: {
+      label: 'Conectadas',
+      value: '1',
     },
     available: true,
   },
@@ -332,6 +356,10 @@ export default function FinanzasPage() {
               <Button variant="outline" onClick={() => router.push('/open-banking')}>
                 <Building className="h-4 w-4 mr-2" />
                 Ver cuentas bancarias
+              </Button>
+              <Button variant="outline" onClick={() => router.push('/contabilidad/integraciones')}>
+                <CreditCard className="h-4 w-4 mr-2" />
+                Integraciones contables
               </Button>
             </div>
           </CardContent>

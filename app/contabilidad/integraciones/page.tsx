@@ -195,11 +195,11 @@ export default function ContabilidadIntegracionesPage() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/contabilidad">Contabilidad</BreadcrumbLink>
+              <BreadcrumbLink href="/finanzas">Finanzas</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Integraciones</BreadcrumbPage>
+              <BreadcrumbPage>Integraciones Contables</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -212,10 +212,20 @@ export default function ContabilidadIntegracionesPage() {
               Conecta con tu software de contabilidad para sincronizar facturas y gastos
             </p>
           </div>
-          <Badge variant="outline" className="text-base py-2 px-4">
-            <CheckCircle2 className="w-4 h-4 mr-2 text-green-500" />
-            {connectedCount}/{providers.length} conectados
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => router.push('/open-banking')}>
+              <Building2 className="h-4 w-4 mr-2" />
+              Open Banking
+            </Button>
+            <Button variant="outline" onClick={() => router.push('/finanzas/conciliacion')}>
+              <Calculator className="h-4 w-4 mr-2" />
+              Conciliación
+            </Button>
+            <Badge variant="outline" className="text-base py-2 px-4 hidden md:flex">
+              <CheckCircle2 className="w-4 h-4 mr-2 text-green-500" />
+              {connectedCount}/{providers.length} conectados
+            </Badge>
+          </div>
         </div>
 
         {/* Info */}

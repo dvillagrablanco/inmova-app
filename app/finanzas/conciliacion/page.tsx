@@ -549,9 +549,17 @@ export default function ConciliacionBancariaPage() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={() => router.push('/open-banking')}>
+              <Building className="h-4 w-4 mr-2" />
+              Open Banking
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => router.push('/contabilidad/integraciones')}>
+              <FileText className="h-4 w-4 mr-2" />
+              Contabilidad
+            </Button>
             <Button variant="outline" onClick={handleSyncBanks} disabled={isSyncing}>
               <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-              Sincronizar Bancos
+              Sincronizar
             </Button>
             <Button onClick={handleAutoMatch} disabled={isAutoMatching}>
               <Sparkles className={`h-4 w-4 mr-2 ${isAutoMatching ? 'animate-pulse' : ''}`} />

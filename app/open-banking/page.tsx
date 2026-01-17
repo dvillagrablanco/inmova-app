@@ -240,11 +240,11 @@ export default function OpenBankingPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push('/finanzas')}
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            Volver al Dashboard
+            Volver a Finanzas
           </Button>
         </div>
 
@@ -254,6 +254,10 @@ export default function OpenBankingPage() {
               <BreadcrumbLink href="/dashboard">
                 <Home className="h-4 w-4" />
               </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/finanzas">Finanzas</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -278,9 +282,13 @@ export default function OpenBankingPage() {
               <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
               Sincronizar
             </Button>
+            <Button variant="outline" onClick={() => router.push('/finanzas/conciliacion')}>
+              <ArrowRightLeft className="mr-2 h-4 w-4" />
+              Conciliación
+            </Button>
             <Button onClick={() => router.push('/admin/integraciones-banca')}>
               <Settings className="mr-2 h-4 w-4" />
-              Configuración Avanzada
+              Configuración
             </Button>
           </div>
         </div>
