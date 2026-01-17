@@ -370,45 +370,48 @@ export function AIDocumentAssistant({
         {renderTrigger()}
       </SheetTrigger>
 
-      <SheetContent className="w-full sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-500 flex items-center justify-center">
+      <SheetContent className="w-full sm:max-w-xl bg-background border-l shadow-xl">
+        <SheetHeader className="space-y-3">
+          <SheetTitle className="flex items-center gap-3">
+            <div className="h-10 w-10 shrink-0 rounded-lg bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-500 flex items-center justify-center">
               <Brain className="h-5 w-5 text-white" />
             </div>
-            <div>
-              <span>Asistente IA de Documentos</span>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Badge 
-                      variant="outline" 
-                      className="ml-2 text-xs cursor-pointer hover:bg-violet-50"
-                      onClick={() => window.open('/admin/integraciones-plataforma/ia', '_blank')}
-                    >
-                      <Sparkles className="h-3 w-3 mr-1" />
-                      Anthropic Claude
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Powered by Anthropic Claude 3.5 Sonnet</p>
-                    <p className="text-xs text-muted-foreground">Clic para configurar</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
+            <span className="text-lg">Asistente IA</span>
           </SheetTitle>
-          <SheetDescription className="flex items-center justify-between">
-            <span>Sube documentos para clasificación automática, extracción de datos y validación con IA</span>
+          
+          {/* Badge de Claude - Separado para mejor visualización móvil */}
+          <div className="flex flex-wrap items-center gap-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge 
+                    variant="outline" 
+                    className="text-xs cursor-pointer hover:bg-violet-50 bg-white dark:bg-gray-900"
+                    onClick={() => window.open('/admin/integraciones-plataforma/ia', '_blank')}
+                  >
+                    <Sparkles className="h-3 w-3 mr-1 text-violet-500" />
+                    Claude 3.5
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent className="bg-white dark:bg-gray-900 border shadow-lg z-[9999]">
+                  <p>Powered by Anthropic Claude 3.5 Sonnet</p>
+                  <p className="text-xs text-muted-foreground">Clic para configurar</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm" 
-              className="h-6 text-xs"
+              className="h-6 text-xs bg-white dark:bg-gray-900"
               onClick={() => window.open('/admin/ai-agents', '_blank')}
             >
               <ExternalLink className="h-3 w-3 mr-1" />
               Ver Agentes
             </Button>
+          </div>
+          
+          <SheetDescription className="text-sm">
+            Sube documentos para clasificación automática y extracción de datos con IA
           </SheetDescription>
         </SheetHeader>
 
