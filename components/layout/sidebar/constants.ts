@@ -46,6 +46,7 @@ export const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/configuracion': 'configuracion',
   '/admin/usuarios': 'usuarios',
   '/admin/modulos': 'configuracion',
+  '/empresa/modulos': 'configuracion',
   '/admin/sales-team': 'admin_sales_team',
   '/analytics': 'analytics',
   '/str/listings': 'str_listings',

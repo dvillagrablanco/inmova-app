@@ -140,6 +140,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/configuracion': 'configuracion',
   '/admin/usuarios': 'usuarios',
   '/admin/modulos': 'configuracion',
+  '/empresa/modulos': 'configuracion',
   '/admin/sales-team': 'admin_sales_team',
   '/analytics': 'analytics',
   '/str/listings': 'str_listings',
@@ -1521,9 +1522,9 @@ const administradorEmpresaItems = [
   },
   {
     name: 'Módulos',
-    href: '/admin/modulos',
+    href: '/empresa/modulos',
     icon: Package,
-    roles: ['administrador', 'super_admin'],
+    roles: ['administrador', 'super_admin', 'propietario'],
   },
   {
     name: 'Branding',
@@ -1722,11 +1723,10 @@ const superAdminPlatformItems: SidebarItem[] = [
   // ========== 8. CONFIGURACIÓN ==========
   {
     name: 'Configuración',
-    href: '/admin/modulos',
+    href: '/admin/configuracion',
     icon: Settings,
     roles: ['super_admin'],
     subItems: [
-      { name: 'Módulos', href: '/admin/modulos', icon: Package },
       { name: 'Personalización', href: '/admin/personalizacion', icon: Palette },
       { name: 'Mantenimiento', href: '/admin/limpieza', icon: Wrench },
     ],
@@ -1902,6 +1902,17 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
       }
     }
     loadActiveModules();
+
+    // Escuchar evento de actualización de módulos
+    const handleModulesUpdate = () => {
+      logger.info('Módulos actualizados, recargando sidebar...');
+      loadActiveModules();
+    };
+    window.addEventListener('modules-updated', handleModulesUpdate);
+    
+    return () => {
+      window.removeEventListener('modules-updated', handleModulesUpdate);
+    };
   }, []);
 
   // Cargar módulos de la empresa seleccionada (Solo para Super Admin)

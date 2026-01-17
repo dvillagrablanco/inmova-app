@@ -29,6 +29,8 @@ import {
   MapPin,
   FileText,
   RefreshCw,
+  Package,
+  ChevronRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -311,6 +313,29 @@ export default function EmpresaConfiguracionPage() {
                 rows={3}
               />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Gestión de Módulos */}
+        <Card className="border-2 border-primary/20 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Package className="h-5 w-5 text-primary" />
+              <CardTitle>Gestión de Módulos</CardTitle>
+            </div>
+            <CardDescription>
+              Activa o desactiva módulos según las necesidades de tu empresa
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Personaliza qué funcionalidades están disponibles en tu empresa. Los módulos desactivados
+              se ocultarán del menú de navegación pero no perderás datos.
+            </p>
+            <Button onClick={() => router.push('/empresa/modulos')}>
+              Gestionar Módulos
+              <ChevronRight className="h-4 w-4 ml-2" />
+            </Button>
           </CardContent>
         </Card>
 
