@@ -101,6 +101,13 @@ const configSections: ConfigSection[] = [
     icon: <Shield className="h-5 w-5" />,
     href: '/seguridad',
   },
+  {
+    id: 'contabilidad',
+    title: 'Contabilidad',
+    description: 'Integraciones contables',
+    icon: <Building2 className="h-5 w-5" />,
+    href: '/contabilidad/integraciones',
+  },
 ];
 
 export default function ConfiguracionPage() {
