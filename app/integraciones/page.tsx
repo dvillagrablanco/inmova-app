@@ -95,6 +95,7 @@ const allIntegrations: Integration[] = [
     icon: '🏦',
     connected: false,
     status: 'inactive',
+    configUrl: '/configuracion/integraciones/gocardless',
     docsUrl: 'https://gocardless.com/es/',
     features: ['Débito directo SEPA', 'Pagos recurrentes', 'Conciliación automática', 'Bajo coste'],
   },
@@ -106,6 +107,8 @@ const allIntegrations: Integration[] = [
     icon: '🔒',
     connected: false,
     status: 'inactive',
+    configUrl: '/configuracion/integraciones/redsys',
+    docsUrl: 'https://pagosonline.redsys.es/',
     features: ['TPV Virtual', 'PSD2/SCA', 'Bizum', 'Multidivisa'],
   },
   // Contabilidad
@@ -128,6 +131,8 @@ const allIntegrations: Integration[] = [
     icon: '📈',
     connected: false,
     status: 'inactive',
+    configUrl: '/contabilidad/integraciones',
+    docsUrl: 'https://developers.holded.com/',
     features: ['Facturación', 'Contabilidad', 'CRM', 'Proyectos'],
   },
   {
@@ -138,6 +143,7 @@ const allIntegrations: Integration[] = [
     icon: '🏢',
     connected: false,
     status: 'inactive',
+    configUrl: '/contabilidad/integraciones',
     features: ['Contabilidad', 'Facturación', 'Nóminas', 'Impuestos'],
   },
   // Banca
@@ -160,6 +166,8 @@ const allIntegrations: Integration[] = [
     icon: '🌐',
     connected: false,
     status: 'inactive',
+    configUrl: '/admin/integraciones-banca',
+    docsUrl: 'https://plaid.com/docs/',
     features: ['Multi-banco', 'Verificación de cuentas', 'Historial financiero'],
   },
   // Firma Digital
@@ -182,6 +190,8 @@ const allIntegrations: Integration[] = [
     icon: '📝',
     connected: false,
     status: 'inactive',
+    configUrl: '/firma-digital/configuracion',
+    docsUrl: 'https://docs.signaturit.com/',
     features: ['Firma cualificada', 'Certificado digital', 'Validez legal UE'],
   },
   // Comunicación
@@ -193,6 +203,8 @@ const allIntegrations: Integration[] = [
     icon: '💬',
     connected: false,
     status: 'inactive',
+    configUrl: '/dashboard/integrations/crisp',
+    docsUrl: 'https://docs.crisp.chat/',
     features: ['Chat en vivo', 'Chatbot', 'Base de conocimiento', 'CRM integrado'],
   },
   {
@@ -203,6 +215,8 @@ const allIntegrations: Integration[] = [
     icon: '📱',
     connected: false,
     status: 'inactive',
+    configUrl: '/dashboard/integrations/twilio',
+    docsUrl: 'https://www.twilio.com/docs',
     features: ['SMS', 'WhatsApp', 'Llamadas', 'Verificación 2FA'],
   },
   {
@@ -213,6 +227,8 @@ const allIntegrations: Integration[] = [
     icon: '📧',
     connected: false,
     status: 'inactive',
+    configUrl: '/dashboard/integrations/sendgrid',
+    docsUrl: 'https://docs.sendgrid.com/',
     features: ['Emails transaccionales', 'Marketing', 'Templates', 'Analytics'],
   },
   // Analytics
@@ -224,6 +240,8 @@ const allIntegrations: Integration[] = [
     icon: '📉',
     connected: false,
     status: 'inactive',
+    configUrl: '/dashboard/integrations/google-analytics',
+    docsUrl: 'https://developers.google.com/analytics',
     features: ['Tráfico web', 'Conversiones', 'Audiencias', 'Informes'],
   },
   {
@@ -234,6 +252,8 @@ const allIntegrations: Integration[] = [
     icon: '🔥',
     connected: false,
     status: 'inactive',
+    configUrl: '/dashboard/integrations/hotjar',
+    docsUrl: 'https://help.hotjar.com/',
     features: ['Mapas de calor', 'Grabaciones', 'Encuestas', 'Feedback'],
   },
   // Redes Sociales
@@ -245,6 +265,8 @@ const allIntegrations: Integration[] = [
     icon: '📘',
     connected: false,
     status: 'inactive',
+    configUrl: '/dashboard/integrations/facebook',
+    docsUrl: 'https://developers.facebook.com/',
     features: ['Facebook Marketplace', 'Instagram', 'Publicación automática'],
   },
   {
@@ -255,6 +277,8 @@ const allIntegrations: Integration[] = [
     icon: '🏠',
     connected: false,
     status: 'inactive',
+    configUrl: '/dashboard/integrations/idealista',
+    docsUrl: 'https://www.idealista.com/',
     features: ['Sincronización de anuncios', 'Leads automáticos', 'Estadísticas'],
   },
   {
@@ -265,6 +289,8 @@ const allIntegrations: Integration[] = [
     icon: '📷',
     connected: false,
     status: 'inactive',
+    configUrl: '/dashboard/integrations/fotocasa',
+    docsUrl: 'https://www.fotocasa.es/',
     features: ['Sincronización de anuncios', 'Leads automáticos'],
   },
 ];
