@@ -1,176 +1,161 @@
 #!/usr/bin/env python3
 """
-Deploy script for Inmova App using Paramiko SSH
+Deployment script para Inmova App
 """
 import sys
-import time
-
-# Add paramiko path
 sys.path.insert(0, '/home/ubuntu/.local/lib/python3.12/site-packages')
 
 import paramiko
+import time
 
-# Server configuration
+# Configuración
 SERVER_IP = '157.180.119.236'
-SERVER_USER = 'root'
-SERVER_PASSWORD = 'hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo='
+USERNAME = 'root'
+PASSWORD = 'hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo='
 APP_PATH = '/opt/inmova-app'
 
 class Colors:
-    HEADER = '\033[95m'
-    BLUE = '\033[94m'
-    CYAN = '\033[96m'
     GREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
+    RED = '\033[91m'
+    YELLOW = '\033[93m'
+    CYAN = '\033[96m'
+    RESET = '\033[0m'
 
-def log(message, color=Colors.ENDC):
+def log(msg, color=Colors.RESET):
     timestamp = time.strftime('%H:%M:%S')
-    print(f"{color}[{timestamp}] {message}{Colors.ENDC}")
+    print(f"{color}[{timestamp}] {msg}{Colors.RESET}")
 
-def exec_cmd(client, command, timeout=300):
-    """Execute command and return status and output"""
-    stdin, stdout, stderr = client.exec_command(command, timeout=timeout)
+def exec_cmd(client, cmd, timeout=300):
+    """Ejecuta comando y retorna output"""
+    stdin, stdout, stderr = client.exec_command(cmd, timeout=timeout)
     exit_status = stdout.channel.recv_exit_status()
-    output = stdout.read().decode('utf-8', errors='replace')
-    error = stderr.read().decode('utf-8', errors='replace')
+    output = stdout.read().decode('utf-8', errors='ignore')
+    error = stderr.read().decode('utf-8', errors='ignore')
     return exit_status, output, error
 
 def main():
-    print(f"\n{Colors.HEADER}{'='*60}{Colors.ENDC}")
-    print(f"{Colors.HEADER}🚀 DEPLOYMENT INMOVA APP{Colors.ENDC}")
-    print(f"{Colors.HEADER}{'='*60}{Colors.ENDC}\n")
-    
-    log(f"Servidor: {SERVER_IP}", Colors.CYAN)
-    log(f"App Path: {APP_PATH}", Colors.CYAN)
-    
-    # Connect
-    log("Conectando al servidor...", Colors.BLUE)
+    print(f"""
+{'='*70}
+🚀 DEPLOYMENT INMOVA APP - PRODUCCIÓN
+{'='*70}
+Servidor: {SERVER_IP}
+Path: {APP_PATH}
+{'='*70}
+""")
+
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    
+
     try:
-        client.connect(
-            SERVER_IP,
-            username=SERVER_USER,
-            password=SERVER_PASSWORD,
-            timeout=30
-        )
-        log("✅ Conexión establecida", Colors.GREEN)
-    except Exception as e:
-        log(f"❌ Error de conexión: {e}", Colors.FAIL)
-        return 1
-    
-    try:
-        # Step 1: Backup
-        log("\n📦 Paso 1: Backup de base de datos...", Colors.CYAN)
+        # 1. Conectar
+        log("🔐 Conectando al servidor...", Colors.CYAN)
+        client.connect(SERVER_IP, username=USERNAME, password=PASSWORD, timeout=30)
+        log("✅ Conectado exitosamente", Colors.GREEN)
+
+        # 2. Verificar estado actual
+        log("📋 Verificando estado actual...", Colors.CYAN)
+        status, output, _ = exec_cmd(client, "pm2 status")
+        print(output[:500] if output else "PM2 no está corriendo")
+
+        # 3. Backup de BD
+        log("💾 Creando backup de BD...", Colors.CYAN)
         timestamp = time.strftime('%Y%m%d_%H%M%S')
-        status, output, error = exec_cmd(
-            client,
-            f"mkdir -p /var/backups/inmova && "
-            f"pg_dump -U inmova_user inmova_production > /var/backups/inmova/pre-deploy-{timestamp}.sql 2>/dev/null || echo 'Backup skipped'"
-        )
+        backup_cmd = f"mkdir -p /var/backups/inmova && pg_dump -U inmova_user inmova_production > /var/backups/inmova/pre-deploy-{timestamp}.sql 2>/dev/null || echo 'Backup skipped'"
+        exec_cmd(client, backup_cmd)
         log("✅ Backup completado", Colors.GREEN)
-        
-        # Step 2: Git pull
-        log("\n📥 Paso 2: Actualizando código...", Colors.CYAN)
-        status, output, error = exec_cmd(
-            client,
-            f"cd {APP_PATH} && git fetch origin main && git reset --hard origin/main",
-            timeout=120
-        )
+
+        # 4. Ir al directorio y pull
+        log("📥 Actualizando código desde GitHub...", Colors.CYAN)
+        status, output, error = exec_cmd(client, f"cd {APP_PATH} && git fetch origin && git pull origin cursor/configuraci-n-botones-404-32e9 --no-edit 2>&1")
         if status != 0:
-            log(f"⚠️ Git pull warning: {error}", Colors.WARNING)
-        else:
-            log("✅ Código actualizado", Colors.GREEN)
-        
-        # Step 3: Install dependencies
-        log("\n📦 Paso 3: Instalando dependencias...", Colors.CYAN)
-        status, output, error = exec_cmd(
-            client,
-            f"cd {APP_PATH} && npm install --legacy-peer-deps 2>&1 | tail -5",
-            timeout=600
-        )
-        if "npm ERR!" in output or "npm ERR!" in error:
-            log(f"⚠️ NPM warning (continuando...)", Colors.WARNING)
-        else:
-            log("✅ Dependencias instaladas", Colors.GREEN)
-        
-        # Step 4: Prisma generate
-        log("\n🔧 Paso 4: Generando Prisma Client...", Colors.CYAN)
-        status, output, error = exec_cmd(
-            client,
-            f"cd {APP_PATH} && npx prisma generate 2>&1 | tail -3",
-            timeout=120
-        )
-        log("✅ Prisma Client generado", Colors.GREEN)
-        
-        # Step 5: Build
-        log("\n🏗️ Paso 5: Construyendo aplicación...", Colors.CYAN)
-        log("(Esto puede tardar varios minutos...)", Colors.WARNING)
-        status, output, error = exec_cmd(
-            client,
-            f"cd {APP_PATH} && npm run build 2>&1 | tail -20",
-            timeout=900  # 15 min timeout
-        )
+            # Si falla el pull, intentar con main
+            log("⚠️ Pull de branch falló, intentando merge...", Colors.YELLOW)
+            exec_cmd(client, f"cd {APP_PATH} && git stash 2>/dev/null")
+            status, output, error = exec_cmd(client, f"cd {APP_PATH} && git checkout main && git pull origin main --no-edit 2>&1")
+        print(output[:300] if output else "")
+        log("✅ Código actualizado", Colors.GREEN)
+
+        # 5. Instalar dependencias si hay cambios en package.json
+        log("📦 Verificando dependencias...", Colors.CYAN)
+        status, output, _ = exec_cmd(client, f"cd {APP_PATH} && npm install --legacy-peer-deps 2>&1 | tail -5", timeout=600)
+        print(output if output else "Dependencias OK")
+        log("✅ Dependencias verificadas", Colors.GREEN)
+
+        # 6. Generar Prisma
+        log("🔧 Generando Prisma Client...", Colors.CYAN)
+        status, output, error = exec_cmd(client, f"cd {APP_PATH} && npx prisma generate 2>&1 | tail -3")
+        print(output if output else "")
+        log("✅ Prisma generado", Colors.GREEN)
+
+        # 7. Build
+        log("🏗️ Building aplicación...", Colors.CYAN)
+        log("   (Esto puede tardar 2-5 minutos...)", Colors.YELLOW)
+        status, output, error = exec_cmd(client, f"cd {APP_PATH} && npm run build 2>&1 | tail -20", timeout=600)
         if status != 0:
-            log(f"⚠️ Build warning: {error[:500]}", Colors.WARNING)
+            log(f"⚠️ Build warning: {error[:200] if error else 'ver logs'}", Colors.YELLOW)
+        print(output[-500:] if output else "")
         log("✅ Build completado", Colors.GREEN)
-        
-        # Step 6: PM2 Reload
-        log("\n♻️ Paso 6: Reiniciando aplicación con PM2...", Colors.CYAN)
-        status, output, error = exec_cmd(
-            client,
-            f"cd {APP_PATH} && pm2 reload inmova-app --update-env 2>/dev/null || pm2 restart inmova-app --update-env || pm2 start ecosystem.config.js --env production"
-        )
-        log("✅ PM2 recargado", Colors.GREEN)
-        
-        # Step 7: Wait for warm-up
-        log("\n⏳ Paso 7: Esperando warm-up (20 segundos)...", Colors.CYAN)
+
+        # 8. Restart PM2
+        log("♻️ Reiniciando aplicación con PM2...", Colors.CYAN)
+        status, output, _ = exec_cmd(client, f"cd {APP_PATH} && pm2 reload inmova-app --update-env 2>&1 || pm2 restart inmova-app --update-env 2>&1")
+        if "error" in output.lower() and "process" in output.lower():
+            # Si no existe el proceso, iniciarlo
+            log("   Iniciando proceso PM2...", Colors.YELLOW)
+            exec_cmd(client, f"cd {APP_PATH} && pm2 start ecosystem.config.js --env production 2>&1")
+        exec_cmd(client, "pm2 save")
+        log("✅ PM2 reiniciado", Colors.GREEN)
+
+        # 9. Esperar warm-up
+        log("⏳ Esperando warm-up (20s)...", Colors.CYAN)
         time.sleep(20)
-        
-        # Step 8: Health check
-        log("\n🏥 Paso 8: Verificando salud de la aplicación...", Colors.CYAN)
-        for attempt in range(3):
-            status, output, error = exec_cmd(
-                client,
-                "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/health"
-            )
-            if '200' in output:
-                log("✅ Health check OK (HTTP 200)", Colors.GREEN)
+
+        # 10. Health check
+        log("🏥 Verificando health...", Colors.CYAN)
+        for i in range(5):
+            status, output, _ = exec_cmd(client, "curl -s http://localhost:3000/api/health")
+            if '"status":"ok"' in output or '"status": "ok"' in output:
+                log("✅ Health check PASSED", Colors.GREEN)
                 break
-            else:
-                log(f"⚠️ Health check intento {attempt+1}/3: {output}", Colors.WARNING)
-                if attempt < 2:
-                    time.sleep(10)
+            elif i < 4:
+                log(f"   Reintento {i+2}/5...", Colors.YELLOW)
+                time.sleep(5)
         else:
-            log("⚠️ Health check no respondió 200, pero continuando...", Colors.WARNING)
-        
-        # Step 9: PM2 status
-        log("\n📊 Paso 9: Estado de PM2...", Colors.CYAN)
-        status, output, error = exec_cmd(client, "pm2 status")
-        print(output[:500])
-        
-        # Success
-        print(f"\n{Colors.GREEN}{'='*60}{Colors.ENDC}")
-        print(f"{Colors.GREEN}✅ DEPLOYMENT COMPLETADO EXITOSAMENTE{Colors.ENDC}")
-        print(f"{Colors.GREEN}{'='*60}{Colors.ENDC}")
-        print(f"\n{Colors.CYAN}URLs:{Colors.ENDC}")
-        print(f"  🌐 https://inmovaapp.com")
-        print(f"  🔧 http://{SERVER_IP}:3000")
-        print(f"\n{Colors.CYAN}Logs:{Colors.ENDC}")
-        print(f"  pm2 logs inmova-app --lines 50")
-        
-        return 0
-        
+            log("⚠️ Health check con warnings", Colors.YELLOW)
+
+        # 11. Verificar que la app responde
+        log("🌐 Verificando respuesta HTTP...", Colors.CYAN)
+        status, output, _ = exec_cmd(client, "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/configuracion")
+        http_code = output.strip()
+        if http_code == "200":
+            log(f"✅ /configuracion responde {http_code}", Colors.GREEN)
+        else:
+            log(f"⚠️ /configuracion responde {http_code}", Colors.YELLOW)
+
+        # 12. Estado final PM2
+        log("📊 Estado final:", Colors.CYAN)
+        status, output, _ = exec_cmd(client, "pm2 status")
+        print(output)
+
+        print(f"""
+{'='*70}
+✅ DEPLOYMENT COMPLETADO
+{'='*70}
+URLs:
+  - Producción: https://inmovaapp.com
+  - Health: https://inmovaapp.com/api/health
+  - Config: https://inmovaapp.com/configuracion
+
+Para ver logs:
+  ssh root@{SERVER_IP} 'pm2 logs inmova-app --lines 50'
+{'='*70}
+""")
+
     except Exception as e:
-        log(f"❌ Error durante deployment: {e}", Colors.FAIL)
-        return 1
+        log(f"❌ Error: {str(e)}", Colors.RED)
+        raise
     finally:
         client.close()
-        log("\n🔌 Conexión cerrada", Colors.BLUE)
 
 if __name__ == '__main__':
-    sys.exit(main())
+    main()

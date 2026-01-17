@@ -240,7 +240,30 @@ export default function HerramientasEmpresaPage() {
     ],
   };
 
-  const IntegrationCardPropia = ({ integration }: { integration: any }) => (
+  // Mapeo de rutas de configuración para integraciones propias
+  const getConfigUrl = (integrationId: string, category: string): string => {
+    const routes: Record<string, string> = {
+      // Contabilidad
+      'contasimple': '/contabilidad/integraciones',
+      'holded': '/contabilidad/integraciones',
+      'a3': '/contabilidad/integraciones',
+      'sage': '/contabilidad/integraciones',
+      'alegra': '/contabilidad/integraciones',
+      'zucchetti': '/contabilidad/integraciones',
+      // Banca
+      'openbanking': '/admin/integraciones-banca',
+      'plaid': '/admin/integraciones-banca',
+      // Portales
+      'idealista': '/dashboard/integrations/idealista',
+      'fotocasa': '/dashboard/integrations/fotocasa',
+      'habitaclia': '/dashboard/integrations/habitaclia',
+      'pisos': '/dashboard/integrations/pisos',
+      'yaencontre': '/dashboard/integrations/yaencontre',
+    };
+    return routes[integrationId] || `/dashboard/integrations/${integrationId}`;
+  };
+
+  const IntegrationCardPropia = ({ integration, category }: { integration: any; category: string }) => (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="pt-4">
         <div className="flex items-start justify-between mb-3">
@@ -262,7 +285,12 @@ export default function HerramientasEmpresaPage() {
           </Badge>
         </div>
         
-        <Button size="sm" className="w-full" variant={integration.status === 'connected' ? 'outline' : 'default'}>
+        <Button 
+          size="sm" 
+          className="w-full" 
+          variant={integration.status === 'connected' ? 'outline' : 'default'}
+          onClick={() => router.push(getConfigUrl(integration.id, category))}
+        >
           {integration.status === 'connected' ? (
             <><Settings className="h-4 w-4 mr-2" /> Configurar</>
           ) : (
@@ -272,6 +300,21 @@ export default function HerramientasEmpresaPage() {
       </CardContent>
     </Card>
   );
+
+  // Mapeo de rutas para integraciones compartidas
+  const getSharedConfigUrl = (integrationId: string, type: 'pagos' | 'firma'): string => {
+    const routes: Record<string, string> = {
+      // Pagos
+      'stripe': '/configuracion/integraciones/stripe',
+      'gocardless': '/configuracion/integraciones/gocardless',
+      'bizum': '/configuracion/integraciones/redsys',
+      'tpv': '/configuracion/integraciones/redsys',
+      // Firma
+      'docusign': '/firma-digital/configuracion',
+      'signaturit': '/firma-digital/configuracion',
+    };
+    return routes[integrationId] || (type === 'pagos' ? '/pagos/configuracion' : '/firma-digital/configuracion');
+  };
 
   const IntegrationCardCompartida = ({ integration, type }: { integration: any; type: 'pagos' | 'firma' }) => (
     <Card className={`hover:shadow-md transition-shadow ${integration.enabled ? '' : 'opacity-60'}`}>
@@ -302,12 +345,22 @@ export default function HerramientasEmpresaPage() {
           </div>
         )}
 
-        {integration.configuredByInmova && (
-          <div className="text-xs text-muted-foreground flex items-center gap-1">
-            <Shield className="h-3 w-3" />
-            Configurado por Inmova
-          </div>
-        )}
+        <div className="flex items-center justify-between mt-3">
+          {integration.configuredByInmova && (
+            <div className="text-xs text-muted-foreground flex items-center gap-1">
+              <Shield className="h-3 w-3" />
+              Configurado por Inmova
+            </div>
+          )}
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={() => router.push(getSharedConfigUrl(integration.id, type))}
+          >
+            <Settings className="h-4 w-4 mr-1" />
+            Ver Config
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
@@ -357,7 +410,7 @@ export default function HerramientasEmpresaPage() {
               Conecta tu software de contabilidad para sincronizar facturas y gastos automáticamente.
             </p>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {integracionesPropias.contabilidad.map(i => <IntegrationCardPropia key={i.id} integration={i} />)}
+              {integracionesPropias.contabilidad.map(i => <IntegrationCardPropia key={i.id} integration={i} category="contabilidad" />)}
             </div>
           </section>
 
@@ -372,7 +425,7 @@ export default function HerramientasEmpresaPage() {
               Conecta tus cuentas bancarias para conciliación automática de pagos.
             </p>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {integracionesPropias.banca.map(i => <IntegrationCardPropia key={i.id} integration={i} />)}
+              {integracionesPropias.banca.map(i => <IntegrationCardPropia key={i.id} integration={i} category="banca" />)}
             </div>
           </section>
 
@@ -387,7 +440,7 @@ export default function HerramientasEmpresaPage() {
               Publica tus propiedades automáticamente en los principales portales.
             </p>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {integracionesPropias.portales.map(i => <IntegrationCardPropia key={i.id} integration={i} />)}
+              {integracionesPropias.portales.map(i => <IntegrationCardPropia key={i.id} integration={i} category="portales" />)}
             </div>
           </section>
         </TabsContent>

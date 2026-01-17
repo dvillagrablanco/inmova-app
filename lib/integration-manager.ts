@@ -548,6 +548,45 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
       { key: 'agencyId', label: 'Agency ID', type: 'text', required: true },
     ],
   },
+  {
+    id: 'habitaclia',
+    name: 'Habitaclia',
+    category: 'social_media',
+    description: 'Portal inmobiliario líder en Cataluña',
+    logo: '/integrations/habitaclia.svg',
+    website: 'https://habitaclia.com',
+    status: 'active',
+    credentialFields: [
+      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
+      { key: 'agencyId', label: 'ID Agencia', type: 'text', required: true },
+    ],
+  },
+  {
+    id: 'pisos',
+    name: 'Pisos.com',
+    category: 'social_media',
+    description: 'Buscador de pisos en España',
+    logo: '/integrations/pisos.svg',
+    website: 'https://pisos.com',
+    status: 'active',
+    credentialFields: [
+      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
+      { key: 'clientId', label: 'Client ID', type: 'text', required: true },
+    ],
+  },
+  {
+    id: 'yaencontre',
+    name: 'yaencontré',
+    category: 'social_media',
+    description: 'Portal inmobiliario yaencontré',
+    logo: '/integrations/yaencontre.svg',
+    website: 'https://yaencontre.com',
+    status: 'active',
+    credentialFields: [
+      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
+      { key: 'userId', label: 'User ID', type: 'text', required: true },
+    ],
+  },
 
   // ========== CONTABILIDAD (Nuevos) ==========
   {
@@ -576,6 +615,81 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     credentialFields: [
       { key: 'clientId', label: 'Client ID', type: 'text', required: true },
       { key: 'clientSecret', label: 'Client Secret', type: 'password', required: true },
+    ],
+  },
+  {
+    id: 'sage',
+    name: 'Sage',
+    category: 'accounting',
+    description: 'Gestión empresarial y contabilidad',
+    logo: '/integrations/sage.svg',
+    website: 'https://sage.com',
+    status: 'active',
+    credentialFields: [
+      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
+      { key: 'companyId', label: 'Company ID', type: 'text', required: true },
+      { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
+        { value: 'sandbox', label: 'Sandbox' },
+        { value: 'production', label: 'Producción' },
+      ]},
+    ],
+  },
+  {
+    id: 'alegra',
+    name: 'Alegra',
+    category: 'accounting',
+    description: 'Facturación y contabilidad online',
+    logo: '/integrations/alegra.svg',
+    website: 'https://alegra.com',
+    status: 'active',
+    credentialFields: [
+      { key: 'email', label: 'Email', type: 'text', required: true },
+      { key: 'apiToken', label: 'API Token', type: 'password', required: true },
+    ],
+  },
+  {
+    id: 'a3',
+    name: 'A3 Software',
+    category: 'accounting',
+    description: 'Contabilidad profesional A3',
+    logo: '/integrations/a3.svg',
+    website: 'https://a3software.com',
+    status: 'active',
+    credentialFields: [
+      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
+      { key: 'companyCode', label: 'Código Empresa', type: 'text', required: true },
+    ],
+  },
+  {
+    id: 'zucchetti',
+    name: 'Zucchetti',
+    category: 'accounting',
+    description: 'Software de gestión empresarial',
+    logo: '/integrations/zucchetti.svg',
+    website: 'https://zucchetti.es',
+    status: 'active',
+    credentialFields: [
+      { key: 'apiEndpoint', label: 'API Endpoint', type: 'url', required: true },
+      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
+      { key: 'companyId', label: 'ID Empresa', type: 'text', required: true },
+    ],
+  },
+  {
+    id: 'plaid',
+    name: 'Plaid',
+    category: 'banking',
+    description: 'Agregador bancario internacional',
+    logo: '/integrations/plaid.svg',
+    website: 'https://plaid.com',
+    status: 'active',
+    credentialFields: [
+      { key: 'clientId', label: 'Client ID', type: 'text', required: true },
+      { key: 'secret', label: 'Secret', type: 'password', required: true },
+      { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
+        { value: 'sandbox', label: 'Sandbox' },
+        { value: 'development', label: 'Development' },
+        { value: 'production', label: 'Production' },
+      ]},
     ],
   },
 ];
