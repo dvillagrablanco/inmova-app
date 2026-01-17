@@ -379,7 +379,7 @@ export function EnhancedGlobalSearch({ open: externalOpen, onOpenChange }: Enhan
                   <FileText className="mr-2 h-4 w-4" />
                   Nuevo Contrato
                 </CommandItem>
-                <CommandItem onSelect={() => router.push('/settings')} className="cursor-pointer">
+                <CommandItem onSelect={() => router.push('/configuracion')} className="cursor-pointer">
                   <Settings className="mr-2 h-4 w-4" />
                   Configuración
                 </CommandItem>
