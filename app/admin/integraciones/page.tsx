@@ -344,6 +344,42 @@ export default function IntegracionesUnificadasPage() {
     ],
   };
 
+  // Mapeo de IDs de integración a URLs de configuración
+  const getConfigUrl = (integrationId: string): string => {
+    const configUrls: Record<string, string> = {
+      // Contabilidad
+      'contasimple': '/contabilidad/integraciones',
+      // Comunicación
+      'crisp': '/dashboard/integrations/crisp',
+      'twilio': '/dashboard/integrations/twilio',
+      'sendgrid': '/dashboard/integrations/sendgrid',
+      'gmail': '/dashboard/integrations/sendgrid', // Usa sendgrid config
+      // Analytics
+      'ga4': '/dashboard/integrations/google-analytics',
+      'hotjar': '/dashboard/integrations/hotjar',
+      // Social
+      'facebook': '/dashboard/integrations/facebook',
+      'instagram': '/dashboard/integrations/facebook',
+      'linkedin': '/dashboard/integrations/linkedin',
+      'twitter': '/dashboard/integrations/twitter',
+      // Infraestructura
+      'aws': '/admin/integraciones-plataforma/infraestructura',
+      'postgresql': '/admin/integraciones-plataforma/infraestructura',
+      // IA
+      'claude': '/admin/integraciones-plataforma/ia',
+      // Monitoreo
+      'sentry': '/admin/integraciones-plataforma/monitoreo',
+      // Pagos
+      'stripe': '/configuracion/integraciones/stripe',
+      'gocardless': '/dashboard/integrations/gocardless',
+      'redsys': '/dashboard/integrations/redsys',
+      // Firma
+      'docusign': '/firma-digital/configuracion',
+      'signaturit': '/firma-digital/configuracion',
+    };
+    return configUrls[integrationId] || `/dashboard/integrations/${integrationId}`;
+  };
+
   const IntegrationCard = ({ integration }: { integration: any }) => (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="pt-4">
@@ -383,7 +419,7 @@ export default function IntegracionesUnificadasPage() {
         )}
 
         <div className="mt-3 flex gap-2">
-          <Button size="sm" variant="outline">
+          <Button size="sm" variant="outline" onClick={() => router.push(getConfigUrl(integration.id))}>
             <Settings className="h-4 w-4 mr-1" />
             Configurar
           </Button>

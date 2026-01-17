@@ -83,7 +83,7 @@ const allIntegrations: Integration[] = [
     icon: '💳',
     connected: false,
     status: 'inactive',
-    configUrl: '/pagos/configuracion',
+    configUrl: '/configuracion/integraciones/stripe',
     docsUrl: 'https://stripe.com/docs',
     features: ['Pagos con tarjeta', 'Suscripciones', 'Facturación automática', 'Links de pago'],
   },
@@ -117,7 +117,7 @@ const allIntegrations: Integration[] = [
     icon: '📊',
     connected: false,
     status: 'inactive',
-    configUrl: '/contabilidad/integraciones',
+    configUrl: '/dashboard/integrations/contasimple',
     features: ['Facturación', 'Modelo 303/390', 'Libros contables', 'SII'],
   },
   {
@@ -149,7 +149,7 @@ const allIntegrations: Integration[] = [
     icon: '🔐',
     connected: false,
     status: 'inactive',
-    configUrl: '/open-banking',
+    configUrl: '/dashboard/integrations/openbanking',
     features: ['Saldos en tiempo real', 'Movimientos', 'Conciliación', 'Pagos iniciados'],
   },
   {
@@ -171,7 +171,7 @@ const allIntegrations: Integration[] = [
     icon: '✍️',
     connected: false,
     status: 'inactive',
-    configUrl: '/firma-digital/configuracion',
+    configUrl: '/dashboard/integrations/docusign',
     features: ['Firma avanzada', 'Plantillas', 'Flujos de aprobación', 'Auditoría'],
   },
   {

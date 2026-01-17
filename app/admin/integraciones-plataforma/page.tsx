@@ -213,7 +213,27 @@ export default function IntegracionesPlataformaPage() {
   const totalCount = integrations.length;
 
   const handleConfigure = (integrationId: string) => {
-    toast.info('Configuración en desarrollo');
+    // Mapeo de IDs de integración a URLs de configuración
+    const configUrls: Record<string, string> = {
+      'contasimple-inmova': '/contabilidad/integraciones',
+      'crisp': '/dashboard/integrations/crisp',
+      'twilio': '/dashboard/integrations/twilio',
+      'sendgrid': '/dashboard/integrations/sendgrid',
+      'gmail-smtp': '/dashboard/integrations/sendgrid',
+      'google-analytics': '/dashboard/integrations/google-analytics',
+      'hotjar': '/dashboard/integrations/hotjar',
+      'facebook': '/dashboard/integrations/facebook',
+      'instagram': '/dashboard/integrations/facebook',
+      'linkedin': '/dashboard/integrations/linkedin',
+      'twitter-x': '/dashboard/integrations/twitter',
+      'aws-s3': '/admin/integraciones-plataforma/infraestructura',
+      'postgresql': '/admin/integraciones-plataforma/infraestructura',
+      'anthropic-claude': '/admin/integraciones-plataforma/ia',
+      'sentry': '/admin/integraciones-plataforma/monitoreo',
+    };
+    
+    const url = configUrls[integrationId] || `/dashboard/integrations/${integrationId}`;
+    router.push(url);
   };
 
   const handleTest = (integrationId: string) => {
