@@ -125,21 +125,36 @@ export function WelcomeWizard({ onComplete }: { onComplete?: () => void }) {
   const handleSkip = async () => {
     setIsClosing(true);
     try {
-      await fetch('/api/onboarding/skip', { method: 'POST' });
+      await fetch('/api/onboarding/complete-setup', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completedTasks: [], setupVersion: 'skipped' })
+      });
       onComplete?.();
     } catch (error) {
       console.error('Error skipping wizard:', error);
+      // Permitir cerrar incluso si falla la API
+      onComplete?.();
     }
   };
 
   const handleComplete = async () => {
     try {
-      await fetch('/api/onboarding/complete', { method: 'POST' });
+      await fetch('/api/onboarding/complete-setup', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          completedTasks: WIZARD_STEPS.map(s => s.id), 
+          setupVersion: '1.0' 
+        })
+      });
       toast.success('¡Configuración completada! Bienvenido');
       onComplete?.();
     } catch (error) {
       console.error('Error completing wizard:', error);
-      toast.error('Error al completar. Intenta de nuevo');
+      // Permitir completar incluso si falla la API
+      toast.success('¡Bienvenido! Ya puedes empezar');
+      onComplete?.();
     }
   };
 

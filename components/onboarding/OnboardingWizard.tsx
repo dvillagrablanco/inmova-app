@@ -2,15 +2,17 @@
 
 /**
  * Onboarding Wizard Component
- * Wizard guiado de 5 pasos para nuevos usuarios
+ * Wizard guiado simplificado para nuevos usuarios
  */
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle2, Building2, Home, UserPlus, FileText, Sparkles } from 'lucide-react';
+import { CheckCircle2, Building2, Home, UserPlus, FileText, Sparkles, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface OnboardingWizardProps {
   open: boolean;
@@ -18,282 +20,59 @@ interface OnboardingWizardProps {
   onComplete: () => void;
 }
 
-const STEPS = [
+// Definición de pasos simplificados
+interface StepConfig {
+  id: string;
+  title: string;
+  description: string;
+  icon: typeof Sparkles;
+  route?: string; // Ruta de navegación opcional
+}
+
+const STEP_CONFIGS: StepConfig[] = [
   {
     id: 'welcome',
     title: '¡Bienvenido a INMOVA!',
-    description: 'Te guiaremos en los primeros pasos',
+    description: 'Tu plataforma de gestión inmobiliaria',
     icon: Sparkles,
-    content: (
-      <div className="space-y-4">
-        <p className="text-gray-600">
-          INMOVA es la plataforma todo-en-uno para gestión inmobiliaria profesional.
-        </p>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-900 mb-2">
-            ¿Qué aprenderás en este tutorial?
-          </h4>
-          <ul className="space-y-2 text-sm text-blue-800">
-            <li className="flex items-start">
-              <CheckCircle2 className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
-              <span>Cómo crear tu primer edificio</span>
-            </li>
-            <li className="flex items-start">
-              <CheckCircle2 className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
-              <span>Agregar unidades (pisos, locales)</span>
-            </li>
-            <li className="flex items-start">
-              <CheckCircle2 className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
-              <span>Registrar inquilinos</span>
-            </li>
-            <li className="flex items-start">
-              <CheckCircle2 className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
-              <span>Crear contratos de alquiler</span>
-            </li>
-          </ul>
-        </div>
-        <p className="text-sm text-gray-500">
-          ⏱️ Tiempo estimado: 5 minutos
-        </p>
-      </div>
-    ),
   },
   {
     id: 'building',
-    title: 'Paso 1: Crea tu primer edificio',
-    description: 'Los edificios son el contenedor principal de tus propiedades',
+    title: 'Crea tu primera propiedad',
+    description: 'Solo necesitas la dirección para empezar',
     icon: Building2,
-    content: (
-      <div className="space-y-4">
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
-          <h4 className="font-semibold text-gray-900 mb-3">
-            💡 ¿Qué es un edificio?
-          </h4>
-          <p className="text-sm text-gray-600 mb-3">
-            Un edificio es una propiedad que contiene una o más unidades. Puede ser:
-          </p>
-          <ul className="space-y-2 text-sm text-gray-600">
-            <li>• Un edificio de apartamentos</li>
-            <li>• Una casa unifamiliar</li>
-            <li>• Un local comercial</li>
-            <li>• Una oficina</li>
-          </ul>
-        </div>
-        
-        <div className="border-l-4 border-yellow-400 bg-yellow-50 p-4 rounded">
-          <p className="text-sm text-yellow-800">
-            <strong>Consejo:</strong> Empieza con los datos básicos. Podrás agregar más detalles después.
-          </p>
-        </div>
-        
-        <Button className="w-full" size="lg">
-          <Building2 className="h-5 w-5 mr-2" />
-          Crear mi primer edificio
-        </Button>
-      </div>
-    ),
-  },
-  {
-    id: 'unit',
-    title: 'Paso 2: Agrega una unidad',
-    description: 'Las unidades son los espacios individuales que alquilas',
-    icon: Home,
-    content: (
-      <div className="space-y-4">
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
-          <h4 className="font-semibold text-gray-900 mb-3">
-            🏠 ¿Qué es una unidad?
-          </h4>
-          <p className="text-sm text-gray-600 mb-3">
-            Una unidad es un espacio individual dentro de un edificio:
-          </p>
-          <ul className="space-y-2 text-sm text-gray-600">
-            <li>• Apartamento 1A, 2B, etc.</li>
-            <li>• Local comercial</li>
-            <li>• Oficina</li>
-            <li>• Plaza de garaje</li>
-          </ul>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-white border rounded-lg p-4">
-            <div className="font-semibold text-gray-900 mb-1">Dormitorios</div>
-            <div className="text-2xl font-bold text-blue-600">2</div>
-          </div>
-          <div className="bg-white border rounded-lg p-4">
-            <div className="font-semibold text-gray-900 mb-1">Superficie</div>
-            <div className="text-2xl font-bold text-blue-600">75 m²</div>
-          </div>
-        </div>
-        
-        <Button className="w-full" size="lg">
-          <Home className="h-5 w-5 mr-2" />
-          Agregar unidad al edificio
-        </Button>
-      </div>
-    ),
+    route: '/edificios/nuevo',
   },
   {
     id: 'tenant',
-    title: 'Paso 3: Registra un inquilino',
-    description: 'Gestiona la información de tus inquilinos',
+    title: 'Añade un inquilino',
+    description: 'Nombre y contacto, nada más',
     icon: UserPlus,
-    content: (
-      <div className="space-y-4">
-        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-200">
-          <h4 className="font-semibold text-gray-900 mb-3">
-            👥 Datos del inquilino
-          </h4>
-          <p className="text-sm text-gray-600 mb-3">
-            Información básica que necesitarás:
-          </p>
-          <ul className="space-y-2 text-sm text-gray-600">
-            <li>• Nombre completo</li>
-            <li>• Email y teléfono</li>
-            <li>• DNI/NIE (opcional)</li>
-            <li>• Documentación (opcional)</li>
-          </ul>
-        </div>
-        
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-800">
-            <strong>✨ Extra:</strong> INMOVA te permite crear un portal para que tus inquilinos puedan:
-          </p>
-          <ul className="mt-2 space-y-1 text-sm text-blue-700">
-            <li>• Ver sus pagos</li>
-            <li>• Descargar recibos</li>
-            <li>• Reportar incidencias</li>
-            <li>• Comunicarse contigo</li>
-          </ul>
-        </div>
-        
-        <Button className="w-full" size="lg">
-          <UserPlus className="h-5 w-5 mr-2" />
-          Registrar inquilino
-        </Button>
-      </div>
-    ),
-  },
-  {
-    id: 'contract',
-    title: 'Paso 4: Crea un contrato',
-    description: 'El último paso: vincula inquilino, unidad y condiciones',
-    icon: FileText,
-    content: (
-      <div className="space-y-4">
-        <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-4 border border-orange-200">
-          <h4 className="font-semibold text-gray-900 mb-3">
-            📄 Contrato de alquiler
-          </h4>
-          <p className="text-sm text-gray-600 mb-3">
-            Un contrato vincula:
-          </p>
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center">
-                <UserPlus className="h-5 w-5 text-orange-600" />
-              </div>
-              <div>
-                <div className="font-medium text-gray-900">Inquilino</div>
-                <div className="text-xs text-gray-500">Quién alquila</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center">
-                <Home className="h-5 w-5 text-orange-600" />
-              </div>
-              <div>
-                <div className="font-medium text-gray-900">Unidad</div>
-                <div className="text-xs text-gray-500">Qué se alquila</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center">
-                <FileText className="h-5 w-5 text-orange-600" />
-              </div>
-              <div>
-                <div className="font-medium text-gray-900">Condiciones</div>
-                <div className="text-xs text-gray-500">Renta, duración, etc.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <Button className="w-full" size="lg">
-          <FileText className="h-5 w-5 mr-2" />
-          Crear contrato
-        </Button>
-      </div>
-    ),
+    route: '/inquilinos/nuevo',
   },
   {
     id: 'complete',
-    title: '¡Felicidades! 🎉',
-    description: 'Ya conoces los conceptos básicos',
+    title: '¡Ya puedes empezar!',
+    description: 'Explora el dashboard cuando quieras',
     icon: CheckCircle2,
-    content: (
-      <div className="space-y-4">
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-6 border border-green-200 text-center">
-          <div className="h-16 w-16 rounded-full bg-green-500 mx-auto mb-4 flex items-center justify-center">
-            <CheckCircle2 className="h-8 w-8 text-white" />
-          </div>
-          <h4 className="text-2xl font-bold text-gray-900 mb-2">
-            ¡Completaste el onboarding!
-          </h4>
-          <p className="text-gray-600">
-            Ya estás listo para empezar a gestionar tus propiedades
-          </p>
-        </div>
-        
-        <div className="space-y-3">
-          <div className="bg-white border rounded-lg p-4">
-            <h5 className="font-semibold text-gray-900 mb-2">
-              📚 Próximos pasos recomendados:
-            </h5>
-            <ul className="space-y-2 text-sm text-gray-600">
-              <li className="flex items-start">
-                <CheckCircle2 className="h-4 w-4 mr-2 mt-0.5 text-green-500 flex-shrink-0" />
-                <span>Explora el dashboard y los diferentes módulos</span>
-              </li>
-              <li className="flex items-start">
-                <CheckCircle2 className="h-4 w-4 mr-2 mt-0.5 text-green-500 flex-shrink-0" />
-                <span>Personaliza las notificaciones en Configuración</span>
-              </li>
-              <li className="flex items-start">
-                <CheckCircle2 className="h-4 w-4 mr-2 mt-0.5 text-green-500 flex-shrink-0" />
-                <span>Invita a tu equipo a colaborar</span>
-              </li>
-              <li className="flex items-start">
-                <CheckCircle2 className="h-4 w-4 mr-2 mt-0.5 text-green-500 flex-shrink-0" />
-                <span>Consulta la documentación completa</span>
-              </li>
-            </ul>
-          </div>
-          
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-800">
-              <strong>💡 ¿Necesitas ayuda?</strong> Usa el chatbot de soporte (abajo a la derecha) o escríbenos a inmovaapp@gmail.com
-            </p>
-          </div>
-        </div>
-      </div>
-    ),
+    route: '/dashboard',
   },
 ];
 
 export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
+  const router = useRouter();
 
-  const step = STEPS[currentStep];
-  const progress = ((currentStep + 1) / STEPS.length) * 100;
-  const Icon = step.icon;
+  const stepConfig = STEP_CONFIGS[currentStep];
+  const progress = ((currentStep + 1) / STEP_CONFIGS.length) * 100;
+  const Icon = stepConfig.icon;
+  const isLastStep = currentStep === STEP_CONFIGS.length - 1;
 
   const handleNext = () => {
-    if (currentStep < STEPS.length - 1) {
+    if (!isLastStep) {
       setCurrentStep(currentStep + 1);
     } else {
-      onComplete();
-      onClose();
+      handleComplete();
     }
   };
 
@@ -303,82 +82,198 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
     }
   };
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
+    // Guardar que se saltó el tutorial
+    try {
+      await fetch('/api/onboarding/complete-setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completedTasks: [], setupVersion: 'skipped' })
+      });
+    } catch (e) {
+      // Ignorar errores de API
+    }
     onClose();
+  };
+
+  const handleComplete = async () => {
+    try {
+      await fetch('/api/onboarding/complete-setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          completedTasks: STEP_CONFIGS.map(s => s.id), 
+          setupVersion: '1.0' 
+        })
+      });
+    } catch (e) {
+      // Ignorar errores de API
+    }
+    toast.success('¡Bienvenido! Ya puedes empezar');
+    onComplete();
+    onClose();
+  };
+
+  const handleActionClick = () => {
+    if (stepConfig.route) {
+      router.push(stepConfig.route);
+      toast.info('Vamos a esa sección');
+      // Auto-avanzar al siguiente paso después de un breve delay
+      setTimeout(() => {
+        if (!isLastStep) {
+          setCurrentStep(prev => prev + 1);
+        }
+      }, 500);
+    }
+  };
+
+  // Contenido simplificado para cada paso
+  const renderStepContent = () => {
+    switch (stepConfig.id) {
+      case 'welcome':
+        return (
+          <div className="space-y-4 text-center">
+            <p className="text-gray-600 text-lg">
+              Gestiona propiedades, inquilinos y contratos en un solo lugar.
+            </p>
+            <div className="bg-blue-50 rounded-lg p-4 text-left">
+              <p className="text-sm text-blue-800 font-medium mb-2">
+                Este tutorial es muy rápido:
+              </p>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>✓ Solo 3 pasos</li>
+                <li>✓ Menos de 1 minuto</li>
+                <li>✓ Puedes saltarlo si quieres</li>
+              </ul>
+            </div>
+          </div>
+        );
+
+      case 'building':
+        return (
+          <div className="space-y-4">
+            <p className="text-gray-600">
+              Una propiedad puede ser un piso, casa, local o cualquier inmueble.
+            </p>
+            <div className="bg-green-50 rounded-lg p-4">
+              <p className="text-sm text-green-800">
+                <strong>Tip:</strong> Solo necesitas poner la dirección. Todo lo demás es opcional.
+              </p>
+            </div>
+            {stepConfig.route && (
+              <Button onClick={handleActionClick} className="w-full" size="lg">
+                <Building2 className="h-5 w-5 mr-2" />
+                Crear mi primera propiedad
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            )}
+          </div>
+        );
+
+      case 'tenant':
+        return (
+          <div className="space-y-4">
+            <p className="text-gray-600">
+              Registra a tus inquilinos para llevar el control de contratos y pagos.
+            </p>
+            <div className="bg-purple-50 rounded-lg p-4">
+              <p className="text-sm text-purple-800">
+                <strong>Tip:</strong> Con el nombre y email es suficiente para empezar.
+              </p>
+            </div>
+            {stepConfig.route && (
+              <Button onClick={handleActionClick} className="w-full" size="lg">
+                <UserPlus className="h-5 w-5 mr-2" />
+                Añadir inquilino
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            )}
+          </div>
+        );
+
+      case 'complete':
+        return (
+          <div className="space-y-4 text-center">
+            <div className="h-16 w-16 rounded-full bg-green-500 mx-auto flex items-center justify-center">
+              <CheckCircle2 className="h-8 w-8 text-white" />
+            </div>
+            <p className="text-gray-600 text-lg">
+              ¡Listo! Ya puedes explorar todas las funciones.
+            </p>
+            <div className="bg-gray-50 rounded-lg p-4 text-left">
+              <p className="text-sm text-gray-700">
+                <strong>¿Necesitas ayuda?</strong> Usa el botón de ayuda en la esquina inferior derecha.
+              </p>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className={cn(
                 "h-12 w-12 rounded-full flex items-center justify-center",
-                currentStep === STEPS.length - 1
-                  ? "bg-green-100"
-                  : "bg-blue-100"
+                isLastStep ? "bg-green-100" : "bg-blue-100"
               )}>
                 <Icon className={cn(
                   "h-6 w-6",
-                  currentStep === STEPS.length - 1
-                    ? "text-green-600"
-                    : "text-blue-600"
+                  isLastStep ? "text-green-600" : "text-blue-600"
                 )} />
               </div>
               <div>
-                <DialogTitle>{step.title}</DialogTitle>
-                <DialogDescription>{step.description}</DialogDescription>
+                <DialogTitle>{stepConfig.title}</DialogTitle>
+                <DialogDescription>{stepConfig.description}</DialogDescription>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSkip}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              Saltar tutorial
-            </Button>
           </div>
           
           {/* Progress bar */}
           <div className="space-y-2">
             <Progress value={progress} className="h-2" />
             <div className="flex justify-between text-xs text-gray-500">
-              <span>Paso {currentStep + 1} de {STEPS.length}</span>
-              <span>{Math.round(progress)}% completado</span>
+              <span>Paso {currentStep + 1} de {STEP_CONFIGS.length}</span>
             </div>
           </div>
         </DialogHeader>
 
         {/* Content */}
-        <div className="py-6">
-          {step.content}
+        <div className="py-4">
+          {renderStepContent()}
         </div>
 
         {/* Navigation */}
         <div className="flex justify-between gap-3 pt-4 border-t">
-          <Button
-            variant="outline"
-            onClick={handlePrevious}
-            disabled={currentStep === 0}
-          >
-            Anterior
-          </Button>
+          <div className="flex gap-2">
+            {currentStep > 0 && (
+              <Button variant="outline" onClick={handlePrevious}>
+                Anterior
+              </Button>
+            )}
+            <Button variant="ghost" onClick={handleSkip} className="text-gray-500">
+              Saltar
+            </Button>
+          </div>
           <Button
             onClick={handleNext}
             className={cn(
-              currentStep === STEPS.length - 1 &&
-              "bg-green-600 hover:bg-green-700"
+              isLastStep && "bg-green-600 hover:bg-green-700"
             )}
           >
-            {currentStep === STEPS.length - 1 ? '¡Empezar!' : 'Siguiente'}
+            {isLastStep ? '¡Empezar!' : 'Siguiente'}
           </Button>
         </div>
 
         {/* Step indicators */}
         <div className="flex justify-center gap-2 pt-2">
-          {STEPS.map((_, index) => (
+          {STEP_CONFIGS.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentStep(index)}
