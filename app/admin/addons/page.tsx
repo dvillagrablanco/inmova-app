@@ -53,7 +53,14 @@ import {
   Star,
   DollarSign,
   Percent,
+  Globe,
+  Database,
+  ExternalLink,
+  Zap,
+  Shield,
+  Cpu,
 } from 'lucide-react';
+import { ADD_ONS, getAddOnsByCategory, type AddOn as LandingAddOn } from '@/lib/pricing-config';
 
 interface AddOn {
   id: string;
@@ -461,6 +468,30 @@ export default function AdminAddonsPage() {
     </div>
   );
 
+  // Datos de add-ons de la landing
+  const landingAddOns = Object.values(ADD_ONS);
+  const usageAddons = getAddOnsByCategory('usage');
+  const featureAddons = getAddOnsByCategory('feature');
+  const premiumAddons = getAddOnsByCategory('premium');
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'usage': return Package;
+      case 'feature': return Zap;
+      case 'premium': return Shield;
+      default: return Package;
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'usage': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'feature': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'premium': return 'bg-amber-100 text-amber-800 border-amber-200';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   return (
     <AuthenticatedLayout>
       <div className="container mx-auto py-6 space-y-6">
@@ -482,6 +513,212 @@ export default function AdminAddonsPage() {
             </Button>
           </div>
         </div>
+
+        {/* Tabs principales: Landing vs Database */}
+        <Tabs defaultValue="landing" className="w-full">
+          <TabsList className="grid w-full max-w-lg grid-cols-2 mb-6">
+            <TabsTrigger value="landing" className="flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              Add-ons Landing ({landingAddOns.length})
+            </TabsTrigger>
+            <TabsTrigger value="database" className="flex items-center gap-2">
+              <Database className="h-4 w-4" />
+              Add-ons BD ({allAddons.length})
+            </TabsTrigger>
+          </TabsList>
+
+          {/* PESTAÑA ADD-ONS DE LA LANDING */}
+          <TabsContent value="landing">
+            <Card className="mb-6 border-indigo-200 bg-gradient-to-r from-indigo-50 to-violet-50">
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-3">
+                  <Globe className="h-5 w-5 text-indigo-600" />
+                  <div>
+                    <p className="font-medium text-indigo-800">
+                      Add-ons configurados en la Landing Page
+                    </p>
+                    <p className="text-sm text-indigo-600">
+                      Definidos en lib/pricing-config.ts - Mostrados en /landing/precios
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="ml-auto"
+                    onClick={() => window.open('/landing/precios', '_blank')}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Ver en Landing
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Estadísticas de Landing */}
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Total Add-ons
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{landingAddOns.length}</div>
+                </CardContent>
+              </Card>
+              <Card className="border-blue-200">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-blue-600">
+                    Packs de Uso
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-blue-600">{usageAddons.length}</div>
+                </CardContent>
+              </Card>
+              <Card className="border-purple-200">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-purple-600">
+                    Funcionalidades
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-purple-600">{featureAddons.length}</div>
+                </CardContent>
+              </Card>
+              <Card className="border-amber-200">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-amber-600">
+                    Premium
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-amber-600">{premiumAddons.length}</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Secciones por categoría */}
+            {[
+              { key: 'usage', title: 'Packs de Uso', desc: 'Consumibles: firmas, SMS, IA, storage', items: usageAddons },
+              { key: 'feature', title: 'Funcionalidades', desc: 'Features activables por suscripción', items: featureAddons },
+              { key: 'premium', title: 'Premium', desc: 'Servicios de alto valor', items: premiumAddons },
+            ].map(({ key, title, desc, items }) => (
+              <Card key={key} className="mb-6">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    {key === 'usage' && <Package className="h-5 w-5 text-blue-600" />}
+                    {key === 'feature' && <Zap className="h-5 w-5 text-purple-600" />}
+                    {key === 'premium' && <Shield className="h-5 w-5 text-amber-600" />}
+                    <div>
+                      <CardTitle>{title}</CardTitle>
+                      <CardDescription>{desc}</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Add-on</TableHead>
+                        <TableHead className="text-right">Precio/mes</TableHead>
+                        <TableHead className="text-right">Precio/año</TableHead>
+                        <TableHead>Unidades</TableHead>
+                        <TableHead className="text-right">Costo</TableHead>
+                        <TableHead className="text-right">Margen</TableHead>
+                        <TableHead>Disponible</TableHead>
+                        <TableHead>Incluido</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {items.map((addon) => (
+                        <TableRow key={addon.id} className={addon.highlighted ? 'bg-yellow-50' : ''}>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div>
+                                <div className="font-medium flex items-center gap-2">
+                                  {addon.name}
+                                  {addon.highlighted && (
+                                    <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
+                                  )}
+                                </div>
+                                <div className="text-xs text-muted-foreground max-w-[250px] truncate">
+                                  {addon.description}
+                                </div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right font-mono font-medium">
+                            €{addon.monthlyPrice}
+                          </TableCell>
+                          <TableCell className="text-right font-mono text-muted-foreground">
+                            {addon.annualPrice ? `€${addon.annualPrice}` : '-'}
+                          </TableCell>
+                          <TableCell>
+                            {addon.units && addon.unitType ? (
+                              <Badge variant="outline">{addon.units} {addon.unitType}</Badge>
+                            ) : '-'}
+                          </TableCell>
+                          <TableCell className="text-right font-mono text-muted-foreground">
+                            €{addon.costPerUnit || 0}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Badge 
+                              variant="outline"
+                              className={(addon.marginPercentage || 0) >= 70 
+                                ? 'border-green-500 text-green-700 bg-green-50' 
+                                : 'border-amber-500 text-amber-700 bg-amber-50'}
+                            >
+                              {addon.marginPercentage || 0}%
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-wrap gap-1">
+                              {addon.availableFor.slice(0, 2).map((tier) => (
+                                <Badge key={tier} variant="secondary" className="text-xs">{tier}</Badge>
+                              ))}
+                              {addon.availableFor.length > 2 && (
+                                <Badge variant="secondary" className="text-xs">+{addon.availableFor.length - 2}</Badge>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-wrap gap-1">
+                              {addon.includedIn.length > 0 ? (
+                                addon.includedIn.slice(0, 2).map((tier) => (
+                                  <Badge key={tier} className="text-xs bg-green-100 text-green-800">{tier}</Badge>
+                                ))
+                              ) : (
+                                <span className="text-xs text-muted-foreground">-</span>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            ))}
+          </TabsContent>
+
+          {/* PESTAÑA ADD-ONS DE LA BASE DE DATOS */}
+          <TabsContent value="database">
+            <Card className="mb-6 border-blue-200 bg-blue-50">
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-3">
+                  <Database className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="font-medium text-blue-800">
+                      Add-ons guardados en Base de Datos
+                    </p>
+                    <p className="text-sm text-blue-600">
+                      Administrados vía API - Asignables a suscripciones
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
         {/* Tabs INMOVA / eWoorker */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'inmova' | 'ewoorker')}>
@@ -742,6 +979,8 @@ export default function AdminAddonsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+          </TabsContent>
+        </Tabs>
       </div>
     </AuthenticatedLayout>
   );

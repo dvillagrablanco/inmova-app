@@ -8,7 +8,8 @@ import {
   CardContent, 
   CardDescription, 
   CardHeader, 
-  CardTitle 
+  CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,7 +58,13 @@ import {
   RefreshCw,
   Check,
   X,
+  Star,
+  ExternalLink,
+  CheckCircle,
+  Database,
+  Globe,
 } from 'lucide-react';
+import { PRICING_PLANS, type PricingPlan } from '@/lib/pricing-config';
 
 interface Plan {
   id: string;
@@ -561,6 +568,9 @@ export default function AdminPlanesPage() {
     );
   }
 
+  // Datos de planes de la landing
+  const landingPlans = Object.values(PRICING_PLANS);
+
   return (
     <AuthenticatedLayout>
     <div className="container mx-auto py-8 px-4">
@@ -603,6 +613,221 @@ export default function AdminPlanesPage() {
           </Dialog>
         </div>
       </div>
+
+      {/* Tabs principales */}
+      <Tabs defaultValue="landing" className="mb-6">
+        <TabsList className="grid w-full max-w-lg grid-cols-2">
+          <TabsTrigger value="landing" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            Planes Landing ({landingPlans.length})
+          </TabsTrigger>
+          <TabsTrigger value="database" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            Planes BD ({planes.length})
+          </TabsTrigger>
+        </TabsList>
+
+        {/* PESTAÑA PLANES DE LA LANDING */}
+        <TabsContent value="landing" className="mt-6">
+          <Card className="mb-6 border-indigo-200 bg-gradient-to-r from-indigo-50 to-violet-50">
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-3">
+                <Globe className="h-5 w-5 text-indigo-600" />
+                <div>
+                  <p className="font-medium text-indigo-800">
+                    Planes configurados en la Landing Page
+                  </p>
+                  <p className="text-sm text-indigo-600">
+                    Estos son los planes mostrados en /landing/precios - Definidos en lib/pricing-config.ts
+                  </p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="ml-auto"
+                  onClick={() => window.open('/landing/precios', '_blank')}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Ver en Landing
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Grid de planes de la landing */}
+          <div className="grid md:grid-cols-4 gap-6 mb-8">
+            {landingPlans.map((plan) => (
+              <Card 
+                key={plan.id} 
+                className={`relative flex flex-col ${
+                  plan.popular 
+                    ? 'border-indigo-500 border-2 shadow-xl ring-2 ring-indigo-500 ring-offset-2' 
+                    : 'hover:shadow-lg transition-shadow'
+                }`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-4 py-1 rounded-full text-xs font-bold shadow">
+                    ⭐ Más Popular
+                  </div>
+                )}
+                
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-xl text-gray-900">{plan.name}</CardTitle>
+                  <CardDescription>{plan.description}</CardDescription>
+                  
+                  <div className="mt-3">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-black text-indigo-600">€{plan.monthlyPrice}</span>
+                      <span className="text-gray-500 text-sm">/mes</span>
+                    </div>
+                    <div className="text-xs text-green-600 font-medium mt-1">
+                      €{plan.annualPrice}/año · Ahorra €{plan.annualSavings}
+                    </div>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="flex-1">
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Propiedades:</span>
+                      <Badge variant="secondary">
+                        {plan.maxProperties === 'unlimited' ? 'Ilimitadas' : `Hasta ${plan.maxProperties}`}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Usuarios:</span>
+                      <Badge variant="secondary">
+                        {plan.maxUsers === 'unlimited' ? 'Ilimitados' : plan.maxUsers}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Firmas/mes:</span>
+                      <Badge variant="secondary">
+                        {plan.signaturesIncluded === 'unlimited' ? '∞' : plan.signaturesIncluded}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Almacenamiento:</span>
+                      <Badge variant="secondary">{plan.storageIncluded}</Badge>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-3">
+                    <p className="text-xs font-medium text-gray-700 mb-2">Características:</p>
+                    <ul className="space-y-1.5">
+                      {plan.features.slice(0, 5).map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-xs">
+                          {feature.included ? (
+                            <CheckCircle className="h-3.5 w-3.5 text-green-600 shrink-0 mt-0.5" />
+                          ) : (
+                            <X className="h-3.5 w-3.5 text-gray-300 shrink-0 mt-0.5" />
+                          )}
+                          <span className={feature.included ? 'text-gray-700' : 'text-gray-400'}>
+                            {feature.text}
+                            {feature.badge && (
+                              <Badge variant="outline" className="ml-1 text-[10px] py-0">
+                                {feature.badge}
+                              </Badge>
+                            )}
+                          </span>
+                        </li>
+                      ))}
+                      {plan.features.length > 5 && (
+                        <li className="text-xs text-indigo-600 font-medium">
+                          +{plan.features.length - 5} características más
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                </CardContent>
+
+                <CardFooter className="pt-0">
+                  <div className="w-full text-center">
+                    <Badge variant="outline" className="text-xs">
+                      CTA: {plan.cta}
+                    </Badge>
+                    {plan.killerFeature && (
+                      <p className="text-xs text-indigo-600 mt-2 font-medium">
+                        ★ {plan.killerFeature}
+                      </p>
+                    )}
+                  </div>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+
+          {/* Tabla detallada de planes de landing */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Detalle de Precios Landing</CardTitle>
+              <CardDescription>
+                Comparativa completa de planes configurados para la web pública
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Plan</TableHead>
+                    <TableHead className="text-right">Mensual</TableHead>
+                    <TableHead className="text-right">Anual</TableHead>
+                    <TableHead className="text-right">Ahorro</TableHead>
+                    <TableHead>Propiedades</TableHead>
+                    <TableHead>Usuarios</TableHead>
+                    <TableHead>Firmas</TableHead>
+                    <TableHead>Storage</TableHead>
+                    <TableHead>Target</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {landingPlans.map((plan) => (
+                    <TableRow key={plan.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{plan.name}</span>
+                          {plan.popular && <Star className="h-4 w-4 text-amber-500 fill-amber-500" />}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right font-mono">€{plan.monthlyPrice}</TableCell>
+                      <TableCell className="text-right font-mono">€{plan.annualPrice}</TableCell>
+                      <TableCell className="text-right text-green-600 font-medium">€{plan.annualSavings}</TableCell>
+                      <TableCell>{plan.maxProperties === 'unlimited' ? '∞' : plan.maxProperties}</TableCell>
+                      <TableCell>{plan.maxUsers === 'unlimited' ? '∞' : plan.maxUsers}</TableCell>
+                      <TableCell>{plan.signaturesIncluded === 'unlimited' ? '∞' : plan.signaturesIncluded}</TableCell>
+                      <TableCell>{plan.storageIncluded}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {plan.targetAudience.slice(0, 2).map((t, i) => (
+                            <Badge key={i} variant="outline" className="text-xs">{t}</Badge>
+                          ))}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* PESTAÑA PLANES DE LA BASE DE DATOS */}
+        <TabsContent value="database" className="mt-6">
+          <Card className="mb-6 border-blue-200 bg-blue-50">
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-3">
+                <Database className="h-5 w-5 text-blue-600" />
+                <div>
+                  <p className="font-medium text-blue-800">
+                    Planes guardados en Base de Datos
+                  </p>
+                  <p className="text-sm text-blue-600">
+                    Planes asignados a empresas - Administrados vía API
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4 mb-6">
@@ -776,6 +1001,8 @@ export default function AdminPlanesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+        </TabsContent>
+      </Tabs>
     </div>
     </AuthenticatedLayout>
   );

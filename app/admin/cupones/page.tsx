@@ -78,7 +78,12 @@ import {
   Building2,
   Bell,
   BarChart3,
+  Globe,
+  Database,
+  ExternalLink,
+  Megaphone,
 } from 'lucide-react';
+import { PROMO_CAMPAIGNS, type PromoCampaign as LandingPromoCampaign } from '@/lib/pricing-config';
 
 // Tipos
 interface PromoCoupon {
@@ -854,6 +859,19 @@ export default function AdminCuponesPage() {
     );
   }
 
+  // Datos de campañas de la landing
+  const landingCampaigns = Object.values(PROMO_CAMPAIGNS);
+
+  const getCampaignStatus = (campaign: LandingPromoCampaign) => {
+    const now = new Date();
+    const start = new Date(campaign.validFrom);
+    const end = new Date(campaign.validUntil);
+    
+    if (now < start) return { status: 'upcoming', label: 'Próxima', color: 'bg-blue-100 text-blue-800' };
+    if (now > end) return { status: 'expired', label: 'Expirada', color: 'bg-gray-100 text-gray-800' };
+    return { status: 'active', label: 'Activa', color: 'bg-green-100 text-green-800' };
+  };
+
   return (
     <AuthenticatedLayout>
     <div className="container mx-auto py-8 px-4">
@@ -903,6 +921,182 @@ export default function AdminCuponesPage() {
           </Dialog>
         </div>
       </div>
+
+      {/* Tabs principales: Landing vs Database */}
+      <Tabs defaultValue="landing" className="mb-6">
+        <TabsList className="grid w-full max-w-lg grid-cols-2">
+          <TabsTrigger value="landing" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            Campañas Landing ({landingCampaigns.length})
+          </TabsTrigger>
+          <TabsTrigger value="database" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            Cupones BD ({cupones.length})
+          </TabsTrigger>
+        </TabsList>
+
+        {/* PESTAÑA CAMPAÑAS DE LA LANDING */}
+        <TabsContent value="landing" className="mt-6">
+          <Card className="mb-6 border-indigo-200 bg-gradient-to-r from-indigo-50 to-violet-50">
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-3">
+                <Megaphone className="h-5 w-5 text-indigo-600" />
+                <div>
+                  <p className="font-medium text-indigo-800">
+                    Campañas Promocionales de la Landing Page
+                  </p>
+                  <p className="text-sm text-indigo-600">
+                    Definidas en lib/pricing-config.ts - Usadas en /landing/ofertas
+                  </p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="ml-auto"
+                  onClick={() => window.open('/landing/ofertas', '_blank')}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Ver Ofertas
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Grid de campañas de la landing */}
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            {landingCampaigns.map((campaign) => {
+              const status = getCampaignStatus(campaign);
+              return (
+                <Card key={campaign.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 bg-gradient-to-r from-indigo-500 to-violet-500 rounded-xl text-white">
+                          <Megaphone className="h-6 w-6" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg">{campaign.name}</CardTitle>
+                          <CardDescription>{campaign.description}</CardDescription>
+                        </div>
+                      </div>
+                      <Badge className={status.color}>{status.label}</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Código y descuento */}
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Tag className="h-4 w-4 text-indigo-600" />
+                        <code className="text-lg font-mono font-bold text-indigo-600">{campaign.code}</code>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => {
+                            navigator.clipboard.writeText(campaign.code);
+                            toast.success('Código copiado');
+                          }}
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
+                      <Badge variant="outline" className="text-lg font-bold">
+                        {campaign.discountType === 'percentage' 
+                          ? `${campaign.discountValue}% OFF`
+                          : `€${campaign.discountValue} OFF`
+                        }
+                      </Badge>
+                    </div>
+
+                    {/* Detalles */}
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Plan objetivo:</p>
+                        <Badge variant="secondary">{campaign.targetPlan}</Badge>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Duración:</p>
+                        <p className="font-medium">{campaign.duration} meses</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Válido desde:</p>
+                        <p className="font-medium">{new Date(campaign.validFrom).toLocaleDateString('es-ES')}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Válido hasta:</p>
+                        <p className="font-medium">{new Date(campaign.validUntil).toLocaleDateString('es-ES')}</p>
+                      </div>
+                    </div>
+
+                    {/* Audiencia y mensaje */}
+                    <div className="space-y-2">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Audiencia objetivo:</p>
+                        <p className="text-sm font-medium">{campaign.targetAudience}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Mensaje promocional:</p>
+                        <p className="text-sm italic text-indigo-700">"{campaign.message}"</p>
+                      </div>
+                    </div>
+
+                    {/* URL de uso */}
+                    <div className="p-2 bg-indigo-50 rounded-lg">
+                      <p className="text-xs text-muted-foreground mb-1">URL con cupón:</p>
+                      <div className="flex items-center gap-2">
+                        <code className="flex-1 text-xs bg-white p-2 rounded border truncate">
+                          https://inmovaapp.com/register?coupon={campaign.code}
+                        </code>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            navigator.clipboard.writeText(`https://inmovaapp.com/register?coupon=${campaign.code}`);
+                            toast.success('URL copiada');
+                          }}
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {landingCampaigns.length === 0 && (
+            <Card className="text-center py-12">
+              <CardContent>
+                <Megaphone className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">
+                  No hay campañas configuradas en la landing.
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Edita lib/pricing-config.ts para añadir campañas promocionales.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* PESTAÑA CUPONES DE LA BASE DE DATOS */}
+        <TabsContent value="database" className="mt-6">
+          <Card className="mb-6 border-blue-200 bg-blue-50">
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-3">
+                <Database className="h-5 w-5 text-blue-600" />
+                <div>
+                  <p className="font-medium text-blue-800">
+                    Cupones guardados en Base de Datos
+                  </p>
+                  <p className="text-sm text-blue-600">
+                    Administrados vía API - Con tracking de usos
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4 mb-6">
@@ -1177,6 +1371,8 @@ export default function AdminCuponesPage() {
 
       {/* View Dialog */}
       <CouponViewDialog />
+        </TabsContent>
+      </Tabs>
     </div>
     </AuthenticatedLayout>
   );
