@@ -32,35 +32,20 @@ import {
   AlertCircle,
 } from 'lucide-react';
 
-// Datos de ejemplo
+// Stats iniciales (sin datos)
 const statsOverview = [
-  { label: 'Total Agentes', value: '47', change: '+5 este mes', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-  { label: 'Agentes Activos', value: '38', change: '81% del total', icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50' },
-  { label: 'Comisiones Mes', value: '€24.500', change: '+12% vs anterior', icon: DollarSign, color: 'text-amber-600', bg: 'bg-amber-50' },
-  { label: 'Operaciones', value: '23', change: 'Este mes', icon: Building2, color: 'text-purple-600', bg: 'bg-purple-50' },
+  { label: 'Total Agentes', value: '0', change: 'Sin agentes', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+  { label: 'Agentes Activos', value: '0', change: '0% del total', icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50' },
+  { label: 'Comisiones Mes', value: '€0', change: 'Sin comisiones', icon: DollarSign, color: 'text-amber-600', bg: 'bg-amber-50' },
+  { label: 'Operaciones', value: '0', change: 'Este mes', icon: Building2, color: 'text-purple-600', bg: 'bg-purple-50' },
 ];
 
-const topAgentes = [
-  { id: 1, name: 'María García López', zona: 'Madrid Centro', operaciones: 8, comisiones: '€12.400', rating: 4.9, avatar: 'MG' },
-  { id: 2, name: 'Carlos Rodríguez', zona: 'Barcelona Eixample', operaciones: 6, comisiones: '€9.200', rating: 4.8, avatar: 'CR' },
-  { id: 3, name: 'Ana Martínez', zona: 'Valencia Centro', operaciones: 5, comisiones: '€7.800', rating: 4.7, avatar: 'AM' },
-  { id: 4, name: 'Pedro Sánchez', zona: 'Sevilla', operaciones: 4, comisiones: '€5.600', rating: 4.6, avatar: 'PS' },
-];
+// Arrays vacíos - se llenarán con datos reales de la BD
+const topAgentes: Array<{ id: number; name: string; zona: string; operaciones: number; comisiones: string; rating: number; avatar: string }> = [];
 
-const zonasActivas = [
-  { zona: 'Madrid', agentes: 15, operaciones: 12, comisionTotal: '€18.500' },
-  { zona: 'Barcelona', agentes: 10, operaciones: 8, comisionTotal: '€12.200' },
-  { zona: 'Valencia', agentes: 8, operaciones: 5, comisionTotal: '€7.800' },
-  { zona: 'Sevilla', agentes: 6, operaciones: 4, comisionTotal: '€5.200' },
-  { zona: 'Málaga', agentes: 5, operaciones: 3, comisionTotal: '€4.100' },
-];
+const zonasActivas: Array<{ zona: string; agentes: number; operaciones: number; comisionTotal: string }> = [];
 
-const actividadReciente = [
-  { tipo: 'venta', agente: 'María García', propiedad: 'Piso en Salamanca', valor: '€450.000', fecha: 'Hace 2 horas' },
-  { tipo: 'nuevo', agente: 'Luis Fernández', zona: 'Bilbao', fecha: 'Hace 5 horas' },
-  { tipo: 'comision', agente: 'Carlos Rodríguez', monto: '€3.200', fecha: 'Ayer' },
-  { tipo: 'formacion', agente: 'Ana Martínez', curso: 'Certificación Premium', fecha: 'Hace 2 días' },
-];
+const actividadReciente: Array<{ tipo: string; agente: string; propiedad?: string; valor?: string; zona?: string; monto?: string; curso?: string; fecha: string }> = [];
 
 const modulosRed = [
   {
@@ -69,7 +54,7 @@ const modulosRed = [
     icon: BarChart3,
     href: '/red-agentes/dashboard',
     color: 'from-blue-500 to-blue-600',
-    stats: '12 KPIs activos'
+    stats: 'Ver métricas'
   },
   {
     title: 'Gestión de Agentes',
@@ -77,7 +62,7 @@ const modulosRed = [
     icon: Users,
     href: '/red-agentes/agentes',
     color: 'from-green-500 to-green-600',
-    stats: '47 agentes'
+    stats: 'Ver agentes'
   },
   {
     title: 'Sistema de Comisiones',
@@ -85,7 +70,7 @@ const modulosRed = [
     icon: DollarSign,
     href: '/red-agentes/comisiones',
     color: 'from-amber-500 to-amber-600',
-    stats: '€24.5K este mes'
+    stats: 'Ver comisiones'
   },
   {
     title: 'Zonas y Territorios',
@@ -93,7 +78,7 @@ const modulosRed = [
     icon: MapPin,
     href: '/red-agentes/zonas',
     color: 'from-purple-500 to-purple-600',
-    stats: '12 zonas activas'
+    stats: 'Ver zonas'
   },
   {
     title: 'Formación y Certificación',
@@ -101,7 +86,7 @@ const modulosRed = [
     icon: GraduationCap,
     href: '/red-agentes/formacion',
     color: 'from-cyan-500 to-cyan-600',
-    stats: '8 cursos disponibles'
+    stats: 'Ver cursos'
   },
   {
     title: 'Registro de Agentes',
@@ -109,7 +94,7 @@ const modulosRed = [
     icon: UserPlus,
     href: '/red-agentes/registro',
     color: 'from-pink-500 to-pink-600',
-    stats: '5 solicitudes pendientes'
+    stats: 'Registrar agente'
   },
 ];
 

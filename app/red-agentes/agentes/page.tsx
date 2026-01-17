@@ -48,93 +48,21 @@ import {
   TrendingUp,
 } from 'lucide-react';
 
-// Datos de ejemplo de agentes
-const agentesData = [
-  {
-    id: 1,
-    nombre: 'María García López',
-    email: 'maria.garcia@inmova.com',
-    telefono: '+34 612 345 678',
-    zona: 'Madrid Centro',
-    estado: 'activo',
-    operaciones: 8,
-    comisiones: 12400,
-    rating: 4.9,
-    fechaAlta: '2024-03-15',
-    certificaciones: ['Premium', 'Lujo'],
-    avatar: 'MG',
-  },
-  {
-    id: 2,
-    nombre: 'Carlos Rodríguez Pérez',
-    email: 'carlos.rodriguez@inmova.com',
-    telefono: '+34 623 456 789',
-    zona: 'Barcelona Eixample',
-    estado: 'activo',
-    operaciones: 6,
-    comisiones: 9200,
-    rating: 4.8,
-    fechaAlta: '2024-01-20',
-    certificaciones: ['Comercial'],
-    avatar: 'CR',
-  },
-  {
-    id: 3,
-    nombre: 'Ana Martínez Ruiz',
-    email: 'ana.martinez@inmova.com',
-    telefono: '+34 634 567 890',
-    zona: 'Valencia Centro',
-    estado: 'activo',
-    operaciones: 5,
-    comisiones: 7800,
-    rating: 4.7,
-    fechaAlta: '2024-05-10',
-    certificaciones: ['Residencial'],
-    avatar: 'AM',
-  },
-  {
-    id: 4,
-    nombre: 'Pedro Sánchez Gil',
-    email: 'pedro.sanchez@inmova.com',
-    telefono: '+34 645 678 901',
-    zona: 'Sevilla',
-    estado: 'activo',
-    operaciones: 4,
-    comisiones: 5600,
-    rating: 4.6,
-    fechaAlta: '2024-02-28',
-    certificaciones: [],
-    avatar: 'PS',
-  },
-  {
-    id: 5,
-    nombre: 'Laura Fernández',
-    email: 'laura.fernandez@inmova.com',
-    telefono: '+34 656 789 012',
-    zona: 'Málaga',
-    estado: 'inactivo',
-    operaciones: 2,
-    comisiones: 3200,
-    rating: 4.4,
-    fechaAlta: '2024-06-01',
-    certificaciones: [],
-    avatar: 'LF',
-  },
-  {
-    id: 6,
-    nombre: 'Javier López',
-    email: 'javier.lopez@inmova.com',
-    telefono: '+34 667 890 123',
-    zona: 'Bilbao',
-    estado: 'pendiente',
-    operaciones: 0,
-    comisiones: 0,
-    rating: 0,
-    fechaAlta: '2025-01-10',
-    certificaciones: [],
-    avatar: 'JL',
-  },
-];
+// Array vacío - se llenará con datos reales de la BD
+const agentesData: Array<{
+  id: number;
+  nombre: string;
+  email: string;
+  telefono: string;
+  zona: string;
+  estado: string;
+  operaciones: number;
+  comisiones: number;
+  rating: number;
+  fechaAlta: string;
+  certificaciones: string[];
+  avatar: string;
+}> = [];
 
 export default function RedAgentesAgentesPage() {
   const router = useRouter();

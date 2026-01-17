@@ -32,13 +32,17 @@ import {
   Send,
 } from 'lucide-react';
 
-// Solicitudes pendientes
-const solicitudesPendientes = [
-  { id: 1, nombre: 'Luis Fernández García', email: 'luis.fernandez@email.com', telefono: '+34 678 123 456', zona: 'Bilbao', experiencia: '3 años', fecha: '2026-01-15', estado: 'pendiente' },
-  { id: 2, nombre: 'Sara López Ruiz', email: 'sara.lopez@email.com', telefono: '+34 689 234 567', zona: 'Zaragoza', experiencia: '5 años', fecha: '2026-01-14', estado: 'revision' },
-  { id: 3, nombre: 'Miguel Torres', email: 'miguel.torres@email.com', telefono: '+34 690 345 678', zona: 'Alicante', experiencia: '2 años', fecha: '2026-01-12', estado: 'aprobada' },
-  { id: 4, nombre: 'Elena Martín', email: 'elena.martin@email.com', telefono: '+34 691 456 789', zona: 'Murcia', experiencia: '1 año', fecha: '2026-01-10', estado: 'rechazada' },
-];
+// Array vacío - se llenará con datos reales de la BD
+const solicitudesPendientes: Array<{
+  id: number;
+  nombre: string;
+  email: string;
+  telefono: string;
+  zona: string;
+  experiencia: string;
+  fecha: string;
+  estado: string;
+}> = [];
 
 const zonasDisponibles = [
   'Madrid Centro', 'Madrid Norte', 'Madrid Sur',

@@ -23,69 +23,32 @@ import {
   FileText,
 } from 'lucide-react';
 
-// Cursos disponibles
-const cursosDisponibles = [
-  {
-    id: 1,
-    titulo: 'Certificación Premium',
-    descripcion: 'Especialización en propiedades de alto standing',
-    duracion: '20 horas',
-    modulos: 8,
-    nivel: 'Avanzado',
-    categoria: 'Certificación',
-    imagen: '🏆',
-    inscritos: 12,
-  },
-  {
-    id: 2,
-    titulo: 'Técnicas de Venta Inmobiliaria',
-    descripcion: 'Estrategias de captación y cierre de operaciones',
-    duracion: '15 horas',
-    modulos: 6,
-    nivel: 'Intermedio',
-    categoria: 'Ventas',
-    imagen: '📈',
-    inscritos: 18,
-  },
-  {
-    id: 3,
-    titulo: 'Marketing Digital para Agentes',
-    descripcion: 'Redes sociales, portales y generación de leads',
-    duracion: '12 horas',
-    modulos: 5,
-    nivel: 'Básico',
-    categoria: 'Marketing',
-    imagen: '💻',
-    inscritos: 25,
-  },
-  {
-    id: 4,
-    titulo: 'Legislación Inmobiliaria',
-    descripcion: 'Normativa, contratos y fiscalidad',
-    duracion: '10 horas',
-    modulos: 4,
-    nivel: 'Intermedio',
-    categoria: 'Legal',
-    imagen: '⚖️',
-    inscritos: 15,
-  },
-];
+// Arrays vacíos - se llenarán con datos reales de la BD
+const cursosDisponibles: Array<{
+  id: number;
+  titulo: string;
+  descripcion: string;
+  duracion: string;
+  modulos: number;
+  nivel: string;
+  categoria: string;
+  imagen: string;
+  inscritos: number;
+}> = [];
 
-// Certificaciones
-const certificaciones = [
-  { nombre: 'Agente Premium', agentes: 8, requisitos: 'Curso Premium + 10 operaciones lujo', color: 'bg-amber-500' },
-  { nombre: 'Especialista Comercial', agentes: 12, requisitos: 'Curso Ventas + 20 operaciones', color: 'bg-blue-500' },
-  { nombre: 'Experto Residencial', agentes: 15, requisitos: 'Curso básico + 15 operaciones', color: 'bg-green-500' },
-  { nombre: 'Certificación Legal', agentes: 6, requisitos: 'Curso Legislación + examen', color: 'bg-purple-500' },
-];
+const certificaciones: Array<{
+  nombre: string;
+  agentes: number;
+  requisitos: string;
+  color: string;
+}> = [];
 
-// Progreso de agentes
-const progresoAgentes = [
-  { nombre: 'María García', curso: 'Certificación Premium', progreso: 85, ultimaActividad: 'Hace 2 horas' },
-  { nombre: 'Carlos Rodríguez', curso: 'Marketing Digital', progreso: 60, ultimaActividad: 'Hace 1 día' },
-  { nombre: 'Ana Martínez', curso: 'Técnicas de Venta', progreso: 45, ultimaActividad: 'Hace 3 horas' },
-  { nombre: 'Pedro Sánchez', curso: 'Legislación', progreso: 30, ultimaActividad: 'Hace 5 días' },
-];
+const progresoAgentes: Array<{
+  nombre: string;
+  curso: string;
+  progreso: number;
+  ultimaActividad: string;
+}> = [];
 
 export default function RedAgentesFormacionPage() {
   const router = useRouter();

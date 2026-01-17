@@ -30,7 +30,7 @@ import {
   Percent,
 } from 'lucide-react';
 
-// Estructura de comisiones
+// Estructura de comisiones (configuración por defecto)
 const estructuraComisiones = [
   { tipo: 'Venta Residencial', porcentaje: 3, split: '70/30', descripcion: 'Comisión estándar venta pisos y casas' },
   { tipo: 'Venta Lujo', porcentaje: 2.5, split: '75/25', descripcion: 'Propiedades > €500.000' },
@@ -39,20 +39,10 @@ const estructuraComisiones = [
   { tipo: 'Gestión Patrimonial', porcentaje: 5, split: '50/50', descripcion: '5% mensual sobre rentas' },
 ];
 
-// Comisiones pendientes
-const comisionesPendientes = [
-  { id: 1, agente: 'María García', operacion: 'Venta Piso Salamanca', valor: 450000, comision: 9450, fecha: '2026-01-15', estado: 'pendiente' },
-  { id: 2, agente: 'Carlos Rodríguez', operacion: 'Alquiler Eixample', valor: 1800, comision: 1260, fecha: '2026-01-12', estado: 'aprobada' },
-  { id: 3, agente: 'Ana Martínez', operacion: 'Venta Casa Valencia', valor: 380000, comision: 7980, fecha: '2026-01-10', estado: 'pagada' },
-];
+// Arrays vacíos - se llenarán con datos reales de la BD
+const comisionesPendientes: Array<{ id: number; agente: string; operacion: string; valor: number; comision: number; fecha: string; estado: string }> = [];
 
-// Historial de pagos
-const historialPagos = [
-  { id: 1, agente: 'María García', monto: 12400, fecha: '2026-01-01', concepto: 'Comisiones Diciembre 2025', estado: 'pagado' },
-  { id: 2, agente: 'Carlos Rodríguez', monto: 9200, fecha: '2026-01-01', concepto: 'Comisiones Diciembre 2025', estado: 'pagado' },
-  { id: 3, agente: 'Ana Martínez', monto: 7800, fecha: '2026-01-01', concepto: 'Comisiones Diciembre 2025', estado: 'pagado' },
-  { id: 4, agente: 'Pedro Sánchez', monto: 5600, fecha: '2026-01-01', concepto: 'Comisiones Diciembre 2025', estado: 'pagado' },
-];
+const historialPagos: Array<{ id: number; agente: string; monto: number; fecha: string; concepto: string; estado: string }> = [];
 
 export default function RedAgentesComisionesPage() {
   const router = useRouter();

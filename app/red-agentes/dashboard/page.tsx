@@ -34,46 +34,27 @@ import {
   XCircle,
 } from 'lucide-react';
 
-// KPIs principales
+// KPIs principales (sin datos iniciales)
 const kpis = [
-  { label: 'Facturación Total', value: '€145.200', change: '+18%', trend: 'up', icon: DollarSign, color: 'text-green-600' },
-  { label: 'Operaciones Cerradas', value: '23', change: '+5', trend: 'up', icon: Building2, color: 'text-blue-600' },
-  { label: 'Tasa de Conversión', value: '34%', change: '+2.5%', trend: 'up', icon: Target, color: 'text-purple-600' },
-  { label: 'Ticket Medio', value: '€6.313', change: '-3%', trend: 'down', icon: TrendingUp, color: 'text-amber-600' },
+  { label: 'Facturación Total', value: '€0', change: '-', trend: 'up' as const, icon: DollarSign, color: 'text-green-600' },
+  { label: 'Operaciones Cerradas', value: '0', change: '-', trend: 'up' as const, icon: Building2, color: 'text-blue-600' },
+  { label: 'Tasa de Conversión', value: '0%', change: '-', trend: 'up' as const, icon: Target, color: 'text-purple-600' },
+  { label: 'Ticket Medio', value: '€0', change: '-', trend: 'up' as const, icon: TrendingUp, color: 'text-amber-600' },
 ];
 
-// Datos de rendimiento mensual
-const rendimientoMensual = [
-  { mes: 'Ene', operaciones: 18, comisiones: 112000 },
-  { mes: 'Feb', operaciones: 21, comisiones: 128000 },
-  { mes: 'Mar', operaciones: 19, comisiones: 118000 },
-  { mes: 'Abr', operaciones: 25, comisiones: 152000 },
-  { mes: 'May', operaciones: 22, comisiones: 138000 },
-  { mes: 'Jun', operaciones: 23, comisiones: 145200 },
-];
+// Arrays vacíos - se llenarán con datos reales
+const rendimientoMensual: Array<{ mes: string; operaciones: number; comisiones: number }> = [];
 
-// Distribución por tipo de operación
-const tiposOperacion = [
-  { tipo: 'Venta', cantidad: 12, porcentaje: 52, color: 'bg-blue-500' },
-  { tipo: 'Alquiler', cantidad: 8, porcentaje: 35, color: 'bg-green-500' },
-  { tipo: 'Gestión', cantidad: 3, porcentaje: 13, color: 'bg-purple-500' },
-];
+const tiposOperacion: Array<{ tipo: string; cantidad: number; porcentaje: number; color: string }> = [];
 
-// Objetivos
 const objetivos = [
-  { nombre: 'Facturación Q2', actual: 145200, objetivo: 200000, unidad: '€' },
-  { nombre: 'Operaciones Mes', actual: 23, objetivo: 30, unidad: '' },
-  { nombre: 'Nuevos Agentes', actual: 5, objetivo: 8, unidad: '' },
-  { nombre: 'Tasa Retención', actual: 92, objetivo: 95, unidad: '%' },
+  { nombre: 'Facturación Q2', actual: 0, objetivo: 100000, unidad: '€' },
+  { nombre: 'Operaciones Mes', actual: 0, objetivo: 20, unidad: '' },
+  { nombre: 'Nuevos Agentes', actual: 0, objetivo: 5, unidad: '' },
+  { nombre: 'Tasa Retención', actual: 0, objetivo: 95, unidad: '%' },
 ];
 
-// Métricas por agente
-const metricasAgentes = [
-  { nombre: 'María García', operaciones: 8, conversion: 42, comisiones: 12400, leads: 19, status: 'excellent' },
-  { nombre: 'Carlos Rodríguez', operaciones: 6, conversion: 38, comisiones: 9200, leads: 16, status: 'good' },
-  { nombre: 'Ana Martínez', operaciones: 5, conversion: 35, comisiones: 7800, leads: 14, status: 'good' },
-  { nombre: 'Pedro Sánchez', operaciones: 4, conversion: 28, comisiones: 5600, leads: 14, status: 'average' },
-];
+const metricasAgentes: Array<{ nombre: string; operaciones: number; conversion: number; comisiones: number; leads: number; status: string }> = [];
 
 export default function RedAgentesDashboardPage() {
   const router = useRouter();

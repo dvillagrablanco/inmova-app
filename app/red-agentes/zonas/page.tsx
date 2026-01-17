@@ -20,15 +20,17 @@ import {
   MoreVertical,
 } from 'lucide-react';
 
-// Datos de zonas
-const zonasData = [
-  { id: 1, nombre: 'Madrid Centro', agentes: 8, propiedades: 45, operaciones: 12, comisiones: 18500, cobertura: 85, color: 'bg-blue-500' },
-  { id: 2, nombre: 'Barcelona Eixample', agentes: 5, propiedades: 32, operaciones: 8, comisiones: 12200, cobertura: 70, color: 'bg-green-500' },
-  { id: 3, nombre: 'Valencia Centro', agentes: 4, propiedades: 28, operaciones: 5, comisiones: 7800, cobertura: 60, color: 'bg-amber-500' },
-  { id: 4, nombre: 'Sevilla', agentes: 3, propiedades: 22, operaciones: 4, comisiones: 5200, cobertura: 55, color: 'bg-purple-500' },
-  { id: 5, nombre: 'Málaga Costa', agentes: 3, propiedades: 18, operaciones: 3, comisiones: 4100, cobertura: 45, color: 'bg-cyan-500' },
-  { id: 6, nombre: 'Bilbao', agentes: 2, propiedades: 15, operaciones: 2, comisiones: 3200, cobertura: 40, color: 'bg-pink-500' },
-];
+// Array vacío - se llenará con datos reales de la BD
+const zonasData: Array<{
+  id: number;
+  nombre: string;
+  agentes: number;
+  propiedades: number;
+  operaciones: number;
+  comisiones: number;
+  cobertura: number;
+  color: string;
+}> = [];
 
 export default function RedAgentesZonasPage() {
   const router = useRouter();
