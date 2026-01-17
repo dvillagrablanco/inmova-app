@@ -49,8 +49,8 @@ export function MobileNavigation({ className }: MobileNavProps) {
     {
       label: 'Más',
       icon: Menu,
-      href: '/menu',
-      active: pathname === '/menu',
+      href: '/configuracion',
+      active: pathname?.startsWith('/configuracion'),
     },
   ];
 
