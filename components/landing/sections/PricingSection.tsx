@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Building2, Home, Hotel, Hammer, Shield, Briefcase, ArrowRight, Zap } from 'lucide-react';
+import { CheckCircle, Building2, Home, Hotel, Hammer, Shield, Briefcase, ArrowRight, Zap, Users, Crown, Layers } from 'lucide-react';
+import { PLAN_INFO, MODULES_BY_PLAN, MODULE_ADDON_PRICES, type PlanTier } from '@/lib/modules-pricing-config';
 
 // Los 7 verticales de INMOVA
 const VERTICALES = [
@@ -17,164 +18,26 @@ const VERTICALES = [
   { id: 'servicios', name: 'Servicios Pro', icon: Briefcase },
 ];
 
-// Add-ons disponibles
-const ADDONS = [
-  { id: 'signatures', name: 'Pack 10 Firmas', price: 15, desc: 'Firmas digitales adicionales' },
-  { id: 'storage', name: 'Pack 10GB Storage', price: 5, desc: 'Almacenamiento extra' },
-  { id: 'ai', name: 'Pack IA Avanzada', price: 10, desc: '50K tokens IA/mes' },
-  { id: 'sms', name: 'Pack 50 SMS', price: 8, desc: 'Notificaciones SMS' },
-  { id: 'whitelabel', name: 'White-label', price: 49, desc: 'Tu marca, tu dominio' },
-  { id: 'api', name: 'Acceso API', price: 29, desc: 'Integraciones personalizadas' },
-];
+// Planes públicos (excluyendo owner)
+const PUBLIC_PLANS: PlanTier[] = ['starter', 'professional', 'business', 'enterprise'];
 
-interface PlanData {
-  name: string;
-  price: string;
-  period: string;
-  yearlyPrice?: string;
-  yearlySavings?: string;
-  properties: string;
-  costPerProperty: string;
-  verticales: number;
-  verticalesDesc: string;
-  popular?: boolean;
-  limits: {
-    users: string;
-    signatures: string;
-    storage: string;
-    ai: string;
-    sms: string;
-    api: boolean;
-    whiteLabel: boolean;
-    support: string;
-  };
-  features: string[];
-  highlight: string;
-}
+// Iconos por plan
+const PLAN_ICONS: Record<PlanTier, React.ComponentType<any>> = {
+  starter: Users,
+  professional: Building2,
+  business: Briefcase,
+  enterprise: Crown,
+  owner: Crown,
+};
 
-const plans: PlanData[] = [
-  {
-    name: 'Starter',
-    price: '€35',
-    period: '/mes',
-    yearlyPrice: '€350/año',
-    yearlySavings: '2 meses gratis',
-    properties: '1-5 propiedades',
-    costPerProperty: '€7/prop',
-    verticales: 1,
-    verticalesDesc: '1 vertical a elegir',
-    limits: {
-      users: '1 usuario',
-      signatures: '2 firmas/mes',
-      storage: '1 GB',
-      ai: 'No incluido',
-      sms: 'No incluido',
-      api: false,
-      whiteLabel: false,
-      support: 'Email',
-    },
-    features: [
-      'Gestión completa de propiedades',
-      'Contratos digitales',
-      'Portal inquilinos básico',
-      'Cobros y recordatorios',
-      'Dashboard con métricas',
-    ],
-    highlight: 'Ideal para empezar',
-  },
-  {
-    name: 'Professional',
-    price: '€59',
-    period: '/mes',
-    yearlyPrice: '€590/año',
-    yearlySavings: '2 meses gratis',
-    properties: '6-25 propiedades',
-    costPerProperty: '€2.36/prop',
-    verticales: 3,
-    verticalesDesc: 'Hasta 3 verticales',
-    popular: true,
-    limits: {
-      users: '3 usuarios',
-      signatures: '5 firmas/mes',
-      storage: '5 GB',
-      ai: '5K tokens/mes',
-      sms: 'No incluido',
-      api: false,
-      whiteLabel: false,
-      support: 'Chat prioritario',
-    },
-    features: [
-      'Todo de Starter +',
-      'Combina Alquiler + STR + Coliving',
-      'Portal propietarios',
-      'Reportes avanzados',
-      'Integraciones portales',
-      'IA para valoraciones',
-    ],
-    highlight: 'El más elegido',
-  },
-  {
-    name: 'Business',
-    price: '€129',
-    period: '/mes',
-    yearlyPrice: '€1.290/año',
-    yearlySavings: '2 meses gratis',
-    properties: '26-100 propiedades',
-    costPerProperty: '€1.29/prop',
-    verticales: 7,
-    verticalesDesc: 'Los 7 verticales',
-    limits: {
-      users: '10 usuarios',
-      signatures: '15 firmas/mes',
-      storage: '20 GB',
-      ai: '50K tokens/mes',
-      sms: '25 SMS/mes',
-      api: true,
-      whiteLabel: false,
-      support: 'Prioritario + Gestor',
-    },
-    features: [
-      'Todo de Professional +',
-      'TODOS los 7 verticales',
-      'API completa incluida',
-      'Personalización de marca',
-      'CRM integrado',
-      'Automatizaciones',
-      'Gestor de cuenta dedicado',
-    ],
-    highlight: 'Máximo valor',
-  },
-  {
-    name: 'Enterprise',
-    price: '€299',
-    period: '/mes',
-    yearlyPrice: '€2.990/año',
-    yearlySavings: '2 meses gratis',
-    properties: '+100 propiedades',
-    costPerProperty: 'Desde €0.50/prop',
-    verticales: 7,
-    verticalesDesc: '7 verticales + Custom',
-    limits: {
-      users: 'Ilimitados',
-      signatures: '50 firmas/mes',
-      storage: '50 GB',
-      ai: '100K tokens/mes',
-      sms: '100 SMS/mes',
-      api: true,
-      whiteLabel: true,
-      support: '24/7 + Account Manager',
-    },
-    features: [
-      'Todo de Business +',
-      'White-label incluido',
-      'Desarrollos a medida',
-      'Migración asistida',
-      'SLA 99.9% garantizado',
-      'Formación presencial',
-      'Integraciones custom',
-    ],
-    highlight: 'Para grandes gestoras',
-  },
+// Add-ons destacados para la sección
+const ADD_ONS_DESTACADOS = [
+  { id: 'recordatorios_auto', name: 'Recordatorios Auto', price: 8, desc: 'Notificaciones automáticas' },
+  { id: 'portal_inquilino', name: 'Portal Inquilino', price: 15, desc: 'Autoservicio para inquilinos' },
+  { id: 'analytics', name: 'Analytics Avanzado', price: 25, desc: 'Predicciones con IA' },
+  { id: 'contabilidad', name: 'Contabilidad', price: 30, desc: 'Integración A3, Sage...' },
+  { id: 'whitelabel_basic', name: 'White-label', price: 35, desc: 'Tu marca y colores' },
+  { id: 'api_access', name: 'Acceso API', price: 49, desc: 'Integraciones personalizadas' },
 ];
 
 // Comparativa genérica
@@ -185,7 +48,7 @@ const featureComparison = [
   { feature: 'IA integrada', inmova: '✅ Incluida', others: '❌ No disponible' },
   { feature: 'Multi-vertical', inmova: '✅ Sí', others: '❌ No' },
   { feature: 'API abierta', inmova: '✅ Desde Business', others: '❌ Solo Enterprise' },
-  { feature: 'White-label', inmova: '✅ Disponible', others: '❌ No disponible' },
+  { feature: 'Add-ons flexibles', inmova: '✅ Disponibles', others: '❌ No disponible' },
 ];
 
 export function PricingSection() {
@@ -227,114 +90,127 @@ export function PricingSection() {
 
         {/* Plans Grid */}
         <div className="grid md:grid-cols-4 gap-6 max-w-7xl mx-auto mb-16 auto-rows-fr">
-          {plans.map((plan, i) => (
-            <Card key={i} className={`group hover:shadow-2xl transition-all flex flex-col ${
-              plan.popular 
-                ? 'border-indigo-500 border-2 shadow-2xl relative ring-2 ring-indigo-500 ring-offset-2' 
-                : 'hover:border-indigo-300 border-2'
-            }`}>
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
-                  ⭐ Más Popular
-                </div>
-              )}
-              
-              <CardHeader className="pb-3">
-                <CardTitle className="text-xl mb-1 text-gray-900">{plan.name}</CardTitle>
+          {PUBLIC_PLANS.map((planKey) => {
+            const plan = PLAN_INFO[planKey];
+            const PlanIcon = PLAN_ICONS[planKey];
+            const modules = MODULES_BY_PLAN[planKey];
+            const moduleCount = modules.core.length + modules.included.length;
+
+            return (
+              <Card key={planKey} className={`group hover:shadow-2xl transition-all flex flex-col ${
+                plan.popular 
+                  ? 'border-indigo-500 border-2 shadow-2xl relative ring-2 ring-indigo-500 ring-offset-2' 
+                  : 'hover:border-indigo-300 border-2'
+              }`}>
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
+                    ⭐ Más Popular
+                  </div>
+                )}
                 
-                {/* Precio */}
-                <div className="space-y-1">
-                  <div>
-                    <span className="text-4xl font-black bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-                      {plan.price}
-                    </span>
-                    <span className="text-gray-500 text-sm">{plan.period}</span>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-center mb-2">
+                    <PlanIcon className="h-8 w-8 text-indigo-600" />
                   </div>
-                  {plan.yearlyPrice && (
-                    <div className="text-xs text-green-600 font-semibold">
-                      {plan.yearlyPrice} · {plan.yearlySavings}
+                  <CardTitle className="text-xl mb-1 text-gray-900 text-center">{plan.name}</CardTitle>
+                  
+                  {/* Precio */}
+                  <div className="space-y-1 text-center">
+                    <div>
+                      <span className="text-4xl font-black bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                        €{plan.monthlyPrice}
+                      </span>
+                      <span className="text-gray-500 text-sm">/mes</span>
                     </div>
-                  )}
-                </div>
+                    <div className="text-xs text-green-600 font-semibold">
+                      €{plan.annualPrice}/año · Ahorra 2 meses
+                    </div>
+                  </div>
 
-                {/* Propiedades y Verticales */}
-                <div className="mt-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Propiedades:</span>
-                    <Badge variant="secondary" className="font-semibold">{plan.properties}</Badge>
+                  {/* Propiedades y Límites */}
+                  <div className="mt-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Propiedades:</span>
+                      <Badge variant="secondary" className="font-semibold">
+                        {plan.maxProperties === 'unlimited' ? 'Ilimitadas' : `Hasta ${plan.maxProperties}`}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Usuarios:</span>
+                      <Badge variant="secondary" className="font-semibold">
+                        {plan.maxUsers === 'unlimited' ? 'Ilimitados' : plan.maxUsers}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Módulos:</span>
+                      <Badge className={`font-semibold ${planKey === 'enterprise' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                        {planKey === 'enterprise' ? 'Todos' : moduleCount}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Verticales:</span>
-                    <Badge className={`font-semibold ${plan.verticales === 7 ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                      {plan.verticalesDesc}
-                    </Badge>
-                  </div>
-                  <div className="text-xs text-gray-500 text-center font-medium">
-                    {plan.costPerProperty}
-                  </div>
-                </div>
 
-                {/* Highlight */}
-                <div className="mt-3 p-2 bg-gradient-to-r from-indigo-50 to-violet-50 rounded-lg border border-indigo-100">
-                  <div className="text-sm text-indigo-700 font-semibold text-center">
-                    {plan.highlight}
+                  {/* Highlight */}
+                  <div className="mt-3 p-2 bg-gradient-to-r from-indigo-50 to-violet-50 rounded-lg border border-indigo-100">
+                    <div className="text-sm text-indigo-700 font-semibold text-center">
+                      {plan.description}
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
+                </CardHeader>
 
-              <CardContent className="pt-0 flex-1">
-                {/* Límites */}
-                <div className="mb-4 p-2 bg-gray-50 rounded-lg text-xs space-y-1">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">👤 Usuarios:</span>
-                    <span className="font-medium text-gray-800">{plan.limits.users}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">✍️ Firmas:</span>
-                    <span className="font-medium text-gray-800">{plan.limits.signatures}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">💾 Storage:</span>
-                    <span className="font-medium text-gray-800">{plan.limits.storage}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">🤖 IA:</span>
-                    <span className="font-medium text-gray-800">{plan.limits.ai}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">🔌 API:</span>
-                    <span className="font-medium text-gray-800">{plan.limits.api ? '✅' : '❌'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">💬 Soporte:</span>
-                    <span className="font-medium text-gray-800">{plan.limits.support}</span>
-                  </div>
-                </div>
-
-                {/* Features */}
-                <ul className="space-y-2">
-                  {plan.features.map((feature, j) => (
-                    <li key={j} className="flex items-start gap-2 text-sm">
+                <CardContent className="pt-0 flex-1">
+                  {/* Features */}
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2 text-sm">
                       <CheckCircle className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                      <span className="text-gray-700">{feature}</span>
+                      <span className="text-gray-700">
+                        {plan.signaturesIncluded === 'unlimited' ? 'Firmas ilimitadas' : `${plan.signaturesIncluded} firmas/mes`}
+                      </span>
                     </li>
-                  ))}
-                </ul>
-              </CardContent>
+                    <li className="flex items-start gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span className="text-gray-700">{plan.storageIncluded} almacenamiento</span>
+                    </li>
+                    {planKey === 'enterprise' && (
+                      <>
+                        <li className="flex items-start gap-2 text-sm">
+                          <CheckCircle className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                          <span className="text-gray-700">Todos los add-ons incluidos</span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm">
+                          <CheckCircle className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                          <span className="text-gray-700">White-label completo</span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm">
+                          <CheckCircle className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                          <span className="text-gray-700">SLA 99.9% garantizado</span>
+                        </li>
+                      </>
+                    )}
+                    {modules.addon.length > 0 && planKey !== 'enterprise' && (
+                      <li className="flex items-start gap-2 text-sm">
+                        <Layers className="h-4 w-4 text-purple-600 shrink-0 mt-0.5" />
+                        <span className="text-gray-700 text-xs">
+                          +{modules.addon.length} módulos disponibles como add-on
+                        </span>
+                      </li>
+                    )}
+                  </ul>
+                </CardContent>
 
-              {/* CTA - En CardFooter para alineación */}
-              <CardFooter className="mt-auto">
-                <Link href="/register" className="w-full block">
-                  <Button 
-                    className="w-full font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white"
-                  >
-                    Probar 30 días gratis
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          ))}
+                {/* CTA */}
+                <CardFooter className="mt-auto">
+                  <Link href={planKey === 'enterprise' ? '/landing/contacto' : '/register'} className="w-full block">
+                    <Button 
+                      className="w-full font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white"
+                    >
+                      {planKey === 'enterprise' ? 'Contactar ventas' : 'Probar 30 días gratis'}
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </Link>
+                </CardFooter>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Add-ons Section */}
@@ -342,18 +218,18 @@ export function PricingSection() {
           <div className="text-center mb-8">
             <Badge className="mb-3 bg-white text-gray-900 border-2 border-purple-400 font-bold shadow-sm">
               <Zap className="h-3 w-3 mr-1 inline text-purple-600" />
-              Mejoras Opcionales
+              Módulos Add-on
             </Badge>
             <h3 className="text-2xl font-bold text-gray-800">
-              ¿Necesitas más? Añade lo que necesites
+              ¿Necesitas más funcionalidades?
             </h3>
             <p className="text-gray-600 mt-2">
-              Paga solo por lo que uses. Sin compromisos.
+              Activa módulos premium según tus necesidades. <span className="text-indigo-600 font-medium">Incluidos en Enterprise.</span>
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-4">
-            {ADDONS.map((addon) => (
+            {ADD_ONS_DESTACADOS.map((addon) => (
               <div key={addon.id} className="bg-white p-4 rounded-xl border-2 border-gray-100 hover:border-purple-300 transition-all">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-semibold text-gray-800">{addon.name}</span>
@@ -366,12 +242,17 @@ export function PricingSection() {
             ))}
           </div>
           
-          <p className="text-center text-sm text-gray-500 mt-4">
-            Los add-ons se pueden añadir a cualquier plan en cualquier momento
-          </p>
+          <div className="text-center mt-6">
+            <Link href="/landing/precios">
+              <Button variant="outline" className="font-semibold">
+                Ver todos los add-ons
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </Link>
+          </div>
         </div>
 
-        {/* Tabla Comparativa Genérica */}
+        {/* Tabla Comparativa */}
         <div className="max-w-3xl mx-auto">
           <div className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white py-4 px-6 rounded-t-xl">
             <h3 className="text-2xl font-bold text-center">
@@ -409,7 +290,7 @@ export function PricingSection() {
           <p className="text-lg text-gray-700 mb-4">
             ¿Más de 100 propiedades? ¿Necesitas personalización?
           </p>
-          <Link href="/contacto">
+          <Link href="/landing/demo">
             <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold shadow-lg">
               Solicitar Demo Personalizada
             </Button>

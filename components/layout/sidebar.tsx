@@ -141,6 +141,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/usuarios': 'usuarios',
   '/admin/modulos': 'configuracion',
   '/empresa/modulos': 'configuracion',
+  '/empresa/facturas': 'configuracion',
   '/admin/sales-team': 'admin_sales_team',
   '/analytics': 'analytics',
   '/str/listings': 'str_listings',
@@ -1524,6 +1525,12 @@ const administradorEmpresaItems = [
     name: 'Módulos',
     href: '/empresa/modulos',
     icon: Package,
+    roles: ['administrador', 'super_admin', 'propietario'],
+  },
+  {
+    name: 'Facturas',
+    href: '/empresa/facturas',
+    icon: FileText,
     roles: ['administrador', 'super_admin', 'propietario'],
   },
   {
