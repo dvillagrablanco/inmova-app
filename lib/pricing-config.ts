@@ -644,12 +644,127 @@ export const ADD_ONS: Record<string, AddOn> = {
 
 /**
  * CAMPAÑAS PROMOCIONALES
+ * Sincronizado con:
+ * - /app/landing/ofertas/page.tsx
+ * - /app/landing/campanas/launch2025/page.tsx
+ * - /app/landing/modulos/coliving/page.tsx
  */
 export const PROMO_CAMPAIGNS: Record<string, PromoCampaign> = {
+  // ═══════════════════════════════════════════════════════════════
+  // OFERTAS PRINCIPALES (Página /landing/ofertas)
+  // ═══════════════════════════════════════════════════════════════
+  
+  starter26: {
+    id: 'starter26',
+    code: 'STARTER26',
+    name: '50% de Descuento Starter',
+    description: 'Plan Starter a mitad de precio durante 3 meses (€17/mes en lugar de €35/mes)',
+    targetPlan: 'starter',
+    discountType: 'percentage',
+    discountValue: 50,
+    duration: 3,
+    maxUses: 1000,
+    validFrom: new Date('2026-01-01'),
+    validUntil: new Date('2026-03-31'),
+    targetAudience: 'Pequeños propietarios y house flippers',
+    message: 'Gestión profesional de hasta 5 propiedades con todas las herramientas esenciales'
+  },
+  
+  coliving26: {
+    id: 'coliving26',
+    code: 'COLIVING26',
+    name: 'Oferta Coliving',
+    description: '30 días gratis + 20% dto. siguientes 6 meses en Plan Professional',
+    targetPlan: 'professional',
+    discountType: 'percentage',
+    discountValue: 100, // Primer mes gratis
+    duration: 7, // 1 mes gratis + 6 meses con 20%
+    maxUses: 500,
+    validFrom: new Date('2026-01-01'),
+    validUntil: new Date('2026-03-31'),
+    targetAudience: 'Gestores de coliving',
+    message: 'Prorrateo automático de suministros, contratos flexibles y portal de residentes'
+  },
+  
+  switch26: {
+    id: 'switch26',
+    code: 'SWITCH26',
+    name: 'Cambia y Ahorra',
+    description: 'Igualamos precio de tu plataforma actual + Plan superior incluido durante 12 meses',
+    targetPlan: 'professional',
+    discountType: 'percentage',
+    discountValue: 0, // Variable según factura del cliente
+    duration: 12,
+    validFrom: new Date('2026-01-01'),
+    validUntil: new Date('2026-03-31'),
+    targetAudience: 'Usuarios de otras plataformas (Homming, Rentger, etc.)',
+    message: 'Trae tu última factura y te damos INMOVA al mismo precio pero con el plan superior'
+  },
+  
+  // ═══════════════════════════════════════════════════════════════
+  // CAMPAÑA LANZAMIENTO 2026 (/landing/campanas/launch2025)
+  // ═══════════════════════════════════════════════════════════════
+  
+  launch2026: {
+    id: 'launch2026',
+    code: 'LAUNCH2026',
+    name: 'Lanzamiento 2026',
+    description: '50% de descuento en el primer mes - Campaña de lanzamiento Q1 2026',
+    targetPlan: 'professional',
+    discountType: 'percentage',
+    discountValue: 50,
+    duration: 1,
+    maxUses: 150,
+    validFrom: new Date('2026-01-01'),
+    validUntil: new Date('2026-03-31'),
+    targetAudience: 'Nuevos usuarios Q1 2026',
+    message: 'Solo 150 plazas disponibles con el descuento del 50% en el primer mes'
+  },
+  
+  launch2025: {
+    id: 'launch2025',
+    code: 'LAUNCH2025',
+    name: 'Lanzamiento 2025 (Legacy)',
+    description: '50% de descuento en el primer mes - Campaña original',
+    targetPlan: 'professional',
+    discountType: 'percentage',
+    discountValue: 50,
+    duration: 1,
+    maxUses: 500,
+    validFrom: new Date('2025-01-01'),
+    validUntil: new Date('2026-06-30'), // Extendida para usuarios legacy
+    targetAudience: 'Usuarios early adopters',
+    message: 'Código legacy válido para usuarios que lo recibieron en 2025'
+  },
+  
+  // ═══════════════════════════════════════════════════════════════
+  // OFERTAS ESPECÍFICAS POR VERTICAL
+  // ═══════════════════════════════════════════════════════════════
+  
+  coliving50: {
+    id: 'coliving50',
+    code: 'COLIVING50',
+    name: 'Coliving 50% Off',
+    description: '50% de descuento adicional para operadores de coliving',
+    targetPlan: 'professional',
+    discountType: 'percentage',
+    discountValue: 50,
+    duration: 3,
+    maxUses: 200,
+    validFrom: new Date('2026-01-01'),
+    validUntil: new Date('2026-06-30'),
+    targetAudience: 'Operadores de coliving y habitaciones',
+    message: 'Descuento exclusivo para espacios compartidos y coliving'
+  },
+  
+  // ═══════════════════════════════════════════════════════════════
+  // OFERTAS LEGACY (Compatibilidad)
+  // ═══════════════════════════════════════════════════════════════
+  
   starter2026: {
     id: 'starter2026',
     code: 'STARTER2026',
-    name: 'Oferta Lanzamiento 2026',
+    name: 'Oferta Lanzamiento 2026 (Legacy)',
     description: 'Plan Starter a €25/mes durante 6 meses',
     targetPlan: 'starter',
     discountType: 'fixed_amount',
@@ -665,7 +780,7 @@ export const PROMO_CAMPAIGNS: Record<string, PromoCampaign> = {
   switch2026: {
     id: 'switch2026',
     code: 'SWITCH2026',
-    name: 'Migración Competencia',
+    name: 'Migración Competencia (Legacy)',
     description: 'Igualamos precio de tu plataforma actual 1 año',
     targetPlan: 'professional',
     discountType: 'percentage',
