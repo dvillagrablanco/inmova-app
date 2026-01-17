@@ -14,12 +14,8 @@ import { handleModuleWebhook } from '@/lib/stripe-module-addons';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Deshabilitar body parser para verificar firma de Stripe
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// En Next.js App Router, el body parser se maneja automáticamente
+// No necesita configuración adicional para webhooks
 
 async function getRawBody(req: NextRequest): Promise<Buffer> {
   const chunks: Uint8Array[] = [];
