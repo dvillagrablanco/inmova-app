@@ -356,14 +356,18 @@ export default function IntegracionesUnificadasPage() {
       'gmail': '/dashboard/integrations/sendgrid', // Usa sendgrid config
       // Analytics
       'ga4': '/dashboard/integrations/google-analytics',
+      'google-analytics': '/dashboard/integrations/google-analytics',
       'hotjar': '/dashboard/integrations/hotjar',
       // Social
       'facebook': '/dashboard/integrations/facebook',
       'instagram': '/dashboard/integrations/facebook',
       'linkedin': '/dashboard/integrations/linkedin',
       'twitter': '/dashboard/integrations/twitter',
+      'idealista': '/dashboard/integrations/idealista',
+      'fotocasa': '/dashboard/integrations/fotocasa',
       // Infraestructura
       'aws': '/admin/integraciones-plataforma/infraestructura',
+      'aws-s3': '/dashboard/integrations/aws-s3',
       'postgresql': '/admin/integraciones-plataforma/infraestructura',
       // IA
       'claude': '/admin/integraciones-plataforma/ia',
@@ -371,11 +375,13 @@ export default function IntegracionesUnificadasPage() {
       'sentry': '/admin/integraciones-plataforma/monitoreo',
       // Pagos
       'stripe': '/configuracion/integraciones/stripe',
-      'gocardless': '/dashboard/integrations/gocardless',
-      'redsys': '/dashboard/integrations/redsys',
+      'gocardless': '/configuracion/integraciones/gocardless',
+      'redsys': '/configuracion/integraciones/redsys',
       // Firma
       'docusign': '/firma-digital/configuracion',
       'signaturit': '/firma-digital/configuracion',
+      // Banca
+      'openbanking': '/admin/integraciones-banca',
     };
     return configUrls[integrationId] || `/dashboard/integrations/${integrationId}`;
   };

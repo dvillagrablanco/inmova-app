@@ -226,10 +226,18 @@ export default function IntegracionesPlataformaPage() {
       'instagram': '/dashboard/integrations/facebook',
       'linkedin': '/dashboard/integrations/linkedin',
       'twitter-x': '/dashboard/integrations/twitter',
-      'aws-s3': '/admin/integraciones-plataforma/infraestructura',
+      'aws-s3': '/dashboard/integrations/aws-s3',
       'postgresql': '/admin/integraciones-plataforma/infraestructura',
       'anthropic-claude': '/admin/integraciones-plataforma/ia',
       'sentry': '/admin/integraciones-plataforma/monitoreo',
+      // Categorías de plataforma
+      'contabilidad': '/admin/integraciones-plataforma/contabilidad',
+      'comunicacion': '/admin/integraciones-plataforma/comunicacion',
+      'analytics': '/admin/integraciones-plataforma/analytics',
+      'social': '/admin/integraciones-plataforma/social',
+      'infraestructura': '/admin/integraciones-plataforma/infraestructura',
+      'ia': '/admin/integraciones-plataforma/ia',
+      'monitoreo': '/admin/integraciones-plataforma/monitoreo',
     };
     
     const url = configUrls[integrationId] || `/dashboard/integrations/${integrationId}`;
