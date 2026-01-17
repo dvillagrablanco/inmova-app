@@ -44,9 +44,17 @@ import {
   CreditCard,
   Lock,
   ShoppingCart,
+  Crown,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import logger from '@/lib/logger';
+import {
+  MODULES_BY_PLAN,
+  MODULE_ADDON_PRICES,
+  PLAN_INFO,
+  getModuleStatus,
+  type PlanTier,
+} from '@/lib/modules-pricing-config';
 
 interface ModuloDefinicion {
   codigo: string;
@@ -262,27 +270,44 @@ export default function EmpresaModulosPage() {
     return addOnsPurchased.some(a => a.codigo === codigo);
   }
 
-  function canActivateModule(modulo: ModuloDefinicion): { canActivate: boolean; reason: string } {
+  function canActivateModule(modulo: ModuloDefinicion): { canActivate: boolean; reason: string; addonPrice?: number } {
     if (modulo.esCore) {
       return { canActivate: false, reason: 'Los módulos esenciales siempre están activos' };
+    }
+
+    // Plan Owner tiene acceso total
+    const planTier = (currentPlan?.tier?.toLowerCase() || 'starter') as PlanTier;
+    if (planTier === 'owner') {
+      return { canActivate: true, reason: 'Plan Owner - Todo incluido' };
     }
 
     if (hasTotalAccess()) {
       return { canActivate: true, reason: 'Incluido en tu plan' };
     }
 
-    if (isModuleIncludedInPlan(modulo.codigo)) {
-      return { canActivate: true, reason: 'Incluido en tu plan' };
+    // Usar la nueva configuración de módulos por plan
+    const moduleStatus = getModuleStatus(modulo.codigo, planTier);
+    
+    switch (moduleStatus) {
+      case 'core':
+        return { canActivate: false, reason: 'Módulo esencial siempre activo' };
+      case 'included':
+        return { canActivate: true, reason: 'Incluido en tu plan' };
+      case 'addon':
+        if (isAddOnPurchased(modulo.codigo)) {
+          return { canActivate: true, reason: 'Add-on comprado' };
+        }
+        const addonInfo = MODULE_ADDON_PRICES[modulo.codigo];
+        const price = addonInfo?.monthlyPrice || modulo.precioAddOn || 0;
+        return { 
+          canActivate: false, 
+          reason: `Requiere add-on (€${price}/mes)`,
+          addonPrice: price
+        };
+      case 'unavailable':
+      default:
+        return { canActivate: false, reason: 'Requiere upgrade de plan' };
     }
-
-    if (modulo.esAddOn) {
-      if (isAddOnPurchased(modulo.codigo)) {
-        return { canActivate: true, reason: 'Add-on comprado' };
-      }
-      return { canActivate: false, reason: `Requiere comprar add-on (€${modulo.precioAddOn}/mes)` };
-    }
-
-    return { canActivate: false, reason: 'Requiere upgrade de plan' };
   }
 
   function getModulosByCategoria(categoria: string) {
@@ -341,33 +366,60 @@ export default function EmpresaModulosPage() {
 
         {/* Plan Actual */}
         {currentPlan && (
-          <Card className="border-2 border-primary/20 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <Card className={`border-2 ${
+            currentPlan.tier?.toLowerCase() === 'owner' 
+              ? 'border-purple-300 bg-gradient-to-r from-purple-50 to-pink-50'
+              : 'border-primary/20 bg-gradient-to-r from-blue-50 to-indigo-50'
+          }`}>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <Star className="h-5 w-5 text-yellow-500" />
+                    {currentPlan.tier?.toLowerCase() === 'owner' ? (
+                      <Crown className="h-5 w-5 text-purple-500" />
+                    ) : (
+                      <Star className="h-5 w-5 text-yellow-500" />
+                    )}
                     <CardTitle className="text-xl">Tu Plan: {currentPlan.nombre}</CardTitle>
+                    {currentPlan.tier?.toLowerCase() === 'owner' && (
+                      <Badge className="bg-purple-600">OWNER</Badge>
+                    )}
                   </div>
-                  {hasTotalAccess() && (
+                  {currentPlan.tier?.toLowerCase() === 'owner' ? (
+                    <p className="text-sm text-purple-600 flex items-center gap-1">
+                      <Crown className="h-4 w-4" />
+                      Acceso total a todos los módulos sin límites
+                    </p>
+                  ) : hasTotalAccess() ? (
                     <p className="text-sm text-green-600 flex items-center gap-1">
                       <CheckCircle className="h-4 w-4" />
                       Tu plan incluye acceso a todos los módulos
                     </p>
-                  )}
+                  ) : null}
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold">€{currentPlan.precioMensual}/mes</p>
-                  <p className="text-sm text-muted-foreground">{currentPlan.modulosIncluidos.length} módulos incluidos</p>
+                  {currentPlan.tier?.toLowerCase() === 'owner' ? (
+                    <>
+                      <p className="text-2xl font-bold text-purple-600">Ilimitado</p>
+                      <p className="text-sm text-muted-foreground">Todo incluido</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-2xl font-bold">€{currentPlan.precioMensual}/mes</p>
+                      <p className="text-sm text-muted-foreground">{currentPlan.modulosIncluidos.length} módulos incluidos</p>
+                    </>
+                  )}
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" onClick={() => router.push('/landing/precios')}>
-                  <TrendingUp className="h-4 w-4 mr-2" />
-                  Ver planes disponibles
-                </Button>
+                {currentPlan.tier?.toLowerCase() !== 'owner' && (
+                  <Button variant="outline" size="sm" onClick={() => router.push('/landing/precios')}>
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    Ver planes disponibles
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" onClick={() => router.push('/contacto')}>
                   <MessageSquare className="h-4 w-4 mr-2" />
                   Contactar soporte
@@ -418,9 +470,13 @@ export default function EmpresaModulosPage() {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {modulosCategoria.map((modulo) => {
                       const activo = isModuleActive(modulo.codigo);
-                      const { canActivate, reason } = canActivateModule(modulo);
+                      const { canActivate, reason, addonPrice } = canActivateModule(modulo);
                       const isDisabled = modulo.esCore || updating === modulo.codigo;
-                      const needsPurchase = modulo.esAddOn && !isAddOnPurchased(modulo.codigo) && !hasTotalAccess() && !isModuleIncludedInPlan(modulo.codigo);
+                      const planTier = (currentPlan?.tier?.toLowerCase() || 'starter') as PlanTier;
+                      const moduleStatus = planTier === 'owner' ? 'included' : getModuleStatus(modulo.codigo, planTier);
+                      const needsPurchase = moduleStatus === 'addon' && !isAddOnPurchased(modulo.codigo);
+                      const isUnavailable = moduleStatus === 'unavailable';
+                      const displayPrice = addonPrice || MODULE_ADDON_PRICES[modulo.codigo]?.monthlyPrice || modulo.precioAddOn;
 
                       return (
                         <div
@@ -428,9 +484,13 @@ export default function EmpresaModulosPage() {
                           className={`p-4 border rounded-lg transition-all ${
                             activo
                               ? 'bg-green-50 border-green-200'
-                              : canActivate
-                                ? 'bg-gray-50 border-gray-200'
-                                : 'bg-orange-50 border-orange-200'
+                              : needsPurchase
+                                ? 'bg-amber-50 border-amber-200'
+                                : isUnavailable
+                                  ? 'bg-red-50 border-red-200 opacity-75'
+                                  : canActivate
+                                    ? 'bg-gray-50 border-gray-200'
+                                    : 'bg-gray-50 border-gray-200'
                           }`}
                         >
                           <div className="flex items-start justify-between gap-4">
@@ -443,19 +503,31 @@ export default function EmpresaModulosPage() {
                                     Esencial
                                   </Badge>
                                 )}
-                                {activo && !modulo.esCore && (
+                                {planTier === 'owner' && !modulo.esCore && (
+                                  <Badge className="text-xs bg-purple-600">
+                                    <Crown className="h-3 w-3 mr-1" />
+                                    Owner
+                                  </Badge>
+                                )}
+                                {activo && !modulo.esCore && planTier !== 'owner' && (
                                   <Badge className="text-xs bg-green-600">
                                     <CheckCircle className="h-3 w-3 mr-1" />
                                     Activo
                                   </Badge>
                                 )}
-                                {needsPurchase && (
-                                  <Badge variant="outline" className="text-xs text-orange-600 border-orange-300">
-                                    <ShoppingCart className="h-3 w-3 mr-1" />
-                                    Add-on €{modulo.precioAddOn}/mes
+                                {moduleStatus === 'included' && !activo && planTier !== 'owner' && (
+                                  <Badge variant="outline" className="text-xs text-blue-600 border-blue-300">
+                                    <Star className="h-3 w-3 mr-1" />
+                                    Incluido
                                   </Badge>
                                 )}
-                                {!canActivate && !modulo.esCore && !needsPurchase && (
+                                {needsPurchase && displayPrice && (
+                                  <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">
+                                    <ShoppingCart className="h-3 w-3 mr-1" />
+                                    Add-on €{displayPrice}/mes
+                                  </Badge>
+                                )}
+                                {isUnavailable && (
                                   <Badge variant="outline" className="text-xs text-red-600 border-red-300">
                                     <Lock className="h-3 w-3 mr-1" />
                                     Requiere upgrade
@@ -466,15 +538,28 @@ export default function EmpresaModulosPage() {
                               <p className="text-xs text-muted-foreground">{reason}</p>
                             </div>
                             <div className="flex flex-col items-center gap-2 flex-shrink-0">
-                              {needsPurchase ? (
+                              {needsPurchase && displayPrice ? (
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="text-orange-600 border-orange-300 hover:bg-orange-50"
-                                  onClick={() => setPurchaseDialog({ open: true, modulo })}
+                                  className="text-amber-600 border-amber-300 hover:bg-amber-50"
+                                  onClick={() => setPurchaseDialog({ 
+                                    open: true, 
+                                    modulo: { ...modulo, precioAddOn: displayPrice } 
+                                  })}
                                 >
                                   <CreditCard className="h-4 w-4 mr-1" />
-                                  Comprar
+                                  €{displayPrice}/mes
+                                </Button>
+                              ) : isUnavailable ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-red-600 border-red-300"
+                                  onClick={() => router.push('/landing/precios')}
+                                >
+                                  <TrendingUp className="h-4 w-4 mr-1" />
+                                  Upgrade
                                 </Button>
                               ) : (
                                 <>
