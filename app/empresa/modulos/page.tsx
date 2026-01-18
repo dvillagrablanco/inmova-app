@@ -613,7 +613,11 @@ export default function EmpresaModulosPage() {
               <DialogTitle className="flex items-center gap-2">
                 {detailDialog.modulo && (
                   <>
-                    <detailDialog.modulo.icon className="h-6 w-6 text-primary" />
+                    {detailDialog.modulo.icon ? (
+                      <detailDialog.modulo.icon className="h-6 w-6 text-primary" />
+                    ) : (
+                      <Package className="h-6 w-6 text-primary" />
+                    )}
                     {detailDialog.modulo.nombre}
                   </>
                 )}
