@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -26,25 +25,30 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import {
   Home,
   ArrowLeft,
   Package,
   CheckCircle,
-  XCircle,
   AlertCircle,
-  Building2,
-  DollarSign,
-  MessageSquare,
   TrendingUp,
-  Shield,
-  Users,
-  Zap,
+  MessageSquare,
   RefreshCw,
   Star,
   CreditCard,
   Lock,
   ShoppingCart,
   Crown,
+  Info,
+  ChevronRight,
+  Sparkles,
+  Check,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import logger from '@/lib/logger';
@@ -55,6 +59,11 @@ import {
   getModuleStatus,
   type PlanTier,
 } from '@/lib/modules-pricing-config';
+import {
+  MODULE_DESCRIPTIONS,
+  CATEGORY_INFO,
+  type ModuleDescription,
+} from '@/lib/modules-descriptions';
 
 interface ModuloDefinicion {
   codigo: string;
@@ -96,17 +105,6 @@ interface AddOnPurchased {
   fechaCompra: string;
 }
 
-const CATEGORIAS: Record<string, { nombre: string; icono: React.ComponentType<any>; color: string }> = {
-  core: { nombre: 'Módulos Esenciales', icono: Package, color: 'bg-blue-100 text-blue-800' },
-  gestion: { nombre: 'Gestión Básica', icono: Building2, color: 'bg-green-100 text-green-800' },
-  financiero: { nombre: 'Financiero', icono: DollarSign, color: 'bg-purple-100 text-purple-800' },
-  comunicacion: { nombre: 'Comunicación', icono: MessageSquare, color: 'bg-orange-100 text-orange-800' },
-  avanzado: { nombre: 'Avanzado', icono: TrendingUp, color: 'bg-red-100 text-red-800' },
-  comunidad: { nombre: 'Comunidad', icono: Users, color: 'bg-teal-100 text-teal-800' },
-  portales: { nombre: 'Portales', icono: Zap, color: 'bg-indigo-100 text-indigo-800' },
-  admin: { nombre: 'Administración', icono: Shield, color: 'bg-gray-100 text-gray-800' },
-};
-
 export default function EmpresaModulosPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -120,6 +118,10 @@ export default function EmpresaModulosPage() {
     open: false,
     modulo: null,
   });
+  const [detailDialog, setDetailDialog] = useState<{ open: boolean; modulo: ModuleDescription | null }>({
+    open: false,
+    modulo: null,
+  });
   const [purchasing, setPurchasing] = useState(false);
 
   useEffect(() => {
@@ -130,7 +132,6 @@ export default function EmpresaModulosPage() {
 
     if (status === 'authenticated') {
       const userRole = (session?.user as any)?.role;
-      // Solo administradores de empresa pueden gestionar módulos
       if (!['administrador', 'super_admin', 'propietario'].includes(userRole)) {
         router.push('/dashboard');
         toast.error('Solo el administrador de la empresa puede gestionar módulos');
@@ -144,28 +145,24 @@ export default function EmpresaModulosPage() {
     try {
       setLoading(true);
 
-      // Cargar catálogo de módulos
       const catalogRes = await fetch('/api/modules/catalog');
       if (catalogRes.ok) {
         const catalogData = await catalogRes.json();
         setModulos(catalogData.modulos || []);
       }
 
-      // Cargar módulos de la empresa
       const companyRes = await fetch('/api/modules/company');
       if (companyRes.ok) {
         const companyData = await companyRes.json();
         setCompanyModules(companyData.modules || []);
       }
 
-      // Cargar plan actual
       const planRes = await fetch('/api/modules/current-plan');
       if (planRes.ok) {
         const planData = await planRes.json();
         setCurrentPlan(planData.currentPlan);
       }
 
-      // Cargar add-ons comprados
       const addOnsRes = await fetch('/api/addons/purchased');
       if (addOnsRes.ok) {
         const addOnsData = await addOnsRes.json();
@@ -194,12 +191,8 @@ export default function EmpresaModulosPage() {
         throw new Error(error.error || 'Error al modificar módulo');
       }
 
-      toast.success(activo ? 'Módulo activado - Actualiza la página para ver los cambios en el menú' : 'Módulo desactivado');
-      
-      // Recargar datos para actualizar el estado
+      toast.success(activo ? 'Módulo activado' : 'Módulo desactivado');
       await loadData();
-      
-      // Disparar evento para que el sidebar se actualice
       window.dispatchEvent(new CustomEvent('modules-updated'));
     } catch (error: any) {
       logger.error('Error toggling module:', error);
@@ -230,7 +223,6 @@ export default function EmpresaModulosPage() {
       const data = await res.json();
       
       if (data.requiresPayment && data.checkoutUrl) {
-        // Redirigir a Stripe Checkout
         window.location.href = data.checkoutUrl;
         return;
       }
@@ -260,22 +252,15 @@ export default function EmpresaModulosPage() {
       currentPlan.modulosIncluidos?.includes('*');
   }
 
-  function isModuleIncludedInPlan(codigo: string): boolean {
-    if (!currentPlan) return false;
-    if (hasTotalAccess()) return true;
-    return currentPlan.modulosIncluidos?.includes(codigo) || false;
-  }
-
   function isAddOnPurchased(codigo: string): boolean {
     return addOnsPurchased.some(a => a.codigo === codigo);
   }
 
   function canActivateModule(modulo: ModuloDefinicion): { canActivate: boolean; reason: string; addonPrice?: number } {
     if (modulo.esCore) {
-      return { canActivate: false, reason: 'Los módulos esenciales siempre están activos' };
+      return { canActivate: false, reason: 'Módulo esencial siempre activo' };
     }
 
-    // Plan Owner tiene acceso total
     const planTier = (currentPlan?.tier?.toLowerCase() || 'starter') as PlanTier;
     if (planTier === 'owner') {
       return { canActivate: true, reason: 'Plan Owner - Todo incluido' };
@@ -285,7 +270,6 @@ export default function EmpresaModulosPage() {
       return { canActivate: true, reason: 'Incluido en tu plan' };
     }
 
-    // Usar la nueva configuración de módulos por plan
     const moduleStatus = getModuleStatus(modulo.codigo, planTier);
     
     switch (moduleStatus) {
@@ -301,7 +285,7 @@ export default function EmpresaModulosPage() {
         const price = addonInfo?.monthlyPrice || modulo.precioAddOn || 0;
         return { 
           canActivate: false, 
-          reason: `Requiere add-on (€${price}/mes)`,
+          reason: `Disponible como add-on`,
           addonPrice: price
         };
       case 'unavailable':
@@ -313,6 +297,13 @@ export default function EmpresaModulosPage() {
   function getModulosByCategoria(categoria: string) {
     return modulos.filter((m) => m.categoria === categoria);
   }
+
+  function getModuleDetails(codigo: string): ModuleDescription | undefined {
+    return MODULE_DESCRIPTIONS[codigo];
+  }
+
+  // Agrupar módulos por categoría
+  const categorias = [...new Set(modulos.map(m => m.categoria))];
 
   if (status === 'loading' || loading) {
     return (
@@ -326,7 +317,7 @@ export default function EmpresaModulosPage() {
 
   return (
     <AuthenticatedLayout>
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="container mx-auto p-6 space-y-6 max-w-6xl">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -347,9 +338,12 @@ export default function EmpresaModulosPage() {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            <h1 className="text-3xl font-bold mt-2">Gestión de Módulos</h1>
+            <h1 className="text-3xl font-bold mt-2 flex items-center gap-2">
+              <Package className="h-8 w-8 text-primary" />
+              Gestión de Módulos
+            </h1>
             <p className="text-muted-foreground mt-1">
-              Activa o desactiva módulos según las necesidades de tu empresa. Los cambios se reflejarán en el menú de navegación.
+              Activa los módulos que necesitas. Haz clic en cada módulo para ver una descripción detallada.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -387,7 +381,7 @@ export default function EmpresaModulosPage() {
                   </div>
                   {currentPlan.tier?.toLowerCase() === 'owner' ? (
                     <p className="text-sm text-purple-600 flex items-center gap-1">
-                      <Crown className="h-4 w-4" />
+                      <Sparkles className="h-4 w-4" />
                       Acceso total a todos los módulos sin límites
                     </p>
                   ) : hasTotalAccess() ? (
@@ -417,56 +411,79 @@ export default function EmpresaModulosPage() {
                 {currentPlan.tier?.toLowerCase() !== 'owner' && (
                   <Button variant="outline" size="sm" onClick={() => router.push('/landing/precios')}>
                     <TrendingUp className="h-4 w-4 mr-2" />
-                    Ver planes disponibles
+                    Ver planes y add-ons
                   </Button>
                 )}
-                <Button variant="outline" size="sm" onClick={() => router.push('/contacto')}>
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Contactar soporte
+                <Button variant="outline" size="sm" onClick={() => router.push('/empresa/facturas')}>
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Ver facturas
                 </Button>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Información importante */}
-        <Card className="bg-amber-50 border-amber-200">
+        {/* Información sobre cómo funciona */}
+        <Card className="bg-blue-50 border-blue-200">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
+              <Info className="h-5 w-5 text-blue-600 mt-0.5" />
               <div className="text-sm">
-                <p className="font-medium text-amber-800">Información sobre módulos</p>
-                <ul className="mt-1 text-amber-700 space-y-1">
-                  <li>• Los módulos <strong>activos</strong> aparecerán en el menú de navegación</li>
-                  <li>• Los módulos <strong>desactivados</strong> se ocultarán del menú pero no se perderán datos</li>
-                  <li>• Algunos módulos requieren <strong>add-ons de pago</strong> para activarse</li>
-                  <li>• Puedes cambiar la configuración en cualquier momento</li>
+                <p className="font-medium text-blue-800">¿Cómo funcionan los módulos?</p>
+                <ul className="mt-2 text-blue-700 space-y-1">
+                  <li className="flex items-center gap-2">
+                    <Check className="h-3 w-3 text-green-600" />
+                    <strong>Activo:</strong> El módulo aparece en el menú y puedes usarlo
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <X className="h-3 w-3 text-gray-400" />
+                    <strong>Inactivo:</strong> Se oculta del menú pero no pierdes datos
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <ShoppingCart className="h-3 w-3 text-amber-600" />
+                    <strong>Add-on:</strong> Puedes comprarlo para añadirlo a tu plan
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Lock className="h-3 w-3 text-red-500" />
+                    <strong>Bloqueado:</strong> Necesitas upgrade de plan
+                  </li>
                 </ul>
+                <p className="mt-2 text-blue-600">
+                  <strong>Tip:</strong> Haz clic en cualquier módulo para ver una descripción detallada de para qué sirve.
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Módulos por categoría */}
-        <div className="space-y-6">
-          {Object.entries(CATEGORIAS).map(([key, cat]) => {
-            const modulosCategoria = getModulosByCategoria(key);
+        <Accordion type="multiple" defaultValue={categorias} className="space-y-4">
+          {categorias.map((categoria) => {
+            const modulosCategoria = getModulosByCategoria(categoria);
             if (modulosCategoria.length === 0) return null;
 
-            const CatIcon = cat.icono;
+            const categoryInfo = CATEGORY_INFO[categoria] || {
+              nombre: categoria,
+              descripcion: '',
+              color: 'bg-gray-100 text-gray-800',
+            };
 
             return (
-              <Card key={key}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CatIcon className="h-5 w-5" />
-                    {cat.nombre}
-                    <Badge variant="outline" className="ml-2">
-                      {modulosCategoria.length} módulos
+              <AccordionItem key={categoria} value={categoria} className="border rounded-lg overflow-hidden">
+                <AccordionTrigger className="px-4 py-3 hover:no-underline bg-gray-50">
+                  <div className="flex items-center gap-3">
+                    <Badge className={categoryInfo.color}>
+                      {categoryInfo.nombre}
                     </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+                    <span className="text-sm text-muted-foreground">
+                      {modulosCategoria.length} módulos
+                    </span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="p-4">
+                  {categoryInfo.descripcion && (
+                    <p className="text-sm text-muted-foreground mb-4">{categoryInfo.descripcion}</p>
+                  )}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {modulosCategoria.map((modulo) => {
                       const activo = isModuleActive(modulo.codigo);
@@ -477,21 +494,23 @@ export default function EmpresaModulosPage() {
                       const needsPurchase = moduleStatus === 'addon' && !isAddOnPurchased(modulo.codigo);
                       const isUnavailable = moduleStatus === 'unavailable';
                       const displayPrice = addonPrice || MODULE_ADDON_PRICES[modulo.codigo]?.monthlyPrice || modulo.precioAddOn;
+                      const moduleDetails = getModuleDetails(modulo.codigo);
 
                       return (
                         <div
                           key={modulo.codigo}
-                          className={`p-4 border rounded-lg transition-all ${
+                          className={`p-4 border rounded-lg transition-all cursor-pointer hover:shadow-md ${
                             activo
                               ? 'bg-green-50 border-green-200'
                               : needsPurchase
                                 ? 'bg-amber-50 border-amber-200'
                                 : isUnavailable
-                                  ? 'bg-red-50 border-red-200 opacity-75'
+                                  ? 'bg-gray-50 border-gray-200 opacity-60'
                                   : canActivate
-                                    ? 'bg-gray-50 border-gray-200'
+                                    ? 'bg-white border-gray-200 hover:border-blue-300'
                                     : 'bg-gray-50 border-gray-200'
                           }`}
+                          onClick={() => moduleDetails && setDetailDialog({ open: true, modulo: moduleDetails })}
                         >
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
@@ -510,34 +529,35 @@ export default function EmpresaModulosPage() {
                                   </Badge>
                                 )}
                                 {activo && !modulo.esCore && planTier !== 'owner' && (
-                                  <Badge className="text-xs bg-green-600">
-                                    <CheckCircle className="h-3 w-3 mr-1" />
-                                    Activo
-                                  </Badge>
+                                  <Badge className="text-xs bg-green-600">Activo</Badge>
                                 )}
                                 {moduleStatus === 'included' && !activo && planTier !== 'owner' && (
                                   <Badge variant="outline" className="text-xs text-blue-600 border-blue-300">
-                                    <Star className="h-3 w-3 mr-1" />
                                     Incluido
                                   </Badge>
                                 )}
                                 {needsPurchase && displayPrice && (
                                   <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">
-                                    <ShoppingCart className="h-3 w-3 mr-1" />
-                                    Add-on €{displayPrice}/mes
+                                    €{displayPrice}/mes
                                   </Badge>
                                 )}
                                 {isUnavailable && (
                                   <Badge variant="outline" className="text-xs text-red-600 border-red-300">
                                     <Lock className="h-3 w-3 mr-1" />
-                                    Requiere upgrade
+                                    Upgrade
                                   </Badge>
                                 )}
                               </div>
-                              <p className="text-sm text-muted-foreground mb-2">{modulo.descripcion}</p>
-                              <p className="text-xs text-muted-foreground">{reason}</p>
+                              <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                                {moduleDetails?.descripcionCorta || modulo.descripcion}
+                              </p>
+                              <div className="flex items-center gap-2 text-xs text-primary">
+                                <Info className="h-3 w-3" />
+                                <span>Ver más detalles</span>
+                                <ChevronRight className="h-3 w-3" />
+                              </div>
                             </div>
-                            <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                            <div className="flex flex-col items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                               {needsPurchase && displayPrice ? (
                                 <Button
                                   size="sm"
@@ -548,8 +568,8 @@ export default function EmpresaModulosPage() {
                                     modulo: { ...modulo, precioAddOn: displayPrice } 
                                   })}
                                 >
-                                  <CreditCard className="h-4 w-4 mr-1" />
-                                  €{displayPrice}/mes
+                                  <ShoppingCart className="h-4 w-4 mr-1" />
+                                  Comprar
                                 </Button>
                               ) : isUnavailable ? (
                                 <Button
@@ -580,11 +600,144 @@ export default function EmpresaModulosPage() {
                       );
                     })}
                   </div>
-                </CardContent>
-              </Card>
+                </AccordionContent>
+              </AccordionItem>
             );
           })}
-        </div>
+        </Accordion>
+
+        {/* Dialog de detalles del módulo */}
+        <Dialog open={detailDialog.open} onOpenChange={(open) => setDetailDialog({ open, modulo: detailDialog.modulo })}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                {detailDialog.modulo && (
+                  <>
+                    <detailDialog.modulo.icon className="h-6 w-6 text-primary" />
+                    {detailDialog.modulo.nombre}
+                  </>
+                )}
+              </DialogTitle>
+              <DialogDescription>
+                {detailDialog.modulo?.descripcionCorta}
+              </DialogDescription>
+            </DialogHeader>
+            
+            {detailDialog.modulo && (
+              <div className="space-y-6">
+                {/* Descripción larga */}
+                <div>
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    <Info className="h-4 w-4" />
+                    ¿Qué es?
+                  </h4>
+                  <p className="text-muted-foreground">{detailDialog.modulo.descripcionLarga}</p>
+                </div>
+
+                {/* Funcionalidades */}
+                <div>
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-600" />
+                    Funcionalidades incluidas
+                  </h4>
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {detailDialog.modulo.funcionalidades.map((func, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm">
+                        <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                        <span>{func}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Casos de uso */}
+                <div>
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    <Star className="h-4 w-4 text-yellow-500" />
+                    Casos de uso
+                  </h4>
+                  <ul className="space-y-2">
+                    {detailDialog.modulo.casosDeUso.map((caso, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm bg-gray-50 p-2 rounded">
+                        <span className="text-primary font-medium">{idx + 1}.</span>
+                        <span>{caso}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Beneficios */}
+                <div>
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-purple-600" />
+                    Beneficios clave
+                  </h4>
+                  <ul className="space-y-2">
+                    {detailDialog.modulo.beneficios.map((beneficio, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm">
+                        <Badge variant="outline" className="text-purple-600 border-purple-300">
+                          ✓
+                        </Badge>
+                        <span>{beneficio}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Precio si es add-on */}
+                {MODULE_ADDON_PRICES[detailDialog.modulo.codigo] && (
+                  <Card className="bg-amber-50 border-amber-200">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-amber-800">Disponible como Add-on</p>
+                          <p className="text-sm text-amber-700">
+                            Se añade a tu factura mensual
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-amber-600">
+                            €{MODULE_ADDON_PRICES[detailDialog.modulo.codigo].monthlyPrice}/mes
+                          </p>
+                          <p className="text-xs text-amber-600">
+                            o €{MODULE_ADDON_PRICES[detailDialog.modulo.codigo].annualPrice}/año
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDetailDialog({ open: false, modulo: null })}>
+                Cerrar
+              </Button>
+              {detailDialog.modulo && MODULE_ADDON_PRICES[detailDialog.modulo.codigo] && !isAddOnPurchased(detailDialog.modulo.codigo) && (
+                <Button 
+                  onClick={() => {
+                    const modulo = modulos.find(m => m.codigo === detailDialog.modulo?.codigo);
+                    if (modulo) {
+                      setDetailDialog({ open: false, modulo: null });
+                      setPurchaseDialog({ 
+                        open: true, 
+                        modulo: { 
+                          ...modulo, 
+                          precioAddOn: MODULE_ADDON_PRICES[modulo.codigo]?.monthlyPrice 
+                        } 
+                      });
+                    }
+                  }}
+                  className="bg-amber-600 hover:bg-amber-700"
+                >
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  Comprar Add-on
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Dialog de compra de Add-on */}
         <Dialog open={purchaseDialog.open} onOpenChange={(open) => setPurchaseDialog({ open, modulo: purchaseDialog.modulo })}>
@@ -608,18 +761,21 @@ export default function EmpresaModulosPage() {
                 <Card>
                   <CardContent className="p-4">
                     <h4 className="font-semibold mb-2">{purchaseDialog.modulo.nombre}</h4>
-                    <p className="text-sm text-muted-foreground mb-4">{purchaseDialog.modulo.descripcion}</p>
-                    <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {MODULE_DESCRIPTIONS[purchaseDialog.modulo.codigo]?.descripcionLarga || purchaseDialog.modulo.descripcion}
+                    </p>
+                    <div className="flex items-center justify-between border-t pt-4">
                       <span className="text-muted-foreground">Precio mensual:</span>
                       <span className="text-2xl font-bold">€{purchaseDialog.modulo.precioAddOn}/mes</span>
                     </div>
                   </CardContent>
                 </Card>
                 
-                <div className="bg-blue-50 p-3 rounded-lg text-sm text-blue-800">
-                  <p>• Se añadirá a tu factura mensual</p>
-                  <p>• Puedes cancelar en cualquier momento</p>
-                  <p>• El módulo se activará inmediatamente</p>
+                <div className="bg-blue-50 p-3 rounded-lg text-sm text-blue-800 space-y-1">
+                  <p>✓ Se añadirá a tu factura mensual automáticamente</p>
+                  <p>✓ Puedes cancelar en cualquier momento</p>
+                  <p>✓ El módulo se activará inmediatamente tras el pago</p>
+                  <p>✓ Recibirás factura por email</p>
                 </div>
               </div>
             )}
@@ -631,6 +787,7 @@ export default function EmpresaModulosPage() {
               <Button 
                 onClick={() => purchaseDialog.modulo && purchaseAddOn(purchaseDialog.modulo)}
                 disabled={purchasing}
+                className="bg-amber-600 hover:bg-amber-700"
               >
                 {purchasing ? (
                   <>

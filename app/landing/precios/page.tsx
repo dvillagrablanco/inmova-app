@@ -131,42 +131,186 @@ const consumptionAddons = [
   },
 ];
 
-// Categorías de módulos add-on
+// Categorías de módulos add-on con descripciones completas
 const moduleAddonCategories = [
   {
     category: 'Funcionalidades Básicas',
-    description: 'Mejora la gestión diaria',
+    description: 'Mejora la gestión diaria de tus propiedades',
     addons: [
-      { id: 'recordatorios_auto', name: 'Recordatorios Automáticos', price: 8, desc: 'Pagos, vencimientos y mantenimientos' },
-      { id: 'galerias', name: 'Galerías Multimedia', price: 8, desc: 'Fotos y vídeos de propiedades' },
-      { id: 'gastos', name: 'Control de Gastos', price: 10, desc: 'Categorización de gastos operativos' },
-      { id: 'proveedores', name: 'Gestión de Proveedores', price: 10, desc: 'Administración de proveedores' },
-      { id: 'reportes', name: 'Reportes Financieros', price: 15, desc: 'Informes detallados y exportables' },
-      { id: 'portal_inquilino', name: 'Portal del Inquilino', price: 15, desc: 'Autoservicio para inquilinos' },
+      { 
+        id: 'recordatorios_auto', 
+        name: 'Recordatorios Automáticos', 
+        price: 8, 
+        descCorta: 'Pagos, vencimientos y mantenimientos',
+        descLarga: 'Automatiza recordatorios para ti y tus inquilinos: pagos próximos, revisiones de ITV de garajes, caducidad de certificados, vencimientos de contratos. Configura una vez, olvídate para siempre.',
+        funcionalidades: ['Recordatorios de pago a inquilinos', 'Alertas de vencimiento de documentos', 'Revisiones programadas', 'Múltiples canales (email, SMS, push)'],
+        beneficio: 'Reduce impagos y nunca olvides una fecha importante'
+      },
+      { 
+        id: 'galerias', 
+        name: 'Galerías Multimedia', 
+        price: 8, 
+        descCorta: 'Fotos y vídeos de propiedades',
+        descLarga: 'Gestiona las fotos y vídeos de tus propiedades de forma organizada. Antes/después de reformas, estado de entradas, inspecciones. Etiqueta, ordena y comparte fácilmente.',
+        funcionalidades: ['Galería ilimitada por propiedad', 'Antes/después de reformas', 'Vídeos e imágenes 360°', 'Compartir por enlace'],
+        beneficio: 'Documentación visual para evitar conflictos'
+      },
+      { 
+        id: 'gastos', 
+        name: 'Control de Gastos', 
+        price: 10, 
+        descCorta: 'Categorización de gastos operativos',
+        descLarga: 'Registra todos los gastos asociados a tus propiedades: mantenimiento, suministros, seguros, impuestos, comunidad. Categoriza, adjunta facturas y obtén informes de gastos por propiedad o concepto.',
+        funcionalidades: ['Registro rápido de gastos', 'Categorización automática', 'Adjuntar facturas digitalizadas', 'Informes por categoría'],
+        beneficio: 'Maximiza deducciones fiscales y controla costes'
+      },
+      { 
+        id: 'proveedores', 
+        name: 'Gestión de Proveedores', 
+        price: 10, 
+        descCorta: 'Base de datos de servicios',
+        descLarga: 'Gestiona tu red de proveedores: fontaneros, electricistas, pintores, cerrajeros, empresas de limpieza. Almacena contactos, valoraciones, tarifas y asigna trabajos directamente.',
+        funcionalidades: ['Directorio de proveedores', 'Valoraciones y comentarios', 'Historial de trabajos', 'Asignación desde incidencias'],
+        beneficio: 'Encuentra al proveedor adecuado rápidamente'
+      },
+      { 
+        id: 'reportes', 
+        name: 'Reportes Financieros', 
+        price: 15, 
+        descCorta: 'Informes detallados y exportables',
+        descLarga: 'Genera informes financieros profesionales: cuenta de resultados por propiedad, rentabilidad, evolución de ingresos, comparativas anuales. Exporta a Excel/PDF para tu contable o inversores.',
+        funcionalidades: ['Cuenta de resultados', 'Informe de rentabilidad (ROI)', 'Comparativa interanual', 'Exportación Excel/PDF'],
+        beneficio: 'Decisiones basadas en datos reales'
+      },
+      { 
+        id: 'portal_inquilino', 
+        name: 'Portal del Inquilino', 
+        price: 15, 
+        descCorta: 'Autoservicio para inquilinos',
+        descLarga: 'Ofrece a tus inquilinos un portal donde consultar contratos, descargar recibos, pagar online, reportar incidencias y comunicarse contigo. Reduce llamadas y emails repetitivos.',
+        funcionalidades: ['Consulta de contrato y documentos', 'Descarga de recibos', 'Pago online de rentas', 'Reporte de incidencias'],
+        beneficio: 'Reduce consultas repetitivas un 60%'
+      },
     ],
   },
   {
     category: 'Funcionalidades Avanzadas',
-    description: 'Potencia tu negocio',
+    description: 'Herramientas para profesionales que quieren escalar',
     addons: [
-      { id: 'screening', name: 'Screening Inquilinos', price: 20, desc: 'Verificación de solvencia' },
-      { id: 'valoraciones', name: 'Valoraciones IA', price: 20, desc: 'Valoraciones automáticas' },
-      { id: 'publicaciones', name: 'Multi-Portal', price: 25, desc: 'Publica en Idealista, Fotocasa...' },
-      { id: 'analytics', name: 'Analytics Avanzado', price: 25, desc: 'Predicciones y tendencias' },
-      { id: 'contabilidad', name: 'Contabilidad Integrada', price: 30, desc: 'Conexión con A3, Sage, Holded' },
-      { id: 'crm', name: 'CRM Completo', price: 35, desc: 'Pipeline de ventas y leads' },
+      { 
+        id: 'screening', 
+        name: 'Screening Inquilinos', 
+        price: 20, 
+        descCorta: 'Verificación de solvencia',
+        descLarga: 'Evalúa candidatos antes de alquilar. Verificación de identidad, consulta de ficheros de morosidad (ASNEF, RAI), análisis de capacidad de pago, scoring de riesgo. Reduce impagos con datos objetivos.',
+        funcionalidades: ['Verificación de identidad', 'Consulta ficheros de morosidad', 'Scoring de riesgo con IA', 'Informe completo del candidato'],
+        beneficio: 'Reduce impagos hasta un 70%'
+      },
+      { 
+        id: 'valoraciones', 
+        name: 'Valoraciones IA', 
+        price: 20, 
+        descCorta: 'Valoraciones automáticas',
+        descLarga: 'Obtén valoraciones instantáneas de tus propiedades usando inteligencia artificial. Compara con precios del mercado, analiza tendencias de la zona, optimiza el precio de alquiler o venta.',
+        funcionalidades: ['Valoración instantánea con IA', 'Comparativa con mercado local', 'Sugerencia de precio óptimo', 'Informes profesionales'],
+        beneficio: 'Precio óptimo sin esperas'
+      },
+      { 
+        id: 'publicaciones', 
+        name: 'Multi-Portal', 
+        price: 25, 
+        descCorta: 'Publica en Idealista, Fotocasa...',
+        descLarga: 'Publica tus anuncios en múltiples portales inmobiliarios con un solo clic. Sincroniza cambios automáticamente, gestiona leads centralizadamente y analiza qué portales funcionan mejor.',
+        funcionalidades: ['Idealista, Fotocasa, Habitaclia', 'Sincronización automática', 'Gestión centralizada de leads', 'Estadísticas por portal'],
+        beneficio: 'Ahorra horas y maximiza visibilidad'
+      },
+      { 
+        id: 'analytics', 
+        name: 'Analytics Avanzado', 
+        price: 25, 
+        descCorta: 'Predicciones y tendencias',
+        descLarga: 'Inteligencia de negocio aplicada a tu cartera. Predicciones de ocupación, detección de tendencias, alertas de riesgo de impago, comparativas con el mercado. Toma decisiones estratégicas.',
+        funcionalidades: ['Predicción de ocupación', 'Detección de riesgo de impago', 'Análisis de tendencias', 'Dashboards personalizables'],
+        beneficio: 'Anticípate a los problemas'
+      },
+      { 
+        id: 'contabilidad', 
+        name: 'Contabilidad Integrada', 
+        price: 30, 
+        descCorta: 'Conexión con A3, Sage, Holded',
+        descLarga: 'Sincroniza INMOVA con tu programa de contabilidad: A3, Sage, Holded, Contasimple. Exporta asientos, facturas y movimientos automáticamente. Reduce errores y duplicidades.',
+        funcionalidades: ['Integración con software contable', 'Exportación de asientos', 'Sincronización de facturas', 'Conciliación automatizada'],
+        beneficio: 'Elimina la doble entrada de datos'
+      },
+      { 
+        id: 'crm', 
+        name: 'CRM Completo', 
+        price: 35, 
+        descCorta: 'Pipeline de ventas y leads',
+        descLarga: 'Captura leads de portales, web y redes sociales. Gestiona el embudo de ventas: primer contacto, visita, negociación, cierre. Automatiza seguimientos y no pierdas ninguna oportunidad.',
+        funcionalidades: ['Captura de leads automática', 'Pipeline visual', 'Scoring de leads con IA', 'Automatización de seguimientos'],
+        beneficio: 'No pierdas ningún lead'
+      },
     ],
   },
   {
     category: 'Módulos Premium',
-    description: 'Diferénciate de la competencia',
+    description: 'Diferénciate de la competencia con tecnología punta',
     addons: [
-      { id: 'whitelabel_basic', name: 'White-Label Básico', price: 35, desc: 'Tu marca y colores' },
-      { id: 'pricing_dinamico', name: 'Pricing IA', price: 45, desc: 'Optimización de precios con ML' },
-      { id: 'api_access', name: 'Acceso API REST', price: 49, desc: 'Integraciones personalizadas' },
-      { id: 'esg', name: 'ESG & Sostenibilidad', price: 50, desc: 'Huella de carbono y CSRD' },
-      { id: 'iot', name: 'Smart Buildings IoT', price: 75, desc: 'Cerraduras, sensores, termostatos' },
-      { id: 'whitelabel_full', name: 'White-Label Completo', price: 99, desc: 'Tu dominio y app móvil' },
+      { 
+        id: 'whitelabel_basic', 
+        name: 'White-Label Básico', 
+        price: 35, 
+        descCorta: 'Tu marca y colores',
+        descLarga: 'Personaliza INMOVA con tu identidad corporativa. Añade tu logo, colores corporativos, y personaliza los emails y documentos que envías a inquilinos y propietarios.',
+        funcionalidades: ['Logo personalizado', 'Colores corporativos', 'Emails con tu marca', 'Documentos personalizados'],
+        beneficio: 'Refuerza tu marca profesionalmente'
+      },
+      { 
+        id: 'pricing_dinamico', 
+        name: 'Pricing IA', 
+        price: 45, 
+        descCorta: 'Optimización de precios con ML',
+        descLarga: 'Maximiza tus ingresos con precios inteligentes. El algoritmo analiza demanda, estacionalidad, competencia y eventos locales para sugerir el precio óptimo en cada momento.',
+        funcionalidades: ['Análisis de demanda en tiempo real', 'Sugerencias de precio diarias', 'Automatización de cambios', 'Simulador de ingresos'],
+        beneficio: 'Aumenta ingresos hasta un 30%'
+      },
+      { 
+        id: 'api_access', 
+        name: 'Acceso API REST', 
+        price: 49, 
+        descCorta: 'Integraciones personalizadas',
+        descLarga: 'Conecta INMOVA con cualquier sistema mediante nuestra API REST. Automatiza procesos, sincroniza datos con tu ERP, CRM o herramientas internas.',
+        funcionalidades: ['API REST documentada', 'Autenticación OAuth 2.0', 'Webhooks para eventos', 'Sandbox de pruebas'],
+        beneficio: 'Flexibilidad máxima de integración'
+      },
+      { 
+        id: 'esg', 
+        name: 'ESG & Sostenibilidad', 
+        price: 50, 
+        descCorta: 'Huella de carbono y CSRD',
+        descLarga: 'Gestiona la sostenibilidad de tu cartera inmobiliaria. Calcula la huella de carbono, gestiona certificaciones energéticas, prepara informes CSRD.',
+        funcionalidades: ['Cálculo de huella de carbono', 'Gestión de certificados', 'Informes CSRD/SFDR', 'Dashboard de sostenibilidad'],
+        beneficio: 'Cumple normativa ESG y atrae inversores'
+      },
+      { 
+        id: 'iot', 
+        name: 'Smart Buildings IoT', 
+        price: 75, 
+        descCorta: 'Cerraduras, sensores, termostatos',
+        descLarga: 'Conecta tus propiedades con dispositivos IoT: cerraduras inteligentes para check-in autónomo, termostatos para eficiencia energética, sensores de humo, agua y movimiento.',
+        funcionalidades: ['Cerraduras inteligentes', 'Termostatos conectados', 'Sensores de seguridad', 'Control remoto desde app'],
+        beneficio: 'Check-in autónomo y ahorro energético'
+      },
+      { 
+        id: 'whitelabel_full', 
+        name: 'White-Label Completo', 
+        price: 99, 
+        descCorta: 'Tu dominio y app móvil',
+        descLarga: 'Lleva la personalización al máximo: tu propio dominio, app móvil con tu marca en App Store y Google Play, emails desde tu dominio. INMOVA desaparece completamente.',
+        funcionalidades: ['Dominio propio', 'App móvil personalizada', 'Emails desde tu dominio', 'Sin menciones a INMOVA'],
+        beneficio: 'Tu propia plataforma sin desarrollar'
+      },
     ],
   },
 ];
@@ -471,49 +615,116 @@ export default function PreciosPage() {
             <h2 className="text-3xl font-bold mb-4">Activa funcionalidades extra</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Si tu plan no incluye un módulo que necesitas, puedes activarlo como add-on.
-              <span className="font-medium text-indigo-600"> Incluidos en Enterprise.</span>
+              <span className="font-medium text-indigo-600"> Haz clic en cada módulo para ver todos los detalles.</span>
+              <br />
+              <span className="text-green-600 font-medium">✓ Todos incluidos en Enterprise.</span>
             </p>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-10">
             {moduleAddonCategories.map((category) => (
               <div key={category.category}>
-                <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-xl font-semibold">{category.category}</h3>
-                  <span className="text-gray-500 text-sm">— {category.description}</span>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <Layers className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold">{category.category}</h3>
+                    <p className="text-gray-500 text-sm">{category.description}</p>
+                  </div>
                 </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                
+                <Accordion type="single" collapsible className="space-y-3">
                   {category.addons.map((addon) => (
-                    <div 
+                    <AccordionItem 
                       key={addon.id} 
-                      className="bg-white p-4 rounded-xl border hover:border-purple-300 hover:shadow-md transition-all"
+                      value={addon.id}
+                      className="bg-white rounded-xl border hover:border-purple-300 transition-all overflow-hidden"
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-semibold mb-1">{addon.name}</h4>
-                          <p className="text-sm text-gray-600">{addon.desc}</p>
+                      <AccordionTrigger className="px-4 py-4 hover:no-underline">
+                        <div className="flex items-center justify-between w-full pr-4">
+                          <div className="flex items-center gap-3 text-left">
+                            <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <Sparkles className="w-5 h-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold">{addon.name}</h4>
+                              <p className="text-sm text-gray-600">{addon.descCorta}</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-purple-100 text-purple-700 font-bold text-sm px-3 py-1 flex-shrink-0">
+                            €{addon.price}/mes
+                          </Badge>
                         </div>
-                        <Badge className="bg-purple-100 text-purple-700 font-bold">
-                          €{addon.price}/mes
-                        </Badge>
-                      </div>
-                    </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="px-4 pb-4">
+                        <div className="pt-2 space-y-4 border-t">
+                          {/* Descripción larga */}
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <p className="text-gray-700">{addon.descLarga}</p>
+                          </div>
+                          
+                          {/* Funcionalidades */}
+                          <div>
+                            <h5 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                              <CheckCircle2 className="w-4 h-4 text-green-600" />
+                              Funcionalidades incluidas
+                            </h5>
+                            <div className="grid sm:grid-cols-2 gap-2">
+                              {addon.funcionalidades.map((func, i) => (
+                                <div key={i} className="flex items-start gap-2 text-sm">
+                                  <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                                  <span className="text-gray-600">{func}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          {/* Beneficio destacado */}
+                          <div className="bg-purple-50 p-3 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Sparkles className="w-4 h-4 text-purple-600" />
+                              <span className="font-medium text-purple-800">{addon.beneficio}</span>
+                            </div>
+                          </div>
+                          
+                          {/* Precio y CTA */}
+                          <div className="flex items-center justify-between pt-2">
+                            <div>
+                              <span className="text-2xl font-bold text-purple-700">€{addon.price}</span>
+                              <span className="text-gray-500">/mes</span>
+                              <p className="text-xs text-gray-500">Se añade a tu factura automáticamente</p>
+                            </div>
+                            <Link href="/register">
+                              <Button className="bg-purple-600 hover:bg-purple-700">
+                                Activar módulo
+                                <ArrowRight className="w-4 h-4 ml-2" />
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
                   ))}
-                </div>
+                </Accordion>
               </div>
             ))}
           </div>
 
-          <div className="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-            <div className="flex items-start gap-3">
-              <Info className="w-5 h-5 text-amber-600 mt-0.5" />
+          <div className="mt-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Info className="w-6 h-6 text-amber-600" />
+              </div>
               <div>
-                <p className="font-medium text-amber-800">¿Cómo se facturan los módulos add-on?</p>
-                <p className="text-sm text-amber-700 mt-1">
-                  Los módulos add-on se añaden a tu factura mensual automáticamente. 
-                  Si activas un módulo a mitad de mes, se prorratea. 
-                  Puedes desactivarlos en cualquier momento desde tu panel de empresa.
-                </p>
+                <h4 className="font-semibold text-amber-800 mb-2">¿Cómo se facturan los módulos add-on?</h4>
+                <ul className="text-sm text-amber-700 space-y-1">
+                  <li>✓ Se añaden automáticamente a tu factura mensual</li>
+                  <li>✓ Si activas un módulo a mitad de mes, se prorratea</li>
+                  <li>✓ Puedes desactivarlos en cualquier momento desde tu panel</li>
+                  <li>✓ Recibirás factura detallada por email cada mes</li>
+                  <li>✓ Pago con tarjeta o domiciliación bancaria SEPA</li>
+                </ul>
               </div>
             </div>
           </div>
