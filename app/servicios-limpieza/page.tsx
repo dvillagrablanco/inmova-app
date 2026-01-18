@@ -195,25 +195,28 @@ export default function ServiciosLimpiezaPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      // TODO: Integrar con API real
-      // const [serviciosRes, personalRes, checklistsRes] = await Promise.all([
-      //   fetch('/api/limpieza/servicios'),
-      //   fetch('/api/limpieza/personal'),
-      //   fetch('/api/limpieza/checklists'),
-      // ]);
+      const [serviciosRes, personalRes, checklistsRes] = await Promise.all([
+        fetch('/api/limpieza/servicios'),
+        fetch('/api/limpieza/personal'),
+        fetch('/api/limpieza/checklists'),
+      ]);
 
-      // Estado vacío inicial
-      setServicios([]);
-      setPersonal([]);
-      setChecklists([]);
-      setKpis({
-        serviciosHoy: 0,
-        serviciosCompletados: 0,
-        tiempoPromedioHoy: 0,
-        calificacionPromedio: 0,
-        personalActivo: 0,
-        serviciosPendientes: 0,
-      });
+      const serviciosData = await serviciosRes.json();
+      const personalData = await personalRes.json();
+      const checklistsData = await checklistsRes.json();
+
+      if (serviciosData.success) {
+        setServicios(serviciosData.data || []);
+        if (serviciosData.kpis) {
+          setKpis(serviciosData.kpis);
+        }
+      }
+      if (personalData.success) {
+        setPersonal(personalData.data || []);
+      }
+      if (checklistsData.success) {
+        setChecklists(checklistsData.data || []);
+      }
     } catch (error) {
       console.error('Error cargando datos:', error);
       toast.error('Error al cargar datos de limpieza');
@@ -229,25 +232,30 @@ export default function ServiciosLimpiezaPage() {
     }
 
     try {
-      // TODO: Integrar con API real
-      // await fetch('/api/limpieza/servicios', {
-      //   method: 'POST',
-      //   body: JSON.stringify(nuevoServicio),
-      // });
-
-      toast.success('Servicio de limpieza programado');
-      setShowCreateDialog(false);
-      setNuevoServicio({
-        propiedadId: '',
-        tipo: 'rutinaria',
-        fechaProgramada: '',
-        horaInicio: '09:00',
-        duracionEstimada: 120,
-        personalAsignado: [],
-        notas: '',
-        checklist: '',
+      const res = await fetch('/api/limpieza/servicios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nuevoServicio),
       });
-      loadData();
+      
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Servicio de limpieza programado');
+        setShowCreateDialog(false);
+        setNuevoServicio({
+          propiedadId: '',
+          tipo: 'rutinaria',
+          fechaProgramada: '',
+          horaInicio: '09:00',
+          duracionEstimada: 120,
+          personalAsignado: [],
+          notas: '',
+          checklist: '',
+        });
+        loadData();
+      } else {
+        toast.error(data.error || 'Error al programar servicio');
+      }
     } catch (error) {
       toast.error('Error al programar servicio');
     }
@@ -255,9 +263,19 @@ export default function ServiciosLimpiezaPage() {
 
   const actualizarEstadoServicio = async (id: string, nuevoEstado: ServicioLimpieza['estado']) => {
     try {
-      // TODO: Integrar con API real
-      toast.success(`Servicio actualizado a: ${nuevoEstado}`);
-      loadData();
+      const res = await fetch(`/api/limpieza/servicios/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado: nuevoEstado }),
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`Servicio actualizado a: ${nuevoEstado}`);
+        loadData();
+      } else {
+        toast.error(data.error || 'Error al actualizar servicio');
+      }
     } catch (error) {
       toast.error('Error al actualizar servicio');
     }
@@ -265,9 +283,17 @@ export default function ServiciosLimpiezaPage() {
 
   const eliminarServicio = async (id: string) => {
     try {
-      // TODO: Integrar con API real
-      toast.success('Servicio eliminado');
-      loadData();
+      const res = await fetch(`/api/limpieza/servicios/${id}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Servicio eliminado');
+        loadData();
+      } else {
+        toast.error(data.error || 'Error al eliminar servicio');
+      }
     } catch (error) {
       toast.error('Error al eliminar servicio');
     }

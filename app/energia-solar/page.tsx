@@ -139,19 +139,22 @@ export default function EnergiaSolarPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      // TODO: Integrar con API real
-      // const [instRes, prodRes, mantRes, roiRes] = await Promise.all([
-      //   fetch('/api/energia-solar/instalaciones'),
-      //   fetch(`/api/energia-solar/produccion?periodo=${periodoFilter}`),
-      //   fetch('/api/energia-solar/mantenimientos'),
-      //   fetch('/api/energia-solar/roi'),
-      // ]);
+      const [instRes, prodRes, mantRes, roiRes] = await Promise.all([
+        fetch('/api/energia-solar/instalaciones'),
+        fetch(`/api/energia-solar/produccion?periodo=${periodoFilter}`),
+        fetch('/api/energia-solar/mantenimientos'),
+        fetch('/api/energia-solar/roi'),
+      ]);
 
-      // Estado vacío inicial
-      setInstalaciones([]);
-      setProduccion([]);
-      setMantenimientos([]);
-      setRoiData([]);
+      const instData = await instRes.json();
+      const prodData = await prodRes.json();
+      const mantData = await mantRes.json();
+      const roiData = await roiRes.json();
+
+      if (instData.success) setInstalaciones(instData.data || []);
+      if (prodData.success) setProduccion(prodData.data || []);
+      if (mantData.success) setMantenimientos(mantData.data || []);
+      if (roiData.success) setRoiData(roiData.data || []);
     } catch (error) {
       console.error('Error cargando datos:', error);
       toast.error('Error al cargar datos de energía solar');
@@ -162,11 +165,76 @@ export default function EnergiaSolarPage() {
 
   const programarMantenimiento = async (instalacionId: string) => {
     try {
-      // TODO: Integrar con API real
-      toast.success('Mantenimiento programado');
-      loadData();
+      const res = await fetch('/api/energia-solar/mantenimientos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          instalacionId,
+          tipo: 'revision',
+          fecha: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          descripcion: 'Revisión programada',
+        }),
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Mantenimiento programado');
+        loadData();
+      } else {
+        toast.error(data.error || 'Error al programar mantenimiento');
+      }
     } catch (error) {
       toast.error('Error al programar mantenimiento');
+    }
+  };
+  
+  const [formInstalacion, setFormInstalacion] = useState({
+    propiedadId: '',
+    capacidadKw: '',
+    numeroPaneles: '',
+    fechaInstalacion: '',
+    inversor: '',
+    inversionInicial: '',
+  });
+  
+  const crearInstalacion = async () => {
+    if (!formInstalacion.propiedadId || !formInstalacion.capacidadKw) {
+      toast.error('Completa los campos obligatorios');
+      return;
+    }
+    
+    try {
+      const res = await fetch('/api/energia-solar/instalaciones', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          propiedadId: formInstalacion.propiedadId,
+          capacidadKw: parseFloat(formInstalacion.capacidadKw),
+          numeroPaneles: parseInt(formInstalacion.numeroPaneles) || undefined,
+          fechaInstalacion: formInstalacion.fechaInstalacion || undefined,
+          inversor: formInstalacion.inversor || undefined,
+          inversionInicial: parseFloat(formInstalacion.inversionInicial) || undefined,
+        }),
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Instalación registrada exitosamente');
+        setShowAddDialog(false);
+        setFormInstalacion({
+          propiedadId: '',
+          capacidadKw: '',
+          numeroPaneles: '',
+          fechaInstalacion: '',
+          inversor: '',
+          inversionInicial: '',
+        });
+        loadData();
+      } else {
+        toast.error(data.error || 'Error al registrar instalación');
+      }
+    } catch (error) {
+      toast.error('Error al registrar instalación');
     }
   };
 
@@ -697,10 +765,7 @@ export default function EnergiaSolarPage() {
               <Button variant="outline" onClick={() => setShowAddDialog(false)}>
                 Cancelar
               </Button>
-              <Button onClick={() => {
-                toast.success('Instalación registrada');
-                setShowAddDialog(false);
-              }}>
+              <Button onClick={crearInstalacion}>
                 <Plus className="h-4 w-4 mr-2" />
                 Registrar
               </Button>

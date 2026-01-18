@@ -198,19 +198,22 @@ export default function InstalacionesDeportivasPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      // TODO: Integrar con API real
-      // const [instRes, resRes, mantRes, accRes] = await Promise.all([
-      //   fetch('/api/instalaciones-deportivas'),
-      //   fetch('/api/instalaciones-deportivas/reservas'),
-      //   fetch('/api/instalaciones-deportivas/mantenimientos'),
-      //   fetch('/api/instalaciones-deportivas/accesos'),
-      // ]);
+      const [instRes, resRes, mantRes, accRes] = await Promise.all([
+        fetch('/api/instalaciones-deportivas'),
+        fetch('/api/instalaciones-deportivas/reservas'),
+        fetch('/api/instalaciones-deportivas/mantenimientos'),
+        fetch('/api/instalaciones-deportivas/accesos'),
+      ]);
 
-      // Estado vacío inicial
-      setInstalaciones([]);
-      setReservas([]);
-      setMantenimientos([]);
-      setAccesos([]);
+      const instData = await instRes.json();
+      const resData = await resRes.json();
+      const mantData = await mantRes.json();
+      const accData = await accRes.json();
+
+      if (instData.success) setInstalaciones(instData.data || []);
+      if (resData.success) setReservas(resData.data || []);
+      if (mantData.success) setMantenimientos(mantData.data || []);
+      if (accData.success) setAccesos(accData.data || []);
     } catch (error) {
       console.error('Error cargando datos:', error);
       toast.error('Error al cargar instalaciones deportivas');
@@ -226,21 +229,31 @@ export default function InstalacionesDeportivasPage() {
     }
 
     try {
-      // TODO: Integrar con API real
-      toast.success('Instalación creada exitosamente');
-      setShowAddDialog(false);
-      setNuevaInstalacion({
-        nombre: '',
-        tipo: 'gimnasio',
-        ubicacion: '',
-        capacidad: 10,
-        horarioApertura: '07:00',
-        horarioCierre: '22:00',
-        precioHora: 0,
-        incluidoEnCuota: true,
-        descripcion: '',
+      const res = await fetch('/api/instalaciones-deportivas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nuevaInstalacion),
       });
-      loadData();
+      
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Instalación creada exitosamente');
+        setShowAddDialog(false);
+        setNuevaInstalacion({
+          nombre: '',
+          tipo: 'gimnasio',
+          ubicacion: '',
+          capacidad: 10,
+          horarioApertura: '07:00',
+          horarioCierre: '22:00',
+          precioHora: 0,
+          incluidoEnCuota: true,
+          descripcion: '',
+        });
+        loadData();
+      } else {
+        toast.error(data.error || 'Error al crear instalación');
+      }
     } catch (error) {
       toast.error('Error al crear instalación');
     }
@@ -253,17 +266,27 @@ export default function InstalacionesDeportivasPage() {
     }
 
     try {
-      // TODO: Integrar con API real
-      toast.success('Reserva creada exitosamente');
-      setShowReservaDialog(false);
-      setNuevaReserva({
-        instalacionId: '',
-        fecha: '',
-        horaInicio: '09:00',
-        horaFin: '10:00',
-        notas: '',
+      const res = await fetch('/api/instalaciones-deportivas/reservas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nuevaReserva),
       });
-      loadData();
+      
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Reserva creada exitosamente');
+        setShowReservaDialog(false);
+        setNuevaReserva({
+          instalacionId: '',
+          fecha: '',
+          horaInicio: '09:00',
+          horaFin: '10:00',
+          notas: '',
+        });
+        loadData();
+      } else {
+        toast.error(data.error || 'Error al crear reserva');
+      }
     } catch (error) {
       toast.error('Error al crear reserva');
     }
@@ -271,9 +294,17 @@ export default function InstalacionesDeportivasPage() {
 
   const cancelarReserva = async (id: string) => {
     try {
-      // TODO: Integrar con API real
-      toast.success('Reserva cancelada');
-      loadData();
+      const res = await fetch(`/api/instalaciones-deportivas/reservas/${id}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Reserva cancelada');
+        loadData();
+      } else {
+        toast.error(data.error || 'Error al cancelar reserva');
+      }
     } catch (error) {
       toast.error('Error al cancelar reserva');
     }

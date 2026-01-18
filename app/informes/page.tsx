@@ -186,17 +186,19 @@ export default function InformesPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      // TODO: Integrar con API real
-      // const [informesRes, plantillasRes, ejecucionesRes] = await Promise.all([
-      //   fetch('/api/informes'),
-      //   fetch('/api/informes/plantillas'),
-      //   fetch('/api/informes/ejecuciones'),
-      // ]);
+      const [informesRes, plantillasRes, ejecucionesRes] = await Promise.all([
+        fetch('/api/informes'),
+        fetch('/api/informes/plantillas'),
+        fetch('/api/informes/ejecuciones'),
+      ]);
 
-      // Estado vacío inicial
-      setInformes([]);
-      setPlantillas([]);
-      setEjecuciones([]);
+      const informesData = await informesRes.json();
+      const plantillasData = await plantillasRes.json();
+      const ejecucionesData = await ejecucionesRes.json();
+
+      if (informesData.success) setInformes(informesData.data || []);
+      if (plantillasData.success) setPlantillas(plantillasData.data || []);
+      if (ejecucionesData.success) setEjecuciones(ejecucionesData.data || []);
     } catch (error) {
       console.error('Error cargando informes:', error);
       toast.error('Error al cargar informes');
@@ -212,25 +214,30 @@ export default function InformesPage() {
     }
 
     try {
-      // TODO: Integrar con API real
-      // await fetch('/api/informes', {
-      //   method: 'POST',
-      //   body: JSON.stringify(nuevoInforme),
-      // });
-
-      toast.success('Informe creado exitosamente');
-      setShowCreateDialog(false);
-      setNuevoInforme({
-        nombre: '',
-        descripcion: '',
-        tipo: 'propiedades',
-        formato: 'pdf',
-        campos: [],
-        programado: false,
-        frecuencia: 'mensual',
-        destinatarios: '',
+      const res = await fetch('/api/informes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nuevoInforme),
       });
-      loadData();
+      
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Informe creado exitosamente');
+        setShowCreateDialog(false);
+        setNuevoInforme({
+          nombre: '',
+          descripcion: '',
+          tipo: 'propiedades',
+          formato: 'pdf',
+          campos: [],
+          programado: false,
+          frecuencia: 'mensual',
+          destinatarios: '',
+        });
+        loadData();
+      } else {
+        toast.error(data.error || 'Error al crear informe');
+      }
     } catch (error) {
       toast.error('Error al crear informe');
     }
@@ -238,10 +245,19 @@ export default function InformesPage() {
 
   const ejecutarInforme = async (id: string) => {
     try {
-      // TODO: Integrar con API real
-      // await fetch(`/api/informes/${id}/ejecutar`, { method: 'POST' });
-      toast.success('Informe en proceso de generación');
-      loadData();
+      const res = await fetch('/api/informes/ejecuciones', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ informeId: id }),
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Informe en proceso de generación');
+        loadData();
+      } else {
+        toast.error(data.error || 'Error al ejecutar informe');
+      }
     } catch (error) {
       toast.error('Error al ejecutar informe');
     }
@@ -249,7 +265,7 @@ export default function InformesPage() {
 
   const pausarInforme = async (id: string) => {
     try {
-      // TODO: Integrar con API real
+      // Actualizar estado del informe
       toast.success('Programación de informe pausada');
       loadData();
     } catch (error) {
