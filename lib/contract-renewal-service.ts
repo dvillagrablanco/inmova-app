@@ -1,13 +1,21 @@
 /**
- * Servicio de Renovación Automática de Contratos
- * Gestiona alertas, recordatorios y flujos de renovación
+ * SERVICIO DE RENOVACIÓN AUTOMÁTICA DE CONTRATOS
+ * 
+ * Gestiona el ciclo completo de renovación:
+ * 1. Detectar contratos próximos a vencer (90, 60, 30, 15 días)
+ * 2. Enviar alertas y recordatorios
+ * 3. Generar nuevo contrato con actualización de renta (IPC)
+ * 4. Enviar para firma digital
+ * 5. Activar nuevo contrato cuando se firma
+ * 
+ * @module ContractRenewalService
  */
 
 import { prisma } from './db';
 import { sendEmail } from './email-config';
 import { createNotification } from './notification-generator';
 import logger from './logger';
-import { format, addDays, differenceInDays } from 'date-fns';
+import { format, addDays, addYears, addMonths, differenceInDays, startOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 interface RenewalAlert {
@@ -650,5 +658,532 @@ export async function generateRenewalReport(companyId: string): Promise<any> {
     contracts,
     grouped,
     generatedAt: new Date(),
+  };
+}
+
+// ============================================================================
+// FLUJO DE RENOVACIÓN AUTOMÁTICA
+// ============================================================================
+
+export interface RenewalConfig {
+  durationMonths?: number;     // Duración del nuevo contrato (default: 12)
+  applyIpcIncrease?: boolean;  // Aplicar incremento IPC
+  ipcRate?: number;            // Tasa IPC a aplicar (default: último publicado)
+  customRentIncrease?: number; // Incremento personalizado en %
+  sendForSignature?: boolean;  // Enviar automáticamente para firma
+}
+
+export interface RenewalResult {
+  success: boolean;
+  originalContractId: string;
+  newContractId?: string;
+  newRent?: number;
+  rentIncreasePercent?: number;
+  message: string;
+  actions: string[];
+}
+
+/**
+ * Genera un nuevo contrato de renovación
+ */
+export async function generateRenewalContract(
+  contractId: string,
+  config: RenewalConfig = {}
+): Promise<RenewalResult> {
+  const actions: string[] = [];
+
+  try {
+    // 1. Obtener contrato original
+    const originalContract = await prisma.contract.findUnique({
+      where: { id: contractId },
+      include: {
+        tenant: true,
+        unit: {
+          include: {
+            building: {
+              include: { company: true },
+            },
+          },
+        },
+        clauses: true,
+      },
+    });
+
+    if (!originalContract) {
+      return {
+        success: false,
+        originalContractId: contractId,
+        message: 'Contrato original no encontrado',
+        actions,
+      };
+    }
+
+    // 2. Calcular nueva renta
+    const originalRent = Number(originalContract.rentaMensual);
+    let newRent = originalRent;
+    let rentIncreasePercent = 0;
+
+    if (config.customRentIncrease) {
+      // Incremento personalizado
+      rentIncreasePercent = config.customRentIncrease;
+      newRent = originalRent * (1 + rentIncreasePercent / 100);
+      actions.push(`Incremento de renta personalizado: ${rentIncreasePercent}%`);
+    } else if (config.applyIpcIncrease !== false) {
+      // Obtener último IPC (simulado - en producción conectar con INE)
+      const ipcRate = config.ipcRate || await getLatestIpcRate();
+      rentIncreasePercent = ipcRate;
+      newRent = originalRent * (1 + ipcRate / 100);
+      actions.push(`Incremento IPC aplicado: ${ipcRate}%`);
+    }
+
+    newRent = Math.round(newRent * 100) / 100; // Redondear a 2 decimales
+
+    // 3. Calcular fechas del nuevo contrato
+    const durationMonths = config.durationMonths || 12;
+    const newStartDate = addDays(new Date(originalContract.fechaFin), 1);
+    const newEndDate = addMonths(newStartDate, durationMonths);
+
+    // 4. Crear nuevo contrato
+    const newContract = await prisma.contract.create({
+      data: {
+        tenantId: originalContract.tenantId,
+        unitId: originalContract.unitId,
+        
+        // Fechas
+        fechaInicio: newStartDate,
+        fechaFin: newEndDate,
+        diaCobro: originalContract.diaCobro,
+        
+        // Importes
+        rentaMensual: newRent,
+        deposito: originalContract.deposito,
+        
+        // Estado
+        estado: 'borrador',
+        
+        // Referencia al contrato original
+        contratoAnteriorId: originalContract.id,
+        esRenovacion: true,
+        incrementoAplicado: rentIncreasePercent,
+        
+        // Copiar configuración
+        tipoContrato: originalContract.tipoContrato,
+        duracionMeses: durationMonths,
+      },
+    });
+
+    actions.push(`Nuevo contrato creado: ${newContract.id}`);
+
+    // 5. Copiar cláusulas del contrato original
+    if (originalContract.clauses && originalContract.clauses.length > 0) {
+      for (const clause of originalContract.clauses) {
+        await prisma.contractClause.create({
+          data: {
+            contractId: newContract.id,
+            titulo: clause.titulo,
+            contenido: clause.contenido,
+            orden: clause.orden,
+            esObligatoria: clause.esObligatoria,
+          },
+        });
+      }
+      actions.push(`${originalContract.clauses.length} cláusulas copiadas`);
+    }
+
+    // 6. Marcar contrato original como "pendiente_renovacion"
+    await prisma.contract.update({
+      where: { id: originalContract.id },
+      data: {
+        contratoRenovacionId: newContract.id,
+        estadoRenovacion: 'generado',
+      },
+    });
+
+    // 7. Crear notificación
+    const company = originalContract.unit.building.company;
+    await createNotification({
+      companyId: company.id,
+      tipo: 'contrato_renovacion',
+      titulo: '📋 Nuevo contrato de renovación generado',
+      mensaje: `Se ha generado el contrato de renovación para ${originalContract.tenant.nombreCompleto}. Nueva renta: ${newRent.toFixed(2)}€/mes (${rentIncreasePercent > 0 ? '+' : ''}${rentIncreasePercent.toFixed(2)}%)`,
+      prioridad: 'alta',
+      entityId: newContract.id,
+      entityType: 'Contract',
+      enlace: `/contratos/${newContract.id}`,
+    });
+
+    // 8. Enviar para firma si está configurado
+    if (config.sendForSignature) {
+      try {
+        const { initiateContractSignature } = await import('./digital-signature-service');
+        await initiateContractSignature({
+          contractId: newContract.id,
+          companyId: company.id,
+          requestedBy: 'system',
+        });
+        actions.push('Enviado para firma digital');
+      } catch (error) {
+        logger.warn('No se pudo enviar para firma:', error);
+        actions.push('Error al enviar para firma (requiere configuración)');
+      }
+    }
+
+    logger.info(`✅ Contrato de renovación generado: ${newContract.id}`);
+
+    return {
+      success: true,
+      originalContractId: contractId,
+      newContractId: newContract.id,
+      newRent,
+      rentIncreasePercent,
+      message: 'Contrato de renovación generado correctamente',
+      actions,
+    };
+  } catch (error: any) {
+    logger.error('Error generando contrato de renovación:', error);
+    return {
+      success: false,
+      originalContractId: contractId,
+      message: `Error: ${error.message}`,
+      actions,
+    };
+  }
+}
+
+/**
+ * Obtiene la última tasa IPC publicada
+ * En producción, esto debería conectar con el INE o similar
+ */
+async function getLatestIpcRate(): Promise<number> {
+  // Intentar obtener de la configuración o usar valor por defecto
+  try {
+    const config = await prisma.systemConfig.findFirst({
+      where: { key: 'latest_ipc_rate' },
+    });
+    if (config?.value) {
+      return parseFloat(config.value);
+    }
+  } catch {
+    // Ignorar error y usar valor por defecto
+  }
+  
+  // Valor por defecto basado en IPC España 2024
+  return 2.8;
+}
+
+/**
+ * Procesa renovaciones automáticas para contratos que vencen pronto
+ */
+export async function processAutoRenewals(
+  companyId?: string,
+  daysBeforeExpiry: number = 30
+): Promise<{
+  processed: number;
+  renewed: number;
+  errors: string[];
+}> {
+  const errors: string[] = [];
+  let processed = 0;
+  let renewed = 0;
+
+  try {
+    const now = new Date();
+    const targetDate = addDays(now, daysBeforeExpiry);
+
+    // Buscar contratos que:
+    // - Vencen en los próximos X días
+    // - Tienen auto-renovación activada
+    // - No tienen ya un contrato de renovación generado
+    const where: any = {
+      estado: 'activo',
+      autoRenovacion: true,
+      contratoRenovacionId: null,
+      fechaFin: {
+        lte: targetDate,
+        gte: now,
+      },
+    };
+
+    if (companyId) {
+      where.unit = {
+        building: { companyId },
+      };
+    }
+
+    const contracts = await prisma.contract.findMany({
+      where,
+      include: {
+        tenant: true,
+        unit: {
+          include: {
+            building: true,
+          },
+        },
+      },
+    });
+
+    processed = contracts.length;
+
+    for (const contract of contracts) {
+      try {
+        const result = await generateRenewalContract(contract.id, {
+          applyIpcIncrease: true,
+          sendForSignature: true,
+        });
+
+        if (result.success) {
+          renewed++;
+          
+          // Notificar al inquilino
+          await sendRenewalProposalEmail(contract, result.newRent!, result.rentIncreasePercent!);
+        } else {
+          errors.push(`Contrato ${contract.id}: ${result.message}`);
+        }
+      } catch (error: any) {
+        errors.push(`Contrato ${contract.id}: ${error.message}`);
+      }
+    }
+
+    logger.info(`📋 Auto-renovaciones procesadas: ${renewed}/${processed}`);
+
+    return { processed, renewed, errors };
+  } catch (error: any) {
+    logger.error('Error en proceso de auto-renovación:', error);
+    return { processed: 0, renewed: 0, errors: [error.message] };
+  }
+}
+
+/**
+ * Envía email de propuesta de renovación al inquilino
+ */
+async function sendRenewalProposalEmail(
+  contract: any,
+  newRent: number,
+  rentIncreasePercent: number
+): Promise<void> {
+  const tenant = contract.tenant;
+  if (!tenant.email) return;
+
+  const oldRent = Number(contract.rentaMensual);
+  const increaseAmount = newRent - oldRent;
+  const newEndDate = addYears(new Date(contract.fechaFin), 1);
+
+  await sendEmail({
+    to: tenant.email,
+    subject: '📋 Propuesta de renovación de contrato',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #1e40af;">Propuesta de renovación de contrato</h2>
+        
+        <p>Hola <strong>${tenant.nombreCompleto}</strong>,</p>
+        
+        <p>Tu contrato de alquiler está próximo a vencer y queremos ofrecerte la renovación.</p>
+        
+        <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #1e40af;">Condiciones de renovación</h3>
+          <table style="width: 100%;">
+            <tr>
+              <td style="color: #6b7280; padding: 8px 0;">Renta actual:</td>
+              <td style="font-weight: bold;">${oldRent.toFixed(2)} €/mes</td>
+            </tr>
+            <tr>
+              <td style="color: #6b7280; padding: 8px 0;">Nueva renta:</td>
+              <td style="font-weight: bold; color: #1e40af;">${newRent.toFixed(2)} €/mes</td>
+            </tr>
+            <tr>
+              <td style="color: #6b7280; padding: 8px 0;">Variación:</td>
+              <td>${increaseAmount >= 0 ? '+' : ''}${increaseAmount.toFixed(2)} € (${rentIncreasePercent >= 0 ? '+' : ''}${rentIncreasePercent.toFixed(2)}%)</td>
+            </tr>
+            <tr>
+              <td style="color: #6b7280; padding: 8px 0;">Nuevo período:</td>
+              <td>Hasta ${format(newEndDate, "d 'de' MMMM 'de' yyyy", { locale: es })}</td>
+            </tr>
+          </table>
+        </div>
+        
+        <p>Si estás de acuerdo con las condiciones, recibirás un email con el nuevo contrato para firmar digitalmente.</p>
+        
+        <p>Si tienes alguna pregunta o deseas negociar las condiciones, contacta con nosotros.</p>
+        
+        <a href="${process.env.NEXTAUTH_URL}/portal-inquilino/contrato" 
+           style="display: inline-block; background-color: #1e40af; color: white; 
+                  padding: 12px 24px; border-radius: 6px; text-decoration: none; 
+                  font-weight: bold; margin: 20px 0;">
+          Ver detalles en mi portal
+        </a>
+        
+        <p style="color: #6b7280; font-size: 0.9em; margin-top: 30px;">
+          Si no deseas renovar, tu contrato finalizará automáticamente en la fecha de vencimiento.
+        </p>
+      </div>
+    `,
+  });
+
+  logger.info(`📧 Propuesta de renovación enviada a ${tenant.email}`);
+}
+
+/**
+ * Confirma una renovación (cuando el inquilino acepta)
+ */
+export async function confirmRenewal(
+  renewalContractId: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const newContract = await prisma.contract.findUnique({
+      where: { id: renewalContractId },
+      include: {
+        contratoAnterior: true,
+      },
+    });
+
+    if (!newContract || !newContract.esRenovacion) {
+      return { success: false, message: 'Contrato de renovación no encontrado' };
+    }
+
+    // Actualizar estado del nuevo contrato
+    await prisma.contract.update({
+      where: { id: renewalContractId },
+      data: {
+        estado: 'pendiente_firma',
+      },
+    });
+
+    // Actualizar estado del contrato original
+    if (newContract.contratoAnteriorId) {
+      await prisma.contract.update({
+        where: { id: newContract.contratoAnteriorId },
+        data: {
+          estadoRenovacion: 'confirmado',
+        },
+      });
+    }
+
+    return { success: true, message: 'Renovación confirmada' };
+  } catch (error: any) {
+    return { success: false, message: error.message };
+  }
+}
+
+/**
+ * Rechaza una renovación
+ */
+export async function rejectRenewal(
+  renewalContractId: string,
+  reason?: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const newContract = await prisma.contract.findUnique({
+      where: { id: renewalContractId },
+    });
+
+    if (!newContract || !newContract.esRenovacion) {
+      return { success: false, message: 'Contrato de renovación no encontrado' };
+    }
+
+    // Cancelar el contrato de renovación
+    await prisma.contract.update({
+      where: { id: renewalContractId },
+      data: {
+        estado: 'cancelado',
+        motivoCancelacion: reason || 'Renovación rechazada por el inquilino',
+      },
+    });
+
+    // Actualizar estado del contrato original
+    if (newContract.contratoAnteriorId) {
+      await prisma.contract.update({
+        where: { id: newContract.contratoAnteriorId },
+        data: {
+          estadoRenovacion: 'rechazado',
+          contratoRenovacionId: null,
+        },
+      });
+    }
+
+    return { success: true, message: 'Renovación rechazada' };
+  } catch (error: any) {
+    return { success: false, message: error.message };
+  }
+}
+
+/**
+ * Obtiene estadísticas de renovaciones
+ */
+export async function getRenewalStats(companyId: string): Promise<{
+  pendingRenewals: number;
+  confirmedRenewals: number;
+  rejectedRenewals: number;
+  expiringIn30Days: number;
+  expiringIn60Days: number;
+  expiringIn90Days: number;
+  avgRentIncrease: number;
+}> {
+  const now = new Date();
+  
+  const [pending, confirmed, rejected, exp30, exp60, exp90, renewals] = await Promise.all([
+    prisma.contract.count({
+      where: {
+        esRenovacion: true,
+        estado: 'borrador',
+        unit: { building: { companyId } },
+      },
+    }),
+    prisma.contract.count({
+      where: {
+        esRenovacion: true,
+        estado: { in: ['pendiente_firma', 'activo'] },
+        unit: { building: { companyId } },
+      },
+    }),
+    prisma.contract.count({
+      where: {
+        esRenovacion: true,
+        estado: 'cancelado',
+        unit: { building: { companyId } },
+      },
+    }),
+    prisma.contract.count({
+      where: {
+        estado: 'activo',
+        fechaFin: { lte: addDays(now, 30), gte: now },
+        unit: { building: { companyId } },
+      },
+    }),
+    prisma.contract.count({
+      where: {
+        estado: 'activo',
+        fechaFin: { lte: addDays(now, 60), gte: now },
+        unit: { building: { companyId } },
+      },
+    }),
+    prisma.contract.count({
+      where: {
+        estado: 'activo',
+        fechaFin: { lte: addDays(now, 90), gte: now },
+        unit: { building: { companyId } },
+      },
+    }),
+    prisma.contract.findMany({
+      where: {
+        esRenovacion: true,
+        incrementoAplicado: { not: null },
+        unit: { building: { companyId } },
+      },
+      select: { incrementoAplicado: true },
+    }),
+  ]);
+
+  const avgIncrease = renewals.length > 0
+    ? renewals.reduce((sum, r) => sum + (r.incrementoAplicado || 0), 0) / renewals.length
+    : 0;
+
+  return {
+    pendingRenewals: pending,
+    confirmedRenewals: confirmed,
+    rejectedRenewals: rejected,
+    expiringIn30Days: exp30,
+    expiringIn60Days: exp60,
+    expiringIn90Days: exp90,
+    avgRentIncrease: Math.round(avgIncrease * 100) / 100,
   };
 }

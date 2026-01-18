@@ -146,20 +146,28 @@ async function handleSignatureReady(contract: any, data: any) {
 /**
  * Maneja evento: signature_completed
  * Todos los firmantes han firmado el documento
+ * 
+ * FLUJO COMPLETO:
+ * 1. Descargar documento firmado
+ * 2. Activar contrato (via ContractActivationService)
+ * 3. Generar primer pago
+ * 4. Configurar SEPA si aplica
+ * 5. Notificar a todas las partes
  */
 async function handleSignatureCompleted(contract: any, data: any) {
   try {
-    // 1. Actualizar estado del contrato
+    // 1. Actualizar estado de firma en contrato
     await prisma.contract.update({
       where: { id: contract.id },
       data: {
         signatureStatus: 'COMPLETED',
         signatureCompletedAt: new Date(),
-        estado: 'ACTIVO', // Activar contrato
       },
     });
 
     // 2. Descargar documento firmado y guardarlo en S3 (si está configurado)
+    let signedDocumentUrl: string | undefined;
+    
     if (S3Service.isS3Configured() && data.documents && data.documents.length > 0) {
       try {
         const documentId = data.documents[0].id;
@@ -178,17 +186,11 @@ async function handleSignatureCompleted(contract: any, data: any) {
           );
 
           if (uploadResult.success) {
-            await prisma.contract.update({
-              where: { id: contract.id },
-              data: {
-                signedDocumentUrl: uploadResult.url,
-              },
-            });
+            signedDocumentUrl = uploadResult.url;
           }
         }
       } catch (error) {
         console.error('[handleSignatureCompleted] Error downloading signed document:', error);
-        // No fallar el webhook por esto
       }
     }
 
@@ -220,7 +222,35 @@ async function handleSignatureCompleted(contract: any, data: any) {
       }
     }
 
-    // 4. Log de auditoría
+    // 4. ACTIVAR CONTRATO CON FLUJO COMPLETO
+    // Importar dinámicamente para evitar circular dependencies
+    const { activateContract } = await import('@/lib/contract-activation-service');
+    
+    const signatories = data.signers?.map((s: any) => s.email) || [];
+    const signedAt = data.signers?.[0]?.signed_at 
+      ? new Date(data.signers[0].signed_at) 
+      : new Date();
+
+    const activationResult = await activateContract(contract.id, {
+      signatureId: data.id,
+      signedDocumentUrl,
+      signedAt,
+      signedBy: signatories,
+      enableSepa: true, // Intentar configurar SEPA automáticamente
+    });
+
+    if (activationResult.success) {
+      console.log('[Signaturit] Contract activated:', {
+        contractId: contract.id,
+        paymentId: activationResult.paymentId,
+        sepaConfigured: activationResult.sepaConfigured,
+        actions: activationResult.actions,
+      });
+    } else {
+      console.error('[Signaturit] Contract activation failed:', activationResult.message);
+    }
+
+    // 5. Log de auditoría
     await prisma.auditLog.create({
       data: {
         action: 'SIGNATURE_COMPLETED',
@@ -232,14 +262,16 @@ async function handleSignatureCompleted(contract: any, data: any) {
             email: s.email,
             signedAt: s.signed_at,
           })),
+          activationResult: {
+            success: activationResult.success,
+            paymentId: activationResult.paymentId,
+            sepaConfigured: activationResult.sepaConfigured,
+          },
         },
       },
     });
 
-    // 5. Enviar notificación al propietario (opcional)
-    // await sendContractSignedNotification(contract);
-
-    console.log('[Signaturit] Signature completed:', data.id);
+    console.log('[Signaturit] Signature completed and contract activated:', data.id);
   } catch (error: any) {
     console.error('[handleSignatureCompleted] Error:', error);
   }
