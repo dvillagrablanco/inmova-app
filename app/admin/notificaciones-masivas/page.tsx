@@ -94,52 +94,7 @@ const NOTIFICATION_TYPES = [
   { value: 'in_app', label: 'In-App', icon: Bell },
 ];
 
-const AUDIENCE_SEGMENTS: AudienceSegment[] = [
-  {
-    id: 'all',
-    name: 'Todos los Clientes',
-    description: 'Todas las empresas registradas',
-    count: 156,
-    criteria: ['Todos los clientes activos'],
-  },
-  {
-    id: 'active',
-    name: 'Clientes Activos',
-    description: 'Empresas con actividad en los últimos 30 días',
-    count: 89,
-    criteria: ['Plan activo', 'Login en últimos 30 días'],
-  },
-  {
-    id: 'trial',
-    name: 'En Período de Prueba',
-    description: 'Empresas en trial que no han convertido',
-    count: 23,
-    criteria: ['Plan trial', 'Sin pago registrado'],
-  },
-  {
-    id: 'expiring',
-    name: 'Suscripción por Vencer',
-    description: 'Empresas cuyo plan vence en los próximos 15 días',
-    count: 12,
-    criteria: ['Renovación < 15 días'],
-  },
-  {
-    id: 'inactive',
-    name: 'Clientes Inactivos',
-    description: 'Sin login en más de 30 días',
-    count: 34,
-    criteria: ['Sin actividad > 30 días'],
-  },
-  {
-    id: 'enterprise',
-    name: 'Plan Enterprise',
-    description: 'Clientes con plan Enterprise',
-    count: 18,
-    criteria: ['Plan = Enterprise'],
-  },
-];
-
-// No mock data - cargar datos reales desde la API
+// Segmentos de audiencia - se cargan dinámicamente desde la API
 
 const STATUS_CONFIG = {
   draft: { label: 'Borrador', color: 'bg-gray-100 text-gray-800' },
@@ -154,6 +109,7 @@ export default function MassNotificationsPage() {
 
   const [loading, setLoading] = useState(true);
   const [campaigns, setCampaigns] = useState<NotificationCampaign[]>([]);
+  const [audienceSegments, setAudienceSegments] = useState<AudienceSegment[]>([]);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState<NotificationCampaign | null>(null);
   const [sending, setSending] = useState(false);
@@ -184,19 +140,27 @@ export default function MassNotificationsPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Cargar datos reales desde la API (sin datos demo)
-      const response = await fetch('/api/admin/notification-campaigns');
-      if (response.ok) {
-        const data = await response.json();
+      // Cargar campañas
+      const campaignsResponse = await fetch('/api/admin/notification-campaigns');
+      if (campaignsResponse.ok) {
+        const data = await campaignsResponse.json();
         setCampaigns(data.campaigns || []);
       } else {
-        // Si no hay datos o API no disponible, mostrar lista vacía
         setCampaigns([]);
+      }
+
+      // Cargar segmentos de audiencia dinámicamente
+      const segmentsResponse = await fetch('/api/admin/audience-segments');
+      if (segmentsResponse.ok) {
+        const segmentsData = await segmentsResponse.json();
+        setAudienceSegments(segmentsData.segments || []);
+      } else {
+        setAudienceSegments([]);
       }
     } catch (error) {
       console.error('Error loading data:', error);
-      // En caso de error, mostrar lista vacía (no mock data)
       setCampaigns([]);
+      setAudienceSegments([]);
     } finally {
       setLoading(false);
     }
@@ -224,7 +188,7 @@ export default function MassNotificationsPage() {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      const audience = AUDIENCE_SEGMENTS.find((a) => a.id === formData.targetAudience);
+      const audience = audienceSegments.find((a) => a.id === formData.targetAudience);
 
       const newCampaign: NotificationCampaign = {
         id: String(campaigns.length + 1),
@@ -268,7 +232,7 @@ export default function MassNotificationsPage() {
     );
   }
 
-  const selectedAudience = AUDIENCE_SEGMENTS.find((a) => a.id === formData.targetAudience);
+  const selectedAudience = audienceSegments.find((a) => a.id === formData.targetAudience);
 
   return (
     <AuthenticatedLayout>
@@ -366,7 +330,11 @@ export default function MassNotificationsPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {AUDIENCE_SEGMENTS.map((segment) => (
+              {audienceSegments.length === 0 ? (
+                <div className="col-span-full text-center py-8 text-muted-foreground">
+                  No hay segmentos de audiencia disponibles
+                </div>
+              ) : audienceSegments.map((segment) => (
                 <div
                   key={segment.id}
                   className="p-4 border rounded-lg hover:border-indigo-300 transition-colors"
@@ -553,7 +521,7 @@ export default function MassNotificationsPage() {
                     <SelectValue placeholder="Selecciona un segmento" />
                   </SelectTrigger>
                   <SelectContent>
-                    {AUDIENCE_SEGMENTS.map((segment) => (
+                    {audienceSegments.map((segment) => (
                       <SelectItem key={segment.id} value={segment.id}>
                         <div className="flex items-center justify-between gap-4">
                           <span>{segment.name}</span>

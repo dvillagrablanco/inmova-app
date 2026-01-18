@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Store,
@@ -34,66 +34,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
-// Datos de ejemplo
-const mockLocales = [
-  {
-    id: '1',
-    nombre: 'Local 12B - Centro Comercial Norte',
-    direccion: 'Av. de la Ilustración 8, Local 12B, Madrid',
-    superficie: 85,
-    superficieUtil: 80,
-    estado: 'ocupada',
-    rentaMensual: 2800,
-    arrendatario: 'Café Central SL',
-    tipo: 'local_centro_comercial',
-    longitudFachada: 6,
-    actividad: 'Hostelería',
-    caracteristicas: ['fachada', 'climatizacion', 'salida_humos'],
-  },
-  {
-    id: '2',
-    nombre: 'Local a pie de calle - Gran Vía',
-    direccion: 'Gran Vía 78, Madrid',
-    superficie: 120,
-    superficieUtil: 115,
-    estado: 'disponible',
-    rentaMensual: 5500,
-    arrendatario: null,
-    tipo: 'local_comercial',
-    longitudFachada: 8,
-    actividad: null,
-    caracteristicas: ['fachada', 'escaparate', 'climatizacion'],
-  },
-  {
-    id: '3',
-    nombre: 'Local 5A - Mercado Gourmet',
-    direccion: 'Calle Fuencarral 45, Madrid',
-    superficie: 45,
-    superficieUtil: 42,
-    estado: 'ocupada',
-    rentaMensual: 1800,
-    arrendatario: 'Delicias del Mar',
-    tipo: 'local_centro_comercial',
-    longitudFachada: 4,
-    actividad: 'Alimentación',
-    caracteristicas: ['fachada', 'refrigeracion'],
-  },
-  {
-    id: '4',
-    nombre: 'Local esquina - Barrio Salamanca',
-    direccion: 'Calle Serrano 92 esquina Goya, Madrid',
-    superficie: 200,
-    superficieUtil: 185,
-    estado: 'reservada',
-    rentaMensual: 8500,
-    arrendatario: 'Negociación en curso',
-    tipo: 'local_comercial',
-    longitudFachada: 12,
-    actividad: null,
-    caracteristicas: ['fachada', 'escaparate', 'climatizacion', 'doble_altura'],
-  },
-];
+interface Local {
+  id: string;
+  nombre: string;
+  direccion: string;
+  superficie: number;
+  superficieUtil: number;
+  estado: 'ocupada' | 'disponible' | 'reservada' | 'mantenimiento';
+  rentaMensual: number;
+  arrendatario: string | null;
+  tipo: string;
+  longitudFachada: number;
+  actividad: string | null;
+  caracteristicas: string[];
+}
 
 const estadoColors: Record<string, string> = {
   ocupada: 'bg-green-100 text-green-800',
@@ -110,15 +66,52 @@ const actividadIcons: Record<string, any> = {
 };
 
 export default function LocalesPage() {
+  const [locales, setLocales] = useState<Local[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [estadoFilter, setEstadoFilter] = useState('todos');
 
-  const filteredLocales = mockLocales.filter((local) => {
+  useEffect(() => {
+    loadLocales();
+  }, []);
+
+  const loadLocales = async () => {
+    try {
+      setLoading(true);
+      // TODO: Integrar con API real
+      // const response = await fetch('/api/comercial/locales');
+      // const data = await response.json();
+      // setLocales(data.locales);
+      
+      // Estado vacío inicial
+      setLocales([]);
+    } catch (error) {
+      toast.error('Error al cargar los locales');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredLocales = locales.filter((local) => {
     const matchesSearch = local.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
       local.direccion.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesEstado = estadoFilter === 'todos' || local.estado === estadoFilter;
     return matchesSearch && matchesEstado;
   });
+
+  // KPIs dinámicos
+  const totalLocales = locales.length;
+  const ocupados = locales.filter(l => l.estado === 'ocupada').length;
+  const disponibles = locales.filter(l => l.estado === 'disponible').length;
+  const ingresosMes = locales.reduce((sum, l) => sum + l.rentaMensual, 0);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6 flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -153,25 +146,25 @@ export default function LocalesPage() {
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-gray-600">Total Locales</div>
-            <div className="text-2xl font-bold">15</div>
+            <div className="text-2xl font-bold">{totalLocales}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-gray-600">Ocupados</div>
-            <div className="text-2xl font-bold text-green-600">12</div>
+            <div className="text-2xl font-bold text-green-600">{ocupados}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-gray-600">Disponibles</div>
-            <div className="text-2xl font-bold text-blue-600">3</div>
+            <div className="text-2xl font-bold text-blue-600">{disponibles}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-gray-600">Ingresos/mes</div>
-            <div className="text-2xl font-bold">28.500€</div>
+            <div className="text-2xl font-bold">{ingresosMes.toLocaleString('es-ES')}€</div>
           </CardContent>
         </Card>
       </div>
@@ -211,6 +204,23 @@ export default function LocalesPage() {
       </Card>
 
       {/* Lista de locales */}
+      {filteredLocales.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-12">
+            <Store className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No hay locales comerciales</h3>
+            <p className="text-gray-600 mb-4">
+              Añade tu primer local comercial para empezar
+            </p>
+            <Button asChild>
+              <Link href="/comercial/espacios/nuevo?tipo=local">
+                <Plus className="h-4 w-4 mr-2" />
+                Nuevo Local
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredLocales.map((local) => {
           const ActividadIcon = local.actividad ? actividadIcons[local.actividad] || Store : Store;
@@ -306,6 +316,7 @@ export default function LocalesPage() {
           );
         })}
       </div>
+      )}
     </div>
   );
 }

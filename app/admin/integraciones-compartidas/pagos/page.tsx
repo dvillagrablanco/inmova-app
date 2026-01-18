@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   ArrowLeft, 
   CheckCircle2, 
@@ -22,10 +23,53 @@ import {
   Smartphone
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
+
+interface PaymentProvider {
+  id: string;
+  name: string;
+  description: string;
+  status: 'connected' | 'disconnected' | 'error';
+  mode: 'live' | 'test';
+  stats: {
+    transactions: number;
+    volume: string;
+    fee: string;
+  };
+}
+
+interface PaymentSummary {
+  totalTransactions: number;
+  totalVolume: number;
+  totalCommissions: number;
+  successRate: number;
+}
+
+interface CompanyPayments {
+  name: string;
+  methods: string[];
+  transactions: number;
+}
+
+const PROVIDER_ICONS: Record<string, any> = {
+  stripe: CreditCard,
+  gocardless: Building2,
+  redsys: Smartphone,
+};
+
+const PROVIDER_COLORS: Record<string, string> = {
+  stripe: 'from-purple-500 to-indigo-600',
+  gocardless: 'from-cyan-500 to-blue-600',
+  redsys: 'from-red-500 to-orange-500',
+};
 
 export default function PagosCompartidosPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [providers, setProviders] = useState<PaymentProvider[]>([]);
+  const [summary, setSummary] = useState<PaymentSummary | null>(null);
+  const [companiesWithPayments, setCompaniesWithPayments] = useState<CompanyPayments[]>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -36,56 +80,38 @@ export default function PagosCompartidosPage() {
     if (status === 'authenticated' && userRole && !allowedRoles.map(r => r.toLowerCase()).includes(userRole)) {
       router.push('/unauthorized');
     }
+    if (status === 'authenticated') {
+      loadData();
+    }
   }, [status, session, router]);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/integrations/payments/status');
+      if (response.ok) {
+        const data = await response.json();
+        setProviders(data.providers || []);
+        setSummary(data.summary || null);
+        setCompaniesWithPayments(data.companiesWithPayments || []);
+      } else {
+        setProviders([]);
+        setSummary(null);
+        setCompaniesWithPayments([]);
+      }
+    } catch (error) {
+      console.error('Error loading payment data:', error);
+      setProviders([]);
+      setSummary(null);
+      setCompaniesWithPayments([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (status === 'loading') {
     return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
   }
-
-  const paymentProviders = [
-    {
-      id: 'stripe',
-      name: 'Stripe',
-      description: 'Tarjetas de crédito/débito internacionales',
-      icon: CreditCard,
-      color: 'from-purple-500 to-indigo-600',
-      status: 'connected',
-      mode: 'live',
-      stats: {
-        transactions: 1234,
-        volume: '€45,230',
-        fee: '1.4% + €0.25'
-      }
-    },
-    {
-      id: 'gocardless',
-      name: 'GoCardless',
-      description: 'Domiciliación bancaria SEPA',
-      icon: Building2,
-      color: 'from-cyan-500 to-blue-600',
-      status: 'connected',
-      mode: 'live',
-      stats: {
-        transactions: 456,
-        volume: '€89,340',
-        fee: '1% + €0.20'
-      }
-    },
-    {
-      id: 'redsys',
-      name: 'Redsys',
-      description: 'TPV Virtual y Bizum',
-      icon: Smartphone,
-      color: 'from-red-500 to-orange-500',
-      status: 'connected',
-      mode: 'live',
-      stats: {
-        transactions: 890,
-        volume: '€34,560',
-        fee: '0.5% - 1.5%'
-      }
-    },
-  ];
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-5xl">
@@ -95,14 +121,20 @@ export default function PagosCompartidosPage() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Volver a Integraciones Compartidas
         </Link>
-        <div className="flex items-center gap-4">
-          <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-            <CreditCard className="h-8 w-8 text-white" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+              <CreditCard className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">Pasarelas de Pago</h1>
+              <p className="text-muted-foreground">Stripe, GoCardless y Redsys - Configuración centralizada de Inmova</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold">Pasarelas de Pago</h1>
-            <p className="text-muted-foreground">Stripe, GoCardless y Redsys - Configuración centralizada de Inmova</p>
-          </div>
+          <Button variant="outline" onClick={loadData} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Actualizar
+          </Button>
         </div>
       </div>
 
@@ -124,147 +156,179 @@ export default function PagosCompartidosPage() {
           <CardDescription>Totales agregados de todas las pasarelas</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="p-4 border rounded-lg">
-              <p className="text-sm text-muted-foreground">Transacciones Totales</p>
-              <p className="text-2xl font-bold">2,580</p>
-              <p className="text-xs text-muted-foreground">Este mes</p>
+          {loading ? (
+            <div className="grid gap-4 md:grid-cols-4">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-20 w-full" />
+              ))}
             </div>
-            <div className="p-4 border rounded-lg">
-              <p className="text-sm text-muted-foreground">Volumen Total</p>
-              <p className="text-2xl font-bold text-green-600">€169,130</p>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-4">
+              <div className="p-4 border rounded-lg">
+                <p className="text-sm text-muted-foreground">Transacciones Totales</p>
+                <p className="text-2xl font-bold">{summary?.totalTransactions?.toLocaleString('es-ES') || 0}</p>
+                <p className="text-xs text-muted-foreground">Este mes</p>
+              </div>
+              <div className="p-4 border rounded-lg">
+                <p className="text-sm text-muted-foreground">Volumen Total</p>
+                <p className="text-2xl font-bold text-green-600">
+                  €{summary?.totalVolume?.toLocaleString('es-ES', { minimumFractionDigits: 2 }) || '0,00'}
+                </p>
+              </div>
+              <div className="p-4 border rounded-lg">
+                <p className="text-sm text-muted-foreground">Comisiones</p>
+                <p className="text-2xl font-bold text-red-500">
+                  €{summary?.totalCommissions?.toLocaleString('es-ES', { minimumFractionDigits: 2 }) || '0,00'}
+                </p>
+              </div>
+              <div className="p-4 border rounded-lg">
+                <p className="text-sm text-muted-foreground">Tasa de Éxito</p>
+                <p className="text-2xl font-bold">{summary?.successRate || 0}%</p>
+              </div>
             </div>
-            <div className="p-4 border rounded-lg">
-              <p className="text-sm text-muted-foreground">Comisiones</p>
-              <p className="text-2xl font-bold text-red-500">€2,340</p>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <p className="text-sm text-muted-foreground">Tasa de Éxito</p>
-              <p className="text-2xl font-bold">98.7%</p>
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 
       {/* Pasarelas */}
-      <Tabs defaultValue="stripe" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="stripe">Stripe</TabsTrigger>
-          <TabsTrigger value="gocardless">GoCardless</TabsTrigger>
-          <TabsTrigger value="redsys">Redsys</TabsTrigger>
-        </TabsList>
+      {loading ? (
+        <Skeleton className="h-96 w-full" />
+      ) : providers.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-muted-foreground">No hay pasarelas de pago configuradas</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Tabs defaultValue={providers[0]?.id || 'stripe'} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            {providers.map((provider) => (
+              <TabsTrigger key={provider.id} value={provider.id}>
+                {provider.name}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        {paymentProviders.map((provider) => (
-          <TabsContent key={provider.id} value={provider.id}>
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className={`h-12 w-12 rounded-lg bg-gradient-to-br ${provider.color} flex items-center justify-center`}>
-                      <provider.icon className="h-6 w-6 text-white" />
+          {providers.map((provider) => {
+            const Icon = PROVIDER_ICONS[provider.id] || CreditCard;
+            const color = PROVIDER_COLORS[provider.id] || 'from-gray-500 to-gray-600';
+            
+            return (
+              <TabsContent key={provider.id} value={provider.id}>
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className={`h-12 w-12 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center`}>
+                          <Icon className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <CardTitle>{provider.name}</CardTitle>
+                          <CardDescription>{provider.description}</CardDescription>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">{provider.mode === 'live' ? '🟢 Live' : '🟡 Test'}</Badge>
+                        <Badge variant={provider.status === 'connected' ? 'default' : 'secondary'}>
+                          {provider.status === 'connected' ? (
+                            <><CheckCircle2 className="h-3 w-3 mr-1" />Conectado</>
+                          ) : (
+                            <><XCircle className="h-3 w-3 mr-1" />Desconectado</>
+                          )}
+                        </Badge>
+                      </div>
                     </div>
-                    <div>
-                      <CardTitle>{provider.name}</CardTitle>
-                      <CardDescription>{provider.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Stats */}
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <div className="p-4 border rounded-lg">
+                        <p className="text-sm text-muted-foreground">Transacciones</p>
+                        <p className="text-2xl font-bold">{provider.stats.transactions}</p>
+                      </div>
+                      <div className="p-4 border rounded-lg">
+                        <p className="text-sm text-muted-foreground">Volumen</p>
+                        <p className="text-2xl font-bold text-green-600">{provider.stats.volume}</p>
+                      </div>
+                      <div className="p-4 border rounded-lg">
+                        <p className="text-sm text-muted-foreground">Comisión</p>
+                        <p className="text-2xl font-bold">{provider.stats.fee}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">{provider.mode === 'live' ? '🟢 Live' : '🟡 Test'}</Badge>
-                    <Badge variant="default">
-                      <CheckCircle2 className="h-3 w-3 mr-1" />
-                      Conectado
-                    </Badge>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Stats */}
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div className="p-4 border rounded-lg">
-                    <p className="text-sm text-muted-foreground">Transacciones</p>
-                    <p className="text-2xl font-bold">{provider.stats.transactions}</p>
-                  </div>
-                  <div className="p-4 border rounded-lg">
-                    <p className="text-sm text-muted-foreground">Volumen</p>
-                    <p className="text-2xl font-bold text-green-600">{provider.stats.volume}</p>
-                  </div>
-                  <div className="p-4 border rounded-lg">
-                    <p className="text-sm text-muted-foreground">Comisión</p>
-                    <p className="text-2xl font-bold">{provider.stats.fee}</p>
-                  </div>
-                </div>
 
-                {/* Configuración */}
-                <div className="space-y-4">
-                  {provider.id === 'stripe' && (
-                    <>
-                      <div className="space-y-2">
-                        <Label>Publishable Key</Label>
-                        <Input defaultValue="pk_live_••••••••••••••••" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Secret Key</Label>
-                        <Input type="password" defaultValue="sk_live_••••••••••••••••" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Webhook Secret</Label>
-                        <Input type="password" defaultValue="whsec_••••••••••••••••" />
-                      </div>
-                    </>
-                  )}
-                  {provider.id === 'gocardless' && (
-                    <>
-                      <div className="space-y-2">
-                        <Label>Access Token</Label>
-                        <Input type="password" defaultValue="live_••••••••••••••••" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Webhook Secret</Label>
-                        <Input type="password" defaultValue="••••••••••••••••" />
-                      </div>
-                    </>
-                  )}
-                  {provider.id === 'redsys' && (
-                    <>
-                      <div className="space-y-2">
-                        <Label>Código de Comercio (FUC)</Label>
-                        <Input defaultValue="999008881" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Clave de Encriptación</Label>
-                        <Input type="password" defaultValue="••••••••••••••••" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Terminal</Label>
-                        <Input defaultValue="001" />
-                      </div>
-                    </>
-                  )}
+                    {/* Configuración */}
+                    <div className="space-y-4">
+                      {provider.id === 'stripe' && (
+                        <>
+                          <div className="space-y-2">
+                            <Label>Publishable Key</Label>
+                            <Input placeholder="pk_live_xxxx" type="password" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Secret Key</Label>
+                            <Input type="password" placeholder="sk_live_xxxx" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Webhook Secret</Label>
+                            <Input type="password" placeholder="whsec_xxxx" />
+                          </div>
+                        </>
+                      )}
+                      {provider.id === 'gocardless' && (
+                        <>
+                          <div className="space-y-2">
+                            <Label>Access Token</Label>
+                            <Input type="password" placeholder="live_xxxx" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Webhook Secret</Label>
+                            <Input type="password" placeholder="Webhook Secret" />
+                          </div>
+                        </>
+                      )}
+                      {provider.id === 'redsys' && (
+                        <>
+                          <div className="space-y-2">
+                            <Label>Código de Comercio (FUC)</Label>
+                            <Input placeholder="999008881" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Clave de Encriptación</Label>
+                            <Input type="password" placeholder="Clave de encriptación" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Terminal</Label>
+                            <Input placeholder="001" />
+                          </div>
+                        </>
+                      )}
 
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <p className="font-medium">Modo Live</p>
-                      <p className="text-sm text-muted-foreground">Procesar pagos reales</p>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <p className="font-medium">Modo Live</p>
+                          <p className="text-sm text-muted-foreground">Procesar pagos reales</p>
+                        </div>
+                        <Switch defaultChecked={provider.mode === 'live'} />
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button onClick={() => toast.success('Conexión verificada')}>
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Probar Conexión
+                        </Button>
+                        <Button variant="outline">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Abrir Dashboard
+                        </Button>
+                      </div>
                     </div>
-                    <Switch defaultChecked />
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button>
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Probar Conexión
-                    </Button>
-                    <Button variant="outline">
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Abrir Dashboard
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        ))}
-      </Tabs>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            );
+          })}
+        </Tabs>
+      )}
 
       {/* Empresas que usan pagos */}
       <Card className="mt-6">
@@ -273,23 +337,31 @@ export default function PagosCompartidosPage() {
           <CardDescription>Clientes de Inmova que usan estas pasarelas</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {[
-              { name: 'Inmobiliaria García', methods: ['Stripe', 'GoCardless'], transactions: 234 },
-              { name: 'Gestiones López', methods: ['Stripe'], transactions: 156 },
-              { name: 'Alquileres Madrid', methods: ['Stripe', 'Redsys'], transactions: 89 },
-            ].map((company, idx) => (
-              <div key={idx} className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <p className="font-medium">{company.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {company.methods.join(', ')}
-                  </p>
+          {loading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          ) : companiesWithPayments.length === 0 ? (
+            <p className="text-center py-8 text-muted-foreground">
+              No hay empresas con pagos activos este mes
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {companiesWithPayments.map((company, idx) => (
+                <div key={idx} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{company.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {company.methods.length > 0 ? company.methods.join(', ') : 'Sin método asignado'}
+                    </p>
+                  </div>
+                  <Badge variant="outline">{company.transactions} transacciones</Badge>
                 </div>
-                <Badge variant="outline">{company.transactions} transacciones</Badge>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

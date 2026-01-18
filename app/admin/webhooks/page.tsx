@@ -63,11 +63,16 @@ export default function WebhooksPage() {
 
   const loadWebhooks = async () => {
     try {
-      // En una implementación real, esto llamaría a una API
-      // Por ahora, mostramos un estado inicial vacío
-      setWebhooks([]);
+      const response = await fetch('/api/admin/webhooks');
+      if (!response.ok) {
+        throw new Error('Error al cargar webhooks');
+      }
+      const data = await response.json();
+      setWebhooks(data.webhooks || []);
     } catch (error) {
+      console.error('Error al cargar webhooks:', error);
       toast.error('Error al cargar webhooks');
+      setWebhooks([]);
     } finally {
       setIsLoading(false);
     }
@@ -86,36 +91,68 @@ export default function WebhooksPage() {
     }
 
     try {
-      const webhook: WebhookConfig = {
-        id: `wh_${Date.now()}`,
-        ...newWebhook,
-        secret: generateSecret(),
-        active: true,
-        lastStatus: 'pending',
-      };
+      const response = await fetch('/api/admin/webhooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newWebhook),
+      });
       
-      setWebhooks([...webhooks, webhook]);
+      if (!response.ok) {
+        throw new Error('Error al crear webhook');
+      }
+      
+      const data = await response.json();
+      
+      setWebhooks([...webhooks, data.webhook]);
       setNewWebhook({ name: '', url: '', events: [] });
       setIsCreating(false);
       toast.success('Webhook creado correctamente');
     } catch (error) {
+      console.error('Error al crear webhook:', error);
       toast.error('Error al crear webhook');
     }
   };
 
   const handleDeleteWebhook = async (id: string) => {
     try {
+      const response = await fetch(`/api/admin/webhooks?id=${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Error al eliminar webhook');
+      }
+      
       setWebhooks(webhooks.filter(w => w.id !== id));
       toast.success('Webhook eliminado');
     } catch (error) {
+      console.error('Error al eliminar webhook:', error);
       toast.error('Error al eliminar webhook');
     }
   };
 
   const handleToggleActive = async (id: string) => {
-    setWebhooks(webhooks.map(w => 
-      w.id === id ? { ...w, active: !w.active } : w
-    ));
+    const webhook = webhooks.find(w => w.id === id);
+    if (!webhook) return;
+    
+    try {
+      const response = await fetch('/api/admin/webhooks', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, active: !webhook.active }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Error al actualizar webhook');
+      }
+      
+      setWebhooks(webhooks.map(w => 
+        w.id === id ? { ...w, active: !w.active } : w
+      ));
+    } catch (error) {
+      console.error('Error al actualizar webhook:', error);
+      toast.error('Error al actualizar webhook');
+    }
   };
 
   const handleTestWebhook = async (webhook: WebhookConfig) => {

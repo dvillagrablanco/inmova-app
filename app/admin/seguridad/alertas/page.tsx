@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Shield,
   AlertTriangle,
@@ -18,19 +19,21 @@ import {
   Globe,
   Clock,
   RefreshCw,
+  FileEdit,
+  Trash2,
 } from 'lucide-react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface SecurityAlert {
   id: string;
-  type: 'login_failed' | 'suspicious_activity' | 'ip_blocked' | 'brute_force' | 'data_breach';
+  type: 'FAILED_LOGINS' | 'AUDIT_CHANGE' | 'suspicious_activity' | 'ip_blocked' | 'brute_force' | 'data_breach';
   severity: 'low' | 'medium' | 'high' | 'critical';
-  title: string;
-  description: string;
-  timestamp: string;
+  title?: string;
+  description?: string;
+  timestamp?: string;
   status: 'new' | 'acknowledged' | 'resolved';
-  metadata?: Record<string, any>;
+  data?: any;
 }
 
 interface AlertConfig {
@@ -47,47 +50,56 @@ export default function SecurityAlertsPage() {
   const [configs, setConfigs] = useState<AlertConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('alerts');
+  const [period, setPeriod] = useState('7');
+  const [summary, setSummary] = useState({ critical: 0, high: 0, medium: 0, low: 0 });
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [period]);
 
   const loadData = async () => {
+    setIsLoading(true);
     try {
-      // Alertas de ejemplo
-      const sampleAlerts: SecurityAlert[] = [
-        {
-          id: '1',
-          type: 'login_failed',
-          severity: 'medium',
-          title: 'Múltiples intentos de login fallidos',
-          description: '5 intentos fallidos desde la IP 192.168.1.100 en los últimos 10 minutos',
-          timestamp: new Date().toISOString(),
+      // Cargar alertas desde la API real
+      const response = await fetch(`/api/admin/security-alerts?period=${period}`);
+      if (!response.ok) {
+        throw new Error('Error al cargar alertas');
+      }
+      const data = await response.json();
+      
+      // Transformar alertas al formato esperado
+      const transformedAlerts: SecurityAlert[] = (data.alerts || []).map((alert: any, index: number) => {
+        let title = '';
+        let description = '';
+        let timestamp = new Date().toISOString();
+        
+        if (alert.type === 'FAILED_LOGINS') {
+          title = `Múltiples intentos de login fallidos`;
+          description = `${alert.data?.failedAttempts || 0} intentos fallidos para el usuario ${alert.data?.user?.email || 'desconocido'}`;
+          timestamp = alert.data?.createdAt || new Date().toISOString();
+        } else if (alert.type === 'AUDIT_CHANGE') {
+          const action = alert.data?.action || 'CAMBIO';
+          title = action === 'DELETE' ? 'Eliminación de registro' : 'Modificación de registro';
+          description = `${action} en ${alert.data?.entity || 'entidad'} por ${alert.data?.user?.email || 'usuario desconocido'}`;
+          timestamp = alert.data?.createdAt || new Date().toISOString();
+        }
+        
+        return {
+          id: `alert-${index}-${Date.now()}`,
+          type: alert.type,
+          severity: alert.severity || 'medium',
+          title,
+          description,
+          timestamp,
           status: 'new',
-          metadata: { ip: '192.168.1.100', attempts: 5, user: 'admin@test.com' },
-        },
-        {
-          id: '2',
-          type: 'suspicious_activity',
-          severity: 'high',
-          title: 'Acceso desde ubicación inusual',
-          description: 'Inicio de sesión detectado desde un nuevo país (India) para el usuario test@company.com',
-          timestamp: new Date(Date.now() - 30 * 60000).toISOString(),
-          status: 'acknowledged',
-          metadata: { country: 'India', city: 'Mumbai' },
-        },
-        {
-          id: '3',
-          type: 'ip_blocked',
-          severity: 'low',
-          title: 'IP bloqueada automáticamente',
-          description: 'La IP 10.0.0.55 ha sido bloqueada por exceder el límite de rate limiting',
-          timestamp: new Date(Date.now() - 2 * 60 * 60000).toISOString(),
-          status: 'resolved',
-          metadata: { ip: '10.0.0.55', reason: 'rate_limit_exceeded' },
-        },
-      ];
+          data: alert.data,
+        };
+      });
+      
+      setAlerts(transformedAlerts);
+      setSummary(data.summary || { critical: 0, high: 0, medium: 0, low: 0 });
 
+      // Configuraciones por defecto (estas podrían venir de otra API en el futuro)
       const defaultConfigs: AlertConfig[] = [
         {
           id: 'login_failed',
@@ -120,11 +132,11 @@ export default function SecurityAlertsPage() {
           channels: ['email'],
         },
       ];
-
-      setAlerts(sampleAlerts);
       setConfigs(defaultConfigs);
     } catch (error) {
-      toast.error('Error al cargar datos de seguridad');
+      console.error('Error al cargar datos de seguridad:', error);
+      toast.error('Error al cargar alertas de seguridad');
+      setAlerts([]);
     } finally {
       setIsLoading(false);
     }
@@ -160,6 +172,7 @@ export default function SecurityAlertsPage() {
 
   const getTypeIcon = (type: string) => {
     switch (type) {
+      case 'FAILED_LOGINS':
       case 'login_failed':
         return <Lock className="h-5 w-5" />;
       case 'suspicious_activity':
@@ -168,6 +181,8 @@ export default function SecurityAlertsPage() {
         return <Globe className="h-5 w-5" />;
       case 'brute_force':
         return <UserX className="h-5 w-5" />;
+      case 'AUDIT_CHANGE':
+        return <FileEdit className="h-5 w-5" />;
       default:
         return <Shield className="h-5 w-5" />;
     }
@@ -187,10 +202,11 @@ export default function SecurityAlertsPage() {
     toast.success('Alerta resuelta');
   };
 
-  const handleToggleConfig = (id: string) => {
+  const handleToggleConfig = async (id: string) => {
     setConfigs(configs.map(c => 
       c.id === id ? { ...c, enabled: !c.enabled } : c
     ));
+    toast.success('Configuración actualizada');
   };
 
   const newAlerts = alerts.filter(a => a.status === 'new').length;
@@ -207,10 +223,23 @@ export default function SecurityAlertsPage() {
               Monitorea y configura alertas de seguridad de la plataforma
             </p>
           </div>
-          <Button onClick={loadData} disabled={isLoading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            Actualizar
-          </Button>
+          <div className="flex items-center gap-4">
+            <Select value={period} onValueChange={setPeriod}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Período" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">Últimas 24 horas</SelectItem>
+                <SelectItem value="7">Últimos 7 días</SelectItem>
+                <SelectItem value="30">Últimos 30 días</SelectItem>
+                <SelectItem value="90">Últimos 90 días</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button onClick={loadData} disabled={isLoading}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              Actualizar
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -218,17 +247,8 @@ export default function SecurityAlertsPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-yellow-500" />
-                <span className="text-2xl font-bold">{newAlerts}</span>
-                <span className="text-muted-foreground">Nuevas</span>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-red-500" />
-                <span className="text-2xl font-bold">{criticalAlerts}</span>
+                <span className="text-2xl font-bold">{summary.critical}</span>
                 <span className="text-muted-foreground">Críticas</span>
               </div>
             </CardContent>
@@ -236,11 +256,18 @@ export default function SecurityAlertsPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                <span className="text-2xl font-bold">
-                  {alerts.filter(a => a.status === 'resolved').length}
-                </span>
-                <span className="text-muted-foreground">Resueltas</span>
+                <AlertTriangle className="h-5 w-5 text-orange-500" />
+                <span className="text-2xl font-bold">{summary.high}</span>
+                <span className="text-muted-foreground">Altas</span>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                <span className="text-2xl font-bold">{summary.medium}</span>
+                <span className="text-muted-foreground">Medias</span>
               </div>
             </CardContent>
           </Card>
@@ -268,13 +295,20 @@ export default function SecurityAlertsPage() {
           </TabsList>
 
           <TabsContent value="alerts" className="space-y-4">
-            {alerts.length === 0 ? (
+            {isLoading ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <RefreshCw className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
+                  <p className="text-muted-foreground">Cargando alertas...</p>
+                </CardContent>
+              </Card>
+            ) : alerts.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
                   <Shield className="h-12 w-12 mx-auto text-green-500 mb-4" />
                   <h3 className="text-lg font-semibold mb-2">Todo está seguro</h3>
                   <p className="text-muted-foreground">
-                    No hay alertas de seguridad activas
+                    No hay alertas de seguridad en el período seleccionado
                   </p>
                 </CardContent>
               </Card>
@@ -298,26 +332,28 @@ export default function SecurityAlertsPage() {
                         </div>
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <h3 className="font-semibold">{alert.title}</h3>
+                            <h3 className="font-semibold">{alert.title || alert.type}</h3>
                             {getSeverityBadge(alert.severity)}
                           </div>
                           <p className="text-sm text-muted-foreground">
-                            {alert.description}
+                            {alert.description || 'Sin descripción'}
                           </p>
                           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {new Date(alert.timestamp).toLocaleString()}
-                            </span>
+                            {alert.timestamp && (
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {new Date(alert.timestamp).toLocaleString()}
+                              </span>
+                            )}
                             <span className="flex items-center gap-1">
                               {getStatusIcon(alert.status)}
                               {alert.status === 'new' ? 'Nueva' :
                                alert.status === 'acknowledged' ? 'Revisada' : 'Resuelta'}
                             </span>
                           </div>
-                          {alert.metadata && (
-                            <div className="mt-2 p-2 bg-muted/50 rounded text-xs font-mono">
-                              {JSON.stringify(alert.metadata, null, 2)}
+                          {alert.data && (
+                            <div className="mt-2 p-2 bg-muted/50 rounded text-xs font-mono overflow-auto max-h-32">
+                              {JSON.stringify(alert.data, null, 2)}
                             </div>
                           )}
                         </div>
