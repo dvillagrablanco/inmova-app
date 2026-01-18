@@ -715,6 +715,9 @@ model Tenant {
   referralsEnviados        TenantReferral[]        @relation("TenantReferrer")
   referralRecibido         TenantReferral?         @relation("TenantReferred")
 
+  // Facturación a inquilinos
+  tenantInvoices TenantInvoice[]
+
   // Índices optimizados para consultas frecuentes
   @@index([companyId])
   @@index([email])
@@ -1405,6 +1408,9 @@ model Contract {
   // Nuevas funcionalidades IA (Firma Digital)
   contractSignatures ContractSignature[] @relation("ContractSignatures")
 
+  // Facturación a inquilinos
+  tenantInvoices TenantInvoice[]
+
   // Índices optimizados para consultas frecuentes
   @@index([tenantId, estado])
   @@index([unitId, estado])
@@ -1463,13 +1469,12 @@ model Payment {
   badDebtProvision BadDebtProvision?
 
   // Facturación a inquilinos
-  tenantInvoice   TenantInvoice?
-  tenantInvoiceId String?
-  
+  tenantInvoice TenantInvoice?
+
   // GoCardless SEPA fields
   gcPaymentId     String?
   gcPaymentStatus String?
-  
+
   // Conciliación bancaria
   referenciaBancaria String?
   notas              String?
@@ -2157,6 +2162,9 @@ model Company {
   documentImportBatches      DocumentImportBatch[]
   documentImports            DocumentImport[]
   onboardingDocumentSessions OnboardingDocumentSession?
+
+  // Facturación a inquilinos
+  tenantInvoices TenantInvoice[]
 
   @@map("company")
 }
@@ -15753,7 +15761,6 @@ model OnboardingDocumentSession {
   @@map("onboarding_document_sessions")
 }
 
-
 // ============================================================================
 // FACTURACIÓN A INQUILINOS
 // ============================================================================
@@ -15762,54 +15769,54 @@ model TenantInvoice {
   id            String @id @default(cuid())
   invoiceNumber String @unique
   series        String @default("ALQ")
-  
+
   // Relaciones
-  paymentId  String  @unique
-  payment    Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  paymentId  String   @unique
+  payment    Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
   contractId String
   contract   Contract @relation(fields: [contractId], references: [id])
   tenantId   String
   tenant     Tenant   @relation(fields: [tenantId], references: [id])
   companyId  String
   company    Company  @relation(fields: [companyId], references: [id])
-  
+
   // Datos fiscales del emisor
   issuerName    String
   issuerTaxId   String
   issuerAddress String
-  
+
   // Datos del destinatario
   recipientName    String
   recipientTaxId   String?
   recipientAddress String?
-  
+
   // Concepto
   concept     String
   description String?
   period      String
-  
+
   // Importes
   baseAmount  Float
-  vatRate     Float   @default(0)
-  vatAmount   Float   @default(0)
-  irpfRate    Float   @default(0)
-  irpfAmount  Float   @default(0)
+  vatRate     Float @default(0)
+  vatAmount   Float @default(0)
+  irpfRate    Float @default(0)
+  irpfAmount  Float @default(0)
   totalAmount Float
-  
+
   // Fechas
-  issueDate   DateTime @default(now())
+  issueDate   DateTime  @default(now())
   dueDate     DateTime?
   paymentDate DateTime?
-  
+
   // Estado y PDF
-  status             String  @default("issued") // draft, issued, paid, cancelled
+  status             String    @default("issued") // draft, issued, paid, cancelled
   pdfUrl             String?
   cancelledAt        DateTime?
   cancellationReason String?
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([tenantId])
   @@index([companyId])
   @@index([contractId])
@@ -15817,4 +15824,3 @@ model TenantInvoice {
   @@index([issueDate])
   @@map("tenant_invoices")
 }
-
