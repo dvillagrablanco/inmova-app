@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,15 +42,21 @@ interface OnboardingProgress {
   vertical: string;
 }
 
+// Clave para localStorage para persistir el cierre del wizard
+const WIZARD_DISMISSED_KEY = 'inmova-onboarding-wizard-dismissed';
+
 export default function SmartOnboardingWizard() {
   const router = useRouter();
   const { data: session } = useSession();
   const [progress, setProgress] = useState<OnboardingProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(true);
+  // Ref para evitar reabrir el wizard en la misma sesión
+  const dismissedRef = useRef(false);
 
   // Obtener el rol del usuario
   const userRole = (session?.user as any)?.role;
+  const userId = (session?.user as any)?.id;
 
   useEffect(() => {
     // No cargar para superadmin
@@ -59,8 +65,21 @@ export default function SmartOnboardingWizard() {
       setIsVisible(false);
       return;
     }
+    
+    // Verificar si el wizard fue cerrado previamente (localStorage)
+    if (userId) {
+      const dismissedKey = `${WIZARD_DISMISSED_KEY}-${userId}`;
+      const wasDismissed = localStorage.getItem(dismissedKey);
+      if (wasDismissed === 'true') {
+        setLoading(false);
+        setIsVisible(false);
+        dismissedRef.current = true;
+        return;
+      }
+    }
+    
     loadProgress();
-  }, [userRole]);
+  }, [userRole, userId]);
 
   const loadProgress = async () => {
     try {
@@ -137,11 +156,26 @@ export default function SmartOnboardingWizard() {
 
       if (res.ok) {
         toast.info('Onboarding omitido. Puedes retomarlo en cualquier momento.');
+        // Persistir en localStorage para evitar que reaparezca
+        if (userId) {
+          localStorage.setItem(`${WIZARD_DISMISSED_KEY}-${userId}`, 'true');
+        }
+        dismissedRef.current = true;
         setIsVisible(false);
       }
     } catch (error) {
       logger.error('Error skipping onboarding:', error);
     }
+  };
+
+  // Handler para cerrar el wizard con la X (también persiste el estado)
+  const handleDismiss = () => {
+    // Persistir en localStorage para evitar que reaparezca
+    if (userId) {
+      localStorage.setItem(`${WIZARD_DISMISSED_KEY}-${userId}`, 'true');
+    }
+    dismissedRef.current = true;
+    setIsVisible(false);
   };
 
   const handleRestart = async () => {
@@ -174,7 +208,7 @@ export default function SmartOnboardingWizard() {
     );
   }
 
-  if (!progress || !isVisible) {
+  if (!progress || !isVisible || dismissedRef.current) {
     return null;
   }
 
@@ -234,7 +268,7 @@ export default function SmartOnboardingWizard() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setIsVisible(false)}
+                  onClick={handleDismiss}
                 >
                   <X className="h-4 w-4" />
                 </Button>
