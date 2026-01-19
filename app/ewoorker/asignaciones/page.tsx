@@ -31,101 +31,49 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
-// Mock data para asignaciones
-const mockAsignaciones = [
-  {
-    id: '1',
-    trabajador: {
-      id: 'w1',
-      nombre: 'Carlos García',
-      especialidad: 'Electricista',
-      avatar: null,
-      rating: 4.8,
-    },
-    obra: {
-      id: 'o1',
-      nombre: 'Reforma Oficinas Gran Vía',
-      empresa: 'Constructora Madrid S.L.',
-      direccion: 'Gran Vía 45, Madrid',
-    },
-    fechaInicio: new Date(Date.now() - 5 * 86400000),
-    fechaFin: new Date(Date.now() + 10 * 86400000),
-    estado: 'activa',
-    tarifaDiaria: 180,
-    diasTrabajados: 5,
-    diasTotales: 15,
-  },
-  {
-    id: '2',
-    trabajador: {
-      id: 'w2',
-      nombre: 'María López',
-      especialidad: 'Fontanera',
-      avatar: null,
-      rating: 4.9,
-    },
-    obra: {
-      id: 'o2',
-      nombre: 'Residencial Las Torres',
-      empresa: 'Inmobiliaria Norte',
-      direccion: 'Av. de la Castellana 200, Madrid',
-    },
-    fechaInicio: new Date(Date.now() - 2 * 86400000),
-    fechaFin: new Date(Date.now() + 8 * 86400000),
-    estado: 'activa',
-    tarifaDiaria: 165,
-    diasTrabajados: 2,
-    diasTotales: 10,
-  },
-  {
-    id: '3',
-    trabajador: {
-      id: 'w3',
-      nombre: 'Pedro Martínez',
-      especialidad: 'Albañil',
-      avatar: null,
-      rating: 4.5,
-    },
-    obra: {
-      id: 'o1',
-      nombre: 'Reforma Oficinas Gran Vía',
-      empresa: 'Constructora Madrid S.L.',
-      direccion: 'Gran Vía 45, Madrid',
-    },
-    fechaInicio: new Date(Date.now() - 15 * 86400000),
-    fechaFin: new Date(Date.now() - 1 * 86400000),
-    estado: 'completada',
-    tarifaDiaria: 150,
-    diasTrabajados: 14,
-    diasTotales: 14,
-  },
-  {
-    id: '4',
-    trabajador: {
-      id: 'w4',
-      nombre: 'Ana Sánchez',
-      especialidad: 'Pintora',
-      avatar: null,
-      rating: 4.7,
-    },
-    obra: {
-      id: 'o3',
-      nombre: 'Chalet Pozuelo',
-      empresa: 'Reformas Premium',
-      direccion: 'C/ del Bosque 12, Pozuelo',
-    },
-    fechaInicio: new Date(Date.now() + 3 * 86400000),
-    fechaFin: new Date(Date.now() + 10 * 86400000),
-    estado: 'pendiente',
-    tarifaDiaria: 140,
-    diasTrabajados: 0,
-    diasTotales: 7,
-  },
-];
+interface Asignacion {
+  id: string;
+  trabajador: {
+    id: string;
+    nombre: string;
+    especialidad: string;
+    avatar: string | null;
+    rating: number;
+  };
+  obra: {
+    id: string;
+    nombre: string;
+    empresa: string;
+    direccion: string;
+  };
+  fechaInicio: string;
+  fechaFin: string | null;
+  estado: string;
+  tarifaDiaria: number;
+  diasTrabajados: number;
+  diasTotales: number;
+}
 
-const estadoConfig = {
+interface Stats {
+  totalAsignaciones: number;
+  activas: number;
+  completadas: number;
+  pendientes: number;
+  canceladas?: number;
+}
+
+const estadoConfig: Record<
+  string,
+  { label: string; color: string; icon: React.ComponentType<{ className?: string }> }
+> = {
+  asignado: { label: 'Pendiente', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
+  en_curso: { label: 'Activa', color: 'bg-green-100 text-green-800', icon: CheckCircle },
+  completado: { label: 'Completada', color: 'bg-blue-100 text-blue-800', icon: CheckCircle },
+  cancelado: { label: 'Cancelada', color: 'bg-red-100 text-red-800', icon: AlertCircle },
+  // Aliases for backward compatibility
   pendiente: { label: 'Pendiente', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
   activa: { label: 'Activa', color: 'bg-green-100 text-green-800', icon: CheckCircle },
   completada: { label: 'Completada', color: 'bg-blue-100 text-blue-800', icon: CheckCircle },
@@ -137,28 +85,96 @@ export default function EwoorkerAsignacionesPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
+  const [stats, setStats] = useState<Stats>({
+    totalAsignaciones: 0,
+    activas: 0,
+    completadas: 0,
+    pendientes: 0,
+  });
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/ewoorker/login');
     } else if (status === 'authenticated') {
-      setLoading(false);
+      fetchAsignaciones();
     }
   }, [status, router]);
 
-  const stats = {
-    totalAsignaciones: 24,
-    activas: 8,
-    completadas: 14,
-    pendientes: 2,
-    ingresosMes: 12500,
-    tasaExito: 92,
+  const fetchAsignaciones = async () => {
+    try {
+      const response = await fetch('/api/ewoorker/asignaciones');
+      if (!response.ok) {
+        throw new Error('Error al cargar asignaciones');
+      }
+      const data = await response.json();
+      setAsignaciones(data.asignaciones || []);
+      setStats(
+        data.stats || {
+          totalAsignaciones: 0,
+          activas: 0,
+          completadas: 0,
+          pendientes: 0,
+        }
+      );
+    } catch (error) {
+      console.error('Error fetching asignaciones:', error);
+      toast.error('Error al cargar las asignaciones');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // Calcular ingresos del mes y tasa de éxito
+  const ingresosMes = asignaciones
+    .filter((a) => a.estado === 'en_curso' || a.estado === 'activa')
+    .reduce((sum, a) => sum + a.tarifaDiaria * a.diasTrabajados, 0);
+
+  const tasaExito =
+    stats.totalAsignaciones > 0
+      ? Math.round((stats.completadas / stats.totalAsignaciones) * 100)
+      : 0;
 
   if (loading || status === 'loading') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600" />
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50">
+        <div className="container mx-auto px-4 py-8">
+          <Skeleton className="h-8 w-48 mb-6" />
+          <div className="flex justify-between mb-8">
+            <div>
+              <Skeleton className="h-10 w-64 mb-2" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+            <div className="flex gap-2">
+              <Skeleton className="h-10 w-24" />
+              <Skeleton className="h-10 w-36" />
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-4 mb-8">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i}>
+                <CardHeader className="pb-2">
+                  <Skeleton className="h-4 w-24" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-8 w-16" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-24 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -222,8 +238,8 @@ export default function EwoorkerAsignacionesPage() {
               <CheckCircle className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.tasaExito}%</div>
-              <Progress value={stats.tasaExito} className="mt-2" />
+              <div className="text-2xl font-bold">{tasaExito}%</div>
+              <Progress value={tasaExito} className="mt-2" />
             </CardContent>
           </Card>
           <Card>
@@ -232,7 +248,7 @@ export default function EwoorkerAsignacionesPage() {
               <Building2 className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.ingresosMes.toLocaleString()}€</div>
+              <div className="text-2xl font-bold">{ingresosMes.toLocaleString()}€</div>
               <p className="text-xs text-muted-foreground">comisiones generadas</p>
             </CardContent>
           </Card>
@@ -252,9 +268,7 @@ export default function EwoorkerAsignacionesPage() {
         <Card>
           <CardHeader>
             <CardTitle>Listado de Asignaciones</CardTitle>
-            <CardDescription>
-              Todas las asignaciones de trabajadores a obras
-            </CardDescription>
+            <CardDescription>Todas las asignaciones de trabajadores a obras</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -266,91 +280,116 @@ export default function EwoorkerAsignacionesPage() {
               </TabsList>
               <TabsContent value={activeTab} className="mt-4">
                 <div className="space-y-4">
-                  {mockAsignaciones
-                    .filter((a) => activeTab === 'all' || a.estado === activeTab)
-                    .map((asignacion) => {
-                      const estadoInfo = estadoConfig[asignacion.estado as keyof typeof estadoConfig];
-                      const EstadoIcon = estadoInfo.icon;
-                      const progreso = Math.round(
-                        (asignacion.diasTrabajados / asignacion.diasTotales) * 100
-                      );
+                  {asignaciones.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No hay asignaciones</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Aún no tienes asignaciones de trabajadores a obras
+                      </p>
+                      <Button className="bg-orange-600 hover:bg-orange-700">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Nueva Asignación
+                      </Button>
+                    </div>
+                  ) : (
+                    asignaciones
+                      .filter((a) => {
+                        if (activeTab === 'all') return true;
+                        // Map tab values to estado values
+                        const estadoMap: Record<string, string[]> = {
+                          activa: ['en_curso', 'activa'],
+                          pendiente: ['asignado', 'pendiente'],
+                          completada: ['completado', 'completada'],
+                        };
+                        return estadoMap[activeTab]?.includes(a.estado) || a.estado === activeTab;
+                      })
+                      .map((asignacion) => {
+                        const estadoInfo =
+                          estadoConfig[asignacion.estado] || estadoConfig['pendiente'];
+                        const EstadoIcon = estadoInfo.icon;
+                        const progreso =
+                          asignacion.diasTotales > 0
+                            ? Math.round((asignacion.diasTrabajados / asignacion.diasTotales) * 100)
+                            : 0;
 
-                      return (
-                        <div
-                          key={asignacion.id}
-                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                        >
-                          <div className="flex items-center gap-4">
-                            {/* Trabajador */}
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-12 w-12">
-                                <AvatarImage src={asignacion.trabajador.avatar || undefined} />
-                                <AvatarFallback className="bg-orange-100 text-orange-600">
-                                  {asignacion.trabajador.nombre
-                                    .split(' ')
-                                    .map((n) => n[0])
-                                    .join('')}
-                                </AvatarFallback>
-                              </Avatar>
+                        return (
+                          <div
+                            key={asignacion.id}
+                            className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                          >
+                            <div className="flex items-center gap-4">
+                              {/* Trabajador */}
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-12 w-12">
+                                  <AvatarImage src={asignacion.trabajador.avatar || undefined} />
+                                  <AvatarFallback className="bg-orange-100 text-orange-600">
+                                    {asignacion.trabajador.nombre
+                                      .split(' ')
+                                      .map((n) => n[0])
+                                      .join('')}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <h3 className="font-medium">{asignacion.trabajador.nombre}</h3>
+                                  <Badge variant="secondary" className="text-xs">
+                                    <HardHat className="h-3 w-3 mr-1" />
+                                    {asignacion.trabajador.especialidad}
+                                  </Badge>
+                                </div>
+                              </div>
+
+                              <ArrowRight className="h-5 w-5 text-muted-foreground" />
+
+                              {/* Obra */}
                               <div>
-                                <h3 className="font-medium">{asignacion.trabajador.nombre}</h3>
-                                <Badge variant="secondary" className="text-xs">
-                                  <HardHat className="h-3 w-3 mr-1" />
-                                  {asignacion.trabajador.especialidad}
-                                </Badge>
+                                <h3 className="font-medium">{asignacion.obra.nombre}</h3>
+                                <p className="text-sm text-muted-foreground">
+                                  {asignacion.obra.empresa}
+                                </p>
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                  <MapPin className="h-3 w-3" />
+                                  {asignacion.obra.direccion}
+                                </div>
                               </div>
                             </div>
 
-                            <ArrowRight className="h-5 w-5 text-muted-foreground" />
-
-                            {/* Obra */}
-                            <div>
-                              <h3 className="font-medium">{asignacion.obra.nombre}</h3>
-                              <p className="text-sm text-muted-foreground">
-                                {asignacion.obra.empresa}
-                              </p>
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                                <MapPin className="h-3 w-3" />
-                                {asignacion.obra.direccion}
+                            <div className="flex items-center gap-6">
+                              {/* Progreso */}
+                              <div className="text-center">
+                                <div className="text-sm font-medium">
+                                  {asignacion.diasTrabajados}/{asignacion.diasTotales} días
+                                </div>
+                                <Progress value={progreso} className="w-24 mt-1" />
                               </div>
+
+                              {/* Tarifa */}
+                              <div className="text-right">
+                                <div className="text-lg font-bold">
+                                  {asignacion.tarifaDiaria}€
+                                  <span className="text-xs text-muted-foreground font-normal">
+                                    /día
+                                  </span>
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  Total: {asignacion.tarifaDiaria * asignacion.diasTotales}€
+                                </div>
+                              </div>
+
+                              {/* Estado */}
+                              <Badge className={estadoInfo.color}>
+                                <EstadoIcon className="h-3 w-3 mr-1" />
+                                {estadoInfo.label}
+                              </Badge>
+
+                              <Button variant="outline" size="sm">
+                                Ver Detalles
+                              </Button>
                             </div>
                           </div>
-
-                          <div className="flex items-center gap-6">
-                            {/* Progreso */}
-                            <div className="text-center">
-                              <div className="text-sm font-medium">
-                                {asignacion.diasTrabajados}/{asignacion.diasTotales} días
-                              </div>
-                              <Progress value={progreso} className="w-24 mt-1" />
-                            </div>
-
-                            {/* Tarifa */}
-                            <div className="text-right">
-                              <div className="text-lg font-bold">
-                                {asignacion.tarifaDiaria}€
-                                <span className="text-xs text-muted-foreground font-normal">
-                                  /día
-                                </span>
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                Total: {asignacion.tarifaDiaria * asignacion.diasTotales}€
-                              </div>
-                            </div>
-
-                            {/* Estado */}
-                            <Badge className={estadoInfo.color}>
-                              <EstadoIcon className="h-3 w-3 mr-1" />
-                              {estadoInfo.label}
-                            </Badge>
-
-                            <Button variant="outline" size="sm">
-                              Ver Detalles
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
