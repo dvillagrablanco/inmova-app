@@ -73,101 +73,19 @@ export default function ProfessionalClientsPage() {
     try {
       setLoading(true);
       
-      // Mock data - TODO: Replace with real API
-      setClients([
-        {
-          id: 'c1',
-          name: 'María García López',
-          email: 'maria.garcia@email.com',
-          phone: '+34 612 345 678',
-          type: 'individual',
-          status: 'active',
-          propertiesCount: 5,
-          monthlyRevenue: 850,
-          contractStart: '2024-01-15',
-          contractEnd: '2025-01-15',
-          nextBilling: '2026-01-01',
-          paymentStatus: 'paid',
-          lastContact: '2025-12-20',
-          tags: ['Alquiler Larga Duración', 'Premium'],
-        },
-        {
-          id: 'c2',
-          name: 'Inversiones Urbanas SL',
-          email: 'contacto@inversionesurbanas.com',
-          phone: '+34 915 123 456',
-          type: 'company',
-          status: 'active',
-          propertiesCount: 12,
-          monthlyRevenue: 2400,
-          contractStart: '2023-06-01',
-          contractEnd: '2025-06-01',
-          nextBilling: '2026-01-01',
-          paymentStatus: 'paid',
-          lastContact: '2025-12-18',
-          tags: ['Alquiler Vacacional', 'Corporativo', 'VIP'],
-        },
-        {
-          id: 'c3',
-          name: 'Carlos Rodríguez',
-          email: 'carlos.r@email.com',
-          phone: '+34 678 901 234',
-          type: 'individual',
-          status: 'active',
-          propertiesCount: 3,
-          monthlyRevenue: 450,
-          contractStart: '2024-09-01',
-          contractEnd: '2025-09-01',
-          nextBilling: '2026-01-01',
-          paymentStatus: 'pending',
-          lastContact: '2025-12-15',
-          tags: ['Coliving'],
-        },
-        {
-          id: 'c4',
-          name: 'Ana Martínez',
-          email: 'ana.martinez@email.com',
-          phone: '+34 654 321 098',
-          type: 'individual',
-          status: 'pending',
-          propertiesCount: 0,
-          monthlyRevenue: 0,
-          contractStart: '2025-12-26',
-          contractEnd: '2026-12-26',
-          nextBilling: '2026-01-01',
-          paymentStatus: 'pending',
-          lastContact: '2025-12-26',
-          tags: ['Nuevo Cliente'],
-        },
-        {
-          id: 'c5',
-          name: 'Propiedades del Sur SA',
-          email: 'info@propiedadesdelsur.es',
-          phone: '+34 955 678 901',
-          type: 'company',
-          status: 'active',
-          propertiesCount: 8,
-          monthlyRevenue: 1600,
-          contractStart: '2024-03-01',
-          contractEnd: '2026-03-01',
-          nextBilling: '2026-01-01',
-          paymentStatus: 'overdue',
-          lastContact: '2025-11-30',
-          tags: ['Alquiler Larga Duración', 'Moroso'],
-        },
-      ]);
-
-      const mockStats: ClientStats = {
-        totalClients: 5,
-        activeClients: 4,
-        totalProperties: 28,
-        monthlyRevenue: 5300,
-        pendingPayments: 450,
-        avgPropertiesPerClient: 5.6,
-      };
-      setStats(mockStats);
+      // Fetch from real API
+      const response = await fetch('/api/professional/clients');
+      
+      if (!response.ok) {
+        throw new Error('Error al cargar clientes');
+      }
+      
+      const data = await response.json();
+      setClients(data.clients || []);
+      setStats(data.stats || null);
 
     } catch (error) {
+      console.error('Error loading clients:', error);
       toast.error('Error al cargar clientes');
     } finally {
       setLoading(false);

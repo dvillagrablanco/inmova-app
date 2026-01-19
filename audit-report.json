@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-01-19T18:50:07.467Z",
+  "timestamp": "2026-01-19T19:13:57.909Z",
   "summary": {
     "errors": 7,
-    "warnings": 119,
+    "warnings": 115,
     "info": 177,
-    "total": 303
+    "total": 299
   },
   "results": [
     {
@@ -19,34 +19,6 @@
       "file": "app/ewoorker/asignaciones/page.tsx",
       "message": "Array mock: const mockAsignaciones = [...",
       "line": 37
-    },
-    {
-      "category": "mock-data",
-      "severity": "warning",
-      "file": "app/comercial/oficinas/page.tsx",
-      "message": "Array mock: const mockOficinas = [...",
-      "line": 39
-    },
-    {
-      "category": "mock-data",
-      "severity": "warning",
-      "file": "app/comercial/naves/page.tsx",
-      "message": "Array mock: const mockNaves = [...",
-      "line": 39
-    },
-    {
-      "category": "mock-data",
-      "severity": "warning",
-      "file": "app/comercial/locales/page.tsx",
-      "message": "Array mock: const mockLocales = [...",
-      "line": 39
-    },
-    {
-      "category": "mock-data",
-      "severity": "warning",
-      "file": "app/comercial/coworking/page.tsx",
-      "message": "Array mock: const mockCoworking = [...",
-      "line": 41
     },
     {
       "category": "mock-data",
@@ -76,12 +48,6 @@
     {
       "category": "api",
       "severity": "info",
-      "file": "app/api/tenants/route.ts",
-      "message": "API sin verificación de sesión (puede ser intencional)"
-    },
-    {
-      "category": "api",
-      "severity": "info",
       "file": "app/api/tasks/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
@@ -89,6 +55,12 @@
       "category": "api",
       "severity": "info",
       "file": "app/api/suggestions/route.ts",
+      "message": "API sin verificación de sesión (puede ser intencional)"
+    },
+    {
+      "category": "api",
+      "severity": "info",
+      "file": "app/api/tenants/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
@@ -130,13 +102,13 @@
     {
       "category": "api",
       "severity": "info",
-      "file": "app/api/notification-templates/route.ts",
+      "file": "app/api/notification-rules/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
       "category": "api",
       "severity": "info",
-      "file": "app/api/notification-rules/route.ts",
+      "file": "app/api/notification-templates/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
@@ -231,6 +203,12 @@
     },
     {
       "category": "api",
+      "severity": "info",
+      "file": "app/api/users/[id]/route.ts",
+      "message": "API sin verificación de sesión (puede ser intencional)"
+    },
+    {
+      "category": "api",
       "severity": "warning",
       "file": "app/api/v1/webhooks/route.ts",
       "message": "Archivo de API sin métodos HTTP exportados"
@@ -267,12 +245,6 @@
     },
     {
       "category": "api",
-      "severity": "info",
-      "file": "app/api/users/[id]/route.ts",
-      "message": "API sin verificación de sesión (puede ser intencional)"
-    },
-    {
-      "category": "api",
       "severity": "warning",
       "file": "app/api/user/generate-demo-data/route.ts",
       "message": "API con Prisma sin especificar runtime"
@@ -298,6 +270,18 @@
     {
       "category": "api",
       "severity": "info",
+      "file": "app/api/stripe/webhook/route.ts",
+      "message": "API sin verificación de sesión (puede ser intencional)"
+    },
+    {
+      "category": "api",
+      "severity": "info",
+      "file": "app/api/str/channel-manager/route.ts",
+      "message": "API sin verificación de sesión (puede ser intencional)"
+    },
+    {
+      "category": "api",
+      "severity": "info",
       "file": "app/api/support/knowledge-search/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
@@ -310,19 +294,7 @@
     {
       "category": "api",
       "severity": "info",
-      "file": "app/api/str/channel-manager/route.ts",
-      "message": "API sin verificación de sesión (puede ser intencional)"
-    },
-    {
-      "category": "api",
-      "severity": "info",
       "file": "app/api/scheduled-reports/[id]/route.ts",
-      "message": "API sin verificación de sesión (puede ser intencional)"
-    },
-    {
-      "category": "api",
-      "severity": "info",
-      "file": "app/api/stripe/webhook/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
@@ -364,13 +336,13 @@
     {
       "category": "api",
       "severity": "info",
-      "file": "app/api/providers/recommend/route.ts",
+      "file": "app/api/providers/stats/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
       "category": "api",
       "severity": "info",
-      "file": "app/api/providers/stats/route.ts",
+      "file": "app/api/providers/recommend/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
@@ -495,12 +467,6 @@
     },
     {
       "category": "api",
-      "severity": "info",
-      "file": "app/api/notification-templates/[id]/route.ts",
-      "message": "API sin verificación de sesión (puede ser intencional)"
-    },
-    {
-      "category": "api",
       "severity": "warning",
       "file": "app/api/notifications/mark-all-read/route.ts",
       "message": "Archivo de API sin métodos HTTP exportados"
@@ -509,6 +475,12 @@
       "category": "api",
       "severity": "info",
       "file": "app/api/notification-rules/[id]/route.ts",
+      "message": "API sin verificación de sesión (puede ser intencional)"
+    },
+    {
+      "category": "api",
+      "severity": "info",
+      "file": "app/api/notification-templates/[id]/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
@@ -585,12 +557,6 @@
     },
     {
       "category": "api",
-      "severity": "info",
-      "file": "app/api/debug/create-test-user/route.ts",
-      "message": "API sin verificación de sesión (puede ser intencional)"
-    },
-    {
-      "category": "api",
       "severity": "warning",
       "file": "app/api/dashboard/stats-cached-example/route.ts",
       "message": "API sin manejo de errores try/catch"
@@ -611,6 +577,12 @@
       "category": "api",
       "severity": "info",
       "file": "app/api/dashboard/analytics/route.ts",
+      "message": "API sin verificación de sesión (puede ser intencional)"
+    },
+    {
+      "category": "api",
+      "severity": "info",
+      "file": "app/api/debug/create-test-user/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
@@ -646,12 +618,6 @@
     {
       "category": "api",
       "severity": "info",
-      "file": "app/api/cron/process-monthly-overages/route.ts",
-      "message": "API sin verificación de sesión (puede ser intencional)"
-    },
-    {
-      "category": "api",
-      "severity": "info",
       "file": "app/api/cron/process-email-triggers/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
@@ -659,6 +625,12 @@
       "category": "api",
       "severity": "info",
       "file": "app/api/cron/process-contract-renewals/route.ts",
+      "message": "API sin verificación de sesión (puede ser intencional)"
+    },
+    {
+      "category": "api",
+      "severity": "info",
+      "file": "app/api/cron/process-monthly-overages/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
@@ -694,13 +666,13 @@
     {
       "category": "api",
       "severity": "info",
-      "file": "app/api/community/events/route.ts",
+      "file": "app/api/community/engagement/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
       "category": "api",
       "severity": "info",
-      "file": "app/api/community/engagement/route.ts",
+      "file": "app/api/community/events/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
@@ -742,6 +714,24 @@
     {
       "category": "api",
       "severity": "info",
+      "file": "app/api/auth-propietario/me/route.ts",
+      "message": "API sin verificación de sesión (puede ser intencional)"
+    },
+    {
+      "category": "api",
+      "severity": "info",
+      "file": "app/api/auth-propietario/logout/route.ts",
+      "message": "API sin verificación de sesión (puede ser intencional)"
+    },
+    {
+      "category": "api",
+      "severity": "info",
+      "file": "app/api/auth-propietario/login/route.ts",
+      "message": "API sin verificación de sesión (puede ser intencional)"
+    },
+    {
+      "category": "api",
+      "severity": "info",
       "file": "app/api/auth-proveedor/reset-password/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
@@ -766,31 +756,13 @@
     {
       "category": "api",
       "severity": "info",
-      "file": "app/api/auth-proveedor/login/route.ts",
-      "message": "API sin verificación de sesión (puede ser intencional)"
-    },
-    {
-      "category": "api",
-      "severity": "info",
       "file": "app/api/auth-proveedor/forgot-password/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
       "category": "api",
       "severity": "info",
-      "file": "app/api/auth-propietario/me/route.ts",
-      "message": "API sin verificación de sesión (puede ser intencional)"
-    },
-    {
-      "category": "api",
-      "severity": "info",
-      "file": "app/api/auth-propietario/logout/route.ts",
-      "message": "API sin verificación de sesión (puede ser intencional)"
-    },
-    {
-      "category": "api",
-      "severity": "info",
-      "file": "app/api/auth-propietario/login/route.ts",
+      "file": "app/api/auth-proveedor/login/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
@@ -804,12 +776,6 @@
       "severity": "warning",
       "file": "app/api/auth/[...nextauth]/route.ts",
       "message": "API sin manejo de errores try/catch"
-    },
-    {
-      "category": "api",
-      "severity": "info",
-      "file": "app/api/analytics/web-vitals/route.ts",
-      "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
       "category": "api",
@@ -844,6 +810,12 @@
     {
       "category": "api",
       "severity": "info",
+      "file": "app/api/analytics/web-vitals/route.ts",
+      "message": "API sin verificación de sesión (puede ser intencional)"
+    },
+    {
+      "category": "api",
+      "severity": "info",
       "file": "app/api/v1/search/autocomplete/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
@@ -867,20 +839,14 @@
     },
     {
       "category": "api",
-      "severity": "info",
-      "file": "app/api/support/tickets/analyze/route.ts",
-      "message": "API sin verificación de sesión (puede ser intencional)"
-    },
-    {
-      "category": "api",
       "severity": "warning",
-      "file": "app/api/str/pricing/suggestions/route.ts",
+      "file": "app/api/str/pricing/market-data/route.ts",
       "message": "API con Prisma sin especificar runtime"
     },
     {
       "category": "api",
       "severity": "warning",
-      "file": "app/api/str/pricing/market-data/route.ts",
+      "file": "app/api/str/pricing/suggestions/route.ts",
       "message": "API con Prisma sin especificar runtime"
     },
     {
@@ -904,6 +870,12 @@
     {
       "category": "api",
       "severity": "info",
+      "file": "app/api/support/tickets/analyze/route.ts",
+      "message": "API sin verificación de sesión (puede ser intencional)"
+    },
+    {
+      "category": "api",
+      "severity": "info",
       "file": "app/api/providers/performance/[id]/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
@@ -922,13 +894,13 @@
     {
       "category": "api",
       "severity": "info",
-      "file": "app/api/portal-proveedor/chat/messages/route.ts",
+      "file": "app/api/portal-proveedor/chat/conversations/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
       "category": "api",
       "severity": "info",
-      "file": "app/api/portal-proveedor/chat/conversations/route.ts",
+      "file": "app/api/portal-proveedor/chat/messages/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
@@ -1036,13 +1008,13 @@
     {
       "category": "api",
       "severity": "info",
-      "file": "app/api/portal-proveedor/work-orders/[id]/start/route.ts",
+      "file": "app/api/portal-proveedor/work-orders/[id]/reject/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
       "category": "api",
       "severity": "info",
-      "file": "app/api/portal-proveedor/work-orders/[id]/reject/route.ts",
+      "file": "app/api/portal-proveedor/work-orders/[id]/start/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
@@ -1054,13 +1026,13 @@
     {
       "category": "api",
       "severity": "info",
-      "file": "app/api/portal-proveedor/invoices/[id]/submit/route.ts",
+      "file": "app/api/portal-proveedor/invoices/[id]/pdf/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
       "category": "api",
       "severity": "info",
-      "file": "app/api/portal-proveedor/invoices/[id]/pdf/route.ts",
+      "file": "app/api/portal-proveedor/invoices/[id]/submit/route.ts",
       "message": "API sin verificación de sesión (puede ser intencional)"
     },
     {
@@ -1390,13 +1362,13 @@
     {
       "category": "pages",
       "severity": "info",
-      "file": "app/seguros/[id]/page.tsx",
+      "file": "app/seguros/analisis/page.tsx",
       "message": "Página con TODO pendiente"
     },
     {
       "category": "pages",
       "severity": "info",
-      "file": "app/seguros/analisis/page.tsx",
+      "file": "app/seguros/[id]/page.tsx",
       "message": "Página con TODO pendiente"
     },
     {
@@ -1486,13 +1458,13 @@
     {
       "category": "pages",
       "severity": "warning",
-      "file": "app/inquilinos/[id]/page.tsx",
+      "file": "app/garajes-trasteros/nuevo/page.tsx",
       "message": "Página retorna contenido vacío"
     },
     {
       "category": "pages",
       "severity": "warning",
-      "file": "app/garajes-trasteros/nuevo/page.tsx",
+      "file": "app/inquilinos/[id]/page.tsx",
       "message": "Página retorna contenido vacío"
     },
     {
@@ -1510,19 +1482,13 @@
     {
       "category": "pages",
       "severity": "warning",
-      "file": "app/flipping/calculator/page.tsx",
-      "message": "Página retorna contenido vacío"
-    },
-    {
-      "category": "pages",
-      "severity": "warning",
       "file": "app/finanzas/conciliacion/page.tsx",
       "message": "Página retorna contenido vacío"
     },
     {
       "category": "pages",
       "severity": "warning",
-      "file": "app/edificios/nuevo/page.tsx",
+      "file": "app/flipping/calculator/page.tsx",
       "message": "Página retorna contenido vacío"
     },
     {
@@ -1530,6 +1496,12 @@
       "severity": "info",
       "file": "app/economia-circular/huertos/page.tsx",
       "message": "Página marcada como \"en desarrollo\""
+    },
+    {
+      "category": "pages",
+      "severity": "warning",
+      "file": "app/edificios/nuevo/page.tsx",
+      "message": "Página retorna contenido vacío"
     },
     {
       "category": "pages",
@@ -1552,13 +1524,13 @@
     {
       "category": "pages",
       "severity": "info",
-      "file": "app/dashboard/messages/page.tsx",
+      "file": "app/dashboard/payments/page.tsx",
       "message": "Página marcada como \"en desarrollo\""
     },
     {
       "category": "pages",
       "severity": "info",
-      "file": "app/dashboard/payments/page.tsx",
+      "file": "app/dashboard/messages/page.tsx",
       "message": "Página marcada como \"en desarrollo\""
     },
     {
@@ -1582,13 +1554,13 @@
     {
       "category": "pages",
       "severity": "info",
-      "file": "app/dashboard/coupons/page.tsx",
+      "file": "app/dashboard/documents/page.tsx",
       "message": "Página marcada como \"en desarrollo\""
     },
     {
       "category": "pages",
       "severity": "info",
-      "file": "app/dashboard/documents/page.tsx",
+      "file": "app/dashboard/coupons/page.tsx",
       "message": "Página marcada como \"en desarrollo\""
     },
     {
@@ -1600,13 +1572,13 @@
     {
       "category": "pages",
       "severity": "info",
-      "file": "app/dashboard/analytics/page.tsx",
+      "file": "app/dashboard/budgets/page.tsx",
       "message": "Página marcada como \"en desarrollo\""
     },
     {
       "category": "pages",
       "severity": "info",
-      "file": "app/dashboard/budgets/page.tsx",
+      "file": "app/dashboard/analytics/page.tsx",
       "message": "Página marcada como \"en desarrollo\""
     },
     {
@@ -1725,15 +1697,15 @@
     },
     {
       "category": "pages",
-      "severity": "warning",
-      "file": "app/admin/clientes/page.tsx",
-      "message": "Página retorna contenido vacío"
-    },
-    {
-      "category": "pages",
       "severity": "info",
       "file": "app/admin/canva/page.tsx",
       "message": "Página con TODO pendiente"
+    },
+    {
+      "category": "pages",
+      "severity": "warning",
+      "file": "app/admin/clientes/page.tsx",
+      "message": "Página retorna contenido vacío"
     },
     {
       "category": "pages",
