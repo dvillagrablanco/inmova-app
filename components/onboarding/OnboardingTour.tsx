@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Joyride, { Step, CallBackProps, STATUS, EVENTS } from 'react-joyride';
 import { useSession } from 'next-auth/react';
 import { useOnboarding } from '@/hooks/useOnboarding';
@@ -167,6 +167,11 @@ export function OnboardingTour({ role }: OnboardingTourProps) {
   const { data: session } = useSession();
   const { shouldShowOnboarding, markOnboardingAsSeen, isLoading } = useOnboarding();
   const [run, setRun] = useState(false);
+  
+  // Ref para evitar el bucle infinito - rastrea si el tour ya fue cerrado en esta sesión
+  const tourClosedRef = useRef(false);
+  // Ref para evitar múltiples llamadas al callback
+  const isProcessingRef = useRef(false);
 
   // Determinar qué pasos mostrar según el rol
   const steps = role === 'TENANT' ? tenantSteps : ownerSteps;
@@ -175,33 +180,54 @@ export function OnboardingTour({ role }: OnboardingTourProps) {
   const userRole = (session?.user as any)?.role;
 
   useEffect(() => {
+    // No hacer nada si el tour ya fue cerrado en esta sesión
+    if (tourClosedRef.current) {
+      return;
+    }
+
     // Solo mostrar si el onboarding debe mostrarse y no estamos cargando
     // NO mostrar para superadministradores
     if (shouldShowOnboarding && !isLoading && userRole !== 'super_admin') {
       // Delay para asegurar que el DOM está listo
       const timer = setTimeout(() => {
-        setRun(true);
+        // Verificar de nuevo antes de iniciar (por si cambió durante el timeout)
+        if (!tourClosedRef.current) {
+          setRun(true);
+        }
       }, 1000);
       
       return () => clearTimeout(timer);
     }
   }, [shouldShowOnboarding, isLoading, userRole]);
 
-  const handleJoyrideCallback = (data: CallBackProps) => {
+  const handleJoyrideCallback = useCallback((data: CallBackProps) => {
     const { status, type } = data;
     const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
 
-    // Si el tour se completó o se saltó
-    if (finishedStatuses.includes(status)) {
-      setRun(false);
-      markOnboardingAsSeen();
-    }
-
     // Log para debugging (solo en dev)
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Onboarding]', { type, status });
+      console.log('[Onboarding]', { type, status, tourClosed: tourClosedRef.current });
     }
-  };
+
+    // Si el tour se completó o se saltó
+    if (finishedStatuses.includes(status)) {
+      // Evitar procesamiento múltiple
+      if (isProcessingRef.current || tourClosedRef.current) {
+        return;
+      }
+      
+      isProcessingRef.current = true;
+      tourClosedRef.current = true; // Marcar como cerrado ANTES de actualizar el estado
+      
+      setRun(false);
+      markOnboardingAsSeen();
+      
+      // Reset del flag de procesamiento después de un breve delay
+      setTimeout(() => {
+        isProcessingRef.current = false;
+      }, 100);
+    }
+  }, [markOnboardingAsSeen]);
 
   // No renderizar si no hay sesión o es superadmin
   if (!session || isLoading || userRole === 'super_admin') {
