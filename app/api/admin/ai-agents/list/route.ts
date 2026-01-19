@@ -140,6 +140,54 @@ const SYSTEM_AGENTS = [
       autoEscalate: false,
     },
   },
+  {
+    id: 'document_assistant',
+    type: 'document_assistant',
+    name: 'Asistente Documental',
+    description: 'Analiza, resume y extrae información de documentos PDF, contratos e imágenes',
+    icon: 'FileText',
+    color: 'from-teal-500 to-cyan-500',
+    enabled: true,
+    capabilities: [
+      'Análisis de documentos PDF',
+      'Resumen automático de contratos',
+      'Extracción de datos clave',
+      'OCR de imágenes',
+      'Clasificación de documentos',
+      'Búsqueda inteligente en documentos',
+    ],
+    keywords: ['documento', 'pdf', 'contrato', 'análisis', 'resumen', 'extraer', 'imagen', 'OCR', 'archivo'],
+    defaultConfig: {
+      model: 'claude-3-5-sonnet',
+      temperature: 0.3,
+      maxTokens: 8192,
+      autoEscalate: false,
+    },
+  },
+  {
+    id: 'general',
+    type: 'general',
+    name: 'Asistente General',
+    description: 'Coordinador inteligente que analiza tu consulta y te dirige al agente especializado más adecuado',
+    icon: 'Sparkles',
+    color: 'from-indigo-500 to-violet-500',
+    enabled: true,
+    capabilities: [
+      'Análisis de intención',
+      'Derivación a agentes especializados',
+      'Consultas generales',
+      'Información de la plataforma',
+      'Recomendación de agentes',
+      'Asistencia multidominio',
+    ],
+    keywords: ['ayuda', 'general', 'no sé', 'información', 'orientación', 'qué agente', 'recomendar'],
+    defaultConfig: {
+      model: 'claude-3-5-sonnet',
+      temperature: 0.5,
+      maxTokens: 4096,
+      autoEscalate: true,
+    },
+  },
 ];
 
 /**
@@ -154,10 +202,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const userRole = (session.user as any).role;
-    if (!['super_admin'].includes(userRole)) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
-    }
+    // Permitir a cualquier usuario autenticado ver la lista de agentes
+    // La función PUT sigue requiriendo super_admin para configuración
 
     const { searchParams } = new URL(request.url);
     const includeMetrics = searchParams.get('metrics') === 'true';

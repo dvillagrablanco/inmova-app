@@ -17,7 +17,8 @@ export type AgentType =
   | 'financial_analysis'     // Análisis Financiero
   | 'legal_compliance'       // Legal y Cumplimiento
   | 'maintenance_preventive' // Mantenimiento Preventivo
-  | 'general';               // Asistente General
+  | 'document_assistant'     // Asistente Documental
+  | 'general';               // Asistente General / Coordinador
 
 export type AgentStatus = 'idle' | 'thinking' | 'executing' | 'waiting' | 'completed' | 'error';
 

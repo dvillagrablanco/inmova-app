@@ -48,6 +48,16 @@ export const SYSTEM_INFO = {
   description: 'Sistema avanzado de agentes IA especializados para gestión inmobiliaria',
   agents: [
     {
+      type: 'general',
+      name: 'Asistente General',
+      description: 'Coordinador inteligente que dirige al agente especializado más adecuado'
+    },
+    {
+      type: 'document_assistant',
+      name: 'Asistente Documental',
+      description: 'Análisis, resumen y extracción de información de documentos'
+    },
+    {
       type: 'technical_support',
       name: 'Agente de Servicio Técnico',
       description: 'Gestión de mantenimiento y soporte técnico'

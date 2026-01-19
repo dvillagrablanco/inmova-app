@@ -265,7 +265,8 @@ export class AgentCoordinator {
       technical_support: ['reparar', 'arreglar', 'mantenimiento', 'técnico', 'emergencia'],
       legal_compliance: ['legal', 'contrato', 'abogado', 'demanda', 'cláusula'],
       financial_analysis: ['financiero', 'rentabilidad', 'roi', 'ingresos', 'gastos'],
-      commercial_management: ['venta', 'lead', 'cliente', 'propuesta', 'comercial']
+      commercial_management: ['venta', 'lead', 'cliente', 'propuesta', 'comercial'],
+      document_assistant: ['documento', 'pdf', 'archivo', 'analizar', 'extraer', 'resumen', 'ocr', 'imagen']
     };
 
     for (const [agentType, keywords] of Object.entries(agentKeywords)) {
@@ -507,6 +508,7 @@ export class AgentCoordinator {
       financial_analysis: 'Análisis Financiero',
       legal_compliance: 'Legal y Cumplimiento',
       maintenance_preventive: 'Mantenimiento Preventivo',
+      document_assistant: 'Asistente Documental',
       general: 'Asistente General'
     };
 

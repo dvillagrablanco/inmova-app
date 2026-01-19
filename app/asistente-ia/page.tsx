@@ -43,6 +43,7 @@ import {
   Clock,
   AlertTriangle,
   RefreshCw,
+  FileText,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import logger from '@/lib/logger';
@@ -77,6 +78,8 @@ const iconMap: Record<string, any> = {
   Scale: Scale,
   Megaphone: Megaphone,
   Bot: Bot,
+  FileText: FileText,
+  Sparkles: Sparkles,
 };
 
 // Colores de los agentes
@@ -88,6 +91,11 @@ const colorMap: Record<string, string> = {
   'red': 'from-red-500 to-rose-500',
   'yellow': 'from-yellow-500 to-amber-400',
   'indigo': 'from-indigo-500 to-blue-500',
+  'teal': 'from-teal-500 to-cyan-500',
+  'violet': 'from-violet-500 to-purple-500',
+  'fuchsia': 'from-fuchsia-500 to-pink-500',
+  'amber': 'from-amber-500 to-orange-500',
+  'rose': 'from-rose-500 to-pink-500',
 };
 
 export default function AIAssistantPage() {
