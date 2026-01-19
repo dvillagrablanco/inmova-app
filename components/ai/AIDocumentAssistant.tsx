@@ -306,9 +306,11 @@ export function AIDocumentAssistant({
   };
 
   // Posiciones para el botón flotante
+  // NOTA: bottom-24 en móvil para evitar solapamiento con BottomNavigation
+  // z-[60] para estar por encima de otros elementos flotantes
   const positionClasses: Record<string, string> = {
-    'bottom-right': 'fixed bottom-6 right-6',
-    'bottom-left': 'fixed bottom-6 left-6',
+    'bottom-right': 'fixed bottom-24 md:bottom-6 right-6',
+    'bottom-left': 'fixed bottom-24 md:bottom-6 left-6',
     'top-right': 'fixed top-20 right-6',
     'top-left': 'fixed top-20 left-6',
   };
@@ -348,12 +350,12 @@ export function AIDocumentAssistant({
 
     // Floating
     return (
-      <div className={`${positionClasses[position]} z-50`}>
+      <div className={`${positionClasses[position]} z-[60]`}>
         <Button
           size="lg"
-          className="h-14 w-14 rounded-full shadow-lg bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-500 hover:shadow-xl transition-all"
+          className="h-14 w-14 rounded-full shadow-xl bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-500 hover:shadow-2xl hover:scale-105 transition-all animate-pulse-slow"
         >
-          <Brain className="h-6 w-6" />
+          <Brain className="h-6 w-6 text-white" />
           {stats.analyzing > 0 && (
             <span className="absolute -top-1 -right-1 h-5 w-5 bg-amber-500 rounded-full flex items-center justify-center text-xs font-bold">
               {stats.analyzing}

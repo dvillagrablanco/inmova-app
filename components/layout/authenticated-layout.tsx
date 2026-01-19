@@ -18,6 +18,13 @@ import { CommandPalette } from '@/components/navigation/command-palette';
 import { GlobalShortcuts } from '@/components/navigation/global-shortcuts';
 import { ShortcutsHelpDialog } from '@/components/navigation/shortcuts-help-dialog';
 import { NavigationTutorial } from '@/components/navigation/navigation-tutorial';
+import dynamic from 'next/dynamic';
+
+// Cargar el chatbot de soporte de forma lazy para mejor rendimiento
+const IntelligentSupportChatbot = dynamic(
+  () => import('@/components/automation/IntelligentSupportChatbot'),
+  { ssr: false }
+);
 
 /**
  * Layout autenticado con navegación optimizada para mobile-first
@@ -223,6 +230,9 @@ export function AuthenticatedLayout({
 
       {/* Navigation Tutorial - Tutorial interactivo (NO para superadmin) */}
       {session?.user?.role !== 'super_admin' && <NavigationTutorial />}
+
+      {/* Chatbot de Soporte Inteligente - Disponible en todas las páginas */}
+      <IntelligentSupportChatbot />
     </div>
   );
 }
