@@ -65,65 +65,36 @@ export default function LogsPage() {
   const loadLogs = async () => {
     setIsLoading(true);
     try {
-      // En una implementación real, esto llamaría a una API
-      // Por ahora, generamos logs de ejemplo
-      const sampleLogs: LogEntry[] = [
-        {
-          id: '1',
-          timestamp: new Date().toISOString(),
-          level: 'info',
-          source: 'api',
-          message: 'Usuario inició sesión correctamente',
-          userId: 'user_123',
-          details: { ip: '192.168.1.1', browser: 'Chrome' },
-        },
-        {
-          id: '2',
-          timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
-          level: 'warn',
-          source: 'payment',
-          message: 'Intento de pago con tarjeta rechazada',
-          companyId: 'company_456',
-          details: { cardLast4: '4242', errorCode: 'card_declined' },
-        },
-        {
-          id: '3',
-          timestamp: new Date(Date.now() - 15 * 60000).toISOString(),
-          level: 'error',
-          source: 'email',
-          message: 'Error al enviar notificación por email',
-          details: { recipient: 'user@example.com', error: 'SMTP connection failed' },
-        },
-        {
-          id: '4',
-          timestamp: new Date(Date.now() - 30 * 60000).toISOString(),
-          level: 'info',
-          source: 'cron',
-          message: 'Job de limpieza de sesiones completado',
-          details: { sessionsDeleted: 145, duration: '2.3s' },
-        },
-        {
-          id: '5',
-          timestamp: new Date(Date.now() - 60 * 60000).toISOString(),
-          level: 'debug',
-          source: 'api',
-          message: 'Query de búsqueda ejecutada',
-          details: { query: 'propiedades', results: 42, time: '0.15s' },
-        },
-      ];
-
-      // Aplicar filtros
-      let filteredLogs = sampleLogs;
-      if (levelFilter !== 'all') {
-        filteredLogs = filteredLogs.filter(log => log.level === levelFilter);
+      // Llamar a la API real de logs del sistema
+      const params = new URLSearchParams();
+      if (levelFilter !== 'all') params.append('level', levelFilter);
+      if (sourceFilter !== 'all') params.append('source', sourceFilter);
+      
+      const response = await fetch(`/api/admin/system-logs?${params.toString()}`);
+      
+      if (!response.ok) {
+        throw new Error('Error al cargar logs');
       }
-      if (sourceFilter !== 'all') {
-        filteredLogs = filteredLogs.filter(log => log.source === sourceFilter);
-      }
+      
+      const data = await response.json();
+      
+      // Transformar datos de la API al formato esperado
+      const formattedLogs: LogEntry[] = (data.logs || []).map((log: any) => ({
+        id: log.id,
+        timestamp: log.timestamp,
+        level: log.level || 'info',
+        source: log.source || 'system',
+        message: log.message,
+        userId: log.userId,
+        companyId: log.companyId,
+        details: log.metadata || {},
+      }));
 
-      setLogs(filteredLogs);
+      setLogs(formattedLogs);
     } catch (error) {
-      toast.error('Error al cargar logs');
+      console.error('Error al cargar logs:', error);
+      toast.error('Error al cargar logs del sistema');
+      setLogs([]);
     } finally {
       setIsLoading(false);
     }
