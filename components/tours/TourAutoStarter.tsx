@@ -75,7 +75,11 @@ export function TourAutoStarter() {
     setActiveTour(null);
   };
 
-  const handleTourSkip = () => {
+  const handleTourSkip = async () => {
+    // IMPORTANTE: También marcar como completado al saltar para evitar bucle
+    if (activeTour) {
+      await completeTour(activeTour.id);
+    }
     setActiveTour(null);
   };
 

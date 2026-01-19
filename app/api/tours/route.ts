@@ -50,7 +50,9 @@ export async function GET(request: NextRequest) {
     let response: any = {
       success: true,
       experienceLevel: prefs.experienceLevel,
-      completedTours: completedTourIds.length
+      // IMPORTANTE: Devolver el array completo, no solo el length
+      completedTours: completedTourIds,
+      completedCount: completedTourIds.length
     };
 
     switch (view) {
