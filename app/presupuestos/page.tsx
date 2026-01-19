@@ -153,12 +153,18 @@ export default function PresupuestosPage() {
   const loadBudgets = async () => {
     setLoading(true);
     try {
-      // En producción, cargar desde la API
-      // const response = await fetch('/api/budgets');
-      // const data = await response.json();
-      setBudgets(mockBudgets);
+      const response = await fetch('/api/budgets');
+      if (response.ok) {
+        const data = await response.json();
+        setBudgets(data.budgets || data || []);
+      } else {
+        console.error('Error fetching budgets');
+        setBudgets([]);
+      }
     } catch (error) {
+      console.error('Error loading budgets:', error);
       toast.error('Error al cargar presupuestos');
+      setBudgets([]);
     } finally {
       setLoading(false);
     }
