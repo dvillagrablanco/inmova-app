@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
@@ -12,119 +13,50 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // TODO: Implementar desde base de datos
-    const services = [
-      {
-        id: 's1',
-        name: 'Limpieza Profesional Express',
-        category: 'cleaning',
-        provider: {
-          id: 'p1',
-          name: 'CleanPro Services',
-          verified: true,
-          rating: 4.8,
-          reviews: 156,
-        },
-        description: 'Servicio de limpieza profesional para propiedades vacacionales con entrega en 2 horas',
-        price: 45,
-        priceType: 'fixed',
-        image: '/images/services/cleaning.jpg',
-        featured: true,
-        tags: ['Limpieza profunda', '2 horas', 'Productos incluidos'],
+    // Obtener servicios reales de la base de datos
+    const services = await prisma.marketplaceService.findMany({
+      where: {
+        activo: true,
+        disponible: true,
       },
-      {
-        id: 's2',
-        name: 'Reparación de Averías 24/7',
-        category: 'maintenance',
+      include: {
         provider: {
-          id: 'p2',
-          name: 'Fix It Now',
-          verified: true,
-          rating: 4.9,
-          reviews: 203,
+          select: {
+            id: true,
+            nombre: true,
+            telefono: true,
+            tipo: true,
+            rating: true,
+          },
         },
-        description: 'Servicio de fontanería, electricidad y cerrajería con disponibilidad 24/7',
-        price: 60,
-        priceType: 'hourly',
-        image: '/images/services/maintenance.jpg',
-        featured: true,
-        tags: ['24/7', 'Urgencias', 'Multi-servicio'],
       },
-      {
-        id: 's3',
-        name: 'Fibra Óptica 1GB',
-        category: 'internet',
-        provider: {
-          id: 'p3',
-          name: 'FastNet Telecom',
-          verified: true,
-          rating: 4.6,
-          reviews: 89,
-        },
-        description: 'Internet de alta velocidad con instalación gratuita y router incluido',
-        price: 39,
-        priceType: 'monthly',
-        image: '/images/services/internet.jpg',
-        featured: false,
-        tags: ['1GB', 'Instalación gratis', 'Router incluido'],
-      },
-      {
-        id: 's4',
-        name: 'Seguro de Hogar Plus',
-        category: 'insurance',
-        provider: {
-          id: 'p4',
-          name: 'SafeHome Insurance',
-          verified: true,
-          rating: 4.7,
-          reviews: 342,
-        },
-        description: 'Cobertura completa: incendio, robo, daños por agua y responsabilidad civil',
-        price: 25,
-        priceType: 'monthly',
-        image: '/images/services/insurance.jpg',
-        featured: false,
-        tags: ['Cobertura completa', 'Sin franquicia', 'Asistencia 24h'],
-      },
-      {
-        id: 's5',
-        name: 'Mantenimiento Preventivo',
-        category: 'maintenance',
-        provider: {
-          id: 'p5',
-          name: 'ProCare Maintenance',
-          verified: true,
-          rating: 4.8,
-          reviews: 127,
-        },
-        description: 'Revisión trimestral de instalaciones eléctricas, fontanería y climatización',
-        price: 89,
-        priceType: 'fixed',
-        image: '/images/services/preventive.jpg',
-        featured: true,
-        tags: ['Trimestral', 'Informe detallado', 'Garantía'],
-      },
-      {
-        id: 's6',
-        name: 'Limpieza con Ozono',
-        category: 'cleaning',
-        provider: {
-          id: 'p1',
-          name: 'CleanPro Services',
-          verified: true,
-          rating: 4.8,
-          reviews: 156,
-        },
-        description: 'Desinfección completa con ozono, ideal para cambios de inquilino',
-        price: 75,
-        priceType: 'fixed',
-        image: '/images/services/ozone.jpg',
-        featured: false,
-        tags: ['Ozono', 'Desinfección total', 'Certificado'],
-      },
-    ];
+      orderBy: [
+        { destacado: 'desc' },
+        { createdAt: 'desc' },
+      ],
+    });
 
-    return NextResponse.json(services);
+    // Transformar al formato esperado por el frontend
+    const formattedServices = services.map((service) => ({
+      id: service.id,
+      name: service.nombre,
+      category: service.categoria.toLowerCase(),
+      provider: service.provider ? {
+        id: service.provider.id,
+        name: service.provider.nombre,
+        verified: true,
+        rating: service.provider.rating || 0,
+        reviews: 0,
+      } : null,
+      description: service.descripcion,
+      price: service.precioBase || service.precio || 0,
+      priceType: service.tipoPrecio || 'fixed',
+      image: service.imagenUrl || null,
+      featured: service.destacado,
+      tags: [],
+    }));
+
+    return NextResponse.json(formattedServices);
   } catch (error) {
     logger.error('Error fetching marketplace services:', error);
     return NextResponse.json(

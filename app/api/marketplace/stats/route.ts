@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
@@ -12,12 +13,50 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // TODO: Implementar cálculo real desde base de datos
+    const companyId = session.user.companyId;
+
+    // Calcular estadísticas reales desde la base de datos
+    const [
+      totalServices,
+      totalBookings,
+      bookingsWithRevenue,
+    ] = await Promise.all([
+      // Total de servicios activos
+      prisma.marketplaceService.count({
+        where: {
+          companyId,
+          activo: true,
+        },
+      }),
+      // Total de reservas
+      prisma.marketplaceBooking.count({
+        where: {
+          companyId,
+        },
+      }),
+      // Reservas con ingresos para calcular revenue
+      prisma.marketplaceBooking.findMany({
+        where: {
+          companyId,
+          estado: 'completada',
+        },
+        select: {
+          precio: true,
+        },
+      }),
+    ]);
+
+    // Calcular ingresos totales
+    const totalRevenue = bookingsWithRevenue.reduce(
+      (sum, booking) => sum + (booking.precio || 0),
+      0
+    );
+
     const stats = {
-      totalServices: 156,
-      totalBookings: 342,
-      totalRevenue: 45280,
-      commissionRate: 12,
+      totalServices,
+      totalBookings,
+      totalRevenue,
+      commissionRate: 12, // Porcentaje de comisión configurado
     };
 
     return NextResponse.json(stats);

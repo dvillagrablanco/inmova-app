@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
@@ -13,15 +14,35 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { serviceId } = body;
+    const { serviceId, fechaSolicitada, notas } = body;
 
-    // TODO: Implementar creación real de reserva en base de datos
-    logger.info(`Creating booking for service ${serviceId}`);
+    // Verificar que el servicio existe
+    const service = await prisma.marketplaceService.findUnique({
+      where: { id: serviceId },
+    });
+
+    if (!service) {
+      return NextResponse.json({ error: 'Servicio no encontrado' }, { status: 404 });
+    }
+
+    // Crear la reserva en la base de datos
+    const booking = await prisma.marketplaceBooking.create({
+      data: {
+        serviceId,
+        companyId: session.user.companyId,
+        estado: 'pendiente',
+        precio: service.precioBase || service.precio || 0,
+        notas,
+        fechaSolicitada: fechaSolicitada ? new Date(fechaSolicitada) : null,
+      },
+    });
+
+    logger.info(`Booking created: ${booking.id} for service ${serviceId}`);
 
     return NextResponse.json({ 
       success: true, 
       message: 'Reserva creada correctamente',
-      bookingId: `bk_${Date.now()}`,
+      bookingId: booking.id,
     });
   } catch (error) {
     logger.error('Error creating marketplace booking:', error);
@@ -39,29 +60,41 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // TODO: Implementar consulta real de reservas
-    const bookings = [
-      {
-        id: 'bk_1',
-        serviceId: 's1',
-        serviceName: 'Limpieza Profesional Express',
-        providerName: 'CleanPro Services',
-        status: 'completed',
-        date: '2024-12-20',
-        amount: 45,
+    // Obtener reservas reales de la base de datos
+    const bookings = await prisma.marketplaceBooking.findMany({
+      where: {
+        companyId: session.user.companyId,
       },
-      {
-        id: 'bk_2',
-        serviceId: 's2',
-        serviceName: 'Reparación de Averías 24/7',
-        providerName: 'Fix It Now',
-        status: 'confirmed',
-        date: '2024-12-28',
-        amount: 120,
+      include: {
+        service: {
+          select: {
+            id: true,
+            nombre: true,
+            provider: {
+              select: {
+                nombre: true,
+              },
+            },
+          },
+        },
       },
-    ];
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
 
-    return NextResponse.json(bookings);
+    // Transformar al formato esperado
+    const formattedBookings = bookings.map((booking) => ({
+      id: booking.id,
+      serviceId: booking.serviceId,
+      serviceName: booking.service?.nombre || 'Servicio',
+      providerName: booking.service?.provider?.nombre || 'Proveedor',
+      status: booking.estado,
+      date: booking.fechaSolicitada?.toISOString().split('T')[0] || booking.createdAt.toISOString().split('T')[0],
+      amount: booking.precio || 0,
+    }));
+
+    return NextResponse.json(formattedBookings);
   } catch (error) {
     logger.error('Error fetching bookings:', error);
     return NextResponse.json(
