@@ -64,82 +64,129 @@ export default function STRChannelsPage() {
     try {
       setLoading(true);
       
-      // Mock data
-      setChannels([
-        {
-          id: 'airbnb',
-          name: 'Airbnb',
-          logo: '🏠',
-          connected: true,
-          active: true,
-          propertiesSync: 12,
-          totalProperties: 12,
-          reservations: 45,
-          revenue: 18750,
-          commission: 15,
-          lastSync: '2025-12-26 17:30',
-          apiStatus: 'ok',
-        },
-        {
-          id: 'booking',
-          name: 'Booking.com',
-          logo: '🔵',
-          connected: true,
-          active: true,
-          propertiesSync: 10,
-          totalProperties: 12,
-          reservations: 38,
-          revenue: 15200,
-          commission: 18,
-          lastSync: '2025-12-26 17:28',
-          apiStatus: 'ok',
-        },
-        {
-          id: 'vrbo',
-          name: 'VRBO',
-          logo: '🏖️',
-          connected: true,
-          active: false,
-          propertiesSync: 5,
-          totalProperties: 12,
-          reservations: 12,
-          revenue: 6400,
-          commission: 12,
-          lastSync: '2025-12-26 16:00',
-          apiStatus: 'warning',
-        },
-        {
-          id: 'homeaway',
-          name: 'HomeAway',
-          logo: '🌴',
-          connected: false,
-          active: false,
-          propertiesSync: 0,
-          totalProperties: 12,
-          reservations: 0,
-          revenue: 0,
-          commission: 14,
-          lastSync: '-',
-          apiStatus: 'error',
-        },
-        {
-          id: 'portal1',
-          name: 'Portal Inmobiliario',
-          logo: '🟢',
-          connected: true,
-          active: true,
-          propertiesSync: 12,
-          totalProperties: 12,
-          reservations: 8,
-          revenue: 3200,
-          commission: 0,
-          lastSync: '2025-12-26 17:25',
-          apiStatus: 'ok',
-        },
-      ]);
+      // Cargar canales desde la API
+      const response = await fetch('/api/str/channels');
+      
+      if (response.ok) {
+        const apiChannels = await response.json();
+        
+        // También obtener métricas de canal
+        const metricsResponse = await fetch('/api/str/channel-performance');
+        const metrics = metricsResponse.ok ? await metricsResponse.json() : {};
+        
+        // Mapear al formato de la UI
+        const channelLogos: Record<string, string> = {
+          AIRBNB: '🏠',
+          BOOKING: '🔵',
+          VRBO: '🏖️',
+          HOMEAWAY: '🌴',
+          EXPEDIA: '🟡',
+          TRIPADVISOR: '🦉',
+          IDEALISTA: '🟢',
+          FOTOCASA: '📸',
+          CUSTOM: '🔗',
+        };
+        
+        const channelNames: Record<string, string> = {
+          AIRBNB: 'Airbnb',
+          BOOKING: 'Booking.com',
+          VRBO: 'VRBO',
+          HOMEAWAY: 'HomeAway',
+          EXPEDIA: 'Expedia',
+          TRIPADVISOR: 'TripAdvisor',
+          IDEALISTA: 'Idealista',
+          FOTOCASA: 'Fotocasa',
+          CUSTOM: 'Canal Personalizado',
+        };
+
+        if (Array.isArray(apiChannels) && apiChannels.length > 0) {
+          // Agrupar por canal
+          const channelGroups: Record<string, any[]> = {};
+          apiChannels.forEach((ch: any) => {
+            const key = ch.canal || 'CUSTOM';
+            if (!channelGroups[key]) channelGroups[key] = [];
+            channelGroups[key].push(ch);
+          });
+
+          const formattedChannels: Channel[] = Object.entries(channelGroups).map(([canal, items]) => {
+            const activeItems = items.filter((i: any) => i.activo);
+            const channelMetric = metrics[canal] || {};
+            
+            return {
+              id: canal.toLowerCase(),
+              name: channelNames[canal] || canal,
+              logo: channelLogos[canal] || '🔗',
+              connected: items.length > 0,
+              active: activeItems.length > 0,
+              propertiesSync: activeItems.length,
+              totalProperties: items.length,
+              reservations: channelMetric.reservations || 0,
+              revenue: channelMetric.revenue || 0,
+              commission: channelMetric.commission || 15,
+              lastSync: items[0]?.ultimaSync 
+                ? new Date(items[0].ultimaSync).toLocaleString('es-ES') 
+                : '-',
+              apiStatus: activeItems.length > 0 ? 'ok' : items.length > 0 ? 'warning' : 'error',
+            };
+          });
+
+          setChannels(formattedChannels);
+        } else {
+          // Si no hay canales configurados, mostrar lista vacía
+          setChannels([]);
+        }
+      } else {
+        // Si la API falla, mostrar canales disponibles para conectar
+        setChannels([
+          {
+            id: 'airbnb',
+            name: 'Airbnb',
+            logo: '🏠',
+            connected: false,
+            active: false,
+            propertiesSync: 0,
+            totalProperties: 0,
+            reservations: 0,
+            revenue: 0,
+            commission: 15,
+            lastSync: '-',
+            apiStatus: 'error',
+          },
+          {
+            id: 'booking',
+            name: 'Booking.com',
+            logo: '🔵',
+            connected: false,
+            active: false,
+            propertiesSync: 0,
+            totalProperties: 0,
+            reservations: 0,
+            revenue: 0,
+            commission: 18,
+            lastSync: '-',
+            apiStatus: 'error',
+          },
+          {
+            id: 'vrbo',
+            name: 'VRBO',
+            logo: '🏖️',
+            connected: false,
+            active: false,
+            propertiesSync: 0,
+            totalProperties: 0,
+            reservations: 0,
+            revenue: 0,
+            commission: 12,
+            lastSync: '-',
+            apiStatus: 'error',
+          },
+        ]);
+      }
 
     } catch (error) {
+      console.error('Error loading channels:', error);
       toast.error('Error al cargar canales');
+      setChannels([]);
     } finally {
       setLoading(false);
     }
