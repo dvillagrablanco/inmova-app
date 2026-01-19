@@ -1,15 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 import {
   Shield,
   User,
@@ -24,6 +23,7 @@ import {
   Plus,
   Eye,
   RefreshCw,
+  Loader2,
 } from 'lucide-react';
 
 // ==========================================
@@ -57,84 +57,13 @@ interface TenantScore {
   status: 'pending' | 'approved' | 'rejected';
 }
 
-// ==========================================
-// DATOS DE EJEMPLO
-// ==========================================
-
-const SAMPLE_TENANTS: TenantScore[] = [
-  {
-    id: '1',
-    name: 'Ana García',
-    email: 'ana.garcia@email.com',
-    phone: '+34 612 345 678',
-    nationality: 'España',
-    purpose: 'Trabajo temporal',
-    totalScore: 85,
-    riskLevel: 'low',
-    documentationScore: 90,
-    solvencyScore: 82,
-    historyScore: 88,
-    profileScore: 80,
-    factors: [
-      { name: 'DNI verificado', score: 10, maxScore: 10, status: 'positive', details: 'Documento válido hasta 2028' },
-      { name: 'Contrato laboral', score: 15, maxScore: 15, status: 'positive', details: 'Contrato indefinido en empresa verificada' },
-      { name: 'Ingresos estables', score: 12, maxScore: 15, status: 'neutral', details: 'Ingresos 3x renta mensual' },
-      { name: 'Sin incidencias previas', score: 20, maxScore: 20, status: 'positive', details: 'Historial limpio en bases de datos' },
-      { name: 'Referencias positivas', score: 8, maxScore: 10, status: 'positive', details: '2 referencias verificadas' },
-    ],
-    aiAnalysis: 'Perfil de bajo riesgo. La inquilina presenta documentación completa y verificada, con ingresos estables que superan 3 veces la renta mensual. Su historial de alquiler es impecable con referencias positivas de anteriores propietarios. Se recomienda aprobar la solicitud.',
-    createdAt: new Date('2026-01-05'),
-    status: 'approved',
-  },
-  {
-    id: '2',
-    name: 'Marco Rossi',
-    email: 'marco.rossi@email.com',
-    phone: '+39 333 456 789',
-    nationality: 'Italia',
-    purpose: 'Estudios',
-    totalScore: 68,
-    riskLevel: 'medium',
-    documentationScore: 75,
-    solvencyScore: 60,
-    historyScore: 70,
-    profileScore: 65,
-    factors: [
-      { name: 'Pasaporte verificado', score: 10, maxScore: 10, status: 'positive', details: 'Pasaporte italiano válido' },
-      { name: 'Matrícula universitaria', score: 10, maxScore: 10, status: 'positive', details: 'Máster en IE Business School' },
-      { name: 'Aval parental', score: 10, maxScore: 15, status: 'neutral', details: 'Aval presentado, pendiente verificar' },
-      { name: 'Sin historial en España', score: 0, maxScore: 20, status: 'negative', details: 'Primera estancia en el país' },
-      { name: 'Depósito adicional', score: 8, maxScore: 10, status: 'positive', details: 'Dispuesto a pagar 3 meses de fianza' },
-    ],
-    aiAnalysis: 'Perfil de riesgo medio. Estudiante internacional sin historial previo en España, lo que dificulta la verificación. Sin embargo, presenta documentación académica válida y ofrece garantías adicionales (aval parental + depósito extra). Se recomienda aprobar con condiciones: aval parental verificado y 3 meses de fianza.',
-    createdAt: new Date('2026-01-04'),
-    status: 'pending',
-  },
-  {
-    id: '3',
-    name: 'John Smith',
-    email: 'john.smith@email.com',
-    phone: '+44 777 888 999',
-    nationality: 'Reino Unido',
-    purpose: 'Trabajo temporal',
-    totalScore: 45,
-    riskLevel: 'high',
-    documentationScore: 50,
-    solvencyScore: 40,
-    historyScore: 45,
-    profileScore: 45,
-    factors: [
-      { name: 'Pasaporte verificado', score: 10, maxScore: 10, status: 'positive', details: 'Pasaporte británico válido' },
-      { name: 'Contrato laboral', score: 5, maxScore: 15, status: 'negative', details: 'Contrato temporal de 2 meses' },
-      { name: 'Ingresos', score: 5, maxScore: 15, status: 'negative', details: 'Ingresos no verificables completamente' },
-      { name: 'Incidencia previa', score: 0, maxScore: 20, status: 'negative', details: 'Impago registrado en 2024' },
-      { name: 'Sin referencias', score: 0, maxScore: 10, status: 'negative', details: 'No presenta referencias' },
-    ],
-    aiAnalysis: 'Perfil de alto riesgo. El solicitante presenta un historial de impago previo y documentación incompleta. Los ingresos declarados no son fácilmente verificables y el contrato laboral es de muy corta duración. Se recomienda rechazar o solicitar garantías adicionales significativas (aval bancario + 6 meses de fianza).',
-    createdAt: new Date('2026-01-03'),
-    status: 'rejected',
-  },
-];
+interface Stats {
+  total: number;
+  approved: number;
+  pending: number;
+  rejected: number;
+  avgScore: number;
+}
 
 // ==========================================
 // COMPONENTES
@@ -211,7 +140,7 @@ function TenantCard({ tenant, onView }: { tenant: TenantScore; onView: () => voi
             <ScoreGauge score={tenant.totalScore} size="small" />
             <div>
               <p className="font-medium">{tenant.name}</p>
-              <p className="text-sm text-muted-foreground">{tenant.purpose} • {tenant.nationality}</p>
+              <p className="text-sm text-muted-foreground">{tenant.purpose} - {tenant.nationality}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -229,7 +158,7 @@ function TenantCard({ tenant, onView }: { tenant: TenantScore; onView: () => voi
 
 function ScoreBreakdown({ tenant }: { tenant: TenantScore }) {
   const categories = [
-    { name: 'Documentación', score: tenant.documentationScore, icon: FileCheck },
+    { name: 'Documentacion', score: tenant.documentationScore, icon: FileCheck },
     { name: 'Solvencia', score: tenant.solvencyScore, icon: CreditCard },
     { name: 'Historial', score: tenant.historyScore, icon: History },
     { name: 'Perfil', score: tenant.profileScore, icon: User },
@@ -282,7 +211,26 @@ function FactorsList({ factors }: { factors: ScoringFactor[] }) {
   );
 }
 
-function TenantDetail({ tenant, onClose }: { tenant: TenantScore; onClose: () => void }) {
+function TenantDetail({ 
+  tenant, 
+  onClose, 
+  onAction 
+}: { 
+  tenant: TenantScore; 
+  onClose: () => void;
+  onAction: (action: 'approve' | 'reject') => void;
+}) {
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const handleAction = async (action: 'approve' | 'reject') => {
+    setActionLoading(action);
+    try {
+      await onAction(action);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -290,8 +238,21 @@ function TenantDetail({ tenant, onClose }: { tenant: TenantScore; onClose: () =>
         <div className="flex gap-2">
           {tenant.status === 'pending' && (
             <>
-              <Button variant="destructive">Rechazar</Button>
-              <Button>Aprobar</Button>
+              <Button 
+                variant="destructive" 
+                onClick={() => handleAction('reject')}
+                disabled={actionLoading !== null}
+              >
+                {actionLoading === 'reject' && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Rechazar
+              </Button>
+              <Button 
+                onClick={() => handleAction('approve')}
+                disabled={actionLoading !== null}
+              >
+                {actionLoading === 'approve' && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Aprobar
+              </Button>
             </>
           )}
         </div>
@@ -301,7 +262,7 @@ function TenantDetail({ tenant, onClose }: { tenant: TenantScore; onClose: () =>
         {/* Info principal */}
         <Card>
           <CardHeader>
-            <CardTitle>Información del Solicitante</CardTitle>
+            <CardTitle>Informacion del Solicitante</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-col items-center">
@@ -318,7 +279,7 @@ function TenantDetail({ tenant, onClose }: { tenant: TenantScore; onClose: () =>
                 <span className="font-medium">{tenant.email}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Teléfono</span>
+                <span className="text-muted-foreground">Telefono</span>
                 <span className="font-medium">{tenant.phone}</span>
               </div>
               <div className="flex justify-between">
@@ -333,27 +294,27 @@ function TenantDetail({ tenant, onClose }: { tenant: TenantScore; onClose: () =>
           </CardContent>
         </Card>
 
-        {/* Desglose de puntuación */}
+        {/* Desglose de puntuacion */}
         <Card>
           <CardHeader>
-            <CardTitle>Desglose de Puntuación</CardTitle>
+            <CardTitle>Desglose de Puntuacion</CardTitle>
           </CardHeader>
           <CardContent>
             <ScoreBreakdown tenant={tenant} />
           </CardContent>
         </Card>
 
-        {/* Análisis IA */}
+        {/* Analisis IA */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
               <Brain className="h-5 w-5 text-purple-500" />
-              <CardTitle>Análisis IA</CardTitle>
+              <CardTitle>Analisis IA</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {tenant.aiAnalysis}
+              {tenant.aiAnalysis || 'Sin analisis disponible'}
             </p>
           </CardContent>
         </Card>
@@ -362,7 +323,7 @@ function TenantDetail({ tenant, onClose }: { tenant: TenantScore; onClose: () =>
       {/* Factores detallados */}
       <Card>
         <CardHeader>
-          <CardTitle>Factores de Evaluación</CardTitle>
+          <CardTitle>Factores de Evaluacion</CardTitle>
         </CardHeader>
         <CardContent>
           <FactorsList factors={tenant.factors} />
@@ -372,25 +333,141 @@ function TenantDetail({ tenant, onClose }: { tenant: TenantScore; onClose: () =>
   );
 }
 
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <CardContent className="p-4">
+              <Skeleton className="h-8 w-16 mx-auto mb-2" />
+              <Skeleton className="h-4 w-24 mx-auto" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <Card key={i}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="flex-1">
+                  <Skeleton className="h-5 w-32 mb-2" />
+                  <Skeleton className="h-4 w-48" />
+                </div>
+                <Skeleton className="h-6 w-20" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ==========================================
-// PÁGINA PRINCIPAL
+// PAGINA PRINCIPAL
 // ==========================================
 
 export default function ScoringPage() {
+  const [tenants, setTenants] = useState<TenantScore[]>([]);
+  const [stats, setStats] = useState<Stats>({ total: 0, approved: 0, pending: 0, rejected: 0, avgScore: 0 });
   const [selectedTenant, setSelectedTenant] = useState<TenantScore | null>(null);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const filteredTenants = SAMPLE_TENANTS.filter(t => {
-    if (filter !== 'all' && t.status !== filter) return false;
-    if (search && !t.name.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
-  });
+  const fetchData = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (filter !== 'all') params.set('status', filter);
+      if (search) params.set('search', search);
+
+      const response = await fetch(`/api/media-estancia/scoring?${params.toString()}`);
+      if (response.ok) {
+        const data = await response.json();
+        setTenants(data.tenants || []);
+        setStats(data.stats || { total: 0, approved: 0, pending: 0, rejected: 0, avgScore: 0 });
+      } else {
+        console.error('Error fetching scoring data');
+        toast.error('Error al cargar datos de scoring');
+      }
+    } catch (error) {
+      console.error('Error fetching scoring data:', error);
+      toast.error('Error al cargar datos de scoring');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [filter]);
+
+  const handleSearch = () => {
+    setLoading(true);
+    fetchData();
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchData();
+  };
+
+  const handleAction = async (action: 'approve' | 'reject') => {
+    if (!selectedTenant) return;
+
+    try {
+      const response = await fetch('/api/media-estancia/scoring', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tenantId: selectedTenant.id,
+          action,
+          nivelRiesgo: action === 'approve' ? 'bajo' : 'alto',
+        }),
+      });
+
+      if (response.ok) {
+        toast.success(action === 'approve' ? 'Solicitud aprobada' : 'Solicitud rechazada');
+        setSelectedTenant(null);
+        fetchData();
+      } else {
+        toast.error('Error al procesar la accion');
+      }
+    } catch (error) {
+      console.error('Error processing action:', error);
+      toast.error('Error al procesar la accion');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Scoring de Inquilinos</h1>
+            <p className="text-muted-foreground">
+              Evaluacion de riesgo para solicitudes de media estancia
+            </p>
+          </div>
+        </div>
+        <LoadingSkeleton />
+      </div>
+    );
+  }
 
   if (selectedTenant) {
     return (
       <div className="container mx-auto p-6">
-        <TenantDetail tenant={selectedTenant} onClose={() => setSelectedTenant(null)} />
+        <TenantDetail 
+          tenant={selectedTenant} 
+          onClose={() => setSelectedTenant(null)} 
+          onAction={handleAction}
+        />
       </div>
     );
   }
@@ -402,44 +479,44 @@ export default function ScoringPage() {
         <div>
           <h1 className="text-3xl font-bold">Scoring de Inquilinos</h1>
           <p className="text-muted-foreground">
-            Evaluación de riesgo para solicitudes de media estancia
+            Evaluacion de riesgo para solicitudes de media estancia
           </p>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Nueva Evaluación
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleRefresh} disabled={refreshing}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            Actualizar
+          </Button>
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            Nueva Evaluacion
+          </Button>
+        </div>
       </div>
 
-      {/* Estadísticas */}
+      {/* Estadisticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-3xl font-bold text-blue-600">{SAMPLE_TENANTS.length}</p>
+            <p className="text-3xl font-bold text-blue-600">{stats.total}</p>
             <p className="text-sm text-muted-foreground">Total evaluados</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-3xl font-bold text-green-600">
-              {SAMPLE_TENANTS.filter(t => t.status === 'approved').length}
-            </p>
+            <p className="text-3xl font-bold text-green-600">{stats.approved}</p>
             <p className="text-sm text-muted-foreground">Aprobados</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-3xl font-bold text-yellow-600">
-              {SAMPLE_TENANTS.filter(t => t.status === 'pending').length}
-            </p>
+            <p className="text-3xl font-bold text-yellow-600">{stats.pending}</p>
             <p className="text-sm text-muted-foreground">Pendientes</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-3xl font-bold text-red-600">
-              {SAMPLE_TENANTS.filter(t => t.status === 'rejected').length}
-            </p>
+            <p className="text-3xl font-bold text-red-600">{stats.rejected}</p>
             <p className="text-sm text-muted-foreground">Rechazados</p>
           </CardContent>
         </Card>
@@ -453,9 +530,13 @@ export default function ScoringPage() {
             placeholder="Buscar por nombre..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             className="pl-10"
           />
         </div>
+        <Button variant="outline" onClick={handleSearch}>
+          Buscar
+        </Button>
         <Select value={filter} onValueChange={setFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filtrar por estado" />
@@ -471,7 +552,7 @@ export default function ScoringPage() {
 
       {/* Lista de inquilinos */}
       <div className="space-y-4">
-        {filteredTenants.map((tenant) => (
+        {tenants.map((tenant) => (
           <TenantCard 
             key={tenant.id} 
             tenant={tenant} 
@@ -479,13 +560,15 @@ export default function ScoringPage() {
           />
         ))}
 
-        {filteredTenants.length === 0 && (
+        {tenants.length === 0 && (
           <Card>
             <CardContent className="p-12 text-center">
               <Shield className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-lg font-medium">No hay evaluaciones</p>
               <p className="text-muted-foreground">
-                No se encontraron evaluaciones con los filtros seleccionados
+                {filter !== 'all' 
+                  ? 'No se encontraron evaluaciones con el filtro seleccionado'
+                  : 'Aun no hay inquilinos registrados para evaluar. Agrega inquilinos desde la seccion de Tenants.'}
               </p>
             </CardContent>
           </Card>
