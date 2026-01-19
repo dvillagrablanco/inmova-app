@@ -5,7 +5,7 @@
  * Detecta cuando el usuario entra a una página y lanza el tour correspondiente
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { useVirtualTour } from '@/hooks/useVirtualTour';
 import { VirtualTourPlayer } from './VirtualTourPlayer';
@@ -20,11 +20,46 @@ const ROUTE_TO_TOUR_MAP: Record<string, string> = {
   '/coliving': 'tour-coliving'
 };
 
+// Clave para sessionStorage - evita mostrar tours cerrados en esta sesión
+const SESSION_CLOSED_TOURS_KEY = 'inmova_closed_tours_session';
+
 export function TourAutoStarter() {
   const pathname = usePathname();
-  const { availableTours, completeTour, isTourCompleted } = useVirtualTour();
+  const { availableTours, completeTour, isTourCompleted, loading } = useVirtualTour();
   const [activeTour, setActiveTour] = useState<any>(null);
   const [autoplayEnabled, setAutoplayEnabled] = useState(true);
+  
+  // Ref para evitar múltiples inicios del mismo tour
+  const closedToursRef = useRef<Set<string>>(new Set());
+  const isProcessingRef = useRef(false);
+
+  // Cargar tours cerrados de sessionStorage al montar
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem(SESSION_CLOSED_TOURS_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          closedToursRef.current = new Set(parsed);
+        }
+      }
+    } catch (e) {
+      // Ignorar errores de sessionStorage
+    }
+  }, []);
+
+  // Guardar tour cerrado en sessionStorage
+  const markTourAsClosed = useCallback((tourId: string) => {
+    closedToursRef.current.add(tourId);
+    try {
+      sessionStorage.setItem(
+        SESSION_CLOSED_TOURS_KEY, 
+        JSON.stringify([...closedToursRef.current])
+      );
+    } catch (e) {
+      // Ignorar errores de sessionStorage
+    }
+  }, []);
 
   useEffect(() => {
     // Verificar si autoplay está habilitado en preferencias
@@ -32,8 +67,8 @@ export function TourAutoStarter() {
       try {
         const response = await fetch('/api/preferences');
         const data = await response.json();
-        if (data.success) {
-          setAutoplayEnabled(data.preferences.autoplayTours);
+        if (data.success && data.preferences) {
+          setAutoplayEnabled(data.preferences.autoplayTours !== false);
         }
       } catch (error) {
         console.error('Error checking autoplay:', error);
@@ -44,13 +79,17 @@ export function TourAutoStarter() {
   }, []);
 
   useEffect(() => {
-    if (!autoplayEnabled) return;
+    // No hacer nada si está cargando, no hay autoplay, o ya hay un tour activo
+    if (loading || !autoplayEnabled || activeTour || isProcessingRef.current) return;
 
     // Obtener el tour correspondiente a esta ruta
     const tourId = ROUTE_TO_TOUR_MAP[pathname];
     if (!tourId) return;
 
-    // Verificar si ya fue completado
+    // Verificar si ya fue cerrado en esta sesión (previene bucle)
+    if (closedToursRef.current.has(tourId)) return;
+
+    // Verificar si ya fue completado en el backend
     if (isTourCompleted(tourId)) return;
 
     // Buscar el tour en la lista de disponibles
@@ -60,24 +99,39 @@ export function TourAutoStarter() {
     // Verificar si tiene autoStart habilitado
     if (!tour.autoStart) return;
 
+    // Marcar que estamos procesando para evitar múltiples llamadas
+    isProcessingRef.current = true;
+
     // Esperar un poco antes de iniciar (para que la página cargue)
     const timer = setTimeout(() => {
-      setActiveTour(tour);
-    }, 1000);
+      // Verificar de nuevo antes de mostrar
+      if (!closedToursRef.current.has(tourId) && !activeTour) {
+        setActiveTour(tour);
+      }
+      isProcessingRef.current = false;
+    }, 1500);
 
-    return () => clearTimeout(timer);
-  }, [pathname, availableTours, autoplayEnabled, isTourCompleted]);
+    return () => {
+      clearTimeout(timer);
+      isProcessingRef.current = false;
+    };
+  }, [pathname, availableTours, autoplayEnabled, isTourCompleted, loading, activeTour]);
 
   const handleTourComplete = async () => {
     if (activeTour) {
+      // Marcar como cerrado localmente PRIMERO (evita bucle)
+      markTourAsClosed(activeTour.id);
+      // Luego persistir en el backend
       await completeTour(activeTour.id);
     }
     setActiveTour(null);
   };
 
   const handleTourSkip = async () => {
-    // IMPORTANTE: También marcar como completado al saltar para evitar bucle
     if (activeTour) {
+      // Marcar como cerrado localmente PRIMERO (evita bucle)
+      markTourAsClosed(activeTour.id);
+      // Luego persistir en el backend
       await completeTour(activeTour.id);
     }
     setActiveTour(null);

@@ -61,6 +61,14 @@ export function useVirtualTour() {
 
   const completeTour = async (tourId: string) => {
     try {
+      // CRÍTICO: Actualizar estado local INMEDIATAMENTE para evitar bucles
+      // Esto previene que el tour se muestre de nuevo mientras esperamos respuesta del servidor
+      setCompletedTours(prev => {
+        const prevArray = Array.isArray(prev) ? prev : [];
+        if (prevArray.includes(tourId)) return prevArray;
+        return [...prevArray, tourId];
+      });
+
       const response = await fetch('/api/tours', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -73,15 +81,16 @@ export function useVirtualTour() {
       const data = await response.json();
 
       if (data.success) {
-        // Asegurar que completedTours siempre sea un array
+        // Sincronizar con respuesta del servidor
         setCompletedTours(Array.isArray(data.completedTours) ? data.completedTours : []);
-        await fetchTours(); // Refrescar
+        // No refrescar inmediatamente para evitar condiciones de carrera
         return true;
       }
 
       return false;
     } catch (error) {
       console.error('Error completing tour:', error);
+      // Mantener el estado local actualizado aunque falle el servidor
       return false;
     }
   };
