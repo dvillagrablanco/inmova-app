@@ -2025,9 +2025,14 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   };
 
   // Filtrar items según rol y módulos activos
-  const filterItems = (items: any[], useSelectedCompanyModules: boolean = false) => {
-    // Validación: Si no hay rol o módulos aún no cargados, retornar vacío
-    if (!role || !modulesLoaded) return [];
+  // skipModuleCheck: true para items de plataforma que no dependen de módulos de empresa
+  const filterItems = (items: any[], useSelectedCompanyModules: boolean = false, skipModuleCheck: boolean = false) => {
+    // Validación: Si no hay rol, retornar vacío
+    if (!role) return [];
+
+    // Para items que no requieren verificación de módulos (ej: superAdminPlatformItems),
+    // no esperar a que los módulos estén cargados
+    if (!skipModuleCheck && !modulesLoaded) return [];
 
     // Validación: Si items no es un array válido
     if (!Array.isArray(items) || items.length === 0) return [];
@@ -2050,6 +2055,9 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
 
       // Verificar permisos de rol
       if (!item.roles.includes(role)) return false;
+
+      // Si skipModuleCheck es true, no verificar módulos activos
+      if (skipModuleCheck) return true;
 
       // Verificar si el módulo está activo
       const moduleCode = ROUTE_TO_MODULE[item.href];
@@ -2111,7 +2119,8 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
 
   // Administración
   const filteredAdministradorEmpresaItems = filterItems(administradorEmpresaItems);
-  const filteredSuperAdminPlatformItems = filterItems(superAdminPlatformItems);
+  // Items de plataforma para super_admin - NO dependen de módulos de empresa
+  const filteredSuperAdminPlatformItems = filterItems(superAdminPlatformItems, false, true);
 
   // Obtener items favoritos de todas las secciones
   const allItems = [
