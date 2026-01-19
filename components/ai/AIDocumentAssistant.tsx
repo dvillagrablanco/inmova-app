@@ -372,7 +372,7 @@ export function AIDocumentAssistant({
         {renderTrigger()}
       </SheetTrigger>
 
-      <SheetContent className="w-full sm:max-w-xl bg-background border-l shadow-xl">
+      <SheetContent className="w-full sm:max-w-xl bg-white dark:bg-gray-950 border-l shadow-xl">
         <SheetHeader className="space-y-3">
           <SheetTitle className="flex items-center gap-3">
             <div className="h-10 w-10 shrink-0 rounded-lg bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-500 flex items-center justify-center">
