@@ -31,6 +31,7 @@ import {
   MessageSquare,
   Folder,
   BarChart2,
+  BarChart3,
   Package,
   Euro,
   ClipboardList,
@@ -38,6 +39,7 @@ import {
   HeadphonesIcon,
   Bell,
   AlertCircle,
+  AlertTriangle,
   FileSignature,
   ShoppingCart,
   CalendarCheck,
@@ -69,6 +71,7 @@ import {
   Brain,
   Calculator,
   MapPin,
+  Crown,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -182,6 +185,18 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin-fincas/facturas': 'admin_fincas',
   '/admin-fincas/libro-caja': 'admin_fincas',
   '/admin-fincas/informes': 'admin_fincas',
+  '/comunidades': 'admin_fincas',
+  '/comunidades/lista': 'admin_fincas',
+  '/comunidades/propietarios': 'admin_fincas',
+  '/comunidades/cuotas': 'admin_fincas',
+  '/comunidades/fondos': 'admin_fincas',
+  '/comunidades/actas': 'admin_fincas',
+  '/comunidades/votaciones': 'admin_fincas',
+  '/comunidades/incidencias': 'admin_fincas',
+  '/comunidades/reuniones': 'admin_fincas',
+  '/comunidades/cumplimiento': 'admin_fincas',
+  '/comunidades/finanzas': 'admin_fincas',
+  '/comunidades/presidente': 'admin_fincas',
   // Media Estancia (dentro de alquiler residencial)
   '/media-estancia': 'media_estancia',
   '/media-estancia/calendario': 'media_estancia',
@@ -775,9 +790,21 @@ const alquilerComercialNavItems = [
 // AMPLIADO: Incluye todas las sub-páginas de comunidades
 const adminFincasItems = [
   {
-    name: 'Comunidades',
+    name: 'Dashboard',
     href: '/comunidades',
+    icon: LayoutDashboard,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Mis Comunidades',
+    href: '/comunidades/lista',
     icon: Building2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Propietarios',
+    href: '/comunidades/propietarios',
+    icon: Users,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -799,45 +826,39 @@ const adminFincasItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Votaciones',
+    href: '/comunidades/votaciones',
+    icon: Vote,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Incidencias',
+    href: '/comunidades/incidencias',
+    icon: AlertTriangle,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Reuniones',
+    href: '/comunidades/reuniones',
+    icon: Calendar,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Cumplimiento',
     href: '/comunidades/cumplimiento',
     icon: Shield,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Portal Presidente',
-    href: '/comunidades/presidente',
-    icon: User,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Renovaciones',
-    href: '/comunidades/renovaciones',
-    icon: Wrench,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Anuncios',
-    href: '/anuncios',
-    icon: Megaphone,
-    roles: ['super_admin', 'administrador', 'gestor', 'community_manager'],
-  },
-  {
-    name: 'Votaciones',
-    href: '/votaciones',
-    icon: Vote,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Reuniones',
-    href: '/reuniones',
-    icon: Users2,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
     name: 'Finanzas',
     href: '/comunidades/finanzas',
-    icon: Euro,
+    icon: BarChart3,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Portal Presidente',
+    href: '/comunidades/presidente',
+    icon: Crown,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];
