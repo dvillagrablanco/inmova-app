@@ -45,9 +45,12 @@ interface OnboardingProgress {
 // Clave para localStorage para persistir el cierre del wizard
 const WIZARD_DISMISSED_KEY = 'inmova-onboarding-wizard-dismissed';
 
+// Roles que NO deben ver el wizard (administradores ya conocen la plataforma)
+const EXCLUDED_ROLES = ['super_admin', 'administrador', 'admin', 'gestor'];
+
 export default function SmartOnboardingWizard() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
   const [progress, setProgress] = useState<OnboardingProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(true);
@@ -59,8 +62,13 @@ export default function SmartOnboardingWizard() {
   const userId = (session?.user as any)?.id;
 
   useEffect(() => {
-    // No cargar para superadmin
-    if (userRole === 'super_admin') {
+    // Esperar a que la sesión esté lista
+    if (sessionStatus === 'loading') {
+      return;
+    }
+
+    // No cargar para roles excluidos (administradores, etc.)
+    if (userRole && EXCLUDED_ROLES.includes(userRole.toLowerCase())) {
       setLoading(false);
       setIsVisible(false);
       return;
@@ -69,17 +77,21 @@ export default function SmartOnboardingWizard() {
     // Verificar si el wizard fue cerrado previamente (localStorage)
     if (userId) {
       const dismissedKey = `${WIZARD_DISMISSED_KEY}-${userId}`;
-      const wasDismissed = localStorage.getItem(dismissedKey);
-      if (wasDismissed === 'true') {
-        setLoading(false);
-        setIsVisible(false);
-        dismissedRef.current = true;
-        return;
+      try {
+        const wasDismissed = localStorage.getItem(dismissedKey);
+        if (wasDismissed === 'true') {
+          setLoading(false);
+          setIsVisible(false);
+          dismissedRef.current = true;
+          return;
+        }
+      } catch (e) {
+        // localStorage no disponible
       }
     }
     
     loadProgress();
-  }, [userRole, userId]);
+  }, [userRole, userId, sessionStatus]);
 
   const loadProgress = async () => {
     try {
