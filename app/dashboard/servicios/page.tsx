@@ -3,7 +3,7 @@
 /**
  * Marketplace de Servicios para Usuarios
  *
- * Página donde los usuarios de Inmova (inquilinos, propietarios, gestores)
+ * Pagina donde los usuarios de Inmova (inquilinos, propietarios, gestores)
  * pueden explorar y contratar servicios de mantenimiento y otros servicios
  * ofrecidos por proveedores del marketplace.
  */
@@ -14,12 +14,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Search,
   Star,
-  MapPin,
   Clock,
-  Phone,
   ArrowRight,
   Filter,
   Sparkles,
@@ -32,6 +31,7 @@ import {
   Home,
   Heart,
   ShoppingCart,
+  RefreshCw,
 } from 'lucide-react';
 import {
   Select,
@@ -54,33 +54,32 @@ import { toast } from 'sonner';
 
 interface MarketplaceService {
   id: string;
-  nombre: string;
-  descripcion: string;
-  categoria: string;
-  categoriaIcon: React.ReactNode;
-  precio: number;
-  tipoPrecio: string;
-  proveedor: {
-    nombre: string;
-    valoracion: number;
-    totalReviews: number;
-    verificado: boolean;
-  };
-  disponibilidad: string;
-  tiempoRespuesta: string;
-  imagenUrl?: string;
-  destacado: boolean;
+  name: string;
+  description: string;
+  category: string;
+  price: number;
+  priceType: string;
+  provider: {
+    id: string;
+    name: string;
+    verified: boolean;
+    rating: number;
+    reviews: number;
+  } | null;
+  image?: string;
+  featured: boolean;
+  tags: string[];
 }
 
 const CATEGORIAS = [
   { id: 'all', nombre: 'Todas', icon: Home },
   { id: 'limpieza', nombre: 'Limpieza', icon: Sparkles },
-  { id: 'fontaneria', nombre: 'Fontanería', icon: Droplets },
+  { id: 'fontaneria', nombre: 'Fontaneria', icon: Droplets },
   { id: 'electricidad', nombre: 'Electricidad', icon: Zap },
   { id: 'mantenimiento', nombre: 'Mantenimiento', icon: Wrench },
   { id: 'pintura', nombre: 'Pintura', icon: Paintbrush },
   { id: 'mudanzas', nombre: 'Mudanzas', icon: Truck },
-  { id: 'jardineria', nombre: 'Jardinería', icon: TreeDeciduous },
+  { id: 'jardineria', nombre: 'Jardineria', icon: TreeDeciduous },
 ];
 
 const getCategoryIcon = (categoria: string) => {
@@ -92,9 +91,35 @@ const getCategoryIcon = (categoria: string) => {
   return <Wrench className="h-5 w-5" />;
 };
 
+function ServiceCardSkeleton() {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-10 w-10 rounded-lg" />
+            <Skeleton className="h-5 w-20" />
+          </div>
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+        <Skeleton className="h-6 w-3/4 mt-2" />
+        <Skeleton className="h-4 w-full mt-2" />
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-5 w-24" />
+          <Skeleton className="h-6 w-16" />
+        </div>
+        <Skeleton className="h-10 w-full" />
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function UserServicesMarketplacePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [services, setServices] = useState<MarketplaceService[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -118,132 +143,28 @@ export default function UserServicesMarketplacePage() {
 
   const loadServices = async () => {
     try {
-      setLoading(true);
-      // TODO: Cargar servicios del API real
-      // const response = await fetch('/api/marketplace/services');
-
-      // Mock data
-      const mockServices: MarketplaceService[] = [
-        {
-          id: '1',
-          nombre: 'Limpieza profunda de vivienda',
-          descripcion:
-            'Limpieza completa incluyendo cocina, baños, ventanas y todas las habitaciones. Incluye productos.',
-          categoria: 'Limpieza',
-          categoriaIcon: getCategoryIcon('limpieza'),
-          precio: 80,
-          tipoPrecio: 'fijo',
-          proveedor: {
-            nombre: 'CleanPro Madrid',
-            valoracion: 4.9,
-            totalReviews: 156,
-            verificado: true,
-          },
-          disponibilidad: 'Disponible mañana',
-          tiempoRespuesta: '< 2 horas',
-          destacado: true,
-        },
-        {
-          id: '2',
-          nombre: 'Reparación de fontanería urgente',
-          descripcion:
-            'Servicio de fontanería urgente: fugas, atascos, reparación de grifos y tuberías.',
-          categoria: 'Fontanería',
-          categoriaIcon: getCategoryIcon('fontaneria'),
-          precio: 45,
-          tipoPrecio: 'hora',
-          proveedor: {
-            nombre: 'FontaneríaExpress',
-            valoracion: 4.7,
-            totalReviews: 89,
-            verificado: true,
-          },
-          disponibilidad: 'Disponible hoy',
-          tiempoRespuesta: '< 1 hora',
-          destacado: true,
-        },
-        {
-          id: '3',
-          nombre: 'Electricista certificado',
-          descripcion:
-            'Instalación, reparación y mantenimiento eléctrico. Boletín incluido en reformas.',
-          categoria: 'Electricidad',
-          categoriaIcon: getCategoryIcon('electricidad'),
-          precio: 35,
-          tipoPrecio: 'hora',
-          proveedor: {
-            nombre: 'ElectroMadrid',
-            valoracion: 4.8,
-            totalReviews: 67,
-            verificado: true,
-          },
-          disponibilidad: 'Próximos 2 días',
-          tiempoRespuesta: '< 4 horas',
-          destacado: false,
-        },
-        {
-          id: '4',
-          nombre: 'Pintado de habitación',
-          descripcion: 'Pintado profesional de paredes y techos. Incluye preparación y materiales.',
-          categoria: 'Pintura',
-          categoriaIcon: getCategoryIcon('pintura'),
-          precio: 0,
-          tipoPrecio: 'presupuesto',
-          proveedor: {
-            nombre: 'Pinturas Artesanas',
-            valoracion: 4.6,
-            totalReviews: 34,
-            verificado: false,
-          },
-          disponibilidad: 'Bajo demanda',
-          tiempoRespuesta: '< 24 horas',
-          destacado: false,
-        },
-        {
-          id: '5',
-          nombre: 'Limpieza regular semanal',
-          descripcion:
-            'Servicio de limpieza semanal de mantenimiento. Ideal para hogares y oficinas.',
-          categoria: 'Limpieza',
-          categoriaIcon: getCategoryIcon('limpieza'),
-          precio: 45,
-          tipoPrecio: 'fijo',
-          proveedor: {
-            nombre: 'CleanPro Madrid',
-            valoracion: 4.9,
-            totalReviews: 156,
-            verificado: true,
-          },
-          disponibilidad: 'Disponible',
-          tiempoRespuesta: '< 2 horas',
-          destacado: false,
-        },
-        {
-          id: '6',
-          nombre: 'Servicio de mudanzas',
-          descripcion: 'Mudanzas locales y nacionales. Embalaje, transporte y montaje de muebles.',
-          categoria: 'Mudanzas',
-          categoriaIcon: getCategoryIcon('mudanzas'),
-          precio: 0,
-          tipoPrecio: 'presupuesto',
-          proveedor: {
-            nombre: 'MudanzasTop',
-            valoracion: 4.5,
-            totalReviews: 45,
-            verificado: true,
-          },
-          disponibilidad: 'Con cita previa',
-          tiempoRespuesta: '< 12 horas',
-          destacado: false,
-        },
-      ];
-
-      setServices(mockServices);
+      const response = await fetch('/api/marketplace/services');
+      
+      if (response.ok) {
+        const data = await response.json();
+        setServices(data || []);
+      } else {
+        console.error('Error fetching services');
+        setServices([]);
+      }
     } catch (error) {
+      console.error('Error loading services:', error);
       toast.error('Error al cargar servicios');
+      setServices([]);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    loadServices();
   };
 
   const loadFavorites = () => {
@@ -263,34 +184,34 @@ export default function UserServicesMarketplacePage() {
 
   const filteredServices = services.filter((service) => {
     const matchesSearch =
-      service.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.proveedor.nombre.toLowerCase().includes(searchTerm.toLowerCase());
+      service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (service.provider?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
-      selectedCategory === 'all' || service.categoria.toLowerCase() === selectedCategory;
+      selectedCategory === 'all' || service.category.toLowerCase() === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   const sortedServices = [...filteredServices].sort((a, b) => {
     switch (sortBy) {
       case 'precio_asc':
-        return a.precio - b.precio;
+        return a.price - b.price;
       case 'precio_desc':
-        return b.precio - a.precio;
+        return b.price - a.price;
       case 'valoracion':
-        return b.proveedor.valoracion - a.proveedor.valoracion;
+        return (b.provider?.rating || 0) - (a.provider?.rating || 0);
       default:
-        // Relevancia: destacados primero, luego por valoración
-        if (a.destacado !== b.destacado) return a.destacado ? -1 : 1;
-        return b.proveedor.valoracion - a.proveedor.valoracion;
+        // Relevancia: destacados primero, luego por valoracion
+        if (a.featured !== b.featured) return a.featured ? -1 : 1;
+        return (b.provider?.rating || 0) - (a.provider?.rating || 0);
     }
   });
 
   const formatPrice = (precio: number, tipo: string) => {
-    if (tipo === 'presupuesto') return 'Solicitar presupuesto';
+    if (tipo === 'quote' || tipo === 'presupuesto') return 'Solicitar presupuesto';
     if (precio === 0) return 'Consultar';
     const formatted = `€${precio}`;
-    if (tipo === 'hora') return `${formatted}/hora`;
+    if (tipo === 'hour' || tipo === 'hora') return `${formatted}/hora`;
     return formatted;
   };
 
@@ -302,21 +223,46 @@ export default function UserServicesMarketplacePage() {
   const handleRequestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // TODO: Enviar solicitud al API
-      toast.success('Solicitud enviada. El proveedor te contactará pronto.');
-      setIsRequestDialogOpen(false);
-      setRequestForm({ direccion: '', fecha: '', hora: '', notas: '' });
+      const response = await fetch('/api/marketplace/service-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          serviceId: selectedService?.id,
+          ...requestForm,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('Solicitud enviada. El proveedor te contactara pronto.');
+        setIsRequestDialogOpen(false);
+        setRequestForm({ direccion: '', fecha: '', hora: '', notas: '' });
+      } else {
+        toast.error('Error al enviar solicitud');
+      }
     } catch (error) {
+      console.error('Error submitting request:', error);
       toast.error('Error al enviar solicitud');
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Cargando servicios...</p>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold">Marketplace de Servicios</h1>
+          <p className="text-muted-foreground">
+            Encuentra profesionales de confianza para el mantenimiento de tu vivienda
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {CATEGORIAS.slice(0, 5).map((cat) => (
+            <Skeleton key={cat.id} className="h-9 w-24" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(6)].map((_, i) => (
+            <ServiceCardSkeleton key={i} />
+          ))}
         </div>
       </div>
     );
@@ -325,11 +271,17 @@ export default function UserServicesMarketplacePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold">Marketplace de Servicios</h1>
-        <p className="text-muted-foreground">
-          Encuentra profesionales de confianza para el mantenimiento de tu vivienda
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Marketplace de Servicios</h1>
+          <p className="text-muted-foreground">
+            Encuentra profesionales de confianza para el mantenimiento de tu vivienda
+          </p>
+        </div>
+        <Button variant="outline" onClick={handleRefresh} disabled={refreshing}>
+          <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+          Actualizar
+        </Button>
       </div>
 
       {/* Categories quick filter */}
@@ -381,7 +333,7 @@ export default function UserServicesMarketplacePage() {
       </Card>
 
       {/* Featured services */}
-      {sortedServices.some((s) => s.destacado) && selectedCategory === 'all' && (
+      {sortedServices.some((s) => s.featured) && selectedCategory === 'all' && (
         <div>
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
@@ -389,7 +341,7 @@ export default function UserServicesMarketplacePage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {sortedServices
-              .filter((s) => s.destacado)
+              .filter((s) => s.featured)
               .map((service) => (
                 <Card
                   key={service.id}
@@ -399,9 +351,9 @@ export default function UserServicesMarketplacePage() {
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-2">
                         <div className="p-2 bg-primary/10 rounded-lg">
-                          {getCategoryIcon(service.categoria)}
+                          {getCategoryIcon(service.category)}
                         </div>
-                        <Badge variant="secondary">{service.categoria}</Badge>
+                        <Badge variant="secondary" className="capitalize">{service.category}</Badge>
                       </div>
                       <Button
                         variant="ghost"
@@ -414,42 +366,37 @@ export default function UserServicesMarketplacePage() {
                         />
                       </Button>
                     </div>
-                    <CardTitle className="text-lg mt-2">{service.nombre}</CardTitle>
+                    <CardTitle className="text-lg mt-2">{service.name}</CardTitle>
                     <CardDescription className="line-clamp-2">
-                      {service.descripcion}
+                      {service.description}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="font-medium">{service.proveedor.valoracion}</span>
-                        <span className="text-sm text-muted-foreground">
-                          ({service.proveedor.totalReviews})
-                        </span>
-                      </div>
+                      {service.provider && (
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span className="font-medium">{service.provider.rating.toFixed(1)}</span>
+                          <span className="text-sm text-muted-foreground">
+                            ({service.provider.reviews})
+                          </span>
+                        </div>
+                      )}
                       <span className="font-bold text-green-600">
-                        {formatPrice(service.precio, service.tipoPrecio)}
+                        {formatPrice(service.price, service.priceType)}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        {service.proveedor.verificado && (
+                    {service.provider && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span className="font-medium text-gray-700">{service.provider.name}</span>
+                        {service.provider.verified && (
                           <Badge variant="outline" className="text-blue-600 border-blue-200">
                             ✓ Verificado
                           </Badge>
                         )}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="flex items-center gap-1 text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        {service.tiempoRespuesta}
-                      </span>
-                      <span className="text-green-600 font-medium">{service.disponibilidad}</span>
-                    </div>
+                      </div>
+                    )}
 
                     <Button className="w-full" onClick={() => openRequestDialog(service)}>
                       <ShoppingCart className="h-4 w-4 mr-2" />
@@ -469,7 +416,7 @@ export default function UserServicesMarketplacePage() {
             ? 'Todos los Servicios'
             : CATEGORIAS.find((c) => c.id === selectedCategory)?.nombre}
           <span className="text-sm font-normal text-muted-foreground ml-2">
-            ({sortedServices.filter((s) => !s.destacado || selectedCategory !== 'all').length}{' '}
+            ({sortedServices.filter((s) => !s.featured || selectedCategory !== 'all').length}{' '}
             disponibles)
           </span>
         </h2>
@@ -479,24 +426,26 @@ export default function UserServicesMarketplacePage() {
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Search className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">No se encontraron servicios</h3>
-              <p className="text-sm text-muted-foreground">
-                Intenta con otros términos de búsqueda o categoría
+              <p className="text-sm text-muted-foreground text-center">
+                {services.length === 0
+                  ? 'Aun no hay servicios disponibles en el marketplace. Los proveedores pueden publicar sus servicios desde el panel de proveedor.'
+                  : 'Intenta con otros terminos de busqueda o categoria'}
               </p>
             </CardContent>
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {sortedServices
-              .filter((s) => !s.destacado || selectedCategory !== 'all')
+              .filter((s) => !s.featured || selectedCategory !== 'all')
               .map((service) => (
                 <Card key={service.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-2">
                         <div className="p-2 bg-gray-100 rounded-lg">
-                          {getCategoryIcon(service.categoria)}
+                          {getCategoryIcon(service.category)}
                         </div>
-                        <Badge variant="outline">{service.categoria}</Badge>
+                        <Badge variant="outline" className="capitalize">{service.category}</Badge>
                       </div>
                       <Button
                         variant="ghost"
@@ -509,44 +458,40 @@ export default function UserServicesMarketplacePage() {
                         />
                       </Button>
                     </div>
-                    <CardTitle className="text-lg mt-2">{service.nombre}</CardTitle>
+                    <CardTitle className="text-lg mt-2">{service.name}</CardTitle>
                     <CardDescription className="line-clamp-2">
-                      {service.descripcion}
+                      {service.description}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="font-medium">{service.proveedor.valoracion}</span>
-                        <span className="text-sm text-muted-foreground">
-                          ({service.proveedor.totalReviews})
-                        </span>
-                      </div>
-                      <span className="font-bold text-green-600">
-                        {formatPrice(service.precio, service.tipoPrecio)}
-                      </span>
-                    </div>
-
-                    <div className="text-sm text-muted-foreground">
-                      <span className="font-medium text-gray-700">{service.proveedor.nombre}</span>
-                      {service.proveedor.verificado && (
-                        <Badge
-                          variant="outline"
-                          className="ml-2 text-xs text-blue-600 border-blue-200"
-                        >
-                          ✓ Verificado
-                        </Badge>
+                      {service.provider && (
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span className="font-medium">{service.provider.rating.toFixed(1)}</span>
+                          <span className="text-sm text-muted-foreground">
+                            ({service.provider.reviews})
+                          </span>
+                        </div>
                       )}
+                      <span className="font-bold text-green-600">
+                        {formatPrice(service.price, service.priceType)}
+                      </span>
                     </div>
 
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="flex items-center gap-1 text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        {service.tiempoRespuesta}
-                      </span>
-                      <span className="text-green-600">{service.disponibilidad}</span>
-                    </div>
+                    {service.provider && (
+                      <div className="text-sm text-muted-foreground">
+                        <span className="font-medium text-gray-700">{service.provider.name}</span>
+                        {service.provider.verified && (
+                          <Badge
+                            variant="outline"
+                            className="ml-2 text-xs text-blue-600 border-blue-200"
+                          >
+                            ✓ Verificado
+                          </Badge>
+                        )}
+                      </div>
+                    )}
 
                     <Button
                       className="w-full"
@@ -569,17 +514,17 @@ export default function UserServicesMarketplacePage() {
           <DialogHeader>
             <DialogTitle>Solicitar Servicio</DialogTitle>
             <DialogDescription>
-              {selectedService?.nombre} - {selectedService?.proveedor.nombre}
+              {selectedService?.name} - {selectedService?.provider?.name || 'Proveedor'}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleRequestSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="direccion">Dirección del servicio *</Label>
+              <Label htmlFor="direccion">Direccion del servicio *</Label>
               <Input
                 id="direccion"
                 value={requestForm.direccion}
                 onChange={(e) => setRequestForm({ ...requestForm, direccion: e.target.value })}
-                placeholder="Calle, número, piso..."
+                placeholder="Calle, numero, piso..."
                 required
               />
             </div>
@@ -616,16 +561,16 @@ export default function UserServicesMarketplacePage() {
               />
             </div>
 
-            {selectedService && selectedService.precio > 0 && (
+            {selectedService && selectedService.price > 0 && (
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Precio estimado:</span>
                   <span className="font-bold text-lg text-green-600">
-                    {formatPrice(selectedService.precio, selectedService.tipoPrecio)}
+                    {formatPrice(selectedService.price, selectedService.priceType)}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  El precio final puede variar según el trabajo específico.
+                  El precio final puede variar segun el trabajo especifico.
                 </p>
               </div>
             )}

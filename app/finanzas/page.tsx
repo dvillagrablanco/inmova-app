@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -32,6 +33,7 @@ import {
   Clock,
   AlertCircle,
   LineChart,
+  RefreshCw,
 } from 'lucide-react';
 
 interface FinanceModule {
@@ -41,85 +43,91 @@ interface FinanceModule {
   icon: React.ReactNode;
   href: string;
   badge?: string;
-  stats?: {
-    label: string;
-    value: string;
-    trend?: 'up' | 'down' | 'neutral';
-  };
+  statsKey?: string;
+  statsLabel?: string;
+  statsTrend?: 'up' | 'down' | 'neutral';
   available: boolean;
+}
+
+interface FinancialSummary {
+  totalBalance: number;
+  monthlyIncome: number;
+  monthlyExpenses: number;
+  pendingPayments: number;
+  overduePayments: number;
+  reconciliationRate: number;
+}
+
+interface ModuleStats {
+  pendingReconciliation: number;
+  bankConnections: number;
+  pendingCollections: number;
+  monthlyInvoices: number;
+  accountingIntegrations: number;
+  rentabilidad: string;
 }
 
 const financeModules: FinanceModule[] = [
   {
     id: 'conciliacion',
-    title: 'Conciliación Bancaria',
-    description: 'Vincula movimientos bancarios con facturas y recibos automáticamente',
+    title: 'Conciliacion Bancaria',
+    description: 'Vincula movimientos bancarios con facturas y recibos automaticamente',
     icon: <ArrowRightLeft className="h-6 w-6" />,
     href: '/finanzas/conciliacion',
     badge: 'IA',
-    stats: {
-      label: 'Pendientes',
-      value: '5',
-      trend: 'down',
-    },
+    statsKey: 'pendingReconciliation',
+    statsLabel: 'Pendientes',
+    statsTrend: 'down',
     available: true,
   },
   {
     id: 'open-banking',
     title: 'Open Banking',
-    description: 'Conecta tus cuentas bancarias para sincronización automática',
+    description: 'Conecta tus cuentas bancarias para sincronizacion automatica',
     icon: <Building className="h-6 w-6" />,
     href: '/open-banking',
-    stats: {
-      label: 'Cuentas',
-      value: '3',
-    },
+    statsKey: 'bankConnections',
+    statsLabel: 'Cuentas',
     available: true,
   },
   {
     id: 'cobros',
-    title: 'Gestión de Cobros',
+    title: 'Gestion de Cobros',
     description: 'Controla pagos de alquileres, cuotas y recibos pendientes',
     icon: <Euro className="h-6 w-6" />,
     href: '/pagos',
-    stats: {
-      label: 'Por cobrar',
-      value: '€4,250',
-    },
+    statsKey: 'pendingCollections',
+    statsLabel: 'Por cobrar',
     available: true,
   },
   {
     id: 'facturas',
-    title: 'Facturación',
+    title: 'Facturacion',
     description: 'Emite y gestiona facturas, recibos y documentos fiscales',
     icon: <Receipt className="h-6 w-6" />,
     href: '/facturas',
-    stats: {
-      label: 'Este mes',
-      value: '23',
-      trend: 'up',
-    },
+    statsKey: 'monthlyInvoices',
+    statsLabel: 'Este mes',
+    statsTrend: 'up',
     available: true,
   },
   {
     id: 'contabilidad',
     title: 'Integraciones Contables',
-    description: 'Conecta con Contasimple, Holded, a3ERP y más herramientas contables',
+    description: 'Conecta con Contasimple, Holded, a3ERP y mas herramientas contables',
     icon: <FileText className="h-6 w-6" />,
     href: '/contabilidad/integraciones',
-    stats: {
-      label: 'Conectadas',
-      value: '1',
-    },
+    statsKey: 'accountingIntegrations',
+    statsLabel: 'Conectadas',
     available: true,
   },
   {
     id: 'tesoreria',
-    title: 'Tesorería',
-    description: 'Previsión de flujo de caja y gestión de liquidez',
+    title: 'Tesoreria',
+    description: 'Prevision de flujo de caja y gestion de liquidez',
     icon: <Wallet className="h-6 w-6" />,
     href: '/finanzas/tesoreria',
-    badge: 'Próximamente',
+    badge: 'Proximamente',
     available: false,
   },
   {
@@ -128,7 +136,7 @@ const financeModules: FinanceModule[] = [
     description: 'Crea y controla presupuestos anuales por propiedad',
     icon: <PiggyBank className="h-6 w-6" />,
     href: '/finanzas/presupuestos',
-    badge: 'Próximamente',
+    badge: 'Proximamente',
     available: false,
   },
   {
@@ -137,18 +145,91 @@ const financeModules: FinanceModule[] = [
     description: 'Reportes de rentabilidad, P&L y balance por propiedad',
     icon: <BarChart3 className="h-6 w-6" />,
     href: '/analytics',
-    stats: {
-      label: 'Rentabilidad',
-      value: '6.2%',
-      trend: 'up',
-    },
+    statsKey: 'rentabilidad',
+    statsLabel: 'Rentabilidad',
+    statsTrend: 'up',
     available: true,
   },
 ];
 
+function SummarySkeleton() {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {[...Array(6)].map((_, i) => (
+        <Card key={i}>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-3 w-16" />
+            </div>
+            <Skeleton className="h-6 w-20" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
 export default function FinanzasPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [financialSummary, setFinancialSummary] = useState<FinancialSummary>({
+    totalBalance: 0,
+    monthlyIncome: 0,
+    monthlyExpenses: 0,
+    pendingPayments: 0,
+    overduePayments: 0,
+    reconciliationRate: 0,
+  });
+  const [moduleStats, setModuleStats] = useState<ModuleStats>({
+    pendingReconciliation: 0,
+    bankConnections: 0,
+    pendingCollections: 0,
+    monthlyInvoices: 0,
+    accountingIntegrations: 0,
+    rentabilidad: '0',
+  });
+
+  const fetchFinancialData = async () => {
+    try {
+      const response = await fetch('/api/finanzas/summary');
+      if (response.ok) {
+        const data = await response.json();
+        setFinancialSummary(data.summary || financialSummary);
+        setModuleStats(data.moduleStats || moduleStats);
+      }
+    } catch (error) {
+      console.error('Error fetching financial data:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      fetchFinancialData();
+    }
+  }, [status]);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchFinancialData();
+  };
+
+  const getModuleStatValue = (statsKey: string | undefined): string => {
+    if (!statsKey) return '';
+    const value = moduleStats[statsKey as keyof ModuleStats];
+    if (statsKey === 'pendingCollections') {
+      return `€${Number(value).toLocaleString('es-ES')}`;
+    }
+    if (statsKey === 'rentabilidad') {
+      return `${value}%`;
+    }
+    return String(value);
+  };
 
   if (status === 'loading') {
     return (
@@ -159,16 +240,6 @@ export default function FinanzasPage() {
       </AuthenticatedLayout>
     );
   }
-
-  // Resumen financiero (datos de ejemplo)
-  const financialSummary = {
-    totalBalance: 66661.25,
-    monthlyIncome: 12450.00,
-    monthlyExpenses: 3240.50,
-    pendingPayments: 4250.00,
-    overduePayments: 850.00,
-    reconciliationRate: 87,
-  };
 
   return (
     <AuthenticatedLayout>
@@ -202,6 +273,10 @@ export default function FinanzasPage() {
             </div>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={handleRefresh} disabled={refreshing}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              Actualizar
+            </Button>
             <Button variant="outline" onClick={() => router.push('/open-banking')}>
               <Building className="h-4 w-4 mr-2" />
               Conectar Banco
@@ -214,78 +289,82 @@ export default function FinanzasPage() {
         </div>
 
         {/* Resumen financiero */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                <Wallet className="h-4 w-4" />
-                <span className="text-xs">Saldo Total</span>
-              </div>
-              <p className="text-xl font-bold">
-                {financialSummary.totalBalance.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2 text-green-600 mb-1">
-                <TrendingUp className="h-4 w-4" />
-                <span className="text-xs">Ingresos (mes)</span>
-              </div>
-              <p className="text-xl font-bold text-green-600">
-                +{financialSummary.monthlyIncome.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2 text-red-600 mb-1">
-                <LineChart className="h-4 w-4" />
-                <span className="text-xs">Gastos (mes)</span>
-              </div>
-              <p className="text-xl font-bold text-red-600">
-                -{financialSummary.monthlyExpenses.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2 text-amber-600 mb-1">
-                <Clock className="h-4 w-4" />
-                <span className="text-xs">Por Cobrar</span>
-              </div>
-              <p className="text-xl font-bold text-amber-600">
-                {financialSummary.pendingPayments.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2 text-red-500 mb-1">
-                <AlertCircle className="h-4 w-4" />
-                <span className="text-xs">Vencidos</span>
-              </div>
-              <p className="text-xl font-bold text-red-500">
-                {financialSummary.overduePayments.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                <CheckCircle2 className="h-4 w-4" />
-                <span className="text-xs">Conciliación</span>
-              </div>
-              <p className="text-xl font-bold">
-                {financialSummary.reconciliationRate}%
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        {loading ? (
+          <SummarySkeleton />
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                  <Wallet className="h-4 w-4" />
+                  <span className="text-xs">Saldo Total</span>
+                </div>
+                <p className="text-xl font-bold">
+                  {financialSummary.totalBalance.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2 text-green-600 mb-1">
+                  <TrendingUp className="h-4 w-4" />
+                  <span className="text-xs">Ingresos (mes)</span>
+                </div>
+                <p className="text-xl font-bold text-green-600">
+                  +{financialSummary.monthlyIncome.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2 text-red-600 mb-1">
+                  <LineChart className="h-4 w-4" />
+                  <span className="text-xs">Gastos (mes)</span>
+                </div>
+                <p className="text-xl font-bold text-red-600">
+                  -{financialSummary.monthlyExpenses.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2 text-amber-600 mb-1">
+                  <Clock className="h-4 w-4" />
+                  <span className="text-xs">Por Cobrar</span>
+                </div>
+                <p className="text-xl font-bold text-amber-600">
+                  {financialSummary.pendingPayments.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2 text-red-500 mb-1">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="text-xs">Vencidos</span>
+                </div>
+                <p className="text-xl font-bold text-red-500">
+                  {financialSummary.overduePayments.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span className="text-xs">Conciliacion</span>
+                </div>
+                <p className="text-xl font-bold">
+                  {financialSummary.reconciliationRate}%
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-        {/* Módulos financieros */}
+        {/* Modulos financieros */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Módulos Financieros</h2>
+          <h2 className="text-xl font-semibold mb-4">Modulos Financieros</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {financeModules.map((module) => (
               <Card 
@@ -312,13 +391,13 @@ export default function FinanzasPage() {
                   <CardDescription>{module.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {module.stats && module.available && (
+                  {module.statsKey && module.available && (
                     <div className="flex items-center justify-between pt-2 border-t">
-                      <span className="text-sm text-muted-foreground">{module.stats.label}</span>
+                      <span className="text-sm text-muted-foreground">{module.statsLabel}</span>
                       <div className="flex items-center gap-1">
-                        <span className="font-semibold">{module.stats.value}</span>
-                        {module.stats.trend === 'up' && <TrendingUp className="h-4 w-4 text-green-500" />}
-                        {module.stats.trend === 'down' && <TrendingUp className="h-4 w-4 text-red-500 rotate-180" />}
+                        <span className="font-semibold">{getModuleStatValue(module.statsKey)}</span>
+                        {module.statsTrend === 'up' && <TrendingUp className="h-4 w-4 text-green-500" />}
+                        {module.statsTrend === 'down' && <TrendingUp className="h-4 w-4 text-red-500 rotate-180" />}
                       </div>
                     </div>
                   )}
@@ -334,10 +413,10 @@ export default function FinanzasPage() {
           </div>
         </div>
 
-        {/* Accesos rápidos */}
+        {/* Accesos rapidos */}
         <Card>
           <CardHeader>
-            <CardTitle>Acciones Rápidas</CardTitle>
+            <CardTitle>Acciones Rapidas</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
