@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Warehouse,
@@ -26,7 +26,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,70 +41,32 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
-// Datos de ejemplo
-const mockNaves = [
-  {
-    id: '1',
-    nombre: 'Nave Industrial 2 - Polígono Norte',
-    direccion: 'Polígono Industrial Norte, Parcela 25, Getafe',
-    superficie: 2500,
-    superficieUtil: 2400,
-    estado: 'ocupada',
-    rentaMensual: 12500,
-    arrendatario: 'Logística Express SL',
-    tipo: 'nave_industrial',
-    alturaLibre: 10,
-    cargaSuelo: 5000,
-    muelles: 4,
-    caracteristicas: ['muelle_carga', 'patio_maniobras', 'oficinas', 'trifasica'],
-  },
-  {
-    id: '2',
-    nombre: 'Almacén Logístico - Coslada',
-    direccion: 'Av. de la Industria 120, Coslada',
-    superficie: 5000,
-    superficieUtil: 4800,
-    estado: 'disponible',
-    rentaMensual: 22000,
-    arrendatario: null,
-    tipo: 'almacen',
-    alturaLibre: 12,
-    cargaSuelo: 8000,
-    muelles: 8,
-    caracteristicas: ['muelle_carga', 'patio_maniobras', 'oficinas', 'trifasica', 'sprinklers'],
-  },
-  {
-    id: '3',
-    nombre: 'Nave Pequeña - San Fernando',
-    direccion: 'Calle del Trabajo 45, San Fernando de Henares',
-    superficie: 800,
-    superficieUtil: 780,
-    estado: 'ocupada',
-    rentaMensual: 3200,
-    arrendatario: 'Carpintería Moderna',
-    tipo: 'taller',
-    alturaLibre: 6,
-    cargaSuelo: 3000,
-    muelles: 1,
-    caracteristicas: ['portón', 'oficinas', 'trifasica'],
-  },
-  {
-    id: '4',
-    nombre: 'Centro Logístico Premium',
-    direccion: 'Parque Empresarial Las Mercedes, Alcobendas',
-    superficie: 8000,
-    superficieUtil: 7600,
-    estado: 'reservada',
-    rentaMensual: 45000,
-    arrendatario: 'En negociación',
-    tipo: 'nave_industrial',
-    alturaLibre: 14,
-    cargaSuelo: 10000,
-    muelles: 12,
-    caracteristicas: ['muelle_carga', 'patio_maniobras', 'oficinas', 'trifasica', 'sprinklers', 'cross_docking'],
-  },
-];
+interface Nave {
+  id: string;
+  nombre: string;
+  direccion: string;
+  superficie: number;
+  superficieUtil: number;
+  estado: string;
+  rentaMensual: number;
+  arrendatario: string | null;
+  tipo: string;
+  alturaLibre?: number;
+  cargaSuelo?: number;
+  muelles?: number;
+  caracteristicas: string[];
+}
+
+interface Stats {
+  total: number;
+  ocupadas: number;
+  disponibles: number;
+  reservadas: number;
+  rentaMensualTotal: number;
+  superficieTotal: number;
+}
 
 const estadoColors: Record<string, string> = {
   ocupada: 'bg-green-100 text-green-800',
@@ -107,21 +76,65 @@ const estadoColors: Record<string, string> = {
 };
 
 export default function NavesPage() {
+  const [naves, setNaves] = useState<Nave[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [estadoFilter, setEstadoFilter] = useState('todos');
 
-  const filteredNaves = mockNaves.filter((nave) => {
-    const matchesSearch = nave.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  useEffect(() => {
+    const fetchNaves = async () => {
+      try {
+        const response = await fetch('/api/comercial/spaces?categoria=naves');
+        if (!response.ok) throw new Error('Error al cargar naves');
+        const data = await response.json();
+        setNaves(data.spaces || []);
+        setStats(data.stats || null);
+      } catch (error) {
+        console.error('Error fetching naves:', error);
+        toast.error('Error al cargar las naves industriales');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNaves();
+  }, []);
+
+  const filteredNaves = naves.filter((nave) => {
+    const matchesSearch =
+      nave.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
       nave.direccion.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesEstado = estadoFilter === 'todos' || nave.estado === estadoFilter;
     return matchesSearch && matchesEstado;
   });
 
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6 space-y-6">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-12 w-full" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-96" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-600">
-        <Link href="/comercial" className="hover:text-blue-600">Alquiler Comercial</Link>
+        <Link href="/comercial" className="hover:text-blue-600">
+          Alquiler Comercial
+        </Link>
         <ChevronRight className="h-4 w-4" />
         <span className="font-medium text-gray-900">Naves Industriales</span>
       </div>
@@ -150,25 +163,29 @@ export default function NavesPage() {
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-gray-600">Total Naves</div>
-            <div className="text-2xl font-bold">6</div>
+            <div className="text-2xl font-bold">{stats?.total || 0}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-gray-600">Ocupadas</div>
-            <div className="text-2xl font-bold text-green-600">4</div>
+            <div className="text-2xl font-bold text-green-600">{stats?.ocupadas || 0}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-gray-600">Superficie Total</div>
-            <div className="text-2xl font-bold">16.300 m²</div>
+            <div className="text-2xl font-bold">
+              {(stats?.superficieTotal || 0).toLocaleString('es-ES')} m²
+            </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-gray-600">Ingresos/mes</div>
-            <div className="text-2xl font-bold">82.700€</div>
+            <div className="text-2xl font-bold">
+              {(stats?.rentaMensualTotal || 0).toLocaleString('es-ES')}€
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -206,6 +223,29 @@ export default function NavesPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Empty State */}
+      {filteredNaves.length === 0 && !loading && (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <Warehouse className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No hay naves</h3>
+            <p className="text-gray-500 mb-4">
+              {searchQuery || estadoFilter !== 'todos'
+                ? 'No se encontraron naves con los filtros aplicados'
+                : 'Comienza agregando tu primera nave industrial'}
+            </p>
+            {!searchQuery && estadoFilter === 'todos' && (
+              <Button asChild>
+                <Link href="/comercial/espacios/nuevo?tipo=nave">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Agregar Nave
+                </Link>
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Lista de naves */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -252,12 +292,15 @@ export default function NavesPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <Badge className={estadoColors[nave.estado]}>
+                <Badge className={estadoColors[nave.estado] || 'bg-gray-100 text-gray-800'}>
                   {nave.estado.charAt(0).toUpperCase() + nave.estado.slice(1)}
                 </Badge>
                 <Badge variant="outline">
-                  {nave.tipo === 'nave_industrial' ? 'Nave Industrial' : 
-                   nave.tipo === 'almacen' ? 'Almacén' : 'Taller'}
+                  {nave.tipo === 'nave_industrial'
+                    ? 'Nave Industrial'
+                    : nave.tipo === 'almacen'
+                      ? 'Almacén'
+                      : 'Taller'}
                 </Badge>
               </div>
 
@@ -267,28 +310,32 @@ export default function NavesPage() {
                     <Ruler className="h-4 w-4" />
                     Superficie
                   </div>
-                  <div className="font-semibold">{nave.superficieUtil.toLocaleString('es-ES')} m²</div>
+                  <div className="font-semibold">
+                    {(nave.superficieUtil || nave.superficie).toLocaleString('es-ES')} m²
+                  </div>
                 </div>
                 <div>
                   <div className="flex items-center gap-1 text-gray-500">
                     <ArrowUp className="h-4 w-4" />
                     Altura libre
                   </div>
-                  <div className="font-semibold">{nave.alturaLibre} m</div>
+                  <div className="font-semibold">{nave.alturaLibre || '-'} m</div>
                 </div>
                 <div>
                   <div className="flex items-center gap-1 text-gray-500">
                     <Package className="h-4 w-4" />
                     Carga suelo
                   </div>
-                  <div className="font-semibold">{nave.cargaSuelo.toLocaleString('es-ES')} kg/m²</div>
+                  <div className="font-semibold">
+                    {nave.cargaSuelo ? `${nave.cargaSuelo.toLocaleString('es-ES')} kg/m²` : '-'}
+                  </div>
                 </div>
                 <div>
                   <div className="flex items-center gap-1 text-gray-500">
                     <Truck className="h-4 w-4" />
                     Muelles
                   </div>
-                  <div className="font-semibold">{nave.muelles}</div>
+                  <div className="font-semibold">{nave.muelles || '-'}</div>
                 </div>
               </div>
 
@@ -307,14 +354,14 @@ export default function NavesPage() {
                 )}
               </div>
 
-              <div className="flex gap-2">
-                {nave.caracteristicas.includes('muelle_carga') && (
+              <div className="flex gap-2 flex-wrap">
+                {nave.caracteristicas?.includes('muelle_carga') && (
                   <Badge variant="secondary" className="text-xs">
                     <Truck className="h-3 w-3 mr-1" />
                     Muelle de carga
                   </Badge>
                 )}
-                {nave.caracteristicas.includes('trifasica') && (
+                {nave.caracteristicas?.includes('trifasica') && (
                   <Badge variant="secondary" className="text-xs">
                     <Zap className="h-3 w-3 mr-1" />
                     Trifásica

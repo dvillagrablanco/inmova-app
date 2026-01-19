@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Laptop,
@@ -28,7 +28,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,61 +43,31 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
-// Datos de ejemplo
-const mockCoworking = [
-  {
-    id: '1',
-    nombre: 'Oficina Privada 4P - Hub Innovation',
-    direccion: 'Calle Alcalá 250, Madrid',
-    tipo: 'coworking_office',
-    capacidad: 4,
-    estado: 'ocupada',
-    rentaMensual: 1200,
-    arrendatario: 'StartupX SL',
-    periodo: 'mensual',
-    servicios: ['wifi', 'cafe', 'impresora', 'salas'],
-    horasAcceso: '24/7',
-  },
-  {
-    id: '2',
-    nombre: 'Puestos Hot Desk - Zona Premium',
-    direccion: 'Paseo de la Castellana 95, Madrid',
-    tipo: 'coworking_hot_desk',
-    capacidad: 20,
-    ocupados: 15,
-    estado: 'disponible',
-    rentaMensual: 250,
-    periodo: 'mensual',
-    servicios: ['wifi', 'cafe', 'impresora', 'eventos'],
-    horasAcceso: 'L-V 8:00-22:00',
-  },
-  {
-    id: '3',
-    nombre: 'Oficina 6P - Creative Space',
-    direccion: 'Calle Fuencarral 123, Madrid',
-    tipo: 'coworking_office',
-    capacidad: 6,
-    estado: 'disponible',
-    rentaMensual: 1800,
-    periodo: 'mensual',
-    servicios: ['wifi', 'cafe', 'impresora', 'salas', 'terraza'],
-    horasAcceso: '24/7',
-  },
-  {
-    id: '4',
-    nombre: 'Puesto Dedicado - Business Center',
-    direccion: 'Gran Vía 32, Madrid',
-    tipo: 'coworking_dedicated',
-    capacidad: 10,
-    ocupados: 8,
-    estado: 'disponible',
-    rentaMensual: 350,
-    periodo: 'mensual',
-    servicios: ['wifi', 'cafe', 'impresora', 'salas', 'recepcion'],
-    horasAcceso: '24/7',
-  },
-];
+interface Coworking {
+  id: string;
+  nombre: string;
+  direccion: string;
+  tipo: string;
+  capacidad: number;
+  ocupados?: number;
+  estado: string;
+  rentaMensual: number;
+  arrendatario?: string | null;
+  periodo?: string;
+  servicios: string[];
+  horasAcceso?: string;
+}
+
+interface Stats {
+  total: number;
+  ocupadas: number;
+  disponibles: number;
+  reservadas: number;
+  rentaMensualTotal: number;
+  capacidadTotal: number;
+}
 
 const tipoLabels: Record<string, string> = {
   coworking_hot_desk: 'Hot Desk',
@@ -114,21 +91,79 @@ const servicioIcons: Record<string, any> = {
 };
 
 export default function CoworkingPage() {
+  const [espacios, setEspacios] = useState<Coworking[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [tipoFilter, setTipoFilter] = useState('todos');
 
-  const filteredCoworking = mockCoworking.filter((espacio) => {
-    const matchesSearch = espacio.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  useEffect(() => {
+    const fetchCoworking = async () => {
+      try {
+        const response = await fetch('/api/comercial/spaces?categoria=coworking');
+        if (!response.ok) throw new Error('Error al cargar espacios coworking');
+        const data = await response.json();
+        setEspacios(data.spaces || []);
+        setStats(data.stats || null);
+      } catch (error) {
+        console.error('Error fetching coworking:', error);
+        toast.error('Error al cargar los espacios de coworking');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCoworking();
+  }, []);
+
+  const filteredCoworking = espacios.filter((espacio) => {
+    const matchesSearch =
+      espacio.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
       espacio.direccion.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTipo = tipoFilter === 'todos' || espacio.tipo === tipoFilter;
     return matchesSearch && matchesTipo;
   });
 
+  // Calcular métricas adicionales
+  const totalPuestos = espacios.reduce((acc, e) => acc + (e.capacidad || 0), 0);
+  const ocupacion =
+    totalPuestos > 0
+      ? Math.round(
+          (espacios.reduce(
+            (acc, e) => acc + (e.ocupados || (e.estado === 'ocupada' ? e.capacidad : 0)),
+            0
+          ) /
+            totalPuestos) *
+            100
+        )
+      : 0;
+
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6 space-y-6">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-12 w-full" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-80" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-600">
-        <Link href="/comercial" className="hover:text-blue-600">Alquiler Comercial</Link>
+        <Link href="/comercial" className="hover:text-blue-600">
+          Alquiler Comercial
+        </Link>
         <ChevronRight className="h-4 w-4" />
         <span className="font-medium text-gray-900">Coworking</span>
       </div>
@@ -157,25 +192,27 @@ export default function CoworkingPage() {
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-gray-600">Espacios Totales</div>
-            <div className="text-2xl font-bold">4</div>
+            <div className="text-2xl font-bold">{stats?.total || 0}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-gray-600">Puestos Totales</div>
-            <div className="text-2xl font-bold">40</div>
+            <div className="text-2xl font-bold">{totalPuestos}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-gray-600">Ocupación</div>
-            <div className="text-2xl font-bold text-green-600">75%</div>
+            <div className="text-2xl font-bold text-green-600">{ocupacion}%</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-gray-600">Ingresos/mes</div>
-            <div className="text-2xl font-bold">11.950€</div>
+            <div className="text-2xl font-bold">
+              {(stats?.rentaMensualTotal || 0).toLocaleString('es-ES')}€
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -213,6 +250,29 @@ export default function CoworkingPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Empty State */}
+      {filteredCoworking.length === 0 && !loading && (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <Laptop className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No hay espacios</h3>
+            <p className="text-gray-500 mb-4">
+              {searchQuery || tipoFilter !== 'todos'
+                ? 'No se encontraron espacios con los filtros aplicados'
+                : 'Comienza agregando tu primer espacio de coworking'}
+            </p>
+            {!searchQuery && tipoFilter === 'todos' && (
+              <Button asChild>
+                <Link href="/comercial/espacios/nuevo?tipo=coworking">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Agregar Espacio
+                </Link>
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Lista de espacios */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -259,13 +319,15 @@ export default function CoworkingPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <Badge className={tipoColors[espacio.tipo]}>
-                  {tipoLabels[espacio.tipo]}
+                <Badge className={tipoColors[espacio.tipo] || 'bg-gray-100 text-gray-800'}>
+                  {tipoLabels[espacio.tipo] || espacio.tipo}
                 </Badge>
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {espacio.horasAcceso}
-                </Badge>
+                {espacio.horasAcceso && (
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {espacio.horasAcceso}
+                  </Badge>
+                )}
               </div>
 
               <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
@@ -273,7 +335,7 @@ export default function CoworkingPage() {
                   <div className="text-sm text-gray-500">Capacidad</div>
                   <div className="font-semibold flex items-center gap-1">
                     <Users className="h-4 w-4" />
-                    {espacio.tipo === 'coworking_office' 
+                    {espacio.tipo === 'coworking_office'
                       ? `${espacio.capacidad} personas`
                       : `${espacio.ocupados || 0}/${espacio.capacidad} puestos`}
                   </div>
@@ -281,13 +343,14 @@ export default function CoworkingPage() {
                 <div className="text-right">
                   <div className="text-sm text-gray-500">Desde</div>
                   <div className="text-xl font-bold text-purple-600">
-                    {espacio.rentaMensual}€<span className="text-sm font-normal">/mes</span>
+                    {espacio.rentaMensual.toLocaleString('es-ES')}€
+                    <span className="text-sm font-normal">/mes</span>
                   </div>
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {espacio.servicios.map((servicio) => {
+                {espacio.servicios?.map((servicio) => {
                   const ServicioIcon = servicioIcons[servicio]?.icon || Wifi;
                   return (
                     <div
@@ -313,15 +376,9 @@ export default function CoworkingPage() {
 
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1" asChild>
-                  <Link href={`/comercial/espacios/${espacio.id}`}>
-                    Ver detalles
-                  </Link>
+                  <Link href={`/comercial/espacios/${espacio.id}`}>Ver detalles</Link>
                 </Button>
-                {espacio.estado === 'disponible' && (
-                  <Button className="flex-1">
-                    Reservar
-                  </Button>
-                )}
+                {espacio.estado === 'disponible' && <Button className="flex-1">Reservar</Button>}
               </div>
             </CardContent>
           </Card>
