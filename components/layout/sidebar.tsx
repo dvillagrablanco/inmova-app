@@ -1914,7 +1914,13 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
         const res = await fetch('/api/modules/active');
         if (res.ok) {
           const data = await res.json();
-          setActiveModules(data.activeModules || data || []);
+          // Asegurar que siempre sea un array
+          const modules = Array.isArray(data.activeModules) 
+            ? data.activeModules 
+            : Array.isArray(data) 
+              ? data 
+              : [];
+          setActiveModules(modules);
         }
       } catch (error) {
         logger.error('Error loading active modules:', error);
@@ -1937,10 +1943,12 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
         const res = await fetch(`/api/modules/active?companyId=${selectedCompany.id}`);
         if (res.ok) {
           const data = await res.json();
-          setSelectedCompanyModules(data.activeModules || []);
+          // Asegurar que siempre sea un array
+          const modules = Array.isArray(data.activeModules) ? data.activeModules : [];
+          setSelectedCompanyModules(modules);
           logger.info('Módulos de empresa seleccionada cargados', {
             companyId: selectedCompany.id,
-            modulesCount: data.activeModules?.length || 0,
+            modulesCount: modules.length,
           });
         }
       } catch (error) {
@@ -1956,7 +1964,9 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     try {
       const storedFavorites = safeLocalStorage.getItem('sidebar_favorites');
       if (storedFavorites) {
-        setFavorites(JSON.parse(storedFavorites));
+        const parsed = JSON.parse(storedFavorites);
+        // Asegurar que siempre sea un array
+        setFavorites(Array.isArray(parsed) ? parsed : []);
       }
     } catch (error) {
       logger.error('Error loading favorites:', error);
@@ -2029,9 +2039,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
       useSelectedCompanyModules &&
       role === 'super_admin' &&
       selectedCompany &&
+      Array.isArray(selectedCompanyModules) &&
       selectedCompanyModules.length > 0
         ? selectedCompanyModules
-        : activeModules;
+        : Array.isArray(activeModules) ? activeModules : [];
 
     let filtered = items.filter((item) => {
       // Validación: item debe tener roles

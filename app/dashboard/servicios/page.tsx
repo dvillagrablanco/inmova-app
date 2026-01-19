@@ -170,7 +170,9 @@ export default function UserServicesMarketplacePage() {
   const loadFavorites = () => {
     const stored = localStorage.getItem('marketplace_favorites');
     if (stored) {
-      setFavorites(JSON.parse(stored));
+      const parsed = JSON.parse(stored);
+      // Asegurar que siempre sea un array
+      setFavorites(Array.isArray(parsed) ? parsed : []);
     }
   };
 

@@ -56,9 +56,11 @@ export function SetupProgressWidget({ className }: SetupProgressWidgetProps) {
       const response = await fetch('/api/user/setup-progress');
       if (response.ok) {
         const data = await response.json();
+        // Asegurar que completedActions sea un array antes de usar .includes()
+        const completedActions = Array.isArray(data.completedActions) ? data.completedActions : [];
         const updatedActions = actions.map(action => ({
           ...action,
-          completed: data.completedActions?.includes(action.id) || false,
+          completed: completedActions.includes(action.id),
         }));
         setSetupActions(updatedActions);
         setProgress(calculateSetupProgress(updatedActions));
