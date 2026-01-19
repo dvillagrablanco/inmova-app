@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Building2,
@@ -27,6 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,66 +35,31 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
-// Datos de ejemplo
-const mockOficinas = [
-  {
-    id: '1',
-    nombre: 'Oficina 3A - Torre Empresarial',
-    direccion: 'Paseo de la Castellana 120, Madrid',
-    superficie: 250,
-    superficieUtil: 220,
-    estado: 'ocupada',
-    rentaMensual: 4500,
-    arrendatario: 'Tech Solutions SL',
-    tipo: 'oficina_privada',
-    planta: 3,
-    caracteristicas: ['climatizacion', 'parking', 'fibra'],
-    imagen: '/api/placeholder/400/200',
-  },
-  {
-    id: '2',
-    nombre: 'Oficina 7B - Centro de Negocios',
-    direccion: 'Gran Vía 45, Madrid',
-    superficie: 180,
-    superficieUtil: 160,
-    estado: 'disponible',
-    rentaMensual: 3200,
-    arrendatario: null,
-    tipo: 'oficina_abierta',
-    planta: 7,
-    caracteristicas: ['climatizacion', 'fibra'],
-    imagen: '/api/placeholder/400/200',
-  },
-  {
-    id: '3',
-    nombre: 'Oficina 12C - Edificio Azul',
-    direccion: 'Calle Serrano 80, Madrid',
-    superficie: 350,
-    superficieUtil: 320,
-    estado: 'ocupada',
-    rentaMensual: 6800,
-    arrendatario: 'Consultores Asociados',
-    tipo: 'oficina_privada',
-    planta: 12,
-    caracteristicas: ['climatizacion', 'parking', 'fibra', 'recepcion'],
-    imagen: '/api/placeholder/400/200',
-  },
-  {
-    id: '4',
-    nombre: 'Oficina Planta Baja - Local Premium',
-    direccion: 'Calle Velázquez 22, Madrid',
-    superficie: 120,
-    superficieUtil: 110,
-    estado: 'reservada',
-    rentaMensual: 2800,
-    arrendatario: 'Pendiente firma',
-    tipo: 'oficina_privada',
-    planta: 0,
-    caracteristicas: ['climatizacion', 'fachada'],
-    imagen: '/api/placeholder/400/200',
-  },
-];
+interface Oficina {
+  id: string;
+  nombre: string;
+  direccion: string;
+  superficie: number;
+  superficieUtil: number;
+  estado: string;
+  rentaMensual: number;
+  arrendatario: string | null;
+  tipo: string;
+  planta: number;
+  caracteristicas: string[];
+  imagen: string;
+}
+
+interface Stats {
+  total: number;
+  ocupadas: number;
+  disponibles: number;
+  reservadas: number;
+  superficieTotal: number;
+  rentaMensualTotal: number;
+}
 
 const estadoColors: Record<string, string> = {
   ocupada: 'bg-green-100 text-green-800',
@@ -111,16 +77,70 @@ const caracteristicasIcons: Record<string, any> = {
 };
 
 export default function OficinasPage() {
+  const [oficinas, setOficinas] = useState<Oficina[]>([]);
+  const [stats, setStats] = useState<Stats>({
+    total: 0,
+    ocupadas: 0,
+    disponibles: 0,
+    reservadas: 0,
+    superficieTotal: 0,
+    rentaMensualTotal: 0,
+  });
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [estadoFilter, setEstadoFilter] = useState('todos');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  const filteredOficinas = mockOficinas.filter((oficina) => {
+  useEffect(() => {
+    fetchOficinas();
+  }, []);
+
+  const fetchOficinas = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/comercial/spaces?categoria=oficinas');
+      if (res.ok) {
+        const data = await res.json();
+        setOficinas(data.spaces || []);
+        setStats(data.stats || { total: 0, ocupadas: 0, disponibles: 0, reservadas: 0, superficieTotal: 0, rentaMensualTotal: 0 });
+      } else {
+        console.error('Error fetching oficinas');
+        setOficinas([]);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al cargar oficinas');
+      setOficinas([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredOficinas = oficinas.filter((oficina) => {
     const matchesSearch = oficina.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
       oficina.direccion.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesEstado = estadoFilter === 'todos' || oficina.estado === estadoFilter;
     return matchesSearch && matchesEstado;
   });
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6 space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+        <Skeleton className="h-16" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-80" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -155,25 +175,25 @@ export default function OficinasPage() {
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-gray-600">Total Oficinas</div>
-            <div className="text-2xl font-bold">22</div>
+            <div className="text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-gray-600">Ocupadas</div>
-            <div className="text-2xl font-bold text-green-600">19</div>
+            <div className="text-2xl font-bold text-green-600">{stats.ocupadas}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-gray-600">Disponibles</div>
-            <div className="text-2xl font-bold text-blue-600">3</div>
+            <div className="text-2xl font-bold text-blue-600">{stats.disponibles}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="text-sm text-gray-600">Ingresos/mes</div>
-            <div className="text-2xl font-bold">87.400€</div>
+            <div className="text-2xl font-bold">{stats.rentaMensualTotal.toLocaleString('es-ES')}€</div>
           </CardContent>
         </Card>
       </div>

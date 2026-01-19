@@ -1,0 +1,108 @@
+🔍 INICIANDO AUDITORÍA COMPLETA DE INMOVA APP
+
+========================================
+
+📍 Auditando rutas de páginas...
+   Encontradas 520 páginas
+   Encontradas 776 rutas API
+🎭 Buscando datos mock...
+   Encontrados 6 posibles datos mock
+🔌 Auditando APIs...
+   Auditadas 776 APIs
+🧩 Auditando componentes...
+   Auditados 325 componentes
+📝 Verificando tipos TypeScript...
+📦 Verificando dependencias...
+📄 Buscando páginas vacías o placeholder...
+💡 Verificando rutas de innovación...
+🔄 Verificando rutas de sincronización...
+   ✓ API app/api/sync/connections/route.ts encontrada
+   ✓ API app/api/sync/logs/route.ts encontrada
+
+========================================
+📊 REPORTE DE AUDITORÍA
+========================================
+
+📈 Resumen:
+   ❌ Errores: 7
+   ⚠️  Warnings: 119
+   ℹ️  Info: 177
+   📊 Total: 303
+
+❌ ERRORES CRÍTICOS:
+   [routes] app/ewoorker-landing/page.tsx
+      Página sin export default
+   [innovation] app/innovacion/energia-solar/page.tsx
+      Página de innovación no encontrada
+   [innovation] app/innovacion/instalaciones-deportivas/page.tsx
+      Página de innovación no encontrada
+   [innovation] app/innovacion/huertos-urbanos/page.tsx
+      Página de innovación no encontrada
+   [innovation] app/(dashboard)/innovacion/energia-solar/page.tsx
+      Página de innovación no encontrada
+   [innovation] app/(dashboard)/innovacion/instalaciones-deportivas/page.tsx
+      Página de innovación no encontrada
+   [innovation] app/(dashboard)/innovacion/huertos-urbanos/page.tsx
+      Página de innovación no encontrada
+
+⚠️  WARNINGS:
+
+   📁 MOCK-DATA (6):
+      - app/ewoorker/asignaciones/page.tsx:37: Array mock: const mockAsignaciones = [...
+      - app/comercial/oficinas/page.tsx:39: Array mock: const mockOficinas = [...
+      - app/comercial/naves/page.tsx:39: Array mock: const mockNaves = [...
+      - app/comercial/locales/page.tsx:39: Array mock: const mockLocales = [...
+      - app/comercial/coworking/page.tsx:41: Array mock: const mockCoworking = [...
+      - app/admin/clientes/page.tsx:132: Constante DEMO_: const DEMO_SCENARIOS =...
+
+   📁 API (37):
+      - app/api/version/route.ts: API sin manejo de errores try/catch
+      - app/api/docs.disabled/route.ts: API sin manejo de errores try/catch
+      - app/api/docs/route.ts: API sin manejo de errores try/catch
+      - app/api/v1/webhooks/route.ts: Archivo de API sin métodos HTTP exportados
+      - app/api/v1/webhooks/route.ts: API sin manejo de errores try/catch
+      - app/api/v1/properties/route.ts: Archivo de API sin métodos HTTP exportados
+      - app/api/user/generate-demo-data/route.ts: API con Prisma sin especificar runtime
+      - app/api/recommendations/[id]/route.ts: Archivo de API sin métodos HTTP exportados
+      - app/api/push-notifications/public-key/route.ts: API sin manejo de errores try/catch
+      - app/api/ordenes-trabajo/[id]/route.ts: Archivo de API sin métodos HTTP exportados
+      ... y 27 más
+
+   📁 COMPONENTS (12):
+      - components/OptimizedImage.tsx: Componente con hooks sin 'use client'
+      - components/ui/task-card.tsx: Componente con hooks sin 'use client'
+      - components/ui/success-toast.tsx: Componente con hooks sin 'use client'
+      - components/ui/search-input.tsx: Componente con hooks sin 'use client'
+      - components/ui/password-input.tsx: Componente con hooks sin 'use client'
+      - components/ui/pagination-info.tsx: Componente con hooks sin 'use client'
+      - components/ui/filter-chips.tsx: Componente con hooks sin 'use client'
+      - components/ui/error-message.tsx: Componente con hooks sin 'use client'
+      - components/ui/empty-state.tsx: Componente con hooks sin 'use client'
+      - components/ui/date-range-picker.tsx: Componente con hooks sin 'use client'
+      ... y 2 más
+
+   📁 PAGES (64):
+      - app/unidades/page.tsx: Página retorna contenido vacío
+      - app/tours-virtuales/page.tsx: Página retorna contenido vacío
+      - app/sugerencias/page.tsx: Página retorna contenido vacío
+      - app/reportes/page.tsx: Página retorna contenido vacío
+      - app/proveedores/page.tsx: Página retorna contenido vacío
+      - app/propiedades/page.tsx: Página retorna contenido vacío
+      - app/portal-propietario/page.tsx: Página retorna contenido vacío
+      - app/portal-comercial/page.tsx: Página retorna contenido vacío
+      - app/pagos/page.tsx: Página retorna contenido vacío
+      - app/ocr/page.tsx: Página retorna contenido vacío
+      ... y 54 más
+
+📊 Por categoría:
+   routes: 1 errores, 0 warnings, 0 info
+   mock-data: 0 errores, 6 warnings, 0 info
+   api: 0 errores, 37 warnings, 135 info
+   components: 0 errores, 12 warnings, 0 info
+   deps: 0 errores, 0 warnings, 1 info
+   pages: 0 errores, 64 warnings, 41 info
+   innovation: 6 errores, 0 warnings, 0 info
+
+========================================
+
+📄 Reporte guardado en: /workspace/audit-report.json
