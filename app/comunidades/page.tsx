@@ -34,15 +34,39 @@ export default function ComunidadesPage() {
   }, [status, router]);
 
   useEffect(() => {
-    // TODO: Cargar estadísticas desde la API cuando se seleccione un edificio
-    setLoading(false);
-  }, []);
+    if (status === 'authenticated') {
+      fetchDashboard();
+    }
+  }, [status]);
+
+  const fetchDashboard = async () => {
+    try {
+      const res = await fetch('/api/comunidades/dashboard');
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (status === 'loading') {
     return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
   }
 
   const modulos = [
+    {
+      id: 'lista',
+      titulo: 'Mis Comunidades',
+      descripcion: 'Ver todas las comunidades gestionadas',
+      icono: Users,
+      ruta: '/comunidades/lista',
+      color: 'text-indigo-600',
+      bgColor: 'bg-indigo-50',
+    },
     {
       id: 'actas',
       titulo: 'Libro de Actas Digital',
@@ -115,6 +139,33 @@ export default function ComunidadesPage() {
       color: 'text-amber-600',
       bgColor: 'bg-amber-50',
     },
+    {
+      id: 'incidencias',
+      titulo: 'Incidencias',
+      descripcion: 'Gestión de averías y problemas',
+      icono: AlertTriangle,
+      ruta: '/comunidades/incidencias',
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-50',
+    },
+    {
+      id: 'reuniones',
+      titulo: 'Reuniones y Juntas',
+      descripcion: 'Programación de reuniones',
+      icono: Calendar,
+      ruta: '/comunidades/reuniones',
+      color: 'text-cyan-600',
+      bgColor: 'bg-cyan-50',
+    },
+    {
+      id: 'propietarios',
+      titulo: 'Propietarios',
+      descripcion: 'Gestión de propietarios',
+      icono: Users,
+      ruta: '/comunidades/propietarios',
+      color: 'text-pink-600',
+      bgColor: 'bg-pink-50',
+    },
   ];
 
   return (
@@ -176,8 +227,10 @@ export default function ComunidadesPage() {
                           <CardTitle className="text-sm font-medium">Cuotas Pendientes</CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="text-2xl font-bold">-</div>
-                          <p className="text-xs text-muted-foreground">Selecciona un edificio</p>
+                          <div className="text-2xl font-bold">{stats?.finanzas?.cuotasPendientes || 0}</div>
+                          <p className="text-xs text-muted-foreground">
+                            {(stats?.finanzas?.importePendiente || 0).toLocaleString('es-ES')}€ pendiente
+                          </p>
                         </CardContent>
                       </Card>
                       <Card>
@@ -185,17 +238,19 @@ export default function ComunidadesPage() {
                           <CardTitle className="text-sm font-medium">Votaciones Activas</CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="text-2xl font-bold">-</div>
-                          <p className="text-xs text-muted-foreground">Selecciona un edificio</p>
+                          <div className="text-2xl font-bold">{stats?.operativo?.votacionesActivas || 0}</div>
+                          <p className="text-xs text-muted-foreground">En curso</p>
                         </CardContent>
                       </Card>
                       <Card>
                         <CardHeader className="pb-2">
-                          <CardTitle className="text-sm font-medium">Actas Pendientes</CardTitle>
+                          <CardTitle className="text-sm font-medium">Incidencias Abiertas</CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="text-2xl font-bold">-</div>
-                          <p className="text-xs text-muted-foreground">Selecciona un edificio</p>
+                          <div className="text-2xl font-bold">{stats?.operativo?.incidenciasAbiertas || 0}</div>
+                          <p className="text-xs text-muted-foreground">
+                            {stats?.operativo?.incidenciasUrgentes || 0} urgentes
+                          </p>
                         </CardContent>
                       </Card>
                     </div>
