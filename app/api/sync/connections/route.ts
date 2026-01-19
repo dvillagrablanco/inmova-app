@@ -4,8 +4,10 @@ import { authOptions } from '@/lib/auth-options';
 
 export const dynamic = 'force-dynamic';
 
-// In-memory storage for demo purposes
-// In production, this would be stored in the database
+// Nota: En producción, estos datos deberían almacenarse en la base de datos
+// Actualmente no existe un modelo SyncConnection en Prisma
+// Las conexiones se almacenan en memoria durante la sesión del servidor
+
 interface SyncConnection {
   id: string;
   companyId: string;
@@ -29,69 +31,8 @@ interface SyncConnection {
   createdAt: string;
 }
 
-const syncConnections: SyncConnection[] = [
-  {
-    id: 'conn-1',
-    companyId: 'demo-company',
-    nombre: 'Sincronización Idealista',
-    tipo: 'PORTAL_INMOBILIARIO',
-    plataforma: 'idealista',
-    estado: 'ACTIVO',
-    frecuencia: 'DIARIO',
-    ultimaSincronizacion: new Date(Date.now() - 3600000).toISOString(),
-    proximaSincronizacion: new Date(Date.now() + 82800000).toISOString(),
-    registrosSincronizados: 45,
-    erroresUltimaSinc: 0,
-    direccion: 'BIDIRECCIONAL',
-    entidadesSincronizadas: ['PROPIEDADES'],
-    configuracion: {
-      apiKey: '***hidden***',
-      apiUrl: 'https://api.idealista.com/v1',
-    },
-    notas: 'Conexión principal para publicación de propiedades',
-    createdAt: new Date(Date.now() - 86400000 * 30).toISOString(),
-  },
-  {
-    id: 'conn-2',
-    companyId: 'demo-company',
-    nombre: 'Sincronización Fotocasa',
-    tipo: 'PORTAL_INMOBILIARIO',
-    plataforma: 'fotocasa',
-    estado: 'ACTIVO',
-    frecuencia: 'CADA_6_HORAS',
-    ultimaSincronizacion: new Date(Date.now() - 7200000).toISOString(),
-    proximaSincronizacion: new Date(Date.now() + 14400000).toISOString(),
-    registrosSincronizados: 32,
-    erroresUltimaSinc: 2,
-    direccion: 'SOLO_EXPORTAR',
-    entidadesSincronizadas: ['PROPIEDADES'],
-    configuracion: {
-      apiKey: '***hidden***',
-    },
-    notas: '',
-    createdAt: new Date(Date.now() - 86400000 * 15).toISOString(),
-  },
-  {
-    id: 'conn-3',
-    companyId: 'demo-company',
-    nombre: 'CRM HubSpot',
-    tipo: 'CRM',
-    plataforma: 'hubspot',
-    estado: 'INACTIVO',
-    frecuencia: 'CADA_HORA',
-    ultimaSincronizacion: new Date(Date.now() - 86400000 * 5).toISOString(),
-    registrosSincronizados: 128,
-    erroresUltimaSinc: 0,
-    direccion: 'BIDIRECCIONAL',
-    entidadesSincronizadas: ['INQUILINOS', 'CONTRATOS'],
-    configuracion: {
-      apiKey: '***hidden***',
-      apiUrl: 'https://api.hubspot.com/crm/v3',
-    },
-    notas: 'Desactivado temporalmente',
-    createdAt: new Date(Date.now() - 86400000 * 60).toISOString(),
-  },
-];
+// Almacenamiento en memoria (se resetea cuando el servidor reinicia)
+const syncConnections: SyncConnection[] = [];
 
 export async function GET(request: NextRequest) {
   try {
@@ -100,11 +41,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId || 'demo-company';
+    const companyId = (session.user as any).companyId;
 
-    // Filter connections by company
+    // Filtrar conexiones por empresa
     const companyConnections = syncConnections.filter(
-      (conn) => conn.companyId === companyId || conn.companyId === 'demo-company'
+      (conn) => conn.companyId === companyId
     );
 
     return NextResponse.json({ data: companyConnections });
@@ -121,10 +62,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId || 'demo-company';
+    const companyId = (session.user as any).companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Usuario sin empresa asignada' }, { status: 400 });
+    }
+
     const body = await request.json();
 
-    // Validate required fields
+    // Validar campos requeridos
     if (!body.nombre || !body.plataforma) {
       return NextResponse.json(
         { error: 'Nombre y plataforma son requeridos' },

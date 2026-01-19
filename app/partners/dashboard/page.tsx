@@ -23,11 +23,13 @@ import {
   Zap,
   ArrowUpRight,
   ArrowDownRight,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -62,6 +64,14 @@ interface Client {
   commission: number;
 }
 
+interface Commission {
+  id: string;
+  periodo: string;
+  montoComision: number;
+  estado: string;
+  createdAt: string;
+}
+
 const levels = [
   { name: 'Bronze', clients: 10, commission: 20, color: 'text-amber-700' },
   { name: 'Silver', clients: 25, commission: 25, color: 'text-gray-500' },
@@ -73,58 +83,149 @@ const levels = [
 export default function PartnerDashboardPage() {
   const router = useRouter();
   const { data: session } = useSession();
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<PartnerStats>({
-    level: 'Gold',
-    activeClients: 35,
-    monthlyRevenue: 1564.5,
-    totalEarned: 18774,
-    pendingPayment: 2341.2,
-    conversionRate: 28.5,
-    referralLink: 'https://inmovaapp.com/r/PARTNER123',
-    nextLevelClients: 15,
+    level: 'Bronze',
+    activeClients: 0,
+    monthlyRevenue: 0,
+    totalEarned: 0,
+    pendingPayment: 0,
+    conversionRate: 0,
+    referralLink: '',
+    nextLevelClients: 0,
   });
+  const [clients, setClients] = useState<Client[]>([]);
+  const [commissions, setCommissions] = useState<Commission[]>([]);
 
-  const [clients, setClients] = useState<Client[]>([
-    {
-      id: '1',
-      name: 'Inmobiliaria García SL',
-      plan: 'Professional',
-      status: 'active',
-      monthlyValue: 149,
-      signupDate: '2025-11-15',
-      commission: 44.7,
-    },
-    {
-      id: '2',
-      name: 'Propiedades Madrid SA',
-      plan: 'Enterprise',
-      status: 'active',
-      monthlyValue: 499,
-      signupDate: '2025-10-22',
-      commission: 149.7,
-    },
-    {
-      id: '3',
-      name: 'Gestión Alquiler Plus',
-      plan: 'Professional',
-      status: 'active',
-      monthlyValue: 149,
-      signupDate: '2025-12-01',
-      commission: 44.7,
-    },
-  ]);
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        
+        // Obtener token de localStorage si existe (para partners)
+        const partnerToken = localStorage.getItem('partnerToken');
+        
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+        };
+        
+        if (partnerToken) {
+          headers['Authorization'] = `Bearer ${partnerToken}`;
+        }
+
+        const response = await fetch('/api/partners/dashboard', {
+          headers,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Mapear datos de la API al formato del componente
+          const metrics = data.metrics || {};
+          const partner = data.partner || {};
+          
+          // Determinar nivel basado en cantidad de clientes
+          const clientCount = metrics.totalClientes || 0;
+          let partnerLevel = 'Bronze';
+          for (const level of levels) {
+            if (clientCount >= level.clients) {
+              partnerLevel = level.name;
+            }
+          }
+          
+          // Calcular clientes faltantes para el siguiente nivel
+          const currentLevelIndex = levels.findIndex(l => l.name === partnerLevel);
+          const nextLevel = levels[currentLevelIndex + 1];
+          const nextLevelClients = nextLevel ? nextLevel.clients - clientCount : 0;
+
+          setStats({
+            level: partnerLevel,
+            activeClients: clientCount,
+            monthlyRevenue: parseFloat(metrics.totalComisionMes || '0'),
+            totalEarned: parseFloat(metrics.totalComisionHistorica || '0'),
+            pendingPayment: parseFloat(metrics.totalPendientePago || '0'),
+            conversionRate: parseFloat(metrics.tasaConversion || '0'),
+            referralLink: `https://inmovaapp.com/partners/register?ref=${partner.id || ''}`,
+            nextLevelClients,
+          });
+
+          // Mapear clientes
+          if (data.clientes && Array.isArray(data.clientes)) {
+            setClients(data.clientes.map((c: any) => ({
+              id: c.id,
+              name: c.company?.nombre || 'Sin nombre',
+              plan: c.planContratado || 'Professional',
+              status: c.estado || 'active',
+              monthlyValue: c.valorMensual || 149,
+              signupDate: c.fechaAlta || c.createdAt,
+              commission: (c.valorMensual || 149) * ((partner.comisionPorcentaje || 30) / 100),
+            })));
+          }
+
+          // Mapear comisiones
+          if (data.comisiones && Array.isArray(data.comisiones)) {
+            setCommissions(data.comisiones);
+          }
+        } else {
+          // Si no hay datos del servidor, mostrar página vacía
+          console.log('No se pudieron cargar datos del dashboard de partners');
+        }
+      } catch (error) {
+        console.error('Error cargando dashboard:', error);
+        toast.error('Error al cargar los datos del dashboard');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   const currentLevel = levels.find((l) => l.name === stats.level) || levels[0];
   const nextLevel = levels[levels.findIndex((l) => l.name === stats.level) + 1];
   const progressToNext = nextLevel ? (stats.activeClients / nextLevel.clients) * 100 : 100;
 
   const copyReferralLink = () => {
-    navigator.clipboard.writeText(stats.referralLink);
-    toast.success('Link copiado al portapapeles!');
+    if (stats.referralLink) {
+      navigator.clipboard.writeText(stats.referralLink);
+      toast.success('Link copiado al portapapeles!');
+    }
   };
 
-  const monthlyGrowth = 12.5; // %
-  const yearProjection = stats.monthlyRevenue * 12 * 1.1; // Con crecimiento
+  const monthlyGrowth = 12.5; // Estimado
+  const yearProjection = stats.monthlyRevenue * 12 * 1.1;
+
+  if (loading) {
+    return (
+      <AuthenticatedLayout>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <Skeleton className="h-9 w-64 mb-2" />
+              <Skeleton className="h-5 w-80" />
+            </div>
+            <Skeleton className="h-10 w-32" />
+          </div>
+          
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i}>
+                <CardHeader className="pb-2">
+                  <Skeleton className="h-4 w-24" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-8 w-20 mb-2" />
+                  <Skeleton className="h-3 w-32" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Skeleton className="h-32 w-full" />
+        </div>
+      </AuthenticatedLayout>
+    );
+  }
 
   return (
     <AuthenticatedLayout>
@@ -165,7 +266,9 @@ export default function PartnerDashboardPage() {
             <CardContent>
               <div className="text-2xl font-bold">{stats.activeClients}</div>
               <div className="text-xs text-muted-foreground mt-1">
-                {stats.nextLevelClients} para {nextLevel?.name}
+                {stats.nextLevelClients > 0 
+                  ? `${stats.nextLevelClients} para ${nextLevel?.name}`
+                  : 'Nivel máximo alcanzado'}
               </div>
             </CardContent>
           </Card>
@@ -188,7 +291,7 @@ export default function PartnerDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">€{stats.pendingPayment.toLocaleString()}</div>
-              <div className="text-xs text-muted-foreground mt-1">Pago el 5 de enero</div>
+              <div className="text-xs text-muted-foreground mt-1">Próximo pago el día 5</div>
             </CardContent>
           </Card>
         </div>
@@ -266,43 +369,51 @@ export default function PartnerDashboardPage() {
                 <CardTitle>Clientes Activos ({stats.activeClients})</CardTitle>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Cliente</TableHead>
-                      <TableHead>Plan</TableHead>
-                      <TableHead>Fecha Alta</TableHead>
-                      <TableHead>Valor Mensual</TableHead>
-                      <TableHead>Tu Comisión</TableHead>
-                      <TableHead>Estado</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {clients.map((client) => (
-                      <TableRow key={client.id}>
-                        <TableCell className="font-medium">{client.name}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{client.plan}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          {format(new Date(client.signupDate), 'dd MMM yyyy', {
-                            locale: es,
-                          })}
-                        </TableCell>
-                        <TableCell>€{client.monthlyValue}</TableCell>
-                        <TableCell className="font-medium text-green-600">
-                          €{client.commission}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="success">
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                            Activo
-                          </Badge>
-                        </TableCell>
+                {clients.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Cliente</TableHead>
+                        <TableHead>Plan</TableHead>
+                        <TableHead>Fecha Alta</TableHead>
+                        <TableHead>Valor Mensual</TableHead>
+                        <TableHead>Tu Comisión</TableHead>
+                        <TableHead>Estado</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {clients.map((client) => (
+                        <TableRow key={client.id}>
+                          <TableCell className="font-medium">{client.name}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{client.plan}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            {client.signupDate ? format(new Date(client.signupDate), 'dd MMM yyyy', {
+                              locale: es,
+                            }) : '-'}
+                          </TableCell>
+                          <TableCell>€{client.monthlyValue}</TableCell>
+                          <TableCell className="font-medium text-green-600">
+                            €{client.commission.toFixed(2)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={client.status === 'active' || client.status === 'activo' ? 'default' : 'secondary'}>
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                              {client.status === 'active' || client.status === 'activo' ? 'Activo' : client.status}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Aún no tienes clientes referidos</p>
+                    <p className="text-sm">Comparte tu link de referido para empezar a ganar comisiones</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -314,50 +425,40 @@ export default function PartnerDashboardPage() {
                 <CardTitle>Historial de Pagos</CardTitle>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Fecha</TableHead>
-                      <TableHead>Concepto</TableHead>
-                      <TableHead>Monto</TableHead>
-                      <TableHead>Estado</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>05 Dic 2025</TableCell>
-                      <TableCell>Comisiones Noviembre</TableCell>
-                      <TableCell className="font-medium">€1,564.50</TableCell>
-                      <TableCell>
-                        <Badge variant="success">Pagado</Badge>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>05 Nov 2025</TableCell>
-                      <TableCell>Comisiones Octubre</TableCell>
-                      <TableCell className="font-medium">€1,395.20</TableCell>
-                      <TableCell>
-                        <Badge variant="success">Pagado</Badge>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>15 Oct 2025</TableCell>
-                      <TableCell>Bono Trimestral Q3</TableCell>
-                      <TableCell className="font-medium">€1,500.00</TableCell>
-                      <TableCell>
-                        <Badge variant="success">Pagado</Badge>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>05 Ene 2026</TableCell>
-                      <TableCell>Comisiones Diciembre</TableCell>
-                      <TableCell className="font-medium">€2,341.20</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">Pendiente</Badge>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
+                {commissions.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Período</TableHead>
+                        <TableHead>Concepto</TableHead>
+                        <TableHead>Monto</TableHead>
+                        <TableHead>Estado</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {commissions.map((commission) => (
+                        <TableRow key={commission.id}>
+                          <TableCell>{commission.periodo}</TableCell>
+                          <TableCell>Comisiones {commission.periodo}</TableCell>
+                          <TableCell className="font-medium">€{commission.montoComision.toFixed(2)}</TableCell>
+                          <TableCell>
+                            <Badge variant={commission.estado === 'PAID' ? 'default' : 'secondary'}>
+                              {commission.estado === 'PAID' ? 'Pagado' : 
+                               commission.estado === 'APPROVED' ? 'Aprobado' : 
+                               commission.estado === 'PENDING' ? 'Pendiente' : commission.estado}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Euro className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Aún no tienes comisiones registradas</p>
+                    <p className="text-sm">Las comisiones aparecerán aquí cuando tus clientes estén activos</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -378,14 +479,14 @@ export default function PartnerDashboardPage() {
                     <Progress value={stats.conversionRate} />
 
                     <div className="flex items-center justify-between">
-                      <span className="text-sm">Churn Rate</span>
-                      <span className="font-bold text-green-600">2.1%</span>
+                      <span className="text-sm">Clientes Activos</span>
+                      <span className="font-bold">{stats.activeClients}</span>
                     </div>
-                    <Progress value={2.1} className="[&>div]:bg-green-500" />
+                    <Progress value={Math.min(stats.activeClients, 100)} />
 
                     <div className="flex items-center justify-between">
-                      <span className="text-sm">Avg. Contract Value</span>
-                      <span className="font-bold">€195</span>
+                      <span className="text-sm">Nivel de Comisión</span>
+                      <span className="font-bold">{currentLevel.commission}%</span>
                     </div>
                   </div>
                 </CardContent>
@@ -407,17 +508,13 @@ export default function PartnerDashboardPage() {
                       <span>€{(stats.monthlyRevenue * 12).toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>Bonos de alta estimados</span>
-                      <span>€10,500</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Bonos trimestrales</span>
-                      <span>€6,000</span>
+                      <span>Estimación crecimiento (10%)</span>
+                      <span>€{(stats.monthlyRevenue * 12 * 0.1).toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between font-bold pt-2 border-t">
-                      <span>TOTAL</span>
+                      <span>TOTAL PROYECTADO</span>
                       <span className="text-green-600">
-                        €{(yearProjection + 10500 + 6000).toLocaleString()}
+                        €{yearProjection.toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -437,7 +534,7 @@ export default function PartnerDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-3 gap-4">
-              <Button className="w-full" variant="outline">
+              <Button className="w-full" variant="outline" onClick={copyReferralLink}>
                 <Share2 className="mr-2 h-4 w-4" />
                 Compartir Link
               </Button>
@@ -478,9 +575,9 @@ export default function PartnerDashboardPage() {
               <div className="flex items-start gap-3">
                 <Star className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-medium">Bono Trimestral Q1</div>
+                  <div className="font-medium">Bono Trimestral</div>
                   <div className="text-sm text-muted-foreground">
-                    7 clientes más para €1,500 de bonus
+                    Cumple tus objetivos para bonus adicionales
                   </div>
                 </div>
               </div>

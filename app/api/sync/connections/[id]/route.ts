@@ -4,8 +4,9 @@ import { authOptions } from '@/lib/auth-options';
 
 export const dynamic = 'force-dynamic';
 
-// Shared in-memory storage reference
-// Note: In production, use database
+// Nota: En producción, estos datos deberían almacenarse en la base de datos
+// Actualmente no existe un modelo SyncConnection en Prisma
+
 interface SyncConnection {
   id: string;
   companyId: string;
@@ -29,75 +30,8 @@ interface SyncConnection {
   createdAt: string;
 }
 
-// This should be imported from a shared module in production
+// Almacenamiento en memoria compartido
 const syncConnections: SyncConnection[] = [];
-
-// Initialize with demo data if empty
-if (syncConnections.length === 0) {
-  syncConnections.push(
-    {
-      id: 'conn-1',
-      companyId: 'demo-company',
-      nombre: 'Sincronización Idealista',
-      tipo: 'PORTAL_INMOBILIARIO',
-      plataforma: 'idealista',
-      estado: 'ACTIVO',
-      frecuencia: 'DIARIO',
-      ultimaSincronizacion: new Date(Date.now() - 3600000).toISOString(),
-      proximaSincronizacion: new Date(Date.now() + 82800000).toISOString(),
-      registrosSincronizados: 45,
-      erroresUltimaSinc: 0,
-      direccion: 'BIDIRECCIONAL',
-      entidadesSincronizadas: ['PROPIEDADES'],
-      configuracion: {
-        apiKey: '***hidden***',
-        apiUrl: 'https://api.idealista.com/v1',
-      },
-      notas: 'Conexión principal para publicación de propiedades',
-      createdAt: new Date(Date.now() - 86400000 * 30).toISOString(),
-    },
-    {
-      id: 'conn-2',
-      companyId: 'demo-company',
-      nombre: 'Sincronización Fotocasa',
-      tipo: 'PORTAL_INMOBILIARIO',
-      plataforma: 'fotocasa',
-      estado: 'ACTIVO',
-      frecuencia: 'CADA_6_HORAS',
-      ultimaSincronizacion: new Date(Date.now() - 7200000).toISOString(),
-      proximaSincronizacion: new Date(Date.now() + 14400000).toISOString(),
-      registrosSincronizados: 32,
-      erroresUltimaSinc: 2,
-      direccion: 'SOLO_EXPORTAR',
-      entidadesSincronizadas: ['PROPIEDADES'],
-      configuracion: {
-        apiKey: '***hidden***',
-      },
-      notas: '',
-      createdAt: new Date(Date.now() - 86400000 * 15).toISOString(),
-    },
-    {
-      id: 'conn-3',
-      companyId: 'demo-company',
-      nombre: 'CRM HubSpot',
-      tipo: 'CRM',
-      plataforma: 'hubspot',
-      estado: 'INACTIVO',
-      frecuencia: 'CADA_HORA',
-      ultimaSincronizacion: new Date(Date.now() - 86400000 * 5).toISOString(),
-      registrosSincronizados: 128,
-      erroresUltimaSinc: 0,
-      direccion: 'BIDIRECCIONAL',
-      entidadesSincronizadas: ['INQUILINOS', 'CONTRATOS'],
-      configuracion: {
-        apiKey: '***hidden***',
-        apiUrl: 'https://api.hubspot.com/crm/v3',
-      },
-      notas: 'Desactivado temporalmente',
-      createdAt: new Date(Date.now() - 86400000 * 60).toISOString(),
-    }
-  );
-}
 
 export async function GET(
   request: NextRequest,
@@ -142,7 +76,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Conexión no encontrada' }, { status: 404 });
     }
 
-    // Update connection
+    // Actualizar conexión
     const updatedConnection = {
       ...syncConnections[connectionIndex],
       ...body,

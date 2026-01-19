@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
@@ -12,69 +13,104 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // TODO: Implementar ML real para predicción de precios
-    // Por ahora devolvemos datos de ejemplo
-    const suggestions = [
-      {
-        listingId: 'lst_1',
-        listingName: 'Apartamento Centro - C/ Gran Vía 12',
-        currentPrice: 85,
-        suggestedPrice: 105,
-        change: 20,
-        changePercent: 23.5,
-        reason: 'Festival de música este fin de semana aumenta la demanda un 45%',
-        confidence: 87,
-        factors: [
-          {
-            name: 'Evento Local',
-            impact: 'high' as const,
-            description: 'Festival Internacional de Jazz (15.000 asistentes)',
-          },
-          {
-            name: 'Competencia',
-            impact: 'medium' as const,
-            description: 'Propiedades similares a €95-110',
-          },
-          {
-            name: 'Estacionalidad',
-            impact: 'low' as const,
-            description: 'Temporada alta (diciembre)',
-          },
-          {
-            name: 'Histórico',
-            impact: 'medium' as const,
-            description: 'Ocupación 92% a precios €100-110',
-          },
-        ],
+    const companyId = session.user.companyId;
+
+    // Obtener listings STR de la empresa
+    const listings = await prisma.sTRListing.findMany({
+      where: {
+        companyId,
+        activo: true,
       },
-      {
-        listingId: 'lst_2',
-        listingName: 'Loft Moderno - Barrio Salamanca',
-        currentPrice: 120,
-        suggestedPrice: 110,
-        change: -10,
-        changePercent: -8.3,
-        reason: 'Baja demanda prevista. Ajustar para mejorar ocupación',
-        confidence: 78,
-        factors: [
-          {
-            name: 'Demanda',
-            impact: 'high' as const,
-            description: 'Búsquedas -15% vs semana pasada',
+      select: {
+        id: true,
+        titulo: true,
+        precioBase: true,
+        precioActual: true,
+        unit: {
+          select: {
+            numero: true,
+            building: {
+              select: {
+                nombre: true,
+                direccion: true,
+              },
+            },
           },
-          {
-            name: 'Competencia',
-            impact: 'high' as const,
-            description: 'Nuevos listings a €95-105',
-          },
-          {
-            name: 'Estacionalidad',
-            impact: 'medium' as const,
-            description: 'Inicio de temporada baja',
-          },
-        ],
+        },
       },
-    ];
+    });
+
+    // Obtener reglas de pricing dinámico
+    const pricingRules = await prisma.sTRDynamicPricingRule.findMany({
+      where: {
+        companyId,
+        activo: true,
+      },
+    });
+
+    // Generar sugerencias basadas en datos reales
+    const suggestions = listings.map((listing) => {
+      const currentPrice = listing.precioActual || listing.precioBase;
+      
+      // Calcular sugerencia basada en reglas activas
+      let suggestedPrice = currentPrice;
+      const factors: Array<{
+        name: string;
+        impact: 'high' | 'medium' | 'low';
+        description: string;
+      }> = [];
+
+      // Aplicar reglas de pricing si existen
+      for (const rule of pricingRules) {
+        if (rule.tipo === 'estacionalidad') {
+          const config = rule.configuracion as any;
+          if (config?.multiplicador) {
+            suggestedPrice *= config.multiplicador;
+            factors.push({
+              name: 'Estacionalidad',
+              impact: config.multiplicador > 1.2 ? 'high' : 'medium',
+              description: `Ajuste estacional: ${((config.multiplicador - 1) * 100).toFixed(0)}%`,
+            });
+          }
+        }
+        if (rule.tipo === 'demanda') {
+          const config = rule.configuracion as any;
+          if (config?.ajuste) {
+            suggestedPrice += config.ajuste;
+            factors.push({
+              name: 'Demanda',
+              impact: Math.abs(config.ajuste) > 20 ? 'high' : 'medium',
+              description: `Ajuste por demanda: ${config.ajuste > 0 ? '+' : ''}€${config.ajuste}`,
+            });
+          }
+        }
+      }
+
+      const change = suggestedPrice - currentPrice;
+      const changePercent = currentPrice > 0 ? (change / currentPrice) * 100 : 0;
+
+      // Generar razón basada en los factores
+      let reason = 'Sin cambios sugeridos';
+      if (factors.length > 0) {
+        const mainFactor = factors[0];
+        reason = mainFactor.description;
+      }
+
+      // Calcular confianza basada en cantidad de datos
+      const confidence = Math.min(50 + factors.length * 15, 95);
+
+      return {
+        listingId: listing.id,
+        listingName: `${listing.titulo} - ${listing.unit?.building?.nombre || ''} ${listing.unit?.numero || ''}`.trim(),
+        currentPrice,
+        suggestedPrice: Math.round(suggestedPrice * 100) / 100,
+        change: Math.round(change * 100) / 100,
+        changePercent: Math.round(changePercent * 10) / 10,
+        reason,
+        confidence,
+        factors,
+      };
+    });
 
     return NextResponse.json(suggestions);
   } catch (error) {
