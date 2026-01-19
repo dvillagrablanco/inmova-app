@@ -35,9 +35,10 @@ export function useVirtualTour() {
       const availableData = await availableResponse.json();
 
       if (availableData.success) {
-        setAvailableTours(availableData.tours || []);
+        setAvailableTours(Array.isArray(availableData.tours) ? availableData.tours : []);
         setProgress(availableData.progress || 0);
-        setCompletedTours(availableData.completedTours || 0);
+        // CRÍTICO: completedTours debe ser siempre un array para usar .includes()
+        setCompletedTours(Array.isArray(availableData.completedTours) ? availableData.completedTours : []);
       }
 
       // Obtener siguiente tour
@@ -72,7 +73,8 @@ export function useVirtualTour() {
       const data = await response.json();
 
       if (data.success) {
-        setCompletedTours(data.completedTours);
+        // Asegurar que completedTours siempre sea un array
+        setCompletedTours(Array.isArray(data.completedTours) ? data.completedTours : []);
         await fetchTours(); // Refrescar
         return true;
       }
@@ -98,7 +100,8 @@ export function useVirtualTour() {
       const data = await response.json();
 
       if (data.success) {
-        setCompletedTours(data.completedTours);
+        // Asegurar que completedTours siempre sea un array
+        setCompletedTours(Array.isArray(data.completedTours) ? data.completedTours : []);
         await fetchTours();
         return true;
       }
@@ -111,6 +114,8 @@ export function useVirtualTour() {
   };
 
   const isTourCompleted = (tourId: string) => {
+    // Validación defensiva: asegurar que completedTours sea un array
+    if (!Array.isArray(completedTours)) return false;
     return completedTours.includes(tourId);
   };
 

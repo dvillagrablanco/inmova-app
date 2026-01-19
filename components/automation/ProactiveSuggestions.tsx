@@ -40,7 +40,16 @@ export default function ProactiveSuggestions() {
     const loadSuggestions = async () => {
       // Cargar sugerencias descartadas del localStorage
       const stored = localStorage.getItem('dismissed_suggestions');
-      const dismissedIds = stored ? JSON.parse(stored) : [];
+      let dismissedIds: string[] = [];
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          // Asegurar que siempre sea un array
+          dismissedIds = Array.isArray(parsed) ? parsed : [];
+        } catch {
+          dismissedIds = [];
+        }
+      }
       setDismissed(dismissedIds);
       
       // Check if widget was hidden

@@ -42,8 +42,9 @@ export function ToursList() {
       const data = await response.json();
 
       if (data.success) {
-        setTours(data.tours);
-        setCompletedTours(data.completedTours || 0);
+        setTours(Array.isArray(data.tours) ? data.tours : []);
+        // CRÍTICO: completedTours debe ser un array para usar .includes() y .length
+        setCompletedTours(Array.isArray(data.completedTours) ? data.completedTours : []);
         setProgress(data.progress || 0);
       }
     } catch (error) {
@@ -93,6 +94,8 @@ export function ToursList() {
   };
 
   const isTourCompleted = (tourId: string) => {
+    // Validación defensiva
+    if (!Array.isArray(completedTours)) return false;
     return completedTours.includes(tourId);
   };
 
