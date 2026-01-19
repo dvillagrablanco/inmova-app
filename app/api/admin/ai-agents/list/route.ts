@@ -27,7 +27,7 @@ const SYSTEM_AGENTS = [
     ],
     keywords: ['ayuda', 'general', 'no sé', 'información', 'orientación', 'qué agente', 'recomendar'],
     defaultConfig: {
-      model: 'claude-3-5-sonnet',
+      model: 'claude-3-haiku-20240307',
       temperature: 0.5,
       maxTokens: 4096,
       autoEscalate: true,
@@ -51,7 +51,7 @@ const SYSTEM_AGENTS = [
     ],
     keywords: ['documento', 'pdf', 'contrato', 'análisis', 'resumen', 'extraer', 'imagen', 'OCR', 'archivo'],
     defaultConfig: {
-      model: 'claude-3-5-sonnet',
+      model: 'claude-3-haiku-20240307',
       temperature: 0.3,
       maxTokens: 8192,
       autoEscalate: false,
@@ -73,7 +73,7 @@ const SYSTEM_AGENTS = [
     ],
     keywords: ['error', 'problema', 'no funciona', 'ayuda', 'cómo', 'configurar'],
     defaultConfig: {
-      model: 'claude-3-5-sonnet',
+      model: 'claude-3-haiku-20240307',
       temperature: 0.3,
       maxTokens: 4096,
       autoEscalate: true,
@@ -95,7 +95,7 @@ const SYSTEM_AGENTS = [
     ],
     keywords: ['consulta', 'información', 'precio', 'plan', 'cuenta', 'suscripción'],
     defaultConfig: {
-      model: 'claude-3-5-sonnet',
+      model: 'claude-3-haiku-20240307',
       temperature: 0.5,
       maxTokens: 4096,
       autoEscalate: true,
@@ -117,7 +117,7 @@ const SYSTEM_AGENTS = [
     ],
     keywords: ['lead', 'venta', 'cliente potencial', 'propuesta', 'comercial'],
     defaultConfig: {
-      model: 'claude-3-5-sonnet',
+      model: 'claude-3-haiku-20240307',
       temperature: 0.6,
       maxTokens: 4096,
       autoEscalate: true,
@@ -139,7 +139,7 @@ const SYSTEM_AGENTS = [
     ],
     keywords: ['rentabilidad', 'inversión', 'valoración', 'análisis', 'ROI', 'financiero'],
     defaultConfig: {
-      model: 'claude-3-5-sonnet',
+      model: 'claude-3-haiku-20240307',
       temperature: 0.4,
       maxTokens: 8192,
       autoEscalate: false,
@@ -161,7 +161,7 @@ const SYSTEM_AGENTS = [
     ],
     keywords: ['contrato', 'legal', 'ley', 'normativa', 'derechos', 'obligaciones'],
     defaultConfig: {
-      model: 'claude-3-5-sonnet',
+      model: 'claude-3-haiku-20240307',
       temperature: 0.3,
       maxTokens: 4096,
       autoEscalate: true,
@@ -183,7 +183,7 @@ const SYSTEM_AGENTS = [
     ],
     keywords: ['contenido', 'redes', 'blog', 'publicación', 'marketing', 'social'],
     defaultConfig: {
-      model: 'claude-3-5-sonnet',
+      model: 'claude-3-haiku-20240307',
       temperature: 0.7,
       maxTokens: 4096,
       autoEscalate: false,
