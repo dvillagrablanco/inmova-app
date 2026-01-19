@@ -23,7 +23,33 @@ import {
   Plus,
   Settings,
   TrendingDown,
+  Edit,
+  Trash2,
+  MoreVertical,
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
 import {
   LineChart,
@@ -79,6 +105,17 @@ export default function IoTPage() {
   const [automations, setAutomations] = useState<Automation[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deviceToEdit, setDeviceToEdit] = useState<IoTDevice | null>(null);
+  const [deviceToDelete, setDeviceToDelete] = useState<IoTDevice | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    type: 'sensor' as 'thermostat' | 'lock' | 'light' | 'sensor' | 'meter',
+    location: '',
+    status: 'online' as 'online' | 'offline' | 'warning',
+  });
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -158,6 +195,71 @@ export default function IoTPage() {
       setAlerts([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openEditDialog = (device: IoTDevice) => {
+    setDeviceToEdit(device);
+    setEditForm({
+      name: device.name,
+      type: device.type,
+      location: device.location,
+      status: device.status,
+    });
+    setEditDialogOpen(true);
+  };
+
+  const openDeleteDialog = (device: IoTDevice) => {
+    setDeviceToDelete(device);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleEditDevice = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!deviceToEdit) return;
+    setIsSaving(true);
+    try {
+      const res = await fetch(`/api/iot/devices/${deviceToEdit.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm),
+      });
+
+      if (res.ok) {
+        toast.success('Dispositivo actualizado');
+        setEditDialogOpen(false);
+        setDeviceToEdit(null);
+        loadData();
+      } else {
+        throw new Error('Error al actualizar');
+      }
+    } catch (error) {
+      toast.error('Error al actualizar el dispositivo');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteDevice = async () => {
+    if (!deviceToDelete) return;
+    setIsSaving(true);
+    try {
+      const res = await fetch(`/api/iot/devices/${deviceToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        toast.success('Dispositivo eliminado');
+        setDeleteDialogOpen(false);
+        setDeviceToDelete(null);
+        loadData();
+      } else {
+        throw new Error('Error al eliminar');
+      }
+    } catch (error) {
+      toast.error('Error al eliminar el dispositivo');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -375,9 +477,26 @@ export default function IoTPage() {
 
                           <div className="flex justify-between text-xs text-muted-foreground pt-2 border-t">
                             <span>Actualizado {formatTime(device.lastUpdate)}</span>
-                            <Button variant="ghost" size="sm" className="h-6 px-2">
-                              <Settings className="h-3 w-3" />
-                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-6 px-2">
+                                  <MoreVertical className="h-3 w-3" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => openEditDialog(device)}>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Editar
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => openDeleteDialog(device)}
+                                  className="text-red-600"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Eliminar
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </CardContent>
                       </Card>
@@ -536,6 +655,104 @@ export default function IoTPage() {
                 </Card>
               </TabsContent>
             </Tabs>
+
+            {/* Edit Device Dialog */}
+            <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Editar Dispositivo IoT</DialogTitle>
+                  <DialogDescription>
+                    Modifica los datos del dispositivo
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleEditDevice}>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label>Nombre *</Label>
+                      <Input
+                        value={editForm.name}
+                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Tipo *</Label>
+                      <Select
+                        value={editForm.type}
+                        onValueChange={(value: any) => setEditForm({ ...editForm, type: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="thermostat">Termostato</SelectItem>
+                          <SelectItem value="lock">Cerradura</SelectItem>
+                          <SelectItem value="light">Iluminación</SelectItem>
+                          <SelectItem value="sensor">Sensor</SelectItem>
+                          <SelectItem value="meter">Medidor</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Ubicación</Label>
+                      <Input
+                        value={editForm.location}
+                        onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Estado</Label>
+                      <Select
+                        value={editForm.status}
+                        onValueChange={(value: any) => setEditForm({ ...editForm, status: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="online">Online</SelectItem>
+                          <SelectItem value="offline">Offline</SelectItem>
+                          <SelectItem value="warning">Alerta</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
+                      Cancelar
+                    </Button>
+                    <Button type="submit" disabled={isSaving}>
+                      {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+
+            {/* Delete Device Dialog */}
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>¿Eliminar dispositivo?</DialogTitle>
+                  <DialogDescription>
+                    Esta acción eliminará el dispositivo &quot;{deviceToDelete?.name}&quot; permanentemente.
+                    Esta acción no se puede deshacer.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button variant="destructive" onClick={handleDeleteDevice} disabled={isSaving}>
+                    {isSaving ? 'Eliminando...' : 'Eliminar'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </AuthenticatedLayout>
   );

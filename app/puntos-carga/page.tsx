@@ -82,17 +82,22 @@ export default function PuntosCargaPage() {
   const [chargingPoints, setChargingPoints] = useState<ChargingPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [pointToDelete, setPointToDelete] = useState<ChargingPoint | null>(null);
+  const [pointToEdit, setPointToEdit] = useState<ChargingPoint | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const emptyForm = {
     nombre: '',
     ubicacion: '',
     potencia: '7.4',
     tipo: 'TYPE_2',
     tarifa: '0.30',
-  });
+    estado: 'DISPONIBLE',
+  };
+
+  const [formData, setFormData] = useState(emptyForm);
 
   useEffect(() => {
     if (session) {
@@ -116,18 +121,51 @@ export default function PuntosCargaPage() {
       setChargingPoints([...chargingPoints, nuevopunto]);
       toast.success('Punto de carga creado');
       setCreateDialogOpen(false);
-      setFormData({
-        nombre: '',
-        ubicacion: '',
-        potencia: '7.4',
-        tipo: 'TYPE_2',
-        tarifa: '0.30',
-      });
+      setFormData(emptyForm);
     } catch (error) {
       toast.error('Error al crear punto de carga');
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pointToEdit) return;
+    setIsSaving(true);
+    try {
+      const updatedPoint = {
+        ...pointToEdit,
+        ...formData,
+        potencia: parseFloat(formData.potencia),
+        tarifa: parseFloat(formData.tarifa),
+      };
+
+      setChargingPoints((prev) =>
+        prev.map((p) => (p.id === pointToEdit.id ? updatedPoint : p))
+      );
+      toast.success('Punto de carga actualizado');
+      setEditDialogOpen(false);
+      setPointToEdit(null);
+      setFormData(emptyForm);
+    } catch (error) {
+      toast.error('Error al actualizar punto de carga');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const openEditDialog = (point: ChargingPoint) => {
+    setPointToEdit(point);
+    setFormData({
+      nombre: point.nombre,
+      ubicacion: point.ubicacion,
+      potencia: point.potencia.toString(),
+      tipo: point.tipo,
+      tarifa: point.tarifa.toString(),
+      estado: point.estado,
+    });
+    setEditDialogOpen(true);
   };
 
   const handleDelete = async () => {
@@ -298,6 +336,10 @@ export default function PuntosCargaPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => openEditDialog(point)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => {
                                 setPointToDelete(point);
@@ -408,6 +450,117 @@ export default function PuntosCargaPage() {
                 </Button>
                 <Button type="submit" disabled={isSaving}>
                   {isSaving ? 'Creando...' : 'Crear Punto'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Dialog */}
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Editar Punto de Carga</DialogTitle>
+              <DialogDescription>
+                Modifica los datos del punto de carga
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleEdit}>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Nombre *</Label>
+                  <Input
+                    value={formData.nombre}
+                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Ubicación *</Label>
+                  <Input
+                    value={formData.ubicacion}
+                    onChange={(e) => setFormData({ ...formData, ubicacion: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Potencia (kW) *</Label>
+                    <Select
+                      value={formData.potencia}
+                      onValueChange={(value) => setFormData({ ...formData, potencia: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="3.7">3.7 kW</SelectItem>
+                        <SelectItem value="7.4">7.4 kW</SelectItem>
+                        <SelectItem value="11">11 kW</SelectItem>
+                        <SelectItem value="22">22 kW</SelectItem>
+                        <SelectItem value="50">50 kW (Rápida)</SelectItem>
+                        <SelectItem value="150">150 kW (Ultra-Rápida)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Tipo de Conector *</Label>
+                    <Select
+                      value={formData.tipo}
+                      onValueChange={(value) => setFormData({ ...formData, tipo: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="TYPE_2">Type 2 (Mennekes)</SelectItem>
+                        <SelectItem value="CCS">CCS Combo</SelectItem>
+                        <SelectItem value="CHADEMO">CHAdeMO</SelectItem>
+                        <SelectItem value="SCHUKO">Schuko</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Tarifa (€/kWh)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={formData.tarifa}
+                      onChange={(e) => setFormData({ ...formData, tarifa: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Estado</Label>
+                    <Select
+                      value={formData.estado}
+                      onValueChange={(value) => setFormData({ ...formData, estado: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="DISPONIBLE">Disponible</SelectItem>
+                        <SelectItem value="EN_USO">En Uso</SelectItem>
+                        <SelectItem value="MANTENIMIENTO">Mantenimiento</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={isSaving}>
+                  {isSaving ? 'Guardando...' : 'Guardar Cambios'}
                 </Button>
               </DialogFooter>
             </form>
