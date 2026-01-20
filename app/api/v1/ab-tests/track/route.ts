@@ -12,6 +12,7 @@ import { authOptions } from '@/lib/auth-options';
 import { trackABTestEvent } from '@/lib/ab-testing-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const trackEventSchema = z.object({
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('Error tracking A/B test event:', error);
+    logger.error('Error tracking A/B test event:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

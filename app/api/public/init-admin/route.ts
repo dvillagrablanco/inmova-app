@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -109,7 +110,7 @@ export async function GET() {
       nextStep: 'Este endpoint se auto-deshabilitará en el próximo deployment',
     });
   } catch (error: any) {
-    console.error('[InitAdmin] Error:', error);
+    logger.error('[InitAdmin] Error:', error);
     return NextResponse.json(
       {
         error: 'Error creando usuario administrador',

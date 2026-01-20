@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -244,7 +245,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(metrics);
   } catch (error: any) {
-    console.error('[eWoorker Admin Socio Metrics Error]:', error);
+    logger.error('[eWoorker Admin Socio Metrics Error]:', error);
     return NextResponse.json(
       { error: 'Error al calcular métricas', details: error.message },
       { status: 500 }

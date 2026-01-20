@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { ewoorkerAnalytics } from '@/lib/ewoorker-analytics-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const VALID_METRICS = ['empresas', 'obras', 'ofertas', 'contratos', 'transacciones'] as const;
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
       trend,
     });
   } catch (error: any) {
-    console.error('[API EwoorkerAnalytics Trends] Error:', error);
+    logger.error('[API EwoorkerAnalytics Trends] Error:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

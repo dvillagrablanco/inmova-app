@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -43,7 +44,7 @@ export async function GET(
 
     return NextResponse.json(task);
   } catch (error) {
-    console.error('Error al obtener tarea:', error);
+    logger.error('Error al obtener tarea:', error);
     return NextResponse.json(
       { error: 'Error al obtener tarea' },
       { status: 500 }
@@ -124,7 +125,7 @@ export async function PATCH(
 
     return NextResponse.json(task);
   } catch (error) {
-    console.error('Error al actualizar tarea:', error);
+    logger.error('Error al actualizar tarea:', error);
     return NextResponse.json(
       { error: 'Error al actualizar tarea' },
       { status: 500 }
@@ -161,7 +162,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Tarea eliminada correctamente' });
   } catch (error) {
-    console.error('Error al eliminar tarea:', error);
+    logger.error('Error al eliminar tarea:', error);
     return NextResponse.json(
       { error: 'Error al eliminar tarea' },
       { status: 500 }

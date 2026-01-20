@@ -6,6 +6,7 @@ import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import crypto from 'crypto';
 
+import logger from '@/lib/logger';
 // Clave de encriptación para MFA secrets
 const MFA_ENCRYPTION_KEY = process.env.MFA_ENCRYPTION_KEY || 'inmova-mfa-secret-key-change-in-production';
 
@@ -47,7 +48,7 @@ export function decrypt(encryptedText: string): string {
     
     return decrypted;
   } catch (error) {
-    console.error('[MFA] Error decrypting:', error);
+    logger.error('[MFA] Error decrypting:', error);
     throw new Error('Error al desencriptar datos MFA');
   }
 }
@@ -81,7 +82,7 @@ export async function generateQRCode(otpauthUrl: string): Promise<string> {
     const qrCodeDataUrl = await QRCode.toDataURL(otpauthUrl);
     return qrCodeDataUrl;
   } catch (error) {
-    console.error('[MFA] Error generating QR code:', error);
+    logger.error('[MFA] Error generating QR code:', error);
     throw new Error('Error al generar QR code');
   }
 }
@@ -110,7 +111,7 @@ export function verifyTOTPToken(
     
     return verified;
   } catch (error) {
-    console.error('[MFA] Error verifying TOTP token:', error);
+    logger.error('[MFA] Error verifying TOTP token:', error);
     return false;
   }
 }

@@ -14,6 +14,7 @@ import { sendEmail } from '@/lib/email-service';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+import logger from '@/lib/logger';
 // ====================================
 // AUTOMATIZACIÓN DE COMISIONES
 // ====================================
@@ -55,7 +56,7 @@ export async function calculateMonthlyCommissions() {
       bonificacionesGeneradas: bonificaciones.length,
     };
   } catch (error) {
-    console.error('[AUTOMATION] Error al calcular comisiones:', error);
+    logger.error('[AUTOMATION] Error al calcular comisiones:', error);
     throw error;
   }
 }
@@ -174,7 +175,7 @@ async function notifyCommissionsGenerated(
     
     console.log('[AUTOMATION] Notificaciones de comisiones enviadas exitosamente');
   } catch (error) {
-    console.error('[AUTOMATION] Error al enviar notificaciones:', error);
+    logger.error('[AUTOMATION] Error al enviar notificaciones:', error);
   }
 }
 
@@ -242,7 +243,7 @@ async function generateCommissionsReport(
     
     console.log('[AUTOMATION] Reporte de comisiones enviado a administradores');
   } catch (error) {
-    console.error('[AUTOMATION] Error al generar reporte:', error);
+    logger.error('[AUTOMATION] Error al generar reporte:', error);
   }
 }
 
@@ -321,7 +322,7 @@ export async function sendPartnerWelcomeEmail(salesRepId: string) {
     
     console.log(`[AUTOMATION] Email de bienvenida enviado a ${salesRep.email}`);
   } catch (error) {
-    console.error('[AUTOMATION] Error al enviar email de bienvenida:', error);
+    logger.error('[AUTOMATION] Error al enviar email de bienvenida:', error);
   }
 }
 
@@ -413,7 +414,7 @@ export async function sendMonthlyGoalsReminder() {
     
     console.log('[AUTOMATION] Recordatorios de objetivos enviados');
   } catch (error) {
-    console.error('[AUTOMATION] Error al enviar recordatorios:', error);
+    logger.error('[AUTOMATION] Error al enviar recordatorios:', error);
   }
 }
 
@@ -439,7 +440,7 @@ export async function updateAllSalesRepsMetrics() {
     
     console.log(`[AUTOMATION] Métricas actualizadas para ${salesReps.length} comerciales`);
   } catch (error) {
-    console.error('[AUTOMATION] Error al actualizar métricas:', error);
+    logger.error('[AUTOMATION] Error al actualizar métricas:', error);
   }
 }
 

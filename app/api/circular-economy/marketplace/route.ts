@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
     // Los usuarios pueden crear items reales
     return NextResponse.json([]);
   } catch (error: any) {
-    console.error('[Circular Economy Marketplace GET]:', error);
+    logger.error('[Circular Economy Marketplace GET]:', error);
     return NextResponse.json(
       { error: 'Error al obtener items del marketplace' },
       { status: 500 }
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(newItem, { status: 201 });
   } catch (error: any) {
-    console.error('[Circular Economy Marketplace POST]:', error);
+    logger.error('[Circular Economy Marketplace POST]:', error);
     return NextResponse.json(
       { error: 'Error al crear item' },
       { status: 500 }

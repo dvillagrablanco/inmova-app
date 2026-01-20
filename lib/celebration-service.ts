@@ -11,6 +11,7 @@
 
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export type CelebrationType =
   | 'onboarding_completed'
   | 'first_building'
@@ -57,7 +58,7 @@ export async function createCelebration(params: CreateCelebrationParams) {
 
     return { success: true, celebration };
   } catch (error) {
-    console.error('[CelebrationService] Error creating celebration:', error);
+    logger.error('[CelebrationService] Error creating celebration:', error);
     return { success: false, error: 'Failed to create celebration' };
   }
 }
@@ -79,7 +80,7 @@ export async function getPendingCelebrations(userId: string) {
 
     return { success: true, celebrations };
   } catch (error) {
-    console.error('[CelebrationService] Error getting celebrations:', error);
+    logger.error('[CelebrationService] Error getting celebrations:', error);
     return { success: false, celebrations: [] };
   }
 }
@@ -105,7 +106,7 @@ export async function markCelebrationAsShown(
 
     return { success: true, celebration };
   } catch (error) {
-    console.error('[CelebrationService] Error marking celebration:', error);
+    logger.error('[CelebrationService] Error marking celebration:', error);
     return { success: false, error: 'Failed to mark celebration' };
   }
 }

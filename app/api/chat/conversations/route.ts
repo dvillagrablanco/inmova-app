@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/prisma';
 
+import logger from '@/lib/logger';
 // GET - Obtener lista de conversaciones del usuario
 export async function GET(request: NextRequest) {
   try {
@@ -88,7 +89,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ conversations });
   } catch (error) {
-    console.error('Error al obtener conversaciones:', error);
+    logger.error('Error al obtener conversaciones:', error);
     return NextResponse.json(
       { error: 'Error al obtener conversaciones' },
       { status: 500 }

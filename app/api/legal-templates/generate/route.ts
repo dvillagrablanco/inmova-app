@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import Anthropic from '@anthropic-ai/sdk';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -124,7 +125,7 @@ Responde en formato JSON con esta estructura:
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error generating legal template:', error);
+    logger.error('Error generating legal template:', error);
     return NextResponse.json(
       { error: 'Error al generar la plantilla' },
       { status: 500 }

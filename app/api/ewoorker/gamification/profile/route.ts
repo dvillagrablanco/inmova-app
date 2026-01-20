@@ -11,6 +11,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { ewoorkerGamification } from '@/lib/ewoorker-gamification-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -44,7 +45,7 @@ export async function GET() {
       profile,
     });
   } catch (error: any) {
-    console.error('[API EwoorkerGamification Profile] Error:', error);
+    logger.error('[API EwoorkerGamification Profile] Error:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }
@@ -75,7 +76,7 @@ export async function POST() {
       loginResult: result,
     });
   } catch (error: any) {
-    console.error('[API EwoorkerGamification Login] Error:', error);
+    logger.error('[API EwoorkerGamification Login] Error:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

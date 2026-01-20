@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
       message: 'No hay diseños creados. Usa las plantillas para crear tu primer diseño.',
     });
   } catch (error: any) {
-    console.error('[Canva Designs Error]:', error);
+    logger.error('[Canva Designs Error]:', error);
     return NextResponse.json(
       { error: 'Error al obtener diseños' },
       { status: 500 }
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
       message: 'Diseño creado correctamente',
     });
   } catch (error: any) {
-    console.error('[Canva Create Design Error]:', error);
+    logger.error('[Canva Create Design Error]:', error);
     return NextResponse.json(
       { error: 'Error al crear diseño' },
       { status: 500 }
@@ -128,7 +129,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Diseño eliminado correctamente',
     });
   } catch (error: any) {
-    console.error('[Canva Delete Design Error]:', error);
+    logger.error('[Canva Delete Design Error]:', error);
     return NextResponse.json(
       { error: 'Error al eliminar diseño' },
       { status: 500 }

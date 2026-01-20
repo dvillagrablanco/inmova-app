@@ -128,7 +128,7 @@ export function handleAPIError(error: unknown): {
   }
 
   // Error genérico
-  console.error('[API v1 Error]:', error);
+  logger.error('[API v1 Error]:', error);
 
   return {
     statusCode: 500,

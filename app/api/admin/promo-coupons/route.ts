@@ -11,6 +11,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -84,7 +85,7 @@ export async function GET(request: NextRequest) {
       stats,
     });
   } catch (error: any) {
-    console.error('[PromoCoupons GET Error]:', error);
+    logger.error('[PromoCoupons GET Error]:', error);
     // Retornar lista vacía en lugar de error para mejor UX
     return NextResponse.json({
       success: true,
@@ -149,7 +150,7 @@ export async function POST(request: NextRequest) {
       data: coupon,
     }, { status: 201 });
   } catch (error: any) {
-    console.error('[PromoCoupons POST Error]:', error);
+    logger.error('[PromoCoupons POST Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

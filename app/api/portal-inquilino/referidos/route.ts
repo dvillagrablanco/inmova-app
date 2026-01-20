@@ -9,6 +9,7 @@ import { authOptions } from '@/lib/auth-options';
 import { tenantReferrals, REFERRAL_CONFIG } from '@/lib/tenant-referral-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Tenant Referrals GET Error]:', error);
+    logger.error('[Tenant Referrals GET Error]:', error);
     return NextResponse.json(
       { error: error.message || 'Error obteniendo referidos' },
       { status: 500 }
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
       message: `Invitación enviada a ${validated.email}`,
     });
   } catch (error: any) {
-    console.error('[Tenant Referrals POST Error]:', error);
+    logger.error('[Tenant Referrals POST Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Email inválido', details: error.errors }, { status: 400 });

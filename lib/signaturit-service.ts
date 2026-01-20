@@ -22,6 +22,7 @@ import fetch from 'node-fetch';
 import FormData from 'form-data';
 import crypto from 'crypto';
 
+import logger from '@/lib/logger';
 // Configuración global de Signaturit (Inmova paga)
 const SIGNATURIT_API_KEY = process.env.SIGNATURIT_API_KEY || '';
 const SIGNATURIT_ENV = process.env.SIGNATURIT_ENV || 'sandbox'; // 'sandbox' o 'production'
@@ -345,7 +346,7 @@ export async function downloadCertificate(signatureId: string): Promise<Buffer> 
  */
 export function verifyWebhookSignature(bodyText: string, signature: string): boolean {
   if (!SIGNATURIT_WEBHOOK_SECRET) {
-    console.warn('[Signaturit] Webhook secret no configurado. Saltando verificación.');
+    logger.warn('[Signaturit] Webhook secret no configurado. Saltando verificación.');
     return true;
   }
 

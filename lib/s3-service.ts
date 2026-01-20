@@ -6,6 +6,7 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
+import logger from '@/lib/logger';
 // Cliente S3 configurado con variables de entorno
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || 'eu-west-1',
@@ -41,7 +42,7 @@ export class S3Service {
     try {
       // Validar que las credenciales estén configuradas
       if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-        console.warn('⚠️ AWS credentials not configured, using simulated upload');
+        logger.warn('⚠️ AWS credentials not configured, using simulated upload');
         return this.simulateUpload(filename, folder);
       }
 
@@ -76,7 +77,7 @@ export class S3Service {
         key,
       };
     } catch (error: any) {
-      console.error('❌ Error uploading to S3:', error);
+      logger.error('❌ Error uploading to S3:', error);
       
       // Fallback a simulación en caso de error
       return this.simulateUpload(filename, folder);
@@ -90,7 +91,7 @@ export class S3Service {
   static async deleteFile(key: string): Promise<boolean> {
     try {
       if (!process.env.AWS_ACCESS_KEY_ID) {
-        console.warn('⚠️ AWS credentials not configured');
+        logger.warn('⚠️ AWS credentials not configured');
         return true; // Simulación exitosa
       }
 
@@ -102,7 +103,7 @@ export class S3Service {
       await s3Client.send(command);
       return true;
     } catch (error: any) {
-      console.error('❌ Error deleting from S3:', error);
+      logger.error('❌ Error deleting from S3:', error);
       return false;
     }
   }
@@ -125,7 +126,7 @@ export class S3Service {
 
       return await getSignedUrl(s3Client, command, { expiresIn });
     } catch (error: any) {
-      console.error('❌ Error generating signed URL:', error);
+      logger.error('❌ Error generating signed URL:', error);
       return '';
     }
   }

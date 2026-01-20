@@ -23,7 +23,7 @@ function getStripe(): Stripe | null {
   if (stripeInstance) return stripeInstance;
 
   if (!process.env.STRIPE_SECRET_KEY) {
-    console.warn('[Stripe Subscription] STRIPE_SECRET_KEY no definida');
+    logger.warn('[Stripe Subscription] STRIPE_SECRET_KEY no definida');
     return null;
   }
 
@@ -34,7 +34,7 @@ function getStripe(): Stripe | null {
     });
     return stripeInstance;
   } catch (error) {
-    console.error('[Stripe Subscription] Error inicializando:', error);
+    logger.error('[Stripe Subscription] Error inicializando:', error);
     return null;
   }
 }

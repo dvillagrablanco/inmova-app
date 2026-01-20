@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -43,7 +44,7 @@ export async function POST() {
         message: `${result.synced} facturas sincronizadas, ${result.errors} errores`,
       });
     } catch (importError) {
-      console.error('Error importing bridge:', importError);
+      logger.error('Error importing bridge:', importError);
       return NextResponse.json({
         success: false,
         error: 'Error al cargar el servicio de sincronización',
@@ -51,7 +52,7 @@ export async function POST() {
       });
     }
   } catch (error) {
-    console.error('Error syncing invoices:', error);
+    logger.error('Error syncing invoices:', error);
     return NextResponse.json(
       { success: false, error: 'Error sincronizando facturas', synced: 0 },
       { status: 500 }

@@ -11,6 +11,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -110,7 +111,7 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error: any) {
-    console.error('[Billing Addons GET Error]:', error);
+    logger.error('[Billing Addons GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo add-ons' },
       { status: 500 }
@@ -275,7 +276,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Billing Addons POST Error]:', error);
+    logger.error('[Billing Addons POST Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -363,7 +364,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Add-on cancelado. Se mantendrá activo hasta fin del período de facturación.',
     });
   } catch (error: any) {
-    console.error('[Billing Addons DELETE Error]:', error);
+    logger.error('[Billing Addons DELETE Error]:', error);
     return NextResponse.json(
       { error: 'Error cancelando add-on' },
       { status: 500 }

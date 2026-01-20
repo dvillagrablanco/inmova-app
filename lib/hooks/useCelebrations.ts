@@ -13,6 +13,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
+import logger from '@/lib/logger';
 interface Celebration {
   id: string;
   type: string;
@@ -53,7 +54,7 @@ export function useCelebrations(options: UseCelebrationsOptions = {}) {
         }
       }
     } catch (error) {
-      console.error('Error fetching celebrations:', error);
+      logger.error('Error fetching celebrations:', error);
     } finally {
       setIsLoading(false);
     }
@@ -91,7 +92,7 @@ export function useCelebrations(options: UseCelebrationsOptions = {}) {
         }
         return false;
       } catch (error) {
-        console.error('Error marking celebration as shown:', error);
+        logger.error('Error marking celebration as shown:', error);
         return false;
       }
     },

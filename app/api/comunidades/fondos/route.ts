@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const createFondoSchema = z.object({
@@ -95,7 +96,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Fondos GET Error]:', error);
+    logger.error('[Fondos GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo fondos', details: error.message },
       { status: 500 }
@@ -212,7 +213,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[Fondos POST Error]:', error);
+    logger.error('[Fondos POST Error]:', error);
     return NextResponse.json(
       { error: 'Error procesando fondo', details: error.message },
       { status: 500 }

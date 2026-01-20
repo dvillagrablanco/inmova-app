@@ -10,6 +10,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -128,7 +129,7 @@ export async function GET(request: NextRequest) {
       total: DEFAULT_CATEGORIES.length,
     });
   } catch (error) {
-    console.error('[API Error] Marketplace categories:', error);
+    logger.error('[API Error] Marketplace categories:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }
@@ -158,7 +159,7 @@ export async function POST(request: NextRequest) {
       message: 'Categoría creada correctamente',
     }, { status: 201 });
   } catch (error: any) {
-    console.error('[API Error] Create marketplace category:', error);
+    logger.error('[API Error] Create marketplace category:', error);
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Datos inválidos', details: error.errors }, { status: 400 });
     }

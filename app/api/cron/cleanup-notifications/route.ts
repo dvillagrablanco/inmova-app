@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { cleanupExpiredNotifications } from '@/lib/notification-service';
 
+import logger from '@/lib/logger';
 export async function GET() {
   try {
     // Validar que viene desde un cron job (opcional: usar token secreto)
@@ -27,7 +28,7 @@ export async function GET() {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('[CRON cleanup-notifications] Error:', error);
+    logger.error('[CRON cleanup-notifications] Error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -83,7 +83,7 @@ export async function measurePerformance<T>(
     return result;
   } catch (error) {
     const duration = performance.now() - start;
-    console.error(`❌ [Performance] ${name}: Failed after ${duration.toFixed(2)}ms`, error);
+    logger.error(`❌ [Performance] ${name}: Failed after ${duration.toFixed(2)}ms`, error);
     throw error;
   }
 }

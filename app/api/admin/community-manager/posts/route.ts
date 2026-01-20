@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
       message: 'No hay publicaciones. Crea tu primera publicación.',
     });
   } catch (error: any) {
-    console.error('[Community Manager Posts Error]:', error);
+    logger.error('[Community Manager Posts Error]:', error);
     return NextResponse.json(
       { error: 'Error al obtener publicaciones' },
       { status: 500 }
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
       message: status === 'draft' ? 'Borrador guardado' : 'Publicación programada correctamente',
     });
   } catch (error: any) {
-    console.error('[Community Manager Create Post Error]:', error);
+    logger.error('[Community Manager Create Post Error]:', error);
     return NextResponse.json(
       { error: 'Error al crear publicación' },
       { status: 500 }

@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { ewoorkerGamification, LEVELS } from '@/lib/ewoorker-gamification-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
       levels: LEVELS,
     });
   } catch (error: any) {
-    console.error('[API EwoorkerGamification Leaderboard] Error:', error);
+    logger.error('[API EwoorkerGamification Leaderboard] Error:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

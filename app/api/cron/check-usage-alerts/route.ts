@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkUsageLimitsForAllCompanies } from '@/lib/usage-alerts-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutos
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
-    console.error('[Cron] Error checking usage alerts:', error);
+    logger.error('[Cron] Error checking usage alerts:', error);
     
     return NextResponse.json(
       {

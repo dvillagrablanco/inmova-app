@@ -12,6 +12,7 @@
 
 import { getCLS, getFCP, getFID, getLCP, getTTFB, onINP, type Metric } from 'web-vitals';
 
+import logger from '@/lib/logger';
 // Types
 interface WebVitalsData {
   name: string;
@@ -61,7 +62,7 @@ async function sendToAnalytics(data: WebVitalsData): Promise<void> {
   } catch (error) {
     // Silenciar errores de analytics (no debe romper la app)
     if (config.debug) {
-      console.error('Analytics error:', error);
+      logger.error('Analytics error:', error);
     }
   }
 }

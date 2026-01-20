@@ -13,6 +13,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -107,7 +108,7 @@ export async function GET(request: NextRequest) {
       profile,
     });
   } catch (error: any) {
-    console.error('[API Error] GET /api/user/profile:', error);
+    logger.error('[API Error] GET /api/user/profile:', error);
     return NextResponse.json(
       { error: 'Error obteniendo perfil' },
       { status: 500 }
@@ -197,7 +198,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
     
-    console.error('[API Error] PATCH /api/user/profile:', error);
+    logger.error('[API Error] PATCH /api/user/profile:', error);
     return NextResponse.json(
       { error: 'Error actualizando perfil' },
       { status: 500 }

@@ -284,7 +284,7 @@ export class InsuranceComparisonService {
         .map((result) => (result as PromiseFulfilledResult<InsuranceQuote>).value)
         .sort((a, b) => a.annualPremium - b.annualPremium);
     } catch (error) {
-      console.error('Error comparing quotes:', error);
+      logger.error('Error comparing quotes:', error);
       throw error;
     }
   }

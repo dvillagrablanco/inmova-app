@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // GET - Dashboard de comunidades
@@ -215,7 +216,7 @@ export async function GET(request: NextRequest) {
       } : null,
     });
   } catch (error: any) {
-    console.error('[Dashboard Comunidades Error]:', error);
+    logger.error('[Dashboard Comunidades Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo dashboard', details: error.message },
       { status: 500 }

@@ -18,6 +18,7 @@ import { z } from 'zod';
 import { checkUsageLimit, createLimitExceededResponse, logUsageWarning } from '@/lib/usage-limits';
 import { trackUsage } from '@/lib/usage-tracking-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -227,7 +228,7 @@ export async function POST(request: NextRequest) {
       message: 'Solicitud de firma creada. Se han enviado emails a los firmantes.',
     });
   } catch (error: any) {
-    console.error('[API Signature Create] Error:', error);
+    logger.error('[API Signature Create] Error:', error);
 
     // Error de validación
     if (error instanceof z.ZodError) {
@@ -277,7 +278,7 @@ async function generateContractPDF(contract: any): Promise<Buffer | null> {
 
     // Por ahora, retornamos null para indicar que no está implementado
     // En producción, DEBES implementar esto
-    console.warn('[generateContractPDF] PDF generation not implemented');
+    logger.warn('[generateContractPDF] PDF generation not implemented');
 
     // Simulación: retornar un PDF vacío (solo para testing)
     if (process.env.NODE_ENV === 'development') {
@@ -300,7 +301,7 @@ async function generateContractPDF(contract: any): Promise<Buffer | null> {
 
     return null;
   } catch (error: any) {
-    console.error('[generateContractPDF] Error:', error);
+    logger.error('[generateContractPDF] Error:', error);
     return null;
   }
 }

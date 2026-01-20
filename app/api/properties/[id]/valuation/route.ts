@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import { AIValuationService } from '@/lib/ai-valuation-service';
 import { ValuationCacheService } from '@/lib/valuation-cache-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -128,7 +129,7 @@ export async function GET(
     ValuationCacheService.set(propertyId, {
       propertyId,
       ...valuation,
-    }).catch((err) => console.error('Cache save error:', err));
+    }).catch((err) => logger.error('Cache save error:', err));
 
     // 5. Guardar valoración en BD (histórico)
     try {
@@ -150,7 +151,7 @@ export async function GET(
         },
       });
     } catch (dbError) {
-      console.error('Error saving valuation:', dbError);
+      logger.error('Error saving valuation:', dbError);
       // No fallar si no se puede guardar
     }
 
@@ -169,7 +170,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error('[Valuation API Error]:', error);
+    logger.error('[Valuation API Error]:', error);
 
     if (error.message.includes('ANTHROPIC_API_KEY')) {
       return NextResponse.json(

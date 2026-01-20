@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -39,7 +40,7 @@ export async function GET(
 
     return NextResponse.json(garden);
   } catch (error) {
-    console.error('[Gardens API] Error fetching garden:', error);
+    logger.error('[Gardens API] Error fetching garden:', error);
     return NextResponse.json({ error: 'Error al obtener huerto' }, { status: 500 });
   }
 }
@@ -87,7 +88,7 @@ export async function PUT(
 
     return NextResponse.json(updatedGarden);
   } catch (error) {
-    console.error('[Gardens API] Error updating garden:', error);
+    logger.error('[Gardens API] Error updating garden:', error);
     return NextResponse.json({ error: 'Error al actualizar huerto' }, { status: 500 });
   }
 }
@@ -119,7 +120,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, message: 'Huerto eliminado' });
   } catch (error) {
-    console.error('[Gardens API] Error deleting garden:', error);
+    logger.error('[Gardens API] Error deleting garden:', error);
     return NextResponse.json({ error: 'Error al eliminar huerto' }, { status: 500 });
   }
 }

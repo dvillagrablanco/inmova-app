@@ -10,6 +10,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       parcelasDisponibles: garden.parcelas.filter((p) => p.estado === 'DISPONIBLE').length,
     });
   } catch (error: any) {
-    console.error('[UrbanGarden GET] Error:', error);
+    logger.error('[UrbanGarden GET] Error:', error);
     return NextResponse.json({ error: 'Error al obtener huerto', details: error.message }, { status: 500 });
   }
 }
@@ -116,7 +117,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(garden);
   } catch (error: any) {
-    console.error('[UrbanGarden PUT] Error:', error);
+    logger.error('[UrbanGarden PUT] Error:', error);
     return NextResponse.json({ error: 'Error al actualizar huerto', details: error.message }, { status: 500 });
   }
 }
@@ -149,7 +150,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ success: true, message: 'Huerto eliminado' });
   } catch (error: any) {
-    console.error('[UrbanGarden DELETE] Error:', error);
+    logger.error('[UrbanGarden DELETE] Error:', error);
     return NextResponse.json({ error: 'Error al eliminar huerto', details: error.message }, { status: 500 });
   }
 }

@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import { subMonths, startOfMonth, endOfMonth, format, differenceInMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -276,7 +277,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching analytics:', error);
+    logger.error('Error fetching analytics:', error);
     return NextResponse.json({ error: 'Error al obtener analytics' }, { status: 500 });
   }
 }

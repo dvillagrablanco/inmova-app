@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import webpush from 'web-push';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 /**
@@ -23,7 +24,7 @@ export async function GET() {
       publicKey
     });
   } catch (error) {
-    console.error('Error obteniendo VAPID keys:', error);
+    logger.error('Error obteniendo VAPID keys:', error);
     return NextResponse.json(
       { error: 'Error obteniendo claves VAPID' },
       { status: 500 }
@@ -45,7 +46,7 @@ export async function POST() {
       message: 'Agrega estas claves a tu archivo .env:\nNEXT_PUBLIC_VAPID_PUBLIC_KEY=...\nVAPID_PRIVATE_KEY=...'
     });
   } catch (error) {
-    console.error('Error generando VAPID keys:', error);
+    logger.error('Error generando VAPID keys:', error);
     return NextResponse.json(
       { error: 'Error generando claves VAPID' },
       { status: 500 }

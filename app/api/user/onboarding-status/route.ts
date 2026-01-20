@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import prisma from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error: any) {
-    console.error('[Onboarding Status Error]:', error);
+    logger.error('[Onboarding Status Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo estado de onboarding' },
       { status: 500 }

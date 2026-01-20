@@ -8,6 +8,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import Anthropic from '@anthropic-ai/sdk';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -127,7 +128,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('[AI Test Error]:', error);
+    logger.error('[AI Test Error]:', error);
     
     let errorMessage = 'Error desconocido';
     let errorType = 'unknown';

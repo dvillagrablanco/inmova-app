@@ -10,6 +10,7 @@ import { authOptions } from '@/lib/auth-options';
 import { ewoorkerVerification } from '@/lib/ewoorker-verification-service';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -56,7 +57,7 @@ export async function GET() {
       ],
     });
   } catch (error: any) {
-    console.error('[EWOORKER_VERIFICATION_EXPRESS_GET]', error);
+    logger.error('[EWOORKER_VERIFICATION_EXPRESS_GET]', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -101,7 +102,7 @@ export async function POST() {
       message: 'Solicitud creada. Completa el pago para procesar tu verificación.',
     });
   } catch (error: any) {
-    console.error('[EWOORKER_VERIFICATION_EXPRESS_POST]', error);
+    logger.error('[EWOORKER_VERIFICATION_EXPRESS_POST]', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

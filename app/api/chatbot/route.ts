@@ -16,6 +16,7 @@ import {
 } from '@/lib/onboarding-chatbot-service';
 import { getOnboardingProgress } from '@/lib/onboarding-service';
 
+import logger from '@/lib/logger';
 export async function POST(request: NextRequest) {
   try {
     // 1. Verificar autenticación
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[API /chatbot] Error:', error);
+    logger.error('[API /chatbot] Error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

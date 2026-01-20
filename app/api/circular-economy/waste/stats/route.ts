@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
       userBadges: [],
     });
   } catch (error: any) {
-    console.error('[Circular Economy Waste Stats GET]:', error);
+    logger.error('[Circular Economy Waste Stats GET]:', error);
     return NextResponse.json(
       { error: 'Error al obtener estadísticas' },
       { status: 500 }

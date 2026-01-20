@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -211,7 +212,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    console.error('[Impuestos Calcular] Error:', error);
+    logger.error('[Impuestos Calcular] Error:', error);
     return NextResponse.json({
       success: false,
       error: error.message,

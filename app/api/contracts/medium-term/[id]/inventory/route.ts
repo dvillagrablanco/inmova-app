@@ -17,6 +17,7 @@ import {
 } from '@/lib/medium-term-rental-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -83,7 +84,7 @@ export async function GET(
       comparacion,
     });
   } catch (error: any) {
-    console.error('[API Error] GET /api/contracts/medium-term/[id]/inventory:', error);
+    logger.error('[API Error] GET /api/contracts/medium-term/[id]/inventory:', error);
     return NextResponse.json(
       { error: 'Error obteniendo inventario' },
       { status: 500 }
@@ -177,7 +178,7 @@ export async function POST(
       );
     }
 
-    console.error('[API Error] POST /api/contracts/medium-term/[id]/inventory:', error);
+    logger.error('[API Error] POST /api/contracts/medium-term/[id]/inventory:', error);
     return NextResponse.json(
       { error: error.message || 'Error registrando inventario' },
       { status: 500 }

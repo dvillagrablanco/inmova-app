@@ -15,6 +15,7 @@ import {
 } from '@/lib/ai/medium-term-pricing-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const pricingRequestSchema = z.object({
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('[API Error] POST /api/contracts/medium-term/pricing:', error);
+    logger.error('[API Error] POST /api/contracts/medium-term/pricing:', error);
     return NextResponse.json(
       { error: 'Error calculando pricing' },
       { status: 500 }

@@ -10,6 +10,7 @@ import { authOptions } from '@/lib/auth-options';
 import { ewoorkerVerification } from '@/lib/ewoorker-verification-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const ADMIN_ROLES = ['super_admin', 'administrador', 'socio_ewoorker'];
@@ -34,7 +35,7 @@ export async function GET() {
       stats,
     });
   } catch (error: any) {
-    console.error('[EWOORKER_VERIFICATION_ADMIN_GET]', error);
+    logger.error('[EWOORKER_VERIFICATION_ADMIN_GET]', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -87,7 +88,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[EWOORKER_VERIFICATION_ADMIN_POST]', error);
+    logger.error('[EWOORKER_VERIFICATION_ADMIN_POST]', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

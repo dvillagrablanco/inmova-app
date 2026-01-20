@@ -12,6 +12,7 @@
 
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export type NotificationType = 'success' | 'info' | 'warning' | 'action';
 
 export interface CreateNotificationParams {
@@ -46,7 +47,7 @@ export async function createNotification(params: CreateNotificationParams) {
 
     return { success: true, notification };
   } catch (error) {
-    console.error('[NotificationService] Error creating notification:', error);
+    logger.error('[NotificationService] Error creating notification:', error);
     return { success: false, error: 'Failed to create notification' };
   }
 }
@@ -65,7 +66,7 @@ export async function getUnreadCount(userId: string) {
 
     return { success: true, count };
   } catch (error) {
-    console.error('[NotificationService] Error getting unread count:', error);
+    logger.error('[NotificationService] Error getting unread count:', error);
     return { success: false, count: 0 };
   }
 }
@@ -88,7 +89,7 @@ export async function markAsRead(notificationId: string, userId: string) {
 
     return { success: true, notification };
   } catch (error) {
-    console.error('[NotificationService] Error marking notification as read:', error);
+    logger.error('[NotificationService] Error marking notification as read:', error);
     return { success: false, error: 'Failed to mark notification as read' };
   }
 }
@@ -111,7 +112,7 @@ export async function markAllAsRead(userId: string) {
 
     return { success: true, count: result.count };
   } catch (error) {
-    console.error('[NotificationService] Error marking all as read:', error);
+    logger.error('[NotificationService] Error marking all as read:', error);
     return { success: false, error: 'Failed to mark all as read' };
   }
 }
@@ -136,7 +137,7 @@ export async function getRecentNotifications(
 
     return { success: true, notifications };
   } catch (error) {
-    console.error('[NotificationService] Error getting notifications:', error);
+    logger.error('[NotificationService] Error getting notifications:', error);
     return { success: false, notifications: [] };
   }
 }
@@ -161,7 +162,7 @@ export async function cleanOldNotifications(userId?: string) {
 
     return { success: true, count: result.count };
   } catch (error) {
-    console.error('[NotificationService] Error cleaning old notifications:', error);
+    logger.error('[NotificationService] Error cleaning old notifications:', error);
     return { success: false, error: 'Failed to clean old notifications' };
   }
 }

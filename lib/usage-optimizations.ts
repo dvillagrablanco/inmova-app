@@ -14,6 +14,7 @@ import { redis } from './redis';
 import { createHash } from 'crypto';
 import pako from 'pako';
 
+import logger from '@/lib/logger';
 // ═══════════════════════════════════════════════════════════════
 // RATE LIMITING POR USUARIO (Prevenir abuso)
 // ═══════════════════════════════════════════════════════════════
@@ -74,7 +75,7 @@ export async function checkUserRateLimit(
       reset: Date.now() + window * 1000,
     };
   } catch (error) {
-    console.error('[Rate Limit] Error checking limit:', error);
+    logger.error('[Rate Limit] Error checking limit:', error);
     // Si Redis falla, permitir el request (fail open)
     return {
       allowed: true,
@@ -127,7 +128,7 @@ export function compressBuffer(buffer: Buffer): Buffer {
     const compressed = pako.gzip(buffer);
     return Buffer.from(compressed);
   } catch (error) {
-    console.error('[Compression] Error compressing file:', error);
+    logger.error('[Compression] Error compressing file:', error);
     return buffer; // Si falla, retornar original
   }
 }
@@ -140,7 +141,7 @@ export function decompressBuffer(buffer: Buffer): Buffer {
     const decompressed = pako.ungzip(buffer);
     return Buffer.from(decompressed);
   } catch (error) {
-    console.error('[Compression] Error decompressing file:', error);
+    logger.error('[Compression] Error decompressing file:', error);
     return buffer; // Si falla, retornar original
   }
 }
@@ -180,7 +181,7 @@ export async function getCachedAIResponse(
     console.log('[AI Cache] Cache MISS:', cacheKey.substring(0, 20));
     return null;
   } catch (error) {
-    console.error('[AI Cache] Error reading cache:', error);
+    logger.error('[AI Cache] Error reading cache:', error);
     return null;
   }
 }
@@ -199,7 +200,7 @@ export async function cacheAIResponse(
     await redis.setex(cacheKey, TTL, response);
     console.log('[AI Cache] Response cached:', cacheKey.substring(0, 20));
   } catch (error) {
-    console.error('[AI Cache] Error caching response:', error);
+    logger.error('[AI Cache] Error caching response:', error);
   }
 }
 
@@ -228,7 +229,7 @@ export async function invalidateAICache(pattern?: string): Promise<number> {
     
     return keys.length;
   } catch (error) {
-    console.error('[AI Cache] Error invalidating cache:', error);
+    logger.error('[AI Cache] Error invalidating cache:', error);
     return 0;
   }
 }
@@ -330,7 +331,7 @@ export async function getOptimizationStats(): Promise<{
       batchedSignatures,
     };
   } catch (error) {
-    console.error('[Optimization Stats] Error:', error);
+    logger.error('[Optimization Stats] Error:', error);
     return {
       cacheHitRate: 0,
       compressionSavings: 0,
@@ -350,7 +351,7 @@ export async function incrementOptimizationStat(
   try {
     await redis.incrby(`stats:${stat}`, value);
   } catch (error) {
-    console.error('[Optimization Stats] Error incrementing stat:', error);
+    logger.error('[Optimization Stats] Error incrementing stat:', error);
   }
 }
 
@@ -361,6 +362,6 @@ export async function addCompressionSavings(savingsGB: number): Promise<void> {
   try {
     await redis.incrbyfloat('stats:compression:savings', savingsGB);
   } catch (error) {
-    console.error('[Optimization Stats] Error adding compression savings:', error);
+    logger.error('[Optimization Stats] Error adding compression savings:', error);
   }
 }

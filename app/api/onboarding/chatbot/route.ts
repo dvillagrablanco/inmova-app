@@ -19,6 +19,7 @@ import {
 } from '@/lib/onboarding-chatbot-service';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 /**
  * POST /api/onboarding/chatbot
  * Procesa un mensaje del usuario y devuelve la respuesta del chatbot
@@ -117,7 +118,7 @@ export async function POST(request: NextRequest) {
       });
     } catch (dbError) {
       // No fallar si no se puede guardar en DB
-      console.warn('[Chatbot] Could not save interaction to DB:', dbError);
+      logger.warn('[Chatbot] Could not save interaction to DB:', dbError);
     }
 
     return NextResponse.json({
@@ -125,7 +126,7 @@ export async function POST(request: NextRequest) {
       suggestedActions: response.suggestedActions,
     });
   } catch (error) {
-    console.error('[API] Error in POST /api/onboarding/chatbot:', error);
+    logger.error('[API] Error in POST /api/onboarding/chatbot:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
@@ -175,7 +176,7 @@ export async function GET(request: NextRequest) {
       quickQuestions,
     });
   } catch (error) {
-    console.error('[API] Error in GET /api/onboarding/chatbot:', error);
+    logger.error('[API] Error in GET /api/onboarding/chatbot:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

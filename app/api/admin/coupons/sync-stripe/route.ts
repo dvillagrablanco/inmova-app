@@ -16,6 +16,7 @@ import { authOptions } from '@/lib/auth-options';
 import { syncCouponToStripe, syncAllCouponsToStripe, validateStripeCoupon } from '@/lib/stripe-coupon-service';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[API Sync Stripe] Error:', error);
+    logger.error('[API Sync Stripe] Error:', error);
     return NextResponse.json(
       { error: 'Error en sincronización', details: error.message },
       { status: 500 }
@@ -134,7 +135,7 @@ export async function GET(request: NextRequest) {
       detallePendientes: pendientes,
     });
   } catch (error: any) {
-    console.error('[API Sync Stripe] Error:', error);
+    logger.error('[API Sync Stripe] Error:', error);
     return NextResponse.json(
       { error: 'Error obteniendo estado' },
       { status: 500 }

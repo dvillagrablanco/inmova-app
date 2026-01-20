@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import prisma from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
       isCompleted: userProgress?.isCompleted || false
     });
   } catch (error: any) {
-    console.error('[Checklist GET Error]:', error);
+    logger.error('[Checklist GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo progreso' },
       { status: 500 }
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
       progress: userProgress
     });
   } catch (error: any) {
-    console.error('[Checklist POST Error]:', error);
+    logger.error('[Checklist POST Error]:', error);
     return NextResponse.json(
       { error: 'Error guardando progreso' },
       { status: 500 }

@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ewoorkerReferral } from '@/lib/ewoorker-referral-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const validateSchema = z.object({
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ valid: false, error: 'Código inválido' }, { status: 400 });
     }
-    console.error('[API EwoorkerReferrals Validate] Error:', error);
+    logger.error('[API EwoorkerReferrals Validate] Error:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

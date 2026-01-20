@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { processScheduledEmails } from '@/lib/email-triggers-service';
 
+import logger from '@/lib/logger';
 export async function GET() {
   try {
     console.log('[CRON process-email-triggers] Starting...');
@@ -31,7 +32,7 @@ export async function GET() {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('[CRON process-email-triggers] Error:', error);
+    logger.error('[CRON process-email-triggers] Error:', error);
     return NextResponse.json(
       {
         error: 'Internal server error',

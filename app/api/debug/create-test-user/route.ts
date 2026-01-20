@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -99,7 +100,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error: any) {
-    console.error('[CreateTestUser] Error:', error);
+    logger.error('[CreateTestUser] Error:', error);
     return NextResponse.json(
       {
         error: 'Error creando usuario',

@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
 import { prisma } from './db';
 
+import logger from '@/lib/logger';
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 const TOKEN_EXPIRY = '7d'; // 7 días
 const COOKIE_NAME = 'provider-auth-token';
@@ -97,7 +98,7 @@ export async function getAuthenticatedProvider() {
       password: undefined, // No exponer el password
     };
   } catch (error) {
-    console.error('Error al obtener proveedor autenticado:', error);
+    logger.error('Error al obtener proveedor autenticado:', error);
     return null;
   }
 }

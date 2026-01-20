@@ -11,6 +11,7 @@ import { ewoorkerMatching, MatchCriteria } from '@/lib/ewoorker-matching-service
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -120,7 +121,7 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[EWOORKER_MATCHING_GET]', error);
+    logger.error('[EWOORKER_MATCHING_GET]', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

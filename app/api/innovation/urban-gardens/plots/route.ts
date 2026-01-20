@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(formattedPlots);
   } catch (error: any) {
-    console.error('[GardenPlots GET] Error:', error);
+    logger.error('[GardenPlots GET] Error:', error);
     return NextResponse.json({ error: 'Error al obtener parcelas', details: error.message }, { status: 500 });
   }
 }
@@ -133,7 +134,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error: any) {
-    console.error('[GardenPlots POST] Error:', error);
+    logger.error('[GardenPlots POST] Error:', error);
     return NextResponse.json({ error: 'Error al crear parcela', details: error.message }, { status: 500 });
   }
 }

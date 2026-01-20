@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -38,7 +39,7 @@ export async function GET(
 
     return NextResponse.json(item);
   } catch (error) {
-    console.error('Error al obtener item:', error);
+    logger.error('Error al obtener item:', error);
     return NextResponse.json(
       { error: 'Error al obtener item' },
       { status: 500 }
@@ -91,7 +92,7 @@ export async function PATCH(
 
     return NextResponse.json(item);
   } catch (error) {
-    console.error('Error al actualizar item:', error);
+    logger.error('Error al actualizar item:', error);
     return NextResponse.json(
       { error: 'Error al actualizar item' },
       { status: 500 }
@@ -128,7 +129,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Item eliminado correctamente' });
   } catch (error) {
-    console.error('Error al eliminar item:', error);
+    logger.error('Error al eliminar item:', error);
     return NextResponse.json(
       { error: 'Error al eliminar item' },
       { status: 500 }

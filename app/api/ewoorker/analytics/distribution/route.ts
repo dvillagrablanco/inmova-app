@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { ewoorkerAnalytics } from '@/lib/ewoorker-analytics-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
       distribution,
     });
   } catch (error: any) {
-    console.error('[API EwoorkerAnalytics Distribution] Error:', error);
+    logger.error('[API EwoorkerAnalytics Distribution] Error:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

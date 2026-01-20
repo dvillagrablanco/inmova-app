@@ -129,7 +129,7 @@ export function captureError(
   // Si es crítico en producción, enviar notificación
   if (environment === 'production' && trackedError.severity === 'critical') {
     sendCriticalErrorNotification(trackedError).catch(err =>
-      console.error('Failed to send critical error notification:', err)
+      logger.error('Failed to send critical error notification:', err)
     );
   }
 

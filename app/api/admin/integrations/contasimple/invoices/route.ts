@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ invoices });
   } catch (error) {
-    console.error('Error getting invoices:', error);
+    logger.error('Error getting invoices:', error);
     return NextResponse.json(
       { error: 'Error obteniendo facturas' },
       { status: 500 }

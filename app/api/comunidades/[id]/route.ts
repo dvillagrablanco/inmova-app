@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const updateComunidadSchema = z.object({
@@ -133,7 +134,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error('[Comunidad GET Error]:', error);
+    logger.error('[Comunidad GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo comunidad', details: error.message },
       { status: 500 }
@@ -187,7 +188,7 @@ export async function PUT(
         { status: 400 }
       );
     }
-    console.error('[Comunidad PUT Error]:', error);
+    logger.error('[Comunidad PUT Error]:', error);
     return NextResponse.json(
       { error: 'Error actualizando comunidad', details: error.message },
       { status: 500 }
@@ -228,7 +229,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Comunidad desactivada correctamente' });
   } catch (error: any) {
-    console.error('[Comunidad DELETE Error]:', error);
+    logger.error('[Comunidad DELETE Error]:', error);
     return NextResponse.json(
       { error: 'Error eliminando comunidad', details: error.message },
       { status: 500 }

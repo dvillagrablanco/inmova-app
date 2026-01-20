@@ -15,6 +15,7 @@ import { getMonthlyUsage } from './usage-tracking-service';
 import nodemailer from 'nodemailer';
 import { startOfMonth } from 'date-fns';
 
+import logger from '@/lib/logger';
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURACIÓN DE EMAIL
 // ═══════════════════════════════════════════════════════════════
@@ -79,7 +80,7 @@ export async function checkUsageLimitsForAllCompanies(): Promise<void> {
         }
       }
     } catch (error) {
-      console.error(`[Usage Alerts] Error checking company ${company.id}:`, error);
+      logger.error(`[Usage Alerts] Error checking company ${company.id}:`, error);
     }
   }
   
@@ -252,7 +253,7 @@ async function sendUsageAlert(company: any, alert: UsageAlert): Promise<void> {
   const contactEmail = company.emailContacto || company.email;
   
   if (!contactEmail) {
-    console.warn(`[Usage Alerts] No contact email for company ${company.id}`);
+    logger.warn(`[Usage Alerts] No contact email for company ${company.id}`);
     return;
   }
   
@@ -278,7 +279,7 @@ async function sendUsageAlert(company: any, alert: UsageAlert): Promise<void> {
     // Crear notificación in-app
     await createInAppNotification(company.id, alert, serviceName);
   } catch (error) {
-    console.error('[Usage Alerts] Error sending email:', error);
+    logger.error('[Usage Alerts] Error sending email:', error);
   }
 }
 
@@ -305,7 +306,7 @@ async function createInAppNotification(
       },
     });
   } catch (error) {
-    console.error('[Usage Alerts] Error creating notification:', error);
+    logger.error('[Usage Alerts] Error creating notification:', error);
   }
 }
 
@@ -474,7 +475,7 @@ export async function runUsageAlertsCheck(): Promise<{ success: boolean; alertsS
     await checkUsageLimitsForAllCompanies();
     return { success: true, alertsSent: 0 }; // TODO: track actual count
   } catch (error) {
-    console.error('[Usage Alerts] Error running check:', error);
+    logger.error('[Usage Alerts] Error running check:', error);
     return { success: false, alertsSent: 0 };
   }
 }

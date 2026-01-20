@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db';
 import { Prisma } from '@prisma/client';
 
+import logger from '@/lib/logger';
 export interface ServiceInput {
   companyId: string;
   nombre: string;
@@ -104,7 +105,7 @@ export async function createService(input: ServiceInput) {
     });
     return { success: true, service };
   } catch (error) {
-    console.error('Error creando servicio:', error);
+    logger.error('Error creando servicio:', error);
     return { success: false, error: 'Error al crear servicio' };
   }
 }
@@ -127,7 +128,7 @@ export async function getServicesByCategory(companyId: string, categoria?: strin
     });
     return { success: true, services };
   } catch (error) {
-    console.error('Error obteniendo servicios:', error);
+    logger.error('Error obteniendo servicios:', error);
     return { success: false, error: 'Error al obtener servicios' };
   }
 }
@@ -172,7 +173,7 @@ export async function bookService(input: ServiceBookingInput) {
 
     return { success: true, booking };
   } catch (error) {
-    console.error('Error reservando servicio:', error);
+    logger.error('Error reservando servicio:', error);
     return { success: false, error: 'Error al reservar servicio' };
   }
 }
@@ -194,7 +195,7 @@ export async function updateBookingStatus(
     });
     return { success: true, booking };
   } catch (error) {
-    console.error('Error actualizando estado de reserva:', error);
+    logger.error('Error actualizando estado de reserva:', error);
     return { success: false, error: 'Error al actualizar estado' };
   }
 }
@@ -212,7 +213,7 @@ export async function getTenantBookings(tenantId: string) {
     });
     return { success: true, bookings };
   } catch (error) {
-    console.error('Error obteniendo reservas:', error);
+    logger.error('Error obteniendo reservas:', error);
     return { success: false, error: 'Error al obtener reservas' };
   }
 }
@@ -248,7 +249,7 @@ export async function createCheckInOut(input: CheckInOutInput) {
     });
     return { success: true, checkInOut };
   } catch (error) {
-    console.error('Error creando check-in/out:', error);
+    logger.error('Error creando check-in/out:', error);
     return { success: false, error: 'Error al crear check-in/out' };
   }
 }
@@ -277,7 +278,7 @@ export async function completeCheckIn(
     });
     return { success: true, checkInOut };
   } catch (error) {
-    console.error('Error completando check-in:', error);
+    logger.error('Error completando check-in:', error);
     return { success: false, error: 'Error al completar check-in' };
   }
 }
@@ -330,7 +331,7 @@ export async function completeCheckOut(
 
     return { success: true, checkInOut };
   } catch (error) {
-    console.error('Error completando check-out:', error);
+    logger.error('Error completando check-out:', error);
     return { success: false, error: 'Error al completar check-out' };
   }
 }
@@ -358,7 +359,7 @@ export async function getPendingCheckInOuts(companyId: string) {
     });
     return { success: true, checkInOuts };
   } catch (error) {
-    console.error('Error obteniendo check-ins/outs pendientes:', error);
+    logger.error('Error obteniendo check-ins/outs pendientes:', error);
     return { success: false, error: 'Error al obtener check-ins/outs' };
   }
 }
@@ -388,7 +389,7 @@ export async function registerSmartLock(input: SmartLockInput) {
     });
     return { success: true, lock };
   } catch (error) {
-    console.error('Error registrando SmartLock:', error);
+    logger.error('Error registrando SmartLock:', error);
     return { success: false, error: 'Error al registrar SmartLock' };
   }
 }
@@ -426,7 +427,7 @@ export async function createLockAccess(input: SmartLockAccessInput) {
 
     return { success: true, access };
   } catch (error) {
-    console.error('Error creando acceso a SmartLock:', error);
+    logger.error('Error creando acceso a SmartLock:', error);
     return { success: false, error: 'Error al crear acceso' };
   }
 }
@@ -442,7 +443,7 @@ export async function revokeLockAccess(accessId: string) {
     });
     return { success: true, access };
   } catch (error) {
-    console.error('Error revocando acceso:', error);
+    logger.error('Error revocando acceso:', error);
     return { success: false, error: 'Error al revocar acceso' };
   }
 }
@@ -490,7 +491,7 @@ export async function recordLockAccess(
 
     return { success: true, access: updatedAccess };
   } catch (error) {
-    console.error('Error registrando acceso:', error);
+    logger.error('Error registrando acceso:', error);
     return { success: false, error: 'Error al registrar acceso' };
   }
 }
@@ -518,7 +519,7 @@ export async function getSmartLocksByBuilding(buildingId: string) {
     });
     return { success: true, locks };
   } catch (error) {
-    console.error('Error obteniendo SmartLocks:', error);
+    logger.error('Error obteniendo SmartLocks:', error);
     return { success: false, error: 'Error al obtener SmartLocks' };
   }
 }
@@ -541,7 +542,7 @@ export async function getTenantLockAccess(tenantId: string) {
     });
     return { success: true, accesos };
   } catch (error) {
-    console.error('Error obteniendo accesos del tenant:', error);
+    logger.error('Error obteniendo accesos del tenant:', error);
     return { success: false, error: 'Error al obtener accesos' };
   }
 }
@@ -582,7 +583,7 @@ export async function registerPackage(input: PackageInput) {
 
     return { success: true, package: package_ };
   } catch (error) {
-    console.error('Error registrando paquete:', error);
+    logger.error('Error registrando paquete:', error);
     return { success: false, error: 'Error al registrar paquete' };
   }
 }
@@ -610,7 +611,7 @@ export async function notifyPackageArrival(packageId: string) {
 
     return { success: true, package: package_ };
   } catch (error) {
-    console.error('Error notificando llegada de paquete:', error);
+    logger.error('Error notificando llegada de paquete:', error);
     return { success: false, error: 'Error al notificar' };
   }
 }
@@ -626,7 +627,7 @@ export async function markPackageAsCollected(packageId: string) {
     });
     return { success: true, package: package_ };
   } catch (error) {
-    console.error('Error marcando paquete como recogido:', error);
+    logger.error('Error marcando paquete como recogido:', error);
     return { success: false, error: 'Error al marcar paquete' };
   }
 }
@@ -644,7 +645,7 @@ export async function getPendingPackages(tenantId: string) {
     });
     return { success: true, packages };
   } catch (error) {
-    console.error('Error obteniendo paquetes pendientes:', error);
+    logger.error('Error obteniendo paquetes pendientes:', error);
     return { success: false, error: 'Error al obtener paquetes' };
   }
 }
@@ -670,7 +671,7 @@ export async function getBuildingPackages(buildingId: string) {
     });
     return { success: true, packages };
   } catch (error) {
-    console.error('Error obteniendo paquetes del edificio:', error);
+    logger.error('Error obteniendo paquetes del edificio:', error);
     return { success: false, error: 'Error al obtener paquetes' };
   }
 }

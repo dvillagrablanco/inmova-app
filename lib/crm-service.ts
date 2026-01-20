@@ -13,6 +13,7 @@
 
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 // ============================================================================
 // TIPOS - Adaptados al modelo Lead real
 // ============================================================================
@@ -495,7 +496,7 @@ export class CRMService {
         },
       };
     } catch (error: any) {
-      console.error('Error getting CRM stats:', error);
+      logger.error('Error getting CRM stats:', error);
       return {
         leads: { total: 0, nuevos: 0, contactados: 0, calificados: 0, ganados: 0, perdidos: 0, winRate: 0 },
         deals: { total: 0, open: 0, won: 0, totalValue: 0, wonValue: 0 },

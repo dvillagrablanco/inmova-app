@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -81,7 +82,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error('[Valuation History API Error]:', error);
+    logger.error('[Valuation History API Error]:', error);
     return NextResponse.json(
       { error: 'Error al obtener histórico de valoraciones' },
       { status: 500 }

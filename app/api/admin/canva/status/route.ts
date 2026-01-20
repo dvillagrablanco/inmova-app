@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
         : 'Canva no configurado. Añade las credenciales en el panel de integraciones.',
     });
   } catch (error: any) {
-    console.error('[Canva Status Error]:', error);
+    logger.error('[Canva Status Error]:', error);
     return NextResponse.json(
       { error: 'Error al verificar estado de Canva' },
       { status: 500 }

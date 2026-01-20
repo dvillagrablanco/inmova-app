@@ -8,6 +8,7 @@ import { authOptions } from '@/lib/auth-options';
 import { tenantProviderMatching } from '@/lib/tenant-provider-matching-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
       data: matchingResult,
     });
   } catch (error: any) {
-    console.error('[Matching Error]:', error);
+    logger.error('[Matching Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

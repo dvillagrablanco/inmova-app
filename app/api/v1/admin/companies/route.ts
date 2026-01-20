@@ -10,6 +10,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getAllCompanies } from '@/lib/admin-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result);
 
   } catch (error: any) {
-    console.error('Error fetching companies:', error);
+    logger.error('Error fetching companies:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

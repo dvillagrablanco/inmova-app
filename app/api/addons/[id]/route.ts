@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -54,7 +55,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error('[Add-ons GET Error]:', error);
+    logger.error('[Add-ons GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo add-on', message: error.message },
       { status: 500 }
@@ -177,7 +178,7 @@ export async function PUT(
           stripeSync.error = 'Stripe no configurado';
         }
       } catch (stripeError: any) {
-        console.error('[Stripe Sync Error]:', stripeError);
+        logger.error('[Stripe Sync Error]:', stripeError);
         stripeSync.error = stripeError.message;
       }
     } else if (existing.stripeProductId) {
@@ -212,7 +213,7 @@ export async function PUT(
       }
     } catch (auditError) {
       // No fallar si el audit log no se puede crear
-      console.warn('[Audit Log Warning]:', auditError);
+      logger.warn('[Audit Log Warning]:', auditError);
     }
 
     return NextResponse.json({
@@ -224,7 +225,7 @@ export async function PUT(
         : 'Add-on actualizado correctamente',
     });
   } catch (error: any) {
-    console.error('[Add-ons PUT Error]:', error);
+    logger.error('[Add-ons PUT Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json({
@@ -291,7 +292,7 @@ export async function DELETE(
           stripeDeactivated = true;
         }
       } catch (stripeError: any) {
-        console.warn('[Stripe Deactivate Warning]:', stripeError.message);
+        logger.warn('[Stripe Deactivate Warning]:', stripeError.message);
       }
     }
 
@@ -330,7 +331,7 @@ export async function DELETE(
           });
         }
       } catch (auditError) {
-        console.warn('[Audit Log Warning]:', auditError);
+        logger.warn('[Audit Log Warning]:', auditError);
       }
 
       return NextResponse.json({
@@ -372,7 +373,7 @@ export async function DELETE(
         });
       }
     } catch (auditError) {
-      console.warn('[Audit Log Warning]:', auditError);
+      logger.warn('[Audit Log Warning]:', auditError);
     }
 
     return NextResponse.json({
@@ -381,7 +382,7 @@ export async function DELETE(
       stripeDeactivated,
     });
   } catch (error: any) {
-    console.error('[Add-ons DELETE Error]:', error);
+    logger.error('[Add-ons DELETE Error]:', error);
     return NextResponse.json({
       error: 'Error eliminando add-on',
       message: error.message,

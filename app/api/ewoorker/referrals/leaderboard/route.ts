@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { ewoorkerReferral } from '@/lib/ewoorker-referral-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
       leaderboard,
     });
   } catch (error: any) {
-    console.error('[API EwoorkerReferrals Leaderboard] Error:', error);
+    logger.error('[API EwoorkerReferrals Leaderboard] Error:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

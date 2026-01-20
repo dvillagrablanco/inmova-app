@@ -1,6 +1,7 @@
 import prisma from '@/lib/db';
 import nodemailer from 'nodemailer';
 
+import logger from '@/lib/logger';
 /**
  * Sistema de notificaciones de vencimiento de seguros
  * Se ejecuta vía cron job diario
@@ -131,7 +132,7 @@ export class InsuranceNotificationService {
         `- Reminder (60 days): ${reminderNotifications.filter((n) => n.daysUntilExpiration === 60).length}`
       );
     } catch (error) {
-      console.error('[Insurance Notifications Error]:', error);
+      logger.error('[Insurance Notifications Error]:', error);
       throw error;
     }
   }
@@ -200,7 +201,7 @@ export class InsuranceNotificationService {
         `[Email Sent] Urgent notification to ${insurance.companyEmail} for policy ${insurance.numeroPoliza}`
       );
     } catch (error) {
-      console.error('[Email Error]:', error);
+      logger.error('[Email Error]:', error);
     }
   }
 
@@ -258,7 +259,7 @@ export class InsuranceNotificationService {
         html,
       });
     } catch (error) {
-      console.error('[Email Error]:', error);
+      logger.error('[Email Error]:', error);
     }
   }
 
@@ -302,7 +303,7 @@ export class InsuranceNotificationService {
         html,
       });
     } catch (error) {
-      console.error('[Email Error]:', error);
+      logger.error('[Email Error]:', error);
     }
   }
 
@@ -362,7 +363,7 @@ export class InsuranceNotificationService {
         `[In-App Notification] Created ${users.length} notifications for policy ${insurance.numeroPoliza}`
       );
     } catch (error) {
-      console.error('[In-App Notification Error]:', error);
+      logger.error('[In-App Notification Error]:', error);
     }
   }
 
@@ -412,7 +413,7 @@ export class InsuranceNotificationService {
         // TODO: Enviar email confirmando renovación automática
       }
     } catch (error) {
-      console.error('[Auto-Renewal Error]:', error);
+      logger.error('[Auto-Renewal Error]:', error);
       throw error;
     }
   }

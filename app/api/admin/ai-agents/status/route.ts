@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -55,7 +56,7 @@ export async function GET(request: NextRequest) {
         connected = testResponse.status !== 401 && testResponse.status !== 403;
         modelAvailable = testResponse.ok;
       } catch (error) {
-        console.error('[AI Agents Status] Error testing API:', error);
+        logger.error('[AI Agents Status] Error testing API:', error);
         connected = false;
       }
     }
@@ -125,7 +126,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('[AI Agents Status] Error:', error);
+    logger.error('[AI Agents Status] Error:', error);
     return NextResponse.json({
       success: false,
       configured: false,

@@ -7,6 +7,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 // Schema de validación para cambiar disponibilidad
 const disponibilidadSchema = z.object({
   disponible: z.boolean(),
@@ -108,7 +109,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
         : 'Trabajador ya no está disponible',
     });
   } catch (error: any) {
-    console.error('[EWOORKER_TRABAJADOR_DISPONIBILIDAD]', error);
+    logger.error('[EWOORKER_TRABAJADOR_DISPONIBILIDAD]', error);
 
     if (error.name === 'ZodError') {
       return NextResponse.json(
@@ -182,7 +183,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       empresaVerificada: trabajador.perfilEmpresa.verificado,
     });
   } catch (error: any) {
-    console.error('[EWOORKER_TRABAJADOR_DISPONIBILIDAD_GET]', error);
+    logger.error('[EWOORKER_TRABAJADOR_DISPONIBILIDAD_GET]', error);
     return NextResponse.json({ error: 'Error al obtener disponibilidad' }, { status: 500 });
   }
 }

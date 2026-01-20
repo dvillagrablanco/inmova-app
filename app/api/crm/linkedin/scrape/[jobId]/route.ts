@@ -11,6 +11,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { LinkedInScrapingJobManager } from '@/lib/linkedin-scraper';
 
+import logger from '@/lib/logger';
 export async function GET(request: Request, { params }: { params: { jobId: string } }) {
   try {
     const session = await getServerSession(authOptions);
@@ -26,7 +27,7 @@ export async function GET(request: Request, { params }: { params: { jobId: strin
 
     return NextResponse.json(job);
   } catch (error: any) {
-    console.error('Error getting scraping job status:', error);
+    logger.error('Error getting scraping job status:', error);
     return NextResponse.json(
       { error: 'Error al obtener estado del job', details: error.message },
       { status: 500 }

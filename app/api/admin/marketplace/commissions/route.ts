@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
       transactions: [],
     });
   } catch (error) {
-    console.error('[API Error] Marketplace commissions:', error);
+    logger.error('[API Error] Marketplace commissions:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

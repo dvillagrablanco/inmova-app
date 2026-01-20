@@ -10,6 +10,7 @@
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 
+import logger from '@/lib/logger';
 interface EmailOptions {
   to: string | string[];
   subject: string;
@@ -68,7 +69,7 @@ function createTransporter(): Transporter {
   }
   // Desarrollo: Ethereal Email (testing)
   else if (process.env.NODE_ENV === 'development') {
-    console.warn('⚠️  No email provider configured. Using console logging.');
+    logger.warn('⚠️  No email provider configured. Using console logging.');
     // En desarrollo, solo loguear
     transporter = nodemailer.createTransport({
       streamTransport: true,
@@ -132,7 +133,7 @@ export async function sendEmail(
       messageId: info.messageId,
     };
   } catch (error) {
-    console.error('❌ Error enviando email:', error);
+    logger.error('❌ Error enviando email:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -348,7 +349,7 @@ export async function verifyEmailConfiguration(): Promise<boolean> {
     console.log('✅ Configuración de email verificada correctamente');
     return true;
   } catch (error) {
-    console.error('❌ Error en configuración de email:', error);
+    logger.error('❌ Error en configuración de email:', error);
     return false;
   }
 }

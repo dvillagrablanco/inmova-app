@@ -14,6 +14,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -162,7 +163,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[ValidateCoupon API Error]:', error);
+    logger.error('[ValidateCoupon API Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

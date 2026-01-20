@@ -4,6 +4,7 @@
  */
 import { useRef, useEffect, useCallback } from 'react';
 
+import logger from '@/lib/logger';
 interface SwipeHandlers {
   onSwipeLeft?: () => void;
   onSwipeRight?: () => void;
@@ -118,7 +119,7 @@ export function usePullToRefresh({
       try {
         await onRefresh();
       } catch (error) {
-        console.error('Error en pull-to-refresh:', error);
+        logger.error('Error en pull-to-refresh:', error);
       } finally {
         isRefreshing.current = false;
       }

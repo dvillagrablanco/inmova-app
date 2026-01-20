@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       data: plan,
     });
   } catch (error: any) {
-    console.error('[eWoorker Plan GET Error]:', error);
+    logger.error('[eWoorker Plan GET Error]:', error);
     return NextResponse.json(
       {
         error: 'Error al obtener plan',
@@ -130,7 +131,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         });
       }
     } catch (auditError) {
-      console.warn('[Audit Log Warning]:', auditError);
+      logger.warn('[Audit Log Warning]:', auditError);
     }
 
     return NextResponse.json({
@@ -139,7 +140,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       message: 'Plan actualizado exitosamente',
     });
   } catch (error: any) {
-    console.error('[eWoorker Plan PUT Error]:', error);
+    logger.error('[eWoorker Plan PUT Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -217,7 +218,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
         });
       }
     } catch (auditError) {
-      console.warn('[Audit Log Warning]:', auditError);
+      logger.warn('[Audit Log Warning]:', auditError);
     }
 
     return NextResponse.json({
@@ -225,7 +226,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       message: 'Plan eliminado exitosamente',
     });
   } catch (error: any) {
-    console.error('[eWoorker Plan DELETE Error]:', error);
+    logger.error('[eWoorker Plan DELETE Error]:', error);
     return NextResponse.json(
       {
         error: 'Error eliminando plan',

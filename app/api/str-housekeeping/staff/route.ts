@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -41,7 +42,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(staff);
   } catch (error) {
-    console.error('Error al obtener personal:', error);
+    logger.error('Error al obtener personal:', error);
     return NextResponse.json(
       { error: 'Error al obtener personal' },
       { status: 500 }
@@ -94,7 +95,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(staff, { status: 201 });
   } catch (error) {
-    console.error('Error al crear personal:', error);
+    logger.error('Error al crear personal:', error);
     return NextResponse.json(
       { error: 'Error al crear personal' },
       { status: 500 }

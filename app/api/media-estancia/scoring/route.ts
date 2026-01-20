@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -419,7 +420,7 @@ export async function GET(request: NextRequest) {
       stats,
     });
   } catch (error) {
-    console.error('Error fetching tenant scoring:', error);
+    logger.error('Error fetching tenant scoring:', error);
     return NextResponse.json({ error: 'Error al obtener scoring de inquilinos' }, { status: 500 });
   }
 }
@@ -474,7 +475,7 @@ export async function POST(request: NextRequest) {
       message: action === 'approve' ? 'Solicitud aprobada' : action === 'reject' ? 'Solicitud rechazada' : 'Scoring actualizado',
     });
   } catch (error) {
-    console.error('Error updating tenant scoring:', error);
+    logger.error('Error updating tenant scoring:', error);
     return NextResponse.json({ error: 'Error al actualizar scoring' }, { status: 500 });
   }
 }

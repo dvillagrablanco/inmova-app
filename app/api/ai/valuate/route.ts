@@ -18,6 +18,7 @@ import { z } from 'zod';
 import { checkAILimit, createLimitExceededResponse, logUsageWarning } from '@/lib/usage-limits';
 import { trackUsage } from '@/lib/usage-tracking-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -227,7 +228,7 @@ export async function POST(request: NextRequest) {
       message: 'Valoración completada con éxito',
     });
   } catch (error: any) {
-    console.error('[API AI Valuate] Error:', error);
+    logger.error('[API AI Valuate] Error:', error);
 
     // Error de validación
     if (error instanceof z.ZodError) {
@@ -300,7 +301,7 @@ export async function GET(request: NextRequest) {
       valuations,
     });
   } catch (error: any) {
-    console.error('[API AI Valuate GET] Error:', error);
+    logger.error('[API AI Valuate GET] Error:', error);
     return NextResponse.json(
       { error: 'Error obteniendo valoraciones' },
       { status: 500 }

@@ -13,6 +13,7 @@ import { z } from 'zod';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -130,7 +131,7 @@ El equipo de Inmova
       
       console.log(`[Password Recovery] Email sent to ${emailsToSend.length} address(es) for user ${user.id}`);
     } catch (emailError) {
-      console.error('[Password Recovery] Error sending email:', emailError);
+      logger.error('[Password Recovery] Error sending email:', emailError);
       // No revelar error de email al usuario
     }
     
@@ -150,7 +151,7 @@ El equipo de Inmova
       );
     }
     
-    console.error('[Password Recovery] Error:', error);
+    logger.error('[Password Recovery] Error:', error);
     return NextResponse.json(
       { error: 'Error procesando la solicitud' },
       { status: 500 }

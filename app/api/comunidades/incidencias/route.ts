@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const createIncidenciaSchema = z.object({
@@ -128,7 +129,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Incidencias GET Error]:', error);
+    logger.error('[Incidencias GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo incidencias', details: error.message },
       { status: 500 }
@@ -186,7 +187,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[Incidencias POST Error]:', error);
+    logger.error('[Incidencias POST Error]:', error);
     return NextResponse.json(
       { error: 'Error creando incidencia', details: error.message },
       { status: 500 }
@@ -244,7 +245,7 @@ export async function PATCH(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[Incidencias PATCH Error]:', error);
+    logger.error('[Incidencias PATCH Error]:', error);
     return NextResponse.json(
       { error: 'Error actualizando incidencia', details: error.message },
       { status: 500 }

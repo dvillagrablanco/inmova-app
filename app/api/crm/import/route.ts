@@ -19,6 +19,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { CRMLeadImporter } from '@/lib/crm-lead-importer';
 
+import logger from '@/lib/logger';
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -76,7 +77,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(result, { status: 200 });
   } catch (error: any) {
-    console.error('Error importing leads:', error);
+    logger.error('Error importing leads:', error);
     return NextResponse.json(
       { error: 'Error al importar leads', details: error.message },
       { status: 500 }
@@ -96,7 +97,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ queries });
   } catch (error: any) {
-    console.error('Error getting import queries:', error);
+    logger.error('Error getting import queries:', error);
     return NextResponse.json(
       { error: 'Error al obtener queries', details: error.message },
       { status: 500 }

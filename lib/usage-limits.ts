@@ -16,6 +16,7 @@
 import { NextResponse } from 'next/server';
 import { getMonthlyUsage, hasExceededLimits, getUsagePercentage } from './usage-tracking-service';
 
+import logger from '@/lib/logger';
 export interface LimitCheckResult {
   allowed: boolean;
   usage?: {
@@ -328,7 +329,7 @@ function getRetryAfterSeconds(): number {
  */
 export function logUsageWarning(companyId: string, check: LimitCheckResult): void {
   if (check.warning) {
-    console.warn(`[Usage Warning] Company ${companyId}: ${check.warning.message}`);
+    logger.warn(`[Usage Warning] Company ${companyId}: ${check.warning.message}`);
     
     // TODO: Enviar email/notificación al cliente
     // await sendUsageWarningEmail(companyId, check.warning);

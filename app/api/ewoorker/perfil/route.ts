@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ perfil });
 
   } catch (error: any) {
-    console.error('[eWoorker Perfil GET Error]:', error);
+    logger.error('[eWoorker Perfil GET Error]:', error);
     return NextResponse.json(
       { error: 'Error al cargar perfil' },
       { status: 500 }
@@ -84,7 +85,7 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('[eWoorker Perfil PUT Error]:', error);
+    logger.error('[eWoorker Perfil PUT Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

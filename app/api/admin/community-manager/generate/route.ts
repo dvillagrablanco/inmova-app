@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -69,7 +70,7 @@ Reglas:
           model: 'claude-3-haiku',
         });
       } catch (aiError) {
-        console.error('[AI Generation Error]:', aiError);
+        logger.error('[AI Generation Error]:', aiError);
         // Fallback a plantilla si falla la IA
       }
     }
@@ -103,7 +104,7 @@ Reglas:
       message: 'Contenido generado desde plantilla. Configura la API de Anthropic para generación con IA.',
     });
   } catch (error: any) {
-    console.error('[Community Manager Generate Error]:', error);
+    logger.error('[Community Manager Generate Error]:', error);
     return NextResponse.json(
       { error: 'Error al generar contenido' },
       { status: 500 }

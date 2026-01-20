@@ -4,6 +4,7 @@
  */
 import Redis from 'ioredis';
 
+import logger from '@/lib/logger';
 let redisClient: Redis | null = null;
 
 /**
@@ -44,7 +45,7 @@ export function getRedisClient(): Redis | null {
     });
 
     redisClient.on('error', (error) => {
-      console.error('[Redis] Error:', error);
+      logger.error('[Redis] Error:', error);
     });
 
     redisClient.on('ready', () => {
@@ -53,13 +54,13 @@ export function getRedisClient(): Redis | null {
 
     // Conectar
     redisClient.connect().catch((error) => {
-      console.error('[Redis] Error al conectar:', error);
+      logger.error('[Redis] Error al conectar:', error);
       redisClient = null;
     });
 
     return redisClient;
   } catch (error) {
-    console.error('[Redis] Error al inicializar:', error);
+    logger.error('[Redis] Error al inicializar:', error);
     return null;
   }
 }

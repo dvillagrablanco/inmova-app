@@ -18,7 +18,7 @@ export async function sendSlackNotification(message: SlackMessage): Promise<void
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
 
   if (!webhookUrl) {
-    console.warn('[Slack] Webhook URL not configured, skipping notification');
+    logger.warn('[Slack] Webhook URL not configured, skipping notification');
     return;
   }
 
@@ -37,7 +37,7 @@ export async function sendSlackNotification(message: SlackMessage): Promise<void
 
     // Notification sent successfully
   } catch (error) {
-    console.error('[Slack] Error sending notification:', error);
+    logger.error('[Slack] Error sending notification:', error);
   }
 }
 

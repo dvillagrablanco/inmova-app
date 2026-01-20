@@ -12,6 +12,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { LinkedInScrapingJobManager } from '@/lib/linkedin-scraper';
 
+import logger from '@/lib/logger';
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
     // En producción, usar una queue (Bull, BullMQ, etc.)
     LinkedInScrapingJobManager.executeJob(job.id, linkedInEmail, linkedInPassword).catch(
       (error) => {
-        console.error('Error executing LinkedIn scraping job:', error);
+        logger.error('Error executing LinkedIn scraping job:', error);
       }
     );
 
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
       { status: 202 }
     );
   } catch (error: any) {
-    console.error('Error starting LinkedIn scraping:', error);
+    logger.error('Error starting LinkedIn scraping:', error);
     return NextResponse.json(
       { error: 'Error al iniciar scraping', details: error.message },
       { status: 500 }
@@ -84,7 +85,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ jobs });
   } catch (error: any) {
-    console.error('Error listing scraping jobs:', error);
+    logger.error('Error listing scraping jobs:', error);
     return NextResponse.json(
       { error: 'Error al listar jobs', details: error.message },
       { status: 500 }

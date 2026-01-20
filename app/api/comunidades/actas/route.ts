@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const createActaSchema = z.object({
@@ -116,7 +117,7 @@ export async function GET(request: NextRequest) {
       stats,
     });
   } catch (error: any) {
-    console.error('[Actas GET Error]:', error);
+    logger.error('[Actas GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo actas', details: error.message },
       { status: 500 }
@@ -184,7 +185,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[Actas POST Error]:', error);
+    logger.error('[Actas POST Error]:', error);
     return NextResponse.json(
       { error: 'Error creando acta', details: error.message },
       { status: 500 }

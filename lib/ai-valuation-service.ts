@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 
+import logger from '@/lib/logger';
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
@@ -92,7 +93,7 @@ export class AIValuationService {
 
       return result;
     } catch (error: any) {
-      console.error('[AI Valuation Error]:', error);
+      logger.error('[AI Valuation Error]:', error);
       throw new Error(`Error en valoración: ${error.message}`);
     }
   }
@@ -290,7 +291,7 @@ Responde en JSON:
         return JSON.parse(content.text);
       }
     } catch (error) {
-      console.error('[AI Recommendations Error]:', error);
+      logger.error('[AI Recommendations Error]:', error);
     }
 
     return [];

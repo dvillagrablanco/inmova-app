@@ -17,6 +17,7 @@ import {
 } from '@/lib/medium-term-rental-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -74,7 +75,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error('[API Error] GET /api/contracts/medium-term/[id]:', error);
+    logger.error('[API Error] GET /api/contracts/medium-term/[id]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo contrato' },
       { status: 500 }
@@ -143,7 +144,7 @@ export async function PUT(
       );
     }
 
-    console.error('[API Error] PUT /api/contracts/medium-term/[id]:', error);
+    logger.error('[API Error] PUT /api/contracts/medium-term/[id]:', error);
     return NextResponse.json(
       { error: 'Error actualizando contrato' },
       { status: 500 }
@@ -193,7 +194,7 @@ export async function DELETE(
       message: 'Contrato cancelado correctamente',
     });
   } catch (error: any) {
-    console.error('[API Error] DELETE /api/contracts/medium-term/[id]:', error);
+    logger.error('[API Error] DELETE /api/contracts/medium-term/[id]:', error);
     return NextResponse.json(
       { error: 'Error cancelando contrato' },
       { status: 500 }

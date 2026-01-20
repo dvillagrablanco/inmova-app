@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const createCuotaSchema = z.object({
@@ -117,7 +118,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Cuotas GET Error]:', error);
+    logger.error('[Cuotas GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo cuotas', details: error.message },
       { status: 500 }
@@ -216,7 +217,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[Cuotas POST Error]:', error);
+    logger.error('[Cuotas POST Error]:', error);
     return NextResponse.json(
       { error: 'Error creando cuota', details: error.message },
       { status: 500 }

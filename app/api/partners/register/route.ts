@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -119,7 +120,7 @@ export async function POST(request: NextRequest) {
         razonSocial: partner.razonSocial,
       });
     } catch (emailError) {
-      console.error('[Partner Registration Email Error]:', emailError);
+      logger.error('[Partner Registration Email Error]:', emailError);
       // Continue even if email fails
     }
 
@@ -153,7 +154,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('[Partner Register Error]:', error);
+    logger.error('[Partner Register Error]:', error);
     return NextResponse.json({ error: 'Error registrando partner' }, { status: 500 });
   }
 }

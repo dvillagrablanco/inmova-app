@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -98,7 +99,7 @@ export async function GET(request: NextRequest) {
       payments: transformedPayments,
     });
   } catch (error: any) {
-    console.error('[API Error]:', error);
+    logger.error('[API Error]:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor', details: error.message },
       { status: 500 }

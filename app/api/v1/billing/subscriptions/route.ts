@@ -12,6 +12,7 @@ import { createSubscription, SUBSCRIPTION_PLANS } from '@/lib/stripe-connect-ser
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('Error creating subscription:', error);
+    logger.error('Error creating subscription:', error);
     return NextResponse.json(
       { error: 'Error interno', message: error.message },
       { status: 500 }
@@ -84,7 +85,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Error fetching subscription:', error);
+    logger.error('Error fetching subscription:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

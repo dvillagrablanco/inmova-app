@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isWithinInterval, isSameDay } from 'date-fns';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -206,7 +207,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching calendar data:', error);
+    logger.error('Error fetching calendar data:', error);
     return NextResponse.json({ error: 'Error al obtener datos del calendario' }, { status: 500 });
   }
 }

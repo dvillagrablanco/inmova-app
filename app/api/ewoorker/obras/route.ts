@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
 
+import logger from '@/lib/logger';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -78,7 +79,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ obras });
 
   } catch (error) {
-    console.error("[EWOORKER_OBRAS_GET]", error);
+    logger.error("[EWOORKER_OBRAS_GET]", error);
     return NextResponse.json(
       { error: "Error al obtener obras" },
       { status: 500 }
@@ -163,7 +164,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ obra }, { status: 201 });
 
   } catch (error) {
-    console.error("[EWOORKER_OBRAS_POST]", error);
+    logger.error("[EWOORKER_OBRAS_POST]", error);
     return NextResponse.json(
       { error: "Error al crear obra" },
       { status: 500 }

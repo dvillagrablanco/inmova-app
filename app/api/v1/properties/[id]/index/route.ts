@@ -12,6 +12,7 @@ import { authOptions } from '@/lib/auth-options';
 import { indexProperty } from '@/lib/semantic-search-service';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -51,7 +52,7 @@ export async function POST(
       message: 'Propiedad indexada correctamente',
     });
   } catch (error: any) {
-    console.error('Error indexing property:', error);
+    logger.error('Error indexing property:', error);
     return NextResponse.json(
       { error: 'Error interno', message: error.message },
       { status: 500 }

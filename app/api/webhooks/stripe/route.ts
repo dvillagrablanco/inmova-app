@@ -62,11 +62,11 @@ export async function POST(req: NextRequest) {
         event = getStripe().webhooks.constructEvent(body, signature, webhookSecret);
       } else {
         // En desarrollo sin webhook secret
-        console.warn('[Stripe Webhook] No webhook secret configured');
+        logger.warn('[Stripe Webhook] No webhook secret configured');
         event = JSON.parse(body);
       }
     } catch (err: any) {
-      console.error('[Stripe Webhook] Signature verification failed:', err.message);
+      logger.error('[Stripe Webhook] Signature verification failed:', err.message);
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 400 }
@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true, platform: 'inmova' });
 
   } catch (error: any) {
-    console.error('[Stripe Webhook Error]:', error);
+    logger.error('[Stripe Webhook Error]:', error);
     return NextResponse.json(
       { error: 'Webhook error', message: error.message },
       { status: 500 }
@@ -176,7 +176,7 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
       // Ej: Marcar mes como pagado, generar recibo, etc.
     }
   } else {
-    console.warn(`[Stripe] Payment not found for PI: ${paymentIntent.id}`);
+    logger.warn(`[Stripe] Payment not found for PI: ${paymentIntent.id}`);
   }
 }
 

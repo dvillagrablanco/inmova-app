@@ -14,6 +14,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { prisma } from '../db';
 import { differenceInMonths, getMonth } from 'date-fns';
 
+import logger from '@/lib/logger';
 // ==========================================
 // TIPOS
 // ==========================================
@@ -544,7 +545,7 @@ Responde en español, de forma concisa y profesional.`;
 
     return 'No se pudo generar el análisis con IA.';
   } catch (error: any) {
-    console.error('[IA Pricing Error]:', error);
+    logger.error('[IA Pricing Error]:', error);
     return `No se pudo conectar con el servicio de IA: ${error.message}`;
   }
 }

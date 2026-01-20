@@ -10,6 +10,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { ewoorkerAnalytics } from '@/lib/ewoorker-analytics-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
       metrics,
     });
   } catch (error: any) {
-    console.error('[API EwoorkerAnalytics Profile] Error:', error);
+    logger.error('[API EwoorkerAnalytics Profile] Error:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

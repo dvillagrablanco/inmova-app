@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
     // Los huertos se crearán cuando haya edificios configurados con esta funcionalidad
     return NextResponse.json([]);
   } catch (error: any) {
-    console.error('[Circular Economy Gardens GET]:', error);
+    logger.error('[Circular Economy Gardens GET]:', error);
     return NextResponse.json(
       { error: 'Error al obtener huertos' },
       { status: 500 }

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -38,7 +39,7 @@ export async function GET(
 
     return NextResponse.json(template);
   } catch (error) {
-    console.error('Error fetching legal template:', error);
+    logger.error('Error fetching legal template:', error);
     return NextResponse.json(
       { error: 'Error al obtener la plantilla' },
       { status: 500 }
@@ -77,7 +78,7 @@ export async function PUT(
 
     return NextResponse.json(template);
   } catch (error) {
-    console.error('Error updating legal template:', error);
+    logger.error('Error updating legal template:', error);
     return NextResponse.json(
       { error: 'Error al actualizar la plantilla' },
       { status: 500 }
@@ -110,7 +111,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting legal template:', error);
+    logger.error('Error deleting legal template:', error);
     return NextResponse.json(
       { error: 'Error al eliminar la plantilla' },
       { status: 500 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[API Error] GET /api/budgets:', error);
+    logger.error('[API Error] GET /api/budgets:', error);
     return NextResponse.json(
       { error: 'Error al obtener presupuestos' },
       { status: 500 }
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(newBudget, { status: 201 });
   } catch (error) {
-    console.error('[API Error] POST /api/budgets:', error);
+    logger.error('[API Error] POST /api/budgets:', error);
     return NextResponse.json(
       { error: 'Error al crear presupuesto' },
       { status: 500 }

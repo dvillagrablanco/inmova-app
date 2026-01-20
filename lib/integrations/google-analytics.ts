@@ -17,7 +17,7 @@ export async function trackGA4Event(event: GA4Event): Promise<void> {
   const apiSecret = process.env.GA4_API_SECRET;
 
   if (!measurementId || !apiSecret) {
-    console.warn('[GA4] Missing credentials, skipping tracking');
+    logger.warn('[GA4] Missing credentials, skipping tracking');
     return;
   }
 
@@ -45,7 +45,7 @@ export async function trackGA4Event(event: GA4Event): Promise<void> {
 
     // Event tracked successfully
   } catch (error) {
-    console.error('[GA4] Error tracking event:', error);
+    logger.error('[GA4] Error tracking event:', error);
   }
 }
 

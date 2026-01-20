@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -86,7 +87,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error('[Partner GET Error]:', error);
+    logger.error('[Partner GET Error]:', error);
     return NextResponse.json(
       { error: 'Error al obtener partner', message: error.message },
       { status: 500 }
@@ -162,7 +163,7 @@ export async function PUT(
       message: 'Partner actualizado correctamente',
     });
   } catch (error: any) {
-    console.error('[Partner PUT Error]:', error);
+    logger.error('[Partner PUT Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json({
@@ -236,7 +237,7 @@ export async function DELETE(
       message: 'Partner eliminado correctamente',
     });
   } catch (error: any) {
-    console.error('[Partner DELETE Error]:', error);
+    logger.error('[Partner DELETE Error]:', error);
     return NextResponse.json(
       { error: 'Error al eliminar partner', message: error.message },
       { status: 500 }

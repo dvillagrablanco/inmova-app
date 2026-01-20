@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 
+import logger from '@/lib/logger';
 export interface WizardStep {
   id: string;
   title: string;
@@ -48,7 +49,7 @@ export function useWizard(config: WizardConfig) {
           setCompletedSteps(new Set(parsed.completedSteps || []));
           setData(parsed.data || {});
         } catch (e) {
-          console.error('Error al restaurar wizard:', e);
+          logger.error('Error al restaurar wizard:', e);
         }
       }
     }
@@ -129,7 +130,7 @@ export function useWizard(config: WizardConfig) {
         await onComplete(data);
         reset();
       } catch (error) {
-        console.error('Error al completar wizard:', error);
+        logger.error('Error al completar wizard:', error);
         throw error;
       } finally {
         setIsSubmitting(false);

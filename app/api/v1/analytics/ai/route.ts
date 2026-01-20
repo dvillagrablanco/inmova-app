@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getAIMetrics } from '@/lib/analytics-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
@@ -37,7 +38,7 @@ export async function GET(req: NextRequest) {
       data: metrics,
     });
   } catch (error: any) {
-    console.error('Error getting AI metrics:', error);
+    logger.error('Error getting AI metrics:', error);
     return NextResponse.json(
       { error: 'Error obteniendo métricas de IA', message: error.message },
       { status: 500 }

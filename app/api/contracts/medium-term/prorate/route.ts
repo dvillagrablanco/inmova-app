@@ -11,6 +11,7 @@ import { calcularProrrateoSchema } from '@/lib/validations/medium-term-rental';
 import { calcularProrrateo, generarResumenProrrateo } from '@/lib/medium-term-rental-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 /**
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('[API Error] POST /api/contracts/medium-term/prorate:', error);
+    logger.error('[API Error] POST /api/contracts/medium-term/prorate:', error);
     return NextResponse.json(
       { error: 'Error calculando prorrateo' },
       { status: 500 }

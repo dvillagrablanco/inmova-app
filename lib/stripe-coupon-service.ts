@@ -10,12 +10,13 @@
 import Stripe from 'stripe';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 // Singleton de Stripe (lazy initialization)
 let stripeInstance: Stripe | null = null;
 
 function getStripe(): Stripe | null {
   if (!process.env.STRIPE_SECRET_KEY) {
-    console.warn('[Stripe Coupon] STRIPE_SECRET_KEY no configurada');
+    logger.warn('[Stripe Coupon] STRIPE_SECRET_KEY no configurada');
     return null;
   }
 
@@ -110,7 +111,7 @@ export async function createStripeCoupon(data: CouponData): Promise<{
       stripePromotionCodeId: promoCode.id,
     };
   } catch (error: any) {
-    console.error('[Stripe Coupon] Error creando cupón:', error.message);
+    logger.error('[Stripe Coupon] Error creando cupón:', error.message);
     return {
       stripeCouponId: null,
       stripePromotionCodeId: null,
@@ -178,7 +179,7 @@ export async function validateStripeCoupon(codigo: string): Promise<{
       promotionCode: promoCode,
     };
   } catch (error: any) {
-    console.error('[Stripe Coupon] Error validando:', error.message);
+    logger.error('[Stripe Coupon] Error validando:', error.message);
     return { valid: false, error: error.message };
   }
 }
@@ -281,7 +282,7 @@ export async function deleteStripeCoupon(stripeCouponId: string): Promise<{
     await stripe.coupons.del(stripeCouponId);
     return { success: true };
   } catch (error: any) {
-    console.error('[Stripe Coupon] Error eliminando:', error.message);
+    logger.error('[Stripe Coupon] Error eliminando:', error.message);
     return { success: false, error: error.message };
   }
 }
@@ -330,7 +331,7 @@ export async function applyCouponToSubscription(
 
     return { success: true, subscription };
   } catch (error: any) {
-    console.error('[Stripe Coupon] Error aplicando:', error.message);
+    logger.error('[Stripe Coupon] Error aplicando:', error.message);
     return { success: false, error: error.message };
   }
 }

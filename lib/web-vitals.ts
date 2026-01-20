@@ -74,7 +74,7 @@ async function sendToAnalytics(metric: VitalReport) {
       });
     }
   } catch (error) {
-    console.error('Error sending web vitals:', error);
+    logger.error('Error sending web vitals:', error);
   }
 }
 
@@ -133,7 +133,7 @@ export async function initWebVitals() {
   } catch (error) {
     // Error silencioso - web vitals es opcional
     if (process.env.NODE_ENV === 'development') {
-      console.warn('Web vitals not available:', error);
+      logger.warn('Web vitals not available:', error);
     }
   }
 }

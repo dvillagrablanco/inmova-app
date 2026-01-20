@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -82,7 +83,7 @@ export async function POST(
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error al registrar movimiento:', error);
+    logger.error('Error al registrar movimiento:', error);
     return NextResponse.json(
       { error: 'Error al registrar movimiento' },
       { status: 500 }

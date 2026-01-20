@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -45,7 +46,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(items);
   } catch (error) {
-    console.error('Error al obtener inventario:', error);
+    logger.error('Error al obtener inventario:', error);
     return NextResponse.json(
       { error: 'Error al obtener inventario' },
       { status: 500 }
@@ -94,7 +95,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(item, { status: 201 });
   } catch (error) {
-    console.error('Error al crear item:', error);
+    logger.error('Error al crear item:', error);
     return NextResponse.json(
       { error: 'Error al crear item' },
       { status: 500 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PRICING_PLANS, ADD_ONS } from '@/lib/pricing-config';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
         orderBy: { precioMensual: 'asc' },
       });
     } catch (e) {
-      console.warn('[Planes API] No se pudo leer planes de BD');
+      logger.warn('[Planes API] No se pudo leer planes de BD');
     }
 
     try {
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
         orderBy: [{ destacado: 'desc' }, { orden: 'asc' }],
       });
     } catch (e) {
-      console.warn('[Planes API] No se pudo leer add-ons de BD');
+      logger.warn('[Planes API] No se pudo leer add-ons de BD');
     }
 
     // Formatear add-ons
@@ -127,7 +128,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('[Planes API Error]:', error);
+    logger.error('[Planes API Error]:', error);
     
     // Fallback completo a config si falla todo
     const planesFromConfig = Object.values(PRICING_PLANS).map(plan => ({

@@ -9,6 +9,7 @@ import { authOptions } from '@/lib/auth-options';
 import { tenantGamification } from '@/lib/tenant-gamification-service';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
       data: profile,
     });
   } catch (error: any) {
-    console.error('[Tenant Gamification GET Error]:', error);
+    logger.error('[Tenant Gamification GET Error]:', error);
     return NextResponse.json(
       { error: error.message || 'Error obteniendo perfil de gamificación' },
       { status: 500 }
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
           : 'Ya registraste tu login hoy',
     });
   } catch (error: any) {
-    console.error('[Tenant Gamification POST Error]:', error);
+    logger.error('[Tenant Gamification POST Error]:', error);
     return NextResponse.json(
       { error: error.message || 'Error registrando login' },
       { status: 500 }

@@ -14,6 +14,7 @@ import { validateStripeCoupon } from '@/lib/stripe-coupon-service';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -141,7 +142,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('[API Validate Coupon] Error:', error);
+    logger.error('[API Validate Coupon] Error:', error);
     return NextResponse.json(
       { valid: false, error: 'Error validando cupón' },
       { status: 500 }

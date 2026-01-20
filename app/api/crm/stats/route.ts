@@ -11,6 +11,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { CRMService } from '@/lib/crm-service';
 
+import logger from '@/lib/logger';
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -25,7 +26,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(stats);
   } catch (error: any) {
-    console.error('Error getting CRM stats:', error);
+    logger.error('Error getting CRM stats:', error);
     return NextResponse.json(
       { error: 'Error al obtener estadísticas', details: error.message },
       { status: 500 }

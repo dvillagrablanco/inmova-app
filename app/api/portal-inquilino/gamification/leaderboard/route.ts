@@ -8,6 +8,7 @@ import { authOptions } from '@/lib/auth-options';
 import { tenantGamification } from '@/lib/tenant-gamification-service';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Tenant Leaderboard Error]:', error);
+    logger.error('[Tenant Leaderboard Error]:', error);
     return NextResponse.json(
       { error: error.message || 'Error obteniendo leaderboard' },
       { status: 500 }

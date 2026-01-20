@@ -8,6 +8,7 @@ import { prisma } from '../db';
 import { format, differenceInDays, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+import logger from '@/lib/logger';
 // ==========================================
 // TIPOS
 // ==========================================
@@ -556,7 +557,7 @@ export async function sendNotification(
           break;
       }
     } catch (error) {
-      console.error(`[Notification] Error sending ${channel}:`, error);
+      logger.error(`[Notification] Error sending ${channel}:`, error);
     }
   }
 

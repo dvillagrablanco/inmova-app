@@ -6,6 +6,7 @@
 
 import { NextResponse } from 'next/server';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
@@ -24,7 +25,7 @@ export async function GET() {
     });
 
   } catch (error: any) {
-    console.error('Error getting VAPID public key:', error);
+    logger.error('Error getting VAPID public key:', error);
     return NextResponse.json(
       { error: 'Error getting public key' },
       { status: 500 }

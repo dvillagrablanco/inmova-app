@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -288,7 +289,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(analysis);
   } catch (error: any) {
-    console.error('[AI Document Analysis] Error:', error);
+    logger.error('[AI Document Analysis] Error:', error);
     return NextResponse.json(
       { error: 'Error al analizar el documento', details: error.message },
       { status: 500 }

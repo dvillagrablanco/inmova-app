@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // Schema de validación para crear comunidad
@@ -124,7 +125,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Comunidades GET Error]:', error);
+    logger.error('[Comunidades GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo comunidades', details: error.message },
       { status: 500 }
@@ -209,7 +210,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[Comunidades POST Error]:', error);
+    logger.error('[Comunidades POST Error]:', error);
     return NextResponse.json(
       { error: 'Error creando comunidad', details: error.message },
       { status: 500 }

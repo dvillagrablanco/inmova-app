@@ -17,6 +17,7 @@ import { SignatureStatus } from '@/lib/signaturit-service';
 import { prisma } from '@/lib/db';
 import * as S3Service from '@/lib/aws-s3-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
     const isValid = SignaturitService.verifyWebhookSignature(bodyText, signature);
     
     if (!isValid && process.env.NODE_ENV === 'production') {
-      console.error('[Signaturit Webhook] Invalid signature');
+      logger.error('[Signaturit Webhook] Invalid signature');
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 401 }
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!contract) {
-      console.warn('[Signaturit Webhook] Contract not found for signature:', data.id);
+      logger.warn('[Signaturit Webhook] Contract not found for signature:', data.id);
       return NextResponse.json({ received: true, warning: 'Contract not found' });
     }
 
@@ -106,7 +107,7 @@ export async function POST(request: NextRequest) {
     // 6. Respuesta OK (Signaturit requiere 200 OK)
     return NextResponse.json({ received: true });
   } catch (error: any) {
-    console.error('[Signaturit Webhook] Error:', error);
+    logger.error('[Signaturit Webhook] Error:', error);
     
     // Retornar 200 para que Signaturit no reintente
     // (ya logueamos el error)
@@ -139,7 +140,7 @@ async function handleSignatureReady(contract: any, data: any) {
 
     console.log('[Signaturit] Signature ready:', data.id);
   } catch (error: any) {
-    console.error('[handleSignatureReady] Error:', error);
+    logger.error('[handleSignatureReady] Error:', error);
   }
 }
 
@@ -187,7 +188,7 @@ async function handleSignatureCompleted(contract: any, data: any) {
           }
         }
       } catch (error) {
-        console.error('[handleSignatureCompleted] Error downloading signed document:', error);
+        logger.error('[handleSignatureCompleted] Error downloading signed document:', error);
         // No fallar el webhook por esto
       }
     }
@@ -216,7 +217,7 @@ async function handleSignatureCompleted(contract: any, data: any) {
           }
         }
       } catch (error) {
-        console.error('[handleSignatureCompleted] Error downloading certificate:', error);
+        logger.error('[handleSignatureCompleted] Error downloading certificate:', error);
       }
     }
 
@@ -241,7 +242,7 @@ async function handleSignatureCompleted(contract: any, data: any) {
 
     console.log('[Signaturit] Signature completed:', data.id);
   } catch (error: any) {
-    console.error('[handleSignatureCompleted] Error:', error);
+    logger.error('[handleSignatureCompleted] Error:', error);
   }
 }
 
@@ -277,7 +278,7 @@ async function handleSignatureDeclined(contract: any, data: any) {
 
     console.log('[Signaturit] Signature declined:', data.id);
   } catch (error: any) {
-    console.error('[handleSignatureDeclined] Error:', error);
+    logger.error('[handleSignatureDeclined] Error:', error);
   }
 }
 
@@ -310,7 +311,7 @@ async function handleSignatureExpired(contract: any, data: any) {
 
     console.log('[Signaturit] Signature expired:', data.id);
   } catch (error: any) {
-    console.error('[handleSignatureExpired] Error:', error);
+    logger.error('[handleSignatureExpired] Error:', error);
   }
 }
 
@@ -340,6 +341,6 @@ async function handleSignatureCanceled(contract: any, data: any) {
 
     console.log('[Signaturit] Signature canceled:', data.id);
   } catch (error: any) {
-    console.error('[handleSignatureCanceled] Error:', error);
+    logger.error('[handleSignatureCanceled] Error:', error);
   }
 }

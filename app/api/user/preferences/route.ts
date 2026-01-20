@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 
+import logger from '@/lib/logger';
 /**
  * PUT /api/user/preferences
  * 
@@ -64,7 +65,7 @@ export async function PUT(request: NextRequest) {
       message: 'Preferencias actualizadas correctamente',
     });
   } catch (error: any) {
-    console.error('[Preferences API Error]:', error);
+    logger.error('[Preferences API Error]:', error);
     return NextResponse.json(
       { error: 'Error al actualizar preferencias', details: error.message },
       { status: 500 }
@@ -121,7 +122,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Preferences API Error]:', error);
+    logger.error('[Preferences API Error]:', error);
     return NextResponse.json(
       { error: 'Error al obtener preferencias', details: error.message },
       { status: 500 }

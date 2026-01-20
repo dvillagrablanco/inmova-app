@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isValidLocale, type Locale } from '@/lib/i18n-config';
 import { getTranslations } from '@/lib/i18n-server';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export async function GET(
@@ -38,7 +39,7 @@ export async function GET(
     });
 
   } catch (error: any) {
-    console.error('Error loading translations:', error);
+    logger.error('Error loading translations:', error);
     return NextResponse.json(
       { error: 'Error loading translations' },
       { status: 500 }

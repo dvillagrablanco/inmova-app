@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
       total: planes.length,
     });
   } catch (error: any) {
-    console.error('[eWoorker Planes API Error]:', error);
+    logger.error('[eWoorker Planes API Error]:', error);
     // Retornar lista vacía en lugar de error para mejor UX
     return NextResponse.json({
       success: true,
@@ -156,7 +157,7 @@ export async function POST(request: NextRequest) {
         });
       }
     } catch (auditError) {
-      console.warn('[Audit Log Warning]:', auditError);
+      logger.warn('[Audit Log Warning]:', auditError);
     }
 
     return NextResponse.json(
@@ -168,7 +169,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error: any) {
-    console.error('[eWoorker Planes POST Error]:', error);
+    logger.error('[eWoorker Planes POST Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

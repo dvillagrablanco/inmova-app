@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -108,7 +109,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error: any) {
-    console.error('[eWoorker Registro Error]:', error);
+    logger.error('[eWoorker Registro Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

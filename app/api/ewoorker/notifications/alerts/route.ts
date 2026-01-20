@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ewoorkerNotifications } from '@/lib/ewoorker-notifications-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
       message: `Alertas procesadas: ${results.vencidos} vencidos, ${results.alertas7dias} en 7 días, ${results.alertas15dias} en 15 días, ${results.alertas30dias} en 30 días`,
     });
   } catch (error: any) {
-    console.error('[EWOORKER_NOTIFICATIONS_ALERTS]', error);
+    logger.error('[EWOORKER_NOTIFICATIONS_ALERTS]', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

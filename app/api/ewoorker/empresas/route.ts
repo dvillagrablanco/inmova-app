@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -84,7 +85,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('[eWoorker Empresas Error]:', error);
+    logger.error('[eWoorker Empresas Error]:', error);
     return NextResponse.json(
       { error: 'Error al cargar empresas' },
       { status: 500 }

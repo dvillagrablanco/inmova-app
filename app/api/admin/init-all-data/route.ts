@@ -16,6 +16,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { isSuperAdmin } from '@/lib/admin-roles';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -745,7 +746,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Init All Data Error]:', error);
+    logger.error('[Init All Data Error]:', error);
     return NextResponse.json(
       { error: 'Error inicializando datos', details: error.message },
       { status: 500 }

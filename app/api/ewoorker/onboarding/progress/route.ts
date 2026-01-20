@@ -10,6 +10,7 @@ import { authOptions } from '@/lib/auth-options';
 import { ewoorkerOnboarding } from '@/lib/ewoorker-onboarding-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 /**
@@ -30,7 +31,7 @@ export async function GET() {
 
     return NextResponse.json({ progress });
   } catch (error: any) {
-    console.error('[EWOORKER_ONBOARDING_PROGRESS_GET]', error);
+    logger.error('[EWOORKER_ONBOARDING_PROGRESS_GET]', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[EWOORKER_ONBOARDING_PROGRESS_POST]', error);
+    logger.error('[EWOORKER_ONBOARDING_PROGRESS_POST]', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

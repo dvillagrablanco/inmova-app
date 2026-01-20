@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -90,7 +91,7 @@ export async function GET(request: NextRequest) {
       total: formattedAddons.length,
     });
   } catch (error: any) {
-    console.error('[Add-ons API Error]:', error);
+    logger.error('[Add-ons API Error]:', error);
 
     // Fallback: retornar add-ons desde config si BD falla
     const { ADD_ONS } = await import('@/lib/pricing-config');
@@ -210,7 +211,7 @@ export async function POST(request: NextRequest) {
           stripeSync.error = 'Stripe no configurado o error de sincronización';
         }
       } catch (stripeError: any) {
-        console.error('[Stripe Sync Error]:', stripeError);
+        logger.error('[Stripe Sync Error]:', stripeError);
         stripeSync.error = stripeError.message;
       }
     }
@@ -243,7 +244,7 @@ export async function POST(request: NextRequest) {
         });
       }
     } catch (auditError) {
-      console.warn('[Audit Log Warning]:', auditError);
+      logger.warn('[Audit Log Warning]:', auditError);
     }
 
     return NextResponse.json(
@@ -258,7 +259,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error: any) {
-    console.error('[Add-ons POST Error]:', error);
+    logger.error('[Add-ons POST Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -216,7 +217,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching financial summary:', error);
+    logger.error('Error fetching financial summary:', error);
     return NextResponse.json({ error: 'Error al obtener resumen financiero' }, { status: 500 });
   }
 }

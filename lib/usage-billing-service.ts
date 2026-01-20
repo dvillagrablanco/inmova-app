@@ -16,6 +16,7 @@ import Stripe from 'stripe';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
 import nodemailer from 'nodemailer';
 
+import logger from '@/lib/logger';
 // Lazy initialization to avoid build-time errors
 let stripeInstance: Stripe | null = null;
 function getStripe(): Stripe {
@@ -112,7 +113,7 @@ export async function processMonthlyOverages(): Promise<{
         console.log(`[Overage Billing] Invoice created for ${company.nombre}: €${invoice.totalAmount.toFixed(2)}`);
       }
     } catch (error: any) {
-      console.error(`[Overage Billing] Error processing company ${company.id}:`, error);
+      logger.error(`[Overage Billing] Error processing company ${company.id}:`, error);
       errors.push({
         companyId: company.id,
         error: error.message,
@@ -140,7 +141,7 @@ async function processCompanyOverage(
   const usage = await getMonthlyUsage(company.id, period);
   
   if (!company.subscriptionPlan) {
-    console.warn(`[Overage Billing] Company ${company.id} has no subscription plan`);
+    logger.warn(`[Overage Billing] Company ${company.id} has no subscription plan`);
     return null;
   }
   
@@ -277,7 +278,7 @@ async function sendOverageInvoiceEmail(
   const contactEmail = company.emailContacto || company.email;
   
   if (!contactEmail) {
-    console.warn(`[Overage Billing] No contact email for company ${company.id}`);
+    logger.warn(`[Overage Billing] No contact email for company ${company.id}`);
     return;
   }
   
@@ -375,7 +376,7 @@ async function sendOverageInvoiceEmail(
     
     console.log(`[Overage Billing] Invoice email sent to ${contactEmail}`);
   } catch (error) {
-    console.error('[Overage Billing] Error sending email:', error);
+    logger.error('[Overage Billing] Error sending email:', error);
   }
 }
 
@@ -395,7 +396,7 @@ export async function runMonthlyBilling(): Promise<{
       totalAmount: result.totalAmount,
     };
   } catch (error) {
-    console.error('[Overage Billing] Error running monthly billing:', error);
+    logger.error('[Overage Billing] Error running monthly billing:', error);
     return {
       success: false,
       invoicesCreated: 0,

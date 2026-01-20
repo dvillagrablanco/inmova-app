@@ -10,6 +10,7 @@
 
 import { useEffect, useCallback } from 'react';
 
+import logger from '@/lib/logger';
 // Types
 export interface NavigationEvent {
   type: 'command_palette' | 'shortcut' | 'quick_action' | 'breadcrumb' | 'search';
@@ -72,7 +73,7 @@ export function trackNavigationEvent(event: Omit<NavigationEvent, 'timestamp'>) 
     }
 
   } catch (error) {
-    console.warn('[Navigation Analytics] Error tracking event:', error);
+    logger.warn('[Navigation Analytics] Error tracking event:', error);
   }
 }
 
@@ -213,7 +214,7 @@ export function getNavigationAnalytics(): NavigationAnalytics {
 
     return analytics;
   } catch (error) {
-    console.warn('[Navigation Analytics] Error getting analytics:', error);
+    logger.warn('[Navigation Analytics] Error getting analytics:', error);
     return {
       totalEvents: 0,
       commandPaletteUsage: 0,
@@ -264,7 +265,7 @@ export function cleanOldAnalytics() {
       remaining: recentEvents.length,
     };
   } catch (error) {
-    console.warn('[Navigation Analytics] Error cleaning analytics:', error);
+    logger.warn('[Navigation Analytics] Error cleaning analytics:', error);
     return { removed: 0, remaining: 0 };
   }
 }
@@ -291,7 +292,7 @@ export function useNavigationSession() {
         console.log(`[Navigation Analytics] Limpiados ${cleaned.removed} eventos antiguos`);
       }
     } catch (error) {
-      console.warn('[Navigation Analytics] Error initializing session:', error);
+      logger.warn('[Navigation Analytics] Error initializing session:', error);
     }
   }, []);
 }

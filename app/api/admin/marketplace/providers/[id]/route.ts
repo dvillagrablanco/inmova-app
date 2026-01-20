@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -26,7 +27,7 @@ export async function GET(
       message: 'Proveedor no encontrado',
     }, { status: 404 });
   } catch (error) {
-    console.error('[API Error] Get marketplace provider:', error);
+    logger.error('[API Error] Get marketplace provider:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }
@@ -50,7 +51,7 @@ export async function PUT(
       message: 'Proveedor actualizado correctamente',
     });
   } catch (error) {
-    console.error('[API Error] Update marketplace provider:', error);
+    logger.error('[API Error] Update marketplace provider:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }
@@ -71,7 +72,7 @@ export async function DELETE(
       message: 'Proveedor eliminado correctamente',
     });
   } catch (error) {
-    console.error('[API Error] Delete marketplace provider:', error);
+    logger.error('[API Error] Delete marketplace provider:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }
@@ -116,7 +117,7 @@ export async function PATCH(
       message,
     });
   } catch (error) {
-    console.error('[API Error] Patch marketplace provider:', error);
+    logger.error('[API Error] Patch marketplace provider:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

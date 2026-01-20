@@ -13,6 +13,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getMonthlyUsage } from '@/lib/usage-tracking-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -100,7 +101,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[API Usage Current] Error:', error);
+    logger.error('[API Usage Current] Error:', error);
     return NextResponse.json(
       { error: 'Error obteniendo uso actual' },
       { status: 500 }

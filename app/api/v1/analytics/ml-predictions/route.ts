@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger from '@/lib/logger';
 import {
   predictChurnBatch,
   forecastRevenue,
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(results);
   } catch (error: any) {
-    console.error('Error in ML predictions:', error);
+    logger.error('Error in ML predictions:', error);
     return NextResponse.json(
       { error: 'Error interno', message: error.message },
       { status: 500 }

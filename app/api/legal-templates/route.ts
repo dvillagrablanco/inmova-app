@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(templates);
   } catch (error) {
-    console.error('Error fetching legal templates:', error);
+    logger.error('Error fetching legal templates:', error);
     return NextResponse.json(
       { error: 'Error al obtener las plantillas' },
       { status: 500 }
@@ -98,7 +99,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(template, { status: 201 });
   } catch (error) {
-    console.error('Error creating legal template:', error);
+    logger.error('Error creating legal template:', error);
     return NextResponse.json(
       { error: 'Error al crear la plantilla' },
       { status: 500 }

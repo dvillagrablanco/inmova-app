@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { ewoorkerAnalytics } from '@/lib/ewoorker-analytics-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const ADMIN_ROLES = ['super_admin', 'administrador', 'socio_ewoorker'];
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
       metrics,
     });
   } catch (error: any) {
-    console.error('[API EwoorkerAnalytics Platform] Error:', error);
+    logger.error('[API EwoorkerAnalytics Platform] Error:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

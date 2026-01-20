@@ -24,6 +24,7 @@ import {
 } from '@/lib/onboarding-role-adapter';
 import { initializeDefaultModules } from '@/lib/user-preferences-service';
 
+import logger from '@/lib/logger';
 interface OnboardingTaskDefinition {
   taskId: string;
   title: string;
@@ -553,13 +554,13 @@ export async function initializeOnboardingTasks(
         console.log(`✅ Módulos por defecto inicializados para usuario ${userId}`);
       }
     } catch (moduleError) {
-      console.error('Error inicializando módulos (continuando):', moduleError);
+      logger.error('Error inicializando módulos (continuando):', moduleError);
       // No lanzar error para no bloquear el onboarding
     }
     
     return tasks;
   } catch (error) {
-    console.error('Error inicializando tareas de onboarding:', error);
+    logger.error('Error inicializando tareas de onboarding:', error);
     throw error;
   }
 }
@@ -615,7 +616,7 @@ export async function completeOnboardingTask(
 
     return task;
   } catch (error) {
-    console.error('Error completando tarea de onboarding:', error);
+    logger.error('Error completando tarea de onboarding:', error);
     throw error;
   }
 }
@@ -722,7 +723,7 @@ async function triggerOnboardingCompleteEvent(userId: string, companyId: string)
 
     console.log(`Eventos de onboarding completado creados para usuario ${userId}`);
   } catch (error) {
-    console.error('Error creando eventos de onboarding completado:', error);
+    logger.error('Error creando eventos de onboarding completado:', error);
   }
 }
 

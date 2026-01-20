@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from '@/lib/auth-options';
 import prisma from "@/lib/prisma";
 
+import logger from '@/lib/logger';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -145,7 +146,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error("[EWOORKER_DASHBOARD_STATS]", error);
+    logger.error("[EWOORKER_DASHBOARD_STATS]", error);
     return NextResponse.json(
       { error: "Error al obtener estadísticas" },
       { status: 500 }

@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { autocompleteLocation } from '@/lib/advanced-search-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Error in autocomplete:', error);
+    logger.error('Error in autocomplete:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
       message: 'No hay cuentas de redes sociales conectadas. Conecta tus cuentas para comenzar.',
     });
   } catch (error: any) {
-    console.error('[Community Manager Accounts Error]:', error);
+    logger.error('[Community Manager Accounts Error]:', error);
     return NextResponse.json(
       { error: 'Error al obtener cuentas' },
       { status: 500 }
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
       // account: newAccount
     });
   } catch (error: any) {
-    console.error('[Community Manager Connect Account Error]:', error);
+    logger.error('[Community Manager Connect Account Error]:', error);
     return NextResponse.json(
       { error: 'Error al conectar cuenta' },
       { status: 500 }

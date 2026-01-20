@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { getStripe } from '@/lib/stripe-config';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -98,7 +99,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('[Create Payment Intent Error]:', error);
+    logger.error('[Create Payment Intent Error]:', error);
     
     return NextResponse.json(
       {

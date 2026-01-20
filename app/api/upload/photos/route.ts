@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { S3Service } from '@/lib/s3-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
       type: file.type,
     });
   } catch (error: any) {
-    console.error('[Upload Error]:', error);
+    logger.error('[Upload Error]:', error);
     return NextResponse.json(
       { error: 'Error interno al procesar el archivo' },
       { status: 500 }
@@ -106,7 +107,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Archivo eliminado exitosamente',
     });
   } catch (error: any) {
-    console.error('[Delete Error]:', error);
+    logger.error('[Delete Error]:', error);
     return NextResponse.json(
       { error: 'Error interno al eliminar archivo' },
       { status: 500 }

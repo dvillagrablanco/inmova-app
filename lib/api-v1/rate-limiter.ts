@@ -6,6 +6,7 @@
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 
+import logger from '@/lib/logger';
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL || 'http://localhost:6379',
   token: process.env.UPSTASH_REDIS_REST_TOKEN || '',
@@ -48,7 +49,7 @@ export async function checkRateLimit(
     const result = await apiV1RateLimiter.limit(companyId);
     return result;
   } catch (error) {
-    console.error('[Rate Limiter Error]:', error);
+    logger.error('[Rate Limiter Error]:', error);
 
     // En caso de error de Redis, permitir el request (fail-open)
     return {
@@ -118,7 +119,7 @@ export async function getApiUsageStats(
       avgResponseTime: Math.round(avgResponseTime),
     };
   } catch (error) {
-    console.error('[API Usage Stats Error]:', error);
+    logger.error('[API Usage Stats Error]:', error);
     return {
       requests: 0,
       errors: 0,

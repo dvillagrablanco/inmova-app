@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 interface HubSpotConfig {
   accessToken: string;
   portalId?: string;
@@ -263,7 +264,7 @@ export class HubSpotService {
     const contactId = tenantMetadata?.hubspotContactId;
 
     if (!contactId) {
-      console.warn('[HubSpot] Contact ID not found for tenant');
+      logger.warn('[HubSpot] Contact ID not found for tenant');
       return;
     }
 

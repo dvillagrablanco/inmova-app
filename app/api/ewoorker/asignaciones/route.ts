@@ -7,6 +7,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 // Schema de validación para crear asignación
 const createAsignacionSchema = z.object({
   trabajadorId: z.string().min(1, 'Trabajador requerido'),
@@ -181,7 +182,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[EWOORKER_ASIGNACIONES_GET]', error);
+    logger.error('[EWOORKER_ASIGNACIONES_GET]', error);
     return NextResponse.json({ error: 'Error al obtener asignaciones' }, { status: 500 });
   }
 }
@@ -252,7 +253,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ asignacion }, { status: 201 });
   } catch (error: any) {
-    console.error('[EWOORKER_ASIGNACIONES_POST]', error);
+    logger.error('[EWOORKER_ASIGNACIONES_POST]', error);
 
     if (error.name === 'ZodError') {
       return NextResponse.json(

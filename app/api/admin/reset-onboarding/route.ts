@@ -11,6 +11,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import prisma from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -113,7 +114,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('[Reset Onboarding API Error]:', error);
+    logger.error('[Reset Onboarding API Error]:', error);
     return NextResponse.json(
       { error: 'Error reseteando onboarding', details: error.message },
       { status: 500 }

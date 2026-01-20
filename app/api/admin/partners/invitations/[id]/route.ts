@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -47,7 +48,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error('[Partner Invitation GET Error]:', error);
+    logger.error('[Partner Invitation GET Error]:', error);
     return NextResponse.json({ error: 'Error obteniendo invitación' }, { status: 500 });
   }
 }
@@ -91,7 +92,7 @@ export async function PUT(
       message: 'Invitación actualizada',
     });
   } catch (error: any) {
-    console.error('[Partner Invitation PUT Error]:', error);
+    logger.error('[Partner Invitation PUT Error]:', error);
     return NextResponse.json({ error: 'Error actualizando invitación' }, { status: 500 });
   }
 }
@@ -135,7 +136,7 @@ export async function DELETE(
       message: 'Invitación eliminada correctamente',
     });
   } catch (error: any) {
-    console.error('[Partner Invitation DELETE Error]:', error);
+    logger.error('[Partner Invitation DELETE Error]:', error);
     return NextResponse.json({ error: 'Error eliminando invitación' }, { status: 500 });
   }
 }

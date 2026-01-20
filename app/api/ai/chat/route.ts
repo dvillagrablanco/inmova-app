@@ -16,6 +16,7 @@ import { z } from 'zod';
 import { checkAILimit, createLimitExceededResponse, logUsageWarning } from '@/lib/usage-limits';
 import { trackUsage } from '@/lib/usage-tracking-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -120,7 +121,7 @@ Company: ${session.user.companyId}`;
       response,
     });
   } catch (error: any) {
-    console.error('[API AI Chat] Error:', error);
+    logger.error('[API AI Chat] Error:', error);
 
     // Error de validación
     if (error instanceof z.ZodError) {

@@ -20,6 +20,7 @@ import type { CompanySize, CRMLeadSource } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import puppeteer, { type Browser, type Page } from 'puppeteer';
 
+import logger from '@/lib/logger';
 // ============================================================================
 // CONFIGURACIÓN
 // ============================================================================
@@ -196,7 +197,7 @@ export class LinkedInScraper {
 
       return this.isAuthenticated;
     } catch (error) {
-      console.error('LinkedIn authentication failed:', error);
+      logger.error('LinkedIn authentication failed:', error);
       return false;
     }
   }
@@ -259,13 +260,13 @@ export class LinkedInScraper {
           }
           await this.randomDelay();
         } catch (error) {
-          console.error(`Error extracting profile ${url}:`, error);
+          logger.error(`Error extracting profile ${url}:`, error);
         }
       }
 
       return profiles;
     } catch (error) {
-      console.error('Search error:', error);
+      logger.error('Search error:', error);
       return profiles;
     }
   }
@@ -373,7 +374,7 @@ export class LinkedInScraper {
 
       return profile.firstName ? (profile as LinkedInProfile) : null;
     } catch (error) {
-      console.error(`Error extracting profile ${profileUrl}:`, error);
+      logger.error(`Error extracting profile ${profileUrl}:`, error);
       return null;
     }
   }

@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { searchDocuments } from '@/lib/document-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(results);
   } catch (error: any) {
-    console.error('Error searching documents:', error);
+    logger.error('Error searching documents:', error);
     return NextResponse.json(
       { error: 'Error interno', message: error.message },
       { status: 500 }

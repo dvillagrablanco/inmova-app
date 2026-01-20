@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { EWOORKER_PLANS } from '@/lib/ewoorker-stripe-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
         orderBy: { orden: 'asc' },
       });
     } catch (dbError) {
-      console.warn('[eWoorker Planes] No se pudo leer de BD, usando config');
+      logger.warn('[eWoorker Planes] No se pudo leer de BD, usando config');
     }
 
     // Si hay planes en BD, usarlos
@@ -86,7 +87,7 @@ export async function GET(request: NextRequest) {
       data: planes,
     });
   } catch (error: any) {
-    console.error('[eWoorker Planes Error]:', error);
+    logger.error('[eWoorker Planes Error]:', error);
 
     // Fallback a config siempre
     const planes = Object.values(EWOORKER_PLANS).map(plan => ({

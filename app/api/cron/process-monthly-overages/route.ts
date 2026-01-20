@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processMonthlyOverages } from '@/lib/usage-billing-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 export const maxDuration = 600; // 10 minutos
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
-    console.error('[Cron] Error processing monthly overages:', error);
+    logger.error('[Cron] Error processing monthly overages:', error);
     
     return NextResponse.json(
       {

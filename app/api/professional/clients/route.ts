@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 /**
  * GET /api/professional/clients
  * Lista los clientes (inquilinos y propietarios) del profesional
@@ -157,7 +158,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[PROFESSIONAL_CLIENTS_GET]', error);
+    logger.error('[PROFESSIONAL_CLIENTS_GET]', error);
     return NextResponse.json({ error: 'Error al obtener clientes' }, { status: 500 });
   }
 }

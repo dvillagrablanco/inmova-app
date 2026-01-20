@@ -11,6 +11,7 @@ import { generateApiKey, parseScopes } from '@/lib/api-v1/auth';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -65,7 +66,7 @@ export async function GET(req: NextRequest) {
       data: apiKeys,
     });
   } catch (error) {
-    console.error('[API Keys GET Error]:', error);
+    logger.error('[API Keys GET Error]:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -149,7 +150,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.error('[API Keys POST Error]:', error);
+    logger.error('[API Keys POST Error]:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

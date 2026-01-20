@@ -10,6 +10,7 @@ import { authOptions } from '@/lib/auth-options';
 import { recordMatchFeedback } from '@/lib/matching-feedback-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const feedbackSchema = z.object({
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Error recording feedback:', error);
+    logger.error('Error recording feedback:', error);
     return NextResponse.json(
       { error: 'Error registrando feedback', message: error.message },
       { status: 500 }

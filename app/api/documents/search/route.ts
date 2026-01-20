@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/prisma';
 
+import logger from '@/lib/logger';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -78,7 +79,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ results, total: results.length });
   } catch (error) {
-    console.error('Error en búsqueda de documentos:', error);
+    logger.error('Error en búsqueda de documentos:', error);
     return NextResponse.json(
       { error: 'Error al buscar documentos' },
       { status: 500 }

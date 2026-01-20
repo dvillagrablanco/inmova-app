@@ -11,6 +11,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -113,7 +114,7 @@ export async function GET(request: NextRequest) {
       content: partner.landingContent || null,
     });
   } catch (error: any) {
-    console.error('[API Partners Landing Content] Error:', error);
+    logger.error('[API Partners Landing Content] Error:', error);
     return NextResponse.json({ error: 'Error obteniendo contenido' }, { status: 500 });
   }
 }
@@ -159,7 +160,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    console.error('[API Partners Landing Content] Error:', error);
+    logger.error('[API Partners Landing Content] Error:', error);
     return NextResponse.json({ error: 'Error actualizando contenido' }, { status: 500 });
   }
 }

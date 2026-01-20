@@ -12,6 +12,7 @@
 import { prisma } from './db';
 import { addDays, startOfDay, endOfDay, differenceInDays, subDays } from 'date-fns';
 
+import logger from '@/lib/logger';
 // ============================================================================
 // FUNCIONES STUB - Implementar cuando se activen módulos STR avanzados
 // ============================================================================
@@ -110,13 +111,13 @@ export async function syncAllICalFeeds(
             console.log(`  ✅ ${channel.canal} (${channel.listing.titulo}): ${result.eventsProcessed} eventos`);
           } else {
             errors.push(`${channel.canal}: ${result.errors?.join(', ')}`);
-            console.error(`  ❌ ${channel.canal}: Error`);
+            logger.error(`  ❌ ${channel.canal}: Error`);
           }
         }
       } catch (error) {
         const errorMsg = `Error sincronizando ${channel.canal}: ${error}`;
         errors.push(errorMsg);
-        console.error(`  ❌ ${errorMsg}`);
+        logger.error(`  ❌ ${errorMsg}`);
       }
     }
 
@@ -131,7 +132,7 @@ export async function syncAllICalFeeds(
     };
   } catch (error) {
     const duration = Date.now() - startTime;
-    console.error('[CRON] Error general en sincronización:', error);
+    logger.error('[CRON] Error general en sincronización:', error);
     return {
       success: false,
       itemsProcessed,
@@ -180,12 +181,12 @@ export async function syncAvailabilityToChannels(
           console.log(`  ✅ ${listing.titulo}: ${result.channelsSynced.join(', ')}`);
         } else {
           errors.push(`${listing.titulo}: ${result.errors?.join(', ')}`);
-          console.error(`  ❌ ${listing.titulo}: Error`);
+          logger.error(`  ❌ ${listing.titulo}: Error`);
         }
       } catch (error) {
         const errorMsg = `Error sincronizando ${listing.titulo}: ${error}`;
         errors.push(errorMsg);
-        console.error(`  ❌ ${errorMsg}`);
+        logger.error(`  ❌ ${errorMsg}`);
       }
     }
 
@@ -200,7 +201,7 @@ export async function syncAvailabilityToChannels(
     };
   } catch (error) {
     const duration = Date.now() - startTime;
-    console.error('[CRON] Error general en sincronización de disponibilidad:', error);
+    logger.error('[CRON] Error general en sincronización de disponibilidad:', error);
     return {
       success: false,
       itemsProcessed,
@@ -259,7 +260,7 @@ export async function autoCreateCleaningTasks(
       } catch (error) {
         const errorMsg = `Error creando tarea para booking ${booking.id}: ${error}`;
         errors.push(errorMsg);
-        console.error(`  ❌ ${errorMsg}`);
+        logger.error(`  ❌ ${errorMsg}`);
       }
     }
 
@@ -274,7 +275,7 @@ export async function autoCreateCleaningTasks(
     };
   } catch (error) {
     const duration = Date.now() - startTime;
-    console.error('[CRON] Error general en creación de tareas:', error);
+    logger.error('[CRON] Error general en creación de tareas:', error);
     return {
       success: false,
       itemsProcessed,
@@ -336,7 +337,7 @@ export async function sendAutomaticReviewRequests(
       } catch (error) {
         const errorMsg = `Error enviando solicitud para booking ${booking.id}: ${error}`;
         errors.push(errorMsg);
-        console.error(`  ❌ ${errorMsg}`);
+        logger.error(`  ❌ ${errorMsg}`);
       }
     }
 
@@ -351,7 +352,7 @@ export async function sendAutomaticReviewRequests(
     };
   } catch (error) {
     const duration = Date.now() - startTime;
-    console.error('[CRON] Error general en envío de solicitudes:', error);
+    logger.error('[CRON] Error general en envío de solicitudes:', error);
     return {
       success: false,
       itemsProcessed,
@@ -405,7 +406,7 @@ export async function checkLegalCompliance(
       } catch (error) {
         const errorMsg = `Error verificando ${listing.titulo}: ${error}`;
         errors.push(errorMsg);
-        console.error(`  ❌ ${errorMsg}`);
+        logger.error(`  ❌ ${errorMsg}`);
       }
     }
 
@@ -420,7 +421,7 @@ export async function checkLegalCompliance(
     };
   } catch (error) {
     const duration = Date.now() - startTime;
-    console.error('[CRON] Error general en verificación de cumplimiento:', error);
+    logger.error('[CRON] Error general en verificación de cumplimiento:', error);
     return {
       success: false,
       itemsProcessed,

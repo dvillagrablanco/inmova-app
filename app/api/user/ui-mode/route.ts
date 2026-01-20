@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import type { UIMode } from '@/types/prisma-types';
 
+import logger from '@/lib/logger';
 /**
  * PUT /api/user/ui-mode
  *
@@ -53,7 +54,7 @@ export async function PUT(request: NextRequest) {
       message: `Modo de interfaz actualizado a: ${uiMode}`,
     });
   } catch (error: any) {
-    console.error('[UI Mode API Error]:', error);
+    logger.error('[UI Mode API Error]:', error);
     return NextResponse.json(
       { error: 'Error al actualizar modo de interfaz', details: error.message },
       { status: 500 }
@@ -96,7 +97,7 @@ export async function GET(request: NextRequest) {
       profile: user,
     });
   } catch (error: any) {
-    console.error('[UI Mode API Error]:', error);
+    logger.error('[UI Mode API Error]:', error);
     return NextResponse.json(
       { error: 'Error al obtener modo de interfaz', details: error.message },
       { status: 500 }

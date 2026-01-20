@@ -12,6 +12,7 @@ import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { trackPartnerLandingLead } from '@/lib/partner-branding-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('[API Partners Lead Create] Error:', error);
+    logger.error('[API Partners Lead Create] Error:', error);
     return NextResponse.json({ error: 'Error procesando solicitud' }, { status: 500 });
   }
 }

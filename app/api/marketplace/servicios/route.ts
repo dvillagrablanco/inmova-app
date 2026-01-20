@@ -9,6 +9,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -86,7 +87,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Marketplace Services GET Error]:', error);
+    logger.error('[Marketplace Services GET Error]:', error);
     return NextResponse.json(
       { error: error.message || 'Error obteniendo servicios' },
       { status: 500 }
@@ -159,7 +160,7 @@ export async function POST(request: NextRequest) {
       message: '¡Solicitud enviada! El proveedor te contactará pronto.',
     });
   } catch (error: any) {
-    console.error('[Marketplace Booking POST Error]:', error);
+    logger.error('[Marketplace Booking POST Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

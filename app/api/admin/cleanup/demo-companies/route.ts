@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -63,7 +64,7 @@ export async function GET() {
       realCount: realCompanies.length,
     });
   } catch (error) {
-    console.error('Error listing companies:', error);
+    logger.error('Error listing companies:', error);
     return NextResponse.json(
       { error: 'Error listando empresas' },
       { status: 500 }
@@ -217,7 +218,7 @@ export async function DELETE(request: NextRequest) {
       details: results,
     });
   } catch (error) {
-    console.error('Error deleting companies:', error);
+    logger.error('Error deleting companies:', error);
     return NextResponse.json(
       { error: 'Error eliminando empresas' },
       { status: 500 }

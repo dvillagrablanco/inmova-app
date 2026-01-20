@@ -10,6 +10,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { trackEvent, AnalyticsEventName } from '@/lib/analytics-service';
 
+import logger from '@/lib/logger';
 export async function POST(request: NextRequest) {
   try {
     // 1. Obtener sesión (opcional, permite tracking anónimo)
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[API /analytics/track] Error:', error);
+    logger.error('[API /analytics/track] Error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

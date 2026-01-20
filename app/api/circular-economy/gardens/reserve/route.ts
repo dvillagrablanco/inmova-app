@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(reservation, { status: 201 });
   } catch (error: any) {
-    console.error('[Circular Economy Reserve POST]:', error);
+    logger.error('[Circular Economy Reserve POST]:', error);
     return NextResponse.json(
       { error: 'Error al reservar parcela' },
       { status: 500 }

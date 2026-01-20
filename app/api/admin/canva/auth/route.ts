@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest) {
     // Redirigir a Canva
     return NextResponse.redirect(authUrl.toString());
   } catch (error: any) {
-    console.error('[Canva Auth Error]:', error);
+    logger.error('[Canva Auth Error]:', error);
     return NextResponse.json(
       { error: 'Error iniciando autenticación con Canva' },
       { status: 500 }
@@ -131,7 +132,7 @@ export async function POST(request: NextRequest) {
 
     if (!tokenResponse.ok) {
       const error = await tokenResponse.json();
-      console.error('[Canva Token Error]:', error);
+      logger.error('[Canva Token Error]:', error);
       return NextResponse.json(
         { error: 'Error obteniendo token de Canva' },
         { status: 500 }
@@ -156,7 +157,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Canva Token Exchange Error]:', error);
+    logger.error('[Canva Token Exchange Error]:', error);
     return NextResponse.json(
       { error: 'Error en el intercambio de tokens' },
       { status: 500 }

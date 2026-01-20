@@ -5,6 +5,7 @@
 
 import { Redis } from '@upstash/redis';
 
+import logger from '@/lib/logger';
 // Cliente Redis (Upstash ya está configurado en el proyecto)
 const redis = process.env.UPSTASH_REDIS_REST_URL
   ? new Redis({
@@ -37,7 +38,7 @@ export class ValuationCacheService {
    */
   static async get(propertyId: string): Promise<CachedValuation | null> {
     if (!redis) {
-      console.warn('⚠️ Redis not configured, cache disabled');
+      logger.warn('⚠️ Redis not configured, cache disabled');
       return null;
     }
 
@@ -63,7 +64,7 @@ export class ValuationCacheService {
       console.log(`❌ Valuation cache MISS for property ${propertyId}`);
       return null;
     } catch (error) {
-      console.error('❌ Valuation cache GET error:', error);
+      logger.error('❌ Valuation cache GET error:', error);
       return null;
     }
   }
@@ -99,7 +100,7 @@ export class ValuationCacheService {
       console.log(`✅ Valuation cached for property ${propertyId} (TTL: ${ttl}s)`);
       return true;
     } catch (error) {
-      console.error('❌ Valuation cache SET error:', error);
+      logger.error('❌ Valuation cache SET error:', error);
       return false;
     }
   }
@@ -120,7 +121,7 @@ export class ValuationCacheService {
       console.log(`🗑️ Valuation cache INVALIDATED for property ${propertyId}`);
       return true;
     } catch (error) {
-      console.error('❌ Valuation cache INVALIDATE error:', error);
+      logger.error('❌ Valuation cache INVALIDATE error:', error);
       return false;
     }
   }

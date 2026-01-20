@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getMarketplaceServices } from '@/lib/marketplace-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ services });
   } catch (error: any) {
-    console.error('Error fetching marketplace services:', error);
+    logger.error('Error fetching marketplace services:', error);
     return NextResponse.json(
       { error: 'Error interno', message: error.message },
       { status: 500 }

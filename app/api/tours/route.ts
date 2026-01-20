@@ -22,6 +22,7 @@ import {
 } from '@/lib/virtual-tours-system';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 // GET: Obtener tours
 export async function GET(request: NextRequest) {
   try {
@@ -100,7 +101,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error: any) {
-    console.error('Error obteniendo tours:', error);
+    logger.error('Error obteniendo tours:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor', details: error.message },
       { status: 500 }
@@ -160,7 +161,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('Error gestionando tour:', error);
+    logger.error('Error gestionando tour:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor', details: error.message },
       { status: 500 }

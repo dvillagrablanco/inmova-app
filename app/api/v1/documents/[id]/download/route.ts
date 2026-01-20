@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getDownloadUrl, hasDocumentAccess } from '@/lib/document-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export async function GET(
@@ -37,7 +38,7 @@ export async function GET(
     // Redirect a S3
     return NextResponse.redirect(downloadUrl);
   } catch (error: any) {
-    console.error('Error downloading document:', error);
+    logger.error('Error downloading document:', error);
     return NextResponse.json(
       { error: 'Error interno', message: error.message },
       { status: 500 }

@@ -5,6 +5,7 @@
 import { prisma } from '@/lib/db';
 import Anthropic from '@anthropic-ai/sdk';
 
+import logger from '@/lib/logger';
 // ============================================
 // TIPOS
 // ============================================
@@ -191,7 +192,7 @@ Criterios de urgencia:
         return JSON.parse(content.text);
       }
     } catch (error) {
-      console.error('[AI Classification Error]:', error);
+      logger.error('[AI Classification Error]:', error);
     }
 
     return this.basicClassification(descripcion);
@@ -336,7 +337,7 @@ Analiza y responde SOLO con JSON válido:
         return JSON.parse(content.text);
       }
     } catch (error) {
-      console.error('[AI Match Analysis Error]:', error);
+      logger.error('[AI Match Analysis Error]:', error);
     }
 
     return { scores: {}, recommendation: '' };

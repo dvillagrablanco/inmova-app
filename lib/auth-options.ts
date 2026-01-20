@@ -4,6 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import bcrypt from 'bcryptjs';
 
+import logger from '@/lib/logger';
 // Lazy load de Prisma para evitar problemas en build
 function getPrismaClient() {
   if (process.env.SKIP_PRISMA === 'true' || process.env.SKIP_API_ANALYSIS === '1') {
@@ -13,7 +14,7 @@ function getPrismaClient() {
     const { prisma } = require('./db');
     return prisma;
   } catch (error) {
-    console.error('[NextAuth] Failed to load Prisma:', error);
+    logger.error('[NextAuth] Failed to load Prisma:', error);
     return null;
   }
 }
@@ -27,7 +28,7 @@ function getAdapter() {
   try {
     return PrismaAdapter(prisma);
   } catch (error) {
-    console.error('[NextAuth] Failed to create Prisma adapter:', error);
+    logger.error('[NextAuth] Failed to create Prisma adapter:', error);
     return undefined;
   }
 }
@@ -187,7 +188,7 @@ export const authOptions: NextAuthOptions = {
           };
         } catch (error) {
           // Asegurar delay constante incluso en errores
-          console.error('[NextAuth] Error en authorize():', error instanceof Error ? error.message : error);
+          logger.error('[NextAuth] Error en authorize():', error instanceof Error ? error.message : error);
           await addConstantDelay();
           throw error;
         }

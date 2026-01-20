@@ -11,6 +11,7 @@ import { authOptions } from '@/lib/auth-options';
 import { createConnectAccount, getConnectAccountStatus } from '@/lib/stripe-connect-service';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result);
 
   } catch (error: any) {
-    console.error('Error creating Connect account:', error);
+    logger.error('Error creating Connect account:', error);
     return NextResponse.json(
       { error: 'Error interno', message: error.message },
       { status: 500 }
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Error fetching Connect account:', error);
+    logger.error('Error fetching Connect account:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -96,7 +97,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('[Admin Planes GET Error]:', error);
+    logger.error('[Admin Planes GET Error]:', error);
     // Retornar lista vacía en lugar de error para mejor UX
     return NextResponse.json({
       planes: [],
@@ -151,7 +152,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error: any) {
-    console.error('[Admin Planes POST Error]:', error);
+    logger.error('[Admin Planes POST Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

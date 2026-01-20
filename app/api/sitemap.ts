@@ -5,6 +5,7 @@
 
 import { MetadataRoute } from 'next';
 
+import logger from '@/lib/logger';
 // Lazy import de prisma para evitar errores en build-time
 let prisma: any = null;
 
@@ -14,7 +15,7 @@ async function getPrisma() {
       const { prisma: prismaClient } = await import('@/lib/db');
       prisma = prismaClient;
     } catch (error) {
-      console.warn('Prisma not available during build, using static routes only');
+      logger.warn('Prisma not available during build, using static routes only');
       return null;
     }
   }
@@ -160,7 +161,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     return [...staticRoutes, ...propertyRoutes, ...buildingRoutes];
   } catch (error) {
-    console.error('Error generating sitemap:', error);
+    logger.error('Error generating sitemap:', error);
     // En caso de error, retornar solo las rutas estáticas
     return staticRoutes;
   }

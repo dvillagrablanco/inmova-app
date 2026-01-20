@@ -12,6 +12,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { markCelebrationAsShown } from '@/lib/celebration-service';
 
+import logger from '@/lib/logger';
 interface RouteContext {
   params: {
     id: string;
@@ -51,7 +52,7 @@ export async function PATCH(
       celebration: result.celebration,
     });
   } catch (error) {
-    console.error('[API] Error in PATCH /api/celebrations/[id]/shown:', error);
+    logger.error('[API] Error in PATCH /api/celebrations/[id]/shown:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

@@ -7,6 +7,7 @@
 import { cookies, headers } from 'next/headers';
 import { Locale, getPreferredLocale, defaultLocale } from './i18n-config';
 
+import logger from '@/lib/logger';
 /**
  * Obtiene el locale actual del usuario (server-side)
  */
@@ -28,7 +29,7 @@ export async function getTranslations(locale: Locale) {
     const translations = await import(`@/i18n/locales/${locale}.json`);
     return translations.default;
   } catch (error) {
-    console.warn(`⚠️ Translations not found for locale: ${locale}, falling back to ${defaultLocale}`);
+    logger.warn(`⚠️ Translations not found for locale: ${locale}, falling back to ${defaultLocale}`);
     const fallback = await import(`@/i18n/locales/${defaultLocale}.json`);
     return fallback.default;
   }
@@ -55,13 +56,13 @@ export async function getTranslationFunction() {
       if (value && typeof value === 'object' && k in value) {
         value = value[k];
       } else {
-        console.warn(`⚠️ Translation key not found: ${key}`);
+        logger.warn(`⚠️ Translation key not found: ${key}`);
         return key;
       }
     }
 
     if (typeof value !== 'string') {
-      console.warn(`⚠️ Translation value is not a string: ${key}`);
+      logger.warn(`⚠️ Translation value is not a string: ${key}`);
       return key;
     }
 

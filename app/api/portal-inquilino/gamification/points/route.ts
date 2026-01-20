@@ -12,6 +12,7 @@ import {
 } from '@/lib/tenant-gamification-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
         : `+${result.pointsAdded} puntos`,
     });
   } catch (error: any) {
-    console.error('[Tenant Add Points Error]:', error);
+    logger.error('[Tenant Add Points Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

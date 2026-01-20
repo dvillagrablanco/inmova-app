@@ -14,6 +14,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { CRMService } from '@/lib/crm-service';
 
+import logger from '@/lib/logger';
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -115,7 +116,7 @@ export async function GET(request: Request) {
       totalPages: result.totalPages,
     });
   } catch (error: any) {
-    console.error('Error listing leads:', error);
+    logger.error('Error listing leads:', error);
     return NextResponse.json(
       { error: 'Error al listar leads', details: error.message },
       { status: 500 }
@@ -211,7 +212,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(mappedLead, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating lead:', error);
+    logger.error('Error creating lead:', error);
     return NextResponse.json(
       { error: 'Error al crear lead', details: error.message },
       { status: 500 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // Nota: En producción, estos datos deberían almacenarse en la base de datos
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: companyConnections });
   } catch (error) {
-    console.error('[Sync Connections GET Error]:', error);
+    logger.error('[Sync Connections GET Error]:', error);
     return NextResponse.json({ error: 'Error al obtener conexiones' }, { status: 500 });
   }
 }
@@ -98,7 +99,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: newConnection }, { status: 201 });
   } catch (error) {
-    console.error('[Sync Connections POST Error]:', error);
+    logger.error('[Sync Connections POST Error]:', error);
     return NextResponse.json({ error: 'Error al crear conexión' }, { status: 500 });
   }
 }

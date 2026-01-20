@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -26,7 +27,7 @@ export async function GET(
       message: 'Categoría no encontrada',
     }, { status: 404 });
   } catch (error) {
-    console.error('[API Error] Get marketplace category:', error);
+    logger.error('[API Error] Get marketplace category:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }
@@ -50,7 +51,7 @@ export async function PUT(
       message: 'Categoría actualizada correctamente',
     });
   } catch (error) {
-    console.error('[API Error] Update marketplace category:', error);
+    logger.error('[API Error] Update marketplace category:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }
@@ -71,7 +72,7 @@ export async function DELETE(
       message: 'Categoría eliminada correctamente',
     });
   } catch (error) {
-    console.error('[API Error] Delete marketplace category:', error);
+    logger.error('[API Error] Delete marketplace category:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }
@@ -96,7 +97,7 @@ export async function PATCH(
       message: activo ? 'Categoría activada' : 'Categoría desactivada',
     });
   } catch (error) {
-    console.error('[API Error] Patch marketplace category:', error);
+    logger.error('[API Error] Patch marketplace category:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

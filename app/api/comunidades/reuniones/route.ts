@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const createReunionSchema = z.object({
@@ -140,7 +141,7 @@ export async function GET(request: NextRequest) {
       proximaReunion,
     });
   } catch (error: any) {
-    console.error('[Reuniones GET Error]:', error);
+    logger.error('[Reuniones GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo reuniones', details: error.message },
       { status: 500 }
@@ -197,7 +198,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[Reuniones POST Error]:', error);
+    logger.error('[Reuniones POST Error]:', error);
     return NextResponse.json(
       { error: 'Error creando reunión', details: error.message },
       { status: 500 }
@@ -248,7 +249,7 @@ export async function PATCH(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[Reuniones PATCH Error]:', error);
+    logger.error('[Reuniones PATCH Error]:', error);
     return NextResponse.json(
       { error: 'Error actualizando reunión', details: error.message },
       { status: 500 }

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -52,7 +53,7 @@ export async function POST() {
       });
     }
   } catch (error) {
-    console.error('Error testing Contasimple:', error);
+    logger.error('Error testing Contasimple:', error);
     return NextResponse.json(
       { success: false, error: 'Error probando conexión' },
       { status: 500 }

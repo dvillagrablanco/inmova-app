@@ -11,6 +11,7 @@ import { sendNotification } from './notification-service';
 import { initializeSignature } from './signature-service';
 import { calcularProrrateo } from '../medium-term-rental-service';
 
+import logger from '@/lib/logger';
 // ==========================================
 // TIPOS
 // ==========================================
@@ -552,7 +553,7 @@ export async function processAutoRenewals(): Promise<{
         });
         renewed++;
       } catch (error) {
-        console.error(`[Renewal] Error procesando ${contract.id}:`, error);
+        logger.error(`[Renewal] Error procesando ${contract.id}:`, error);
       }
     } else {
       // Notificar que no se puede renovar

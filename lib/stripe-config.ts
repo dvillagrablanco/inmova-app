@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 
+import logger from '@/lib/logger';
 // Lazy initialization to prevent build errors when Stripe is not configured
 let stripeInstance: Stripe | null = null;
 
@@ -9,7 +10,7 @@ export function getStripe(): Stripe | null {
   }
 
   if (!process.env.STRIPE_SECRET_KEY) {
-    console.warn('STRIPE_SECRET_KEY is not defined. Stripe functionality will be disabled.');
+    logger.warn('STRIPE_SECRET_KEY is not defined. Stripe functionality will be disabled.');
     return null;
   }
 
@@ -22,7 +23,7 @@ export function getStripe(): Stripe | null {
     });
     return stripeInstance;
   } catch (error) {
-    console.error('Failed to initialize Stripe:', error);
+    logger.error('Failed to initialize Stripe:', error);
     return null;
   }
 }

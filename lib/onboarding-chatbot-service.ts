@@ -212,7 +212,7 @@ export async function sendChatMessage(
       suggestedActions,
     };
   } catch (error) {
-    console.error('[OnboardingChatbot] Error:', error);
+    logger.error('[OnboardingChatbot] Error:', error);
     return {
       success: false,
       error: 'Lo siento, he tenido un problema. ¿Podrías intentarlo de nuevo? 😔',

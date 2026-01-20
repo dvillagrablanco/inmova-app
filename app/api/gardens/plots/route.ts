@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(plots);
   } catch (error) {
-    console.error('[Gardens API] Error fetching plots:', error);
+    logger.error('[Gardens API] Error fetching plots:', error);
     return NextResponse.json({ error: 'Error al obtener parcelas' }, { status: 500 });
   }
 }
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(newPlot, { status: 201 });
   } catch (error) {
-    console.error('[Gardens API] Error creating plot:', error);
+    logger.error('[Gardens API] Error creating plot:', error);
     return NextResponse.json({ error: 'Error al crear parcela' }, { status: 500 });
   }
 }

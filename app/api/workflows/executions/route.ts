@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -57,7 +58,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(executions);
   } catch (error: any) {
-    console.error('Error obteniendo ejecuciones:', error);
+    logger.error('Error obteniendo ejecuciones:', error);
     return NextResponse.json(
       { error: 'Error obteniendo ejecuciones' },
       { status: 500 }

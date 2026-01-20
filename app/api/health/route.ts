@@ -3,6 +3,7 @@ export const runtime = 'nodejs'; // Force Node.js runtime
 
 import { NextResponse } from 'next/server';
 
+import logger from '@/lib/logger';
 export async function GET() {
   try {
     // Get basic system info (sin Prisma para evitar problemas)
@@ -21,7 +22,7 @@ export async function GET() {
       const isConnected = await checkDbConnection();
       dbStatus = isConnected ? 'connected' : 'disconnected';
     } catch (dbError) {
-      console.warn('[Health Check] DB check skipped:', dbError);
+      logger.warn('[Health Check] DB check skipped:', dbError);
       dbStatus = 'check-skipped';
     }
 
@@ -56,7 +57,7 @@ export async function GET() {
       }
     );
   } catch (error) {
-    console.error('[Health Check] Error:', error);
+    logger.error('[Health Check] Error:', error);
 
     return NextResponse.json(
       {

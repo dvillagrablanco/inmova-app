@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
       message: 'No hay artículos en el blog. Crea tu primer artículo.',
     });
   } catch (error: any) {
-    console.error('[Community Manager Blog Error]:', error);
+    logger.error('[Community Manager Blog Error]:', error);
     return NextResponse.json(
       { error: 'Error al obtener artículos del blog' },
       { status: 500 }
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
       message: 'Artículo creado correctamente',
     });
   } catch (error: any) {
-    console.error('[Community Manager Create Blog Post Error]:', error);
+    logger.error('[Community Manager Create Blog Post Error]:', error);
     return NextResponse.json(
       { error: 'Error al crear artículo' },
       { status: 500 }

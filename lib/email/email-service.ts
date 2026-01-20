@@ -6,6 +6,7 @@
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+import logger from '@/lib/logger';
 export interface EmailTemplate {
   id: string;
   subject: string;
@@ -102,7 +103,7 @@ export class EmailService {
         return { success: false, error: 'No email provider configured' };
       }
     } catch (error) {
-      console.error('[EMAIL] Error sending email:', error);
+      logger.error('[EMAIL] Error sending email:', error);
       return { success: false, error: String(error) };
     }
   }

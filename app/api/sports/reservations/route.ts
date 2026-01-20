@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(reservations);
   } catch (error) {
-    console.error('[Sports API] Error fetching reservations:', error);
+    logger.error('[Sports API] Error fetching reservations:', error);
     return NextResponse.json({ error: 'Error al obtener reservas' }, { status: 500 });
   }
 }
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(newReservation, { status: 201 });
   } catch (error) {
-    console.error('[Sports API] Error creating reservation:', error);
+    logger.error('[Sports API] Error creating reservation:', error);
     return NextResponse.json({ error: 'Error al crear reserva' }, { status: 500 });
   }
 }

@@ -109,7 +109,7 @@ export function captureError(error: Error | string, context?: ErrorContext): voi
 
   // Debug console
   if (config.debug) {
-    console.error('🔴 Error captured:', {
+    logger.error('🔴 Error captured:', {
       message: errorMessage,
       context,
     });

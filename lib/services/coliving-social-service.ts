@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db';
 import { Prisma } from '@prisma/client';
 
+import logger from '@/lib/logger';
 export interface ColivingProfileInput {
   tenantId: string;
   companyId: string;
@@ -91,7 +92,7 @@ export async function createColivingProfile(input: ColivingProfileInput) {
     });
     return { success: true, profile };
   } catch (error) {
-    console.error('Error creando perfil de coliving:', error);
+    logger.error('Error creando perfil de coliving:', error);
     return { success: false, error: 'Error al crear perfil' };
   }
 }
@@ -109,7 +110,7 @@ export async function updateColivingProfile(
     });
     return { success: true, profile };
   } catch (error) {
-    console.error('Error actualizando perfil:', error);
+    logger.error('Error actualizando perfil:', error);
     return { success: false, error: 'Error al actualizar perfil' };
   }
 }
@@ -142,7 +143,7 @@ export async function getColivingProfile(tenantId: string) {
     });
     return { success: true, profile };
   } catch (error) {
-    console.error('Error obteniendo perfil:', error);
+    logger.error('Error obteniendo perfil:', error);
     return { success: false, error: 'Error al obtener perfil' };
   }
 }
@@ -180,7 +181,7 @@ export async function addReputationPoints(
 
     return { success: true, profile: updatedProfile };
   } catch (error) {
-    console.error('Error añadiendo puntos de reputación:', error);
+    logger.error('Error añadiendo puntos de reputación:', error);
     return { success: false, error: 'Error al añadir puntos' };
   }
 }
@@ -210,7 +211,7 @@ export async function addBadge(
 
     return { success: true, profile: updatedProfile };
   } catch (error) {
-    console.error('Error añadiendo badge:', error);
+    logger.error('Error añadiendo badge:', error);
     return { success: false, error: 'Error al añadir badge' };
   }
 }
@@ -296,7 +297,7 @@ export async function findMatches(profileId: string) {
 
     return { success: true, matches: goodMatches };
   } catch (error) {
-    console.error('Error buscando matches:', error);
+    logger.error('Error buscando matches:', error);
     return { success: false, error: 'Error al buscar matches' };
   }
 }
@@ -335,7 +336,7 @@ export async function createMatch(
 
     return { success: true, match };
   } catch (error) {
-    console.error('Error creando match:', error);
+    logger.error('Error creando match:', error);
     return { success: false, error: 'Error al crear match' };
   }
 }
@@ -351,7 +352,7 @@ export async function acceptMatch(matchId: string) {
     });
     return { success: true, match };
   } catch (error) {
-    console.error('Error aceptando match:', error);
+    logger.error('Error aceptando match:', error);
     return { success: false, error: 'Error al aceptar match' };
   }
 }
@@ -379,7 +380,7 @@ export async function createGroup(input: GroupInput) {
     });
     return { success: true, group };
   } catch (error) {
-    console.error('Error creando grupo:', error);
+    logger.error('Error creando grupo:', error);
     return { success: false, error: 'Error al crear grupo' };
   }
 }
@@ -412,7 +413,7 @@ export async function joinGroup(groupId: string, profileId: string) {
 
     return { success: true, member };
   } catch (error) {
-    console.error('Error uniéndose al grupo:', error);
+    logger.error('Error uniéndose al grupo:', error);
     return { success: false, error: 'Error al unirse al grupo' };
   }
 }
@@ -448,7 +449,7 @@ export async function getGroupsByCompany(companyId: string) {
     });
     return { success: true, groups };
   } catch (error) {
-    console.error('Error obteniendo grupos:', error);
+    logger.error('Error obteniendo grupos:', error);
     return { success: false, error: 'Error al obtener grupos' };
   }
 }
@@ -484,7 +485,7 @@ export async function createActivityPost(input: ActivityPostInput) {
     });
     return { success: true, post };
   } catch (error) {
-    console.error('Error creando publicación:', error);
+    logger.error('Error creando publicación:', error);
     return { success: false, error: 'Error al crear publicación' };
   }
 }
@@ -514,7 +515,7 @@ export async function getFeed(companyId: string, buildingId?: string) {
     });
     return { success: true, posts };
   } catch (error) {
-    console.error('Error obteniendo feed:', error);
+    logger.error('Error obteniendo feed:', error);
     return { success: false, error: 'Error al obtener feed' };
   }
 }
@@ -549,7 +550,7 @@ export async function likePost(postId: string, tenantId: string) {
       return { success: true, liked: true };
     }
   } catch (error) {
-    console.error('Error dando like:', error);
+    logger.error('Error dando like:', error);
     return { success: false, error: 'Error al dar like' };
   }
 }
@@ -582,7 +583,7 @@ export async function addComment(
 
     return { success: true, post: updatedPost };
   } catch (error) {
-    console.error('Error añadiendo comentario:', error);
+    logger.error('Error añadiendo comentario:', error);
     return { success: false, error: 'Error al añadir comentario' };
   }
 }
@@ -614,7 +615,7 @@ export async function createEvent(input: EventInput) {
     });
     return { success: true, event };
   } catch (error) {
-    console.error('Error creando evento:', error);
+    logger.error('Error creando evento:', error);
     return { success: false, error: 'Error al crear evento' };
   }
 }
@@ -647,7 +648,7 @@ export async function attendEvent(eventId: string, profileId: string) {
 
     return { success: true, attendance };
   } catch (error) {
-    console.error('Error asistiendo a evento:', error);
+    logger.error('Error asistiendo a evento:', error);
     return { success: false, error: 'Error al asistir al evento' };
   }
 }
@@ -687,7 +688,7 @@ export async function getUpcomingEvents(companyId: string) {
     });
     return { success: true, events };
   } catch (error) {
-    console.error('Error obteniendo eventos:', error);
+    logger.error('Error obteniendo eventos:', error);
     return { success: false, error: 'Error al obtener eventos' };
   }
 }

@@ -7,6 +7,7 @@
 import { prisma } from '../db';
 import { generateContractPDF } from './pdf-generator';
 
+import logger from '@/lib/logger';
 // ==========================================
 // TIPOS
 // ==========================================
@@ -70,7 +71,7 @@ class SignaturitClient {
     this.baseUrl = process.env.SIGNATURIT_API_URL || 'https://api.signaturit.com/v3';
     
     if (!this.apiKey) {
-      console.warn('[SignaturitClient] API key no configurada');
+      logger.warn('[SignaturitClient] API key no configurada');
     }
   }
 
@@ -379,7 +380,7 @@ export async function processSignatureWebhook(
   });
 
   if (!signatureRecord) {
-    console.warn(`[Signature Webhook] Firma no encontrada: ${payload.signatureId}`);
+    logger.warn(`[Signature Webhook] Firma no encontrada: ${payload.signatureId}`);
     return;
   }
 

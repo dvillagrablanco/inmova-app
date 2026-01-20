@@ -13,6 +13,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -55,7 +56,7 @@ async function sendEmailAlert(subject: string, html: string) {
 
     return true;
   } catch (error) {
-    console.error('[SendEmail Error]:', error);
+    logger.error('[SendEmail Error]:', error);
     return false;
   }
 }
@@ -223,7 +224,7 @@ export async function GET(request: NextRequest) {
       resultados,
     });
   } catch (error: any) {
-    console.error('[Cron CheckCoupons Error]:', error);
+    logger.error('[Cron CheckCoupons Error]:', error);
     return NextResponse.json(
       { error: 'Error verificando cupones', details: error.message },
       { status: 500 }

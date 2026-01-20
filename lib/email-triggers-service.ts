@@ -15,6 +15,7 @@ import { prisma } from '@/lib/db';
 import { sendOnboardingEmail } from '@/lib/onboarding-email-service';
 import { addHours, addDays } from 'date-fns';
 
+import logger from '@/lib/logger';
 export type EmailTriggerType =
   | 'SIGNUP_2H'
   | 'SIGNUP_24H'
@@ -55,7 +56,7 @@ export async function scheduleOnboardingEmails(userId: string, userEmail: string
     );
     return true;
   } catch (error) {
-    console.error('[EmailTriggers] Error scheduling emails:', error);
+    logger.error('[EmailTriggers] Error scheduling emails:', error);
     return false;
   }
 }
@@ -142,7 +143,7 @@ export async function processScheduledEmails() {
           failedCount++;
         }
       } catch (error) {
-        console.error(`[EmailTriggers] Error processing email ${emailLog.id}:`, error);
+        logger.error(`[EmailTriggers] Error processing email ${emailLog.id}:`, error);
         
         // Marcar como fallido
         await prisma.emailLog.update({
@@ -162,7 +163,7 @@ export async function processScheduledEmails() {
 
     return { sentCount, skippedCount, failedCount };
   } catch (error) {
-    console.error('[EmailTriggers] Error in processScheduledEmails:', error);
+    logger.error('[EmailTriggers] Error in processScheduledEmails:', error);
     return { sentCount: 0, skippedCount: 0, failedCount: 0 };
   }
 }
@@ -202,7 +203,7 @@ export async function cancelScheduledEmails(userId: string, reason?: string) {
     );
     return result.count;
   } catch (error) {
-    console.error('[EmailTriggers] Error cancelling emails:', error);
+    logger.error('[EmailTriggers] Error cancelling emails:', error);
     return 0;
   }
 }
@@ -234,7 +235,7 @@ export async function scheduleCustomEmail(
     );
     return true;
   } catch (error) {
-    console.error('[EmailTriggers] Error scheduling custom email:', error);
+    logger.error('[EmailTriggers] Error scheduling custom email:', error);
     return false;
   }
 }

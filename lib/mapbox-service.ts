@@ -27,7 +27,7 @@ export class MapboxService {
   static async geocodeAddress(address: string, city: string): Promise<GeocodingResult | null> {
     // Si no hay token, usar simulación
     if (!MAPBOX_TOKEN) {
-      console.warn('⚠️ MAPBOX_TOKEN not configured, using simulated geocoding');
+      logger.warn('⚠️ MAPBOX_TOKEN not configured, using simulated geocoding');
       return this.simulateGeocoding(address, city);
     }
 
@@ -56,7 +56,7 @@ export class MapboxService {
 
       return null;
     } catch (error) {
-      console.error('❌ Mapbox geocoding error:', error);
+      logger.error('❌ Mapbox geocoding error:', error);
       return this.simulateGeocoding(address, city);
     }
   }
@@ -151,7 +151,7 @@ export class MapboxService {
       const data = await response.json();
       return data.features || [];
     } catch (error) {
-      console.error('❌ Mapbox POI search error:', error);
+      logger.error('❌ Mapbox POI search error:', error);
       return this.simulateNearbyPOIs(lat, lng);
     }
   }

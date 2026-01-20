@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
       message: 'No hay datos fiscales registrados para este ejercicio. Añade tus obligaciones tributarias.',
     });
   } catch (error: any) {
-    console.error('[Impuestos Resumen Error]:', error);
+    logger.error('[Impuestos Resumen Error]:', error);
     return NextResponse.json(
       { error: 'Error al obtener resumen fiscal' },
       { status: 500 }
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
       message: 'Obligación fiscal registrada correctamente',
     }, { status: 201 });
   } catch (error: any) {
-    console.error('[Impuestos Create Obligacion Error]:', error);
+    logger.error('[Impuestos Create Obligacion Error]:', error);
     return NextResponse.json(
       { error: 'Error al registrar obligación fiscal' },
       { status: 500 }

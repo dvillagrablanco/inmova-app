@@ -12,6 +12,7 @@ import { createABTest } from '@/lib/ab-testing-service';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ tests });
 
   } catch (error: any) {
-    console.error('Error fetching A/B tests:', error);
+    logger.error('Error fetching A/B tests:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('Error creating A/B test:', error);
+    logger.error('Error creating A/B test:', error);
     return NextResponse.json(
       { error: 'Error interno', message: error.message },
       { status: 500 }

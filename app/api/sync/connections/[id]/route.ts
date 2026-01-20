@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // Nota: En producción, estos datos deberían almacenarse en la base de datos
@@ -52,7 +53,7 @@ export async function GET(
 
     return NextResponse.json({ data: connection });
   } catch (error) {
-    console.error('[Sync Connection GET Error]:', error);
+    logger.error('[Sync Connection GET Error]:', error);
     return NextResponse.json({ error: 'Error al obtener conexión' }, { status: 500 });
   }
 }
@@ -87,7 +88,7 @@ export async function PUT(
 
     return NextResponse.json({ data: updatedConnection });
   } catch (error) {
-    console.error('[Sync Connection PUT Error]:', error);
+    logger.error('[Sync Connection PUT Error]:', error);
     return NextResponse.json({ error: 'Error al actualizar conexión' }, { status: 500 });
   }
 }
@@ -113,7 +114,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Conexión eliminada exitosamente' });
   } catch (error) {
-    console.error('[Sync Connection DELETE Error]:', error);
+    logger.error('[Sync Connection DELETE Error]:', error);
     return NextResponse.json({ error: 'Error al eliminar conexión' }, { status: 500 });
   }
 }

@@ -12,6 +12,7 @@ import { generateRentalContract } from '@/lib/contract-generator';
 import { ContractData } from '@/lib/contract-generator/types';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -133,7 +134,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('[Contract API Error]:', error);
+    logger.error('[Contract API Error]:', error);
     return NextResponse.json(
       { error: 'Error generando contrato' },
       { status: 500 }
@@ -205,7 +206,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('[Contract Templates API Error]:', error);
+    logger.error('[Contract Templates API Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo plantillas' },
       { status: 500 }

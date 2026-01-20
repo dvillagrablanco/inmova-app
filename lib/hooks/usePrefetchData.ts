@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
+import logger from '@/lib/logger';
 interface PrefetchConfig {
   /**
    * URL to prefetch data from
@@ -59,7 +60,7 @@ export function usePrefetchData(config: PrefetchConfig | PrefetchConfig[]) {
       prefetchedUrls.current.add(url);
     } catch (error) {
       // Silently fail - prefetching is not critical
-      console.warn(`Failed to prefetch ${url}:`, error);
+      logger.warn(`Failed to prefetch ${url}:`, error);
     }
   };
 

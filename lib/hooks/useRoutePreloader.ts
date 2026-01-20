@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useRef } from 'react';
 
+import logger from '@/lib/logger';
 interface PreloadOptions {
   delay?: number;
   prefetchData?: boolean;
@@ -46,7 +47,7 @@ export function useRoutePreloader() {
           console.log(`[RoutePreloader] Precargando ruta: ${route}`);
         }
       } catch (error) {
-        console.error(`[RoutePreloader] Error precargando ${route}:`, error);
+        logger.error(`[RoutePreloader] Error precargando ${route}:`, error);
       }
     }, delay);
   }, [router]);
@@ -75,7 +76,7 @@ export function useRoutePreloader() {
       dataCache.set(key, data);
       return data;
     } catch (error) {
-      console.error(`[RoutePreloader] Error precargando datos ${key}:`, error);
+      logger.error(`[RoutePreloader] Error precargando datos ${key}:`, error);
       return null;
     }
   }, []);

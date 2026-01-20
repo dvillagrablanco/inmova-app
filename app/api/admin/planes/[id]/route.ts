@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -68,7 +69,7 @@ export async function GET(
     return NextResponse.json({ plan });
 
   } catch (error: any) {
-    console.error('[Admin Plan GET Error]:', error);
+    logger.error('[Admin Plan GET Error]:', error);
     return NextResponse.json({ error: 'Error al cargar plan' }, { status: 500 });
   }
 }
@@ -115,7 +116,7 @@ export async function PUT(
     });
 
   } catch (error: any) {
-    console.error('[Admin Plan PUT Error]:', error);
+    logger.error('[Admin Plan PUT Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -227,7 +228,7 @@ export async function DELETE(
     });
 
   } catch (error: any) {
-    console.error('[Admin Plan DELETE Error]:', error);
+    logger.error('[Admin Plan DELETE Error]:', error);
     return NextResponse.json({ error: 'Error al eliminar plan' }, { status: 500 });
   }
 }

@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { tenantReferrals } from '@/lib/tenant-referral-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
       message: `¡Bienvenido! ${result.referrerName} te ha referido. Ganaste ${result.pointsAwarded} puntos.`,
     });
   } catch (error: any) {
-    console.error('[Validate Referral Error]:', error);
+    logger.error('[Validate Referral Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

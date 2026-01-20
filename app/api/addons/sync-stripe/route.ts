@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -141,7 +142,7 @@ export async function POST(request: NextRequest) {
         });
       }
     } catch (auditError) {
-      console.warn('[Audit Log Warning]:', auditError);
+      logger.warn('[Audit Log Warning]:', auditError);
     }
 
     return NextResponse.json({
@@ -150,7 +151,7 @@ export async function POST(request: NextRequest) {
       results,
     });
   } catch (error: any) {
-    console.error('[Stripe Sync Error]:', error);
+    logger.error('[Stripe Sync Error]:', error);
     return NextResponse.json({
       success: false,
       error: 'Error en sincronización',
@@ -217,7 +218,7 @@ export async function GET(request: NextRequest) {
       addons: syncStatus,
     });
   } catch (error: any) {
-    console.error('[Stripe Sync Status Error]:', error);
+    logger.error('[Stripe Sync Status Error]:', error);
     return NextResponse.json({
       success: false,
       error: 'Error obteniendo estado de sincronización',

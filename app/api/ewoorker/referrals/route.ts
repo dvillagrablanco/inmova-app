@@ -12,6 +12,7 @@ import { prisma } from '@/lib/db';
 import { ewoorkerReferral } from '@/lib/ewoorker-referral-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -46,7 +47,7 @@ export async function GET() {
       stats,
     });
   } catch (error: any) {
-    console.error('[API EwoorkerReferrals] Error:', error);
+    logger.error('[API EwoorkerReferrals] Error:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }
@@ -111,7 +112,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[API EwoorkerReferrals] Error:', error);
+    logger.error('[API EwoorkerReferrals] Error:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

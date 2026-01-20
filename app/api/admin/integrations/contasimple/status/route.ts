@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -35,7 +36,7 @@ export async function GET() {
       pendingSync: pendingCount,
     });
   } catch (error) {
-    console.error('Error getting Contasimple status:', error);
+    logger.error('Error getting Contasimple status:', error);
     return NextResponse.json(
       { error: 'Error obteniendo estado' },
       { status: 500 }

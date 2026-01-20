@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
       message: 'No hay proveedores registrados aún. Use el botón "Nuevo Proveedor" para añadir.',
     });
   } catch (error) {
-    console.error('[API Error] Marketplace providers:', error);
+    logger.error('[API Error] Marketplace providers:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
       message: 'Proveedor creado correctamente. Pendiente de aprobación.',
     }, { status: 201 });
   } catch (error: any) {
-    console.error('[API Error] Create marketplace provider:', error);
+    logger.error('[API Error] Create marketplace provider:', error);
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Datos inválidos', details: error.errors }, { status: 400 });
     }

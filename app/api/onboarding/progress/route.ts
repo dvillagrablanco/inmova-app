@@ -10,6 +10,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getOnboardingProgress } from '@/lib/onboarding-service';
 
+import logger from '@/lib/logger';
 export async function GET(request: Request) {
   try {
     // Autenticación
@@ -29,7 +30,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(progress);
   } catch (error: any) {
-    console.error('Error obteniendo progreso de onboarding:', error);
+    logger.error('Error obteniendo progreso de onboarding:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor', details: error.message },
       { status: 500 }

@@ -14,6 +14,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
+import logger from '@/lib/logger';
 interface Notification {
   id: string;
   type: string;
@@ -51,7 +52,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
         setError('Error al cargar notificaciones');
       }
     } catch (err) {
-      console.error('Error fetching notifications:', err);
+      logger.error('Error fetching notifications:', err);
       setError('Error al cargar notificaciones');
     } finally {
       setIsLoading(false);
@@ -67,7 +68,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
         setUnreadCount(data.count || 0);
       }
     } catch (err) {
-      console.error('Error fetching unread count:', err);
+      logger.error('Error fetching unread count:', err);
     }
   }, []);
 
@@ -94,7 +95,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
         }
         return false;
       } catch (err) {
-        console.error('Error marking notification as read:', err);
+        logger.error('Error marking notification as read:', err);
         return false;
       }
     },
@@ -118,7 +119,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       }
       return false;
     } catch (err) {
-      console.error('Error marking all as read:', err);
+      logger.error('Error marking all as read:', err);
       return false;
     }
   }, []);

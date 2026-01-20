@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(facilities);
   } catch (error) {
-    console.error('[Sports API] Error fetching facilities:', error);
+    logger.error('[Sports API] Error fetching facilities:', error);
     return NextResponse.json({ error: 'Error al obtener instalaciones' }, { status: 500 });
   }
 }
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(newFacility, { status: 201 });
   } catch (error) {
-    console.error('[Sports API] Error creating facility:', error);
+    logger.error('[Sports API] Error creating facility:', error);
     return NextResponse.json({ error: 'Error al crear instalación' }, { status: 500 });
   }
 }

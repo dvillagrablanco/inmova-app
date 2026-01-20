@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -230,7 +231,7 @@ export async function GET(request: NextRequest) {
       message: 'Los agentes están disponibles. Las métricas se actualizarán cuando los agentes procesen interacciones.',
     });
   } catch (error: any) {
-    console.error('[AI Agents List Error]:', error);
+    logger.error('[AI Agents List Error]:', error);
     return NextResponse.json(
       { error: 'Error al obtener lista de agentes' },
       { status: 500 }
@@ -275,7 +276,7 @@ export async function PUT(request: NextRequest) {
       enabled,
     });
   } catch (error: any) {
-    console.error('[AI Agents Update Error]:', error);
+    logger.error('[AI Agents Update Error]:', error);
     return NextResponse.json(
       { error: 'Error al actualizar agente' },
       { status: 500 }

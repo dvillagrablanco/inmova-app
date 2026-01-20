@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -128,7 +129,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       },
     });
   } catch (error: any) {
-    console.error('[Partner Stats Error]:', error);
+    logger.error('[Partner Stats Error]:', error);
     return NextResponse.json({ error: 'Error obteniendo estadísticas' }, { status: 500 });
   }
 }

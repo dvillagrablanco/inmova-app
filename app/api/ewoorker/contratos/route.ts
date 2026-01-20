@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -87,7 +88,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ contratos: contratosFormateados });
 
   } catch (error: any) {
-    console.error('[eWoorker Contratos Error]:', error);
+    logger.error('[eWoorker Contratos Error]:', error);
     return NextResponse.json(
       { error: 'Error al cargar contratos' },
       { status: 500 }

@@ -10,6 +10,7 @@ import { authOptions } from '@/lib/auth-options';
 import { savePushSubscription } from '@/lib/push-notification-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const subscribeSchema = z.object({
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Error subscribing to push notifications:', error);
+    logger.error('Error subscribing to push notifications:', error);
     return NextResponse.json(
       { error: 'Error guardando suscripción', message: error.message },
       { status: 500 }

@@ -11,6 +11,7 @@ import { ewoorkerChat } from '@/lib/ewoorker-chat-service';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       count: mensajes.length,
     });
   } catch (error: any) {
-    console.error('[EWOORKER_CHAT_MESSAGES_GET]', error);
+    logger.error('[EWOORKER_CHAT_MESSAGES_GET]', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -127,7 +128,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         { status: 400 }
       );
     }
-    console.error('[EWOORKER_CHAT_MESSAGES_POST]', error);
+    logger.error('[EWOORKER_CHAT_MESSAGES_POST]', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -30,7 +30,7 @@ export const safeLocalStorage = {
       }
       return memoryStorage[key] || null;
     } catch (error) {
-      console.warn('localStorage.getItem failed:', error);
+      logger.warn('localStorage.getItem failed:', error);
       return memoryStorage[key] || null;
     }
   },
@@ -42,7 +42,7 @@ export const safeLocalStorage = {
       }
       memoryStorage[key] = value;
     } catch (error) {
-      console.warn('localStorage.setItem failed:', error);
+      logger.warn('localStorage.setItem failed:', error);
       memoryStorage[key] = value;
     }
   },
@@ -54,7 +54,7 @@ export const safeLocalStorage = {
       }
       delete memoryStorage[key];
     } catch (error) {
-      console.warn('localStorage.removeItem failed:', error);
+      logger.warn('localStorage.removeItem failed:', error);
       delete memoryStorage[key];
     }
   },
@@ -66,7 +66,7 @@ export const safeLocalStorage = {
       }
       Object.keys(memoryStorage).forEach((key) => delete memoryStorage[key]);
     } catch (error) {
-      console.warn('localStorage.clear failed:', error);
+      logger.warn('localStorage.clear failed:', error);
       Object.keys(memoryStorage).forEach((key) => delete memoryStorage[key]);
     }
   },
@@ -83,7 +83,7 @@ export const safeSessionStorage = {
       }
       return memoryStorage[`session_${key}`] || null;
     } catch (error) {
-      console.warn('sessionStorage.getItem failed:', error);
+      logger.warn('sessionStorage.getItem failed:', error);
       return memoryStorage[`session_${key}`] || null;
     }
   },
@@ -95,7 +95,7 @@ export const safeSessionStorage = {
       }
       memoryStorage[`session_${key}`] = value;
     } catch (error) {
-      console.warn('sessionStorage.setItem failed:', error);
+      logger.warn('sessionStorage.setItem failed:', error);
       memoryStorage[`session_${key}`] = value;
     }
   },
@@ -107,7 +107,7 @@ export const safeSessionStorage = {
       }
       delete memoryStorage[`session_${key}`];
     } catch (error) {
-      console.warn('sessionStorage.removeItem failed:', error);
+      logger.warn('sessionStorage.removeItem failed:', error);
       delete memoryStorage[`session_${key}`];
     }
   },
@@ -121,7 +121,7 @@ export const safeSessionStorage = {
         .filter((key) => key.startsWith('session_'))
         .forEach((key) => delete memoryStorage[key]);
     } catch (error) {
-      console.warn('sessionStorage.clear failed:', error);
+      logger.warn('sessionStorage.clear failed:', error);
       Object.keys(memoryStorage)
         .filter((key) => key.startsWith('session_'))
         .forEach((key) => delete memoryStorage[key]);

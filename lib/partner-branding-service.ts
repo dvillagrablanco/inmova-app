@@ -13,6 +13,7 @@
 import { prisma } from '@/lib/db';
 import { cache } from 'react';
 
+import logger from '@/lib/logger';
 export interface PartnerTheme {
   // Identidad
   nombre: string;
@@ -462,7 +463,7 @@ export async function trackPartnerLandingView(slug: string): Promise<void> {
       },
     });
   } catch (error) {
-    console.error('[Partner Branding] Error tracking view:', error);
+    logger.error('[Partner Branding] Error tracking view:', error);
   }
 }
 
@@ -478,7 +479,7 @@ export async function trackPartnerLandingLead(slug: string): Promise<void> {
       },
     });
   } catch (error) {
-    console.error('[Partner Branding] Error tracking lead:', error);
+    logger.error('[Partner Branding] Error tracking lead:', error);
   }
 }
 
@@ -494,7 +495,7 @@ export async function trackBannerClick(bannerId: string): Promise<void> {
       },
     });
   } catch (error) {
-    console.error('[Partner Branding] Error tracking banner click:', error);
+    logger.error('[Partner Branding] Error tracking banner click:', error);
   }
 }
 
@@ -510,7 +511,7 @@ export async function trackServiceInteraction(serviceId: string, tipo: 'vista' |
         : { clicks: { increment: 1 } },
     });
   } catch (error) {
-    console.error('[Partner Branding] Error tracking service:', error);
+    logger.error('[Partner Branding] Error tracking service:', error);
   }
 }
 

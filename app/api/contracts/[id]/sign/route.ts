@@ -15,6 +15,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -141,7 +142,7 @@ export async function POST(
     });
 
   } catch (error: any) {
-    console.error('[Contract Sign Error]:', error);
+    logger.error('[Contract Sign Error]:', error);
     
     return NextResponse.json(
       {

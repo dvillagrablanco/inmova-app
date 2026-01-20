@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/prisma';
 
+import logger from '@/lib/logger';
 // GET - Obtener mensajes entre dos usuarios
 export async function GET(
   request: NextRequest,
@@ -82,7 +83,7 @@ export async function GET(
       otherUser
     });
   } catch (error) {
-    console.error('Error al obtener mensajes:', error);
+    logger.error('Error al obtener mensajes:', error);
     return NextResponse.json(
       { error: 'Error al obtener mensajes' },
       { status: 500 }
@@ -146,7 +147,7 @@ export async function POST(
 
     return NextResponse.json({ message: newMessage }, { status: 201 });
   } catch (error) {
-    console.error('Error al enviar mensaje:', error);
+    logger.error('Error al enviar mensaje:', error);
     return NextResponse.json(
       { error: 'Error al enviar mensaje' },
       { status: 500 }

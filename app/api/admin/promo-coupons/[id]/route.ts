@@ -12,6 +12,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -74,7 +75,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error('[PromoCoupon GET Error]:', error);
+    logger.error('[PromoCoupon GET Error]:', error);
     return NextResponse.json({ error: 'Error obteniendo cupón' }, { status: 500 });
   }
 }
@@ -147,7 +148,7 @@ export async function PUT(
       data: coupon,
     });
   } catch (error: any) {
-    console.error('[PromoCoupon PUT Error]:', error);
+    logger.error('[PromoCoupon PUT Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -200,7 +201,7 @@ export async function DELETE(
       message: 'Cupón eliminado correctamente',
     });
   } catch (error: any) {
-    console.error('[PromoCoupon DELETE Error]:', error);
+    logger.error('[PromoCoupon DELETE Error]:', error);
     return NextResponse.json({ error: 'Error eliminando cupón' }, { status: 500 });
   }
 }

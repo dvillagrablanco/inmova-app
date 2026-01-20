@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const createPropietarioSchema = z.object({
@@ -132,7 +133,7 @@ export async function GET(request: NextRequest) {
       stats,
     });
   } catch (error: any) {
-    console.error('[Propietarios GET Error]:', error);
+    logger.error('[Propietarios GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo propietarios', details: error.message },
       { status: 500 }
@@ -196,7 +197,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[Propietarios POST Error]:', error);
+    logger.error('[Propietarios POST Error]:', error);
     return NextResponse.json(
       { error: 'Error creando propietario', details: error.message },
       { status: 500 }

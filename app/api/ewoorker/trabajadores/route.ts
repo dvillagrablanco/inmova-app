@@ -7,6 +7,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 // Schema de validación para crear trabajador
 const createTrabajadorSchema = z.object({
   nombre: z.string().min(2, 'Nombre requerido'),
@@ -139,7 +140,7 @@ export async function GET(request: NextRequest) {
       });
     }
   } catch (error: any) {
-    console.error('[EWOORKER_TRABAJADORES_GET]', error);
+    logger.error('[EWOORKER_TRABAJADORES_GET]', error);
     return NextResponse.json({ error: 'Error al obtener trabajadores' }, { status: 500 });
   }
 }
@@ -231,7 +232,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ trabajador }, { status: 201 });
   } catch (error: any) {
-    console.error('[EWOORKER_TRABAJADORES_POST]', error);
+    logger.error('[EWOORKER_TRABAJADORES_POST]', error);
 
     if (error.name === 'ZodError') {
       return NextResponse.json(

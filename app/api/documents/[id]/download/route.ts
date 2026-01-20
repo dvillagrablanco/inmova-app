@@ -10,6 +10,7 @@ import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -91,7 +92,7 @@ export async function GET(
     });
 
   } catch (error: any) {
-    console.error('[Document Download Error]:', error);
+    logger.error('[Document Download Error]:', error);
     
     return NextResponse.json(
       {

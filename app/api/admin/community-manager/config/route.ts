@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
       config: DEFAULT_CONFIG,
     });
   } catch (error: any) {
-    console.error('[Community Manager Config Error]:', error);
+    logger.error('[Community Manager Config Error]:', error);
     return NextResponse.json(
       { error: 'Error al obtener configuración' },
       { status: 500 }
@@ -86,7 +87,7 @@ export async function PUT(request: NextRequest) {
       message: 'Configuración guardada correctamente',
     });
   } catch (error: any) {
-    console.error('[Community Manager Update Config Error]:', error);
+    logger.error('[Community Manager Update Config Error]:', error);
     return NextResponse.json(
       { error: 'Error al guardar configuración' },
       { status: 500 }

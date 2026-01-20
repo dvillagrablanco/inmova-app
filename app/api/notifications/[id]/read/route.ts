@@ -12,6 +12,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { markAsRead } from '@/lib/notification-service';
 
+import logger from '@/lib/logger';
 interface RouteContext {
   params: {
     id: string;
@@ -51,7 +52,7 @@ export async function PATCH(
       notification: result.notification,
     });
   } catch (error) {
-    console.error('[API] Error in PATCH /api/notifications/[id]/read:', error);
+    logger.error('[API] Error in PATCH /api/notifications/[id]/read:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

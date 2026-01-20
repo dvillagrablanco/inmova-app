@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
       message: 'Tarea creada correctamente',
     }, { status: 201 });
   } catch (error: any) {
-    console.error('[Professional Task Create Error]:', error);
+    logger.error('[Professional Task Create Error]:', error);
     return NextResponse.json(
       { error: 'Error al crear tarea' },
       { status: 500 }
@@ -76,7 +77,7 @@ export async function PUT(request: NextRequest) {
       message: 'Tarea actualizada correctamente',
     });
   } catch (error: any) {
-    console.error('[Professional Task Update Error]:', error);
+    logger.error('[Professional Task Update Error]:', error);
     return NextResponse.json(
       { error: 'Error al actualizar tarea' },
       { status: 500 }
@@ -110,7 +111,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Tarea eliminada correctamente',
     });
   } catch (error: any) {
-    console.error('[Professional Task Delete Error]:', error);
+    logger.error('[Professional Task Delete Error]:', error);
     return NextResponse.json(
       { error: 'Error al eliminar tarea' },
       { status: 500 }

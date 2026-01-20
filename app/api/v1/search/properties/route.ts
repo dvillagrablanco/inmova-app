@@ -12,6 +12,7 @@ import { authOptions } from '@/lib/auth-options';
 import { searchProperties, getSearchFacets } from '@/lib/advanced-search-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const searchSchema = z.object({
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('Error in property search:', error);
+    logger.error('Error in property search:', error);
     return NextResponse.json(
       { error: 'Error interno', message: error.message },
       { status: 500 }

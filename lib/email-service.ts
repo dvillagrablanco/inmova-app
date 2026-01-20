@@ -6,6 +6,7 @@
 
 import nodemailer from 'nodemailer';
 
+import logger from '@/lib/logger';
 // Configuración del transporter (ajustar según el proveedor)
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -55,7 +56,7 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     console.log('[EMAIL] Email enviado exitosamente a:', options.to);
     return true;
   } catch (error) {
-    console.error('[EMAIL] Error al enviar email:', error);
+    logger.error('[EMAIL] Error al enviar email:', error);
     return false;
   }
 }

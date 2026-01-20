@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from '@/lib/auth-options';
 import prisma from "@/lib/prisma";
 
+import logger from '@/lib/logger';
 // IDs de usuarios autorizados (socio fundador)
 // TODO: Configurar en variables de entorno
 const SOCIO_FUNDADOR_IDS = process.env.EWOORKER_SOCIO_IDS?.split(",") || [];
@@ -323,7 +324,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(metricas);
 
   } catch (error) {
-    console.error("[EWOORKER_ADMIN_SOCIO_METRICAS]", error);
+    logger.error("[EWOORKER_ADMIN_SOCIO_METRICAS]", error);
     return NextResponse.json(
       { error: "Error al obtener métricas" },
       { status: 500 }

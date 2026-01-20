@@ -7,6 +7,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 // Schema de validación para actualizar trabajador
 const updateTrabajadorSchema = z.object({
   nombre: z.string().min(2).optional(),
@@ -96,7 +97,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       esMiTrabajador,
     });
   } catch (error: any) {
-    console.error('[EWOORKER_TRABAJADOR_GET]', error);
+    logger.error('[EWOORKER_TRABAJADOR_GET]', error);
     return NextResponse.json({ error: 'Error al obtener trabajador' }, { status: 500 });
   }
 }
@@ -158,7 +159,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json({ trabajador });
   } catch (error: any) {
-    console.error('[EWOORKER_TRABAJADOR_PUT]', error);
+    logger.error('[EWOORKER_TRABAJADOR_PUT]', error);
 
     if (error.name === 'ZodError') {
       return NextResponse.json(
@@ -241,7 +242,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     return NextResponse.json({ success: true, message: 'Trabajador eliminado' });
   } catch (error: any) {
-    console.error('[EWOORKER_TRABAJADOR_DELETE]', error);
+    logger.error('[EWOORKER_TRABAJADOR_DELETE]', error);
     return NextResponse.json({ error: 'Error al eliminar trabajador' }, { status: 500 });
   }
 }

@@ -6,6 +6,7 @@ import { prisma } from '@/lib/db';
 import { tenantGamification, TENANT_POINTS } from '@/lib/tenant-gamification-service';
 import { customAlphabet } from 'nanoid';
 
+import logger from '@/lib/logger';
 // ============================================
 // CONSTANTES
 // ============================================
@@ -147,7 +148,7 @@ class TenantReferralService {
         code,
       });
     } catch (err) {
-      console.warn('[Referral Gamification Error]:', err);
+      logger.warn('[Referral Gamification Error]:', err);
     }
 
     return { code, sent: true };
@@ -214,7 +215,7 @@ class TenantReferralService {
         isWelcomeBonus: true,
       });
     } catch (err) {
-      console.warn('[Referral New Tenant Points Error]:', err);
+      logger.warn('[Referral New Tenant Points Error]:', err);
     }
 
     return {
@@ -256,7 +257,7 @@ class TenantReferralService {
         code: referral.code,
       });
     } catch (err) {
-      console.warn('[Referral Verification Points Error]:', err);
+      logger.warn('[Referral Verification Points Error]:', err);
     }
 
     return true;

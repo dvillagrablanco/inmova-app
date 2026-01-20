@@ -15,6 +15,7 @@ import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } fro
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import crypto from 'crypto';
 
+import logger from '@/lib/logger';
 // Configuración global de AWS S3 (Inmova paga)
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID || '';
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY || '';
@@ -128,7 +129,7 @@ export async function uploadToS3(
       key,
     };
   } catch (error: any) {
-    console.error('[S3] Upload error:', error);
+    logger.error('[S3] Upload error:', error);
     return {
       success: false,
       error: error.message || 'Error subiendo archivo',
@@ -153,7 +154,7 @@ export async function getSignedUrlForObject(key: string, expiresIn: number = 360
     const url = await getSignedUrl(s3Client, command, { expiresIn });
     return url;
   } catch (error: any) {
-    console.error('[S3] Signed URL error:', error);
+    logger.error('[S3] Signed URL error:', error);
     throw new Error('Error generando URL firmada');
   }
 }
@@ -174,7 +175,7 @@ export async function deleteFromS3(key: string): Promise<boolean> {
     await s3Client.send(command);
     return true;
   } catch (error: any) {
-    console.error('[S3] Delete error:', error);
+    logger.error('[S3] Delete error:', error);
     return false;
   }
 }

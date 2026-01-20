@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -30,7 +31,7 @@ export async function GET(
 
     return NextResponse.json(checklist);
   } catch (error) {
-    console.error('Error al obtener checklist:', error);
+    logger.error('Error al obtener checklist:', error);
     return NextResponse.json(
       { error: 'Error al obtener checklist' },
       { status: 500 }
@@ -79,7 +80,7 @@ export async function PATCH(
 
     return NextResponse.json(checklist);
   } catch (error) {
-    console.error('Error al actualizar checklist:', error);
+    logger.error('Error al actualizar checklist:', error);
     return NextResponse.json(
       { error: 'Error al actualizar checklist' },
       { status: 500 }
@@ -116,7 +117,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Checklist eliminada correctamente' });
   } catch (error) {
-    console.error('Error al eliminar checklist:', error);
+    logger.error('Error al eliminar checklist:', error);
     return NextResponse.json(
       { error: 'Error al eliminar checklist' },
       { status: 500 }

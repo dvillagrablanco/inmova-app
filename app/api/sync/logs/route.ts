@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // Nota: En producción, estos logs deberían almacenarse en la base de datos
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: filteredLogs });
   } catch (error) {
-    console.error('[Sync Logs GET Error]:', error);
+    logger.error('[Sync Logs GET Error]:', error);
     return NextResponse.json({ error: 'Error al obtener logs' }, { status: 500 });
   }
 }

@@ -23,6 +23,7 @@ import {
 } from '@/lib/modules-management-system';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 // GET: Obtener información de módulos
 export async function GET(request: NextRequest) {
   try {
@@ -105,7 +106,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error: any) {
-    console.error('Error obteniendo módulos:', error);
+    logger.error('Error obteniendo módulos:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor', details: error.message },
       { status: 500 }
@@ -166,7 +167,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('Error gestionando módulo:', error);
+    logger.error('Error gestionando módulo:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor', details: error.message },
       { status: 500 }

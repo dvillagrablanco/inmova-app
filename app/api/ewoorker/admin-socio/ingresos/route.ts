@@ -12,6 +12,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import ewoorkerStripeService from '@/lib/ewoorker-stripe-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
@@ -77,7 +78,7 @@ export async function GET(request: NextRequest) {
       nota: 'Todos los montos están en EUR. Los ingresos de eWoorker se dividen 50/50 entre el socio fundador y la plataforma.',
     });
   } catch (error: any) {
-    console.error('[eWoorker Admin Socio Ingresos Error]:', error);
+    logger.error('[eWoorker Admin Socio Ingresos Error]:', error);
     return NextResponse.json(
       { error: 'Error al obtener ingresos', details: error.message },
       { status: 500 }

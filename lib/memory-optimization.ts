@@ -5,6 +5,7 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 
+import logger from '@/lib/logger';
 /**
  * Hook para limpiar efectos y prevenir memory leaks
  */
@@ -189,7 +190,7 @@ export function usePreventMultipleCalls() {
 
   return useCallback(async <T>(fn: () => Promise<T>): Promise<T | null> => {
     if (isCallingRef.current) {
-      console.warn('Prevented multiple simultaneous calls');
+      logger.warn('Prevented multiple simultaneous calls');
       return null;
     }
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
       message: 'No hay proyectos. Crea tu primer proyecto de servicios profesionales.',
     });
   } catch (error: any) {
-    console.error('[Professional Projects Error]:', error);
+    logger.error('[Professional Projects Error]:', error);
     return NextResponse.json(
       { error: 'Error al obtener proyectos' },
       { status: 500 }
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
       message: 'Proyecto creado correctamente',
     }, { status: 201 });
   } catch (error: any) {
-    console.error('[Professional Create Error]:', error);
+    logger.error('[Professional Create Error]:', error);
     return NextResponse.json(
       { error: 'Error al crear proyecto' },
       { status: 500 }
@@ -124,7 +125,7 @@ export async function PUT(request: NextRequest) {
       message: 'Proyecto actualizado correctamente',
     });
   } catch (error: any) {
-    console.error('[Professional Update Error]:', error);
+    logger.error('[Professional Update Error]:', error);
     return NextResponse.json(
       { error: 'Error al actualizar proyecto' },
       { status: 500 }
@@ -157,7 +158,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Proyecto eliminado correctamente',
     });
   } catch (error: any) {
-    console.error('[Professional Delete Error]:', error);
+    logger.error('[Professional Delete Error]:', error);
     return NextResponse.json(
       { error: 'Error al eliminar proyecto' },
       { status: 500 }

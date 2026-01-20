@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -102,7 +103,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(planesConFeatures);
   } catch (error: any) {
-    console.error('[Public Plans API Error]:', error);
+    logger.error('[Public Plans API Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo planes' },
       { status: 500 }

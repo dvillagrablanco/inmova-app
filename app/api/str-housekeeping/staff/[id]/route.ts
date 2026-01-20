@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -45,7 +46,7 @@ export async function GET(
 
     return NextResponse.json(staff);
   } catch (error) {
-    console.error('Error al obtener personal:', error);
+    logger.error('Error al obtener personal:', error);
     return NextResponse.json(
       { error: 'Error al obtener personal' },
       { status: 500 }
@@ -102,7 +103,7 @@ export async function PATCH(
 
     return NextResponse.json(staff);
   } catch (error) {
-    console.error('Error al actualizar personal:', error);
+    logger.error('Error al actualizar personal:', error);
     return NextResponse.json(
       { error: 'Error al actualizar personal' },
       { status: 500 }
@@ -156,7 +157,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Personal eliminado correctamente' });
   } catch (error) {
-    console.error('Error al eliminar personal:', error);
+    logger.error('Error al eliminar personal:', error);
     return NextResponse.json(
       { error: 'Error al eliminar personal' },
       { status: 500 }

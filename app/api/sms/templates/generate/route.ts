@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -86,7 +87,7 @@ Requisitos:
           aiSuggestion = response.content[0].text.trim();
         }
       } catch (aiError) {
-        console.error('Error con IA:', aiError);
+        logger.error('Error con IA:', aiError);
         // Continuar sin IA si hay error
       }
     }
@@ -102,7 +103,7 @@ Requisitos:
       aiGenerated: !!aiSuggestion
     });
   } catch (error) {
-    console.error('Error generating templates:', error);
+    logger.error('Error generating templates:', error);
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

@@ -19,6 +19,7 @@ import { FileType } from '@/lib/aws-s3-service';
 import { checkStorageLimit, createLimitExceededResponse, logUsageWarning } from '@/lib/usage-limits';
 import { trackUsage } from '@/lib/usage-tracking-service';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -137,7 +138,7 @@ export async function POST(request: NextRequest) {
       count: uploads.length,
     });
   } catch (error: any) {
-    console.error('[API Upload] Error:', error);
+    logger.error('[API Upload] Error:', error);
 
     // Error específico de AWS
     if (error.message?.includes('AWS')) {
@@ -208,7 +209,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ url });
   } catch (error: any) {
-    console.error('[API Upload GET] Error:', error);
+    logger.error('[API Upload GET] Error:', error);
     return NextResponse.json(
       { error: 'Error generando URL' },
       { status: 500 }
@@ -268,7 +269,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('[API Upload DELETE] Error:', error);
+    logger.error('[API Upload DELETE] Error:', error);
     return NextResponse.json(
       { error: 'Error eliminando archivo' },
       { status: 500 }

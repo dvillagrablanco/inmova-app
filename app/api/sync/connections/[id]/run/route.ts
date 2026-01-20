@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // In-memory storage for sync logs
@@ -84,7 +85,7 @@ export async function POST(
       message: 'Sincronización ejecutada' 
     });
   } catch (error) {
-    console.error('[Sync Run Error]:', error);
+    logger.error('[Sync Run Error]:', error);
     return NextResponse.json({ error: 'Error al ejecutar sincronización' }, { status: 500 });
   }
 }

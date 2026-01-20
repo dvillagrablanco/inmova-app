@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(formattedGardens);
   } catch (error: any) {
-    console.error('[UrbanGardens GET] Error:', error);
+    logger.error('[UrbanGardens GET] Error:', error);
     return NextResponse.json({ error: 'Error al obtener huertos', details: error.message }, { status: 500 });
   }
 }
@@ -135,7 +136,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(garden, { status: 201 });
   } catch (error: any) {
-    console.error('[UrbanGardens POST] Error:', error);
+    logger.error('[UrbanGardens POST] Error:', error);
     return NextResponse.json({ error: 'Error al crear huerto', details: error.message }, { status: 500 });
   }
 }

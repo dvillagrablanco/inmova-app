@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -39,7 +40,7 @@ export async function GET(
 
     return NextResponse.json(facility);
   } catch (error) {
-    console.error('[Sports API] Error fetching facility:', error);
+    logger.error('[Sports API] Error fetching facility:', error);
     return NextResponse.json({ error: 'Error al obtener instalación' }, { status: 500 });
   }
 }
@@ -88,7 +89,7 @@ export async function PUT(
 
     return NextResponse.json(updatedFacility);
   } catch (error) {
-    console.error('[Sports API] Error updating facility:', error);
+    logger.error('[Sports API] Error updating facility:', error);
     return NextResponse.json({ error: 'Error al actualizar instalación' }, { status: 500 });
   }
 }
@@ -120,7 +121,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, message: 'Instalación eliminada' });
   } catch (error) {
-    console.error('[Sports API] Error deleting facility:', error);
+    logger.error('[Sports API] Error deleting facility:', error);
     return NextResponse.json({ error: 'Error al eliminar instalación' }, { status: 500 });
   }
 }

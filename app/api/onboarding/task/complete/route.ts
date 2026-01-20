@@ -10,6 +10,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { completeOnboardingTask } from '@/lib/onboarding-service';
 
+import logger from '@/lib/logger';
 export async function POST(request: Request) {
   try {
     // Autenticación
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
       message: 'Tarea completada'
     });
   } catch (error: any) {
-    console.error('Error completando tarea de onboarding:', error);
+    logger.error('Error completando tarea de onboarding:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor', details: error.message },
       { status: 500 }

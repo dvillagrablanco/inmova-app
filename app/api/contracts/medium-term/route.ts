@@ -26,6 +26,7 @@ import {
 import { differenceInMonths } from 'date-fns';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -98,7 +99,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[API Error] GET /api/contracts/medium-term:', error);
+    logger.error('[API Error] GET /api/contracts/medium-term:', error);
     return NextResponse.json(
       { error: 'Error obteniendo contratos de media estancia' },
       { status: 500 }
@@ -222,7 +223,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('[API Error] POST /api/contracts/medium-term:', error);
+    logger.error('[API Error] POST /api/contracts/medium-term:', error);
     return NextResponse.json(
       { error: error.message || 'Error creando contrato de media estancia' },
       { status: 500 }

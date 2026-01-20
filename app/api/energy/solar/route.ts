@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(installations);
   } catch (error) {
-    console.error('[Solar API] Error fetching installations:', error);
+    logger.error('[Solar API] Error fetching installations:', error);
     return NextResponse.json({ error: 'Error al obtener instalaciones' }, { status: 500 });
   }
 }
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(newInstallation, { status: 201 });
   } catch (error) {
-    console.error('[Solar API] Error creating installation:', error);
+    logger.error('[Solar API] Error creating installation:', error);
     return NextResponse.json({ error: 'Error al crear instalación' }, { status: 500 });
   }
 }

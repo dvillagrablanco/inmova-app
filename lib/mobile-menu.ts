@@ -16,7 +16,7 @@ export function toggleMobileMenu() {
   console.log('Elements found:', { sidebar: !!sidebar, overlay: !!overlay });
 
   if (!sidebar || !overlay) {
-    console.error('Sidebar or overlay not found!');
+    logger.error('Sidebar or overlay not found!');
     return;
   }
 

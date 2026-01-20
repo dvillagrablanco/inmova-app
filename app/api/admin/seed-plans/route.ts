@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import prisma from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -220,7 +221,7 @@ export async function GET(request: NextRequest) {
           });
           companiesUpdated++;
         } catch (error) {
-          console.error(`Error asignando plan a ${company.nombre}:`, error);
+          logger.error(`Error asignando plan a ${company.nombre}:`, error);
         }
       }
     }
@@ -238,7 +239,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('[Seed Plans API Error]:', error);
+    logger.error('[Seed Plans API Error]:', error);
     return NextResponse.json(
       { error: 'Error ejecutando seed', details: error.message },
       { status: 500 }

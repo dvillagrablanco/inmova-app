@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(gardens);
   } catch (error) {
-    console.error('[Gardens API] Error fetching gardens:', error);
+    logger.error('[Gardens API] Error fetching gardens:', error);
     return NextResponse.json({ error: 'Error al obtener huertos' }, { status: 500 });
   }
 }
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(newGarden, { status: 201 });
   } catch (error) {
-    console.error('[Gardens API] Error creating garden:', error);
+    logger.error('[Gardens API] Error creating garden:', error);
     return NextResponse.json({ error: 'Error al crear huerto' }, { status: 500 });
   }
 }

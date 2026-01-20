@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -21,7 +22,7 @@ export async function GET() {
       authKeyMasked: authKey ? `****${authKey.slice(-8)}` : null,
     });
   } catch (error) {
-    console.error('Error getting config:', error);
+    logger.error('Error getting config:', error);
     return NextResponse.json(
       { error: 'Error obteniendo configuración' },
       { status: 500 }
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
       ],
     });
   } catch (error) {
-    console.error('Error saving config:', error);
+    logger.error('Error saving config:', error);
     return NextResponse.json(
       { error: 'Error guardando configuración' },
       { status: 500 }

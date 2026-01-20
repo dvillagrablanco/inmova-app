@@ -56,7 +56,7 @@ class RoutePreloaderManager {
     const strategy = preloadStrategies[role];
 
     if (!strategy) {
-      console.warn(`[RoutePreloader] Estrategia no encontrada para rol: ${role}`);
+      logger.warn(`[RoutePreloader] Estrategia no encontrada para rol: ${role}`);
       this.isPreloading = false;
       return;
     }
@@ -74,7 +74,7 @@ class RoutePreloaderManager {
 
       console.log(`[RoutePreloader] Precarga completada para rol: ${role}`);
     } catch (error) {
-      console.error('[RoutePreloader] Error en precarga:', error);
+      logger.error('[RoutePreloader] Error en precarga:', error);
     } finally {
       this.isPreloading = false;
     }
@@ -116,7 +116,7 @@ class RoutePreloaderManager {
           this.preloadedData.set(endpoint, data);
         }
       } catch (error) {
-        console.error(`[RoutePreloader] Error precargando ${endpoint}:`, error);
+        logger.error(`[RoutePreloader] Error precargando ${endpoint}:`, error);
       }
     });
 

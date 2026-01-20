@@ -3,6 +3,7 @@ import { verifyAuthSystem } from '@/lib/auth-guard';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -54,7 +55,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(response, { status: statusCode });
     
   } catch (error) {
-    console.error('[Auth Health Check] Error:', error);
+    logger.error('[Auth Health Check] Error:', error);
     
     return NextResponse.json(
       {

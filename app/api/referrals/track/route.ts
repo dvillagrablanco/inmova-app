@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('[Referral Track Error]:', error);
+    logger.error('[Referral Track Error]:', error);
     return NextResponse.json({ error: 'Error registrando referral' }, { status: 500 });
   }
 }
@@ -128,7 +129,7 @@ export async function PUT(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Referral Update Error]:', error);
+    logger.error('[Referral Update Error]:', error);
     return NextResponse.json(
       { error: 'Error creando relación partner-client' },
       { status: 500 }

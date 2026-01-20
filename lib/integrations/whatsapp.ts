@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 interface WhatsAppConfig {
   phoneNumberId: string;
   accessToken: string;
@@ -281,7 +282,7 @@ export class WhatsAppService {
     const tenant = payment.contract.tenant;
 
     if (!tenant.phone) {
-      console.warn('[WhatsApp] Tenant has no phone number');
+      logger.warn('[WhatsApp] Tenant has no phone number');
       return;
     }
 

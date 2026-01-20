@@ -9,7 +9,7 @@
  */
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
-    console.warn('Service Workers not supported');
+    logger.warn('Service Workers not supported');
     return null;
   }
 
@@ -18,7 +18,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
     console.log('✅ Service Worker registered:', registration);
     return registration;
   } catch (error) {
-    console.error('❌ Service Worker registration failed:', error);
+    logger.error('❌ Service Worker registration failed:', error);
     return null;
   }
 }
@@ -28,7 +28,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
  */
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
   if (typeof window === 'undefined' || !('Notification' in window)) {
-    console.warn('Notifications not supported');
+    logger.warn('Notifications not supported');
     return 'denied';
   }
 
@@ -62,7 +62,7 @@ export async function subscribeToPush(): Promise<boolean> {
     // 2. Solicitar permiso
     const permission = await requestNotificationPermission();
     if (permission !== 'granted') {
-      console.warn('Notification permission denied');
+      logger.warn('Notification permission denied');
       return false;
     }
 
@@ -96,7 +96,7 @@ export async function subscribeToPush(): Promise<boolean> {
     return true;
 
   } catch (error) {
-    console.error('❌ Error subscribing to push:', error);
+    logger.error('❌ Error subscribing to push:', error);
     return false;
   }
 }
@@ -128,7 +128,7 @@ export async function unsubscribeFromPush(): Promise<boolean> {
     return true;
 
   } catch (error) {
-    console.error('❌ Error unsubscribing from push:', error);
+    logger.error('❌ Error unsubscribing from push:', error);
     return false;
   }
 }
@@ -148,7 +148,7 @@ export async function isPushSubscribed(): Promise<boolean> {
     return subscription !== null;
 
   } catch (error) {
-    console.error('Error checking push subscription:', error);
+    logger.error('Error checking push subscription:', error);
     return false;
   }
 }

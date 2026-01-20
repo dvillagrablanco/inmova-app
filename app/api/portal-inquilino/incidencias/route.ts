@@ -11,6 +11,7 @@ import { tenantProviderMatching } from '@/lib/tenant-provider-matching-service';
 import { tenantGamification } from '@/lib/tenant-gamification-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -92,7 +93,7 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error: any) {
-    console.error('[Incidencias GET Error]:', error);
+    logger.error('[Incidencias GET Error]:', error);
     return NextResponse.json(
       { error: error.message || 'Error obteniendo incidencias' },
       { status: 500 }
@@ -141,7 +142,7 @@ export async function POST(request: NextRequest) {
           urgencia: aiClassification.urgencia,
         };
       } catch (err) {
-        console.warn('[Auto-classify failed, using manual]:', err);
+        logger.warn('[Auto-classify failed, using manual]:', err);
       }
     }
 
@@ -178,7 +179,7 @@ export async function POST(request: NextRequest) {
         ubicacion: validated.ubicacion,
       });
     } catch (err) {
-      console.warn('[Provider matching failed]:', err);
+      logger.warn('[Provider matching failed]:', err);
     }
 
     // Añadir puntos de gamificación
@@ -188,7 +189,7 @@ export async function POST(request: NextRequest) {
         tipo: classification.tipo,
       });
     } catch (err) {
-      console.warn('[Gamification failed]:', err);
+      logger.warn('[Gamification failed]:', err);
     }
 
     return NextResponse.json({
@@ -208,7 +209,7 @@ export async function POST(request: NextRequest) {
       message: '¡Incidencia reportada! Te mostramos proveedores recomendados.',
     });
   } catch (error: any) {
-    console.error('[Incidencias POST Error]:', error);
+    logger.error('[Incidencias POST Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

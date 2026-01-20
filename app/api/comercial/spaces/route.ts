@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -116,7 +117,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ spaces: formattedSpaces, stats });
   } catch (error: any) {
-    console.error('[CommercialSpaces GET] Error:', error);
+    logger.error('[CommercialSpaces GET] Error:', error);
     return NextResponse.json({ error: 'Error al obtener espacios', details: error.message }, { status: 500 });
   }
 }
@@ -186,7 +187,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(space, { status: 201 });
   } catch (error: any) {
-    console.error('[CommercialSpaces POST] Error:', error);
+    logger.error('[CommercialSpaces POST] Error:', error);
     return NextResponse.json({ error: 'Error al crear espacio', details: error.message }, { status: 500 });
   }
 }

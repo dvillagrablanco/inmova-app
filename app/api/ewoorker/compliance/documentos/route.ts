@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from '@/lib/auth-options';
 import prisma from "@/lib/prisma";
 
+import logger from '@/lib/logger';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -86,7 +87,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error("[EWOORKER_COMPLIANCE_DOCS]", error);
+    logger.error("[EWOORKER_COMPLIANCE_DOCS]", error);
     return NextResponse.json(
       { error: "Error al obtener documentos" },
       { status: 500 }

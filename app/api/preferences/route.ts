@@ -17,6 +17,7 @@ import {
 } from '@/lib/user-preferences-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 // GET: Obtener preferencias
 export async function GET(request: NextRequest) {
   try {
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error: any) {
-    console.error('Error obteniendo preferencias:', error);
+    logger.error('Error obteniendo preferencias:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor', details: error.message },
       { status: 500 }
@@ -124,7 +125,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    console.error('Error actualizando preferencias:', error);
+    logger.error('Error actualizando preferencias:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor', details: error.message },
       { status: 500 }

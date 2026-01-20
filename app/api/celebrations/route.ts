@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger from '@/lib/logger';
 import {
   getPendingCelebrations,
   createCelebration,
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
       celebrations: result.celebrations,
     });
   } catch (error) {
-    console.error('[API] Error in GET /api/celebrations:', error);
+    logger.error('[API] Error in GET /api/celebrations:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
@@ -104,7 +105,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('[API] Error in POST /api/celebrations:', error);
+    logger.error('[API] Error in POST /api/celebrations:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

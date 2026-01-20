@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 
+import logger from '@/lib/logger';
 const transporter = nodemailer.createTransporter({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: parseInt(process.env.SMTP_PORT || '587'),
@@ -83,7 +84,7 @@ export async function sendPartnerWelcomeEmail(partner: {
 
     // Email sent successfully
   } catch (error) {
-    console.error('[Partner Welcome Email Error]:', error);
+    logger.error('[Partner Welcome Email Error]:', error);
     throw error;
   }
 }
@@ -194,7 +195,7 @@ export async function sendPartnerApprovalEmail(partner: {
 
     // Email sent successfully
   } catch (error) {
-    console.error('[Partner Approval Email Error]:', error);
+    logger.error('[Partner Approval Email Error]:', error);
     throw error;
   }
 }
@@ -246,6 +247,6 @@ export async function sendAdminNewPartnerNotification(partner: {
 
     // Notification sent successfully
   } catch (error) {
-    console.error('[Admin Notification Error]:', error);
+    logger.error('[Admin Notification Error]:', error);
   }
 }

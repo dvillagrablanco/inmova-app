@@ -11,6 +11,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -114,7 +115,7 @@ export async function GET(request: NextRequest) {
       branding: partner.brandingConfig || null,
     });
   } catch (error: any) {
-    console.error('[API Partners Branding] Error:', error);
+    logger.error('[API Partners Branding] Error:', error);
     return NextResponse.json({ error: 'Error obteniendo branding' }, { status: 500 });
   }
 }
@@ -161,7 +162,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    console.error('[API Partners Branding] Error:', error);
+    logger.error('[API Partners Branding] Error:', error);
     return NextResponse.json({ error: 'Error actualizando branding' }, { status: 500 });
   }
 }

@@ -7,6 +7,7 @@ import prisma from './db';
 import { getDefaultActiveModules, validateModuleDependencies, MODULES } from './modules-management-system';
 import type { UserRole, BusinessVertical } from '@prisma/client';
 
+import logger from '@/lib/logger';
 export interface UserPreferences {
   activeModules: string[];
   completedTours: string[];
@@ -105,7 +106,7 @@ export async function activateModule(
 
     return { success: true, activeModules: newActiveModules };
   } catch (error: any) {
-    console.error('Error activando módulo:', error);
+    logger.error('Error activando módulo:', error);
     return { success: false, error: error.message };
   }
 }
@@ -146,7 +147,7 @@ export async function deactivateModule(
 
     return { success: true, activeModules: newActiveModules };
   } catch (error: any) {
-    console.error('Error desactivando módulo:', error);
+    logger.error('Error desactivando módulo:', error);
     return { success: false, error: error.message };
   }
 }
@@ -170,7 +171,7 @@ export async function completeTour(
 
     return { success: true, completedTours: newCompletedTours };
   } catch (error: any) {
-    console.error('Error completando tour:', error);
+    logger.error('Error completando tour:', error);
     return { success: false, completedTours: [] };
   }
 }
@@ -190,7 +191,7 @@ export async function resetTour(
 
     return { success: true, completedTours: newCompletedTours };
   } catch (error: any) {
-    console.error('Error reseteando tour:', error);
+    logger.error('Error reseteando tour:', error);
     return { success: false, completedTours: [] };
   }
 }
@@ -215,7 +216,7 @@ export async function initializeDefaultModules(
 
     return defaultModules;
   } catch (error: any) {
-    console.error('Error inicializando módulos:', error);
+    logger.error('Error inicializando módulos:', error);
     return [];
   }
 }
@@ -264,7 +265,7 @@ export async function changeExperienceLevel(
 
     return { success: true };
   } catch (error: any) {
-    console.error('Error cambiando nivel de experiencia:', error);
+    logger.error('Error cambiando nivel de experiencia:', error);
     return { success: false };
   }
 }

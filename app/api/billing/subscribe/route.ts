@@ -15,6 +15,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -286,7 +287,7 @@ export async function POST(request: NextRequest) {
       discount: discountInfo,
     });
   } catch (error: any) {
-    console.error('[Subscribe API Error]:', error);
+    logger.error('[Subscribe API Error]:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

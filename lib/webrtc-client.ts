@@ -9,6 +9,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useWebSocket } from './websocket-client';
 
+import logger from '@/lib/logger';
 interface UseVideoCallOptions {
   roomId?: string;
   autoJoin?: boolean;
@@ -67,7 +68,7 @@ export function useVideoCall(options: UseVideoCallOptions = {}) {
 
       return stream;
     } catch (error) {
-      console.error('Error accessing media devices:', error);
+      logger.error('Error accessing media devices:', error);
       throw error;
     }
   }, []);

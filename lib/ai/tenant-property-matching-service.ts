@@ -9,6 +9,7 @@ import { prisma } from '../db';
 import Anthropic from '@anthropic-ai/sdk';
 import { differenceInMonths, addMonths, isBefore, isAfter } from 'date-fns';
 
+import logger from '@/lib/logger';
 // ==========================================
 // TIPOS
 // ==========================================
@@ -532,7 +533,7 @@ Proporciona un breve resumen (máximo 150 palabras) explicando por qué esta pro
 
     return 'No se pudo generar la explicación.';
   } catch (error: any) {
-    console.error('[IA Matching Error]:', error);
+    logger.error('[IA Matching Error]:', error);
     return `Encontramos ${matches.length} propiedades compatibles. La mejor opción tiene ${matches[0].puntuacionTotal} puntos de compatibilidad.`;
   }
 }

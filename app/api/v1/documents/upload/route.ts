@@ -10,6 +10,7 @@ import { authOptions } from '@/lib/auth-options';
 import { uploadDocument } from '@/lib/document-service';
 import { z } from 'zod';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('Error uploading document:', error);
+    logger.error('Error uploading document:', error);
     return NextResponse.json(
       { error: 'Error interno', message: error.message },
       { status: 500 }

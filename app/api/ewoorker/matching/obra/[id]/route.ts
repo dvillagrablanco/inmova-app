@@ -9,6 +9,7 @@ import { authOptions } from '@/lib/auth-options';
 import { ewoorkerMatching } from '@/lib/ewoorker-matching-service';
 import { prisma } from '@/lib/db';
 
+import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       },
     });
   } catch (error: any) {
-    console.error('[EWOORKER_MATCHING_OBRA_GET]', error);
+    logger.error('[EWOORKER_MATCHING_OBRA_GET]', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

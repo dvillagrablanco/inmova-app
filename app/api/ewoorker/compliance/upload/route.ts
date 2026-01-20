@@ -6,6 +6,7 @@ import { authOptions } from '@/lib/auth-options';
 import prisma from "@/lib/prisma";
 import { put } from "@vercel/blob";
 
+import logger from '@/lib/logger';
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error("[EWOORKER_UPLOAD_DOC]", error);
+    logger.error("[EWOORKER_UPLOAD_DOC]", error);
     return NextResponse.json(
       { error: "Error al subir documento" },
       { status: 500 }
