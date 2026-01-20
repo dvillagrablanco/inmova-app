@@ -72,6 +72,7 @@ import {
   Calculator,
   MapPin,
   Crown,
+  ArrowRightLeft,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -1127,6 +1128,12 @@ const finanzasNavItems = [
     name: 'Open Banking',
     href: '/open-banking',
     icon: CreditCard,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Conciliación Bancaria',
+    href: '/finanzas/conciliacion',
+    icon: ArrowRightLeft,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];

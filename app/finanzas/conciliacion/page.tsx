@@ -3,7 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
+// Lazy load del asistente financiero IA
+const FinancialAIAssistant = dynamic(
+  () => import('@/components/ai/FinancialAIAssistant'),
+  { ssr: false }
+);
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -1073,6 +1080,27 @@ export default function ConciliacionBancariaPage() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Asistente Financiero IA */}
+      <FinancialAIAssistant
+        context="conciliacion"
+        contextData={{
+          pendingTransactions: stats.pendingCount,
+          totalBalance: mockBankAccounts.reduce((sum, acc) => sum + acc.balance, 0),
+          unreconciled: stats.pendingCount,
+          bankAccounts: mockBankAccounts.map(acc => ({ name: acc.bankName, balance: acc.balance })),
+        }}
+        onAutoReconcile={handleAutoMatch}
+        isSyncing={isSyncing || isAutoMatching}
+        onAction={(action, data) => {
+          if (action === 'sync_banks') {
+            handleSyncBanks();
+          } else if (action === 'view_pending') {
+            setStatusFilter('pending');
+            setActiveTab('movimientos');
+          }
+        }}
+      />
     </AuthenticatedLayout>
   );
 }
