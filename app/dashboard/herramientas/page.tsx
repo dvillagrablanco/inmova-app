@@ -1,338 +1,259 @@
 'use client';
 
-import { useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Calculator,
-  FileText,
-  TrendingUp,
-  Building,
-  Euro,
-  Home,
-  PiggyBank,
-  Hammer,
-  FileDown,
-  BookOpen,
-  Scale,
-  ArrowUpRight,
-  Percent,
-  Landmark,
+import { 
+  Calculator, 
+  FileText, 
+  PenTool, 
+  Camera,
+  QrCode,
+  BarChart3,
+  FileSpreadsheet,
+  Printer,
+  Download,
+  ExternalLink
 } from 'lucide-react';
+import Link from 'next/link';
 
-import { RentalYieldCalculator } from '@/components/calculators/RentalYieldCalculator';
-import { MortgageCalculator } from '@/components/calculators/MortgageCalculator';
-import { TransactionCostsCalculator } from '@/components/calculators/TransactionCostsCalculator';
-
-type ToolCategory = 'calculadoras' | 'contratos' | 'guias' | 'recursos';
-
-interface Tool {
-  id: string;
-  name: string;
-  description: string;
-  icon: React.ElementType;
-  category: ToolCategory;
-  available: boolean;
-  premium?: boolean;
-  component?: React.ComponentType;
-}
-
-const TOOLS: Tool[] = [
-  // Calculadoras
+const tools = [
   {
-    id: 'rental-yield',
-    name: 'Rentabilidad de Alquiler',
-    description: 'Calcula ROI, cashflow y rentabilidad neta de inversiones en alquiler',
-    icon: TrendingUp,
-    category: 'calculadoras',
-    available: true,
-    component: RentalYieldCalculator,
+    id: 'calculadora-rentabilidad',
+    name: 'Calculadora de Rentabilidad',
+    description: 'Calcula el ROI y rentabilidad de tus inversiones inmobiliarias',
+    icon: Calculator,
+    href: '/landing/calculadora-roi',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50',
   },
   {
-    id: 'mortgage',
-    name: 'Calculadora de Hipoteca',
-    description: 'Simula cuotas, TAE y tabla de amortización',
-    icon: Building,
-    category: 'calculadoras',
-    available: true,
-    component: MortgageCalculator,
-  },
-  {
-    id: 'transaction-costs',
-    name: 'Gastos de Compraventa',
-    description: 'Estima impuestos y gastos por CCAA',
-    icon: Euro,
-    category: 'calculadoras',
-    available: true,
-    component: TransactionCostsCalculator,
-  },
-  {
-    id: 'rent-increase',
-    name: 'Subida IPC / IRAV',
-    description: 'Calcula incrementos legales de alquiler',
-    icon: Percent,
-    category: 'calculadoras',
-    available: false,
-    premium: true,
-  },
-  {
-    id: 'flipping',
-    name: 'Flipping / Reforma',
-    description: 'Rentabilidad de operaciones de compra-reforma-venta',
-    icon: Hammer,
-    category: 'calculadoras',
-    available: false,
-    premium: true,
-  },
-  
-  // Contratos
-  {
-    id: 'contract-rental',
-    name: 'Contrato de Arrendamiento',
-    description: 'Genera contratos de alquiler personalizados',
+    id: 'generador-contratos',
+    name: 'Generador de Contratos',
+    description: 'Crea contratos de alquiler personalizados automáticamente',
     icon: FileText,
-    category: 'contratos',
-    available: false,
-    premium: true,
+    href: '/contratos/nuevo',
+    color: 'text-green-600',
+    bgColor: 'bg-green-50',
   },
   {
-    id: 'contract-room',
-    name: 'Contrato de Habitación',
-    description: 'Para coliving y alquiler por habitaciones',
-    icon: Home,
-    category: 'contratos',
-    available: false,
-    premium: true,
+    id: 'firma-digital',
+    name: 'Firma Digital',
+    description: 'Firma documentos electrónicamente de forma segura',
+    icon: PenTool,
+    href: '/firma-digital/configuracion',
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-50',
   },
   {
-    id: 'inventory',
-    name: 'Inventario / Acta Entrega',
-    description: 'Checklist de entrega de llaves',
-    icon: Scale,
-    category: 'contratos',
-    available: false,
-    premium: true,
-  },
-  
-  // Guías
-  {
-    id: 'guide-tax',
-    name: 'Guía Fiscal Propietarios',
-    description: 'IRPF, deducciones y optimización fiscal',
-    icon: Landmark,
-    category: 'guias',
-    available: false,
-    premium: true,
+    id: 'escaner-documentos',
+    name: 'Escáner de Documentos',
+    description: 'Digitaliza y extrae información de documentos con IA',
+    icon: Camera,
+    href: '/documentos/subir',
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-50',
   },
   {
-    id: 'guide-lau',
-    name: 'Resumen LAU',
-    description: 'Ley de Arrendamientos Urbanos explicada',
-    icon: BookOpen,
-    category: 'guias',
-    available: false,
-    premium: true,
+    id: 'generador-qr',
+    name: 'Generador de QR',
+    description: 'Crea códigos QR para tus propiedades y anuncios',
+    icon: QrCode,
+    href: '#',
+    color: 'text-pink-600',
+    bgColor: 'bg-pink-50',
+    disabled: true,
   },
   {
-    id: 'guide-screening',
-    name: 'Screening de Inquilinos',
-    description: 'Cómo verificar y seleccionar inquilinos',
-    icon: FileDown,
-    category: 'guias',
-    available: false,
-    premium: true,
+    id: 'reportes',
+    name: 'Generador de Reportes',
+    description: 'Crea informes personalizados de tu cartera',
+    icon: BarChart3,
+    href: '/dashboard/analytics',
+    color: 'text-indigo-600',
+    bgColor: 'bg-indigo-50',
+  },
+  {
+    id: 'exportar-datos',
+    name: 'Exportar Datos',
+    description: 'Exporta tus datos a Excel, CSV o PDF',
+    icon: FileSpreadsheet,
+    href: '#',
+    color: 'text-teal-600',
+    bgColor: 'bg-teal-50',
+    action: 'export',
+  },
+  {
+    id: 'imprimir',
+    name: 'Centro de Impresión',
+    description: 'Imprime contratos, recibos y documentos',
+    icon: Printer,
+    href: '#',
+    color: 'text-gray-600',
+    bgColor: 'bg-gray-50',
+    action: 'print',
+  },
+];
+
+const externalTools = [
+  {
+    name: 'Idealista',
+    description: 'Publica tus propiedades en Idealista',
+    href: 'https://www.idealista.com',
+  },
+  {
+    name: 'Fotocasa',
+    description: 'Sincroniza con Fotocasa',
+    href: 'https://www.fotocasa.es',
+  },
+  {
+    name: 'Catastro',
+    description: 'Consulta el catastro virtual',
+    href: 'https://www.sedecatastro.gob.es',
+  },
+  {
+    name: 'Registro de la Propiedad',
+    description: 'Accede al registro de la propiedad online',
+    href: 'https://www.registradores.org',
   },
 ];
 
 export default function HerramientasPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const [selectedTool, setSelectedTool] = useState<string | null>('rental-yield');
-  const [activeCategory, setActiveCategory] = useState<ToolCategory>('calculadoras');
+  const handleExport = () => {
+    // TODO: Implement export functionality
+    alert('Funcionalidad de exportación en desarrollo');
+  };
 
-  if (status === 'loading') {
-    return (
-      <AuthenticatedLayout>
-        <div className="container mx-auto py-6 px-4">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-muted rounded w-1/3" />
-            <div className="h-64 bg-muted rounded" />
-          </div>
-        </div>
-      </AuthenticatedLayout>
-    );
-  }
-
-  const filteredTools = TOOLS.filter(t => t.category === activeCategory);
-  const selectedToolData = TOOLS.find(t => t.id === selectedTool);
-  const ToolComponent = selectedToolData?.component;
+  const handlePrint = () => {
+    window.print();
+  };
 
   return (
-    <AuthenticatedLayout>
-      <div className="container mx-auto py-6 px-4 max-w-7xl">
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
-          <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 flex items-center justify-center">
-              <Calculator className="h-8 w-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold">Herramientas</h1>
-              <p className="text-muted-foreground">
-                Calculadoras, contratos y recursos para inversores inmobiliarios
-              </p>
-            </div>
-          </div>
-          <Badge variant="secondary" className="w-fit">
-            Basado en análisis ZONA3
-          </Badge>
-        </div>
-
-        {/* Categorías */}
-        <Tabs value={activeCategory} onValueChange={(v) => setActiveCategory(v as ToolCategory)} className="mb-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="calculadoras" className="flex items-center gap-2">
-              <Calculator className="h-4 w-4" />
-              Calculadoras
-            </TabsTrigger>
-            <TabsTrigger value="contratos" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Contratos
-            </TabsTrigger>
-            <TabsTrigger value="guias" className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              Guías
-            </TabsTrigger>
-            <TabsTrigger value="recursos" className="flex items-center gap-2">
-              <FileDown className="h-4 w-4" />
-              Recursos
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Lista de herramientas */}
-          <div className="lg:col-span-1 space-y-2">
-            {filteredTools.map((tool) => {
-              const Icon = tool.icon;
-              const isSelected = selectedTool === tool.id;
-              
-              return (
-                <Card
-                  key={tool.id}
-                  className={`cursor-pointer transition-all ${
-                    isSelected 
-                      ? 'border-primary ring-2 ring-primary/20' 
-                      : 'hover:border-primary/50'
-                  } ${!tool.available ? 'opacity-60' : ''}`}
-                  onClick={() => tool.available && setSelectedTool(tool.id)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-lg ${isSelected ? 'bg-primary text-white' : 'bg-muted'}`}>
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium text-sm truncate">{tool.name}</h4>
-                          {tool.premium && (
-                            <Badge variant="secondary" className="text-[10px] px-1">PRO</Badge>
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-                          {tool.description}
-                        </p>
-                        {!tool.available && (
-                          <p className="text-xs text-amber-600 mt-1">Próximamente</p>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-            
-            {filteredTools.length === 0 && (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <p className="text-muted-foreground">
-                    Próximamente en esta categoría
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Contenido de la herramienta */}
-          <div className="lg:col-span-3">
-            {ToolComponent ? (
-              <ToolComponent />
-            ) : selectedToolData ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    {(() => {
-                      const Icon = selectedToolData.icon;
-                      return <Icon className="h-5 w-5" />;
-                    })()}
-                    {selectedToolData.name}
-                  </CardTitle>
-                  <CardDescription>{selectedToolData.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-12">
-                    <PiggyBank className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">Disponible próximamente</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Esta herramienta está en desarrollo y estará disponible pronto
-                    </p>
-                    {selectedToolData.premium && (
-                      <Button>
-                        Desbloquear con Plan Pro
-                        <ArrowUpRight className="h-4 w-4 ml-2" />
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <Calculator className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-                  <h3 className="text-lg font-semibold">Selecciona una herramienta</h3>
-                  <p className="text-muted-foreground">
-                    Elige una herramienta de la lista para comenzar
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
-
-        {/* Info footer */}
-        <Card className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 border-blue-200 dark:border-blue-800">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                <BookOpen className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold mb-1">Herramientas inspiradas en ZONA3</h3>
-                <p className="text-sm text-muted-foreground">
-                  Estas herramientas están diseñadas para inversores inmobiliarios, inspiradas en las mejores 
-                  prácticas del sector. Incluyen calculadoras financieras, plantillas de contratos y guías 
-                  educativas para ayudarte a tomar mejores decisiones de inversión.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="container mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Herramientas</h1>
+        <p className="text-gray-600 mt-1">
+          Utilidades para gestionar tu negocio inmobiliario
+        </p>
       </div>
-    </AuthenticatedLayout>
+
+      {/* Main Tools */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {tools.map((tool) => {
+          const Icon = tool.icon;
+          const isDisabled = tool.disabled;
+          
+          const content = (
+            <Card className={`h-full hover:shadow-lg transition-shadow ${isDisabled ? 'opacity-60' : 'cursor-pointer'}`}>
+              <CardContent className="pt-6">
+                <div className={`w-12 h-12 ${tool.bgColor} rounded-lg flex items-center justify-center mb-4`}>
+                  <Icon className={`h-6 w-6 ${tool.color}`} />
+                </div>
+                <h3 className="font-semibold mb-2">{tool.name}</h3>
+                <p className="text-sm text-gray-600">{tool.description}</p>
+                {isDisabled && (
+                  <span className="text-xs text-gray-400 mt-2 block">Próximamente</span>
+                )}
+              </CardContent>
+            </Card>
+          );
+
+          if (isDisabled) {
+            return <div key={tool.id}>{content}</div>;
+          }
+
+          if (tool.action === 'export') {
+            return (
+              <div key={tool.id} onClick={handleExport}>
+                {content}
+              </div>
+            );
+          }
+
+          if (tool.action === 'print') {
+            return (
+              <div key={tool.id} onClick={handlePrint}>
+                {content}
+              </div>
+            );
+          }
+
+          return (
+            <Link key={tool.id} href={tool.href}>
+              {content}
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Quick Actions */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Acciones Rápidas</CardTitle>
+          <CardDescription>Accesos directos a las funciones más usadas</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/edificios/nuevo">
+              <Button variant="outline">
+                <FileText className="h-4 w-4 mr-2" />
+                Nuevo Edificio
+              </Button>
+            </Link>
+            <Link href="/contratos/nuevo">
+              <Button variant="outline">
+                <FileText className="h-4 w-4 mr-2" />
+                Nuevo Contrato
+              </Button>
+            </Link>
+            <Link href="/inquilinos/nuevo">
+              <Button variant="outline">
+                <FileText className="h-4 w-4 mr-2" />
+                Nuevo Inquilino
+              </Button>
+            </Link>
+            <Link href="/pagos/nuevo">
+              <Button variant="outline">
+                <FileText className="h-4 w-4 mr-2" />
+                Registrar Pago
+              </Button>
+            </Link>
+            <Link href="/documentos/subir">
+              <Button variant="outline">
+                <Download className="h-4 w-4 mr-2" />
+                Subir Documento
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* External Tools */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Herramientas Externas</CardTitle>
+          <CardDescription>Enlaces útiles a servicios externos</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {externalTools.map((tool) => (
+              <a
+                key={tool.name}
+                href={tool.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <div>
+                  <p className="font-medium">{tool.name}</p>
+                  <p className="text-sm text-gray-600">{tool.description}</p>
+                </div>
+                <ExternalLink className="h-4 w-4 text-gray-400" />
+              </a>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
