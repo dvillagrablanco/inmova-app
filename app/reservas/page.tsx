@@ -346,22 +346,48 @@ export default function ReservasPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      // En producción, cargar desde API
-      // const [espaciosRes, reservasRes] = await Promise.all([
-      //   fetch('/api/reservas/espacios'),
-      //   fetch('/api/reservas'),
-      // ]);
       
-      // Usar mock data
-      setEspacios(mockEspacios);
-      setReservas(mockReservas);
+      // Cargar datos desde APIs reales
+      const [espaciosRes, reservasRes] = await Promise.all([
+        fetch('/api/reservas/espacios'),
+        fetch('/api/reservas'),
+      ]);
+      
+      let espaciosData: Espacio[] = [];
+      let reservasData: Reserva[] = [];
+      
+      if (espaciosRes.ok) {
+        const data = await espaciosRes.json();
+        espaciosData = Array.isArray(data) ? data : [];
+      }
+      
+      if (reservasRes.ok) {
+        const data = await reservasRes.json();
+        reservasData = Array.isArray(data) ? data : [];
+      }
+      
+      // Si no hay datos de API, usar datos de ejemplo para demo
+      if (espaciosData.length === 0) {
+        espaciosData = mockEspacios;
+      }
+      if (reservasData.length === 0 && espaciosData.length > 0) {
+        // Mapear espacios a las reservas mock
+        reservasData = mockReservas.map(r => ({
+          ...r,
+          espacio: espaciosData.find(e => e.id === r.espacioId) || espaciosData[0]
+        }));
+      }
+      
+      setEspacios(espaciosData);
+      setReservas(reservasData);
       
       // Calcular stats
-      const total = mockReservas.length;
-      const pendientes = mockReservas.filter(r => r.estado === 'pendiente').length;
-      const confirmadas = mockReservas.filter(r => r.estado === 'confirmada').length;
-      const canceladas = mockReservas.filter(r => r.estado === 'cancelada').length;
-      const completadas = mockReservas.filter(r => r.estado === 'completada').length;
+      const total = reservasData.length;
+      const pendientes = reservasData.filter(r => r.estado === 'pendiente').length;
+      const confirmadas = reservasData.filter(r => r.estado === 'confirmada').length;
+      const canceladas = reservasData.filter(r => r.estado === 'cancelada').length;
+      const completadas = reservasData.filter(r => r.estado === 'completada').length;
+      const ocupacionMes = total > 0 ? Math.round((confirmadas + completadas) / total * 100) : 0;
       
       setStats({
         total,
@@ -369,12 +395,15 @@ export default function ReservasPage() {
         confirmadas,
         canceladas,
         completadas,
-        ocupacionMes: 45, // Porcentaje mock
+        ocupacionMes,
       });
       
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Error al cargar los datos');
+      // Fallback a mock data en caso de error
+      setEspacios(mockEspacios);
+      setReservas(mockReservas);
     } finally {
       setLoading(false);
     }

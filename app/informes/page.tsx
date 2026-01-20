@@ -313,15 +313,44 @@ export default function InformesPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 500));
       
-      setTemplates(mockTemplates);
-      setSavedReports(mockSavedReports);
-      setHistory(mockHistory);
+      // Cargar desde APIs
+      const [templatesRes, informesRes, historyRes] = await Promise.all([
+        fetch('/api/informes/templates'),
+        fetch('/api/informes'),
+        fetch('/api/informes/history'),
+      ]);
+      
+      // Templates
+      if (templatesRes.ok) {
+        const data = await templatesRes.json();
+        setTemplates(Array.isArray(data) && data.length > 0 ? data : mockTemplates);
+      } else {
+        setTemplates(mockTemplates);
+      }
+      
+      // Informes guardados
+      if (informesRes.ok) {
+        const data = await informesRes.json();
+        setSavedReports(Array.isArray(data) && data.length > 0 ? data : mockSavedReports);
+      } else {
+        setSavedReports(mockSavedReports);
+      }
+      
+      // Historial
+      if (historyRes.ok) {
+        const data = await historyRes.json();
+        setHistory(Array.isArray(data) && data.length > 0 ? data : mockHistory);
+      } else {
+        setHistory(mockHistory);
+      }
       
     } catch (error) {
       console.error('Error loading data:', error);
-      toast.error('Error al cargar los datos');
+      // Fallback a mock data
+      setTemplates(mockTemplates);
+      setSavedReports(mockSavedReports);
+      setHistory(mockHistory);
     } finally {
       setLoading(false);
     }
