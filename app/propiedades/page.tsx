@@ -58,6 +58,8 @@ import Image from 'next/image';
 import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
 import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
+import { usePlanLimits } from '@/hooks/usePlanLimits';
+import { PlanLimitWarning } from '@/components/shared/PlanLimitWarning';
 
 interface Property {
   id: string;
@@ -95,6 +97,9 @@ export default function PropiedadesPage() {
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  
+  // Hook para verificar límites del plan
+  const { limits, isLoading: limitsLoading } = usePlanLimits();
   
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
@@ -331,6 +336,16 @@ export default function PropiedadesPage() {
           {/* Quick Actions */}
           <ContextualQuickActions />
         </div>
+        
+        {/* Advertencia de límite de plan */}
+        {!limitsLoading && limits?.propiedades && (
+          <PlanLimitWarning
+            resourceName="Propiedades"
+            used={limits.propiedades.used}
+            limit={limits.propiedades.limit}
+            showUpgrade={true}
+          />
+        )}
 
         {/* Estadísticas */}
         <div className="grid gap-4 md:grid-cols-4">

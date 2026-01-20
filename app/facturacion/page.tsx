@@ -461,7 +461,32 @@ function InvoiceTable({
               <TableCell className="text-right">
                 <div className="flex gap-1 justify-end">
                   {(invoice.estado === 'PENDIENTE' || invoice.estado === 'VENCIDA') && (
-                    <Button variant="default" size="sm">
+                    <Button 
+                      variant="default" 
+                      size="sm"
+                      onClick={async () => {
+                        try {
+                          const res = await fetch(`/api/b2b-billing/invoices/${invoice.id}/pay`, {
+                            method: 'POST',
+                          });
+                          if (res.ok) {
+                            const data = await res.json();
+                            // Redirigir a Stripe Checkout o mostrar modal de pago
+                            if (data.checkoutUrl) {
+                              window.location.href = data.checkoutUrl;
+                            } else if (data.clientSecret) {
+                              // TODO: Integrar Stripe Elements para pago inline
+                              toast.info('Redirigiendo al pago...');
+                            }
+                          } else {
+                            const error = await res.json();
+                            toast.error(error.error || 'Error al procesar pago');
+                          }
+                        } catch (error) {
+                          toast.error('Error de conexión');
+                        }
+                      }}
+                    >
                       <CreditCard className="w-4 h-4 mr-1" />
                       Pagar
                     </Button>

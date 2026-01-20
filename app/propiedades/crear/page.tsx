@@ -43,6 +43,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PhotoUploader } from '@/components/property/PhotoUploader';
+import { usePlanLimits } from '@/hooks/usePlanLimits';
+import { PlanLimitWarning, PlanLimitBlocker } from '@/components/shared/PlanLimitWarning';
 
 interface Building {
   id: string;
@@ -58,6 +60,15 @@ export default function CrearPropiedadPage() {
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [loadingBuildings, setLoadingBuildings] = useState(true);
   const [photos, setPhotos] = useState<string[]>([]);
+  const [showLimitBlocker, setShowLimitBlocker] = useState(false);
+  
+  // Hook para verificar límites del plan
+  const { 
+    canCreateProperty, 
+    limits, 
+    isLoading: limitsLoading,
+    propertyUsagePercent 
+  } = usePlanLimits();
 
   // Datos del formulario
   const [formData, setFormData] = useState({
@@ -146,6 +157,12 @@ export default function CrearPropiedadPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Verificar límite de plan antes de crear
+    if (!canCreateProperty) {
+      setShowLimitBlocker(true);
+      return;
+    }
 
     if (!validateForm()) return;
 
@@ -256,6 +273,23 @@ export default function CrearPropiedadPage() {
             Completa la información de la nueva unidad inmobiliaria
           </p>
         </div>
+
+        {/* Advertencia de límite de plan */}
+        {!limitsLoading && limits?.propiedades && (
+          <PlanLimitWarning
+            resourceName="Propiedades"
+            used={limits.propiedades.used}
+            limit={limits.propiedades.limit}
+            showUpgrade={true}
+          />
+        )}
+
+        {/* Modal de bloqueo cuando se alcanza el límite */}
+        <PlanLimitBlocker
+          show={showLimitBlocker}
+          resourceName="propiedades"
+          onClose={() => setShowLimitBlocker(false)}
+        />
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Información Básica */}

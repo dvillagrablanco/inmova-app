@@ -31,6 +31,8 @@ import { BackButton } from '@/components/ui/back-button';
 import { MobileFormWizard, FormStep } from '@/components/ui/mobile-form-wizard';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { usePlanLimits } from '@/hooks/usePlanLimits';
+import { PlanLimitWarning, PlanLimitBlocker } from '@/components/shared/PlanLimitWarning';
 
 interface UploadedDocument {
   id: string;
@@ -46,6 +48,15 @@ export default function NuevoInquilinoPage() {
   const { data: session, status } = useSession() || {};
   const [isLoading, setIsLoading] = useState(false);
   const [documents, setDocuments] = useState<UploadedDocument[]>([]);
+  const [showLimitBlocker, setShowLimitBlocker] = useState(false);
+  
+  // Hook para verificar límites del plan
+  const { 
+    canCreateTenant, 
+    limits, 
+    isLoading: limitsLoading 
+  } = usePlanLimits();
+  
   const [formData, setFormData] = useState({
     nombre: '',
     email: '',
@@ -126,6 +137,13 @@ export default function NuevoInquilinoPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Verificar límite de plan antes de crear
+    if (!canCreateTenant) {
+      setShowLimitBlocker(true);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -220,7 +238,24 @@ export default function NuevoInquilinoPage() {
                 <h1 className="text-3xl font-bold tracking-tight">Nuevo Inquilino</h1>
                 <p className="text-muted-foreground">Registra un nuevo inquilino en el sistema</p>
               </div>
+              
+              {/* Advertencia de límite de plan */}
+              {!limitsLoading && limits?.inquilinos && (
+                <PlanLimitWarning
+                  resourceName="Inquilinos"
+                  used={limits.inquilinos.used}
+                  limit={limits.inquilinos.limit}
+                  showUpgrade={true}
+                />
+              )}
             </div>
+            
+            {/* Modal de bloqueo cuando se alcanza el límite */}
+            <PlanLimitBlocker
+              show={showLimitBlocker}
+              resourceName="inquilinos"
+              onClose={() => setShowLimitBlocker(false)}
+            />
 
             {/* Formulario con Wizard para móvil */}
             <form onSubmit={handleSubmit}>
