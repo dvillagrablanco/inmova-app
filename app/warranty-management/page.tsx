@@ -166,147 +166,7 @@ const ESTADOS_GARANTIA = {
   pendiente: { label: 'Pendiente', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
 };
 
-// Mock Data
-const mockGarantias: Garantia[] = [
-  {
-    id: 'g1',
-    tipo: 'fianza',
-    inquilinoId: 'i1',
-    inquilinoNombre: 'María García López',
-    propiedadId: 'p1',
-    propiedadNombre: 'Apartamento Calle Mayor 15, 2ºB',
-    contratoId: 'c1',
-    monto: 2400,
-    montoMensualidades: 2,
-    fechaConstitucion: '2024-01-15',
-    fechaVencimiento: null,
-    estado: 'activa',
-    entidadEmisora: 'Organismo Autonómico de Fianzas',
-    numeroReferencia: 'FZ-2024-001234',
-    documentoUrl: '/docs/fianza-001.pdf',
-    observaciones: 'Fianza depositada en organismo oficial',
-    renovacionAutomatica: false,
-    alertasActivas: true,
-    historial: [
-      { id: 'h1', fecha: '2024-01-15', accion: 'Constitución', descripcion: 'Fianza constituida', usuario: 'Admin' },
-    ],
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z',
-  },
-  {
-    id: 'g2',
-    tipo: 'aval_bancario',
-    inquilinoId: 'i2',
-    inquilinoNombre: 'Carlos Rodríguez Sánchez',
-    propiedadId: 'p2',
-    propiedadNombre: 'Local Comercial Av. Principal 42',
-    contratoId: 'c2',
-    monto: 12000,
-    montoMensualidades: 6,
-    fechaConstitucion: '2023-06-01',
-    fechaVencimiento: '2026-06-01',
-    estado: 'activa',
-    entidadEmisora: 'Banco Santander',
-    numeroReferencia: 'AVL-2023-789456',
-    documentoUrl: '/docs/aval-002.pdf',
-    observaciones: 'Aval a primer requerimiento',
-    renovacionAutomatica: true,
-    alertasActivas: true,
-    historial: [
-      { id: 'h2', fecha: '2023-06-01', accion: 'Constitución', descripcion: 'Aval bancario emitido', usuario: 'Admin' },
-      { id: 'h3', fecha: '2024-06-01', accion: 'Renovación', descripcion: 'Renovación automática', usuario: 'Sistema', montoAnterior: 12000, montoNuevo: 12000 },
-    ],
-    createdAt: '2023-06-01T09:00:00Z',
-    updatedAt: '2024-06-01T00:00:00Z',
-  },
-  {
-    id: 'g3',
-    tipo: 'seguro_impago',
-    inquilinoId: 'i3',
-    inquilinoNombre: 'Ana Martínez Pérez',
-    propiedadId: 'p3',
-    propiedadNombre: 'Piso Calle Norte 23, 4ºA',
-    contratoId: 'c3',
-    monto: 14400,
-    montoMensualidades: 12,
-    fechaConstitucion: '2024-03-01',
-    fechaVencimiento: '2025-03-01',
-    estado: 'activa',
-    entidadEmisora: 'ARAG Seguros',
-    numeroReferencia: 'POL-2024-567890',
-    documentoUrl: '/docs/seguro-003.pdf',
-    observaciones: 'Cobertura de 12 meses de impago + defensa jurídica',
-    renovacionAutomatica: true,
-    alertasActivas: true,
-    historial: [
-      { id: 'h4', fecha: '2024-03-01', accion: 'Contratación', descripcion: 'Póliza de seguro emitida', usuario: 'Admin' },
-    ],
-    createdAt: '2024-03-01T11:00:00Z',
-    updatedAt: '2024-03-01T11:00:00Z',
-  },
-  {
-    id: 'g4',
-    tipo: 'fianza',
-    inquilinoId: 'i4',
-    inquilinoNombre: 'Pedro López Fernández',
-    propiedadId: 'p4',
-    propiedadNombre: 'Estudio Plaza Central 5, 1ºC',
-    contratoId: 'c4',
-    monto: 1600,
-    montoMensualidades: 2,
-    fechaConstitucion: '2023-09-01',
-    fechaVencimiento: null,
-    estado: 'liberada',
-    entidadEmisora: 'Organismo Autonómico de Fianzas',
-    numeroReferencia: 'FZ-2023-005678',
-    observaciones: 'Liberada al finalizar contrato sin incidencias',
-    renovacionAutomatica: false,
-    alertasActivas: false,
-    historial: [
-      { id: 'h5', fecha: '2023-09-01', accion: 'Constitución', descripcion: 'Fianza constituida', usuario: 'Admin' },
-      { id: 'h6', fecha: '2024-08-31', accion: 'Liberación', descripcion: 'Fianza devuelta al inquilino', usuario: 'Admin' },
-    ],
-    createdAt: '2023-09-01T14:00:00Z',
-    updatedAt: '2024-08-31T16:00:00Z',
-  },
-  {
-    id: 'g5',
-    tipo: 'deposito',
-    inquilinoId: 'i5',
-    inquilinoNombre: 'Laura Sánchez Gil',
-    propiedadId: 'p5',
-    propiedadNombre: 'Apartamento Paseo Marítimo 8, 3ºD',
-    contratoId: 'c5',
-    monto: 1800,
-    montoMensualidades: 2,
-    fechaConstitucion: '2025-01-10',
-    fechaVencimiento: null,
-    estado: 'pendiente',
-    observaciones: 'Pendiente de verificación de transferencia',
-    renovacionAutomatica: false,
-    alertasActivas: true,
-    historial: [
-      { id: 'h7', fecha: '2025-01-10', accion: 'Registro', descripcion: 'Depósito registrado, pendiente confirmación', usuario: 'Admin' },
-    ],
-    createdAt: '2025-01-10T09:30:00Z',
-    updatedAt: '2025-01-10T09:30:00Z',
-  },
-];
-
-const mockStats: GarantiaStats = {
-  totalGarantias: 5,
-  garantiasActivas: 3,
-  garantiasVencidas: 0,
-  garantiasPendientes: 1,
-  montoTotalGarantizado: 32200,
-  proximasAVencer: 1,
-  porTipo: [
-    { tipo: 'Fianza', cantidad: 2, monto: 4000 },
-    { tipo: 'Aval Bancario', cantidad: 1, monto: 12000 },
-    { tipo: 'Seguro Impago', cantidad: 1, monto: 14400 },
-    { tipo: 'Depósito', cantidad: 1, monto: 1800 },
-  ],
-};
+// Los datos se cargan desde la API /api/garantias
 
 export default function WarrantyManagementPage() {
   const { data: session, status } = useSession();
@@ -362,10 +222,26 @@ export default function WarrantyManagementPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      // En producción: fetch desde API
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setGarantias(mockGarantias);
-      setStats(mockStats);
+      const response = await fetch('/api/garantias');
+      if (response.ok) {
+        const data = await response.json();
+        // Transformar datos de API al formato esperado
+        const garantiasFromAPI: Garantia[] = (data.garantias || []).map((g: any) => ({
+          ...g,
+          historial: g.historial || [{
+            id: `h-${g.id}`,
+            fecha: g.fechaConstitucion,
+            accion: 'Constitución',
+            descripcion: 'Garantía registrada desde contrato',
+            usuario: 'Sistema',
+          }],
+        }));
+        setGarantias(garantiasFromAPI);
+        setStats(data.stats || null);
+      } else {
+        console.error('Error loading garantias');
+        toast.error('Error al cargar las garantías');
+      }
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Error al cargar las garantías');

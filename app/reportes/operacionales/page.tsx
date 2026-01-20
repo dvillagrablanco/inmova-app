@@ -132,66 +132,7 @@ interface OperationalKPI {
   variacion: number;
 }
 
-// Mock Data
-const mockOccupancy: OccupancyData[] = [
-  { propiedadId: '1', nombre: 'Edificio Residencial Sol', unidadesTotales: 24, unidadesOcupadas: 23, ocupacion: 95.8, tendencia: 'up', variacion: 2.3 },
-  { propiedadId: '2', nombre: 'Apartamentos Luna', unidadesTotales: 16, unidadesOcupadas: 14, ocupacion: 87.5, tendencia: 'down', variacion: -4.2 },
-  { propiedadId: '3', nombre: 'Oficinas Centro', unidadesTotales: 8, unidadesOcupadas: 8, ocupacion: 100, tendencia: 'stable', variacion: 0 },
-  { propiedadId: '4', nombre: 'Local Comercial Norte', unidadesTotales: 4, unidadesOcupadas: 4, ocupacion: 100, tendencia: 'stable', variacion: 0 },
-  { propiedadId: '5', nombre: 'Viviendas Mar', unidadesTotales: 10, unidadesOcupadas: 6, ocupacion: 60, tendencia: 'down', variacion: -10 },
-];
-
-const mockMaintenance: MaintenanceKPI = {
-  tiempoPromedio: 18.5,
-  tiempoObjetivo: 24,
-  ticketsAbiertos: 12,
-  ticketsResueltos: 145,
-  ticketsPendientes: 8,
-  satisfaccionMantenimiento: 4.2,
-  porTipo: [
-    { tipo: 'Fontanería', cantidad: 35, tiempoPromedio: 12 },
-    { tipo: 'Electricidad', cantidad: 28, tiempoPromedio: 8 },
-    { tipo: 'Climatización', cantidad: 22, tiempoPromedio: 24 },
-    { tipo: 'Cerrajería', cantidad: 18, tiempoPromedio: 4 },
-    { tipo: 'Pintura', cantidad: 15, tiempoPromedio: 48 },
-    { tipo: 'Otros', cantidad: 39, tiempoPromedio: 20 },
-  ],
-};
-
-const mockSatisfaction: TenantSatisfaction = {
-  puntuacionGeneral: 4.3,
-  totalRespuestas: 156,
-  nps: 42,
-  categorias: [
-    { categoria: 'Atención al cliente', puntuacion: 4.5, tendencia: 'up' },
-    { categoria: 'Mantenimiento', puntuacion: 4.2, tendencia: 'stable' },
-    { categoria: 'Instalaciones', puntuacion: 4.1, tendencia: 'up' },
-    { categoria: 'Comunicación', puntuacion: 4.4, tendencia: 'up' },
-    { categoria: 'Relación calidad-precio', puntuacion: 3.9, tendencia: 'down' },
-  ],
-  comentariosRecientes: [
-    { fecha: '2026-01-18', puntuacion: 5, comentario: 'Excelente servicio, muy rápida respuesta a mi solicitud.', inquilino: 'María G.' },
-    { fecha: '2026-01-17', puntuacion: 4, comentario: 'Buen trato pero el mantenimiento tardó un poco más de lo esperado.', inquilino: 'Carlos M.' },
-    { fecha: '2026-01-15', puntuacion: 5, comentario: 'Todo perfecto, muy profesionales.', inquilino: 'Ana P.' },
-    { fecha: '2026-01-14', puntuacion: 3, comentario: 'La calefacción no funciona bien, esperando solución.', inquilino: 'Pedro L.' },
-  ],
-};
-
-const mockTeam: TeamPerformance[] = [
-  { miembro: 'Juan García', rol: 'Técnico Senior', ticketsAsignados: 45, ticketsResueltos: 42, tiempoPromedio: 14, satisfaccion: 4.6 },
-  { miembro: 'Ana Martínez', rol: 'Técnico', ticketsAsignados: 38, ticketsResueltos: 35, tiempoPromedio: 18, satisfaccion: 4.4 },
-  { miembro: 'Pedro López', rol: 'Técnico', ticketsAsignados: 32, ticketsResueltos: 30, tiempoPromedio: 22, satisfaccion: 4.2 },
-  { miembro: 'María Sánchez', rol: 'Coordinadora', ticketsAsignados: 28, ticketsResueltos: 28, tiempoPromedio: 16, satisfaccion: 4.8 },
-];
-
-const mockKPIs: OperationalKPI[] = [
-  { nombre: 'Tiempo medio de respuesta', valor: 2.5, objetivo: 4, unidad: 'horas', tendencia: 'up', variacion: -15 },
-  { nombre: 'Tasa de resolución primer contacto', valor: 68, objetivo: 75, unidad: '%', tendencia: 'up', variacion: 5 },
-  { nombre: 'Ocupación media', valor: 88.5, objetivo: 95, unidad: '%', tendencia: 'stable', variacion: 0.5 },
-  { nombre: 'Rotación de inquilinos', valor: 8.2, objetivo: 10, unidad: '%', tendencia: 'up', variacion: -2.1 },
-  { nombre: 'Tiempo medio de arrendamiento', valor: 14, objetivo: 21, unidad: 'días', tendencia: 'up', variacion: -18 },
-  { nombre: 'Incidencias por unidad/mes', valor: 0.35, objetivo: 0.5, unidad: 'inc', tendencia: 'up', variacion: -10 },
-];
+// Los datos se cargan desde la API /api/reportes/operacionales
 
 export default function ReportesOperacionalesPage() {
   const { data: session, status } = useSession();
@@ -222,14 +163,18 @@ export default function ReportesOperacionalesPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setOccupancy(mockOccupancy);
-      setMaintenance(mockMaintenance);
-      setSatisfaction(mockSatisfaction);
-      setTeam(mockTeam);
-      setKpis(mockKPIs);
-      
+      const response = await fetch('/api/reportes/operacionales');
+      if (response.ok) {
+        const data = await response.json();
+        setOccupancy(data.occupancy || []);
+        setMaintenance(data.maintenance || null);
+        setSatisfaction(data.satisfaction || null);
+        setTeam(data.team || []);
+        setKpis(data.kpis || []);
+      } else {
+        console.error('Error loading operational data');
+        toast.error('Error al cargar los datos operacionales');
+      }
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Error al cargar los datos operacionales');
