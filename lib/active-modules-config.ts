@@ -204,12 +204,7 @@ export const HIDDEN_ROUTES: string[] = [
   '/partners/comisiones',
   '/partners/terminos',
   
-  // Portal Inquilino placeholders
-  '/portal-inquilino/contrato',
-  '/portal-inquilino/comunicacion',
-  '/portal-inquilino/mantenimiento',
-  '/portal-inquilino/chatbot',
-  '/portal-inquilino/valoraciones',
+  // Portal Inquilino - AHORA FUNCIONALES (eliminadas del listado oculto)
   
   // Portal Proveedor placeholders
   '/portal-proveedor/reseñas',
