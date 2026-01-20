@@ -45,172 +45,42 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Mock data para empleados/huéspedes
-const HUESPEDES_MOCK = [
-  {
-    id: 'EMP001',
-    nombre: 'Carlos Martínez',
-    email: 'carlos.martinez@empresa.com',
-    telefono: '+34 612 345 678',
-    departamento: 'Ventas',
-    cargo: 'Director Comercial',
-    nivelViajero: 'gold',
-    viajesAnuales: 24,
-    gastoAnual: 18500,
-    ultimoViaje: '2026-01-15',
-    proximoViaje: '2026-01-25',
-    preferencias: {
-      tipoHabitacion: 'Superior Doble',
-      piso: 'Alto',
-      fumador: false,
-      desayuno: true,
-      wifi: true,
-      parking: true,
-      lateCheckout: false,
-      dietaEspecial: null,
-      asientoAvion: 'Pasillo',
-    },
-    documento: {
-      tipo: 'DNI',
-      numero: '12345678A',
-      fechaExpiracion: '2028-05-15',
-    },
-    activo: true,
-    fechaAlta: '2020-03-15',
-    notas: 'Viajero frecuente. Preferencia por hoteles céntricos.',
-  },
-  {
-    id: 'EMP002',
-    nombre: 'Laura García',
-    email: 'laura.garcia@empresa.com',
-    telefono: '+34 623 456 789',
-    departamento: 'Marketing',
-    cargo: 'Marketing Manager',
-    nivelViajero: 'silver',
-    viajesAnuales: 12,
-    gastoAnual: 8200,
-    ultimoViaje: '2025-12-20',
-    proximoViaje: '2026-01-26',
-    preferencias: {
-      tipoHabitacion: 'Standard',
-      piso: 'Medio',
-      fumador: false,
-      desayuno: true,
-      wifi: true,
-      parking: false,
-      lateCheckout: false,
-      dietaEspecial: 'Vegetariana',
-      asientoAvion: 'Ventana',
-    },
-    documento: {
-      tipo: 'DNI',
-      numero: '23456789B',
-      fechaExpiracion: '2027-08-20',
-    },
-    activo: true,
-    fechaAlta: '2021-06-01',
-    notas: 'Preferencia por vuelos directos.',
-  },
-  {
-    id: 'EMP003',
-    nombre: 'Miguel Torres',
-    email: 'miguel.torres@empresa.com',
-    telefono: '+34 634 567 890',
-    departamento: 'Dirección',
-    cargo: 'CEO',
-    nivelViajero: 'platinum',
-    viajesAnuales: 36,
-    gastoAnual: 45000,
-    ultimoViaje: '2026-01-18',
-    proximoViaje: '2026-01-28',
-    preferencias: {
-      tipoHabitacion: 'Suite',
-      piso: 'Alto',
-      fumador: false,
-      desayuno: true,
-      wifi: true,
-      parking: true,
-      lateCheckout: true,
-      dietaEspecial: null,
-      asientoAvion: 'Business',
-    },
-    documento: {
-      tipo: 'Pasaporte',
-      numero: 'AB1234567',
-      fechaExpiracion: '2030-03-10',
-    },
-    activo: true,
-    fechaAlta: '2018-01-15',
-    notas: 'Requiere suite o habitación premium. Business class obligatoria.',
-  },
-  {
-    id: 'EMP004',
-    nombre: 'Ana Sánchez',
-    email: 'ana.sanchez@empresa.com',
-    telefono: '+34 645 678 901',
-    departamento: 'Operaciones',
-    cargo: 'Operations Lead',
-    nivelViajero: 'silver',
-    viajesAnuales: 8,
-    gastoAnual: 5500,
-    ultimoViaje: '2025-11-10',
-    proximoViaje: '2026-01-30',
-    preferencias: {
-      tipoHabitacion: 'Standard',
-      piso: 'Bajo',
-      fumador: false,
-      desayuno: true,
-      wifi: true,
-      parking: false,
-      lateCheckout: false,
-      dietaEspecial: 'Sin gluten',
-      asientoAvion: 'Pasillo',
-    },
-    documento: {
-      tipo: 'DNI',
-      numero: '34567890C',
-      fechaExpiracion: '2026-12-05',
-    },
-    activo: true,
-    fechaAlta: '2022-02-20',
-    notas: 'Dieta sin gluten. Confirmar siempre con hotel.',
-  },
-  {
-    id: 'EMP005',
-    nombre: 'Pedro López',
-    email: 'pedro.lopez@empresa.com',
-    telefono: '+34 656 789 012',
-    departamento: 'IT',
-    cargo: 'Tech Lead',
-    nivelViajero: 'bronze',
-    viajesAnuales: 4,
-    gastoAnual: 2800,
-    ultimoViaje: '2025-10-05',
-    proximoViaje: null,
-    preferencias: {
-      tipoHabitacion: 'Standard',
-      piso: 'Indiferente',
-      fumador: false,
-      desayuno: false,
-      wifi: true,
-      parking: false,
-      lateCheckout: false,
-      dietaEspecial: null,
-      asientoAvion: 'Indiferente',
-    },
-    documento: {
-      tipo: 'DNI',
-      numero: '45678901D',
-      fechaExpiracion: '2029-04-15',
-    },
-    activo: true,
-    fechaAlta: '2023-05-10',
-    notas: 'Viajes ocasionales. Preferencia por hoteles con buen WiFi.',
-  },
-];
+// Tipos
+interface Huesped {
+  id: string;
+  nombre: string;
+  email: string;
+  telefono: string;
+  departamento: string;
+  cargo: string;
+  nivelViajero: string;
+  viajesAnuales: number;
+  gastoAnual: number;
+  ultimoViaje: string | null;
+  proximoViaje: string | null;
+  preferencias: {
+    tipoHabitacion: string;
+    piso: string;
+    fumador: boolean;
+    desayuno: boolean;
+    wifi: boolean;
+    parking: boolean;
+    lateCheckout: boolean;
+    dietaEspecial: string | null;
+    asientoAvion: string;
+  };
+  documento: {
+    tipo: string;
+    numero: string;
+    fechaExpiracion: string;
+  };
+  activo: boolean;
+  fechaAlta: string;
+  notas: string;
+}
 
 export default function ViajesCorporativosGuestsPage() {
-  const [huespedes, setHuespedes] = useState<any[]>([]);
+  const [huespedes, setHuespedes] = useState<Huesped[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtroDepartamento, setFiltroDepartamento] = useState('todos');
   const [filtroNivel, setFiltroNivel] = useState('todos');
@@ -283,7 +153,7 @@ export default function ViajesCorporativosGuestsPage() {
     setFormData({ nombre: '', email: '', telefono: '', departamento: '', cargo: '' });
   };
 
-  const handleEnviarEmail = (huesped: typeof HUESPEDES_MOCK[0]) => {
+  const handleEnviarEmail = (huesped: Huesped) => {
     toast.success(`Abriendo correo para ${huesped.email}`);
   };
 

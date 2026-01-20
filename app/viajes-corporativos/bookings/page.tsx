@@ -51,150 +51,65 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Mock data para reservas
-const RESERVAS_MOCK = [
-  {
-    id: 'RES001',
-    empleado: 'Carlos Martínez',
-    email: 'carlos.martinez@empresa.com',
-    departamento: 'Ventas',
-    destino: 'Barcelona',
-    hotel: 'Hotel Arts Barcelona',
-    direccion: 'Carrer de la Marina, 19-21',
-    fechaEntrada: '2026-01-25',
-    fechaSalida: '2026-01-28',
-    noches: 3,
-    habitacion: 'Superior Doble',
-    costeNoche: 180,
-    costeTotal: 540,
-    estado: 'confirmada',
-    aprobadoPor: 'María López',
-    fechaReserva: '2026-01-15',
-    motivoViaje: 'Visita cliente importante',
-    serviciosAdicionales: ['Desayuno', 'WiFi Premium'],
-  },
-  {
-    id: 'RES002',
-    empleado: 'Laura García',
-    email: 'laura.garcia@empresa.com',
-    departamento: 'Marketing',
-    destino: 'Madrid',
-    hotel: 'NH Collection Madrid',
-    direccion: 'Gran Vía, 21',
-    fechaEntrada: '2026-01-26',
-    fechaSalida: '2026-01-28',
-    noches: 2,
-    habitacion: 'Standard',
-    costeNoche: 145,
-    costeTotal: 290,
-    estado: 'pendiente',
-    aprobadoPor: null,
-    fechaReserva: '2026-01-18',
-    motivoViaje: 'Evento marketing digital',
-    serviciosAdicionales: ['Desayuno'],
-  },
-  {
-    id: 'RES003',
-    empleado: 'Miguel Torres',
-    email: 'miguel.torres@empresa.com',
-    departamento: 'Dirección',
-    destino: 'Valencia',
-    hotel: 'The Westin Valencia',
-    direccion: 'Amadeo de Saboya, 16',
-    fechaEntrada: '2026-01-28',
-    fechaSalida: '2026-02-01',
-    noches: 4,
-    habitacion: 'Suite Junior',
-    costeNoche: 250,
-    costeTotal: 1000,
-    estado: 'confirmada',
-    aprobadoPor: 'CEO',
-    fechaReserva: '2026-01-12',
-    motivoViaje: 'Congreso internacional',
-    serviciosAdicionales: ['Desayuno', 'Parking', 'Late checkout'],
-  },
-  {
-    id: 'RES004',
-    empleado: 'Ana Sánchez',
-    email: 'ana.sanchez@empresa.com',
-    departamento: 'Operaciones',
-    destino: 'Sevilla',
-    hotel: 'Hotel Alfonso XIII',
-    direccion: 'San Fernando, 2',
-    fechaEntrada: '2026-01-30',
-    fechaSalida: '2026-02-01',
-    noches: 2,
-    habitacion: 'Deluxe',
-    costeNoche: 220,
-    costeTotal: 440,
-    estado: 'pendiente',
-    aprobadoPor: null,
-    fechaReserva: '2026-01-19',
-    motivoViaje: 'Formación equipo',
-    serviciosAdicionales: ['Desayuno', 'Sala reuniones'],
-  },
-  {
-    id: 'RES005',
-    empleado: 'Pedro López',
-    email: 'pedro.lopez@empresa.com',
-    departamento: 'IT',
-    destino: 'Bilbao',
-    hotel: 'Gran Hotel Domine',
-    direccion: 'Alameda Mazarredo, 61',
-    fechaEntrada: '2026-02-03',
-    fechaSalida: '2026-02-05',
-    noches: 2,
-    habitacion: 'Standard',
-    costeNoche: 160,
-    costeTotal: 320,
-    estado: 'rechazada',
-    aprobadoPor: null,
-    fechaReserva: '2026-01-10',
-    motivoViaje: 'Instalación sistemas',
-    serviciosAdicionales: [],
-    motivoRechazo: 'Presupuesto excedido para el departamento',
-  },
-];
-
-// Empleados disponibles para reserva
-const EMPLEADOS = [
-  { id: 'emp1', nombre: 'Carlos Martínez', departamento: 'Ventas' },
-  { id: 'emp2', nombre: 'Laura García', departamento: 'Marketing' },
-  { id: 'emp3', nombre: 'Miguel Torres', departamento: 'Dirección' },
-  { id: 'emp4', nombre: 'Ana Sánchez', departamento: 'Operaciones' },
-  { id: 'emp5', nombre: 'Pedro López', departamento: 'IT' },
-];
-
-// Hoteles disponibles
-const HOTELES = [
-  { id: 'h1', nombre: 'Hotel Arts Barcelona', ciudad: 'Barcelona', precioBase: 180 },
-  { id: 'h2', nombre: 'NH Collection Madrid', ciudad: 'Madrid', precioBase: 145 },
-  { id: 'h3', nombre: 'The Westin Valencia', ciudad: 'Valencia', precioBase: 250 },
-  { id: 'h4', nombre: 'Hotel Alfonso XIII', ciudad: 'Sevilla', precioBase: 220 },
-  { id: 'h5', nombre: 'Gran Hotel Domine', ciudad: 'Bilbao', precioBase: 160 },
-];
+// Tipos
+interface Reserva {
+  id: string;
+  empleado: string;
+  email: string;
+  departamento: string;
+  destino: string;
+  hotel: string;
+  direccion: string;
+  fechaEntrada: string;
+  fechaSalida: string;
+  noches: number;
+  habitacion: string;
+  costeNoche: number;
+  costeTotal: number;
+  estado: string;
+  aprobadoPor: string | null;
+  fechaReserva: string;
+  motivoViaje: string;
+  serviciosAdicionales: string[];
+  motivoRechazo?: string;
+}
 
 export default function ViajesCorporativosBookingsPage() {
-  const [reservas, setReservas] = useState<any[]>([]);
+  const [reservas, setReservas] = useState<Reserva[]>([]);
+  const [empleados, setEmpleados] = useState<{id: string; nombre: string; departamento: string}[]>([]);
+  const [hoteles, setHoteles] = useState<{id: string; nombre: string; ciudad: string; precioBase: number}[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [busqueda, setBusqueda] = useState('');
 
   useEffect(() => {
-    const fetchReservas = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/viajes-corporativos/bookings');
-        if (response.ok) {
-          const data = await response.json();
+        const [reservasRes, empleadosRes, hotelesRes] = await Promise.all([
+          fetch('/api/viajes-corporativos/bookings'),
+          fetch('/api/viajes-corporativos/employees'),
+          fetch('/api/viajes-corporativos/hotels')
+        ]);
+        
+        if (reservasRes.ok) {
+          const data = await reservasRes.json();
           setReservas(data.data || []);
         }
+        if (empleadosRes.ok) {
+          const data = await empleadosRes.json();
+          setEmpleados(data.data || []);
+        }
+        if (hotelesRes.ok) {
+          const data = await hotelesRes.json();
+          setHoteles(data.data || []);
+        }
       } catch (error) {
-        console.error('Error fetching bookings:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchReservas();
+    fetchData();
   }, []);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -261,7 +176,7 @@ export default function ViajesCorporativosBookingsPage() {
     toast.success('Reserva rechazada');
   };
 
-  const handleDescargarVoucher = (reserva: typeof RESERVAS_MOCK[0]) => {
+  const handleDescargarVoucher = (reserva: Reserva) => {
     toast.success(`Descargando voucher para ${reserva.hotel}`);
   };
 
@@ -294,7 +209,7 @@ export default function ViajesCorporativosBookingsPage() {
                     <SelectValue placeholder="Selecciona empleado" />
                   </SelectTrigger>
                   <SelectContent>
-                    {EMPLEADOS.map(emp => (
+                    {empleados.map(emp => (
                       <SelectItem key={emp.id} value={emp.id}>
                         {emp.nombre} - {emp.departamento}
                       </SelectItem>
@@ -309,7 +224,7 @@ export default function ViajesCorporativosBookingsPage() {
                     <SelectValue placeholder="Selecciona hotel" />
                   </SelectTrigger>
                   <SelectContent>
-                    {HOTELES.map(hotel => (
+                    {hoteles.map(hotel => (
                       <SelectItem key={hotel.id} value={hotel.id}>
                         {hotel.nombre} ({hotel.ciudad}) - {hotel.precioBase}€/noche
                       </SelectItem>
