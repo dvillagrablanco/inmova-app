@@ -1,17 +1,5 @@
-import { ComingSoonPage } from '@/components/shared/ComingSoonPage';
+import { redirect } from 'next/navigation';
 
 export default function ViajesCorporativosPage() {
-  return (
-    <ComingSoonPage
-      title="Viajes Corporativos"
-      description="Gestión de alojamientos para empresas y viajes de negocio"
-      expectedFeatures={[
-        "Reservas corporativas",
-        "Gestión de políticas de viaje",
-        "Centro de costes",
-        "Facturación centralizada",
-        "Reportes de gastos"
-      ]}
-    />
-  );
+  redirect('/viajes-corporativos/dashboard');
 }

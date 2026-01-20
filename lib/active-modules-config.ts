@@ -92,12 +92,14 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   partners_capacitacion: { status: 'coming_soon', name: 'Capacitación Partners', expectedDate: 'Q2 2026' },
   partners_recursos: { status: 'coming_soon', name: 'Recursos Partners', expectedDate: 'Q2 2026' },
   
-  // Verticales Especializadas - NO IMPLEMENTADAS
-  student_housing: { status: 'coming_soon', name: 'Student Housing', expectedDate: 'Q3 2026' },
-  vivienda_social: { status: 'coming_soon', name: 'Vivienda Social', expectedDate: 'Q3 2026' },
-  real_estate_developer: { status: 'coming_soon', name: 'Real Estate Developer', expectedDate: 'Q3 2026' },
-  viajes_corporativos: { status: 'coming_soon', name: 'Viajes Corporativos', expectedDate: 'Q4 2026' },
-  workspace: { status: 'coming_soon', name: 'Workspace/Coworking', expectedDate: 'Q3 2026' },
+  // Verticales Especializadas - IMPLEMENTADAS
+  student_housing: { status: 'active', name: 'Student Housing' },
+  vivienda_social: { status: 'active', name: 'Vivienda Social' },
+  real_estate_developer: { status: 'active', name: 'Real Estate Developer' },
+  viajes_corporativos: { status: 'active', name: 'Viajes Corporativos' },
+  workspace: { status: 'active', name: 'Workspace/Coworking' },
+  
+  // Verticales Especializadas - PENDIENTES
   warehouse: { status: 'coming_soon', name: 'Warehouse', expectedDate: 'Q4 2026' },
   hospitality: { status: 'coming_soon', name: 'Hospitality', expectedDate: 'Q4 2026' },
   retail: { status: 'coming_soon', name: 'Retail', expectedDate: 'Q4 2026' },
@@ -127,43 +129,7 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
  * Rutas que deben ocultarse del sidebar completamente
  */
 export const HIDDEN_ROUTES: string[] = [
-  // Verticales no implementadas
-  '/student-housing',
-  '/student-housing/dashboard',
-  '/student-housing/residentes',
-  '/student-housing/habitaciones',
-  '/student-housing/aplicaciones',
-  '/student-housing/actividades',
-  '/student-housing/pagos',
-  '/student-housing/mantenimiento',
-  
-  '/vivienda-social',
-  '/vivienda-social/dashboard',
-  '/vivienda-social/applications',
-  '/vivienda-social/eligibility',
-  '/vivienda-social/compliance',
-  '/vivienda-social/reporting',
-  
-  '/real-estate-developer',
-  '/real-estate-developer/dashboard',
-  '/real-estate-developer/projects',
-  '/real-estate-developer/sales',
-  '/real-estate-developer/marketing',
-  '/real-estate-developer/commercial',
-  
-  '/viajes-corporativos',
-  '/viajes-corporativos/dashboard',
-  '/viajes-corporativos/bookings',
-  '/viajes-corporativos/guests',
-  '/viajes-corporativos/expense-reports',
-  '/viajes-corporativos/policies',
-  
-  '/workspace',
-  '/workspace/dashboard',
-  '/workspace/coworking',
-  '/workspace/booking',
-  '/workspace/members',
-  
+  // Verticales pendientes de implementación
   '/warehouse',
   '/warehouse/inventory',
   '/warehouse/locations',
