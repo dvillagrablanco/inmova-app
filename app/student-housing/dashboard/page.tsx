@@ -1,104 +1,163 @@
 'use client';
 
-/**
- * Student Housing - Dashboard
- * 
- * Panel de control para gestión de residencias estudiantiles
- */
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
-  GraduationCap,
-  Home,
   Users,
-  Euro,
+  Building,
   Calendar,
+  DollarSign,
   AlertTriangle,
   CheckCircle,
   Clock,
   TrendingUp,
-  Bed,
-  CalendarDays,
-  PartyPopper,
-  BookOpen,
+  Home,
+  FileText,
+  Wrench,
+  ArrowRight,
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
-const STATS = {
-  totalCamas: 256,
-  ocupadas: 234,
-  disponibles: 22,
-  ocupacion: 91.4,
-  ingresosMes: 89500,
-  pagosAlDia: 87,
-  solicitudesPendientes: 12,
-  mantenimientoPendiente: 5,
-};
-
-const RESIDENTES_POR_CURSO = [
-  { curso: '1º Universidad', count: 85 },
-  { curso: '2º Universidad', count: 72 },
-  { curso: '3º Universidad', count: 45 },
-  { curso: '4º Universidad', count: 32 },
-];
-
-const PROXIMOS_EVENTOS = [
-  { id: 1, titulo: 'Noche de estudio grupal', fecha: '2026-01-22', asistentes: 28 },
-  { id: 2, titulo: 'Torneo de videojuegos', fecha: '2026-01-25', asistentes: 45 },
-  { id: 3, titulo: 'Charla: Orientación laboral', fecha: '2026-01-28', asistentes: 62 },
-];
-
-const ALERTAS = [
-  { id: 1, tipo: 'pago', mensaje: '3 estudiantes con pago pendiente > 15 días', severidad: 'alta' },
-  { id: 2, tipo: 'mantenimiento', mensaje: 'Avería en caldera edificio B', severidad: 'media' },
-  { id: 3, tipo: 'ocupacion', mensaje: 'Disponibilidad baja para próximo curso', severidad: 'baja' },
-];
+interface Stats {
+  totalResidentes: number;
+  residenciaOcupacion: number;
+  totalHabitaciones: number;
+  habitacionesDisponibles: number;
+  aplicacionesPendientes: number;
+  actividadesProximas: number;
+  pagosPendientes: number;
+  incidenciasAbiertas: number;
+}
 
 export default function StudentHousingDashboardPage() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/student-housing/stats');
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Error cargando estadísticas');
+      }
+      
+      setStats(result.data);
+      setError(null);
+    } catch (err: any) {
+      console.error('Error fetching stats:', err);
+      setError(err.message);
+      toast.error('Error cargando estadísticas');
+      // Fallback a valores por defecto
+      setStats({
+        totalResidentes: 0,
+        residenciaOcupacion: 0,
+        totalHabitaciones: 0,
+        habitacionesDisponibles: 0,
+        aplicacionesPendientes: 0,
+        actividadesProximas: 0,
+        pagosPendientes: 0,
+        incidenciasAbiertas: 0,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardContent className="pt-6">
+                <Skeleton className="h-20 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="container mx-auto py-6 space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <GraduationCap className="h-6 w-6" />
-            Student Housing
-          </h1>
-          <p className="text-muted-foreground">
-            Gestión de residencias estudiantiles
-          </p>
+          <h1 className="text-3xl font-bold">Dashboard Residencia Estudiantil</h1>
+          <p className="text-muted-foreground">Gestión integral de tu residencia universitaria</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
             <Link href="/student-housing/aplicaciones">
-              Ver Solicitudes
+              <FileText className="h-4 w-4 mr-2" />
+              Ver Aplicaciones
             </Link>
           </Button>
           <Button asChild>
             <Link href="/student-housing/residentes">
+              <Users className="h-4 w-4 mr-2" />
               Gestionar Residentes
             </Link>
           </Button>
         </div>
       </div>
 
-      {/* Main Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {error && (
+        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p className="text-yellow-700 text-sm">
+            <AlertTriangle className="h-4 w-4 inline mr-2" />
+            Mostrando datos de ejemplo. {error}
+          </p>
+        </div>
+      )}
+
+      {/* KPIs principales */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Residentes Activos</p>
+                <p className="text-2xl font-bold">{stats?.totalResidentes || 0}</p>
+                <p className="text-xs text-green-600 flex items-center gap-1">
+                  <TrendingUp className="h-3 w-3" />
+                  Ocupación al día
+                </p>
+              </div>
+              <Users className="h-8 w-8 text-blue-500 opacity-80" />
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Ocupación</p>
-                <p className="text-2xl font-bold">{STATS.ocupacion}%</p>
+                <p className="text-2xl font-bold">{stats?.residenciaOcupacion || 0}%</p>
                 <p className="text-xs text-muted-foreground">
-                  {STATS.ocupadas}/{STATS.totalCamas} camas
+                  {stats?.habitacionesDisponibles || 0} disponibles
                 </p>
               </div>
-              <Bed className="h-8 w-8 text-blue-500 opacity-80" />
+              <Building className="h-8 w-8 text-green-500 opacity-80" />
             </div>
           </CardContent>
         </Card>
@@ -107,11 +166,11 @@ export default function StudentHousingDashboardPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Residentes</p>
-                <p className="text-2xl font-bold">{STATS.ocupadas}</p>
-                <p className="text-xs text-green-600">+12 este mes</p>
+                <p className="text-sm text-muted-foreground">Aplicaciones</p>
+                <p className="text-2xl font-bold">{stats?.aplicacionesPendientes || 0}</p>
+                <p className="text-xs text-yellow-600">Pendientes de revisión</p>
               </div>
-              <Users className="h-8 w-8 text-green-500 opacity-80" />
+              <FileText className="h-8 w-8 text-yellow-500 opacity-80" />
             </div>
           </CardContent>
         </Card>
@@ -120,142 +179,140 @@ export default function StudentHousingDashboardPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Ingresos/mes</p>
-                <p className="text-2xl font-bold">€{STATS.ingresosMes.toLocaleString()}</p>
-                <p className="text-xs text-green-600">+5.2% vs anterior</p>
+                <p className="text-sm text-muted-foreground">Incidencias</p>
+                <p className="text-2xl font-bold">{stats?.incidenciasAbiertas || 0}</p>
+                <p className="text-xs text-muted-foreground">Abiertas</p>
               </div>
-              <Euro className="h-8 w-8 text-emerald-500 opacity-80" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Solicitudes</p>
-                <p className="text-2xl font-bold">{STATS.solicitudesPendientes}</p>
-                <p className="text-xs text-muted-foreground">pendientes</p>
-              </div>
-              <Clock className="h-8 w-8 text-orange-500 opacity-80" />
+              <Wrench className="h-8 w-8 text-orange-500 opacity-80" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Ocupación por Edificio */}
+      {/* Resumen y Actividades */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Ocupación por edificio */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Home className="h-5 w-5" />
-              Ocupación por Edificio
+              Ocupación General
             </CardTitle>
+            <CardDescription>Estado actual de la residencia</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {['Edificio A', 'Edificio B', 'Edificio C'].map((edificio, i) => {
-              const ocupacion = [95, 89, 92][i];
-              return (
-                <div key={edificio} className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="font-medium">{edificio}</span>
-                    <span className="text-muted-foreground">{ocupacion}%</span>
-                  </div>
-                  <Progress value={ocupacion} />
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-
-        {/* Residentes por Curso */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5" />
-              Residentes por Curso
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {RESIDENTES_POR_CURSO.map((item) => (
-              <div key={item.curso} className="flex items-center justify-between p-2 border rounded">
-                <span className="text-sm font-medium">{item.curso}</span>
-                <Badge variant="secondary">{item.count} estudiantes</Badge>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Habitaciones ocupadas</span>
+                <span className="font-medium">
+                  {(stats?.totalHabitaciones || 0) - (stats?.habitacionesDisponibles || 0)} / {stats?.totalHabitaciones || 0}
+                </span>
               </div>
-            ))}
-          </CardContent>
-        </Card>
+              <Progress value={stats?.residenciaOcupacion || 0} />
+            </div>
 
-        {/* Próximos Eventos */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PartyPopper className="h-5 w-5" />
-              Próximos Eventos
-            </CardTitle>
-            <CardDescription>
-              Actividades programadas para residentes
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {PROXIMOS_EVENTOS.map((evento) => (
-              <div key={evento.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <p className="font-medium text-sm">{evento.titulo}</p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <CalendarDays className="h-3 w-3" />
-                    {evento.fecha}
-                  </p>
-                </div>
-                <Badge variant="outline">{evento.asistentes} inscritos</Badge>
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="p-4 bg-green-50 rounded-lg text-center">
+                <CheckCircle className="h-6 w-6 text-green-500 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-green-600">
+                  {(stats?.totalHabitaciones || 0) - (stats?.habitacionesDisponibles || 0)}
+                </p>
+                <p className="text-xs text-green-700">Ocupadas</p>
               </div>
-            ))}
-            <Button variant="outline" className="w-full" asChild>
-              <Link href="/student-housing/actividades">Ver todos los eventos</Link>
+              <div className="p-4 bg-blue-50 rounded-lg text-center">
+                <Home className="h-6 w-6 text-blue-500 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-blue-600">{stats?.habitacionesDisponibles || 0}</p>
+                <p className="text-xs text-blue-700">Disponibles</p>
+              </div>
+            </div>
+
+            <Button variant="outline" className="w-full mt-4" asChild>
+              <Link href="/student-housing/habitaciones">
+                Ver todas las habitaciones
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Link>
             </Button>
           </CardContent>
         </Card>
 
-        {/* Alertas */}
+        {/* Alertas y pendientes */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5" />
-              Alertas Activas
+              Pendientes y Alertas
             </CardTitle>
+            <CardDescription>Tareas que requieren atención</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {ALERTAS.map((alerta) => (
-              <div
-                key={alerta.id}
-                className={`p-3 rounded-lg ${
-                  alerta.severidad === 'alta'
-                    ? 'bg-red-50 dark:bg-red-900/20 border-red-200'
-                    : alerta.severidad === 'media'
-                    ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200'
-                    : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200'
-                } border`}
-              >
-                <p className="text-sm font-medium">{alerta.mensaje}</p>
-                <Badge
-                  variant="outline"
-                  className={`mt-1 ${
-                    alerta.severidad === 'alta'
-                      ? 'border-red-500 text-red-600'
-                      : alerta.severidad === 'media'
-                      ? 'border-yellow-500 text-yellow-600'
-                      : 'border-blue-500 text-blue-600'
-                  }`}
-                >
-                  {alerta.tipo}
-                </Badge>
+            <Link
+              href="/student-housing/aplicaciones"
+              className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <FileText className="h-5 w-5 text-yellow-600" />
+                <div>
+                  <p className="font-medium text-sm">Aplicaciones pendientes</p>
+                  <p className="text-xs text-muted-foreground">Requieren revisión</p>
+                </div>
               </div>
-            ))}
+              <Badge className="bg-yellow-100 text-yellow-700">
+                {stats?.aplicacionesPendientes || 0}
+              </Badge>
+            </Link>
+
+            <Link
+              href="/student-housing/pagos"
+              className="flex items-center justify-between p-3 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <DollarSign className="h-5 w-5 text-red-600" />
+                <div>
+                  <p className="font-medium text-sm">Pagos pendientes</p>
+                  <p className="text-xs text-muted-foreground">Requieren cobro</p>
+                </div>
+              </div>
+              <Badge className="bg-red-100 text-red-700">
+                {stats?.pagosPendientes || 0}
+              </Badge>
+            </Link>
+
+            <Link
+              href="/student-housing/mantenimiento"
+              className="flex items-center justify-between p-3 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Wrench className="h-5 w-5 text-orange-600" />
+                <div>
+                  <p className="font-medium text-sm">Incidencias abiertas</p>
+                  <p className="text-xs text-muted-foreground">En espera de resolución</p>
+                </div>
+              </div>
+              <Badge className="bg-orange-100 text-orange-700">
+                {stats?.incidenciasAbiertas || 0}
+              </Badge>
+            </Link>
+
+            <Link
+              href="/student-housing/actividades"
+              className="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Calendar className="h-5 w-5 text-blue-600" />
+                <div>
+                  <p className="font-medium text-sm">Actividades próximas</p>
+                  <p className="text-xs text-muted-foreground">Eventos programados</p>
+                </div>
+              </div>
+              <Badge className="bg-blue-100 text-blue-700">
+                {stats?.actividadesProximas || 0}
+              </Badge>
+            </Link>
           </CardContent>
         </Card>
       </div>
 
-      {/* Quick Actions */}
+      {/* Acciones rápidas */}
       <Card>
         <CardHeader>
           <CardTitle>Acciones Rápidas</CardTitle>
@@ -270,20 +327,20 @@ export default function StudentHousingDashboardPage() {
             </Button>
             <Button variant="outline" className="h-auto py-4 flex-col" asChild>
               <Link href="/student-housing/habitaciones">
-                <Bed className="h-6 w-6 mb-2" />
+                <Home className="h-6 w-6 mb-2" />
                 <span>Habitaciones</span>
               </Link>
             </Button>
             <Button variant="outline" className="h-auto py-4 flex-col" asChild>
               <Link href="/student-housing/pagos">
-                <Euro className="h-6 w-6 mb-2" />
+                <DollarSign className="h-6 w-6 mb-2" />
                 <span>Pagos</span>
               </Link>
             </Button>
             <Button variant="outline" className="h-auto py-4 flex-col" asChild>
-              <Link href="/student-housing/mantenimiento">
-                <AlertTriangle className="h-6 w-6 mb-2" />
-                <span>Mantenimiento</span>
+              <Link href="/student-housing/actividades">
+                <Calendar className="h-6 w-6 mb-2" />
+                <span>Actividades</span>
               </Link>
             </Button>
           </div>
