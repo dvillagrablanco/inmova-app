@@ -41,71 +41,7 @@ interface Campana {
   estado: 'activa' | 'pausada' | 'finalizada' | 'planificada';
 }
 
-const CAMPANAS_MOCK: Campana[] = [
-  {
-    id: '1',
-    nombre: 'Lanzamiento Aurora Fase 2',
-    proyecto: 'Residencial Aurora',
-    canal: 'digital',
-    fechaInicio: '2026-01-01',
-    fechaFin: '2026-02-28',
-    presupuesto: 25000,
-    gastado: 12500,
-    leads: 145,
-    visitas: 3200,
-    conversiones: 8,
-    estado: 'activa',
-  },
-  {
-    id: '2',
-    nombre: 'Open House Skyline',
-    proyecto: 'Torre Skyline',
-    canal: 'eventos',
-    fechaInicio: '2026-01-20',
-    fechaFin: '2026-01-20',
-    presupuesto: 8000,
-    gastado: 5000,
-    leads: 45,
-    visitas: 120,
-    conversiones: 3,
-    estado: 'planificada',
-  },
-  {
-    id: '3',
-    nombre: 'Campaña Primavera Jardines',
-    proyecto: 'Jardines del Sur',
-    canal: 'digital',
-    fechaInicio: '2025-12-01',
-    fechaFin: '2026-01-15',
-    presupuesto: 15000,
-    gastado: 15000,
-    leads: 210,
-    visitas: 4500,
-    conversiones: 12,
-    estado: 'finalizada',
-  },
-  {
-    id: '4',
-    nombre: 'Vallas Mirador Costa',
-    proyecto: 'Mirador Costa',
-    canal: 'exterior',
-    fechaInicio: '2026-01-15',
-    fechaFin: '2026-03-15',
-    presupuesto: 12000,
-    gastado: 4000,
-    leads: 25,
-    visitas: 0,
-    conversiones: 1,
-    estado: 'activa',
-  },
-];
-
-const LEADS_RECIENTES = [
-  { id: 1, nombre: 'Juan García', proyecto: 'Residencial Aurora', origen: 'Google Ads', fecha: '2026-01-20' },
-  { id: 2, nombre: 'María López', proyecto: 'Torre Skyline', origen: 'Portal inmobiliario', fecha: '2026-01-19' },
-  { id: 3, nombre: 'Pedro Sánchez', proyecto: 'Jardines del Sur', origen: 'Facebook', fecha: '2026-01-19' },
-  { id: 4, nombre: 'Ana Martínez', proyecto: 'Residencial Aurora', origen: 'Web directa', fecha: '2026-01-18' },
-];
+// Datos cargados desde API /api/real-estate-developer/marketing
 
 export default function RealEstateDeveloperMarketingPage() {
   const [campanas, setCampanas] = useState<Campana[]>([]);

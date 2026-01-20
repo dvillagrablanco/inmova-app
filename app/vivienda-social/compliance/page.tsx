@@ -53,74 +53,7 @@ interface ControlCumplimiento {
   afectados: number;
 }
 
-const CONTROLES_MOCK: ControlCumplimiento[] = [
-  {
-    id: '1',
-    tipo: 'Verificación de Ingresos',
-    descripcion: 'Control anual de ingresos de adjudicatarios',
-    estado: 'cumple',
-    ultimaRevision: '2025-12-15',
-    proximaRevision: '2026-12-15',
-    detalles: '392 de 398 inquilinos verificados correctamente',
-    afectados: 6,
-  },
-  {
-    id: '2',
-    tipo: 'Ocupación Efectiva',
-    descripcion: 'Verificación de residencia habitual',
-    estado: 'cumple',
-    ultimaRevision: '2025-11-01',
-    proximaRevision: '2026-05-01',
-    detalles: 'Todas las viviendas cumplen con ocupación mínima requerida',
-    afectados: 0,
-  },
-  {
-    id: '3',
-    tipo: 'Límite de Ingresos VPO',
-    descripcion: 'Control de que inquilinos no superen límites de ingresos',
-    estado: 'revision',
-    ultimaRevision: '2026-01-10',
-    proximaRevision: '2026-07-10',
-    detalles: '5 familias en revisión por posible superación de límites',
-    afectados: 5,
-  },
-  {
-    id: '4',
-    tipo: 'Renovación de Contratos',
-    descripcion: 'Control de renovaciones y prórrogas',
-    estado: 'pendiente',
-    ultimaRevision: '2025-10-01',
-    proximaRevision: '2026-01-31',
-    detalles: '12 contratos pendientes de renovación este mes',
-    afectados: 12,
-  },
-  {
-    id: '5',
-    tipo: 'Documentación Actualizada',
-    descripcion: 'Expedientes con documentación vigente',
-    estado: 'no_cumple',
-    ultimaRevision: '2026-01-05',
-    proximaRevision: '2026-02-05',
-    detalles: '8 expedientes con documentación caducada o incompleta',
-    afectados: 8,
-  },
-  {
-    id: '6',
-    tipo: 'Inspección de Viviendas',
-    descripcion: 'Estado de conservación de las viviendas',
-    estado: 'cumple',
-    ultimaRevision: '2025-09-15',
-    proximaRevision: '2026-09-15',
-    detalles: 'Inspección anual completada sin incidencias graves',
-    afectados: 3,
-  },
-];
-
-const ALERTAS_NORMATIVAS = [
-  { id: 1, mensaje: '5 familias superan el límite de ingresos establecido', tipo: 'critica', fecha: '2026-01-15' },
-  { id: 2, mensaje: '12 contratos expiran en los próximos 30 días', tipo: 'aviso', fecha: '2026-01-18' },
-  { id: 3, mensaje: 'Nueva normativa autonómica entra en vigor el 01/03/2026', tipo: 'info', fecha: '2026-01-10' },
-];
+// Datos cargados desde API /api/vivienda-social/compliance
 
 export default function ViviendaSocialCompliancePage() {
   const [controles, setControles] = useState<ControlCumplimiento[]>([]);
