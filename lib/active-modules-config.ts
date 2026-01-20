@@ -213,11 +213,9 @@ export const HIDDEN_ROUTES: string[] = [
   '/planificacion',
   '/automatizacion/resumen',
   '/community',
-  '/permisos',
   '/estadisticas',
   '/valoracion-ia',
-  '/usuarios',
-  '/usuarios/nuevo',
+  // Usuarios y permisos - AHORA FUNCIONALES (eliminados del listado oculto)
 ];
 
 /**
