@@ -482,7 +482,7 @@ export default function ConciliacionBancariaPage() {
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-3 gap-4">
-              {mockBankAccounts.map(account => (
+              {accounts.map(account => (
                 <div
                   key={account.id}
                   className={`p-4 border rounded-lg cursor-pointer transition-all ${
