@@ -381,7 +381,7 @@ console.log('Lead creado:', data.id);`}
                 </a>
 
                 <a
-                  href="#"
+                  href="/docs/partners/getting-started"
                   className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted transition-colors"
                 >
                   <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
@@ -397,7 +397,7 @@ console.log('Lead creado:', data.id);`}
                 </a>
 
                 <a
-                  href="#"
+                  href="/docs/partners/webhooks"
                   className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted transition-colors"
                 >
                   <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
@@ -413,7 +413,7 @@ console.log('Lead creado:', data.id);`}
                 </a>
 
                 <a
-                  href="#"
+                  href="/docs/partners/sandbox"
                   className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted transition-colors"
                 >
                   <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">

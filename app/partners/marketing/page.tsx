@@ -398,7 +398,7 @@ export default function PartnersMarketingPage() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" asChild>
-                      <a href="#" target="_blank">
+                      <a href={PARTNER_LINK} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="h-4 w-4 mr-2" />
                         Ver
                       </a>

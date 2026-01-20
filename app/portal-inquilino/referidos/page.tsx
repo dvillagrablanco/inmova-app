@@ -129,8 +129,8 @@ export default function ReferidosPage() {
           text: '¡Regístrate como inquilino y ambos ganaremos puntos!',
           url: data.shareUrl,
         });
-      } catch (err) {
-        console.log('Share cancelled');
+      } catch {
+        // User cancelled share action
       }
     } else {
       copyLink();

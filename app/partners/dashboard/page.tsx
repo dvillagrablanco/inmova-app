@@ -168,7 +168,6 @@ export default function PartnerDashboardPage() {
           }
         } else {
           // Si no hay datos del servidor, mostrar página vacía
-          console.log('No se pudieron cargar datos del dashboard de partners');
         }
       } catch (error) {
         console.error('Error cargando dashboard:', error);
