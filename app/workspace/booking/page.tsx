@@ -3,10 +3,10 @@
 /**
  * Workspace - Reservas
  * 
- * Sistema de reservas de espacios de coworking
+ * Sistema de reservas de espacios de coworking (conectado a API real)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -142,9 +142,30 @@ const HORAS = [
 ];
 
 export default function WorkspaceBookingPage() {
-  const [reservas, setReservas] = useState<Reserva[]>(RESERVAS_MOCK);
+  const [reservas, setReservas] = useState<Reserva[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Cargar reservas desde API
+  const fetchReservas = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/workspace/bookings');
+      if (response.ok) {
+        const data = await response.json();
+        setReservas(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReservas();
+  }, []);
   const [filterEstado, setFilterEstado] = useState<string>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({

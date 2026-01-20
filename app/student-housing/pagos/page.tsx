@@ -3,10 +3,10 @@
 /**
  * Student Housing - Pagos
  * 
- * Gestión de pagos y facturación de residentes
+ * Gestión de pagos y facturación de residentes (conectado a API real)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -62,71 +62,29 @@ interface Pago {
   recibo: string | null;
 }
 
-const PAGOS_MOCK: Pago[] = [
-  {
-    id: '1',
-    residente: 'María García López',
-    habitacion: 'A-201',
-    concepto: 'Alojamiento Enero 2026',
-    monto: 450,
-    fechaVencimiento: '2026-01-05',
-    fechaPago: '2026-01-03',
-    estado: 'pagado',
-    metodoPago: 'Transferencia',
-    recibo: 'REC-2026-001',
-  },
-  {
-    id: '2',
-    residente: 'Carlos Martínez Ruiz',
-    habitacion: 'B-105',
-    concepto: 'Alojamiento Enero 2026',
-    monto: 350,
-    fechaVencimiento: '2026-01-05',
-    fechaPago: '2026-01-05',
-    estado: 'pagado',
-    metodoPago: 'Domiciliación',
-    recibo: 'REC-2026-002',
-  },
-  {
-    id: '3',
-    residente: 'Ana Fernández Torres',
-    habitacion: 'C-302',
-    concepto: 'Alojamiento Enero 2026',
-    monto: 420,
-    fechaVencimiento: '2026-01-05',
-    fechaPago: null,
-    estado: 'vencido',
-    metodoPago: null,
-    recibo: null,
-  },
-  {
-    id: '4',
-    residente: 'David López Sánchez',
-    habitacion: 'A-108',
-    concepto: 'Alojamiento Febrero 2026',
-    monto: 450,
-    fechaVencimiento: '2026-02-05',
-    fechaPago: null,
-    estado: 'pendiente',
-    metodoPago: null,
-    recibo: null,
-  },
-  {
-    id: '5',
-    residente: 'Laura Rodríguez Pérez',
-    habitacion: 'B-210',
-    concepto: 'Alojamiento Enero 2026',
-    monto: 380,
-    fechaVencimiento: '2026-01-05',
-    fechaPago: '2026-01-10',
-    estado: 'parcial',
-    metodoPago: 'Transferencia',
-    recibo: 'REC-2026-003',
-  },
-];
-
 export default function StudentHousingPagosPage() {
-  const [pagos, setPagos] = useState<Pago[]>(PAGOS_MOCK);
+  const [pagos, setPagos] = useState<Pago[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Cargar pagos desde API
+  const fetchPagos = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/student-housing/payments');
+      if (response.ok) {
+        const data = await response.json();
+        setPagos(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching payments:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPagos();
+  }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEstado, setFilterEstado] = useState<string>('all');
   const [selectedPago, setSelectedPago] = useState<Pago | null>(null);

@@ -3,10 +3,10 @@
 /**
  * Workspace - Coworking
  * 
- * Gestión de espacios de coworking
+ * Gestión de espacios de coworking (conectado a API real)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -149,9 +149,30 @@ const ESPACIOS_MOCK: Espacio[] = [
 ];
 
 export default function WorkspaceCoworkingPage() {
-  const [espacios, setEspacios] = useState<Espacio[]>(ESPACIOS_MOCK);
+  const [espacios, setEspacios] = useState<Espacio[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTipo, setFilterTipo] = useState<string>('all');
+
+  // Cargar espacios desde API
+  const fetchEspacios = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/workspace/spaces');
+      if (response.ok) {
+        const data = await response.json();
+        setEspacios(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching spaces:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEspacios();
+  }, []);
   const [filterEstado, setFilterEstado] = useState<string>('all');
   const [selectedEspacio, setSelectedEspacio] = useState<Espacio | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);

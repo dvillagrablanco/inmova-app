@@ -3,15 +3,16 @@
 /**
  * Student Housing - Aplicaciones/Solicitudes
  * 
- * Gestión de solicitudes de ingreso a la residencia
+ * Gestión de solicitudes de ingreso a la residencia (conectado a API real)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
@@ -53,6 +54,7 @@ import {
   Phone,
   Building,
   User,
+  RefreshCw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -73,91 +75,32 @@ interface Aplicacion {
   notas: string;
 }
 
-const APLICACIONES_MOCK: Aplicacion[] = [
-  {
-    id: '1',
-    nombre: 'Elena',
-    apellidos: 'García Martín',
-    email: 'elena.garcia@universidad.es',
-    telefono: '+34 612 123 456',
-    universidad: 'Universidad Complutense',
-    carrera: 'Medicina',
-    curso: '1º',
-    tipoHabitacion: 'individual',
-    fechaSolicitud: '2026-01-15',
-    fechaIngreso: '2026-09-01',
-    estado: 'pendiente',
-    documentos: true,
-    notas: '',
-  },
-  {
-    id: '2',
-    nombre: 'Pablo',
-    apellidos: 'López Fernández',
-    email: 'pablo.lopez@universidad.es',
-    telefono: '+34 623 234 567',
-    universidad: 'Universidad Politécnica',
-    carrera: 'Ingeniería Informática',
-    curso: '2º',
-    tipoHabitacion: 'doble',
-    fechaSolicitud: '2026-01-14',
-    fechaIngreso: '2026-09-01',
-    estado: 'revision',
-    documentos: true,
-    notas: 'Estudiante Erasmus entrante',
-  },
-  {
-    id: '3',
-    nombre: 'Sofía',
-    apellidos: 'Rodríguez Pérez',
-    email: 'sofia.rodriguez@universidad.es',
-    telefono: '+34 634 345 678',
-    universidad: 'Universidad Autónoma',
-    carrera: 'Derecho',
-    curso: '3º',
-    tipoHabitacion: 'individual',
-    fechaSolicitud: '2026-01-10',
-    fechaIngreso: '2026-09-01',
-    estado: 'aprobada',
-    documentos: true,
-    notas: 'Asignada a habitación A-205',
-  },
-  {
-    id: '4',
-    nombre: 'Miguel',
-    apellidos: 'Sánchez Torres',
-    email: 'miguel.sanchez@universidad.es',
-    telefono: '+34 645 456 789',
-    universidad: 'Universidad Complutense',
-    carrera: 'Economía',
-    curso: '1º',
-    tipoHabitacion: 'triple',
-    fechaSolicitud: '2026-01-08',
-    fechaIngreso: '2026-09-01',
-    estado: 'lista_espera',
-    documentos: true,
-    notas: 'Sin disponibilidad actual. Posición #3',
-  },
-  {
-    id: '5',
-    nombre: 'Lucía',
-    apellidos: 'Martínez Ruiz',
-    email: 'lucia.martinez@universidad.es',
-    telefono: '+34 656 567 890',
-    universidad: 'Universidad Politécnica',
-    carrera: 'Arquitectura',
-    curso: '4º',
-    tipoHabitacion: 'individual',
-    fechaSolicitud: '2026-01-05',
-    fechaIngreso: '2026-02-01',
-    estado: 'rechazada',
-    documentos: false,
-    notas: 'Documentación incompleta - DNI caducado',
-  },
-];
-
 export default function StudentHousingAplicacionesPage() {
-  const [aplicaciones, setAplicaciones] = useState<Aplicacion[]>(APLICACIONES_MOCK);
+  const [aplicaciones, setAplicaciones] = useState<Aplicacion[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Cargar aplicaciones desde API
+  const fetchAplicaciones = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/student-housing/applications');
+      if (response.ok) {
+        const data = await response.json();
+        setAplicaciones(data.data || []);
+      } else {
+        toast.error('Error al cargar solicitudes');
+      }
+    } catch (error) {
+      console.error('Error fetching applications:', error);
+      toast.error('Error de conexión');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAplicaciones();
+  }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEstado, setFilterEstado] = useState<string>('all');
   const [selectedAplicacion, setSelectedAplicacion] = useState<Aplicacion | null>(null);
@@ -189,41 +132,67 @@ export default function StudentHousingAplicacionesPage() {
     }
   };
 
-  const handleAprobar = (id: string) => {
-    setAplicaciones(
-      aplicaciones.map((a) =>
-        a.id === id ? { ...a, estado: 'aprobada' as const } : a
-      )
-    );
-    toast.success('Solicitud aprobada. Se enviará notificación al estudiante.');
+  const updateApplicationStatus = async (id: string, estado: string, notas?: string) => {
+    try {
+      const response = await fetch(`/api/student-housing/applications?id=${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado, ...(notas && { notas }) }),
+      });
+      if (response.ok) {
+        return true;
+      }
+      toast.error('Error al actualizar solicitud');
+      return false;
+    } catch (error) {
+      toast.error('Error de conexión');
+      return false;
+    }
   };
 
-  const handleRechazar = (id: string) => {
-    setAplicaciones(
-      aplicaciones.map((a) =>
-        a.id === id ? { ...a, estado: 'rechazada' as const, notas: notaRechazo || a.notas } : a
-      )
-    );
-    setNotaRechazo('');
-    toast.info('Solicitud rechazada. Se notificará al estudiante.');
+  const handleAprobar = async (id: string) => {
+    if (await updateApplicationStatus(id, 'aprobada')) {
+      setAplicaciones(
+        aplicaciones.map((a) =>
+          a.id === id ? { ...a, estado: 'aprobada' as const } : a
+        )
+      );
+      toast.success('Solicitud aprobada. Se enviará notificación al estudiante.');
+    }
   };
 
-  const handleListaEspera = (id: string) => {
-    setAplicaciones(
-      aplicaciones.map((a) =>
-        a.id === id ? { ...a, estado: 'lista_espera' as const } : a
-      )
-    );
-    toast.info('Solicitud añadida a lista de espera.');
+  const handleRechazar = async (id: string) => {
+    if (await updateApplicationStatus(id, 'rechazada', notaRechazo)) {
+      setAplicaciones(
+        aplicaciones.map((a) =>
+          a.id === id ? { ...a, estado: 'rechazada' as const, notas: notaRechazo || a.notas } : a
+        )
+      );
+      setNotaRechazo('');
+      toast.info('Solicitud rechazada. Se notificará al estudiante.');
+    }
   };
 
-  const handleEnviarRevision = (id: string) => {
-    setAplicaciones(
-      aplicaciones.map((a) =>
-        a.id === id ? { ...a, estado: 'revision' as const } : a
-      )
-    );
-    toast.success('Solicitud enviada a revisión.');
+  const handleListaEspera = async (id: string) => {
+    if (await updateApplicationStatus(id, 'lista_espera')) {
+      setAplicaciones(
+        aplicaciones.map((a) =>
+          a.id === id ? { ...a, estado: 'lista_espera' as const } : a
+        )
+      );
+      toast.info('Solicitud añadida a lista de espera.');
+    }
+  };
+
+  const handleEnviarRevision = async (id: string) => {
+    if (await updateApplicationStatus(id, 'revision')) {
+      setAplicaciones(
+        aplicaciones.map((a) =>
+          a.id === id ? { ...a, estado: 'revision' as const } : a
+        )
+      );
+      toast.success('Solicitud enviada a revisión.');
+    }
   };
 
   const stats = {
@@ -246,6 +215,10 @@ export default function StudentHousingAplicacionesPage() {
             Gestión de aplicaciones para la residencia
           </p>
         </div>
+        <Button variant="outline" onClick={fetchAplicaciones} disabled={loading}>
+          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          Actualizar
+        </Button>
       </div>
 
       {/* Stats */}

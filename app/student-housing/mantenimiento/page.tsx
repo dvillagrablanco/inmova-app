@@ -3,10 +3,10 @@
 /**
  * Student Housing - Mantenimiento
  * 
- * Gestión de solicitudes de mantenimiento
+ * Gestión de solicitudes de mantenimiento (conectado a API real)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,84 +59,6 @@ interface SolicitudMantenimiento {
   comentarios: string[];
 }
 
-const SOLICITUDES_MOCK: SolicitudMantenimiento[] = [
-  {
-    id: '1',
-    residente: 'María García',
-    habitacion: 'A-201',
-    edificio: 'Edificio A',
-    titulo: 'Grifo del baño gotea',
-    descripcion: 'El grifo del lavabo lleva goteando varios días. Urgente porque no puedo dormir.',
-    categoria: 'fontaneria',
-    prioridad: 'media',
-    estado: 'asignada',
-    fechaCreacion: '2026-01-18',
-    fechaResolucion: null,
-    asignadoA: 'Juan Pérez (Fontanero)',
-    comentarios: ['Visita programada para mañana a las 10:00'],
-  },
-  {
-    id: '2',
-    residente: 'Carlos Martínez',
-    habitacion: 'B-105',
-    edificio: 'Edificio B',
-    titulo: 'Calefacción no funciona',
-    descripcion: 'El radiador de la habitación no calienta. Hace mucho frío.',
-    categoria: 'climatizacion',
-    prioridad: 'urgente',
-    estado: 'en_proceso',
-    fechaCreacion: '2026-01-19',
-    fechaResolucion: null,
-    asignadoA: 'Miguel Santos (Técnico HVAC)',
-    comentarios: ['Técnico en camino', 'Problema identificado: válvula defectuosa'],
-  },
-  {
-    id: '3',
-    residente: 'Ana López',
-    habitacion: 'C-302',
-    edificio: 'Edificio C',
-    titulo: 'Enchufe no funciona',
-    descripcion: 'El enchufe junto al escritorio no tiene corriente.',
-    categoria: 'electricidad',
-    prioridad: 'media',
-    estado: 'pendiente',
-    fechaCreacion: '2026-01-20',
-    fechaResolucion: null,
-    asignadoA: null,
-    comentarios: [],
-  },
-  {
-    id: '4',
-    residente: 'David Ruiz',
-    habitacion: 'A-108',
-    edificio: 'Edificio A',
-    titulo: 'Silla de escritorio rota',
-    descripcion: 'La silla del escritorio tiene una rueda rota.',
-    categoria: 'mobiliario',
-    prioridad: 'baja',
-    estado: 'completada',
-    fechaCreacion: '2026-01-15',
-    fechaResolucion: '2026-01-17',
-    asignadoA: 'Servicios Generales',
-    comentarios: ['Silla reemplazada'],
-  },
-  {
-    id: '5',
-    residente: 'Laura Pérez',
-    habitacion: 'B-210',
-    edificio: 'Edificio B',
-    titulo: 'Persiana atascada',
-    descripcion: 'La persiana de la ventana principal no sube ni baja.',
-    categoria: 'otro',
-    prioridad: 'baja',
-    estado: 'pendiente',
-    fechaCreacion: '2026-01-20',
-    fechaResolucion: null,
-    asignadoA: null,
-    comentarios: [],
-  },
-];
-
 const CATEGORIAS = [
   { value: 'fontaneria', label: 'Fontanería', icon: '🚿' },
   { value: 'electricidad', label: 'Electricidad', icon: '⚡' },
@@ -154,7 +76,28 @@ const TECNICOS = [
 ];
 
 export default function StudentHousingMantenimientoPage() {
-  const [solicitudes, setSolicitudes] = useState<SolicitudMantenimiento[]>(SOLICITUDES_MOCK);
+  const [solicitudes, setSolicitudes] = useState<SolicitudMantenimiento[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Cargar solicitudes desde API
+  const fetchSolicitudes = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/student-housing/maintenance');
+      if (response.ok) {
+        const data = await response.json();
+        setSolicitudes(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching maintenance requests:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSolicitudes();
+  }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEstado, setFilterEstado] = useState<string>('all');
   const [filterPrioridad, setFilterPrioridad] = useState<string>('all');

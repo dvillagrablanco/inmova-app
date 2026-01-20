@@ -3,15 +3,16 @@
 /**
  * Student Housing - Habitaciones
  * 
- * Gestión de habitaciones y camas
+ * Gestión de habitaciones y camas (conectado a API real)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
@@ -39,6 +40,7 @@ import {
   Eye,
   Edit,
   Home,
+  RefreshCw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -56,95 +58,32 @@ interface Habitacion {
   residentes: string[];
 }
 
-const HABITACIONES_MOCK: Habitacion[] = [
-  {
-    id: '1',
-    numero: 'A-101',
-    edificio: 'Edificio A',
-    planta: 1,
-    tipo: 'individual',
-    camas: 1,
-    ocupadas: 1,
-    precio: 450,
-    estado: 'ocupada',
-    amenities: ['Baño privado', 'WiFi', 'Escritorio'],
-    residentes: ['María García'],
-  },
-  {
-    id: '2',
-    numero: 'A-102',
-    edificio: 'Edificio A',
-    planta: 1,
-    tipo: 'doble',
-    camas: 2,
-    ocupadas: 1,
-    precio: 350,
-    estado: 'disponible',
-    amenities: ['Baño compartido', 'WiFi', 'Escritorio'],
-    residentes: ['Carlos Martínez'],
-  },
-  {
-    id: '3',
-    numero: 'B-201',
-    edificio: 'Edificio B',
-    planta: 2,
-    tipo: 'individual',
-    camas: 1,
-    ocupadas: 0,
-    precio: 420,
-    estado: 'disponible',
-    amenities: ['Baño privado', 'WiFi', 'Escritorio', 'Balcón'],
-    residentes: [],
-  },
-  {
-    id: '4',
-    numero: 'B-202',
-    edificio: 'Edificio B',
-    planta: 2,
-    tipo: 'triple',
-    camas: 3,
-    ocupadas: 3,
-    precio: 300,
-    estado: 'ocupada',
-    amenities: ['Baño compartido', 'WiFi', 'Escritorio'],
-    residentes: ['Ana López', 'David Ruiz', 'Laura Pérez'],
-  },
-  {
-    id: '5',
-    numero: 'C-301',
-    edificio: 'Edificio C',
-    planta: 3,
-    tipo: 'doble',
-    camas: 2,
-    ocupadas: 0,
-    precio: 380,
-    estado: 'mantenimiento',
-    amenities: ['Baño privado', 'WiFi', 'Escritorio'],
-    residentes: [],
-  },
-  {
-    id: '6',
-    numero: 'A-201',
-    edificio: 'Edificio A',
-    planta: 2,
-    tipo: 'individual',
-    camas: 1,
-    ocupadas: 0,
-    precio: 450,
-    estado: 'reservada',
-    amenities: ['Baño privado', 'WiFi', 'Escritorio', 'Vista al jardín'],
-    residentes: [],
-  },
-];
-
-const EDIFICIOS_STATS = [
-  { nombre: 'Edificio A', total: 80, ocupadas: 72 },
-  { nombre: 'Edificio B', total: 96, ocupadas: 85 },
-  { nombre: 'Edificio C', total: 80, ocupadas: 77 },
-];
-
 export default function StudentHousingHabitacionesPage() {
-  const [habitaciones, setHabitaciones] = useState<Habitacion[]>(HABITACIONES_MOCK);
+  const [habitaciones, setHabitaciones] = useState<Habitacion[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Cargar habitaciones desde API
+  const fetchHabitaciones = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/student-housing/rooms');
+      if (response.ok) {
+        const data = await response.json();
+        setHabitaciones(data.data || []);
+      } else {
+        toast.error('Error al cargar habitaciones');
+      }
+    } catch (error) {
+      console.error('Error fetching rooms:', error);
+      toast.error('Error de conexión');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHabitaciones();
+  }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEdificio, setFilterEdificio] = useState<string>('all');
   const [filterEstado, setFilterEstado] = useState<string>('all');
@@ -188,14 +127,39 @@ export default function StudentHousingHabitacionesPage() {
     }
   };
 
-  const handleChangeStatus = (habitacionId: string, newStatus: string) => {
-    setHabitaciones(
-      habitaciones.map((h) =>
-        h.id === habitacionId ? { ...h, estado: newStatus as Habitacion['estado'] } : h
-      )
-    );
-    toast.success('Estado actualizado correctamente');
+  const handleChangeStatus = async (habitacionId: string, newStatus: string) => {
+    try {
+      const response = await fetch(`/api/student-housing/rooms?id=${habitacionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado: newStatus }),
+      });
+      if (response.ok) {
+        setHabitaciones(
+          habitaciones.map((h) =>
+            h.id === habitacionId ? { ...h, estado: newStatus as Habitacion['estado'] } : h
+          )
+        );
+        toast.success('Estado actualizado correctamente');
+      } else {
+        toast.error('Error al actualizar estado');
+      }
+    } catch (error) {
+      toast.error('Error de conexión');
+    }
   };
+
+  // Calcular estadísticas por edificio dinámicamente
+  const edificiosStats = habitaciones.reduce((acc, h) => {
+    const existing = acc.find(e => e.nombre === h.edificio);
+    if (existing) {
+      existing.total += h.camas;
+      existing.ocupadas += h.ocupadas;
+    } else {
+      acc.push({ nombre: h.edificio, total: h.camas, ocupadas: h.ocupadas });
+    }
+    return acc;
+  }, [] as { nombre: string; total: number; ocupadas: number }[]);
 
   const totalCamas = habitaciones.reduce((acc, h) => acc + h.camas, 0);
   const camasOcupadas = habitaciones.reduce((acc, h) => acc + h.ocupadas, 0);
@@ -215,10 +179,16 @@ export default function StudentHousingHabitacionesPage() {
             Gestión de habitaciones y camas
           </p>
         </div>
-        <Button>
-          <Home className="h-4 w-4 mr-2" />
-          Nueva Habitación
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={fetchHabitaciones} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Actualizar
+          </Button>
+          <Button>
+            <Home className="h-4 w-4 mr-2" />
+            Nueva Habitación
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -281,7 +251,7 @@ export default function StudentHousingHabitacionesPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
-            {EDIFICIOS_STATS.map((edificio) => (
+            {edificiosStats.map((edificio) => (
               <div key={edificio.nombre} className="p-4 border rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-medium">{edificio.nombre}</span>

@@ -3,10 +3,10 @@
 /**
  * Workspace - Miembros
  * 
- * Gestión de miembros del coworking
+ * Gestión de miembros del coworking (conectado a API real)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -156,9 +156,30 @@ const PLANES = [
 ];
 
 export default function WorkspaceMembersPage() {
-  const [miembros, setMiembros] = useState<Miembro[]>(MIEMBROS_MOCK);
+  const [miembros, setMiembros] = useState<Miembro[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPlan, setFilterPlan] = useState<string>('all');
+
+  // Cargar miembros desde API
+  const fetchMiembros = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/workspace/members');
+      if (response.ok) {
+        const data = await response.json();
+        setMiembros(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching members:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMiembros();
+  }, []);
   const [filterEstado, setFilterEstado] = useState<string>('all');
   const [selectedMiembro, setSelectedMiembro] = useState<Miembro | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);

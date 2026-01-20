@@ -3,16 +3,17 @@
 /**
  * Student Housing - Actividades
  * 
- * Gestión de eventos y actividades para residentes
+ * Gestión de eventos y actividades para residentes (conectado a API real)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
@@ -41,6 +42,7 @@ import {
   Eye,
   CalendarDays,
   CheckCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -58,74 +60,6 @@ interface Actividad {
   organizador: string;
 }
 
-const ACTIVIDADES_MOCK: Actividad[] = [
-  {
-    id: '1',
-    titulo: 'Noche de juegos de mesa',
-    descripcion: 'Una velada divertida con juegos de mesa clásicos y modernos. Se proporcionarán snacks y bebidas.',
-    fecha: '2026-01-22',
-    hora: '20:00',
-    ubicacion: 'Sala Común - Edificio A',
-    categoria: 'social',
-    capacidad: 30,
-    inscritos: 24,
-    estado: 'proxima',
-    organizador: 'Comité de Residentes',
-  },
-  {
-    id: '2',
-    titulo: 'Taller de preparación de exámenes',
-    descripcion: 'Técnicas de estudio efectivas y gestión del tiempo para el período de exámenes.',
-    fecha: '2026-01-25',
-    hora: '18:00',
-    ubicacion: 'Aula de Estudio - Planta Baja',
-    categoria: 'academico',
-    capacidad: 40,
-    inscritos: 35,
-    estado: 'proxima',
-    organizador: 'Tutores Académicos',
-  },
-  {
-    id: '3',
-    titulo: 'Torneo de fútbol sala',
-    descripcion: 'Competición amistosa entre los diferentes edificios de la residencia.',
-    fecha: '2026-01-28',
-    hora: '16:00',
-    ubicacion: 'Polideportivo',
-    categoria: 'deportivo',
-    capacidad: 48,
-    inscritos: 42,
-    estado: 'proxima',
-    organizador: 'Club Deportivo Residencia',
-  },
-  {
-    id: '4',
-    titulo: 'Visita al Museo del Prado',
-    descripcion: 'Excursión cultural guiada al Museo del Prado. Transporte incluido.',
-    fecha: '2026-02-01',
-    hora: '10:00',
-    ubicacion: 'Punto de encuentro: Recepción',
-    categoria: 'cultural',
-    capacidad: 25,
-    inscritos: 18,
-    estado: 'proxima',
-    organizador: 'Coordinación Cultural',
-  },
-  {
-    id: '5',
-    titulo: 'Sesión de yoga matutino',
-    descripcion: 'Clases de yoga para principiantes. Trae tu esterilla o usa una de las nuestras.',
-    fecha: '2026-01-20',
-    hora: '08:00',
-    ubicacion: 'Jardín / Sala Común (si llueve)',
-    categoria: 'deportivo',
-    capacidad: 20,
-    inscritos: 20,
-    estado: 'completada',
-    organizador: 'Club de Bienestar',
-  },
-];
-
 const CATEGORIAS = [
   { value: 'social', label: 'Social', color: 'bg-pink-100 text-pink-700' },
   { value: 'academico', label: 'Académico', color: 'bg-blue-100 text-blue-700' },
@@ -135,7 +69,31 @@ const CATEGORIAS = [
 ];
 
 export default function StudentHousingActividadesPage() {
-  const [actividades, setActividades] = useState<Actividad[]>(ACTIVIDADES_MOCK);
+  const [actividades, setActividades] = useState<Actividad[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Cargar actividades desde API
+  const fetchActividades = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/student-housing/activities');
+      if (response.ok) {
+        const data = await response.json();
+        setActividades(data.data || []);
+      } else {
+        toast.error('Error al cargar actividades');
+      }
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      toast.error('Error de conexión');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchActividades();
+  }, []);
   const [filterCategoria, setFilterCategoria] = useState<string>('all');
   const [filterEstado, setFilterEstado] = useState<string>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);

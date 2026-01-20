@@ -3,15 +3,16 @@
 /**
  * Student Housing - Residentes
  * 
- * Gestión de estudiantes residentes
+ * Gestión de estudiantes residentes (conectado a API real)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
   DialogContent,
@@ -41,6 +42,7 @@ import {
   Eye,
   Edit,
   UserX,
+  RefreshCw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -61,90 +63,36 @@ interface Residente {
   pagosAlDia: boolean;
 }
 
-const RESIDENTES_MOCK: Residente[] = [
-  {
-    id: '1',
-    nombre: 'María',
-    apellidos: 'García López',
-    email: 'maria.garcia@universidad.es',
-    telefono: '+34 612 345 678',
-    universidad: 'Universidad Complutense',
-    curso: '2º Medicina',
-    habitacion: 'A-201',
-    edificio: 'Edificio A',
-    fechaIngreso: '2025-09-01',
-    fechaFin: '2026-06-30',
-    estado: 'activo',
-    pagosAlDia: true,
-  },
-  {
-    id: '2',
-    nombre: 'Carlos',
-    apellidos: 'Martínez Ruiz',
-    email: 'carlos.martinez@universidad.es',
-    telefono: '+34 623 456 789',
-    universidad: 'Universidad Politécnica',
-    curso: '3º Ingeniería',
-    habitacion: 'B-105',
-    edificio: 'Edificio B',
-    fechaIngreso: '2025-09-01',
-    fechaFin: '2026-06-30',
-    estado: 'activo',
-    pagosAlDia: true,
-  },
-  {
-    id: '3',
-    nombre: 'Ana',
-    apellidos: 'Fernández Torres',
-    email: 'ana.fernandez@universidad.es',
-    telefono: '+34 634 567 890',
-    universidad: 'Universidad Autónoma',
-    curso: '1º Derecho',
-    habitacion: 'C-302',
-    edificio: 'Edificio C',
-    fechaIngreso: '2025-09-15',
-    fechaFin: '2026-06-30',
-    estado: 'activo',
-    pagosAlDia: false,
-  },
-  {
-    id: '4',
-    nombre: 'David',
-    apellidos: 'López Sánchez',
-    email: 'david.lopez@universidad.es',
-    telefono: '+34 645 678 901',
-    universidad: 'Universidad Complutense',
-    curso: '4º Económicas',
-    habitacion: 'A-108',
-    edificio: 'Edificio A',
-    fechaIngreso: '2024-09-01',
-    fechaFin: '2025-06-30',
-    estado: 'exresidente',
-    pagosAlDia: true,
-  },
-  {
-    id: '5',
-    nombre: 'Laura',
-    apellidos: 'Rodríguez Pérez',
-    email: 'laura.rodriguez@universidad.es',
-    telefono: '+34 656 789 012',
-    universidad: 'Universidad Politécnica',
-    curso: '2º Arquitectura',
-    habitacion: 'B-210',
-    edificio: 'Edificio B',
-    fechaIngreso: '2026-02-01',
-    fechaFin: '2026-06-30',
-    estado: 'pendiente',
-    pagosAlDia: true,
-  },
-];
-
 export default function StudentHousingResidentesPage() {
-  const [residentes, setResidentes] = useState<Residente[]>(RESIDENTES_MOCK);
+  const [residentes, setResidentes] = useState<Residente[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEdificio, setFilterEdificio] = useState<string>('all');
   const [filterEstado, setFilterEstado] = useState<string>('all');
   const [selectedResidente, setSelectedResidente] = useState<Residente | null>(null);
+
+  // Cargar residentes desde la API
+  const fetchResidentes = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/student-housing/residents');
+      if (response.ok) {
+        const data = await response.json();
+        setResidentes(data.data || []);
+      } else {
+        toast.error('Error al cargar residentes');
+      }
+    } catch (error) {
+      console.error('Error fetching residents:', error);
+      toast.error('Error de conexión');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchResidentes();
+  }, []);
 
   const filteredResidentes = residentes.filter((r) => {
     const matchSearch =
@@ -159,17 +107,30 @@ export default function StudentHousingResidentesPage() {
     return matchSearch && matchEdificio && matchEstado;
   });
 
-  const handleSendEmail = (residente: Residente) => {
+  const handleSendEmail = async (residente: Residente) => {
     toast.success(`Email enviado a ${residente.email}`);
   };
 
-  const handleDeactivate = (residente: Residente) => {
-    setResidentes(
-      residentes.map((r) =>
-        r.id === residente.id ? { ...r, estado: 'exresidente' as const } : r
-      )
-    );
-    toast.success(`${residente.nombre} ha sido dado de baja`);
+  const handleDeactivate = async (residente: Residente) => {
+    try {
+      const response = await fetch(`/api/student-housing/residents?id=${residente.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado: 'exresidente' }),
+      });
+      if (response.ok) {
+        setResidentes(
+          residentes.map((r) =>
+            r.id === residente.id ? { ...r, estado: 'exresidente' as const } : r
+          )
+        );
+        toast.success(`${residente.nombre} ha sido dado de baja`);
+      } else {
+        toast.error('Error al dar de baja');
+      }
+    } catch (error) {
+      toast.error('Error de conexión');
+    }
   };
 
   const getEstadoBadge = (estado: string) => {
@@ -198,15 +159,33 @@ export default function StudentHousingResidentesPage() {
             Gestión de estudiantes residentes
           </p>
         </div>
-        <Button asChild>
-          <Link href="/student-housing/aplicaciones">
-            <Plus className="h-4 w-4 mr-2" />
-            Nueva Admisión
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={fetchResidentes} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Actualizar
+          </Button>
+          <Button asChild>
+            <Link href="/student-housing/aplicaciones">
+              <Plus className="h-4 w-4 mr-2" />
+              Nueva Admisión
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
+      {loading ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardContent className="pt-4">
+                <Skeleton className="h-4 w-24 mb-2" />
+                <Skeleton className="h-8 w-16" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-4">
@@ -241,6 +220,7 @@ export default function StudentHousingResidentesPage() {
           </CardContent>
         </Card>
       </div>
+      )}
 
       {/* Filters */}
       <Card>
