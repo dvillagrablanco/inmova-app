@@ -5,6 +5,10 @@ import { authOptions } from '@/lib/auth-options';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Modelo por defecto de Claude
+const DEFAULT_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-20250514';
+const DEFAULT_MAX_TOKENS = parseInt(process.env.ANTHROPIC_MAX_TOKENS || '8192');
+
 // Definición de agentes de IA del sistema
 // Estos son los agentes disponibles en la plataforma
 // ORDEN: General primero, luego Documental, después el resto por categoría
@@ -27,9 +31,9 @@ const SYSTEM_AGENTS = [
     ],
     keywords: ['ayuda', 'general', 'no sé', 'información', 'orientación', 'qué agente', 'recomendar'],
     defaultConfig: {
-      model: 'claude-3-haiku-20240307',
+      model: DEFAULT_MODEL,
       temperature: 0.5,
-      maxTokens: 4096,
+      maxTokens: DEFAULT_MAX_TOKENS,
       autoEscalate: true,
     },
   },
@@ -51,9 +55,9 @@ const SYSTEM_AGENTS = [
     ],
     keywords: ['documento', 'pdf', 'contrato', 'análisis', 'resumen', 'extraer', 'imagen', 'OCR', 'archivo'],
     defaultConfig: {
-      model: 'claude-3-haiku-20240307',
+      model: DEFAULT_MODEL,
       temperature: 0.3,
-      maxTokens: 8192,
+      maxTokens: DEFAULT_MAX_TOKENS,
       autoEscalate: false,
     },
   },
@@ -73,9 +77,9 @@ const SYSTEM_AGENTS = [
     ],
     keywords: ['error', 'problema', 'no funciona', 'ayuda', 'cómo', 'configurar'],
     defaultConfig: {
-      model: 'claude-3-haiku-20240307',
+      model: DEFAULT_MODEL,
       temperature: 0.3,
-      maxTokens: 4096,
+      maxTokens: DEFAULT_MAX_TOKENS,
       autoEscalate: true,
     },
   },
@@ -95,9 +99,9 @@ const SYSTEM_AGENTS = [
     ],
     keywords: ['consulta', 'información', 'precio', 'plan', 'cuenta', 'suscripción'],
     defaultConfig: {
-      model: 'claude-3-haiku-20240307',
+      model: DEFAULT_MODEL,
       temperature: 0.5,
-      maxTokens: 4096,
+      maxTokens: DEFAULT_MAX_TOKENS,
       autoEscalate: true,
     },
   },
@@ -117,9 +121,9 @@ const SYSTEM_AGENTS = [
     ],
     keywords: ['lead', 'venta', 'cliente potencial', 'propuesta', 'comercial'],
     defaultConfig: {
-      model: 'claude-3-haiku-20240307',
+      model: DEFAULT_MODEL,
       temperature: 0.6,
-      maxTokens: 4096,
+      maxTokens: DEFAULT_MAX_TOKENS,
       autoEscalate: true,
     },
   },
@@ -139,7 +143,7 @@ const SYSTEM_AGENTS = [
     ],
     keywords: ['rentabilidad', 'inversión', 'valoración', 'análisis', 'ROI', 'financiero'],
     defaultConfig: {
-      model: 'claude-3-haiku-20240307',
+      model: DEFAULT_MODEL,
       temperature: 0.4,
       maxTokens: 8192,
       autoEscalate: false,
@@ -161,9 +165,9 @@ const SYSTEM_AGENTS = [
     ],
     keywords: ['contrato', 'legal', 'ley', 'normativa', 'derechos', 'obligaciones'],
     defaultConfig: {
-      model: 'claude-3-haiku-20240307',
+      model: DEFAULT_MODEL,
       temperature: 0.3,
-      maxTokens: 4096,
+      maxTokens: DEFAULT_MAX_TOKENS,
       autoEscalate: true,
     },
   },
@@ -183,9 +187,9 @@ const SYSTEM_AGENTS = [
     ],
     keywords: ['contenido', 'redes', 'blog', 'publicación', 'marketing', 'social'],
     defaultConfig: {
-      model: 'claude-3-haiku-20240307',
+      model: DEFAULT_MODEL,
       temperature: 0.7,
-      maxTokens: 4096,
+      maxTokens: DEFAULT_MAX_TOKENS,
       autoEscalate: false,
     },
   },

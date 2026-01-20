@@ -23,8 +23,8 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || ''
 });
 
-const DEFAULT_MODEL = 'claude-3-haiku-20240307';
-const DEFAULT_MAX_TOKENS = 4096;
+const DEFAULT_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-20250514';
+const DEFAULT_MAX_TOKENS = parseInt(process.env.ANTHROPIC_MAX_TOKENS || '8192');
 const DEFAULT_TEMPERATURE = 0.7;
 const MAX_ITERATIONS = 5; // Prevenir loops infinitos en tool calling
 
