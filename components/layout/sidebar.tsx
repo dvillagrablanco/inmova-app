@@ -88,6 +88,7 @@ import {
   type UserRole,
   type BusinessVertical,
 } from './sidebar-config';
+import { HIDDEN_ROUTES } from '@/lib/active-modules-config';
 import { CompanySelector } from './CompanySelector';
 import { useSelectedCompany } from '@/lib/hooks/admin/useSelectedCompany';
 
@@ -2052,6 +2053,9 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     let filtered = items.filter((item) => {
       // Validación: item debe tener roles
       if (!item || !Array.isArray(item.roles)) return false;
+
+      // NUEVO: Filtrar rutas ocultas (placeholders no funcionales)
+      if (HIDDEN_ROUTES.includes(item.href)) return false;
 
       // Verificar permisos de rol
       if (!item.roles.includes(role)) return false;
