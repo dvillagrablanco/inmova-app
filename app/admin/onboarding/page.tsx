@@ -259,7 +259,19 @@ export default function OnboardingTrackerPage() {
   };
 
   const handleAssignAgent = async (companyId: string) => {
-    toast.info('Funcionalidad de asignación próximamente');
+    try {
+      const response = await fetch(`/api/admin/companies/${companyId}/assign-agent`, {
+        method: 'POST',
+      });
+      if (response.ok) {
+        toast.success('Agente asignado automáticamente');
+        loadCompanies();
+      } else {
+        toast.error('Error al asignar agente');
+      }
+    } catch {
+      toast.error('Error de conexión');
+    }
   };
 
   if (status === 'loading' || loading) {

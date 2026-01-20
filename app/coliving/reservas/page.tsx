@@ -166,7 +166,7 @@ export default function ColivingReservationsPage() {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver
             </Button>
-            <Button onClick={() => toast.info('Funcionalidad de nueva reserva próximamente')}>
+            <Button onClick={() => router.push('/coliving/reservas/nueva')}>
               <Plus className="h-4 w-4 mr-2" />
               Nueva Reserva
             </Button>

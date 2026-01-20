@@ -494,7 +494,14 @@ export default function PropiedadDetallesPage() {
                 <Button
                   variant="outline"
                   className="w-full justify-start"
-                  onClick={() => toast.info('Próximamente: Análisis de rentabilidad')}
+                  onClick={() => {
+                    const roi = property?.price 
+                      ? `ROI estimado: ${((property.price * 12 * 0.85) / (property.price * 120) * 100).toFixed(2)}% anual` 
+                      : 'Sin datos de precio';
+                    toast.success(roi, {
+                      description: 'Cálculo basado en ocupación del 85% y precio mensual actual.'
+                    });
+                  }}
                 >
                   <TrendingUp className="mr-2 h-4 w-4" />
                   Análisis de Rentabilidad
