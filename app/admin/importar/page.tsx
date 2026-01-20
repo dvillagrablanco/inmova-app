@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import dynamic from 'next/dynamic';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,9 +54,17 @@ import {
   CheckCircle2,
   Info,
   ArrowRight,
+  Brain,
+  Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
+
+// Lazy load del asistente IA para importación
+const ImportAIAssistant = dynamic(
+  () => import('@/components/ai/ImportAIAssistant'),
+  { ssr: false }
+);
 
 type ImportStep = 'select' | 'validate' | 'preview' | 'import' | 'results';
 
@@ -137,12 +146,71 @@ export default function ImportarPage() {
   const [importing, setImporting] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [aiSuggestedType, setAiSuggestedType] = useState<string | null>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (entityType === 'units') {
       fetchBuildings();
     }
   }, [entityType]);
+
+  // Handler para cuando la IA detecta el tipo de entidad
+  const handleAIEntityTypeDetected = useCallback((detectedType: string, confidence: number) => {
+    if (confidence > 0.6 && !entityType) {
+      setAiSuggestedType(detectedType);
+      toast.info(`IA sugiere: ${ENTITY_LABELS[detectedType as keyof typeof ENTITY_LABELS] || detectedType}`, {
+        description: `Confianza: ${Math.round(confidence * 100)}%`,
+        action: {
+          label: 'Aplicar',
+          onClick: () => {
+            setEntityType(detectedType);
+            setAiSuggestedType(null);
+            toast.success('Tipo de datos aplicado');
+          },
+        },
+      });
+    }
+  }, [entityType]);
+
+  // Drag & Drop handlers
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Solo desactivar si salimos del contenedor principal
+    if (dropZoneRef.current && !dropZoneRef.current.contains(e.relatedTarget as Node)) {
+      setIsDragging(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const droppedFiles = e.dataTransfer.files;
+    if (droppedFiles && droppedFiles.length > 0) {
+      const droppedFile = droppedFiles[0];
+      if (droppedFile.name.endsWith('.csv') || droppedFile.name.endsWith('.txt')) {
+        setFile(droppedFile);
+        setCurrentStep('validate');
+        toast.success('Archivo cargado', {
+          description: `${droppedFile.name} - El asistente IA analizará el archivo automáticamente`,
+        });
+      } else {
+        toast.error('Formato no soportado', {
+          description: 'Por favor arrastra un archivo CSV',
+        });
+      }
+    }
+  }, []);
 
   const fetchBuildings = async () => {
     try {
@@ -426,11 +494,28 @@ export default function ImportarPage() {
           <CardTitle className="flex items-center gap-2">
             <Upload className="h-5 w-5" />
             Subir Archivo
+            <Badge variant="outline" className="ml-2 text-xs">
+              <Brain className="h-3 w-3 mr-1" />
+              Análisis IA
+            </Badge>
           </CardTitle>
+          <CardDescription>
+            Arrastra tu archivo y el asistente IA lo analizará automáticamente
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-indigo-500 transition-colors">
+            <div
+              ref={dropZoneRef}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 ${
+                isDragging
+                  ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-950/20 scale-[1.02]'
+                  : 'border-gray-300 hover:border-indigo-500'
+              }`}
+            >
               <Input
                 id="file"
                 type="file"
@@ -439,9 +524,23 @@ export default function ImportarPage() {
                 className="hidden"
               />
               <label htmlFor="file" className="cursor-pointer">
-                <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-sm font-medium">Click para seleccionar archivo CSV</p>
-                <p className="text-xs text-muted-foreground mt-1">o arrastra y suelta aquí</p>
+                {isDragging ? (
+                  <>
+                    <Brain className="h-12 w-12 mx-auto text-cyan-500 mb-4 animate-pulse" />
+                    <p className="text-sm font-medium text-cyan-700">Suelta el archivo aquí</p>
+                    <p className="text-xs text-cyan-600 mt-1">El asistente IA lo analizará</p>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                    <p className="text-sm font-medium">Click para seleccionar archivo CSV</p>
+                    <p className="text-xs text-muted-foreground mt-1">o arrastra y suelta aquí</p>
+                    <div className="flex items-center justify-center gap-2 mt-3">
+                      <Sparkles className="h-4 w-4 text-cyan-500" />
+                      <span className="text-xs text-cyan-600">Análisis inteligente con IA</span>
+                    </div>
+                  </>
+                )}
               </label>
             </div>
             {file && (
@@ -791,7 +890,65 @@ export default function ImportarPage() {
         {currentStep === 'preview' && renderPreviewStep()}
         {currentStep === 'import' && renderImportStep()}
         {currentStep === 'results' && renderResultsStep()}
+
+        {/* Sugerencia de IA flotante */}
+        {aiSuggestedType && !entityType && (
+          <div className="fixed bottom-24 left-6 md:bottom-6 z-50 animate-in slide-in-from-left">
+            <Card className="border-cyan-200 bg-cyan-50/95 dark:bg-cyan-950/95 shadow-lg max-w-sm backdrop-blur">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shrink-0">
+                    <Brain className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-cyan-900 dark:text-cyan-100">
+                      IA sugiere: {ENTITY_LABELS[aiSuggestedType as keyof typeof ENTITY_LABELS]}
+                    </p>
+                    <p className="text-xs text-cyan-700 dark:text-cyan-300 mt-1">
+                      He analizado tu archivo y parece contener estos datos
+                    </p>
+                    <div className="flex gap-2 mt-2">
+                      <Button
+                        size="sm"
+                        className="bg-cyan-600 hover:bg-cyan-700"
+                        onClick={() => {
+                          setEntityType(aiSuggestedType);
+                          setAiSuggestedType(null);
+                          toast.success('Tipo de datos aplicado');
+                        }}
+                      >
+                        Aplicar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setAiSuggestedType(null)}
+                      >
+                        Ignorar
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
+
+      {/* Asistente IA de Importación */}
+      <ImportAIAssistant
+        currentFile={file}
+        currentEntityType={entityType}
+        onEntityTypeDetected={handleAIEntityTypeDetected}
+        onAnalysisComplete={(analysis, analyzedFile) => {
+          logger.info('Import analysis complete:', { 
+            entityType: analysis.suggestedEntityType,
+            columns: analysis.columnCount,
+            rows: analysis.rowCount
+          });
+        }}
+        autoOpenOnFile={true}
+      />
     </AuthenticatedLayout>
   );
 }
