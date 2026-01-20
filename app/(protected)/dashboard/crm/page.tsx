@@ -34,6 +34,7 @@ import {
   FileSpreadsheet,
   BarChart3,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function CRMDashboard() {
   const { data: session } = useSession();
@@ -105,13 +106,13 @@ export default function CRMDashboard() {
 
       if (response.ok) {
         const result = await response.json();
-        alert(`Importados ${result.imported} leads de clientes objetivo de INMOVA`);
+        toast.success(`Importados ${result.imported} leads de clientes objetivo de INMOVA`);
         loadStats();
         loadLeads();
       }
     } catch (error) {
       console.error('Error importing target clients:', error);
-      alert('Error al importar clientes objetivo');
+      toast.error('Error al importar clientes objetivo');
     }
   };
 

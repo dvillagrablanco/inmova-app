@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DollarSign, TrendingUp, Target, ArrowRight, Calculator, Mail } from 'lucide-react';
+import { toast } from 'sonner';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const partnerTypes = [
@@ -122,12 +123,33 @@ export default function PartnerCalculatorPage() {
 
   const handleSendEmail = async () => {
     if (!email) {
-      alert('Por favor introduce tu email');
+      toast.error('Por favor introduce tu email');
       return;
     }
     
-    // TODO: Implementar envío de email
-    alert('¡Cálculo enviado a tu email!');
+    // TODO: Implementar envío de email con el servicio real
+    try {
+      const response = await fetch('/api/partners/send-calculation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          partnerType,
+          numClients,
+          comisionCaptacion,
+          mrrRecurrente,
+          ingresoAnual,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('¡Cálculo enviado a tu email!');
+      } else {
+        toast.info('Funcionalidad de envío de email en desarrollo');
+      }
+    } catch {
+      toast.info('Funcionalidad de envío de email en desarrollo');
+    }
   };
 
   return (

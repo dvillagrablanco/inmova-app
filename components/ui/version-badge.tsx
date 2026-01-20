@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Info } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface VersionInfo {
   version: string;
@@ -101,7 +102,7 @@ export function VersionBadge({
             <button
               onClick={() => {
                 navigator.clipboard.writeText(JSON.stringify(versionInfo, null, 2));
-                alert('Información copiada al portapapeles');
+                toast.success('Información copiada al portapapeles');
               }}
               className="text-blue-400 hover:text-blue-300 text-xs"
             >

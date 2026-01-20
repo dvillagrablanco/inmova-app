@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { 
   Calculator, 
   FileText, 
@@ -120,7 +121,7 @@ const externalTools = [
 export default function HerramientasPage() {
   const handleExport = () => {
     // TODO: Implement export functionality
-    alert('Funcionalidad de exportación en desarrollo');
+    toast.info('Funcionalidad de exportación próximamente disponible');
   };
 
   const handlePrint = () => {

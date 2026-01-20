@@ -25,6 +25,7 @@ import {
   Maximize2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 
 interface Message {
   id: string;
@@ -195,7 +196,7 @@ export function IntelligentChatbot({
       // Ejecutar función específica
       if (action.value === 'requestCallback') {
         // Aquí se podría abrir un formulario o enviar a API
-        alert('Te contactaremos pronto. Revisa tu email.');
+        toast.success('Te contactaremos pronto. Revisa tu email.');
       }
     }
   };
