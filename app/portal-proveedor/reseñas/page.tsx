@@ -178,7 +178,7 @@ export default function PortalProveedorReseñasPage() {
 
               {/* Distribution */}
               <div className="flex-1 space-y-2">
-                {RATING_DISTRIBUTION.map(({ stars, count }) => (
+                {ratingDistribution.map(({ stars, count }) => (
                   <div key={stars} className="flex items-center gap-2">
                     <span className="text-sm w-3">{stars}</span>
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -218,7 +218,9 @@ export default function PortalProveedorReseñasPage() {
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Satisfacción</span>
               <span className="font-semibold text-green-600">
-                {Math.round((RATING_DISTRIBUTION[0].count + RATING_DISTRIBUTION[1].count) / totalReviews * 100)}%
+                {ratingDistribution.length >= 2 && totalReviews > 0
+                  ? Math.round((ratingDistribution[0].count + ratingDistribution[1].count) / totalReviews * 100)
+                  : 0}%
               </span>
             </div>
             <div className="pt-4 border-t">
