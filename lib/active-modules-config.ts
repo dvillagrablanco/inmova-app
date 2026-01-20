@@ -193,16 +193,7 @@ export const HIDDEN_ROUTES: string[] = [
   '/verificacion-inquilinos',
   '/informes',
   
-  // Partners Portal placeholders
-  '/partners/integraciones',
-  '/partners/soporte',
-  '/partners/registro',
-  '/partners/marketing',
-  '/partners/analiticas',
-  '/partners/capacitacion',
-  '/partners/recursos',
-  '/partners/comisiones',
-  '/partners/terminos',
+  // Partners Portal - AHORA FUNCIONALES (eliminados del listado oculto)
   
   // Portal Inquilino - AHORA FUNCIONALES (eliminadas del listado oculto)
   
