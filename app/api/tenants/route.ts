@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { requireAuth, requirePermission, forbiddenResponse, badRequestResponse } from '@/lib/permissions';
 import logger, { logError } from '@/lib/logger';
 import { tenantCreateSchema } from '@/lib/validations';
+import { checkCanCreate } from '@/lib/plan-limits-checker';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -104,6 +105,20 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const user = await requirePermission('create');
+
+    // Verificar límites del plan antes de crear
+    const limitCheck = await checkCanCreate('tenants', user.companyId);
+    if (!limitCheck.allowed) {
+      return NextResponse.json(
+        { 
+          error: limitCheck.message || 'Límite de inquilinos alcanzado',
+          code: 'PLAN_LIMIT_EXCEEDED',
+          limit: limitCheck.limit,
+          used: limitCheck.used,
+        },
+        { status: 403 }
+      );
+    }
 
     const body = await req.json();
     

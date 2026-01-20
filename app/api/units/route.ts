@@ -7,6 +7,7 @@ import { unitCreateSchema } from '@/lib/validations';
 import { cachedUnits, invalidateUnitsCache, invalidateBuildingsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
 import { getPaginationParams, buildPaginationResponse } from '@/lib/pagination-helper';
 import { selectBuildingMinimal, selectTenantMinimal, selectContractMinimal } from '@/lib/query-optimizer';
+import { checkCanCreate } from '@/lib/plan-limits-checker';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -170,6 +171,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const companyId = session.user?.companyId;
+
+    // Verificar límites del plan antes de crear
+    const limitCheck = await checkCanCreate('properties', companyId || undefined);
+    if (!limitCheck.allowed) {
+      return NextResponse.json(
+        { 
+          error: limitCheck.message || 'Límite de propiedades alcanzado',
+          code: 'PLAN_LIMIT_EXCEEDED',
+          limit: limitCheck.limit,
+          used: limitCheck.used,
+        },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
     
     // Validación con Zod
@@ -188,8 +205,6 @@ export async function POST(req: NextRequest) {
     }
 
     const validatedData = validationResult.data;
-
-    const companyId = session.user?.companyId;
 
     const unit = await prisma.unit.create({
       data: {
