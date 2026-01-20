@@ -143,188 +143,8 @@ interface ReconciliationSuggestion {
   reason: string;
 }
 
-// ============================================
-// DATOS DE EJEMPLO
-// ============================================
+// Datos cargados desde API /api/finanzas/conciliacion
 
-const mockBankAccounts: BankAccount[] = [
-  {
-    id: 'acc-1',
-    bankName: 'CaixaBank',
-    accountNumber: '****4521',
-    iban: 'ES12 2100 0418 4502 0005 4521',
-    balance: 45890.50,
-    currency: 'EUR',
-    lastSync: new Date().toISOString(),
-    status: 'connected',
-  },
-  {
-    id: 'acc-2',
-    bankName: 'BBVA',
-    accountNumber: '****7823',
-    iban: 'ES91 0182 2370 4200 0178 2354',
-    balance: 12450.00,
-    currency: 'EUR',
-    lastSync: subDays(new Date(), 1).toISOString(),
-    status: 'connected',
-  },
-  {
-    id: 'acc-3',
-    bankName: 'Santander',
-    accountNumber: '****9012',
-    iban: 'ES68 0049 5103 8920 1690 1234',
-    balance: 8320.75,
-    currency: 'EUR',
-    lastSync: subDays(new Date(), 2).toISOString(),
-    status: 'pending',
-  },
-];
-
-const mockTransactions: BankTransaction[] = [
-  {
-    id: 'tx-1',
-    accountId: 'acc-1',
-    date: new Date().toISOString(),
-    valueDate: new Date().toISOString(),
-    description: 'TRANSFERENCIA DE GARCIA MARTINEZ JUAN',
-    reference: 'ALQUILER ENERO 2026 - PISO 3A',
-    amount: 950.00,
-    balance: 45890.50,
-    type: 'income',
-    category: 'alquiler',
-    reconciliationStatus: 'pending',
-    matchConfidence: 95,
-  },
-  {
-    id: 'tx-2',
-    accountId: 'acc-1',
-    date: subDays(new Date(), 1).toISOString(),
-    valueDate: subDays(new Date(), 1).toISOString(),
-    description: 'RECIBO COMUNIDAD EDIFICIO SOL 15',
-    amount: -180.50,
-    balance: 44940.50,
-    type: 'expense',
-    category: 'comunidad',
-    reconciliationStatus: 'matched',
-    matchedDocumentId: 'inv-3',
-    matchedDocumentType: 'invoice',
-    matchConfidence: 100,
-  },
-  {
-    id: 'tx-3',
-    accountId: 'acc-1',
-    date: subDays(new Date(), 2).toISOString(),
-    valueDate: subDays(new Date(), 2).toISOString(),
-    description: 'BIZUM DE LOPEZ FERNANDEZ MARIA',
-    reference: 'Alquiler diciembre',
-    amount: 850.00,
-    balance: 45121.00,
-    type: 'income',
-    category: 'alquiler',
-    reconciliationStatus: 'matched',
-    matchedDocumentId: 'inv-2',
-    matchedDocumentType: 'invoice',
-    matchConfidence: 92,
-  },
-  {
-    id: 'tx-4',
-    accountId: 'acc-1',
-    date: subDays(new Date(), 3).toISOString(),
-    valueDate: subDays(new Date(), 3).toISOString(),
-    description: 'PAGO SEGURO HOGAR MAPFRE',
-    amount: -425.00,
-    balance: 44271.00,
-    type: 'expense',
-    category: 'seguros',
-    reconciliationStatus: 'manual',
-    matchedDocumentId: 'inv-5',
-    matchedDocumentType: 'receipt',
-  },
-  {
-    id: 'tx-5',
-    accountId: 'acc-1',
-    date: subDays(new Date(), 5).toISOString(),
-    valueDate: subDays(new Date(), 5).toISOString(),
-    description: 'TRANSFERENCIA PEREZ SANCHEZ ANTONIO',
-    amount: 1200.00,
-    balance: 44696.00,
-    type: 'income',
-    category: 'alquiler',
-    reconciliationStatus: 'pending',
-  },
-  {
-    id: 'tx-6',
-    accountId: 'acc-2',
-    date: subDays(new Date(), 1).toISOString(),
-    valueDate: subDays(new Date(), 1).toISOString(),
-    description: 'FACTURA ELECTRICIDAD ENDESA',
-    amount: -156.30,
-    balance: 12450.00,
-    type: 'expense',
-    category: 'suministros',
-    reconciliationStatus: 'pending',
-  },
-  {
-    id: 'tx-7',
-    accountId: 'acc-2',
-    date: subDays(new Date(), 4).toISOString(),
-    valueDate: subDays(new Date(), 4).toISOString(),
-    description: 'DOMICILIACION AGUA CANAL ISABEL II',
-    amount: -45.80,
-    balance: 12606.30,
-    type: 'expense',
-    category: 'suministros',
-    reconciliationStatus: 'ignored',
-  },
-];
-
-const mockInvoices: Invoice[] = [
-  {
-    id: 'inv-1',
-    number: 'FAC-2026-0015',
-    date: new Date().toISOString(),
-    dueDate: new Date().toISOString(),
-    tenant: 'Juan García Martínez',
-    concept: 'Alquiler Enero 2026 - Piso 3A',
-    amount: 950.00,
-    status: 'pending',
-    reconciled: false,
-  },
-  {
-    id: 'inv-2',
-    number: 'FAC-2025-0198',
-    date: subDays(new Date(), 30).toISOString(),
-    dueDate: subDays(new Date(), 25).toISOString(),
-    tenant: 'María López Fernández',
-    concept: 'Alquiler Diciembre 2025',
-    amount: 850.00,
-    status: 'paid',
-    reconciled: true,
-    matchedTransactionId: 'tx-3',
-  },
-  {
-    id: 'inv-3',
-    number: 'COM-2026-001',
-    date: subDays(new Date(), 5).toISOString(),
-    dueDate: subDays(new Date(), 1).toISOString(),
-    concept: 'Cuota Comunidad Enero - Edificio Sol 15',
-    amount: 180.50,
-    status: 'paid',
-    reconciled: true,
-    matchedTransactionId: 'tx-2',
-  },
-  {
-    id: 'inv-4',
-    number: 'FAC-2026-0014',
-    date: subDays(new Date(), 2).toISOString(),
-    dueDate: subDays(new Date(), 2).toISOString(),
-    tenant: 'Antonio Pérez Sánchez',
-    concept: 'Alquiler Enero 2026 - Local Comercial',
-    amount: 1200.00,
-    status: 'pending',
-    reconciled: false,
-  },
-];
 
 // ============================================
 // COMPONENTE PRINCIPAL
@@ -336,8 +156,10 @@ export default function ConciliacionBancariaPage() {
   
   const [activeTab, setActiveTab] = useState('movimientos');
   const [selectedAccount, setSelectedAccount] = useState<string>('all');
-  const [transactions, setTransactions] = useState<BankTransaction[]>(mockTransactions);
-  const [invoices, setInvoices] = useState<Invoice[]>(mockInvoices);
+  const [accounts, setAccounts] = useState<BankAccount[]>([]);
+  const [transactions, setTransactions] = useState<BankTransaction[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
@@ -346,9 +168,29 @@ export default function ConciliacionBancariaPage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isAutoMatching, setIsAutoMatching] = useState(false);
 
+  // Cargar datos desde API
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/finanzas/conciliacion');
+      if (response.ok) {
+        const result = await response.json();
+        setAccounts(result.data?.accounts || []);
+        setTransactions(result.data?.transactions || []);
+        setInvoices(result.data?.invoices || []);
+      }
+    } catch (error) {
+      console.error('Error fetching conciliacion data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
+    } else if (status === 'authenticated') {
+      fetchData();
     }
   }, [status, router]);
 

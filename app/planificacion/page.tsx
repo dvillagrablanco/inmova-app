@@ -57,62 +57,7 @@ interface ScheduledEvent {
   completado: boolean;
 }
 
-const MOCK_EVENTS: ScheduledEvent[] = [
-  {
-    id: '1',
-    titulo: 'Visita propiedad Centro',
-    tipo: 'visita',
-    fecha: new Date(),
-    hora: '10:00',
-    duracion: 30,
-    propiedad: 'Apartamento Centro',
-    asignado: 'María García',
-    completado: false,
-  },
-  {
-    id: '2',
-    titulo: 'Reparación fontanería',
-    tipo: 'mantenimiento',
-    fecha: new Date(),
-    hora: '14:00',
-    duracion: 60,
-    propiedad: 'Torre Marina #204',
-    asignado: 'Técnico Juan',
-    completado: false,
-  },
-  {
-    id: '3',
-    titulo: 'Firma contrato nuevo inquilino',
-    tipo: 'contrato',
-    fecha: addDays(new Date(), 1),
-    hora: '11:00',
-    duracion: 45,
-    propiedad: 'Estudio Plaza',
-    asignado: 'Carlos López',
-    completado: false,
-  },
-  {
-    id: '4',
-    titulo: 'Reunión propietarios',
-    tipo: 'reunion',
-    fecha: addDays(new Date(), 2),
-    hora: '17:00',
-    duracion: 90,
-    descripcion: 'Revisión trimestral',
-    completado: false,
-  },
-  {
-    id: '5',
-    titulo: 'Inspección anual',
-    tipo: 'visita',
-    fecha: addDays(new Date(), 3),
-    hora: '09:00',
-    duracion: 120,
-    propiedad: 'Centro Empresarial',
-    asignado: 'Ana Martínez',
-    completado: false,
-  },
-];
+// Datos cargados desde API /api/planificacion
 
 const EVENT_TYPES = [
   { id: 'visita', nombre: 'Visita', icon: Building2, color: 'bg-blue-500' },
@@ -123,11 +68,35 @@ const EVENT_TYPES = [
 ];
 
 export default function PlanificacionPage() {
-  const [events, setEvents] = useState<ScheduledEvent[]>(MOCK_EVENTS);
+  const [events, setEvents] = useState<ScheduledEvent[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [weekStart, setWeekStart] = useState<Date>(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [view, setView] = useState<'week' | 'month'>('week');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Cargar eventos desde API
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch('/api/planificacion');
+        if (response.ok) {
+          const result = await response.json();
+          // Convertir strings de fecha a Date objects
+          const eventsWithDates = (result.data || []).map((e: ScheduledEvent) => ({
+            ...e,
+            fecha: new Date(e.fecha),
+          }));
+          setEvents(eventsWithDates);
+        }
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, []);
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 

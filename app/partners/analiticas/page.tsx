@@ -6,7 +6,7 @@
  * Dashboard de métricas y rendimiento para partners
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -77,31 +77,33 @@ const METRICS: MetricCard[] = [
   },
 ];
 
-const FUNNEL_DATA = [
-  { stage: 'Visitas', count: 12543, percentage: 100 },
-  { stage: 'Clicks', count: 4892, percentage: 39 },
-  { stage: 'Leads', count: 234, percentage: 4.8 },
-  { stage: 'Conversiones', count: 89, percentage: 38 },
-];
-
-const CHANNEL_DATA = [
-  { channel: 'Link Directo', leads: 98, conversiones: 42, revenue: 2100 },
-  { channel: 'Landing Page', leads: 76, conversiones: 28, revenue: 1400 },
-  { channel: 'Email Marketing', leads: 45, conversiones: 15, revenue: 750 },
-  { channel: 'Redes Sociales', leads: 15, conversiones: 4, revenue: 200 },
-];
-
-const MONTHLY_DATA = [
-  { mes: 'Jul', leads: 145, conversiones: 52, revenue: 2600 },
-  { mes: 'Ago', leads: 167, conversiones: 61, revenue: 3050 },
-  { mes: 'Sep', leads: 189, conversiones: 72, revenue: 3600 },
-  { mes: 'Oct', leads: 212, conversiones: 79, revenue: 3950 },
-  { mes: 'Nov', leads: 198, conversiones: 74, revenue: 3700 },
-  { mes: 'Dic', leads: 234, conversiones: 89, revenue: 4450 },
-];
+// Datos cargados desde API /api/partners/analytics
 
 export default function PartnersAnaliticasPage() {
   const [period, setPeriod] = useState('30d');
+  const [funnelData, setFunnelData] = useState<{stage: string; count: number; percentage: number}[]>([]);
+  const [channelData, setChannelData] = useState<{channel: string; leads: number; conversiones: number; revenue: number}[]>([]);
+  const [monthlyData, setMonthlyData] = useState<{mes: string; leads: number; conversiones: number; revenue: number}[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const response = await fetch('/api/partners/analytics');
+        if (response.ok) {
+          const result = await response.json();
+          setFunnelData(result.data?.funnelData || []);
+          setChannelData(result.data?.channelData || []);
+          setMonthlyData(result.data?.monthlyData || []);
+        }
+      } catch (error) {
+        console.error('Error fetching analytics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnalytics();
+  }, []);
 
   return (
     <div className="space-y-6">

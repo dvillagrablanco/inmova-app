@@ -80,32 +80,33 @@ const STATS: StatCard[] = [
   },
 ];
 
-const MONTHLY_DATA = [
-  { mes: 'Jul', ingresos: 98500, ocupacion: 89 },
-  { mes: 'Ago', ingresos: 105200, ocupacion: 91 },
-  { mes: 'Sep', ingresos: 112800, ocupacion: 93 },
-  { mes: 'Oct', ingresos: 118400, ocupacion: 94 },
-  { mes: 'Nov', ingresos: 115600, ocupacion: 92 },
-  { mes: 'Dic', ingresos: 124500, ocupacion: 92 },
-];
-
-const PROPERTY_TYPES = [
-  { tipo: 'Apartamentos', count: 85, ocupacion: 94, ingresos: 68500 },
-  { tipo: 'Estudios', count: 42, ocupacion: 91, ingresos: 28200 },
-  { tipo: 'Locales', count: 18, ocupacion: 78, ingresos: 18500 },
-  { tipo: 'Oficinas', count: 11, ocupacion: 82, ingresos: 9300 },
-];
-
-const TOP_PROPERTIES = [
-  { nombre: 'Torre Marina', unidades: 24, ocupacion: 100, ingresos: 28800 },
-  { nombre: 'Residencial Sol', unidades: 18, ocupacion: 94, ingresos: 21600 },
-  { nombre: 'Centro Empresarial', unidades: 12, ocupacion: 92, ingresos: 15200 },
-  { nombre: 'Parque Residencial', unidades: 15, ocupacion: 87, ingresos: 13500 },
-];
+// Datos cargados desde API /api/estadisticas
 
 export default function EstadisticasPage() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('6m');
+  const [monthlyData, setMonthlyData] = useState<{mes: string; ingresos: number; ocupacion: number}[]>([]);
+  const [propertyTypes, setPropertyTypes] = useState<{tipo: string; count: number; ocupacion: number; ingresos: number}[]>([]);
+  const [topProperties, setTopProperties] = useState<{nombre: string; unidades: number; ocupacion: number; ingresos: number}[]>([]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/estadisticas');
+        if (response.ok) {
+          const result = await response.json();
+          setMonthlyData(result.data?.monthlyData || []);
+          setPropertyTypes(result.data?.propertyTypes || []);
+          setTopProperties(result.data?.topProperties || []);
+        }
+      } catch (error) {
+        console.error('Error fetching statistics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   const handleExport = () => {
     toast.success('Exportando estadísticas...');

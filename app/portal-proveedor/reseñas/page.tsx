@@ -52,75 +52,39 @@ interface Review {
   noUtil: number;
 }
 
-const MOCK_REVIEWS: Review[] = [
-  {
-    id: '1',
-    clienteNombre: 'María G.',
-    servicio: 'Reparación de fontanería',
-    puntuacion: 5,
-    comentario: 'Excelente trabajo. El técnico llegó puntual y resolvió el problema rápidamente. Muy profesional y limpio en su trabajo.',
-    fecha: '2026-01-15',
-    respondida: true,
-    respuesta: '¡Muchas gracias por tu valoración! Nos alegra saber que quedaste satisfecha con nuestro servicio.',
-    fechaRespuesta: '2026-01-16',
-    util: 5,
-    noUtil: 0,
-  },
-  {
-    id: '2',
-    clienteNombre: 'Carlos R.',
-    servicio: 'Instalación eléctrica',
-    puntuacion: 4,
-    comentario: 'Buen servicio en general. El trabajo quedó bien pero tardó un poco más de lo esperado.',
-    fecha: '2026-01-12',
-    respondida: false,
-    util: 3,
-    noUtil: 1,
-  },
-  {
-    id: '3',
-    clienteNombre: 'Ana M.',
-    servicio: 'Mantenimiento general',
-    puntuacion: 5,
-    comentario: 'Muy contentos con el servicio. El proveedor fue muy amable y explicó todo lo que hizo. Lo recomiendo totalmente.',
-    fecha: '2026-01-08',
-    respondida: true,
-    respuesta: 'Gracias Ana, es un placer trabajar con clientes como tú. ¡Estamos a tu disposición!',
-    fechaRespuesta: '2026-01-09',
-    util: 8,
-    noUtil: 0,
-  },
-  {
-    id: '4',
-    clienteNombre: 'Pedro L.',
-    servicio: 'Pintura',
-    puntuacion: 3,
-    comentario: 'El resultado final está bien pero hubo algunos retrasos en la comunicación.',
-    fecha: '2026-01-05',
-    respondida: false,
-    util: 2,
-    noUtil: 2,
-  },
-];
-
-const RATING_DISTRIBUTION = [
-  { stars: 5, count: 45 },
-  { stars: 4, count: 28 },
-  { stars: 3, count: 12 },
-  { stars: 2, count: 3 },
-  { stars: 1, count: 2 },
-];
+// Datos cargados desde API /api/portal-proveedor/reviews
 
 export default function PortalProveedorReseñasPage() {
-  const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [ratingDistribution, setRatingDistribution] = useState<{stars: number; count: number}[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [isReplyDialogOpen, setIsReplyDialogOpen] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [filter, setFilter] = useState<'all' | 'pending' | 'responded'>('all');
 
-  const totalReviews = RATING_DISTRIBUTION.reduce((sum, r) => sum + r.count, 0);
-  const avgRating = RATING_DISTRIBUTION.reduce((sum, r) => sum + r.stars * r.count, 0) / totalReviews;
+  // Cargar datos desde API
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await fetch('/api/portal-proveedor/reviews');
+        if (response.ok) {
+          const result = await response.json();
+          setReviews(result.data?.reviews || []);
+          setRatingDistribution(result.data?.ratingDistribution || []);
+        }
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReviews();
+  }, []);
+
+  const totalReviews = ratingDistribution.reduce((sum, r) => sum + r.count, 0);
+  const avgRating = totalReviews > 0 ? ratingDistribution.reduce((sum, r) => sum + r.stars * r.count, 0) / totalReviews : 0;
 
   const handleReply = async () => {
     if (!selectedReview || !replyText.trim()) {

@@ -85,41 +85,32 @@ const FAQ_ITEMS = [
   },
 ];
 
-const MOCK_TICKETS: Ticket[] = [
-  {
-    id: 'TK-001',
-    asunto: 'Consulta sobre integración API',
-    categoria: 'tecnico',
-    estado: 'en_progreso',
-    prioridad: 'alta',
-    fechaCreacion: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    ultimaActualizacion: new Date(Date.now() - 6 * 60 * 60 * 1000),
-  },
-  {
-    id: 'TK-002',
-    asunto: 'Problema con comisiones de diciembre',
-    categoria: 'facturacion',
-    estado: 'abierto',
-    prioridad: 'media',
-    fechaCreacion: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-    ultimaActualizacion: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: 'TK-003',
-    asunto: 'Solicitud de materiales personalizados',
-    categoria: 'marketing',
-    estado: 'resuelto',
-    prioridad: 'baja',
-    fechaCreacion: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-    ultimaActualizacion: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-  },
-];
+// Datos cargados desde API /api/partners/support
 
 export default function PartnersSoportePage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [tickets, setTickets] = useState<Ticket[]>(MOCK_TICKETS);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // Cargar tickets desde API
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const response = await fetch('/api/partners/support');
+        if (response.ok) {
+          const result = await response.json();
+          setTickets(result.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching tickets:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTickets();
+  }, []);
   
   const [formData, setFormData] = useState({
     asunto: '',
