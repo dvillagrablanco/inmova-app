@@ -83,6 +83,9 @@ import {
   AlertTriangle,
   Loader2,
   Database,
+  Crown,
+  Lock,
+  Rocket,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
@@ -150,6 +153,12 @@ interface MatchSuggestion {
   applied?: boolean;
 }
 
+interface AddonStatus {
+  hasAddon: boolean;
+  isIncludedInPlan: boolean;
+  addonPrice?: number;
+}
+
 // ============================================
 // COMPONENTE PRINCIPAL
 // ============================================
@@ -184,6 +193,32 @@ export default function ConciliacionBancariaPage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isAutoMatching, setIsAutoMatching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Estado del addon
+  const [addonStatus, setAddonStatus] = useState<AddonStatus>({
+    hasAddon: true, // Por defecto true mientras carga
+    isIncludedInPlan: false,
+    addonPrice: 29
+  });
+
+  // Verificar addon
+  const checkAddonStatus = useCallback(async () => {
+    try {
+      const response = await fetch('/api/company/addons?code=bank_reconciliation');
+      if (response.ok) {
+        const data = await response.json();
+        setAddonStatus({
+          hasAddon: data.hasAddon || false,
+          isIncludedInPlan: data.addon?.isIncludedInPlan || false,
+          addonPrice: 29
+        });
+      }
+    } catch (err) {
+      console.error('Error checking addon status:', err);
+      // En caso de error, permitir acceso (fail-safe)
+      setAddonStatus({ hasAddon: true, isIncludedInPlan: false });
+    }
+  }, []);
 
   // Cargar datos iniciales
   const loadData = useCallback(async () => {
@@ -233,9 +268,10 @@ export default function ConciliacionBancariaPage() {
     if (status === 'unauthenticated') {
       router.push('/login');
     } else if (status === 'authenticated') {
+      checkAddonStatus();
       loadData();
     }
-  }, [status, router, loadData]);
+  }, [status, router, loadData, checkAddonStatus]);
 
   // Filtrar transacciones localmente para búsqueda rápida
   const filteredTransactions = transactions.filter(tx => {
@@ -483,6 +519,60 @@ export default function ConciliacionBancariaPage() {
             </Button>
           </div>
         </div>
+
+        {/* Banner de Upgrade para Addon */}
+        {!addonStatus.hasAddon && !addonStatus.isIncludedInPlan && (
+          <Card className="border-2 border-dashed border-amber-400 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/50 dark:to-orange-950/50">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shrink-0">
+                    <Crown className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      Conciliación Bancaria Avanzada
+                      <Badge className="bg-amber-500">ADD-ON</Badge>
+                    </h3>
+                    <p className="text-muted-foreground mt-1">
+                      Desbloquea la conciliación automática con IA, conexión Open Banking PSD2 y sincronización en tiempo real con tus bancos.
+                    </p>
+                    <div className="flex flex-wrap gap-4 mt-3 text-sm">
+                      <div className="flex items-center gap-1">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        <span>Auto-matching inteligente</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        <span>Conexión PSD2</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        <span>Reglas personalizadas</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-2 shrink-0">
+                  <div className="text-right">
+                    <span className="text-3xl font-bold">{addonStatus.addonPrice}€</span>
+                    <span className="text-muted-foreground">/mes</span>
+                  </div>
+                  <Button 
+                    onClick={() => router.push('/admin/addons?highlight=bank_reconciliation')}
+                    className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
+                  >
+                    <Rocket className="h-4 w-4 mr-2" />
+                    Activar Ahora
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Incluido en plan Enterprise
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Error Alert */}
         {error && (

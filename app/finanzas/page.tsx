@@ -70,11 +70,11 @@ interface ModuleStats {
 const financeModules: FinanceModule[] = [
   {
     id: 'conciliacion',
-    title: 'Conciliacion Bancaria',
-    description: 'Vincula movimientos bancarios con facturas y recibos automaticamente',
+    title: 'Conciliación Bancaria',
+    description: 'Vincula movimientos bancarios con facturas y recibos automáticamente con IA',
     icon: <ArrowRightLeft className="h-6 w-6" />,
     href: '/finanzas/conciliacion',
-    badge: 'IA',
+    badge: 'ADD-ON',
     statsKey: 'pendingReconciliation',
     statsLabel: 'Pendientes',
     statsTrend: 'down',
@@ -382,7 +382,13 @@ export default function FinanzasPage() {
                       {module.icon}
                     </div>
                     {module.badge && (
-                      <Badge variant={module.badge === 'IA' ? 'default' : 'secondary'} className={module.badge === 'IA' ? 'bg-purple-500' : ''}>
+                      <Badge 
+                        variant={module.badge === 'IA' ? 'default' : 'secondary'} 
+                        className={
+                          module.badge === 'IA' ? 'bg-purple-500' : 
+                          module.badge === 'ADD-ON' ? 'bg-amber-500' : ''
+                        }
+                      >
                         {module.badge}
                       </Badge>
                     )}

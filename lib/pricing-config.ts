@@ -516,6 +516,20 @@ export const ADD_ONS: Record<string, AddOn> = {
     availableFor: ['professional', 'business'],
     includedIn: ['enterprise'],
   },
+  bank_reconciliation: {
+    id: 'bank_reconciliation',
+    name: 'Conciliación Bancaria Avanzada',
+    description: 'Conciliación automática de movimientos bancarios con IA, conexión Open Banking y sincronización en tiempo real',
+    category: 'feature',
+    monthlyPrice: 29,
+    annualPrice: 290,
+    costPerUnit: 5,           // APIs Open Banking (PSD2)
+    marginPercentage: 83,     // (29-5)/29 = 83%
+    costSource: 'APIs PSD2 (Bankinter/Redsys)',
+    availableFor: ['starter', 'professional', 'business'],
+    includedIn: ['enterprise'],
+    highlighted: true,
+  },
   
   // ═══════════════════════════════════════════════════════════════
   // PREMIUM - Servicios de alto valor
