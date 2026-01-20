@@ -197,15 +197,12 @@ export const HIDDEN_ROUTES: string[] = [
   
   // Portal Inquilino - AHORA FUNCIONALES (eliminadas del listado oculto)
   
-  // Portal Proveedor placeholders
-  '/portal-proveedor/reseñas',
+  // Portal Proveedor - AHORA FUNCIONAL (eliminado del listado oculto)
   
   // Otros placeholders
-  '/planificacion',
-  '/automatizacion/resumen',
   '/community',
-  '/estadisticas',
   '/valoracion-ia',
+  // Herramientas Core - AHORA FUNCIONALES (planificación, estadísticas, automatización)
   // Usuarios y permisos - AHORA FUNCIONALES (eliminados del listado oculto)
 ];
 
