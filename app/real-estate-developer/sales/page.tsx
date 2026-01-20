@@ -6,7 +6,7 @@
  * Gestión de ventas de unidades inmobiliarias
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -129,9 +129,27 @@ const VENTAS_MOCK: Venta[] = [
 ];
 
 export default function RealEstateDeveloperSalesPage() {
-  const [ventas] = useState<Venta[]>(VENTAS_MOCK);
+  const [ventas, setVentas] = useState<Venta[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEstado, setFilterEstado] = useState<string>('all');
+
+  useEffect(() => {
+    const fetchVentas = async () => {
+      try {
+        const response = await fetch('/api/real-estate-developer/sales');
+        if (response.ok) {
+          const data = await response.json();
+          setVentas(data.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching sales:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVentas();
+  }, []);
   const [filterProyecto, setFilterProyecto] = useState<string>('all');
 
   const filteredVentas = ventas.filter((v) => {

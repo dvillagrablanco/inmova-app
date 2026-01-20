@@ -6,7 +6,7 @@
  * Gestión de marketing y campañas promocionales
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -108,7 +108,25 @@ const LEADS_RECIENTES = [
 ];
 
 export default function RealEstateDeveloperMarketingPage() {
-  const [campanas] = useState<Campana[]>(CAMPANAS_MOCK);
+  const [campanas, setCampanas] = useState<Campana[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCampanas = async () => {
+      try {
+        const response = await fetch('/api/real-estate-developer/marketing');
+        if (response.ok) {
+          const data = await response.json();
+          setCampanas(data.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching campaigns:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCampanas();
+  }, []);
 
   const getEstadoBadge = (estado: string) => {
     switch (estado) {

@@ -6,7 +6,7 @@
  * Gestión de proyectos de desarrollo inmobiliario
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -139,9 +139,27 @@ const PROYECTOS_MOCK: Proyecto[] = [
 ];
 
 export default function RealEstateDeveloperProjectsPage() {
-  const [proyectos] = useState<Proyecto[]>(PROYECTOS_MOCK);
+  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEstado, setFilterEstado] = useState<string>('all');
+
+  useEffect(() => {
+    const fetchProyectos = async () => {
+      try {
+        const response = await fetch('/api/real-estate-developer/projects');
+        if (response.ok) {
+          const data = await response.json();
+          setProyectos(data.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProyectos();
+  }, []);
   const [selectedProyecto, setSelectedProyecto] = useState<Proyecto | null>(null);
 
   const filteredProyectos = proyectos.filter((p) => {

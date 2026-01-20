@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -175,9 +175,27 @@ const HOTELES = [
 ];
 
 export default function ViajesCorporativosBookingsPage() {
-  const [reservas, setReservas] = useState(RESERVAS_MOCK);
+  const [reservas, setReservas] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [busqueda, setBusqueda] = useState('');
+
+  useEffect(() => {
+    const fetchReservas = async () => {
+      try {
+        const response = await fetch('/api/viajes-corporativos/bookings');
+        if (response.ok) {
+          const data = await response.json();
+          setReservas(data.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReservas();
+  }, []);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     empleado: '',

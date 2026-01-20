@@ -6,7 +6,7 @@
  * Control de cumplimiento de normativa de vivienda protegida
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -123,8 +123,29 @@ const ALERTAS_NORMATIVAS = [
 ];
 
 export default function ViviendaSocialCompliancePage() {
-  const [controles, setControles] = useState<ControlCumplimiento[]>(CONTROLES_MOCK);
+  const [controles, setControles] = useState<ControlCumplimiento[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filterEstado, setFilterEstado] = useState<string>('all');
+
+  // Cargar controles desde API
+  const fetchControles = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/vivienda-social/compliance');
+      if (response.ok) {
+        const data = await response.json();
+        setControles(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching compliance:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchControles();
+  }, []);
 
   const filteredControles = controles.filter((c) => {
     return filterEstado === 'all' || c.estado === filterEstado;

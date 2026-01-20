@@ -6,7 +6,7 @@
  * Gestión de solicitudes de vivienda protegida
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -156,9 +156,30 @@ const SOLICITUDES_MOCK: Solicitud[] = [
 ];
 
 export default function ViviendaSocialApplicationsPage() {
-  const [solicitudes, setSolicitudes] = useState<Solicitud[]>(SOLICITUDES_MOCK);
+  const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEstado, setFilterEstado] = useState<string>('all');
+
+  // Cargar solicitudes desde API
+  const fetchSolicitudes = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/vivienda-social/applications');
+      if (response.ok) {
+        const data = await response.json();
+        setSolicitudes(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching applications:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSolicitudes();
+  }, []);
   const [filterTipo, setFilterTipo] = useState<string>('all');
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
   const [notaRechazo, setNotaRechazo] = useState('');

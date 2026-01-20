@@ -6,7 +6,7 @@
  * Gestión del equipo comercial y seguimiento de ventas
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -118,7 +118,25 @@ const OBJETIVOS_MENSUALES = {
 };
 
 export default function RealEstateDeveloperCommercialPage() {
-  const [comerciales] = useState<Comercial[]>(COMERCIALES_MOCK);
+  const [comerciales, setComerciales] = useState<Comercial[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchComerciales = async () => {
+      try {
+        const response = await fetch('/api/real-estate-developer/commercial');
+        if (response.ok) {
+          const data = await response.json();
+          setComerciales(data.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching commercial:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchComerciales();
+  }, []);
 
   // Stats totales
   const stats = {

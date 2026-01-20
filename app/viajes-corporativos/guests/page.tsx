@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -210,9 +210,27 @@ const HUESPEDES_MOCK = [
 ];
 
 export default function ViajesCorporativosGuestsPage() {
-  const [huespedes, setHuespedes] = useState(HUESPEDES_MOCK);
+  const [huespedes, setHuespedes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filtroDepartamento, setFiltroDepartamento] = useState('todos');
   const [filtroNivel, setFiltroNivel] = useState('todos');
+
+  useEffect(() => {
+    const fetchHuespedes = async () => {
+      try {
+        const response = await fetch('/api/viajes-corporativos/guests');
+        if (response.ok) {
+          const data = await response.json();
+          setHuespedes(data.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching guests:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHuespedes();
+  }, []);
   const [busqueda, setBusqueda] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
