@@ -112,66 +112,22 @@ export default function ProveedorServiciosPage() {
   const loadServices = async () => {
     try {
       setLoading(true);
-      // TODO: Cargar servicios reales del API
-      // const response = await fetch('/api/proveedor/servicios');
+      const response = await fetch('/api/portal-proveedor/servicios');
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          toast.error('Sesión expirada. Por favor, inicia sesión nuevamente.');
+          return;
+        }
+        throw new Error('Error al cargar servicios');
+      }
 
-      // Mock data
-      setServices([
-        {
-          id: '1',
-          nombre: 'Limpieza profunda de vivienda',
-          descripcion: 'Limpieza completa incluyendo cristales, cocina y baños.',
-          categoria: 'Limpieza',
-          precio: 80,
-          tipoPrecio: 'fijo',
-          activo: true,
-          destacado: true,
-          reservas: 45,
-          valoracion: 4.9,
-          totalReviews: 32,
-        },
-        {
-          id: '2',
-          nombre: 'Limpieza regular semanal',
-          descripcion: 'Mantenimiento semanal de la vivienda.',
-          categoria: 'Limpieza',
-          precio: 45,
-          tipoPrecio: 'fijo',
-          activo: true,
-          destacado: false,
-          reservas: 120,
-          valoracion: 4.7,
-          totalReviews: 89,
-        },
-        {
-          id: '3',
-          nombre: 'Reparación de fontanería',
-          descripcion: 'Arreglos de tuberías, grifos y desatascos.',
-          categoria: 'Fontanería',
-          precio: 40,
-          tipoPrecio: 'hora',
-          activo: true,
-          destacado: false,
-          reservas: 28,
-          valoracion: 4.8,
-          totalReviews: 15,
-        },
-        {
-          id: '4',
-          nombre: 'Pintura de habitación',
-          descripcion: 'Pintado profesional de paredes y techos.',
-          categoria: 'Pintura',
-          precio: 0,
-          tipoPrecio: 'presupuesto',
-          activo: false,
-          destacado: false,
-          reservas: 12,
-          valoracion: 4.5,
-          totalReviews: 8,
-        },
-      ]);
+      const data = await response.json();
+      setServices(data);
     } catch (error) {
       toast.error('Error al cargar servicios');
+      // Fallback a array vacío si hay error
+      setServices([]);
     } finally {
       setLoading(false);
     }
@@ -215,12 +171,37 @@ export default function ProveedorServiciosPage() {
     e.preventDefault();
 
     try {
-      // TODO: Llamar al API real
+      const payload = {
+        nombre: formData.nombre,
+        descripcion: formData.descripcion,
+        categoria: formData.categoria,
+        precio: formData.precio ? parseFloat(formData.precio) : null,
+        tipoPrecio: formData.tipoPrecio,
+        activo: formData.activo,
+      };
+
+      const url = editingService 
+        ? `/api/portal-proveedor/servicios/${editingService.id}`
+        : '/api/portal-proveedor/servicios';
+      
+      const method = editingService ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al guardar servicio');
+      }
+
       toast.success(editingService ? 'Servicio actualizado' : 'Servicio creado');
       setIsDialogOpen(false);
       loadServices();
-    } catch (error) {
-      toast.error('Error al guardar servicio');
+    } catch (error: any) {
+      toast.error(error.message || 'Error al guardar servicio');
     }
   };
 
@@ -228,23 +209,48 @@ export default function ProveedorServiciosPage() {
     if (!serviceToDelete) return;
 
     try {
-      // TODO: Llamar al API real
-      toast.success('Servicio eliminado');
+      const response = await fetch(`/api/portal-proveedor/servicios/${serviceToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al eliminar servicio');
+      }
+
+      const result = await response.json();
+      
+      if (result.desactivado) {
+        toast.info('Servicio desactivado (tiene reservas asociadas)');
+      } else {
+        toast.success('Servicio eliminado');
+      }
+      
       setIsDeleteDialogOpen(false);
       setServiceToDelete(null);
       loadServices();
-    } catch (error) {
-      toast.error('Error al eliminar servicio');
+    } catch (error: any) {
+      toast.error(error.message || 'Error al eliminar servicio');
     }
   };
 
   const handleToggleActive = async (service: ProviderService) => {
     try {
-      // TODO: Llamar al API real
+      const response = await fetch(`/api/portal-proveedor/servicios/${service.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activo: !service.activo }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al actualizar servicio');
+      }
+
       setServices(services.map((s) => (s.id === service.id ? { ...s, activo: !s.activo } : s)));
       toast.success(service.activo ? 'Servicio desactivado' : 'Servicio activado');
-    } catch (error) {
-      toast.error('Error al actualizar servicio');
+    } catch (error: any) {
+      toast.error(error.message || 'Error al actualizar servicio');
     }
   };
 
