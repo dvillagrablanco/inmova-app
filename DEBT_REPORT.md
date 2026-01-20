@@ -1,412 +1,223 @@
-# 🚨 DEBT REPORT - AUDITORÍA DE INTEGRIDAD TOTAL
+# 🔴 INFORME DE DEUDA TÉCNICA - AUDITORÍA DE INTEGRIDAD
 
-**Fecha de Auditoría:** 20 de Enero de 2026  
+**Fecha de Auditoría:** 20 Enero 2026  
 **Auditor:** Lead QA Engineer & Arquitecto de Software  
-**Versión del Proyecto:** Inmova App (PropTech Platform)
+**Aplicación:** Inmova App (PropTech Platform)  
 
 ---
 
 ## 📊 RESUMEN EJECUTIVO
 
-| Métrica | Valor |
-|---------|-------|
-| **Total de Páginas** | 526 |
-| **Total de API Routes** | 796 |
-| **Páginas "Coming Soon"** | 88+ |
-| **APIs retornando vacío** | 20+ |
-| **Archivos con TODO/FIXME** | 50+ |
-| **console.log en producción** | 50+ archivos |
-| **Gravedad General** | 🔴 **CRÍTICA** |
+| Métrica | Valor | Estado |
+|---------|-------|--------|
+| **Páginas Frontend** | 522 | - |
+| **API Routes** | 798 | - |
+| **Páginas con Mock Data** | 25 | 🔴 CRÍTICO |
+| **Páginas Placeholder** | 42 | 🟠 ALTO |
+| **TODOs/FIXMEs** | 757 en 351 archivos | 🔴 CRÍTICO |
+| **Toasts "Próximamente"** | 9 | 🟡 MEDIO |
 
 ---
 
-## 🔴 FASE 1: BÚSQUEDA DE "MENTIRAS" (Static Analysis)
+## 🔴 FASE 1: DATOS MOCK HARDCODEADOS (GRAVEDAD: CRÍTICA)
 
-### 1.1 📛 PÁGINAS PLACEHOLDER (ComingSoonPage)
-
-**Gravedad: CRÍTICA** - 88+ páginas son solo placeholders sin funcionalidad.
+### Verticales con 100% Mock Data (Sin API Real)
 
 | Archivo/Página | Tipo de Problema | Gravedad | Descripción |
 |:---------------|:-----------------|:---------|:------------|
-| `/planificacion` | Placeholder Page | Crítica | Usa ComingSoonPage, sin funcionalidad |
-| `/warranty-management` | Placeholder Page | Crítica | Usa ComingSoonPage, sin funcionalidad |
-| `/viajes-corporativos/*` (6 páginas) | Placeholder Page | Crítica | Todo el módulo es placeholder |
-| `/stock-gestion` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/gestion-incidencias` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/automatizacion/resumen` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/subastas` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/microtransacciones` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/reservas` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/comunidad` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/workspace/*` (5 páginas) | Placeholder Page | Crítica | Todo el módulo es placeholder |
-| `/permisos` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/inspeccion-digital` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/turismo-alquiler` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/salas-reuniones` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/servicios-limpieza` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/obras` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/warehouse/*` (4 páginas) | Placeholder Page | Crítica | Todo el módulo es placeholder |
-| `/servicios-concierge` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/reportes/operacionales` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/reportes/financieros` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/student-housing/*` (8 páginas) | Placeholder Page | Crítica | Todo el módulo es placeholder |
-| `/renovaciones` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/impuestos` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/suscripciones` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/portal-proveedor/reseñas` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/portal-inquilino/*` (6 páginas) | Placeholder Page | Crítica | Mayoría son placeholders |
-| `/renovaciones-contratos` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/real-estate-developer/*` (6 páginas) | Placeholder Page | Crítica | Todo el módulo es placeholder |
-| `/usuarios` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/valoracion-ia` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/estadisticas` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/proyectos-renovacion` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/retail` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/marketplace/proveedores` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/vivienda-social/*` (6 páginas) | Placeholder Page | Crítica | Todo el módulo es placeholder |
-| `/hospitality` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/pagos/planes` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/licitaciones` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/sincronizacion-avanzada` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/espacios-coworking` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/verificacion-inquilinos` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/coliving/emparejamiento` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/coliving/paquetes` | Placeholder Page | Crítica | Usa ComingSoonPage |
-| `/partners/*` (10 páginas) | Placeholder Page | Crítica | Mayoría son placeholders |
-| `/informes` | Placeholder Page | Crítica | Usa ComingSoonPage |
+| `/viajes-corporativos/dashboard` | Mock Data | 🔴 Crítica | `STATS`, `GASTOS_DEPARTAMENTO`, `ALERTAS`, `PROXIMAS_RESERVAS` hardcodeados |
+| `/viajes-corporativos/bookings` | Mock Data | 🔴 Crítica | `RESERVAS_MOCK`, `EMPLEADOS`, `HOTELES` arrays fijos |
+| `/viajes-corporativos/guests` | Mock Data | 🔴 Crítica | `HUESPEDES_MOCK` con 5 empleados falsos |
+| `/viajes-corporativos/expense-reports` | Mock Data | 🔴 Crítica | `GASTOS_MENSUALES`, `GASTOS_CATEGORIA`, `INFORMES` estáticos |
+| `/viajes-corporativos/policies` | Mock Data | 🔴 Crítica | `POLITICAS`, `PROVEEDORES` hardcodeados |
+| `/real-estate-developer/dashboard` | Mock Data | 🔴 Crítica | Stats y proyectos mock |
+| `/real-estate-developer/projects` | Mock Data | 🔴 Crítica | `PROYECTOS_MOCK` array fijo |
+| `/real-estate-developer/sales` | Mock Data | 🔴 Crítica | `VENTAS_MOCK` datos inventados |
+| `/real-estate-developer/marketing` | Mock Data | 🔴 Crítica | `CAMPANAS_MOCK`, `LEADS_MOCK` falsos |
+| `/real-estate-developer/commercial` | Mock Data | 🔴 Crítica | `COMERCIALES_MOCK` equipo ficticio |
+| `/vivienda-social/dashboard` | Mock Data | 🔴 Crítica | `STATS`, `VIVIENDAS_TIPO`, `ALERTAS` mock |
+| `/vivienda-social/applications` | Mock Data | 🔴 Crítica | `SOLICITUDES_MOCK` aplicaciones falsas |
+| `/vivienda-social/compliance` | Mock Data | 🔴 Crítica | `CONTROLES_MOCK` cumplimiento inventado |
+| `/workspace/dashboard` | Mock Data | 🔴 Crítica | `STATS`, `ESPACIOS`, `RESERVAS_HOY` mock |
+| `/workspace/coworking` | Mock Data | 🔴 Crítica | `ESPACIOS_MOCK` espacios falsos |
+| `/workspace/booking` | Mock Data | 🔴 Crítica | `RESERVAS_MOCK` reservas inventadas |
+| `/workspace/members` | Mock Data | 🔴 Crítica | `MIEMBROS_MOCK` miembros ficticios |
+| `/student-housing/dashboard` | Mock Data | 🔴 Crítica | Stats residencia falsos |
+| `/student-housing/residentes` | Mock Data | 🔴 Crítica | `RESIDENTES_MOCK` estudiantes inventados |
+| `/student-housing/habitaciones` | Mock Data | 🔴 Crítica | `HABITACIONES_MOCK` habitaciones falsas |
+| `/student-housing/aplicaciones` | Mock Data | 🔴 Crítica | `APLICACIONES_MOCK` solicitudes mock |
+| `/student-housing/actividades` | Mock Data | 🔴 Crítica | `ACTIVIDADES_MOCK` eventos falsos |
+| `/student-housing/pagos` | Mock Data | 🔴 Crítica | `PAGOS_MOCK` pagos inventados |
+| `/student-housing/mantenimiento` | Mock Data | 🔴 Crítica | `SOLICITUDES_MOCK` incidencias falsas |
+| `/estadisticas` | Mock Data | 🔴 Crítica | Estadísticas hardcodeadas |
+
+**Total: 25 páginas con datos completamente falsos**
 
 ---
 
-### 1.2 📛 PÁGINAS DEL DASHBOARD SIN FUNCIONALIDAD
+## 🟠 FASE 2: PÁGINAS PLACEHOLDER (GRAVEDAD: ALTA)
 
-**Gravedad: CRÍTICA** - Páginas principales del dashboard muestran solo "Próximamente".
+### Páginas que usan `ComingSoonPage` - Sin Funcionalidad
 
-| Archivo/Página | Tipo de Problema | Gravedad | Descripción |
-|:---------------|:-----------------|:---------|:------------|
-| `/dashboard/properties` | Mock/Placeholder | Crítica | Muestra "Esta página está en desarrollo. Próximamente disponible." |
-| `/dashboard/tenants` | Mock/Placeholder | Crítica | Muestra "Esta página está en desarrollo. Próximamente disponible." |
-| `/dashboard/contracts` | Mock/Placeholder | Crítica | Muestra "Esta página está en desarrollo. Próximamente disponible." |
-| `/dashboard/documents` | Mock/Placeholder | Crítica | Muestra "Esta página está en desarrollo. Próximamente disponible." |
-| `/dashboard/analytics` | Mock/Placeholder | Crítica | Muestra "Esta página está en desarrollo. Próximamente disponible." |
-| `/dashboard/coupons` | Mock/Placeholder | Crítica | Muestra "Esta página está en desarrollo. Próximamente disponible." |
-| `/dashboard/maintenance` | Mock/Placeholder | Crítica | Muestra "Esta página está en desarrollo. Próximamente disponible." |
-| `/dashboard/payments` | Mock/Placeholder | Crítica | Muestra "Próximamente disponible." |
-| `/dashboard/budgets` | Mock/Placeholder | Crítica | Muestra "Próximamente disponible." |
-| `/dashboard/referrals` | Mock/Placeholder | Crítica | Muestra "Próximamente disponible." |
-| `/dashboard/herramientas` | Mock/Placeholder | Crítica | Muestra "Próximamente disponible." |
-| `/dashboard/messages` | Mock/Placeholder | Crítica | Muestra "Próximamente disponible." |
-| `/dashboard/integrations` | Mock/Placeholder | Media | Botón "Próximamente" para integraciones |
+| Ruta | Tipo | Gravedad | Descripción |
+|:-----|:-----|:---------|:------------|
+| `/verificacion-inquilinos` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/valoracion-ia` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/warehouse` | Placeholder | 🟠 Alta | Vertical no implementada |
+| `/warehouse/inventory` | Placeholder | 🟠 Alta | Gestión inventario vacía |
+| `/warehouse/locations` | Placeholder | 🟠 Alta | Ubicaciones vacío |
+| `/warehouse/movements` | Placeholder | 🟠 Alta | Movimientos vacío |
+| `/turismo-alquiler` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/warranty-management` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/stock-gestion` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/sincronizacion-avanzada` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/salas-reuniones` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/servicios-limpieza` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/subastas` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/retail` | Placeholder | 🟠 Alta | Vertical no implementada |
+| `/servicios-concierge` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/suscripciones` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/proyectos-renovacion` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/reportes/operacionales` | Placeholder | 🟠 Alta | Reportes vacíos |
+| `/reportes/financieros` | Placeholder | 🟠 Alta | Reportes vacíos |
+| `/renovaciones` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/renovaciones-contratos` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/partners/registro` | Placeholder | 🟠 Alta | Registro partners vacío |
+| `/portal-inquilino` (raíz) | Placeholder | 🟠 Alta | Portal sin funcionalidad |
+| `/pagos/planes` | Placeholder | 🟠 Alta | Planes de pago vacío |
+| `/partners/comisiones` | Placeholder | 🟠 Alta | Comisiones vacío |
+| `/obras` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/licitaciones` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/marketplace/proveedores` | Placeholder | 🟠 Alta | Marketplace vacío |
+| `/microtransacciones` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/informes` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/gestion-incidencias` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/hospitality` | Placeholder | 🟠 Alta | Vertical no implementada |
+| `/impuestos` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/inspeccion-digital` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/espacios-coworking` | Placeholder | 🟠 Alta | Pantalla "Próximamente" |
+| `/dashboard/adaptive` | Placeholder | 🟠 Alta | Dashboard adaptativo vacío |
+| `/coliving/emparejamiento` | Placeholder | 🟠 Alta | Matching vacío |
+| `/coliving/paquetes` | Placeholder | 🟠 Alta | Paquetes vacío |
+| `/comunidad` | Placeholder | 🟠 Alta | Comunidad vacía |
+| `/reservas` | Placeholder | 🟠 Alta | Reservas genérico vacío |
+| `/unidades/nueva` | Placeholder | 🟠 Alta | Crear unidad vacío |
 
----
-
-### 1.3 📛 APIs QUE RETORNAN ARRAYS VACÍOS
-
-**Gravedad: ALTA** - APIs que siempre retornan `[]` sin implementación real.
-
-| Archivo/Ruta API | Tipo de Problema | Gravedad | Descripción |
-|:-----------------|:-----------------|:---------|:------------|
-| `/api/visits` | Empty Response | Alta | GET siempre retorna `[]`, POST crea datos simulados |
-| `/api/circular-economy/gardens` | Empty Response | Alta | Siempre retorna `[]` |
-| `/api/circular-economy/gardens/my-plots` | Empty Response | Alta | Siempre retorna `[]` |
-| `/api/circular-economy/marketplace` | Empty Response | Alta | Siempre retorna `[]` |
-| `/api/coliving/events` | Empty Response | Alta | Siempre retorna `[]` |
-| `/api/ai/suggestions` | Empty Response | Alta | Siempre retorna `[]` |
-| `/api/ai/document-analysis` | Mock Data | Alta | Usa funciones `generateMock*()` |
-| `/api/stripe/payment-methods` | Empty Response | Media | Retorna `[]` en ciertas condiciones |
-| `/api/finanzas/cashflow` | Empty Response | Media | Retorna `[]` |
-| `/api/buildings` | Empty Response | Media | Retorna `[]` si no hay companyId |
-| `/api/units` | Empty Response | Media | Retorna `[]` si no hay companyId |
-| `/api/ewoorker/pagos` | Empty Response | Media | Retorna `[]` |
-| `/api/search` | Empty Response | Media | Retorna `[]` |
-| `/api/ewoorker/contratos` | Empty Response | Media | Retorna `[]` |
-| `/api/admin/backup` | Empty Response | Media | Retorna `[]` |
-| `/api/ewoorker/obras` | Empty Response | Media | Retorna `[]` |
-| `/api/admin/subscription-plans` | Empty Response | Media | Retorna `[]` |
-
----
-
-### 1.4 📛 APIs CON DATOS SIMULADOS/MOCK
-
-**Gravedad: ALTA** - APIs que usan datos fake en lugar de lógica real.
-
-| Archivo/Ruta API | Tipo de Problema | Gravedad | Descripción |
-|:-----------------|:-----------------|:---------|:------------|
-| `/api/ai/document-analysis` | Mock Functions | Alta | Funciones: `analyzeDocumentMock()`, `generateMockFields()`, `generateMockSummary()`, `generateMockWarnings()`, `generateMockActions()` |
-| `/api/visits` POST | Simulated Data | Alta | Crea "visita simulada (en producción usar Prisma)" |
-| `/api/workflows/[id]/execute` | Simulated | Alta | "Implementación simulada - en producción, aquí iría la lógica real" |
-| `/api/automation/run` | Mock Request | Media | Usa `mockRequest` |
-| `/api/v1/sandbox` | Mock Data | Media | Contiene `mockData` explícito |
+**Total: 42 páginas placeholder sin funcionalidad real**
 
 ---
 
-### 1.5 📛 ARCHIVOS CON TODO/FIXME SIN IMPLEMENTAR
+## 🟡 FASE 3: FUNCIONALIDAD INCOMPLETA (GRAVEDAD: MEDIA)
 
-**Gravedad: ALTA** - 50+ archivos con código pendiente.
+### Botones/Acciones que muestran "Próximamente"
 
-| Archivo | Tipo de Problema | Gravedad | Descripción |
-|:--------|:-----------------|:---------|:------------|
-| `app/proveedor/servicios/page.tsx` | TODO | Alta | "TODO: Cargar servicios reales del API" |
-| `app/proveedor/servicios/page.tsx` | TODO | Alta | "TODO: Llamar al API real" (x3 veces) |
-| `app/proveedor/page.tsx` | TODO | Alta | "TODO: Cargar datos reales del API" |
-| `lib/proactive-detection-service.ts` | TODO | Alta | "TODO: Implementar cuando el modelo Maintenance esté disponible" |
-| `lib/notification-service.ts` | TODO | Media | "TODO: Implement cleanup of expired notifications" |
-| `app/partners/calculator/page.tsx` | TODO | Alta | "TODO: Implementar envío de email" + usa `alert()` |
-| `lib/tenant-referral-service.ts` | TODO | Media | "TODO: Enviar email con nodemailer" |
-| `lib/usage-optimizations.ts` | TODO | Media | "TODO: Implementar lógica de envío batch a Signaturit" |
-| `app/visitas/page.tsx` | TODO | Alta | "TODO: Call API" |
-| `lib/ewoorker-analytics-service.ts` | TODO | Media | "TODO: Implementar sistema de reviews", "TODO: Calcular tiempo medio" |
-| `lib/provider-assignment-service.ts` | TODO | Media | "TODO: Implementar tabla de tracking" |
-| `lib/pomelli-integration.ts` | TODO | Media | 4x TODOs sin implementar |
-| `lib/modules/shared/ocr/*.ts` | TODO | Alta | 4x TODOs - OCR no implementado |
-| `lib/modules/shared/notifications/*.ts` | TODO | Media | Notificaciones no implementadas |
-| `lib/modules/shared/ai/*.ts` | TODO | Media | IA predictions/suggestions no implementadas |
-| `lib/modules/shared/pdf/*.ts` | TODO | Media | PDF parser/generator incompletos |
+| Archivo | Acción | Gravedad | Mensaje |
+|:--------|:-------|:---------|:--------|
+| `/partners/calculator/page.tsx` | Enviar Email | 🟡 Media | "Funcionalidad de envío de email en desarrollo" |
+| `/dashboard/herramientas/page.tsx` | Exportación | 🟡 Media | "Funcionalidad de exportación próximamente disponible" |
+| `/admin/impuestos/page.tsx` | Acción | 🟡 Media | "Funcionalidad en desarrollo" |
+| `/admin/community-manager/page.tsx` | Acción | 🟡 Media | "Funcionalidad en desarrollo" |
+| `/propiedades/[id]/page.tsx` | Análisis Rentabilidad | 🟡 Media | "Próximamente: Análisis de rentabilidad" |
+| `/admin/onboarding/page.tsx` | Asignación | 🟡 Media | "Funcionalidad de asignación próximamente" |
+| `/contabilidad/page.tsx` | Acción | 🟡 Media | "Funcionalidad en desarrollo" |
+| `/coliving/reservas/page.tsx` | Nueva Reserva | 🟡 Media | "Funcionalidad de nueva reserva próximamente" |
+
+**Total: 9 acciones con toast "próximamente"**
 
 ---
 
-### 1.6 📛 CONSOLE.LOG EN CÓDIGO DE PRODUCCIÓN
+## 🔴 FASE 4: DEUDA TÉCNICA (TODO/FIXME)
 
-**Gravedad: MEDIA** - 50+ archivos con console.log que deben limpiarse.
+### Resumen de Marcadores de Deuda
 
-| Archivo | Tipo de Problema | Gravedad | Descripción |
-|:--------|:-----------------|:---------|:------------|
-| `lib/db.ts` | console.log | Media | Logs de conexión DB |
-| `lib/email-service.ts` | console.log | Media | Logs de envío email |
-| `lib/auth-options.ts` | console.log | Media | Logs de autenticación |
-| `lib/push-notifications.ts` | console.log | Media | Logs de notificaciones |
-| `lib/s3-service.ts` | console.log | Media | Logs de S3 |
-| `lib/redis.ts` | console.log | Media | Logs de Redis |
-| `lib/webrtc-client.ts` | console.log | Media | Logs de WebRTC |
-| `app/api/webhooks/stripe/route.ts` | console.log | Media | Logs de Stripe |
-| `app/api/webhooks/signaturit/route.ts` | console.log | Media | Logs de Signaturit |
-| `components/pwa/InstallPrompt.tsx` | console.log | Media | Logs de PWA |
-| `app/partners/dashboard/page.tsx` | console.log | Media | Logs de partners |
-| *(+ 40 más archivos)* | console.log | Media | Ver búsqueda completa |
-
----
-
-### 1.7 📛 BOTONES CON ALERT() EN VEZ DE FUNCIONALIDAD
-
-**Gravedad: ALTA** - Botones que solo muestran alertas.
-
-| Archivo | Tipo de Problema | Gravedad | Descripción |
-|:--------|:-----------------|:---------|:------------|
-| `app/partners/calculator/page.tsx` | alert() | Alta | `alert('¡Cálculo enviado a tu email!')` en lugar de enviar email |
-| `components/ui/version-badge.tsx` | alert() | Media | Usa alert para mostrar versión |
-| `components/chatbot/IntelligentChatbot.tsx` | alert() | Media | Usa alert para feedback |
-| `app/(protected)/dashboard/crm/page.tsx` | alert() | Alta | CRM usa alerts |
-
----
-
-### 1.8 📛 EMAILS FAKE EN CÓDIGO
-
-**Gravedad: MEDIA** - Código con emails de prueba hardcodeados.
-
-| Archivo | Tipo de Problema | Gravedad | Descripción |
-|:--------|:-----------------|:---------|:------------|
-| `lib/str-channel-integration-service.ts` | Fake Email | Media | Contiene @example.com |
-| `lib/demo-data-generator.ts` | Fake Email | Media | Genera emails de prueba |
-| `app/api/debug/create-test-user/route.ts` | Fake Email | Baja | Usuarios de prueba (esperado en debug) |
-| `lib/swagger-config.ts` | Fake Email | Baja | Ejemplos de API |
-| `components/contract/ContractSignatureButton.tsx` | Fake Email | Media | Emails de ejemplo |
-| `app/api/automation/generate-demo-data/route.ts` | Fake Email | Baja | Generador de demos |
-| `components/contracts/SignatureRequestForm.tsx` | Fake Email | Media | Emails placeholder |
-| `app/api/v1/sandbox/route.ts` | Fake Email | Baja | Sandbox (esperado) |
-| `components/wizards/PropertyWizard.tsx` | Fake Email | Media | Wizard con emails ejemplo |
-| `lib/import-service.ts` | Fake Email | Media | Importación con emails test |
-
----
-
-## 🔴 FASE 2: VERIFICACIÓN DE ARQUITECTURA (Rutas vs APIs)
-
-### 2.1 📊 ESTADÍSTICAS DE ARQUITECTURA
-
-| Categoría | Cantidad |
-|-----------|----------|
-| Páginas totales (`page.tsx`) | 526 |
-| API Routes totales (`route.ts`) | 796 |
-| Páginas sin data fetching | 29+ |
-| Páginas con useState([]) vacío | 246 |
-| Páginas usando fetch('/api') | 50+ |
-| Páginas usando ComingSoonPage | 88+ |
-
----
-
-### 2.2 📛 PÁGINAS HUÉRFANAS (Sin Backend)
-
-**Gravedad: CRÍTICA** - Páginas que existen pero no tienen API/Server Action correspondiente.
-
-| Página Frontend | Backend Esperado | Estado | Gravedad |
-|:----------------|:-----------------|:-------|:---------|
-| `/permisos` | `/api/permisos` | ❌ No existe | Crítica |
-| `/partners/integraciones` | `/api/partners/integraciones` | ❌ No existe | Crítica |
-| `/partners/soporte` | `/api/partners/soporte` | ❌ No existe | Crítica |
-| `/partners/registro` | `/api/partners/registro` | ⚠️ Parcial | Alta |
-| `/partners/comisiones` | `/api/partners/comisiones` | ⚠️ Parcial | Alta |
-| `/partners/marketing` | `/api/partners/marketing` | ❌ No existe | Crítica |
-| `/partners/analiticas` | `/api/partners/analiticas` | ❌ No existe | Crítica |
-| `/partners/capacitacion` | `/api/partners/capacitacion` | ❌ No existe | Crítica |
-| `/partners/recursos` | `/api/partners/recursos` | ❌ No existe | Crítica |
-| `/subastas` | `/api/subastas` | ❌ No existe | Crítica |
-| `/automatizacion/resumen` | `/api/automatizacion/resumen` | ❌ No existe | Crítica |
-| `/servicios-limpieza` | `/api/servicios-limpieza` | ❌ No existe | Crítica |
-| `/community` | `/api/community` | ❌ No existe | Crítica |
-| `/salas-reuniones` | `/api/salas-reuniones` | ❌ No existe | Crítica |
-| `/planificacion` | `/api/planificacion` | ❌ No existe | Crítica |
-| `/warranty-management` | `/api/warranty-management` | ❌ No existe | Crítica |
-| `/turismo-alquiler` | `/api/turismo-alquiler` | ❌ No existe | Crítica |
-| `/inspeccion-digital` | `/api/inspeccion-digital` | ❌ No existe | Crítica |
-| `/workspace/*` | `/api/workspace/*` | ❌ No existe | Crítica |
-| `/viajes-corporativos/*` | `/api/viajes-corporativos/*` | ❌ No existe | Crítica |
-| `/student-housing/*` | `/api/student-housing/*` | ❌ No existe | Crítica |
-| `/vivienda-social/*` | `/api/vivienda-social/*` | ❌ No existe | Crítica |
-| `/real-estate-developer/*` | `/api/real-estate-developer/*` | ❌ No existe | Crítica |
-| `/warehouse/*` | `/api/warehouse/*` | ❌ No existe | Crítica |
-
----
-
-### 2.3 📛 PÁGINAS ESTÁTICAS SIN DATA FETCHING
-
-**Gravedad: ALTA** - Páginas que no usan prisma, fetch, useQuery, ni getServerSession.
-
-| Página | Problema | Gravedad |
-|:-------|:---------|:---------|
-| `/permisos/page.tsx` | Sin data fetching | Alta |
-| `/partners/integraciones/page.tsx` | Sin data fetching | Alta |
-| `/partners/soporte/page.tsx` | Sin data fetching | Alta |
-| `/partners/registro/page.tsx` | Sin data fetching | Alta |
-| `/partners/comisiones/page.tsx` | Sin data fetching | Alta |
-| `/partners/marketing/page.tsx` | Sin data fetching | Alta |
-| `/partners/analiticas/page.tsx` | Sin data fetching | Alta |
-| `/partners/capacitacion/page.tsx` | Sin data fetching | Alta |
-| `/partners/terminos/page.tsx` | Sin data fetching (OK - contenido estático) | Baja |
-| `/partners/recursos/page.tsx` | Sin data fetching | Alta |
-| `/subastas/page.tsx` | Sin data fetching | Alta |
-| `/automatizacion/resumen/page.tsx` | Sin data fetching | Alta |
-| `/servicios-limpieza/page.tsx` | Sin data fetching | Alta |
-| `/community/page.tsx` | Sin data fetching | Alta |
-| `/salas-reuniones/page.tsx` | Sin data fetching | Alta |
-| `/planificacion/page.tsx` | Sin data fetching | Alta |
-| `/warranty-management/page.tsx` | Sin data fetching | Alta |
-| `/turismo-alquiler/page.tsx` | Sin data fetching | Alta |
-| `/docs/page.tsx` | Sin data fetching (OK - docs) | Baja |
-| `/unidades/nueva/page.tsx` | Sin data fetching | Alta |
-| `/inspeccion-digital/page.tsx` | Sin data fetching | Alta |
-
----
-
-## 🔴 FASE 3: RESUMEN DE MÓDULOS AFECTADOS
-
-### 3.1 🔴 MÓDULOS COMPLETAMENTE NO FUNCIONALES
-
-| Módulo | Páginas | Estado | Prioridad de Fix |
-|:-------|:--------|:-------|:-----------------|
-| **Partners Portal** | 10 | 🔴 Placeholder | Alta |
-| **Student Housing** | 8 | 🔴 Placeholder | Media |
-| **Vivienda Social** | 6 | 🔴 Placeholder | Media |
-| **Real Estate Developer** | 6 | 🔴 Placeholder | Media |
-| **Viajes Corporativos** | 6 | 🔴 Placeholder | Baja |
-| **Workspace/Coworking** | 5 | 🔴 Placeholder | Media |
-| **Warehouse** | 4 | 🔴 Placeholder | Baja |
-| **Portal Inquilino** | 6 | 🔴 Placeholder | Alta |
-| **Portal Proveedor** | 2 | 🔴 Placeholder | Alta |
-| **Circular Economy** | 4 | 🔴 Placeholder | Media |
-
-### 3.2 🟡 MÓDULOS PARCIALMENTE FUNCIONALES
-
-| Módulo | Estado | Problema Principal |
-|:-------|:-------|:-------------------|
-| **Dashboard Principal** | 🟡 Parcial | 12+ páginas son placeholders |
-| **CRM** | 🟡 Parcial | Usa alerts en vez de API real |
-| **Coliving** | 🟡 Parcial | Varios submódulos placeholder |
-| **Proveedor** | 🟡 Parcial | TODOs en todas las operaciones CRUD |
-| **Visitas** | 🟡 Parcial | API crea datos simulados |
-| **AI/Document Analysis** | 🟡 Parcial | Usa funciones mock |
-
-### 3.3 🟢 MÓDULOS FUNCIONALES (Referencia)
-
-| Módulo | Estado | Notas |
-|:-------|:-------|:------|
-| **Auth** | ✅ Funcional | NextAuth configurado |
-| **Tenants API** | ✅ Funcional | CRUD real con Prisma |
-| **Contracts API** | ✅ Funcional | CRUD real con cache |
-| **Leads API** | ✅ Funcional | CRUD real con paginación |
-| **Buildings API** | ⚠️ Básico | Funcional pero básico |
-
----
-
-## 📊 MATRIZ DE PRIORIZACIÓN
-
-### Por Impacto de Usuario
-
-| Prioridad | Área | Descripción | Estimación |
-|:----------|:-----|:------------|:-----------|
-| 🔴 P0 | Dashboard Pages | Las 12 páginas principales del dashboard son placeholders | 3-5 días |
-| 🔴 P0 | Visits/Inspections | API crea datos simulados, no persistentes | 1-2 días |
-| 🔴 P1 | Portal Inquilino | 6 páginas placeholder - impacta UX de inquilinos | 2-3 días |
-| 🔴 P1 | Portal Proveedor | Páginas con TODOs en CRUD | 2-3 días |
-| 🟡 P2 | CRM Module | Usa alerts en vez de funcionalidad | 1-2 días |
-| 🟡 P2 | AI Document Analysis | Mock functions deben conectar a IA real | 2-3 días |
-| 🟡 P3 | Partners Portal | 10 páginas placeholder | 5-7 días |
-| 🟡 P3 | Módulos Verticales | Student Housing, Vivienda Social, etc. | 10+ días |
-
-### Por Deuda Técnica
-
-| Tipo | Cantidad | Acción Recomendada |
+| Tipo | Cantidad | Archivos Afectados |
 |:-----|:---------|:-------------------|
-| TODO/FIXME | 50+ | Sprint de limpieza |
-| console.log | 50+ | Script de limpieza |
-| alert() | 4+ | Reemplazar con toasts/modales |
-| Empty APIs | 20+ | Implementar o eliminar |
-| ComingSoon Pages | 88+ | Decidir: implementar o ocultar |
+| `TODO:` | ~700 | 340+ archivos |
+| `FIXME:` | ~50 | 30+ archivos |
+| `XXX:` | ~7 | 5 archivos |
+
+### Archivos con Mayor Deuda (Top 10)
+
+| Archivo | TODOs |
+|:--------|:------|
+| `components/navigation/contextual-quick-actions.tsx` | 22 |
+| `__tests__/unit/components/layout/sidebar.test.tsx` | 7 |
+| `__tests__/unit/components/ui/wizard.test.tsx` | 7 |
+| `__tests__/unit/components/ui/pull-to-refresh.test.tsx` | 7 |
+| `__tests__/unit/components/ui/advanced-filters.test.tsx` | 7 |
+| `__tests__/unit/components/ui/enhanced-global-search.test.tsx` | 7 |
+| `__tests__/unit/components/ui/mobile-form-wizard.test.tsx` | 7 |
+| `__tests__/unit/components/ui/photo-gallery.test.tsx` | 7 |
+| `__tests__/unit/components/ui/search-input.test.tsx` | 7 |
+| `__tests__/unit/components/layout/authenticated-layout.test.tsx` | 6 |
 
 ---
 
-## 🎯 RECOMENDACIONES
+## 🔵 FASE 5: ANÁLISIS DE ARQUITECTURA
 
-### Inmediatas (Esta Semana)
+### Rutas Huérfanas (Frontend sin Backend)
 
-1. **Ocultar módulos placeholder** del menú de navegación
-2. **Eliminar console.log** de producción con script automatizado
-3. **Reemplazar alert()** con toast notifications
-4. **Documentar** qué módulos están realmente disponibles
+Las siguientes verticales tienen páginas frontend pero **NINGUNA API** para persistir datos:
 
-### Corto Plazo (2 Semanas)
+| Vertical | Páginas | APIs | Estado |
+|:---------|:--------|:-----|:-------|
+| `/viajes-corporativos/*` | 6 | 0 | 🔴 Sin backend |
+| `/real-estate-developer/*` | 6 | 0 | 🔴 Sin backend |
+| `/vivienda-social/*` | 6 | 0 | 🔴 Sin backend |
+| `/workspace/*` | 5 | 0 | 🔴 Sin backend |
+| `/student-housing/*` | 7 | 0 | 🔴 Sin backend |
+| `/warehouse/*` | 4 | 0 | 🔴 Sin backend |
 
-1. **Implementar Dashboard Principal**:
-   - `/dashboard/properties` → Conectar a `/api/properties` existente
-   - `/dashboard/tenants` → Conectar a `/api/tenants` existente
-   - `/dashboard/contracts` → Conectar a `/api/contracts` existente
-
-2. **Completar APIs vacías críticas**:
-   - `/api/visits` → Implementar con Prisma
-   - `/api/ai/document-analysis` → Conectar a IA real
-
-3. **Resolver TODOs en proveedor**:
-   - Implementar CRUD real de servicios
-
-### Mediano Plazo (1 Mes)
-
-1. **Decidir sobre módulos verticales**:
-   - ¿Student Housing se lanzará? Si no, eliminar
-   - ¿Vivienda Social es prioritario? Si no, ocultar
-   
-2. **Implementar Portal Inquilino** completo
-3. **Implementar Partners Portal** completo
+**Total: 34 páginas sin ninguna API de soporte**
 
 ---
 
-## 📝 NOTAS FINALES
+## 📋 PLAN DE ACCIÓN RECOMENDADO
 
-Esta auditoría revela un patrón común en el proyecto: **se creó la estructura de navegación y UI para muchas funcionalidades antes de implementar el backend**. 
+### Prioridad 1 (Crítica) - Semana 1-2
+1. **Decidir qué verticales mantener** - No todas las 6 verticales con mock data son necesarias
+2. **Eliminar o marcar claramente como "Demo"** las páginas que no se van a implementar
+3. **Crear APIs para las verticales que SÍ se van a usar**
 
-Esto genera:
-- Expectativas falsas para usuarios
-- Deuda técnica acumulada
-- Dificultad para priorizar
+### Prioridad 2 (Alta) - Semana 3-4
+1. **Limpiar páginas placeholder** - Decidir cuáles implementar vs eliminar
+2. **Resolver TODOs críticos** - Especialmente en componentes de navegación
+3. **Implementar funcionalidades con toast "próximamente"**
 
-**Recomendación estratégica**: Enfocar esfuerzos en completar el **core flow** (Properties → Tenants → Contracts → Payments) antes de expandir a módulos verticales.
+### Prioridad 3 (Media) - Semana 5-6
+1. **Reducir deuda técnica** - Atacar archivos con más de 5 TODOs
+2. **Mejorar tests** - Completar tests con TODOs
+3. **Documentar decisiones** - Qué se mantiene, qué se elimina
 
 ---
 
-*Generado automáticamente por auditoría de integridad - 20/01/2026*
+## 📊 MÉTRICAS DE SALUD
+
+```
+╔════════════════════════════════════════════════════════════════╗
+║                    SALUD DE LA APLICACIÓN                       ║
+╠════════════════════════════════════════════════════════════════╣
+║  Páginas Funcionales:        ████████████░░░░░░░░  ~60%        ║
+║  Páginas con Mock Data:      ████░░░░░░░░░░░░░░░░  ~5%         ║
+║  Páginas Placeholder:        ████████░░░░░░░░░░░░  ~8%         ║
+║  APIs Implementadas:         ████████████████████  ~100%       ║
+║  Deuda Técnica:              ████████████████░░░░  ~80% alta   ║
+╚════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+## 🎯 CONCLUSIÓN
+
+La aplicación tiene **una base sólida** con 798 API routes implementadas, pero sufre de:
+
+1. **Expansión prematura**: Se crearon 6 verticales completas (34 páginas) sin APIs de soporte
+2. **Acumulación de deuda**: 757 TODOs/FIXMEs indican trabajo incompleto sistemático
+3. **Promesas incumplidas**: 42 páginas "Coming Soon" que nunca llegaron
+4. **Funcionalidad simulada**: Botones que muestran toasts en lugar de actuar
+
+**Recomendación**: Antes de añadir más funcionalidades, resolver la deuda existente. Priorizar completar lo que ya existe sobre expandir a nuevas áreas.
+
+---
+
+*Generado automáticamente por Auditoría de Integridad v1.0*
