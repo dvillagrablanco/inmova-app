@@ -8751,6 +8751,39 @@ model RoomSharedSpace {
   @@map("room_shared_spaces")
 }
 
+// Room Rental Property Config
+model RoomRentalProperty {
+  id         String @id @default(cuid())
+  companyId  String
+  buildingId String
+  unitId     String
+
+  // Datos base
+  nombre    String
+  direccion String
+  totalRooms Int
+
+  // Configuracion
+  utilities       Json?
+  commonAreas     Json?
+  quietHours      String?
+  cleaningSchedule String?
+  petsAllowed     Boolean @default(false)
+  smokingAllowed  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  building Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  unit     Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId])
+  @@index([companyId])
+  @@index([buildingId])
+  @@map("room_rental_properties")
+}
+
 // ============================================
 // SISTEMA MULTI-EMPRESA POR USUARIO
 // ============================================
