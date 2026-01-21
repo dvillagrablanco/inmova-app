@@ -133,11 +133,11 @@ export default function NuevoInquilinoPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          nombre: formData.nombre,
+          // Usar nombreCompleto para que la API lo divida en nombre/apellidos
+          nombreCompleto: formData.nombre,
           email: formData.email,
           telefono: formData.telefono,
-          documentoIdentidad: formData.documentoIdentidad,
-          tipoDocumento: formData.tipoDocumento,
+          dni: formData.documentoIdentidad,
           fechaNacimiento: formData.fechaNacimiento
             ? new Date(formData.fechaNacimiento).toISOString()
             : undefined,
