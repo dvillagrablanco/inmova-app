@@ -1,986 +1,461 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  Package,
-  FileSignature,
-  HardDrive,
-  Bot,
-  MessageSquare,
+import { 
+  FileText, 
+  Brain, 
+  Megaphone, 
+  MessageCircle, 
+  Euro, 
+  Code, 
   Palette,
-  Code,
-  Leaf,
-  TrendingUp,
-  Eye,
-  RefreshCw,
+  Check,
+  Sparkles,
+  CreditCard,
+  Search,
   Star,
-  DollarSign,
-  Percent,
-  Globe,
-  Database,
-  ExternalLink,
   Zap,
-  Shield,
-  Cpu,
+  Settings,
+  ChevronRight,
+  Package,
+  TrendingUp,
+  ShieldCheck,
+  Loader2,
 } from 'lucide-react';
-import { ADD_ONS, getAddOnsByCategory, type AddOn as LandingAddOn } from '@/lib/pricing-config';
 
-interface AddOn {
+interface Addon {
   id: string;
-  codigo: string;
   nombre: string;
   descripcion: string;
   categoria: string;
   precioMensual: number;
-  precioAnual: number | null;
-  unidades: number | null;
-  tipoUnidad: string | null;
-  disponiblePara: string[];
-  incluidoEn: string[];
-  margenPorcentaje: number | null;
-  costoUnitario: number | null;
-  destacado: boolean;
+  precioAnual: number;
+  caracteristicas: string[];
   activo: boolean;
-  orden: number;
+  popular?: boolean;
 }
 
-const categoriaColors: Record<string, string> = {
-  usage: 'bg-blue-100 text-blue-800',
-  feature: 'bg-purple-100 text-purple-800',
-  premium: 'bg-amber-100 text-amber-800',
+interface Categoria {
+  id: string;
+  nombre: string;
+  icono: string;
+}
+
+const iconMap: Record<string, React.ElementType> = {
+  'file-text': FileText,
+  'brain': Brain,
+  'megaphone': Megaphone,
+  'message-circle': MessageCircle,
+  'euro': Euro,
+  'code': Code,
+  'palette': Palette,
 };
 
-const categoriaIcons: Record<string, any> = {
-  usage: Package,
-  feature: Star,
-  premium: DollarSign,
-};
-
-const tierOptions = ['STARTER', 'PROFESSIONAL', 'BUSINESS', 'ENTERPRISE'];
-const ewoorkerTierOptions = ['OBRERO', 'CAPATAZ', 'CONSTRUCTOR'];
-
-export default function AdminAddonsPage() {
-  const router = useRouter();
-  const [addons, setAddons] = useState<AddOn[]>([]);
+export default function AddonsPage() {
+  const { data: session, status } = useSession();
+  const searchParams = useSearchParams();
+  const [addons, setAddons] = useState<Addon[]>([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showNewDialog, setShowNewDialog] = useState(false);
-  const [editingAddon, setEditingAddon] = useState<AddOn | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'inmova' | 'ewoorker'>('inmova');
-  const [allAddons, setAllAddons] = useState<AddOn[]>([]); // Todos los add-ons sin filtrar
-
-  const [formData, setFormData] = useState({
-    codigo: '',
-    nombre: '',
-    descripcion: '',
-    categoria: 'usage',
-    precioMensual: 0,
-    precioAnual: 0,
-    unidades: 0,
-    tipoUnidad: '',
-    disponiblePara: [] as string[],
-    incluidoEn: [] as string[],
-    margenPorcentaje: 0,
-    costoUnitario: 0,
-    destacado: false,
-    activo: true,
-    vertical: 'inmova' as 'inmova' | 'ewoorker',
-  });
+  const [procesando, setProcesando] = useState<string | null>(null);
+  const [categoriaActiva, setCategoriaActiva] = useState('all');
+  const [busqueda, setBusqueda] = useState('');
+  const [planSeleccionado, setPlanSeleccionado] = useState<'mensual' | 'anual'>('mensual');
+  const [resumen, setResumen] = useState({ total: 0, activos: 0, gastoMensual: 0 });
 
   useEffect(() => {
-    loadAddons();
-  }, []);
+    // Verificar si venimos de un checkout exitoso
+    const success = searchParams.get('success');
+    const canceled = searchParams.get('canceled');
+    const addonId = searchParams.get('addon');
 
-  // Filtrar add-ons según el tab activo
+    if (success === 'true') {
+      toast.success('¡Add-on activado exitosamente!');
+      // Limpiar URL
+      window.history.replaceState({}, '', '/admin/addons');
+    } else if (canceled === 'true') {
+      toast.info('Pago cancelado');
+      window.history.replaceState({}, '', '/admin/addons');
+    }
+  }, [searchParams]);
+
   useEffect(() => {
-    const filtered = allAddons.filter((addon: any) => {
-      const vertical = addon.vertical || 'inmova';
-      if (activeTab === 'inmova') {
-        return vertical === 'inmova' || !addon.codigo?.startsWith('ewoorker_');
-      } else {
-        return vertical === 'ewoorker' || addon.codigo?.startsWith('ewoorker_');
-      }
-    });
-    setAddons(filtered);
-  }, [activeTab, allAddons]);
+    if (status === 'authenticated') {
+      loadAddons();
+    }
+  }, [status, categoriaActiva]);
 
   const loadAddons = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/addons?vertical=all');
-
-      if (!res.ok) {
-        throw new Error('Error al cargar add-ons');
+      const params = new URLSearchParams();
+      if (categoriaActiva !== 'all') {
+        params.set('categoria', categoriaActiva);
       }
 
-      const data = await res.json();
-      setAllAddons(data.data || []);
+      const response = await fetch(`/api/addons?${params}`);
+      if (response.ok) {
+        const data = await response.json();
+        setAddons(data.addons || []);
+        setCategorias(data.categorias || []);
+        setResumen(data.resumen || { total: 0, activos: 0, gastoMensual: 0 });
+      }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error cargando addons:', error);
       toast.error('Error al cargar los add-ons');
     } finally {
       setLoading(false);
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      codigo: activeTab === 'ewoorker' ? 'ewoorker_' : '',
-      nombre: '',
-      descripcion: '',
-      categoria: 'usage',
-      precioMensual: 0,
-      precioAnual: 0,
-      unidades: 0,
-      tipoUnidad: '',
-      disponiblePara: [],
-      incluidoEn: [],
-      margenPorcentaje: 0,
-      costoUnitario: 0,
-      destacado: false,
-      activo: true,
-      vertical: activeTab,
-    });
-  };
-
-  const openNewDialog = () => {
-    resetForm();
-    setEditingAddon(null);
-    setShowNewDialog(true);
-  };
-
-  const openEditDialog = (addon: AddOn) => {
-    setEditingAddon(addon);
-    const isEwoorker =
-      addon.codigo?.startsWith('ewoorker_') || (addon as any).vertical === 'ewoorker';
-    setFormData({
-      codigo: addon.codigo,
-      nombre: addon.nombre,
-      descripcion: addon.descripcion,
-      categoria: addon.categoria,
-      precioMensual: addon.precioMensual,
-      precioAnual: addon.precioAnual || 0,
-      unidades: addon.unidades || 0,
-      tipoUnidad: addon.tipoUnidad || '',
-      disponiblePara: addon.disponiblePara || [],
-      incluidoEn: addon.incluidoEn || [],
-      margenPorcentaje: addon.margenPorcentaje || 0,
-      costoUnitario: addon.costoUnitario || 0,
-      destacado: addon.destacado,
-      activo: addon.activo !== false,
-      vertical: isEwoorker ? 'ewoorker' : 'inmova',
-    });
-    setShowEditDialog(true);
-  };
-
-  const handleSave = async () => {
+  const handleToggleAddon = async (addon: Addon) => {
+    setProcesando(addon.id);
     try {
-      setSaving(true);
+      if (addon.activo) {
+        // Desactivar
+        const response = await fetch('/api/addons', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ addonId: addon.id, accion: 'desactivar' }),
+        });
 
-      const url = editingAddon ? `/api/addons/${editingAddon.id}` : '/api/addons';
+        if (response.ok) {
+          toast.success(`${addon.nombre} desactivado`);
+          loadAddons();
+        }
+      } else {
+        // Activar - ir a checkout
+        handleComprar(addon);
+      }
+    } catch (error) {
+      toast.error('Error al procesar la solicitud');
+    } finally {
+      setProcesando(null);
+    }
+  };
 
-      const res = await fetch(url, {
-        method: editingAddon ? 'PUT' : 'POST',
+  const handleComprar = async (addon: Addon) => {
+    setProcesando(addon.id);
+    try {
+      const response = await fetch('/api/addons/checkout', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ 
+          addonId: addon.id, 
+          plan: planSeleccionado,
+        }),
       });
 
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Error al guardar');
+      const data = await response.json();
+
+      if (data.mode === 'demo') {
+        // Modo demo - activar directamente
+        const activarResponse = await fetch('/api/addons', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ addonId: addon.id, accion: 'activar' }),
+        });
+
+        if (activarResponse.ok) {
+          toast.success(`${addon.nombre} activado (modo demo)`);
+          loadAddons();
+        }
+      } else if (data.checkoutUrl) {
+        // Redirigir a Stripe Checkout
+        window.location.href = data.checkoutUrl;
+      } else {
+        toast.error(data.error || 'Error al procesar el pago');
       }
-
-      toast.success(editingAddon ? 'Add-on actualizado' : 'Add-on creado');
-      setShowEditDialog(false);
-      setShowNewDialog(false);
-      loadAddons();
-    } catch (error: any) {
-      toast.error(error.message || 'Error al guardar');
+    } catch (error) {
+      toast.error('Error al iniciar el pago');
     } finally {
-      setSaving(false);
+      setProcesando(null);
     }
   };
 
-  const toggleTier = (tier: string, field: 'disponiblePara' | 'incluidoEn') => {
-    const current = formData[field];
-    if (current.includes(tier)) {
-      setFormData({ ...formData, [field]: current.filter((t) => t !== tier) });
-    } else {
-      setFormData({ ...formData, [field]: [...current, tier] });
+  const addonsFiltrados = addons.filter(addon => {
+    if (busqueda) {
+      return (
+        addon.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+        addon.descripcion.toLowerCase().includes(busqueda.toLowerCase())
+      );
     }
-  };
+    return true;
+  });
 
-  const getAddonIcon = (codigo: string) => {
-    if (codigo.includes('signature')) return FileSignature;
-    if (codigo.includes('storage')) return HardDrive;
-    if (codigo.includes('ai')) return Bot;
-    if (codigo.includes('sms')) return MessageSquare;
-    if (codigo.includes('whitelabel')) return Palette;
-    if (codigo.includes('api')) return Code;
-    if (codigo.includes('esg')) return Leaf;
-    if (codigo.includes('pricing')) return TrendingUp;
-    if (codigo.includes('tour')) return Eye;
-    return Package;
-  };
-
-  // Calcular estadísticas
-  const totalAddons = addons.length;
-  const addonsDestacados = addons.filter((a) => a.destacado).length;
-  const avgMargen =
-    addons.length > 0
-      ? addons.reduce((sum, a) => sum + (a.margenPorcentaje || 0), 0) / addons.length
-      : 0;
-
-  const AddOnForm = () => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="codigo">Código</Label>
-          <Input
-            id="codigo"
-            value={formData.codigo}
-            onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
-            placeholder="signatures_pack_10"
-            disabled={!!editingAddon}
-          />
+  if (status === 'loading' || loading) {
+    return (
+      <AuthenticatedLayout>
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="nombre">Nombre</Label>
-          <Input
-            id="nombre"
-            value={formData.nombre}
-            onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-            placeholder="Pack 10 Firmas"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="descripcion">Descripción</Label>
-        <Textarea
-          id="descripcion"
-          value={formData.descripcion}
-          onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-          placeholder="Descripción del add-on..."
-        />
-      </div>
-
-      <div className="grid grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label>Categoría</Label>
-          <Select
-            value={formData.categoria}
-            onValueChange={(v) => setFormData({ ...formData, categoria: v })}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="usage">Uso (packs)</SelectItem>
-              <SelectItem value="feature">Funcionalidad</SelectItem>
-              <SelectItem value="premium">Premium</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="precioMensual">Precio Mensual (€)</Label>
-          <Input
-            id="precioMensual"
-            type="number"
-            value={formData.precioMensual}
-            onChange={(e) =>
-              setFormData({ ...formData, precioMensual: parseFloat(e.target.value) || 0 })
-            }
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="precioAnual">Precio Anual (€)</Label>
-          <Input
-            id="precioAnual"
-            type="number"
-            value={formData.precioAnual}
-            onChange={(e) =>
-              setFormData({ ...formData, precioAnual: parseFloat(e.target.value) || 0 })
-            }
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-4 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="unidades">Unidades</Label>
-          <Input
-            id="unidades"
-            type="number"
-            value={formData.unidades}
-            onChange={(e) => setFormData({ ...formData, unidades: parseInt(e.target.value) || 0 })}
-            placeholder="10"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="tipoUnidad">Tipo Unidad</Label>
-          <Input
-            id="tipoUnidad"
-            value={formData.tipoUnidad}
-            onChange={(e) => setFormData({ ...formData, tipoUnidad: e.target.value })}
-            placeholder="firmas, GB, tokens..."
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="costoUnitario">Costo (€)</Label>
-          <Input
-            id="costoUnitario"
-            type="number"
-            step="0.01"
-            value={formData.costoUnitario}
-            onChange={(e) =>
-              setFormData({ ...formData, costoUnitario: parseFloat(e.target.value) || 0 })
-            }
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="margenPorcentaje">Margen (%)</Label>
-          <Input
-            id="margenPorcentaje"
-            type="number"
-            value={formData.margenPorcentaje}
-            onChange={(e) =>
-              setFormData({ ...formData, margenPorcentaje: parseFloat(e.target.value) || 0 })
-            }
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Producto/Vertical:</Label>
-        <div className="flex gap-2">
-          <Badge
-            variant={formData.vertical === 'inmova' ? 'default' : 'outline'}
-            className="cursor-pointer"
-            onClick={() =>
-              setFormData({ ...formData, vertical: 'inmova', disponiblePara: [], incluidoEn: [] })
-            }
-          >
-            INMOVA
-          </Badge>
-          <Badge
-            variant={formData.vertical === 'ewoorker' ? 'default' : 'outline'}
-            className="cursor-pointer bg-amber-500 hover:bg-amber-600"
-            onClick={() =>
-              setFormData({ ...formData, vertical: 'ewoorker', disponiblePara: [], incluidoEn: [] })
-            }
-          >
-            eWoorker
-          </Badge>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Disponible para planes:</Label>
-        <div className="flex gap-2 flex-wrap">
-          {(formData.vertical === 'ewoorker' ? ewoorkerTierOptions : tierOptions).map((tier) => (
-            <Badge
-              key={tier}
-              variant={formData.disponiblePara.includes(tier) ? 'default' : 'outline'}
-              className="cursor-pointer"
-              onClick={() => toggleTier(tier, 'disponiblePara')}
-            >
-              {tier}
-            </Badge>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Incluido gratis en:</Label>
-        <div className="flex gap-2 flex-wrap">
-          {(formData.vertical === 'ewoorker' ? ewoorkerTierOptions : tierOptions).map((tier) => (
-            <Badge
-              key={tier}
-              variant={formData.incluidoEn.includes(tier) ? 'default' : 'outline'}
-              className="cursor-pointer"
-              onClick={() => toggleTier(tier, 'incluidoEn')}
-            >
-              {tier}
-            </Badge>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="destacado"
-            checked={formData.destacado}
-            onCheckedChange={(v) => setFormData({ ...formData, destacado: v })}
-          />
-          <Label htmlFor="destacado">Destacar este add-on</Label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="activo"
-            checked={formData.activo}
-            onCheckedChange={(v) => setFormData({ ...formData, activo: v })}
-          />
-          <Label htmlFor="activo" className={formData.activo ? 'text-green-600' : 'text-red-600'}>
-            {formData.activo ? 'Activo' : 'Inactivo'}
-          </Label>
-        </div>
-      </div>
-    </div>
-  );
-
-  // Datos de add-ons de la landing
-  const landingAddOns = Object.values(ADD_ONS);
-  const usageAddons = getAddOnsByCategory('usage');
-  const featureAddons = getAddOnsByCategory('feature');
-  const premiumAddons = getAddOnsByCategory('premium');
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'usage': return Package;
-      case 'feature': return Zap;
-      case 'premium': return Shield;
-      default: return Package;
-    }
-  };
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'usage': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'feature': return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'premium': return 'bg-amber-100 text-amber-800 border-amber-200';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+      </AuthenticatedLayout>
+    );
+  }
 
   return (
     <AuthenticatedLayout>
-      <div className="container mx-auto py-6 space-y-6">
-        <div className="flex justify-between items-center">
+      <div className="space-y-6 p-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Add-ons & Mejoras</h1>
-            <p className="text-muted-foreground">
-              Gestiona los add-ons disponibles para los planes de suscripción
+            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+              <Package className="h-8 w-8 text-primary" />
+              Add-ons y Extensiones
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Potencia tu plataforma con funcionalidades adicionales
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={loadAddons}>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Actualizar
-            </Button>
-            <Button onClick={openNewDialog}>
-              <Plus className="mr-2 h-4 w-4" />
-              Nuevo Add-on
-            </Button>
+          <div className="flex items-center gap-4">
+            <div className="relative w-64">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar add-ons..."
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                className="pl-10"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Tabs principales: Landing vs Database */}
-        <Tabs defaultValue="landing" className="w-full">
-          <TabsList className="grid w-full max-w-lg grid-cols-2 mb-6">
-            <TabsTrigger value="landing" className="flex items-center gap-2">
-              <Globe className="h-4 w-4" />
-              Add-ons Landing ({landingAddOns.length})
-            </TabsTrigger>
-            <TabsTrigger value="database" className="flex items-center gap-2">
-              <Database className="h-4 w-4" />
-              Add-ons BD ({allAddons.length})
-            </TabsTrigger>
-          </TabsList>
-
-          {/* PESTAÑA ADD-ONS DE LA LANDING */}
-          <TabsContent value="landing">
-            <Card className="mb-6 border-indigo-200 bg-gradient-to-r from-indigo-50 to-violet-50">
-              <CardContent className="pt-4">
-                <div className="flex items-center gap-3">
-                  <Globe className="h-5 w-5 text-indigo-600" />
-                  <div>
-                    <p className="font-medium text-indigo-800">
-                      Add-ons configurados en la Landing Page
-                    </p>
-                    <p className="text-sm text-indigo-600">
-                      Definidos en lib/pricing-config.ts - Mostrados en /landing/precios
-                    </p>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="ml-auto"
-                    onClick={() => window.open('/landing/precios', '_blank')}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Ver en Landing
-                  </Button>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Add-ons Disponibles</p>
+                  <p className="text-3xl font-bold">{resumen.total}</p>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Estadísticas de Landing */}
-            <div className="grid grid-cols-4 gap-4 mb-6">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Total Add-ons
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{landingAddOns.length}</div>
-                </CardContent>
-              </Card>
-              <Card className="border-blue-200">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-blue-600">
-                    Packs de Uso
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-blue-600">{usageAddons.length}</div>
-                </CardContent>
-              </Card>
-              <Card className="border-purple-200">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-purple-600">
-                    Funcionalidades
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-purple-600">{featureAddons.length}</div>
-                </CardContent>
-              </Card>
-              <Card className="border-amber-200">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-amber-600">
-                    Premium
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-amber-600">{premiumAddons.length}</div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Secciones por categoría */}
-            {[
-              { key: 'usage', title: 'Packs de Uso', desc: 'Consumibles: firmas, SMS, IA, storage', items: usageAddons },
-              { key: 'feature', title: 'Funcionalidades', desc: 'Features activables por suscripción', items: featureAddons },
-              { key: 'premium', title: 'Premium', desc: 'Servicios de alto valor', items: premiumAddons },
-            ].map(({ key, title, desc, items }) => (
-              <Card key={key} className="mb-6">
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    {key === 'usage' && <Package className="h-5 w-5 text-blue-600" />}
-                    {key === 'feature' && <Zap className="h-5 w-5 text-purple-600" />}
-                    {key === 'premium' && <Shield className="h-5 w-5 text-amber-600" />}
-                    <div>
-                      <CardTitle>{title}</CardTitle>
-                      <CardDescription>{desc}</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Add-on</TableHead>
-                        <TableHead className="text-right">Precio/mes</TableHead>
-                        <TableHead className="text-right">Precio/año</TableHead>
-                        <TableHead>Unidades</TableHead>
-                        <TableHead className="text-right">Costo</TableHead>
-                        <TableHead className="text-right">Margen</TableHead>
-                        <TableHead>Disponible</TableHead>
-                        <TableHead>Incluido</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {items.map((addon) => (
-                        <TableRow key={addon.id} className={addon.highlighted ? 'bg-yellow-50' : ''}>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div>
-                                <div className="font-medium flex items-center gap-2">
-                                  {addon.name}
-                                  {addon.highlighted && (
-                                    <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
-                                  )}
-                                </div>
-                                <div className="text-xs text-muted-foreground max-w-[250px] truncate">
-                                  {addon.description}
-                                </div>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right font-mono font-medium">
-                            €{addon.monthlyPrice}
-                          </TableCell>
-                          <TableCell className="text-right font-mono text-muted-foreground">
-                            {addon.annualPrice ? `€${addon.annualPrice}` : '-'}
-                          </TableCell>
-                          <TableCell>
-                            {addon.units && addon.unitType ? (
-                              <Badge variant="outline">{addon.units} {addon.unitType}</Badge>
-                            ) : '-'}
-                          </TableCell>
-                          <TableCell className="text-right font-mono text-muted-foreground">
-                            €{addon.costPerUnit || 0}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Badge 
-                              variant="outline"
-                              className={(addon.marginPercentage || 0) >= 70 
-                                ? 'border-green-500 text-green-700 bg-green-50' 
-                                : 'border-amber-500 text-amber-700 bg-amber-50'}
-                            >
-                              {addon.marginPercentage || 0}%
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-wrap gap-1">
-                              {addon.availableFor.slice(0, 2).map((tier) => (
-                                <Badge key={tier} variant="secondary" className="text-xs">{tier}</Badge>
-                              ))}
-                              {addon.availableFor.length > 2 && (
-                                <Badge variant="secondary" className="text-xs">+{addon.availableFor.length - 2}</Badge>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-wrap gap-1">
-                              {addon.includedIn.length > 0 ? (
-                                addon.includedIn.slice(0, 2).map((tier) => (
-                                  <Badge key={tier} className="text-xs bg-green-100 text-green-800">{tier}</Badge>
-                                ))
-                              ) : (
-                                <span className="text-xs text-muted-foreground">-</span>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            ))}
-          </TabsContent>
-
-          {/* PESTAÑA ADD-ONS DE LA BASE DE DATOS */}
-          <TabsContent value="database">
-            <Card className="mb-6 border-blue-200 bg-blue-50">
-              <CardContent className="pt-4">
-                <div className="flex items-center gap-3">
-                  <Database className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="font-medium text-blue-800">
-                      Add-ons guardados en Base de Datos
-                    </p>
-                    <p className="text-sm text-blue-600">
-                      Administrados vía API - Asignables a suscripciones
-                    </p>
-                  </div>
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Package className="h-6 w-6 text-primary" />
                 </div>
-              </CardContent>
-            </Card>
-
-        {/* Tabs INMOVA / eWoorker */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'inmova' | 'ewoorker')}>
-          <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger
-              value="inmova"
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-            >
-              🏠 INMOVA (
-              {
-                allAddons.filter(
-                  (a) => !a.codigo?.startsWith('ewoorker_') && (a as any).vertical !== 'ewoorker'
-                ).length
-              }
-              )
-            </TabsTrigger>
-            <TabsTrigger
-              value="ewoorker"
-              className="data-[state=active]:bg-amber-500 data-[state=active]:text-white"
-            >
-              🏗️ eWoorker (
-              {
-                allAddons.filter(
-                  (a) => a.codigo?.startsWith('ewoorker_') || (a as any).vertical === 'ewoorker'
-                ).length
-              }
-              )
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        {/* Estadísticas */}
-        <div className="grid grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Add-ons
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalAddons}</div>
+              </div>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Destacados
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-amber-600">{addonsDestacados}</div>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Add-ons Activos</p>
+                  <p className="text-3xl font-bold text-green-600">{resumen.activos}</p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+                  <Check className="h-6 w-6 text-green-600" />
+                </div>
+              </div>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Margen Promedio
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">{avgMargen.toFixed(0)}%</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Categorías
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-1">
-                <Badge variant="outline">
-                  {addons.filter((a) => a.categoria === 'usage').length} uso
-                </Badge>
-                <Badge variant="outline">
-                  {addons.filter((a) => a.categoria === 'feature').length} feat
-                </Badge>
-                <Badge variant="outline">
-                  {addons.filter((a) => a.categoria === 'premium').length} prem
-                </Badge>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Gasto Mensual</p>
+                  <p className="text-3xl font-bold">{resumen.gastoMensual}€</p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                  <Euro className="h-6 w-6 text-blue-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Tabla de Add-ons */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Add-ons Disponibles</CardTitle>
-            <CardDescription>
-              Los add-ons mostrados aquí se sincronizan con la landing page y el sistema de
-              facturación
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="text-center py-8 text-muted-foreground">Cargando...</div>
-            ) : addons.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No hay add-ons. Ejecuta el seed: npx tsx prisma/seed-addons.ts
+        {/* Plan Toggle */}
+        <div className="flex justify-center">
+          <div className="bg-muted p-1 rounded-lg inline-flex items-center gap-1">
+            <button
+              onClick={() => setPlanSeleccionado('mensual')}
+              className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+                planSeleccionado === 'mensual' 
+                  ? 'bg-background shadow text-foreground' 
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Mensual
+            </button>
+            <button
+              onClick={() => setPlanSeleccionado('anual')}
+              className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+                planSeleccionado === 'anual' 
+                  ? 'bg-background shadow text-foreground' 
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Anual
+              <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700">
+                -17%
+              </Badge>
+            </button>
+          </div>
+        </div>
+
+        {/* Categorías */}
+        <Tabs value={categoriaActiva} onValueChange={setCategoriaActiva}>
+          <TabsList className="flex flex-wrap gap-2 h-auto bg-transparent p-0">
+            <TabsTrigger
+              value="all"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
+              Todos
+            </TabsTrigger>
+            {categorias.map((cat) => {
+              const Icon = iconMap[cat.icono] || Package;
+              return (
+                <TabsTrigger
+                  key={cat.id}
+                  value={cat.id}
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2"
+                >
+                  <Icon className="h-4 w-4" />
+                  {cat.nombre}
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+
+          <TabsContent value={categoriaActiva} className="mt-6">
+            {/* Grid de Add-ons */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {addonsFiltrados.map((addon) => (
+                <Card 
+                  key={addon.id} 
+                  className={`relative overflow-hidden transition-all hover:shadow-lg ${
+                    addon.activo ? 'ring-2 ring-primary' : ''
+                  }`}
+                >
+                  {addon.popular && (
+                    <div className="absolute top-4 right-4">
+                      <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+                        <Star className="h-3 w-3 mr-1 fill-current" />
+                        Popular
+                      </Badge>
+                    </div>
+                  )}
+                  {addon.activo && (
+                    <div className="absolute top-4 left-4">
+                      <Badge className="bg-green-500 text-white">
+                        <Check className="h-3 w-3 mr-1" />
+                        Activo
+                      </Badge>
+                    </div>
+                  )}
+                  <CardHeader className={addon.popular || addon.activo ? 'pt-12' : ''}>
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                      {addon.nombre}
+                    </CardTitle>
+                    <CardDescription>{addon.descripcion}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-4">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-3xl font-bold">
+                          {planSeleccionado === 'anual' 
+                            ? Math.round(addon.precioAnual / 12) 
+                            : addon.precioMensual}€
+                        </span>
+                        <span className="text-muted-foreground">/mes</span>
+                      </div>
+                      {planSeleccionado === 'anual' && (
+                        <p className="text-sm text-green-600">
+                          Facturado anualmente ({addon.precioAnual}€/año)
+                        </p>
+                      )}
+                    </div>
+                    <ul className="space-y-2">
+                      {addon.caracteristicas.map((caracteristica, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm">
+                          <Check className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                          <span>{caracteristica}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                  <CardFooter className="flex gap-2">
+                    {addon.activo ? (
+                      <>
+                        <Button variant="outline" className="flex-1" disabled>
+                          <ShieldCheck className="h-4 w-4 mr-2" />
+                          Activo
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => handleToggleAddon(addon)}
+                          disabled={procesando === addon.id}
+                        >
+                          <Settings className="h-4 w-4" />
+                        </Button>
+                      </>
+                    ) : (
+                      <Button 
+                        className="w-full"
+                        onClick={() => handleComprar(addon)}
+                        disabled={procesando === addon.id}
+                      >
+                        {procesando === addon.id ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <CreditCard className="h-4 w-4 mr-2" />
+                        )}
+                        Activar Add-on
+                      </Button>
+                    )}
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+
+            {addonsFiltrados.length === 0 && (
+              <div className="text-center py-12">
+                <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold">No se encontraron add-ons</h3>
+                <p className="text-muted-foreground">
+                  Intenta con otra búsqueda o categoría
+                </p>
               </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Add-on</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead className="text-right">Precio/mes</TableHead>
-                    <TableHead className="text-right">Costo</TableHead>
-                    <TableHead className="text-right">Margen</TableHead>
-                    <TableHead>Disponible</TableHead>
-                    <TableHead className="text-center">Estado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {addons.map((addon) => {
-                    const Icon = getAddonIcon(addon.codigo);
-                    return (
-                      <TableRow key={addon.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Icon className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <div className="font-medium flex items-center gap-2">
-                                {addon.nombre}
-                                {addon.destacado && (
-                                  <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
-                                )}
-                              </div>
-                              <div className="text-sm text-muted-foreground truncate max-w-[200px]">
-                                {addon.descripcion}
-                              </div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={categoriaColors[addon.categoria] || 'bg-gray-100'}>
-                            {addon.categoria}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right font-mono">
-                          €{addon.precioMensual}
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-muted-foreground">
-                          €{addon.costoUnitario || 0}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Badge
-                            variant="outline"
-                            className={
-                              (addon.margenPorcentaje || 0) >= 70
-                                ? 'border-green-500 text-green-700'
-                                : 'border-amber-500 text-amber-700'
-                            }
-                          >
-                            {addon.margenPorcentaje || 0}%
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {(addon.disponiblePara || []).slice(0, 2).map((tier) => (
-                              <Badge key={tier} variant="outline" className="text-xs">
-                                {tier.substring(0, 4)}
-                              </Badge>
-                            ))}
-                            {(addon.disponiblePara || []).length > 2 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{(addon.disponiblePara || []).length - 2}
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge variant={addon.activo !== false ? 'default' : 'secondary'}>
-                            {addon.activo !== false ? 'Activo' : 'Inactivo'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => openEditDialog(addon)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={async () => {
-                                if (confirm(`¿Eliminar el add-on "${addon.nombre}"?`)) {
-                                  try {
-                                    const res = await fetch(`/api/addons/${addon.id}`, {
-                                      method: 'DELETE',
-                                    });
-                                    if (res.ok) {
-                                      toast.success('Add-on eliminado');
-                                      loadAddons();
-                                    } else {
-                                      toast.error('Error al eliminar');
-                                    }
-                                  } catch {
-                                    toast.error('Error al eliminar');
-                                  }
-                                }
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Dialog para nuevo add-on */}
-        <Dialog open={showNewDialog} onOpenChange={setShowNewDialog}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Nuevo Add-on</DialogTitle>
-              <DialogDescription>
-                Crea un nuevo add-on para ofrecer a los suscriptores
-              </DialogDescription>
-            </DialogHeader>
-            <AddOnForm />
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowNewDialog(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? 'Guardando...' : 'Crear Add-on'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Dialog para editar add-on */}
-        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Editar Add-on</DialogTitle>
-              <DialogDescription>Modifica la configuración del add-on</DialogDescription>
-            </DialogHeader>
-            <AddOnForm />
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowEditDialog(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? 'Guardando...' : 'Guardar Cambios'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
           </TabsContent>
         </Tabs>
+
+        {/* Info Section */}
+        <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="flex-shrink-0">
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Zap className="h-8 w-8 text-primary" />
+                </div>
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-lg font-semibold mb-2">
+                  ¿Necesitas una funcionalidad personalizada?
+                </h3>
+                <p className="text-muted-foreground">
+                  Contacta con nuestro equipo para desarrollar integraciones a medida para tu negocio.
+                  Ofrecemos desarrollo personalizado, API dedicadas y soporte prioritario.
+                </p>
+              </div>
+              <Button variant="outline" className="shrink-0">
+                Contactar Ventas
+                <ChevronRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </AuthenticatedLayout>
   );

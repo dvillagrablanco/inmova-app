@@ -72,6 +72,7 @@ import {
   Calculator,
   MapPin,
   Crown,
+  Heart,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -469,10 +470,11 @@ const coLivingNavItems = [
     roles: ['super_admin', 'administrador', 'gestor', 'community_manager'],
   },
   {
-    name: 'Matching',
-    href: '/coliving/emparejamiento',
-    icon: UserCheck,
+    name: 'Matching Habitaciones',
+    href: '/coliving/matching',
+    icon: Heart,
     roles: ['super_admin', 'administrador', 'gestor'],
+    badge: 'Nuevo',
   },
   {
     name: 'Eventos',
