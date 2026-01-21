@@ -278,6 +278,21 @@ enum ExpenseCategory {
   otro
 }
 
+enum CorporateTravelExpenseCategory {
+  alojamiento
+  vuelos
+  transporte_local
+  dietas
+  otros
+}
+
+enum CorporateTravelExpenseStatus {
+  pendiente
+  aprobado
+  rechazado
+  reembolsado
+}
+
 enum RoomStatus {
   disponible
   ocupada
@@ -649,6 +664,7 @@ model Tenant {
 
   // Fase 2
   spaceReservations SpaceReservation[]
+  corporateTravelExpenses CorporateTravelExpense[]
 
   // Nuevos Módulos Estratégicos
   marketplaceBookings MarketplaceBooking[] @relation("TenantMarketplaceBookings")
@@ -1649,6 +1665,37 @@ model Expense {
   @@map("expenses")
 }
 
+model CorporateTravelExpense {
+  id          String                        @id @default(cuid())
+  companyId   String
+  tenantId    String?
+  departamento String?
+  categoria   CorporateTravelExpenseCategory
+  concepto    String
+  monto       Float
+  estado      CorporateTravelExpenseStatus @default(pendiente)
+  fechaGasto  DateTime
+  fechaAprobacion DateTime?
+  aprobadoPor String?
+  centroCoste String?
+  documentos  String[] @default([])
+  notas       String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tenant  Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@index([tenantId])
+  @@index([categoria])
+  @@index([estado])
+  @@index([fechaGasto])
+  @@index([departamento])
+  @@map("corporate_travel_expenses")
+}
+
 model Document {
   id               String       @id @default(cuid())
   nombre           String
@@ -1811,6 +1858,7 @@ model Company {
   emailContacto        String? // Email del contacto
   telefonoContacto     String? // Teléfono del contacto
   notasAdmin           String? @db.Text // Notas internas del super-admin
+  metadata             Json    @default("{}") // Datos adicionales para configuraciones
 
   // Marcador para empresas de prueba/demo (excluidas de analíticas)
   esEmpresaPrueba Boolean @default(false) // Si es true, se excluye de analíticas y reportes
@@ -1891,6 +1939,7 @@ model Company {
   communityMeetings      CommunityMeeting[]
   providerWorkOrders     ProviderWorkOrder[]
   propertyGalleries      PropertyGallery[]
+  corporateTravelExpenses CorporateTravelExpense[]
 
   // Fase 5
   automaticReminders AutomaticReminder[]

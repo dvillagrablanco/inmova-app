@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -49,75 +49,192 @@ import {
   DollarSign,
   AlertTriangle,
   CheckCircle,
+  Loader2,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Mock data para gastos
-const GASTOS_MENSUALES = [
-  { mes: 'Enero', presupuesto: 100000, gastado: 84500, ahorro: 15500 },
-  { mes: 'Diciembre', presupuesto: 95000, gastado: 92000, ahorro: 3000 },
-  { mes: 'Noviembre', presupuesto: 90000, gastado: 78500, ahorro: 11500 },
-  { mes: 'Octubre', presupuesto: 85000, gastado: 81200, ahorro: 3800 },
-];
+interface ExpenseStats {
+  gastoMes: number;
+  presupuestoMes: number;
+  ahorro: number;
+  ahorroVsMercado: number;
+  viajesRealizados: number;
+  costoPromedio: number;
+}
 
-// Gastos por categoría
-const GASTOS_CATEGORIA = [
-  { categoria: 'Alojamiento', gasto: 48500, porcentaje: 57, icono: Hotel, color: 'bg-blue-500' },
-  { categoria: 'Vuelos', gasto: 24200, porcentaje: 29, icono: Plane, color: 'bg-purple-500' },
-  { categoria: 'Transporte local', gasto: 6800, porcentaje: 8, icono: Car, color: 'bg-green-500' },
-  { categoria: 'Dietas', gasto: 5000, porcentaje: 6, icono: Coffee, color: 'bg-orange-500' },
-];
+interface MonthlyExpense {
+  periodo: string;
+  presupuesto: number;
+  gastado: number;
+  ahorro: number;
+}
 
-// Gastos por departamento
-const GASTOS_DEPARTAMENTO = [
-  { departamento: 'Ventas', gasto: 28500, presupuesto: 30000, empleados: 12, viajes: 45 },
-  { departamento: 'Dirección', gasto: 22000, presupuesto: 25000, empleados: 3, viajes: 18 },
-  { departamento: 'Operaciones', gasto: 18500, presupuesto: 20000, empleados: 8, viajes: 22 },
-  { departamento: 'Marketing', gasto: 12000, presupuesto: 15000, empleados: 6, viajes: 15 },
-  { departamento: 'IT', gasto: 3500, presupuesto: 10000, empleados: 5, viajes: 8 },
-];
+interface CategoryExpense {
+  categoria: string;
+  gasto: number;
+  porcentaje: number;
+}
 
-// Informes disponibles
-const INFORMES = [
-  { id: 'INF001', nombre: 'Informe Mensual Enero 2026', tipo: 'mensual', fecha: '2026-01-31', estado: 'generado' },
-  { id: 'INF002', nombre: 'Informe por Departamentos Q1', tipo: 'trimestral', fecha: '2026-01-15', estado: 'generado' },
-  { id: 'INF003', nombre: 'Análisis de Proveedores', tipo: 'analisis', fecha: '2026-01-10', estado: 'generado' },
-  { id: 'INF004', nombre: 'Comparativa Interanual', tipo: 'anual', fecha: '2026-01-05', estado: 'generado' },
-];
+interface DepartmentExpense {
+  departamento: string;
+  gasto: number;
+  presupuesto: number;
+  empleados: number;
+  viajes: number;
+}
 
-// Alertas de presupuesto
-const ALERTAS_PRESUPUESTO = [
-  { id: 1, departamento: 'Ventas', porcentaje: 95, tipo: 'warning' },
-  { id: 2, departamento: 'Dirección', porcentaje: 88, tipo: 'info' },
-  { id: 3, departamento: 'Operaciones', porcentaje: 92, tipo: 'warning' },
-];
+interface TravelReportSummary {
+  id: string;
+  nombre: string;
+  tipo: string;
+  fecha: string;
+  estado: string;
+  periodo: string;
+}
+
+interface BudgetAlert {
+  id: string;
+  departamento: string;
+  porcentaje: number;
+  tipo: 'warning' | 'info';
+}
+
+interface ExpenseReportsResponse {
+  stats: ExpenseStats;
+  monthly: MonthlyExpense[];
+  categories: CategoryExpense[];
+  departments: DepartmentExpense[];
+  reports: TravelReportSummary[];
+  alerts: BudgetAlert[];
+}
+
+const categoryConfig: Record<
+  string,
+  { label: string; icon: LucideIcon; color: string }
+> = {
+  alojamiento: { label: 'Alojamiento', icon: Hotel, color: 'bg-blue-500' },
+  vuelos: { label: 'Vuelos', icon: Plane, color: 'bg-purple-500' },
+  transporte_local: { label: 'Transporte local', icon: Car, color: 'bg-green-500' },
+  dietas: { label: 'Dietas', icon: Coffee, color: 'bg-orange-500' },
+  otros: { label: 'Otros', icon: DollarSign, color: 'bg-gray-500' },
+};
 
 export default function ViajesCorporativosExpenseReportsPage() {
-  const [periodoSeleccionado, setPeriodoSeleccionado] = useState('enero-2026');
-  const [vistaActiva, setVistaActiva] = useState<'resumen' | 'departamentos' | 'informes'>('resumen');
+  const now = new Date();
+  const currentPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const [periodoSeleccionado, setPeriodoSeleccionado] = useState(currentPeriod);
+  const [vistaActiva, setVistaActiva] = useState<'resumen' | 'departamentos' | 'informes'>(
+    'resumen'
+  );
+  const [stats, setStats] = useState<ExpenseStats>({
+    gastoMes: 0,
+    presupuestoMes: 0,
+    ahorro: 0,
+    ahorroVsMercado: 0,
+    viajesRealizados: 0,
+    costoPromedio: 0,
+  });
+  const [monthlyExpenses, setMonthlyExpenses] = useState<MonthlyExpense[]>([]);
+  const [categoryExpenses, setCategoryExpenses] = useState<CategoryExpense[]>([]);
+  const [departmentExpenses, setDepartmentExpenses] = useState<DepartmentExpense[]>([]);
+  const [reports, setReports] = useState<TravelReportSummary[]>([]);
+  const [alerts, setAlerts] = useState<BudgetAlert[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [exportingFormat, setExportingFormat] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const stats = {
-    gastoMes: 84500,
-    presupuestoMes: 100000,
-    ahorro: 15500,
-    ahorroVsMercado: 18,
-    viajesRealizados: 128,
-    costoPromedio: 660,
+  const periodOptions = Array.from({ length: 6 }, (_, index) => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - index);
+    const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const label = date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+    return { value, label };
+  });
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `/api/viajes-corporativos/expense-reports?period=${periodoSeleccionado}`
+        );
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Error al cargar informes');
+        }
+        const data = (await response.json()) as ExpenseReportsResponse;
+        setStats(data.stats);
+        setMonthlyExpenses(data.monthly || []);
+        setCategoryExpenses(data.categories || []);
+        setDepartmentExpenses(data.departments || []);
+        setReports(data.reports || []);
+        setAlerts(data.alerts || []);
+      } catch (error: any) {
+        toast.error(error.message || 'Error al cargar informes');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [periodoSeleccionado]);
+
+  const porcentajePresupuesto =
+    stats.presupuestoMes > 0 ? (stats.gastoMes / stats.presupuestoMes) * 100 : 0;
+  const totalDepartmentSpent = departmentExpenses.reduce((sum, d) => sum + d.gasto, 0);
+  const totalDepartmentBudget = departmentExpenses.reduce((sum, d) => sum + d.presupuesto, 0);
+  const totalDepartmentTrips = departmentExpenses.reduce((sum, d) => sum + d.viajes, 0);
+  const globalAvgTrip =
+    totalDepartmentTrips > 0 ? Math.round(totalDepartmentSpent / totalDepartmentTrips) : 0;
+
+  const normalizeFormat = (format: string) => (format === 'excel' ? 'csv' : format);
+
+  const downloadReport = async (period: string, format: string, name?: string) => {
+    try {
+      const normalized = normalizeFormat(format);
+      setExportingFormat(normalized);
+      const url = `/api/viajes-corporativos/expense-reports/export?period=${period}&format=${normalized}`;
+      window.open(url, '_blank');
+      if (name) {
+        toast.success(`Descargando ${name} en formato ${normalized.toUpperCase()}`);
+      } else {
+        toast.success(`Exportando datos en formato ${normalized.toUpperCase()}`);
+      }
+    } catch (error) {
+      toast.error('Error al exportar datos');
+    } finally {
+      setTimeout(() => setExportingFormat(null), 400);
+    }
   };
 
-  const porcentajePresupuesto = (stats.gastoMes / stats.presupuestoMes) * 100;
-
-  const handleDescargarInforme = (informe: typeof INFORMES[0], formato: string) => {
-    toast.success(`Descargando ${informe.nombre} en formato ${formato.toUpperCase()}`);
+  const handleDescargarInforme = (informe: TravelReportSummary, formato: string) => {
+    void downloadReport(informe.periodo, formato, informe.nombre);
   };
 
-  const handleGenerarInforme = () => {
-    toast.success('Generando nuevo informe personalizado...');
+  const handleGenerarInforme = async () => {
+    try {
+      setIsGenerating(true);
+      await downloadReport(periodoSeleccionado, 'csv');
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleExportarDatos = (formato: string) => {
-    toast.success(`Exportando datos en formato ${formato.toUpperCase()}`);
+    void downloadReport(periodoSeleccionado, formato);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+          <p className="mt-4 text-muted-foreground">Cargando informes...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -132,15 +249,19 @@ export default function ViajesCorporativosExpenseReportsPage() {
               <SelectValue placeholder="Período" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="enero-2026">Enero 2026</SelectItem>
-              <SelectItem value="diciembre-2025">Diciembre 2025</SelectItem>
-              <SelectItem value="noviembre-2025">Noviembre 2025</SelectItem>
-              <SelectItem value="q4-2025">Q4 2025</SelectItem>
-              <SelectItem value="anual-2025">Anual 2025</SelectItem>
+              {periodOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
-          <Button onClick={() => handleExportarDatos('excel')}>
-            <Download className="h-4 w-4 mr-2" />
+          <Button onClick={() => handleExportarDatos('csv')} disabled={exportingFormat !== null}>
+            {exportingFormat ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4 mr-2" />
+            )}
             Exportar
           </Button>
         </div>
@@ -247,29 +368,40 @@ export default function ViajesCorporativosExpenseReportsPage() {
                 <CardDescription>Distribución del gasto mensual</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {GASTOS_CATEGORIA.map((cat) => {
-                  const Icon = cat.icono;
-                  return (
-                    <div key={cat.categoria} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Icon className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{cat.categoria}</span>
+                {categoryExpenses.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Sin datos de categorias.</p>
+                ) : (
+                  categoryExpenses.map((cat) => {
+                    const config = categoryConfig[cat.categoria] || {
+                      label: cat.categoria,
+                      icon: DollarSign,
+                      color: 'bg-gray-500',
+                    };
+                    const Icon = config.icon;
+                    return (
+                      <div key={cat.categoria} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Icon className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">{config.label}</span>
+                          </div>
+                          <div className="text-right">
+                            <span className="font-bold">{cat.gasto.toLocaleString()}€</span>
+                            <span className="text-sm text-muted-foreground ml-2">
+                              ({cat.porcentaje}%)
+                            </span>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <span className="font-bold">{cat.gasto.toLocaleString()}€</span>
-                          <span className="text-sm text-muted-foreground ml-2">({cat.porcentaje}%)</span>
+                        <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className={`absolute h-full ${config.color} rounded-full`}
+                            style={{ width: `${cat.porcentaje}%` }}
+                          />
                         </div>
                       </div>
-                      <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className={`absolute h-full ${cat.color} rounded-full`}
-                          style={{ width: `${cat.porcentaje}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </CardContent>
             </Card>
 
@@ -283,32 +415,38 @@ export default function ViajesCorporativosExpenseReportsPage() {
                 <CardDescription>Departamentos cercanos al límite</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {ALERTAS_PRESUPUESTO.map((alerta) => (
-                  <div
-                    key={alerta.id}
-                    className={`p-4 rounded-lg ${
-                      alerta.tipo === 'warning' ? 'bg-yellow-50' : 'bg-blue-50'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium">{alerta.departamento}</span>
-                      <Badge variant={alerta.porcentaje >= 90 ? 'destructive' : 'secondary'}>
-                        {alerta.porcentaje}% usado
-                      </Badge>
+                {alerts.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Sin alertas activas.</p>
+                ) : (
+                  alerts.map((alerta) => (
+                    <div
+                      key={alerta.id}
+                      className={`p-4 rounded-lg ${
+                        alerta.tipo === 'warning' ? 'bg-yellow-50' : 'bg-blue-50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">{alerta.departamento}</span>
+                        <Badge variant={alerta.porcentaje >= 90 ? 'destructive' : 'secondary'}>
+                          {alerta.porcentaje}% usado
+                        </Badge>
+                      </div>
+                      <Progress
+                        value={alerta.porcentaje}
+                        className={alerta.porcentaje >= 90 ? 'bg-red-100' : ''}
+                      />
                     </div>
-                    <Progress
-                      value={alerta.porcentaje}
-                      className={alerta.porcentaje >= 90 ? 'bg-red-100' : ''}
-                    />
-                  </div>
-                ))}
+                  ))
+                )}
 
-                <div className="pt-4 border-t">
-                  <p className="text-sm text-muted-foreground">
-                    <CheckCircle className="h-4 w-4 inline mr-1 text-green-500" />
-                    2 departamentos bajo control (&lt;80%)
-                  </p>
-                </div>
+                {alerts.length > 0 && (
+                  <div className="pt-4 border-t">
+                    <p className="text-sm text-muted-foreground">
+                      <CheckCircle className="h-4 w-4 inline mr-1 text-green-500" />
+                      {alerts.length} alertas activas
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -331,23 +469,41 @@ export default function ViajesCorporativosExpenseReportsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {GASTOS_MENSUALES.map((mes) => {
-                    const porcentaje = (mes.gastado / mes.presupuesto) * 100;
-                    return (
-                      <TableRow key={mes.mes}>
-                        <TableCell className="font-medium">{mes.mes}</TableCell>
-                        <TableCell className="text-right">{mes.presupuesto.toLocaleString()}€</TableCell>
-                        <TableCell className="text-right">{mes.gastado.toLocaleString()}€</TableCell>
-                        <TableCell className="text-right text-green-600">+{mes.ahorro.toLocaleString()}€</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Progress value={porcentaje} className="w-24" />
-                            <span className="text-sm">{porcentaje.toFixed(0)}%</span>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                  {monthlyExpenses.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-muted-foreground">
+                        Sin datos mensuales.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    monthlyExpenses.map((mes) => {
+                      const porcentaje =
+                        mes.presupuesto > 0 ? (mes.gastado / mes.presupuesto) * 100 : 0;
+                      const label = new Date(`${mes.periodo}-01`).toLocaleDateString('es-ES', {
+                        month: 'long',
+                      });
+                      return (
+                        <TableRow key={mes.periodo}>
+                          <TableCell className="font-medium">{label}</TableCell>
+                          <TableCell className="text-right">
+                            {mes.presupuesto.toLocaleString()}€
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {mes.gastado.toLocaleString()}€
+                          </TableCell>
+                          <TableCell className="text-right text-green-600">
+                            +{mes.ahorro.toLocaleString()}€
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Progress value={porcentaje} className="w-24" />
+                              <span className="text-sm">{porcentaje.toFixed(0)}%</span>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -376,31 +532,46 @@ export default function ViajesCorporativosExpenseReportsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {GASTOS_DEPARTAMENTO.map((dept) => {
-                  const porcentaje = (dept.gasto / dept.presupuesto) * 100;
-                  const mediaViaje = Math.round(dept.gasto / dept.viajes);
-                  return (
-                    <TableRow key={dept.departamento}>
-                      <TableCell className="font-medium">{dept.departamento}</TableCell>
-                      <TableCell className="text-right">{dept.empleados}</TableCell>
-                      <TableCell className="text-right">{dept.viajes}</TableCell>
-                      <TableCell className="text-right">{dept.presupuesto.toLocaleString()}€</TableCell>
-                      <TableCell className="text-right">{dept.gasto.toLocaleString()}€</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Progress
-                            value={porcentaje}
-                            className={`w-20 ${porcentaje >= 90 ? 'bg-red-100' : ''}`}
-                          />
-                          <span className={`text-sm ${porcentaje >= 90 ? 'text-red-600 font-medium' : ''}`}>
-                            {porcentaje.toFixed(0)}%
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">{mediaViaje}€</TableCell>
-                    </TableRow>
-                  );
-                })}
+                {departmentExpenses.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                      Sin datos de departamentos.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  departmentExpenses.map((dept) => {
+                    const porcentaje =
+                      dept.presupuesto > 0 ? (dept.gasto / dept.presupuesto) * 100 : 0;
+                    const mediaViaje = dept.viajes > 0 ? Math.round(dept.gasto / dept.viajes) : 0;
+                    return (
+                      <TableRow key={dept.departamento}>
+                        <TableCell className="font-medium">{dept.departamento}</TableCell>
+                        <TableCell className="text-right">{dept.empleados}</TableCell>
+                        <TableCell className="text-right">{dept.viajes}</TableCell>
+                        <TableCell className="text-right">
+                          {dept.presupuesto.toLocaleString()}€
+                        </TableCell>
+                        <TableCell className="text-right">{dept.gasto.toLocaleString()}€</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Progress
+                              value={porcentaje}
+                              className={`w-20 ${porcentaje >= 90 ? 'bg-red-100' : ''}`}
+                            />
+                            <span
+                              className={`text-sm ${
+                                porcentaje >= 90 ? 'text-red-600 font-medium' : ''
+                              }`}
+                            >
+                              {porcentaje.toFixed(0)}%
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">{mediaViaje}€</TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
               </TableBody>
             </Table>
 
@@ -410,7 +581,7 @@ export default function ViajesCorporativosExpenseReportsPage() {
                   <div className="text-center">
                     <p className="text-sm text-muted-foreground">Total Gastado</p>
                     <p className="text-2xl font-bold">
-                      {GASTOS_DEPARTAMENTO.reduce((sum, d) => sum + d.gasto, 0).toLocaleString()}€
+                      {totalDepartmentSpent.toLocaleString()}€
                     </p>
                   </div>
                 </CardContent>
@@ -420,7 +591,7 @@ export default function ViajesCorporativosExpenseReportsPage() {
                   <div className="text-center">
                     <p className="text-sm text-muted-foreground">Total Presupuesto</p>
                     <p className="text-2xl font-bold">
-                      {GASTOS_DEPARTAMENTO.reduce((sum, d) => sum + d.presupuesto, 0).toLocaleString()}€
+                      {totalDepartmentBudget.toLocaleString()}€
                     </p>
                   </div>
                 </CardContent>
@@ -430,10 +601,7 @@ export default function ViajesCorporativosExpenseReportsPage() {
                   <div className="text-center">
                     <p className="text-sm text-muted-foreground">Media por Viaje Global</p>
                     <p className="text-2xl font-bold">
-                      {Math.round(
-                        GASTOS_DEPARTAMENTO.reduce((sum, d) => sum + d.gasto, 0) /
-                        GASTOS_DEPARTAMENTO.reduce((sum, d) => sum + d.viajes, 0)
-                      )}€
+                      {globalAvgTrip}€
                     </p>
                   </div>
                 </CardContent>
@@ -447,8 +615,12 @@ export default function ViajesCorporativosExpenseReportsPage() {
       {vistaActiva === 'informes' && (
         <>
           <div className="flex justify-end">
-            <Button onClick={handleGenerarInforme}>
-              <FileText className="h-4 w-4 mr-2" />
+            <Button onClick={handleGenerarInforme} disabled={isGenerating}>
+              {isGenerating ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <FileText className="h-4 w-4 mr-2" />
+              )}
               Generar Informe Personalizado
             </Button>
           </div>
@@ -460,75 +632,96 @@ export default function ViajesCorporativosExpenseReportsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {INFORMES.map((informe) => (
-                  <div
-                    key={informe.id}
-                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg gap-4"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                        <FileText className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{informe.nombre}</p>
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {new Date(informe.fecha).toLocaleDateString('es-ES')}
-                          </span>
-                          <Badge variant="outline">{informe.tipo}</Badge>
+                {reports.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">
+                    No hay informes generados.
+                  </div>
+                ) : (
+                  reports.map((informe) => (
+                    <div
+                      key={informe.id}
+                      className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg gap-4"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                          <FileText className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{informe.nombre}</p>
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {new Date(informe.fecha).toLocaleDateString('es-ES')}
+                            </span>
+                            <Badge variant="outline">{informe.tipo}</Badge>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex gap-2 w-full sm:w-auto">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDescargarInforme(informe, 'pdf')}
-                      >
-                        <Download className="h-4 w-4 mr-1" />
-                        PDF
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDescargarInforme(informe, 'excel')}
-                      >
-                        <Download className="h-4 w-4 mr-1" />
-                        Excel
-                      </Button>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Vista previa: {informe.nombre}</DialogTitle>
-                          </DialogHeader>
-                          <div className="py-8 text-center text-muted-foreground">
-                            <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                            <p>Vista previa no disponible</p>
-                            <p className="text-sm">Descarga el informe para ver su contenido completo</p>
-                          </div>
-                          <DialogFooter>
-                            <Button onClick={() => handleDescargarInforme(informe, 'pdf')}>
-                              Descargar PDF
+                      <div className="flex gap-2 w-full sm:w-auto">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDescargarInforme(informe, 'csv')}
+                          disabled={exportingFormat !== null}
+                        >
+                          {exportingFormat ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <Download className="h-4 w-4 mr-1" />
+                          )}
+                          CSV
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDescargarInforme(informe, 'json')}
+                          disabled={exportingFormat !== null}
+                        >
+                          {exportingFormat ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <Download className="h-4 w-4 mr-1" />
+                          )}
+                          JSON
+                        </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <Eye className="h-4 w-4" />
                             </Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Vista previa: {informe.nombre}</DialogTitle>
+                            </DialogHeader>
+                            <div className="py-8 text-center text-muted-foreground">
+                              <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                              <p>Vista previa no disponible</p>
+                              <p className="text-sm">
+                                Descarga el informe para ver su contenido completo
+                              </p>
+                            </div>
+                            <DialogFooter>
+                              <Button onClick={() => handleDescargarInforme(informe, 'csv')}>
+                                Descargar CSV
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
 
           {/* Tipos de informes disponibles */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={handleGenerarInforme}>
+            <Card
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => !isGenerating && handleGenerarInforme()}
+            >
               <CardContent className="pt-6">
                 <div className="text-center">
                   <BarChart3 className="h-10 w-10 mx-auto mb-3 text-blue-500" />
@@ -540,7 +733,10 @@ export default function ViajesCorporativosExpenseReportsPage() {
               </CardContent>
             </Card>
 
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={handleGenerarInforme}>
+            <Card
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => !isGenerating && handleGenerarInforme()}
+            >
               <CardContent className="pt-6">
                 <div className="text-center">
                   <Building className="h-10 w-10 mx-auto mb-3 text-purple-500" />
@@ -552,7 +748,10 @@ export default function ViajesCorporativosExpenseReportsPage() {
               </CardContent>
             </Card>
 
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={handleGenerarInforme}>
+            <Card
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => !isGenerating && handleGenerarInforme()}
+            >
               <CardContent className="pt-6">
                 <div className="text-center">
                   <TrendingUp className="h-10 w-10 mx-auto mb-3 text-green-500" />
