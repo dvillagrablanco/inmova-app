@@ -10369,6 +10369,48 @@ model NotificationLog {
   @@map("notification_logs")
 }
 
+enum NotificationCampaignStatus {
+  draft
+  scheduled
+  sent
+  failed
+}
+
+enum NotificationCampaignType {
+  email
+  sms
+  push
+  in_app
+}
+
+model NotificationCampaign {
+  id             String                     @id @default(cuid())
+  companyId      String
+  title          String
+  message        String                     @db.Text
+  type           NotificationCampaignType
+  status         NotificationCampaignStatus @default(draft)
+  targetAudience String
+  recipientCount Int                        @default(0)
+  sentCount      Int                        @default(0)
+  openRate       Float?
+  clickRate      Float?
+  scheduledAt    DateTime?
+  sentAt         DateTime?
+  createdBy      String
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+
+  company       Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdByUser User    @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([status])
+  @@index([type])
+  @@index([scheduledAt])
+  @@map("notification_campaigns")
+}
+
 // Preferencias Avanzadas de Notificación por Usuario
 model UserNotificationSettings {
   id     String @id @default(cuid())
