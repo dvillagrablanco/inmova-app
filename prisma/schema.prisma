@@ -1588,8 +1588,11 @@ model Provider {
   tipo      String
   telefono  String
   email     String?
+  website   String?
   direccion String?
   rating    Float?
+  descripcion String? @db.Text
+  estado    ProviderStatus @default(active)
   notas     String? @db.Text
 
   // Autenticación para Portal del Proveedor
@@ -1627,6 +1630,12 @@ enum ApprovalStatus {
   pendiente
   aprobado
   rechazado
+}
+
+enum ProviderStatus {
+  active
+  pending
+  suspended
 }
 
 model Expense {

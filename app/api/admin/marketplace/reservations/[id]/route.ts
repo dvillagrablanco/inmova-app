@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -16,16 +17,30 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'super_admin') {
+    if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // TODO: Conectar con modelo real
+    const reservation = await prisma.marketplaceBooking.findFirst({
+      where: { id: params.id, companyId: session.user.companyId },
+      include: {
+        service: { select: { nombre: true, categoria: true, provider: { select: { nombre: true } } } },
+        tenant: { select: { nombreCompleto: true, email: true } },
+        unit: { select: { numero: true } },
+      },
+    });
+
+    if (!reservation) {
+      return NextResponse.json(
+        { success: true, data: null, message: 'Reserva no encontrada' },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
-      data: null,
-      message: 'Reserva no encontrada',
-    }, { status: 404 });
+      data: reservation,
+    });
   } catch (error) {
     logger.error('[API Error] Get marketplace reservation:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
@@ -39,38 +54,49 @@ export async function PATCH(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'super_admin') {
+    if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await request.json();
     const { action } = body; // 'confirm' | 'cancel' | 'complete'
 
+    const existing = await prisma.marketplaceBooking.findFirst({
+      where: { id: params.id, companyId: session.user.companyId },
+      select: { id: true },
+    });
+    if (!existing) {
+      return NextResponse.json({ error: 'Reserva no encontrada' }, { status: 404 });
+    }
+
     let message = '';
-    let newStatus = '';
+    let newStatus: string;
 
     switch (action) {
       case 'confirm':
-        newStatus = 'confirmed';
+        newStatus = 'confirmada';
         message = 'Reserva confirmada correctamente';
         break;
       case 'cancel':
-        newStatus = 'cancelled';
+        newStatus = 'cancelada';
         message = 'Reserva cancelada';
         break;
       case 'complete':
-        newStatus = 'completed';
+        newStatus = 'completada';
         message = 'Reserva marcada como completada';
         break;
       default:
         return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
     }
 
-    // TODO: Conectar con modelo real y actualizar en BD
+    const updated = await prisma.marketplaceBooking.update({
+      where: { id: params.id },
+      data: { estado: newStatus },
+    });
 
     return NextResponse.json({
       success: true,
-      data: { id: params.id, estado: newStatus },
+      data: { id: updated.id, estado: updated.estado },
       message,
     });
   } catch (error) {
@@ -85,11 +111,21 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'super_admin') {
+    if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // TODO: Conectar con modelo real
+    const existing = await prisma.marketplaceBooking.findFirst({
+      where: { id: params.id, companyId: session.user.companyId },
+      select: { id: true },
+    });
+    if (!existing) {
+      return NextResponse.json({ error: 'Reserva no encontrada' }, { status: 404 });
+    }
+
+    await prisma.marketplaceBooking.delete({
+      where: { id: params.id },
+    });
 
     return NextResponse.json({
       success: true,

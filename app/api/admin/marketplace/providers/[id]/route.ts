@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -16,16 +17,25 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'super_admin') {
+    if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // TODO: Conectar con modelo real
+    const provider = await prisma.provider.findFirst({
+      where: { id: params.id, companyId: session.user.companyId },
+    });
+
+    if (!provider) {
+      return NextResponse.json(
+        { success: true, data: null, message: 'Proveedor no encontrado' },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
-      data: null,
-      message: 'Proveedor no encontrado',
-    }, { status: 404 });
+      data: provider,
+    });
   } catch (error) {
     logger.error('[API Error] Get marketplace provider:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
@@ -38,16 +48,35 @@ export async function PUT(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'super_admin') {
+    if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await request.json();
-    
-    // Simular actualización exitosa
+
+    const existing = await prisma.provider.findFirst({
+      where: { id: params.id, companyId: session.user.companyId },
+    });
+    if (!existing) {
+      return NextResponse.json({ error: 'Proveedor no encontrado' }, { status: 404 });
+    }
+
+    const updated = await prisma.provider.update({
+      where: { id: params.id },
+      data: {
+        nombre: body.nombre,
+        email: body.email,
+        telefono: body.telefono,
+        website: body.website || null,
+        direccion: body.direccion || null,
+        descripcion: body.descripcion || null,
+        tipo: body.categoria,
+      },
+    });
+
     return NextResponse.json({
       success: true,
-      data: { id: params.id, ...body, updatedAt: new Date().toISOString() },
+      data: updated,
       message: 'Proveedor actualizado correctamente',
     });
   } catch (error) {
@@ -62,18 +91,25 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'super_admin') {
+    if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // Simular eliminación exitosa
-    return NextResponse.json({
-      success: true,
-      message: 'Proveedor eliminado correctamente',
+    const existing = await prisma.provider.findFirst({
+      where: { id: params.id, companyId: session.user.companyId },
     });
+    if (!existing) {
+      return NextResponse.json({ error: 'Proveedor no encontrado' }, { status: 404 });
+    }
+
+    await prisma.provider.delete({
+      where: { id: params.id },
+    });
+
+    return NextResponse.json({ success: true, message: 'Proveedor eliminado correctamente' });
   } catch (error) {
     logger.error('[API Error] Delete marketplace provider:', error);
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 });
+    return NextResponse.json({ error: 'No se pudo eliminar el proveedor' }, { status: 500 });
   }
 }
 
@@ -84,36 +120,55 @@ export async function PATCH(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'super_admin') {
+    if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await request.json();
     const { action } = body; // 'approve' | 'suspend' | 'activate'
 
+    const existing = await prisma.provider.findFirst({
+      where: { id: params.id, companyId: session.user.companyId },
+    });
+    if (!existing) {
+      return NextResponse.json({ error: 'Proveedor no encontrado' }, { status: 404 });
+    }
+
     let message = '';
-    let newStatus = '';
+    let newStatus: 'active' | 'pending' | 'suspended';
+    let activo = true;
 
     switch (action) {
       case 'approve':
         newStatus = 'active';
+        activo = true;
         message = 'Proveedor aprobado correctamente';
         break;
       case 'suspend':
         newStatus = 'suspended';
+        activo = false;
         message = 'Proveedor suspendido';
         break;
       case 'activate':
         newStatus = 'active';
+        activo = true;
         message = 'Proveedor activado correctamente';
         break;
       default:
         return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
     }
 
+    const updated = await prisma.provider.update({
+      where: { id: params.id },
+      data: {
+        estado: newStatus,
+        activo,
+      },
+    });
+
     return NextResponse.json({
       success: true,
-      data: { id: params.id, estado: newStatus },
+      data: { id: updated.id, estado: updated.estado },
       message,
     });
   } catch (error) {

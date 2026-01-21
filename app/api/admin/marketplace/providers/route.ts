@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
+import { prisma } from '@/lib/db';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -20,16 +21,102 @@ const providerSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'super_admin') {
+    if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // Por ahora, retornar array vacío
-    // TODO: Cuando se cree el modelo Provider específico para marketplace, conectar aquí
+    const companyId = session.user.companyId;
+
+    const providers = await prisma.provider.findMany({
+      where: { companyId },
+      include: {
+        marketplaceServices: {
+          select: { id: true, activo: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const providerIds = providers.map((provider) => provider.id);
+
+    const [reviews, services, bookings] = await Promise.all([
+      prisma.providerReview.groupBy({
+        by: ['providerId'],
+        where: { companyId, providerId: { in: providerIds } },
+        _avg: { puntuacion: true },
+        _count: { _all: true },
+      }),
+      prisma.marketplaceService.findMany({
+        where: { companyId, providerId: { in: providerIds } },
+        select: { providerId: true, activo: true },
+      }),
+      prisma.marketplaceBooking.findMany({
+        where: { companyId, service: { providerId: { in: providerIds } } },
+        select: {
+          estado: true,
+          precioTotal: true,
+          comision: true,
+          service: { select: { providerId: true } },
+        },
+      }),
+    ]);
+
+    const reviewMap = new Map(
+      reviews.map((review) => [
+        review.providerId,
+        { rating: review._avg.puntuacion || 0, totalReviews: review._count._all },
+      ])
+    );
+
+    const serviceCountMap = new Map<string, { total: number; active: number }>();
+    services.forEach((service) => {
+      if (!service.providerId) return;
+      const current = serviceCountMap.get(service.providerId) || { total: 0, active: 0 };
+      current.total += 1;
+      if (service.activo) current.active += 1;
+      serviceCountMap.set(service.providerId, current);
+    });
+
+    const bookingMap = new Map<string, { completed: number; ingresos: number }>();
+    bookings.forEach((booking) => {
+      const providerId = booking.service.providerId;
+      if (!providerId) return;
+      const current = bookingMap.get(providerId) || { completed: 0, ingresos: 0 };
+      if (booking.estado === 'completada') {
+        current.completed += 1;
+        current.ingresos += booking.precioTotal || 0;
+      }
+      bookingMap.set(providerId, current);
+    });
+
+    const formattedProviders = providers.map((provider) => {
+      const review = reviewMap.get(provider.id) || { rating: provider.rating || 0, totalReviews: 0 };
+      const servicesCount = serviceCountMap.get(provider.id) || { total: 0, active: 0 };
+      const bookingsInfo = bookingMap.get(provider.id) || { completed: 0, ingresos: 0 };
+
+      return {
+        id: provider.id,
+        nombre: provider.nombre,
+        email: provider.email || '',
+        telefono: provider.telefono,
+        tipo: provider.tipo,
+        estado: provider.estado,
+        verificado: review.totalReviews > 0,
+        rating: review.rating,
+        totalReviews: review.totalReviews,
+        serviciosActivos: servicesCount.active,
+        reservasCompletadas: bookingsInfo.completed,
+        ingresosTotales: bookingsInfo.ingresos,
+        fechaRegistro: provider.createdAt.toISOString(),
+        website: provider.website || null,
+        direccion: provider.direccion || null,
+        descripcion: provider.descripcion || null,
+      };
+    });
+
     return NextResponse.json({
       success: true,
-      providers: [],
-      message: 'No hay proveedores registrados aún. Use el botón "Nuevo Proveedor" para añadir.',
+      providers: formattedProviders,
     });
   } catch (error) {
     logger.error('[API Error] Marketplace providers:', error);
@@ -40,28 +127,46 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'super_admin') {
+    if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await request.json();
     const validated = providerSchema.parse(body);
 
-    // TODO: Crear modelo MarketplaceProvider en Prisma
-    // Por ahora, simular creación exitosa
-    const newProvider = {
-      id: `prov_${Date.now()}`,
-      ...validated,
-      estado: 'pending',
-      rating: 0,
-      serviciosCount: 0,
-      transaccionesTotal: 0,
-      createdAt: new Date().toISOString(),
-    };
+    const newProvider = await prisma.provider.create({
+      data: {
+        companyId: session.user.companyId,
+        nombre: validated.nombre,
+        email: validated.email,
+        telefono: validated.telefono || '',
+        tipo: validated.categoria,
+        website: validated.website || null,
+        descripcion: validated.descripcion || null,
+        estado: 'pending',
+        activo: false,
+      },
+    });
 
     return NextResponse.json({
       success: true,
-      data: newProvider,
+      data: {
+        id: newProvider.id,
+        nombre: newProvider.nombre,
+        email: newProvider.email || '',
+        telefono: newProvider.telefono,
+        tipo: newProvider.tipo,
+        estado: newProvider.estado,
+        rating: newProvider.rating || 0,
+        totalReviews: 0,
+        serviciosActivos: 0,
+        reservasCompletadas: 0,
+        ingresosTotales: 0,
+        fechaRegistro: newProvider.createdAt.toISOString(),
+        website: newProvider.website || null,
+        direccion: newProvider.direccion || null,
+        descripcion: newProvider.descripcion || null,
+      },
       message: 'Proveedor creado correctamente. Pendiente de aprobación.',
     }, { status: 201 });
   } catch (error: any) {
