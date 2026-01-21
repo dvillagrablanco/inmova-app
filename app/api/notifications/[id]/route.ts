@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -19,14 +19,25 @@ export async function PATCH(
     }
 
     const { id } = params;
-    const body = await req.json();
+    const body = (await req.json()) as { read?: boolean };
+    const read = typeof body.read === 'boolean' ? body.read : true;
 
-    const notification = await prisma.notification.update({
-      where: { id },
-      data: { leida: body.leida },
+    const result = await prisma.inAppNotification.updateMany({
+      where: { id, userId: session.user.id },
+      data: {
+        read,
+        readAt: read ? new Date() : null,
+      },
     });
 
-    return NextResponse.json(notification);
+    if (result.count === 0) {
+      return NextResponse.json(
+        { error: 'Notificación no encontrada' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ id, read });
   } catch (error) {
     logger.error('Error updating notification:', error);
     return NextResponse.json(
@@ -49,9 +60,16 @@ export async function DELETE(
 
     const { id } = params;
 
-    await prisma.notification.delete({
-      where: { id },
+    const result = await prisma.inAppNotification.deleteMany({
+      where: { id, userId: session.user.id },
     });
+
+    if (result.count === 0) {
+      return NextResponse.json(
+        { error: 'Notificación no encontrada' },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({ message: 'Notificación eliminada' });
   } catch (error) {
