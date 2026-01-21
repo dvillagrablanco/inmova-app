@@ -53,18 +53,32 @@ import {
   AlertCircle,
   Edit,
   Trash2,
+  Loader2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
+
+interface VoteRecordSummary {
+  id: string;
+  opcionSeleccionada?: string;
+}
+
+interface BuildingSummary {
+  id: string;
+  nombre: string;
+}
+
+type VotacionTipo = 'decision_comunidad' | 'mejora' | 'gasto' | 'normativa' | 'otro';
+type VotacionEstado = 'activa' | 'cerrada' | 'cancelada';
 
 interface Votacion {
   id: string;
   titulo: string;
   descripcion: string;
-  tipo: string;
+  tipo: VotacionTipo;
   opciones: string[];
-  estado: 'activa' | 'cerrada' | 'cancelada';
+  estado: VotacionEstado;
   quorumRequerido: number;
   totalVotantes: number;
   fechaCierre: string;
@@ -74,7 +88,7 @@ interface Votacion {
     id: string;
     nombre: string;
   };
-  votos: any[];
+  votos: VoteRecordSummary[];
   createdAt: string;
 }
 
@@ -97,7 +111,7 @@ export default function VotacionesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [votaciones, setVotaciones] = useState<Votacion[]>([]);
-  const [buildings, setBuildings] = useState<any[]>([]);
+  const [buildings, setBuildings] = useState<BuildingSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [openNewDialog, setOpenNewDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
@@ -106,6 +120,11 @@ export default function VotacionesPage() {
   const [editingVotacion, setEditingVotacion] = useState<Votacion | null>(null);
   const [filterEstado, setFilterEstado] = useState<string>('todas');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [closingId, setClosingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   // Form state para nueva votación
   const [formData, setFormData] = useState({
@@ -138,8 +157,9 @@ export default function VotacionesPage() {
     try {
       const res = await fetch('/api/votaciones');
       if (res.ok) {
-        const data = await res.json();
-        setVotaciones(Array.isArray(data) ? data : []);
+        const data = (await res.json()) as Votacion[] | { data?: Votacion[] };
+        const list = Array.isArray(data) ? data : data.data || [];
+        setVotaciones(list);
       }
     } catch (error) {
       logger.error('Error al cargar votaciones:', error);
@@ -153,8 +173,9 @@ export default function VotacionesPage() {
     try {
       const res = await fetch('/api/buildings');
       if (res.ok) {
-        const data = await res.json();
-        setBuildings(Array.isArray(data) ? data : []);
+        const data = (await res.json()) as BuildingSummary[] | { data?: BuildingSummary[] };
+        const list = Array.isArray(data) ? data : data.data || [];
+        setBuildings(list);
       }
     } catch (error) {
       logger.error('Error al cargar edificios:', error);
@@ -162,6 +183,7 @@ export default function VotacionesPage() {
   };
 
   const handleCreateVotacion = async () => {
+    setIsCreating(true);
     try {
       // Validaciones
       if (!formData.buildingId || !formData.titulo || !formData.descripcion) {
@@ -200,28 +222,34 @@ export default function VotacionesPage() {
           totalVotantes: 0,
         });
       } else {
-        const error = await res.json();
-        toast.error(error.error || 'Error al crear votación');
+        const errorData = await res.json();
+        toast.error(errorData.error || 'Error al crear votación');
       }
     } catch (error) {
       logger.error('Error:', error);
       toast.error('Error al crear votación');
+    } finally {
+      setIsCreating(false);
     }
   };
 
   const handleViewDetail = async (votacionId: string) => {
     try {
+      setDetailLoading(true);
+      setSelectedVotacion(null);
+      setOpenDetailDialog(true);
       const res = await fetch(`/api/votaciones/${votacionId}`);
       if (res.ok) {
-        const data = await res.json();
+        const data = (await res.json()) as DetalleVotacion;
         setSelectedVotacion(data);
-        setOpenDetailDialog(true);
       } else {
         toast.error('Error al cargar detalles de votación');
       }
     } catch (error) {
       logger.error('Error:', error);
       toast.error('Error al cargar detalles');
+    } finally {
+      setDetailLoading(false);
     }
   };
 
@@ -252,6 +280,7 @@ export default function VotacionesPage() {
 
   const handleCerrarVotacion = async (votacionId: string) => {
     try {
+      setClosingId(votacionId);
       const res = await fetch(`/api/votaciones/${votacionId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -268,6 +297,8 @@ export default function VotacionesPage() {
     } catch (error) {
       logger.error('Error:', error);
       toast.error('Error al cerrar votación');
+    } finally {
+      setClosingId(null);
     }
   };
 
@@ -290,6 +321,7 @@ export default function VotacionesPage() {
     if (!editingVotacion) return;
 
     try {
+      setIsUpdating(true);
       if (!formData.buildingId || !formData.titulo || !formData.descripcion) {
         toast.error('Por favor completa los campos requeridos');
         return;
@@ -328,6 +360,8 @@ export default function VotacionesPage() {
     } catch (error) {
       logger.error('Error:', error);
       toast.error('Error al actualizar votación');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -335,6 +369,7 @@ export default function VotacionesPage() {
     if (!confirm('¿Estás seguro de cancelar esta votación?')) return;
 
     try {
+      setDeletingId(votacionId);
       const res = await fetch(`/api/votaciones/${votacionId}`, {
         method: 'DELETE',
       });
@@ -348,6 +383,8 @@ export default function VotacionesPage() {
     } catch (error) {
       logger.error('Error:', error);
       toast.error('Error al cancelar votación');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -630,10 +667,19 @@ export default function VotacionesPage() {
                         </div>
 
                         <div className="flex justify-end gap-2">
-                          <Button variant="outline" onClick={() => setOpenNewDialog(false)}>
+                          <Button variant="outline" onClick={() => setOpenNewDialog(false)} disabled={isCreating}>
                             Cancelar
                           </Button>
-                          <Button onClick={handleCreateVotacion}>Crear Votación</Button>
+                          <Button onClick={handleCreateVotacion} disabled={isCreating}>
+                            {isCreating ? (
+                              <span className="flex items-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Creando...
+                              </span>
+                            ) : (
+                              'Crear Votación'
+                            )}
+                          </Button>
                         </div>
                       </DialogContent>
                     </Dialog>
@@ -810,10 +856,20 @@ export default function VotacionesPage() {
                               setEditingVotacion(null);
                               resetForm();
                             }}
+                            disabled={isUpdating}
                           >
                             Cancelar
                           </Button>
-                          <Button onClick={handleUpdateVotacion}>Actualizar Votación</Button>
+                          <Button onClick={handleUpdateVotacion} disabled={isUpdating}>
+                            {isUpdating ? (
+                              <span className="flex items-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Actualizando...
+                              </span>
+                            ) : (
+                              'Actualizar Votación'
+                            )}
+                          </Button>
                         </div>
                       </DialogContent>
                     </Dialog>
@@ -991,6 +1047,7 @@ export default function VotacionesPage() {
                                 variant="outline"
                                 onClick={() => handleViewDetail(votacion.id)}
                                 className="flex-1"
+                                disabled={detailLoading}
                               >
                                 Ver Resultados
                               </Button>
@@ -998,6 +1055,7 @@ export default function VotacionesPage() {
                                 <Button
                                   onClick={() => handleViewDetail(votacion.id)}
                                   className="flex-1"
+                                  disabled={detailLoading}
                                 >
                                   Votar Ahora
                                 </Button>
@@ -1006,8 +1064,16 @@ export default function VotacionesPage() {
                                 <Button
                                   variant="destructive"
                                   onClick={() => handleCerrarVotacion(votacion.id)}
+                                  disabled={closingId === votacion.id}
                                 >
-                                  Cerrar Votación
+                                  {closingId === votacion.id ? (
+                                    <span className="flex items-center gap-2">
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                      Cerrando...
+                                    </span>
+                                  ) : (
+                                    'Cerrar Votación'
+                                  )}
                                 </Button>
                               )}
                             </div>
@@ -1018,6 +1084,7 @@ export default function VotacionesPage() {
                                   size="sm"
                                   onClick={() => handleEditVotacion(votacion)}
                                   className="flex-1"
+                                  disabled={closingId === votacion.id || deletingId === votacion.id || isUpdating}
                                 >
                                   <Edit className="h-4 w-4 mr-2" />
                                   Editar
@@ -1027,9 +1094,19 @@ export default function VotacionesPage() {
                                   size="sm"
                                   onClick={() => handleDeleteVotacion(votacion.id)}
                                   className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  disabled={deletingId === votacion.id}
                                 >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Cancelar
+                                  {deletingId === votacion.id ? (
+                                    <span className="flex items-center gap-2">
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                      Cancelando...
+                                    </span>
+                                  ) : (
+                                    <>
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      Cancelar
+                                    </>
+                                  )}
                                 </Button>
                               </div>
                             )}
@@ -1045,7 +1122,18 @@ export default function VotacionesPage() {
             {/* Dialog de Detalle y Votación */}
             <Dialog open={openDetailDialog} onOpenChange={setOpenDetailDialog}>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                {selectedVotacion && (
+                {detailLoading && (
+                  <div className="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Cargando detalles de la votación...
+                  </div>
+                )}
+                {!detailLoading && !selectedVotacion && (
+                  <div className="py-8 text-center text-sm text-muted-foreground">
+                    No se pudieron cargar los detalles.
+                  </div>
+                )}
+                {!detailLoading && selectedVotacion && (
                   <>
                     <DialogHeader>
                       <div className="flex items-center gap-2">
@@ -1165,17 +1253,26 @@ function VotarForm({
   onVotar,
 }: {
   opciones: string[];
-  onVotar: (opcion: string, comentario: string) => void;
+  onVotar: (opcion: string, comentario: string) => Promise<void>;
 }) {
   const [opcionSeleccionada, setOpcionSeleccionada] = useState('');
   const [comentario, setComentario] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!opcionSeleccionada) {
       toast.error('Por favor selecciona una opción');
       return;
     }
-    onVotar(opcionSeleccionada, comentario);
+    try {
+      setIsSubmitting(true);
+      await onVotar(opcionSeleccionada, comentario);
+    } catch (error) {
+      logger.error('Error al votar:', error);
+      toast.error('Error al registrar voto');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -1208,9 +1305,18 @@ function VotarForm({
         />
       </div>
 
-      <Button onClick={handleSubmit} className="w-full">
-        <Vote className="h-4 w-4 mr-2" />
-        Confirmar Voto
+      <Button onClick={handleSubmit} className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Registrando...
+          </span>
+        ) : (
+          <>
+            <Vote className="h-4 w-4 mr-2" />
+            Confirmar Voto
+          </>
+        )}
       </Button>
     </div>
   );
