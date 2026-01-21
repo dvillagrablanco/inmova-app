@@ -37,6 +37,7 @@ import {
   BarChart3,
   FileText,
   CheckCircle2,
+  Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -49,12 +50,48 @@ import {
 } from '@/components/ui/breadcrumb';
 import logger, { logError } from '@/lib/logger';
 
+interface UnitOption {
+  id: string;
+  numero: string;
+  building?: {
+    id: string;
+    nombre?: string | null;
+    direccion?: string | null;
+  } | null;
+}
+
+type ValoracionFinalidad = 'venta' | 'alquiler' | 'seguro' | 'hipoteca';
+
+interface ValoracionItem {
+  id: string;
+  direccion: string;
+  municipio: string;
+  provincia: string;
+  codigoPostal?: string | null;
+  metrosCuadrados: number;
+  habitaciones?: number | null;
+  banos?: number | null;
+  garajes?: number | null;
+  ascensor: boolean;
+  terraza: boolean;
+  piscina: boolean;
+  estadoConservacion?: string | null;
+  finalidad: ValoracionFinalidad;
+  valorEstimado: number;
+  valorMinimo: number;
+  valorMaximo: number;
+  precioM2: number;
+  confianzaValoracion: number;
+  fechaValoracion: string;
+  createdAt: string;
+}
+
 export default function ValoracionesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [valoraciones, setValoraciones] = useState<any[]>([]);
-  const [units, setUnits] = useState<any[]>([]);
+  const [valoraciones, setValoraciones] = useState<ValoracionItem[]>([]);
+  const [units, setUnits] = useState<UnitOption[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [generando, setGenerando] = useState(false);
 
@@ -85,10 +122,22 @@ export default function ValoracionesPage() {
         fetch('/api/valoraciones'),
         fetch('/api/units'),
       ]);
+
+      if (!valRes.ok) {
+        throw new Error('Error al cargar valoraciones');
+      }
+
+      if (!unitsRes.ok) {
+        throw new Error('Error al cargar unidades');
+      }
+
       const valData = await valRes.json();
       const unitsData = await unitsRes.json();
-      setValoraciones(valData);
-      setUnits(unitsData);
+      const valList = Array.isArray(valData) ? valData : valData.data || [];
+      const unitsList = Array.isArray(unitsData) ? unitsData : unitsData.data || [];
+
+      setValoraciones(valList);
+      setUnits(unitsList);
       setLoading(false);
     } catch (error) {
       logger.error('Error:', error);
@@ -118,9 +167,12 @@ export default function ValoracionesPage() {
         }),
       });
 
-      if (!response.ok) throw new Error('Error al generar valoración');
-
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al generar valoración');
+      }
+
       toast.success('Valoración generada exitosamente');
       setOpenDialog(false);
       fetchData();
@@ -136,8 +188,9 @@ export default function ValoracionesPage() {
         estadoConservacion: 'bueno',
         finalidad: 'venta',
       });
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al generar valoración';
+      toast.error(message);
     } finally {
       setGenerando(false);
     }
@@ -340,7 +393,14 @@ export default function ValoracionesPage() {
                       </div>
 
                       <Button onClick={handleGenerar} disabled={generando} className="w-full">
-                        {generando ? 'Generando...' : 'Generar Valoración'}
+                        {generando ? (
+                          <span className="flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Generando...
+                          </span>
+                        ) : (
+                          'Generar Valoración'
+                        )}
                       </Button>
                     </div>
                   </DialogContent>
