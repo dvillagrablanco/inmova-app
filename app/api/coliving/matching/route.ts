@@ -4,16 +4,13 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
-// Tipos de preferencias para matching
-interface PerfilInquilino {
-  id: string;
+// Tipos para matching
+interface PerfilBusqueda {
   nombre: string;
   email: string;
-  telefono?: string;
-  avatar?: string;
   edad: number;
-  genero: 'masculino' | 'femenino' | 'otro' | 'sin_preferencia';
   ocupacion: string;
   presupuestoMin: number;
   presupuestoMax: number;
@@ -25,9 +22,9 @@ interface PerfilInquilino {
     estudiante: boolean;
     trabajador: boolean;
     horarios: 'diurno' | 'nocturno' | 'flexible';
-    limpieza: 1 | 2 | 3 | 4 | 5;
-    ruido: 1 | 2 | 3 | 4 | 5;
-    social: 1 | 2 | 3 | 4 | 5;
+    limpieza: number;
+    ruido: number;
+    social: number;
     visitantes: 'nunca' | 'ocasional' | 'frecuente';
     cocinaTipo: 'individual' | 'compartida' | 'indiferente';
     baño: 'privado' | 'compartido' | 'indiferente';
@@ -35,12 +32,9 @@ interface PerfilInquilino {
     idiomas: string[];
     intereses: string[];
   };
-  verificado: boolean;
-  puntuacion?: number;
-  createdAt: string;
 }
 
-interface Habitacion {
+interface HabitacionMatch {
   id: string;
   propiedadId: string;
   propiedadNombre: string;
@@ -68,11 +62,17 @@ interface Habitacion {
   fotos: string[];
   inquilinosActuales: number;
   capacidadTotal: number;
-  perfilIdeal?: Partial<PerfilInquilino['preferencias']>;
+}
+
+interface CompañeroInfo {
+  nombre: string;
+  edad: number;
+  ocupacion: string;
+  compatibilidad: number;
 }
 
 interface MatchResult {
-  habitacion: Habitacion;
+  habitacion: HabitacionMatch;
   puntuacion: number;
   detalles: {
     presupuesto: number;
@@ -81,205 +81,14 @@ interface MatchResult {
     disponibilidad: number;
     compatibilidadCompañeros: number;
   };
-  compañeros: Array<{
-    nombre: string;
-    edad: number;
-    ocupacion: string;
-    compatibilidad: number;
-  }>;
+  compañeros: CompañeroInfo[];
 }
-
-// Datos de ejemplo para desarrollo
-const habitacionesDemo: Habitacion[] = [
-  {
-    id: 'hab-001',
-    propiedadId: 'prop-001',
-    propiedadNombre: 'Coliving Malasaña',
-    direccion: 'Calle Fuencarral 45, Madrid',
-    zona: 'Malasaña',
-    numero: 'A1',
-    superficie: 14,
-    precio: 550,
-    disponible: true,
-    fechaDisponible: '2026-02-01',
-    caracteristicas: {
-      bañoPrivado: false,
-      amueblada: true,
-      balcon: false,
-      aireAcondicionado: true,
-      calefaccion: true,
-      armarioEmpotrado: true,
-    },
-    reglas: {
-      fumadores: false,
-      mascotas: false,
-      parejas: false,
-      visitasNocturnas: true,
-    },
-    fotos: ['/placeholder-room.jpg'],
-    inquilinosActuales: 3,
-    capacidadTotal: 5,
-  },
-  {
-    id: 'hab-002',
-    propiedadId: 'prop-001',
-    propiedadNombre: 'Coliving Malasaña',
-    direccion: 'Calle Fuencarral 45, Madrid',
-    zona: 'Malasaña',
-    numero: 'B2',
-    superficie: 18,
-    precio: 680,
-    disponible: true,
-    fechaDisponible: '2026-01-25',
-    caracteristicas: {
-      bañoPrivado: true,
-      amueblada: true,
-      balcon: true,
-      aireAcondicionado: true,
-      calefaccion: true,
-      armarioEmpotrado: true,
-    },
-    reglas: {
-      fumadores: false,
-      mascotas: true,
-      parejas: false,
-      visitasNocturnas: true,
-    },
-    fotos: ['/placeholder-room.jpg'],
-    inquilinosActuales: 3,
-    capacidadTotal: 5,
-  },
-  {
-    id: 'hab-003',
-    propiedadId: 'prop-002',
-    propiedadNombre: 'Student House Moncloa',
-    direccion: 'Avenida Complutense 12, Madrid',
-    zona: 'Moncloa',
-    numero: '201',
-    superficie: 12,
-    precio: 450,
-    disponible: true,
-    fechaDisponible: '2026-01-20',
-    caracteristicas: {
-      bañoPrivado: false,
-      amueblada: true,
-      balcon: false,
-      aireAcondicionado: false,
-      calefaccion: true,
-      armarioEmpotrado: true,
-    },
-    reglas: {
-      fumadores: false,
-      mascotas: false,
-      parejas: false,
-      visitasNocturnas: false,
-    },
-    fotos: ['/placeholder-room.jpg'],
-    inquilinosActuales: 7,
-    capacidadTotal: 8,
-  },
-  {
-    id: 'hab-004',
-    propiedadId: 'prop-003',
-    propiedadNombre: 'Professional Living Chamberí',
-    direccion: 'Calle Almagro 28, Madrid',
-    zona: 'Chamberí',
-    numero: '3A',
-    superficie: 16,
-    precio: 750,
-    disponible: true,
-    fechaDisponible: '2026-02-15',
-    caracteristicas: {
-      bañoPrivado: true,
-      amueblada: true,
-      balcon: true,
-      aireAcondicionado: true,
-      calefaccion: true,
-      armarioEmpotrado: true,
-    },
-    reglas: {
-      fumadores: false,
-      mascotas: true,
-      parejas: true,
-      visitasNocturnas: true,
-    },
-    fotos: ['/placeholder-room.jpg'],
-    inquilinosActuales: 2,
-    capacidadTotal: 4,
-  },
-];
-
-const perfilesDemo: Partial<PerfilInquilino>[] = [
-  {
-    nombre: 'María García',
-    edad: 26,
-    ocupacion: 'Diseñadora UX',
-    preferencias: {
-      fumador: false,
-      mascotas: false,
-      estudiante: false,
-      trabajador: true,
-      horarios: 'diurno',
-      limpieza: 4,
-      ruido: 2,
-      social: 4,
-      visitantes: 'ocasional',
-      cocinaTipo: 'compartida',
-      baño: 'indiferente',
-      zonas: ['Malasaña', 'Chamberí'],
-      idiomas: ['Español', 'Inglés'],
-      intereses: ['Yoga', 'Diseño', 'Viajes'],
-    },
-  },
-  {
-    nombre: 'Carlos Martínez',
-    edad: 24,
-    ocupacion: 'Desarrollador',
-    preferencias: {
-      fumador: false,
-      mascotas: false,
-      estudiante: false,
-      trabajador: true,
-      horarios: 'nocturno',
-      limpieza: 3,
-      ruido: 3,
-      social: 3,
-      visitantes: 'ocasional',
-      cocinaTipo: 'compartida',
-      baño: 'indiferente',
-      zonas: ['Malasaña', 'Lavapiés'],
-      idiomas: ['Español', 'Inglés'],
-      intereses: ['Gaming', 'Música', 'Tecnología'],
-    },
-  },
-  {
-    nombre: 'Ana López',
-    edad: 22,
-    ocupacion: 'Estudiante Medicina',
-    preferencias: {
-      fumador: false,
-      mascotas: false,
-      estudiante: true,
-      trabajador: false,
-      horarios: 'flexible',
-      limpieza: 5,
-      ruido: 1,
-      social: 2,
-      visitantes: 'nunca',
-      cocinaTipo: 'individual',
-      baño: 'indiferente',
-      zonas: ['Moncloa', 'Argüelles'],
-      idiomas: ['Español'],
-      intereses: ['Lectura', 'Running', 'Cine'],
-    },
-  },
-];
 
 // Función de cálculo de matching
 function calcularMatching(
-  perfil: PerfilInquilino,
-  habitacion: Habitacion,
-  compañeros: Partial<PerfilInquilino>[]
+  perfil: PerfilBusqueda,
+  habitacion: HabitacionMatch,
+  compañerosPerfiles: any[]
 ): MatchResult {
   let puntuacionTotal = 0;
   const detalles = {
@@ -293,7 +102,6 @@ function calcularMatching(
   // 1. Puntuación de presupuesto (25%)
   if (habitacion.precio >= perfil.presupuestoMin && habitacion.precio <= perfil.presupuestoMax) {
     detalles.presupuesto = 25;
-    // Bonus si está cerca del precio ideal (mitad del rango)
     const precioIdeal = (perfil.presupuestoMin + perfil.presupuestoMax) / 2;
     const diferencia = Math.abs(habitacion.precio - precioIdeal);
     const rangoTotal = perfil.presupuestoMax - perfil.presupuestoMin;
@@ -301,7 +109,7 @@ function calcularMatching(
       detalles.presupuesto += (1 - diferencia / rangoTotal) * 5;
     }
   } else if (habitacion.precio < perfil.presupuestoMin) {
-    detalles.presupuesto = 20; // Más barato de lo esperado
+    detalles.presupuesto = 20;
   } else {
     const exceso = (habitacion.precio - perfil.presupuestoMax) / perfil.presupuestoMax;
     detalles.presupuesto = Math.max(0, 15 - exceso * 30);
@@ -313,28 +121,25 @@ function calcularMatching(
   const reglas = habitacion.reglas;
   const caract = habitacion.caracteristicas;
 
-  // Reglas críticas
   if (prefs.fumador && !reglas.fumadores) prefScore -= 30;
   if (prefs.mascotas && !reglas.mascotas) prefScore -= 20;
 
-  // Baño privado
   if (prefs.baño === 'privado' && caract.bañoPrivado) prefScore += 10;
   if (prefs.baño === 'privado' && !caract.bañoPrivado) prefScore -= 5;
 
-  // Amueblada (siempre positivo)
   if (caract.amueblada) prefScore += 5;
-
-  // Extras
   if (caract.balcon) prefScore += 3;
   if (caract.aireAcondicionado) prefScore += 3;
 
   detalles.preferencias = Math.max(0, Math.min(30, 20 + prefScore));
 
   // 3. Puntuación de ubicación (20%)
-  if (prefs.zonas && prefs.zonas.includes(habitacion.zona)) {
+  if (prefs.zonas && prefs.zonas.length > 0 && prefs.zonas.includes(habitacion.zona)) {
     detalles.ubicacion = 20;
+  } else if (prefs.zonas && prefs.zonas.length === 0) {
+    detalles.ubicacion = 15; // Sin preferencia de zona
   } else {
-    detalles.ubicacion = 10; // Zona no preferida pero aceptable
+    detalles.ubicacion = 10;
   }
 
   // 4. Disponibilidad (10%)
@@ -354,49 +159,50 @@ function calcularMatching(
   }
 
   // 5. Compatibilidad con compañeros (15%)
-  const compatibilidadCompañeros = compañeros.map((comp) => {
-    let compat = 50; // Base
+  const compañerosInfo: CompañeroInfo[] = compañerosPerfiles.map((comp) => {
+    let compat = 50;
 
-    if (comp.preferencias) {
-      // Horarios similares
-      if (comp.preferencias.horarios === prefs.horarios) compat += 15;
+    if (comp.profile) {
+      if (comp.profile.horariosActividad) {
+        const horariosComp = comp.profile.horariosActividad.toLowerCase();
+        if (
+          (prefs.horarios === 'diurno' && horariosComp.includes('diurno')) ||
+          (prefs.horarios === 'nocturno' && horariosComp.includes('nocturno')) ||
+          prefs.horarios === 'flexible'
+        ) {
+          compat += 15;
+        }
+      }
 
-      // Nivel de limpieza similar
-      const difLimpieza = Math.abs((comp.preferencias.limpieza || 3) - prefs.limpieza);
+      const difLimpieza = Math.abs((comp.profile.preferenciaLimpieza || 5) - prefs.limpieza);
       compat += (5 - difLimpieza) * 3;
 
-      // Nivel social similar
-      const difSocial = Math.abs((comp.preferencias.social || 3) - prefs.social);
+      const difSocial = Math.abs((comp.profile.nivelSociabilidad || 5) - prefs.social);
       compat += (5 - difSocial) * 3;
 
-      // Intereses comunes
-      const interesesComunes =
-        comp.preferencias.intereses?.filter((i) => prefs.intereses?.includes(i)) || [];
-      compat += interesesComunes.length * 5;
-
-      // Idiomas comunes
-      const idiomasComunes =
-        comp.preferencias.idiomas?.filter((i) => prefs.idiomas?.includes(i)) || [];
-      compat += idiomasComunes.length * 3;
+      if (comp.profile.idiomas && prefs.idiomas) {
+        const idiomasComunes = comp.profile.idiomas.filter((i: string) =>
+          prefs.idiomas.includes(i)
+        );
+        compat += idiomasComunes.length * 5;
+      }
     }
 
     return {
-      nombre: comp.nombre || 'Inquilino',
-      edad: comp.edad || 0,
-      ocupacion: comp.ocupacion || 'N/A',
+      nombre: comp.nombre || comp.user?.name || 'Inquilino',
+      edad: comp.profile?.edad || 0,
+      ocupacion: comp.profile?.ocupacion || 'N/A',
       compatibilidad: Math.min(100, Math.max(0, compat)),
     };
   });
 
   const avgCompatibilidad =
-    compatibilidadCompañeros.length > 0
-      ? compatibilidadCompañeros.reduce((sum, c) => sum + c.compatibilidad, 0) /
-        compatibilidadCompañeros.length
-      : 50;
+    compañerosInfo.length > 0
+      ? compañerosInfo.reduce((sum, c) => sum + c.compatibilidad, 0) / compañerosInfo.length
+      : 70; // Sin compañeros = buena compatibilidad base
 
   detalles.compatibilidadCompañeros = Math.round((avgCompatibilidad / 100) * 15);
 
-  // Total
   puntuacionTotal =
     detalles.presupuesto +
     detalles.preferencias +
@@ -414,7 +220,7 @@ function calcularMatching(
       disponibilidad: Math.round(detalles.disponibilidad),
       compatibilidadCompañeros: Math.round(detalles.compatibilidadCompañeros),
     },
-    compañeros: compatibilidadCompañeros,
+    compañeros: compañerosInfo,
   };
 }
 
@@ -429,68 +235,145 @@ export async function GET(request: NextRequest) {
     const zona = searchParams.get('zona');
     const precioMax = searchParams.get('precioMax');
 
-    let habitaciones = habitacionesDemo;
+    // Obtener habitaciones reales de la BD
+    let habitaciones: HabitacionMatch[] = [];
+    let zonas: string[] = [];
 
-    // Aplicar filtros
-    if (zona) {
-      habitaciones = habitaciones.filter((h) => h.zona.toLowerCase().includes(zona.toLowerCase()));
-    }
-    if (precioMax) {
-      habitaciones = habitaciones.filter((h) => h.precio <= parseInt(precioMax));
-    }
-
-    // Intentar obtener habitaciones reales de la BD
     try {
-      const habitacionesDB = await prisma.property.findMany({
+      // Buscar habitaciones disponibles (modelo Room)
+      const rooms = await prisma.room.findMany({
         where: {
           companyId: session.user.companyId,
-          tipo: { in: ['HABITACION', 'COLIVING'] },
-          estado: 'DISPONIBLE',
+          estado: 'disponible',
+          ...(zona && { zona: { contains: zona, mode: 'insensitive' } }),
+          ...(precioMax && { precioMensual: { lte: parseFloat(precioMax) } }),
         },
         include: {
-          building: true,
+          unit: {
+            include: {
+              building: true,
+            },
+          },
+          contracts: {
+            where: {
+              estado: 'activo',
+            },
+            include: {
+              tenant: {
+                include: {
+                  user: true,
+                  profile: true,
+                },
+              },
+            },
+          },
         },
       });
 
-      if (habitacionesDB.length > 0) {
-        habitaciones = habitacionesDB.map((h: any) => ({
-          id: h.id,
-          propiedadId: h.buildingId || h.id,
-          propiedadNombre: h.building?.name || h.nombre || 'Propiedad',
-          direccion: h.direccion || h.building?.address || '',
-          zona: h.zona || 'Centro',
-          numero: h.numero || '1',
-          superficie: h.superficie || 12,
-          precio: h.precioAlquiler || h.precio || 500,
-          disponible: h.estado === 'DISPONIBLE',
-          fechaDisponible: h.fechaDisponible?.toISOString() || new Date().toISOString(),
-          caracteristicas: h.caracteristicas || {
-            bañoPrivado: false,
-            amueblada: true,
-            balcon: false,
-            aireAcondicionado: false,
-            calefaccion: true,
+      habitaciones = rooms.map((room: any) => ({
+        id: room.id,
+        propiedadId: room.unitId,
+        propiedadNombre: room.unit?.building?.name || room.unit?.numero || 'Propiedad',
+        direccion: room.unit?.building?.address || '',
+        zona: room.zona || room.unit?.building?.zona || 'Centro',
+        numero: room.numero,
+        superficie: room.superficie,
+        precio: room.precioMensual,
+        disponible: room.estado === 'disponible',
+        fechaDisponible: room.fechaDisponible?.toISOString() || new Date().toISOString(),
+        caracteristicas: {
+          bañoPrivado: room.banoPrivado,
+          amueblada: room.amueblada,
+          balcon: room.tieneBalcon,
+          aireAcondicionado: room.aireAcondicionado,
+          calefaccion: room.calefaccion,
+          armarioEmpotrado: room.armarioEmpotrado,
+        },
+        reglas: {
+          fumadores: room.permiteFumar || false,
+          mascotas: room.permiteMascotas || false,
+          parejas: room.permitePareja || false,
+          visitasNocturnas: true,
+        },
+        fotos: room.imagenes || [],
+        inquilinosActuales: room.contracts?.length || 0,
+        capacidadTotal: room.capacidad || 1,
+      }));
+
+      // Obtener zonas únicas
+      const zonasSet = new Set(habitaciones.map((h) => h.zona).filter(Boolean));
+      zonas = Array.from(zonasSet);
+    } catch (dbError) {
+      console.warn('[Matching API] Error de BD Room, intentando con Unit:', dbError);
+
+      // Fallback: usar Units tipo HABITACION
+      try {
+        const units = await prisma.unit.findMany({
+          where: {
+            building: {
+              companyId: session.user.companyId,
+            },
+            tipo: { in: ['habitacion', 'coliving'] },
+            estado: 'disponible',
+            ...(precioMax && { rentaMensual: { lte: parseFloat(precioMax) } }),
+          },
+          include: {
+            building: true,
+            tenant: {
+              include: {
+                user: true,
+                profile: true,
+              },
+            },
+          },
+        });
+
+        habitaciones = units.map((unit: any) => ({
+          id: unit.id,
+          propiedadId: unit.buildingId,
+          propiedadNombre: unit.building?.name || 'Propiedad',
+          direccion: unit.building?.address || '',
+          zona: unit.building?.zona || 'Centro',
+          numero: unit.numero,
+          superficie: unit.superficie,
+          precio: unit.rentaMensual,
+          disponible: unit.estado === 'disponible',
+          fechaDisponible: new Date().toISOString(),
+          caracteristicas: {
+            bañoPrivado: unit.banos >= 1,
+            amueblada: unit.amueblado,
+            balcon: unit.balcon,
+            aireAcondicionado: unit.aireAcondicionado,
+            calefaccion: unit.calefaccion,
             armarioEmpotrado: true,
           },
-          reglas: h.reglas || {
+          reglas: {
             fumadores: false,
             mascotas: false,
-            parejas: false,
+            parejas: true,
             visitasNocturnas: true,
           },
-          fotos: h.fotos || [],
-          inquilinosActuales: 0,
-          capacidadTotal: h.capacidad || 1,
+          fotos: unit.imagenes || [],
+          inquilinosActuales: unit.tenant ? 1 : 0,
+          capacidadTotal: unit.habitaciones || 1,
         }));
+
+        const zonasSet = new Set(habitaciones.map((h) => h.zona).filter(Boolean));
+        zonas = Array.from(zonasSet);
+      } catch (unitError) {
+        console.warn('[Matching API] Error de BD Unit:', unitError);
       }
-    } catch (dbError) {
-      console.warn('[Matching API] Usando datos demo:', dbError);
+    }
+
+    // Si no hay zonas, devolver lista por defecto
+    if (zonas.length === 0) {
+      zonas = ['Centro', 'Norte', 'Sur', 'Este', 'Oeste'];
     }
 
     return NextResponse.json({
       habitaciones: habitaciones.filter((h) => h.disponible),
-      perfiles: perfilesDemo,
-      zonas: ['Malasaña', 'Chamberí', 'Moncloa', 'Lavapiés', 'Argüelles', 'Salamanca'],
+      total: habitaciones.length,
+      zonas,
     });
   } catch (error: any) {
     console.error('[Matching API] Error:', error);
@@ -506,20 +389,155 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { perfil } = body as { perfil: PerfilInquilino };
+    const { perfil } = body as { perfil: PerfilBusqueda };
 
     if (!perfil) {
       return NextResponse.json({ error: 'Perfil de inquilino requerido' }, { status: 400 });
     }
 
     // Obtener habitaciones disponibles
-    let habitaciones = habitacionesDemo.filter((h) => h.disponible);
+    let habitaciones: HabitacionMatch[] = [];
+    let tenantsActuales: any[] = [];
+
+    try {
+      const rooms = await prisma.room.findMany({
+        where: {
+          companyId: session.user.companyId,
+          estado: 'disponible',
+          precioMensual: {
+            gte: perfil.presupuestoMin * 0.8,
+            lte: perfil.presupuestoMax * 1.2,
+          },
+        },
+        include: {
+          unit: {
+            include: {
+              building: true,
+            },
+          },
+          contracts: {
+            where: {
+              estado: 'activo',
+            },
+            include: {
+              tenant: {
+                include: {
+                  user: true,
+                  profile: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      habitaciones = rooms.map((room: any) => {
+        tenantsActuales = room.contracts?.map((c: any) => c.tenant) || [];
+
+        return {
+          id: room.id,
+          propiedadId: room.unitId,
+          propiedadNombre: room.unit?.building?.name || room.unit?.numero || 'Propiedad',
+          direccion: room.unit?.building?.address || '',
+          zona: room.zona || room.unit?.building?.zona || 'Centro',
+          numero: room.numero,
+          superficie: room.superficie,
+          precio: room.precioMensual,
+          disponible: true,
+          fechaDisponible: room.fechaDisponible?.toISOString() || new Date().toISOString(),
+          caracteristicas: {
+            bañoPrivado: room.banoPrivado,
+            amueblada: room.amueblada,
+            balcon: room.tieneBalcon,
+            aireAcondicionado: room.aireAcondicionado,
+            calefaccion: room.calefaccion,
+            armarioEmpotrado: room.armarioEmpotrado,
+          },
+          reglas: {
+            fumadores: room.permiteFumar || false,
+            mascotas: room.permiteMascotas || false,
+            parejas: room.permitePareja || false,
+            visitasNocturnas: true,
+          },
+          fotos: room.imagenes || [],
+          inquilinosActuales: room.contracts?.length || 0,
+          capacidadTotal: room.capacidad || 1,
+        };
+      });
+    } catch (dbError) {
+      console.warn('[Matching API POST] Error Room, intentando Unit:', dbError);
+
+      try {
+        const units = await prisma.unit.findMany({
+          where: {
+            building: {
+              companyId: session.user.companyId,
+            },
+            tipo: { in: ['habitacion', 'coliving'] },
+            estado: 'disponible',
+            rentaMensual: {
+              gte: perfil.presupuestoMin * 0.8,
+              lte: perfil.presupuestoMax * 1.2,
+            },
+          },
+          include: {
+            building: true,
+            tenant: {
+              include: {
+                user: true,
+                profile: true,
+              },
+            },
+          },
+        });
+
+        habitaciones = units.map((unit: any) => ({
+          id: unit.id,
+          propiedadId: unit.buildingId,
+          propiedadNombre: unit.building?.name || 'Propiedad',
+          direccion: unit.building?.address || '',
+          zona: unit.building?.zona || 'Centro',
+          numero: unit.numero,
+          superficie: unit.superficie,
+          precio: unit.rentaMensual,
+          disponible: true,
+          fechaDisponible: new Date().toISOString(),
+          caracteristicas: {
+            bañoPrivado: unit.banos >= 1,
+            amueblada: unit.amueblado,
+            balcon: unit.balcon,
+            aireAcondicionado: unit.aireAcondicionado,
+            calefaccion: unit.calefaccion,
+            armarioEmpotrado: true,
+          },
+          reglas: {
+            fumadores: false,
+            mascotas: false,
+            parejas: true,
+            visitasNocturnas: true,
+          },
+          fotos: unit.imagenes || [],
+          inquilinosActuales: unit.tenant ? 1 : 0,
+          capacidadTotal: unit.habitaciones || 1,
+        }));
+      } catch (unitError) {
+        console.warn('[Matching API POST] Error Unit:', unitError);
+      }
+    }
+
+    // Si no hay habitaciones, retornar vacío
+    if (habitaciones.length === 0) {
+      return NextResponse.json({
+        resultados: [],
+        total: 0,
+        mejorMatch: null,
+        mensaje: 'No se encontraron habitaciones que coincidan con tu presupuesto',
+      });
+    }
 
     // Calcular matching para cada habitación
     const resultados: MatchResult[] = habitaciones.map((habitacion) => {
-      // Obtener compañeros actuales (demo)
-      const compañeros = perfilesDemo.slice(0, habitacion.inquilinosActuales);
-      return calcularMatching(perfil, habitacion, compañeros);
+      return calcularMatching(perfil, habitacion, tenantsActuales);
     });
 
     // Ordenar por puntuación
