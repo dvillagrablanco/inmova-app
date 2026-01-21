@@ -13,6 +13,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   Package,
   Calendar,
   Star,
@@ -63,6 +70,8 @@ export default function ProveedorDashboard() {
     totalValoraciones: 0,
   });
   const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([]);
+  const [selectedBooking, setSelectedBooking] = useState<RecentBooking | null>(null);
+  const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
 
   useEffect(() => {
     loadDashboard();
@@ -124,6 +133,11 @@ export default function ProveedorDashboard() {
       default:
         return <Badge variant="secondary">{estado}</Badge>;
     }
+  };
+
+  const openBookingDetails = (booking: RecentBooking) => {
+    setSelectedBooking(booking);
+    setIsBookingDialogOpen(true);
   };
 
   if (loading) {
@@ -267,7 +281,7 @@ export default function ProveedorDashboard() {
                     <span className="font-semibold text-green-600">
                       {formatCurrency(booking.precio)}
                     </span>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => openBookingDetails(booking)}>
                       <Eye className="h-4 w-4 mr-1" />
                       Ver
                     </Button>
@@ -336,6 +350,44 @@ export default function ProveedorDashboard() {
           </CardContent>
         </Card>
       </div>
+      <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Detalle de Reserva</DialogTitle>
+            <DialogDescription>Información completa de la reserva seleccionada</DialogDescription>
+          </DialogHeader>
+          {selectedBooking ? (
+            <div className="space-y-3 text-sm">
+              <div>
+                <p className="text-muted-foreground">Servicio</p>
+                <p className="font-medium">{selectedBooking.servicio}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Cliente</p>
+                <p className="font-medium">{selectedBooking.cliente}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Fecha</p>
+                <p className="font-medium">{selectedBooking.fecha}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Hora</p>
+                <p className="font-medium">{selectedBooking.hora}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Estado</p>
+                {getStatusBadge(selectedBooking.estado)}
+              </div>
+              <div>
+                <p className="text-muted-foreground">Precio</p>
+                <p className="font-medium">{formatCurrency(selectedBooking.precio)}</p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No hay información disponible.</p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

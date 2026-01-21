@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const policySchema = z.object({
   nombre: z.string().min(1),
@@ -183,6 +184,43 @@ export async function PATCH(request: NextRequest) {
 
     const updatedPolicy = updated.find((policy: any) => policy.id === validationResult.data.id);
     return NextResponse.json({ success: true, data: updatedPolicy });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    if (!id) {
+      return NextResponse.json({ error: 'Id requerido' }, { status: 400 });
+    }
+
+    const company = await prisma.company.findUnique({
+      where: { id: session.user.companyId },
+      select: { metadata: true },
+    });
+
+    const policies = getPolicies(company?.metadata);
+    const updatedPolicies = policies.filter((policy: any) => policy.id !== id);
+
+    await prisma.company.update({
+      where: { id: session.user.companyId },
+      data: {
+        metadata: {
+          ...(company?.metadata as object),
+          politicasViaje: updatedPolicies,
+        },
+      },
+    });
+
+    return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

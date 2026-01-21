@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
     const companyId = user.companyId;
     const { searchParams } = new URL(request.url);
     const period = searchParams.get('period');
+    const format = searchParams.get('format');
     const startDate = getPeriodStart(period);
 
     const [totalPolicies, activePolicies, insurances] = await Promise.all([
@@ -89,8 +90,7 @@ export async function GET(request: NextRequest) {
     const claimsWithAmount = claims.filter(
       (claim) => (claim.montoAprobado ?? claim.montoReclamado ?? 0) > 0
     );
-    const avgClaimAmount =
-      claimsWithAmount.length > 0 ? totalPaid / claimsWithAmount.length : 0;
+    const avgClaimAmount = claimsWithAmount.length > 0 ? totalPaid / claimsWithAmount.length : 0;
 
     const totalPremium = insurances.reduce((sum, insurance) => {
       if (insurance.primaAnual) return sum + insurance.primaAnual;
@@ -157,7 +157,7 @@ export async function GET(request: NextRequest) {
         amount: data.amount,
       }));
 
-    return NextResponse.json({
+    const payload = {
       stats: {
         totalPolicies,
         activePolicies,
@@ -171,7 +171,51 @@ export async function GET(request: NextRequest) {
       claimsByType,
       claimsByMonth,
       topClaimProperties,
-    });
+    };
+
+    if (format === 'csv') {
+      const escapeCsv = (value: string) => {
+        const needsQuotes = value.includes(',') || value.includes('"') || value.includes('\n');
+        const sanitized = value.replace(/"/g, '""');
+        return needsQuotes ? `"${sanitized}"` : sanitized;
+      };
+
+      const lines: string[] = [];
+      lines.push('seccion,clave,valor');
+      Object.entries(payload.stats).forEach(([key, value]) => {
+        lines.push(`stats,${escapeCsv(key)},${escapeCsv(String(value))}`);
+      });
+
+      lines.push('');
+      lines.push('claims_by_type,tipo,cantidad,monto,porcentaje');
+      payload.claimsByType.forEach((item) => {
+        lines.push(
+          `claims_by_type,${escapeCsv(item.type)},${item.count},${item.amount},${item.percentage}`
+        );
+      });
+
+      lines.push('');
+      lines.push('claims_by_month,mes,cantidad,monto');
+      payload.claimsByMonth.forEach((item) => {
+        lines.push(`claims_by_month,${escapeCsv(item.month)},${item.count},${item.amount}`);
+      });
+
+      lines.push('');
+      lines.push('top_properties,direccion,siniestros,monto');
+      payload.topClaimProperties.forEach((item) => {
+        lines.push(`top_properties,${escapeCsv(item.address)},${item.claims},${item.amount}`);
+      });
+
+      const csv = lines.join('\n');
+      return new NextResponse(csv, {
+        headers: {
+          'Content-Type': 'text/csv',
+          'Content-Disposition': 'attachment; filename="seguros_analisis.csv"',
+        },
+      });
+    }
+
+    return NextResponse.json(payload);
   } catch (error) {
     logger.error('[Seguros Analisis] Error al cargar analisis', error);
     return NextResponse.json({ error: 'Error al cargar analisis' }, { status: 500 });

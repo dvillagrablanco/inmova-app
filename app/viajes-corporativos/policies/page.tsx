@@ -90,12 +90,15 @@ interface TravelProvider {
 export default function ViajesCorporativosPoliciesPage() {
   const [politicas, setPoliticas] = useState<TravelPolicy[]>([]);
   const [proveedores, setProveedores] = useState<TravelProvider[]>([]);
-  const [editandoPolitica, setEditandoPolitica] = useState<string | null>(null);
+  const [editandoPolitica, setEditandoPolitica] = useState<TravelPolicy | null>(null);
+  const [editandoProveedor, setEditandoProveedor] = useState<TravelProvider | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isProviderDialogOpen, setIsProviderDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isSavingPolicy, setIsSavingPolicy] = useState(false);
   const [isSavingProvider, setIsSavingProvider] = useState(false);
+  const [deletingPolicyId, setDeletingPolicyId] = useState<string | null>(null);
+  const [deletingProviderId, setDeletingProviderId] = useState<string | null>(null);
   const [newPolicy, setNewPolicy] = useState({
     nombre: '',
     descripcion: '',
@@ -165,9 +168,51 @@ export default function ViajesCorporativosPoliciesPage() {
     }
   };
 
-  const handleGuardarCambios = () => {
-    toast.success('Cambios guardados correctamente');
+  const resetPolicyForm = () => {
+    setNewPolicy({
+      nombre: '',
+      descripcion: '',
+      nivelEmpleado: 'standard',
+      hotelNoche: '',
+      vueloDomestico: '',
+    });
     setEditandoPolitica(null);
+  };
+
+  const handleGuardarCambios = async () => {
+    if (!editandoPolitica) return;
+    try {
+      setIsSavingPolicy(true);
+      const response = await fetch('/api/viajes-corporativos/policies', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editandoPolitica.id,
+          updates: {
+            nombre: newPolicy.nombre,
+            descripcion: newPolicy.descripcion,
+            nivelEmpleado: newPolicy.nivelEmpleado,
+            limites: {
+              hotelNoche: Number(newPolicy.hotelNoche || 0),
+              vueloDomestico: Number(newPolicy.vueloDomestico || 0),
+            },
+          },
+        }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al actualizar política');
+      }
+      const data = (await response.json()) as { data: TravelPolicy };
+      setPoliticas((prev) => prev.map((p) => (p.id === editandoPolitica.id ? data.data : p)));
+      toast.success('Cambios guardados correctamente');
+      setIsDialogOpen(false);
+      resetPolicyForm();
+    } catch (error: any) {
+      toast.error(error.message || 'Error al guardar cambios');
+    } finally {
+      setIsSavingPolicy(false);
+    }
   };
 
   const handleCrearPolitica = async () => {
@@ -198,13 +243,7 @@ export default function ViajesCorporativosPoliciesPage() {
       setPoliticas((prev) => [data.data, ...prev]);
       toast.success('Nueva política creada');
       setIsDialogOpen(false);
-      setNewPolicy({
-        nombre: '',
-        descripcion: '',
-        nivelEmpleado: 'standard',
-        hotelNoche: '',
-        vueloDomestico: '',
-      });
+      resetPolicyForm();
     } catch (error: any) {
       toast.error(error.message || 'Error al crear política');
     } finally {
@@ -220,17 +259,26 @@ export default function ViajesCorporativosPoliciesPage() {
     try {
       setIsSavingProvider(true);
       const response = await fetch('/api/viajes-corporativos/providers', {
-        method: 'POST',
+        method: editandoProveedor ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newProvider),
+        body: JSON.stringify(
+          editandoProveedor ? { id: editandoProveedor.id, updates: newProvider } : newProvider
+        ),
       });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Error al crear proveedor');
       }
       const data = (await response.json()) as { data: TravelProvider };
-      setProveedores((prev) => [data.data, ...prev]);
-      toast.success('Proveedor añadido correctamente');
+      if (editandoProveedor) {
+        setProveedores((prev) =>
+          prev.map((provider) => (provider.id === editandoProveedor.id ? data.data : provider))
+        );
+        toast.success('Proveedor actualizado correctamente');
+      } else {
+        setProveedores((prev) => [data.data, ...prev]);
+        toast.success('Proveedor añadido correctamente');
+      }
       setIsProviderDialogOpen(false);
       setNewProvider({
         nombre: '',
@@ -239,11 +287,76 @@ export default function ViajesCorporativosPoliciesPage() {
         contrato: 'Activo',
         vencimiento: '',
       });
+      setEditandoProveedor(null);
     } catch (error: any) {
       toast.error(error.message || 'Error al crear proveedor');
     } finally {
       setIsSavingProvider(false);
     }
+  };
+
+  const handleEliminarPolitica = async (id: string) => {
+    if (!window.confirm('¿Eliminar esta política?')) return;
+    try {
+      setDeletingPolicyId(id);
+      const response = await fetch(`/api/viajes-corporativos/policies?id=${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al eliminar política');
+      }
+      setPoliticas((prev) => prev.filter((p) => p.id !== id));
+      toast.success('Política eliminada');
+    } catch (error: any) {
+      toast.error(error.message || 'Error al eliminar política');
+    } finally {
+      setDeletingPolicyId(null);
+    }
+  };
+
+  const handleEliminarProveedor = async (id: string) => {
+    if (!window.confirm('¿Eliminar este proveedor?')) return;
+    try {
+      setDeletingProviderId(id);
+      const response = await fetch(`/api/viajes-corporativos/providers?id=${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al eliminar proveedor');
+      }
+      setProveedores((prev) => prev.filter((p) => p.id !== id));
+      toast.success('Proveedor eliminado');
+    } catch (error: any) {
+      toast.error(error.message || 'Error al eliminar proveedor');
+    } finally {
+      setDeletingProviderId(null);
+    }
+  };
+
+  const openEditarPolitica = (policy: TravelPolicy) => {
+    setEditandoPolitica(policy);
+    setNewPolicy({
+      nombre: policy.nombre,
+      descripcion: policy.descripcion,
+      nivelEmpleado: policy.nivelEmpleado,
+      hotelNoche: String(policy.limites?.hotelNoche || ''),
+      vueloDomestico: String(policy.limites?.vueloDomestico || ''),
+    });
+    setIsDialogOpen(true);
+  };
+
+  const openEditarProveedor = (provider: TravelProvider) => {
+    setEditandoProveedor(provider);
+    setNewProvider({
+      nombre: provider.nombre,
+      tipo: provider.tipo,
+      descuento: provider.descuento,
+      contrato: provider.contrato,
+      vencimiento: provider.vencimiento,
+    });
+    setIsProviderDialogOpen(true);
   };
 
   const getNivelBadge = (nivel: string) => {
@@ -260,13 +373,33 @@ export default function ViajesCorporativosPoliciesPage() {
   const getTipoBadge = (tipo: string) => {
     switch (tipo) {
       case 'hotel':
-        return <Badge variant="outline"><Hotel className="h-3 w-3 mr-1" />Hotel</Badge>;
+        return (
+          <Badge variant="outline">
+            <Hotel className="h-3 w-3 mr-1" />
+            Hotel
+          </Badge>
+        );
       case 'aerolinea':
-        return <Badge variant="outline"><Plane className="h-3 w-3 mr-1" />Aerolínea</Badge>;
+        return (
+          <Badge variant="outline">
+            <Plane className="h-3 w-3 mr-1" />
+            Aerolínea
+          </Badge>
+        );
       case 'alquiler':
-        return <Badge variant="outline"><Car className="h-3 w-3 mr-1" />Alquiler</Badge>;
+        return (
+          <Badge variant="outline">
+            <Car className="h-3 w-3 mr-1" />
+            Alquiler
+          </Badge>
+        );
       case 'transporte':
-        return <Badge variant="outline"><Car className="h-3 w-3 mr-1" />Transporte</Badge>;
+        return (
+          <Badge variant="outline">
+            <Car className="h-3 w-3 mr-1" />
+            Transporte
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{tipo}</Badge>;
     }
@@ -277,18 +410,30 @@ export default function ViajesCorporativosPoliciesPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold">Políticas de Viaje</h1>
-          <p className="text-muted-foreground">Configuración de políticas corporativas y límites de gasto</p>
+          <p className="text-muted-foreground">
+            Configuración de políticas corporativas y límites de gasto
+          </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog
+          open={isDialogOpen}
+          onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) {
+              resetPolicyForm();
+            }
+          }}
+        >
           <DialogTrigger asChild>
-            <Button disabled={loading || isSavingPolicy}>
+            <Button disabled={loading || isSavingPolicy} onClick={() => resetPolicyForm()}>
               <Plus className="h-4 w-4 mr-2" />
               Nueva Política
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Crear Nueva Política</DialogTitle>
+              <DialogTitle>
+                {editandoPolitica ? 'Editar Política' : 'Crear Nueva Política'}
+              </DialogTitle>
               <DialogDescription>
                 Define los límites y restricciones para un grupo de empleados
               </DialogDescription>
@@ -316,7 +461,9 @@ export default function ViajesCorporativosPoliciesPage() {
                 <Label>Nivel de empleado</Label>
                 <Select
                   value={newPolicy.nivelEmpleado}
-                  onValueChange={(value) => setNewPolicy((prev) => ({ ...prev, nivelEmpleado: value }))}
+                  onValueChange={(value) =>
+                    setNewPolicy((prev) => ({ ...prev, nivelEmpleado: value }))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecciona nivel" />
@@ -355,11 +502,27 @@ export default function ViajesCorporativosPoliciesPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isSavingPolicy}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsDialogOpen(false);
+                  resetPolicyForm();
+                }}
+                disabled={isSavingPolicy}
+              >
                 Cancelar
               </Button>
-              <Button onClick={handleCrearPolitica} disabled={isSavingPolicy}>
-                {isSavingPolicy ? 'Creando...' : 'Crear Política'}
+              <Button
+                onClick={editandoPolitica ? handleGuardarCambios : handleCrearPolitica}
+                disabled={isSavingPolicy}
+              >
+                {isSavingPolicy
+                  ? editandoPolitica
+                    ? 'Guardando...'
+                    : 'Creando...'
+                  : editandoPolitica
+                    ? 'Guardar Cambios'
+                    : 'Crear Política'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -373,7 +536,7 @@ export default function ViajesCorporativosPoliciesPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Políticas Activas</p>
-                <p className="text-2xl font-bold">{politicas.filter(p => p.activa).length}</p>
+                <p className="text-2xl font-bold">{politicas.filter((p) => p.activa).length}</p>
               </div>
               <Shield className="h-8 w-8 text-green-500 opacity-80" />
             </div>
@@ -414,7 +577,11 @@ export default function ViajesCorporativosPoliciesPage() {
         <CardContent>
           <Accordion type="single" collapsible className="space-y-4">
             {politicas.map((politica) => (
-              <AccordionItem key={politica.id} value={politica.id} className="border rounded-lg px-4">
+              <AccordionItem
+                key={politica.id}
+                value={politica.id}
+                className="border rounded-lg px-4"
+              >
                 <AccordionTrigger className="hover:no-underline">
                   <div className="flex items-center gap-4 w-full">
                     <div className="flex-1 text-left">
@@ -454,7 +621,9 @@ export default function ViajesCorporativosPoliciesPage() {
                         </div>
                         <div className="p-3 bg-muted rounded-lg">
                           <p className="text-sm text-muted-foreground">Vuelo intercontinental</p>
-                          <p className="text-lg font-bold">{politica.limites.vueloIntercontinental}€</p>
+                          <p className="text-lg font-bold">
+                            {politica.limites.vueloIntercontinental}€
+                          </p>
                         </div>
                         <div className="p-3 bg-muted rounded-lg">
                           <p className="text-sm text-muted-foreground">Dieta diaria</p>
@@ -476,7 +645,9 @@ export default function ViajesCorporativosPoliciesPage() {
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <p className="text-muted-foreground">Clase de vuelo</p>
-                          <p className="font-medium capitalize">{politica.restricciones.claseVuelo}</p>
+                          <p className="font-medium capitalize">
+                            {politica.restricciones.claseVuelo}
+                          </p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Categoría hotel</p>
@@ -484,13 +655,17 @@ export default function ViajesCorporativosPoliciesPage() {
                         </div>
                         <div>
                           <p className="text-muted-foreground">Anticipación mínima</p>
-                          <p className="font-medium">{politica.restricciones.anticipacionReserva} días</p>
+                          <p className="font-medium">
+                            {politica.restricciones.anticipacionReserva} días
+                          </p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Aprobación requerida</p>
                           <p className="font-medium">
                             {politica.restricciones.aprobacionRequerida ? (
-                              <span className="text-yellow-600">Sí - {politica.restricciones.nivelAprobacion}</span>
+                              <span className="text-yellow-600">
+                                Sí - {politica.restricciones.nivelAprobacion}
+                              </span>
                             ) : (
                               <span className="text-green-600">No requerida</span>
                             )}
@@ -507,7 +682,9 @@ export default function ViajesCorporativosPoliciesPage() {
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {politica.proveedoresAutorizados.map((prov, idx) => (
-                          <Badge key={idx} variant="outline">{prov}</Badge>
+                          <Badge key={idx} variant="outline">
+                            {prov}
+                          </Badge>
                         ))}
                       </div>
                     </div>
@@ -517,7 +694,9 @@ export default function ViajesCorporativosPoliciesPage() {
                       <div className="p-3 bg-yellow-50 rounded-lg">
                         <p className="text-sm flex items-start gap-2">
                           <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
-                          <span><strong>Excepciones:</strong> {politica.excepciones}</span>
+                          <span>
+                            <strong>Excepciones:</strong> {politica.excepciones}
+                          </span>
                         </p>
                       </div>
                     )}
@@ -532,18 +711,29 @@ export default function ViajesCorporativosPoliciesPage() {
                         <Label className="text-sm">Política activa</Label>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openEditarPolitica(politica)}
+                        >
                           <Edit className="h-4 w-4 mr-1" />
                           Editar
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-red-600">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600"
+                          onClick={() => handleEliminarPolitica(politica.id)}
+                          disabled={deletingPolicyId === politica.id}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
 
                     <p className="text-xs text-muted-foreground">
-                      Última modificación: {new Date(politica.ultimaModificacion).toLocaleDateString('es-ES')}
+                      Última modificación:{' '}
+                      {new Date(politica.ultimaModificacion).toLocaleDateString('es-ES')}
                     </p>
                   </div>
                 </AccordionContent>
@@ -564,7 +754,21 @@ export default function ViajesCorporativosPoliciesPage() {
               </CardTitle>
               <CardDescription>Acuerdos corporativos vigentes</CardDescription>
             </div>
-            <Button variant="outline" size="sm" onClick={() => setIsProviderDialogOpen(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setEditandoProveedor(null);
+                setNewProvider({
+                  nombre: '',
+                  tipo: 'hotel',
+                  descuento: '',
+                  contrato: 'Activo',
+                  vencimiento: '',
+                });
+                setIsProviderDialogOpen(true);
+              }}
+            >
               <Plus className="h-4 w-4 mr-1" />
               Añadir Proveedor
             </Button>
@@ -589,7 +793,9 @@ export default function ViajesCorporativosPoliciesPage() {
                     <p className="font-medium">{proveedor.nombre}</p>
                     <div className="flex items-center gap-2">
                       {getTipoBadge(proveedor.tipo)}
-                      <Badge className="bg-green-100 text-green-700">{proveedor.descuento} dto.</Badge>
+                      <Badge className="bg-green-100 text-green-700">
+                        {proveedor.descuento} dto.
+                      </Badge>
                     </div>
                   </div>
                 </div>
@@ -604,6 +810,24 @@ export default function ViajesCorporativosPoliciesPage() {
                     <CheckCircle className="h-3 w-3 mr-1" />
                     {proveedor.contrato}
                   </Badge>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEditarProveedor(proveedor)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600"
+                      onClick={() => handleEliminarProveedor(proveedor.id)}
+                      disabled={deletingProviderId === proveedor.id}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -611,10 +835,25 @@ export default function ViajesCorporativosPoliciesPage() {
         </CardContent>
       </Card>
 
-      <Dialog open={isProviderDialogOpen} onOpenChange={setIsProviderDialogOpen}>
+      <Dialog
+        open={isProviderDialogOpen}
+        onOpenChange={(open) => {
+          setIsProviderDialogOpen(open);
+          if (!open) {
+            setNewProvider({
+              nombre: '',
+              tipo: 'hotel',
+              descuento: '',
+              contrato: 'Activo',
+              vencimiento: '',
+            });
+            setEditandoProveedor(null);
+          }
+        }}
+      >
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Nuevo Proveedor</DialogTitle>
+            <DialogTitle>{editandoProveedor ? 'Editar Proveedor' : 'Nuevo Proveedor'}</DialogTitle>
             <DialogDescription>Agrega un proveedor autorizado</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-4">
@@ -648,7 +887,9 @@ export default function ViajesCorporativosPoliciesPage() {
                 <Label>Descuento</Label>
                 <Input
                   value={newProvider.descuento}
-                  onChange={(e) => setNewProvider((prev) => ({ ...prev, descuento: e.target.value }))}
+                  onChange={(e) =>
+                    setNewProvider((prev) => ({ ...prev, descuento: e.target.value }))
+                  }
                   placeholder="10%"
                 />
               </div>
@@ -673,7 +914,11 @@ export default function ViajesCorporativosPoliciesPage() {
               Cancelar
             </Button>
             <Button onClick={handleCrearProveedor} disabled={isSavingProvider}>
-              {isSavingProvider ? 'Guardando...' : 'Guardar'}
+              {isSavingProvider
+                ? 'Guardando...'
+                : editandoProveedor
+                  ? 'Guardar Cambios'
+                  : 'Guardar'}
             </Button>
           </DialogFooter>
         </DialogContent>

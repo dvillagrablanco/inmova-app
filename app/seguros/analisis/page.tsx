@@ -80,11 +80,18 @@ export default function InsuranceAnalysisPage() {
   };
 
   const exportReport = () => {
-    toast.success('Generando reporte... Se descargará en breve');
-    // TODO: Generate and download PDF/Excel report
+    const url = `/api/seguros/analisis?period=${period}&format=csv`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `seguros_analisis_${period}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    toast.success('Reporte generado');
   };
 
-  const maxClaimAmount = claimsByMonth.length > 0 ? Math.max(...claimsByMonth.map((m) => m.amount)) : 0;
+  const maxClaimAmount =
+    claimsByMonth.length > 0 ? Math.max(...claimsByMonth.map((m) => m.amount)) : 0;
 
   return (
     <AuthenticatedLayout>
@@ -216,9 +223,12 @@ export default function InsuranceAnalysisPage() {
                       <div className="h-8 bg-gray-200 rounded overflow-hidden">
                         <div
                           className="h-full bg-green-600 transition-all flex items-center justify-end pr-2"
-                        style={{
-                          width: maxClaimAmount > 0 ? `${(item.amount / maxClaimAmount) * 100}%` : '0%',
-                        }}
+                          style={{
+                            width:
+                              maxClaimAmount > 0
+                                ? `${(item.amount / maxClaimAmount) * 100}%`
+                                : '0%',
+                          }}
                         >
                           {item.amount > 0 && (
                             <span className="text-xs text-white font-medium">
