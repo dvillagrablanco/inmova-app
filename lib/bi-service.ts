@@ -6,11 +6,7 @@ import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
  */
 
 // Calcular métricas de ocupación por periodo
-export async function calculateOccupancyMetrics(
-  companyId: string,
-  startDate: Date,
-  endDate: Date
-) {
+export async function calculateOccupancyMetrics(companyId: string, startDate: Date, endDate: Date) {
   const units = await prisma.unit.findMany({
     where: {
       building: { companyId },
@@ -40,36 +36,32 @@ export async function calculateOccupancyMetrics(
 }
 
 // Análisis de tendencias de ingresos
-export async function analyzeRevenueTrends(
-  companyId: string,
-  months: number = 6
-) {
-  const trends: Array<{ periodo: string; totalRevenue: number; paymentsCount: number }> = [];
+export async function analyzeRevenueTrends(companyId: string, months: number = 6) {
   const now = new Date();
 
-  for (let i = months - 1; i >= 0; i--) {
+  const queries = Array.from({ length: months }, (_, idx) => {
+    const i = months - 1 - idx;
     const date = subMonths(now, i);
     const start = startOfMonth(date);
     const end = endOfMonth(date);
     const periodo = format(date, 'yyyy-MM');
 
-    const payments = await prisma.payment.findMany({
-      where: {
-        contract: { tenant: { companyId } },
-        fechaPago: { gte: start, lte: end },
-        estado: 'pagado',
-      },
-    });
+    return prisma.payment
+      .findMany({
+        where: {
+          contract: { tenant: { companyId } },
+          fechaPago: { gte: start, lte: end },
+          estado: 'pagado',
+        },
+      })
+      .then((payments) => ({
+        periodo,
+        totalRevenue: parseFloat(payments.reduce((sum, p) => sum + p.monto, 0).toFixed(2)),
+        paymentsCount: payments.length,
+      }));
+  });
 
-    const totalRevenue = payments.reduce((sum, p) => sum + p.monto, 0);
-
-    trends.push({
-      periodo,
-      totalRevenue: parseFloat(totalRevenue.toFixed(2)),
-      paymentsCount: payments.length,
-    });
-  }
-
+  const trends = await Promise.all(queries);
   return trends;
 }
 
@@ -100,9 +92,9 @@ export async function segmentTenantsByBehavior(companyId: string) {
 
     for (const contract of tenant.contracts) {
       totalPayments += contract.payments.length;
-      latePayments += contract.payments.filter(p => p.estado === 'atrasado').length;
+      latePayments += contract.payments.filter((p) => p.estado === 'atrasado').length;
       onTimePayments += contract.payments.filter(
-        p => p.estado === 'pagado' && p.fechaPago && p.fechaPago <= p.fechaVencimiento
+        (p) => p.estado === 'pagado' && p.fechaPago && p.fechaPago <= p.fechaVencimiento
       ).length;
     }
 
@@ -149,17 +141,17 @@ export async function benchmarkProperties(companyId: string) {
     },
   });
 
-  const benchmarks = buildings.map(building => {
+  const benchmarks = buildings.map((building) => {
     const totalUnits = building.units.length;
-    const occupiedUnits = building.units.filter(u => u.estado === 'ocupada').length;
+    const occupiedUnits = building.units.filter((u) => u.estado === 'ocupada').length;
     const occupancyRate = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
 
     let totalRevenue = 0;
     let totalPayments = 0;
 
-    building.units.forEach(unit => {
-      unit.contracts.forEach(contract => {
-        contract.payments.forEach(payment => {
+    building.units.forEach((unit) => {
+      unit.contracts.forEach((contract) => {
+        contract.payments.forEach((payment) => {
           totalRevenue += payment.monto;
           totalPayments++;
         });
@@ -195,11 +187,7 @@ export async function checkIntelligentAlerts(companyId: string) {
   }> = [];
 
   // Alerta: Tasa de ocupación baja
-  const occupancy = await calculateOccupancyMetrics(
-    companyId,
-    new Date(),
-    new Date()
-  );
+  const occupancy = await calculateOccupancyMetrics(companyId, new Date(), new Date());
   if (occupancy.occupancyRate < 70) {
     alerts.push({
       metrica: 'occupancy_rate',
@@ -262,10 +250,10 @@ export async function compareMultiPeriod(
   metric: 'revenue' | 'occupancy' | 'payments',
   periods: number = 3
 ) {
-  const comparisons: Array<{ periodo: string; value: number; variation?: number }> = [];
   const now = new Date();
 
-  for (let i = periods - 1; i >= 0; i--) {
+  const queries = Array.from({ length: periods }, async (_, idx) => {
+    const i = periods - 1 - idx;
     const date = subMonths(now, i);
     const start = startOfMonth(date);
     const end = endOfMonth(date);
@@ -295,11 +283,13 @@ export async function compareMultiPeriod(
       });
     }
 
-    comparisons.push({
+    return {
       periodo,
       value: parseFloat(value.toFixed(2)),
-    });
-  }
+    };
+  });
+
+  const comparisons = await Promise.all(queries);
 
   // Calcular variaciones
   const result = comparisons.map((item, i) => {
