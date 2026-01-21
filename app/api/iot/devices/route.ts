@@ -42,58 +42,79 @@ export async function GET(request: NextRequest) {
     const buildingId = searchParams.get('buildingId');
     const status = searchParams.get('status');
 
-    // Intentar obtener dispositivos reales de la BD
-    // Nota: Si no existe el modelo IoTDevice, retornamos array vacío
-    let devices: any[] = [];
+    const where: {
+      companyId: string;
+      tipo?: string;
+      buildingId?: string;
+      estado?: string;
+    } = {
+      companyId: session.user.companyId,
+    };
 
-    try {
-      // Verificar si existe el modelo en Prisma
-      if ((prisma as any).ioTDevice) {
-        const where: any = {
-          companyId: session.user.companyId,
-        };
+    if (type) where.tipo = type;
+    if (buildingId) where.buildingId = buildingId;
+    if (status) where.estado = status;
 
-        if (type) where.type = type;
-        if (buildingId) where.buildingId = buildingId;
-        if (status) where.status = status;
+    const devices = await prisma.ioTDevice.findMany({
+      where,
+      include: {
+        building: {
+          select: { id: true, nombre: true },
+        },
+        unit: {
+          select: { id: true, numero: true },
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
 
-        devices = await (prisma as any).ioTDevice.findMany({
-          where,
-          include: {
-            building: {
-              select: { id: true, nombre: true },
-            },
-            unit: {
-              select: { id: true, numero: true },
-            },
-          },
-          orderBy: { updatedAt: 'desc' },
+    const deviceIds = devices.map((device) => device.id);
+    const readings = deviceIds.length
+      ? await prisma.ioTReading.findMany({
+          where: { deviceId: { in: deviceIds } },
+          orderBy: { timestamp: 'desc' },
+        })
+      : [];
+
+    const readingMap = new Map<string, { valor: number; unidad: string; timestamp: Date }>();
+    readings.forEach((reading) => {
+      if (!readingMap.has(reading.deviceId)) {
+        readingMap.set(reading.deviceId, {
+          valor: reading.valor,
+          unidad: reading.unidad,
+          timestamp: reading.timestamp,
         });
       }
-    } catch (dbError) {
-      // El modelo puede no existir, continuar con array vacío
-      logger.warn('IoTDevice model not available:', dbError);
-    }
+    });
 
     // Transformar al formato esperado por el frontend
-    const formattedDevices = devices.map((device: any) => ({
-      id: device.id,
-      name: device.name,
-      type: device.type,
-      status: device.status || 'online',
-      location: device.location || '',
-      buildingId: device.buildingId,
-      buildingName: device.building?.nombre || '',
-      unitId: device.unitId,
-      unitName: device.unit?.numero ? `Unidad ${device.unit.numero}` : undefined,
-      battery: device.batteryLevel,
-      lastUpdate: device.updatedAt?.toISOString() || new Date().toISOString(),
-      currentValue: device.lastReading,
-      unit: device.readingUnit,
-      brand: device.brand,
-      model: device.model,
-      serialNumber: device.serialNumber,
-    }));
+    const formattedDevices = devices.map((device) => {
+      const reading = readingMap.get(device.id);
+      const statusValue = device.conectado
+        ? device.estado === 'warning' || device.estado === 'alerta'
+          ? 'warning'
+          : 'online'
+        : 'offline';
+
+      return {
+        id: device.id,
+        name: device.nombre,
+        type: device.tipo,
+        status: statusValue,
+        location: device.ubicacion || '',
+        buildingId: device.buildingId,
+        buildingName: device.building?.nombre || '',
+        unitId: device.unitId,
+        unitName: device.unit?.numero ? `Unidad ${device.unit.numero}` : undefined,
+        battery: device.bateria ?? undefined,
+        lastUpdate: (reading?.timestamp || device.updatedAt).toISOString(),
+        currentValue: reading?.valor,
+        unit: reading?.unidad,
+        brand: device.marca,
+        model: device.modelo,
+        serialNumber: device.numeroSerie,
+      };
+    });
 
     // Calcular estadísticas
     const stats = {
@@ -123,50 +144,32 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = createDeviceSchema.parse(body);
 
-    // Intentar crear en BD si el modelo existe
-    let device: any = null;
+    const device = await prisma.ioTDevice.create({
+      data: {
+        companyId: session.user.companyId,
+        nombre: validatedData.name,
+        tipo: validatedData.type,
+        marca: validatedData.brand || null,
+        modelo: validatedData.model || null,
+        numeroSerie: validatedData.serialNumber || null,
+        buildingId: validatedData.buildingId || null,
+        unitId: validatedData.unitId || null,
+        ubicacion: validatedData.location || null,
+        configuracion: validatedData.metadata || {},
+        estado: 'activo',
+        conectado: true,
+      },
+      include: {
+        building: {
+          select: { id: true, nombre: true },
+        },
+        unit: {
+          select: { id: true, numero: true },
+        },
+      },
+    });
 
-    try {
-      if ((prisma as any).ioTDevice) {
-        device = await (prisma as any).ioTDevice.create({
-          data: {
-            companyId: session.user.companyId,
-            name: validatedData.name,
-            type: validatedData.type,
-            brand: validatedData.brand,
-            model: validatedData.model,
-            serialNumber: validatedData.serialNumber,
-            buildingId: validatedData.buildingId || null,
-            unitId: validatedData.unitId || null,
-            location: validatedData.location,
-            ipAddress: validatedData.ipAddress,
-            macAddress: validatedData.macAddress,
-            firmwareVersion: validatedData.firmwareVersion,
-            metadata: validatedData.metadata || {},
-            status: 'online',
-          },
-          include: {
-            building: {
-              select: { id: true, nombre: true },
-            },
-            unit: {
-              select: { id: true, numero: true },
-            },
-          },
-        });
-      }
-    } catch (dbError) {
-      logger.warn('IoTDevice model not available for creation:', dbError);
-      // Simular respuesta exitosa
-      device = {
-        id: `temp_${Date.now()}`,
-        ...validatedData,
-        status: 'online',
-        createdAt: new Date(),
-      };
-    }
-
-    logger.info('IoT device created:', { deviceId: device?.id, userId: session.user.id });
+    logger.info('IoT device created:', { deviceId: device.id, userId: session.user.id });
 
     return NextResponse.json(device, { status: 201 });
   } catch (error: any) {

@@ -97,6 +97,17 @@ interface Alert {
   resolved: boolean;
 }
 
+interface TemperaturePoint {
+  time: string;
+  temp: number;
+  target: number;
+}
+
+interface EnergyPoint {
+  day: string;
+  consumption: number;
+}
+
 export default function IoTPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -104,6 +115,9 @@ export default function IoTPage() {
   const [devices, setDevices] = useState<IoTDevice[]>([]);
   const [automations, setAutomations] = useState<Automation[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [temperatureData, setTemperatureData] = useState<TemperaturePoint[]>([]);
+  const [energyData, setEnergyData] = useState<EnergyPoint[]>([]);
+  const [energySavings, setEnergySavings] = useState(0);
   const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -129,63 +143,67 @@ export default function IoTPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      
-      // Cargar dispositivos reales desde la API
-      const response = await fetch('/api/iot/devices');
-      
-      if (response.ok) {
-        const data = await response.json();
-        
-        if (data.devices && data.devices.length > 0) {
-          setDevices(data.devices);
-          
-          // Generar alertas basadas en dispositivos
-          const generatedAlerts: Alert[] = [];
-          data.devices.forEach((device: IoTDevice) => {
-            if (device.battery !== undefined && device.battery < 20) {
-              generatedAlerts.push({
-                id: `al_${device.id}_battery`,
-                type: 'warning',
-                message: `Batería baja en ${device.name}`,
-                deviceId: device.id,
-                deviceName: device.name,
-                timestamp: new Date().toISOString(),
-                resolved: false,
-              });
-            }
-            if (device.status === 'offline') {
-              generatedAlerts.push({
-                id: `al_${device.id}_offline`,
-                type: 'error',
-                message: 'Dispositivo sin conexión',
-                deviceId: device.id,
-                deviceName: device.name,
-                timestamp: device.lastUpdate,
-                resolved: false,
-              });
-            }
-          });
-          setAlerts(generatedAlerts);
-        } else {
-          // No hay dispositivos, mostrar estado vacío
-          setDevices([]);
-          setAlerts([]);
-        }
-      } else {
+      const [devicesResponse, automationsResponse, metricsResponse] = await Promise.all([
+        fetch('/api/iot/devices'),
+        fetch('/api/iot/automations'),
+        fetch('/api/iot/metrics'),
+      ]);
+
+      if (!devicesResponse.ok) {
         throw new Error('Error al cargar dispositivos');
       }
-      
-      // Cargar automatizaciones (si hay API)
-      try {
-        const autoResponse = await fetch('/api/iot/automations');
-        if (autoResponse.ok) {
-          const autoData = await autoResponse.json();
-          setAutomations(autoData.automations || []);
-        } else {
-          setAutomations([]);
-        }
-      } catch {
+
+      const devicesData = await devicesResponse.json();
+      if (devicesData.devices && devicesData.devices.length > 0) {
+        setDevices(devicesData.devices);
+
+        const generatedAlerts: Alert[] = [];
+        devicesData.devices.forEach((device: IoTDevice) => {
+          if (device.battery !== undefined && device.battery < 20) {
+            generatedAlerts.push({
+              id: `al_${device.id}_battery`,
+              type: 'warning',
+              message: `Batería baja en ${device.name}`,
+              deviceId: device.id,
+              deviceName: device.name,
+              timestamp: new Date().toISOString(),
+              resolved: false,
+            });
+          }
+          if (device.status === 'offline') {
+            generatedAlerts.push({
+              id: `al_${device.id}_offline`,
+              type: 'error',
+              message: 'Dispositivo sin conexión',
+              deviceId: device.id,
+              deviceName: device.name,
+              timestamp: device.lastUpdate,
+              resolved: false,
+            });
+          }
+        });
+        setAlerts(generatedAlerts);
+      } else {
+        setDevices([]);
+        setAlerts([]);
+      }
+
+      if (automationsResponse.ok) {
+        const autoData = await automationsResponse.json();
+        setAutomations(autoData.automations || []);
+      } else {
         setAutomations([]);
+      }
+
+      if (metricsResponse.ok) {
+        const metricsData = await metricsResponse.json();
+        setTemperatureData(metricsData.temperatureSeries || []);
+        setEnergyData(metricsData.energySeries || []);
+        setEnergySavings(metricsData.energySavings || 0);
+      } else {
+        setTemperatureData([]);
+        setEnergyData([]);
+        setEnergySavings(0);
       }
     } catch (error) {
       console.error('Error loading IoT data:', error);
@@ -193,6 +211,9 @@ export default function IoTPage() {
       setDevices([]);
       setAutomations([]);
       setAlerts([]);
+      setTemperatureData([]);
+      setEnergyData([]);
+      setEnergySavings(0);
     } finally {
       setLoading(false);
     }
@@ -310,17 +331,9 @@ export default function IoTPage() {
     return `Hace ${Math.floor(diff / 86400)}d`;
   };
 
-  // Mock data para gráficos
-  const temperatureData = Array.from({ length: 24 }, (_, i) => ({
-    time: `${i}:00`,
-    temp: 18 + Math.random() * 6,
-    target: 21,
-  }));
-
-  const energyData = Array.from({ length: 7 }, (_, i) => ({
-    day: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'][i],
-    consumption: 15 + Math.random() * 10,
-  }));
+  const hasEnergyData = energyData.some((item) => item.consumption > 0);
+  const onlineDevices = devices.filter((d) => d.status === 'online').length;
+  const uptimePercentage = devices.length > 0 ? Math.round((onlineDevices / devices.length) * 100) : 0;
 
   if (status === 'unauthenticated') {
     router.push('/login');
@@ -365,12 +378,12 @@ export default function IoTPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold">
-                    {devices.filter((d) => d.status === 'online').length} / {devices.length}
+                    {onlineDevices} / {devices.length}
                   </div>
                   <div className="flex items-center gap-1 mt-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
                     <span className="text-xs text-green-600">
-                      {Math.round((devices.filter((d) => d.status === 'online').length / devices.length) * 100)}% uptime
+                      {uptimePercentage}% uptime
                     </span>
                   </div>
                 </CardContent>
@@ -407,10 +420,12 @@ export default function IoTPage() {
                   <CardTitle className="text-sm font-medium">Ahorro Energético</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-green-600">15%</div>
+                  <div className="text-3xl font-bold text-green-600">{energySavings}%</div>
                   <div className="flex items-center gap-1 mt-2">
                     <TrendingDown className="h-3 w-3 text-green-600" />
-                    <span className="text-xs text-green-600">vs mes anterior</span>
+                    <span className="text-xs text-green-600">
+                      {hasEnergyData ? 'vs semana anterior' : 'sin datos recientes'}
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -560,31 +575,35 @@ export default function IoTPage() {
                       <CardTitle>Temperatura - Últimas 24h</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <AreaChart data={temperatureData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="time" />
-                          <YAxis />
-                          <Tooltip />
-                          <Legend />
-                          <Area
-                            type="monotone"
-                            dataKey="temp"
-                            stroke="#3B82F6"
-                            fill="#3B82F6"
-                            fillOpacity={0.3}
-                            name="Temperatura Real (°C)"
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="target"
-                            stroke="#10B981"
-                            fill="#10B981"
-                            fillOpacity={0.1}
-                            name="Objetivo (°C)"
-                          />
-                        </AreaChart>
-                      </ResponsiveContainer>
+                      {temperatureData.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">Sin datos de temperatura.</p>
+                      ) : (
+                        <ResponsiveContainer width="100%" height={300}>
+                          <AreaChart data={temperatureData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="time" />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Area
+                              type="monotone"
+                              dataKey="temp"
+                              stroke="#3B82F6"
+                              fill="#3B82F6"
+                              fillOpacity={0.3}
+                              name="Temperatura Real (°C)"
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="target"
+                              stroke="#10B981"
+                              fill="#10B981"
+                              fillOpacity={0.1}
+                              name="Objetivo (°C)"
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      )}
                     </CardContent>
                   </Card>
 
@@ -593,22 +612,26 @@ export default function IoTPage() {
                       <CardTitle>Consumo Energético Semanal</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={energyData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="day" />
-                          <YAxis />
-                          <Tooltip />
-                          <Legend />
-                          <Line
-                            type="monotone"
-                            dataKey="consumption"
-                            stroke="#F59E0B"
-                            strokeWidth={2}
-                            name="kWh"
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
+                      {!hasEnergyData ? (
+                        <p className="text-sm text-muted-foreground">Sin datos de consumo.</p>
+                      ) : (
+                        <ResponsiveContainer width="100%" height={300}>
+                          <LineChart data={energyData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="day" />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Line
+                              type="monotone"
+                              dataKey="consumption"
+                              stroke="#F59E0B"
+                              strokeWidth={2}
+                              name="kWh"
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
