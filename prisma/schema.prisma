@@ -452,6 +452,7 @@ model User {
   // Sistema de Notificaciones Avanzado - Fase 2
   notificationLogs         NotificationLog[]
   userNotificationSettings UserNotificationSettings?
+  notificationCampaignsCreated NotificationCampaign[] @relation("NotificationCampaignCreatedBy")
 
   // Soporte e interacciones de ayuda
   supportInteractions SupportInteraction[]
@@ -480,6 +481,7 @@ model User {
   // Nuevas funcionalidades IA (Valoración, Firma Digital)
   propertyValuations PropertyValuation[] @relation("UserPropertyValuations")
   contractSignatures ContractSignature[] @relation("UserContractSignatures")
+  budgetsCreated     Budget[]            @relation("BudgetCreatedBy")
 
   // Partner Program
   partnerAccount Partner?
@@ -543,6 +545,7 @@ model Building {
   energyReadings       EnergyReading[]
   energyAlerts         EnergyAlert[]
   insurancePolicies    InsurancePolicy[]
+  roomRentalProperties RoomRentalProperty[]
 
   // Prioridades Medias
   valoraciones  ValoracionPropiedad[]
@@ -790,6 +793,7 @@ model Unit {
   // Fase 2
   insurances         Insurance[]
   energyCertificates EnergyCertificate[]
+  budgets            Budget[] @relation("BudgetUnit")
 
   // Fase 3
   communityIncidents CommunityIncident[]
@@ -814,6 +818,7 @@ model Unit {
   // Room Rental Module
   rooms            Room[]
   roomSharedSpaces RoomSharedSpace[]
+  roomRentalProperty RoomRentalProperty? @relation("RoomRentalPropertyUnit")
 
   // Gestión de Comunidades
   communityFees            CommunityFee[]
@@ -1922,6 +1927,7 @@ model Company {
   tasks         Task[]
   auditLogs     AuditLog[]
   notifications Notification[]
+  notificationCampaigns NotificationCampaign[] @relation("CompanyNotificationCampaigns")
 
   // Prioridades Medias
   valoraciones  ValoracionPropiedad[]
@@ -1940,6 +1946,7 @@ model Company {
   spaceReservations  SpaceReservation[]
   insurances         Insurance[]
   energyCertificates EnergyCertificate[]
+  budgets            Budget[] @relation("CompanyBudgets")
 
   // Fase 3
   communityIncidents     CommunityIncident[]
@@ -2017,6 +2024,7 @@ model Company {
   strChannelSyncs      STRChannelSync[]       @relation
   flippingProjects     FlippingProject[]      @relation
   constructionProjects ConstructionProject[]  @relation
+  constructionPermits  ConstructionPermit[]
 
   // Partner Program (comentado - usar sistema Partner B2B existente en línea 1285+)
   // referrals            Referral[]
@@ -2034,6 +2042,7 @@ model Company {
   roomContracts    RoomContract[]
   roomPayments     RoomPayment[]
   roomSharedSpaces RoomSharedSpace[]
+  roomRentalProperties RoomRentalProperty[]
 
   // Multi-empresa
   userAccess UserCompanyAccess[]
@@ -8869,7 +8878,7 @@ model RoomRentalProperty {
 
   company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   building Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
-  unit     Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unit     Unit     @relation("RoomRentalPropertyUnit", fields: [unitId], references: [id], onDelete: Cascade)
 
   @@unique([unitId])
   @@index([companyId])
@@ -8913,9 +8922,9 @@ model Budget {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  unidad  Unit?   @relation(fields: [unidadId], references: [id], onDelete: SetNull)
-  creador User?   @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  company Company @relation("CompanyBudgets", fields: [companyId], references: [id], onDelete: Cascade)
+  unidad  Unit?   @relation("BudgetUnit", fields: [unidadId], references: [id], onDelete: SetNull)
+  creador User?   @relation("BudgetCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
   items   BudgetItem[]
 
   @@index([companyId])
@@ -10401,8 +10410,8 @@ model NotificationCampaign {
   createdAt      DateTime                   @default(now())
   updatedAt      DateTime                   @updatedAt
 
-  company       Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  createdByUser User    @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  company       Company @relation("CompanyNotificationCampaigns", fields: [companyId], references: [id], onDelete: Cascade)
+  createdByUser User    @relation("NotificationCampaignCreatedBy", fields: [createdBy], references: [id], onDelete: Cascade)
 
   @@index([companyId])
   @@index([status])

@@ -21,8 +21,10 @@
  * 3. Usar access_token en header Authorization: Bearer {token}
  */
 
-import axios, { AxiosInstance } from 'axios';
-import logger, { logError } from '@/lib/logger';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import logger from '@/lib/logger';
+import { z } from 'zod';
+import { executeWithCircuitBreaker } from '@/lib/integrations/circuit-breaker';
 
 /**
  * TIPOS DE DATOS CONTASIMPLE
@@ -122,9 +124,17 @@ export class ContaSimpleIntegrationService {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
+      timeout: 15000,
     });
 
     logger.info('✅ ContaSimple Integration Service: Inicializado correctamente');
+  }
+
+  private async request<T>(config: AxiosRequestConfig, circuitKey: string): Promise<T> {
+    return executeWithCircuitBreaker(circuitKey, async () => {
+      const response = await this.axiosInstance.request<T>(config);
+      return response.data as T;
+    });
   }
 
   /**
@@ -141,21 +151,34 @@ export class ContaSimpleIntegrationService {
       formData.append('grant_type', 'authentication_key');
       formData.append('key', this.config.authKey);
 
-      const response = await axios.post(
-        `${this.config.apiUrl}/oauth/token`,
-        formData.toString(),
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        }
-      );
+      const tokenSchema = z.object({
+        access_token: z.string(),
+        token_type: z.string().optional(),
+        expires_in: z.number().optional(),
+        created_at: z.number().optional(),
+      });
+
+      const data = await executeWithCircuitBreaker('contasimple:auth', async () => {
+        const response = await axios.post(
+          `${this.config.apiUrl}/oauth/token`,
+          formData.toString(),
+          {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            timeout: 15000,
+          }
+        );
+        return response.data;
+      });
+
+      const parsed = tokenSchema.parse(data);
 
       this.tokens = {
-        access_token: response.data.access_token,
-        token_type: response.data.token_type || 'Bearer',
-        expires_in: response.data.expires_in || 3600,
-        created_at: response.data.created_at,
+        access_token: parsed.access_token,
+        token_type: parsed.token_type || 'Bearer',
+        expires_in: parsed.expires_in || 3600,
+        created_at: parsed.created_at,
       };
 
       // Establecer la fecha de expiración del token
@@ -197,14 +220,32 @@ export class ContaSimpleIntegrationService {
   async createCustomer(customer: Omit<ContaSimpleCustomer, 'id'>): Promise<ContaSimpleCustomer> {
     const token = await this.ensureValidToken();
     try {
-      const response = await this.axiosInstance.post('/customers', customer, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+      const customerSchema = z.object({
+        id: z.string(),
+        name: z.string(),
+        taxId: z.string(),
+        email: z.string().optional(),
+        phone: z.string().optional(),
+        address: z.any().optional(),
+        customerType: z.enum(['individual', 'business']).optional(),
       });
-      logger.info('✅ ContaSimple: Cliente creado:', response.data.id);
-      return response.data;
+
+      const data = await this.request<z.infer<typeof customerSchema>>(
+        {
+          url: '/customers',
+          method: 'POST',
+          data: customer,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+        'contasimple:customers'
+      );
+
+      const parsed = customerSchema.parse(data);
+      logger.info('✅ ContaSimple: Cliente creado:', parsed.id);
+      return parsed;
     } catch (error: any) {
       logger.error('❌ Error al crear cliente en ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al crear cliente en ContaSimple');
@@ -214,12 +255,28 @@ export class ContaSimpleIntegrationService {
   async getCustomer(customerId: string): Promise<ContaSimpleCustomer> {
     const token = await this.ensureValidToken();
     try {
-      const response = await this.axiosInstance.get(`/customers/${customerId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const customerSchema = z.object({
+        id: z.string(),
+        name: z.string(),
+        taxId: z.string(),
+        email: z.string().optional(),
+        phone: z.string().optional(),
+        address: z.any().optional(),
+        customerType: z.enum(['individual', 'business']).optional(),
       });
-      return response.data;
+
+      const data = await this.request<z.infer<typeof customerSchema>>(
+        {
+          url: `/customers/${customerId}`,
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+        'contasimple:customers'
+      );
+
+      return customerSchema.parse(data);
     } catch (error: any) {
       logger.error('❌ Error al obtener cliente de ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al obtener cliente de ContaSimple');
@@ -229,14 +286,30 @@ export class ContaSimpleIntegrationService {
   async updateCustomer(customerId: string, customer: Partial<ContaSimpleCustomer>): Promise<ContaSimpleCustomer> {
     const token = await this.ensureValidToken();
     try {
-      const response = await this.axiosInstance.put(`/customers/${customerId}`, customer, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+      const customerSchema = z.object({
+        id: z.string(),
+        name: z.string(),
+        taxId: z.string(),
+        email: z.string().optional(),
+        phone: z.string().optional(),
+        address: z.any().optional(),
+        customerType: z.enum(['individual', 'business']).optional(),
       });
+
+      const data = await this.request<z.infer<typeof customerSchema>>(
+        {
+          url: `/customers/${customerId}`,
+          method: 'PUT',
+          data: customer,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+        'contasimple:customers'
+      );
       logger.info('✅ ContaSimple: Cliente actualizado:', customerId);
-      return response.data;
+      return customerSchema.parse(data);
     } catch (error: any) {
       logger.error('❌ Error al actualizar cliente en ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al actualizar cliente en ContaSimple');
@@ -250,14 +323,37 @@ export class ContaSimpleIntegrationService {
   async createInvoice(invoice: Omit<ContaSimpleInvoice, 'id'>): Promise<ContaSimpleInvoice> {
     const token = await this.ensureValidToken();
     try {
-      const response = await this.axiosInstance.post('/invoices', invoice, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+      const invoiceSchema = z.object({
+        id: z.string(),
+        number: z.string(),
+        series: z.string().optional(),
+        date: z.string(),
+        dueDate: z.string(),
+        customerId: z.string(),
+        items: z.array(z.any()),
+        subtotal: z.number(),
+        taxBase: z.number().optional(),
+        iva: z.number().optional(),
+        total: z.number(),
+        status: z.string(),
       });
-      logger.info('✅ ContaSimple: Factura creada:', response.data.number);
-      return response.data;
+
+      const data = await this.request<z.infer<typeof invoiceSchema>>(
+        {
+          url: '/invoices',
+          method: 'POST',
+          data: invoice,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+        'contasimple:invoices'
+      );
+
+      const parsed = invoiceSchema.parse(data);
+      logger.info('✅ ContaSimple: Factura creada:', parsed.number);
+      return parsed as ContaSimpleInvoice;
     } catch (error: any) {
       logger.error('❌ Error al crear factura en ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al crear factura en ContaSimple');
@@ -267,12 +363,33 @@ export class ContaSimpleIntegrationService {
   async getInvoice(invoiceId: string): Promise<ContaSimpleInvoice> {
     const token = await this.ensureValidToken();
     try {
-      const response = await this.axiosInstance.get(`/invoices/${invoiceId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const invoiceSchema = z.object({
+        id: z.string(),
+        number: z.string(),
+        series: z.string().optional(),
+        date: z.string(),
+        dueDate: z.string(),
+        customerId: z.string(),
+        items: z.array(z.any()),
+        subtotal: z.number(),
+        taxBase: z.number().optional(),
+        iva: z.number().optional(),
+        total: z.number(),
+        status: z.string(),
       });
-      return response.data;
+
+      const data = await this.request<z.infer<typeof invoiceSchema>>(
+        {
+          url: `/invoices/${invoiceId}`,
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+        'contasimple:invoices'
+      );
+
+      return invoiceSchema.parse(data) as ContaSimpleInvoice;
     } catch (error: any) {
       logger.error('❌ Error al obtener factura de ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al obtener factura de ContaSimple');
@@ -282,18 +399,20 @@ export class ContaSimpleIntegrationService {
   async sendInvoice(invoiceId: string, recipientEmail: string): Promise<boolean> {
     const token = await this.ensureValidToken();
     try {
-      const response = await this.axiosInstance.post(
-        `/invoices/${invoiceId}/send`,
-        { email: recipientEmail },
+      await this.request(
         {
+          url: `/invoices/${invoiceId}/send`,
+          method: 'POST',
+          data: { email: recipientEmail },
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-        }
+        },
+        'contasimple:invoices'
       );
       logger.info('✅ ContaSimple: Factura enviada a', recipientEmail);
-      return response.status === 200;
+      return true;
     } catch (error: any) {
       logger.error('❌ Error al enviar factura de ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al enviar factura de ContaSimple');
@@ -303,17 +422,19 @@ export class ContaSimpleIntegrationService {
   async cancelInvoice(invoiceId: string): Promise<boolean> {
     const token = await this.ensureValidToken();
     try {
-      const response = await this.axiosInstance.post(
-        `/invoices/${invoiceId}/cancel`,
-        {},
+      await this.request(
         {
+          url: `/invoices/${invoiceId}/cancel`,
+          method: 'POST',
+          data: {},
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
+        'contasimple:invoices'
       );
       logger.info('✅ ContaSimple: Factura cancelada:', invoiceId);
-      return response.status === 200;
+      return true;
     } catch (error: any) {
       logger.error('❌ Error al cancelar factura de ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al cancelar factura de ContaSimple');
@@ -327,14 +448,31 @@ export class ContaSimpleIntegrationService {
   async registerPayment(payment: Omit<ContaSimplePayment, 'id'>): Promise<ContaSimplePayment> {
     const token = await this.ensureValidToken();
     try {
-      const response = await this.axiosInstance.post('/payments', payment, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+      const paymentSchema = z.object({
+        id: z.string(),
+        invoiceId: z.string(),
+        date: z.string(),
+        amount: z.number(),
+        method: z.string(),
+        reference: z.string().optional(),
       });
-      logger.info('✅ ContaSimple: Pago registrado:', response.data.amount);
-      return response.data;
+
+      const data = await this.request<z.infer<typeof paymentSchema>>(
+        {
+          url: '/payments',
+          method: 'POST',
+          data: payment,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+        'contasimple:payments'
+      );
+
+      const parsed = paymentSchema.parse(data);
+      logger.info('✅ ContaSimple: Pago registrado:', parsed.amount);
+      return parsed as ContaSimplePayment;
     } catch (error: any) {
       logger.error('❌ Error al registrar pago en ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al registrar pago en ContaSimple');
@@ -348,14 +486,33 @@ export class ContaSimpleIntegrationService {
   async createExpense(expense: Omit<ContaSimpleExpense, 'id'>): Promise<ContaSimpleExpense> {
     const token = await this.ensureValidToken();
     try {
-      const response = await this.axiosInstance.post('/expenses', expense, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+      const expenseSchema = z.object({
+        id: z.string(),
+        date: z.string(),
+        description: z.string(),
+        amount: z.number(),
+        category: z.string(),
+        supplierId: z.string().optional(),
+        taxDeductible: z.boolean().optional(),
+        receiptUrl: z.string().optional(),
       });
-      logger.info('✅ ContaSimple: Gasto registrado:', response.data.amount);
-      return response.data;
+
+      const data = await this.request<z.infer<typeof expenseSchema>>(
+        {
+          url: '/expenses',
+          method: 'POST',
+          data: expense,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+        'contasimple:expenses'
+      );
+
+      const parsed = expenseSchema.parse(data);
+      logger.info('✅ ContaSimple: Gasto registrado:', parsed.amount);
+      return parsed as ContaSimpleExpense;
     } catch (error: any) {
       logger.error('❌ Error al crear gasto en ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al crear gasto en ContaSimple');

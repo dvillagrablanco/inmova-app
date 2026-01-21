@@ -12,6 +12,15 @@
 import { prisma } from './db';
 import logger from './logger';
 import crypto from 'crypto';
+import { z } from 'zod';
+import { fetchJson } from '@/lib/integrations/http-client';
+import {
+  createSignature as createSignaturitSignature,
+  getSignature as getSignaturitSignature,
+  cancelSignature as cancelSignaturitSignature,
+  downloadSignedDocument as downloadSignaturitDocument,
+  SignatureType,
+} from './signaturit-service';
 
 // ============================================================================
 // TIPOS
@@ -97,26 +106,42 @@ class SignaturitProvider implements ISignatureProvider {
   
   async createSignatureRequest(request: SignatureRequest) {
     try {
-      // Simulated implementation - En producción, usar SDK oficial
       logger.info('📝 Creating signature request with Signaturit', {
         contractId: request.contractId,
         signatories: request.signatories.length,
       });
-      
-      // Mock de respuesta para desarrollo
-      // En producción:
-      // const signaturit = require('@signaturit/signaturit-sdk');
-      // const client = new signaturit.Client(this.apiKey);
-      // const result = await client.createSignature({ ... });
-      
-      const externalId = `sig_${crypto.randomBytes(16).toString('hex')}`;
-      const signingUrl = `https://app.signaturit.com/sign/${externalId}`;
+
+      if (!this.apiKey) {
+        throw new Error('SIGNATURIT_API_KEY no configurada');
+      }
+
+      const pdfResponse = await fetch(request.documentUrl);
+      if (!pdfResponse.ok) {
+        throw new Error('No se pudo descargar el documento para firmar');
+      }
+      const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
+
+      const signers = request.signatories.map((signer) => ({
+        email: signer.email,
+        name: signer.name,
+        phone: signer.phone,
+      }));
+
+      const signature = await createSignaturitSignature(pdfBuffer, request.documentName, signers, {
+        type: SignatureType.SIMPLE,
+        subject: request.emailSubject,
+        body: request.emailMessage,
+        expireDays: request.expiresInDays || 7,
+        deliveryType: 'url',
+      });
+
+      const signingUrl = signature.signers?.[0]?.signUrl;
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + (request.expiresInDays || 7));
-      
+
       return {
-        externalId,
-        signingUrl,
+        externalId: signature.id,
+        signingUrl: signingUrl || '',
         expiresAt,
       };
     } catch (error) {
@@ -127,10 +152,26 @@ class SignaturitProvider implements ISignatureProvider {
   
   async getSignatureStatus(externalId: string) {
     try {
-      // Mock - En producción usar SDK
+      const signature = await getSignaturitSignature(externalId);
+      const status = signature?.status || signature?.state || 'ready';
+      const mapStatus = (value: string) => {
+        switch (value) {
+          case 'completed':
+            return 'SIGNED';
+          case 'declined':
+            return 'DECLINED';
+          case 'expired':
+            return 'EXPIRED';
+          case 'canceled':
+            return 'CANCELLED';
+          default:
+            return 'PENDING';
+        }
+      };
+
       return {
-        status: 'PENDING' as const,
-        completedUrl: undefined,
+        status: mapStatus(status),
+        completedUrl: signature?.signers?.[0]?.sign_url,
       };
     } catch (error) {
       logger.error('Error getting Signaturit status:', error);
@@ -141,7 +182,7 @@ class SignaturitProvider implements ISignatureProvider {
   async cancelSignature(externalId: string) {
     try {
       logger.info('❌ Cancelling Signaturit signature:', externalId);
-      // Mock - En producción usar SDK
+      await cancelSignaturitSignature(externalId);
     } catch (error) {
       logger.error('Error cancelling Signaturit signature:', error);
       throw error;
@@ -150,8 +191,12 @@ class SignaturitProvider implements ISignatureProvider {
   
   async downloadSignedDocument(externalId: string): Promise<Buffer> {
     try {
-      // Mock - En producción usar SDK para descargar documento firmado
-      return Buffer.from('Mock signed document');
+      const signature = await getSignaturitSignature(externalId);
+      const documentId = signature?.documents?.[0]?.id;
+      if (!documentId) {
+        throw new Error('No se encontró documento firmado');
+      }
+      return await downloadSignaturitDocument(externalId, documentId);
     } catch (error) {
       logger.error('Error downloading signed document:', error);
       throw error;
@@ -166,13 +211,16 @@ class SignaturitProvider implements ISignatureProvider {
 class DocuSignProvider implements ISignatureProvider {
   private apiKey: string;
   private accountId: string;
-  private baseUrl: string = 'https://demo.docusign.net/restapi';
+  private baseUrl: string;
+  private accessToken: string;
   
   constructor() {
     this.apiKey = process.env.DOCUSIGN_INTEGRATION_KEY || '';
     this.accountId = process.env.DOCUSIGN_ACCOUNT_ID || '';
+    this.accessToken = process.env.DOCUSIGN_ACCESS_TOKEN || '';
+    this.baseUrl = process.env.DOCUSIGN_BASE_PATH || 'https://demo.docusign.net/restapi';
     
-    if (!this.apiKey || !this.accountId) {
+    if (!this.apiKey || !this.accountId || !this.accessToken) {
       logger.warn('DocuSign not fully configured');
     }
   }
@@ -184,19 +232,84 @@ class DocuSignProvider implements ISignatureProvider {
         signatories: request.signatories.length,
       });
       
-      // Mock - En producción usar SDK oficial de DocuSign
-      // const docusign = require('docusign-esign');
-      // const apiClient = new docusign.ApiClient();
-      // ...
-      
-      const externalId = `env_${crypto.randomBytes(16).toString('hex')}`;
-      const signingUrl = `https://demo.docusign.net/Signing/${externalId}`;
+      if (!this.accountId || !this.accessToken) {
+        throw new Error('DOCUSIGN_ACCESS_TOKEN no configurado');
+      }
+
+      const pdfResponse = await fetch(request.documentUrl);
+      if (!pdfResponse.ok) {
+        throw new Error('No se pudo descargar el documento para firmar');
+      }
+      const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
+
+      const envelopeBody = {
+        emailSubject: request.emailSubject || 'Firma de documento',
+        documents: [
+          {
+            documentBase64: pdfBuffer.toString('base64'),
+            name: request.documentName,
+            fileExtension: 'pdf',
+            documentId: '1',
+          },
+        ],
+        recipients: {
+          signers: request.signatories.map((signer, index) => ({
+            email: signer.email,
+            name: signer.name,
+            recipientId: String(index + 1),
+            routingOrder: String(index + 1),
+          })),
+        },
+        status: 'sent',
+      };
+
+      const { data: envelope } = await fetchJson<{ envelopeId: string }>(
+        `${this.baseUrl}/v2.1/accounts/${this.accountId}/envelopes`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+          },
+          body: envelopeBody,
+          timeoutMs: 20_000,
+          circuitKey: 'docusign-envelope',
+        }
+      );
+
+      const envelopeSchema = z.object({ envelopeId: z.string() });
+      const parsedEnvelope = envelopeSchema.parse(envelope);
+
+      const firstSigner = request.signatories[0];
+      const viewBody = {
+        returnUrl: process.env.DOCUSIGN_RETURN_URL || request.documentUrl,
+        authenticationMethod: 'none',
+        email: firstSigner.email,
+        userName: firstSigner.name,
+        recipientId: '1',
+      };
+
+      const { data: view } = await fetchJson<{ url: string }>(
+        `${this.baseUrl}/v2.1/accounts/${this.accountId}/envelopes/${parsedEnvelope.envelopeId}/views/recipient`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+          },
+          body: viewBody,
+          timeoutMs: 20_000,
+          circuitKey: 'docusign-view',
+        }
+      );
+
+      const viewSchema = z.object({ url: z.string() });
+      const parsedView = viewSchema.parse(view);
+
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + (request.expiresInDays || 7));
       
       return {
-        externalId,
-        signingUrl,
+        externalId: parsedEnvelope.envelopeId,
+        signingUrl: parsedView.url,
         expiresAt,
       };
     } catch (error) {
@@ -207,8 +320,39 @@ class DocuSignProvider implements ISignatureProvider {
   
   async getSignatureStatus(externalId: string) {
     try {
+      if (!this.accountId || !this.accessToken) {
+        throw new Error('DOCUSIGN_ACCESS_TOKEN no configurado');
+      }
+
+      const { data } = await fetchJson<{ status: string }>(
+        `${this.baseUrl}/v2.1/accounts/${this.accountId}/envelopes/${externalId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+          },
+          timeoutMs: 15_000,
+          circuitKey: 'docusign-status',
+        }
+      );
+
+      const status = data.status?.toLowerCase();
+      const mapStatus = (value?: string) => {
+        switch (value) {
+          case 'completed':
+            return 'SIGNED';
+          case 'declined':
+            return 'DECLINED';
+          case 'voided':
+            return 'CANCELLED';
+          case 'expired':
+            return 'EXPIRED';
+          default:
+            return 'PENDING';
+        }
+      };
+
       return {
-        status: 'PENDING' as const,
+        status: mapStatus(status),
         completedUrl: undefined,
       };
     } catch (error) {
@@ -220,6 +364,21 @@ class DocuSignProvider implements ISignatureProvider {
   async cancelSignature(externalId: string) {
     try {
       logger.info('❌ Cancelling DocuSign envelope:', externalId);
+      if (!this.accountId || !this.accessToken) {
+        throw new Error('DOCUSIGN_ACCESS_TOKEN no configurado');
+      }
+      await fetchJson(
+        `${this.baseUrl}/v2.1/accounts/${this.accountId}/envelopes/${externalId}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+          },
+          body: { status: 'voided', voidedReason: 'Cancelado por el usuario' },
+          timeoutMs: 15_000,
+          circuitKey: 'docusign-cancel',
+        }
+      );
     } catch (error) {
       logger.error('Error cancelling DocuSign envelope:', error);
       throw error;
@@ -228,7 +387,22 @@ class DocuSignProvider implements ISignatureProvider {
   
   async downloadSignedDocument(externalId: string): Promise<Buffer> {
     try {
-      return Buffer.from('Mock signed document');
+      if (!this.accountId || !this.accessToken) {
+        throw new Error('DOCUSIGN_ACCESS_TOKEN no configurado');
+      }
+      const response = await fetch(
+        `${this.baseUrl}/v2.1/accounts/${this.accountId}/envelopes/${externalId}/documents/combined`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`DocuSign download error: ${errorText}`);
+      }
+      return Buffer.from(await response.arrayBuffer());
     } catch (error) {
       logger.error('Error downloading signed document:', error);
       throw error;
@@ -241,16 +415,24 @@ class DocuSignProvider implements ISignatureProvider {
 // ============================================================================
 
 class SelfHostedProvider implements ISignatureProvider {
+  private baseUrl: string;
+
+  constructor() {
+    this.baseUrl = process.env.SELF_HOSTED_SIGNATURE_URL || '';
+  }
+
   async createSignatureRequest(request: SignatureRequest) {
     try {
       logger.info('📝 Creating self-hosted signature request', {
         contractId: request.contractId,
       });
-      
-      // Para firma simple auto-hospedada
-      // Generar URL única de firma
+
+      if (!this.baseUrl) {
+        throw new Error('SELF_HOSTED_SIGNATURE_URL no configurado');
+      }
+
       const externalId = crypto.randomBytes(32).toString('hex');
-      const signingUrl = `${process.env.NEXTAUTH_URL}/sign/${externalId}`;
+      const signingUrl = `${this.baseUrl}/sign/${externalId}`;
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + (request.expiresInDays || 7));
       
@@ -266,18 +448,45 @@ class SelfHostedProvider implements ISignatureProvider {
   }
   
   async getSignatureStatus(externalId: string) {
+    if (!this.baseUrl) {
+      throw new Error('SELF_HOSTED_SIGNATURE_URL no configurado');
+    }
+    const { data } = await fetchJson<{ status: string; completedUrl?: string }>(
+      `${this.baseUrl}/status/${externalId}`,
+      {
+        timeoutMs: 10_000,
+        circuitKey: 'self-hosted-signature',
+      }
+    );
+
+    const status = data.status?.toUpperCase();
     return {
-      status: 'PENDING' as const,
-      completedUrl: undefined,
+      status: (status as 'PENDING' | 'SIGNED' | 'DECLINED' | 'EXPIRED' | 'CANCELLED') || 'PENDING',
+      completedUrl: data.completedUrl,
     };
   }
   
   async cancelSignature(externalId: string) {
-    logger.info('❌ Cancelling self-hosted signature:', externalId);
+    if (!this.baseUrl) {
+      throw new Error('SELF_HOSTED_SIGNATURE_URL no configurado');
+    }
+    await fetchJson(`${this.baseUrl}/cancel/${externalId}`, {
+      method: 'POST',
+      timeoutMs: 10_000,
+      circuitKey: 'self-hosted-signature',
+    });
   }
   
   async downloadSignedDocument(externalId: string): Promise<Buffer> {
-    return Buffer.from('Mock signed document');
+    if (!this.baseUrl) {
+      throw new Error('SELF_HOSTED_SIGNATURE_URL no configurado');
+    }
+    const response = await fetch(`${this.baseUrl}/documents/${externalId}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error descargando documento: ${errorText}`);
+    }
+    return Buffer.from(await response.arrayBuffer());
   }
 }
 
@@ -305,12 +514,13 @@ function getProvider(provider: SignatureProvider): ISignatureProvider {
 /**
  * Calcula hash SHA-256 del documento
  */
-function calculateDocumentHash(documentUrl: string): string {
-  // En producción, descargar el archivo y calcular hash real
-  return crypto
-    .createHash('sha256')
-    .update(documentUrl)
-    .digest('hex');
+async function calculateDocumentHash(documentUrl: string): Promise<string> {
+  const response = await fetch(documentUrl);
+  if (!response.ok) {
+    throw new Error('No se pudo descargar el documento para calcular hash');
+  }
+  const buffer = Buffer.from(await response.arrayBuffer());
+  return crypto.createHash('sha256').update(buffer).digest('hex');
 }
 
 /**
@@ -329,7 +539,7 @@ export async function createSignatureRequest(
     });
     
     // 1. Calcular hash del documento
-    const documentHash = calculateDocumentHash(request.documentUrl);
+    const documentHash = await calculateDocumentHash(request.documentUrl);
     
     // 2. Crear solicitud en proveedor externo
     const providerInstance = getProvider(provider);

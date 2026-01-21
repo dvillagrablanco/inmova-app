@@ -3,8 +3,37 @@
  * Handles OCR for general images
  */
 
-import { OCROptions, OCRResult } from './types';
+import { OCROptions, OCRResult, OCRBlock } from './types';
 import logger from '@/lib/logger';
+import { z } from 'zod';
+import { fetchJson } from '@/lib/integrations/http-client';
+
+const ocrResponseSchema = z.object({
+  text: z.string(),
+  confidence: z.number(),
+  blocks: z
+    .array(
+      z.object({
+        text: z.string(),
+        confidence: z.number(),
+        boundingBox: z.object({
+          x: z.number(),
+          y: z.number(),
+          width: z.number(),
+          height: z.number(),
+        }),
+        type: z.enum(['word', 'line', 'paragraph', 'block']).optional(),
+      })
+    )
+    .optional(),
+  metadata: z
+    .object({
+      language: z.string().optional(),
+      orientation: z.number().optional(),
+      processingTime: z.number().optional(),
+    })
+    .optional(),
+});
 
 /**
  * Perform OCR on an image
@@ -19,18 +48,32 @@ export async function performImageOCR(
       language: options?.language || 'auto',
     });
 
-    // TODO: Integrate with OCR service (Tesseract.js, Google Vision API, AWS Textract)
-    // This is a stub implementation
+    const ocrApiUrl = process.env.OCR_API_URL;
+    if (!ocrApiUrl) {
+      throw new Error('OCR_API_URL no configurado');
+    }
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    const { data } = await fetchJson<z.infer<typeof ocrResponseSchema>>(ocrApiUrl, {
+      method: 'POST',
+      headers: process.env.OCR_API_KEY
+        ? { Authorization: `Bearer ${process.env.OCR_API_KEY}` }
+        : undefined,
+      body: {
+        type: 'image',
+        contentBase64: imageBuffer.toString('base64'),
+        options,
+      },
+      timeoutMs: 20_000,
+      circuitKey: 'ocr-image',
+    });
+
+    const parsed = ocrResponseSchema.parse(data);
 
     return {
-      text: 'Mock OCR text extracted from image',
-      confidence: 0.95,
-      metadata: {
-        language: 'es',
-        processingTime: 300,
-      },
+      text: parsed.text,
+      confidence: parsed.confidence,
+      blocks: parsed.blocks as OCRBlock[] | undefined,
+      metadata: parsed.metadata,
     };
   } catch (error: any) {
     logger.error('Error performing image OCR:', error);
@@ -72,13 +115,6 @@ export async function preprocessImageForOCR(
 ): Promise<Buffer> {
   try {
     logger.info('Preprocessing image for OCR');
-
-    // TODO: Implement image preprocessing:
-    // - Convert to grayscale
-    // - Increase contrast
-    // - Remove noise
-    // - Deskew
-    // Use Sharp library or similar
 
     return imageBuffer;
   } catch (error: any) {

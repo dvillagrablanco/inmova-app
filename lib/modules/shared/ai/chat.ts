@@ -5,6 +5,13 @@
 
 import { AIMessage, AIConversation, AIChatOptions, AIChatResponse } from './types';
 import logger from '@/lib/logger';
+import Anthropic from '@anthropic-ai/sdk';
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY || '',
+});
+
+const DEFAULT_MODEL = 'claude-3-5-sonnet-20241022';
 
 /**
  * Send a chat message and get AI response
@@ -20,17 +27,44 @@ export async function sendChatMessage(
       model: options?.model || 'default',
     });
 
-    // TODO: Integrate with AI service (OpenAI, Anthropic, Abacus.AI)
-    // This is a stub implementation
+    if (!process.env.ANTHROPIC_API_KEY) {
+      throw new Error('ANTHROPIC_API_KEY no configurada');
+    }
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    const systemPrompt =
+      options?.systemPrompt ||
+      conversation?.messages.find((msg) => msg.role === 'system')?.content;
+
+    const messages: Anthropic.Messages.MessageParam[] = [
+      ...(conversation?.messages || [])
+        .filter((msg) => msg.role !== 'system')
+        .map((msg) => ({
+          role: msg.role as 'user' | 'assistant',
+          content: msg.content,
+        })),
+      { role: 'user', content: message },
+    ];
+
+    const response = await anthropic.messages.create({
+      model: options?.model || DEFAULT_MODEL,
+      max_tokens: options?.maxTokens || 1024,
+      temperature: options?.temperature ?? 0.2,
+      system: systemPrompt,
+      messages,
+    });
+
+    const content = response.content[0]?.type === 'text' ? response.content[0].text : '';
 
     return {
-      message: 'Mock AI response to: ' + message.substring(0, 50),
+      message: content,
       usage: {
-        promptTokens: 10,
-        completionTokens: 20,
-        totalTokens: 30,
+        promptTokens: response.usage?.input_tokens || 0,
+        completionTokens: response.usage?.output_tokens || 0,
+        totalTokens: (response.usage?.input_tokens || 0) + (response.usage?.output_tokens || 0),
+      },
+      metadata: {
+        model: response.model,
+        stopReason: response.stop_reason,
       },
     };
   } catch (error: any) {
@@ -91,9 +125,24 @@ export async function summarizeConversation(
       messageCount: conversation.messages.length,
     });
 
-    // TODO: Use AI to generate summary
-    
-    return 'Conversation summary';
+    if (!process.env.ANTHROPIC_API_KEY) {
+      const recent = conversation.messages.slice(-5).map((msg) => `${msg.role}: ${msg.content}`);
+      return recent.join(' | ').slice(0, 500);
+    }
+
+    const summaryPrompt = `Resume brevemente la conversación en 3-5 frases:\n\n${conversation.messages
+      .map((msg) => `${msg.role}: ${msg.content}`)
+      .join('\n')}`;
+
+    const response = await anthropic.messages.create({
+      model: DEFAULT_MODEL,
+      max_tokens: 300,
+      temperature: 0.2,
+      messages: [{ role: 'user', content: summaryPrompt }],
+    });
+
+    const content = response.content[0]?.type === 'text' ? response.content[0].text : '';
+    return content.trim();
   } catch (error: any) {
     logger.error('Error summarizing conversation:', error);
     return '';
