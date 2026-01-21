@@ -14,7 +14,6 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  Users,
   Shield,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -24,9 +23,9 @@ interface Permit {
   name: string;
   type: string;
   status: 'pending' | 'submitted' | 'approved' | 'rejected';
-  deadline: string;
-  issuer: string;
-  cost: number;
+  deadline?: string | null;
+  issuer?: string | null;
+  cost?: number | null;
   required: boolean;
 }
 
@@ -44,12 +43,21 @@ interface ConstructionPhase {
   milestones: string[];
 }
 
+interface GanttSummary {
+  projectId: string;
+  name: string;
+  address: string;
+  units: number | null;
+  buildingName: string | null;
+}
+
 export default function ConstructionGanttPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [permits, setPermits] = useState<Permit[]>([]);
   const [phases, setPhases] = useState<ConstructionPhase[]>([]);
+  const [summary, setSummary] = useState<GanttSummary | null>(null);
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -60,142 +68,19 @@ export default function ConstructionGanttPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      
-      // Mock data - TODO: Cargar desde API
-      setPermits([
-        {
-          id: 'p1',
-          name: 'Licencia de Obra Mayor',
-          type: 'Construcción',
-          status: 'approved',
-          deadline: '2025-02-15',
-          issuer: 'Ayuntamiento',
-          cost: 8500,
-          required: true,
-        },
-        {
-          id: 'p2',
-          name: 'Proyecto Técnico Visado',
-          type: 'Técnico',
-          status: 'approved',
-          deadline: '2025-01-30',
-          issuer: 'Colegio de Arquitectos',
-          cost: 3200,
-          required: true,
-        },
-        {
-          id: 'p3',
-          name: 'Estudio Geotécnico',
-          type: 'Técnico',
-          status: 'submitted',
-          deadline: '2025-02-10',
-          issuer: 'Laboratorio Acreditado',
-          cost: 2500,
-          required: true,
-        },
-        {
-          id: 'p4',
-          name: 'Certificado Eficiencia Energética',
-          type: 'Sostenibilidad',
-          status: 'pending',
-          deadline: '2025-06-30',
-          issuer: 'Técnico Certificador',
-          cost: 800,
-          required: true,
-        },
-        {
-          id: 'p5',
-          name: 'Certificación BREEAM',
-          type: 'Sostenibilidad',
-          status: 'pending',
-          deadline: '2025-08-15',
-          issuer: 'BRE Global',
-          cost: 15000,
-          required: false,
-        },
-      ]);
-
-      setPhases([
-        {
-          id: 'ph1',
-          name: 'Cimentación',
-          description: 'Excavación, saneamiento y cimentación',
-          startDate: '2025-03-01',
-          endDate: '2025-04-15',
-          duration: 45,
-          progress: 0,
-          status: 'not_started',
-          budget: 125000,
-          spent: 0,
-          milestones: ['Excavación completada', 'Cimentación hormigonada', 'Muros contención'],
-        },
-        {
-          id: 'ph2',
-          name: 'Estructura',
-          description: 'Pilares, forjados y cubierta',
-          startDate: '2025-04-16',
-          endDate: '2025-07-15',
-          duration: 90,
-          progress: 0,
-          status: 'not_started',
-          budget: 280000,
-          spent: 0,
-          milestones: ['Planta baja', 'Planta primera', 'Planta segunda', 'Cubierta'],
-        },
-        {
-          id: 'ph3',
-          name: 'Cerramientos',
-          description: 'Fachadas, carpintería exterior',
-          startDate: '2025-07-16',
-          endDate: '2025-09-30',
-          duration: 76,
-          progress: 0,
-          status: 'not_started',
-          budget: 180000,
-          spent: 0,
-          milestones: ['Fachada principal', 'Fachada posterior', 'Carpintería'],
-        },
-        {
-          id: 'ph4',
-          name: 'Instalaciones',
-          description: 'Electricidad, fontanería, climatización',
-          startDate: '2025-08-01',
-          endDate: '2025-11-15',
-          duration: 106,
-          progress: 0,
-          status: 'not_started',
-          budget: 220000,
-          spent: 0,
-          milestones: ['Electricidad', 'Fontanería', 'Climatización', 'Telecomunicaciones'],
-        },
-        {
-          id: 'ph5',
-          name: 'Acabados',
-          description: 'Alicatados, pavimentos, pintura',
-          startDate: '2025-10-01',
-          endDate: '2025-12-31',
-          duration: 91,
-          progress: 0,
-          status: 'not_started',
-          budget: 150000,
-          spent: 0,
-          milestones: ['Alicatados', 'Pavimentos', 'Pintura', 'Carpintería interior'],
-        },
-        {
-          id: 'ph6',
-          name: 'Urbanización',
-          description: 'Exteriores, jardines, accesos',
-          startDate: '2025-12-01',
-          endDate: '2026-01-31',
-          duration: 61,
-          progress: 0,
-          status: 'not_started',
-          budget: 85000,
-          spent: 0,
-          milestones: ['Pavimentación', 'Jardines', 'Iluminación exterior'],
-        },
-      ]);
-      
+      const response = await fetch('/api/construction/gantt');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al cargar datos');
+      }
+      const data = (await response.json()) as {
+        summary: GanttSummary | null;
+        permits: Permit[];
+        phases: ConstructionPhase[];
+      };
+      setSummary(data.summary);
+      setPermits(data.permits || []);
+      setPhases(data.phases || []);
     } catch (error) {
       toast.error('Error al cargar datos');
     } finally {
@@ -238,6 +123,7 @@ export default function ConstructionGanttPage() {
   };
 
   const formatDate = (dateStr: string) => {
+    if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('es-ES', {
       day: 'numeric',
       month: 'long',
@@ -250,6 +136,9 @@ export default function ConstructionGanttPage() {
   const overallProgress = phases.length > 0
     ? Math.round(phases.reduce((sum, p) => sum + p.progress, 0) / phases.length)
     : 0;
+  const budgetExecution = totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0;
+  const pendingPermits = permits.filter((permit) => permit.status !== 'approved');
+  const requiredPermits = permits.filter((permit) => permit.required);
 
   if (status === 'unauthenticated') {
     router.push('/login');
@@ -275,7 +164,11 @@ export default function ConstructionGanttPage() {
               <div>
                 <h1 className="text-3xl font-bold">Gestión de Obra y Permisos</h1>
                 <p className="text-muted-foreground mt-2">
-                  Edificio Residencial - 24 viviendas - C/ Príncipe 123
+                  {summary
+                    ? `${summary.buildingName || summary.name}${
+                        summary.units ? ` - ${summary.units} viviendas` : ''
+                      }${summary.address ? ` - ${summary.address}` : ''}`
+                    : 'Sin proyectos activos'}
                 </p>
               </div>
               <Button onClick={() => router.push('/construction')}>
@@ -307,7 +200,7 @@ export default function ConstructionGanttPage() {
                 <CardContent>
                   <div className="text-2xl font-bold">{formatCurrency(totalBudget)}</div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {formatCurrency(totalSpent)} ejecutado ({Math.round((totalSpent / totalBudget) * 100)}%)
+                    {formatCurrency(totalSpent)} ejecutado ({budgetExecution}%)
                   </p>
                 </CardContent>
               </Card>
@@ -346,61 +239,70 @@ export default function ConstructionGanttPage() {
                     Checklist de Permisos y Licencias
                   </CardTitle>
                   <Badge variant="outline">
-                    {permits.filter((p) => p.status === 'approved').length} de {permits.filter((p) => p.required).length} obligatorios
+                    {permits.filter((p) => p.status === 'approved').length} de {requiredPermits.length} obligatorios
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {permits.map((permit) => (
-                    <div
-                      key={permit.id}
-                      className={`flex items-start gap-4 p-4 border rounded-lg ${
-                        permit.status === 'rejected' ? 'border-red-300 bg-red-50' :
-                        permit.status === 'approved' ? 'border-green-300 bg-green-50' :
-                        'border-gray-200'
-                      }`}
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-semibold">{permit.name}</h4>
-                          {permit.required && (
-                            <Badge variant="destructive" className="text-xs">
-                              Obligatorio
-                            </Badge>
-                          )}
+                  {permits.length === 0 ? (
+                    <div className="text-sm text-muted-foreground">No hay permisos cargados.</div>
+                  ) : (
+                    permits.map((permit) => (
+                      <div
+                        key={permit.id}
+                        className={`flex items-start gap-4 p-4 border rounded-lg ${
+                          permit.status === 'rejected' ? 'border-red-300 bg-red-50' :
+                          permit.status === 'approved' ? 'border-green-300 bg-green-50' :
+                          'border-gray-200'
+                        }`}
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-semibold">{permit.name}</h4>
+                            {permit.required && (
+                              <Badge variant="destructive" className="text-xs">
+                                Obligatorio
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-muted-foreground">
+                            <div>
+                              <span className="font-medium">Tipo:</span> {permit.type}
+                            </div>
+                            <div>
+                              <span className="font-medium">Emisor:</span> {permit.issuer || '-'}
+                            </div>
+                            <div>
+                              <span className="font-medium">Plazo:</span> {formatDate(permit.deadline || '')}
+                            </div>
+                            <div>
+                              <span className="font-medium">Coste:</span>{' '}
+                              {permit.cost !== null && permit.cost !== undefined
+                                ? formatCurrency(permit.cost)
+                                : '-'}
+                            </div>
+                          </div>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-muted-foreground">
-                          <div>
-                            <span className="font-medium">Tipo:</span> {permit.type}
-                          </div>
-                          <div>
-                            <span className="font-medium">Emisor:</span> {permit.issuer}
-                          </div>
-                          <div>
-                            <span className="font-medium">Plazo:</span> {formatDate(permit.deadline)}
-                          </div>
-                          <div>
-                            <span className="font-medium">Coste:</span> {formatCurrency(permit.cost)}
-                          </div>
-                        </div>
+                        {getPermitStatusBadge(permit.status)}
                       </div>
-                      {getPermitStatusBadge(permit.status)}
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
 
-                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="flex gap-2">
-                    <FileCheck className="h-5 w-5 text-blue-600 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium text-blue-900">Documentación Pendiente</p>
-                      <p className="text-sm text-blue-700 mt-1">
-                        Recuerda solicitar el Certificado de Eficiencia Energética antes del plazo límite
-                      </p>
+                {pendingPermits.length > 0 && (
+                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex gap-2">
+                      <FileCheck className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-blue-900">Documentación Pendiente</p>
+                        <p className="text-sm text-blue-700 mt-1">
+                          Hay permisos pendientes de aprobación o tramitación.
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
@@ -414,66 +316,74 @@ export default function ConstructionGanttPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {phases.map((phase) => (
-                    <div key={phase.id} className="border rounded-lg p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-1">
-                            <h4 className="font-semibold text-lg">{phase.name}</h4>
-                            {getPhaseStatusBadge(phase.status)}
+                  {phases.length === 0 ? (
+                    <div className="text-sm text-muted-foreground">No hay fases registradas.</div>
+                  ) : (
+                    phases.map((phase) => {
+                      const phaseExecution =
+                        phase.budget > 0 ? Math.round((phase.spent / phase.budget) * 100) : 0;
+                      return (
+                        <div key={phase.id} className="border rounded-lg p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-1">
+                                <h4 className="font-semibold text-lg">{phase.name}</h4>
+                                {getPhaseStatusBadge(phase.status)}
+                              </div>
+                              <p className="text-sm text-muted-foreground">{phase.description}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold">{phase.progress}%</p>
+                              <p className="text-xs text-muted-foreground">{phase.duration} días</p>
+                            </div>
                           </div>
-                          <p className="text-sm text-muted-foreground">{phase.description}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold">{phase.progress}%</p>
-                          <p className="text-xs text-muted-foreground">{phase.duration} días</p>
-                        </div>
-                      </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
-                        <div>
-                          <p className="text-xs text-muted-foreground">Periodo</p>
-                          <p className="text-sm font-medium">
-                            {formatDate(phase.startDate)} - {formatDate(phase.endDate)}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Presupuesto</p>
-                          <p className="text-sm font-medium">{formatCurrency(phase.budget)}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Ejecutado</p>
-                          <p className="text-sm font-medium">
-                            {formatCurrency(phase.spent)} ({Math.round((phase.spent / phase.budget) * 100)}%)
-                          </p>
-                        </div>
-                      </div>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                            <div>
+                              <p className="text-xs text-muted-foreground">Periodo</p>
+                              <p className="text-sm font-medium">
+                                {formatDate(phase.startDate)} - {formatDate(phase.endDate)}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Presupuesto</p>
+                              <p className="text-sm font-medium">{formatCurrency(phase.budget)}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Ejecutado</p>
+                              <p className="text-sm font-medium">
+                                {formatCurrency(phase.spent)} ({phaseExecution}%)
+                              </p>
+                            </div>
+                          </div>
 
-                      <div className="mb-3">
-                        <div className="flex justify-between text-xs mb-1">
-                          <span className="text-muted-foreground">Progreso</span>
-                          <span className="font-medium">{phase.progress}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-blue-500 h-2 rounded-full transition-all"
-                            style={{ width: `${phase.progress}%` }}
-                          />
-                        </div>
-                      </div>
+                          <div className="mb-3">
+                            <div className="flex justify-between text-xs mb-1">
+                              <span className="text-muted-foreground">Progreso</span>
+                              <span className="font-medium">{phase.progress}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div
+                                className="bg-blue-500 h-2 rounded-full transition-all"
+                                style={{ width: `${phase.progress}%` }}
+                              />
+                            </div>
+                          </div>
 
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground mb-2">Hitos:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {phase.milestones.map((milestone, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs">
-                              {milestone}
-                            </Badge>
-                          ))}
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-2">Hitos:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {phase.milestones.map((milestone, idx) => (
+                                <Badge key={idx} variant="outline" className="text-xs">
+                                  {milestone}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  ))}
+                      );
+                    })
+                  )}
                 </div>
               </CardContent>
             </Card>

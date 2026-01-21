@@ -5648,6 +5648,13 @@ enum ConstructionPhase {
   GARANTIA
 }
 
+enum ConstructionPermitStatus {
+  pending
+  submitted
+  approved
+  rejected
+}
+
 enum ProjectType {
   PROYECTO_BASICO
   PROYECTO_EJECUCION
@@ -8389,8 +8396,35 @@ model ConstructionProject {
   workOrders  ConstructionWorkOrder[]
   inspections ConstructionInspection[]
   suppliers   ConstructionSupplier[]
+  permits     ConstructionPermit[]
 
   @@map("construction_projects")
+}
+
+model ConstructionPermit {
+  id        String                  @id @default(cuid())
+  companyId String
+  projectId String
+
+  nombre    String
+  tipo      String
+  estado    ConstructionPermitStatus @default(pending)
+  requerido Boolean                  @default(true)
+  fechaLimite DateTime?
+  emisor     String?
+  costo      Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  project ConstructionProject  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([projectId])
+  @@index([estado])
+  @@index([fechaLimite])
+  @@map("construction_permits")
 }
 
 model ConstructionWorkOrder {
