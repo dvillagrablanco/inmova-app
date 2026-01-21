@@ -70,6 +70,7 @@ import {
   TrendingUp,
   AlertCircle,
   RefreshCw,
+  Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -94,17 +95,14 @@ interface Budget {
   propiedad?: { id: string; direccion: string };
   cliente?: { id: string; nombre: string };
   proveedor?: { id: string; nombre: string };
-  fechaCreacion: Date;
-  fechaValidez: Date;
+  fechaCreacion: string;
+  fechaValidez: string;
   items: BudgetItem[];
   subtotal: number;
   iva: number;
   total: number;
   notas?: string;
 }
-
-// Mock data - en producción vendría de la API
-const mockBudgets: Budget[] = [];
 
 export default function PresupuestosPage() {
   const { data: session, status } = useSession();
@@ -116,6 +114,7 @@ export default function PresupuestosPage() {
   const [filterTipo, setFilterTipo] = useState<string>('todos');
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
 
   // Form state for new budget
   const [newBudget, setNewBudget] = useState({
@@ -235,41 +234,52 @@ export default function PresupuestosPage() {
       return;
     }
 
-    const { subtotal, ivaAmount, total } = calculateTotals();
-    
-    const budget: Budget = {
-      id: Date.now().toString(),
-      numero: `PRES-${new Date().getFullYear()}-${String(budgets.length + 1).padStart(4, '0')}`,
-      titulo: newBudget.titulo,
-      descripcion: newBudget.descripcion,
-      tipo: newBudget.tipo,
-      estado: 'borrador',
-      fechaCreacion: new Date(),
-      fechaValidez: new Date(Date.now() + parseInt(newBudget.validezDias) * 24 * 60 * 60 * 1000),
-      items: newBudget.items,
-      subtotal,
-      iva: ivaAmount,
-      total,
-      notas: newBudget.notas,
-      cliente: newBudget.clienteNombre ? { id: '1', nombre: newBudget.clienteNombre } : undefined,
-      proveedor: newBudget.proveedorNombre ? { id: '1', nombre: newBudget.proveedorNombre } : undefined,
-    };
+    try {
+      setIsCreating(true);
+      const response = await fetch('/api/budgets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          titulo: newBudget.titulo,
+          descripcion: newBudget.descripcion,
+          tipo: newBudget.tipo,
+          propiedadId: newBudget.propiedadId,
+          clienteNombre: newBudget.clienteNombre,
+          proveedorNombre: newBudget.proveedorNombre,
+          validezDias: newBudget.validezDias,
+          items: newBudget.items,
+          notas: newBudget.notas,
+          ivaRate: newBudget.ivaRate,
+        }),
+      });
 
-    setBudgets(prev => [budget, ...prev]);
-    setShowNewDialog(false);
-    setNewBudget({
-      titulo: '',
-      descripcion: '',
-      tipo: 'mantenimiento',
-      propiedadId: '',
-      clienteNombre: '',
-      proveedorNombre: '',
-      validezDias: '30',
-      items: [],
-      notas: '',
-      ivaRate: '21',
-    });
-    toast.success('Presupuesto creado correctamente');
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast.error(errorData.error || 'Error al crear presupuesto');
+        return;
+      }
+
+      const budget = (await response.json()) as Budget;
+      setBudgets(prev => [budget, ...prev]);
+      setShowNewDialog(false);
+      setNewBudget({
+        titulo: '',
+        descripcion: '',
+        tipo: 'mantenimiento',
+        propiedadId: '',
+        clienteNombre: '',
+        proveedorNombre: '',
+        validezDias: '30',
+        items: [],
+        notas: '',
+        ivaRate: '21',
+      });
+      toast.success('Presupuesto creado correctamente');
+    } catch (error) {
+      toast.error('Error al crear presupuesto');
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const getEstadoBadge = (estado: Budget['estado']) => {
@@ -591,12 +601,21 @@ export default function PresupuestosPage() {
                 </div>
 
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setShowNewDialog(false)}>
+                  <Button variant="outline" onClick={() => setShowNewDialog(false)} disabled={isCreating}>
                     Cancelar
                   </Button>
-                  <Button onClick={handleCreateBudget}>
-                    <FileText className="mr-2 h-4 w-4" />
-                    Crear Presupuesto
+                  <Button onClick={handleCreateBudget} disabled={isCreating}>
+                    {isCreating ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Creando...
+                      </span>
+                    ) : (
+                      <>
+                        <FileText className="mr-2 h-4 w-4" />
+                        Crear Presupuesto
+                      </>
+                    )}
                   </Button>
                 </DialogFooter>
               </DialogContent>

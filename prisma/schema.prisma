@@ -8784,6 +8784,68 @@ model RoomRentalProperty {
   @@map("room_rental_properties")
 }
 
+enum BudgetType {
+  mantenimiento
+  reforma
+  servicio
+  honorarios
+}
+
+enum BudgetStatus {
+  borrador
+  enviado
+  aprobado
+  rechazado
+  facturado
+}
+
+model Budget {
+  id           String       @id @default(cuid())
+  companyId    String
+  numero       String
+  titulo       String
+  descripcion  String?
+  tipo         BudgetType
+  estado       BudgetStatus @default(borrador)
+  fechaCreacion DateTime    @default(now())
+  fechaValidez DateTime
+  subtotal     Float
+  iva          Float
+  total        Float
+  notas        String?
+  clienteNombre  String?
+  proveedorNombre String?
+  unidadId     String?
+  createdBy    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  unidad  Unit?   @relation(fields: [unidadId], references: [id], onDelete: SetNull)
+  creador User?   @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  items   BudgetItem[]
+
+  @@index([companyId])
+  @@index([estado])
+  @@index([tipo])
+  @@map("budgets")
+}
+
+model BudgetItem {
+  id            String @id @default(cuid())
+  budgetId      String
+  concepto      String
+  cantidad      Float
+  unidad        String
+  precioUnitario Float
+  total         Float
+
+  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  @@index([budgetId])
+  @@map("budget_items")
+}
+
 // ============================================
 // SISTEMA MULTI-EMPRESA POR USUARIO
 // ============================================
