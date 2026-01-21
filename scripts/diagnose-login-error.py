@@ -1,72 +1,142 @@
 #!/usr/bin/env python3
-"""Diagnosticar error de login en producción"""
+"""
+Diagnosticar y arreglar error de login
+"""
 
 import sys
-sys.path.insert(0, '/home/ubuntu/.local/lib/python3.12/site-packages')
-import paramiko
+import time
+from datetime import datetime
 
-SERVER_IP = '157.180.119.236'
-SERVER_USER = 'root'
-SERVER_PASSWORD = 'hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo='
+try:
+    import paramiko
+except ImportError:
+    import subprocess
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'paramiko', '-q'])
+    import paramiko
 
-def log(msg, level='INFO'):
-    colors = {'INFO': '\033[0;36m', 'ERROR': '\033[0;31m', 'SUCCESS': '\033[0;32m'}
-    print(f"{colors.get(level, '')}{level}\033[0m: {msg}")
+SERVER_IP = "157.180.119.236"
+USERNAME = "root"
+PASSWORD = "hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo="
+APP_PATH = "/opt/inmova-app"
 
-client = paramiko.SSHClient()
-client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-client.connect(SERVER_IP, username=SERVER_USER, password=SERVER_PASSWORD, timeout=10)
+class C:
+    G = '\033[92m'
+    R = '\033[91m'
+    Y = '\033[93m'
+    B = '\033[94m'
+    C = '\033[96m'
+    E = '\033[0m'
 
-log("🔍 DIAGNÓSTICO DE ERROR DE LOGIN")
-log("=" * 80)
+def log(msg, c=C.E):
+    print(f"{c}[{datetime.now().strftime('%H:%M:%S')}] {msg}{C.E}")
 
-# 1. Ver logs de PM2 (últimas 100 líneas)
-log("\n📋 Logs de PM2 (últimas 100 líneas con 'error'):")
-log("-" * 80)
-stdin, stdout, stderr = client.exec_command("pm2 logs inmova-app --lines 100 --nostream | grep -i error | tail -50")
-stdout.channel.recv_exit_status()
-output = stdout.read().decode()
-print(output if output.strip() else "No hay errores en logs")
+def cmd(client, command, timeout=300):
+    try:
+        stdin, stdout, stderr = client.exec_command(command, timeout=timeout)
+        status = stdout.channel.recv_exit_status()
+        out = stdout.read().decode('utf-8', errors='ignore')
+        err = stderr.read().decode('utf-8', errors='ignore')
+        return status, out, err
+    except Exception as e:
+        return -1, "", str(e)
 
-# 2. Ver estado de PM2
-log("\n📊 Estado de PM2:")
-log("-" * 80)
-stdin, stdout, stderr = client.exec_command("pm2 status")
-stdout.channel.recv_exit_status()
-output = stdout.read().decode()
-print(output)
+def main():
+    print(f"\n{C.C}{'='*60}\n🔍 DIAGNÓSTICO DE ERROR DE LOGIN\n{'='*60}{C.E}\n")
 
-# 3. Test de login page
-log("\n🔐 Test de login page:")
-log("-" * 80)
-stdin, stdout, stderr = client.exec_command("curl -s http://localhost:3000/login | head -20")
-stdout.channel.recv_exit_status()
-output = stdout.read().decode()
-print(output)
+    log("🔐 Conectando al servidor...", C.B)
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(SERVER_IP, username=USERNAME, password=PASSWORD, timeout=30)
+    log("✅ Conectado", C.G)
 
-# 4. Test de API auth
-log("\n🔑 Test de API /api/auth/session:")
-log("-" * 80)
-stdin, stdout, stderr = client.exec_command("curl -s http://localhost:3000/api/auth/session")
-stdout.channel.recv_exit_status()
-output = stdout.read().decode()
-print(output)
+    try:
+        # 1. Ver logs de error recientes
+        log("\n📋 LOGS DE ERROR RECIENTES:", C.C)
+        _, out, _ = cmd(client, "pm2 logs inmova-app --err --lines 30 --nostream 2>&1")
+        print(out[-2500:])
 
-# 5. Ver variables de entorno críticas
-log("\n⚙️ Variables de entorno críticas:")
-log("-" * 80)
-stdin, stdout, stderr = client.exec_command("grep -E 'NEXTAUTH_URL|DATABASE_URL|NEXTAUTH_SECRET' /opt/inmova-app/.env.production | sed 's/=.*/=***/'")
-stdout.channel.recv_exit_status()
-output = stdout.read().decode()
-print(output)
+        # 2. Verificar variables de entorno críticas para auth
+        log("\n🔧 VARIABLES DE ENTORNO AUTH:", C.C)
+        _, out, _ = cmd(client, f"cd {APP_PATH} && grep -E '^(NEXTAUTH|DATABASE_URL)' .env.production 2>/dev/null | head -10")
+        for line in out.strip().split('\n'):
+            if 'SECRET' in line:
+                # Ocultar el valor del secret
+                key = line.split('=')[0]
+                print(f"  {key}=*****(configurado)")
+            elif 'DATABASE_URL' in line:
+                # Mostrar solo parte de la URL
+                if 'dummy' in line.lower():
+                    print(f"  ❌ DATABASE_URL contiene 'dummy' - PROBLEMA!")
+                else:
+                    print(f"  ✅ DATABASE_URL configurado")
+            else:
+                print(f"  {line}")
 
-# 6. Ver logs recientes de errores
-log("\n📝 Logs más recientes (últimas 30 líneas):")
-log("-" * 80)
-stdin, stdout, stderr = client.exec_command("pm2 logs inmova-app --lines 30 --nostream")
-stdout.channel.recv_exit_status()
-output = stdout.read().decode()
-print(output)
+        # 3. Verificar si NEXTAUTH_SECRET existe
+        _, out, _ = cmd(client, f"cd {APP_PATH} && grep -c 'NEXTAUTH_SECRET' .env.production")
+        if out.strip() == "0" or not out.strip():
+            log("  ❌ NEXTAUTH_SECRET NO ESTÁ CONFIGURADO!", C.R)
+        else:
+            log("  ✅ NEXTAUTH_SECRET está presente", C.G)
 
-client.close()
-log("\n" + "=" * 80)
+        # 4. Verificar si NEXTAUTH_URL existe
+        _, out, _ = cmd(client, f"cd {APP_PATH} && grep 'NEXTAUTH_URL' .env.production")
+        if not out.strip():
+            log("  ❌ NEXTAUTH_URL NO ESTÁ CONFIGURADO!", C.R)
+        else:
+            log(f"  {out.strip()}", C.G)
+
+        # 5. Verificar conexión a la BD
+        log("\n🗄️ VERIFICANDO BASE DE DATOS:", C.C)
+        _, out, _ = cmd(client, "sudo -u postgres psql -c '\\conninfo' 2>/dev/null")
+        if out.strip():
+            log("  ✅ PostgreSQL está corriendo", C.G)
+        
+        _, out, _ = cmd(client, "sudo -u postgres psql -d inmova_production -c 'SELECT COUNT(*) FROM \"User\"' 2>/dev/null")
+        if "count" in out.lower():
+            log(f"  ✅ Tabla User accesible", C.G)
+            print(f"  {out.strip()}")
+        else:
+            log("  ⚠️ No se pudo acceder a la tabla User", C.Y)
+
+        # 6. Test de la API de auth
+        log("\n🔐 TEST API AUTH:", C.C)
+        _, out, _ = cmd(client, "curl -sf http://localhost:3000/api/auth/session 2>/dev/null")
+        if out.strip():
+            log(f"  Session API: {out[:100]}", C.G)
+        else:
+            log("  ❌ Session API no responde", C.R)
+
+        _, out, _ = cmd(client, "curl -sf http://localhost:3000/api/auth/providers 2>/dev/null")
+        if out.strip():
+            log(f"  Providers API: {out[:100]}", C.G)
+        else:
+            log("  ❌ Providers API no responde", C.R)
+
+        # 7. Buscar errores específicos de NextAuth
+        log("\n🔍 ERRORES NEXTAUTH EN LOGS:", C.C)
+        _, out, _ = cmd(client, "pm2 logs inmova-app --lines 100 --nostream 2>&1 | grep -i 'nextauth\\|NO_SECRET\\|auth.*error\\|ECONNREFUSED' | tail -20")
+        if out.strip():
+            for line in out.strip().split('\n')[-15:]:
+                print(f"  {line}")
+        else:
+            log("  No se encontraron errores específicos de NextAuth", C.Y)
+
+        # 8. Verificar si hay error de BD
+        _, out, _ = cmd(client, "pm2 logs inmova-app --lines 100 --nostream 2>&1 | grep -i 'prisma\\|database\\|ECONNREFUSED\\|connection' | tail -10")
+        if out.strip():
+            log("\n🗄️ ERRORES DE BASE DE DATOS:", C.C)
+            for line in out.strip().split('\n')[-10:]:
+                print(f"  {line}")
+
+        print(f"\n{C.Y}{'='*60}{C.E}")
+        return True
+
+    except Exception as e:
+        log(f"❌ Error: {e}", C.R)
+        return False
+    finally:
+        client.close()
+
+if __name__ == "__main__":
+    sys.exit(0 if main() else 1)
