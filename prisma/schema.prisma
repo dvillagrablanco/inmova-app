@@ -8345,6 +8345,7 @@ model ConstructionProject {
   nombre       String
   descripcion  String @db.Text
   tipoProyecto String
+  estado       String @default("planificacion")
 
   direccion           String
   parcela             String?

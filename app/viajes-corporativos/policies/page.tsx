@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -51,107 +51,118 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Mock data para políticas
-const POLITICAS = [
-  {
-    id: 'POL001',
-    nombre: 'Política Estándar',
-    descripcion: 'Política por defecto para empleados regulares',
-    nivelEmpleado: 'standard',
-    activa: true,
-    limites: {
-      hotelNoche: 150,
-      vueloDomestico: 300,
-      vueloEuropeo: 500,
-      vueloIntercontinental: 1500,
-      dietaDiaria: 50,
-      transporteLocal: 30,
-    },
-    restricciones: {
-      claseVuelo: 'economy',
-      categoriaHotel: '3-4 estrellas',
-      anticipacionReserva: 14,
-      aprobacionRequerida: true,
-      nivelAprobacion: 'manager',
-    },
-    proveedoresAutorizados: ['NH Hotels', 'Ibis', 'Holiday Inn', 'Iberia', 'Vueling', 'Ryanair'],
-    excepciones: 'Requiere aprobación del director para exceder límites',
-    fechaCreacion: '2024-01-15',
-    ultimaModificacion: '2025-12-01',
-  },
-  {
-    id: 'POL002',
-    nombre: 'Política Directivos',
-    descripcion: 'Política para directores y nivel C-suite',
-    nivelEmpleado: 'executive',
-    activa: true,
-    limites: {
-      hotelNoche: 300,
-      vueloDomestico: 500,
-      vueloEuropeo: 1200,
-      vueloIntercontinental: 3500,
-      dietaDiaria: 100,
-      transporteLocal: 80,
-    },
-    restricciones: {
-      claseVuelo: 'business',
-      categoriaHotel: '4-5 estrellas',
-      anticipacionReserva: 7,
-      aprobacionRequerida: false,
-      nivelAprobacion: null,
-    },
-    proveedoresAutorizados: ['Hotel Arts', 'Marriott', 'NH Collection', 'Iberia Plus', 'Air Europa'],
-    excepciones: 'Auto-aprobación hasta límite. CEO no requiere aprobación.',
-    fechaCreacion: '2024-01-15',
-    ultimaModificacion: '2025-11-15',
-  },
-  {
-    id: 'POL003',
-    nombre: 'Política Ventas',
-    descripcion: 'Política especial para el equipo comercial',
-    nivelEmpleado: 'sales',
-    activa: true,
-    limites: {
-      hotelNoche: 180,
-      vueloDomestico: 350,
-      vueloEuropeo: 600,
-      vueloIntercontinental: 1800,
-      dietaDiaria: 70,
-      transporteLocal: 50,
-    },
-    restricciones: {
-      claseVuelo: 'economy-premium',
-      categoriaHotel: '3-4 estrellas',
-      anticipacionReserva: 7,
-      aprobacionRequerida: true,
-      nivelAprobacion: 'director-ventas',
-    },
-    proveedoresAutorizados: ['NH Hotels', 'AC Hotels', 'Meliá', 'Iberia', 'Vueling'],
-    excepciones: 'Visitas a clientes clave permiten exceder límite +20%',
-    fechaCreacion: '2024-03-01',
-    ultimaModificacion: '2025-10-20',
-  },
-];
+interface TravelPolicy {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  nivelEmpleado: 'standard' | 'executive' | 'sales' | 'custom';
+  activa: boolean;
+  limites: {
+    hotelNoche: number;
+    vueloDomestico: number;
+    vueloEuropeo: number;
+    vueloIntercontinental: number;
+    dietaDiaria: number;
+    transporteLocal: number;
+  };
+  restricciones: {
+    claseVuelo: string;
+    categoriaHotel: string;
+    anticipacionReserva: number;
+    aprobacionRequerida: boolean;
+    nivelAprobacion: string | null;
+  };
+  proveedoresAutorizados: string[];
+  excepciones?: string;
+  fechaCreacion: string;
+  ultimaModificacion: string;
+}
 
-// Proveedores autorizados globales
-const PROVEEDORES = [
-  { id: 1, nombre: 'NH Hotels', tipo: 'hotel', descuento: '15%', contrato: 'Activo', vencimiento: '2026-12-31' },
-  { id: 2, nombre: 'Marriott Internacional', tipo: 'hotel', descuento: '12%', contrato: 'Activo', vencimiento: '2027-06-30' },
-  { id: 3, nombre: 'Iberia', tipo: 'aerolinea', descuento: '10%', contrato: 'Activo', vencimiento: '2026-09-30' },
-  { id: 4, nombre: 'Europcar', tipo: 'alquiler', descuento: '18%', contrato: 'Activo', vencimiento: '2026-06-30' },
-  { id: 5, nombre: 'Cabify Business', tipo: 'transporte', descuento: '20%', contrato: 'Activo', vencimiento: '2026-03-31' },
-];
+interface TravelProvider {
+  id: string;
+  nombre: string;
+  tipo: 'hotel' | 'aerolinea' | 'alquiler' | 'transporte' | 'otro';
+  descuento: string;
+  contrato: string;
+  vencimiento: string;
+}
 
 export default function ViajesCorporativosPoliciesPage() {
-  const [politicas, setPoliticas] = useState(POLITICAS);
+  const [politicas, setPoliticas] = useState<TravelPolicy[]>([]);
+  const [proveedores, setProveedores] = useState<TravelProvider[]>([]);
   const [editandoPolitica, setEditandoPolitica] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isProviderDialogOpen, setIsProviderDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isSavingPolicy, setIsSavingPolicy] = useState(false);
+  const [isSavingProvider, setIsSavingProvider] = useState(false);
+  const [newPolicy, setNewPolicy] = useState({
+    nombre: '',
+    descripcion: '',
+    nivelEmpleado: 'standard',
+    hotelNoche: '',
+    vueloDomestico: '',
+  });
+  const [newProvider, setNewProvider] = useState({
+    nombre: '',
+    tipo: 'hotel',
+    descuento: '',
+    contrato: 'Activo',
+    vencimiento: '',
+  });
 
-  const handleTogglePolitica = (id: string) => {
-    setPoliticas(prev =>
-      prev.map(p => (p.id === id ? { ...p, activa: !p.activa } : p))
-    );
-    toast.success('Estado de política actualizado');
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [policiesRes, providersRes] = await Promise.all([
+        fetch('/api/viajes-corporativos/policies'),
+        fetch('/api/viajes-corporativos/providers'),
+      ]);
+
+      if (policiesRes.ok) {
+        const data = (await policiesRes.json()) as { data: TravelPolicy[] };
+        setPoliticas(data.data || []);
+      }
+      if (providersRes.ok) {
+        const data = (await providersRes.json()) as { data: TravelProvider[] };
+        setProveedores(data.data || []);
+      }
+    } catch (error) {
+      toast.error('Error al cargar políticas');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTogglePolitica = async (id: string) => {
+    const policy = politicas.find((p) => p.id === id);
+    if (!policy) return;
+    try {
+      setIsSavingPolicy(true);
+      const response = await fetch('/api/viajes-corporativos/policies', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          updates: { activa: !policy.activa },
+        }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al actualizar política');
+      }
+      const data = (await response.json()) as { data: TravelPolicy };
+      setPoliticas((prev) => prev.map((p) => (p.id === id ? data.data : p)));
+      toast.success('Estado de política actualizado');
+    } catch (error: any) {
+      toast.error(error.message || 'Error al actualizar política');
+    } finally {
+      setIsSavingPolicy(false);
+    }
   };
 
   const handleGuardarCambios = () => {
@@ -159,9 +170,80 @@ export default function ViajesCorporativosPoliciesPage() {
     setEditandoPolitica(null);
   };
 
-  const handleCrearPolitica = () => {
-    toast.success('Nueva política creada');
-    setIsDialogOpen(false);
+  const handleCrearPolitica = async () => {
+    if (!newPolicy.nombre) {
+      toast.error('Nombre de política requerido');
+      return;
+    }
+    try {
+      setIsSavingPolicy(true);
+      const response = await fetch('/api/viajes-corporativos/policies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: newPolicy.nombre,
+          descripcion: newPolicy.descripcion,
+          nivelEmpleado: newPolicy.nivelEmpleado,
+          limites: {
+            hotelNoche: Number(newPolicy.hotelNoche || 0),
+            vueloDomestico: Number(newPolicy.vueloDomestico || 0),
+          },
+        }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al crear política');
+      }
+      const data = (await response.json()) as { data: TravelPolicy };
+      setPoliticas((prev) => [data.data, ...prev]);
+      toast.success('Nueva política creada');
+      setIsDialogOpen(false);
+      setNewPolicy({
+        nombre: '',
+        descripcion: '',
+        nivelEmpleado: 'standard',
+        hotelNoche: '',
+        vueloDomestico: '',
+      });
+    } catch (error: any) {
+      toast.error(error.message || 'Error al crear política');
+    } finally {
+      setIsSavingPolicy(false);
+    }
+  };
+
+  const handleCrearProveedor = async () => {
+    if (!newProvider.nombre) {
+      toast.error('Nombre de proveedor requerido');
+      return;
+    }
+    try {
+      setIsSavingProvider(true);
+      const response = await fetch('/api/viajes-corporativos/providers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newProvider),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al crear proveedor');
+      }
+      const data = (await response.json()) as { data: TravelProvider };
+      setProveedores((prev) => [data.data, ...prev]);
+      toast.success('Proveedor añadido correctamente');
+      setIsProviderDialogOpen(false);
+      setNewProvider({
+        nombre: '',
+        tipo: 'hotel',
+        descuento: '',
+        contrato: 'Activo',
+        vencimiento: '',
+      });
+    } catch (error: any) {
+      toast.error(error.message || 'Error al crear proveedor');
+    } finally {
+      setIsSavingProvider(false);
+    }
   };
 
   const getNivelBadge = (nivel: string) => {
@@ -199,7 +281,7 @@ export default function ViajesCorporativosPoliciesPage() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button disabled={loading || isSavingPolicy}>
               <Plus className="h-4 w-4 mr-2" />
               Nueva Política
             </Button>
@@ -214,15 +296,28 @@ export default function ViajesCorporativosPoliciesPage() {
             <div className="space-y-4 mt-4">
               <div>
                 <Label>Nombre de la política *</Label>
-                <Input placeholder="Ej: Política Consultores" />
+                <Input
+                  placeholder="Ej: Política Consultores"
+                  value={newPolicy.nombre}
+                  onChange={(e) => setNewPolicy((prev) => ({ ...prev, nombre: e.target.value }))}
+                />
               </div>
               <div>
                 <Label>Descripción</Label>
-                <Textarea placeholder="Describe a quién aplica esta política..." />
+                <Textarea
+                  placeholder="Describe a quién aplica esta política..."
+                  value={newPolicy.descripcion}
+                  onChange={(e) =>
+                    setNewPolicy((prev) => ({ ...prev, descripcion: e.target.value }))
+                  }
+                />
               </div>
               <div>
                 <Label>Nivel de empleado</Label>
-                <Select>
+                <Select
+                  value={newPolicy.nivelEmpleado}
+                  onValueChange={(value) => setNewPolicy((prev) => ({ ...prev, nivelEmpleado: value }))}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecciona nivel" />
                   </SelectTrigger>
@@ -237,17 +332,35 @@ export default function ViajesCorporativosPoliciesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Límite hotel/noche (€)</Label>
-                  <Input type="number" placeholder="150" />
+                  <Input
+                    type="number"
+                    placeholder="150"
+                    value={newPolicy.hotelNoche}
+                    onChange={(e) =>
+                      setNewPolicy((prev) => ({ ...prev, hotelNoche: e.target.value }))
+                    }
+                  />
                 </div>
                 <div>
                   <Label>Límite vuelo doméstico (€)</Label>
-                  <Input type="number" placeholder="300" />
+                  <Input
+                    type="number"
+                    placeholder="300"
+                    value={newPolicy.vueloDomestico}
+                    onChange={(e) =>
+                      setNewPolicy((prev) => ({ ...prev, vueloDomestico: e.target.value }))
+                    }
+                  />
                 </div>
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-              <Button onClick={handleCrearPolitica}>Crear Política</Button>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isSavingPolicy}>
+                Cancelar
+              </Button>
+              <Button onClick={handleCrearPolitica} disabled={isSavingPolicy}>
+                {isSavingPolicy ? 'Creando...' : 'Crear Política'}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -271,7 +384,7 @@ export default function ViajesCorporativosPoliciesPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Proveedores Autorizados</p>
-                <p className="text-2xl font-bold">{PROVEEDORES.length}</p>
+                <p className="text-2xl font-bold">{proveedores.length}</p>
               </div>
               <Building className="h-8 w-8 text-blue-500 opacity-80" />
             </div>
@@ -451,7 +564,7 @@ export default function ViajesCorporativosPoliciesPage() {
               </CardTitle>
               <CardDescription>Acuerdos corporativos vigentes</CardDescription>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setIsProviderDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-1" />
               Añadir Proveedor
             </Button>
@@ -459,7 +572,7 @@ export default function ViajesCorporativosPoliciesPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {PROVEEDORES.map((proveedor) => (
+            {proveedores.map((proveedor) => (
               <div
                 key={proveedor.id}
                 className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg gap-3"
@@ -497,6 +610,74 @@ export default function ViajesCorporativosPoliciesPage() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={isProviderDialogOpen} onOpenChange={setIsProviderDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Nuevo Proveedor</DialogTitle>
+            <DialogDescription>Agrega un proveedor autorizado</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label>Nombre *</Label>
+              <Input
+                value={newProvider.nombre}
+                onChange={(e) => setNewProvider((prev) => ({ ...prev, nombre: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Tipo</Label>
+              <Select
+                value={newProvider.tipo}
+                onValueChange={(value) => setNewProvider((prev) => ({ ...prev, tipo: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="hotel">Hotel</SelectItem>
+                  <SelectItem value="aerolinea">Aerolínea</SelectItem>
+                  <SelectItem value="alquiler">Alquiler</SelectItem>
+                  <SelectItem value="transporte">Transporte</SelectItem>
+                  <SelectItem value="otro">Otro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Descuento</Label>
+                <Input
+                  value={newProvider.descuento}
+                  onChange={(e) => setNewProvider((prev) => ({ ...prev, descuento: e.target.value }))}
+                  placeholder="10%"
+                />
+              </div>
+              <div>
+                <Label>Vencimiento</Label>
+                <Input
+                  type="date"
+                  value={newProvider.vencimiento}
+                  onChange={(e) =>
+                    setNewProvider((prev) => ({ ...prev, vencimiento: e.target.value }))
+                  }
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsProviderDialogOpen(false)}
+              disabled={isSavingProvider}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleCrearProveedor} disabled={isSavingProvider}>
+              {isSavingProvider ? 'Guardando...' : 'Guardar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

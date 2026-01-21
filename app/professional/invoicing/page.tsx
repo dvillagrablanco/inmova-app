@@ -20,6 +20,7 @@ import {
   DollarSign,
   TrendingUp,
   Calendar,
+  Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -56,11 +57,13 @@ interface InvoiceItem {
 }
 
 export default function ProfessionalInvoicingPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [selectedTab, setSelectedTab] = useState('all');
+  const [sendingId, setSendingId] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -71,76 +74,67 @@ export default function ProfessionalInvoicingPage() {
   const loadInvoices = async () => {
     try {
       setLoading(true);
-      
-      // Mock data
-      setInvoices([
-        {
-          id: 'inv1',
-          number: 'FAC-2025-001',
-          clientId: 'c1',
-          clientName: 'María García López',
-          issueDate: '2025-12-01',
-          dueDate: '2025-12-15',
-          amount: 850,
-          status: 'paid',
-          items: [
-            { description: 'Gestión de 5 propiedades - Diciembre 2025', quantity: 1, unitPrice: 850, total: 850 },
-          ],
-        },
-        {
-          id: 'inv2',
-          number: 'FAC-2025-002',
-          clientId: 'c2',
-          clientName: 'Inversiones Urbanas SL',
-          issueDate: '2025-12-01',
-          dueDate: '2025-12-15',
-          amount: 2400,
-          status: 'paid',
-          items: [
-            { description: 'Gestión de 12 propiedades - Diciembre 2025', quantity: 1, unitPrice: 2400, total: 2400 },
-          ],
-        },
-        {
-          id: 'inv3',
-          number: 'FAC-2025-003',
-          clientId: 'c3',
-          clientName: 'Carlos Rodríguez',
-          issueDate: '2025-12-01',
-          dueDate: '2025-12-15',
-          amount: 450,
-          status: 'sent',
-          items: [
-            { description: 'Gestión de 3 propiedades - Diciembre 2025', quantity: 1, unitPrice: 450, total: 450 },
-          ],
-        },
-        {
-          id: 'inv4',
-          number: 'FAC-2025-004',
-          clientId: 'c5',
-          clientName: 'Propiedades del Sur SA',
-          issueDate: '2025-11-01',
-          dueDate: '2025-11-15',
-          amount: 1600,
-          status: 'overdue',
-          items: [
-            { description: 'Gestión de 8 propiedades - Noviembre 2025', quantity: 1, unitPrice: 1600, total: 1600 },
-          ],
-          notes: 'Pago vencido. Enviado recordatorio 3 veces.',
-        },
-        {
-          id: 'inv5',
-          number: 'FAC-2026-001',
-          clientId: 'c1',
-          clientName: 'María García López',
-          issueDate: '2026-01-01',
-          dueDate: '2026-01-15',
-          amount: 850,
-          status: 'draft',
-          items: [
-            { description: 'Gestión de 5 propiedades - Enero 2026', quantity: 1, unitPrice: 850, total: 850 },
-          ],
-        },
-      ]);
+      const response = await fetch('/api/b2b-billing/invoices');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al cargar facturas');
+      }
+
+      const data = (await response.json()) as {
+        invoices: Array<{
+          id: string;
+          numeroFactura: string;
+          fechaEmision: string;
+          fechaVencimiento: string;
+          total: number;
+          estado: 'PENDIENTE' | 'PAGADA' | 'VENCIDA' | 'CANCELADA' | 'PARCIALMENTE_PAGADA';
+          conceptos: Array<{
+            descripcion: string;
+            cantidad?: number;
+            precioUnitario?: number;
+            total?: number;
+          }>;
+          notas?: string | null;
+          company: { id: string; nombre: string };
+        }>;
+      };
+
+      const mapped = data.invoices.map((invoice) => {
+        const statusMap: Record<string, Invoice['status']> = {
+          PENDIENTE: 'sent',
+          PAGADA: 'paid',
+          VENCIDA: 'overdue',
+          CANCELADA: 'cancelled',
+          PARCIALMENTE_PAGADA: 'sent',
+        };
+
+        const items = (invoice.conceptos || []).map((item) => {
+          const quantity = item.cantidad ?? 1;
+          const unitPrice = item.precioUnitario ?? 0;
+          const total = item.total ?? quantity * unitPrice;
+          return {
+            description: item.descripcion,
+            quantity,
+            unitPrice,
+            total,
+          };
+        });
+
+        return {
+          id: invoice.id,
+          number: invoice.numeroFactura,
+          clientId: invoice.company.id,
+          clientName: invoice.company.nombre,
+          issueDate: invoice.fechaEmision,
+          dueDate: invoice.fechaVencimiento,
+          amount: invoice.total,
+          status: statusMap[invoice.estado] || 'draft',
+          items,
+          notes: invoice.notas || undefined,
+        } as Invoice;
+      });
+
+      setInvoices(mapped);
     } catch (error) {
       toast.error('Error al cargar facturas');
     } finally {
@@ -180,6 +174,37 @@ export default function ProfessionalInvoicingPage() {
     });
   };
 
+  const handleDownload = async (invoiceId: string) => {
+    try {
+      setDownloadingId(invoiceId);
+      window.open(`/api/b2b-billing/invoices/${invoiceId}/pdf`, '_blank');
+    } catch (error) {
+      toast.error('Error al descargar factura');
+    } finally {
+      setTimeout(() => setDownloadingId(null), 500);
+    }
+  };
+
+  const handleSendReminder = async (invoiceId: string) => {
+    try {
+      setSendingId(invoiceId);
+      const response = await fetch('/api/b2b-billing/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'send-single-reminder', invoiceId }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al enviar recordatorio');
+      }
+      toast.success('Recordatorio enviado');
+    } catch (error: any) {
+      toast.error(error.message || 'Error al enviar recordatorio');
+    } finally {
+      setSendingId(null);
+    }
+  };
+
   const totalAmount = invoices.reduce((sum, inv) => sum + inv.amount, 0);
   const paidAmount = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + inv.amount, 0);
   const pendingAmount = invoices.filter(inv => inv.status === 'sent').reduce((sum, inv) => sum + inv.amount, 0);
@@ -189,15 +214,23 @@ export default function ProfessionalInvoicingPage() {
     ? invoices 
     : invoices.filter(inv => inv.status === selectedTab);
 
-  // Mock chart data
-  const monthlyData = [
-    { month: 'Jul', amount: 4200 },
-    { month: 'Ago', amount: 4800 },
-    { month: 'Sep', amount: 5100 },
-    { month: 'Oct', amount: 4900 },
-    { month: 'Nov', amount: 5300 },
-    { month: 'Dic', amount: 5700 },
-  ];
+  const monthlyTotals = invoices.reduce<Record<string, number>>((acc, invoice) => {
+    const date = new Date(invoice.issueDate);
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    acc[key] = (acc[key] || 0) + invoice.amount;
+    return acc;
+  }, {});
+
+  const monthlyData = Array.from({ length: 6 }).map((_, index) => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - (5 - index));
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const monthLabel = date.toLocaleDateString('es-ES', { month: 'short' });
+    return {
+      month: monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1),
+      amount: monthlyTotals[key] || 0,
+    };
+  });
 
   if (status === 'unauthenticated') {
     router.push('/login');
@@ -370,18 +403,40 @@ export default function ProfessionalInvoicingPage() {
                             </p>
                           </div>
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm">
-                              <Download className="h-4 w-4" />
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDownload(invoice.id)}
+                              disabled={downloadingId === invoice.id}
+                            >
+                              {downloadingId === invoice.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Download className="h-4 w-4" />
+                              )}
                             </Button>
                             {invoice.status === 'draft' && (
-                              <Button size="sm">
-                                <Send className="h-4 w-4 mr-1" />
+                              <Button size="sm" onClick={() => handleSendReminder(invoice.id)} disabled={sendingId === invoice.id}>
+                                {sendingId === invoice.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                                ) : (
+                                  <Send className="h-4 w-4 mr-1" />
+                                )}
                                 Enviar
                               </Button>
                             )}
                             {invoice.status === 'overdue' && (
-                              <Button size="sm" variant="destructive">
-                                <AlertTriangle className="h-4 w-4 mr-1" />
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleSendReminder(invoice.id)}
+                                disabled={sendingId === invoice.id}
+                              >
+                                {sendingId === invoice.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                                ) : (
+                                  <AlertTriangle className="h-4 w-4 mr-1" />
+                                )}
                                 Reclamar
                               </Button>
                             )}

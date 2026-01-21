@@ -29,48 +29,25 @@ export default function InsuranceAnalysisPage() {
   const [period, setPeriod] = useState('year');
   const [loading, setLoading] = useState(true);
 
-  // Mock data - TODO: Fetch from API
-  const stats = {
-    totalPolicies: 45,
-    activePolicies: 42,
-    totalClaims: 23,
-    totalPaid: 125000,
-    avgClaimAmount: 5435,
-    claimRate: 51.1, // % de pólizas con siniestros
-    lossRatio: 42.5, // % de prima vs pagos
-    pendingClaims: 5,
-  };
-
-  const claimsByType = [
-    { type: 'Daños por Agua', count: 8, amount: 45000, percentage: 35 },
-    { type: 'Incendio', count: 3, amount: 32000, percentage: 26 },
-    { type: 'Robo', count: 6, amount: 24000, percentage: 19 },
-    { type: 'Eléctricos', count: 4, amount: 18000, percentage: 14 },
-    { type: 'Otros', count: 2, amount: 6000, percentage: 6 },
-  ];
-
-  const claimsByMonth = [
-    { month: 'Ene', count: 2, amount: 8500 },
-    { month: 'Feb', count: 1, amount: 3200 },
-    { month: 'Mar', count: 3, amount: 15000 },
-    { month: 'Abr', count: 2, amount: 9800 },
-    { month: 'May', count: 4, amount: 21000 },
-    { month: 'Jun', count: 1, amount: 5500 },
-    { month: 'Jul', count: 3, amount: 13000 },
-    { month: 'Ago', count: 2, amount: 10500 },
-    { month: 'Sep', count: 1, amount: 4500 },
-    { month: 'Oct', count: 3, amount: 18000 },
-    { month: 'Nov', count: 1, amount: 6000 },
-    { month: 'Dic', count: 0, amount: 0 },
-  ];
-
-  const topClaimProperties = [
-    { address: 'Calle Mayor 123', claims: 4, amount: 28000 },
-    { address: 'Av. Libertad 45', claims: 3, amount: 19500 },
-    { address: 'Plaza España 8', claims: 2, amount: 15000 },
-    { address: 'Calle Sol 67', claims: 2, amount: 12500 },
-    { address: 'Av. Constitución 12', claims: 2, amount: 10000 },
-  ];
+  const [stats, setStats] = useState({
+    totalPolicies: 0,
+    activePolicies: 0,
+    totalClaims: 0,
+    totalPaid: 0,
+    avgClaimAmount: 0,
+    claimRate: 0,
+    lossRatio: 0,
+    pendingClaims: 0,
+  });
+  const [claimsByType, setClaimsByType] = useState<
+    Array<{ type: string; count: number; amount: number; percentage: number }>
+  >([]);
+  const [claimsByMonth, setClaimsByMonth] = useState<
+    Array<{ month: string; count: number; amount: number }>
+  >([]);
+  const [topClaimProperties, setTopClaimProperties] = useState<
+    Array<{ address: string; claims: number; amount: number }>
+  >([]);
 
   useEffect(() => {
     loadAnalytics();
@@ -79,9 +56,21 @@ export default function InsuranceAnalysisPage() {
   const loadAnalytics = async () => {
     try {
       setLoading(true);
-      // TODO: Fetch real data from API
-      // await fetch(`/api/insurances/analytics?period=${period}`);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch(`/api/seguros/analisis?period=${period}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al cargar análisis');
+      }
+      const data = (await response.json()) as {
+        stats: typeof stats;
+        claimsByType: typeof claimsByType;
+        claimsByMonth: typeof claimsByMonth;
+        topClaimProperties: typeof topClaimProperties;
+      };
+      setStats(data.stats);
+      setClaimsByType(data.claimsByType || []);
+      setClaimsByMonth(data.claimsByMonth || []);
+      setTopClaimProperties(data.topClaimProperties || []);
     } catch (error) {
       console.error('Error loading analytics:', error);
       toast.error('Error al cargar análisis');
@@ -95,7 +84,7 @@ export default function InsuranceAnalysisPage() {
     // TODO: Generate and download PDF/Excel report
   };
 
-  const maxClaimAmount = Math.max(...claimsByMonth.map((m) => m.amount));
+  const maxClaimAmount = claimsByMonth.length > 0 ? Math.max(...claimsByMonth.map((m) => m.amount)) : 0;
 
   return (
     <AuthenticatedLayout>
@@ -227,7 +216,9 @@ export default function InsuranceAnalysisPage() {
                       <div className="h-8 bg-gray-200 rounded overflow-hidden">
                         <div
                           className="h-full bg-green-600 transition-all flex items-center justify-end pr-2"
-                          style={{ width: `${(item.amount / maxClaimAmount) * 100}%` }}
+                        style={{
+                          width: maxClaimAmount > 0 ? `${(item.amount / maxClaimAmount) * 100}%` : '0%',
+                        }}
                         >
                           {item.amount > 0 && (
                             <span className="text-xs text-white font-medium">

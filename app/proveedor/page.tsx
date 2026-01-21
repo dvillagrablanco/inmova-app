@@ -46,6 +46,11 @@ interface RecentBooking {
   precio: number;
 }
 
+interface ProviderDashboardResponse {
+  stats: ProviderStats;
+  recentBookings: RecentBooking[];
+}
+
 export default function ProveedorDashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -66,48 +71,15 @@ export default function ProveedorDashboard() {
   const loadDashboard = async () => {
     try {
       setLoading(true);
-      // TODO: Cargar datos reales del API
-      // const response = await fetch('/api/proveedor/dashboard');
+      const response = await fetch('/api/proveedor/dashboard');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al cargar dashboard');
+      }
 
-      // Mock data para demostración
-      setStats({
-        serviciosActivos: 5,
-        reservasEsteMes: 23,
-        reservasPendientes: 4,
-        ingresosMes: 2450,
-        valoracionMedia: 4.8,
-        totalValoraciones: 47,
-      });
-
-      setRecentBookings([
-        {
-          id: '1',
-          servicio: 'Limpieza profunda',
-          cliente: 'María García',
-          fecha: '2026-01-10',
-          hora: '10:00',
-          estado: 'pendiente',
-          precio: 80,
-        },
-        {
-          id: '2',
-          servicio: 'Reparación fontanería',
-          cliente: 'Carlos Ruiz',
-          fecha: '2026-01-10',
-          hora: '14:00',
-          estado: 'confirmada',
-          precio: 120,
-        },
-        {
-          id: '3',
-          servicio: 'Limpieza regular',
-          cliente: 'Ana López',
-          fecha: '2026-01-09',
-          hora: '09:00',
-          estado: 'completada',
-          precio: 45,
-        },
-      ]);
+      const data = (await response.json()) as ProviderDashboardResponse;
+      setStats(data.stats);
+      setRecentBookings(data.recentBookings);
     } catch (error) {
       toast.error('Error al cargar dashboard');
     } finally {
