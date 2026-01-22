@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import dynamic from 'next/dynamic';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import {
   Home,
@@ -43,6 +44,17 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PhotoUploader } from '@/components/property/PhotoUploader';
+
+// AI Components - Dynamic imports for client-side only
+const PropertyDocumentAnalyzer = dynamic(
+  () => import('@/components/propiedades/PropertyDocumentAnalyzer').then(mod => ({ default: mod.PropertyDocumentAnalyzer })),
+  { ssr: false }
+);
+
+const FormAIAssistant = dynamic(
+  () => import('@/components/ai/FormAIAssistant').then(mod => ({ default: mod.FormAIAssistant })),
+  { ssr: false }
+);
 
 interface Building {
   id: string;
@@ -123,6 +135,58 @@ export default function CrearPropiedadPage() {
   const handleCheckboxChange = (field: string, checked: boolean) => {
     setFormData((prev) => ({ ...prev, [field]: checked }));
   };
+
+  // AI Document Analysis handler
+  const handlePropertyDataExtracted = (extractedData: Partial<typeof formData>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...extractedData,
+    }));
+    toast.success('Datos de propiedad aplicados desde el documento');
+  };
+
+  // AI Form Assistant handler
+  const handleAISuggestions = (suggestions: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...suggestions,
+    }));
+  };
+
+  // Form fields definition for AI Assistant
+  const formFields = [
+    { name: 'numero', label: 'Número de Unidad', type: 'text' as const, required: true },
+    { name: 'tipo', label: 'Tipo de Propiedad', type: 'select' as const, options: [
+      { value: 'vivienda', label: 'Vivienda' },
+      { value: 'local', label: 'Local Comercial' },
+      { value: 'oficina', label: 'Oficina' },
+      { value: 'estudio', label: 'Estudio' },
+      { value: 'garaje', label: 'Garaje' },
+      { value: 'trastero', label: 'Trastero' },
+    ]},
+    { name: 'estado', label: 'Estado', type: 'select' as const, options: [
+      { value: 'disponible', label: 'Disponible' },
+      { value: 'ocupada', label: 'Ocupada' },
+      { value: 'en_mantenimiento', label: 'En Mantenimiento' },
+    ]},
+    { name: 'superficie', label: 'Superficie Total (m²)', type: 'number' as const, required: true },
+    { name: 'superficieUtil', label: 'Superficie Útil (m²)', type: 'number' as const },
+    { name: 'habitaciones', label: 'Habitaciones', type: 'number' as const },
+    { name: 'banos', label: 'Baños', type: 'number' as const },
+    { name: 'planta', label: 'Planta', type: 'number' as const },
+    { name: 'orientacion', label: 'Orientación', type: 'select' as const, options: [
+      { value: 'Norte', label: 'Norte' },
+      { value: 'Sur', label: 'Sur' },
+      { value: 'Este', label: 'Este' },
+      { value: 'Oeste', label: 'Oeste' },
+    ]},
+    { name: 'rentaMensual', label: 'Renta Mensual (€)', type: 'currency' as const, required: true },
+    { name: 'aireAcondicionado', label: 'Aire Acondicionado', type: 'checkbox' as const },
+    { name: 'calefaccion', label: 'Calefacción', type: 'checkbox' as const },
+    { name: 'terraza', label: 'Terraza', type: 'checkbox' as const },
+    { name: 'balcon', label: 'Balcón', type: 'checkbox' as const },
+    { name: 'amueblado', label: 'Amueblado', type: 'checkbox' as const },
+  ];
 
   const validateForm = () => {
     if (!formData.numero.trim()) {
@@ -250,12 +314,27 @@ export default function CrearPropiedadPage() {
         </div>
 
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Crear Nueva Propiedad</h1>
-          <p className="text-muted-foreground">
-            Completa la información de la nueva unidad inmobiliaria
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Crear Nueva Propiedad</h1>
+            <p className="text-muted-foreground">
+              Completa la información de la nueva unidad inmobiliaria
+            </p>
+          </div>
+          <FormAIAssistant
+            formContext="propiedad"
+            fields={formFields}
+            currentValues={formData}
+            onSuggestionsApply={handleAISuggestions}
+            additionalContext={buildings.length > 0 ? `Edificios disponibles: ${buildings.map(b => b.nombre).join(', ')}` : undefined}
+          />
         </div>
+
+        {/* AI Document Analyzer */}
+        <PropertyDocumentAnalyzer
+          onDataExtracted={handlePropertyDataExtracted}
+          currentFormData={formData}
+        />
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Información Básica */}

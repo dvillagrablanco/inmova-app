@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import dynamic from 'next/dynamic';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 import { CreditCard, Home, ArrowLeft, Save } from 'lucide-react';
@@ -27,6 +28,12 @@ import {
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
+
+// AI Components - Dynamic imports for client-side only
+const FormAIAssistant = dynamic(
+  () => import('@/components/ai/FormAIAssistant').then(mod => ({ default: mod.FormAIAssistant })),
+  { ssr: false }
+);
 
 interface Contract {
   id: string;
@@ -105,6 +112,33 @@ export default function NuevoPagoPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // AI Form Assistant handler
+  const handleAISuggestions = (suggestions: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...suggestions,
+    }));
+  };
+
+  // Form fields definition for AI Assistant
+  const formFields = [
+    { name: 'periodo', label: 'Período', type: 'text' as const, required: true, description: 'Ej: Enero 2026' },
+    { name: 'monto', label: 'Monto (€)', type: 'currency' as const, required: true },
+    { name: 'fechaVencimiento', label: 'Fecha de Vencimiento', type: 'date' as const, required: true },
+    { name: 'fechaPago', label: 'Fecha de Pago', type: 'date' as const },
+    { name: 'estado', label: 'Estado', type: 'select' as const, options: [
+      { value: 'pendiente', label: 'Pendiente' },
+      { value: 'pagado', label: 'Pagado' },
+      { value: 'atrasado', label: 'Atrasado' },
+    ]},
+    { name: 'metodoPago', label: 'Método de Pago', type: 'select' as const, options: [
+      { value: 'transferencia', label: 'Transferencia' },
+      { value: 'tarjeta', label: 'Tarjeta' },
+      { value: 'efectivo', label: 'Efectivo' },
+      { value: 'domiciliacion', label: 'Domiciliación' },
+    ]},
+  ];
+
   if (status === 'loading') {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -152,9 +186,18 @@ export default function NuevoPagoPage() {
             </div>
 
             {/* Header Section */}
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Nuevo Pago</h1>
-              <p className="text-muted-foreground">Registra un nuevo pago o cuota de alquiler</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Nuevo Pago</h1>
+                <p className="text-muted-foreground">Registra un nuevo pago o cuota de alquiler</p>
+              </div>
+              <FormAIAssistant
+                formContext="pago"
+                fields={formFields}
+                currentValues={formData}
+                onSuggestionsApply={handleAISuggestions}
+                additionalContext={contracts.length > 0 ? `Contratos disponibles: ${contracts.map(c => `${c.unit.building.nombre} - ${c.tenant.nombre}`).join(', ')}` : undefined}
+              />
             </div>
 
             {/* Formulario */}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import dynamic from 'next/dynamic';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 import { Building2, Home, ArrowLeft, Save } from 'lucide-react';
@@ -30,6 +31,12 @@ import logger, { logError } from '@/lib/logger';
 import { LoadingState } from '@/components/ui/loading-state';
 import { BackButton } from '@/components/ui/back-button';
 import { MobileFormWizard, FormStep } from '@/components/ui/mobile-form-wizard';
+
+// AI Components - Dynamic imports for client-side only
+const FormAIAssistant = dynamic(
+  () => import('@/components/ai/FormAIAssistant').then(mod => ({ default: mod.FormAIAssistant })),
+  { ssr: false }
+);
 
 export default function NuevoEdificioPage() {
   const router = useRouter();
@@ -78,6 +85,28 @@ export default function NuevoEdificioPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  // AI Form Assistant handler
+  const handleAISuggestions = (suggestions: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...suggestions,
+    }));
+  };
+
+  // Form fields definition for AI Assistant
+  const formFields = [
+    { name: 'nombre', label: 'Nombre del Edificio', type: 'text' as const, required: true },
+    { name: 'direccion', label: 'Dirección Completa', type: 'text' as const, required: true },
+    { name: 'tipo', label: 'Tipo de Edificio', type: 'select' as const, options: [
+      { value: 'residencial', label: 'Residencial' },
+      { value: 'comercial', label: 'Comercial' },
+      { value: 'mixto', label: 'Mixto' },
+      { value: 'industrial', label: 'Industrial' },
+    ]},
+    { name: 'anoConstructor', label: 'Año de Construcción', type: 'number' as const, required: true },
+    { name: 'numeroUnidades', label: 'Número de Unidades', type: 'number' as const, required: true },
+  ];
 
   if (status === 'loading') {
     return (
@@ -128,9 +157,17 @@ export default function NuevoEdificioPage() {
             {/* Header Section */}
             <div className="space-y-4">
               <BackButton href="/edificios" label="Volver a Edificios" />
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Nuevo Edificio</h1>
-                <p className="text-muted-foreground">Registra un nuevo edificio en tu cartera</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight">Nuevo Edificio</h1>
+                  <p className="text-muted-foreground">Registra un nuevo edificio en tu cartera</p>
+                </div>
+                <FormAIAssistant
+                  formContext="edificio"
+                  fields={formFields}
+                  currentValues={formData}
+                  onSuggestionsApply={handleAISuggestions}
+                />
               </div>
             </div>
 
