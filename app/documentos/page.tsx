@@ -58,6 +58,13 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
 import logger, { logError } from '@/lib/logger';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
+import dynamic from 'next/dynamic';
+
+// Cargar el analizador de documentos con IA
+const DocumentUploadAnalyzer = dynamic(
+  () => import('@/components/documents/DocumentUploadAnalyzer'),
+  { ssr: false }
+);
 
 interface Document {
   id: string;
@@ -94,6 +101,22 @@ export default function DocumentosPage() {
     tipo: 'otro',
     fechaVencimiento: '',
   });
+
+  // Handler para datos extraídos del agente documental IA
+  const handleDocumentAnalysisComplete = (data: {
+    tipo: string;
+    nombre: string;
+    fechaVencimiento?: string;
+    extractedData: any;
+  }) => {
+    setUploadForm(prev => ({
+      ...prev,
+      nombre: data.nombre || prev.nombre,
+      tipo: data.tipo || prev.tipo,
+      fechaVencimiento: data.fechaVencimiento || prev.fechaVencimiento,
+    }));
+    setOpenUploadDialog(true);
+  };
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -482,6 +505,12 @@ export default function DocumentosPage() {
         </CardContent>
       </Card>
         </div>
+
+        {/* Agente Documental IA */}
+        <DocumentUploadAnalyzer 
+          onAnalysisComplete={handleDocumentAnalysisComplete}
+          context="general"
+        />
 
         {/* Búsqueda y Filtros */}
         <Card>

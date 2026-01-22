@@ -889,7 +889,7 @@ Métricas clave:
 - ROI de campañas`,
   capabilities,
   tools,
-  model: 'claude-3-5-sonnet-20241022',
+  model: 'claude-3-haiku-20240307',
   temperature: 0.65,
   maxTokens: 4096,
   enabled: true

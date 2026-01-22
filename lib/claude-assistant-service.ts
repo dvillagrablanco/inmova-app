@@ -19,7 +19,7 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || ''
 });
 
-const CLAUDE_MODEL = 'claude-3-5-sonnet-20241022'; // Modelo más reciente con tool calling
+const CLAUDE_MODEL = 'claude-3-haiku-20240307'; // Modelo más reciente con tool calling
 
 // ============================================================================
 // TIPOS

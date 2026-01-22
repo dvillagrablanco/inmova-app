@@ -694,7 +694,7 @@ Estilo de comunicación:
 - Proactivo en ofrecer soluciones`,
   capabilities,
   tools,
-  model: 'claude-3-5-sonnet-20241022',
+  model: 'claude-3-haiku-20240307',
   temperature: 0.6, // Más bajo para respuestas más consistentes
   maxTokens: 4096,
   enabled: true

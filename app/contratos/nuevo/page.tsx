@@ -6,6 +6,13 @@ import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 import { FileText, Home, ArrowLeft, Save, Upload, X, Loader2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+// Cargar el analizador de contratos con IA
+const ContractDocumentAnalyzer = dynamic(
+  () => import('@/components/contracts/ContractDocumentAnalyzer'),
+  { ssr: false }
+);
 import { Button } from '@/components/ui/button';
 import { ButtonWithLoading } from '@/components/ui/button-with-loading';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
@@ -198,6 +205,19 @@ export default function NuevoContratoPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Handler para datos extraídos del agente de contratos IA
+  const handleContractDataExtracted = (contractData: Partial<typeof formData>, tenantData?: any) => {
+    setFormData(prev => ({
+      ...prev,
+      ...contractData,
+    }));
+    
+    // Si se extrajo info del inquilino, podría notificarse
+    if (tenantData?.nombre) {
+      toast.info(`Inquilino detectado: ${tenantData.nombre}. Selecciónalo de la lista si ya existe.`);
+    }
+  };
+
   if (status === 'loading') {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -252,6 +272,12 @@ export default function NuevoContratoPage() {
                 <p className="text-muted-foreground">Crea un nuevo contrato de arrendamiento</p>
               </div>
             </div>
+
+            {/* Agente de Contratos IA */}
+            <ContractDocumentAnalyzer 
+              onDataExtracted={handleContractDataExtracted}
+              currentFormData={formData}
+            />
 
             {/* Formulario con Wizard para móvil */}
             <form onSubmit={handleSubmit}>

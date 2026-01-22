@@ -20,7 +20,7 @@ const anthropic = new Anthropic({
   apiKey: CLAUDE_API_KEY,
 });
 
-const DEFAULT_MODEL = 'claude-3-5-sonnet-20241022';
+const DEFAULT_MODEL = 'claude-3-haiku-20240307';
 const DEFAULT_MAX_TOKENS = 2048;
 
 /**
