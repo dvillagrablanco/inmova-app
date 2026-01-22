@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import dynamic from 'next/dynamic';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 import { Home as HomeIcon, ArrowLeft, Save } from 'lucide-react';
@@ -29,6 +30,12 @@ import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
 import { BackButton } from '@/components/ui/back-button';
 import { MobileFormWizard, FormStep } from '@/components/ui/mobile-form-wizard';
+
+// AI Components - Dynamic imports for client-side only
+const FormAIAssistant = dynamic(
+  () => import('@/components/ai/FormAIAssistant').then(mod => ({ default: mod.FormAIAssistant })),
+  { ssr: false }
+);
 
 interface Building {
   id: string;
@@ -107,6 +114,30 @@ export default function NuevaUnidadPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // AI Form Assistant handler
+  const handleAISuggestions = (suggestions: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...suggestions,
+    }));
+  };
+
+  // Form fields definition for AI Assistant
+  const formFields = [
+    { name: 'numero', label: 'Número de Unidad', type: 'text' as const, required: true },
+    { name: 'tipo', label: 'Tipo de Unidad', type: 'select' as const, options: [
+      { value: 'apartamento', label: 'Apartamento' },
+      { value: 'local', label: 'Local Comercial' },
+      { value: 'oficina', label: 'Oficina' },
+      { value: 'garaje', label: 'Garaje' },
+      { value: 'trastero', label: 'Trastero' },
+    ]},
+    { name: 'superficie', label: 'Superficie (m²)', type: 'number' as const, required: true },
+    { name: 'habitaciones', label: 'Habitaciones', type: 'number' as const },
+    { name: 'banos', label: 'Baños', type: 'number' as const },
+    { name: 'precio', label: 'Precio Alquiler (€)', type: 'currency' as const, required: true },
+  ];
+
   if (status === 'loading') {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -156,9 +187,18 @@ export default function NuevaUnidadPage() {
             {/* Header Section */}
             <div className="space-y-4">
               <BackButton href="/unidades" label="Volver a Unidades" />
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Nueva Unidad</h1>
-                <p className="text-muted-foreground">Registra una nueva unidad en un edificio</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight">Nueva Unidad</h1>
+                  <p className="text-muted-foreground">Registra una nueva unidad en un edificio</p>
+                </div>
+                <FormAIAssistant
+                  formContext="propiedad"
+                  fields={formFields}
+                  currentValues={formData}
+                  onSuggestionsApply={handleAISuggestions}
+                  additionalContext={buildings.length > 0 ? `Edificios disponibles: ${buildings.map(b => b.nombre).join(', ')}` : undefined}
+                />
               </div>
             </div>
 
