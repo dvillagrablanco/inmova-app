@@ -17,7 +17,10 @@ import {
   sendPushNotificationToMany,
   NotificationPayload,
 } from './push-notification-service';
-import { enviarSMSDirecto } from './sms-service';
+import { enviarSMS } from './sms-service';
+
+// Wrapper para mantener compatibilidad
+const enviarSMSDirecto = enviarSMS;
 import nodemailer from 'nodemailer';
 
 // ============================================================================

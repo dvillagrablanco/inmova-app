@@ -55,8 +55,16 @@ interface ControlCumplimiento {
 
 // Datos cargados desde API /api/vivienda-social/compliance
 
+interface AlertaNormativa {
+  id: string;
+  tipo: 'critica' | 'aviso' | 'info';
+  mensaje: string;
+  fecha: string;
+}
+
 export default function ViviendaSocialCompliancePage() {
   const [controles, setControles] = useState<ControlCumplimiento[]>([]);
+  const [alertas, setAlertas] = useState<AlertaNormativa[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterEstado, setFilterEstado] = useState<string>('all');
 
@@ -67,7 +75,8 @@ export default function ViviendaSocialCompliancePage() {
       const response = await fetch('/api/vivienda-social/compliance');
       if (response.ok) {
         const data = await response.json();
-        setControles(data.data || []);
+        setControles(data.data?.controles || data.data || []);
+        setAlertas(data.data?.alertas || []);
       }
     } catch (error) {
       console.error('Error fetching compliance:', error);
@@ -355,21 +364,25 @@ export default function ViviendaSocialCompliancePage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {ALERTAS_NORMATIVAS.map((alerta) => (
-                <div
-                  key={alerta.id}
-                  className={`p-3 rounded-lg border ${
-                    alerta.tipo === 'critica'
-                      ? 'bg-red-50 border-red-200'
-                      : alerta.tipo === 'aviso'
-                      ? 'bg-yellow-50 border-yellow-200'
-                      : 'bg-blue-50 border-blue-200'
-                  }`}
-                >
-                  <p className="text-sm">{alerta.mensaje}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{alerta.fecha}</p>
-                </div>
-              ))}
+              {alertas.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No hay alertas activas</p>
+              ) : (
+                alertas.map((alerta) => (
+                  <div
+                    key={alerta.id}
+                    className={`p-3 rounded-lg border ${
+                      alerta.tipo === 'critica'
+                        ? 'bg-red-50 border-red-200'
+                        : alerta.tipo === 'aviso'
+                        ? 'bg-yellow-50 border-yellow-200'
+                        : 'bg-blue-50 border-blue-200'
+                    }`}
+                  >
+                    <p className="text-sm">{alerta.mensaje}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{alerta.fecha}</p>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
 
