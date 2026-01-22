@@ -59,9 +59,18 @@ const defaultObjetivos: ObjetivosMensuales = {
   leadsObjetivo: 1,
 };
 
+interface Cita {
+  id: string;
+  cliente: string;
+  fecha: string;
+  hora: string;
+  comercial: string;
+}
+
 export default function RealEstateDeveloperCommercialPage() {
   const [comerciales, setComerciales] = useState<Comercial[]>([]);
   const [objetivosMensuales, setObjetivosMensuales] = useState<ObjetivosMensuales>(defaultObjetivos);
+  const [citasProximas, setCitasProximas] = useState<Cita[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -73,6 +82,9 @@ export default function RealEstateDeveloperCommercialPage() {
           setComerciales(data.data?.comerciales || data.data || []);
           if (data.data?.objetivosMensuales) {
             setObjetivosMensuales(data.data.objetivosMensuales);
+          }
+          if (data.data?.citasProximas) {
+            setCitasProximas(data.data.citasProximas);
           }
         }
       } catch (error) {
@@ -324,7 +336,7 @@ export default function RealEstateDeveloperCommercialPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {CITAS_PROXIMAS.map((cita) => (
+            {citasProximas.map((cita) => (
               <div
                 key={cita.id}
                 className="p-3 border rounded-lg"

@@ -183,7 +183,7 @@ export default function PortalProveedorReseñasPage() {
                     <span className="text-sm w-3">{stars}</span>
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                     <Progress
-                      value={(count / totalReviews) * 100}
+                      value={totalReviews > 0 ? (count / totalReviews) * 100 : 0}
                       className="flex-1"
                     />
                     <span className="text-sm text-muted-foreground w-8">
@@ -218,7 +218,9 @@ export default function PortalProveedorReseñasPage() {
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Satisfacción</span>
               <span className="font-semibold text-green-600">
-                {Math.round((ratingDistribution[0].count + ratingDistribution[1].count) / totalReviews * 100)}%
+                {totalReviews > 0 && ratingDistribution.length >= 2
+                  ? Math.round(((ratingDistribution[0]?.count || 0) + (ratingDistribution[1]?.count || 0)) / totalReviews * 100)
+                  : 0}%
               </span>
             </div>
             <div className="pt-4 border-t">
