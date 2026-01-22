@@ -292,10 +292,10 @@ export async function POST(request: NextRequest) {
       ];
     }
 
-    // Llamar a Claude
+    // Llamar a Claude - usar modelo disponible
     const client = getAnthropicClient();
     const response = await client.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-3-5-sonnet-20240620',
       max_tokens: 2048,
       temperature: 0.1, // Baja temperatura para extracción precisa
       messages,
