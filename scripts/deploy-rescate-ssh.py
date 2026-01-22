@@ -5,6 +5,7 @@ Fecha: 22 Enero 2026
 """
 
 import sys
+import os
 import time
 import paramiko
 from datetime import datetime
@@ -15,7 +16,7 @@ from datetime import datetime
 SSH_HOST = "157.180.119.236"
 SSH_PORT = 22
 SSH_USER = "root"
-SSH_PASS = "hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo="
+SSH_PASS = os.getenv("SSH_PASSWORD", "")  # Set via environment variable
 REMOTE_PATH = "/opt/inmova-app"
 GIT_BRANCH = "main"
 

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Quick SSH Deployment"""
+import os
 import paramiko
 import time
 
 HOST = "157.180.119.236"
 USER = "root"
-PASS = "hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo="
+PASS = os.getenv("SSH_PASSWORD", "")  # Set via environment variable
 
 def run(ssh, cmd, timeout=300):
     print(f"\n>>> {cmd[:80]}...")
