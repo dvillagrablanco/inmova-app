@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import dynamic from 'next/dynamic';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 import { UserPlus, Home, ArrowLeft, Save, Upload, FileText, X, Loader2 } from 'lucide-react';
@@ -29,6 +30,17 @@ import {
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
 import { Badge } from '@/components/ui/badge';
+
+// AI Components - Dynamic imports for client-side only
+const TenantDocumentAnalyzer = dynamic(
+  () => import('@/components/inquilinos/TenantDocumentAnalyzer').then(mod => ({ default: mod.TenantDocumentAnalyzer })),
+  { ssr: false }
+);
+
+const FormAIAssistant = dynamic(
+  () => import('@/components/ai/FormAIAssistant').then(mod => ({ default: mod.FormAIAssistant })),
+  { ssr: false }
+);
 
 interface Unit {
   id: string;
@@ -184,6 +196,44 @@ export default function NuevoCandidatoPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // AI Document Analysis handler
+  const handleCandidateDataExtracted = (extractedData: Partial<typeof formData>) => {
+    // Map tenant field names to candidate field names
+    const mappedData: Partial<typeof formData> = {};
+    if (extractedData.nombre) mappedData.nombreCompleto = extractedData.nombre as string;
+    if (extractedData.documentoIdentidad) mappedData.dni = extractedData.documentoIdentidad as string;
+    if (extractedData.email) mappedData.email = extractedData.email as string;
+    if (extractedData.telefono) mappedData.telefono = extractedData.telefono as string;
+    if (extractedData.fechaNacimiento) mappedData.fechaNacimiento = extractedData.fechaNacimiento as string;
+    if (extractedData.profesion) mappedData.profesion = extractedData.profesion as string;
+    if (extractedData.ingresosMensuales) mappedData.ingresosMensuales = extractedData.ingresosMensuales as string;
+    
+    setFormData(prev => ({
+      ...prev,
+      ...mappedData,
+    }));
+    toast.success('Datos del candidato aplicados desde el documento');
+  };
+
+  // AI Form Assistant handler
+  const handleAISuggestions = (suggestions: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...suggestions,
+    }));
+  };
+
+  // Form fields definition for AI Assistant
+  const formFields = [
+    { name: 'nombreCompleto', label: 'Nombre Completo', type: 'text' as const, required: true },
+    { name: 'dni', label: 'DNI/NIE', type: 'text' as const, required: true },
+    { name: 'email', label: 'Email', type: 'email' as const, required: true },
+    { name: 'telefono', label: 'Teléfono', type: 'phone' as const },
+    { name: 'fechaNacimiento', label: 'Fecha de Nacimiento', type: 'date' as const },
+    { name: 'profesion', label: 'Profesión', type: 'text' as const },
+    { name: 'ingresosMensuales', label: 'Ingresos Mensuales (€)', type: 'currency' as const },
+  ];
+
   if (status === 'loading') {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -231,12 +281,35 @@ export default function NuevoCandidatoPage() {
             </div>
 
             {/* Header Section */}
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Nuevo Candidato</h1>
-              <p className="text-muted-foreground">
-                Registra un nuevo candidato interesado en alquilar
-              </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Nuevo Candidato</h1>
+                <p className="text-muted-foreground">
+                  Registra un nuevo candidato interesado en alquilar
+                </p>
+              </div>
+              <FormAIAssistant
+                formContext="inquilino"
+                fields={formFields}
+                currentValues={formData}
+                onSuggestionsApply={handleAISuggestions}
+                additionalContext={units.length > 0 ? `Propiedades disponibles: ${units.map(u => `${u.building.nombre} - ${u.numero}`).join(', ')}` : undefined}
+              />
             </div>
+
+            {/* AI Document Analyzer for Candidate Documents */}
+            <TenantDocumentAnalyzer
+              onDataExtracted={handleCandidateDataExtracted}
+              currentFormData={{
+                nombre: formData.nombreCompleto,
+                email: formData.email,
+                telefono: formData.telefono,
+                documentoIdentidad: formData.dni,
+                fechaNacimiento: formData.fechaNacimiento,
+                profesion: formData.profesion,
+                ingresosMensuales: formData.ingresosMensuales,
+              }}
+            />
 
             {/* Formulario */}
             <Card>

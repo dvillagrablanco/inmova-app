@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -44,6 +45,12 @@ import {
   Save,
   Image as ImageIcon,
 } from 'lucide-react';
+
+// AI Components - Dynamic imports for client-side only
+const FormAIAssistant = dynamic(
+  () => import('@/components/ai/FormAIAssistant').then(mod => ({ default: mod.FormAIAssistant })),
+  { ssr: false }
+);
 
 interface Property {
   id: string;
@@ -123,6 +130,38 @@ export default function NuevoAnuncioSTRPage() {
     }));
   };
 
+  // AI Form Assistant handler
+  const handleAISuggestions = (suggestions: Record<string, any>) => {
+    setForm(prev => ({
+      ...prev,
+      ...suggestions,
+    }));
+  };
+
+  // Form fields definition for AI Assistant
+  const formFields = [
+    { name: 'titulo', label: 'Título del Anuncio', type: 'text' as const, required: true },
+    { name: 'descripcion', label: 'Descripción', type: 'textarea' as const },
+    { name: 'tipoAlojamiento', label: 'Tipo de Alojamiento', type: 'select' as const, options: [
+      { value: 'entire_place', label: 'Alojamiento Entero' },
+      { value: 'private_room', label: 'Habitación Privada' },
+      { value: 'shared_room', label: 'Habitación Compartida' },
+    ]},
+    { name: 'capacidad', label: 'Capacidad (huéspedes)', type: 'number' as const },
+    { name: 'habitaciones', label: 'Habitaciones', type: 'number' as const },
+    { name: 'camas', label: 'Camas', type: 'number' as const },
+    { name: 'banos', label: 'Baños', type: 'number' as const },
+    { name: 'precioNoche', label: 'Precio por Noche (€)', type: 'currency' as const, required: true },
+    { name: 'precioLimpieza', label: 'Tarifa de Limpieza (€)', type: 'currency' as const },
+    { name: 'minimoNoches', label: 'Mínimo de Noches', type: 'number' as const },
+    { name: 'maximoNoches', label: 'Máximo de Noches', type: 'number' as const },
+    { name: 'politicaCancelacion', label: 'Política de Cancelación', type: 'select' as const, options: [
+      { value: 'flexible', label: 'Flexible' },
+      { value: 'moderada', label: 'Moderada' },
+      { value: 'estricta', label: 'Estricta' },
+    ]},
+  ];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -191,14 +230,23 @@ export default function NuevoAnuncioSTRPage() {
         </Breadcrumb>
 
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">Nuevo Anuncio STR</h1>
-            <p className="text-muted-foreground">Crea un nuevo anuncio para alquiler vacacional</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => router.back()}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold">Nuevo Anuncio STR</h1>
+              <p className="text-muted-foreground">Crea un nuevo anuncio para alquiler vacacional</p>
+            </div>
           </div>
+          <FormAIAssistant
+            formContext="propiedad"
+            fields={formFields}
+            currentValues={form}
+            onSuggestionsApply={handleAISuggestions}
+            additionalContext="Contexto: Alquiler vacacional / Short-Term Rental (STR). Considerar precios de mercado para Airbnb/Booking."
+          />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
