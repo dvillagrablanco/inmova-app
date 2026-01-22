@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
+import * as ClaudeAIService from '@/lib/claude-ai-service';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -239,8 +240,60 @@ function searchKnowledgeBase(query: string): any[] {
   return results.slice(0, 3);
 }
 
-// Generar respuesta inteligente
-function generateResponse(query: string, results: any[], sentiment: any): any {
+// Generar respuesta con IA (Claude) cuando esté disponible
+async function generateAIResponse(query: string, conversationHistory: any[], userContext: string): Promise<string | null> {
+  try {
+    if (!ClaudeAIService.isClaudeConfigured()) {
+      logger.info('[Chatbot] Claude no configurado, usando respuestas predefinidas');
+      return null;
+    }
+    
+    const systemPrompt = `Eres el asistente inteligente de INMOVA, una plataforma de gestión inmobiliaria PropTech.
+
+Tu rol es ayudar a usuarios con:
+- Gestión de edificios, unidades y propiedades
+- Registro y gestión de inquilinos  
+- Creación y gestión de contratos
+- Pagos y cobros de alquiler
+- Mantenimiento e incidencias
+- Cualquier duda sobre la plataforma
+
+Contexto del usuario: ${userContext}
+
+Reglas importantes:
+1. Responde SIEMPRE en español
+2. Sé conciso y útil (máximo 200 palabras)
+3. Si no sabes algo, sugiere contactar con soporte
+4. Incluye pasos concretos cuando sea posible
+5. Usa emojis ocasionalmente para ser más amigable
+6. Si detectas frustración, sé especialmente empático
+
+Información de la plataforma:
+- Precio: €149/mes empresas, €49/mes particulares
+- Incluye: 88 módulos, usuarios ilimitados, soporte 24/7
+- Funciones clave: gestión propiedades, inquilinos, contratos, pagos, mantenimiento, IA integrada`;
+
+    // Convertir historial de conversación al formato de Claude
+    const history = conversationHistory.slice(-6).map(msg => ({
+      role: msg.sender === 'user' ? 'user' as const : 'assistant' as const,
+      content: msg.text
+    }));
+
+    const response = await ClaudeAIService.chat(query, {
+      systemPrompt,
+      maxTokens: 500,
+      temperature: 0.7
+    });
+
+    return response;
+  } catch (error) {
+    logger.error('[Chatbot] Error con Claude AI:', error);
+    return null;
+  }
+}
+
+// Generar respuesta inteligente (con fallback a respuestas predefinidas)
+async function generateResponse(query: string, results: any[], sentiment: any, conversationHistory: any[] = [], userContext: string = ''): Promise<any> {
   const lowerQuery = query.toLowerCase();
   
   // Detectar intención
@@ -248,107 +301,147 @@ function generateResponse(query: string, results: any[], sentiment: any): any {
   let response = '';
   let confidence = 0.5;
   const suggestedActions: any[] = [];
+  let usedAI = false;
   
-  // Saludos
-  if (lowerQuery.match(/hola|buenos días|buenas tardes|hey|hi/)) {
-    response = '¡Hola! 👋 Estoy aquí para ayudarte. ¿En qué puedo asistirte hoy?';
-    confidence = 1.0;
-    intent = 'greeting';
-    
-    suggestedActions.push(
-      { id: '1', label: 'Ver tutoriales', action: 'navigate:/help', icon: 'BookOpen' },
-      { id: '2', label: 'Contactar soporte', action: 'create_ticket', icon: 'Ticket' }
-    );
-  }
-  // Pricing
-  else if (lowerQuery.match(/precio|costo|tarifa|plan|cuanto|pagar/)) {
-    response = 'INMOVA tiene un plan único de €149/mes para empresas con TODO incluido: 88 módulos, usuarios ilimitados, propiedades ilimitadas y soporte 24/7. También ofrecemos €49/mes para propietarios individuales. ¡Prueba gratis 30 días!';
-    confidence = 0.95;
-    intent = 'pricing';
-    
-    suggestedActions.push(
-      { id: '1', label: 'Ver detalles de precios', action: 'navigate:/landing', icon: 'ExternalLink' },
-      { id: '2', label: 'Iniciar prueba gratis', action: 'navigate:/register', icon: 'Ticket' }
-    );
-  }
-  // Crear/Añadir
-  else if (lowerQuery.match(/crear|añadir|agregar|nuevo|registrar/)) {
-    if (lowerQuery.includes('edificio') || lowerQuery.includes('propiedad') || lowerQuery.includes('inmueble')) {
-      response = 'Para crear un edificio, ve a Edificios > Nuevo Edificio. Completa los datos básicos y ¡listo! Te recomiendo ver el video tutorial para una guía paso a paso.';
+  // Intentar respuesta con IA primero para consultas complejas
+  const isComplexQuery = !lowerQuery.match(/^(hola|buenos días|buenas tardes|hey|hi|gracias|ok|vale|sí|no)$/i);
+  
+  if (isComplexQuery) {
+    const aiResponse = await generateAIResponse(query, conversationHistory, userContext);
+    if (aiResponse) {
+      response = aiResponse;
       confidence = 0.9;
-      intent = 'how_to';
+      intent = 'ai_response';
+      usedAI = true;
       
-      suggestedActions.push(
-        { id: '1', label: 'Crear edificio ahora', action: 'navigate:/edificios/nuevo', icon: 'ExternalLink' },
-        { id: '2', label: 'Ver tutorial', action: 'play_video:https://www.youtube.com/embed/zm55Gdl5G1Q', icon: 'BookOpen' }
-      );
-    } else if (lowerQuery.includes('unidad') || lowerQuery.includes('apartamento') || lowerQuery.includes('piso')) {
-      response = 'Para añadir unidades, primero debes tener un edificio creado. Luego ve a Unidades > Nueva Unidad, selecciona el edificio y completa los datos.';
-      confidence = 0.9;
-      intent = 'how_to';
-      
-      suggestedActions.push(
-        { id: '1', label: 'Crear unidad', action: 'navigate:/unidades/nuevo', icon: 'ExternalLink' },
-        { id: '2', label: 'Ver mis edificios', action: 'navigate:/edificios', icon: 'BookOpen' }
-      );
-    } else if (lowerQuery.includes('inquilino') || lowerQuery.includes('tenant')) {
-      response = 'Para registrar un inquilino, ve a Inquilinos > Nuevo Inquilino. Completa sus datos personales y podrás asignarlo a una unidad disponible.';
-      confidence = 0.9;
-      intent = 'how_to';
-      
-      suggestedActions.push(
-        { id: '1', label: 'Registrar inquilino', action: 'navigate:/inquilinos/nuevo', icon: 'ExternalLink' },
-        { id: '2', label: 'Ver screening', action: 'navigate:/screening', icon: 'BookOpen' }
-      );
-    } else if (lowerQuery.includes('contrato')) {
-      response = 'Para crear un contrato, ve a Contratos > Nuevo Contrato. Selecciona el inquilino y la unidad, define las condiciones y genera el PDF automáticamente.';
-      confidence = 0.9;
-      intent = 'how_to';
-      
-      suggestedActions.push(
-        { id: '1', label: 'Crear contrato', action: 'navigate:/contratos/nuevo', icon: 'ExternalLink' },
-        { id: '2', label: 'Ver firma digital', action: 'navigate:/firma-digital', icon: 'BookOpen' }
-      );
-    } else {
-      response = 'Puedo ayudarte a crear edificios, unidades, inquilinos, contratos y más. ¿Qué te gustaría crear específicamente?';
-      confidence = 0.6;
+      // Añadir acciones relevantes según el contenido
+      if (lowerQuery.includes('inquilino') || lowerQuery.includes('tenant')) {
+        suggestedActions.push(
+          { id: '1', label: 'Ir a Inquilinos', action: 'navigate:/inquilinos', icon: 'ExternalLink' },
+          { id: '2', label: 'Nuevo Inquilino', action: 'navigate:/inquilinos/nuevo', icon: 'BookOpen' }
+        );
+      } else if (lowerQuery.includes('edificio') || lowerQuery.includes('propiedad')) {
+        suggestedActions.push(
+          { id: '1', label: 'Ir a Edificios', action: 'navigate:/edificios', icon: 'ExternalLink' },
+          { id: '2', label: 'Nuevo Edificio', action: 'navigate:/edificios/nuevo', icon: 'BookOpen' }
+        );
+      } else if (lowerQuery.includes('contrato')) {
+        suggestedActions.push(
+          { id: '1', label: 'Ir a Contratos', action: 'navigate:/contratos', icon: 'ExternalLink' },
+          { id: '2', label: 'Nuevo Contrato', action: 'navigate:/contratos/nuevo', icon: 'BookOpen' }
+        );
+      } else if (lowerQuery.includes('pago') || lowerQuery.includes('cobr')) {
+        suggestedActions.push(
+          { id: '1', label: 'Ver Pagos', action: 'navigate:/pagos', icon: 'ExternalLink' },
+          { id: '2', label: 'Ir a Finanzas', action: 'navigate:/finanzas', icon: 'BookOpen' }
+        );
+      }
     }
   }
-  // Problemas/Errores
-  else if (lowerQuery.match(/problema|error|fallo|no funciona|no puedo|ayuda/)) {
-    response = 'Lamento que estés teniendo problemas. Para ayudarte mejor, ¿podrías especificar qué funcionalidad no está funcionando? Mientras tanto, revisa si tu sesión está activa y los permisos de tu usuario.';
-    confidence = 0.7;
-    intent = 'support';
-    
-    suggestedActions.push(
-      { id: '1', label: 'Crear ticket de soporte', action: 'create_ticket', icon: 'Ticket' },
-      { id: '2', label: 'Ver FAQs', action: 'navigate:/help', icon: 'BookOpen' },
-      { id: '3', label: 'Hablar con humano', action: 'navigate:/chat', icon: 'MessageCircle' }
-    );
-  }
-  // Respuesta basada en búsqueda
-  else if (results.length > 0) {
-    const topResult = results[0];
-    response = `Encontré información relevante: ${topResult.content.substring(0, 300)}...\n\nPuedes ver más detalles en los artículos relacionados.`;
-    confidence = Math.min(0.8, topResult.relevanceScore / 5);
-    intent = 'knowledge_base';
-    
-    if (topResult.videoUrl) {
+  
+  // Fallback a respuestas predefinidas si IA no disponible o para saludos simples
+  if (!usedAI) {
+    // Saludos
+    if (lowerQuery.match(/hola|buenos días|buenas tardes|hey|hi/)) {
+      response = '¡Hola! 👋 Soy el asistente IA de INMOVA. Estoy aquí para ayudarte con cualquier duda sobre la plataforma. ¿En qué puedo asistirte hoy?';
+      confidence = 1.0;
+      intent = 'greeting';
+      
       suggestedActions.push(
-        { id: '1', label: 'Ver tutorial en video', action: `play_video:${topResult.videoUrl}`, icon: 'BookOpen' }
+        { id: '1', label: 'Ver tutoriales', action: 'navigate:/help', icon: 'BookOpen' },
+        { id: '2', label: 'Contactar soporte', action: 'create_ticket', icon: 'Ticket' }
       );
     }
-  }
-  // Respuesta genérica
-  else {
-    response = 'No estoy seguro de cómo responder a eso específicamente. Te recomiendo:\n\n1. Consultar la sección de Ayuda\n2. Ver los tutoriales en video\n3. Crear un ticket de soporte para asistencia personalizada';
-    confidence = 0.3;
-    
-    suggestedActions.push(
-      { id: '1', label: 'Ver ayuda', action: 'navigate:/help', icon: 'BookOpen' },
-      { id: '2', label: 'Crear ticket', action: 'create_ticket', icon: 'Ticket' },
-      { id: '3', label: 'Contactar equipo', action: 'navigate:/chat', icon: 'ExternalLink' }
-    );
+    // Pricing
+    else if (lowerQuery.match(/precio|costo|tarifa|plan|cuanto|pagar/)) {
+      response = '💰 INMOVA tiene un plan único de €149/mes para empresas con TODO incluido: 88 módulos, usuarios ilimitados, propiedades ilimitadas y soporte 24/7. También ofrecemos €49/mes para propietarios individuales. ¡Prueba gratis 30 días!';
+      confidence = 0.95;
+      intent = 'pricing';
+      
+      suggestedActions.push(
+        { id: '1', label: 'Ver detalles de precios', action: 'navigate:/landing', icon: 'ExternalLink' },
+        { id: '2', label: 'Iniciar prueba gratis', action: 'navigate:/register', icon: 'Ticket' }
+      );
+    }
+    // Crear/Añadir
+    else if (lowerQuery.match(/crear|añadir|agregar|nuevo|registrar/)) {
+      if (lowerQuery.includes('edificio') || lowerQuery.includes('propiedad') || lowerQuery.includes('inmueble')) {
+        response = '🏢 Para crear un edificio, ve a Edificios > Nuevo Edificio. Completa los datos básicos (nombre, dirección, tipo) y ¡listo! Te recomiendo ver el video tutorial para una guía paso a paso.';
+        confidence = 0.9;
+        intent = 'how_to';
+        
+        suggestedActions.push(
+          { id: '1', label: 'Crear edificio ahora', action: 'navigate:/edificios/nuevo', icon: 'ExternalLink' },
+          { id: '2', label: 'Ver tutorial', action: 'play_video:https://www.youtube.com/embed/zm55Gdl5G1Q', icon: 'BookOpen' }
+        );
+      } else if (lowerQuery.includes('unidad') || lowerQuery.includes('apartamento') || lowerQuery.includes('piso')) {
+        response = '🏠 Para añadir unidades, primero debes tener un edificio creado. Luego ve a Unidades > Nueva Unidad, selecciona el edificio y completa los datos (tipo, m², habitaciones, precio).';
+        confidence = 0.9;
+        intent = 'how_to';
+        
+        suggestedActions.push(
+          { id: '1', label: 'Crear unidad', action: 'navigate:/unidades/nuevo', icon: 'ExternalLink' },
+          { id: '2', label: 'Ver mis edificios', action: 'navigate:/edificios', icon: 'BookOpen' }
+        );
+      } else if (lowerQuery.includes('inquilino') || lowerQuery.includes('tenant')) {
+        response = '👤 Para registrar un inquilino:\n\n1. Ve a Inquilinos > Nuevo Inquilino\n2. Completa datos personales (nombre, email, teléfono, DNI)\n3. Opcionalmente sube documentos\n4. Guarda y podrás asignarlo a una unidad\n\n¡Te guío paso a paso si necesitas!';
+        confidence = 0.9;
+        intent = 'how_to';
+        
+        suggestedActions.push(
+          { id: '1', label: 'Registrar inquilino', action: 'navigate:/inquilinos/nuevo', icon: 'ExternalLink' },
+          { id: '2', label: 'Ver screening', action: 'navigate:/screening', icon: 'BookOpen' }
+        );
+      } else if (lowerQuery.includes('contrato')) {
+        response = '📝 Para crear un contrato:\n\n1. Ve a Contratos > Nuevo Contrato\n2. Selecciona inquilino y unidad\n3. Define fechas, renta y depósito\n4. Añade cláusulas (opcional)\n5. Genera PDF automáticamente\n6. Envía para firma digital';
+        confidence = 0.9;
+        intent = 'how_to';
+        
+        suggestedActions.push(
+          { id: '1', label: 'Crear contrato', action: 'navigate:/contratos/nuevo', icon: 'ExternalLink' },
+          { id: '2', label: 'Ver firma digital', action: 'navigate:/firma-digital', icon: 'BookOpen' }
+        );
+      } else {
+        response = '🛠️ Puedo ayudarte a crear:\n\n• Edificios y propiedades\n• Unidades (pisos, locales, habitaciones)\n• Inquilinos\n• Contratos de alquiler\n• Tareas y recordatorios\n\n¿Qué te gustaría crear específicamente?';
+        confidence = 0.6;
+      }
+    }
+    // Problemas/Errores
+    else if (lowerQuery.match(/problema|error|fallo|no funciona|no puedo|ayuda/)) {
+      response = '😟 Lamento que estés teniendo problemas. Para ayudarte mejor:\n\n1. ¿Qué acción intentabas realizar?\n2. ¿Qué mensaje de error aparece?\n\nMientras tanto, prueba a refrescar la página o cerrar y abrir sesión.';
+      confidence = 0.7;
+      intent = 'support';
+      
+      suggestedActions.push(
+        { id: '1', label: 'Crear ticket de soporte', action: 'create_ticket', icon: 'Ticket' },
+        { id: '2', label: 'Ver FAQs', action: 'navigate:/help', icon: 'BookOpen' },
+        { id: '3', label: 'Hablar con humano', action: 'navigate:/chat', icon: 'MessageCircle' }
+      );
+    }
+    // Respuesta basada en búsqueda en knowledge base
+    else if (results.length > 0) {
+      const topResult = results[0];
+      response = `📚 Encontré información relevante:\n\n${topResult.content.substring(0, 300)}...\n\nPuedes ver más detalles en los artículos relacionados.`;
+      confidence = Math.min(0.8, topResult.relevanceScore / 5);
+      intent = 'knowledge_base';
+      
+      if (topResult.videoUrl) {
+        suggestedActions.push(
+          { id: '1', label: 'Ver tutorial en video', action: `play_video:${topResult.videoUrl}`, icon: 'BookOpen' }
+        );
+      }
+    }
+    // Respuesta genérica
+    else {
+      response = '🤔 No estoy seguro de cómo responder a eso específicamente. Te recomiendo:\n\n1. Consultar la sección de Ayuda\n2. Ver los tutoriales en video\n3. Crear un ticket de soporte\n\n¿Puedo ayudarte con algo más concreto?';
+      confidence = 0.3;
+      
+      suggestedActions.push(
+        { id: '1', label: 'Ver ayuda', action: 'navigate:/help', icon: 'BookOpen' },
+        { id: '2', label: 'Crear ticket', action: 'create_ticket', icon: 'Ticket' },
+        { id: '3', label: 'Contactar equipo', action: 'navigate:/chat', icon: 'ExternalLink' }
+      );
+    }
   }
   
   // Si la urgencia es alta, añadir acción de escalamiento
@@ -357,7 +450,9 @@ function generateResponse(query: string, results: any[], sentiment: any): any {
       { id: '0', label: 'Hablar con un humano AHORA', action: 'navigate:/chat', icon: 'AlertTriangle' }
     );
     
-    response = `⚠️ Detecto que es urgente. ${response}\n\nTe sugiero contactar directamente con nuestro equipo para resolverlo rápidamente.`;
+    if (!usedAI) {
+      response = `⚠️ Detecto que es urgente. ${response}\n\nTe sugiero contactar directamente con nuestro equipo para resolverlo rápidamente.`;
+    }
   }
   
   return {
@@ -371,7 +466,8 @@ function generateResponse(query: string, results: any[], sentiment: any): any {
       excerpt: r.excerpt,
       videoUrl: r.videoUrl
     })),
-    sentimentAnalysis: sentiment
+    sentimentAnalysis: sentiment,
+    usedAI
   };
 }
 
@@ -392,15 +488,18 @@ export async function POST(request: NextRequest) {
       // Buscar en base de conocimientos
       const results = searchKnowledgeBase(question);
       
-      // Generar respuesta
-      const response = generateResponse(question, results, sentiment);
+      // Contexto del usuario para IA
+      const userContext = `Usuario: ${session.user.name || session.user.email} (${session.user.role || 'user'})`;
+      
+      // Generar respuesta (ahora con IA cuando esté disponible)
+      const response = await generateResponse(question, results, sentiment, conversationHistory || [], userContext);
       
       // Registrar conversación para análisis (opcional)
       try {
         await prisma.supportInteraction.create({
           data: {
             userId: session.user.id,
-            type: 'chatbot',
+            type: response.usedAI ? 'chatbot_ai' : 'chatbot',
             question,
             response: response.message,
             confidence: response.confidence,

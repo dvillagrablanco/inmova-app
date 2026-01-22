@@ -4,8 +4,15 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import dynamic from 'next/dynamic';
 
 import { Users, Home, ArrowLeft, Save, Upload, FileText, X, Loader2 } from 'lucide-react';
+
+// Cargar el asistente de IA de forma dinámica para evitar problemas de SSR
+const TenantFormAIAssistant = dynamic(
+  () => import('@/components/inquilinos/TenantFormAIAssistant'),
+  { ssr: false }
+);
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -505,6 +512,9 @@ export default function NuevoInquilinoPage() {
                 }
               />
             </form>
+
+            {/* Asistente IA para el formulario */}
+            <TenantFormAIAssistant formData={formData} />
           </div>
         </AuthenticatedLayout>
   );
