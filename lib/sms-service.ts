@@ -624,3 +624,46 @@ export async function generarSMSAutomaticos(evento: string, companyId: string) {
   
   return smsGenerados;
 }
+
+/**
+ * ENVÍA UN SMS DIRECTAMENTE A UN NÚMERO
+ * 
+ * Esta función envía un SMS sin pasar por el sistema de tenants.
+ * Útil para notificaciones del sistema, alertas urgentes, etc.
+ * 
+ * @param telefono - Número de teléfono de destino
+ * @param mensaje - Mensaje a enviar
+ * @returns Resultado del envío
+ */
+export async function enviarSMSDirecto(
+  telefono: string,
+  mensaje: string
+): Promise<{ success: boolean; sid?: string; error?: string }> {
+  if (!isTwilioConfigured()) {
+    logger.warn('📱 Twilio no configurado - SMS no enviado:', { telefono, mensaje: mensaje.substring(0, 50) });
+    return { success: false, error: 'Twilio no configurado' };
+  }
+
+  if (!telefono || !mensaje) {
+    return { success: false, error: 'Teléfono y mensaje son requeridos' };
+  }
+
+  try {
+    const twilioClient = twilio(
+      process.env.TWILIO_ACCOUNT_SID!,
+      process.env.TWILIO_AUTH_TOKEN!
+    );
+
+    const result = await twilioClient.messages.create({
+      body: mensaje,
+      from: process.env.TWILIO_FROM_NUMBER,
+      to: telefono,
+    });
+
+    logger.info(`📱 SMS enviado directamente a ${telefono} - SID: ${result.sid}`);
+    return { success: true, sid: result.sid };
+  } catch (error: any) {
+    logger.error(`❌ Error enviando SMS directo a ${telefono}:`, error.message);
+    return { success: false, error: error.message };
+  }
+}
