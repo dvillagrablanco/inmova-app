@@ -48,6 +48,7 @@ interface Campana {
 export default function RealEstateDeveloperMarketingPage() {
   const [campanas, setCampanas] = useState<Campana[]>([]);
   const [loading, setLoading] = useState(true);
+  const [leadsRecientes, setLeadsRecientes] = useState<{id: string; nombre: string; proyecto: string; origen: string; fecha: string}[]>([]);
 
   useEffect(() => {
     const fetchCampanas = async () => {
@@ -55,7 +56,10 @@ export default function RealEstateDeveloperMarketingPage() {
         const response = await fetch('/api/real-estate-developer/marketing');
         if (response.ok) {
           const data = await response.json();
-          setCampanas(data.data || []);
+          setCampanas(data.data?.campanas || data.data || []);
+          if (data.data?.leadsRecientes) {
+            setLeadsRecientes(data.data.leadsRecientes);
+          }
         }
       } catch (error) {
         console.error('Error fetching campaigns:', error);
@@ -251,7 +255,7 @@ export default function RealEstateDeveloperMarketingPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {LEADS_RECIENTES.map((lead) => (
+              {leadsRecientes.map((lead) => (
                 <div
                   key={lead.id}
                   className="flex items-center justify-between p-3 border rounded-lg"

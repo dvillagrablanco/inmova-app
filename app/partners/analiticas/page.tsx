@@ -176,7 +176,7 @@ export default function PartnersAnaliticasPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {FUNNEL_DATA.map((stage, index) => (
+              {funnelData.map((stage, index) => (
                 <div key={stage.stage} className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="font-medium">{stage.stage}</span>
@@ -187,7 +187,7 @@ export default function PartnersAnaliticasPage() {
                   <div className="h-3 bg-muted rounded-full overflow-hidden">
                     <div
                       className="h-full bg-primary transition-all"
-                      style={{ width: `${index === 0 ? 100 : (stage.count / FUNNEL_DATA[0].count) * 100}%` }}
+                      style={{ width: `${index === 0 ? 100 : (funnelData[0]?.count ? (stage.count / funnelData[0].count) * 100 : 0)}%` }}
                     />
                   </div>
                 </div>
@@ -219,7 +219,7 @@ export default function PartnersAnaliticasPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {CHANNEL_DATA.map((channel) => (
+              {channelData.map((channel) => (
                 <div
                   key={channel.channel}
                   className="flex items-center justify-between p-3 border rounded-lg"
@@ -267,8 +267,8 @@ export default function PartnersAnaliticasPage() {
                 </tr>
               </thead>
               <tbody>
-                {MONTHLY_DATA.map((month, index) => {
-                  const prevMonth = MONTHLY_DATA[index - 1];
+                {monthlyData.map((month, index) => {
+                  const prevMonth = monthlyData[index - 1];
                   const leadChange = prevMonth
                     ? ((month.leads - prevMonth.leads) / prevMonth.leads) * 100
                     : 0;
@@ -301,17 +301,17 @@ export default function PartnersAnaliticasPage() {
                 <tr className="font-bold">
                   <td className="py-3">Total</td>
                   <td className="py-3 text-right">
-                    {MONTHLY_DATA.reduce((sum, m) => sum + m.leads, 0)}
+                    {monthlyData.reduce((sum, m) => sum + m.leads, 0)}
                   </td>
                   <td className="py-3 text-right">
-                    {MONTHLY_DATA.reduce((sum, m) => sum + m.conversiones, 0)}
+                    {monthlyData.reduce((sum, m) => sum + m.conversiones, 0)}
                   </td>
                   <td className="py-3 text-right">
-                    {((MONTHLY_DATA.reduce((sum, m) => sum + m.conversiones, 0) /
-                      MONTHLY_DATA.reduce((sum, m) => sum + m.leads, 0)) * 100).toFixed(1)}%
+                    {monthlyData.length > 0 ? ((monthlyData.reduce((sum, m) => sum + m.conversiones, 0) /
+                      monthlyData.reduce((sum, m) => sum + m.leads, 0)) * 100).toFixed(1) : 0}%
                   </td>
                   <td className="py-3 text-right text-green-600">
-                    €{MONTHLY_DATA.reduce((sum, m) => sum + m.revenue, 0).toLocaleString()}
+                    €{monthlyData.reduce((sum, m) => sum + m.revenue, 0).toLocaleString()}
                   </td>
                 </tr>
               </tfoot>
