@@ -18,6 +18,7 @@ import {
   Maximize,
   Users,
   X,
+  Calendar,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,7 +60,7 @@ interface Unit {
   id: string;
   numero: string;
   tipo: string;
-  modoAlquiler?: 'tradicional' | 'coliving';
+  modoAlquiler?: 'tradicional' | 'media_estancia' | 'coliving';
   estado: string;
   superficie: number;
   habitaciones?: number;
@@ -93,7 +94,7 @@ export default function UnidadesPage() {
   // Leer filtro de modoAlquiler desde la URL
   useEffect(() => {
     const modoAlquilerParam = searchParams.get('modoAlquiler');
-    if (modoAlquilerParam && ['tradicional', 'coliving'].includes(modoAlquilerParam)) {
+    if (modoAlquilerParam && ['tradicional', 'media_estancia', 'coliving'].includes(modoAlquilerParam)) {
       setModoAlquilerFilter(modoAlquilerParam);
     }
   }, [searchParams]);
@@ -207,7 +208,8 @@ export default function UnidadesPage() {
 
     if (modoAlquilerFilter && modoAlquilerFilter !== 'all') {
       const modoLabels: Record<string, string> = {
-        tradicional: 'Alquiler Tradicional',
+        tradicional: 'Larga Duración',
+        media_estancia: 'Media Estancia',
         coliving: 'Coliving',
       };
       filters.push({
@@ -355,7 +357,7 @@ export default function UnidadesPage() {
               )}
             </div>
 
-            {/* Alerta de Modo Coliving */}
+            {/* Alerta de Modo de Alquiler */}
             {modoAlquilerFilter === 'coliving' && (
               <Alert className="border-purple-200 bg-purple-50 dark:border-purple-800 dark:bg-purple-950/30">
                 <Users className="h-5 w-5 text-purple-600" />
@@ -372,6 +374,29 @@ export default function UnidadesPage() {
                       router.push('/unidades');
                     }}
                     className="h-7 text-purple-600 hover:text-purple-800"
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Ver todas
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
+            {modoAlquilerFilter === 'media_estancia' && (
+              <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
+                <Calendar className="h-5 w-5 text-blue-600" />
+                <AlertTitle className="text-blue-800 dark:text-blue-200">
+                  Media Estancia
+                </AlertTitle>
+                <AlertDescription className="text-blue-700 dark:text-blue-300 flex items-center justify-between">
+                  <span>Mostrando unidades para alquileres temporales (1-11 meses)</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => {
+                      setModoAlquilerFilter('all');
+                      router.push('/unidades');
+                    }}
+                    className="h-7 text-blue-600 hover:text-blue-800"
                   >
                     <X className="h-4 w-4 mr-1" />
                     Ver todas
@@ -431,7 +456,13 @@ export default function UnidadesPage() {
                   <SelectItem value="tradicional">
                     <div className="flex items-center gap-2">
                       <Building2 className="h-4 w-4" />
-                      <span>Alquiler Tradicional</span>
+                      <span>Larga Duración (12+ meses)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="media_estancia">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      <span>Media Estancia (1-11 meses)</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="coliving">
@@ -495,12 +526,18 @@ export default function UnidadesPage() {
                       <CardHeader>
                         <div className="flex items-start justify-between">
                           <div className="space-y-1 flex-1">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <CardTitle className="text-lg">Unidad {unit.numero}</CardTitle>
                               {unit.modoAlquiler === 'coliving' && (
                                 <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
                                   <Users className="h-3 w-3 mr-1" />
                                   Coliving
+                                </Badge>
+                              )}
+                              {unit.modoAlquiler === 'media_estancia' && (
+                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                  <Calendar className="h-3 w-3 mr-1" />
+                                  Media Estancia
                                 </Badge>
                               )}
                             </div>

@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import dynamic from 'next/dynamic';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
-import { Home as HomeIcon, ArrowLeft, Save, Building2, Users, Info } from 'lucide-react';
+import { Home as HomeIcon, ArrowLeft, Save, Building2, Users, Info, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -210,7 +210,8 @@ export default function NuevaUnidadPage() {
       { value: 'trastero', label: 'Trastero' },
     ]},
     { name: 'modoAlquiler', label: 'Modo de Alquiler', type: 'select' as const, options: [
-      { value: 'tradicional', label: 'Alquiler Tradicional (Unidad completa)' },
+      { value: 'tradicional', label: 'Alquiler Tradicional (12+ meses)' },
+      { value: 'media_estancia', label: 'Media Estancia (1-11 meses)' },
       { value: 'coliving', label: 'Coliving (Por habitaciones)' },
     ], description: 'El modo de alquiler determina cómo se gestionará esta unidad' },
     { name: 'superficie', label: 'Superficie (m²)', type: 'number' as const, required: true },
@@ -373,7 +374,13 @@ export default function NuevaUnidadPage() {
                               <SelectItem value="tradicional">
                                 <div className="flex items-center gap-2">
                                   <Building2 className="h-4 w-4" />
-                                  <span>Alquiler Tradicional</span>
+                                  <span>Alquiler Tradicional (12+ meses)</span>
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="media_estancia">
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="h-4 w-4" />
+                                  <span>Media Estancia (1-11 meses)</span>
                                 </div>
                               </SelectItem>
                               <SelectItem value="coliving">
@@ -391,7 +398,16 @@ export default function NuevaUnidadPage() {
                               <Building2 className="h-4 w-4" />
                               <AlertTitle className="text-sm">Alquiler Tradicional</AlertTitle>
                               <AlertDescription className="text-xs">
-                                La unidad se alquilará completa a un único inquilino o familia.
+                                Contratos de larga duración (12 meses o más). La unidad se alquila completa a un único inquilino o familia.
+                              </AlertDescription>
+                            </Alert>
+                          )}
+                          {formData.modoAlquiler === 'media_estancia' && (
+                            <Alert className="mt-2 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
+                              <Calendar className="h-4 w-4 text-blue-600" />
+                              <AlertTitle className="text-sm text-blue-800 dark:text-blue-200">Media Estancia</AlertTitle>
+                              <AlertDescription className="text-xs text-blue-700 dark:text-blue-300">
+                                Contratos temporales de 1 a 11 meses. Ideal para estudiantes, profesionales desplazados o alquileres de temporada.
                               </AlertDescription>
                             </Alert>
                           )}

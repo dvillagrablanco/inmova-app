@@ -118,8 +118,9 @@ enum UnitStatus {
 }
 
 enum RentalMode {
-  tradicional // Alquiler completo de la unidad
-  coliving    // Alquiler por habitaciones individuales
+  tradicional    // Alquiler de larga duración (12+ meses)
+  media_estancia // Alquiler temporal (1-11 meses)
+  coliving       // Alquiler por habitaciones individuales
 }
 
 enum ContractStatus {

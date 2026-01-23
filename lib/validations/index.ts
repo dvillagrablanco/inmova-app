@@ -70,7 +70,7 @@ export const unitCreateSchema = z.object({
   tipo: z.enum(['vivienda', 'local', 'garaje', 'trastero', 'oficina', 'nave_industrial', 'coworking_space'])
     .optional()
     .default('vivienda'),
-  modoAlquiler: z.enum(['tradicional', 'coliving'])
+  modoAlquiler: z.enum(['tradicional', 'media_estancia', 'coliving'])
     .optional()
     .default('tradicional'),
   estado: z.enum(['disponible', 'ocupada', 'en_mantenimiento'])
