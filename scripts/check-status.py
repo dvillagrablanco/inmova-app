@@ -1,45 +1,27 @@
 #!/usr/bin/env python3
+import sys
+sys.path.insert(0, '/home/ubuntu/.local/lib/python3.12/site-packages')
 import paramiko
 
-HOST = "157.180.119.236"
-USER = "root"
-PASS = "xqxAkFdA33j3"
+SERVER_IP = "157.180.119.236"
+USERNAME = "root"
+PASSWORD = "hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo="
 
-ssh = paramiko.SSHClient()
-ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+client = paramiko.SSHClient()
+client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+client.connect(SERVER_IP, username=USERNAME, password=PASSWORD, timeout=30)
 
-try:
-    ssh.connect(HOST, 22, USER, PASS, timeout=30)
-    
-    print("\n🔍 VERIFICACIÓN DE ESTADO\n")
-    
-    # Check containers
-    print("1️⃣  Contenedores Docker:")
-    _, out, _ = ssh.exec_command("docker ps -a | grep -E 'inmova|postgres|redis'")
-    out.channel.recv_exit_status()
-    print(out.read().decode('utf-8'))
-    
-    # Check if any container is running
-    print("\n2️⃣  HTTP Test:")
-    _, out, _ = ssh.exec_command("curl -s -I http://localhost:3000 2>&1 | head -5")
-    out.channel.recv_exit_status()
-    result = out.read().decode('utf-8')
-    if result.strip():
-        print(result)
-    else:
-        print("❌ No respuesta")
-    
-    # Check ports
-    print("\n3️⃣  Puertos en uso:")
-    _, out, _ = ssh.exec_command("netstat -tulpn | grep ':3000\\|:5432\\|:6379' | head -5")
-    out.channel.recv_exit_status()
-    print(out.read().decode('utf-8'))
-    
-    # Check docker-compose file
-    print("\n4️⃣  Docker compose file:")
-    _, out, _ = ssh.exec_command("ls -la /opt/inmova-app/docker-compose* 2>&1 | head -5")
-    out.channel.recv_exit_status()
-    print(out.read().decode('utf-8'))
-    
-finally:
-    ssh.close()
+print("=== PM2 Status ===")
+stdin, stdout, stderr = client.exec_command("pm2 status")
+print(stdout.read().decode())
+
+print("=== PM2 Logs (últimas 30 líneas) ===")
+stdin, stdout, stderr = client.exec_command("pm2 logs inmova-app --nostream --lines 30")
+print(stdout.read().decode())
+print(stderr.read().decode())
+
+print("=== Health check local ===")
+stdin, stdout, stderr = client.exec_command("curl -s http://localhost:3000/api/health")
+print(stdout.read().decode())
+
+client.close()

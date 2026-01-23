@@ -234,17 +234,29 @@ export function PersonalizedOnboarding({
       )}
       
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
-          <DialogHeader className="pb-2">
+        <DialogContent className="max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto flex flex-col p-4 sm:p-6">
+          <DialogHeader className="pb-2 flex-shrink-0">
+            {/* Mobile close button - always visible at top */}
+            <div className="flex justify-end mb-2 sm:hidden">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleDismiss}
+                className="text-gray-500 -mr-2"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Cerrar
+              </Button>
+            </div>
             <div className="flex items-center justify-between">
               <div>
                 <Badge variant="secondary" className="mb-2">
                   {onboardingFlow.name}
                 </Badge>
-                <DialogTitle className="text-xl">
+                <DialogTitle className="text-lg sm:text-xl">
                   {currentStep.title}
                 </DialogTitle>
-                <DialogDescription>
+                <DialogDescription className="text-sm">
                   {currentStep.description}
                 </DialogDescription>
               </div>
@@ -252,7 +264,7 @@ export function PersonalizedOnboarding({
                 variant="ghost" 
                 size="icon" 
                 onClick={handleDismiss}
-                className="absolute right-4 top-4"
+                className="absolute right-4 top-4 hidden sm:flex"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -334,25 +346,34 @@ export function PersonalizedOnboarding({
           </div>
           
           {/* Navigation */}
-          <div className="flex items-center justify-between pt-4 border-t">
-            <div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-4 border-t gap-2 sm:gap-0 flex-shrink-0">
+            <div className="order-2 sm:order-1 flex justify-between sm:justify-start">
               {!isFirstStep && (
-                <Button variant="ghost" onClick={handlePrevious}>
+                <Button variant="ghost" onClick={handlePrevious} size="sm">
                   <ChevronLeft className="h-4 w-4 mr-1" />
-                  Anterior
+                  <span className="hidden sm:inline">Anterior</span>
+                  <span className="sm:hidden">Atrás</span>
+                </Button>
+              )}
+              {/* Mobile skip button */}
+              {currentStep.skippable && !isLastStep && (
+                <Button variant="ghost" onClick={handleSkip} size="sm" className="sm:hidden">
+                  <SkipForward className="h-4 w-4 mr-1" />
+                  Saltar
                 </Button>
               )}
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex gap-2 order-1 sm:order-2">
+              {/* Desktop skip button */}
               {currentStep.skippable && !isLastStep && (
-                <Button variant="ghost" onClick={handleSkip}>
+                <Button variant="ghost" onClick={handleSkip} className="hidden sm:flex">
                   <SkipForward className="h-4 w-4 mr-1" />
                   Saltar
                 </Button>
               )}
               
-              <Button onClick={handleNext}>
+              <Button onClick={handleNext} className="flex-1 sm:flex-none">
                 {isLastStep ? (
                   <>
                     <CheckCircle2 className="h-4 w-4 mr-2" />
