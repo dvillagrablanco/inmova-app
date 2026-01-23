@@ -19,7 +19,7 @@ import paramiko
 # Configuración
 HOST = os.environ.get('SSH_HOST', '157.180.119.236')
 USER = os.environ.get('SSH_USER', 'root')
-PASS = os.environ.get('SSH_PASSWORD', 'xcc9brgkMMbf')
+PASS = os.environ.get('SSH_PASSWORD', 'hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo=')
 APP_PATH = '/opt/inmova-app'
 DOMAIN = 'inmovaapp.com'
 
