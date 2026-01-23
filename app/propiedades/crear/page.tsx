@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import dynamic from 'next/dynamic';
 import {
   Home,
   Building2,
@@ -43,6 +44,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PhotoUploader } from '@/components/property/PhotoUploader';
+import logger from '@/lib/logger';
+
+// Cargar el asistente de documentos IA de forma dinámica
+const AIDocumentAssistant = dynamic(
+  () => import('@/components/ai/AIDocumentAssistant').then(mod => mod.AIDocumentAssistant),
+  { ssr: false }
+);
 
 interface Building {
   id: string;
@@ -194,6 +202,23 @@ export default function CrearPropiedadPage() {
     }
   };
 
+  // Callback para aplicar datos extraídos por la IA desde documentos
+  const handleApplyAIData = (data: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...(data.superficie && { superficie: data.superficie.toString() }),
+      ...(data.habitaciones && { habitaciones: data.habitaciones.toString() }),
+      ...(data.banos && { banos: data.banos.toString() }),
+      ...(data.planta && { planta: data.planta.toString() }),
+      ...(data.rentaMensual && { rentaMensual: data.rentaMensual.toString() }),
+      ...(data.numero && { numero: data.numero }),
+      ...(data.tipo && { tipo: data.tipo }),
+      ...(data.descripcion && { descripcion: data.descripcion }),
+      ...(data.orientacion && { orientacion: data.orientacion }),
+    }));
+    toast.success('Datos del documento aplicados al formulario');
+  };
+
   if (status === 'loading' || loadingBuildings) {
     return (
       <AuthenticatedLayout>
@@ -218,6 +243,20 @@ export default function CrearPropiedadPage() {
 
   return (
     <AuthenticatedLayout>
+      {/* Asistente IA de Documentos - Botón flotante */}
+      <AIDocumentAssistant 
+        context="propiedades"
+        variant="floating"
+        position="bottom-right"
+        onApplyData={handleApplyAIData}
+        onAnalysisComplete={(analysis, file) => {
+          logger.info('Documento analizado:', { 
+            filename: file.name, 
+            category: analysis.classification.category 
+          });
+        }}
+      />
+
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Breadcrumbs */}
         <div className="flex items-center gap-4">

@@ -13,6 +13,12 @@ const TenantFormAIAssistant = dynamic(
   () => import('@/components/inquilinos/TenantFormAIAssistant'),
   { ssr: false }
 );
+
+// Cargar el asistente de documentos IA de forma dinámica
+const AIDocumentAssistant = dynamic(
+  () => import('@/components/ai/AIDocumentAssistant').then(mod => mod.AIDocumentAssistant),
+  { ssr: false }
+);
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -174,6 +180,22 @@ export default function NuevoInquilinoPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Callback para aplicar datos extraídos por la IA desde documentos (DNI, contratos, etc.)
+  const handleApplyAIData = (data: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...(data.nombre && { nombre: data.nombre }),
+      ...(data.email && { email: data.email }),
+      ...(data.telefono && { telefono: data.telefono }),
+      ...(data.documentoIdentidad && { documentoIdentidad: data.documentoIdentidad }),
+      ...(data.tipoDocumento && { tipoDocumento: data.tipoDocumento }),
+      ...(data.fechaNacimiento && { fechaNacimiento: data.fechaNacimiento }),
+      ...(data.nacionalidad && { nacionalidad: data.nacionalidad }),
+      ...(data.profesion && { profesion: data.profesion }),
+    }));
+    toast.success('Datos del documento aplicados al formulario');
+  };
+
   if (status === 'loading') {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -189,6 +211,20 @@ export default function NuevoInquilinoPage() {
 
   return (
     <AuthenticatedLayout>
+          {/* Asistente IA de Documentos - Botón flotante para DNIs y documentación */}
+          <AIDocumentAssistant 
+            context="inquilinos"
+            variant="floating"
+            position="bottom-right"
+            onApplyData={handleApplyAIData}
+            onAnalysisComplete={(analysis, file) => {
+              logger.info('Documento analizado:', { 
+                filename: file.name, 
+                category: analysis.classification.category 
+              });
+            }}
+          />
+          
           <div className="container mx-auto p-6 space-y-6">
             {/* Botón Volver y Breadcrumbs */}
             <div className="flex items-center gap-4 pt-4">
