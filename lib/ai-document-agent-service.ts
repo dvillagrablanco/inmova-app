@@ -27,7 +27,7 @@ import {
 // ============================================================================
 
 const CLAUDE_API_KEY = process.env.ANTHROPIC_API_KEY || '';
-const DEFAULT_MODEL = 'claude-3-5-sonnet-20241022';
+const DEFAULT_MODEL = 'claude-3-haiku-20240307';
 const MAX_TOKENS = 4096;
 
 // Lazy initialization para evitar errores en tests/SSR

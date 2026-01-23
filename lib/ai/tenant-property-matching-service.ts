@@ -519,7 +519,7 @@ Se encontraron ${matches.length} propiedades en total.
 Proporciona un breve resumen (máximo 150 palabras) explicando por qué esta propiedad es el mejor match y qué debería considerar el inquilino. Responde en español de forma profesional y amigable.`;
 
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-3-haiku-20240307',
       max_tokens: 300,
       messages: [
         { role: 'user', content: prompt },

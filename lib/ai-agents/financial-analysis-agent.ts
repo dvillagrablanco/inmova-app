@@ -944,7 +944,7 @@ Métricas clave a monitorear:
 - Tasa de ocupación vs óptima`,
   capabilities,
   tools,
-  model: 'claude-3-5-sonnet-20241022',
+  model: 'claude-3-haiku-20240307',
   temperature: 0.5, // Más bajo para análisis más precisos
   maxTokens: 4096,
   enabled: true

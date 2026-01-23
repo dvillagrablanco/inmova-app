@@ -69,7 +69,7 @@ export class AIValuationService {
 
     try {
       const message = await anthropic.messages.create({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-3-haiku-20240307',
         max_tokens: 2048,
         temperature: 0.3, // Baja temperatura para respuestas más consistentes
         messages: [
@@ -281,7 +281,7 @@ Responde en JSON:
 
     try {
       const message = await anthropic.messages.create({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-3-haiku-20240307',
         max_tokens: 1024,
         messages: [{ role: 'user', content: prompt }],
       });

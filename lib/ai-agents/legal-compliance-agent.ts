@@ -910,7 +910,7 @@ IMPORTANTE:
 - Mediación y resolución de conflictos`,
   capabilities,
   tools,
-  model: 'claude-3-5-sonnet-20241022',
+  model: 'claude-3-haiku-20240307',
   temperature: 0.4, // Muy bajo para mayor precisión legal
   maxTokens: 4096,
   enabled: true

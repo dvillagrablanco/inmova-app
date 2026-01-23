@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       status: {
         configured: hasApiKey,
         keyPrefix: hasApiKey ? keyPrefix : null,
-        model: process.env.ANTHROPIC_MODEL || 'claude-3-5-sonnet-20241022',
+        model: process.env.ANTHROPIC_MODEL || 'claude-3-haiku-20240307',
         maxTokens: process.env.ANTHROPIC_MAX_TOKENS || '4096',
       },
       message: hasApiKey 
