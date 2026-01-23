@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
@@ -16,11 +16,14 @@ import {
   Search,
   Square,
   Maximize,
+  Users,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   Select,
   SelectContent,
@@ -56,6 +59,7 @@ interface Unit {
   id: string;
   numero: string;
   tipo: string;
+  modoAlquiler?: 'tradicional' | 'coliving';
   estado: string;
   superficie: number;
   habitaciones?: number;
@@ -71,6 +75,7 @@ interface Unit {
 
 export default function UnidadesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession() || {};
   const { canCreate } = usePermissions();
   const [units, setUnits] = useState<Unit[]>([]);
@@ -79,10 +84,19 @@ export default function UnidadesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<string>('all');
   const [tipoFilter, setTipoFilter] = useState<string>('all');
+  const [modoAlquilerFilter, setModoAlquilerFilter] = useState<string>('all');
   const [activeFilters, setActiveFilters] = useState<
     Array<{ id: string; label: string; value: string }>
   >([]);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+
+  // Leer filtro de modoAlquiler desde la URL
+  useEffect(() => {
+    const modoAlquilerParam = searchParams.get('modoAlquiler');
+    if (modoAlquilerParam && ['tradicional', 'coliving'].includes(modoAlquilerParam)) {
+      setModoAlquilerFilter(modoAlquilerParam);
+    }
+  }, [searchParams]);
 
   // Load view preference from localStorage
   useEffect(() => {
@@ -145,8 +159,12 @@ export default function UnidadesPage() {
       filtered = filtered.filter((unit) => unit.tipo === tipoFilter);
     }
 
+    if (modoAlquilerFilter && modoAlquilerFilter !== 'all') {
+      filtered = filtered.filter((unit) => (unit.modoAlquiler || 'tradicional') === modoAlquilerFilter);
+    }
+
     setFilteredUnits(filtered);
-  }, [searchTerm, estadoFilter, tipoFilter, units]);
+  }, [searchTerm, estadoFilter, tipoFilter, modoAlquilerFilter, units]);
 
   // Actualizar filtros activos
   useEffect(() => {
@@ -187,8 +205,20 @@ export default function UnidadesPage() {
       });
     }
 
+    if (modoAlquilerFilter && modoAlquilerFilter !== 'all') {
+      const modoLabels: Record<string, string> = {
+        tradicional: 'Alquiler Tradicional',
+        coliving: 'Coliving',
+      };
+      filters.push({
+        id: 'modoAlquiler',
+        label: 'Modo',
+        value: modoLabels[modoAlquilerFilter] || modoAlquilerFilter,
+      });
+    }
+
     setActiveFilters(filters);
-  }, [searchTerm, estadoFilter, tipoFilter]);
+  }, [searchTerm, estadoFilter, tipoFilter, modoAlquilerFilter]);
 
   const clearFilter = (id: string) => {
     if (id === 'search') {
@@ -197,6 +227,10 @@ export default function UnidadesPage() {
       setEstadoFilter('all');
     } else if (id === 'tipo') {
       setTipoFilter('all');
+    } else if (id === 'modoAlquiler') {
+      setModoAlquilerFilter('all');
+      // Limpiar también el parámetro de URL
+      router.push('/unidades');
     }
   };
 
@@ -204,6 +238,9 @@ export default function UnidadesPage() {
     setSearchTerm('');
     setEstadoFilter('all');
     setTipoFilter('all');
+    setModoAlquilerFilter('all');
+    // Limpiar parámetros de URL
+    router.push('/unidades');
   };
 
   if (status === 'loading' || isLoading) {
@@ -318,9 +355,34 @@ export default function UnidadesPage() {
               )}
             </div>
 
+            {/* Alerta de Modo Coliving */}
+            {modoAlquilerFilter === 'coliving' && (
+              <Alert className="border-purple-200 bg-purple-50 dark:border-purple-800 dark:bg-purple-950/30">
+                <Users className="h-5 w-5 text-purple-600" />
+                <AlertTitle className="text-purple-800 dark:text-purple-200">
+                  Modo Coliving
+                </AlertTitle>
+                <AlertDescription className="text-purple-700 dark:text-purple-300 flex items-center justify-between">
+                  <span>Mostrando unidades configuradas para alquiler por habitaciones</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => {
+                      setModoAlquilerFilter('all');
+                      router.push('/unidades');
+                    }}
+                    className="h-7 text-purple-600 hover:text-purple-800"
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Ver todas
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Search and Filters */}
-            <div className="grid gap-4 md:grid-cols-3">
-              <Card className="md:col-span-3">
+            <div className="grid gap-4 md:grid-cols-4">
+              <Card className="md:col-span-4">
                 <CardContent className="pt-6">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="relative flex-1">
@@ -357,6 +419,27 @@ export default function UnidadesPage() {
                   <SelectItem value="local">Local</SelectItem>
                   <SelectItem value="garaje">Garaje</SelectItem>
                   <SelectItem value="trastero">Trastero</SelectItem>
+                  <SelectItem value="oficina">Oficina</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={modoAlquilerFilter} onValueChange={setModoAlquilerFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos los modos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los modos</SelectItem>
+                  <SelectItem value="tradicional">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4" />
+                      <span>Alquiler Tradicional</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="coliving">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      <span>Coliving</span>
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -412,7 +495,15 @@ export default function UnidadesPage() {
                       <CardHeader>
                         <div className="flex items-start justify-between">
                           <div className="space-y-1 flex-1">
-                            <CardTitle className="text-lg">Unidad {unit.numero}</CardTitle>
+                            <div className="flex items-center gap-2">
+                              <CardTitle className="text-lg">Unidad {unit.numero}</CardTitle>
+                              {unit.modoAlquiler === 'coliving' && (
+                                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                                  <Users className="h-3 w-3 mr-1" />
+                                  Coliving
+                                </Badge>
+                              )}
+                            </div>
                             <p className="text-sm text-muted-foreground">{unit.building.nombre}</p>
                           </div>
                           <Badge variant={estadoBadge.variant}>{estadoBadge.label}</Badge>

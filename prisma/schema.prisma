@@ -117,6 +117,11 @@ enum UnitStatus {
   en_mantenimiento
 }
 
+enum RentalMode {
+  tradicional // Alquiler completo de la unidad
+  coliving    // Alquiler por habitaciones individuales
+}
+
 enum ContractStatus {
   activo
   vencido
@@ -730,6 +735,7 @@ model Unit {
   numero            String
   buildingId        String
   tipo              UnitType
+  modoAlquiler      RentalMode @default(tradicional) // Modo de alquiler: tradicional o coliving
   estado            UnitStatus @default(disponible)
   superficie        Float
   superficieUtil    Float?
@@ -737,6 +743,7 @@ model Unit {
   banos             Int?
   planta            Int?
   orientacion       String?
+  descripcion       String?    // Descripción de la unidad
   rentaMensual      Float
   tenantId          String?
   aireAcondicionado Boolean    @default(false)
