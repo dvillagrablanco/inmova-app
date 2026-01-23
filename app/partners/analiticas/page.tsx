@@ -79,7 +79,29 @@ const METRICS: MetricCard[] = [
   },
 ];
 
-// Datos cargados desde API /api/partners/analytics
+// Datos mock (cargados desde API /api/partners/analytics en producción)
+const FUNNEL_DATA = [
+  { stage: 'Visitas', count: 12543, percentage: 100 },
+  { stage: 'Clicks', count: 4892, percentage: 39 },
+  { stage: 'Leads', count: 234, percentage: 1.9 },
+  { stage: 'Conversiones', count: 89, percentage: 0.7 },
+];
+
+const CHANNEL_DATA = [
+  { channel: 'Link Directo', leads: 98, conversiones: 42, revenue: 2100 },
+  { channel: 'Email Marketing', leads: 76, conversiones: 28, revenue: 1400 },
+  { channel: 'Redes Sociales', leads: 45, conversiones: 15, revenue: 750 },
+  { channel: 'Banner Web', leads: 15, conversiones: 4, revenue: 200 },
+];
+
+const MONTHLY_DATA = [
+  { mes: 'Julio', leads: 145, conversiones: 52, revenue: 2600 },
+  { mes: 'Agosto', leads: 168, conversiones: 61, revenue: 3050 },
+  { mes: 'Septiembre', leads: 189, conversiones: 68, revenue: 3400 },
+  { mes: 'Octubre', leads: 201, conversiones: 75, revenue: 3750 },
+  { mes: 'Noviembre', leads: 218, conversiones: 82, revenue: 4100 },
+  { mes: 'Diciembre', leads: 234, conversiones: 89, revenue: 4450 },
+];
 
 export default function PartnersAnaliticasPage() {
   const [period, setPeriod] = useState('30d');

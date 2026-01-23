@@ -41,7 +41,22 @@ interface Comercial {
   citasSemana: number;
 }
 
-// Datos cargados desde API /api/real-estate-developer/commercial
+// Datos mock (cargados desde API en producción)
+const OBJETIVOS_MENSUALES = {
+  ventasActuales: 18,
+  ventasObjetivo: 25,
+  visitasActuales: 145,
+  visitasObjetivo: 200,
+  leadsActuales: 89,
+  leadsObjetivo: 100,
+};
+
+const CITAS_PROXIMAS = [
+  { id: '1', cliente: 'María García', tipo: 'Visita', proyecto: 'Residencial Sol', comercial: 'Juan Pérez', fecha: '25 Ene', hora: '10:00' },
+  { id: '2', cliente: 'Pedro López', tipo: 'Segunda Visita', proyecto: 'Torre Centro', comercial: 'Ana Martín', fecha: '25 Ene', hora: '12:30' },
+  { id: '3', cliente: 'Laura Sánchez', tipo: 'Firma', proyecto: 'Residencial Sol', comercial: 'Juan Pérez', fecha: '26 Ene', hora: '09:00' },
+  { id: '4', cliente: 'Carlos Ruiz', tipo: 'Visita', proyecto: 'Apartamentos Mar', comercial: 'Ana Martín', fecha: '26 Ene', hora: '16:00' },
+];
 
 export default function RealEstateDeveloperCommercialPage() {
   const [comerciales, setComerciales] = useState<Comercial[]>([]);

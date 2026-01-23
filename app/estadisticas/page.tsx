@@ -82,7 +82,28 @@ const STATS: StatCard[] = [
   },
 ];
 
-// Datos cargados desde API /api/estadisticas
+// Datos mock (cargados desde API /api/estadisticas en producción)
+const MONTHLY_DATA = [
+  { mes: 'Jul', ingresos: 118500, ocupacion: 89 },
+  { mes: 'Ago', ingresos: 121200, ocupacion: 90 },
+  { mes: 'Sep', ingresos: 119800, ocupacion: 91 },
+  { mes: 'Oct', ingresos: 122500, ocupacion: 92 },
+  { mes: 'Nov', ingresos: 123800, ocupacion: 91 },
+  { mes: 'Dic', ingresos: 124500, ocupacion: 92 },
+];
+
+const PROPERTY_TYPES = [
+  { tipo: 'Apartamentos', count: 89, ocupacion: 94, ingresos: 68500 },
+  { tipo: 'Pisos', count: 45, ocupacion: 91, ingresos: 38200 },
+  { tipo: 'Estudios', count: 22, ocupacion: 88, ingresos: 17800 },
+];
+
+const TOP_PROPERTIES = [
+  { nombre: 'Edificio Centro', unidades: 24, ocupacion: 96, ingresos: 28500 },
+  { nombre: 'Residencial Playa', unidades: 18, ocupacion: 94, ingresos: 24200 },
+  { nombre: 'Apartamentos Norte', unidades: 32, ocupacion: 91, ingresos: 35800 },
+  { nombre: 'Torres del Mar', unidades: 15, ocupacion: 93, ingresos: 18900 },
+];
 
 export default function EstadisticasPage() {
   const [loading, setLoading] = useState(true);

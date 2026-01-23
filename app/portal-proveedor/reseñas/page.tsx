@@ -54,7 +54,14 @@ interface Review {
   noUtil: number;
 }
 
-// Datos cargados desde API /api/portal-proveedor/reviews
+// Datos mock (cargados desde API en producción)
+const RATING_DISTRIBUTION = [
+  { stars: 5, count: 45 },
+  { stars: 4, count: 28 },
+  { stars: 3, count: 12 },
+  { stars: 2, count: 5 },
+  { stars: 1, count: 2 },
+];
 
 export default function PortalProveedorReseñasPage() {
   const [reviews, setReviews] = useState<Review[]>([]);

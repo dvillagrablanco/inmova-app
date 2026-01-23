@@ -55,7 +55,12 @@ interface ControlCumplimiento {
   afectados: number;
 }
 
-// Datos cargados desde API /api/vivienda-social/compliance
+// Datos mock (cargados desde API en producción)
+const ALERTAS_NORMATIVAS = [
+  { id: '1', tipo: 'critica', mensaje: 'Control de ingresos pendiente para 12 expedientes', fecha: '22 Ene 2025' },
+  { id: '2', tipo: 'aviso', mensaje: 'Nueva normativa autonómica en vigor desde febrero', fecha: '20 Ene 2025' },
+  { id: '3', tipo: 'info', mensaje: 'Actualización de baremos de renta máxima', fecha: '18 Ene 2025' },
+];
 
 export default function ViviendaSocialCompliancePage() {
   const [controles, setControles] = useState<ControlCumplimiento[]>([]);

@@ -43,7 +43,13 @@ interface Campana {
   estado: 'activa' | 'pausada' | 'finalizada' | 'planificada';
 }
 
-// Datos cargados desde API /api/real-estate-developer/marketing
+// Datos mock (cargados desde API en producción)
+const LEADS_RECIENTES = [
+  { id: '1', nombre: 'María García', proyecto: 'Residencial Sol', origen: 'Web', fecha: '23 Ene' },
+  { id: '2', nombre: 'Pedro López', proyecto: 'Torre Centro', origen: 'Instagram', fecha: '22 Ene' },
+  { id: '3', nombre: 'Laura Sánchez', proyecto: 'Residencial Sol', origen: 'Google Ads', fecha: '22 Ene' },
+  { id: '4', nombre: 'Carlos Ruiz', proyecto: 'Apartamentos Mar', origen: 'Referido', fecha: '21 Ene' },
+];
 
 export default function RealEstateDeveloperMarketingPage() {
   const [campanas, setCampanas] = useState<Campana[]>([]);
