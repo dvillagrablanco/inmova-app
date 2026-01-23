@@ -43,6 +43,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PhotoUploader } from '@/components/property/PhotoUploader';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Building {
   id: string;
@@ -645,6 +646,20 @@ export default function CrearPropiedadPage() {
           </div>
         </form>
       </div>
+
+      {/* Asistente IA de Documentos - Para escrituras, certificados, etc. */}
+      <AIDocumentAssistant 
+        context="propiedades"
+        variant="floating"
+        position="bottom-right"
+        onApplyData={(data) => {
+          // Aplicar datos extraídos del documento al formulario
+          if (data.superficie) setFormData(prev => ({ ...prev, superficie: data.superficie }));
+          if (data.habitaciones) setFormData(prev => ({ ...prev, habitaciones: data.habitaciones }));
+          if (data.banos) setFormData(prev => ({ ...prev, banos: data.banos }));
+          toast.success('Datos del documento aplicados al formulario');
+        }}
+      />
     </AuthenticatedLayout>
   );
 }

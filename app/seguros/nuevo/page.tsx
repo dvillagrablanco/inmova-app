@@ -48,6 +48,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -676,6 +677,20 @@ export default function NuevoSeguroPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Asistente IA de Documentos - Para subir pólizas de seguros */}
+      <AIDocumentAssistant 
+        context="seguros"
+        variant="floating"
+        position="bottom-right"
+        onApplyData={(data) => {
+          // Aplicar datos extraídos de la póliza al formulario
+          if (data.poliza) setFormData(prev => ({ ...prev, numeroPoliza: data.poliza }));
+          if (data.aseguradora) setFormData(prev => ({ ...prev, aseguradora: data.aseguradora }));
+          if (data.prima) setFormData(prev => ({ ...prev, prima: data.prima }));
+          toast.success('Datos de la póliza aplicados al formulario');
+        }}
+      />
     </AuthenticatedLayout>
   );
 }

@@ -53,6 +53,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import logger from '@/lib/logger';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 type ImportStep = 'select' | 'validate' | 'preview' | 'import' | 'results';
 
@@ -693,6 +694,13 @@ export default function ImportarContratosPage() {
         {currentStep === 'import' && renderImportStep()}
         {currentStep === 'results' && renderResultsStep()}
       </div>
+
+      {/* Asistente IA de Documentos - Para analizar contratos antes de importar */}
+      <AIDocumentAssistant 
+        context="contratos"
+        variant="floating"
+        position="bottom-right"
+      />
     </AuthenticatedLayout>
   );
 }
