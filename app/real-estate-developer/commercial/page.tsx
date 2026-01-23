@@ -43,8 +43,19 @@ interface Comercial {
 
 // Datos cargados desde API /api/real-estate-developer/commercial
 
+interface Cita {
+  id: string;
+  cliente: string;
+  tipo: string;
+  proyecto: string;
+  comercial: string;
+  fecha: string;
+  hora: string;
+}
+
 export default function RealEstateDeveloperCommercialPage() {
   const [comerciales, setComerciales] = useState<Comercial[]>([]);
+  const [citasProximas, setCitasProximas] = useState<Cita[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -53,7 +64,8 @@ export default function RealEstateDeveloperCommercialPage() {
         const response = await fetch('/api/real-estate-developer/commercial');
         if (response.ok) {
           const data = await response.json();
-          setComerciales(data.data || []);
+          setComerciales(data.data?.comerciales || data.data || []);
+          setCitasProximas(data.data?.citasProximas || []);
         }
       } catch (error) {
         console.error('Error fetching commercial:', error);
@@ -304,7 +316,7 @@ export default function RealEstateDeveloperCommercialPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {CITAS_PROXIMAS.map((cita) => (
+            {citasProximas.map((cita) => (
               <div
                 key={cita.id}
                 className="p-3 border rounded-lg"

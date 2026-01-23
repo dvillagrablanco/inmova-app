@@ -176,7 +176,7 @@ export default function PartnersAnaliticasPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {FUNNEL_DATA.map((stage, index) => (
+              {funnelData.map((stage, index) => (
                 <div key={stage.stage} className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="font-medium">{stage.stage}</span>
@@ -187,7 +187,7 @@ export default function PartnersAnaliticasPage() {
                   <div className="h-3 bg-muted rounded-full overflow-hidden">
                     <div
                       className="h-full bg-primary transition-all"
-                      style={{ width: `${index === 0 ? 100 : (stage.count / FUNNEL_DATA[0].count) * 100}%` }}
+                      style={{ width: `${index === 0 ? 100 : (funnelData[0]?.count ? (stage.count / funnelData[0].count) * 100 : 0)}%` }}
                     />
                   </div>
                 </div>

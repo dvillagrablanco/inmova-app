@@ -184,8 +184,8 @@ export default function EstadisticasPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {MONTHLY_DATA.map((data, index) => {
-                const prevData = MONTHLY_DATA[index - 1];
+              {monthlyData.map((data, index) => {
+                const prevData = monthlyData[index - 1];
                 const change = prevData 
                   ? ((data.ingresos - prevData.ingresos) / prevData.ingresos * 100).toFixed(1)
                   : 0;
