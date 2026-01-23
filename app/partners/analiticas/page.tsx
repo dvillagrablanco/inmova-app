@@ -267,8 +267,8 @@ export default function PartnersAnaliticasPage() {
                 </tr>
               </thead>
               <tbody>
-                {MONTHLY_DATA.map((month, index) => {
-                  const prevMonth = MONTHLY_DATA[index - 1];
+                {monthlyData.map((month, index) => {
+                  const prevMonth = monthlyData[index - 1];
                   const leadChange = prevMonth
                     ? ((month.leads - prevMonth.leads) / prevMonth.leads) * 100
                     : 0;
@@ -301,17 +301,17 @@ export default function PartnersAnaliticasPage() {
                 <tr className="font-bold">
                   <td className="py-3">Total</td>
                   <td className="py-3 text-right">
-                    {MONTHLY_DATA.reduce((sum, m) => sum + m.leads, 0)}
+                    {monthlyData.reduce((sum, m) => sum + m.leads, 0)}
                   </td>
                   <td className="py-3 text-right">
-                    {MONTHLY_DATA.reduce((sum, m) => sum + m.conversiones, 0)}
+                    {monthlyData.reduce((sum, m) => sum + m.conversiones, 0)}
                   </td>
                   <td className="py-3 text-right">
-                    {((MONTHLY_DATA.reduce((sum, m) => sum + m.conversiones, 0) /
-                      MONTHLY_DATA.reduce((sum, m) => sum + m.leads, 0)) * 100).toFixed(1)}%
+                    {((monthlyData.reduce((sum, m) => sum + m.conversiones, 0) /
+                      monthlyData.reduce((sum, m) => sum + m.leads, 0)) * 100).toFixed(1)}%
                   </td>
                   <td className="py-3 text-right text-green-600">
-                    €{MONTHLY_DATA.reduce((sum, m) => sum + m.revenue, 0).toLocaleString()}
+                    €{monthlyData.reduce((sum, m) => sum + m.revenue, 0).toLocaleString()}
                   </td>
                 </tr>
               </tfoot>

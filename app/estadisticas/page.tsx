@@ -272,7 +272,7 @@ export default function EstadisticasPage() {
                 </tr>
               </thead>
               <tbody>
-                {TOP_PROPERTIES.map((prop, index) => (
+                {topProperties.map((prop, index) => (
                   <tr key={prop.nombre} className="border-t">
                     <td className="py-3">
                       <div className="flex items-center gap-2">
