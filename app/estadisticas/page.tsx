@@ -227,7 +227,7 @@ export default function EstadisticasPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {PROPERTY_TYPES.map((type) => (
+              {propertyTypes.map((type) => (
                 <div key={type.tipo} className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="font-medium">{type.tipo}</span>

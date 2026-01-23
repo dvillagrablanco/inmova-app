@@ -219,7 +219,7 @@ export default function PartnersAnaliticasPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {CHANNEL_DATA.map((channel) => (
+              {channelData.map((channel) => (
                 <div
                   key={channel.channel}
                   className="flex items-center justify-between p-3 border rounded-lg"

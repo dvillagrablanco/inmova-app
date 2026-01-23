@@ -53,9 +53,26 @@ interface Cita {
   hora: string;
 }
 
+interface ObjetivosMensuales {
+  ventasActuales: number;
+  ventasObjetivo: number;
+  visitasActuales: number;
+  visitasObjetivo: number;
+  leadsActuales: number;
+  leadsObjetivo: number;
+}
+
 export default function RealEstateDeveloperCommercialPage() {
   const [comerciales, setComerciales] = useState<Comercial[]>([]);
   const [citasProximas, setCitasProximas] = useState<Cita[]>([]);
+  const [objetivosMensuales, setObjetivosMensuales] = useState<ObjetivosMensuales>({
+    ventasActuales: 0,
+    ventasObjetivo: 1,
+    visitasActuales: 0,
+    visitasObjetivo: 1,
+    leadsActuales: 0,
+    leadsObjetivo: 1,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -66,6 +83,9 @@ export default function RealEstateDeveloperCommercialPage() {
           const data = await response.json();
           setComerciales(data.data?.comerciales || data.data || []);
           setCitasProximas(data.data?.citasProximas || []);
+          if (data.data?.objetivosMensuales) {
+            setObjetivosMensuales(data.data.objetivosMensuales);
+          }
         }
       } catch (error) {
         console.error('Error fetching commercial:', error);
@@ -165,17 +185,17 @@ export default function RealEstateDeveloperCommercialPage() {
               <div className="flex justify-between text-sm">
                 <span>Ventas</span>
                 <span className="font-medium">
-                  {OBJETIVOS_MENSUALES.ventasActuales}/{OBJETIVOS_MENSUALES.ventasObjetivo}
+                  {objetivosMensuales.ventasActuales}/{objetivosMensuales.ventasObjetivo}
                 </span>
               </div>
               <Progress
                 value={
-                  (OBJETIVOS_MENSUALES.ventasActuales / OBJETIVOS_MENSUALES.ventasObjetivo) * 100
+                  (objetivosMensuales.ventasActuales / objetivosMensuales.ventasObjetivo) * 100
                 }
               />
               <p className="text-xs text-muted-foreground">
                 {Math.round(
-                  (OBJETIVOS_MENSUALES.ventasActuales / OBJETIVOS_MENSUALES.ventasObjetivo) * 100
+                  (objetivosMensuales.ventasActuales / objetivosMensuales.ventasObjetivo) * 100
                 )}
                 % del objetivo
               </p>
@@ -184,17 +204,17 @@ export default function RealEstateDeveloperCommercialPage() {
               <div className="flex justify-between text-sm">
                 <span>Visitas</span>
                 <span className="font-medium">
-                  {OBJETIVOS_MENSUALES.visitasActuales}/{OBJETIVOS_MENSUALES.visitasObjetivo}
+                  {objetivosMensuales.visitasActuales}/{objetivosMensuales.visitasObjetivo}
                 </span>
               </div>
               <Progress
                 value={
-                  (OBJETIVOS_MENSUALES.visitasActuales / OBJETIVOS_MENSUALES.visitasObjetivo) * 100
+                  (objetivosMensuales.visitasActuales / objetivosMensuales.visitasObjetivo) * 100
                 }
               />
               <p className="text-xs text-muted-foreground">
                 {Math.round(
-                  (OBJETIVOS_MENSUALES.visitasActuales / OBJETIVOS_MENSUALES.visitasObjetivo) * 100
+                  (objetivosMensuales.visitasActuales / objetivosMensuales.visitasObjetivo) * 100
                 )}
                 % del objetivo
               </p>
@@ -203,17 +223,17 @@ export default function RealEstateDeveloperCommercialPage() {
               <div className="flex justify-between text-sm">
                 <span>Leads</span>
                 <span className="font-medium">
-                  {OBJETIVOS_MENSUALES.leadsActuales}/{OBJETIVOS_MENSUALES.leadsObjetivo}
+                  {objetivosMensuales.leadsActuales}/{objetivosMensuales.leadsObjetivo}
                 </span>
               </div>
               <Progress
                 value={
-                  (OBJETIVOS_MENSUALES.leadsActuales / OBJETIVOS_MENSUALES.leadsObjetivo) * 100
+                  (objetivosMensuales.leadsActuales / objetivosMensuales.leadsObjetivo) * 100
                 }
               />
               <p className="text-xs text-muted-foreground">
                 {Math.round(
-                  (OBJETIVOS_MENSUALES.leadsActuales / OBJETIVOS_MENSUALES.leadsObjetivo) * 100
+                  (objetivosMensuales.leadsActuales / objetivosMensuales.leadsObjetivo) * 100
                 )}
                 % del objetivo
               </p>
