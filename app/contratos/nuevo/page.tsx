@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
-import { FileText, Home, ArrowLeft, Save, Upload, X, Loader2 } from 'lucide-react';
+import { FileText, Home, ArrowLeft, Save, Upload, X, Loader2, Building2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 // Cargar el analizador de contratos con IA
@@ -40,15 +40,25 @@ import { BackButton } from '@/components/ui/back-button';
 import { MobileFormWizard, FormStep } from '@/components/ui/mobile-form-wizard';
 import { Badge } from '@/components/ui/badge';
 
+interface Building {
+  id: string;
+  nombre: string;
+  direccion: string;
+}
+
 interface Unit {
   id: string;
   numero: string;
-  building: { nombre: string };
+  estado: string;
+  rentaMensual: number;
+  buildingId: string;
+  building: { id: string; nombre: string };
+  tenant?: { nombreCompleto: string } | null;
 }
 
 interface Tenant {
   id: string;
-  nombre: string;
+  nombreCompleto: string;
   email: string;
 }
 
@@ -65,9 +75,12 @@ export default function NuevoContratoPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const [isLoading, setIsLoading] = useState(false);
+  const [buildings, setBuildings] = useState<Building[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
+  const [filteredUnits, setFilteredUnits] = useState<Unit[]>([]);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [documents, setDocuments] = useState<UploadedDocument[]>([]);
+  const [selectedBuildingId, setSelectedBuildingId] = useState<string>('');
   const [formData, setFormData] = useState({
     unitId: '',
     tenantId: '',
@@ -142,19 +155,25 @@ export default function NuevoContratoPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [unitsRes, tenantsRes] = await Promise.all([
-          fetch('/api/units?estado=disponible'),
+        const [buildingsRes, unitsRes, tenantsRes] = await Promise.all([
+          fetch('/api/buildings'),
+          fetch('/api/units'), // Cargar TODAS las unidades
           fetch('/api/tenants'),
         ]);
 
+        if (buildingsRes.ok) {
+          const buildingsData = await buildingsRes.json();
+          setBuildings(Array.isArray(buildingsData) ? buildingsData : buildingsData.data || []);
+        }
+
         if (unitsRes.ok) {
           const unitsData = await unitsRes.json();
-          setUnits(unitsData);
+          setUnits(Array.isArray(unitsData) ? unitsData : unitsData.data || []);
         }
 
         if (tenantsRes.ok) {
           const tenantsData = await tenantsRes.json();
-          setTenants(tenantsData);
+          setTenants(Array.isArray(tenantsData) ? tenantsData : tenantsData.data || []);
         }
       } catch (error) {
         logger.error('Error fetching data:', error);
@@ -165,6 +184,33 @@ export default function NuevoContratoPage() {
       fetchData();
     }
   }, [status]);
+
+  // Filtrar unidades cuando cambia el edificio seleccionado
+  useEffect(() => {
+    if (selectedBuildingId) {
+      const filtered = units.filter(unit => unit.buildingId === selectedBuildingId);
+      setFilteredUnits(filtered);
+      // Limpiar la unidad seleccionada si ya no está en el edificio
+      if (formData.unitId && !filtered.find(u => u.id === formData.unitId)) {
+        setFormData(prev => ({ ...prev, unitId: '' }));
+      }
+    } else {
+      setFilteredUnits([]);
+    }
+  }, [selectedBuildingId, units]);
+
+  // Cuando se selecciona una unidad, actualizar la renta mensual sugerida
+  useEffect(() => {
+    if (formData.unitId) {
+      const selectedUnit = units.find(u => u.id === formData.unitId);
+      if (selectedUnit && selectedUnit.rentaMensual > 0) {
+        setFormData(prev => ({
+          ...prev,
+          rentaMensual: selectedUnit.rentaMensual.toString(),
+        }));
+      }
+    }
+  }, [formData.unitId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -289,24 +335,86 @@ export default function NuevoContratoPage() {
                     description: 'Selecciona la unidad, inquilino y tipo de contrato',
                     fields: (
                       <div className="space-y-4">
+                        {/* Edificio */}
+                        <div className="space-y-2">
+                          <Label htmlFor="buildingId">Edificio *</Label>
+                          <Select
+                            value={selectedBuildingId}
+                            onValueChange={(value) => {
+                              setSelectedBuildingId(value);
+                              setFormData(prev => ({ ...prev, unitId: '' }));
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona un edificio" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {buildings.map((building) => (
+                                <SelectItem key={building.id} value={building.id}>
+                                  {building.nombre} - {building.direccion}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
                         {/* Unidad */}
                         <div className="space-y-2">
                           <Label htmlFor="unitId">Unidad *</Label>
                           <Select
                             value={formData.unitId}
                             onValueChange={(value) => setFormData({ ...formData, unitId: value })}
+                            disabled={!selectedBuildingId}
                           >
                             <SelectTrigger>
-                              <SelectValue placeholder="Selecciona una unidad" />
+                              <SelectValue placeholder={selectedBuildingId ? "Selecciona una unidad" : "Primero selecciona un edificio"} />
                             </SelectTrigger>
                             <SelectContent>
-                              {units.map((unit) => (
-                                <SelectItem key={unit.id} value={unit.id}>
-                                  {unit.building.nombre} - {unit.numero}
+                              {filteredUnits.map((unit) => {
+                                const estadoLabel = unit.estado?.toLowerCase();
+                                const isOcupada = estadoLabel === 'ocupada' || estadoLabel === 'ocupado';
+                                return (
+                                  <SelectItem key={unit.id} value={unit.id}>
+                                    <div className="flex items-center gap-2">
+                                      <span>{unit.numero}</span>
+                                      <Badge 
+                                        variant={isOcupada ? "destructive" : estadoLabel === 'disponible' ? "default" : "secondary"}
+                                        className="text-xs"
+                                      >
+                                        {unit.estado}
+                                      </Badge>
+                                      {unit.rentaMensual > 0 && (
+                                        <span className="text-muted-foreground text-xs">
+                                          €{unit.rentaMensual}/mes
+                                        </span>
+                                      )}
+                                      {unit.tenant && (
+                                        <span className="text-muted-foreground text-xs">
+                                          ({unit.tenant.nombreCompleto})
+                                        </span>
+                                      )}
+                                    </div>
+                                  </SelectItem>
+                                );
+                              })}
+                              {filteredUnits.length === 0 && selectedBuildingId && (
+                                <SelectItem value="no-units" disabled>
+                                  No hay unidades en este edificio
                                 </SelectItem>
-                              ))}
+                              )}
                             </SelectContent>
                           </Select>
+                          {formData.unitId && (
+                            <p className="text-xs text-muted-foreground">
+                              {(() => {
+                                const selectedUnit = filteredUnits.find(u => u.id === formData.unitId);
+                                if (selectedUnit?.estado?.toLowerCase() === 'ocupada' || selectedUnit?.estado?.toLowerCase() === 'ocupado') {
+                                  return `⚠️ Esta unidad está actualmente ocupada por ${selectedUnit.tenant?.nombreCompleto || 'un inquilino'}. Al crear el contrato se actualizará el estado.`;
+                                }
+                                return null;
+                              })()}
+                            </p>
+                          )}
                         </div>
 
                         {/* Inquilino */}
@@ -322,7 +430,7 @@ export default function NuevoContratoPage() {
                             <SelectContent>
                               {tenants.map((tenant) => (
                                 <SelectItem key={tenant.id} value={tenant.id}>
-                                  {tenant.nombre} - {tenant.email}
+                                  {tenant.nombreCompleto} - {tenant.email}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -492,13 +600,16 @@ export default function NuevoContratoPage() {
                             <h4 className="font-medium text-sm">Resumen del Contrato</h4>
                             <div className="text-sm space-y-1">
                               <p>
+                                <span className="text-muted-foreground">Edificio:</span>{' '}
+                                {buildings.find((b) => b.id === selectedBuildingId)?.nombre}
+                              </p>
+                              <p>
                                 <span className="text-muted-foreground">Unidad:</span>{' '}
-                                {units.find((u) => u.id === formData.unitId)?.building.nombre} -{' '}
-                                {units.find((u) => u.id === formData.unitId)?.numero}
+                                {filteredUnits.find((u) => u.id === formData.unitId)?.numero}
                               </p>
                               <p>
                                 <span className="text-muted-foreground">Inquilino:</span>{' '}
-                                {tenants.find((t) => t.id === formData.tenantId)?.nombre}
+                                {tenants.find((t) => t.id === formData.tenantId)?.nombreCompleto}
                               </p>
                               <p>
                                 <span className="text-muted-foreground">Tipo:</span> {formData.tipo}
