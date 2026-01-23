@@ -45,8 +45,17 @@ interface Campana {
 
 // Datos cargados desde API /api/real-estate-developer/marketing
 
+interface Lead {
+  id: string;
+  nombre: string;
+  proyecto: string;
+  origen: string;
+  fecha: string;
+}
+
 export default function RealEstateDeveloperMarketingPage() {
   const [campanas, setCampanas] = useState<Campana[]>([]);
+  const [leadsRecientes, setLeadsRecientes] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,7 +64,8 @@ export default function RealEstateDeveloperMarketingPage() {
         const response = await fetch('/api/real-estate-developer/marketing');
         if (response.ok) {
           const data = await response.json();
-          setCampanas(data.data || []);
+          setCampanas(data.data?.campanas || data.data || []);
+          setLeadsRecientes(data.data?.leadsRecientes || []);
         }
       } catch (error) {
         console.error('Error fetching campaigns:', error);
@@ -251,27 +261,31 @@ export default function RealEstateDeveloperMarketingPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {LEADS_RECIENTES.map((lead) => (
-                <div
-                  key={lead.id}
-                  className="flex items-center justify-between p-3 border rounded-lg"
-                >
-                  <div>
-                    <p className="font-medium text-sm">{lead.nombre}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {lead.proyecto}
-                    </p>
+              {leadsRecientes.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No hay leads recientes</p>
+              ) : (
+                leadsRecientes.map((lead) => (
+                  <div
+                    key={lead.id}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
+                    <div>
+                      <p className="font-medium text-sm">{lead.nombre}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {lead.proyecto}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant="outline" className="text-xs">
+                        {lead.origen}
+                      </Badge>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {lead.fecha}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <Badge variant="outline" className="text-xs">
-                      {lead.origen}
-                    </Badge>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {lead.fecha}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
               <Button variant="outline" className="w-full">
                 Ver Todos los Leads
               </Button>

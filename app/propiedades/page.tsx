@@ -25,6 +25,7 @@ import {
   MoreVertical,
   Star,
   ArrowLeft,
+  AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -52,6 +53,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import Image from 'next/image';
@@ -104,6 +115,11 @@ export default function PropiedadesPage() {
   const [precioMax, setPrecioMax] = useState<string>('');
   const [habitacionesMin, setHabitacionesMin] = useState<string>('');
   const [sortBy, setSortBy] = useState<string>('newest'); // newest, oldest, price-asc, price-desc, size-asc, size-desc
+
+  // Estado para eliminar propiedad
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Redirect si no autenticado
   useEffect(() => {
@@ -210,6 +226,41 @@ export default function PropiedadesPage() {
 
     setFilteredProperties(sorted);
   }, [searchTerm, estadoFilter, tipoFilter, precioMin, precioMax, habitacionesMin, sortBy, properties]);
+
+  // Función para eliminar propiedad
+  const handleDeleteClick = (property: Property, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPropertyToDelete(property);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!propertyToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/units/${propertyToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Error al eliminar la propiedad');
+      }
+
+      // Eliminar de la lista local
+      setProperties((prev) => prev.filter((p) => p.id !== propertyToDelete.id));
+      toast.success(`Propiedad "${propertyToDelete.building.nombre} - ${propertyToDelete.numero}" eliminada correctamente`);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Error al eliminar';
+      toast.error(errorMsg);
+      console.error('Error deleting property:', error);
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setPropertyToDelete(null);
+    }
+  };
 
   // Funciones de utilidad
   const getEstadoBadge = (estado: string) => {
@@ -675,10 +726,7 @@ export default function PropiedadesPage() {
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 className="text-red-600"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toast.error('Función en desarrollo');
-                                }}
+                                onClick={(e) => handleDeleteClick(property, e)}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Eliminar
@@ -815,6 +863,14 @@ export default function PropiedadesPage() {
                               <Edit className="h-4 w-4 mr-2" />
                               Editar
                             </Button>
+                            <Button
+                              variant="outline"
+                              className="flex-1 lg:flex-none text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={(e) => handleDeleteClick(property, e)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Eliminar
+                            </Button>
                           </div>
                         </div>
                       </CardContent>
@@ -833,6 +889,49 @@ export default function PropiedadesPage() {
           position="bottom-right"
         />
       </div>
+
+      {/* Diálogo de Confirmación de Eliminación */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              ¿Eliminar propiedad?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {propertyToDelete && (
+                <>
+                  Estás a punto de eliminar la propiedad{' '}
+                  <span className="font-semibold">
+                    {propertyToDelete.building.nombre} - {propertyToDelete.numero}
+                  </span>
+                  .
+                  <br /><br />
+                  Esta acción eliminará permanentemente:
+                  <ul className="list-disc list-inside mt-2 space-y-1">
+                    <li>Todos los datos de la propiedad</li>
+                    <li>Contratos asociados</li>
+                    <li>Historial de pagos</li>
+                    <li>Solicitudes de mantenimiento</li>
+                  </ul>
+                  <br />
+                  <span className="text-red-500 font-medium">Esta acción no se puede deshacer.</span>
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isDeleting ? 'Eliminando...' : 'Eliminar Propiedad'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AuthenticatedLayout>
   );
 }
