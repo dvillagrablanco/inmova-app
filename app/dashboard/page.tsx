@@ -49,7 +49,8 @@ import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 interface DashboardData {
   kpis: {
     ingresosTotalesMensuales: number;
-    numeroPropiedades: number;
+    numeroEdificios: number;
+    numeroUnidades: number;
     tasaOcupacion: number;
     tasaMorosidad: number;
     ingresosNetos: number;
@@ -155,7 +156,7 @@ function DashboardPageContent() {
 
   // Estado vacío elegante - cuando no hay datos reales
   const isEmptyState = !data || !data.kpis || (
-    data.kpis.numeroPropiedades === 0 && 
+    data.kpis.numeroEdificios === 0 && 
     data.kpis.ingresosTotalesMensuales === 0 &&
     data.kpis.tasaOcupacion === 0
   );
@@ -229,7 +230,7 @@ function DashboardPageContent() {
           </div>
 
           {/* KPIs vacíos con estilo */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
             <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
               <div className="flex items-center gap-3 mb-2">
                 <TrendingUp className="w-5 h-5 text-gray-400" />
@@ -240,7 +241,14 @@ function DashboardPageContent() {
             <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
               <div className="flex items-center gap-3 mb-2">
                 <Building2 className="w-5 h-5 text-gray-400" />
-                <span className="text-sm text-gray-500">Propiedades</span>
+                <span className="text-sm text-gray-500">Edificios</span>
+              </div>
+              <p className="text-2xl font-bold text-gray-300">0</p>
+            </div>
+            <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+              <div className="flex items-center gap-3 mb-2">
+                <Home className="w-5 h-5 text-gray-400" />
+                <span className="text-sm text-gray-500">Unidades</span>
               </div>
               <p className="text-2xl font-bold text-gray-300">0</p>
             </div>
@@ -311,7 +319,7 @@ function DashboardPageContent() {
         {/* Smart Onboarding Wizard - Sistema automatizado de configuración inicial */}
         <SmartOnboardingWizard />
         {/* Demo Data Generator - Solo visible para empresas de prueba/demo sin datos */}
-        {data?.esEmpresaPrueba && data?.kpis?.numeroPropiedades === 0 && <DemoDataGenerator />}
+        {data?.esEmpresaPrueba && data?.kpis?.numeroEdificios === 0 && <DemoDataGenerator />}
 
         {/* Vertical-Specific Widgets - Accesos rápidos personalizados por tipo de negocio */}
         <div data-tour="quick-actions">
@@ -327,7 +335,7 @@ function DashboardPageContent() {
         {/* KPIs Grid */}
         <div
           data-tour="kpi-cards"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8"
         >
           <KPICard
             title="Ingresos Mensuales"
@@ -335,9 +343,14 @@ function DashboardPageContent() {
             icon={TrendingUp}
           />
           <KPICard
-            title="Total Propiedades"
-            value={Number(data.kpis.numeroPropiedades || 0)}
+            title="Total Edificios"
+            value={Number(data.kpis.numeroEdificios || 0)}
             icon={Building2}
+          />
+          <KPICard
+            title="Total Unidades"
+            value={Number(data.kpis.numeroUnidades || 0)}
+            icon={Home}
           />
           <KPICard
             title="Tasa de Ocupación"
