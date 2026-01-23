@@ -111,7 +111,6 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/reportes': 'reportes',
   '/documentos': 'documentos',
   '/room-rental': 'room_rental',
-  '/coliving/unidades': 'room_rental',
   '/proveedores': 'proveedores',
   '/gastos': 'gastos',
   '/tareas': 'tareas',
@@ -364,6 +363,13 @@ const alquilerResidencialItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Unidades',
+    href: '/unidades',
+    icon: DoorOpen,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'unidades-menu',
+  },
+  {
     name: 'Inquilinos',
     href: '/inquilinos',
     icon: Users,
@@ -449,19 +455,13 @@ const strNavItems = [
   },
 ];
 
-// 2.3 CO-LIVING - SIMPLIFICADO (9→7 items)
+// 2.3 CO-LIVING - SIMPLIFICADO (9→6 items)
 // Fusión: Comunidad Social+Gestión → Comunidad, 2x Reservas → 1
 const coLivingNavItems = [
   {
     name: 'Habitaciones',
     href: '/room-rental',
     icon: Home,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Unidades de Living',
-    href: '/coliving/unidades',
-    icon: DoorOpen,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
