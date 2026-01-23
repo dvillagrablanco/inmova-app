@@ -383,7 +383,7 @@ const alquilerResidencialItems = [
   },
   {
     name: 'Garantías',
-    href: '/warranty-management',
+    href: '/garantias',
     icon: Shield,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
