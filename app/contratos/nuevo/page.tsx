@@ -51,7 +51,6 @@ interface Unit {
   numero: string;
   estado: string;
   rentaMensual: number;
-  buildingId: string;
   building: { id: string; nombre: string };
   tenant?: { nombreCompleto: string } | null;
 }
@@ -188,7 +187,7 @@ export default function NuevoContratoPage() {
   // Filtrar unidades cuando cambia el edificio seleccionado
   useEffect(() => {
     if (selectedBuildingId) {
-      const filtered = units.filter(unit => unit.buildingId === selectedBuildingId);
+      const filtered = units.filter(unit => unit.building?.id === selectedBuildingId);
       setFilteredUnits(filtered);
       // Limpiar la unidad seleccionada si ya no está en el edificio
       if (formData.unitId && !filtered.find(u => u.id === formData.unitId)) {
