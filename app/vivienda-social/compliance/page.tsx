@@ -55,10 +55,18 @@ interface ControlCumplimiento {
   afectados: number;
 }
 
+interface AlertaNormativa {
+  id: string;
+  tipo: 'critica' | 'aviso' | 'info';
+  mensaje: string;
+  fecha: string;
+}
+
 // Datos cargados desde API /api/vivienda-social/compliance
 
 export default function ViviendaSocialCompliancePage() {
   const [controles, setControles] = useState<ControlCumplimiento[]>([]);
+  const [alertasNormativas, setAlertasNormativas] = useState<AlertaNormativa[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterEstado, setFilterEstado] = useState<string>('all');
 
@@ -69,7 +77,8 @@ export default function ViviendaSocialCompliancePage() {
       const response = await fetch('/api/vivienda-social/compliance');
       if (response.ok) {
         const data = await response.json();
-        setControles(data.data || []);
+        setControles(data.data?.controles || data.data || []);
+        setAlertasNormativas(data.data?.alertasNormativas || []);
       }
     } catch (error) {
       console.error('Error fetching compliance:', error);
@@ -357,7 +366,7 @@ export default function ViviendaSocialCompliancePage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {ALERTAS_NORMATIVAS.map((alerta) => (
+              {alertasNormativas.map((alerta) => (
                 <div
                   key={alerta.id}
                   className={`p-3 rounded-lg border ${

@@ -72,6 +72,7 @@ import {
   Calculator,
   MapPin,
   Crown,
+  DoorOpen,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -360,6 +361,13 @@ const alquilerResidencialItems = [
     href: '/edificios',
     icon: Building2,
     roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Unidades',
+    href: '/unidades',
+    icon: DoorOpen,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'unidades-menu',
   },
   {
     name: 'Inquilinos',

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import dynamic from 'next/dynamic';
 
 import { FileText, Home, ArrowLeft, Save, Upload, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,12 @@ import logger, { logError } from '@/lib/logger';
 import { BackButton } from '@/components/ui/back-button';
 import { MobileFormWizard, FormStep } from '@/components/ui/mobile-form-wizard';
 import { Badge } from '@/components/ui/badge';
+
+// Cargar el asistente de documentos IA de forma dinámica para evitar problemas de SSR
+const AIDocumentAssistant = dynamic(
+  () => import('@/components/ai/AIDocumentAssistant').then(mod => mod.AIDocumentAssistant),
+  { ssr: false }
+);
 
 interface Unit {
   id: string;
@@ -198,6 +205,19 @@ export default function NuevoContratoPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Callback para aplicar datos extraídos por la IA desde documentos
+  const handleApplyAIData = (data: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...(data.rentaMensual && { rentaMensual: data.rentaMensual.toString() }),
+      ...(data.deposito && { deposito: data.deposito.toString() }),
+      ...(data.fechaInicio && { fechaInicio: data.fechaInicio }),
+      ...(data.fechaFin && { fechaFin: data.fechaFin }),
+      ...(data.tipo && { tipo: data.tipo }),
+    }));
+    toast.success('Datos del documento aplicados al formulario');
+  };
+
   if (status === 'loading') {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -213,6 +233,20 @@ export default function NuevoContratoPage() {
 
   return (
     <AuthenticatedLayout>
+          {/* Asistente IA de Documentos - Botón flotante */}
+          <AIDocumentAssistant 
+            context="contratos"
+            variant="floating"
+            position="bottom-right"
+            onApplyData={handleApplyAIData}
+            onAnalysisComplete={(analysis, file) => {
+              logger.info('Documento analizado:', { 
+                filename: file.name, 
+                category: analysis.classification.category 
+              });
+            }}
+          />
+          
           <div className="container mx-auto p-6 space-y-6">
             {/* Botón Volver y Breadcrumbs */}
             <div className="flex items-center gap-4 pt-4">
