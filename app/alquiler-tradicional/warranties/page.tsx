@@ -19,6 +19,7 @@ import {
   Calendar,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Warranty {
   id: string;
@@ -308,6 +309,16 @@ export default function WarrantiesPage() {
               ))}
             </div>
           </div>
+
+      {/* Asistente IA de Documentos - Para subir recibos de fianza, avales, etc. */}
+      <AIDocumentAssistant 
+        context="documentos"
+        variant="floating"
+        position="bottom-right"
+        onAnalysisComplete={(analysis, file) => {
+          toast.success(`Documento "${file.name}" analizado correctamente`);
+        }}
+      />
         </AuthenticatedLayout>
   );
 }
