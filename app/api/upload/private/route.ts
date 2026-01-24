@@ -147,10 +147,16 @@ export async function POST(req: NextRequest) {
     await s3Client!.send(command);
 
     // 7. Guardar registro en BD (adaptado al schema existente)
+    // Mapear folder a tipo de documento (enum en minúsculas)
+    const tipoDocumento = folder === 'contratos' ? 'contrato' 
+                        : folder === 'dni' ? 'dni'
+                        : folder === 'facturas' ? 'factura'
+                        : 'otro';
+    
     const document = await prisma.document.create({
       data: {
         nombre: file.name,
-        tipo: folder === 'contratos' ? 'CONTRATO' : 'OTRO',
+        tipo: tipoDocumento as any,
         cloudStoragePath: fileName, // S3 key
         descripcion: `Bucket: ${BUCKET_NAME}, Size: ${file.size}, Type: ${file.type}`,
         // Relaciones opcionales
