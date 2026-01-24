@@ -306,11 +306,12 @@ export function AIDocumentAssistant({
   };
 
   // Posiciones para el botón flotante
-  // NOTA: bottom-24 en móvil para evitar solapamiento con BottomNavigation
-  // z-[60] para estar por encima de otros elementos flotantes
+  // NOTA: Usa el sistema de CSS global para evitar solapamiento con otros widgets
+  // data-floating-widget="ai-document-assistant" activa el posicionamiento automático
+  // z-[60] para estar por encima de otros elementos pero debajo de Crisp
   const positionClasses: Record<string, string> = {
-    'bottom-right': 'fixed bottom-24 md:bottom-6 right-6',
-    'bottom-left': 'fixed bottom-24 md:bottom-6 left-6',
+    'bottom-right': 'fixed bottom-36 md:bottom-24 right-6 ai-document-assistant-floating',
+    'bottom-left': 'fixed bottom-36 md:bottom-24 left-6',
     'top-right': 'fixed top-20 right-6',
     'top-left': 'fixed top-20 left-6',
   };

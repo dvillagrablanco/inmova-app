@@ -40,8 +40,8 @@ export function FloatingTourButton() {
       <button
         onClick={() => setIsMinimized(false)}
         className={cn(
-          // Posicionado arriba del chatbot (bottom-[100px] para dejar espacio al botón del chat)
-          'fixed bottom-[100px] right-6 z-40',
+          // Posicionado más arriba para evitar solapamiento con otros widgets
+          'fixed bottom-48 md:bottom-40 right-6 z-40',
           'w-12 h-12 rounded-full',
           'bg-gradient-to-br from-indigo-500 to-purple-600',
           'text-white shadow-xl',
@@ -49,9 +49,12 @@ export function FloatingTourButton() {
           'transition-all duration-200',
           'flex items-center justify-center',
           'lg:right-8',
+          // Clase para sistema de posicionamiento flotante
+          'floating-tour-button',
           // Ocultar en móvil para evitar solapamiento con bottom nav
           'hidden lg:flex'
         )}
+        data-floating-widget="tour-button"
         aria-label="Mostrar ayuda de tours"
       >
         <HelpCircle size={20} />
@@ -62,16 +65,18 @@ export function FloatingTourButton() {
   return (
     <div
       className={cn(
-        // Posicionado arriba del chatbot (bottom-[100px])
-        'fixed bottom-[100px] right-6 z-40',
+        // Posicionado más arriba para evitar solapamiento con otros widgets
+        'fixed bottom-48 md:bottom-40 right-6 z-40',
         'bg-white rounded-2xl shadow-2xl',
         'border border-gray-200',
         'p-4 max-w-xs',
         'lg:right-8',
         'animate-in slide-in-from-bottom-4 fade-in duration-300',
+        'floating-tour-button',
         // Ocultar en móvil
         'hidden lg:block'
       )}
+      data-floating-widget="tour-button"
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-3">

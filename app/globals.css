@@ -1657,7 +1657,7 @@ select[aria-invalid='true']:focus {
 
 /* === MOBILE LAYOUT (< 768px) === */
 @media (max-width: 767px) {
-  /* Crisp Chat - Inferior derecha */
+  /* Crisp Chat - Inferior derecha, por encima del bottom nav */
   .crisp-client .crisp-1brjxns,
   .crisp-client .cc-1brjxns,
   .crisp-client[data-website-id] > div > div {
@@ -1703,5 +1703,146 @@ select[aria-invalid='true']:focus {
     right: 136px !important;
     width: 48px !important;
     height: 48px !important;
+  }
+}
+
+/* ========================================
+   FLOATING WIDGETS STACK SYSTEM
+   Sistema de posicionamiento escalonado para
+   evitar solapamiento de widgets flotantes
+   ======================================== */
+
+/* Variables CSS para posicionamiento */
+:root {
+  /* Posición base (bottom) en desktop */
+  --floating-widget-base: 24px;
+  /* Posición base (bottom) en móvil (encima del bottom nav) */
+  --floating-widget-base-mobile: 80px;
+  /* Espacio entre widgets */
+  --floating-widget-gap: 64px;
+  /* Posición derecha */
+  --floating-widget-right: 24px;
+  --floating-widget-right-mobile: 16px;
+}
+
+/* === NIVEL 1: Crisp Chat (más abajo) === */
+/* z-index: 9999 - El más alto para chat de soporte */
+
+/* === NIVEL 2: AI Document Assistant === */
+/* z-index: 60 - Por debajo de Crisp */
+[data-floating-widget="ai-document-assistant"],
+.ai-document-assistant-floating {
+  bottom: calc(var(--floating-widget-base) + var(--floating-widget-gap)) !important;
+  right: var(--floating-widget-right) !important;
+  z-index: 60 !important;
+}
+
+@media (max-width: 767px) {
+  [data-floating-widget="ai-document-assistant"],
+  .ai-document-assistant-floating {
+    bottom: calc(var(--floating-widget-base-mobile) + var(--floating-widget-gap)) !important;
+    right: var(--floating-widget-right-mobile) !important;
+  }
+}
+
+/* === NIVEL 3: Intelligent Support Chatbot === */
+/* z-index: 50 */
+[data-floating-widget="support-chatbot"],
+.intelligent-chatbot-floating {
+  bottom: calc(var(--floating-widget-base) + var(--floating-widget-gap) * 2) !important;
+  right: var(--floating-widget-right) !important;
+  z-index: 50 !important;
+}
+
+@media (max-width: 767px) {
+  [data-floating-widget="support-chatbot"],
+  .intelligent-chatbot-floating {
+    bottom: calc(var(--floating-widget-base-mobile) + var(--floating-widget-gap) * 1.5) !important;
+    right: var(--floating-widget-right-mobile) !important;
+  }
+}
+
+/* === NIVEL 4: Floating Tour Button === */
+/* z-index: 40 */
+[data-floating-widget="tour-button"],
+.floating-tour-button {
+  bottom: calc(var(--floating-widget-base) + var(--floating-widget-gap) * 3) !important;
+  right: var(--floating-widget-right) !important;
+  z-index: 40 !important;
+}
+
+@media (max-width: 767px) {
+  [data-floating-widget="tour-button"],
+  .floating-tour-button {
+    /* En móvil, posicionar a la izquierda de Crisp */
+    bottom: var(--floating-widget-base-mobile) !important;
+    right: calc(var(--floating-widget-right-mobile) + 60px) !important;
+  }
+}
+
+/* === NIVEL 5: Contextual Help === */
+/* z-index: 30 */
+[data-floating-widget="contextual-help"],
+.contextual-help-floating {
+  bottom: calc(var(--floating-widget-base) + var(--floating-widget-gap) * 4) !important;
+  right: var(--floating-widget-right) !important;
+  z-index: 30 !important;
+}
+
+/* Ocultar help contextual en móvil por defecto */
+@media (max-width: 767px) {
+  [data-floating-widget="contextual-help"],
+  .contextual-help-floating {
+    display: none !important;
+  }
+}
+
+/* === Botones flotantes genéricos - tamaño consistente === */
+[data-floating-widget] button,
+.floating-widget-button {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+[data-floating-widget] button:hover,
+.floating-widget-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 767px) {
+  [data-floating-widget] button,
+  .floating-widget-button {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* === Animación de entrada para widgets flotantes === */
+@keyframes floatingWidgetEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+[data-floating-widget] {
+  animation: floatingWidgetEnter 0.3s ease-out;
+}
+
+/* === Ocultar widgets redundantes cuando hay muchos === */
+/* Si hay más de 3 widgets, ocultar los menos prioritarios en móvil */
+@media (max-width: 767px) {
+  /* Solo mostrar los 2 widgets más importantes en móvil */
+  body.has-many-widgets [data-floating-widget="contextual-help"],
+  body.has-many-widgets [data-floating-widget="tour-button"] {
+    display: none !important;
   }
 }
