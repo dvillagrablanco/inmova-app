@@ -205,16 +205,32 @@ export function AIDocumentAssistant({
       formData.append('file', file);
       formData.append('context', context);
 
+      console.log('[AIDocumentAssistant] Enviando documento:', file.name, file.type, file.size);
+      
       const response = await fetch('/api/ai/document-analysis', {
         method: 'POST',
         body: formData,
       });
 
+      console.log('[AIDocumentAssistant] Respuesta status:', response.status);
+
       if (!response.ok) {
-        throw new Error('Error al analizar el documento');
+        // Capturar el error real del servidor
+        let errorMessage = 'Error al analizar el documento';
+        try {
+          const errorData = await response.json();
+          console.error('[AIDocumentAssistant] Error del servidor:', errorData);
+          errorMessage = errorData.error || errorData.message || `Error ${response.status}: ${response.statusText}`;
+        } catch (parseError) {
+          const textError = await response.text();
+          console.error('[AIDocumentAssistant] Error texto:', textError);
+          errorMessage = textError || `Error ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
       const analysis: DocumentAnalysis = await response.json();
+      console.log('[AIDocumentAssistant] Análisis completado:', analysis.classification?.category);
 
       // Actualizar progreso
       setUploadedFiles(prev =>

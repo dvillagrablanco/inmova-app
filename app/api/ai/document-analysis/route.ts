@@ -833,10 +833,24 @@ function basicAnalysis(filename: string, fileType: string) {
 }
 
 export async function POST(request: NextRequest) {
+  logger.info('[AI Document Analysis] 🚀 POST request recibido', {
+    url: request.url,
+    method: request.method,
+    contentType: request.headers.get('content-type'),
+  });
+  
   try {
     // Verificar autenticación
     const session = await getServerSession(authOptions);
+    
+    logger.info('[AI Document Analysis] 🔐 Verificación de sesión', {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      userId: session?.user?.id || 'none',
+    });
+    
     if (!session?.user) {
+      logger.warn('[AI Document Analysis] ⚠️ Usuario no autenticado');
       return NextResponse.json(
         { error: 'No autenticado' },
         { status: 401 }
@@ -867,23 +881,48 @@ export async function POST(request: NextRequest) {
       ),
     });
 
-    // Verificar tipo de archivo
+    // Verificar tipo de archivo - Lista ampliada para soportar más variantes
     const allowedTypes = [
       'application/pdf',
       'image/jpeg',
       'image/png',
       'image/jpg',
+      'image/gif',
+      'image/webp',
+      'image/heic',
+      'image/heif',
+      'image/bmp',
+      'image/tiff',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'text/plain',
+      'application/octet-stream', // Fallback genérico
+      '', // Algunos navegadores móviles envían tipo vacío
     ];
 
-    if (!allowedTypes.includes(file.type)) {
+    // Verificar también por extensión si el tipo MIME no coincide
+    const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.doc', '.docx', '.txt', '.heic', '.bmp'];
+    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+    const isAllowedByExtension = allowedExtensions.includes(fileExtension);
+
+    if (!allowedTypes.includes(file.type) && !isAllowedByExtension) {
+      logger.warn('[AI Document Analysis] ⚠️ Tipo de archivo no permitido', {
+        fileName: file.name,
+        fileType: file.type,
+        fileExtension,
+      });
       return NextResponse.json(
-        { error: 'Tipo de archivo no permitido' },
+        { error: `Tipo de archivo no permitido: ${file.type || 'desconocido'} (${file.name})` },
         { status: 400 }
       );
     }
+    
+    logger.info('[AI Document Analysis] ✅ Tipo de archivo verificado', {
+      fileType: file.type,
+      fileExtension,
+      allowedByType: allowedTypes.includes(file.type),
+      allowedByExtension: isAllowedByExtension,
+    });
 
     // Verificar tamaño (máximo 10MB)
     const maxSize = 10 * 1024 * 1024;
