@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import dynamic from 'next/dynamic';
 import {
   Home,
   Building2,
@@ -18,6 +19,8 @@ import {
   X,
   Plus,
   Info,
+  Brain,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -43,7 +46,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PhotoUploader } from '@/components/property/PhotoUploader';
-import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
+
+// Cargar asistente de IA de forma dinámica para evitar problemas de SSR
+const AIDocumentAssistant = dynamic(
+  () => import('@/components/ai/AIDocumentAssistant'),
+  { ssr: false }
+);
 
 interface Building {
   id: string;
@@ -124,6 +132,146 @@ export default function CrearPropiedadPage() {
   const handleCheckboxChange = (field: string, checked: boolean) => {
     setFormData((prev) => ({ ...prev, [field]: checked }));
   };
+
+  // Callback para aplicar datos extraídos por IA desde documentos (escrituras, notas simples, certificados energéticos)
+  const handleApplyAIData = useCallback((extractedData: Record<string, any>) => {
+    const updates: Partial<typeof formData> = {};
+    let updatedCount = 0;
+    
+    // Mapear campos extraídos a campos del formulario
+    Object.entries(extractedData).forEach(([key, value]) => {
+      if (!value) return;
+      
+      const keyLower = key.toLowerCase();
+      const valueStr = String(value);
+      
+      // Superficie total
+      if (keyLower.includes('superficie') && !keyLower.includes('util')) {
+        const numValue = parseFloat(valueStr.replace(/[^0-9.,]/g, '').replace(',', '.'));
+        if (!isNaN(numValue) && numValue > 0) {
+          updates.superficie = numValue.toString();
+          updatedCount++;
+        }
+      }
+      // Superficie útil
+      else if (keyLower.includes('superficie_util') || (keyLower.includes('superficie') && keyLower.includes('util'))) {
+        const numValue = parseFloat(valueStr.replace(/[^0-9.,]/g, '').replace(',', '.'));
+        if (!isNaN(numValue) && numValue > 0) {
+          updates.superficieUtil = numValue.toString();
+          updatedCount++;
+        }
+      }
+      // Habitaciones / Dormitorios
+      else if (keyLower.includes('habitacion') || keyLower.includes('dormitorio') || keyLower.includes('rooms')) {
+        const numValue = parseInt(valueStr.replace(/[^0-9]/g, ''));
+        if (!isNaN(numValue) && numValue >= 0) {
+          updates.habitaciones = numValue.toString();
+          updatedCount++;
+        }
+      }
+      // Baños
+      else if (keyLower.includes('bano') || keyLower.includes('bath')) {
+        const numValue = parseInt(valueStr.replace(/[^0-9]/g, ''));
+        if (!isNaN(numValue) && numValue >= 0) {
+          updates.banos = numValue.toString();
+          updatedCount++;
+        }
+      }
+      // Planta
+      else if (keyLower.includes('planta') || keyLower.includes('piso') || keyLower.includes('floor')) {
+        const numValue = parseInt(valueStr.replace(/[^0-9-]/g, ''));
+        if (!isNaN(numValue)) {
+          updates.planta = numValue.toString();
+          updatedCount++;
+        }
+      }
+      // Orientación
+      else if (keyLower.includes('orientacion') || keyLower.includes('orientation')) {
+        const orientations = ['Norte', 'Sur', 'Este', 'Oeste', 'Noreste', 'Noroeste', 'Sureste', 'Suroeste'];
+        const matchedOrientation = orientations.find(o => 
+          valueStr.toLowerCase().includes(o.toLowerCase())
+        );
+        if (matchedOrientation) {
+          updates.orientacion = matchedOrientation;
+          updatedCount++;
+        }
+      }
+      // Renta / Precio
+      else if (keyLower.includes('renta') || keyLower.includes('precio') || keyLower.includes('alquiler')) {
+        const numValue = parseFloat(valueStr.replace(/[^0-9.,]/g, '').replace(',', '.'));
+        if (!isNaN(numValue) && numValue > 0) {
+          updates.rentaMensual = numValue.toString();
+          updatedCount++;
+        }
+      }
+      // Referencia catastral -> se puede usar como número
+      else if (keyLower.includes('catastral') || keyLower.includes('referencia')) {
+        if (!updates.numero && valueStr.length > 0) {
+          // Usar los últimos caracteres como identificador
+          updates.numero = valueStr.slice(-10);
+          updatedCount++;
+        }
+      }
+      // Tipo de propiedad
+      else if (keyLower.includes('tipo') || keyLower.includes('uso')) {
+        const valueLower = valueStr.toLowerCase();
+        if (valueLower.includes('local') || valueLower.includes('comercial')) {
+          updates.tipo = 'local';
+          updatedCount++;
+        } else if (valueLower.includes('oficina')) {
+          updates.tipo = 'oficina';
+          updatedCount++;
+        } else if (valueLower.includes('garaje') || valueLower.includes('parking')) {
+          updates.tipo = 'garaje';
+          updatedCount++;
+        } else if (valueLower.includes('trastero') || valueLower.includes('almacen')) {
+          updates.tipo = 'trastero';
+          updatedCount++;
+        } else if (valueLower.includes('estudio') || valueLower.includes('loft')) {
+          updates.tipo = 'estudio';
+          updatedCount++;
+        } else if (valueLower.includes('vivienda') || valueLower.includes('piso') || valueLower.includes('apartamento')) {
+          updates.tipo = 'vivienda';
+          updatedCount++;
+        }
+      }
+      // Características booleanas
+      else if (keyLower.includes('aire') || keyLower.includes('climatizacion')) {
+        if (valueStr.toLowerCase().includes('si') || valueStr.toLowerCase() === 'true') {
+          updates.aireAcondicionado = true;
+          updatedCount++;
+        }
+      } else if (keyLower.includes('calefaccion')) {
+        if (valueStr.toLowerCase().includes('si') || valueStr.toLowerCase() === 'true') {
+          updates.calefaccion = true;
+          updatedCount++;
+        }
+      } else if (keyLower.includes('terraza')) {
+        if (valueStr.toLowerCase().includes('si') || valueStr.toLowerCase() === 'true') {
+          updates.terraza = true;
+          updatedCount++;
+        }
+      } else if (keyLower.includes('balcon')) {
+        if (valueStr.toLowerCase().includes('si') || valueStr.toLowerCase() === 'true') {
+          updates.balcon = true;
+          updatedCount++;
+        }
+      } else if (keyLower.includes('amueblado') || keyLower.includes('furnished')) {
+        if (valueStr.toLowerCase().includes('si') || valueStr.toLowerCase() === 'true') {
+          updates.amueblado = true;
+          updatedCount++;
+        }
+      }
+    });
+
+    // Solo actualizar si hay cambios
+    if (Object.keys(updates).length > 0) {
+      setFormData(prev => ({ ...prev, ...updates }));
+      toast.success(`${updatedCount} campo(s) rellenado(s) automáticamente`, {
+        description: 'Los datos han sido extraídos del documento',
+      });
+    }
+  }, []);
 
   const validateForm = () => {
     if (!formData.numero.trim()) {
@@ -647,17 +795,19 @@ export default function CrearPropiedadPage() {
         </form>
       </div>
 
-      {/* Asistente IA de Documentos - Para escrituras, certificados, etc. */}
+      {/* Asistente IA Documental - Extrae datos de escrituras, notas simples, certificados energéticos */}
       <AIDocumentAssistant 
         context="propiedades"
         variant="floating"
         position="bottom-right"
-        onApplyData={(data) => {
-          // Aplicar datos extraídos del documento al formulario
-          if (data.superficie) setFormData(prev => ({ ...prev, superficie: data.superficie }));
-          if (data.habitaciones) setFormData(prev => ({ ...prev, habitaciones: data.habitaciones }));
-          if (data.banos) setFormData(prev => ({ ...prev, banos: data.banos }));
-          toast.success('Datos del documento aplicados al formulario');
+        onApplyData={handleApplyAIData}
+        onAnalysisComplete={(analysis, file) => {
+          // Log para debugging
+          console.warn('[AI Document] Análisis de propiedad completado:', {
+            category: analysis.classification.category,
+            fieldsCount: analysis.extractedFields.length,
+            filename: file.name,
+          });
         }}
       />
     </AuthenticatedLayout>

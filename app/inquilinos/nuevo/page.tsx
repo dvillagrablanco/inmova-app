@@ -1,16 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import dynamic from 'next/dynamic';
 
-import { Users, Home, ArrowLeft, Save, Upload, FileText, X, Loader2 } from 'lucide-react';
+import { Users, Home, ArrowLeft, Save, Upload, FileText, X, Loader2, Brain, Sparkles } from 'lucide-react';
 
-// Cargar el asistente de IA de forma dinámica para evitar problemas de SSR
+// Cargar asistentes de IA de forma dinámica para evitar problemas de SSR
 const TenantFormAIAssistant = dynamic(
   () => import('@/components/inquilinos/TenantFormAIAssistant'),
+  { ssr: false }
+);
+
+const AIDocumentAssistant = dynamic(
+  () => import('@/components/ai/AIDocumentAssistant'),
   { ssr: false }
 );
 import { Button } from '@/components/ui/button';
@@ -189,6 +194,70 @@ export default function NuevoInquilinoPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  // Callback para aplicar datos extraídos por IA desde documentos (DNI, pasaporte, etc.)
+  const handleApplyAIData = useCallback((extractedData: Record<string, any>) => {
+    const updates: Partial<typeof formData> = {};
+    
+    // Mapear campos extraídos a campos del formulario
+    Object.entries(extractedData).forEach(([key, value]) => {
+      if (!value) return;
+      
+      const keyLower = key.toLowerCase();
+      const valueStr = String(value);
+      
+      // Nombre completo
+      if (keyLower.includes('nombre') || keyLower.includes('name') || keyLower === 'titular') {
+        updates.nombre = valueStr;
+      }
+      // Documento de identidad (DNI/NIE/Pasaporte)
+      else if (keyLower.includes('dni') || keyLower.includes('nie') || keyLower.includes('documento') || keyLower.includes('numero_documento') || keyLower.includes('id_number')) {
+        updates.documentoIdentidad = valueStr;
+        // Detectar tipo de documento
+        if (valueStr.match(/^[XYZ]/i)) {
+          updates.tipoDocumento = 'nie';
+        } else if (valueStr.match(/^[0-9]{8}[A-Z]$/i)) {
+          updates.tipoDocumento = 'dni';
+        } else if (valueStr.length > 10) {
+          updates.tipoDocumento = 'pasaporte';
+        }
+      }
+      // Email
+      else if (keyLower.includes('email') || keyLower.includes('correo')) {
+        updates.email = valueStr;
+      }
+      // Teléfono
+      else if (keyLower.includes('telefono') || keyLower.includes('phone') || keyLower.includes('movil')) {
+        updates.telefono = valueStr;
+      }
+      // Fecha de nacimiento
+      else if (keyLower.includes('nacimiento') || keyLower.includes('birth') || keyLower.includes('fecha_nacimiento')) {
+        // Intentar parsear fecha
+        const dateMatch = valueStr.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+        if (dateMatch) {
+          const [, day, month, year] = dateMatch;
+          const fullYear = year.length === 2 ? (parseInt(year) > 50 ? '19' + year : '20' + year) : year;
+          updates.fechaNacimiento = `${fullYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        }
+      }
+      // Nacionalidad
+      else if (keyLower.includes('nacionalidad') || keyLower.includes('nationality')) {
+        updates.nacionalidad = valueStr;
+      }
+      // Profesión
+      else if (keyLower.includes('profesion') || keyLower.includes('ocupacion') || keyLower.includes('profession')) {
+        updates.profesion = valueStr;
+      }
+    });
+
+    // Solo actualizar si hay cambios
+    if (Object.keys(updates).length > 0) {
+      setFormData(prev => ({ ...prev, ...updates }));
+      toast.success(`${Object.keys(updates).length} campo(s) rellenado(s) automáticamente`, {
+        description: 'Los datos han sido extraídos del documento',
+      });
+    }
+  }, []);
 
   if (status === 'loading') {
     return (
@@ -529,8 +598,24 @@ export default function NuevoInquilinoPage() {
               />
             </form>
 
-            {/* Asistente IA para el formulario */}
+            {/* Asistente IA conversacional para el formulario */}
             <TenantFormAIAssistant formData={formData} />
+
+            {/* Asistente IA Documental - Extrae datos de DNI/NIE/Pasaporte automáticamente */}
+            <AIDocumentAssistant
+              context="inquilinos"
+              variant="floating"
+              position="bottom-right"
+              onApplyData={handleApplyAIData}
+              onAnalysisComplete={(analysis, file) => {
+                // Log para debugging
+                console.warn('[AI Document] Análisis completado:', {
+                  category: analysis.classification.category,
+                  fieldsCount: analysis.extractedFields.length,
+                  filename: file.name,
+                });
+              }}
+            />
           </div>
         </AuthenticatedLayout>
   );

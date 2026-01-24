@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import dynamic from 'next/dynamic';
 
-import { FileText, Home, ArrowLeft, Save, Upload, X, Loader2 } from 'lucide-react';
+import { FileText, Home, ArrowLeft, Save, Upload, X, Loader2, Brain, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ButtonWithLoading } from '@/components/ui/button-with-loading';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
@@ -32,7 +33,12 @@ import logger, { logError } from '@/lib/logger';
 import { BackButton } from '@/components/ui/back-button';
 import { MobileFormWizard, FormStep } from '@/components/ui/mobile-form-wizard';
 import { Badge } from '@/components/ui/badge';
-import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
+
+// Cargar asistente de IA de forma dinámica para evitar problemas de SSR
+const AIDocumentAssistant = dynamic(
+  () => import('@/components/ai/AIDocumentAssistant'),
+  { ssr: false }
+);
 
 interface Unit {
   id: string;
@@ -198,6 +204,79 @@ export default function NuevoContratoPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  // Callback para aplicar datos extraídos por IA desde documentos de contrato
+  const handleApplyAIData = useCallback((extractedData: Record<string, any>) => {
+    const updates: Partial<typeof formData> = {};
+    let updatedCount = 0;
+    
+    // Mapear campos extraídos a campos del formulario
+    Object.entries(extractedData).forEach(([key, value]) => {
+      if (!value) return;
+      
+      const keyLower = key.toLowerCase();
+      const valueStr = String(value);
+      
+      // Renta mensual
+      if (keyLower.includes('renta') || keyLower.includes('alquiler') || keyLower.includes('mensual') || keyLower.includes('precio')) {
+        const numValue = parseFloat(valueStr.replace(/[^0-9.,]/g, '').replace(',', '.'));
+        if (!isNaN(numValue) && numValue > 0) {
+          updates.rentaMensual = numValue.toString();
+          updatedCount++;
+        }
+      }
+      // Depósito / Fianza
+      else if (keyLower.includes('deposito') || keyLower.includes('fianza') || keyLower.includes('garantia')) {
+        const numValue = parseFloat(valueStr.replace(/[^0-9.,]/g, '').replace(',', '.'));
+        if (!isNaN(numValue) && numValue > 0) {
+          updates.deposito = numValue.toString();
+          updatedCount++;
+        }
+      }
+      // Fecha de inicio
+      else if (keyLower.includes('inicio') || keyLower.includes('desde') || keyLower.includes('comienzo') || keyLower.includes('fecha_inicio')) {
+        const dateMatch = valueStr.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+        if (dateMatch) {
+          const [, day, month, year] = dateMatch;
+          const fullYear = year.length === 2 ? (parseInt(year) > 50 ? '19' + year : '20' + year) : year;
+          updates.fechaInicio = `${fullYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+          updatedCount++;
+        }
+      }
+      // Fecha de fin
+      else if (keyLower.includes('fin') || keyLower.includes('hasta') || keyLower.includes('vencimiento') || keyLower.includes('fecha_fin') || keyLower.includes('termino')) {
+        const dateMatch = valueStr.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+        if (dateMatch) {
+          const [, day, month, year] = dateMatch;
+          const fullYear = year.length === 2 ? (parseInt(year) > 50 ? '19' + year : '20' + year) : year;
+          updates.fechaFin = `${fullYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+          updatedCount++;
+        }
+      }
+      // Tipo de contrato
+      else if (keyLower.includes('tipo') || keyLower.includes('modalidad')) {
+        const valueLower = valueStr.toLowerCase();
+        if (valueLower.includes('comercial') || valueLower.includes('local') || valueLower.includes('negocio')) {
+          updates.tipo = 'comercial';
+          updatedCount++;
+        } else if (valueLower.includes('temporal') || valueLower.includes('temporada')) {
+          updates.tipo = 'temporal';
+          updatedCount++;
+        } else if (valueLower.includes('residencial') || valueLower.includes('vivienda')) {
+          updates.tipo = 'residencial';
+          updatedCount++;
+        }
+      }
+    });
+
+    // Solo actualizar si hay cambios
+    if (Object.keys(updates).length > 0) {
+      setFormData(prev => ({ ...prev, ...updates }));
+      toast.success(`${updatedCount} campo(s) rellenado(s) automáticamente`, {
+        description: 'Los datos han sido extraídos del contrato',
+      });
+    }
+  }, []);
 
   if (status === 'loading') {
     return (
@@ -521,18 +600,19 @@ export default function NuevoContratoPage() {
               />
             </form>
 
-            {/* Asistente IA de Documentos */}
+            {/* Asistente IA Documental - Extrae datos de contratos automáticamente */}
             <AIDocumentAssistant 
               context="contratos"
               variant="floating"
               position="bottom-right"
-              onApplyData={(data) => {
-                // Aplicar datos extraídos del documento al formulario
-                if (data.rentaMensual) setFormData(prev => ({ ...prev, rentaMensual: data.rentaMensual }));
-                if (data.deposito) setFormData(prev => ({ ...prev, deposito: data.deposito }));
-                if (data.fechaInicio) setFormData(prev => ({ ...prev, fechaInicio: data.fechaInicio }));
-                if (data.fechaFin) setFormData(prev => ({ ...prev, fechaFin: data.fechaFin }));
-                toast.success('Datos del documento aplicados al formulario');
+              onApplyData={handleApplyAIData}
+              onAnalysisComplete={(analysis, file) => {
+                // Log para debugging
+                console.warn('[AI Document] Análisis de contrato completado:', {
+                  category: analysis.classification.category,
+                  fieldsCount: analysis.extractedFields.length,
+                  filename: file.name,
+                });
               }}
             />
           </div>
