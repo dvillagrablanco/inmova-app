@@ -205,6 +205,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/media-estancia/analytics': 'media_estancia',
   '/media-estancia/configuracion': 'media_estancia',
   '/valoraciones': 'valoraciones',
+  '/valoracion-ia': 'valoracion_ia',
   '/publicaciones': 'publicaciones',
   '/screening': 'screening',
   '/galerias': 'galerias',
@@ -295,6 +296,8 @@ const CORE_MODULES = [
   'calendario',
   'chat',
   'notificaciones',
+  // Herramientas IA - Valor añadido transversal
+  'valoracion_ia',
   // Administración - Siempre visible para roles admin
   'configuracion',
   'usuarios',
