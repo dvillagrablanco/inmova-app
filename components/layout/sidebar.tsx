@@ -1176,6 +1176,12 @@ const analyticsNavItems = [
     icon: Sparkles,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
+  {
+    name: 'Valoración IA',
+    href: '/valoracion-ia',
+    icon: Brain,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
 ];
 
 // 3.3 OPERACIONES - SIMPLIFICADO (12→7 items)
