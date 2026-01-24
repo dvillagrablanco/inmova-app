@@ -118,8 +118,8 @@ export default function IAPlataformaPage() {
 
             <div className="space-y-2">
               <Label>Modelo</Label>
-              <Input defaultValue="claude-3-5-sonnet-20241022" readOnly />
-              <p className="text-xs text-muted-foreground">Claude 3.5 Sonnet - Mejor balance calidad/costo</p>
+              <Input defaultValue="claude-3-haiku-20240307" readOnly />
+              <p className="text-xs text-muted-foreground">Claude 3 Haiku - Rápido y eficiente</p>
             </div>
 
             <div className="space-y-4">

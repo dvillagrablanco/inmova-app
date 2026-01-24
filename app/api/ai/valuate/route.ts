@@ -438,7 +438,7 @@ export async function POST(request: NextRequest) {
           reasoning: valuation.reasoning,
           keyFactors: valuation.keyFactors,
           recommendations: valuation.recommendations,
-          model: 'claude-3-5-sonnet',
+          model: 'claude-3-haiku-20240307',
         },
       });
     }
