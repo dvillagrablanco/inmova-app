@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Bell, Check, Trash2, CheckCheck, Filter, Settings } from 'lucide-react';
+import { Bell, Check, Trash2, CheckCheck, Filter, Settings, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -16,6 +16,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Link from 'next/link';
 import logger, { logError } from '@/lib/logger';
+import { toast } from 'sonner';
 
 export interface Notification {
   id: string;
@@ -34,6 +35,9 @@ export function NotificationCenter() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [activeTab, setActiveTab] = useState('all');
+  const [isMarkingAllRead, setIsMarkingAllRead] = useState(false);
+  const [isDeletingRead, setIsDeletingRead] = useState(false);
+  const [pendingIds, setPendingIds] = useState<Record<string, boolean>>({});
 
   // Cargar notificaciones
   useEffect(() => {
@@ -54,7 +58,8 @@ export function NotificationCenter() {
       const response = await fetch('/api/notifications');
       if (response.ok) {
         const data = await response.json();
-        setNotifications(data);
+        const list = Array.isArray(data) ? data : data.notifications || [];
+        setNotifications(list);
       }
     } catch (error) {
       logger.error('Error fetching notifications:', error);
@@ -63,6 +68,7 @@ export function NotificationCenter() {
 
   const markAsRead = async (id: string) => {
     try {
+      setPendingIds((prev) => ({ ...prev, [id]: true }));
       const response = await fetch(`/api/notifications/${id}/read`, {
         method: 'PATCH',
       });
@@ -71,51 +77,91 @@ export function NotificationCenter() {
         setNotifications(prev =>
           prev.map(n => (n.id === id ? { ...n, read: true } : n))
         );
+        toast.success('Notificación marcada como leída');
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Error al marcar notificación');
       }
     } catch (error) {
       logger.error('Error marking notification as read:', error);
+      toast.error('Error al marcar notificación');
+    } finally {
+      setPendingIds((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
     }
   };
 
   const markAllAsRead = async () => {
     try {
+      setIsMarkingAllRead(true);
       const response = await fetch('/api/notifications/read-all', {
         method: 'PATCH',
       });
       
       if (response.ok) {
         setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        toast.success('Todas las notificaciones marcadas como leídas');
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Error al marcar todas como leídas');
       }
     } catch (error) {
       logger.error('Error marking all as read:', error);
+      toast.error('Error al marcar todas como leídas');
+    } finally {
+      setIsMarkingAllRead(false);
     }
   };
 
   const deleteNotification = async (id: string) => {
     try {
+      setPendingIds((prev) => ({ ...prev, [id]: true }));
       const response = await fetch(`/api/notifications/${id}`, {
         method: 'DELETE',
       });
       
       if (response.ok) {
         setNotifications(prev => prev.filter(n => n.id !== id));
+        toast.success('Notificación eliminada');
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Error al eliminar notificación');
       }
     } catch (error) {
       logger.error('Error deleting notification:', error);
+      toast.error('Error al eliminar notificación');
+    } finally {
+      setPendingIds((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
     }
   };
 
   const deleteAllRead = async () => {
     try {
+      setIsDeletingRead(true);
       const response = await fetch('/api/notifications/delete-read', {
         method: 'DELETE',
       });
       
       if (response.ok) {
         setNotifications(prev => prev.filter(n => !n.read));
+        const data = await response.json();
+        toast.success(data.message || 'Notificaciones leídas eliminadas');
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Error al eliminar notificaciones leídas');
       }
     } catch (error) {
       logger.error('Error deleting read notifications:', error);
+      toast.error('Error al eliminar notificaciones leídas');
+    } finally {
+      setIsDeletingRead(false);
     }
   };
 
@@ -141,7 +187,7 @@ export function NotificationCenter() {
 
   const NotificationItem = ({ notification }: { notification: Notification }) => {
     const handleClick = () => {
-      if (!notification.read) {
+      if (!notification.read && !pendingIds[notification.id]) {
         markAsRead(notification.id);
       }
       if (notification.link) {
@@ -168,12 +214,17 @@ export function NotificationCenter() {
               variant="ghost"
               size="icon"
               className="h-6 w-6 shrink-0"
+              disabled={pendingIds[notification.id]}
               onClick={(e) => {
                 e.stopPropagation();
                 deleteNotification(notification.id);
               }}
             >
-              <Trash2 className="h-3 w-3" />
+              {pendingIds[notification.id] ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Trash2 className="h-3 w-3" />
+              )}
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
@@ -230,9 +281,14 @@ export function NotificationCenter() {
                 size="icon"
                 className="h-8 w-8"
                 onClick={markAllAsRead}
+                disabled={isMarkingAllRead}
                 title="Marcar todo como leído"
               >
-                <CheckCheck className="h-4 w-4" />
+                {isMarkingAllRead ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <CheckCheck className="h-4 w-4" />
+                )}
               </Button>
             )}
             <Button
@@ -240,9 +296,14 @@ export function NotificationCenter() {
               size="icon"
               className="h-8 w-8"
               onClick={deleteAllRead}
+              disabled={isDeletingRead}
               title="Eliminar leídas"
             >
-              <Trash2 className="h-4 w-4" />
+              {isDeletingRead ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
             </Button>
           </div>
         </div>

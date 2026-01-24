@@ -87,7 +87,7 @@ interface ServiceProvider {
   email: string;
   telefono: string;
   tipo: string;
-  estado: 'PENDIENTE' | 'ACTIVO' | 'SUSPENDIDO' | 'RECHAZADO';
+  estado: 'pending' | 'active' | 'suspended';
   verificado: boolean;
   rating: number;
   totalReviews: number;
@@ -95,6 +95,9 @@ interface ServiceProvider {
   reservasCompletadas: number;
   ingresosTotales: number;
   fechaRegistro: string;
+  website?: string | null;
+  direccion?: string | null;
+  descripcion?: string | null;
 }
 
 // Servicio del marketplace
@@ -119,6 +122,16 @@ interface MarketplaceService {
     nombre: string;
     verificado: boolean;
   } | null;
+}
+
+interface MarketplaceReservation {
+  id: string;
+  servicio: string;
+  categoria: string;
+  proveedor: string;
+  fechaServicio: string;
+  precio: number;
+  estado: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'disputed';
 }
 
 // Categorías de servicios
@@ -149,6 +162,7 @@ export default function MarketplaceAdminPage() {
   const [stats, setStats] = useState<MarketplaceStats | null>(null);
   const [providers, setProviders] = useState<ServiceProvider[]>([]);
   const [services, setServices] = useState<MarketplaceService[]>([]);
+  const [reservations, setReservations] = useState<MarketplaceReservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -183,23 +197,32 @@ export default function MarketplaceAdminPage() {
   const loadData = async () => {
     try {
       setLoading(true);
+      const [statsRes, servicesRes, providersRes, reservationsRes] = await Promise.all([
+        fetch('/api/marketplace/stats'),
+        fetch('/api/admin/marketplace/services'),
+        fetch('/api/admin/marketplace/providers'),
+        fetch('/api/admin/marketplace/reservations'),
+      ]);
 
-      // Cargar estadísticas
-      const statsRes = await fetch('/api/marketplace/stats');
       if (statsRes.ok) {
         const statsData = await statsRes.json();
         setStats(statsData);
       }
 
-      // Cargar servicios
-      const servicesRes = await fetch('/api/admin/marketplace/services');
       if (servicesRes.ok) {
         const servicesData = await servicesRes.json();
         setServices(servicesData);
       }
 
-      // Mock providers (TODO: crear API)
-      setProviders([]);
+      if (providersRes.ok) {
+        const providersData = await providersRes.json();
+        setProviders(providersData.providers || providersData || []);
+      }
+
+      if (reservationsRes.ok) {
+        const reservationsData = await reservationsRes.json();
+        setReservations(reservationsData.reservations || []);
+      }
     } catch (error) {
       logger.error('Error loading marketplace data:', error);
       toast.error('Error al cargar datos del marketplace');
@@ -322,6 +345,36 @@ export default function MarketplaceAdminPage() {
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
+  };
+
+  const getProviderStatusBadge = (status: ServiceProvider['estado']) => {
+    switch (status) {
+      case 'active':
+        return <Badge className="bg-green-100 text-green-700">Activo</Badge>;
+      case 'pending':
+        return <Badge className="bg-yellow-100 text-yellow-700">Pendiente</Badge>;
+      case 'suspended':
+        return <Badge className="bg-red-100 text-red-700">Suspendido</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const getReservationStatusBadge = (status: MarketplaceReservation['estado']) => {
+    switch (status) {
+      case 'pending':
+        return <Badge className="bg-yellow-100 text-yellow-700">Pendiente</Badge>;
+      case 'confirmed':
+        return <Badge className="bg-blue-100 text-blue-700">Confirmada</Badge>;
+      case 'completed':
+        return <Badge className="bg-green-100 text-green-700">Completada</Badge>;
+      case 'cancelled':
+        return <Badge className="bg-red-100 text-red-700">Cancelada</Badge>;
+      case 'disputed':
+        return <Badge className="bg-orange-100 text-orange-700">Disputa</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
   };
 
   if (loading) {
@@ -610,13 +663,50 @@ export default function MarketplaceAdminPage() {
                 </div>
               </CardHeader>
               <CardContent>
+              {providers.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Gestión de proveedores disponible próximamente</p>
+                  <p>No hay proveedores registrados</p>
                   <p className="text-sm mt-2">
-                    Los proveedores podrán registrarse y gestionar sus propios servicios
+                    Los proveedores aparecerán aquí cuando se registren en la plataforma
                   </p>
                 </div>
+              ) : (
+                <div className="space-y-3">
+                  {providers.map((provider) => (
+                    <div
+                      key={provider.id}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border rounded-lg"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{provider.nombre}</p>
+                          {provider.verificado && (
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{provider.email}</p>
+                        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground mt-1">
+                          <span>{provider.tipo}</span>
+                          <span>•</span>
+                          <span>{provider.serviciosActivos} servicios</span>
+                          <span>•</span>
+                          <span>{provider.reservasCompletadas} reservas</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {provider.rating > 0 && (
+                          <div className="flex items-center gap-1 text-sm">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span className="font-medium">{provider.rating.toFixed(1)}</span>
+                          </div>
+                        )}
+                        {getProviderStatusBadge(provider.estado)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -641,13 +731,42 @@ export default function MarketplaceAdminPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No hay reservas recientes</p>
-                  <p className="text-sm mt-2">
-                    Las reservas aparecerán aquí cuando los usuarios contraten servicios
-                  </p>
-                </div>
+                {reservations.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No hay reservas recientes</p>
+                    <p className="text-sm mt-2">
+                      Las reservas aparecerán aquí cuando los usuarios contraten servicios
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {reservations.slice(0, 5).map((reservation) => (
+                      <div
+                        key={reservation.id}
+                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border rounded-lg"
+                      >
+                        <div>
+                          <p className="font-medium">{reservation.servicio}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {reservation.proveedor}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {reservation.fechaServicio
+                              ? new Date(reservation.fechaServicio).toLocaleDateString('es-ES')
+                              : 'Fecha por definir'}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="font-semibold">
+                            {formatCurrency(reservation.precio)}
+                          </span>
+                          {getReservationStatusBadge(reservation.estado)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

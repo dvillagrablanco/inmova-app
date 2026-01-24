@@ -10,6 +10,8 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { prisma } from './db';
 import logger from './logger';
+import { z } from 'zod';
+import { fetchJson } from '@/lib/integrations/http-client';
 
 // ============================================================================
 // CONFIGURACIÓN
@@ -155,29 +157,37 @@ async function fetchMarketData(
 }
 
 /**
- * Obtiene el precio medio por m² desde APIs externas (mock)
- * En producción: Idealista API, Fotocasa API, etc.
+ * Obtiene el precio medio por m² desde APIs externas (Idealista, Fotocasa, etc.)
  */
 async function fetchExternalMarketData(
   city: string,
   postalCode: string
 ): Promise<{ avgPricePerM2: number; trend: 'UP' | 'STABLE' | 'DOWN' }> {
-  // Mock de datos para desarrollo
-  // En producción, hacer fetch real a APIs externas
-  const cityPrices: Record<string, number> = {
-    Madrid: 15,
-    Barcelona: 18,
-    Valencia: 10,
-    Sevilla: 9,
-    Málaga: 11,
-    Bilbao: 12,
-  };
+  const apiUrl = process.env.MARKET_DATA_API_URL;
+  if (!apiUrl) {
+    logger.warn('MARKET_DATA_API_URL no configurado');
+    return { avgPricePerM2: 0, trend: 'STABLE' };
+  }
 
-  const avgPricePerM2 = cityPrices[city] || 10;
+  const responseSchema = z.object({
+    avgPricePerM2: z.number(),
+    trend: z.enum(['UP', 'STABLE', 'DOWN']).optional(),
+  });
 
+  const { data } = await fetchJson<z.infer<typeof responseSchema>>(apiUrl, {
+    method: 'POST',
+    headers: process.env.MARKET_DATA_API_KEY
+      ? { Authorization: `Bearer ${process.env.MARKET_DATA_API_KEY}` }
+      : undefined,
+    body: { city, postalCode },
+    timeoutMs: 15_000,
+    circuitKey: 'market-data',
+  });
+
+  const parsed = responseSchema.parse(data);
   return {
-    avgPricePerM2,
-    trend: 'STABLE',
+    avgPricePerM2: parsed.avgPricePerM2,
+    trend: parsed.trend || 'STABLE',
   };
 }
 

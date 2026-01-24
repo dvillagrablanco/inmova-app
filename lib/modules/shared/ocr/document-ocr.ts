@@ -5,6 +5,32 @@
 
 import { OCROptions, DocumentOCRResult, DocumentField } from './types';
 import logger from '@/lib/logger';
+import { z } from 'zod';
+import { fetchJson } from '@/lib/integrations/http-client';
+
+const documentResponseSchema = z.object({
+  text: z.string(),
+  confidence: z.number(),
+  documentType: z.string().optional(),
+  fields: z
+    .array(
+      z.object({
+        key: z.string(),
+        value: z.string(),
+        confidence: z.number(),
+        type: z.enum(['text', 'number', 'date', 'currency', 'boolean']),
+      })
+    )
+    .optional(),
+  tables: z.array(z.any()).optional(),
+  metadata: z
+    .object({
+      language: z.string().optional(),
+      orientation: z.number().optional(),
+      processingTime: z.number().optional(),
+    })
+    .optional(),
+});
 
 /**
  * Perform OCR on a structured document
@@ -20,22 +46,35 @@ export async function performDocumentOCR(
       type: documentType || 'auto',
     });
 
-    // TODO: Integrate with document OCR service
-    // - AWS Textract (for invoices, receipts)
-    // - Google Document AI
-    // - Azure Form Recognizer
+    const ocrApiUrl = process.env.OCR_API_URL;
+    if (!ocrApiUrl) {
+      throw new Error('OCR_API_URL no configurado');
+    }
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    const { data } = await fetchJson<z.infer<typeof documentResponseSchema>>(ocrApiUrl, {
+      method: 'POST',
+      headers: process.env.OCR_API_KEY
+        ? { Authorization: `Bearer ${process.env.OCR_API_KEY}` }
+        : undefined,
+      body: {
+        type: 'document',
+        documentType,
+        contentBase64: documentBuffer.toString('base64'),
+        options,
+      },
+      timeoutMs: 30_000,
+      circuitKey: 'ocr-document',
+    });
+
+    const parsed = documentResponseSchema.parse(data);
 
     return {
-      text: 'Mock document text',
-      confidence: 0.92,
-      documentType: documentType || 'other',
-      fields: [],
-      metadata: {
-        language: 'es',
-        processingTime: 500,
-      },
+      text: parsed.text,
+      confidence: parsed.confidence,
+      documentType: (parsed.documentType || documentType || 'other') as DocumentOCRResult['documentType'],
+      fields: parsed.fields || [],
+      tables: parsed.tables || [],
+      metadata: parsed.metadata,
     };
   } catch (error: any) {
     logger.error('Error performing document OCR:', error);
@@ -53,15 +92,29 @@ export async function extractInvoiceFields(
     logger.info('Extracting invoice fields');
 
     const result = await performDocumentOCR(invoiceBuffer, 'invoice');
+    if (result.fields && result.fields.length > 0) {
+      return result.fields;
+    }
 
-    // TODO: Parse and extract specific fields:
-    // - Invoice number
-    // - Date
-    // - Total amount
-    // - Vendor name
-    // - Line items
+    const fields: DocumentField[] = [];
+    const text = result.text || '';
 
-    return result.fields || [];
+    const invoiceNumber = text.match(/factura\s*(?:n[oº]?|num(?:ero)?)\s*[:#]?\s*([A-Z0-9-]+)/i);
+    if (invoiceNumber?.[1]) {
+      fields.push({ key: 'invoice_number', value: invoiceNumber[1], confidence: 0.6, type: 'text' });
+    }
+
+    const dateMatch = text.match(/(\d{2}\/\d{2}\/\d{4})/);
+    if (dateMatch?.[1]) {
+      fields.push({ key: 'date', value: dateMatch[1], confidence: 0.6, type: 'date' });
+    }
+
+    const totalMatch = text.match(/total\s*[:€]?\s*([0-9.,]+)/i);
+    if (totalMatch?.[1]) {
+      fields.push({ key: 'total', value: totalMatch[1], confidence: 0.6, type: 'currency' });
+    }
+
+    return fields;
   } catch (error: any) {
     logger.error('Error extracting invoice fields:', error);
     return [];
@@ -78,15 +131,29 @@ export async function extractIDFields(
     logger.info('Extracting ID fields');
 
     const result = await performDocumentOCR(idBuffer, 'id');
+    if (result.fields && result.fields.length > 0) {
+      return result.fields;
+    }
 
-    // TODO: Parse and extract specific fields:
-    // - Name
-    // - Document number
-    // - Date of birth
-    // - Expiration date
-    // - Address
+    const fields: DocumentField[] = [];
+    const text = result.text || '';
 
-    return result.fields || [];
+    const dniMatch = text.match(/(dni|nif)\s*[:#]?\s*([0-9A-Z-]+)/i);
+    if (dniMatch?.[2]) {
+      fields.push({ key: 'document_number', value: dniMatch[2], confidence: 0.6, type: 'text' });
+    }
+
+    const nameMatch = text.match(/nombre\s*[:#]?\s*([A-ZÁÉÍÓÚÑ\s]+)/i);
+    if (nameMatch?.[1]) {
+      fields.push({ key: 'name', value: nameMatch[1].trim(), confidence: 0.5, type: 'text' });
+    }
+
+    const birthMatch = text.match(/(\d{2}\/\d{2}\/\d{4})/);
+    if (birthMatch?.[1]) {
+      fields.push({ key: 'date_of_birth', value: birthMatch[1], confidence: 0.5, type: 'date' });
+    }
+
+    return fields;
   } catch (error: any) {
     logger.error('Error extracting ID fields:', error);
     return [];
@@ -101,10 +168,8 @@ export async function extractDocumentTables(
 ): Promise<any[]> {
   try {
     logger.info('Extracting tables from document');
-
-    // TODO: Use AWS Textract or similar to extract tables
-    
-    return [];
+    const result = await performDocumentOCR(documentBuffer, 'invoice');
+    return result.tables || [];
   } catch (error: any) {
     logger.error('Error extracting tables:', error);
     return [];

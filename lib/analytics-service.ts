@@ -163,6 +163,15 @@ export async function trackAIUsage(
     const currentCost = (await cache.get<number>(costKey)) || 0;
     await cache.set(costKey, currentCost + cost, { ttl: 86400 });
 
+    const latencyTotalKey = { type: 'ai_latency_total', date: dateKey };
+    const latencyCountKey = { type: 'ai_latency_count', date: dateKey };
+    const currentLatencyTotal = (await cache.get<number>(latencyTotalKey)) || 0;
+    const currentLatencyCount = (await cache.get<number>(latencyCountKey)) || 0;
+    await Promise.all([
+      cache.set(latencyTotalKey, currentLatencyTotal + latency, { ttl: 86400 }),
+      cache.set(latencyCountKey, currentLatencyCount + 1, { ttl: 86400 }),
+    ]);
+
   } catch (error) {
     logger.warn('Failed to track AI usage:', error);
   }
@@ -181,8 +190,24 @@ export async function trackCacheAccess(
 
     if (hit) {
       await cache.increment({ type: 'cache_hit', date: dateKey });
+      const totalKey = { type: 'cache_hit_latency_total', date: dateKey };
+      const countKey = { type: 'cache_hit_latency_count', date: dateKey };
+      const currentTotal = (await cache.get<number>(totalKey)) || 0;
+      const currentCount = (await cache.get<number>(countKey)) || 0;
+      await Promise.all([
+        cache.set(totalKey, currentTotal + latency, { ttl: 86400 }),
+        cache.set(countKey, currentCount + 1, { ttl: 86400 }),
+      ]);
     } else {
       await cache.increment({ type: 'cache_miss', date: dateKey });
+      const totalKey = { type: 'cache_miss_latency_total', date: dateKey };
+      const countKey = { type: 'cache_miss_latency_count', date: dateKey };
+      const currentTotal = (await cache.get<number>(totalKey)) || 0;
+      const currentCount = (await cache.get<number>(countKey)) || 0;
+      await Promise.all([
+        cache.set(totalKey, currentTotal + latency, { ttl: 86400 }),
+        cache.set(countKey, currentCount + 1, { ttl: 86400 }),
+      ]);
     }
 
   } catch (error) {
@@ -221,7 +246,7 @@ export async function getUsageMetrics(
     ]);
 
     // Métricas de Usuarios
-    const [totalUsers, activeUsers] = await Promise.all([
+    const [totalUsers, activeUsers, newUsers] = await Promise.all([
       prisma.user.count({ where: { companyId } }),
       prisma.user.count({
         where: {
@@ -229,26 +254,63 @@ export async function getUsageMetrics(
           lastLogin: { gte: startDate },
         },
       }),
+      prisma.user.count({
+        where: {
+          companyId,
+          createdAt: { gte: startDate },
+        },
+      }),
     ]);
 
     // Métricas de Propiedades
-    const properties = await prisma.unit.groupBy({
-      by: ['estado'],
-      where: { building: { companyId } },
-      _count: true,
-    });
+    const [properties, newProperties] = await Promise.all([
+      prisma.unit.groupBy({
+        by: ['estado'],
+        where: { building: { companyId } },
+        _count: true,
+      }),
+      prisma.unit.count({
+        where: { building: { companyId }, createdAt: { gte: startDate } },
+      }),
+    ]);
 
     const totalProperties = properties.reduce((sum, p) => sum + p._count, 0);
     const rentedProperties = properties.find((p) => p.estado === 'rentada')?._count || 0;
     const availableProperties = properties.find((p) => p.estado === 'disponible')?._count || 0;
 
+    const apiLogs = await prisma.apiLog.findMany({
+      where: {
+        companyId,
+        timestamp: { gte: startDate, lte: endDate },
+      },
+      select: {
+        path: true,
+        statusCode: true,
+        responseTime: true,
+      },
+    });
+
+    const totalRequests = apiLogs.length;
+    const errorCount = apiLogs.filter((log) => log.statusCode >= 400).length;
+    const avgResponseTime =
+      totalRequests > 0
+        ? Math.round(
+            apiLogs.reduce((sum, log) => sum + (log.responseTime || 0), 0) / totalRequests
+          )
+        : 0;
+
+    const requestsByEndpoint = apiLogs.reduce<Record<string, number>>((acc, log) => {
+      acc[log.path] = (acc[log.path] || 0) + 1;
+      return acc;
+    }, {});
+
     return {
       period,
       api: {
-        totalRequests: 0, // Calculado desde cache
-        requestsByEndpoint: {},
-        avgResponseTime: 0,
-        errorRate: 0,
+        totalRequests,
+        requestsByEndpoint,
+        avgResponseTime,
+        errorRate: totalRequests > 0 ? Number(((errorCount / totalRequests) * 100).toFixed(1)) : 0,
       },
       features: {
         valuationsCount: valuations,
@@ -258,12 +320,12 @@ export async function getUsageMetrics(
       },
       users: {
         activeUsers,
-        newUsers: 0, // TODO: calcular
+        newUsers,
         dailyActiveUsers: activeUsers,
       },
       properties: {
         totalProperties,
-        newProperties: 0, // TODO: calcular desde period
+        newProperties,
         rentedProperties,
         availableProperties,
       },
@@ -322,6 +384,41 @@ export async function getAIMetrics(
       }
     }
 
+    const [commandsSuccess, commandsError, latencyTotals, latencyCounts] = await Promise.all([
+      prisma.aICommand.count({
+        where: {
+          conversation: { companyId },
+          createdAt: { gte: startDate, lte: endDate },
+          exitoso: true,
+        },
+      }),
+      prisma.aICommand.count({
+        where: {
+          conversation: { companyId },
+          createdAt: { gte: startDate, lte: endDate },
+          exitoso: false,
+        },
+      }),
+      Promise.all(
+        dates.map(async (date) => {
+          const dateKey = date.toISOString().split('T')[0];
+          return (await cache.get<number>({ type: 'ai_latency_total', date: dateKey })) || 0;
+        })
+      ),
+      Promise.all(
+        dates.map(async (date) => {
+          const dateKey = date.toISOString().split('T')[0];
+          return (await cache.get<number>({ type: 'ai_latency_count', date: dateKey })) || 0;
+        })
+      ),
+    ]);
+
+    const totalLatency = latencyTotals.reduce((sum, value) => sum + value, 0);
+    const totalLatencyCount = latencyCounts.reduce((sum, value) => sum + value, 0);
+    const avgLatency = totalLatencyCount > 0 ? Math.round(totalLatency / totalLatencyCount) : 0;
+
+    const totalCommands = commandsSuccess + commandsError;
+
     return {
       period,
       usage: {
@@ -342,9 +439,9 @@ export async function getAIMetrics(
         avgCostPerRequest: totalRequests > 0 ? Math.round((totalCost / totalRequests) * 1000) / 1000 : 0,
       },
       performance: {
-        avgLatency: 0, // TODO: calcular desde cache
-        successRate: 0,
-        errorRate: 0,
+        avgLatency,
+        successRate: totalCommands > 0 ? Math.round((commandsSuccess / totalCommands) * 1000) / 10 : 0,
+        errorRate: totalCommands > 0 ? Math.round((commandsError / totalCommands) * 1000) / 10 : 0,
       },
     };
 
@@ -380,6 +477,60 @@ export async function getPerformanceMetrics(
     const totalRequests = totalHits + totalMisses;
     const hitRate = totalRequests > 0 ? (totalHits / totalRequests) * 100 : 0;
 
+    const [hitLatencyTotals, hitLatencyCounts, missLatencyTotals, missLatencyCounts] = await Promise.all([
+      Promise.all(
+        dates.map(async (date) => {
+          const dateKey = date.toISOString().split('T')[0];
+          return (await cache.get<number>({ type: 'cache_hit_latency_total', date: dateKey })) || 0;
+        })
+      ),
+      Promise.all(
+        dates.map(async (date) => {
+          const dateKey = date.toISOString().split('T')[0];
+          return (await cache.get<number>({ type: 'cache_hit_latency_count', date: dateKey })) || 0;
+        })
+      ),
+      Promise.all(
+        dates.map(async (date) => {
+          const dateKey = date.toISOString().split('T')[0];
+          return (await cache.get<number>({ type: 'cache_miss_latency_total', date: dateKey })) || 0;
+        })
+      ),
+      Promise.all(
+        dates.map(async (date) => {
+          const dateKey = date.toISOString().split('T')[0];
+          return (await cache.get<number>({ type: 'cache_miss_latency_count', date: dateKey })) || 0;
+        })
+      ),
+    ]);
+
+    const totalHitLatency = hitLatencyTotals.reduce((sum, value) => sum + value, 0);
+    const totalHitLatencyCount = hitLatencyCounts.reduce((sum, value) => sum + value, 0);
+    const totalMissLatency = missLatencyTotals.reduce((sum, value) => sum + value, 0);
+    const totalMissLatencyCount = missLatencyCounts.reduce((sum, value) => sum + value, 0);
+
+    const avgHitLatency =
+      totalHitLatencyCount > 0 ? Math.round(totalHitLatency / totalHitLatencyCount) : 0;
+    const avgMissLatency =
+      totalMissLatencyCount > 0 ? Math.round(totalMissLatency / totalMissLatencyCount) : 0;
+
+    const apiLogs = await prisma.apiLog.findMany({
+      where: {
+        timestamp: { gte: startDate, lte: endDate },
+      },
+      select: { responseTime: true },
+    });
+
+    const responseTimes = apiLogs
+      .map((log) => log.responseTime || 0)
+      .filter((value) => value > 0)
+      .sort((a, b) => a - b);
+
+    const avgResponseTime =
+      responseTimes.length > 0
+        ? Math.round(responseTimes.reduce((sum, value) => sum + value, 0) / responseTimes.length)
+        : 0;
+
     return {
       period,
       cache: {
@@ -388,19 +539,19 @@ export async function getPerformanceMetrics(
         totalRequests,
         hits: totalHits,
         misses: totalMisses,
-        avgHitLatency: 10, // Mock - calcular real desde logs
-        avgMissLatency: 250, // Mock
+        avgHitLatency,
+        avgMissLatency,
       },
       database: {
-        avgQueryTime: 50, // Mock - integrar con Prisma metrics
+        avgQueryTime: 0,
         slowQueries: 0,
         totalQueries: 0,
       },
       api: {
-        p50: 200, // Mock
-        p95: 500,
-        p99: 1000,
-        avgResponseTime: 300,
+        p50: calculatePercentile(responseTimes, 50),
+        p95: calculatePercentile(responseTimes, 95),
+        p99: calculatePercentile(responseTimes, 99),
+        avgResponseTime,
       },
     };
 
@@ -446,6 +597,13 @@ function getDateRange(startDate: Date, endDate: Date): Date[] {
   }
 
   return dates;
+}
+
+function calculatePercentile(values: number[], percentile: number): number {
+  if (values.length === 0) return 0;
+  const index = Math.ceil((percentile / 100) * values.length) - 1;
+  const safeIndex = Math.min(Math.max(index, 0), values.length - 1);
+  return values[safeIndex];
 }
 
 /**

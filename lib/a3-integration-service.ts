@@ -14,8 +14,10 @@
  * Documentación API: https://www.wolterskluwer.com/es-es/solutions/a3software
  */
 
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { prisma } from './db';
+import { z } from 'zod';
+import { executeWithCircuitBreaker } from '@/lib/integrations/circuit-breaker';
 
 interface A3Config {
   apiKey: string;
@@ -91,7 +93,15 @@ class A3IntegrationService {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'X-API-Key': this.config.apiKey
-      }
+      },
+      timeout: 15000,
+    });
+  }
+
+  private async request<T>(config: AxiosRequestConfig, circuitKey: string): Promise<T> {
+    return executeWithCircuitBreaker(circuitKey, async () => {
+      const response = await this.client.request<T>(config);
+      return response.data as T;
     });
   }
 
@@ -111,13 +121,25 @@ class A3IntegrationService {
     }
 
     try {
-      const response = await this.client.post('/auth/login', {
-        username: this.config.username,
-        password: this.config.password,
-        companyId: this.config.companyId
+      const authSchema = z.object({
+        token: z.string(),
       });
 
-      this.sessionToken = response.data.token;
+      const data = await this.request<z.infer<typeof authSchema>>(
+        {
+          url: '/auth/login',
+          method: 'POST',
+          data: {
+            username: this.config.username,
+            password: this.config.password,
+            companyId: this.config.companyId,
+          },
+        },
+        'a3:auth'
+      );
+
+      const parsed = authSchema.parse(data);
+      this.sessionToken = parsed.token;
       this.client.defaults.headers.common['Authorization'] = `Bearer ${this.sessionToken}`;
 
       return this.sessionToken;
@@ -141,23 +163,37 @@ class A3IntegrationService {
   async createCustomer(customer: A3Customer): Promise<any> {
     await this.ensureAuthenticated();
 
-    const response = await this.client.post('/customers', {
-      codigo: customer.code,
-      razonSocial: customer.fiscalName,
-      nombreComercial: customer.tradeName || customer.fiscalName,
-      nif: customer.taxId,
-      email: customer.email,
-      telefono: customer.phone,
-      direccion: customer.address,
-      ciudad: customer.city,
-      codigoPostal: customer.postalCode,
-      provincia: customer.province,
-      pais: customer.country || 'ES',
-      formaPago: customer.paymentMethod || 'TRANSFERENCIA',
-      diasPago: customer.paymentDays || 30
+    const customerSchema = z.object({
+      id: z.string().optional(),
+      codigo: z.string().optional(),
+      razonSocial: z.string().optional(),
+      nif: z.string().optional(),
     });
 
-    return response.data;
+    const data = await this.request<z.infer<typeof customerSchema>>(
+      {
+        url: '/customers',
+        method: 'POST',
+        data: {
+          codigo: customer.code,
+          razonSocial: customer.fiscalName,
+          nombreComercial: customer.tradeName || customer.fiscalName,
+          nif: customer.taxId,
+          email: customer.email,
+          telefono: customer.phone,
+          direccion: customer.address,
+          ciudad: customer.city,
+          codigoPostal: customer.postalCode,
+          provincia: customer.province,
+          pais: customer.country || 'ES',
+          formaPago: customer.paymentMethod || 'TRANSFERENCIA',
+          diasPago: customer.paymentDays || 30,
+        },
+      },
+      'a3:customers'
+    );
+
+    return customerSchema.parse(data);
   }
 
   /**
@@ -166,8 +202,22 @@ class A3IntegrationService {
   async getCustomer(customerId: string): Promise<any> {
     await this.ensureAuthenticated();
 
-    const response = await this.client.get(`/customers/${customerId}`);
-    return response.data;
+    const customerSchema = z.object({
+      id: z.string().optional(),
+      codigo: z.string().optional(),
+      razonSocial: z.string().optional(),
+      nif: z.string().optional(),
+    });
+
+    const data = await this.request<z.infer<typeof customerSchema>>(
+      {
+        url: `/customers/${customerId}`,
+        method: 'GET',
+      },
+      'a3:customers'
+    );
+
+    return customerSchema.parse(data);
   }
 
   /**
@@ -189,8 +239,16 @@ class A3IntegrationService {
   async updateCustomer(customerId: string, customer: Partial<A3Customer>): Promise<any> {
     await this.ensureAuthenticated();
 
-    const response = await this.client.put(`/customers/${customerId}`, customer);
-    return response.data;
+    const data = await this.request(
+      {
+        url: `/customers/${customerId}`,
+        method: 'PUT',
+        data: customer,
+      },
+      'a3:customers'
+    );
+
+    return data;
   }
 
   /**
@@ -199,23 +257,37 @@ class A3IntegrationService {
   async createInvoice(invoice: A3Invoice): Promise<any> {
     await this.ensureAuthenticated();
 
-    const response = await this.client.post('/invoices', {
-      clienteId: invoice.customerId,
-      serie: invoice.series || 'A',
-      fecha: invoice.date,
-      fechaVencimiento: invoice.dueDate,
-      moneda: invoice.currency || 'EUR',
-      lineas: invoice.lines.map(line => ({
-        descripcion: line.description,
-        cantidad: line.quantity,
-        precioUnitario: line.unitPrice,
-        tipoIVA: line.taxRate,
-        descuento: line.discount || 0
-      })),
-      observaciones: invoice.notes
+    const invoiceSchema = z.object({
+      id: z.string().optional(),
+      invoiceNumber: z.string().optional(),
+      customerId: z.string().optional(),
+      status: z.string().optional(),
     });
 
-    return response.data;
+    const data = await this.request<z.infer<typeof invoiceSchema>>(
+      {
+        url: '/invoices',
+        method: 'POST',
+        data: {
+          clienteId: invoice.customerId,
+          serie: invoice.series || 'A',
+          fecha: invoice.date,
+          fechaVencimiento: invoice.dueDate,
+          moneda: invoice.currency || 'EUR',
+          lineas: invoice.lines.map((line) => ({
+            descripcion: line.description,
+            cantidad: line.quantity,
+            precioUnitario: line.unitPrice,
+            tipoIVA: line.taxRate,
+            descuento: line.discount || 0,
+          })),
+          observaciones: invoice.notes,
+        },
+      },
+      'a3:invoices'
+    );
+
+    return invoiceSchema.parse(data);
   }
 
   /**
@@ -224,8 +296,21 @@ class A3IntegrationService {
   async getInvoice(invoiceId: string): Promise<any> {
     await this.ensureAuthenticated();
 
-    const response = await this.client.get(`/invoices/${invoiceId}`);
-    return response.data;
+    const invoiceSchema = z.object({
+      id: z.string().optional(),
+      invoiceNumber: z.string().optional(),
+      status: z.string().optional(),
+    });
+
+    const data = await this.request<z.infer<typeof invoiceSchema>>(
+      {
+        url: `/invoices/${invoiceId}`,
+        method: 'GET',
+      },
+      'a3:invoices'
+    );
+
+    return invoiceSchema.parse(data);
   }
 
   /**
@@ -234,17 +319,30 @@ class A3IntegrationService {
   async registerPayment(payment: A3Payment): Promise<any> {
     await this.ensureAuthenticated();
 
-    const response = await this.client.post('/payments/receipts', {
-      clienteId: payment.customerId,
-      facturaId: payment.invoiceId,
-      fecha: payment.date,
-      importe: payment.amount,
-      formaPago: payment.paymentMethod,
-      cuentaBancaria: payment.bankAccount,
-      referencia: payment.reference
+    const paymentSchema = z.object({
+      id: z.string().optional(),
+      amount: z.number().optional(),
+      status: z.string().optional(),
     });
 
-    return response.data;
+    const data = await this.request<z.infer<typeof paymentSchema>>(
+      {
+        url: '/payments/receipts',
+        method: 'POST',
+        data: {
+          clienteId: payment.customerId,
+          facturaId: payment.invoiceId,
+          fecha: payment.date,
+          importe: payment.amount,
+          formaPago: payment.paymentMethod,
+          cuentaBancaria: payment.bankAccount,
+          referencia: payment.reference,
+        },
+      },
+      'a3:payments'
+    );
+
+    return paymentSchema.parse(data);
   }
 
   /**

@@ -46,6 +46,7 @@ import {
   FileText,
   MapPin,
   ArrowRight,
+  Loader2,
 } from 'lucide-react';
 
 // Tipos
@@ -142,6 +143,8 @@ export default function ConstruccionProyectosPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'gantt'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [isSaving, setIsSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   
   // Dialog states
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -182,10 +185,13 @@ export default function ConstruccionProyectosPage() {
       const res = await fetch('/api/proyectos/construccion');
       if (res.ok) {
         const data = await res.json();
-        setProjects(data.projects || []);
+        const list = Array.isArray(data) ? data : data.projects || [];
+        setProjects(list);
+      } else {
+        toast.error('Error al cargar proyectos');
       }
     } catch (error) {
-      console.error('Error loading projects:', error);
+      toast.error('Error al cargar proyectos');
     } finally {
       setIsLoading(false);
     }
@@ -217,8 +223,13 @@ export default function ConstruccionProyectosPage() {
     }
 
     try {
-      const res = await fetch('/api/proyectos/construccion', {
-        method: 'POST',
+      setIsSaving(true);
+      const method = editingProject ? 'PUT' : 'POST';
+      const endpoint = editingProject
+        ? `/api/proyectos/construccion?id=${editingProject.id}`
+        : '/api/proyectos/construccion';
+      const res = await fetch(endpoint, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
@@ -230,12 +241,15 @@ export default function ConstruccionProyectosPage() {
         toast.success(editingProject ? 'Proyecto actualizado' : 'Proyecto creado');
         setShowCreateDialog(false);
         resetForm();
+        setEditingProject(null);
         loadProjects();
       } else {
         toast.error('Error al guardar proyecto');
       }
     } catch (error) {
       toast.error('Error de conexión');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -244,6 +258,7 @@ export default function ConstruccionProyectosPage() {
     if (!confirm('¿Estás seguro de eliminar este proyecto?')) return;
 
     try {
+      setDeletingId(projectId);
       const res = await fetch(`/api/proyectos/construccion?id=${projectId}`, {
         method: 'DELETE',
       });
@@ -256,6 +271,8 @@ export default function ConstruccionProyectosPage() {
       }
     } catch (error) {
       toast.error('Error de conexión');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -631,8 +648,13 @@ export default function ConstruccionProyectosPage() {
                         size="sm"
                         className="text-destructive"
                         onClick={() => handleDeleteProject(project.id)}
+                        disabled={deletingId === project.id}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        {deletingId === project.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
                       </Button>
                     </div>
                   </CardContent>
@@ -690,8 +712,18 @@ export default function ConstruccionProyectosPage() {
                           <Button variant="ghost" size="icon" onClick={() => openEditDialog(project)}>
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDeleteProject(project.id)}>
-                            <Trash2 className="h-4 w-4" />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive"
+                            onClick={() => handleDeleteProject(project.id)}
+                            disabled={deletingId === project.id}
+                          >
+                            {deletingId === project.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
                           </Button>
                         </div>
                       </div>
@@ -827,14 +859,22 @@ export default function ConstruccionProyectosPage() {
             </div>
             
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={isSaving}>
                 Cancelar
               </Button>
-              <Button 
+              <Button
                 className="bg-gradient-to-r from-amber-500 to-orange-500"
                 onClick={handleCreateProject}
+                disabled={isSaving}
               >
-                {editingProject ? 'Guardar Cambios' : 'Crear Proyecto'}
+                {isSaving ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Guardando...
+                  </span>
+                ) : (
+                  <>{editingProject ? 'Guardar Cambios' : 'Crear Proyecto'}</>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

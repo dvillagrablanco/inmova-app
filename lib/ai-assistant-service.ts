@@ -64,8 +64,7 @@ export async function executeAICommand(data: {
   ejecutadoPor?: string;
 }) {
   try {
-    // Simulación de ejecución de comando
-    const resultado = await simulateCommandExecution(data.funcion, data.parametros);
+    const resultado = await executeCommand(data.funcion, data.parametros);
 
     const command = await prisma.aICommand.create({
       data: {
@@ -98,30 +97,117 @@ export async function executeAICommand(data: {
 }
 
 /**
- * Simula la ejecución de un comando
+ * Ejecuta un comando con lógica real
  */
-async function simulateCommandExecution(funcion: string, parametros: any) {
-  // Mapeo de funciones disponibles
-  const functions: Record<string, any> = {
-    crearContrato: async (params: any) => {
-      return { success: true, message: 'Contrato creado exitosamente', contractId: 'mock-id' };
-    },
-    programarMantenimiento: async (params: any) => {
-      return { success: true, message: 'Mantenimiento programado', scheduleId: 'mock-id' };
-    },
-    enviarRecordatorio: async (params: any) => {
-      return { success: true, message: 'Recordatorio enviado', recipients: params.recipients };
-    },
-    buscarInquilino: async (params: any) => {
-      return { success: true, message: 'Búsqueda realizada', results: [] };
-    },
-  };
-
-  if (functions[funcion]) {
-    return await functions[funcion](parametros);
+async function executeCommand(funcion: string, parametros: any) {
+  switch (funcion) {
+    case 'crearContrato': {
+      if (!parametros?.unitId || !parametros?.tenantId || !parametros?.fechaInicio || !parametros?.fechaFin) {
+        throw new Error('Parametros insuficientes para crear contrato');
+      }
+      if (!parametros?.rentaMensual || !parametros?.deposito) {
+        throw new Error('Renta y deposito son obligatorios');
+      }
+      const contract = await prisma.contract.create({
+        data: {
+          unitId: parametros.unitId,
+          tenantId: parametros.tenantId,
+          fechaInicio: new Date(parametros.fechaInicio),
+          fechaFin: new Date(parametros.fechaFin),
+          rentaMensual: Number(parametros.rentaMensual),
+          deposito: Number(parametros.deposito),
+          diaPago: parametros.diaPago || 1,
+          mesesFianza: parametros.mesesFianza || 1,
+          renovacionAutomatica: Boolean(parametros.renovacionAutomatica),
+          incrementoType: parametros.incrementoType || 'ipc',
+          incrementoValor: parametros.incrementoValor || null,
+          gastosIncluidos: parametros.gastosIncluidos || [],
+          gastosExcluidos: parametros.gastosExcluidos || [],
+          clausulasAdicionales: parametros.clausulasAdicionales || null,
+          tipo: parametros.tipo || 'residencial',
+          estado: parametros.estado || 'activo',
+        },
+      });
+      return { success: true, contractId: contract.id };
+    }
+    case 'programarMantenimiento': {
+      if (!parametros?.titulo || !parametros?.descripcion || !parametros?.tipo || !parametros?.frecuencia) {
+        throw new Error('Parametros insuficientes para programar mantenimiento');
+      }
+      if (!parametros?.proximaFecha || (!parametros?.buildingId && !parametros?.unitId)) {
+        throw new Error('Se requiere proximaFecha y buildingId o unitId');
+      }
+      const schedule = await prisma.maintenanceSchedule.create({
+        data: {
+          titulo: parametros.titulo,
+          descripcion: parametros.descripcion,
+          tipo: parametros.tipo,
+          frecuencia: parametros.frecuencia,
+          proximaFecha: new Date(parametros.proximaFecha),
+          buildingId: parametros.buildingId || null,
+          unitId: parametros.unitId || null,
+          diasAnticipacion: parametros.diasAnticipacion || 15,
+          providerId: parametros.providerId || null,
+          costoEstimado: parametros.costoEstimado || null,
+          notas: parametros.notas || null,
+        },
+      });
+      return { success: true, scheduleId: schedule.id };
+    }
+    case 'enviarRecordatorio': {
+      const companyId = parametros?.companyId;
+      const recipients = parametros?.recipients;
+      if (!companyId || !Array.isArray(recipients) || recipients.length === 0) {
+        throw new Error('companyId y recipients son obligatorios');
+      }
+      const message = parametros?.message || 'Recordatorio automático';
+      const subject = parametros?.subject || 'Recordatorio';
+      await prisma.notificationLog.createMany({
+        data: recipients.map((recipient: string) => ({
+          companyId,
+          tipo: 'info',
+          canal: parametros?.channel || 'email',
+          destinatario: recipient,
+          asunto: subject,
+          mensaje: message,
+          estado: 'pendiente',
+          metadatos: parametros?.metadata || null,
+        })),
+      });
+      return { success: true, recipients: recipients.length };
+    }
+    case 'buscarInquilino': {
+      const companyId = parametros?.companyId;
+      if (!companyId) {
+        throw new Error('companyId es obligatorio');
+      }
+      const query = parametros?.query?.toLowerCase();
+      const results = await prisma.tenant.findMany({
+        where: {
+          companyId,
+          ...(query
+            ? {
+                OR: [
+                  { nombreCompleto: { contains: query, mode: 'insensitive' } },
+                  { email: { contains: query, mode: 'insensitive' } },
+                  { telefono: { contains: query, mode: 'insensitive' } },
+                ],
+              }
+            : {}),
+        },
+        select: {
+          id: true,
+          nombreCompleto: true,
+          email: true,
+          telefono: true,
+        },
+        take: 10,
+      });
+      return { success: true, results };
+    }
+    default:
+      throw new Error(`Función ${funcion} no encontrada`);
   }
-
-  throw new Error(`Función ${funcion} no encontrada`);
 }
 
 /**
@@ -135,8 +221,14 @@ export async function processVoiceInteraction(data: {
   transcripcion?: string;
   idioma?: string;
 }) {
-  // Simulación de procesamiento de voz
-  const respuestaTexto = `He procesado tu comando: "${data.transcripcion}"`;
+  if (!data.transcripcion) {
+    throw new Error('Transcripcion requerida');
+  }
+
+  const comandoDetectado = extractCommand(data.transcripcion);
+  const respuestaTexto = comandoDetectado
+    ? `Comando detectado: "${comandoDetectado}". Lo he registrado para su ejecución.`
+    : `No pude identificar un comando claro en: "${data.transcripcion}"`;
 
   const interaction = await prisma.voiceInteraction.create({
     data: {
@@ -147,7 +239,7 @@ export async function processVoiceInteraction(data: {
       transcripcion: data.transcripcion,
       idioma: data.idioma || 'es',
       respuestaTexto,
-      comando: extractCommand(data.transcripcion || ''),
+      comando: comandoDetectado,
       exitoso: true,
     },
   });
@@ -185,9 +277,20 @@ export async function analyzeSentiment(conversationId: string) {
     take: 10,
   });
 
-  // Simulación de análisis de sentimiento
-  const sentimiento = ['positivo', 'neutral', 'negativo'][Math.floor(Math.random() * 3)];
-  const satisfaccion = Math.floor(Math.random() * 5) + 1; // 1-5
+  const text = messages.map((msg) => msg.contenido).join(' ').toLowerCase();
+  const positiveWords = ['excelente', 'genial', 'gracias', 'perfecto', 'encantado', 'feliz'];
+  const negativeWords = ['malo', 'problema', 'queja', 'fallo', 'error', 'molesto'];
+
+  let score = 0;
+  positiveWords.forEach((word) => {
+    if (text.includes(word)) score += 1;
+  });
+  negativeWords.forEach((word) => {
+    if (text.includes(word)) score -= 1;
+  });
+
+  const sentimiento = score > 0 ? 'positivo' : score < 0 ? 'negativo' : 'neutral';
+  const satisfaccion = Math.min(5, Math.max(1, 3 + score));
 
   await prisma.aIConversation.update({
     where: { id: conversationId },

@@ -249,38 +249,57 @@ export class ViajesCorporativosService {
     categoria?: string;
     periodo?: string;
   }): Promise<ExpenseReport[]> {
-    const payments = await prisma.payment.findMany({
-      where: {
-        companyId,
-        metadata: {
-          path: ['tipoPago'],
-          equals: 'gasto_viaje'
-        },
-        ...(filters?.estado && { status: filters.estado })
-      },
+    const where: {
+      companyId: string;
+      estado?: string;
+      categoria?: string;
+      fechaGasto?: { gte: Date; lt: Date };
+    } = {
+      companyId,
+    };
+
+    if (filters?.estado) {
+      where.estado = filters.estado;
+    }
+
+    if (filters?.categoria) {
+      where.categoria = filters.categoria;
+    }
+
+    if (filters?.periodo) {
+      const [year, month] = filters.periodo.split('-').map(Number);
+      if (!Number.isNaN(year) && !Number.isNaN(month)) {
+        const start = new Date(Date.UTC(year, month - 1, 1));
+        const end = new Date(Date.UTC(year, month, 1));
+        where.fechaGasto = { gte: start, lt: end };
+      }
+    }
+
+    const expenses = await prisma.corporateTravelExpense.findMany({
+      where,
       include: { tenant: true },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { fechaGasto: 'desc' },
     });
 
-    return payments.map(p => ({
-      id: p.id,
-      empleadoId: p.tenantId || '',
-      empleadoNombre: p.tenant ? `${p.tenant.firstName} ${p.tenant.lastName}` : '',
-      periodo: p.dueDate?.toISOString().substring(0, 7) || '',
-      departamento: (p.tenant?.metadata as any)?.departamento || '',
-      categoria: (p.metadata as any)?.categoria || '',
-      concepto: p.concept || '',
-      importe: p.amount.toNumber(),
-      estado: p.status as any || 'pendiente',
-      documentos: (p.metadata as any)?.documentos || [],
-      fechaGasto: (p.metadata as any)?.fechaGasto || p.createdAt.toISOString(),
-      fechaAprobacion: p.paidDate?.toISOString() || null,
-      aprobadoPor: (p.metadata as any)?.aprobadoPor || null,
-      centroCoste: (p.metadata as any)?.centroCoste || '',
-      notas: (p.metadata as any)?.notas || '',
-      companyId: p.companyId,
-      createdAt: p.createdAt,
-      updatedAt: p.updatedAt
+    return expenses.map((expense) => ({
+      id: expense.id,
+      empleadoId: expense.tenantId || '',
+      empleadoNombre: expense.tenant?.nombreCompleto || '',
+      periodo: expense.fechaGasto.toISOString().substring(0, 7),
+      departamento: expense.departamento || '',
+      categoria: expense.categoria,
+      concepto: expense.concepto,
+      importe: expense.monto,
+      estado: expense.estado,
+      documentos: expense.documentos || [],
+      fechaGasto: expense.fechaGasto.toISOString(),
+      fechaAprobacion: expense.fechaAprobacion?.toISOString() || null,
+      aprobadoPor: expense.aprobadoPor || null,
+      centroCoste: expense.centroCoste || '',
+      notas: expense.notas || '',
+      companyId: expense.companyId,
+      createdAt: expense.createdAt,
+      updatedAt: expense.updatedAt,
     }));
   }
 

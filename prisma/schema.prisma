@@ -278,6 +278,21 @@ enum ExpenseCategory {
   otro
 }
 
+enum CorporateTravelExpenseCategory {
+  alojamiento
+  vuelos
+  transporte_local
+  dietas
+  otros
+}
+
+enum CorporateTravelExpenseStatus {
+  pendiente
+  aprobado
+  rechazado
+  reembolsado
+}
+
 enum RoomStatus {
   disponible
   ocupada
@@ -437,6 +452,7 @@ model User {
   // Sistema de Notificaciones Avanzado - Fase 2
   notificationLogs         NotificationLog[]
   userNotificationSettings UserNotificationSettings?
+  notificationCampaignsCreated NotificationCampaign[] @relation("NotificationCampaignCreatedBy")
 
   // Soporte e interacciones de ayuda
   supportInteractions SupportInteraction[]
@@ -465,6 +481,7 @@ model User {
   // Nuevas funcionalidades IA (Valoración, Firma Digital)
   propertyValuations PropertyValuation[] @relation("UserPropertyValuations")
   contractSignatures ContractSignature[] @relation("UserContractSignatures")
+  budgetsCreated     Budget[]            @relation("BudgetCreatedBy")
 
   // Partner Program
   partnerAccount Partner?
@@ -528,6 +545,7 @@ model Building {
   energyReadings       EnergyReading[]
   energyAlerts         EnergyAlert[]
   insurancePolicies    InsurancePolicy[]
+  roomRentalProperties RoomRentalProperty[]
 
   // Prioridades Medias
   valoraciones  ValoracionPropiedad[]
@@ -649,6 +667,7 @@ model Tenant {
 
   // Fase 2
   spaceReservations SpaceReservation[]
+  corporateTravelExpenses CorporateTravelExpense[]
 
   // Nuevos Módulos Estratégicos
   marketplaceBookings MarketplaceBooking[] @relation("TenantMarketplaceBookings")
@@ -774,6 +793,7 @@ model Unit {
   // Fase 2
   insurances         Insurance[]
   energyCertificates EnergyCertificate[]
+  budgets            Budget[] @relation("BudgetUnit")
 
   // Fase 3
   communityIncidents CommunityIncident[]
@@ -798,6 +818,7 @@ model Unit {
   // Room Rental Module
   rooms            Room[]
   roomSharedSpaces RoomSharedSpace[]
+  roomRentalProperty RoomRentalProperty? @relation("RoomRentalPropertyUnit")
 
   // Gestión de Comunidades
   communityFees            CommunityFee[]
@@ -1572,8 +1593,11 @@ model Provider {
   tipo      String
   telefono  String
   email     String?
+  website   String?
   direccion String?
   rating    Float?
+  descripcion String? @db.Text
+  estado    ProviderStatus @default(active)
   notas     String? @db.Text
 
   // Autenticación para Portal del Proveedor
@@ -1613,6 +1637,12 @@ enum ApprovalStatus {
   rechazado
 }
 
+enum ProviderStatus {
+  active
+  pending
+  suspended
+}
+
 model Expense {
   id                   String          @id @default(cuid())
   buildingId           String?
@@ -1647,6 +1677,37 @@ model Expense {
   @@index([buildingId, fecha])
   @@index([createdAt])
   @@map("expenses")
+}
+
+model CorporateTravelExpense {
+  id          String                        @id @default(cuid())
+  companyId   String
+  tenantId    String?
+  departamento String?
+  categoria   CorporateTravelExpenseCategory
+  concepto    String
+  monto       Float
+  estado      CorporateTravelExpenseStatus @default(pendiente)
+  fechaGasto  DateTime
+  fechaAprobacion DateTime?
+  aprobadoPor String?
+  centroCoste String?
+  documentos  String[] @default([])
+  notas       String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tenant  Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@index([tenantId])
+  @@index([categoria])
+  @@index([estado])
+  @@index([fechaGasto])
+  @@index([departamento])
+  @@map("corporate_travel_expenses")
 }
 
 model Document {
@@ -1811,6 +1872,7 @@ model Company {
   emailContacto        String? // Email del contacto
   telefonoContacto     String? // Teléfono del contacto
   notasAdmin           String? @db.Text // Notas internas del super-admin
+  metadata             Json    @default("{}") // Datos adicionales para configuraciones
 
   // Marcador para empresas de prueba/demo (excluidas de analíticas)
   esEmpresaPrueba Boolean @default(false) // Si es true, se excluye de analíticas y reportes
@@ -1865,6 +1927,7 @@ model Company {
   tasks         Task[]
   auditLogs     AuditLog[]
   notifications Notification[]
+  notificationCampaigns NotificationCampaign[] @relation("CompanyNotificationCampaigns")
 
   // Prioridades Medias
   valoraciones  ValoracionPropiedad[]
@@ -1883,6 +1946,7 @@ model Company {
   spaceReservations  SpaceReservation[]
   insurances         Insurance[]
   energyCertificates EnergyCertificate[]
+  budgets            Budget[] @relation("CompanyBudgets")
 
   // Fase 3
   communityIncidents     CommunityIncident[]
@@ -1891,6 +1955,7 @@ model Company {
   communityMeetings      CommunityMeeting[]
   providerWorkOrders     ProviderWorkOrder[]
   propertyGalleries      PropertyGallery[]
+  corporateTravelExpenses CorporateTravelExpense[]
 
   // Fase 5
   automaticReminders AutomaticReminder[]
@@ -1959,6 +2024,7 @@ model Company {
   strChannelSyncs      STRChannelSync[]       @relation
   flippingProjects     FlippingProject[]      @relation
   constructionProjects ConstructionProject[]  @relation
+  constructionPermits  ConstructionPermit[]
 
   // Partner Program (comentado - usar sistema Partner B2B existente en línea 1285+)
   // referrals            Referral[]
@@ -1976,6 +2042,7 @@ model Company {
   roomContracts    RoomContract[]
   roomPayments     RoomPayment[]
   roomSharedSpaces RoomSharedSpace[]
+  roomRentalProperties RoomRentalProperty[]
 
   // Multi-empresa
   userAccess UserCompanyAccess[]
@@ -5648,6 +5715,13 @@ enum ConstructionPhase {
   GARANTIA
 }
 
+enum ConstructionPermitStatus {
+  pending
+  submitted
+  approved
+  rejected
+}
+
 enum ProjectType {
   PROYECTO_BASICO
   PROYECTO_EJECUCION
@@ -8345,6 +8419,7 @@ model ConstructionProject {
   nombre       String
   descripcion  String @db.Text
   tipoProyecto String
+  estado       String @default("planificacion")
 
   direccion           String
   parcela             String?
@@ -8388,8 +8463,35 @@ model ConstructionProject {
   workOrders  ConstructionWorkOrder[]
   inspections ConstructionInspection[]
   suppliers   ConstructionSupplier[]
+  permits     ConstructionPermit[]
 
   @@map("construction_projects")
+}
+
+model ConstructionPermit {
+  id        String                  @id @default(cuid())
+  companyId String
+  projectId String
+
+  nombre    String
+  tipo      String
+  estado    ConstructionPermitStatus @default(pending)
+  requerido Boolean                  @default(true)
+  fechaLimite DateTime?
+  emisor     String?
+  costo      Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  project ConstructionProject  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([projectId])
+  @@index([estado])
+  @@index([fechaLimite])
+  @@map("construction_permits")
 }
 
 model ConstructionWorkOrder {
@@ -8749,6 +8851,101 @@ model RoomSharedSpace {
   unit    Unit    @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   @@map("room_shared_spaces")
+}
+
+// Room Rental Property Config
+model RoomRentalProperty {
+  id         String @id @default(cuid())
+  companyId  String
+  buildingId String
+  unitId     String
+
+  // Datos base
+  nombre    String
+  direccion String
+  totalRooms Int
+
+  // Configuracion
+  utilities       Json?
+  commonAreas     Json?
+  quietHours      String?
+  cleaningSchedule String?
+  petsAllowed     Boolean @default(false)
+  smokingAllowed  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  building Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  unit     Unit     @relation("RoomRentalPropertyUnit", fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId])
+  @@index([companyId])
+  @@index([buildingId])
+  @@map("room_rental_properties")
+}
+
+enum BudgetType {
+  mantenimiento
+  reforma
+  servicio
+  honorarios
+}
+
+enum BudgetStatus {
+  borrador
+  enviado
+  aprobado
+  rechazado
+  facturado
+}
+
+model Budget {
+  id           String       @id @default(cuid())
+  companyId    String
+  numero       String
+  titulo       String
+  descripcion  String?
+  tipo         BudgetType
+  estado       BudgetStatus @default(borrador)
+  fechaCreacion DateTime    @default(now())
+  fechaValidez DateTime
+  subtotal     Float
+  iva          Float
+  total        Float
+  notas        String?
+  clienteNombre  String?
+  proveedorNombre String?
+  unidadId     String?
+  createdBy    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  company Company @relation("CompanyBudgets", fields: [companyId], references: [id], onDelete: Cascade)
+  unidad  Unit?   @relation("BudgetUnit", fields: [unidadId], references: [id], onDelete: SetNull)
+  creador User?   @relation("BudgetCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  items   BudgetItem[]
+
+  @@index([companyId])
+  @@index([estado])
+  @@index([tipo])
+  @@map("budgets")
+}
+
+model BudgetItem {
+  id            String @id @default(cuid())
+  budgetId      String
+  concepto      String
+  cantidad      Float
+  unidad        String
+  precioUnitario Float
+  total         Float
+
+  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  @@index([budgetId])
+  @@map("budget_items")
 }
 
 // ============================================
@@ -10179,6 +10376,48 @@ model NotificationLog {
   @@index([canal])
   @@index([tipo])
   @@map("notification_logs")
+}
+
+enum NotificationCampaignStatus {
+  draft
+  scheduled
+  sent
+  failed
+}
+
+enum NotificationCampaignType {
+  email
+  sms
+  push
+  in_app
+}
+
+model NotificationCampaign {
+  id             String                     @id @default(cuid())
+  companyId      String
+  title          String
+  message        String                     @db.Text
+  type           NotificationCampaignType
+  status         NotificationCampaignStatus @default(draft)
+  targetAudience String
+  recipientCount Int                        @default(0)
+  sentCount      Int                        @default(0)
+  openRate       Float?
+  clickRate      Float?
+  scheduledAt    DateTime?
+  sentAt         DateTime?
+  createdBy      String
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+
+  company       Company @relation("CompanyNotificationCampaigns", fields: [companyId], references: [id], onDelete: Cascade)
+  createdByUser User    @relation("NotificationCampaignCreatedBy", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([status])
+  @@index([type])
+  @@index([scheduledAt])
+  @@map("notification_campaigns")
 }
 
 // Preferencias Avanzadas de Notificación por Usuario

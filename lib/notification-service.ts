@@ -118,6 +118,25 @@ export async function markAllAsRead(userId: string) {
 }
 
 /**
+ * Elimina todas las notificaciones leídas de un usuario
+ */
+export async function deleteReadNotifications(userId: string) {
+  try {
+    const result = await prisma.inAppNotification.deleteMany({
+      where: {
+        userId,
+        read: true,
+      },
+    });
+
+    return { success: true, count: result.count };
+  } catch (error) {
+    logger.error('[NotificationService] Error deleting read notifications:', error);
+    return { success: false, error: 'Failed to delete read notifications' };
+  }
+}
+
+/**
  * Obtiene las notificaciones más recientes de un usuario
  */
 export async function getRecentNotifications(

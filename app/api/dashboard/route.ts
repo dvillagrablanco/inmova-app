@@ -256,7 +256,19 @@ export async function GET() {
       };
     });
 
+    const stats = {
+      totalBuildings,
+      totalUnits,
+      totalTenants,
+      activeContracts,
+      monthlyRevenue: ingresosTotalesMensuales,
+      occupancyRate: Number(tasaOcupacion.toFixed(1)),
+      pendingPayments: pagosPendientes.length,
+      maintenanceIssues: maintenanceActive.length,
+    };
+
     return NextResponse.json({
+      stats,
       kpis: {
         ingresosTotalesMensuales,
         numeroPropiedades: totalBuildings,
@@ -265,6 +277,10 @@ export async function GET() {
         ingresosNetos,
         gastosTotales,
         margenNeto: Number(margenNeto.toFixed(1)),
+        totalUnits,
+        totalTenants,
+        activeContracts,
+        pendingPayments: pagosPendientes.length,
       },
       monthlyIncome,
       occupancyChartData,

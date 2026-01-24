@@ -70,6 +70,7 @@ import {
   TrendingUp,
   AlertCircle,
   RefreshCw,
+  Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -94,17 +95,14 @@ interface Budget {
   propiedad?: { id: string; direccion: string };
   cliente?: { id: string; nombre: string };
   proveedor?: { id: string; nombre: string };
-  fechaCreacion: Date;
-  fechaValidez: Date;
+  fechaCreacion: string;
+  fechaValidez: string;
   items: BudgetItem[];
   subtotal: number;
   iva: number;
   total: number;
   notas?: string;
 }
-
-// Mock data - en producción vendría de la API
-const mockBudgets: Budget[] = [];
 
 export default function PresupuestosPage() {
   const { data: session, status } = useSession();
@@ -116,6 +114,9 @@ export default function PresupuestosPage() {
   const [filterTipo, setFilterTipo] = useState<string>('todos');
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isViewing, setIsViewing] = useState(false);
+  const [isDownloading, setIsDownloading] = useState<string | null>(null);
 
   // Form state for new budget
   const [newBudget, setNewBudget] = useState({
@@ -235,41 +236,76 @@ export default function PresupuestosPage() {
       return;
     }
 
-    const { subtotal, ivaAmount, total } = calculateTotals();
-    
-    const budget: Budget = {
-      id: Date.now().toString(),
-      numero: `PRES-${new Date().getFullYear()}-${String(budgets.length + 1).padStart(4, '0')}`,
-      titulo: newBudget.titulo,
-      descripcion: newBudget.descripcion,
-      tipo: newBudget.tipo,
-      estado: 'borrador',
-      fechaCreacion: new Date(),
-      fechaValidez: new Date(Date.now() + parseInt(newBudget.validezDias) * 24 * 60 * 60 * 1000),
-      items: newBudget.items,
-      subtotal,
-      iva: ivaAmount,
-      total,
-      notas: newBudget.notas,
-      cliente: newBudget.clienteNombre ? { id: '1', nombre: newBudget.clienteNombre } : undefined,
-      proveedor: newBudget.proveedorNombre ? { id: '1', nombre: newBudget.proveedorNombre } : undefined,
-    };
+    try {
+      setIsCreating(true);
+      const response = await fetch('/api/budgets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          titulo: newBudget.titulo,
+          descripcion: newBudget.descripcion,
+          tipo: newBudget.tipo,
+          propiedadId: newBudget.propiedadId,
+          clienteNombre: newBudget.clienteNombre,
+          proveedorNombre: newBudget.proveedorNombre,
+          validezDias: newBudget.validezDias,
+          items: newBudget.items,
+          notas: newBudget.notas,
+          ivaRate: newBudget.ivaRate,
+        }),
+      });
 
-    setBudgets(prev => [budget, ...prev]);
-    setShowNewDialog(false);
-    setNewBudget({
-      titulo: '',
-      descripcion: '',
-      tipo: 'mantenimiento',
-      propiedadId: '',
-      clienteNombre: '',
-      proveedorNombre: '',
-      validezDias: '30',
-      items: [],
-      notas: '',
-      ivaRate: '21',
-    });
-    toast.success('Presupuesto creado correctamente');
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast.error(errorData.error || 'Error al crear presupuesto');
+        return;
+      }
+
+      const budget = (await response.json()) as Budget;
+      setBudgets(prev => [budget, ...prev]);
+      setShowNewDialog(false);
+      setNewBudget({
+        titulo: '',
+        descripcion: '',
+        tipo: 'mantenimiento',
+        propiedadId: '',
+        clienteNombre: '',
+        proveedorNombre: '',
+        validezDias: '30',
+        items: [],
+        notas: '',
+        ivaRate: '21',
+      });
+      toast.success('Presupuesto creado correctamente');
+    } catch (error) {
+      toast.error('Error al crear presupuesto');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleViewBudget = async (budgetId: string) => {
+    try {
+      setIsViewing(true);
+      const response = await fetch(`/api/budgets/${budgetId}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al cargar presupuesto');
+      }
+      const budget = (await response.json()) as Budget;
+      setSelectedBudget(budget);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error al cargar presupuesto');
+      setSelectedBudget(null);
+    } finally {
+      setIsViewing(false);
+    }
+  };
+
+  const handleDownloadBudget = (budget: Budget) => {
+    setIsDownloading(budget.id);
+    window.open(`/api/budgets/${budget.id}/export`, '_blank');
+    setTimeout(() => setIsDownloading(null), 500);
   };
 
   const getEstadoBadge = (estado: Budget['estado']) => {
@@ -591,12 +627,21 @@ export default function PresupuestosPage() {
                 </div>
 
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setShowNewDialog(false)}>
+                  <Button variant="outline" onClick={() => setShowNewDialog(false)} disabled={isCreating}>
                     Cancelar
                   </Button>
-                  <Button onClick={handleCreateBudget}>
-                    <FileText className="mr-2 h-4 w-4" />
-                    Crear Presupuesto
+                  <Button onClick={handleCreateBudget} disabled={isCreating}>
+                    {isCreating ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Creando...
+                      </span>
+                    ) : (
+                      <>
+                        <FileText className="mr-2 h-4 w-4" />
+                        Crear Presupuesto
+                      </>
+                    )}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -752,11 +797,24 @@ export default function PresupuestosPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="icon">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleViewBudget(budget.id)}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon">
-                            <Download className="h-4 w-4" />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDownloadBudget(budget)}
+                            disabled={isDownloading === budget.id}
+                          >
+                            {isDownloading === budget.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Download className="h-4 w-4" />
+                            )}
                           </Button>
                         </div>
                       </TableCell>
@@ -793,6 +851,151 @@ export default function PresupuestosPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* View Budget Dialog */}
+        <Dialog open={Boolean(selectedBudget)} onOpenChange={(open) => !open && setSelectedBudget(null)}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Detalle del Presupuesto</DialogTitle>
+              <DialogDescription>
+                {selectedBudget ? `Presupuesto #${selectedBudget.numero}` : 'Detalle'}
+              </DialogDescription>
+            </DialogHeader>
+
+            {isViewing ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : selectedBudget ? (
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  {getEstadoBadge(selectedBudget.estado)}
+                  {getTipoBadge(selectedBudget.tipo)}
+                  <span className="text-sm text-muted-foreground">
+                    {format(new Date(selectedBudget.fechaCreacion), 'dd/MM/yyyy', { locale: es })}
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold">{selectedBudget.titulo}</h3>
+                  {selectedBudget.descripcion && (
+                    <p className="text-sm text-muted-foreground mt-1">{selectedBudget.descripcion}</p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Cliente</p>
+                    <p>{selectedBudget.cliente?.nombre || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Proveedor</p>
+                    <p>{selectedBudget.proveedor?.nombre || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Validez</p>
+                    <p>{format(new Date(selectedBudget.fechaValidez), 'dd/MM/yyyy', { locale: es })}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Propiedad</p>
+                    <p>{selectedBudget.propiedad?.direccion || '-'}</p>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h4 className="font-medium mb-2">Items</h4>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Concepto</TableHead>
+                        <TableHead className="text-right">Cantidad</TableHead>
+                        <TableHead>Unidad</TableHead>
+                        <TableHead className="text-right">Precio</TableHead>
+                        <TableHead className="text-right">Total</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedBudget.items.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell>{item.concepto}</TableCell>
+                          <TableCell className="text-right">{item.cantidad}</TableCell>
+                          <TableCell>{item.unidad}</TableCell>
+                          <TableCell className="text-right">
+                            {item.precioUnitario.toLocaleString('es-ES', {
+                              style: 'currency',
+                              currency: 'EUR',
+                            })}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {item.total.toLocaleString('es-ES', {
+                              style: 'currency',
+                              currency: 'EUR',
+                            })}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                <div className="flex justify-end gap-4">
+                  <div className="text-right text-sm">
+                    <p className="text-muted-foreground">Subtotal</p>
+                    <p>
+                      {selectedBudget.subtotal.toLocaleString('es-ES', {
+                        style: 'currency',
+                        currency: 'EUR',
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-right text-sm">
+                    <p className="text-muted-foreground">IVA</p>
+                    <p>
+                      {selectedBudget.iva.toLocaleString('es-ES', {
+                        style: 'currency',
+                        currency: 'EUR',
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-right text-sm font-semibold">
+                    <p className="text-muted-foreground">Total</p>
+                    <p>
+                      {selectedBudget.total.toLocaleString('es-ES', {
+                        style: 'currency',
+                        currency: 'EUR',
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                {selectedBudget.notas && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Notas</p>
+                    <p className="text-sm">{selectedBudget.notas}</p>
+                  </div>
+                )}
+              </div>
+            ) : null}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSelectedBudget(null)}>
+                Cerrar
+              </Button>
+              {selectedBudget && (
+                <Button onClick={() => handleDownloadBudget(selectedBudget)}>
+                  {isDownloading === selectedBudget.id ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4 mr-2" />
+                  )}
+                  Descargar CSV
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AuthenticatedLayout>
   );

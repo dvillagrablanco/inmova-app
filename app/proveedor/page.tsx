@@ -13,6 +13,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   Package,
   Calendar,
   Star,
@@ -46,6 +53,11 @@ interface RecentBooking {
   precio: number;
 }
 
+interface ProviderDashboardResponse {
+  stats: ProviderStats;
+  recentBookings: RecentBooking[];
+}
+
 export default function ProveedorDashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -58,6 +70,8 @@ export default function ProveedorDashboard() {
     totalValoraciones: 0,
   });
   const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([]);
+  const [selectedBooking, setSelectedBooking] = useState<RecentBooking | null>(null);
+  const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
 
   useEffect(() => {
     loadDashboard();
@@ -66,48 +80,15 @@ export default function ProveedorDashboard() {
   const loadDashboard = async () => {
     try {
       setLoading(true);
-      // TODO: Cargar datos reales del API
-      // const response = await fetch('/api/proveedor/dashboard');
+      const response = await fetch('/api/proveedor/dashboard');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al cargar dashboard');
+      }
 
-      // Mock data para demostración
-      setStats({
-        serviciosActivos: 5,
-        reservasEsteMes: 23,
-        reservasPendientes: 4,
-        ingresosMes: 2450,
-        valoracionMedia: 4.8,
-        totalValoraciones: 47,
-      });
-
-      setRecentBookings([
-        {
-          id: '1',
-          servicio: 'Limpieza profunda',
-          cliente: 'María García',
-          fecha: '2026-01-10',
-          hora: '10:00',
-          estado: 'pendiente',
-          precio: 80,
-        },
-        {
-          id: '2',
-          servicio: 'Reparación fontanería',
-          cliente: 'Carlos Ruiz',
-          fecha: '2026-01-10',
-          hora: '14:00',
-          estado: 'confirmada',
-          precio: 120,
-        },
-        {
-          id: '3',
-          servicio: 'Limpieza regular',
-          cliente: 'Ana López',
-          fecha: '2026-01-09',
-          hora: '09:00',
-          estado: 'completada',
-          precio: 45,
-        },
-      ]);
+      const data = (await response.json()) as ProviderDashboardResponse;
+      setStats(data.stats);
+      setRecentBookings(data.recentBookings);
     } catch (error) {
       toast.error('Error al cargar dashboard');
     } finally {
@@ -152,6 +133,11 @@ export default function ProveedorDashboard() {
       default:
         return <Badge variant="secondary">{estado}</Badge>;
     }
+  };
+
+  const openBookingDetails = (booking: RecentBooking) => {
+    setSelectedBooking(booking);
+    setIsBookingDialogOpen(true);
   };
 
   if (loading) {
@@ -295,7 +281,7 @@ export default function ProveedorDashboard() {
                     <span className="font-semibold text-green-600">
                       {formatCurrency(booking.precio)}
                     </span>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => openBookingDetails(booking)}>
                       <Eye className="h-4 w-4 mr-1" />
                       Ver
                     </Button>
@@ -364,6 +350,44 @@ export default function ProveedorDashboard() {
           </CardContent>
         </Card>
       </div>
+      <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Detalle de Reserva</DialogTitle>
+            <DialogDescription>Información completa de la reserva seleccionada</DialogDescription>
+          </DialogHeader>
+          {selectedBooking ? (
+            <div className="space-y-3 text-sm">
+              <div>
+                <p className="text-muted-foreground">Servicio</p>
+                <p className="font-medium">{selectedBooking.servicio}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Cliente</p>
+                <p className="font-medium">{selectedBooking.cliente}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Fecha</p>
+                <p className="font-medium">{selectedBooking.fecha}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Hora</p>
+                <p className="font-medium">{selectedBooking.hora}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Estado</p>
+                {getStatusBadge(selectedBooking.estado)}
+              </div>
+              <div>
+                <p className="text-muted-foreground">Precio</p>
+                <p className="font-medium">{formatCurrency(selectedBooking.precio)}</p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No hay información disponible.</p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

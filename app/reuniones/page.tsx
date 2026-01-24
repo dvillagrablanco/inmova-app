@@ -46,9 +46,23 @@ import {
   Users,
   Edit,
   Trash2,
+  Loader2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+interface OrdenDiaItem {
+  titulo: string;
+}
+
+interface AsistenteItem {
+  nombre: string;
+}
+
+interface BuildingSummary {
+  id: string;
+  nombre: string;
+}
 
 interface Reunion {
   id: string;
@@ -56,8 +70,8 @@ interface Reunion {
   descripcion: string;
   fecha: string;
   lugar: string;
-  ordenDia: any[];
-  asistentes: any[];
+  ordenDia: OrdenDiaItem[];
+  asistentes: AsistenteItem[];
   actaGenerada: boolean;
   building: { id: string; nombre: string };
 }
@@ -66,11 +80,15 @@ export default function ReunionesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [reuniones, setReuniones] = useState<Reunion[]>([]);
-  const [buildings, setBuildings] = useState<any[]>([]);
+  const [buildings, setBuildings] = useState<BuildingSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [editingReunion, setEditingReunion] = useState<Reunion | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     buildingId: '',
     titulo: '',
@@ -94,8 +112,16 @@ export default function ReunionesPage() {
         fetch('/api/reuniones'),
         fetch('/api/buildings'),
       ]);
-      if (reunionesRes.ok) setReuniones(await reunionesRes.json());
-      if (buildingsRes.ok) setBuildings(await buildingsRes.json());
+      if (reunionesRes.ok) {
+        const data = (await reunionesRes.json()) as Reunion[] | { data?: Reunion[] };
+        const list = Array.isArray(data) ? data : data.data || [];
+        setReuniones(list);
+      }
+      if (buildingsRes.ok) {
+        const data = (await buildingsRes.json()) as BuildingSummary[] | { data?: BuildingSummary[] };
+        const list = Array.isArray(data) ? data : data.data || [];
+        setBuildings(list);
+      }
     } catch (error) {
       toast.error('Error al cargar datos');
     } finally {
@@ -104,35 +130,59 @@ export default function ReunionesPage() {
   };
 
   const handleSubmit = async () => {
+    setIsCreating(true);
     if (!formData.buildingId || !formData.titulo || !formData.fecha) {
       toast.error('Completa los campos requeridos');
+      setIsCreating(false);
       return;
     }
+    const ordenDia = formData.ordenDia
+      .map((item) => ({ titulo: item.titulo.trim() }))
+      .filter((item) => item.titulo);
+    const asistentes = formData.asistentes
+      .map((item) => ({ nombre: item.nombre.trim() }))
+      .filter((item) => item.nombre);
     try {
       const res = await fetch('/api/reuniones', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          ordenDia,
+          asistentes,
+        }),
       });
       if (res.ok) {
         toast.success('Reunión creada');
         setOpenDialog(false);
         loadData();
+        resetForm();
+      } else {
+        const errorData = await res.json();
+        toast.error(errorData.error || 'Error al crear reunión');
       }
     } catch (error) {
       toast.error('Error al crear reunión');
+    } finally {
+      setIsCreating(false);
     }
   };
 
   const handleGenerarActa = async (id: string) => {
     try {
+      setGeneratingId(id);
       const res = await fetch(`/api/reuniones/${id}/generar-acta`, { method: 'POST' });
       if (res.ok) {
         toast.success('Acta generada');
         loadData();
+      } else {
+        const errorData = await res.json();
+        toast.error(errorData.error || 'Error al generar acta');
       }
     } catch (error) {
       toast.error('Error al generar acta');
+    } finally {
+      setGeneratingId(null);
     }
   };
 
@@ -158,10 +208,22 @@ export default function ReunionesPage() {
         return;
       }
 
+      setIsUpdating(true);
+      const ordenDia = formData.ordenDia
+        .map((item) => ({ titulo: item.titulo.trim() }))
+        .filter((item) => item.titulo);
+      const asistentes = formData.asistentes
+        .map((item) => ({ nombre: item.nombre.trim() }))
+        .filter((item) => item.nombre);
+
       const res = await fetch(`/api/reuniones/${editingReunion.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          ordenDia,
+          asistentes,
+        }),
       });
 
       if (res.ok) {
@@ -171,25 +233,32 @@ export default function ReunionesPage() {
         resetForm();
         loadData();
       } else {
-        toast.error('Error al actualizar reunión');
+        const errorData = await res.json();
+        toast.error(errorData.error || 'Error al actualizar reunión');
       }
     } catch (error) {
       toast.error('Error al actualizar reunión');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('¿Estás seguro de eliminar esta reunión?')) return;
     try {
+      setDeletingId(id);
       const res = await fetch(`/api/reuniones/${id}`, { method: 'DELETE' });
       if (res.ok) {
         toast.success('Reunión eliminada correctamente');
         loadData();
       } else {
-        toast.error('Error al eliminar reunión');
+        const errorData = await res.json();
+        toast.error(errorData.error || 'Error al eliminar reunión');
       }
     } catch (error) {
       toast.error('Error al eliminar reunión');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -318,10 +387,19 @@ export default function ReunionesPage() {
                       </div>
                     </div>
                     <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setOpenDialog(false)}>
+                      <Button variant="outline" onClick={() => setOpenDialog(false)} disabled={isCreating}>
                         Cancelar
                       </Button>
-                      <Button onClick={handleSubmit}>Crear</Button>
+                      <Button onClick={handleSubmit} disabled={isCreating}>
+                        {isCreating ? (
+                          <span className="flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Creando...
+                          </span>
+                        ) : (
+                          'Crear'
+                        )}
+                      </Button>
                     </div>
                   </DialogContent>
                 </Dialog>
@@ -401,10 +479,20 @@ export default function ReunionesPage() {
                           setEditingReunion(null);
                           resetForm();
                         }}
+                        disabled={isUpdating}
                       >
                         Cancelar
                       </Button>
-                      <Button onClick={handleUpdate}>Actualizar Reunión</Button>
+                      <Button onClick={handleUpdate} disabled={isUpdating}>
+                        {isUpdating ? (
+                          <span className="flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Actualizando...
+                          </span>
+                        ) : (
+                          'Actualizar Reunión'
+                        )}
+                      </Button>
                     </div>
                   </DialogContent>
                 </Dialog>
@@ -492,9 +580,19 @@ export default function ReunionesPage() {
                               size="sm"
                               onClick={() => handleGenerarActa(reunion.id)}
                               className="gap-2"
+                              disabled={generatingId === reunion.id}
                             >
-                              <FileText className="h-4 w-4" />
-                              Generar Acta
+                              {generatingId === reunion.id ? (
+                                <span className="flex items-center gap-2">
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                  Generando...
+                                </span>
+                              ) : (
+                                <>
+                                  <FileText className="h-4 w-4" />
+                                  Generar Acta
+                                </>
+                              )}
                             </Button>
                           )}
                           <Button
@@ -502,6 +600,7 @@ export default function ReunionesPage() {
                             size="sm"
                             onClick={() => handleEdit(reunion)}
                             className="gap-2"
+                            disabled={isUpdating || deletingId === reunion.id}
                           >
                             <Edit className="h-4 w-4" />
                             Editar
@@ -511,9 +610,19 @@ export default function ReunionesPage() {
                             size="sm"
                             onClick={() => handleDelete(reunion.id)}
                             className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            disabled={deletingId === reunion.id}
                           >
-                            <Trash2 className="h-4 w-4" />
-                            Eliminar
+                            {deletingId === reunion.id ? (
+                              <span className="flex items-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Eliminando...
+                              </span>
+                            ) : (
+                              <>
+                                <Trash2 className="h-4 w-4" />
+                                Eliminar
+                              </>
+                            )}
                           </Button>
                         </div>
                       </div>

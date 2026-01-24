@@ -1,4 +1,6 @@
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
+import { z } from 'zod';
+import { executeWithCircuitBreaker } from '@/lib/integrations/circuit-breaker';
 
 /**
  * ZUCCHETTI INTEGRATION SERVICE
@@ -117,7 +119,221 @@ export class ZucchettiIntegrationService {
     //   },
     // });
 
-    logger.info('⚠️ Zucchetti Integration Service: Modo DEMO - Requiere credenciales reales');
+    logger.info('✅ Zucchetti Integration Service: Inicializado');
+  }
+
+  private async request<T>(
+    path: string,
+    method: string,
+    accessToken?: string,
+    body?: any
+  ): Promise<T> {
+    const url = `${this.config.apiUrl}${path}`;
+    return executeWithCircuitBreaker(`zucchetti:${path}`, async () => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15_000);
+      try {
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            ...(this.config.apiKey ? { 'X-API-Key': this.config.apiKey } : {}),
+            ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+          },
+          body: body ? JSON.stringify(body) : undefined,
+          signal: controller.signal,
+        });
+
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : {};
+        if (!response.ok) {
+          throw new Error(`Zucchetti error ${response.status}: ${text}`);
+        }
+        return data as T;
+      } finally {
+        clearTimeout(timeout);
+      }
+    });
+  }
+
+  async getAuthorizationUrl(redirectUri: string): Promise<string> {
+    const params = new URLSearchParams({
+      client_id: this.config.clientId,
+      redirect_uri: redirectUri,
+      response_type: 'code',
+      scope: 'read write accounting invoices payments',
+    });
+    return `${this.config.oauthUrl}/authorize?${params.toString()}`;
+  }
+
+  async exchangeCodeForTokens(code: string, redirectUri: string): Promise<ZucchettiTokens> {
+    const tokenSchema = z.object({
+      access_token: z.string(),
+      refresh_token: z.string(),
+      expires_in: z.number(),
+      token_type: z.string(),
+    });
+
+    const result = await executeWithCircuitBreaker('zucchetti:oauth', async () => {
+      const response = await fetch(`${this.config.oauthUrl}/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          grant_type: 'authorization_code',
+          code,
+          redirect_uri: redirectUri,
+          client_id: this.config.clientId,
+          client_secret: this.config.clientSecret,
+        }).toString(),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`OAuth error: ${JSON.stringify(data)}`);
+      }
+      return tokenSchema.parse(data);
+    });
+
+    return {
+      accessToken: result.access_token,
+      refreshToken: result.refresh_token,
+      expiresIn: result.expires_in,
+      tokenType: result.token_type,
+    };
+  }
+
+  async refreshAccessToken(refreshToken: string): Promise<ZucchettiTokens> {
+    const tokenSchema = z.object({
+      access_token: z.string(),
+      refresh_token: z.string(),
+      expires_in: z.number(),
+      token_type: z.string(),
+    });
+
+    const result = await executeWithCircuitBreaker('zucchetti:refresh', async () => {
+      const response = await fetch(`${this.config.oauthUrl}/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          refresh_token: refreshToken,
+          client_id: this.config.clientId,
+          client_secret: this.config.clientSecret,
+        }).toString(),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`OAuth refresh error: ${JSON.stringify(data)}`);
+      }
+      return tokenSchema.parse(data);
+    });
+
+    return {
+      accessToken: result.access_token,
+      refreshToken: result.refresh_token,
+      expiresIn: result.expires_in,
+      tokenType: result.token_type,
+    };
+  }
+
+  async createCustomer(
+    customer: Omit<ZucchettiCustomer, 'id'>,
+    accessToken: string
+  ): Promise<ZucchettiCustomer> {
+    const schema = z.object({
+      id: z.string(),
+      name: z.string(),
+      taxId: z.string(),
+      email: z.string().optional(),
+      phone: z.string().optional(),
+      address: z.any().optional(),
+    });
+    const data = await this.request<z.infer<typeof schema>>('/customers', 'POST', accessToken, customer);
+    return schema.parse(data);
+  }
+
+  async getCustomer(customerId: string, accessToken: string): Promise<ZucchettiCustomer> {
+    const schema = z.object({
+      id: z.string(),
+      name: z.string(),
+      taxId: z.string(),
+      email: z.string().optional(),
+      phone: z.string().optional(),
+      address: z.any().optional(),
+    });
+    const data = await this.request<z.infer<typeof schema>>(`/customers/${customerId}`, 'GET', accessToken);
+    return schema.parse(data);
+  }
+
+  async createInvoice(invoice: Omit<ZucchettiInvoice, 'id'>, accessToken: string): Promise<ZucchettiInvoice> {
+    const schema = z.object({
+      id: z.string(),
+      number: z.string(),
+      date: z.string(),
+      dueDate: z.string(),
+      customerId: z.string(),
+      items: z.array(z.any()),
+      subtotal: z.number(),
+      tax: z.number(),
+      total: z.number(),
+      status: z.string(),
+    });
+    const data = await this.request<z.infer<typeof schema>>('/invoices', 'POST', accessToken, invoice);
+    return {
+      ...data,
+      date: new Date(data.date),
+      dueDate: new Date(data.dueDate),
+    } as ZucchettiInvoice;
+  }
+
+  async listInvoices(accessToken: string): Promise<ZucchettiInvoice[]> {
+    const schema = z.array(
+      z.object({
+        id: z.string(),
+        number: z.string(),
+        date: z.string(),
+        dueDate: z.string(),
+        customerId: z.string(),
+        items: z.array(z.any()),
+        subtotal: z.number(),
+        tax: z.number(),
+        total: z.number(),
+        status: z.string(),
+      })
+    );
+    const data = await this.request<z.infer<typeof schema>>('/invoices', 'GET', accessToken);
+    return schema.parse(data).map((item) => ({
+      ...item,
+      date: new Date(item.date),
+      dueDate: new Date(item.dueDate),
+    })) as ZucchettiInvoice[];
+  }
+
+  async registerPayment(payment: Omit<ZucchettiPayment, 'id'>, accessToken: string): Promise<ZucchettiPayment> {
+    const schema = z.object({
+      id: z.string(),
+      invoiceId: z.string(),
+      date: z.string(),
+      amount: z.number(),
+      method: z.string(),
+      reference: z.string().optional(),
+    });
+    const data = await this.request<z.infer<typeof schema>>('/payments', 'POST', accessToken, payment);
+    return {
+      ...data,
+      date: new Date(data.date),
+    } as ZucchettiPayment;
+  }
+
+  async testConnection(accessToken: string): Promise<boolean> {
+    try {
+      await this.request('/user/me', 'GET', accessToken);
+      return true;
+    } catch (error) {
+      logger.warn('Zucchetti test connection failed', error);
+      return false;
+    }
   }
 
   /**

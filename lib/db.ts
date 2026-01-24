@@ -7,7 +7,6 @@ import logger from './logger';
  */
 const isBuildTime =
   process.env.NEXT_PHASE === 'phase-production-build' ||
-  process.env.NODE_ENV === 'test' ||
   typeof window !== 'undefined';
 
 /**
@@ -52,10 +51,18 @@ const globalForPrisma = global as typeof globalThis & {
  * Patrón estándar para Next.js con protección para build-time
  */
 function createPrismaClient(): PrismaClient {
-  // Durante el build, retornar un mock que no hace nada
   if (isBuildTime) {
-    console.log('[Prisma] Build-time detected, skipping Prisma initialization');
-    return {} as PrismaClient;
+    console.log('[Prisma] Build-time detected, Prisma client disabled');
+    return new Proxy(
+      {},
+      {
+        get() {
+          throw new Error(
+            'Prisma client no disponible durante build-time. Usa lazy loading con getPrismaClient().'
+          );
+        },
+      }
+    ) as PrismaClient;
   }
 
   console.log('[Prisma] Inicializando cliente Prisma...');

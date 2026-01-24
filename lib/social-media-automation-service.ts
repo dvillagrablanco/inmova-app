@@ -11,6 +11,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { prisma } from './db';
 import logger from './logger';
 import { createCanvas, loadImage } from 'canvas';
+import { z } from 'zod';
+import { fetchJson } from '@/lib/integrations/http-client';
 
 // ============================================================================
 // CONFIGURACIÓN
@@ -292,15 +294,59 @@ export async function generateMarketingImage(
 }
 
 /**
- * Publica propiedad en redes sociales (mock - integrar con APIs reales)
+ * Publica propiedad en redes sociales usando webhook configurable
  */
 export async function publishToSocialMedia(
   property: any,
-  platforms: SocialPlatform[] = ['INSTAGRAM', 'FACEBOOK', 'LINKEDIN']
+  platforms: SocialPlatform[] = ['INSTAGRAM', 'FACEBOOK', 'LINKEDIN'],
+  createdBy?: string
 ): Promise<{ platform: SocialPlatform; status: 'success' | 'failed'; postUrl?: string }[]> {
   try {
     // 1. Generar contenido
     const marketingCopy = await generateMarketingCopy(property);
+
+    const companyId = property.companyId || property.building?.companyId;
+    if (!companyId) {
+      throw new Error('companyId requerido para publicar en redes');
+    }
+
+    const creatorId =
+      createdBy ||
+      (
+        await prisma.user.findFirst({
+          where: {
+            companyId,
+            role: { in: ['super_admin', 'administrador', 'admin'] },
+          },
+          select: { id: true },
+        })
+      )?.id;
+
+    if (!creatorId) {
+      throw new Error('No se encontró un usuario administrador para registrar la publicación');
+    }
+
+    const accounts = await prisma.socialMediaAccount.findMany({
+      where: {
+        companyId,
+        activo: true,
+        platform: { in: platforms },
+      },
+      select: {
+        id: true,
+        platform: true,
+        accessToken: true,
+        accountId: true,
+      },
+    });
+
+    const webhookUrl = process.env.SOCIAL_AUTOMATION_WEBHOOK_URL;
+    const webhookSchema = z
+      .object({
+        postUrl: z.string().optional(),
+        externalId: z.string().optional(),
+      })
+      .passthrough();
 
     // 2. Publicar en cada plataforma
     const results = await Promise.allSettled(
@@ -314,31 +360,68 @@ export async function publishToSocialMedia(
           // Generar imagen
           const imageBuffer = await generateMarketingImage(property, platform);
 
-          // TODO: Integrar con APIs reales de cada plataforma
-          // - Instagram: Graph API
-          // - Facebook: Graph API
-          // - LinkedIn: LinkedIn API
-          // - Twitter: Twitter API v2
+          const account = accounts.find((acc) => acc.platform === platform);
+          if (!account) {
+            throw new Error(`No hay cuenta activa configurada para ${platform}`);
+          }
 
-          // Por ahora, guardar en BD como "scheduled"
+          let postUrl: string | undefined;
+          let externalId: string | undefined;
+          let estado: 'publicado' | 'programado' | 'error' = 'error';
+          let errorMessage: string | undefined;
+
+          if (!webhookUrl) {
+            errorMessage = 'SOCIAL_AUTOMATION_WEBHOOK_URL no configurado';
+          } else {
+            const message = `${post.copy}\n\n${post.hashtags.join(' ')}\n${post.callToAction || ''}`.trim();
+            const payload = {
+              platform,
+              accountId: account.accountId,
+              accessToken: account.accessToken,
+              message,
+              hashtags: post.hashtags,
+              imageBase64: imageBuffer ? imageBuffer.toString('base64') : null,
+              propertyId: property.id,
+              companyId,
+            };
+
+            const { data } = await fetchJson<z.infer<typeof webhookSchema>>(webhookUrl, {
+              method: 'POST',
+              body: payload,
+              timeoutMs: 20_000,
+              circuitKey: `social-${platform}`,
+            });
+
+            const parsed = webhookSchema.parse(data);
+            postUrl = parsed.postUrl;
+            externalId = parsed.externalId;
+            estado = 'publicado';
+          }
+
           await prisma.socialMediaPost.create({
             data: {
-              companyId: property.companyId || property.building?.companyId,
-              unitId: property.id,
-              plataforma: platform,
-              contenido: post.copy,
-              hashtags: post.hashtags,
-              estado: 'PUBLICADO',
-              // imagenUrl: imageBuffer ? await uploadImageToS3(imageBuffer) : null,
+              companyId,
+              accountId: account.id,
+              estado,
+              mensaje: post.copy,
+              imagenesUrls: property.fotos?.[0]?.url ? [property.fotos[0].url] : [],
+              enlace: postUrl,
+              postId: externalId,
+              creadoPor: creatorId,
+              errorMessage,
             },
           });
+
+          if (estado !== 'publicado') {
+            throw new Error(errorMessage || 'No se pudo publicar en redes sociales');
+          }
 
           logger.info(`✅ Posted to ${platform}`, { propertyId: property.id });
 
           return {
             platform,
             status: 'success' as const,
-            postUrl: `https://example.com/${platform.toLowerCase()}`, // Mock URL
+            postUrl,
           };
 
         } catch (error: any) {

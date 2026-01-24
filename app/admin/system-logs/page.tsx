@@ -52,7 +52,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { format, subDays, subHours } from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 interface LogEntry {
@@ -151,6 +151,7 @@ export default function SystemLogsPage() {
       const queryParams = new URLSearchParams({
         level: levelFilter,
         source: sourceFilter,
+        timeRange,
         page: page.toString(),
         limit: pageSize.toString(),
       });

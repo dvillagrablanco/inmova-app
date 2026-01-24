@@ -6,6 +6,11 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
+const startOfMonth = (date: Date) =>
+  new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
+const addMonths = (date: Date, count: number) =>
+  new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + count, 1));
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -14,52 +19,55 @@ export async function GET(request: NextRequest) {
     }
 
     const companyId = session.user.companyId;
+    const now = new Date();
+    const monthStart = startOfMonth(now);
+    const monthEnd = addMonths(monthStart, 1);
+    const prevMonthStart = addMonths(monthStart, -1);
 
-    // Calcular estadísticas reales desde la base de datos
     const [
-      totalServices,
-      totalBookings,
-      bookingsWithRevenue,
+      totalProveedores,
+      proveedoresActivos,
+      totalServicios,
+      serviciosActivos,
+      reservasMes,
+      reservasMesAnterior,
+      ingresosMesAgg,
     ] = await Promise.all([
-      // Total de servicios activos
-      prisma.marketplaceService.count({
-        where: {
-          companyId,
-          activo: true,
-        },
-      }),
-      // Total de reservas
+      prisma.provider.count({ where: { companyId } }),
+      prisma.provider.count({ where: { companyId, activo: true } }),
+      prisma.marketplaceService.count({ where: { companyId } }),
+      prisma.marketplaceService.count({ where: { companyId, activo: true } }),
       prisma.marketplaceBooking.count({
-        where: {
-          companyId,
-        },
+        where: { companyId, fechaSolicitud: { gte: monthStart, lt: monthEnd } },
       }),
-      // Reservas con ingresos para calcular revenue
-      prisma.marketplaceBooking.findMany({
-        where: {
-          companyId,
-          estado: 'completada',
-        },
-        select: {
-          precio: true,
-        },
+      prisma.marketplaceBooking.count({
+        where: { companyId, fechaSolicitud: { gte: prevMonthStart, lt: monthStart } },
+      }),
+      prisma.marketplaceBooking.aggregate({
+        where: { companyId, estado: 'completada', fechaServicio: { gte: monthStart, lt: monthEnd } },
+        _sum: { precioTotal: true, comision: true },
       }),
     ]);
 
-    // Calcular ingresos totales
-    const totalRevenue = bookingsWithRevenue.reduce(
-      (sum, booking) => sum + (booking.precio || 0),
-      0
-    );
+    const ingresosTotales = ingresosMesAgg._sum.precioTotal || 0;
+    const comisionesGeneradas = ingresosMesAgg._sum.comision || 0;
+    const tasaConversion =
+      reservasMesAnterior > 0
+        ? Math.round(((reservasMes - reservasMesAnterior) / reservasMesAnterior) * 100)
+        : reservasMes > 0
+          ? 100
+          : 0;
 
-    const stats = {
-      totalServices,
-      totalBookings,
-      totalRevenue,
-      commissionRate: 12, // Porcentaje de comisión configurado
-    };
-
-    return NextResponse.json(stats);
+    return NextResponse.json({
+      totalProveedores,
+      proveedoresActivos,
+      totalServicios,
+      serviciosActivos,
+      reservasEsteMes: reservasMes,
+      ingresosTotales,
+      comisionesGeneradas,
+      tasaConversion,
+    });
   } catch (error) {
     logger.error('Error fetching marketplace stats:', error);
     return NextResponse.json(

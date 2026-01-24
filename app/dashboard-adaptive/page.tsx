@@ -6,6 +6,7 @@ import { AdaptiveDashboard } from '@/components/adaptive/AdaptiveDashboard';
 import { AdaptiveSidebar } from '@/components/adaptive/AdaptiveSidebar';
 import { UserProfile } from '@/lib/ui-mode-service';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 /**
  * EJEMPLO DE PÁGINA CON DASHBOARD ADAPTATIVO
@@ -15,7 +16,7 @@ import { Loader2 } from 'lucide-react';
  * - AdaptiveSidebar: Sidebar contextual
  */
 export default function AdaptiveDashboardPage() {
-  const { data: session, status } = useSession() || {};
+  const { status } = useSession() || {};
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [stats, setStats] = useState({
     totalBuildings: 0,
@@ -46,20 +47,26 @@ export default function AdaptiveDashboardPage() {
           });
         }
 
-        // Obtener estadísticas (ejemplo con datos mock)
-        // En producción, reemplazar con llamada a API real
-        setStats({
-          totalBuildings: 12,
-          totalUnits: 45,
-          totalTenants: 38,
-          activeContracts: 35,
-          monthlyRevenue: 42500,
-          occupancyRate: 84,
-          pendingPayments: 3,
-          maintenanceIssues: 7,
-        });
+        const dashboardRes = await fetch('/api/dashboard');
+        if (!dashboardRes.ok) {
+          const errorData = await dashboardRes.json();
+          throw new Error(errorData.error || 'Error al cargar estadísticas');
+        }
+        const dashboardData = await dashboardRes.json();
+        const statsPayload = dashboardData.stats || {
+          totalBuildings: dashboardData.kpis?.numeroPropiedades || 0,
+          totalUnits: dashboardData.kpis?.totalUnits || 0,
+          totalTenants: dashboardData.kpis?.totalTenants || 0,
+          activeContracts: dashboardData.kpis?.activeContracts || 0,
+          monthlyRevenue: dashboardData.kpis?.ingresosTotalesMensuales || 0,
+          occupancyRate: dashboardData.kpis?.tasaOcupacion || 0,
+          pendingPayments: dashboardData.kpis?.pendingPayments || dashboardData.pagosPendientes?.length || 0,
+          maintenanceIssues: dashboardData.maintenanceRequests?.length || 0,
+        };
+        setStats(statsPayload);
       } catch (error) {
         console.error('Error al cargar datos:', error);
+        toast.error('Error al cargar datos del dashboard');
       } finally {
         setLoading(false);
       }
