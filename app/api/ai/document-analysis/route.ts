@@ -27,14 +27,63 @@ export const runtime = 'nodejs';
  */
 function isImageFile(file: File): boolean {
   // Verificar por tipo MIME
-  if (file.type.startsWith('image/')) {
+  if (file.type && file.type.startsWith('image/')) {
     return true;
   }
   
-  // Verificar por extensión del nombre del archivo (fallback)
+  // Verificar por extensión del nombre del archivo (fallback importante)
   const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff', '.heic', '.heif'];
-  const fileName = file.name.toLowerCase();
-  return imageExtensions.some(ext => fileName.endsWith(ext));
+  const fileName = (file.name || '').toLowerCase();
+  if (imageExtensions.some(ext => fileName.endsWith(ext))) {
+    return true;
+  }
+  
+  // Si el tipo MIME incluye 'image' en cualquier parte
+  if (file.type && file.type.includes('image')) {
+    return true;
+  }
+  
+  return false;
+}
+
+/**
+ * Verifica si el archivo es una imagen por sus bytes mágicos (magic numbers)
+ */
+async function isImageByMagicBytes(file: File): Promise<boolean> {
+  try {
+    const buffer = await file.slice(0, 12).arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    
+    // JPEG: FF D8 FF
+    if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) {
+      return true;
+    }
+    
+    // PNG: 89 50 4E 47 0D 0A 1A 0A
+    if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) {
+      return true;
+    }
+    
+    // GIF: 47 49 46 38
+    if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38) {
+      return true;
+    }
+    
+    // WebP: 52 49 46 46 ... 57 45 42 50
+    if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+        bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) {
+      return true;
+    }
+    
+    // BMP: 42 4D
+    if (bytes[0] === 0x42 && bytes[1] === 0x4D) {
+      return true;
+    }
+    
+    return false;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -808,7 +857,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Analizar documento con IA real
-    const fileIsImage = isImageFile(file);
+    let fileIsImage = isImageFile(file);
+    
+    // Si no se detectó como imagen por tipo/extensión, verificar por magic bytes
+    if (!fileIsImage) {
+      fileIsImage = await isImageByMagicBytes(file);
+      if (fileIsImage) {
+        logger.info('[AI Document Analysis] 🔍 Imagen detectada por magic bytes', {
+          filename: file.name,
+          declaredType: file.type,
+        });
+      }
+    }
+    
     logger.info('[AI Document Analysis] Iniciando análisis con IA', {
       filename: file.name,
       fileType: file.type,
@@ -816,6 +877,10 @@ export async function POST(request: NextRequest) {
       userId: session.user.id,
       isImage: fileIsImage,
       context,
+      detectedByMIME: file.type?.startsWith('image/'),
+      detectedByExtension: ['.jpg', '.jpeg', '.png', '.gif', '.webp'].some(ext => 
+        (file.name || '').toLowerCase().endsWith(ext)
+      ),
     });
 
     // Si es una imagen, usar Claude Vision directamente
