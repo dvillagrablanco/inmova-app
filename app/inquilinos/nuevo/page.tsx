@@ -116,11 +116,27 @@ export default function NuevoInquilinoPage() {
           ));
           toast.success(`${file.name} subido correctamente`);
         } else {
-          throw new Error('Error al subir');
+          const errorData = await response.json().catch(() => ({}));
+          let errorMessage = 'Error al subir el archivo';
+          
+          // Mostrar mensaje específico según el código de error
+          if (errorData.code === 'S3_NOT_CONFIGURED') {
+            errorMessage = 'El servicio de almacenamiento no está disponible';
+          } else if (errorData.code === 'S3_ERROR') {
+            errorMessage = 'Error de conexión con el almacenamiento';
+          } else if (errorData.error === 'Tipo de archivo no permitido') {
+            errorMessage = `Tipo de archivo no permitido: ${file.type}`;
+          } else if (errorData.error === 'Archivo demasiado grande (máximo 10MB)') {
+            errorMessage = 'El archivo es demasiado grande (máx. 10MB)';
+          } else if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+          
+          throw new Error(errorMessage);
         }
-      } catch (error) {
+      } catch (error: any) {
         setDocuments(prev => prev.filter(d => d.id !== docId));
-        toast.error(`Error al subir ${file.name}`);
+        toast.error(error.message || `Error al subir ${file.name}`);
       }
     }
     // Reset input

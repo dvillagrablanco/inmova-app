@@ -15,18 +15,30 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Configurar S3 Client
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION!,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
+// Configuración de AWS S3
+const AWS_REGION = process.env.AWS_REGION || 'eu-west-1';
+const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID || '';
+const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY || '';
+// Usar bucket privado si existe, sino usar el estándar
+const BUCKET_NAME = process.env.AWS_BUCKET_PRIVATE || process.env.AWS_BUCKET || 'inmova-production';
+
+// Verificar si S3 está configurado
+const isS3Configured = !!(AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY);
+
+// Configurar S3 Client (solo si está configurado)
+const s3Client = isS3Configured 
+  ? new S3Client({
+      region: AWS_REGION,
+      credentials: {
+        accessKeyId: AWS_ACCESS_KEY_ID,
+        secretAccessKey: AWS_SECRET_ACCESS_KEY,
+      },
+    })
+  : null;
 
 // Validación
 const uploadSchema = z.object({
-  folder: z.enum(['contratos', 'dni', 'documentos', 'facturas']).optional().default('documentos'),
+  folder: z.enum(['contratos', 'dni', 'documentos', 'facturas', 'tenants', 'inquilinos']).optional().default('documentos'),
   entityType: z.enum(['property', 'contract', 'tenant', 'user']).optional(),
   entityId: z.string().optional(),
 });
@@ -43,6 +55,19 @@ const ALLOWED_MIME_TYPES = [
 
 export async function POST(req: NextRequest) {
   try {
+    // 0. Verificar que S3 esté configurado
+    if (!isS3Configured || !s3Client) {
+      logger.error('[Upload Private] AWS S3 no está configurado');
+      return NextResponse.json(
+        { 
+          error: 'Servicio de almacenamiento no disponible',
+          message: 'AWS S3 no está configurado correctamente. Contacta al administrador.',
+          code: 'S3_NOT_CONFIGURED'
+        },
+        { status: 503 }
+      );
+    }
+
     // 1. Autenticación
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -104,9 +129,9 @@ export async function POST(req: NextRequest) {
     // 5. Convertir a Buffer
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // 6. Upload a S3 (bucket PRIVADO)
+    // 6. Upload a S3 (bucket privado o estándar)
     const command = new PutObjectCommand({
-      Bucket: process.env.AWS_BUCKET_PRIVATE!, // inmova-private
+      Bucket: BUCKET_NAME,
       Key: fileName,
       Body: buffer,
       ContentType: file.type,
@@ -119,7 +144,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    await s3Client.send(command);
+    await s3Client!.send(command);
 
     // 7. Guardar registro en BD (adaptado al schema existente)
     const document = await prisma.document.create({
@@ -127,7 +152,7 @@ export async function POST(req: NextRequest) {
         nombre: file.name,
         tipo: folder === 'contratos' ? 'CONTRATO' : 'OTRO',
         cloudStoragePath: fileName, // S3 key
-        descripcion: `Bucket: inmova-private, Size: ${file.size}, Type: ${file.type}`,
+        descripcion: `Bucket: ${BUCKET_NAME}, Size: ${file.size}, Type: ${file.type}`,
         // Relaciones opcionales
         ...(entityType === 'contract' && entityId && { contractId: entityId }),
         ...(entityType === 'tenant' && entityId && { tenantId: entityId }),
@@ -142,18 +167,39 @@ export async function POST(req: NextRequest) {
       fileName,
       size: file.size,
       type: file.type,
-      bucket: 'inmova-private',
+      bucket: BUCKET_NAME,
       message: 'Documento subido de forma segura',
+      key: fileName,
       // NO retornar URL pública - usar endpoint de descarga
     }, { status: 201 });
 
   } catch (error: any) {
     logger.error('[Upload Private Error]:', error);
     
+    // Detectar errores específicos de AWS
+    const errorMessage = error.message || 'Error desconocido';
+    const isAwsError = errorMessage.includes('AWS') || 
+                       errorMessage.includes('S3') || 
+                       errorMessage.includes('AccessDenied') ||
+                       errorMessage.includes('NoSuchBucket') ||
+                       error.name?.includes('S3');
+
+    if (isAwsError) {
+      return NextResponse.json(
+        {
+          error: 'Error de almacenamiento',
+          message: 'No se pudo conectar con el servicio de almacenamiento. Intenta de nuevo más tarde.',
+          code: 'S3_ERROR',
+        },
+        { status: 503 }
+      );
+    }
+
     return NextResponse.json(
       {
         error: 'Error subiendo documento',
-        message: error.message,
+        message: errorMessage,
+        code: 'UPLOAD_ERROR',
       },
       { status: 500 }
     );
