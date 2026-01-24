@@ -253,22 +253,58 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(analysis);
   } catch (error: any) {
-    logger.error('[AI Document Analysis] Error:', error);
+    const errorMessage = error?.message || error?.toString() || 'Error desconocido';
+    const errorDetails = {
+      message: errorMessage,
+      name: error?.name,
+      status: error?.status,
+      code: error?.code,
+    };
     
-    // Si hay error con la IA, intentar análisis básico como fallback
-    const formData = await request.formData().catch(() => null);
-    const file = formData?.get('file') as File | null;
+    logger.error('[AI Document Analysis] Error:', errorDetails);
     
-    if (file) {
-      logger.warn('[AI Document Analysis] Usando análisis básico como fallback');
-      const basicResult = basicAnalysis(file.name, file.type);
-      basicResult.warnings.push(`Error en IA: ${error.message}`);
-      return NextResponse.json(basicResult);
+    // Registrar el error en el sistema de tracking
+    try {
+      const { trackError } = await import('@/lib/error-tracker');
+      await trackError(error, {
+        source: 'api',
+        route: '/api/ai/document-analysis',
+        severity: 'high',
+        metadata: { errorDetails },
+      });
+    } catch (e) {
+      // Ignorar errores de tracking
     }
     
-    return NextResponse.json(
-      { error: 'Error al analizar el documento', details: error.message },
-      { status: 500 }
-    );
+    // Retornar análisis básico como fallback con mensaje de error claro
+    return NextResponse.json({
+      classification: {
+        category: 'otro',
+        confidence: 0,
+        specificType: 'Error en análisis',
+        reasoning: `No se pudo analizar el documento: ${errorMessage}`,
+      },
+      ownershipValidation: {
+        isOwned: false,
+        detectedCIF: null,
+        detectedCompanyName: null,
+        matchesCIF: false,
+        matchesName: false,
+        confidence: 0,
+        notes: 'Error en el análisis',
+      },
+      extractedFields: [],
+      summary: `Error: ${errorMessage}`,
+      warnings: [`Error en análisis de IA: ${errorMessage}`],
+      suggestedActions: [],
+      sensitiveData: { hasSensitive: false, types: [] },
+      processingMetadata: {
+        tokensUsed: 0,
+        processingTimeMs: 0,
+        modelUsed: 'error-fallback',
+      },
+      error: true,
+      errorMessage,
+    });
   }
 }

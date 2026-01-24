@@ -390,8 +390,15 @@ export async function classifyDocument(
 
     throw new Error('No se pudo parsear la clasificación');
   } catch (error: any) {
-    logger.error('❌ Error clasificando documento:', error);
-    throw error;
+    const errorMessage = error?.message || error?.toString() || 'Error desconocido';
+    const errorDetails = {
+      message: errorMessage,
+      name: error?.name,
+      status: error?.status,
+      code: error?.code,
+    };
+    logger.error('❌ Error clasificando documento:', errorDetails);
+    throw new Error(`Error en clasificación: ${errorMessage}`);
   }
 }
 
@@ -435,8 +442,15 @@ export async function validateDocumentOwnership(
 
     throw new Error('No se pudo validar la propiedad del documento');
   } catch (error: any) {
-    logger.error('❌ Error validando propiedad:', error);
-    throw error;
+    const errorMessage = error?.message || error?.toString() || 'Error desconocido';
+    const errorDetails = {
+      message: errorMessage,
+      name: error?.name,
+      status: error?.status,
+      code: error?.code,
+    };
+    logger.error('❌ Error validando propiedad:', errorDetails);
+    throw new Error(`Error en validación: ${errorMessage}`);
   }
 }
 
@@ -501,8 +515,16 @@ export async function extractDocumentData(
 
     throw new Error('No se pudieron extraer los datos');
   } catch (error: any) {
-    logger.error('❌ Error extrayendo datos:', error);
-    throw error;
+    const errorMessage = error?.message || error?.toString() || 'Error desconocido';
+    const errorDetails = {
+      message: errorMessage,
+      name: error?.name,
+      status: error?.status,
+      statusCode: error?.statusCode,
+      code: error?.code,
+    };
+    logger.error('❌ Error extrayendo datos:', errorDetails);
+    throw new Error(`Error en extracción de datos: ${errorMessage}`);
   }
 }
 
@@ -548,7 +570,11 @@ export async function generateSuggestedActions(
 
     return [];
   } catch (error: any) {
-    logger.error('❌ Error generando acciones:', error);
+    const errorMessage = error?.message || error?.toString() || 'Error desconocido';
+    logger.error('❌ Error generando acciones:', {
+      message: errorMessage,
+      name: error?.name,
+    });
     return [];
   }
 }
@@ -616,8 +642,17 @@ export async function analyzeDocument(
       },
     };
   } catch (error: any) {
-    logger.error('❌ Error en análisis completo:', error);
-    throw error;
+    const errorMessage = error?.message || error?.toString() || 'Error desconocido';
+    const errorDetails = {
+      message: errorMessage,
+      name: error?.name,
+      status: error?.status,
+      statusCode: error?.statusCode,
+      code: error?.code,
+      type: error?.type,
+    };
+    logger.error('❌ Error en análisis completo:', errorDetails);
+    throw new Error(`Error en análisis de documento: ${errorMessage}`);
   }
 }
 
