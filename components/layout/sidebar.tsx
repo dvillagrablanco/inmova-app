@@ -72,6 +72,7 @@ import {
   Calculator,
   MapPin,
   Crown,
+  Bug,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -138,6 +139,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/importar': 'admin_importar',
   '/admin/ocr-import': 'admin_ocr_import',
   '/admin/system-logs': 'admin_logs',
+  '/admin/errors': 'admin_errors',
   '/admin/onboarding': 'admin_onboarding',
   '/admin/notificaciones-masivas': 'admin_notificaciones',
   '/api-docs': 'api_docs',
@@ -1736,6 +1738,7 @@ const superAdminPlatformItems: SidebarItem[] = [
     roles: ['super_admin'],
     subItems: [
       { name: 'Actividad', href: '/admin/activity', icon: Activity },
+      { name: 'Errores', href: '/admin/errors', icon: Bug },
       { name: 'Salud', href: '/admin/salud-sistema', icon: CheckSquare },
       { name: 'Alertas', href: '/admin/alertas', icon: Bell },
       { name: 'Seguridad', href: '/admin/seguridad', icon: Shield },

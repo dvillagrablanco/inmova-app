@@ -11,32 +11,37 @@ import { BrandingProvider } from '@/components/BrandingProvider';
 import { DesignSystemProvider } from '@/components/DesignSystemProvider';
 import { QueryProvider } from '@/components/QueryProvider';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import GlobalErrorBoundary from '@/components/error/GlobalErrorBoundary';
+import { GlobalErrorInitializer } from '@/components/error/GlobalErrorInitializer';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ErrorBoundary>
-      <SessionProvider>
-        <QueryProvider>
-          <DesignSystemProvider>
-            <BrandingProvider>
-              <I18nProvider>
-                <ThemeProvider
-                  attribute="class"
-                  defaultTheme="light"
-                  enableSystem
-                  disableTransitionOnChange
-                >
-                  <ServiceWorkerRegister />
-                  {children}
-                  <InstallPrompt />
-                  <ConnectivityIndicator />
-                  <Toaster />
-                </ThemeProvider>
-              </I18nProvider>
-            </BrandingProvider>
-          </DesignSystemProvider>
-        </QueryProvider>
-      </SessionProvider>
-    </ErrorBoundary>
+    <GlobalErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
+      <ErrorBoundary>
+        <SessionProvider>
+          <QueryProvider>
+            <DesignSystemProvider>
+              <BrandingProvider>
+                <I18nProvider>
+                  <ThemeProvider
+                    attribute="class"
+                    defaultTheme="light"
+                    enableSystem
+                    disableTransitionOnChange
+                  >
+                    <GlobalErrorInitializer />
+                    <ServiceWorkerRegister />
+                    {children}
+                    <InstallPrompt />
+                    <ConnectivityIndicator />
+                    <Toaster />
+                  </ThemeProvider>
+                </I18nProvider>
+              </BrandingProvider>
+            </DesignSystemProvider>
+          </QueryProvider>
+        </SessionProvider>
+      </ErrorBoundary>
+    </GlobalErrorBoundary>
   );
 }

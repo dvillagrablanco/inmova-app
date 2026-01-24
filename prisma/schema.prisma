@@ -15740,3 +15740,89 @@ model OnboardingDocumentSession {
   @@index([isActive])
   @@map("onboarding_document_sessions")
 }
+
+// ============================================================================
+// ERROR TRACKING - Sistema centralizado de captura y gestión de errores
+// ============================================================================
+
+enum ErrorSeverity {
+  low
+  medium
+  high
+  critical
+}
+
+enum ErrorSource {
+  frontend
+  backend
+  api
+  database
+  external
+  unknown
+}
+
+enum ErrorStatus {
+  new
+  investigating
+  resolved
+  ignored
+}
+
+model ErrorLog {
+  id        String   @id @default(cuid())
+  errorHash String   @unique // Para deduplicación
+
+  // Información del error
+  name    String // Error name (TypeError, ValidationError, etc.)
+  message String @db.Text // Mensaje de error
+  stack   String? @db.Text // Stack trace
+  code    String? // Código de error si aplica
+
+  // Clasificación
+  source   ErrorSource   @default(unknown)
+  severity ErrorSeverity @default(medium)
+  status   ErrorStatus   @default(new)
+
+  // Ubicación
+  url       String? // URL donde ocurrió
+  route     String? // Ruta de la API
+  component String? // Componente React
+
+  // Usuario
+  userId    String?
+  userEmail String?
+  userRole  String?
+
+  // Request info (para errores de API)
+  method   String? // GET, POST, etc.
+  metadata Json? // Metadata adicional (body, query, headers)
+
+  // Ambiente
+  environment String @default("production")
+  userAgent   String?
+  ip          String?
+
+  // Conteo de ocurrencias
+  occurrences Int      @default(1)
+  firstSeenAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+
+  // Resolución
+  resolution String?   @db.Text
+  resolvedAt DateTime?
+  resolvedBy String?
+
+  // Sugerencia de IA para corrección
+  aiSuggestion String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([errorHash])
+  @@index([severity])
+  @@index([source])
+  @@index([status])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("error_logs")
+}
