@@ -724,6 +724,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // LOG DETALLADO DEL ARCHIVO RECIBIDO
+    logger.info('[AI Document Analysis] 📥 Archivo recibido', {
+      fileName: file.name,
+      fileType: file.type,
+      fileSize: file.size,
+      context,
+      isImageByType: file.type.startsWith('image/'),
+      isImageByExtension: ['.jpg', '.jpeg', '.png', '.gif', '.webp'].some(ext => 
+        file.name.toLowerCase().endsWith(ext)
+      ),
+    });
+
     // Verificar tipo de archivo
     const allowedTypes = [
       'application/pdf',
