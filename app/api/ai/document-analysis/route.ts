@@ -23,8 +23,195 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 /**
- * Extrae texto de un archivo (PDF, imagen, texto)
- * En producción, esto debería usar un servicio OCR como AWS Textract o Google Vision
+ * Verifica si el archivo es una imagen
+ */
+function isImageFile(file: File): boolean {
+  return file.type.startsWith('image/');
+}
+
+/**
+ * Convierte un archivo a base64
+ */
+async function fileToBase64(file: File): Promise<string> {
+  const arrayBuffer = await file.arrayBuffer();
+  const uint8Array = new Uint8Array(arrayBuffer);
+  let binary = '';
+  for (let i = 0; i < uint8Array.length; i++) {
+    binary += String.fromCharCode(uint8Array[i]);
+  }
+  return btoa(binary);
+}
+
+/**
+ * Analiza una imagen usando Claude Vision
+ */
+async function analyzeImageWithVision(
+  file: File,
+  companyInfo: { cif: string | null; nombre: string; direccion: string | null }
+): Promise<any> {
+  const Anthropic = (await import('@anthropic-ai/sdk')).default;
+  
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error('ANTHROPIC_API_KEY no configurada');
+  }
+  
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const base64Image = await fileToBase64(file);
+  
+  // Determinar el media type correcto
+  let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/jpeg';
+  if (file.type === 'image/png') mediaType = 'image/png';
+  else if (file.type === 'image/gif') mediaType = 'image/gif';
+  else if (file.type === 'image/webp') mediaType = 'image/webp';
+  
+  const prompt = `Analiza esta imagen de documento y extrae toda la información visible.
+
+CONTEXTO:
+- Empresa del usuario: ${companyInfo.nombre}
+- CIF de la empresa: ${companyInfo.cif || 'No proporcionado'}
+
+INSTRUCCIONES:
+1. Identifica el tipo de documento (DNI, NIE, pasaporte, contrato, factura, etc.)
+2. Extrae TODOS los datos visibles de forma estructurada
+3. Si es un documento de identidad (DNI/NIE), extrae:
+   - Nombre completo
+   - Número de documento (DNI/NIE)
+   - Fecha de nacimiento
+   - Fecha de caducidad
+   - Nacionalidad
+   - Sexo
+   - Dirección (si aparece)
+
+RESPONDE EN FORMATO JSON:
+{
+  "documentType": "tipo de documento",
+  "classification": {
+    "category": "dni_nie|pasaporte|contrato_alquiler|factura|otro",
+    "confidence": 0.0-1.0,
+    "specificType": "descripción específica"
+  },
+  "extractedFields": [
+    {
+      "fieldName": "nombre del campo (ej: nombre_completo, dni, fecha_nacimiento)",
+      "fieldValue": "valor extraído",
+      "confidence": 0.0-1.0
+    }
+  ],
+  "summary": "resumen breve del documento",
+  "warnings": ["lista de advertencias si hay datos ilegibles o incompletos"]
+}`;
+
+  logger.info('[Vision Analysis] Analizando imagen con Claude Vision', {
+    filename: file.name,
+    fileType: file.type,
+    fileSize: file.size,
+  });
+
+  const response = await client.messages.create({
+    model: 'claude-3-5-sonnet-20241022', // Modelo con mejor visión
+    max_tokens: 2048,
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'image',
+            source: {
+              type: 'base64',
+              media_type: mediaType,
+              data: base64Image,
+            },
+          },
+          {
+            type: 'text',
+            text: prompt,
+          },
+        ],
+      },
+    ],
+  });
+
+  const content = response.content[0];
+  if (content.type === 'text') {
+    // Extraer JSON de la respuesta
+    const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const result = JSON.parse(jsonMatch[0]);
+      
+      logger.info('[Vision Analysis] Análisis completado', {
+        documentType: result.documentType,
+        fieldsExtracted: result.extractedFields?.length || 0,
+      });
+      
+      // Mapear a la estructura esperada
+      return {
+        classification: {
+          category: result.classification?.category || 'otro',
+          confidence: result.classification?.confidence || 0.7,
+          specificType: result.classification?.specificType || result.documentType || 'Documento',
+          reasoning: 'Análisis mediante Claude Vision',
+        },
+        ownershipValidation: {
+          isOwned: true,
+          detectedCIF: null,
+          detectedCompanyName: null,
+          matchesCIF: false,
+          matchesName: false,
+          confidence: 0.5,
+          notes: 'Documento de identidad personal',
+        },
+        extractedFields: (result.extractedFields || []).map((f: any) => ({
+          fieldName: f.fieldName,
+          fieldValue: f.fieldValue,
+          dataType: 'tenant_info',
+          confidence: f.confidence || 0.8,
+          targetEntity: 'Tenant',
+          targetField: mapFieldNameToTarget(f.fieldName),
+        })),
+        summary: result.summary || 'Documento analizado con visión artificial',
+        warnings: result.warnings || [],
+        suggestedActions: [],
+        sensitiveData: {
+          hasSensitive: true,
+          types: ['documento_identidad'],
+        },
+        processingMetadata: {
+          tokensUsed: response.usage?.output_tokens || 0,
+          processingTimeMs: 0,
+          modelUsed: 'claude-3-5-sonnet-vision',
+        },
+      };
+    }
+  }
+  
+  throw new Error('No se pudo procesar la respuesta de visión');
+}
+
+/**
+ * Mapea nombres de campo extraídos a campos del sistema
+ */
+function mapFieldNameToTarget(fieldName: string): string {
+  const mapping: Record<string, string> = {
+    'nombre_completo': 'nombreCompleto',
+    'nombre': 'nombreCompleto',
+    'dni': 'documentoIdentidad',
+    'nie': 'documentoIdentidad',
+    'numero_documento': 'documentoIdentidad',
+    'fecha_nacimiento': 'fechaNacimiento',
+    'nacionalidad': 'nacionalidad',
+    'email': 'email',
+    'telefono': 'telefono',
+    'direccion': 'direccion',
+    'sexo': 'sexo',
+  };
+  
+  const lowerName = fieldName.toLowerCase().replace(/\s+/g, '_');
+  return mapping[lowerName] || fieldName;
+}
+
+/**
+ * Extrae texto de un archivo (PDF, documento de texto)
+ * Para imágenes, se usa Claude Vision directamente
  */
 async function extractTextFromFile(file: File): Promise<string> {
   // Para archivos de texto
@@ -32,8 +219,12 @@ async function extractTextFromFile(file: File): Promise<string> {
     return await file.text();
   }
 
+  // Para imágenes, retornar solo info básica (se procesará con Vision)
+  if (isImageFile(file)) {
+    return `[IMAGEN: ${file.name}] - Este archivo se procesará con análisis de visión.`;
+  }
+
   // Para PDFs y documentos - usar el nombre del archivo como contexto básico
-  // En producción, aquí se integraría con un servicio OCR
   const basicInfo = `
 Nombre de archivo: ${file.name}
 Tipo MIME: ${file.type}
@@ -42,22 +233,18 @@ Fecha de carga: ${new Date().toISOString()}
   `.trim();
 
   // Si el archivo es un PDF o documento, intentar leer como texto
-  // (muchos PDFs generados digitalmente contienen texto extraíble)
   try {
     const arrayBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
     
-    // Buscar texto legible en el buffer (para PDFs con texto)
     let extractedText = '';
     let textChars: number[] = [];
     
     for (let i = 0; i < uint8Array.length && extractedText.length < 50000; i++) {
       const byte = uint8Array[i];
-      // Caracteres ASCII imprimibles y espacios
       if ((byte >= 32 && byte <= 126) || byte === 10 || byte === 13) {
         textChars.push(byte);
       } else if (textChars.length > 10) {
-        // Si tenemos una secuencia de caracteres legibles, añadirla
         const text = String.fromCharCode(...textChars);
         if (text.trim().length > 5 && /[a-zA-Z0-9áéíóúñÁÉÍÓÚÑ]/.test(text)) {
           extractedText += text + ' ';
@@ -235,8 +422,24 @@ export async function POST(request: NextRequest) {
       fileType: file.type,
       fileSize: file.size,
       userId: session.user.id,
+      isImage: isImageFile(file),
     });
 
+    // Si es una imagen, usar Claude Vision directamente
+    if (isImageFile(file)) {
+      logger.info('[AI Document Analysis] Usando análisis de visión para imagen');
+      const visionAnalysis = await analyzeImageWithVision(file, companyInfo);
+      
+      logger.info('[AI Document Analysis] Análisis de visión completado', {
+        filename: file.name,
+        category: visionAnalysis.classification?.category,
+        fieldsExtracted: visionAnalysis.extractedFields?.length || 0,
+      });
+      
+      return NextResponse.json(visionAnalysis);
+    }
+
+    // Para documentos de texto/PDF, usar el análisis tradicional
     const analysis = await analyzeDocument({
       text: extractedText,
       filename: file.name,
