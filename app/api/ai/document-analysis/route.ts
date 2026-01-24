@@ -26,7 +26,15 @@ export const runtime = 'nodejs';
  * Verifica si el archivo es una imagen
  */
 function isImageFile(file: File): boolean {
-  return file.type.startsWith('image/');
+  // Verificar por tipo MIME
+  if (file.type.startsWith('image/')) {
+    return true;
+  }
+  
+  // Verificar por extensión del nombre del archivo (fallback)
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff', '.heic', '.heif'];
+  const fileName = file.name.toLowerCase();
+  return imageExtensions.some(ext => fileName.endsWith(ext));
 }
 
 /**
@@ -788,17 +796,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Analizar documento con IA real
+    const fileIsImage = isImageFile(file);
     logger.info('[AI Document Analysis] Iniciando análisis con IA', {
       filename: file.name,
       fileType: file.type,
       fileSize: file.size,
       userId: session.user.id,
-      isImage: isImageFile(file),
+      isImage: fileIsImage,
+      context,
     });
 
     // Si es una imagen, usar Claude Vision directamente
-    if (isImageFile(file)) {
-      logger.info('[AI Document Analysis] Usando análisis de visión para imagen', { context });
+    if (fileIsImage) {
+      logger.info('[AI Document Analysis] 🖼️ USANDO CLAUDE VISION para imagen', { 
+        context,
+        filename: file.name,
+        fileType: file.type,
+      });
       const visionAnalysis = await analyzeImageWithVision(file, companyInfo, context);
       
       logger.info('[AI Document Analysis] Análisis de visión completado', {
@@ -812,6 +826,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Para documentos de texto/PDF, usar el análisis tradicional
+    logger.info('[AI Document Analysis] 📄 Usando análisis de TEXTO (no Vision)', {
+      filename: file.name,
+      fileType: file.type,
+      textLength: extractedText.length,
+    });
+    
     const analysis = await analyzeDocument({
       text: extractedText,
       filename: file.name,
