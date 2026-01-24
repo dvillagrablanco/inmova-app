@@ -105,17 +105,21 @@ function ContratosPageContent() {
         setError(null);
         const response = await fetch('/api/contracts');
         if (!response.ok) {
-      throw new Error(`Error ${response.status}: No se pudieron cargar los contratos`);
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `Error ${response.status}: No se pudieron cargar los contratos`);
         }
         const data = await response.json();
-        setContracts(data);
-        setFilteredContracts(data);
+        
+        // Manejar tanto el formato de array como el formato con paginación
+        const contractsList = Array.isArray(data) ? data : (data.data || []);
+        setContracts(contractsList);
+        setFilteredContracts(contractsList);
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
         setError(errorMsg);
         logError(error instanceof Error ? error : new Error(errorMsg), {
-      context: 'fetchContracts',
-      page: 'contratos',
+          context: 'fetchContracts',
+          page: 'contratos',
         });
       } finally {
         setIsLoading(false);
