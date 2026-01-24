@@ -5,6 +5,7 @@ import Joyride, { Step, CallBackProps, STATUS, EVENTS } from 'react-joyride';
 import { useSession } from 'next-auth/react';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { UserRole } from '@/types/prisma-types';
+import { useOnboardingElement } from '@/lib/hooks/useOnboardingManager';
 
 interface OnboardingTourProps {
   role?: UserRole;
@@ -174,6 +175,9 @@ export function OnboardingTour({ role }: OnboardingTourProps) {
   const { shouldShowOnboarding, markOnboardingAsSeen, isLoading } = useOnboarding();
   const [run, setRun] = useState(false);
   
+  // Hook centralizado para evitar solapamientos con otros elementos de onboarding
+  const { canShow, show, complete, dismiss } = useOnboardingElement('tour');
+  
   // Ref para evitar el bucle infinito - rastrea si el tour ya fue cerrado en esta sesión
   const tourClosedRef = useRef(false);
   // Ref para evitar múltiples llamadas al callback
@@ -222,19 +226,25 @@ export function OnboardingTour({ role }: OnboardingTourProps) {
       return;
     }
 
+    // Verificar si el sistema centralizado permite mostrar este elemento
+    if (!canShow) {
+      return;
+    }
+
     // Solo mostrar si el onboarding debe mostrarse y no estamos cargando
     if (shouldShowOnboarding && !isLoading) {
       // Delay para asegurar que el DOM está listo
       const timer = setTimeout(() => {
         // Verificar de nuevo antes de iniciar (por si cambió durante el timeout)
-        if (!tourClosedRef.current) {
+        if (!tourClosedRef.current && canShow) {
+          show(); // Registrar en el manager
           setRun(true);
         }
       }, 1000);
       
       return () => clearTimeout(timer);
     }
-  }, [shouldShowOnboarding, isLoading, userRole, sessionStatus]);
+  }, [shouldShowOnboarding, isLoading, userRole, sessionStatus, canShow, show]);
 
   const handleJoyrideCallback = useCallback((data: CallBackProps) => {
     const { status } = data;
@@ -261,23 +271,32 @@ export function OnboardingTour({ role }: OnboardingTourProps) {
       setRun(false);
       markOnboardingAsSeen();
       
+      // Marcar como completado en el manager centralizado
+      if (status === STATUS.FINISHED) {
+        complete();
+      } else {
+        dismiss();
+      }
+      
       // Reset del flag de procesamiento después de un breve delay
       setTimeout(() => {
         isProcessingRef.current = false;
       }, 100);
     }
-  }, [markOnboardingAsSeen, userId]);
+  }, [markOnboardingAsSeen, userId, complete, dismiss]);
 
   // No renderizar si:
   // - No hay sesión
   // - Sesión cargando
   // - Rol excluido
   // - Tour ya cerrado
+  // - El manager centralizado no permite mostrar
   if (
     !session || 
     sessionStatus === 'loading' || 
     isLoading || 
     tourClosedRef.current ||
+    !canShow ||
     (userRole && EXCLUDED_ROLES.includes(userRole.toLowerCase()))
   ) {
     return null;

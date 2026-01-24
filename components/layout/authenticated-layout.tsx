@@ -6,9 +6,6 @@ import { Header } from './header';
 import { BottomNavigation } from './bottom-navigation';
 import { TourAutoStarter } from '@/components/tours/TourAutoStarter';
 import { FloatingTourButton } from '@/components/tours/FloatingTourButton';
-import { ContextualHelp } from '@/components/help/ContextualHelp';
-import { OnboardingChecklist } from '@/components/tutorials/OnboardingChecklist';
-import { FirstTimeSetupWizard } from '@/components/tutorials/FirstTimeSetupWizard';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useIsMobile } from '@/lib/hooks/useMediaQuery';
@@ -17,14 +14,22 @@ import { SkipLink } from '@/components/accessibility/SkipLink';
 import { CommandPalette } from '@/components/navigation/command-palette';
 import { GlobalShortcuts } from '@/components/navigation/global-shortcuts';
 import { ShortcutsHelpDialog } from '@/components/navigation/shortcuts-help-dialog';
-import { NavigationTutorial } from '@/components/navigation/navigation-tutorial';
 import dynamic from 'next/dynamic';
+import { useOnboardingManager } from '@/lib/hooks/useOnboardingManager';
 
-// Cargar el chatbot de soporte de forma lazy para mejor rendimiento
+// Cargar componentes de onboarding de forma lazy para mejor rendimiento
+// y para evitar que se carguen todos a la vez
 const IntelligentSupportChatbot = dynamic(
   () => import('@/components/automation/IntelligentSupportChatbot'),
   { ssr: false }
 );
+
+// NOTA: Estos componentes han sido removidos o simplificados para evitar solapamientos
+// El sistema ahora usa useOnboardingManager para coordinar qué elemento mostrar
+// - ContextualHelp: Removido temporalmente (causa solapamiento)
+// - OnboardingChecklist: Se gestiona desde el dashboard
+// - FirstTimeSetupWizard: Se gestiona desde el dashboard  
+// - NavigationTutorial: Removido temporalmente (causa solapamiento)
 
 /**
  * Layout autenticado con navegación optimizada para mobile-first
@@ -55,10 +60,8 @@ export function AuthenticatedLayout({
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  // Estados para tutoriales y onboarding
-  const [showSetupWizard, setShowSetupWizard] = useState(false);
-  const [showChecklist, setShowChecklist] = useState(false);
-  const [isNewUser, setIsNewUser] = useState(false);
+  // Hook centralizado para gestionar onboarding - evita solapamientos
+  const { isOnboardingDisabled, disableOnboarding } = useOnboardingManager();
 
   // Redirección para socios de eWoorker: solo pueden acceder a rutas de eWoorker
   useEffect(() => {
@@ -88,69 +91,12 @@ export function AuthenticatedLayout({
     '4xl': 'max-w-4xl',
   };
 
-  // Verificar estado de onboarding
+  // Deshabilitar onboarding para super_admin
   useEffect(() => {
-    const checkOnboarding = async () => {
-      if (!session?.user?.id) return;
-
-      // OCULTAR TOURS Y ONBOARDING PARA SUPERADMIN
-      if (session.user.role === 'super_admin') {
-        setShowSetupWizard(false);
-        setShowChecklist(false);
-        setIsNewUser(false);
-        return;
-      }
-
-      try {
-        const response = await fetch('/api/user/onboarding-status');
-        if (!response.ok) return;
-
-        const data = await response.json();
-        setIsNewUser(data.isNewUser);
-
-        // Si es usuario nuevo Y nunca completó onboarding
-        if (!data.hasCompletedOnboarding && data.isNewUser) {
-          // Mostrar wizard si nunca lo saltó
-          const hasSkippedWizard = localStorage.getItem('skipped-setup-wizard');
-          if (!hasSkippedWizard) {
-            setShowSetupWizard(true);
-          }
-        }
-
-        // Checklist visible hasta completar todo
-        setShowChecklist(!data.hasCompletedOnboarding);
-      } catch (error) {
-        console.error('Error checking onboarding:', error);
-      }
-    };
-
-    checkOnboarding();
-  }, [session]);
-
-  // Handlers para wizard
-  const handleCompleteSetup = () => {
-    setShowSetupWizard(false);
-    setShowChecklist(true);
-  };
-
-  const handleSkipSetup = () => {
-    setShowSetupWizard(false);
-    setShowChecklist(true);
-    localStorage.setItem('skipped-setup-wizard', 'true');
-  };
-
-  const handleDismissChecklist = () => {
-    setShowChecklist(false);
-  };
-
-  // Determinar página para ayuda contextual
-  const getPageForHelp = () => {
-    if (pathname?.includes('/edificios')) return 'edificios';
-    if (pathname?.includes('/inquilinos')) return 'inquilinos';
-    if (pathname?.includes('/contratos')) return 'contratos';
-    if (pathname?.includes('/configuracion')) return 'configuracion';
-    return 'dashboard';
-  };
+    if (session?.user?.role === 'super_admin') {
+      disableOnboarding();
+    }
+  }, [session, disableOnboarding]);
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -194,30 +140,17 @@ export function AuthenticatedLayout({
         <BottomNavigation />
       </div>
 
-      {/* Tour Auto-Starter - Sistema de tours virtuales (NO para superadmin) */}
-      {session?.user?.role !== 'super_admin' && <TourAutoStarter />}
+      {/* 
+        SISTEMA DE ONBOARDING CENTRALIZADO
+        Solo se muestra UN elemento a la vez, controlado por useOnboardingManager
+        Esto evita el problema de múltiples widgets superpuestos
+      */}
+      
+      {/* Tour Auto-Starter - Solo si onboarding no está deshabilitado */}
+      {!isOnboardingDisabled && <TourAutoStarter />}
 
-      {/* Floating Tour Button - Acceso rápido a tours (NO para superadmin) */}
-      {session?.user?.role !== 'super_admin' && <FloatingTourButton />}
-
-      {/* Contextual Help - Ayuda específica según página (NO para superadmin) */}
-      {session?.user?.role !== 'super_admin' && (
-        <ContextualHelp page={getPageForHelp()} />
-      )}
-
-      {/* Setup Wizard - Primera vez (NO para superadmin) */}
-      {showSetupWizard && session?.user?.role !== 'super_admin' && (
-        <FirstTimeSetupWizard onComplete={handleCompleteSetup} onSkip={handleSkipSetup} />
-      )}
-
-      {/* Onboarding Checklist - Hasta completar (NO para superadmin) */}
-      {showChecklist && session?.user?.id && session?.user?.role !== 'super_admin' && (
-        <OnboardingChecklist
-          userId={session.user.id}
-          isNewUser={isNewUser}
-          onDismiss={handleDismissChecklist}
-        />
-      )}
+      {/* Floating Tour Button - Controlado por el manager */}
+      {!isOnboardingDisabled && <FloatingTourButton />}
 
       {/* Command Palette - Navegación rápida con Cmd+K */}
       <CommandPalette />
@@ -228,11 +161,8 @@ export function AuthenticatedLayout({
       {/* Shortcuts Help Dialog - Ayuda de atajos con ? */}
       <ShortcutsHelpDialog />
 
-      {/* Navigation Tutorial - Tutorial interactivo (NO para superadmin) */}
-      {session?.user?.role !== 'super_admin' && <NavigationTutorial />}
-
-      {/* Chatbot de Soporte Inteligente - Disponible en todas las páginas */}
-      <IntelligentSupportChatbot />
+      {/* Chatbot de Soporte Inteligente - Solo si onboarding no está deshabilitado */}
+      {!isOnboardingDisabled && <IntelligentSupportChatbot />}
     </div>
   );
 }

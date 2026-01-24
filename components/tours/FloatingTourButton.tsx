@@ -1,24 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HelpCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useOnboardingElement } from '@/lib/hooks/useOnboardingManager';
 
 /**
  * Botón flotante de acceso rápido a Tours
  *
  * Se muestra en la esquina inferior derecha (móvil y desktop)
  * Permite al usuario acceder rápidamente a la lista de tours disponibles
+ * 
+ * IMPORTANTE: Solo se muestra si no hay otros elementos de onboarding activos
+ * (wizard, tour, checklist) para evitar solapamientos
  */
 export function FloatingTourButton() {
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true); // Iniciar minimizado
   const router = useRouter();
+  const { canShow, dismiss } = useOnboardingElement('tour-button');
 
   const handleClick = () => {
     router.push('/configuracion?tab=tours');
   };
+
+  const handleDismiss = () => {
+    setIsMinimized(true);
+    dismiss();
+  };
+
+  // No mostrar si hay otros elementos de onboarding activos
+  if (!canShow) {
+    return null;
+  }
 
   if (isMinimized) {
     return (
@@ -70,9 +85,9 @@ export function FloatingTourButton() {
           </div>
         </div>
         <button
-          onClick={() => setIsMinimized(true)}
+          onClick={handleDismiss}
           className="text-gray-400 hover:text-gray-600 transition-colors p-1"
-          aria-label="Minimizar"
+          aria-label="Cerrar"
         >
           <X size={16} />
         </button>

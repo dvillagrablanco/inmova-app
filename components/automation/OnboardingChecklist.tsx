@@ -12,6 +12,7 @@ import { getOnboardingProgress, type OnboardingProgress } from '@/lib/ai-automat
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 import logger, { logError } from '@/lib/logger';
+import { useOnboardingElement } from '@/lib/hooks/useOnboardingManager';
 
 interface OnboardingChecklistProps {
   userId: string;
@@ -22,17 +23,14 @@ export function OnboardingChecklist({ userId }: OnboardingChecklistProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
   const router = useRouter();
   const { width, height } = useWindowSize();
+  
+  // Usar el hook centralizado de onboarding
+  const { canShow, dismiss, complete } = useOnboardingElement('checklist');
 
   useEffect(() => {
     loadProgress();
-    // Check if was dismissed
-    const dismissed = localStorage.getItem('onboardingChecklistDismissed');
-    if (dismissed === 'true') {
-      setIsDismissed(true);
-    }
   }, [userId]);
 
   const loadProgress = async () => {
@@ -48,6 +46,8 @@ export function OnboardingChecklist({ userId }: OnboardingChecklistProps) {
           sessionStorage.setItem('confettiShown', 'true');
           setTimeout(() => setShowConfetti(false), 5000);
         }
+        // Marcar como completado en el manager
+        complete();
       }
     } catch (error) {
       logger.error('Error loading progress:', error);
@@ -57,15 +57,15 @@ export function OnboardingChecklist({ userId }: OnboardingChecklistProps) {
   };
 
   const handleDismiss = () => {
-    setIsDismissed(true);
-    localStorage.setItem('onboardingChecklistDismissed', 'true');
+    dismiss();
   };
 
   const handleAction = (route: string) => {
     router.push(route);
   };
 
-  if (isDismissed || isLoading || !progress) return null;
+  // No mostrar si está descartado, cargando, sin datos, o si hay otros elementos activos de mayor prioridad
+  if (!canShow || isLoading || !progress) return null;
 
   // Si ya está 100% completo, mostrar solo si no fue colapsado
   if (progress.percentage === 100 && isCollapsed) return null;
