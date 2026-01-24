@@ -380,6 +380,10 @@ export async function POST(request: NextRequest) {
     if (!isAIConfigured()) {
       logger.warn('[AI Document Analysis] ANTHROPIC_API_KEY no configurado, usando análisis básico');
       const basicResult = basicAnalysis(file.name, file.type);
+      basicResult.warnings.push(
+        '⚠️ IA no configurada: Para análisis inteligente de documentos, configure ANTHROPIC_API_KEY en el servidor.'
+      );
+      basicResult.summary = 'Análisis básico (sin IA). Configure ANTHROPIC_API_KEY para extracción automática de datos.';
       return NextResponse.json(basicResult);
     }
 
