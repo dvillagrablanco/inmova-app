@@ -1846,3 +1846,79 @@ select[aria-invalid='true']:focus {
     display: none !important;
   }
 }
+
+/* ========================================
+   LANDING PAGE - FLOATING WIDGETS LAYOUT
+   Disposición horizontal para evitar solapamiento
+   ======================================== */
+
+/* === LANDING: Desktop Layout (768px+) === */
+@media (min-width: 768px) {
+  /* Crisp Chat en landing - posición base (derecha) */
+  body:has([data-landing-page]) .crisp-client .crisp-1brjxns,
+  body:has([data-landing-page]) .crisp-client .cc-1brjxns,
+  body:has([data-landing-page]) .crisp-client .crisp-kquevr,
+  body:has([data-landing-page]) .crisp-client .cc-kquevr {
+    bottom: 24px !important;
+    right: 24px !important;
+  }
+  
+  /* Landing chatbot - a la izquierda de Crisp */
+  [data-floating-widget="landing-chatbot"] {
+    bottom: 24px !important;
+    right: 96px !important;
+  }
+  
+  /* WhatsApp - más a la izquierda */
+  [data-floating-widget="whatsapp"] {
+    bottom: 24px !important;
+    right: 168px !important;
+  }
+}
+
+/* === LANDING: Mobile Layout (< 768px) === */
+@media (max-width: 767px) {
+  /* Crisp Chat en landing móvil - derecha */
+  body:has([data-landing-page]) .crisp-client .crisp-kquevr,
+  body:has([data-landing-page]) .crisp-client .cc-kquevr,
+  body:has([data-landing-page]) .crisp-client .crisp-1m5fbvw {
+    bottom: 16px !important;
+    right: 16px !important;
+    width: 48px !important;
+    height: 48px !important;
+  }
+  
+  /* Landing chatbot móvil - izquierda de Crisp */
+  [data-floating-widget="landing-chatbot"] {
+    bottom: 16px !important;
+    right: 72px !important;
+    width: 48px !important;
+    height: 48px !important;
+    padding: 12px !important;
+  }
+  
+  /* WhatsApp móvil - más a la izquierda */
+  [data-floating-widget="whatsapp"] {
+    bottom: 16px !important;
+    right: 128px !important;
+    width: 48px !important;
+    height: 48px !important;
+    padding: 10px !important;
+  }
+  
+  /* Tamaño de iconos en móvil */
+  [data-floating-widget="landing-chatbot"] svg,
+  [data-floating-widget="whatsapp"] svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
+}
+
+/* === Ocultar indicadores de notificación si molestan === */
+@media (max-width: 767px) {
+  [data-floating-widget] .absolute.-top-1,
+  [data-floating-widget] .absolute.-right-1,
+  [data-floating-widget] .absolute.-left-1 {
+    display: none !important;
+  }
+}
