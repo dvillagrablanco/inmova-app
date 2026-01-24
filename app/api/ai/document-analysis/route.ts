@@ -47,6 +47,24 @@ function isImageFile(file: File): boolean {
 }
 
 /**
+ * Verifica si el archivo es un PDF
+ */
+function isPDFFile(file: File): boolean {
+  if (file.type === 'application/pdf') {
+    return true;
+  }
+  const fileName = (file.name || '').toLowerCase();
+  return fileName.endsWith('.pdf');
+}
+
+/**
+ * Verifica si el archivo debe usar Claude Vision (imágenes o PDFs)
+ */
+function shouldUseVision(file: File): boolean {
+  return isImageFile(file) || isPDFFile(file);
+}
+
+/**
  * Verifica si el archivo es una imagen por sus bytes mágicos (magic numbers)
  */
 async function isImageByMagicBytes(file: File): Promise<boolean> {
@@ -253,9 +271,9 @@ function getDataTypeFromCategory(category: string): string {
 }
 
 /**
- * Analiza una imagen usando Claude Vision
+ * Analiza un documento (imagen o PDF) usando Claude Vision
  */
-async function analyzeImageWithVision(
+async function analyzeDocumentWithVision(
   file: File,
   companyInfo: { cif: string | null; nombre: string; direccion: string | null },
   context: string = 'general'
@@ -267,21 +285,56 @@ async function analyzeImageWithVision(
   }
   
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const base64Image = await fileToBase64(file);
+  const base64Data = await fileToBase64(file);
+  const isPDF = isPDFFile(file);
   
-  // Determinar el media type correcto
-  let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/jpeg';
-  if (file.type === 'image/png') mediaType = 'image/png';
-  else if (file.type === 'image/gif') mediaType = 'image/gif';
-  else if (file.type === 'image/webp') mediaType = 'image/webp';
+  // Determinar el tipo de contenido para Claude
+  let contentBlock: any;
+  
+  if (isPDF) {
+    // Para PDFs, usar el tipo document de Claude
+    contentBlock = {
+      type: 'document',
+      source: {
+        type: 'base64',
+        media_type: 'application/pdf',
+        data: base64Data,
+      },
+    };
+    logger.info('[Vision Analysis] Procesando PDF con Claude', {
+      filename: file.name,
+      fileSize: file.size,
+    });
+  } else {
+    // Para imágenes
+    let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/jpeg';
+    if (file.type === 'image/png') mediaType = 'image/png';
+    else if (file.type === 'image/gif') mediaType = 'image/gif';
+    else if (file.type === 'image/webp') mediaType = 'image/webp';
+    
+    contentBlock = {
+      type: 'image',
+      source: {
+        type: 'base64',
+        media_type: mediaType,
+        data: base64Data,
+      },
+    };
+    logger.info('[Vision Analysis] Procesando imagen con Claude Vision', {
+      filename: file.name,
+      fileType: file.type,
+      fileSize: file.size,
+    });
+  }
   
   const prompt = getVisionPromptForContext(context, companyInfo);
 
-  logger.info('[Vision Analysis] Analizando imagen con Claude Vision', {
+  logger.info('[Vision Analysis] Enviando a Claude para análisis', {
     filename: file.name,
     fileType: file.type,
     fileSize: file.size,
     context,
+    isPDF,
   });
 
   const startTime = Date.now();
@@ -293,14 +346,7 @@ async function analyzeImageWithVision(
       {
         role: 'user',
         content: [
-          {
-            type: 'image',
-            source: {
-              type: 'base64',
-              media_type: mediaType,
-              data: base64Image,
-            },
-          },
+          contentBlock,
           {
             type: 'text',
             text: prompt,
@@ -857,12 +903,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Analizar documento con IA real
-    let fileIsImage = isImageFile(file);
+    // Determinar si usar Vision (para imágenes y PDFs)
+    const isPDF = isPDFFile(file);
+    let isImage = isImageFile(file);
     
     // Si no se detectó como imagen por tipo/extensión, verificar por magic bytes
-    if (!fileIsImage) {
-      fileIsImage = await isImageByMagicBytes(file);
-      if (fileIsImage) {
+    if (!isImage && !isPDF) {
+      isImage = await isImageByMagicBytes(file);
+      if (isImage) {
         logger.info('[AI Document Analysis] 🔍 Imagen detectada por magic bytes', {
           filename: file.name,
           declaredType: file.type,
@@ -870,27 +918,30 @@ export async function POST(request: NextRequest) {
       }
     }
     
+    // Usar Vision para imágenes y PDFs
+    const useVision = isImage || isPDF;
+    
     logger.info('[AI Document Analysis] Iniciando análisis con IA', {
       filename: file.name,
       fileType: file.type,
       fileSize: file.size,
       userId: session.user.id,
-      isImage: fileIsImage,
+      isImage,
+      isPDF,
+      useVision,
       context,
-      detectedByMIME: file.type?.startsWith('image/'),
-      detectedByExtension: ['.jpg', '.jpeg', '.png', '.gif', '.webp'].some(ext => 
-        (file.name || '').toLowerCase().endsWith(ext)
-      ),
     });
 
-    // Si es una imagen, usar Claude Vision directamente
-    if (fileIsImage) {
-      logger.info('[AI Document Analysis] 🖼️ USANDO CLAUDE VISION para imagen', { 
+    // Si es imagen o PDF, usar Claude Vision
+    if (useVision) {
+      logger.info('[AI Document Analysis] 🖼️ USANDO CLAUDE VISION', { 
         context,
         filename: file.name,
         fileType: file.type,
+        isPDF,
+        isImage,
       });
-      const visionAnalysis = await analyzeImageWithVision(file, companyInfo, context);
+      const visionAnalysis = await analyzeDocumentWithVision(file, companyInfo, context);
       
       logger.info('[AI Document Analysis] Análisis de visión completado', {
         filename: file.name,
