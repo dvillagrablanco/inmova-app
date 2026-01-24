@@ -1714,25 +1714,34 @@ select[aria-invalid='true']:focus {
 
 /* Variables CSS para posicionamiento */
 :root {
-  /* Posición base (bottom) en desktop */
-  --floating-widget-base: 24px;
+  /* Posición base (bottom) en desktop - encima de Crisp (que está a ~24px) */
+  --floating-widget-base: 100px;
   /* Posición base (bottom) en móvil (encima del bottom nav) */
-  --floating-widget-base-mobile: 80px;
-  /* Espacio entre widgets */
-  --floating-widget-gap: 64px;
+  --floating-widget-base-mobile: 100px;
+  /* Espacio entre widgets - aumentado para evitar solapamiento */
+  --floating-widget-gap: 70px;
   /* Posición derecha */
   --floating-widget-right: 24px;
   --floating-widget-right-mobile: 16px;
 }
 
-/* === NIVEL 1: Crisp Chat (más abajo) === */
-/* z-index: 9999 - El más alto para chat de soporte */
+/* === CRISP CHAT OVERRIDE === */
+/* Forzar Crisp a la posición más baja */
+#crisp-chatbox {
+  z-index: 9998 !important;
+}
 
-/* === NIVEL 2: AI Document Assistant === */
-/* z-index: 60 - Por debajo de Crisp */
+#crisp-chatbox > div {
+  bottom: 24px !important;
+  right: 24px !important;
+}
+
+/* === NIVEL 1: AI Document Assistant === */
+/* z-index: 60 - Primer widget encima de Crisp */
 [data-floating-widget="ai-document-assistant"],
 .ai-document-assistant-floating {
-  bottom: calc(var(--floating-widget-base) + var(--floating-widget-gap)) !important;
+  position: fixed !important;
+  bottom: var(--floating-widget-base) !important;
   right: var(--floating-widget-right) !important;
   z-index: 60 !important;
 }
@@ -1740,16 +1749,17 @@ select[aria-invalid='true']:focus {
 @media (max-width: 767px) {
   [data-floating-widget="ai-document-assistant"],
   .ai-document-assistant-floating {
-    bottom: calc(var(--floating-widget-base-mobile) + var(--floating-widget-gap)) !important;
+    bottom: var(--floating-widget-base-mobile) !important;
     right: var(--floating-widget-right-mobile) !important;
   }
 }
 
-/* === NIVEL 3: Intelligent Support Chatbot === */
+/* === NIVEL 2: Intelligent Support Chatbot === */
 /* z-index: 50 */
 [data-floating-widget="support-chatbot"],
 .intelligent-chatbot-floating {
-  bottom: calc(var(--floating-widget-base) + var(--floating-widget-gap) * 2) !important;
+  position: fixed !important;
+  bottom: calc(var(--floating-widget-base) + var(--floating-widget-gap)) !important;
   right: var(--floating-widget-right) !important;
   z-index: 50 !important;
 }
@@ -1757,16 +1767,17 @@ select[aria-invalid='true']:focus {
 @media (max-width: 767px) {
   [data-floating-widget="support-chatbot"],
   .intelligent-chatbot-floating {
-    bottom: calc(var(--floating-widget-base-mobile) + var(--floating-widget-gap) * 1.5) !important;
+    bottom: calc(var(--floating-widget-base-mobile) + var(--floating-widget-gap)) !important;
     right: var(--floating-widget-right-mobile) !important;
   }
 }
 
-/* === NIVEL 4: Floating Tour Button === */
+/* === NIVEL 3: Floating Tour Button === */
 /* z-index: 40 */
 [data-floating-widget="tour-button"],
 .floating-tour-button {
-  bottom: calc(var(--floating-widget-base) + var(--floating-widget-gap) * 3) !important;
+  position: fixed !important;
+  bottom: calc(var(--floating-widget-base) + var(--floating-widget-gap) * 2) !important;
   right: var(--floating-widget-right) !important;
   z-index: 40 !important;
 }
@@ -1774,23 +1785,23 @@ select[aria-invalid='true']:focus {
 @media (max-width: 767px) {
   [data-floating-widget="tour-button"],
   .floating-tour-button {
-    /* En móvil, posicionar a la izquierda de Crisp */
-    bottom: var(--floating-widget-base-mobile) !important;
-    right: calc(var(--floating-widget-right-mobile) + 60px) !important;
+    bottom: calc(var(--floating-widget-base-mobile) + var(--floating-widget-gap) * 2) !important;
+    right: var(--floating-widget-right-mobile) !important;
   }
 }
 
-/* === NIVEL 5: Contextual Help === */
+/* === NIVEL 4: Contextual Help === */
 /* z-index: 30 */
 [data-floating-widget="contextual-help"],
 .contextual-help-floating {
-  bottom: calc(var(--floating-widget-base) + var(--floating-widget-gap) * 4) !important;
+  position: fixed !important;
+  bottom: calc(var(--floating-widget-base) + var(--floating-widget-gap) * 3) !important;
   right: var(--floating-widget-right) !important;
   z-index: 30 !important;
 }
 
-/* Ocultar help contextual en móvil por defecto */
 @media (max-width: 767px) {
+  /* En móvil, ocultar el help contextual para reducir widgets */
   [data-floating-widget="contextual-help"],
   .contextual-help-floating {
     display: none !important;

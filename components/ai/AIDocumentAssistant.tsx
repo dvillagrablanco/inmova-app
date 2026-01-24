@@ -306,15 +306,9 @@ export function AIDocumentAssistant({
   };
 
   // Posiciones para el botón flotante
-  // NOTA: Usa el sistema de CSS global para evitar solapamiento con otros widgets
-  // data-floating-widget="ai-document-assistant" activa el posicionamiento automático
-  // z-[60] para estar por encima de otros elementos pero debajo de Crisp
-  const positionClasses: Record<string, string> = {
-    'bottom-right': 'fixed bottom-36 md:bottom-24 right-6 ai-document-assistant-floating',
-    'bottom-left': 'fixed bottom-36 md:bottom-24 left-6',
-    'top-right': 'fixed top-20 right-6',
-    'top-left': 'fixed top-20 left-6',
-  };
+  // NOTA: El posicionamiento se controla via CSS global en globals.css
+  // usando data-floating-widget="ai-document-assistant"
+  // Esto evita solapamiento con otros widgets flotantes
 
   // Botón trigger según variante
   const renderTrigger = () => {
@@ -349,9 +343,12 @@ export function AIDocumentAssistant({
       );
     }
 
-    // Floating
+    // Floating - posicionamiento controlado por CSS global
     return (
-      <div className={`${positionClasses[position]} z-[60]`}>
+      <div 
+        data-floating-widget="ai-document-assistant"
+        className="ai-document-assistant-floating"
+      >
         <Button
           size="lg"
           className="h-14 w-14 rounded-full shadow-xl bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-500 hover:shadow-2xl hover:scale-105 transition-all animate-pulse-slow"

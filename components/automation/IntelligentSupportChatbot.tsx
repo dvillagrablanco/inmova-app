@@ -203,7 +203,7 @@ export default function IntelligentSupportChatbot() {
   return (
     <>
       {/* Botón flotante mejorado con emoticono */}
-      {/* Usa intelligent-chatbot-floating para posicionamiento automático sin solapamiento */}
+      {/* Posicionamiento controlado por CSS global via data-floating-widget */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
@@ -211,7 +211,7 @@ export default function IntelligentSupportChatbot() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             whileHover={{ scale: 1.05 }}
-            className="fixed bottom-36 md:bottom-24 right-6 z-50 intelligent-chatbot-floating"
+            className="intelligent-chatbot-floating"
             data-floating-widget="support-chatbot"
           >
             <Button

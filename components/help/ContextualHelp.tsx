@@ -137,8 +137,8 @@ export function ContextualHelp({ page = 'dashboard' }: { page?: string }) {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        // Posicionado más arriba para evitar solapamiento, solo visible en desktop
-        className="fixed bottom-56 md:bottom-52 right-6 w-10 h-10 rounded-full shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 z-30 hidden lg:flex lg:right-8 contextual-help-floating"
+        // Posicionamiento controlado por CSS global via data-floating-widget
+        className="contextual-help-floating w-10 h-10 rounded-full shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hidden lg:flex"
         size="icon"
         title="Ayuda contextual"
         data-floating-widget="contextual-help"
@@ -154,8 +154,8 @@ export function ContextualHelp({ page = 'dashboard' }: { page?: string }) {
         initial={{ opacity: 0, x: 100 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: 100 }}
-        // Panel de ayuda posicionado en la derecha, más arriba para no tapar otros elementos
-        className="fixed bottom-60 md:bottom-56 right-6 w-80 max-h-[45vh] z-[60] hidden lg:block lg:right-8 contextual-help-floating"
+        // Posicionamiento controlado por CSS global
+        className="contextual-help-floating w-80 max-h-[45vh] hidden lg:block"
         data-floating-widget="contextual-help"
       >
         <Card className="bg-white shadow-2xl border-2 border-blue-200">
