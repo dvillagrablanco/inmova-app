@@ -8,9 +8,14 @@ import dynamic from 'next/dynamic';
 
 import { Users, Home, ArrowLeft, Save, Upload, FileText, X, Loader2 } from 'lucide-react';
 
-// Cargar el asistente de IA de forma dinámica para evitar problemas de SSR
+// Cargar los asistentes de IA de forma dinámica para evitar problemas de SSR
 const TenantFormAIAssistant = dynamic(
   () => import('@/components/inquilinos/TenantFormAIAssistant'),
+  { ssr: false }
+);
+
+const TenantDocumentAnalyzer = dynamic(
+  () => import('@/components/inquilinos/TenantDocumentAnalyzer'),
   { ssr: false }
 );
 import { Button } from '@/components/ui/button';
@@ -190,6 +195,14 @@ export default function NuevoInquilinoPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Handler para datos extraídos del agente documental IA
+  const handleDataExtracted = (extractedData: Partial<typeof formData>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...extractedData,
+    }));
+  };
+
   if (status === 'loading') {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -244,6 +257,12 @@ export default function NuevoInquilinoPage() {
                 <p className="text-muted-foreground">Registra un nuevo inquilino en el sistema</p>
               </div>
             </div>
+
+            {/* Agente Documental IA */}
+            <TenantDocumentAnalyzer 
+              onDataExtracted={handleDataExtracted}
+              currentFormData={formData}
+            />
 
             {/* Formulario con Wizard para móvil */}
             <form onSubmit={handleSubmit}>

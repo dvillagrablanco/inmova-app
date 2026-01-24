@@ -8,6 +8,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +33,12 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+// AI Components - Dynamic imports for client-side only
+const FormAIAssistant = dynamic(
+  () => import('@/components/ai/FormAIAssistant').then(mod => ({ default: mod.FormAIAssistant })),
+  { ssr: false }
+);
 
 const ROLES = [
   { id: 'administrador', nombre: 'Administrador', description: 'Acceso completo a la empresa' },
@@ -144,19 +151,42 @@ export default function NuevoUsuarioPage() {
     setShowPassword(true);
   };
 
+  // AI Form Assistant handler
+  const handleAISuggestions = (suggestions: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...suggestions,
+    }));
+  };
+
+  // Form fields definition for AI Assistant
+  const formFields = [
+    { name: 'name', label: 'Nombre Completo', type: 'text' as const, required: true },
+    { name: 'email', label: 'Email', type: 'email' as const, required: true },
+    { name: 'role', label: 'Rol', type: 'select' as const, options: ROLES.map(r => ({ value: r.id, label: r.nombre })) },
+  ];
+
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold">Nuevo Usuario</h1>
-          <p className="text-muted-foreground">
-            Crea una nueva cuenta de usuario
-          </p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => router.back()}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">Nuevo Usuario</h1>
+            <p className="text-muted-foreground">
+              Crea una nueva cuenta de usuario
+            </p>
+          </div>
         </div>
+        <FormAIAssistant
+          formContext="usuario"
+          fields={formFields}
+          currentValues={formData}
+          onSuggestionsApply={handleAISuggestions}
+        />
       </div>
 
       <form onSubmit={handleSubmit}>

@@ -67,9 +67,12 @@ export const unitCreateSchema = z.object({
   piso: z.string()
     .max(20, 'El piso no puede exceder 20 caracteres')
     .optional(),
-  tipo: z.enum(['vivienda', 'local', 'garaje', 'trastero'])
+  tipo: z.enum(['vivienda', 'local', 'garaje', 'trastero', 'oficina', 'nave_industrial', 'coworking_space'])
     .optional()
     .default('vivienda'),
+  modoAlquiler: z.enum(['tradicional', 'media_estancia', 'coliving'])
+    .optional()
+    .default('tradicional'),
   estado: z.enum(['disponible', 'ocupada', 'en_mantenimiento'])
     .optional()
     .default('disponible'),
@@ -86,6 +89,9 @@ export const unitCreateSchema = z.object({
   superficie: z.number()
     .positive('La superficie debe ser mayor a 0')
     .max(100000, 'La superficie no puede exceder 100,000 m²')
+    .optional(),
+  descripcion: z.string()
+    .max(2000, 'La descripción no puede exceder 2000 caracteres')
     .optional(),
   rentaMensual: z.number()
     .nonnegative('La renta debe ser cero o mayor')

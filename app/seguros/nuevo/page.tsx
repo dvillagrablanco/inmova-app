@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import dynamic from 'next/dynamic';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import {
   Shield,
@@ -18,6 +19,17 @@ import {
   Euro,
   Sparkles,
 } from 'lucide-react';
+
+// AI Components - Dynamic imports for client-side only
+const InsuranceDocumentAnalyzer = dynamic(
+  () => import('@/components/seguros/InsuranceDocumentAnalyzer').then(mod => ({ default: mod.InsuranceDocumentAnalyzer })),
+  { ssr: false }
+);
+
+const FormAIAssistant = dynamic(
+  () => import('@/components/ai/FormAIAssistant').then(mod => ({ default: mod.FormAIAssistant })),
+  { ssr: false }
+);
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -193,6 +205,35 @@ export default function NuevoSeguroPage() {
     toast.success(`Cotización de ${quote.provider} seleccionada`);
   };
 
+  // AI Document Analysis handler
+  const handleInsuranceDataExtracted = (extractedData: Partial<typeof formData>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...extractedData,
+    }));
+    toast.success('Datos del seguro aplicados desde el documento');
+  };
+
+  // AI Form Assistant handler
+  const handleAISuggestions = (suggestions: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...suggestions,
+    }));
+  };
+
+  // Form fields definition for AI Assistant
+  const formFields = [
+    { name: 'tipo', label: 'Tipo de Seguro', type: 'select' as const, required: true, options: tiposSeguro },
+    { name: 'aseguradora', label: 'Aseguradora', type: 'select' as const, required: true, options: aseguradoras.map(a => ({ value: a, label: a })) },
+    { name: 'numeroPoliza', label: 'Número de Póliza', type: 'text' as const },
+    { name: 'fechaInicio', label: 'Fecha de Inicio', type: 'date' as const },
+    { name: 'fechaVencimiento', label: 'Fecha de Vencimiento', type: 'date' as const },
+    { name: 'prima', label: 'Prima Anual (€)', type: 'currency' as const },
+    { name: 'cobertura', label: 'Cobertura (€)', type: 'currency' as const },
+    { name: 'franquicia', label: 'Franquicia (€)', type: 'currency' as const },
+  ];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -271,11 +312,26 @@ export default function NuevoSeguroPage() {
               </div>
             </div>
 
-            <Button variant="outline" onClick={() => router.back()}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver
-            </Button>
+            <div className="flex items-center gap-2">
+              <FormAIAssistant
+                formContext="seguro"
+                fields={formFields}
+                currentValues={formData}
+                onSuggestionsApply={handleAISuggestions}
+                additionalContext={buildings.length > 0 ? `Edificios: ${buildings.map(b => `${b.nombre} (${b.ciudad})`).join(', ')}` : undefined}
+              />
+              <Button variant="outline" onClick={() => router.back()}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Volver
+              </Button>
+            </div>
           </div>
+
+          {/* AI Document Analyzer for Insurance Documents */}
+          <InsuranceDocumentAnalyzer
+            onDataExtracted={handleInsuranceDataExtracted}
+            currentFormData={formData}
+          />
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>

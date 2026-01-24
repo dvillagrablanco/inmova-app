@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,12 @@ import { toast } from 'sonner';
 import { LoadingState } from '@/components/ui/loading-state';
 import { BackButton } from '@/components/ui/back-button';
 import logger from '@/lib/logger';
+
+// AI Components - Dynamic imports for client-side only
+const FormAIAssistant = dynamic(
+  () => import('@/components/ai/FormAIAssistant').then(mod => ({ default: mod.FormAIAssistant })),
+  { ssr: false }
+);
 
 interface Building {
   id: string;
@@ -129,6 +136,32 @@ export default function NuevoGarajeTrasteroPage() {
     }
   };
 
+  // AI Form Assistant handler
+  const handleAISuggestions = (suggestions: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...suggestions,
+    }));
+  };
+
+  // Form fields definition for AI Assistant
+  const formFields = [
+    { name: 'tipo', label: 'Tipo', type: 'select' as const, options: [
+      { value: 'garaje', label: 'Garaje' },
+      { value: 'trastero', label: 'Trastero' },
+    ]},
+    { name: 'numero', label: 'Número', type: 'text' as const, required: true },
+    { name: 'superficie', label: 'Superficie (m²)', type: 'number' as const, required: true },
+    { name: 'planta', label: 'Planta', type: 'number' as const },
+    { name: 'orientacion', label: 'Orientación', type: 'text' as const },
+    { name: 'rentaMensual', label: 'Renta Mensual (€)', type: 'currency' as const, required: true },
+    { name: 'estado', label: 'Estado', type: 'select' as const, options: [
+      { value: 'disponible', label: 'Disponible' },
+      { value: 'ocupado', label: 'Ocupado' },
+      { value: 'mantenimiento', label: 'En Mantenimiento' },
+    ]},
+  ];
+
   if (status === 'loading') {
     return (
       <div className="flex h-screen items-center justify-center bg-gradient-bg">
@@ -168,13 +201,22 @@ export default function NuevoGarajeTrasteroPage() {
             {/* Header */}
             <div className="space-y-4">
               <BackButton href="/garajes-trasteros" label="Volver a Garajes y Trasteros" />
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight gradient-text">
-                  Nuevo Garaje o Trastero
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                  Registra un nuevo espacio de almacenamiento o estacionamiento
-                </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight gradient-text">
+                    Nuevo Garaje o Trastero
+                  </h1>
+                  <p className="text-muted-foreground mt-1">
+                    Registra un nuevo espacio de almacenamiento o estacionamiento
+                  </p>
+                </div>
+                <FormAIAssistant
+                  formContext="propiedad"
+                  fields={formFields}
+                  currentValues={formData}
+                  onSuggestionsApply={handleAISuggestions}
+                  additionalContext={buildings.length > 0 ? `Edificios disponibles: ${buildings.map(b => b.nombre).join(', ')}. Contexto: Garajes y trasteros - precios típicos más bajos que viviendas.` : undefined}
+                />
               </div>
             </div>
 

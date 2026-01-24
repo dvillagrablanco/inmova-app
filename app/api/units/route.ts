@@ -31,6 +31,7 @@ export async function GET(req: NextRequest) {
     const buildingId = searchParams.get('buildingId');
     const estado = searchParams.get('estado');
     const tipo = searchParams.get('tipo');
+    const modoAlquiler = searchParams.get('modoAlquiler');
     const filterCompanyId = searchParams.get('companyId');
     const usePagination = searchParams.get('paginate') === 'true';
 
@@ -40,12 +41,13 @@ export async function GET(req: NextRequest) {
       : companyId;
 
     // Si hay filtros o se solicita paginación, no usar caché
-    const hasFilters = buildingId || estado || tipo;
+    const hasFilters = buildingId || estado || tipo || modoAlquiler;
 
     if (hasFilters || usePagination) {
       const where: any = whereCompanyId ? { building: { companyId: whereCompanyId } } : {};
       if (buildingId) where.buildingId = buildingId;
       if (estado) where.estado = estado;
+      if (modoAlquiler) where.modoAlquiler = modoAlquiler;
       // Soportar múltiples tipos separados por comas (ej: garaje,trastero)
       if (tipo) {
         const tipos = tipo.split(',').map(t => t.trim());
@@ -67,12 +69,14 @@ export async function GET(req: NextRequest) {
               id: true,
               numero: true,
               tipo: true,
+              modoAlquiler: true,
               estado: true,
               planta: true,
               superficie: true,
               habitaciones: true,
               banos: true,
               rentaMensual: true,
+              descripcion: true,
               createdAt: true,
               building: {
                 select: selectBuildingMinimal,
@@ -113,12 +117,14 @@ export async function GET(req: NextRequest) {
           id: true,
           numero: true,
           tipo: true,
+          modoAlquiler: true,
           estado: true,
           planta: true,
           superficie: true,
           habitaciones: true,
           banos: true,
           rentaMensual: true,
+          descripcion: true,
           createdAt: true,
           building: {
             select: selectBuildingMinimal,
@@ -196,12 +202,14 @@ export async function POST(req: NextRequest) {
         buildingId: validatedData.buildingId,
         numero: validatedData.numero,
         tipo: validatedData.tipo || 'vivienda',
+        modoAlquiler: validatedData.modoAlquiler || 'tradicional',
         estado: validatedData.estado || 'disponible',
         planta: typeof validatedData.piso === 'number' ? validatedData.piso : (typeof validatedData.piso === 'string' ? parseInt(validatedData.piso, 10) || null : null),
         superficie: typeof validatedData.superficie === 'number' ? validatedData.superficie : (typeof validatedData.superficie === 'string' ? parseFloat(validatedData.superficie) || 0 : 0),
         habitaciones: validatedData.habitaciones || null,
         banos: validatedData.banos || null,
         rentaMensual: validatedData.rentaMensual || 0,
+        descripcion: validatedData.descripcion || null,
       },
     });
 

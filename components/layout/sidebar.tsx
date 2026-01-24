@@ -362,6 +362,12 @@ const alquilerResidencialItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Unidades',
+    href: '/unidades',
+    icon: Home,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Inquilinos',
     href: '/inquilinos',
     icon: Users,
@@ -449,6 +455,7 @@ const strNavItems = [
 
 // 2.3 CO-LIVING - SIMPLIFICADO (9→6 items)
 // Fusión: Comunidad Social+Gestión → Comunidad, 2x Reservas → 1
+// NOTA: Propiedades coliving fusionadas con Unidades (usa modoAlquiler='coliving')
 const coLivingNavItems = [
   {
     name: 'Habitaciones',
@@ -457,8 +464,8 @@ const coLivingNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Propiedades',
-    href: '/coliving/propiedades',
+    name: 'Unidades Coliving',
+    href: '/unidades?modoAlquiler=coliving',
     icon: Building2,
     roles: ['super_admin', 'administrador', 'gestor'],
   },

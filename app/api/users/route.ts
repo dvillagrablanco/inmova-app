@@ -35,8 +35,21 @@ export async function GET() {
     }
 
     // Si es super_admin, puede ver usuarios de todas las empresas
-    // Si es administrador, solo de su empresa
-    const whereClause = user.role === 'super_admin' ? {} : { companyId: user.companyId };
+    // Si es administrador, SOLO de su empresa (debe tener companyId)
+    let whereClause: any = {};
+    
+    if (user.role === 'super_admin') {
+      // Super admin ve todos
+      whereClause = {};
+    } else if (user.companyId) {
+      // Administrador con empresa: solo usuarios de su empresa
+      whereClause = { companyId: user.companyId };
+    } else {
+      // Administrador sin empresa: solo puede verse a sí mismo
+      // Esto previene que vea usuarios de otras empresas
+      whereClause = { id: user.id };
+      logger.warn(`[Users API] Administrador sin companyId intentó listar usuarios: ${user.id}`);
+    }
 
     const users = await prisma.user.findMany({
       where: whereClause,

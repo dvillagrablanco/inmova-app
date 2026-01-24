@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import dynamic from 'next/dynamic';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 import { Wrench, Home, ArrowLeft, Save } from 'lucide-react';
@@ -28,6 +29,17 @@ import {
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
+
+// AI Components - Dynamic imports for client-side only
+const MaintenanceDocumentAnalyzer = dynamic(
+  () => import('@/components/mantenimiento/MaintenanceDocumentAnalyzer').then(mod => ({ default: mod.MaintenanceDocumentAnalyzer })),
+  { ssr: false }
+);
+
+const FormAIAssistant = dynamic(
+  () => import('@/components/ai/FormAIAssistant').then(mod => ({ default: mod.FormAIAssistant })),
+  { ssr: false }
+);
 
 interface Unit {
   id: string;
@@ -103,6 +115,44 @@ export default function NuevaMantenimientoPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // AI Document Analysis handler
+  const handleMaintenanceDataExtracted = (extractedData: Partial<typeof formData>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...extractedData,
+    }));
+    toast.success('Datos de incidencia aplicados desde la imagen');
+  };
+
+  // AI Form Assistant handler
+  const handleAISuggestions = (suggestions: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...suggestions,
+    }));
+  };
+
+  // Form fields definition for AI Assistant
+  const formFields = [
+    { name: 'titulo', label: 'Título de la Solicitud', type: 'text' as const, required: true },
+    { name: 'descripcion', label: 'Descripción Detallada', type: 'textarea' as const, required: true },
+    { name: 'tipo', label: 'Tipo de Mantenimiento', type: 'select' as const, options: [
+      { value: 'general', label: 'General' },
+      { value: 'fontaneria', label: 'Fontanería' },
+      { value: 'electricidad', label: 'Electricidad' },
+      { value: 'pintura', label: 'Pintura' },
+      { value: 'carpinteria', label: 'Carpintería' },
+      { value: 'electrodomesticos', label: 'Electrodomésticos' },
+      { value: 'limpieza', label: 'Limpieza' },
+    ]},
+    { name: 'prioridad', label: 'Prioridad', type: 'select' as const, options: [
+      { value: 'baja', label: 'Baja' },
+      { value: 'media', label: 'Media' },
+      { value: 'alta', label: 'Alta' },
+      { value: 'urgente', label: 'Urgente' },
+    ]},
+  ];
+
   if (status === 'loading') {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -150,12 +200,27 @@ export default function NuevaMantenimientoPage() {
             </div>
 
             {/* Header Section */}
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">
-                Nueva Solicitud de Mantenimiento
-              </h1>
-              <p className="text-muted-foreground">Registra una nueva solicitud de mantenimiento</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">
+                  Nueva Solicitud de Mantenimiento
+                </h1>
+                <p className="text-muted-foreground">Registra una nueva solicitud de mantenimiento</p>
+              </div>
+              <FormAIAssistant
+                formContext="mantenimiento"
+                fields={formFields}
+                currentValues={formData}
+                onSuggestionsApply={handleAISuggestions}
+                additionalContext={units.length > 0 ? `Unidades disponibles: ${units.map(u => `${u.building.nombre} - ${u.numero}`).join(', ')}` : undefined}
+              />
             </div>
+
+            {/* AI Document Analyzer for Maintenance Photos */}
+            <MaintenanceDocumentAnalyzer
+              onDataExtracted={handleMaintenanceDataExtracted}
+              currentFormData={formData}
+            />
 
             {/* Formulario */}
             <Card>

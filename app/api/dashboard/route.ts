@@ -259,7 +259,8 @@ export async function GET() {
     return NextResponse.json({
       kpis: {
         ingresosTotalesMensuales,
-        numeroPropiedades: totalBuildings,
+        numeroEdificios: totalBuildings,
+        numeroUnidades: totalUnits,
         tasaOcupacion: Number(tasaOcupacion.toFixed(1)),
         tasaMorosidad: Number(tasaMorosidad.toFixed(1)),
         ingresosNetos,

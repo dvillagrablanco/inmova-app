@@ -28,9 +28,11 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 
 interface DashboardStats {
-  totalPropiedades: number;
-  propiedadesOcupadas: number;
-  propiedadesDisponibles: number;
+  totalEdificios: number;
+  totalUnidades: number;
+  unidadesOcupadas: number;
+  unidadesDisponibles: number;
+  unidadesMantenimiento: number;
   tasaOcupacion: number;
   ingresosMensuales: number;
   ingresosProyectados: number;
@@ -48,9 +50,11 @@ interface DashboardStats {
 
 export default function TraditionalRentalDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
-    totalPropiedades: 0,
-    propiedadesOcupadas: 0,
-    propiedadesDisponibles: 0,
+    totalEdificios: 0,
+    totalUnidades: 0,
+    unidadesOcupadas: 0,
+    unidadesDisponibles: 0,
+    unidadesMantenimiento: 0,
     tasaOcupacion: 0,
     ingresosMensuales: 0,
     ingresosProyectados: 0,
@@ -60,39 +64,54 @@ export default function TraditionalRentalDashboard() {
     contratosProximosVencer: 0,
     inquilinosActivos: 0,
     rentaMediaMensual: 0,
-    duracionMediaContrato: 0,
-    rotacionAnual: 0,
+    duracionMediaContrato: 12,
+    rotacionAnual: 15,
     morosidadPorcentaje: 0,
-    rentabilidadMedia: 0,
+    rentabilidadMedia: 5.2,
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchStats() {
       try {
-        const [propertiesRes, contractsRes, paymentsRes, tenantsRes] = await Promise.all([
-          fetch('/api/properties').then((r) => (r.ok ? r.json() : [])),
+        // Obtener datos de edificios, unidades, contratos, pagos e inquilinos
+        const [buildingsRes, unitsRes, contractsRes, paymentsRes, tenantsRes] = await Promise.all([
+          fetch('/api/buildings').then((r) => (r.ok ? r.json() : [])),
+          fetch('/api/units').then((r) => (r.ok ? r.json() : [])),
           fetch('/api/contracts').then((r) => (r.ok ? r.json() : [])),
           fetch('/api/payments').then((r) => (r.ok ? r.json() : [])),
           fetch('/api/tenants').then((r) => (r.ok ? r.json() : [])),
         ]);
 
-        const properties = Array.isArray(propertiesRes) ? propertiesRes : propertiesRes.data || [];
+        const buildings = Array.isArray(buildingsRes) ? buildingsRes : buildingsRes.data || [];
+        const units = Array.isArray(unitsRes) ? unitsRes : unitsRes.data || [];
         const contracts = Array.isArray(contractsRes) ? contractsRes : contractsRes.data || [];
         const payments = Array.isArray(paymentsRes) ? paymentsRes : paymentsRes.data || [];
         const tenants = Array.isArray(tenantsRes) ? tenantsRes : tenantsRes.data || [];
 
-        // Calcular KPIs
+        // Contar unidades por estado
+        const unidadesOcupadas = units.filter((u: any) => 
+          u.estado?.toLowerCase() === 'ocupada' || u.estado?.toLowerCase() === 'ocupado'
+        ).length;
+        const unidadesDisponibles = units.filter((u: any) => 
+          u.estado?.toLowerCase() === 'disponible'
+        ).length;
+        const unidadesMantenimiento = units.filter((u: any) => 
+          u.estado?.toLowerCase() === 'en_mantenimiento' || u.estado?.toLowerCase() === 'mantenimiento'
+        ).length;
+
+        const totalUnidades = units.length || 1;
+        const tasaOcupacion = (unidadesOcupadas / totalUnidades) * 100;
+
+        // Calcular ingresos de unidades ocupadas
+        const ingresosMensuales = units
+          .filter((u: any) => u.estado?.toLowerCase() === 'ocupada' || u.estado?.toLowerCase() === 'ocupado')
+          .reduce((acc: number, u: any) => acc + (Number(u.rentaMensual) || 0), 0);
+
+        // Contratos activos
         const activeContracts = contracts.filter((c: any) => c.estado?.toLowerCase() === 'activo');
-        const occupiedProperties = activeContracts.length;
-        const totalProperties = properties.length || 1;
-        const occupancyRate = (occupiedProperties / totalProperties) * 100;
 
-        const monthlyIncome = activeContracts.reduce(
-          (acc: number, c: any) => acc + (Number(c.rentaMensual) || 0),
-          0
-        );
-
+        // Pagos pendientes
         const pendingPayments = payments.filter((p: any) => p.estado === 'pendiente');
         const overduePendingAmount = pendingPayments.reduce(
           (acc: number, p: any) => acc + (Number(p.monto) || 0),
@@ -108,33 +127,34 @@ export default function TraditionalRentalDashboard() {
         });
 
         // Renta media
-        const avgRent = activeContracts.length > 0 ? monthlyIncome / activeContracts.length : 0;
+        const avgRent = unidadesOcupadas > 0 ? ingresosMensuales / unidadesOcupadas : 0;
 
-        // Morosidad (pagos pendientes vs total esperado)
+        // Morosidad
         const expectedPayments = payments.filter((p: any) => new Date(p.fechaVencimiento) <= now);
         const paidPayments = expectedPayments.filter((p: any) => p.estado === 'pagado');
-        const morosidadRate =
-          expectedPayments.length > 0
-            ? ((expectedPayments.length - paidPayments.length) / expectedPayments.length) * 100
-            : 0;
+        const morosidadRate = expectedPayments.length > 0
+          ? ((expectedPayments.length - paidPayments.length) / expectedPayments.length) * 100
+          : 0;
 
         setStats({
-          totalPropiedades: totalProperties,
-          propiedadesOcupadas: occupiedProperties,
-          propiedadesDisponibles: totalProperties - occupiedProperties,
-          tasaOcupacion: occupancyRate,
-          ingresosMensuales: monthlyIncome,
-          ingresosProyectados: monthlyIncome * 12,
+          totalEdificios: buildings.length,
+          totalUnidades: units.length,
+          unidadesOcupadas,
+          unidadesDisponibles,
+          unidadesMantenimiento,
+          tasaOcupacion,
+          ingresosMensuales,
+          ingresosProyectados: ingresosMensuales * 12,
           impagos: pendingPayments.length,
           importeImpagos: overduePendingAmount,
           contratosActivos: activeContracts.length,
           contratosProximosVencer: expiringContracts.length,
           inquilinosActivos: tenants.filter((t: any) => t.activo !== false).length,
           rentaMediaMensual: avgRent,
-          duracionMediaContrato: 12, // Aproximado
-          rotacionAnual: 15, // Aproximado (%)
+          duracionMediaContrato: 12,
+          rotacionAnual: 15,
           morosidadPorcentaje: morosidadRate,
-          rentabilidadMedia: 5.2, // Aproximado (%)
+          rentabilidadMedia: 5.2,
         });
       } catch (error) {
         console.error('Error fetching stats:', error);
@@ -152,14 +172,24 @@ export default function TraditionalRentalDashboard() {
   // KPIs principales para alquiler larga/media estancia
   const kpis = [
     {
+      title: 'Edificios',
+      value: stats.totalEdificios.toString(),
+      subValue: `${stats.totalUnidades} unidades totales`,
+      icon: Building2,
+      color: 'text-indigo-600',
+      bgColor: 'bg-indigo-50',
+      trend: 'neutral',
+      trendValue: '',
+    },
+    {
       title: 'Tasa de Ocupación',
       value: `${stats.tasaOcupacion.toFixed(1)}%`,
-      subValue: `${stats.propiedadesOcupadas}/${stats.totalPropiedades} propiedades`,
+      subValue: `${stats.unidadesOcupadas}/${stats.totalUnidades} unidades ocupadas`,
       icon: Home,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
       trend: stats.tasaOcupacion > 80 ? 'up' : 'down',
-      trendValue: stats.tasaOcupacion > 80 ? '+5%' : '-3%',
+      trendValue: stats.tasaOcupacion > 80 ? 'Excelente' : 'Mejorable',
     },
     {
       title: 'Ingresos Mensuales',
@@ -169,7 +199,7 @@ export default function TraditionalRentalDashboard() {
       color: 'text-green-600',
       bgColor: 'bg-green-50',
       trend: 'up',
-      trendValue: '+8.2%',
+      trendValue: '',
     },
     {
       title: 'Contratos Activos',
@@ -182,16 +212,6 @@ export default function TraditionalRentalDashboard() {
       trendValue: '',
     },
     {
-      title: 'Renta Media',
-      value: formatCurrency(stats.rentaMediaMensual),
-      subValue: 'Por propiedad ocupada',
-      icon: TrendingUp,
-      color: 'text-indigo-600',
-      bgColor: 'bg-indigo-50',
-      trend: 'up',
-      trendValue: '+2.3%',
-    },
-    {
       title: 'Morosidad',
       value: `${stats.morosidadPorcentaje.toFixed(1)}%`,
       subValue:
@@ -202,26 +222,26 @@ export default function TraditionalRentalDashboard() {
       color: stats.morosidadPorcentaje > 5 ? 'text-red-600' : 'text-green-600',
       bgColor: stats.morosidadPorcentaje > 5 ? 'bg-red-50' : 'bg-green-50',
       trend: stats.morosidadPorcentaje > 5 ? 'up' : 'down',
-      trendValue: stats.morosidadPorcentaje > 5 ? '+1.2%' : '-0.5%',
+      trendValue: stats.morosidadPorcentaje > 5 ? 'Alto' : 'Bajo',
     },
     {
-      title: 'Inquilinos Activos',
+      title: 'Inquilinos',
       value: stats.inquilinosActivos.toString(),
       subValue: 'Total registrados',
       icon: Users,
       color: 'text-cyan-600',
       bgColor: 'bg-cyan-50',
-      trend: 'up',
-      trendValue: '+3',
+      trend: 'neutral',
+      trendValue: '',
     },
   ];
 
   // Acciones rápidas
   const quickActions = [
-    { label: 'Nueva Propiedad', href: '/propiedades/nuevo', icon: Building2 },
+    { label: 'Nuevo Edificio', href: '/edificios/nuevo', icon: Building2 },
+    { label: 'Nueva Unidad', href: '/unidades/nuevo', icon: Home },
     { label: 'Nuevo Inquilino', href: '/inquilinos/nuevo', icon: Users },
     { label: 'Nuevo Contrato', href: '/contratos/nuevo', icon: FileText },
-    { label: 'Registrar Pago', href: '/pagos', icon: Euro },
   ];
 
   return (
@@ -300,27 +320,31 @@ export default function TraditionalRentalDashboard() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Home className="h-5 w-5 text-blue-600" />
-                Estado de Ocupación
+                Estado de Unidades
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">Propiedades ocupadas</span>
+                  <span className="text-sm font-medium">Unidades ocupadas</span>
                   <span className="text-sm text-gray-500">
-                    {stats.propiedadesOcupadas}/{stats.totalPropiedades}
+                    {stats.unidadesOcupadas}/{stats.totalUnidades}
                   </span>
                 </div>
                 <Progress value={stats.tasaOcupacion} className="h-3" />
               </div>
-              <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="grid grid-cols-3 gap-3 pt-2">
+                <div className="p-3 bg-blue-50 rounded-lg">
+                  <p className="text-xs text-blue-600 font-medium">Ocupadas</p>
+                  <p className="text-xl font-bold text-blue-700">{stats.unidadesOcupadas}</p>
+                </div>
                 <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="text-xs text-green-600 font-medium">Ocupadas</p>
-                  <p className="text-xl font-bold text-green-700">{stats.propiedadesOcupadas}</p>
+                  <p className="text-xs text-green-600 font-medium">Disponibles</p>
+                  <p className="text-xl font-bold text-green-700">{stats.unidadesDisponibles}</p>
                 </div>
                 <div className="p-3 bg-amber-50 rounded-lg">
-                  <p className="text-xs text-amber-600 font-medium">Disponibles</p>
-                  <p className="text-xl font-bold text-amber-700">{stats.propiedadesDisponibles}</p>
+                  <p className="text-xs text-amber-600 font-medium">Mantenimiento</p>
+                  <p className="text-xl font-bold text-amber-700">{stats.unidadesMantenimiento}</p>
                 </div>
               </div>
             </CardContent>
@@ -415,16 +439,16 @@ export default function TraditionalRentalDashboard() {
                   </Link>
                 </div>
               )}
-              {stats.propiedadesDisponibles > 0 && (
+              {stats.unidadesDisponibles > 0 && (
                 <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
                   <Building2 className="h-4 w-4 text-blue-600 flex-shrink-0" />
                   <div className="flex-1">
                     <p className="text-sm font-medium text-blue-900">
-                      {stats.propiedadesDisponibles} propiedades disponibles
+                      {stats.unidadesDisponibles} unidades disponibles
                     </p>
                     <p className="text-xs text-blue-600">Listas para nuevos inquilinos</p>
                   </div>
-                  <Link href="/propiedades?filter=available">
+                  <Link href="/unidades?filter=disponible">
                     <Button size="sm" variant="outline">
                       Ver
                     </Button>
