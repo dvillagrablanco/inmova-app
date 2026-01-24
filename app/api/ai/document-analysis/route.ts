@@ -43,11 +43,165 @@ async function fileToBase64(file: File): Promise<string> {
 }
 
 /**
+ * Genera el prompt de Vision según el contexto
+ */
+function getVisionPromptForContext(
+  context: string,
+  companyInfo: { cif: string | null; nombre: string; direccion: string | null }
+): string {
+  const basePrompt = `Analiza esta imagen de documento y extrae toda la información visible.
+
+CONTEXTO:
+- Empresa del usuario: ${companyInfo.nombre}
+- CIF de la empresa: ${companyInfo.cif || 'No proporcionado'}
+- Contexto de uso: ${context}
+
+INSTRUCCIONES:
+1. Identifica el tipo de documento
+2. Extrae TODOS los datos visibles de forma estructurada
+3. Usa el formato de campo más apropiado (fechas en YYYY-MM-DD, números sin formato)
+
+`;
+
+  // Instrucciones específicas según contexto
+  const contextInstructions: Record<string, string> = {
+    inquilinos: `PARA DOCUMENTOS DE INQUILINOS, busca especialmente:
+- Documentos de identidad (DNI, NIE, Pasaporte): nombre completo, número, fecha nacimiento, nacionalidad, sexo, dirección
+- Nóminas: nombre, empresa, salario bruto/neto, fecha
+- Contratos laborales: nombre, empresa, cargo, salario, fecha inicio
+- Certificados de empadronamiento: nombre, dirección, fecha
+- Referencias bancarias: nombre, banco, número cuenta (parcial)`,
+
+    contratos: `PARA DOCUMENTOS DE CONTRATOS, busca especialmente:
+- Contratos de arrendamiento: dirección inmueble, fecha inicio/fin, renta mensual, fianza, partes (arrendador/arrendatario con DNI)
+- Anexos de contrato: modificaciones, cláusulas adicionales
+- Inventarios: lista de elementos, estado
+- Actas de entrega de llaves: fecha, firmas`,
+
+    propiedades: `PARA DOCUMENTOS DE PROPIEDADES, busca especialmente:
+- Escrituras: dirección, referencia catastral, superficie, propietario, fecha
+- Notas simples del registro: finca, titular, cargas
+- Certificados energéticos: calificación, consumo, emisiones
+- IBI/Catastro: referencia catastral, valor catastral, dirección
+- Planos: superficie, distribución, habitaciones`,
+
+    seguros: `PARA DOCUMENTOS DE SEGUROS, busca especialmente:
+- Pólizas: número póliza, aseguradora, tomador, dirección asegurada, coberturas, prima, fecha vigencia
+- Recibos: número recibo, importe, periodo
+- Partes de siniestro: fecha siniestro, descripción, daños`,
+
+    facturas: `PARA FACTURAS Y DOCUMENTOS FINANCIEROS, busca especialmente:
+- Facturas: número factura, emisor (nombre, CIF), receptor, fecha, concepto, base imponible, IVA, total
+- Recibos de suministros: compañía, dirección, periodo, consumo, importe
+- Justificantes de pago: fecha, importe, concepto, ordenante, beneficiario`,
+
+    garantias: `PARA DOCUMENTOS DE GARANTÍAS, busca especialmente:
+- Avales bancarios: banco, importe, beneficiario, vigencia
+- Depósitos: importe, fecha, organismo
+- Seguros de impago: aseguradora, cobertura, prima`,
+
+    incidencias: `PARA DOCUMENTOS DE INCIDENCIAS/MANTENIMIENTO, busca especialmente:
+- Presupuestos: proveedor, concepto, importe, fecha
+- Facturas de reparación: descripción trabajo, materiales, mano de obra, total
+- Informes técnicos: fecha, descripción, conclusiones`,
+
+    general: `TIPOS DE DOCUMENTOS A IDENTIFICAR:
+- Documentos de identidad (DNI, NIE, Pasaporte)
+- Contratos (arrendamiento, compraventa, laboral)
+- Documentos de propiedad (escrituras, notas simples)
+- Documentos financieros (facturas, recibos, nóminas)
+- Certificados (energético, empadronamiento)
+- Seguros (pólizas, recibos)
+- Documentos técnicos (informes, presupuestos)`,
+  };
+
+  const specificInstructions = contextInstructions[context] || contextInstructions.general;
+
+  return basePrompt + specificInstructions + `
+
+CATEGORÍAS DE DOCUMENTO:
+- dni_nie: Documentos de identidad (DNI, NIE, Pasaporte)
+- contrato_alquiler: Contratos de arrendamiento
+- contrato_compraventa: Contratos de compraventa
+- escritura_propiedad: Escrituras y documentos notariales
+- factura: Facturas y recibos
+- nomina: Nóminas y documentos laborales
+- seguro: Pólizas y documentos de seguros
+- certificado_energetico: Certificados de eficiencia energética
+- nota_simple: Notas simples del registro
+- catastro: Documentos catastrales
+- presupuesto: Presupuestos
+- otro: Otros documentos
+
+RESPONDE EN FORMATO JSON:
+{
+  "documentType": "descripción del tipo de documento",
+  "classification": {
+    "category": "categoria_del_documento",
+    "confidence": 0.0-1.0,
+    "specificType": "tipo específico detallado"
+  },
+  "extractedFields": [
+    {
+      "fieldName": "nombre_del_campo_en_snake_case",
+      "fieldValue": "valor extraído",
+      "confidence": 0.0-1.0,
+      "dataType": "string|number|date|currency|percentage"
+    }
+  ],
+  "summary": "resumen breve del documento y su contenido principal",
+  "warnings": ["advertencias si hay datos ilegibles, incompletos o sospechosos"],
+  "suggestedEntity": "Tenant|Property|Contract|Insurance|Provider|Invoice"
+}`;
+}
+
+/**
+ * Determina la entidad objetivo según la categoría del documento
+ */
+function getTargetEntityFromCategory(category: string): string {
+  const entityMapping: Record<string, string> = {
+    dni_nie: 'Tenant',
+    contrato_alquiler: 'Contract',
+    contrato_compraventa: 'Contract',
+    escritura_propiedad: 'Property',
+    factura: 'Invoice',
+    nomina: 'Tenant',
+    seguro: 'Insurance',
+    certificado_energetico: 'Property',
+    nota_simple: 'Property',
+    catastro: 'Property',
+    presupuesto: 'Provider',
+  };
+  return entityMapping[category] || 'Document';
+}
+
+/**
+ * Determina el dataType según la categoría del documento
+ */
+function getDataTypeFromCategory(category: string): string {
+  const dataTypeMapping: Record<string, string> = {
+    dni_nie: 'tenant_info',
+    contrato_alquiler: 'contract_info',
+    contrato_compraventa: 'contract_info',
+    escritura_propiedad: 'property_info',
+    factura: 'financial_info',
+    nomina: 'tenant_info',
+    seguro: 'insurance_info',
+    certificado_energetico: 'energy_info',
+    nota_simple: 'property_info',
+    catastro: 'property_info',
+    presupuesto: 'provider_info',
+  };
+  return dataTypeMapping[category] || 'property_info';
+}
+
+/**
  * Analiza una imagen usando Claude Vision
  */
 async function analyzeImageWithVision(
   file: File,
-  companyInfo: { cif: string | null; nombre: string; direccion: string | null }
+  companyInfo: { cif: string | null; nombre: string; direccion: string | null },
+  context: string = 'general'
 ): Promise<any> {
   const Anthropic = (await import('@anthropic-ai/sdk')).default;
   
@@ -64,52 +218,20 @@ async function analyzeImageWithVision(
   else if (file.type === 'image/gif') mediaType = 'image/gif';
   else if (file.type === 'image/webp') mediaType = 'image/webp';
   
-  const prompt = `Analiza esta imagen de documento y extrae toda la información visible.
-
-CONTEXTO:
-- Empresa del usuario: ${companyInfo.nombre}
-- CIF de la empresa: ${companyInfo.cif || 'No proporcionado'}
-
-INSTRUCCIONES:
-1. Identifica el tipo de documento (DNI, NIE, pasaporte, contrato, factura, etc.)
-2. Extrae TODOS los datos visibles de forma estructurada
-3. Si es un documento de identidad (DNI/NIE), extrae:
-   - Nombre completo
-   - Número de documento (DNI/NIE)
-   - Fecha de nacimiento
-   - Fecha de caducidad
-   - Nacionalidad
-   - Sexo
-   - Dirección (si aparece)
-
-RESPONDE EN FORMATO JSON:
-{
-  "documentType": "tipo de documento",
-  "classification": {
-    "category": "dni_nie|pasaporte|contrato_alquiler|factura|otro",
-    "confidence": 0.0-1.0,
-    "specificType": "descripción específica"
-  },
-  "extractedFields": [
-    {
-      "fieldName": "nombre del campo (ej: nombre_completo, dni, fecha_nacimiento)",
-      "fieldValue": "valor extraído",
-      "confidence": 0.0-1.0
-    }
-  ],
-  "summary": "resumen breve del documento",
-  "warnings": ["lista de advertencias si hay datos ilegibles o incompletos"]
-}`;
+  const prompt = getVisionPromptForContext(context, companyInfo);
 
   logger.info('[Vision Analysis] Analizando imagen con Claude Vision', {
     filename: file.name,
     fileType: file.type,
     fileSize: file.size,
+    context,
   });
 
+  const startTime = Date.now();
+  
   const response = await client.messages.create({
-    model: 'claude-3-5-sonnet-20241022', // Modelo con mejor visión
-    max_tokens: 2048,
+    model: 'claude-3-5-sonnet-20241022',
+    max_tokens: 4096,
     messages: [
       {
         role: 'user',
@@ -131,53 +253,73 @@ RESPONDE EN FORMATO JSON:
     ],
   });
 
+  const processingTimeMs = Date.now() - startTime;
   const content = response.content[0];
+  
   if (content.type === 'text') {
     // Extraer JSON de la respuesta
     const jsonMatch = content.text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const result = JSON.parse(jsonMatch[0]);
+      const category = result.classification?.category || 'otro';
+      const targetEntity = result.suggestedEntity || getTargetEntityFromCategory(category);
+      const dataType = getDataTypeFromCategory(category);
       
       logger.info('[Vision Analysis] Análisis completado', {
         documentType: result.documentType,
+        category,
         fieldsExtracted: result.extractedFields?.length || 0,
+        processingTimeMs,
       });
       
-      // Mapear a la estructura esperada
+      // Detectar si tiene datos sensibles
+      const sensitiveCategories = ['dni_nie', 'nomina', 'contrato_alquiler'];
+      const hasSensitive = sensitiveCategories.includes(category);
+      const sensitiveTypes: string[] = [];
+      if (category === 'dni_nie') sensitiveTypes.push('documento_identidad');
+      if (category === 'nomina') sensitiveTypes.push('datos_financieros', 'datos_laborales');
+      if (category === 'contrato_alquiler') sensitiveTypes.push('datos_personales', 'datos_financieros');
+      
+      // Mapear campos extraídos
+      const extractedFields = (result.extractedFields || []).map((f: any) => ({
+        fieldName: f.fieldName,
+        fieldValue: f.fieldValue,
+        dataType: f.dataType || dataType,
+        confidence: f.confidence || 0.8,
+        targetEntity,
+        targetField: mapFieldNameToTarget(f.fieldName, category),
+      }));
+      
+      // Generar acciones sugeridas basadas en los campos extraídos
+      const suggestedActions = generateSuggestedActions(extractedFields, category, targetEntity);
+      
       return {
         classification: {
-          category: result.classification?.category || 'otro',
-          confidence: result.classification?.confidence || 0.7,
+          category,
+          confidence: result.classification?.confidence || 0.85,
           specificType: result.classification?.specificType || result.documentType || 'Documento',
-          reasoning: 'Análisis mediante Claude Vision',
+          reasoning: `Análisis mediante Claude Vision (contexto: ${context})`,
         },
         ownershipValidation: {
           isOwned: true,
-          detectedCIF: null,
-          detectedCompanyName: null,
+          detectedCIF: extractCIF(result.extractedFields),
+          detectedCompanyName: extractCompanyName(result.extractedFields),
           matchesCIF: false,
           matchesName: false,
-          confidence: 0.5,
-          notes: 'Documento de identidad personal',
+          confidence: 0.7,
+          notes: `Documento analizado en contexto: ${context}`,
         },
-        extractedFields: (result.extractedFields || []).map((f: any) => ({
-          fieldName: f.fieldName,
-          fieldValue: f.fieldValue,
-          dataType: 'tenant_info',
-          confidence: f.confidence || 0.8,
-          targetEntity: 'Tenant',
-          targetField: mapFieldNameToTarget(f.fieldName),
-        })),
+        extractedFields,
         summary: result.summary || 'Documento analizado con visión artificial',
         warnings: result.warnings || [],
-        suggestedActions: [],
+        suggestedActions,
         sensitiveData: {
-          hasSensitive: true,
-          types: ['documento_identidad'],
+          hasSensitive,
+          types: sensitiveTypes,
         },
         processingMetadata: {
           tokensUsed: response.usage?.output_tokens || 0,
-          processingTimeMs: 0,
+          processingTimeMs,
           modelUsed: 'claude-3-5-sonnet-vision',
         },
       };
@@ -188,25 +330,250 @@ RESPONDE EN FORMATO JSON:
 }
 
 /**
- * Mapea nombres de campo extraídos a campos del sistema
+ * Extrae CIF de los campos si existe
  */
-function mapFieldNameToTarget(fieldName: string): string {
-  const mapping: Record<string, string> = {
+function extractCIF(fields: any[]): string | null {
+  if (!fields) return null;
+  const cifField = fields.find((f: any) => 
+    f.fieldName?.toLowerCase().includes('cif') || 
+    f.fieldName?.toLowerCase().includes('nif_empresa')
+  );
+  return cifField?.fieldValue || null;
+}
+
+/**
+ * Extrae nombre de empresa de los campos si existe
+ */
+function extractCompanyName(fields: any[]): string | null {
+  if (!fields) return null;
+  const nameField = fields.find((f: any) => 
+    f.fieldName?.toLowerCase().includes('empresa') || 
+    f.fieldName?.toLowerCase().includes('razon_social') ||
+    f.fieldName?.toLowerCase().includes('emisor')
+  );
+  return nameField?.fieldValue || null;
+}
+
+/**
+ * Genera acciones sugeridas basadas en los campos extraídos
+ */
+function generateSuggestedActions(
+  fields: any[],
+  category: string,
+  targetEntity: string
+): Array<{
+  action: 'create' | 'update' | 'link';
+  entity: string;
+  description: string;
+  data: Record<string, any>;
+  confidence: number;
+  requiresReview: boolean;
+}> {
+  const actions: any[] = [];
+  
+  if (fields.length === 0) return actions;
+  
+  // Construir datos del objeto
+  const data: Record<string, any> = {};
+  fields.forEach(f => {
+    if (f.targetField && f.fieldValue) {
+      data[f.targetField] = f.fieldValue;
+    }
+  });
+  
+  if (Object.keys(data).length > 0) {
+    actions.push({
+      action: 'create',
+      entity: targetEntity,
+      description: `Crear/actualizar ${targetEntity} con datos extraídos del documento`,
+      data,
+      confidence: 0.8,
+      requiresReview: true,
+    });
+  }
+  
+  return actions;
+}
+
+/**
+ * Mapea nombres de campo extraídos a campos del sistema según categoría
+ */
+function mapFieldNameToTarget(fieldName: string, category: string = 'general'): string {
+  // Mapeo base para todos los documentos
+  const baseMapping: Record<string, string> = {
+    // Datos personales
     'nombre_completo': 'nombreCompleto',
     'nombre': 'nombreCompleto',
+    'apellidos': 'apellidos',
+    'primer_apellido': 'primerApellido',
+    'segundo_apellido': 'segundoApellido',
     'dni': 'documentoIdentidad',
     'nie': 'documentoIdentidad',
     'numero_documento': 'documentoIdentidad',
+    'pasaporte': 'documentoIdentidad',
     'fecha_nacimiento': 'fechaNacimiento',
     'nacionalidad': 'nacionalidad',
     'email': 'email',
+    'correo': 'email',
     'telefono': 'telefono',
+    'movil': 'telefono',
     'direccion': 'direccion',
+    'domicilio': 'direccion',
     'sexo': 'sexo',
+    'genero': 'sexo',
+    'estado_civil': 'estadoCivil',
+    'profesion': 'profesion',
+    'ocupacion': 'profesion',
+    
+    // Datos financieros
+    'salario': 'ingresosMensuales',
+    'salario_bruto': 'salarioBruto',
+    'salario_neto': 'salarioNeto',
+    'ingresos': 'ingresosMensuales',
+    'ingresos_mensuales': 'ingresosMensuales',
+    'iban': 'iban',
+    'cuenta_bancaria': 'cuentaBancaria',
+    'banco': 'banco',
+    
+    // Datos de empresa
+    'cif': 'cif',
+    'nif_empresa': 'cif',
+    'razon_social': 'razonSocial',
+    'nombre_empresa': 'nombreEmpresa',
+    'empresa': 'empresa',
+  };
+  
+  // Mapeos específicos por categoría
+  const categoryMappings: Record<string, Record<string, string>> = {
+    contrato_alquiler: {
+      'direccion_inmueble': 'direccionInmueble',
+      'direccion_vivienda': 'direccionInmueble',
+      'fecha_inicio': 'fechaInicio',
+      'fecha_fin': 'fechaFin',
+      'fecha_vencimiento': 'fechaFin',
+      'renta': 'precioAlquiler',
+      'renta_mensual': 'precioAlquiler',
+      'precio_alquiler': 'precioAlquiler',
+      'fianza': 'fianza',
+      'deposito': 'deposito',
+      'arrendador': 'arrendador',
+      'propietario': 'propietario',
+      'arrendatario': 'arrendatario',
+      'inquilino': 'inquilino',
+      'dni_arrendador': 'dniArrendador',
+      'dni_arrendatario': 'dniArrendatario',
+      'duracion': 'duracion',
+      'prorroga': 'prorroga',
+    },
+    escritura_propiedad: {
+      'referencia_catastral': 'referenciaCatastral',
+      'superficie': 'superficie',
+      'metros_cuadrados': 'superficie',
+      'm2': 'superficie',
+      'superficie_construida': 'superficieConstruida',
+      'superficie_util': 'superficieUtil',
+      'fecha_escritura': 'fechaEscritura',
+      'notario': 'notario',
+      'protocolo': 'numeroProtocolo',
+      'precio_compra': 'precioCompra',
+      'valor_escritura': 'valorEscritura',
+    },
+    nota_simple: {
+      'finca': 'numeroFinca',
+      'numero_finca': 'numeroFinca',
+      'titular': 'titular',
+      'propietario': 'propietario',
+      'cargas': 'cargas',
+      'hipoteca': 'hipoteca',
+    },
+    certificado_energetico: {
+      'calificacion': 'calificacionEnergetica',
+      'calificacion_energetica': 'calificacionEnergetica',
+      'consumo': 'consumoEnergetico',
+      'emisiones': 'emisiones',
+      'fecha_emision': 'fechaEmision',
+      'fecha_validez': 'fechaValidez',
+    },
+    factura: {
+      'numero_factura': 'numeroFactura',
+      'fecha_factura': 'fechaFactura',
+      'fecha_emision': 'fechaEmision',
+      'emisor': 'emisor',
+      'receptor': 'receptor',
+      'concepto': 'concepto',
+      'descripcion': 'descripcion',
+      'base_imponible': 'baseImponible',
+      'iva': 'iva',
+      'tipo_iva': 'tipoIva',
+      'total': 'total',
+      'importe_total': 'importeTotal',
+    },
+    seguro: {
+      'numero_poliza': 'numeroPoliza',
+      'aseguradora': 'aseguradora',
+      'compania': 'aseguradora',
+      'tomador': 'tomador',
+      'asegurado': 'asegurado',
+      'direccion_asegurada': 'direccionAsegurada',
+      'cobertura': 'cobertura',
+      'coberturas': 'coberturas',
+      'prima': 'prima',
+      'prima_anual': 'primaAnual',
+      'fecha_efecto': 'fechaEfecto',
+      'fecha_vencimiento': 'fechaVencimiento',
+      'capital_asegurado': 'capitalAsegurado',
+    },
+    nomina: {
+      'periodo': 'periodo',
+      'mes': 'mes',
+      'año': 'año',
+      'salario_base': 'salarioBase',
+      'complementos': 'complementos',
+      'retenciones': 'retenciones',
+      'irpf': 'irpf',
+      'seguridad_social': 'seguridadSocial',
+      'liquido': 'liquido',
+      'neto_a_percibir': 'netoPercibir',
+      'categoria': 'categoria',
+      'puesto': 'puesto',
+      'antiguedad': 'antiguedad',
+    },
+    catastro: {
+      'referencia_catastral': 'referenciaCatastral',
+      'valor_catastral': 'valorCatastral',
+      'uso': 'uso',
+      'clase': 'clase',
+      'superficie_suelo': 'superficieSuelo',
+      'superficie_construida': 'superficieConstruida',
+      'año_construccion': 'añoConstruccion',
+    },
+    presupuesto: {
+      'numero_presupuesto': 'numeroPresupuesto',
+      'fecha_presupuesto': 'fechaPresupuesto',
+      'proveedor': 'proveedor',
+      'concepto': 'concepto',
+      'descripcion_trabajos': 'descripcionTrabajos',
+      'materiales': 'materiales',
+      'mano_obra': 'manoObra',
+      'total': 'total',
+      'validez': 'validez',
+    },
   };
   
   const lowerName = fieldName.toLowerCase().replace(/\s+/g, '_');
-  return mapping[lowerName] || fieldName;
+  
+  // Primero buscar en mapeo específico de categoría
+  if (categoryMappings[category] && categoryMappings[category][lowerName]) {
+    return categoryMappings[category][lowerName];
+  }
+  
+  // Luego buscar en mapeo base
+  if (baseMapping[lowerName]) {
+    return baseMapping[lowerName];
+  }
+  
+  // Si no se encuentra, convertir a camelCase
+  return lowerName.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
 }
 
 /**
@@ -431,11 +798,12 @@ export async function POST(request: NextRequest) {
 
     // Si es una imagen, usar Claude Vision directamente
     if (isImageFile(file)) {
-      logger.info('[AI Document Analysis] Usando análisis de visión para imagen');
-      const visionAnalysis = await analyzeImageWithVision(file, companyInfo);
+      logger.info('[AI Document Analysis] Usando análisis de visión para imagen', { context });
+      const visionAnalysis = await analyzeImageWithVision(file, companyInfo, context);
       
       logger.info('[AI Document Analysis] Análisis de visión completado', {
         filename: file.name,
+        context,
         category: visionAnalysis.classification?.category,
         fieldsExtracted: visionAnalysis.extractedFields?.length || 0,
       });
