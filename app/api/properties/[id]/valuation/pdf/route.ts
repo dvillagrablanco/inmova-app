@@ -308,7 +308,7 @@ function generateValuationHTML(property: any, valuation: any, userName: string):
     <p><strong>INMOVA APP</strong> - Plataforma de Gestión Inmobiliaria</p>
     <p>Este informe ha sido generado automáticamente mediante inteligencia artificial.</p>
     <p>Generado por: ${userName} | Fecha: ${date}</p>
-    <p>Modelo: ${valuation.model || 'claude-3.5-sonnet'} | ID: ${valuation.id}</p>
+    <p>Modelo: ${valuation.model || 'claude-3-haiku-20240307'} | ID: ${valuation.id}</p>
   </div>
 </body>
 </html>
