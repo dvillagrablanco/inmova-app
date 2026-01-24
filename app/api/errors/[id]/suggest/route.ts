@@ -75,18 +75,38 @@ ${JSON.stringify(error.metadata, null, 2).slice(0, 1000)}
 
 Responde en español y sé conciso pero completo.`;
 
-    // Llamar a Claude
+    // Llamar a Claude con fallback de modelos
     const anthropic = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
     });
     
-    const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 2000,
-      messages: [
-        { role: 'user', content: prompt }
-      ],
-    });
+    // Lista de modelos a intentar (en orden de preferencia)
+    const modelsToTry = [
+      'claude-sonnet-4-20250514',      // Más reciente
+      'claude-3-5-sonnet-latest',       // Alias al último 3.5
+      'claude-3-haiku-20240307',        // Fallback rápido
+    ];
+
+    let message: any = null;
+    for (const modelName of modelsToTry) {
+      try {
+        message = await anthropic.messages.create({
+          model: modelName,
+          max_tokens: 2000,
+          messages: [
+            { role: 'user', content: prompt }
+          ],
+        });
+        break; // Si funciona, salimos del loop
+      } catch (modelError: any) {
+        console.warn(`[API Error Suggest] Modelo ${modelName} no disponible:`, modelError?.message);
+        continue;
+      }
+    }
+    
+    if (!message) {
+      throw new Error('No se pudo conectar con ningún modelo de Claude');
+    }
     
     // Extraer respuesta
     const suggestion = message.content[0].type === 'text' 

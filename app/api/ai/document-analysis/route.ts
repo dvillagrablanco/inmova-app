@@ -339,22 +339,57 @@ async function analyzeDocumentWithVision(
 
   const startTime = Date.now();
   
-  const response = await client.messages.create({
-    model: 'claude-3-5-sonnet-20241022',
-    max_tokens: 4096,
-    messages: [
-      {
-        role: 'user',
-        content: [
-          contentBlock,
+  // Lista de modelos a intentar (en orden de preferencia)
+  const modelsToTry = [
+    'claude-sonnet-4-20250514',      // Más reciente (enero 2025)
+    'claude-3-5-sonnet-latest',       // Alias al último 3.5
+    'claude-3-haiku-20240307',        // Fallback rápido
+  ];
+
+  let response: any = null;
+  let lastError: any = null;
+  let usedModel = '';
+
+  for (const modelName of modelsToTry) {
+    try {
+      logger.info('[Vision Analysis] Intentando con modelo', { modelName });
+      response = await client.messages.create({
+        model: modelName,
+        max_tokens: 4096,
+        messages: [
           {
-            type: 'text',
-            text: prompt,
+            role: 'user',
+            content: [
+              contentBlock,
+              {
+                type: 'text',
+                text: prompt,
+              },
+            ],
           },
         ],
-      },
-    ],
-  });
+      });
+      usedModel = modelName;
+      logger.info('[Vision Analysis] Modelo funcionó correctamente', { modelName });
+      break; // Si funciona, salimos del loop
+    } catch (modelError: any) {
+      lastError = modelError;
+      logger.warn('[Vision Analysis] Modelo no disponible, intentando siguiente', { 
+        modelName,
+        error: modelError?.message || 'Error desconocido',
+        status: modelError?.status,
+      });
+      continue;
+    }
+  }
+
+  if (!response) {
+    logger.error('[Vision Analysis] Ningún modelo disponible', {
+      triedModels: modelsToTry,
+      lastError: lastError?.message,
+    });
+    throw new Error(`No se pudo conectar con ningún modelo de Claude: ${lastError?.message || 'Error desconocido'}`);
+  }
 
   const processingTimeMs = Date.now() - startTime;
   const content = response.content[0];
@@ -373,6 +408,7 @@ async function analyzeDocumentWithVision(
         category,
         fieldsExtracted: result.extractedFields?.length || 0,
         processingTimeMs,
+        modelUsed: usedModel,
       });
       
       // Detectar si tiene datos sensibles
@@ -423,7 +459,7 @@ async function analyzeDocumentWithVision(
         processingMetadata: {
           tokensUsed: response.usage?.output_tokens || 0,
           processingTimeMs,
-          modelUsed: 'claude-3-5-sonnet-vision',
+          modelUsed: usedModel || 'claude-vision',
         },
       };
     }
