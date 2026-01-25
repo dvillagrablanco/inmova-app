@@ -1,0 +1,235 @@
+#!/usr/bin/env python3
+"""
+Deploy Frontend Pages to Production
+"""
+
+import sys
+sys.path.insert(0, '/home/ubuntu/.local/lib/python3.12/site-packages')
+
+import paramiko
+import time
+from datetime import datetime
+
+# ============================================================================
+# CONFIGURACIÓN
+# ============================================================================
+
+SERVER_IP = "157.180.119.236"
+SERVER_USER = "root"
+SERVER_PASSWORD = "hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo="
+APP_PATH = "/opt/inmova-app"
+BRANCH = "cursor/edificios-critical-error-cbfd"
+
+# Páginas nuevas a verificar
+NEW_PAGES = [
+    "valoraciones",
+    "recomendaciones",
+    "reportes-programados",
+    "inventario-mantenimiento",
+    "plantillas-legales",
+]
+
+# ============================================================================
+# COLORES
+# ============================================================================
+
+class Colors:
+    HEADER = '\033[95m'
+    BLUE = '\033[94m'
+    CYAN = '\033[96m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+
+def log(msg, color=Colors.ENDC):
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    print(f"{color}[{timestamp}] {msg}{Colors.ENDC}")
+
+# ============================================================================
+# EJECUCIÓN REMOTA
+# ============================================================================
+
+def exec_cmd(client, cmd, timeout=60):
+    """Ejecuta comando SSH y retorna resultado"""
+    log(f"  → {cmd[:80]}..." if len(cmd) > 80 else f"  → {cmd}", Colors.CYAN)
+    
+    stdin, stdout, stderr = client.exec_command(cmd, timeout=timeout)
+    exit_status = stdout.channel.recv_exit_status()
+    
+    output = stdout.read().decode('utf-8', errors='ignore')
+    error = stderr.read().decode('utf-8', errors='ignore')
+    
+    if exit_status != 0 and error:
+        log(f"  ⚠ Error: {error[:200]}", Colors.YELLOW)
+    
+    return exit_status, output, error
+
+# ============================================================================
+# MAIN
+# ============================================================================
+
+def main():
+    log("=" * 70, Colors.HEADER)
+    log("🚀 DEPLOYMENT PÁGINAS FRONTEND - INMOVA APP", Colors.HEADER)
+    log("=" * 70, Colors.HEADER)
+    log("")
+    log(f"Servidor: {SERVER_IP}")
+    log(f"Path: {APP_PATH}")
+    log(f"Branch: {BRANCH}")
+    log(f"Páginas: {', '.join(NEW_PAGES)}")
+    log("")
+    
+    # Conectar SSH
+    log("🔐 Conectando al servidor...", Colors.BLUE)
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    
+    try:
+        client.connect(
+            SERVER_IP,
+            username=SERVER_USER,
+            password=SERVER_PASSWORD,
+            timeout=15
+        )
+        log("✅ Conectado", Colors.GREEN)
+    except Exception as e:
+        log(f"❌ Error de conexión: {e}", Colors.RED)
+        return 1
+    
+    try:
+        # 1. Fetch y actualizar código
+        log("")
+        log("📥 ACTUALIZANDO CÓDIGO", Colors.BLUE)
+        
+        exec_cmd(client, f"cd {APP_PATH} && git fetch origin {BRANCH}")
+        
+        # Checkout de las páginas nuevas
+        pages_to_checkout = [
+            "app/valoraciones/page.tsx",
+            "app/recomendaciones/page.tsx",
+            "app/reportes-programados/page.tsx",
+            "app/inventario-mantenimiento/page.tsx",
+            "app/plantillas-legales/page.tsx",
+        ]
+        
+        for page in pages_to_checkout:
+            # Crear directorio si no existe
+            dir_path = f"{APP_PATH}/{'/'.join(page.split('/')[:-1])}"
+            exec_cmd(client, f"mkdir -p {dir_path}")
+            
+            # Checkout del archivo
+            exec_cmd(
+                client,
+                f"cd {APP_PATH} && git checkout origin/{BRANCH} -- {page}"
+            )
+        
+        log("✅ Código actualizado", Colors.GREEN)
+        
+        # 2. Verificar archivos
+        log("")
+        log("📋 VERIFICANDO ARCHIVOS", Colors.BLUE)
+        
+        for page in NEW_PAGES:
+            status, output, error = exec_cmd(
+                client,
+                f"ls -la {APP_PATH}/app/{page}/page.tsx 2>/dev/null && echo 'OK' || echo 'NOT FOUND'"
+            )
+            if "OK" in output:
+                log(f"   ✅ {page}", Colors.GREEN)
+            else:
+                log(f"   ❌ {page} - NOT FOUND", Colors.RED)
+        
+        # 3. Build
+        log("")
+        log("🏗️ BUILDING APLICACIÓN", Colors.BLUE)
+        log("   (esto puede tardar unos minutos...)")
+        
+        status, output, error = exec_cmd(
+            client,
+            f"cd {APP_PATH} && npm run build 2>&1 | tail -20",
+            timeout=600
+        )
+        
+        if "error" in output.lower() or status != 0:
+            log(f"⚠ Build output: {output[-500:]}", Colors.YELLOW)
+        else:
+            log("✅ Build completado", Colors.GREEN)
+        
+        # 4. Restart PM2
+        log("")
+        log("♻️ REINICIANDO PM2", Colors.BLUE)
+        
+        exec_cmd(client, "pm2 reload inmova-app --update-env")
+        log("✅ PM2 reiniciado", Colors.GREEN)
+        
+        # 5. Esperar warm-up
+        log("")
+        log("⏳ Esperando warm-up (20s)...", Colors.CYAN)
+        time.sleep(20)
+        
+        # 6. Health checks
+        log("")
+        log("🏥 HEALTH CHECKS", Colors.BLUE)
+        
+        # Check API health
+        status, output, error = exec_cmd(
+            client,
+            "curl -s http://localhost:3000/api/health"
+        )
+        
+        if '"status":"ok"' in output or '"status": "ok"' in output:
+            log("✅ API Health OK", Colors.GREEN)
+        else:
+            log(f"⚠ API Health: {output[:100]}", Colors.YELLOW)
+        
+        # Check each new page
+        log("")
+        log("📄 VERIFICANDO PÁGINAS", Colors.BLUE)
+        
+        for page in NEW_PAGES:
+            status, output, error = exec_cmd(
+                client,
+                f"curl -s -o /dev/null -w '%{{http_code}}' http://localhost:3000/{page}"
+            )
+            
+            http_code = output.strip()
+            if http_code in ["200", "307"]:
+                log(f"   ✅ /{page}: HTTP {http_code}", Colors.GREEN)
+            else:
+                log(f"   ⚠ /{page}: HTTP {http_code}", Colors.YELLOW)
+        
+        # Check PM2 status
+        status, output, error = exec_cmd(client, "pm2 list | grep inmova")
+        
+        if "online" in output.lower():
+            log("✅ PM2 Status: online", Colors.GREEN)
+        else:
+            log(f"⚠ PM2 Status: {output.strip()}", Colors.YELLOW)
+        
+        # 7. Resultado final
+        log("")
+        log("=" * 70, Colors.HEADER)
+        log("✅ DEPLOYMENT COMPLETADO", Colors.GREEN)
+        log("=" * 70, Colors.HEADER)
+        log("")
+        log("Nuevas páginas disponibles:", Colors.CYAN)
+        for page in NEW_PAGES:
+            log(f"   🔗 https://inmovaapp.com/{page}", Colors.CYAN)
+        log("")
+        log("Para ver logs:", Colors.YELLOW)
+        log(f"   ssh root@{SERVER_IP} 'pm2 logs inmova-app --lines 50'", Colors.YELLOW)
+        log("")
+        
+        return 0
+        
+    except Exception as e:
+        log(f"❌ Error durante deployment: {e}", Colors.RED)
+        return 1
+        
+    finally:
+        client.close()
+
+if __name__ == "__main__":
+    sys.exit(main())
