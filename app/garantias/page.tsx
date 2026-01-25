@@ -169,126 +169,87 @@ export default function GarantiasPage() {
     try {
       setLoading(true);
       
-      // Cargar garantías (mock data por ahora)
-      const mockWarranties: Warranty[] = [
-        {
-          id: 'w1',
-          tenantId: 't1',
-          tenantName: 'María García López',
-          tenantEmail: 'maria.garcia@email.com',
-          propertyId: 'p1',
-          propertyName: 'Piso en C/ Mayor 45, 3ºA',
-          propertyAddress: 'C/ Mayor 45, 3ºA, Madrid',
-          contractId: 'c1',
-          amount: 2400,
-          type: 'cash',
-          depositDate: '2024-01-15',
-          status: 'active',
-          contractStartDate: '2024-01-15',
-          contractEndDate: '2026-01-15',
-          documents: [
-            { id: 'd1', name: 'Recibo de fianza.pdf', type: 'pdf', url: '/docs/d1', uploadedAt: '2024-01-15' },
-          ],
-          deductions: [],
-          notes: 'Fianza equivalente a 2 meses de renta',
-          createdAt: '2024-01-15',
-          updatedAt: '2024-01-15',
-        },
-        {
-          id: 'w2',
-          tenantId: 't2',
-          tenantName: 'Juan Martínez Ruiz',
-          tenantEmail: 'juan.martinez@email.com',
-          propertyId: 'p2',
-          propertyName: 'Apartamento Playa, Bloque 2-4B',
-          propertyAddress: 'Av. del Mar 23, Bloque 2-4B, Valencia',
-          contractId: 'c2',
-          amount: 1500,
-          type: 'bank_guarantee',
-          depositDate: '2023-06-01',
-          status: 'active',
-          contractStartDate: '2023-06-01',
-          contractEndDate: '2025-06-01',
-          bankName: 'BBVA',
-          documents: [
-            { id: 'd2', name: 'Aval bancario BBVA.pdf', type: 'pdf', url: '/docs/d2', uploadedAt: '2023-06-01' },
-          ],
-          deductions: [],
-          createdAt: '2023-06-01',
-          updatedAt: '2023-06-01',
-        },
-        {
-          id: 'w3',
-          tenantId: 't3',
-          tenantName: 'Ana Rodríguez Pérez',
-          tenantEmail: 'ana.rodriguez@email.com',
-          propertyId: 'p3',
-          propertyName: 'Estudio Centro, 1ºB',
-          propertyAddress: 'C/ Gran Vía 10, 1ºB, Madrid',
-          contractId: 'c3',
-          amount: 900,
-          type: 'insurance',
-          depositDate: '2024-03-01',
-          status: 'pending_return',
-          contractStartDate: '2024-03-01',
-          contractEndDate: '2025-03-01',
-          insuranceCompany: 'Mapfre',
-          policyNumber: 'POL-2024-12345',
-          documents: [
-            { id: 'd3', name: 'Póliza seguro caución.pdf', type: 'pdf', url: '/docs/d3', uploadedAt: '2024-03-01' },
-          ],
-          deductions: [
-            {
-              id: 'ded1',
-              amount: 150,
-              reason: 'Reparación pared dañada en salón',
-              date: '2025-01-15',
-              approved: true,
-              approvedBy: 'Admin',
-            },
-          ],
-          notes: 'Contrato finalizado, pendiente inspección final',
-          createdAt: '2024-03-01',
-          updatedAt: '2025-01-15',
-        },
-        {
-          id: 'w4',
-          tenantId: 't4',
-          tenantName: 'Carlos Fernández',
-          tenantEmail: 'carlos.f@email.com',
-          propertyId: 'p4',
-          propertyName: 'Ático Zona Norte',
-          propertyAddress: 'C/ Serrano 120, Ático, Madrid',
-          contractId: 'c4',
-          amount: 3000,
-          type: 'cash',
-          depositDate: '2022-09-01',
-          status: 'returned',
-          contractStartDate: '2022-09-01',
-          contractEndDate: '2024-09-01',
-          returnDate: '2024-09-15',
-          returnedAmount: 3000,
-          documents: [
-            { id: 'd4', name: 'Recibo fianza.pdf', type: 'pdf', url: '/docs/d4', uploadedAt: '2022-09-01' },
-            { id: 'd5', name: 'Justificante devolución.pdf', type: 'pdf', url: '/docs/d5', uploadedAt: '2024-09-15' },
-          ],
-          deductions: [],
-          createdAt: '2022-09-01',
-          updatedAt: '2024-09-15',
-        },
-      ];
+      // Cargar garantías desde la API real
+      const response = await fetch('/api/garantias');
+      if (!response.ok) {
+        throw new Error('Error al cargar las garantías');
+      }
       
-      setWarranties(mockWarranties);
+      const result = await response.json();
       
-      // Cargar contratos para selector
-      setContracts([
-        { id: 'c1', tenantName: 'María García', propertyName: 'C/ Mayor 45', startDate: '2024-01-15', endDate: '2026-01-15' },
-        { id: 'c5', tenantName: 'Pedro Sánchez', propertyName: 'C/ Alcalá 89', startDate: '2025-01-01', endDate: '2027-01-01' },
-      ]);
+      if (result.success && result.data) {
+        // Transformar datos de la API al formato esperado por el componente
+        const formattedWarranties: Warranty[] = result.data.map((w: any) => ({
+          id: w.id,
+          tenantId: w.tenantId || '',
+          tenantName: w.tenantName || 'Sin inquilino',
+          tenantEmail: w.tenantEmail || '',
+          propertyId: w.propertyId || '',
+          propertyName: w.propertyName || 'Sin propiedad',
+          propertyAddress: w.propertyAddress || '',
+          contractId: w.contractId || '',
+          amount: w.amount || 0,
+          type: w.type || 'cash',
+          depositDate: w.depositDate || new Date().toISOString().split('T')[0],
+          status: w.status || 'active',
+          contractStartDate: w.contractStartDate || '',
+          contractEndDate: w.contractEndDate || '',
+          returnDate: w.returnDate,
+          returnedAmount: w.returnedAmount,
+          bankName: w.bankName,
+          insuranceCompany: w.insuranceCompany,
+          policyNumber: w.policyNumber,
+          documents: Array.isArray(w.documents) ? w.documents.map((d: any, idx: number) => ({
+            id: d.id || `doc-${idx}`,
+            name: d.name || d.fileName || 'Documento',
+            type: d.type || 'pdf',
+            url: d.url || '#',
+            uploadedAt: d.uploadedAt || d.createdAt || new Date().toISOString(),
+          })) : [],
+          deductions: Array.isArray(w.deductions) ? w.deductions.map((d: any, idx: number) => ({
+            id: d.id || `ded-${idx}`,
+            amount: d.amount || 0,
+            reason: d.reason || 'Deducción',
+            date: d.date || new Date().toISOString(),
+            approved: d.approved ?? true,
+            approvedBy: d.approvedBy,
+          })) : [],
+          notes: w.notes,
+          createdAt: w.createdAt || new Date().toISOString(),
+          updatedAt: w.updatedAt || new Date().toISOString(),
+        }));
+        
+        setWarranties(formattedWarranties);
+      } else {
+        setWarranties([]);
+      }
+      
+      // Cargar contratos sin garantía para el selector
+      const contractsResponse = await fetch('/api/contracts?status=activo&limit=50');
+      if (contractsResponse.ok) {
+        const contractsResult = await contractsResponse.json();
+        const contractsData = contractsResult.data || contractsResult || [];
+        
+        // Filtrar contratos que no tienen garantía registrada
+        const existingContractIds = new Set(result.data?.map((w: any) => w.contractId) || []);
+        
+        const availableContracts = contractsData
+          .filter((c: any) => !existingContractIds.has(c.id))
+          .map((c: any) => ({
+            id: c.id,
+            tenantName: c.tenant?.nombreCompleto || c.tenantName || 'Sin inquilino',
+            propertyName: c.unit?.numero ? `${c.unit.building?.nombre || ''} - ${c.unit.numero}` : c.propertyName || 'Sin propiedad',
+            startDate: c.fechaInicio || c.startDate || '',
+            endDate: c.fechaFin || c.endDate || '',
+          }));
+        
+        setContracts(availableContracts);
+      }
       
     } catch (error) {
       console.error('Error cargando datos:', error);
       toast.error('Error al cargar las garantías');
+      setWarranties([]);
     } finally {
       setLoading(false);
     }
@@ -385,7 +346,34 @@ export default function GarantiasPage() {
     }
     
     try {
-      // Aquí iría la llamada a la API
+      // Mapear tipo de frontend a tipo de API
+      const typeMap: Record<string, string> = {
+        'cash': 'legal',
+        'bank_guarantee': 'aval_bancario',
+        'insurance': 'seguro_caucion',
+        'aval_personal': 'aval_personal',
+      };
+
+      const response = await fetch('/api/garantias', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contractId: newWarranty.contractId,
+          importeFianza: parseFloat(newWarranty.amount),
+          tipoFianza: typeMap[newWarranty.type] || 'legal',
+          entidadDeposito: newWarranty.bankName || newWarranty.insuranceCompany || undefined,
+          numeroDeposito: newWarranty.policyNumber || undefined,
+          fechaDeposito: newWarranty.depositDate,
+          notas: newWarranty.notes || undefined,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al crear la garantía');
+      }
+
       toast.success('Garantía registrada correctamente');
       setShowNewDialog(false);
       setNewWarranty({
@@ -399,8 +387,8 @@ export default function GarantiasPage() {
         notes: '',
       });
       loadData();
-    } catch (error) {
-      toast.error('Error al crear la garantía');
+    } catch (error: any) {
+      toast.error(error.message || 'Error al crear la garantía');
     }
   };
 
@@ -412,13 +400,29 @@ export default function GarantiasPage() {
     }
     
     try {
-      // Aquí iría la llamada a la API
+      const response = await fetch(`/api/garantias/${selectedWarranty.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add_deduction',
+          amount: parseFloat(newDeduction.amount),
+          reason: newDeduction.reason,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al añadir la deducción');
+      }
+
       toast.success('Deducción añadida correctamente');
       setShowDeductionDialog(false);
       setNewDeduction({ amount: '', reason: '' });
+      setSelectedWarranty(null);
       loadData();
-    } catch (error) {
-      toast.error('Error al añadir la deducción');
+    } catch (error: any) {
+      toast.error(error.message || 'Error al añadir la deducción');
     }
   };
 
@@ -427,12 +431,30 @@ export default function GarantiasPage() {
     if (!selectedWarranty) return;
     
     try {
-      // Aquí iría la llamada a la API
-      toast.success('Devolución procesada correctamente');
+      const returnAmount = getReturnAmount(selectedWarranty);
+
+      const response = await fetch(`/api/garantias/${selectedWarranty.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'process_return',
+          returnAmount,
+          returnDate: new Date().toISOString().split('T')[0],
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al procesar la devolución');
+      }
+
+      toast.success(`Devolución procesada: ${formatCurrency(returnAmount)}`);
       setShowReturnDialog(false);
+      setSelectedWarranty(null);
       loadData();
-    } catch (error) {
-      toast.error('Error al procesar la devolución');
+    } catch (error: any) {
+      toast.error(error.message || 'Error al procesar la devolución');
     }
   };
 
