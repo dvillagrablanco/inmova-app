@@ -210,6 +210,7 @@ export function AIDocumentAssistant({
       const response = await fetch('/api/ai/document-analysis', {
         method: 'POST',
         body: formData,
+        credentials: 'include', // CRÍTICO: Incluir cookies de sesión
       });
 
       console.log('[AIDocumentAssistant] Respuesta status:', response.status);
