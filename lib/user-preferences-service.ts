@@ -24,15 +24,63 @@ export interface UserPreferences {
 
 /**
  * Obtiene preferencias del usuario
+ * Usa campos directos del modelo User y la relación UserPreference
  */
 export async function getUserPreferences(userId: string): Promise<UserPreferences> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { preferences: true }
-  });
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        preferredModules: true,
+        experienceLevel: true,
+        businessVertical: true,
+        preferences: {
+          select: {
+            theme: true,
+            language: true,
+            notificationPreferences: true,
+          }
+        }
+      }
+    });
 
-  if (!user || !user.preferences) {
-    // Preferencias por defecto
+    if (!user) {
+      // Preferencias por defecto
+      return {
+        activeModules: [],
+        completedTours: [],
+        experienceLevel: 'intermedio',
+        vertical: 'alquiler_tradicional',
+        theme: 'light',
+        language: 'es',
+        enableTooltips: true,
+        enableChatbot: true,
+        enableVideos: true,
+        autoplayTours: true,
+        notificationsEnabled: true
+      };
+    }
+
+    // Obtener completedTours de localStorage/memoria (manejado en cliente)
+    // Por ahora retornar array vacío ya que no está en BD
+    const notifPrefs = user.preferences?.notificationPreferences as any || {};
+
+    return {
+      activeModules: user.preferredModules || [],
+      completedTours: [], // Se maneja en el cliente con localStorage
+      experienceLevel: (user.experienceLevel as any) || 'intermedio',
+      vertical: user.businessVertical || 'alquiler_tradicional',
+      theme: (user.preferences?.theme as any) || 'light',
+      language: (user.preferences?.language as any) || 'es',
+      enableTooltips: true,
+      enableChatbot: true,
+      enableVideos: true,
+      autoplayTours: true,
+      notificationsEnabled: notifPrefs.emailEnabled ?? true
+    };
+  } catch (error: any) {
+    logger.error('Error obteniendo preferencias:', error);
+    // Retornar preferencias por defecto en caso de error
     return {
       activeModules: [],
       completedTours: [],
@@ -47,26 +95,61 @@ export async function getUserPreferences(userId: string): Promise<UserPreference
       notificationsEnabled: true
     };
   }
-
-  return user.preferences as unknown as UserPreferences;
 }
 
 /**
  * Actualiza preferencias del usuario
+ * Mapea los campos a las tablas correctas (User y UserPreference)
  */
 export async function updateUserPreferences(
   userId: string,
   preferences: Partial<UserPreferences>
 ): Promise<UserPreferences> {
-  const current = await getUserPreferences(userId);
-  const updated = { ...current, ...preferences };
+  try {
+    const current = await getUserPreferences(userId);
+    const updated = { ...current, ...preferences };
 
-  await prisma.user.update({
-    where: { id: userId },
-    data: { preferences: updated as any }
-  });
+    // Actualizar campos en User
+    const userUpdateData: any = {};
+    if (preferences.activeModules !== undefined) {
+      userUpdateData.preferredModules = preferences.activeModules;
+    }
+    if (preferences.experienceLevel !== undefined) {
+      userUpdateData.experienceLevel = preferences.experienceLevel;
+    }
+    if (preferences.vertical !== undefined) {
+      userUpdateData.businessVertical = preferences.vertical;
+    }
 
-  return updated;
+    // Solo actualizar User si hay cambios
+    if (Object.keys(userUpdateData).length > 0) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: userUpdateData
+      });
+    }
+
+    // Actualizar UserPreference si hay cambios de tema/idioma
+    if (preferences.theme !== undefined || preferences.language !== undefined) {
+      await prisma.userPreference.upsert({
+        where: { userId },
+        create: {
+          userId,
+          theme: preferences.theme || 'light',
+          language: preferences.language || 'es',
+        },
+        update: {
+          ...(preferences.theme && { theme: preferences.theme }),
+          ...(preferences.language && { language: preferences.language }),
+        }
+      });
+    }
+
+    return updated;
+  } catch (error: any) {
+    logger.error('Error actualizando preferencias:', error);
+    throw error;
+  }
 }
 
 /**
@@ -154,22 +237,17 @@ export async function deactivateModule(
 
 /**
  * Marca un tour como completado
+ * NOTA: completedTours se maneja en el cliente (localStorage) por ahora
+ * ya que no hay campo en BD para esto
  */
 export async function completeTour(
   userId: string,
   tourId: string
 ): Promise<{ success: boolean; completedTours: string[] }> {
   try {
-    const prefs = await getUserPreferences(userId);
-
-    if (prefs.completedTours.includes(tourId)) {
-      return { success: true, completedTours: prefs.completedTours };
-    }
-
-    const newCompletedTours = [...prefs.completedTours, tourId];
-    await updateUserPreferences(userId, { completedTours: newCompletedTours });
-
-    return { success: true, completedTours: newCompletedTours };
+    // Por ahora solo retornar éxito - el cliente maneja el estado
+    logger.info(`Tour ${tourId} marcado como completado para usuario ${userId}`);
+    return { success: true, completedTours: [tourId] };
   } catch (error: any) {
     logger.error('Error completando tour:', error);
     return { success: false, completedTours: [] };
@@ -178,18 +256,15 @@ export async function completeTour(
 
 /**
  * Resetea un tour (para poder volver a verlo)
+ * NOTA: completedTours se maneja en el cliente (localStorage) por ahora
  */
 export async function resetTour(
   userId: string,
   tourId: string
 ): Promise<{ success: boolean; completedTours: string[] }> {
   try {
-    const prefs = await getUserPreferences(userId);
-    const newCompletedTours = prefs.completedTours.filter(id => id !== tourId);
-    
-    await updateUserPreferences(userId, { completedTours: newCompletedTours });
-
-    return { success: true, completedTours: newCompletedTours };
+    logger.info(`Tour ${tourId} reseteado para usuario ${userId}`);
+    return { success: true, completedTours: [] };
   } catch (error: any) {
     logger.error('Error reseteando tour:', error);
     return { success: false, completedTours: [] };
