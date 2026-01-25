@@ -79,6 +79,7 @@ import { cn } from '@/lib/utils';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import logger, { logError } from '@/lib/logger';
 import { safeLocalStorage } from '@/lib/safe-storage';
 import { toggleMobileMenu, closeMobileMenu } from '@/lib/mobile-menu';
@@ -2473,6 +2474,28 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* ============================================================== */}
+            {/* ACCESO RÁPIDO - HERRAMIENTAS IA (Visible para todos los roles)  */}
+            {/* ============================================================== */}
+            {['super_admin', 'administrador', 'gestor'].includes(role || '') && (
+              <div className="mb-4 px-2">
+                <Link
+                  href="/valoracion-ia"
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                    pathname === '/valoracion-ia'
+                      ? 'bg-gradient-to-r from-violet-500/20 to-purple-500/20 text-violet-300 border border-violet-500/30'
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                  }`}
+                >
+                  <span className="text-lg">🤖</span>
+                  <span className="font-medium">Valoración IA</span>
+                  <Badge className="ml-auto bg-violet-500/20 text-violet-300 text-[10px]">
+                    Nuevo
+                  </Badge>
+                </Link>
               </div>
             )}
 

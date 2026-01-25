@@ -387,7 +387,7 @@ export function AIDocumentAssistant({
         {renderTrigger()}
       </SheetTrigger>
 
-      <SheetContent className="w-full sm:max-w-xl bg-white dark:bg-gray-950 border-l shadow-xl">
+      <SheetContent className="w-full sm:max-w-xl bg-white dark:bg-gray-950 border-l shadow-xl flex flex-col h-full overflow-hidden">
         <SheetHeader className="space-y-3">
           <SheetTitle className="flex items-center gap-3">
             <div className="h-10 w-10 shrink-0 rounded-lg bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-500 flex items-center justify-center">
@@ -432,7 +432,8 @@ export function AIDocumentAssistant({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="mt-6 space-y-6">
+        {/* Contenedor con scroll */}
+        <div className="flex-1 overflow-y-auto mt-4 -mx-6 px-6 pb-20">
           {/* Zona de carga */}
           <div
             className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
@@ -717,21 +718,29 @@ export function AIDocumentAssistant({
                   </div>
                 )}
 
-                {/* Acciones */}
+                {/* Acciones del detalle */}
                 <div className="flex gap-2">
                   {onApplyData && selectedFile.analysis.extractedFields.length > 0 && (
                     <Button
                       size="sm"
                       className="flex-1 bg-gradient-to-r from-violet-500 to-purple-500"
-                      onClick={() => applyExtractedData(selectedFile.analysis!)}
+                      onClick={() => {
+                        applyExtractedData(selectedFile.analysis!);
+                        setIsOpen(false); // Cerrar después de aplicar
+                      }}
                     >
                       <Zap className="h-4 w-4 mr-1" />
-                      Aplicar datos
+                      Aplicar y cerrar
                     </Button>
                   )}
-                  <Button size="sm" variant="outline" className="flex-1">
-                    <Eye className="h-4 w-4 mr-1" />
-                    Ver detalle
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => setSelectedFile(null)}
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Cerrar detalle
                   </Button>
                 </div>
               </CardContent>
@@ -739,17 +748,55 @@ export function AIDocumentAssistant({
           )}
         </div>
 
-        <SheetFooter className="mt-6">
-          <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
-            <span>Powered by Claude 3.5 Sonnet</span>
-            <Button variant="link" size="sm" className="h-auto p-0 text-xs" asChild>
-              <a href="/admin/ai-agents" target="_blank">
-                <ExternalLink className="h-3 w-3 mr-1" />
-                Configurar IA
-              </a>
+        {/* Footer fijo con botones de acción */}
+        <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-950 border-t p-4 space-y-3">
+          {/* Botón principal de aceptar cuando hay datos */}
+          {stats.completed > 0 && onApplyData && (
+            <Button
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+              onClick={() => {
+                // Aplicar datos del primer documento completado
+                const completedFile = uploadedFiles.find(f => f.status === 'completed' && f.analysis);
+                if (completedFile?.analysis) {
+                  applyExtractedData(completedFile.analysis);
+                  toast.success('Datos aplicados al formulario');
+                  setIsOpen(false);
+                }
+              }}
+            >
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+              Aceptar y aplicar datos ({stats.completed} documento{stats.completed > 1 ? 's' : ''})
             </Button>
+          )}
+          
+          {/* Botón de cerrar */}
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => setIsOpen(false)}
+            >
+              Cerrar
+            </Button>
+            {stats.completed > 0 && (
+              <Button 
+                variant="ghost" 
+                className="flex-1 text-muted-foreground"
+                onClick={() => {
+                  setUploadedFiles([]);
+                  setSelectedFile(null);
+                }}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Limpiar
+              </Button>
+            )}
           </div>
-        </SheetFooter>
+          
+          <p className="text-xs text-center text-muted-foreground">
+            Powered by Claude 3.5 Sonnet
+          </p>
+        </div>
       </SheetContent>
     </Sheet>
   );
