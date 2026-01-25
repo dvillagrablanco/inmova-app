@@ -88,9 +88,8 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import logger from '@/lib/logger';
-// AIDocumentAssistant se carga de forma dinámica para evitar errores de hidratación
-import dynamic from 'next/dynamic';
 
+// AIDocumentAssistant se carga de forma dinámica para evitar errores de hidratación
 const AIDocumentAssistant = dynamic(
   () => import('@/components/ai/AIDocumentAssistant').then(mod => mod.AIDocumentAssistant),
   { ssr: false }
