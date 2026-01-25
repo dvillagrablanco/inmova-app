@@ -115,6 +115,8 @@ Responde SOLO con el JSON, sin texto adicional:
 }`;
 
   try {
+    logger.info('[AI Valuate] Llamando a Claude con modelo:', process.env.ANTHROPIC_MODEL || 'claude-3-haiku-20240307');
+    
     const message = await anthropic.messages.create({
       model: process.env.ANTHROPIC_MODEL || 'claude-3-haiku-20240307',
       max_tokens: 2048,
@@ -123,20 +125,47 @@ Responde SOLO con el JSON, sin texto adicional:
 
     const content = message.content[0];
     if (content.type === 'text') {
+      logger.info('[AI Valuate] Respuesta recibida de Claude, parseando JSON...');
+      
       // Extraer JSON del texto
       const jsonMatch = content.text.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const result = JSON.parse(jsonMatch[0]);
+        
+        // Validar campos requeridos
+        if (!result.valorEstimado || typeof result.valorEstimado !== 'number') {
+          logger.warn('[AI Valuate] valorEstimado faltante o inválido, usando fallback');
+          return generateFallbackValuation(property, options.finalidad);
+        }
+        
         // Asegurar que comparables tenga al menos 3 elementos
         if (!result.comparables || result.comparables.length < 3) {
           result.comparables = generateMockComparables(property, result.precioM2);
         }
+        
+        // Asegurar valores por defecto para campos opcionales
+        result.valorMinimo = result.valorMinimo || Math.round(result.valorEstimado * 0.9);
+        result.valorMaximo = result.valorMaximo || Math.round(result.valorEstimado * 1.1);
+        result.confianza = result.confianza || 70;
+        result.tendenciaMercado = result.tendenciaMercado || 'estable';
+        result.porcentajeTendencia = result.porcentajeTendencia || 2;
+        result.factoresPositivos = result.factoresPositivos || [];
+        result.factoresNegativos = result.factoresNegativos || [];
+        result.recomendaciones = result.recomendaciones || [];
+        result.analisisMercado = result.analisisMercado || '';
+        result.tiempoEstimadoVenta = result.tiempoEstimadoVenta || '2-4 meses';
+        result.rentabilidadAlquiler = result.rentabilidadAlquiler || 4.5;
+        result.alquilerEstimado = result.alquilerEstimado || Math.round(result.valorEstimado * 0.004);
+        
+        logger.info('[AI Valuate] Valoración exitosa:', { valorEstimado: result.valorEstimado, confianza: result.confianza });
         return result;
       }
     }
-    throw new Error('No se pudo parsear la respuesta de Claude');
+    
+    logger.warn('[AI Valuate] No se pudo parsear respuesta de Claude, usando fallback');
+    return generateFallbackValuation(property, options.finalidad);
   } catch (error: any) {
-    logger.error('Error en valoración Claude:', error);
+    logger.error('[AI Valuate] Error en valoración Claude:', error.message);
     // Devolver valoración por defecto basada en datos
     return generateFallbackValuation(property, options.finalidad);
   }
@@ -406,71 +435,87 @@ export async function POST(request: NextRequest) {
       comparables,
     });
 
-    // 7. Guardar valoración en BD
+    // 7. Guardar valoración en BD (mapear campos español -> inglés)
     if (validated.unitId) {
-      await prisma.propertyValuation.create({
-        data: {
-          companyId: session.user.companyId,
-          unitId: validated.unitId,
-          address: validated.address,
-          postalCode: validated.postalCode,
-          city: validated.city,
-          province: validated.province,
-          neighborhood: validated.neighborhood,
-          squareMeters: validated.squareMeters,
-          rooms: validated.rooms,
-          bathrooms: validated.bathrooms,
-          floor: validated.floor,
-          hasElevator: validated.hasElevator || false,
-          hasParking: validated.hasParking || false,
-          hasGarden: validated.hasGarden || false,
-          hasPool: validated.hasPool || false,
-          hasTerrace: validated.hasTerrace || false,
-          condition: validated.condition || 'GOOD',
-          yearBuilt: validated.yearBuilt,
-          avgPricePerM2: validated.avgPricePerM2,
-          marketTrend: validated.marketTrend,
-          comparables: comparables,
-          estimatedValue: valuation.estimatedValue,
-          minValue: valuation.minValue,
-          maxValue: valuation.maxValue,
-          confidenceScore: valuation.confidenceScore,
-          reasoning: valuation.reasoning,
-          keyFactors: valuation.keyFactors,
-          recommendations: valuation.recommendations,
-          model: 'claude-3-5-sonnet',
-        },
-      });
+      try {
+        await prisma.propertyValuation.create({
+          data: {
+            companyId: session.user.companyId,
+            unitId: validated.unitId,
+            address: direccion || validated.address || 'Sin dirección',
+            postalCode: validated.codigoPostal || validated.postalCode || '',
+            city: ciudad || validated.city || 'Sin ciudad',
+            province: validated.province,
+            neighborhood: validated.neighborhood,
+            squareMeters: superficie,
+            rooms: habitaciones,
+            bathrooms: banos,
+            floor: validated.planta || validated.floor,
+            hasElevator: propertyData.hasElevator,
+            hasParking: propertyData.hasParking,
+            hasGarden: propertyData.hasGarden,
+            hasPool: propertyData.hasPool,
+            hasTerrace: validated.hasTerrace || false,
+            condition: propertyData.condition || 'GOOD',
+            yearBuilt: validated.yearBuilt,
+            avgPricePerM2: valuation.precioM2 || validated.avgPricePerM2,
+            marketTrend: validated.marketTrend,
+            comparables: valuation.comparables || comparables,
+            // Mapear campos español (de Claude) -> inglés (de BD)
+            estimatedValue: valuation.valorEstimado,
+            minValue: valuation.valorMinimo,
+            maxValue: valuation.valorMaximo,
+            confidenceScore: valuation.confianza,
+            pricePerM2: valuation.precioM2,
+            reasoning: valuation.analisisMercado,
+            keyFactors: valuation.factoresPositivos || [],
+            recommendations: valuation.recomendaciones || [],
+            model: process.env.ANTHROPIC_MODEL || 'claude-3-haiku-20240307',
+          },
+        });
+        logger.info('[AI Valuate] Valoración guardada en BD');
+      } catch (dbError: any) {
+        // No fallar si no se puede guardar en BD, solo log
+        logger.warn('[AI Valuate] Error guardando en BD (no crítico):', dbError.message);
+      }
     }
 
     // 8. Log de auditoría
-    await prisma.auditLog.create({
-      data: {
-        userId: session.user.id,
-        action: 'AI_VALUATION',
-        entityType: 'UNIT',
-        entityId: validated.unitId || null,
-        details: {
-          address: validated.address,
-          city: validated.city,
-          estimatedValue: valuation.estimatedValue,
+    try {
+      await prisma.auditLog.create({
+        data: {
+          userId: session.user.id,
+          action: 'AI_VALUATION',
+          entityType: 'UNIT',
+          entityId: validated.unitId || null,
+          details: {
+            address: direccion || validated.address,
+            city: ciudad || validated.city,
+            estimatedValue: valuation.valorEstimado,
+          },
         },
-      },
-    });
+      });
+    } catch (auditError: any) {
+      logger.warn('[AI Valuate] Error en audit log:', auditError.message);
+    }
 
     // 9. Tracking de uso (Control de costos)
-    await trackUsage({
-      companyId: session.user.companyId,
-      service: 'claude',
-      metric: 'tokens',
-      value: ESTIMATED_TOKENS_PER_VALUATION, // Valor real vendría de la API
-      metadata: {
-        action: 'valuation',
-        unitId: validated.unitId,
-        address: validated.address,
-        estimatedValue: valuation.estimatedValue,
-      },
-    });
+    try {
+      await trackUsage({
+        companyId: session.user.companyId,
+        service: 'claude',
+        metric: 'tokens',
+        value: ESTIMATED_TOKENS_PER_VALUATION,
+        metadata: {
+          action: 'valuation',
+          unitId: validated.unitId,
+          address: direccion || validated.address,
+          estimatedValue: valuation.valorEstimado,
+        },
+      });
+    } catch (trackError: any) {
+      logger.warn('[AI Valuate] Error en tracking:', trackError.message);
+    }
 
     // 10. Respuesta exitosa - devolver todos los datos para la UI
     return NextResponse.json({
