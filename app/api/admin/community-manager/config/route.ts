@@ -14,7 +14,7 @@ const DEFAULT_CONFIG = {
   bestTimeToPost: '10:00',
   hashtagStrategy: 'auto',
   contentStyle: 'professional',
-  aiModel: 'claude-3-5-sonnet',
+  aiModel: 'claude-3-haiku-20240307',
   temperature: 0.7,
 };
 

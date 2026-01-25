@@ -390,7 +390,13 @@ export async function classifyDocument(
 
     throw new Error('No se pudo parsear la clasificación');
   } catch (error: any) {
-    logger.error('❌ Error clasificando documento:', error);
+    logger.error('❌ Error clasificando documento:', {
+      message: error?.message || 'Sin mensaje',
+      name: error?.name || 'Sin nombre',
+      status: error?.status,
+      type: error?.error?.type,
+      errorDetail: error?.error?.error?.message || error?.error?.message,
+    });
     throw error;
   }
 }
@@ -435,7 +441,11 @@ export async function validateDocumentOwnership(
 
     throw new Error('No se pudo validar la propiedad del documento');
   } catch (error: any) {
-    logger.error('❌ Error validando propiedad:', error);
+    logger.error('❌ Error validando propiedad:', {
+      message: error?.message || 'Sin mensaje',
+      status: error?.status,
+      errorDetail: error?.error?.error?.message || error?.error?.message,
+    });
     throw error;
   }
 }
@@ -501,7 +511,14 @@ export async function extractDocumentData(
 
     throw new Error('No se pudieron extraer los datos');
   } catch (error: any) {
-    logger.error('❌ Error extrayendo datos:', error);
+    logger.error('❌ Error extrayendo datos:', {
+      message: error?.message || 'Sin mensaje',
+      name: error?.name || 'Sin nombre',
+      status: error?.status,
+      type: error?.error?.type,
+      errorDetail: error?.error?.error?.message || error?.error?.message,
+      stack: error?.stack?.substring(0, 500),
+    });
     throw error;
   }
 }
@@ -548,7 +565,11 @@ export async function generateSuggestedActions(
 
     return [];
   } catch (error: any) {
-    logger.error('❌ Error generando acciones:', error);
+    logger.error('❌ Error generando acciones:', {
+      message: error?.message || 'Sin mensaje',
+      status: error?.status,
+      errorDetail: error?.error?.error?.message || error?.error?.message,
+    });
     return [];
   }
 }
@@ -616,7 +637,14 @@ export async function analyzeDocument(
       },
     };
   } catch (error: any) {
-    logger.error('❌ Error en análisis completo:', error);
+    logger.error('❌ Error en análisis completo:', {
+      message: error?.message || 'Sin mensaje',
+      name: error?.name || 'Sin nombre',
+      status: error?.status,
+      type: error?.error?.type,
+      errorDetail: error?.error?.error?.message || error?.error?.message,
+      stack: error?.stack?.substring(0, 500),
+    });
     throw error;
   }
 }

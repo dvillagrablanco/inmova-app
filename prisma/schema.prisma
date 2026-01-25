@@ -15624,7 +15624,7 @@ model AIDocumentAnalysis {
   document   DocumentImport @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   // Modelo y versión de IA usado
-  aiModel       String  @default("claude-3-5-sonnet-20241022")
+  aiModel       String  @default("claude-3-haiku-20240307")
   aiVersion     String?
   promptVersion String? // Para tracking de mejoras en prompts
 

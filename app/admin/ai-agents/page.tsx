@@ -198,7 +198,7 @@ export default function AIAgentsPage() {
               lastActive: null,
             },
             config: a.defaultConfig || {
-              model: 'claude-3-5-sonnet',
+              model: 'claude-3-haiku-20240307',
               temperature: 0.5,
               maxTokens: 4096,
               autoEscalate: true,
@@ -747,7 +747,7 @@ export default function AIAgentsPage() {
                         {/* Modelo */}
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Modelo:</span>
-                          <Badge variant="outline">{agent.config?.model || 'claude-3-5-sonnet'}</Badge>
+                          <Badge variant="outline">{agent.config?.model || 'claude-3-haiku-20240307'}</Badge>
                         </div>
 
                         {/* Acciones */}
@@ -895,7 +895,7 @@ export default function AIAgentsPage() {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Modelo</label>
-                  <Select defaultValue={selectedAgent.config?.model || 'claude-3-5-sonnet'}>
+                  <Select defaultValue={selectedAgent.config?.model || 'claude-3-haiku-20240307'}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

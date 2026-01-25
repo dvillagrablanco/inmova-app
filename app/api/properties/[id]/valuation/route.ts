@@ -146,7 +146,7 @@ export async function GET(
           marketComparison: valuation.marketComparison,
           investmentPotential: valuation.investmentPotential,
           recommendations: valuation.recommendations,
-          model: 'claude-3.5-sonnet',
+          model: process.env.ANTHROPIC_MODEL || 'claude-3-haiku-20240307',
           companyId: session.user.companyId,
         },
       });
