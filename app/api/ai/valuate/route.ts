@@ -362,45 +362,50 @@ export async function POST(request: NextRequest) {
     // 4. Si hay unitId, enriquecer con datos comparables de BD
     let comparables: any[] = [];
     if (validated.unitId) {
-      // Buscar propiedades similares en la misma ciudad
-      const similarUnits = await prisma.unit.findMany({
-        where: {
-          building: {
-            ciudad: validated.city,
-          },
-          superficieConstruida: {
-            gte: validated.squareMeters * 0.8,
-            lte: validated.squareMeters * 1.2,
-          },
-          numHabitaciones: validated.rooms,
-          NOT: {
-            id: validated.unitId,
-          },
-        },
-        select: {
-          id: true,
-          building: {
-            select: {
-              direccion: true,
-              ciudad: true,
+      try {
+        // Buscar propiedades similares en la misma ciudad
+        const similarUnits = await prisma.unit.findMany({
+          where: {
+            building: {
+              ciudad: ciudad,
+            },
+            superficie: {
+              gte: superficie * 0.8,
+              lte: superficie * 1.2,
+            },
+            habitaciones: habitaciones > 0 ? habitaciones : undefined,
+            NOT: {
+              id: validated.unitId,
             },
           },
-          superficieConstruida: true,
-          precioAlquiler: true,
-        },
-        take: 5,
-        orderBy: {
-          createdAt: 'desc',
-        },
-      });
+          select: {
+            id: true,
+            building: {
+              select: {
+                direccion: true,
+                ciudad: true,
+              },
+            },
+            superficie: true,
+            rentaMensual: true,
+          },
+          take: 5,
+          orderBy: {
+            createdAt: 'desc',
+          },
+        });
 
-      comparables = similarUnits
-        .filter((u) => u.precioAlquiler)
-        .map((u) => ({
-          address: `${u.building?.direccion}, ${u.building?.ciudad}`,
-          price: u.precioAlquiler!,
-          squareMeters: u.superficieConstruida || validated.squareMeters,
-        }));
+        comparables = similarUnits
+          .filter((u) => u.rentaMensual)
+          .map((u) => ({
+            address: `${u.building?.direccion}, ${u.building?.ciudad}`,
+            price: u.rentaMensual!,
+            squareMeters: u.superficie || superficie,
+          }));
+      } catch (dbError: any) {
+        logger.warn('[AI Valuate] Error buscando comparables en BD:', dbError.message);
+        // Continuar sin comparables de BD
+      }
     }
 
     // 5. Preparar datos para IA - mapear nuevos campos al formato esperado
