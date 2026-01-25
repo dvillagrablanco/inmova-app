@@ -61,7 +61,9 @@ export default function ProactiveSuggestions() {
       
       try {
         // Cargar sugerencias reales desde la API
-        const response = await fetch('/api/ai/suggestions');
+        const response = await fetch('/api/ai/suggestions', {
+          credentials: 'include', // Incluir cookies de sesión
+        });
         if (response.ok) {
           const data = await response.json();
           const apiSuggestions = data.suggestions || [];

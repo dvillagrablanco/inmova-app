@@ -270,6 +270,7 @@ export default function ValoracionIAPage() {
       const response = await fetch('/api/ai/valuate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Incluir cookies de sesión
         body: JSON.stringify({
           ...formData,
           superficie: parseFloat(formData.superficie),

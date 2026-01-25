@@ -95,6 +95,7 @@ export function TenantFormAIAssistant({ formData, onSuggestion }: TenantFormAIAs
       const res = await fetch('/api/ai/tenant-assistant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Incluir cookies de sesión
         body: JSON.stringify({
           action,
           question: action === 'ask' ? question : undefined,

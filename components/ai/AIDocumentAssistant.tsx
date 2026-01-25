@@ -594,6 +594,52 @@ export function AIDocumentAssistant({
                         {(uploadedFile.status === 'uploading' || uploadedFile.status === 'analyzing') && (
                           <Progress value={uploadedFile.progress} className="h-1 mt-2" />
                         )}
+
+                        {/* BOTONES DE ACCIÓN - Visibles directamente cuando se completa el análisis */}
+                        {uploadedFile.status === 'completed' && uploadedFile.analysis && (
+                          <div className="mt-3 pt-3 border-t border-muted">
+                            {/* Resumen breve */}
+                            <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                              {uploadedFile.analysis.summary}
+                            </p>
+                            
+                            {/* Campos extraídos preview */}
+                            {uploadedFile.analysis.extractedFields.length > 0 && (
+                              <p className="text-xs text-green-600 mb-2">
+                                ✓ {uploadedFile.analysis.extractedFields.length} campos extraídos
+                              </p>
+                            )}
+                            
+                            {/* Botones de acción */}
+                            <div className="flex gap-2">
+                              {onApplyData && uploadedFile.analysis.extractedFields.length > 0 && (
+                                <Button
+                                  size="sm"
+                                  className="flex-1 h-8 text-xs bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    applyExtractedData(uploadedFile.analysis!);
+                                  }}
+                                >
+                                  <Zap className="h-3 w-3 mr-1" />
+                                  Aplicar al formulario
+                                </Button>
+                              )}
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="h-8 text-xs"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedFile(uploadedFile);
+                                }}
+                              >
+                                <Eye className="h-3 w-3 mr-1" />
+                                Ver datos
+                              </Button>
+                            </div>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   ))}
