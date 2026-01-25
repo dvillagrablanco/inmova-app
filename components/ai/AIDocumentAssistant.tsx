@@ -598,47 +598,48 @@ export function AIDocumentAssistant({
 
                         {/* BOTONES DE ACCIÓN - Visibles directamente cuando se completa el análisis */}
                         {uploadedFile.status === 'completed' && uploadedFile.analysis && (
-                          <div className="mt-3 pt-3 border-t border-muted">
+                          <div className="mt-3 pt-3 border-t border-muted space-y-2">
                             {/* Resumen breve */}
-                            <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                            <p className="text-xs text-muted-foreground line-clamp-2">
                               {uploadedFile.analysis.summary}
                             </p>
                             
                             {/* Campos extraídos preview */}
                             {uploadedFile.analysis.extractedFields.length > 0 && (
-                              <p className="text-xs text-green-600 mb-2">
-                                ✓ {uploadedFile.analysis.extractedFields.length} campos extraídos
+                              <p className="text-xs text-green-600 font-medium">
+                                ✓ {uploadedFile.analysis.extractedFields.length} campos listos para aplicar
                               </p>
                             )}
                             
-                            {/* Botones de acción */}
-                            <div className="flex gap-2">
-                              {onApplyData && uploadedFile.analysis.extractedFields.length > 0 && (
-                                <Button
-                                  size="sm"
-                                  className="flex-1 h-8 text-xs bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    applyExtractedData(uploadedFile.analysis!);
-                                  }}
-                                >
-                                  <Zap className="h-3 w-3 mr-1" />
-                                  Aplicar al formulario
-                                </Button>
-                              )}
-                              <Button 
-                                size="sm" 
-                                variant="outline" 
-                                className="h-8 text-xs"
+                            {/* BOTÓN PRINCIPAL DE APLICAR - Grande y visible */}
+                            {onApplyData && uploadedFile.analysis.extractedFields.length > 0 && (
+                              <Button
+                                size="sm"
+                                className="w-full h-10 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setSelectedFile(uploadedFile);
+                                  applyExtractedData(uploadedFile.analysis!);
+                                  toast.success('¡Datos aplicados al formulario!');
                                 }}
                               >
-                                <Eye className="h-3 w-3 mr-1" />
-                                Ver datos
+                                <CheckCircle2 className="h-4 w-4 mr-2" />
+                                APLICAR DATOS AL FORMULARIO
                               </Button>
-                            </div>
+                            )}
+                            
+                            {/* Botón secundario para ver detalles */}
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="w-full h-8 text-xs"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedFile(uploadedFile);
+                              }}
+                            >
+                              <Eye className="h-3 w-3 mr-1" />
+                              Ver todos los datos extraídos
+                            </Button>
                           </div>
                         )}
                       </CardContent>

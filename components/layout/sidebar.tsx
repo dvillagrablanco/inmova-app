@@ -2044,10 +2044,6 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     // Validación: Si no hay rol, retornar vacío
     if (!role) return [];
 
-    // Para items que no requieren verificación de módulos (ej: superAdminPlatformItems),
-    // no esperar a que los módulos estén cargados
-    if (!skipModuleCheck && !modulesLoaded) return [];
-
     // Validación: Si items no es un array válido
     if (!Array.isArray(items) || items.length === 0) return [];
 
