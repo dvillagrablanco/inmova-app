@@ -8,7 +8,7 @@
  * - Precaching de assets críticos
  */
 
-const CACHE_VERSION = 'v3.0.1-20260108b';
+const CACHE_VERSION = 'v3.0.2-20260125';
 const CACHE_NAME = `inmova-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `inmova-runtime-${CACHE_VERSION}`;
 const IMAGES_CACHE = `inmova-images-${CACHE_VERSION}`;
@@ -93,6 +93,17 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // CRÍTICO: Excluir peticiones de análisis de documentos y subida de archivos
+  // Estas peticiones pueden tardar mucho y no deben ser interceptadas
+  if (url.pathname.includes('/api/ai/') || 
+      url.pathname.includes('/api/upload') ||
+      url.pathname.includes('/api/documents') ||
+      request.method === 'POST' && url.pathname.startsWith('/api/')) {
+    // No interceptar - dejar que vaya directo al servidor
+    console.log('[SW] Skipping interception for:', url.pathname);
+    return;
+  }
+
   // Determine strategy based on request type
   let strategy = CACHE_STRATEGIES.NETWORK_FIRST;
 
@@ -102,7 +113,7 @@ self.addEventListener('fetch', (event) => {
     // Scripts y styles: network first para asegurar actualizaciones
     strategy = CACHE_STRATEGIES.NETWORK_FIRST;
   } else if (url.pathname.startsWith('/api/')) {
-    // API requests: network first with timeout
+    // API requests: network first with longer timeout
     strategy = CACHE_STRATEGIES.NETWORK_FIRST;
   } else if (url.pathname.startsWith('/_next/static/')) {
     // Next.js static assets: network first para asegurar actualizaciones
@@ -154,7 +165,7 @@ async function cacheFirst(request) {
 }
 
 // Network First: Try network, fallback to cache
-async function networkFirst(request, timeout = 3000) {
+async function networkFirst(request, timeout = 30000) {
   try {
     const networkPromise = fetch(request);
     const timeoutPromise = new Promise((_, reject) =>
