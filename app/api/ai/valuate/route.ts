@@ -518,6 +518,16 @@ export async function POST(request: NextRequest) {
     }
 
     // 10. Respuesta exitosa - devolver todos los datos para la UI
+    logger.info('[AI Valuate] Enviando respuesta exitosa:', {
+      valorEstimado: valuation.valorEstimado,
+      valorMinimo: valuation.valorMinimo,
+      valorMaximo: valuation.valorMaximo,
+      precioM2: valuation.precioM2,
+      confianza: valuation.confianza,
+      ciudad,
+      superficie,
+    });
+    
     return NextResponse.json({
       success: true,
       ...valuation,
