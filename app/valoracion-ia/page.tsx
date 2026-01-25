@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -72,9 +71,24 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import logger from '@/lib/logger';
 
-// AIDocumentAssistant se carga de forma dinámica para evitar errores de hidratación
+// Cargar AuthenticatedLayout solo en el cliente para evitar errores de hidratación
+const AuthenticatedLayout = dynamic(
+  () => import('@/components/layout/authenticated-layout').then(mod => mod.AuthenticatedLayout),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto" />
+          <p className="text-gray-600">Cargando interfaz...</p>
+        </div>
+      </div>
+    )
+  }
+);
+
+// AIDocumentAssistant se carga de forma dinámica
 const AIDocumentAssistant = dynamic(
   () => import('@/components/ai/AIDocumentAssistant').then(mod => mod.AIDocumentAssistant),
   { ssr: false }
@@ -155,7 +169,7 @@ export default function ValoracionIAPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   
-  // Estado para controlar si el componente está montado (evita errores de hidratación)
+  // Estado para controlar si el componente está montado
   const [isMounted, setIsMounted] = useState(false);
   
   // Estados
@@ -181,18 +195,21 @@ export default function ValoracionIAPage() {
     descripcionAdicional: '',
   });
 
-  // Marcar como montado después de la hidratación
+  // Marcar como montado
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Cargar datos al iniciar
+  // Cargar datos
   useEffect(() => {
     if (!isMounted) return;
     
     if (status === 'unauthenticated') {
       router.push('/login');
-    } else if (status === 'authenticated') {
+      return;
+    }
+    
+    if (status === 'authenticated') {
       fetchAssets();
     }
   }, [status, router, isMounted]);
@@ -204,44 +221,30 @@ export default function ValoracionIAPage() {
         fetch('/api/properties', { credentials: 'include' }),
       ]);
       
-      // Manejar units
       if (unitsRes.status === 'fulfilled' && unitsRes.value.ok) {
         try {
           const unitsData = await unitsRes.value.json();
           setUnits(Array.isArray(unitsData) ? unitsData : []);
-        } catch (e) {
-          console.warn('Error parsing units response:', e);
+        } catch {
           setUnits([]);
         }
-      } else {
-        console.warn('Units fetch failed or rejected');
-        setUnits([]);
       }
       
-      // Manejar properties
       if (propsRes.status === 'fulfilled' && propsRes.value.ok) {
         try {
           const propsData = await propsRes.value.json();
           setProperties(Array.isArray(propsData) ? propsData : []);
-        } catch (e) {
-          console.warn('Error parsing properties response:', e);
+        } catch {
           setProperties([]);
         }
-      } else {
-        console.warn('Properties fetch failed or rejected');
-        setProperties([]);
       }
     } catch (error) {
-      // Error crítico - seguir cargando la página sin datos
       console.error('Error fetching assets:', error);
-      setUnits([]);
-      setProperties([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Cuando se selecciona un activo, rellenar datos automáticamente
   const handleAssetSelect = (assetId: string) => {
     setSelectedAsset(assetId);
     
@@ -268,17 +271,6 @@ export default function ValoracionIAPage() {
     }
   };
 
-  // Toggle característica
-  const toggleCaracteristica = (id: string) => {
-    setFormData(prev => ({
-      ...prev,
-      caracteristicas: prev.caracteristicas.includes(id)
-        ? prev.caracteristicas.filter(c => c !== id)
-        : [...prev.caracteristicas, id],
-    }));
-  };
-
-  // Realizar valoración con IA
   const handleValorar = async () => {
     if (!formData.superficie || parseFloat(formData.superficie) <= 0) {
       toast.error('Por favor indica la superficie del inmueble');
@@ -289,7 +281,6 @@ export default function ValoracionIAPage() {
     setResultado(null);
 
     try {
-      // Obtener datos del activo seleccionado
       let direccion = '';
       let ciudad = '';
       
@@ -306,7 +297,7 @@ export default function ValoracionIAPage() {
       const response = await fetch('/api/ai/valuate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // Incluir cookies de sesión
+        credentials: 'include',
         body: JSON.stringify({
           ...formData,
           superficie: parseFloat(formData.superficie),
@@ -329,17 +320,15 @@ export default function ValoracionIAPage() {
 
       const data = await response.json();
       setResultado(data);
-      toast.success('Valoración completada con éxito');
-      
+      toast.success('Valoración completada');
     } catch (error: any) {
-      logger.error('Error en valoración:', error);
-      toast.error(error.message || 'Error al realizar la valoración con IA');
+      console.error('Error valorando:', error);
+      toast.error(error.message || 'Error al realizar la valoración');
     } finally {
       setValorando(false);
     }
   };
 
-  // Formatear moneda
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-ES', {
       style: 'currency',
@@ -348,19 +337,6 @@ export default function ValoracionIAPage() {
     }).format(value);
   };
 
-  // Obtener icono de tendencia
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case 'alcista':
-        return <TrendingUp className="h-5 w-5 text-green-500" />;
-      case 'bajista':
-        return <TrendingDown className="h-5 w-5 text-red-500" />;
-      default:
-        return <Minus className="h-5 w-5 text-yellow-500" />;
-    }
-  };
-
-  // Obtener color de tendencia
   const getTrendColor = (trend: string) => {
     switch (trend) {
       case 'alcista':
@@ -372,44 +348,49 @@ export default function ValoracionIAPage() {
     }
   };
 
-  // Mostrar loading mientras se monta el componente o se cargan los datos
-  if (!isMounted || loading) {
+  // Estado de carga inicial - sin AuthenticatedLayout para evitar hidratación
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto" />
+          <p className="text-gray-600">Preparando página...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Sesión cargando
+  if (status === 'loading' || loading) {
     return (
       <AuthenticatedLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
             <p className="text-muted-foreground">
-              {!isMounted ? 'Preparando página...' : 'Cargando activos...'}
+              {status === 'loading' ? 'Verificando sesión...' : 'Cargando activos...'}
             </p>
-            {status === 'loading' && (
-              <p className="text-xs text-muted-foreground mt-2">
-                Verificando sesión...
-              </p>
-            )}
           </div>
         </div>
       </AuthenticatedLayout>
     );
   }
   
-  // Si no está autenticado después de montar, mostrar mensaje
+  // No autenticado
   if (status === 'unauthenticated') {
     return (
-      <AuthenticatedLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Sesión requerida</h2>
-            <p className="text-muted-foreground mb-4">
-              Necesitas iniciar sesión para acceder a esta página.
-            </p>
-            <Button onClick={() => router.push('/login')}>
-              Iniciar sesión
-            </Button>
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center">
+          <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Sesión requerida</h2>
+          <p className="text-muted-foreground mb-4">
+            Necesitas iniciar sesión para acceder a esta página.
+          </p>
+          <Button onClick={() => router.push('/login')}>
+            Iniciar sesión
+          </Button>
         </div>
-      </AuthenticatedLayout>
+      </div>
     );
   }
 
@@ -428,119 +409,105 @@ export default function ValoracionIAPage() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard">
-                  <Home className="h-4 w-4" />
-                </BreadcrumbLink>
+                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Valoración con IA</BreadcrumbPage>
+                <BreadcrumbPage>Valoración IA</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
 
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center justify-between">
             <div>
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-500 flex items-center justify-center">
-                  <Brain className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold">Valoración de Activos con IA</h1>
-                  <p className="text-muted-foreground mt-1">
-                    Tasación inteligente de propiedades con análisis de mercado
-                  </p>
-                </div>
-              </div>
+              <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+                <Brain className="h-8 w-8 text-primary" />
+                Valoración Inteligente
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Obtén una valoración precisa de tu inmueble usando IA avanzada
+              </p>
             </div>
-            <Badge variant="outline" className="gap-1">
-              <Sparkles className="h-3 w-3 text-violet-500" />
-              Powered by Claude AI
+            <Badge variant="secondary" className="flex items-center gap-1">
+              <Sparkles className="h-3 w-3" />
+              Powered by Claude
             </Badge>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Panel de Formulario */}
-          <div className="space-y-6">
-            {/* Selección de Activo */}
+        {/* Contenido principal */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Formulario */}
+          <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5" />
-                  Seleccionar Activo a Valorar
+                  <Calculator className="h-5 w-5" />
+                  Datos del Inmueble
                 </CardTitle>
                 <CardDescription>
-                  Elige un inmueble de tu cartera o introduce datos manualmente
+                  Introduce los datos del inmueble para obtener una valoración precisa
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Tipo de activo */}
-                <div className="space-y-2">
-                  <Label>Tipo de Activo</Label>
-                  <Select 
-                    value={assetType} 
-                    onValueChange={(v: 'unit' | 'property') => {
-                      setAssetType(v);
-                      setSelectedAsset('');
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="unit">Unidades / Viviendas</SelectItem>
-                      <SelectItem value="property">Propiedades / Edificios</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <CardContent className="space-y-6">
+                {/* Selección de activo existente */}
+                <div className="space-y-4">
+                  <Label>Seleccionar activo existente (opcional)</Label>
+                  <div className="flex gap-4">
+                    <Button
+                      type="button"
+                      variant={assetType === 'unit' ? 'default' : 'outline'}
+                      onClick={() => setAssetType('unit')}
+                    >
+                      <Building2 className="h-4 w-4 mr-2" />
+                      Unidades ({units.length})
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={assetType === 'property' ? 'default' : 'outline'}
+                      onClick={() => setAssetType('property')}
+                    >
+                      <Home className="h-4 w-4 mr-2" />
+                      Propiedades ({properties.length})
+                    </Button>
+                  </div>
+
+                  {(units.length > 0 || properties.length > 0) && (
+                    <Select value={selectedAsset} onValueChange={handleAssetSelect}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un activo para autorellenar datos" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {assetType === 'unit' ? (
+                          units.map((unit) => (
+                            <SelectItem key={unit.id} value={unit.id}>
+                              {unit.numero} - {unit.building?.nombre || 'Sin edificio'}
+                              {unit.superficie && ` (${unit.superficie}m²)`}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          properties.map((prop) => (
+                            <SelectItem key={prop.id} value={prop.id}>
+                              {prop.direccion || 'Sin dirección'}
+                              {prop.superficie && ` (${prop.superficie}m²)`}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
 
-                {/* Selector de activo */}
-                <div className="space-y-2">
-                  <Label>Seleccionar Activo</Label>
-                  <Select value={selectedAsset} onValueChange={handleAssetSelect}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona un activo de tu cartera..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">-- Introducir datos manualmente --</SelectItem>
-                      {assetType === 'unit' ? (
-                        units.map((unit) => (
-                          <SelectItem key={unit.id} value={unit.id}>
-                            {unit.building?.nombre || 'Sin edificio'} - Unidad {unit.numero}
-                            {unit.superficie && ` (${unit.superficie}m²)`}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        properties.map((prop) => (
-                          <SelectItem key={prop.id} value={prop.id}>
-                            {prop.direccion || 'Sin dirección'}
-                            {prop.superficie && ` (${prop.superficie}m²)`}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-            </Card>
+                <Separator />
 
-            {/* Características del Inmueble */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Ruler className="h-5 w-5" />
-                  Características del Inmueble
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {/* Datos principales */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="superficie">Superficie (m²) *</Label>
                     <Input
                       id="superficie"
                       type="number"
-                      placeholder="85"
+                      placeholder="80"
                       value={formData.superficie}
                       onChange={(e) => setFormData({ ...formData, superficie: e.target.value })}
                     />
@@ -570,47 +537,38 @@ export default function ValoracionIAPage() {
                     <Input
                       id="antiguedad"
                       type="number"
-                      placeholder="15"
+                      placeholder="10"
                       value={formData.antiguedad}
                       onChange={(e) => setFormData({ ...formData, antiguedad: e.target.value })}
                     />
                   </div>
+                </div>
+
+                {/* Estado y orientación */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="planta">Planta</Label>
-                    <Input
-                      id="planta"
-                      type="number"
-                      placeholder="3"
-                      value={formData.planta}
-                      onChange={(e) => setFormData({ ...formData, planta: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Estado</Label>
-                    <Select 
+                    <Label>Estado de conservación</Label>
+                    <Select
                       value={formData.estadoConservacion}
-                      onValueChange={(v) => setFormData({ ...formData, estadoConservacion: v })}
+                      onValueChange={(value) => setFormData({ ...formData, estadoConservacion: value })}
                     >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="excelente">Excelente / A estrenar</SelectItem>
-                        <SelectItem value="muy_bueno">Muy bueno</SelectItem>
+                        <SelectItem value="nuevo">Nuevo / A estrenar</SelectItem>
+                        <SelectItem value="excelente">Excelente</SelectItem>
                         <SelectItem value="bueno">Bueno</SelectItem>
                         <SelectItem value="normal">Normal</SelectItem>
                         <SelectItem value="reformar">A reformar</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Orientación</Label>
-                    <Select 
+                    <Label>Orientación principal</Label>
+                    <Select
                       value={formData.orientacion}
-                      onValueChange={(v) => setFormData({ ...formData, orientacion: v })}
+                      onValueChange={(value) => setFormData({ ...formData, orientacion: value })}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -624,40 +582,58 @@ export default function ValoracionIAPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Finalidad</Label>
-                    <Select 
-                      value={formData.finalidad}
-                      onValueChange={(v) => setFormData({ ...formData, finalidad: v })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="venta">Venta</SelectItem>
-                        <SelectItem value="alquiler">Alquiler</SelectItem>
-                        <SelectItem value="ambos">Ambos</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="planta">Planta</Label>
+                    <Input
+                      id="planta"
+                      type="number"
+                      placeholder="3"
+                      value={formData.planta}
+                      onChange={(e) => setFormData({ ...formData, planta: e.target.value })}
+                    />
                   </div>
                 </div>
 
-                {/* Características adicionales */}
+                {/* Finalidad */}
+                <div className="space-y-2">
+                  <Label>Finalidad de la valoración</Label>
+                  <Select
+                    value={formData.finalidad}
+                    onValueChange={(value) => setFormData({ ...formData, finalidad: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="venta">Venta</SelectItem>
+                      <SelectItem value="alquiler">Alquiler</SelectItem>
+                      <SelectItem value="ambos">Venta y Alquiler</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Características */}
                 <div className="space-y-2">
                   <Label>Características adicionales</Label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {CARACTERISTICAS.map((car) => {
-                      const Icon = car.icon;
                       const isSelected = formData.caracteristicas.includes(car.id);
+                      const Icon = car.icon;
                       return (
                         <Button
                           key={car.id}
                           type="button"
                           variant={isSelected ? 'default' : 'outline'}
                           size="sm"
-                          className="justify-start gap-2"
-                          onClick={() => toggleCaracteristica(car.id)}
+                          onClick={() => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              caracteristicas: isSelected
+                                ? prev.caracteristicas.filter((c) => c !== car.id)
+                                : [...prev.caracteristicas, car.id],
+                            }));
+                          }}
                         >
-                          <Icon className="h-4 w-4" />
+                          <Icon className="h-3 w-3 mr-1" />
                           {car.label}
                         </Button>
                       );
@@ -667,32 +643,31 @@ export default function ValoracionIAPage() {
 
                 {/* Descripción adicional */}
                 <div className="space-y-2">
-                  <Label htmlFor="descripcion">Información adicional (opcional)</Label>
+                  <Label htmlFor="descripcion">Descripción adicional</Label>
                   <Textarea
                     id="descripcion"
-                    placeholder="Describe características especiales, reformas recientes, vistas, etc."
+                    placeholder="Información adicional relevante para la valoración..."
                     value={formData.descripcionAdicional}
                     onChange={(e) => setFormData({ ...formData, descripcionAdicional: e.target.value })}
-                    rows={3}
                   />
                 </div>
 
                 {/* Botón de valorar */}
-                <Button 
-                  className="w-full bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
-                  size="lg"
+                <Button
                   onClick={handleValorar}
-                  disabled={valorando}
+                  disabled={valorando || !formData.superficie}
+                  className="w-full"
+                  size="lg"
                 >
                   {valorando ? (
                     <>
-                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       Analizando con IA...
                     </>
                   ) : (
                     <>
-                      <Brain className="h-5 w-5 mr-2" />
-                      Valorar con Inteligencia Artificial
+                      <Brain className="h-4 w-4 mr-2" />
+                      Obtener Valoración
                     </>
                   )}
                 </Button>
@@ -700,306 +675,153 @@ export default function ValoracionIAPage() {
             </Card>
           </div>
 
-          {/* Panel de Resultados */}
+          {/* Panel lateral con resultados */}
           <div className="space-y-6">
-            {!resultado && !valorando && (
-              <Card className="h-full flex flex-col items-center justify-center min-h-[400px] border-dashed">
-                <CardContent className="text-center py-12">
-                  <div className="h-20 w-20 rounded-full bg-violet-50 flex items-center justify-center mx-auto mb-6">
-                    <Brain className="h-10 w-10 text-violet-500" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Valoración Inteligente</h3>
-                  <p className="text-muted-foreground max-w-sm mx-auto mb-6">
-                    Completa los datos del inmueble y obtén una valoración profesional 
-                    basada en análisis de mercado con inteligencia artificial.
-                  </p>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    <Badge variant="secondary">
-                      <Target className="h-3 w-3 mr-1" />
-                      Análisis de comparables
-                    </Badge>
-                    <Badge variant="secondary">
-                      <TrendingUp className="h-3 w-3 mr-1" />
-                      Tendencias de mercado
-                    </Badge>
-                    <Badge variant="secondary">
-                      <Lightbulb className="h-3 w-3 mr-1" />
-                      Recomendaciones
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {valorando && (
-              <Card className="h-full flex flex-col items-center justify-center min-h-[400px]">
-                <CardContent className="text-center py-12">
-                  <div className="relative h-24 w-24 mx-auto mb-6">
-                    <div className="absolute inset-0 rounded-full border-4 border-violet-200" />
-                    <div className="absolute inset-0 rounded-full border-4 border-violet-500 border-t-transparent animate-spin" />
-                    <Brain className="absolute inset-0 m-auto h-10 w-10 text-violet-500" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Analizando con IA</h3>
-                  <p className="text-muted-foreground max-w-sm mx-auto">
-                    Claude está analizando el mercado, comparando propiedades similares 
-                    y calculando el valor óptimo...
-                  </p>
-                  <div className="mt-6 space-y-2 text-sm text-left max-w-xs mx-auto">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      Analizando características
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin text-violet-500" />
-                      Buscando comparables
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground opacity-50">
-                      <Clock className="h-4 w-4" />
-                      Calculando valoración
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {resultado && (
-              <div className="space-y-4">
-                {/* Valoración Principal */}
-                <Card className="border-2 border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50">
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span className="flex items-center gap-2">
-                        <Award className="h-5 w-5 text-violet-600" />
-                        Valoración Estimada
-                      </span>
-                      <Badge className={getTrendColor(resultado.tendenciaMercado)}>
-                        {getTrendIcon(resultado.tendenciaMercado)}
-                        <span className="ml-1">
-                          {resultado.tendenciaMercado === 'alcista' ? '+' : 
-                           resultado.tendenciaMercado === 'bajista' ? '-' : ''}
-                          {resultado.porcentajeTendencia}%
-                        </span>
-                      </Badge>
+            {resultado ? (
+              <>
+                {/* Resultado principal */}
+                <Card className="border-2 border-primary">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Target className="h-5 w-5 text-primary" />
+                      Valoración Estimada
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="text-center mb-6">
-                      <p className="text-5xl font-bold text-violet-700">
+                  <CardContent className="space-y-4">
+                    <div className="text-center">
+                      <div className="text-4xl font-bold text-primary">
                         {formatCurrency(resultado.valorEstimado)}
-                      </p>
-                      <p className="text-sm text-muted-foreground mt-2">
+                      </div>
+                      <div className="text-sm text-muted-foreground mt-1">
                         Rango: {formatCurrency(resultado.valorMinimo)} - {formatCurrency(resultado.valorMaximo)}
-                      </p>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-4 pt-4 border-t">
-                      <div className="text-center">
-                        <p className="text-2xl font-bold">{formatCurrency(resultado.precioM2)}</p>
-                        <p className="text-xs text-muted-foreground">Precio/m²</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-2xl font-bold">{resultado.confianza}%</p>
-                        <p className="text-xs text-muted-foreground">Confianza</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-2xl font-bold">{resultado.tiempoEstimadoVenta}</p>
-                        <p className="text-xs text-muted-foreground">Tiempo venta</p>
                       </div>
                     </div>
 
-                    {/* Nivel de confianza */}
-                    <div className="mt-4">
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>Nivel de confianza</span>
+                    <div className="flex items-center justify-center gap-2">
+                      <Badge className={getTrendColor(resultado.tendenciaMercado)}>
+                        {resultado.tendenciaMercado === 'alcista' && <TrendingUp className="h-3 w-3 mr-1" />}
+                        {resultado.tendenciaMercado === 'bajista' && <TrendingDown className="h-3 w-3 mr-1" />}
+                        {resultado.tendenciaMercado === 'estable' && <Minus className="h-3 w-3 mr-1" />}
+                        {resultado.tendenciaMercado.charAt(0).toUpperCase() + resultado.tendenciaMercado.slice(1)}
+                        ({resultado.porcentajeTendencia > 0 ? '+' : ''}{resultado.porcentajeTendencia}%)
+                      </Badge>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Confianza</span>
                         <span className="font-medium">{resultado.confianza}%</span>
                       </div>
-                      <Progress value={resultado.confianza} className="h-2" />
+                      <Progress value={resultado.confianza} />
+                    </div>
+
+                    <Separator />
+
+                    <div className="grid grid-cols-2 gap-4 text-center">
+                      <div>
+                        <div className="text-2xl font-semibold">{formatCurrency(resultado.precioM2)}</div>
+                        <div className="text-xs text-muted-foreground">por m²</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-semibold">{formatCurrency(resultado.alquilerEstimado)}</div>
+                        <div className="text-xs text-muted-foreground">alquiler/mes</div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Rentabilidad Alquiler */}
-                {(formData.finalidad === 'alquiler' || formData.finalidad === 'ambos') && (
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <Euro className="h-4 w-4" />
-                        Análisis de Rentabilidad
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="p-3 bg-green-50 rounded-lg border border-green-100">
-                          <p className="text-sm text-green-700">Alquiler mensual estimado</p>
-                          <p className="text-2xl font-bold text-green-800">
-                            {formatCurrency(resultado.alquilerEstimado)}/mes
-                          </p>
-                        </div>
-                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                          <p className="text-sm text-blue-700">Rentabilidad bruta</p>
-                          <p className="text-2xl font-bold text-blue-800">
-                            {resultado.rentabilidadAlquiler.toFixed(2)}%
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Análisis Detallado */}
-                <Accordion type="single" collapsible className="w-full">
-                  {/* Comparables */}
-                  {resultado.comparables && resultado.comparables.length > 0 && (
-                    <AccordionItem value="comparables">
-                      <AccordionTrigger>
-                        <span className="flex items-center gap-2">
-                          <BarChart3 className="h-4 w-4" />
-                          Propiedades Comparables ({resultado.comparables.length})
-                        </span>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="space-y-2">
-                          {resultado.comparables.map((comp, idx) => (
-                            <div key={idx} className="p-3 bg-muted/50 rounded-lg flex items-center justify-between">
-                              <div>
-                                <p className="font-medium text-sm">{comp.direccion}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {comp.superficie}m² • {formatCurrency(comp.precioM2)}/m²
-                                </p>
-                              </div>
-                              <div className="text-right">
-                                <p className="font-bold">{formatCurrency(comp.precio)}</p>
-                                <Badge variant="outline" className="text-xs">
-                                  {Math.round(comp.similitud * 100)}% similar
-                                </Badge>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  )}
-
-                  {/* Factores */}
-                  <AccordionItem value="factores">
-                    <AccordionTrigger>
-                      <span className="flex items-center gap-2">
-                        <PieChart className="h-4 w-4" />
-                        Factores de Valoración
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm font-medium text-green-700 mb-2 flex items-center gap-1">
+                {/* Factores */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Análisis de Factores</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="positivos">
+                        <AccordionTrigger className="text-green-600">
+                          <div className="flex items-center gap-2">
                             <CheckCircle2 className="h-4 w-4" />
-                            Factores Positivos
-                          </p>
+                            Factores Positivos ({resultado.factoresPositivos.length})
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
                           <ul className="space-y-1">
-                            {resultado.factoresPositivos.map((f, i) => (
-                              <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                                <span className="text-green-500 mt-1">+</span>
-                                {f}
+                            {resultado.factoresPositivos.map((factor, i) => (
+                              <li key={i} className="text-sm flex items-start gap-2">
+                                <CheckCircle2 className="h-3 w-3 text-green-500 mt-1 flex-shrink-0" />
+                                {factor}
                               </li>
                             ))}
                           </ul>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-red-700 mb-2 flex items-center gap-1">
+                        </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="negativos">
+                        <AccordionTrigger className="text-red-600">
+                          <div className="flex items-center gap-2">
                             <AlertTriangle className="h-4 w-4" />
-                            Factores Negativos
-                          </p>
+                            Factores Negativos ({resultado.factoresNegativos.length})
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
                           <ul className="space-y-1">
-                            {resultado.factoresNegativos.map((f, i) => (
-                              <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                                <span className="text-red-500 mt-1">-</span>
-                                {f}
+                            {resultado.factoresNegativos.map((factor, i) => (
+                              <li key={i} className="text-sm flex items-start gap-2">
+                                <AlertTriangle className="h-3 w-3 text-red-500 mt-1 flex-shrink-0" />
+                                {factor}
                               </li>
                             ))}
                           </ul>
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  {/* Recomendaciones */}
-                  <AccordionItem value="recomendaciones">
-                    <AccordionTrigger>
-                      <span className="flex items-center gap-2">
-                        <Lightbulb className="h-4 w-4" />
-                        Recomendaciones del Experto
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <ul className="space-y-2">
-                        {resultado.recomendaciones.map((rec, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm">
-                            <span className="h-5 w-5 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-xs shrink-0 mt-0.5">
-                              {i + 1}
-                            </span>
-                            {rec}
-                          </li>
-                        ))}
-                      </ul>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  {/* Análisis de Mercado */}
-                  <AccordionItem value="mercado">
-                    <AccordionTrigger>
-                      <span className="flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4" />
-                        Análisis de Mercado
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <p className="text-sm text-muted-foreground whitespace-pre-line">
-                        {resultado.analisisMercado}
-                      </p>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-
-                {/* Acciones */}
-                <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1" onClick={() => setResultado(null)}>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Nueva Valoración
-                  </Button>
-                  <Button variant="outline" className="flex-1">
-                    <Download className="h-4 w-4 mr-2" />
-                    Descargar Informe
-                  </Button>
-                  <Button variant="outline" className="flex-1">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Guardar
-                  </Button>
-                </div>
-              </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="recomendaciones">
+                        <AccordionTrigger className="text-blue-600">
+                          <div className="flex items-center gap-2">
+                            <Lightbulb className="h-4 w-4" />
+                            Recomendaciones ({resultado.recomendaciones.length})
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <ul className="space-y-1">
+                            {resultado.recomendaciones.map((rec, i) => (
+                              <li key={i} className="text-sm flex items-start gap-2">
+                                <Lightbulb className="h-3 w-3 text-blue-500 mt-1 flex-shrink-0" />
+                                {rec}
+                              </li>
+                            ))}
+                          </ul>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </CardContent>
+                </Card>
+              </>
+            ) : (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <Brain className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="font-medium mb-2">Obtén una valoración precisa</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Introduce los datos del inmueble y nuestra IA te proporcionará una valoración detallada.
+                  </p>
+                </CardContent>
+              </Card>
             )}
+
+            {/* Info */}
+            <Card>
+              <CardContent className="py-4">
+                <div className="flex items-start gap-3">
+                  <Info className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-muted-foreground">
+                    Esta valoración es orientativa y se basa en datos del mercado y algoritmos de IA.
+                    Para una tasación oficial, contacta con un tasador certificado.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
-
-      {/* Asistente IA de Documentos - Para subir documentación de la propiedad */}
-      <AIDocumentAssistant 
-        context="propiedades"
-        variant="floating"
-        position="bottom-right"
-        onAnalysisComplete={(analysis) => {
-          // Si se detectan datos de superficie, habitaciones, etc., aplicarlos
-          const fields = analysis.extractedFields;
-          const superficie = fields.find(f => f.fieldName.toLowerCase().includes('superficie'));
-          const habitaciones = fields.find(f => f.fieldName.toLowerCase().includes('habitacion'));
-          
-          if (superficie) {
-            setFormData(prev => ({ ...prev, superficie: superficie.fieldValue }));
-          }
-          if (habitaciones) {
-            setFormData(prev => ({ ...prev, habitaciones: habitaciones.fieldValue }));
-          }
-        }}
-      />
     </AuthenticatedLayout>
   );
 }
