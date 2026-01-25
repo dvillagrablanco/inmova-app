@@ -1,6 +1,9 @@
 /**
  * SERVICIO DE PREFERENCIAS DE USUARIO
  * Gestiona módulos activos, tours completados y configuraciones personalizadas
+ * 
+ * NOTA: Usa setupProgress (JSON string) para almacenar preferencias extendidas
+ * y campos existentes en User para datos específicos.
  */
 
 import prisma from './db';
@@ -8,6 +11,7 @@ import { getDefaultActiveModules, validateModuleDependencies, MODULES } from './
 import type { UserRole, BusinessVertical } from '@prisma/client';
 
 import logger from '@/lib/logger';
+
 export interface UserPreferences {
   activeModules: string[];
   completedTours: string[];
@@ -22,17 +26,95 @@ export interface UserPreferences {
   notificationsEnabled: boolean;
 }
 
+interface SetupProgressData {
+  completedTours: string[];
+  activeModules: string[];
+  theme: string;
+  language: string;
+  enableTooltips: boolean;
+  enableChatbot: boolean;
+  enableVideos: boolean;
+  autoplayTours: boolean;
+  notificationsEnabled: boolean;
+}
+
+/**
+ * Parsea el campo setupProgress de forma segura
+ */
+function parseSetupProgress(setupProgress: string | null): SetupProgressData {
+  const defaults: SetupProgressData = {
+    completedTours: [],
+    activeModules: [],
+    theme: 'light',
+    language: 'es',
+    enableTooltips: true,
+    enableChatbot: true,
+    enableVideos: true,
+    autoplayTours: true,
+    notificationsEnabled: true
+  };
+  
+  if (!setupProgress) return defaults;
+  
+  try {
+    const parsed = JSON.parse(setupProgress);
+    return { ...defaults, ...parsed };
+  } catch {
+    return defaults;
+  }
+}
+
 /**
  * Obtiene preferencias del usuario
  */
 export async function getUserPreferences(userId: string): Promise<UserPreferences> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { preferences: true }
-  });
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { 
+        setupProgress: true,
+        experienceLevel: true,
+        businessVertical: true,
+        preferredModules: true
+      }
+    });
 
-  if (!user || !user.preferences) {
-    // Preferencias por defecto
+    if (!user) {
+      // Preferencias por defecto
+      return {
+        activeModules: [],
+        completedTours: [],
+        experienceLevel: 'intermedio',
+        vertical: 'alquiler_tradicional',
+        theme: 'light',
+        language: 'es',
+        enableTooltips: true,
+        enableChatbot: true,
+        enableVideos: true,
+        autoplayTours: true,
+        notificationsEnabled: true
+      };
+    }
+
+    // Parsear setupProgress que contiene preferencias extendidas
+    const setupData = parseSetupProgress(user.setupProgress);
+
+    return {
+      activeModules: setupData.activeModules || user.preferredModules || [],
+      completedTours: setupData.completedTours || [],
+      experienceLevel: (user.experienceLevel as 'principiante' | 'intermedio' | 'avanzado') || 'intermedio',
+      vertical: user.businessVertical || 'alquiler_tradicional',
+      theme: setupData.theme as 'light' | 'dark' || 'light',
+      language: setupData.language as 'es' | 'en' || 'es',
+      enableTooltips: setupData.enableTooltips ?? true,
+      enableChatbot: setupData.enableChatbot ?? true,
+      enableVideos: setupData.enableVideos ?? true,
+      autoplayTours: setupData.autoplayTours ?? true,
+      notificationsEnabled: setupData.notificationsEnabled ?? true
+    };
+  } catch (error) {
+    logger.error('Error obteniendo preferencias:', error);
+    // Devolver preferencias por defecto en caso de error
     return {
       activeModules: [],
       completedTours: [],
@@ -47,8 +129,6 @@ export async function getUserPreferences(userId: string): Promise<UserPreference
       notificationsEnabled: true
     };
   }
-
-  return user.preferences as unknown as UserPreferences;
 }
 
 /**
@@ -58,15 +138,40 @@ export async function updateUserPreferences(
   userId: string,
   preferences: Partial<UserPreferences>
 ): Promise<UserPreferences> {
-  const current = await getUserPreferences(userId);
-  const updated = { ...current, ...preferences };
+  try {
+    const current = await getUserPreferences(userId);
+    const updated = { ...current, ...preferences };
 
-  await prisma.user.update({
-    where: { id: userId },
-    data: { preferences: updated as any }
-  });
+    // Preparar datos para setupProgress (JSON string)
+    const setupProgressData: SetupProgressData = {
+      completedTours: updated.completedTours,
+      activeModules: updated.activeModules,
+      theme: updated.theme,
+      language: updated.language,
+      enableTooltips: updated.enableTooltips,
+      enableChatbot: updated.enableChatbot,
+      enableVideos: updated.enableVideos,
+      autoplayTours: updated.autoplayTours,
+      notificationsEnabled: updated.notificationsEnabled
+    };
 
-  return updated;
+    // Actualizar usando campos existentes en User
+    await prisma.user.update({
+      where: { id: userId },
+      data: { 
+        setupProgress: JSON.stringify(setupProgressData),
+        // Actualizar experienceLevel si se proporciona
+        ...(preferences.experienceLevel && { 
+          experienceLevel: preferences.experienceLevel as any 
+        })
+      }
+    });
+
+    return updated;
+  } catch (error) {
+    logger.error('Error actualizando preferencias:', error);
+    throw error;
+  }
 }
 
 /**
