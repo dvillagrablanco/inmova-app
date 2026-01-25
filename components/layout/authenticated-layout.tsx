@@ -8,7 +8,6 @@ import { TourAutoStarter } from '@/components/tours/TourAutoStarter';
 import { FloatingTourButton } from '@/components/tours/FloatingTourButton';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { useIsMobile } from '@/lib/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 import { SkipLink } from '@/components/accessibility/SkipLink';
 import { CommandPalette } from '@/components/navigation/command-palette';
@@ -57,7 +56,7 @@ export function AuthenticatedLayout({
 }: AuthenticatedLayoutProps) {
   // Estado para controlar el montaje y evitar errores de hidratación
   const [isMounted, setIsMounted] = useState(false);
-  const isMobile = useIsMobile();
+  const [isMobileState, setIsMobileState] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -65,9 +64,16 @@ export function AuthenticatedLayout({
   // Hook centralizado para gestionar onboarding - evita solapamientos
   const { isOnboardingDisabled, disableOnboarding } = useOnboardingManager();
   
-  // Marcar como montado después de la hidratación inicial
+  // Marcar como montado y detectar mobile SOLO en el cliente
   useEffect(() => {
     setIsMounted(true);
+    // Detectar mobile solo después del montaje para evitar hidratación
+    const checkMobile = () => {
+      setIsMobileState(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   // Redirección para socios de eWoorker: solo pueden acceder a rutas de eWoorker
@@ -128,7 +134,7 @@ export function AuthenticatedLayout({
           id="main-content"
           className={cn(
             'flex-1 overflow-y-auto',
-            isMounted && isMobile ? 'pb-20' : '', // Espacio para bottom nav en móvil (solo después de montaje)
+            isMounted && isMobileState ? 'pb-20' : '', // Espacio para bottom nav en móvil (solo después de montaje)
             className
           )}
         >
