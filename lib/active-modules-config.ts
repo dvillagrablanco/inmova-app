@@ -101,10 +101,10 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   viajes_corporativos: { status: 'active', name: 'Viajes Corporativos' },
   workspace: { status: 'active', name: 'Workspace/Coworking' },
   
-  // Verticales Especializadas - PENDIENTES PLACEHOLDER
-  warehouse: { status: 'beta', name: 'Warehouse' },
-  hospitality: { status: 'coming_soon', name: 'Hospitality', expectedDate: 'Q4 2026' },
-  retail: { status: 'coming_soon', name: 'Retail', expectedDate: 'Q4 2026' },
+  // Verticales Especializadas - IMPLEMENTADAS
+  warehouse: { status: 'active', name: 'Warehouse' },
+  hospitality: { status: 'active', name: 'Hospitality' },
+  retail: { status: 'active', name: 'Retail' },
   
   // Módulos Avanzados - YA DESARROLLADOS
   tours_virtuales: { status: 'beta', name: 'Tours Virtuales' },
@@ -123,14 +123,18 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   informes: { status: 'active', name: 'Informes' },
   proyectos_renovacion: { status: 'active', name: 'Proyectos Renovación' },
   
-  // Herramientas - PENDIENTES PLACEHOLDER
-  subastas: { status: 'coming_soon', name: 'Subastas', expectedDate: 'Q3 2026' },
-  marketplace_proveedores: { status: 'coming_soon', name: 'Marketplace Proveedores', expectedDate: 'Q2 2026' },
+  // Herramientas - IMPLEMENTADAS
+  subastas: { status: 'active', name: 'Subastas' },
+  servicios_concierge: { status: 'active', name: 'Servicios Concierge' },
+  stock_gestion: { status: 'active', name: 'Gestión de Stock' },
+  sincronizacion_avanzada: { status: 'active', name: 'Sincronización Avanzada' },
+  warranty_management: { status: 'active', name: 'Gestión Garantías' },
+  microtransacciones: { status: 'active', name: 'Microtransacciones' },
+  marketplace_proveedores: { status: 'beta', name: 'Marketplace Proveedores' },
   
   // ============================================
   // MÓDULOS OCULTOS - NO MOSTRAR EN SIDEBAR
   // ============================================
-  microtransacciones: { status: 'hidden', name: 'Microtransacciones' },
   suscripciones: { status: 'hidden', name: 'Suscripciones' },
   impuestos: { status: 'hidden', name: 'Impuestos' },
 };
@@ -140,24 +144,9 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
  * SOLO incluir páginas que son verdaderos placeholders (ComingSoonPage)
  */
 export const HIDDEN_ROUTES: string[] = [
-  // Verticales placeholder (ComingSoonPage)
-  '/hospitality',
-  '/retail',
-  
-  // Herramientas placeholder (ComingSoonPage)
-  '/subastas',
-  '/microtransacciones',
+  // Herramientas placeholder (ComingSoonPage) - muy bajo prioridad
   '/suscripciones',
-  '/servicios-concierge',
-  '/stock-gestion',
-  '/sincronizacion-avanzada',
-  '/warranty-management',
   '/comunidad', // placeholder general, no coliving
-  
-  // Sub-rutas warehouse (placeholders por desarrollar)
-  '/warehouse/inventory',
-  '/warehouse/locations',
-  '/warehouse/movements',
 ];
 
 /**
@@ -177,7 +166,7 @@ export const BETA_ROUTES: string[] = [
   '/blockchain',
   '/iot',
   '/esg',
-  '/warehouse',
+  '/marketplace/proveedores',
 ];
 
 /**
