@@ -41,6 +41,7 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   calendario: { status: 'active', name: 'Calendario' },
   chat: { status: 'active', name: 'Chat' },
   notificaciones: { status: 'active', name: 'Notificaciones' },
+  matching: { status: 'active', name: 'Matching Inteligente' },
   
   // ============================================
   // ADMINISTRACIÓN - ACTIVOS
