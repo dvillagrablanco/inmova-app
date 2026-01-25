@@ -72,8 +72,7 @@ interface Unit {
   rentaMensual: number;
   tenant?: {
     id: string;
-    nombre: string;
-    apellidos: string;
+    nombreCompleto: string;
   };
 }
 
@@ -582,7 +581,7 @@ export default function BuildingDetailPage() {
                           </TableCell>
                           <TableCell>
                             {unit.tenant ? (
-                              `${unit.tenant.nombre} ${unit.tenant.apellidos}`
+                              unit.tenant.nombreCompleto
                             ) : (
                               <span className="text-muted-foreground">-</span>
                             )}

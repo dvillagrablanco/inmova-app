@@ -38,8 +38,7 @@ export async function GET(
             tenant: {
               select: {
                 id: true,
-                nombre: true,
-                apellidos: true,
+                nombreCompleto: true,
               },
             },
           },
