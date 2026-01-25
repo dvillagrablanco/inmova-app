@@ -1,9 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import dynamic from 'next/dynamic';
+
+// Cargar AuthenticatedLayout de forma dinámica para evitar errores de hidratación
+const AuthenticatedLayout = dynamic(
+  () => import('@/components/layout/authenticated-layout').then(mod => mod.AuthenticatedLayout),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center space-y-4">
+          <div className="h-12 w-12 mx-auto border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-600">Cargando...</p>
+        </div>
+      </div>
+    )
+  }
+);
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
