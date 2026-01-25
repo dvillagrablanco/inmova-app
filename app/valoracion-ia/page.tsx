@@ -95,22 +95,16 @@ const AIDocumentAssistant = dynamic(
 );
 
 // Tipos para la valoración
-interface Property {
+interface Building {
   id: string;
+  nombre: string;
   direccion?: string;
   ciudad?: string;
   codigoPostal?: string;
-  superficie?: number;
-  habitaciones?: number;
-  banos?: number;
-  tipo?: string;
-  estado?: string;
-  building?: {
-    id: string;
-    nombre: string;
-    direccion?: string;
-    ciudad?: string;
-  };
+  tipoEdificio?: string;
+  anosConstruccion?: number;
+  numPlantas?: number;
+  units?: Unit[];
 }
 
 interface Unit {
@@ -121,6 +115,8 @@ interface Unit {
   habitaciones?: number;
   banos?: number;
   estado?: string;
+  rentaMensual?: number;
+  buildingId?: string;
   building?: {
     id: string;
     nombre: string;
@@ -175,11 +171,17 @@ export default function ValoracionIAPage() {
   // Estados
   const [loading, setLoading] = useState(true);
   const [valorando, setValorando] = useState(false);
+  const [buildings, setBuildings] = useState<Building[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [selectedAsset, setSelectedAsset] = useState<string>('');
-  const [assetType, setAssetType] = useState<'unit' | 'property'>('unit');
+  const [selectedBuilding, setSelectedBuilding] = useState<string>('');
+  const [selectedUnit, setSelectedUnit] = useState<string>('');
+  const [valorarEdificioCompleto, setValorarEdificioCompleto] = useState(false);
   const [resultado, setResultado] = useState<ValoracionResult | null>(null);
+  
+  // Unidades filtradas por edificio seleccionado
+  const filteredUnits = selectedBuilding 
+    ? units.filter(u => u.buildingId === selectedBuilding || u.building?.id === selectedBuilding)
+    : [];
   
   // Datos del formulario
   const [formData, setFormData] = useState({
@@ -216,10 +218,19 @@ export default function ValoracionIAPage() {
 
   const fetchAssets = async () => {
     try {
-      const [unitsRes, propsRes] = await Promise.allSettled([
+      const [buildingsRes, unitsRes] = await Promise.allSettled([
+        fetch('/api/buildings', { credentials: 'include' }),
         fetch('/api/units', { credentials: 'include' }),
-        fetch('/api/properties', { credentials: 'include' }),
       ]);
+      
+      if (buildingsRes.status === 'fulfilled' && buildingsRes.value.ok) {
+        try {
+          const buildingsData = await buildingsRes.value.json();
+          setBuildings(Array.isArray(buildingsData) ? buildingsData : []);
+        } catch {
+          setBuildings([]);
+        }
+      }
       
       if (unitsRes.status === 'fulfilled' && unitsRes.value.ok) {
         try {
@@ -229,15 +240,6 @@ export default function ValoracionIAPage() {
           setUnits([]);
         }
       }
-      
-      if (propsRes.status === 'fulfilled' && propsRes.value.ok) {
-        try {
-          const propsData = await propsRes.value.json();
-          setProperties(Array.isArray(propsData) ? propsData : []);
-        } catch {
-          setProperties([]);
-        }
-      }
     } catch (error) {
       console.error('Error fetching assets:', error);
     } finally {
@@ -245,29 +247,62 @@ export default function ValoracionIAPage() {
     }
   };
 
-  const handleAssetSelect = (assetId: string) => {
-    setSelectedAsset(assetId);
+  const handleBuildingSelect = (buildingId: string) => {
+    setSelectedBuilding(buildingId);
+    setSelectedUnit('');
+    setValorarEdificioCompleto(false);
     
-    if (assetType === 'unit') {
-      const unit = units.find(u => u.id === assetId);
-      if (unit) {
-        setFormData(prev => ({
-          ...prev,
-          superficie: unit.superficie?.toString() || '',
-          habitaciones: unit.habitaciones?.toString() || '',
-          banos: unit.banos?.toString() || '',
-        }));
-      }
+    // Limpiar formulario cuando se cambia de edificio
+    setFormData(prev => ({
+      ...prev,
+      superficie: '',
+      habitaciones: '',
+      banos: '',
+    }));
+  };
+  
+  const handleUnitSelect = (unitId: string) => {
+    setSelectedUnit(unitId);
+    setValorarEdificioCompleto(false);
+    
+    const unit = units.find(u => u.id === unitId);
+    if (unit) {
+      setFormData(prev => ({
+        ...prev,
+        superficie: unit.superficie?.toString() || '',
+        habitaciones: unit.habitaciones?.toString() || '',
+        banos: unit.banos?.toString() || '',
+      }));
+    }
+  };
+  
+  const handleValorarEdificioCompleto = (checked: boolean) => {
+    setValorarEdificioCompleto(checked);
+    setSelectedUnit('');
+    
+    if (checked && selectedBuilding) {
+      // Calcular suma de superficies, habitaciones y baños de todas las unidades del edificio
+      const buildingUnits = units.filter(u => 
+        u.buildingId === selectedBuilding || u.building?.id === selectedBuilding
+      );
+      
+      const totalSuperficie = buildingUnits.reduce((sum, u) => sum + (u.superficie || 0), 0);
+      const totalHabitaciones = buildingUnits.reduce((sum, u) => sum + (u.habitaciones || 0), 0);
+      const totalBanos = buildingUnits.reduce((sum, u) => sum + (u.banos || 0), 0);
+      
+      setFormData(prev => ({
+        ...prev,
+        superficie: totalSuperficie.toString(),
+        habitaciones: totalHabitaciones.toString(),
+        banos: totalBanos.toString(),
+      }));
     } else {
-      const prop = properties.find(p => p.id === assetId);
-      if (prop) {
-        setFormData(prev => ({
-          ...prev,
-          superficie: prop.superficie?.toString() || '',
-          habitaciones: prop.habitaciones?.toString() || '',
-          banos: prop.banos?.toString() || '',
-        }));
-      }
+      setFormData(prev => ({
+        ...prev,
+        superficie: '',
+        habitaciones: '',
+        banos: '',
+      }));
     }
   };
 
@@ -284,14 +319,20 @@ export default function ValoracionIAPage() {
       let direccion = '';
       let ciudad = '';
       
-      if (selectedAsset && assetType === 'unit') {
-        const unit = units.find(u => u.id === selectedAsset);
-        direccion = unit?.building?.direccion || '';
-        ciudad = unit?.building?.ciudad || 'Madrid';
-      } else if (selectedAsset && assetType === 'property') {
-        const prop = properties.find(p => p.id === selectedAsset);
-        direccion = prop?.direccion || '';
-        ciudad = prop?.ciudad || 'Madrid';
+      // Obtener datos del edificio seleccionado
+      if (selectedBuilding) {
+        const building = buildings.find(b => b.id === selectedBuilding);
+        direccion = building?.direccion || '';
+        ciudad = building?.ciudad || 'Madrid';
+      }
+      
+      // Si es una unidad específica, usar sus datos de edificio
+      if (selectedUnit && !valorarEdificioCompleto) {
+        const unit = units.find(u => u.id === selectedUnit);
+        if (unit?.building) {
+          direccion = unit.building.direccion || direccion;
+          ciudad = unit.building.ciudad || ciudad;
+        }
       }
 
       const response = await fetch('/api/ai/valuate', {
@@ -308,8 +349,9 @@ export default function ValoracionIAPage() {
           direccion,
           ciudad,
           codigoPostal: '',
-          unitId: assetType === 'unit' ? selectedAsset : undefined,
-          propertyId: assetType === 'property' ? selectedAsset : undefined,
+          unitId: selectedUnit || undefined,
+          buildingId: selectedBuilding || undefined,
+          valorarEdificioCompleto,
         }),
       });
 
@@ -478,51 +520,112 @@ export default function ValoracionIAPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Selección de activo existente */}
+                {/* Selección de edificio y unidad */}
                 <div className="space-y-4">
-                  <Label>Seleccionar activo existente (opcional)</Label>
-                  <div className="flex gap-4">
-                    <Button
-                      type="button"
-                      variant={assetType === 'unit' ? 'default' : 'outline'}
-                      onClick={() => setAssetType('unit')}
-                    >
-                      <Building2 className="h-4 w-4 mr-2" />
-                      Unidades ({units.length})
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={assetType === 'property' ? 'default' : 'outline'}
-                      onClick={() => setAssetType('property')}
-                    >
-                      <Home className="h-4 w-4 mr-2" />
-                      Propiedades ({properties.length})
-                    </Button>
-                  </div>
-
-                  {(units.length > 0 || properties.length > 0) && (
-                    <Select value={selectedAsset} onValueChange={handleAssetSelect}>
+                  <Label className="text-base font-semibold">Seleccionar activo a valorar</Label>
+                  
+                  {/* Selector de Edificio */}
+                  <div className="space-y-2">
+                    <Label>Edificio</Label>
+                    <Select value={selectedBuilding} onValueChange={handleBuildingSelect}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un activo para autorellenar datos" />
+                        <SelectValue placeholder="Selecciona un edificio" />
                       </SelectTrigger>
                       <SelectContent>
-                        {assetType === 'unit' ? (
-                          units.map((unit) => (
-                            <SelectItem key={unit.id} value={unit.id}>
-                              {unit.numero} - {unit.building?.nombre || 'Sin edificio'}
-                              {unit.superficie && ` (${unit.superficie}m²)`}
+                        {buildings.length > 0 ? (
+                          buildings.map((building) => (
+                            <SelectItem key={building.id} value={building.id}>
+                              <div className="flex items-center gap-2">
+                                <Building2 className="h-4 w-4" />
+                                {building.nombre} - {building.direccion || 'Sin dirección'}
+                                {building.ciudad && ` (${building.ciudad})`}
+                              </div>
                             </SelectItem>
                           ))
                         ) : (
-                          properties.map((prop) => (
-                            <SelectItem key={prop.id} value={prop.id}>
-                              {prop.direccion || 'Sin dirección'}
-                              {prop.superficie && ` (${prop.superficie}m²)`}
-                            </SelectItem>
-                          ))
+                          <SelectItem value="no-buildings" disabled>
+                            No hay edificios disponibles
+                          </SelectItem>
                         )}
                       </SelectContent>
                     </Select>
+                  </div>
+                  
+                  {/* Opciones cuando hay edificio seleccionado */}
+                  {selectedBuilding && (
+                    <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+                      {/* Opción: Valorar edificio completo */}
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="valorar-edificio"
+                          checked={valorarEdificioCompleto}
+                          onChange={(e) => handleValorarEdificioCompleto(e.target.checked)}
+                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <Label htmlFor="valorar-edificio" className="text-sm font-medium cursor-pointer">
+                          Valorar edificio completo (suma de {filteredUnits.length} unidades)
+                        </Label>
+                      </div>
+                      
+                      {/* Selector de Unidad (solo si no se valora edificio completo) */}
+                      {!valorarEdificioCompleto && (
+                        <div className="space-y-2">
+                          <Label>Unidad específica</Label>
+                          <Select value={selectedUnit} onValueChange={handleUnitSelect}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona una unidad del edificio" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {filteredUnits.length > 0 ? (
+                                filteredUnits.map((unit) => (
+                                  <SelectItem key={unit.id} value={unit.id}>
+                                    <div className="flex items-center justify-between gap-4">
+                                      <span>{unit.numero} - {unit.tipo || 'Unidad'}</span>
+                                      <span className="text-muted-foreground text-xs">
+                                        {unit.superficie && `${unit.superficie}m²`}
+                                        {unit.habitaciones && ` · ${unit.habitaciones} hab`}
+                                      </span>
+                                    </div>
+                                  </SelectItem>
+                                ))
+                              ) : (
+                                <SelectItem value="no-units" disabled>
+                                  No hay unidades en este edificio
+                                </SelectItem>
+                              )}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                      
+                      {/* Resumen de selección */}
+                      {(valorarEdificioCompleto || selectedUnit) && (
+                        <div className="p-3 bg-primary/10 rounded-md">
+                          <p className="text-sm font-medium text-primary">
+                            {valorarEdificioCompleto ? (
+                              <>
+                                <Building2 className="h-4 w-4 inline mr-1" />
+                                Valorando: Edificio completo ({filteredUnits.length} unidades, {formData.superficie}m² total)
+                              </>
+                            ) : (
+                              <>
+                                <Home className="h-4 w-4 inline mr-1" />
+                                Valorando: Unidad {units.find(u => u.id === selectedUnit)?.numero}
+                              </>
+                            )}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Mensaje si no hay edificios */}
+                  {buildings.length === 0 && !loading && (
+                    <p className="text-sm text-muted-foreground">
+                      No tienes edificios registrados. Puedes introducir los datos manualmente o{' '}
+                      <a href="/edificios/nuevo" className="text-primary underline">crear un edificio</a>.
+                    </p>
                   )}
                 </div>
 
