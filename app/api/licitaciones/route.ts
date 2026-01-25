@@ -57,14 +57,22 @@ export async function GET(req: NextRequest) {
 
     const { prisma } = await import('@/lib/db');
 
-    // Buscar órdenes de trabajo que están en estado de licitación (presupuesto_solicitado)
+    // Buscar órdenes de trabajo - licitaciones usan estado 'pendiente' como "abierta"
+    // Estados posibles: pendiente, asignada, aceptada, en_progreso, pausada, completada, cancelada, rechazada
     const where: any = { 
       companyId,
-      estado: { in: ['presupuesto_solicitado', 'asignada', 'en_progreso', 'completada'] },
     };
 
     if (estado) {
-      where.estado = estado;
+      // Mapear estados de UI a estados del enum
+      const estadoMap: Record<string, string[]> = {
+        'abierta': ['pendiente'],
+        'cerrada': ['asignada'],
+        'adjudicada': ['aceptada', 'en_progreso'],
+        'completada': ['completada'],
+        'cancelada': ['cancelada', 'rechazada'],
+      };
+      where.estado = { in: estadoMap[estado] || [estado] };
     }
 
     const tenders = await prisma.providerWorkOrder.findMany({
@@ -96,15 +104,19 @@ export async function GET(req: NextRequest) {
           orderBy: { total: 'asc' },
         });
 
-        // Determinar estado de la licitación
+        // Determinar estado de la licitación basado en enum WorkOrderStatus
         let estadoLicitacion = 'abierta';
         const ahora = new Date();
         const fechaLimite = tender.fechaEstimada;
         
-        if (tender.estado === 'asignada') {
+        if (tender.estado === 'aceptada' || tender.estado === 'en_progreso') {
           estadoLicitacion = 'adjudicada';
         } else if (tender.estado === 'completada') {
           estadoLicitacion = 'completada';
+        } else if (tender.estado === 'cancelada' || tender.estado === 'rechazada') {
+          estadoLicitacion = 'cancelada';
+        } else if (tender.estado === 'asignada') {
+          estadoLicitacion = 'evaluando';
         } else if (fechaLimite && ahora > fechaLimite) {
           estadoLicitacion = 'cerrada';
         } else if (quotes.length === 0) {
@@ -113,6 +125,7 @@ export async function GET(req: NextRequest) {
 
         return {
           ...tender,
+          presupuesto: tender.presupuestoInicial, // Alias para compatibilidad con frontend
           ofertas: quotes,
           numOfertas: quotes.length,
           mejorOferta: quotes[0]?.total || null,
@@ -186,22 +199,33 @@ export async function POST(req: NextRequest) {
       buildingId = building.id;
     }
 
-    // Crear la licitación como una orden de trabajo en estado de solicitud de presupuesto
+    // Obtener un proveedor por defecto si hay invitados, o usar un placeholder
+    let providerId = data.proveedoresInvitados[0];
+    if (!providerId) {
+      // Buscar cualquier proveedor de la compañía o crear uno temporal
+      const anyProvider = await prisma.provider.findFirst({
+        where: { companyId },
+        select: { id: true },
+      });
+      providerId = anyProvider?.id || '';
+    }
+
+    // Crear la licitación como una orden de trabajo en estado 'pendiente' (abierta)
     const tender = await prisma.providerWorkOrder.create({
       data: {
         companyId,
         buildingId,
         unitId: data.unitId,
-        providerId: data.proveedoresInvitados[0] || '', // Provider temporal o vacío
+        providerId: providerId,
         titulo: data.titulo,
         descripcion: data.descripcion,
         tipo: data.tipo,
-        estado: 'presupuesto_solicitado',
+        estado: 'pendiente', // Estado del enum WorkOrderStatus
         prioridad: 'media',
         fechaEstimada: new Date(data.fechaLimiteOfertas),
-        presupuesto: data.presupuestoMaximo,
-        // Guardar metadata adicional en notas
-        notas: JSON.stringify({
+        presupuestoInicial: data.presupuestoMaximo, // Campo correcto del modelo
+        // Guardar metadata adicional en comentarios
+        comentarios: JSON.stringify({
           requisitos: data.requisitos,
           documentos: data.documentos,
           proveedoresInvitados: data.proveedoresInvitados,

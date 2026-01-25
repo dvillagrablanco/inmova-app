@@ -18,10 +18,13 @@ export const runtime = 'nodejs';
 // VALIDACIÓN
 // ============================================================================
 
+// Fases del enum ConstructionPhase en Prisma
+const CONSTRUCTION_PHASES = ['PLANIFICACION', 'PERMISOS', 'CIMENTACION', 'ESTRUCTURA', 'CERRAMIENTOS', 'INSTALACIONES', 'ACABADOS', 'ENTREGA', 'GARANTIA'] as const;
+
 const createProjectSchema = z.object({
   nombre: z.string().min(3),
   descripcion: z.string().min(10),
-  tipoProyecto: z.enum(['obra_nueva', 'reforma_integral', 'rehabilitacion', 'ampliacion', 'demolicion', 'otro']),
+  tipoProyecto: z.string(),
   direccion: z.string().min(5),
   parcela: z.string().optional(),
   referenciaCatastral: z.string().optional(),
@@ -38,14 +41,15 @@ const createProjectSchema = z.object({
   // Fechas
   fechaInicio: z.string(),
   fechaFinPrevista: z.string(),
+  duracionMeses: z.number().int().positive().optional(),
   
   // Responsables
   arquitecto: z.string().optional(),
-  direccionObra: z.string().optional(),
-  contratistaPrincipal: z.string().optional(),
+  aparejador: z.string().optional(),
+  constructor: z.string().optional(),
   
-  // Estado
-  estado: z.enum(['planificacion', 'licencias', 'ejecucion', 'parada', 'finalizada', 'cancelada']).default('planificacion'),
+  // Fase actual - usa valores del enum Prisma
+  faseActual: z.enum(CONSTRUCTION_PHASES).default('PLANIFICACION'),
 });
 
 // ============================================================================
@@ -65,13 +69,13 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
-    const estado = searchParams.get('estado');
+    const fase = searchParams.get('fase') || searchParams.get('estado'); // Soportar ambos parámetros
 
     const { prisma } = await import('@/lib/db');
 
     const where: any = { companyId };
-    if (estado) {
-      where.estado = estado;
+    if (fase) {
+      where.faseActual = fase;
     }
 
     const projects = await prisma.constructionProject.findMany({
@@ -86,6 +90,19 @@ export async function GET(req: NextRequest) {
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    // Mapeo de faseActual a estado compatible con frontend
+    const FASE_TO_ESTADO: Record<string, string> = {
+      'PLANIFICACION': 'planificacion',
+      'PERMISOS': 'licencias',
+      'CIMENTACION': 'ejecucion',
+      'ESTRUCTURA': 'ejecucion',
+      'CERRAMIENTOS': 'ejecucion',
+      'INSTALACIONES': 'ejecucion',
+      'ACABADOS': 'ejecucion',
+      'ENTREGA': 'finalizada',
+      'GARANTIA': 'finalizada',
+    };
 
     // Calcular métricas de cada proyecto
     const projectsWithMetrics = projects.map(project => {
@@ -108,8 +125,13 @@ export async function GET(req: NextRequest) {
         ? Math.ceil((fechaFin.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
         : null;
 
+      // Mapear faseActual a estado para compatibilidad con frontend
+      const estado = FASE_TO_ESTADO[project.faseActual] || 'planificacion';
+
       return {
         ...project,
+        estado, // Estado compatible con frontend
+        faseActualPrisma: project.faseActual, // Valor original
         avanceGeneral: Math.round(avanceGeneral),
         desviacionPorcentaje: Math.round(desviacionPorcentaje * 100) / 100,
         diasRestantes,
@@ -119,12 +141,17 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    // Estadísticas
+    // Estadísticas - mantener compatibilidad con frontend
     const stats = {
       total: projects.length,
-      enEjecucion: projects.filter(p => p.estado === 'ejecucion').length,
-      enPlanificacion: projects.filter(p => p.estado === 'planificacion').length,
-      finalizadas: projects.filter(p => p.estado === 'finalizada').length,
+      // Campos que espera el frontend
+      enPlanificacion: projects.filter(p => p.faseActual === 'PLANIFICACION').length,
+      enEjecucion: projects.filter(p => ['CIMENTACION', 'ESTRUCTURA', 'CERRAMIENTOS', 'INSTALACIONES', 'ACABADOS'].includes(p.faseActual)).length,
+      finalizadas: projects.filter(p => ['ENTREGA', 'GARANTIA'].includes(p.faseActual)).length,
+      // Campos adicionales detallados
+      enPermisos: projects.filter(p => p.faseActual === 'PERMISOS').length,
+      entregadas: projects.filter(p => p.faseActual === 'ENTREGA').length,
+      enGarantia: projects.filter(p => p.faseActual === 'GARANTIA').length,
       presupuestoTotal: projects.reduce((sum, p) => sum + p.presupuestoTotal, 0),
       gastosReales: projects.reduce((sum, p) => sum + p.gastosReales, 0),
       metrosTotales: projects.reduce((sum, p) => sum + (p.metrosConstruidos || 0), 0),
@@ -170,6 +197,13 @@ export async function POST(req: NextRequest) {
     const data = validationResult.data;
     const { prisma } = await import('@/lib/db');
 
+    // Calcular duración en meses si no se proporciona
+    const fechaIni = new Date(data.fechaInicio);
+    const fechaFin = new Date(data.fechaFinPrevista);
+    const duracionMeses = data.duracionMeses || Math.max(1, Math.round(
+      (fechaFin.getTime() - fechaIni.getTime()) / (1000 * 60 * 60 * 24 * 30)
+    ));
+
     const project = await prisma.constructionProject.create({
       data: {
         companyId,
@@ -184,12 +218,13 @@ export async function POST(req: NextRequest) {
         metrosConstruidos: data.metrosConstruidos,
         numPlantas: data.numPlantas,
         presupuestoTotal: data.presupuestoTotal,
-        fechaInicio: new Date(data.fechaInicio),
-        fechaFinPrevista: new Date(data.fechaFinPrevista),
+        fechaInicio: fechaIni,
+        fechaFinPrevista: fechaFin,
+        duracionMeses,
         arquitecto: data.arquitecto,
-        direccionObra: data.direccionObra,
-        contratistaPrincipal: data.contratistaPrincipal,
-        estado: data.estado,
+        aparejador: data.aparejador,
+        constructor: data.constructor,
+        faseActual: data.faseActual,
       },
     });
 

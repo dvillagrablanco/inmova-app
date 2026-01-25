@@ -55,26 +55,40 @@ export async function GET(req: NextRequest) {
     if (buildingId) {
       where.buildingId = buildingId;
     }
-    if (lowStock) {
-      where.cantidad = { lte: where.cantidadMinima };
-    }
 
-    const items = await prisma.maintenanceInventory.findMany({
+    // Primero obtenemos todos los items
+    let items = await prisma.maintenanceInventory.findMany({
       where,
-      include: {
-        building: {
-          select: { id: true, nombre: true },
-        },
-      },
       orderBy: [
         { categoria: 'asc' },
         { nombre: 'asc' },
       ],
     });
 
-    // Calcular items con stock bajo
+    // Si hay items con buildingId, obtener los nombres de los edificios
+    const buildingIds = [...new Set(items.filter(i => i.buildingId).map(i => i.buildingId!))];
+    let buildingsMap: Record<string, { id: string; nombre: string }> = {};
+    
+    if (buildingIds.length > 0) {
+      const buildings = await prisma.building.findMany({
+        where: { id: { in: buildingIds } },
+        select: { id: true, nombre: true },
+      });
+      buildingsMap = buildings.reduce((acc, b) => {
+        acc[b.id] = b;
+        return acc;
+      }, {} as Record<string, { id: string; nombre: string }>);
+    }
+
+    // Filtrar por stock bajo si se solicita
+    if (lowStock) {
+      items = items.filter(item => item.cantidad <= item.cantidadMinima);
+    }
+
+    // Calcular items con stock bajo y añadir info de building
     const itemsWithStatus = items.map(item => ({
       ...item,
+      building: item.buildingId ? buildingsMap[item.buildingId] || null : null,
       stockBajo: item.cantidad <= item.cantidadMinima,
       valorTotal: item.cantidad * item.costoUnitario,
     }));

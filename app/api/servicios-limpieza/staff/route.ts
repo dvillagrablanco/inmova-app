@@ -24,7 +24,9 @@ const createStaffSchema = z.object({
   diasDisponibles: z.array(z.number().int().min(0).max(6)).default([1, 2, 3, 4, 5]),
   horaInicio: z.string().default('08:00'),
   horaFin: z.string().default('18:00'),
-  tarifaHora: z.number().positive().optional(),
+  tarifaPorHora: z.number().positive().optional(),
+  tarifaPorTurnover: z.number().positive().optional(),
+  capacidadDiaria: z.number().int().positive().default(4),
 });
 
 export async function GET(req: NextRequest) {
@@ -98,7 +100,9 @@ export async function POST(req: NextRequest) {
         diasDisponibles: data.diasDisponibles,
         horaInicio: data.horaInicio,
         horaFin: data.horaFin,
-        tarifaHora: data.tarifaHora,
+        tarifaPorHora: data.tarifaPorHora,
+        tarifaPorTurnover: data.tarifaPorTurnover,
+        capacidadDiaria: data.capacidadDiaria,
         activo: true,
       },
     });

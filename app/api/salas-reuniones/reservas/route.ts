@@ -1,6 +1,8 @@
 /**
  * API Endpoint: Reservas de Salas de Reuniones
  * 
+ * Usa el modelo SpaceReservation para gestionar reservas de CommonSpace
+ * 
  * GET /api/salas-reuniones/reservas - Listar reservas
  * POST /api/salas-reuniones/reservas - Crear reserva
  */
@@ -16,13 +18,13 @@ export const runtime = 'nodejs';
 
 const createBookingSchema = z.object({
   spaceId: z.string(),
-  titulo: z.string().min(2),
-  descripcion: z.string().optional(),
-  fechaInicio: z.string(),
-  fechaFin: z.string(),
-  asistentes: z.array(z.string()).default([]),
-  serviciosAdicionales: z.array(z.string()).default([]), // catering, videoconferencia, etc
-  notas: z.string().optional(),
+  tenantId: z.string(),
+  fechaReserva: z.string(), // Fecha YYYY-MM-DD
+  horaInicio: z.string(), // HH:mm
+  horaFin: z.string(), // HH:mm
+  numeroPersonas: z.number().int().positive().optional(),
+  proposito: z.string().optional(),
+  observaciones: z.string().optional(),
 });
 
 export async function GET(req: NextRequest) {
@@ -52,28 +54,56 @@ export async function GET(req: NextRequest) {
       const fechaDate = new Date(fecha);
       const fechaFin = new Date(fecha);
       fechaFin.setDate(fechaFin.getDate() + 1);
-      where.fechaInicio = {
+      where.fechaReserva = {
         gte: fechaDate,
         lt: fechaFin,
       };
     }
 
-    const bookings = await prisma.workspaceBooking.findMany({
+    const bookings = await prisma.spaceReservation.findMany({
       where,
       include: {
         space: {
-          select: { id: true, nombre: true, capacidad: true },
+          select: { id: true, nombre: true, capacidadMaxima: true },
         },
-        user: {
-          select: { id: true, name: true, email: true },
+        tenant: {
+          select: { id: true, firstName: true, lastName: true, email: true },
         },
       },
-      orderBy: { fechaInicio: 'asc' },
+      orderBy: { fechaReserva: 'asc' },
     });
+
+    // Transformar para mantener compatibilidad con el frontend
+    const transformedBookings = bookings.map(b => ({
+      id: b.id,
+      spaceId: b.spaceId,
+      space: {
+        id: b.space.id,
+        nombre: b.space.nombre,
+        capacidad: b.space.capacidadMaxima,
+      },
+      tenantId: b.tenantId,
+      tenant: b.tenant ? {
+        id: b.tenant.id,
+        name: `${b.tenant.firstName} ${b.tenant.lastName}`,
+        email: b.tenant.email,
+      } : null,
+      titulo: b.proposito || 'Reserva',
+      fechaInicio: b.fechaReserva,
+      horaInicio: b.horaInicio,
+      horaFin: b.horaFin,
+      estado: b.estado,
+      numeroPersonas: b.numeroPersonas,
+      proposito: b.proposito,
+      observaciones: b.observaciones,
+      monto: b.monto,
+      pagado: b.pagado,
+      createdAt: b.createdAt,
+    }));
 
     return NextResponse.json({
       success: true,
-      data: bookings,
+      data: transformedBookings,
     });
   } catch (error: any) {
     logger.error('Error fetching room bookings:', error);
@@ -89,9 +119,8 @@ export async function POST(req: NextRequest) {
     }
 
     const companyId = session.user.companyId;
-    const userId = session.user.id;
-    if (!companyId || !userId) {
-      return NextResponse.json({ error: 'Company/User ID no encontrado' }, { status: 400 });
+    if (!companyId) {
+      return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
     }
 
     const body = await req.json();
@@ -107,23 +136,35 @@ export async function POST(req: NextRequest) {
     const data = validationResult.data;
     const { prisma } = await import('@/lib/db');
 
-    // Verificar disponibilidad
-    const conflictingBooking = await prisma.workspaceBooking.findFirst({
+    // Verificar que el espacio existe y pertenece a la compañía
+    const space = await prisma.commonSpace.findFirst({
+      where: { id: data.spaceId, companyId },
+      select: { id: true, nombre: true, costoPorHora: true, horaApertura: true, horaCierre: true },
+    });
+
+    if (!space) {
+      return NextResponse.json({ error: 'Sala no encontrada' }, { status: 404 });
+    }
+
+    // Verificar disponibilidad - buscar reservas conflictivas
+    const fechaReserva = new Date(data.fechaReserva);
+    const conflictingBooking = await prisma.spaceReservation.findFirst({
       where: {
         spaceId: data.spaceId,
+        fechaReserva: fechaReserva,
         estado: { in: ['confirmada', 'pendiente'] },
         OR: [
           {
-            fechaInicio: { lte: new Date(data.fechaInicio) },
-            fechaFin: { gt: new Date(data.fechaInicio) },
+            horaInicio: { lte: data.horaInicio },
+            horaFin: { gt: data.horaInicio },
           },
           {
-            fechaInicio: { lt: new Date(data.fechaFin) },
-            fechaFin: { gte: new Date(data.fechaFin) },
+            horaInicio: { lt: data.horaFin },
+            horaFin: { gte: data.horaFin },
           },
           {
-            fechaInicio: { gte: new Date(data.fechaInicio) },
-            fechaFin: { lte: new Date(data.fechaFin) },
+            horaInicio: { gte: data.horaInicio },
+            horaFin: { lte: data.horaFin },
           },
         ],
       },
@@ -135,36 +176,33 @@ export async function POST(req: NextRequest) {
       }, { status: 409 });
     }
 
-    // Obtener tarifa de la sala
-    const space = await prisma.workspaceSpace.findUnique({
-      where: { id: data.spaceId },
-      select: { tarifaHora: true, nombre: true },
-    });
-
     // Calcular duración y precio
-    const inicio = new Date(data.fechaInicio);
-    const fin = new Date(data.fechaFin);
-    const duracionHoras = (fin.getTime() - inicio.getTime()) / (1000 * 60 * 60);
-    const precio = space?.tarifaHora ? space.tarifaHora * duracionHoras : 0;
+    const [horaIni, minIni] = data.horaInicio.split(':').map(Number);
+    const [horaFin, minFin] = data.horaFin.split(':').map(Number);
+    const duracionHoras = (horaFin - horaIni) + (minFin - minIni) / 60;
+    const monto = space.costoPorHora ? space.costoPorHora * duracionHoras : null;
 
-    const booking = await prisma.workspaceBooking.create({
+    const booking = await prisma.spaceReservation.create({
       data: {
         companyId,
         spaceId: data.spaceId,
-        userId,
-        titulo: data.titulo,
-        descripcion: data.descripcion,
-        fechaInicio: inicio,
-        fechaFin: fin,
+        tenantId: data.tenantId,
+        fechaReserva,
+        horaInicio: data.horaInicio,
+        horaFin: data.horaFin,
         estado: 'confirmada',
-        asistentes: data.asistentes,
-        serviciosAdicionales: data.serviciosAdicionales,
-        notas: data.notas,
-        precioTotal: precio,
+        monto,
+        pagado: !monto, // Si es gratis, marcar como pagado
+        numeroPersonas: data.numeroPersonas,
+        proposito: data.proposito,
+        observaciones: data.observaciones,
       },
       include: {
         space: {
           select: { id: true, nombre: true },
+        },
+        tenant: {
+          select: { id: true, firstName: true, lastName: true },
         },
       },
     });
@@ -173,8 +211,22 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: booking,
-      message: `Reserva confirmada para ${space?.nombre || 'la sala'}`,
+      data: {
+        id: booking.id,
+        spaceId: booking.spaceId,
+        space: booking.space,
+        tenantId: booking.tenantId,
+        tenant: booking.tenant ? {
+          id: booking.tenant.id,
+          name: `${booking.tenant.firstName} ${booking.tenant.lastName}`,
+        } : null,
+        fechaReserva: booking.fechaReserva,
+        horaInicio: booking.horaInicio,
+        horaFin: booking.horaFin,
+        estado: booking.estado,
+        monto: booking.monto,
+      },
+      message: `Reserva confirmada para ${space.nombre}`,
     }, { status: 201 });
   } catch (error: any) {
     logger.error('Error creating room booking:', error);

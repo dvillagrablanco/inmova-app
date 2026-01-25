@@ -14,8 +14,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Fases del enum ConstructionPhase en Prisma
+const CONSTRUCTION_PHASES = ['PLANIFICACION', 'PERMISOS', 'CIMENTACION', 'ESTRUCTURA', 'CERRAMIENTOS', 'INSTALACIONES', 'ACABADOS', 'ENTREGA', 'GARANTIA'] as const;
+
 const createWorkOrderSchema = z.object({
-  fase: z.enum(['demolicion', 'cimentacion', 'estructura', 'cerramientos', 'instalaciones', 'acabados', 'entrega']),
+  fase: z.enum(CONSTRUCTION_PHASES),
   titulo: z.string().min(3),
   descripcion: z.string().min(10),
   subcontratista: z.string(),
@@ -24,6 +27,7 @@ const createWorkOrderSchema = z.object({
   presupuesto: z.number().positive(),
   fechaInicio: z.string(),
   fechaFin: z.string(),
+  porcentajeAvance: z.number().int().min(0).max(100).default(0),
 });
 
 export async function GET(
@@ -122,7 +126,7 @@ export async function POST(
 
     // Obtener el siguiente orden para esta fase
     const lastOrder = await prisma.constructionWorkOrder.findFirst({
-      where: { projectId: params.id, fase: data.fase as any },
+      where: { projectId: params.id, fase: data.fase },
       orderBy: { orden: 'desc' },
       select: { orden: true },
     });
@@ -130,7 +134,7 @@ export async function POST(
     const workOrder = await prisma.constructionWorkOrder.create({
       data: {
         projectId: params.id,
-        fase: data.fase as any,
+        fase: data.fase,
         titulo: data.titulo,
         descripcion: data.descripcion,
         subcontratista: data.subcontratista,
@@ -140,6 +144,7 @@ export async function POST(
         fechaInicio: new Date(data.fechaInicio),
         fechaFin: new Date(data.fechaFin),
         estado: 'pendiente',
+        porcentajeAvance: data.porcentajeAvance || 0,
         orden: (lastOrder?.orden || 0) + 1,
       },
     });
