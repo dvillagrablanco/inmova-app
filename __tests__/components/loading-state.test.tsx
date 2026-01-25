@@ -5,12 +5,16 @@ import { LoadingState, LoadingSpinner } from '@/components/ui/loading-state';
 describe('LoadingState', () => {
   it('renders with default message', () => {
     render(<LoadingState />);
-    expect(screen.getByText('Cargando...')).toBeInTheDocument();
+    // El texto aparece en múltiples elementos (sr-only y visible)
+    const elements = screen.getAllByText('Cargando...');
+    expect(elements.length).toBeGreaterThan(0);
   });
 
   it('renders with custom message', () => {
     render(<LoadingState message="Loading data" />);
-    expect(screen.getByText('Loading data')).toBeInTheDocument();
+    // El texto aparece en múltiples elementos (sr-only y visible)
+    const elements = screen.getAllByText('Loading data');
+    expect(elements.length).toBeGreaterThan(0);
   });
 
   it('applies fullScreen class when fullScreen prop is true', () => {
@@ -22,6 +26,7 @@ describe('LoadingState', () => {
 
   it('renders LoadingSpinner component', () => {
     const { container } = render(<LoadingSpinner />);
-    expect(container.querySelector('svg')).toBeInTheDocument();
+    // El spinner usa un div con animate-spin, no SVG
+    expect(container.querySelector('[role="status"]') || container.querySelector('.animate-spin')).toBeInTheDocument();
   });
 });

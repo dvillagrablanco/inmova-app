@@ -1,6 +1,24 @@
 import { render, screen } from '@testing-library/react';
 import { KPICard } from '@/components/ui/kpi-card';
 import { DollarSign } from 'lucide-react';
+import { beforeAll, afterAll } from 'vitest';
+
+// Mock matchMedia for framer-motion
+beforeAll(() => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }),
+  });
+});
 
 describe('KPICard Component', () => {
   it('should render title and value', () => {
