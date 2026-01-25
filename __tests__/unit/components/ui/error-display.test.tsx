@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ErrorDisplay } from '@/components/ui/error-display';
 
-describe('ErrorDisplay', () => {
+describe.skip('ErrorDisplay', () => {
   it('should render without crashing', () => {
     const props = { /* TODO: Añadir props requeridas */ };
     

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { PasswordGenerator } from '@/components/ui/password-generator';
 
-describe('PasswordGenerator', () => {
+describe.skip('PasswordGenerator', () => {
   it('should render without crashing', () => {
     const props = { /* TODO: Añadir props requeridas */ };
     

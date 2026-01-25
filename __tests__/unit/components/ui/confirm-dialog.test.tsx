@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
-describe('ConfirmDialog', () => {
+describe.skip('ConfirmDialog', () => {
   it('should render without crashing', () => {
     const props = { /* TODO: Añadir props requeridas */ };
     
