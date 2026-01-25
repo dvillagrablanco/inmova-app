@@ -88,6 +88,8 @@ export const DEFAULT_EXPANDED_BY_ROLE: Record<UserRole, Record<string, boolean>>
     misPropiedades: true, // CRÍTICO: Cartera asignada
     operaciones: true, // CRÍTICO: Tareas del día
     comunicaciones: true, // CRÍTICO: Coordinación
+    alquilerResidencial: true, // Acceso a valoración IA y otras herramientas
+    analytics: true, // Acceso a analytics e IA
     gestion: false,
     reportes: false,
     finanzas: false,
