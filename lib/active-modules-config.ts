@@ -107,7 +107,7 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   // Módulos Avanzados
   tours_virtuales: { status: 'coming_soon', name: 'Tours Virtuales', expectedDate: 'Q2 2026' },
   economia_circular: { status: 'coming_soon', name: 'Economía Circular', expectedDate: 'Q3 2026' },
-  valoracion_ia: { status: 'coming_soon', name: 'Valoración IA', expectedDate: 'Q2 2026' },
+  valoracion_ia: { status: 'active', name: 'Valoración IA' },
   blockchain: { status: 'coming_soon', name: 'Blockchain', expectedDate: 'Q4 2026' },
   iot: { status: 'coming_soon', name: 'IoT', expectedDate: 'Q4 2026' },
   esg: { status: 'coming_soon', name: 'ESG', expectedDate: 'Q3 2026' },
@@ -167,7 +167,7 @@ export const HIDDEN_ROUTES: string[] = [
   
   // Otros placeholders
   '/community',
-  '/valoracion-ia',
+  // '/valoracion-ia', // RESTAURADO - funcional en Living Residencial
   // Herramientas Core - AHORA FUNCIONALES (planificación, estadísticas, automatización)
   // Usuarios y permisos - AHORA FUNCIONALES (eliminados del listado oculto)
 ];

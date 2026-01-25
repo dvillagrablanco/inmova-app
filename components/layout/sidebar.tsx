@@ -146,6 +146,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/modulos': 'configuracion',
   '/admin/sales-team': 'admin_sales_team',
   '/analytics': 'analytics',
+  '/valoracion-ia': 'valoracion_ia',
   '/str/listings': 'str_listings',
   '/str-housekeeping': 'str_housekeeping',
   '/str/bookings': 'str_bookings',
@@ -312,6 +313,8 @@ const CORE_MODULES = [
   'admin_sales_team',
   'admin_portales_externos',
   'api_docs',
+  // Herramientas de Valoración
+  'valoracion_ia',
 ];
 
 // ============================================================================
