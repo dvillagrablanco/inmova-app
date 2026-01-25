@@ -55,6 +55,8 @@ export function AuthenticatedLayout({
   containerClassName,
   maxWidth = 'full',
 }: AuthenticatedLayoutProps) {
+  // Estado para controlar el montaje y evitar errores de hidratación
+  const [isMounted, setIsMounted] = useState(false);
   const isMobile = useIsMobile();
   const pathname = usePathname();
   const router = useRouter();
@@ -62,6 +64,11 @@ export function AuthenticatedLayout({
 
   // Hook centralizado para gestionar onboarding - evita solapamientos
   const { isOnboardingDisabled, disableOnboarding } = useOnboardingManager();
+  
+  // Marcar como montado después de la hidratación inicial
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Redirección para socios de eWoorker: solo pueden acceder a rutas de eWoorker
   useEffect(() => {
@@ -121,7 +128,7 @@ export function AuthenticatedLayout({
           id="main-content"
           className={cn(
             'flex-1 overflow-y-auto',
-            isMobile ? 'pb-20' : '', // Espacio para bottom nav en móvil
+            isMounted && isMobile ? 'pb-20' : '', // Espacio para bottom nav en móvil (solo después de montaje)
             className
           )}
         >
@@ -136,33 +143,37 @@ export function AuthenticatedLayout({
           </div>
         </main>
 
-        {/* Bottom Navigation - Solo en móvil */}
-        <BottomNavigation />
+        {/* Bottom Navigation - Solo en móvil y después de montaje */}
+        {isMounted && <BottomNavigation />}
       </div>
 
       {/* 
         SISTEMA DE ONBOARDING CENTRALIZADO
         Solo se muestra UN elemento a la vez, controlado por useOnboardingManager
-        Esto evita el problema de múltiples widgets superpuestos
+        Solo renderizar después del montaje para evitar errores de hidratación
       */}
       
-      {/* Tour Auto-Starter - Solo si onboarding no está deshabilitado */}
-      {!isOnboardingDisabled && <TourAutoStarter />}
+      {isMounted && (
+        <>
+          {/* Tour Auto-Starter - Solo si onboarding no está deshabilitado */}
+          {!isOnboardingDisabled && <TourAutoStarter />}
 
-      {/* Floating Tour Button - Controlado por el manager */}
-      {!isOnboardingDisabled && <FloatingTourButton />}
+          {/* Floating Tour Button - Controlado por el manager */}
+          {!isOnboardingDisabled && <FloatingTourButton />}
 
-      {/* Command Palette - Navegación rápida con Cmd+K */}
-      <CommandPalette />
+          {/* Command Palette - Navegación rápida con Cmd+K */}
+          <CommandPalette />
 
-      {/* Global Shortcuts - Atajos de teclado globales */}
-      <GlobalShortcuts />
+          {/* Global Shortcuts - Atajos de teclado globales */}
+          <GlobalShortcuts />
 
-      {/* Shortcuts Help Dialog - Ayuda de atajos con ? */}
-      <ShortcutsHelpDialog />
+          {/* Shortcuts Help Dialog - Ayuda de atajos con ? */}
+          <ShortcutsHelpDialog />
 
-      {/* Chatbot de Soporte Inteligente - Solo si onboarding no está deshabilitado */}
-      {!isOnboardingDisabled && <IntelligentSupportChatbot />}
+          {/* Chatbot de Soporte Inteligente - Solo si onboarding no está deshabilitado */}
+          {!isOnboardingDisabled && <IntelligentSupportChatbot />}
+        </>
+      )}
     </div>
   );
 }

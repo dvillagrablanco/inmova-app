@@ -72,7 +72,13 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import logger from '@/lib/logger';
-import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
+// AIDocumentAssistant se carga de forma dinámica para evitar errores de hidratación
+import dynamic from 'next/dynamic';
+
+const AIDocumentAssistant = dynamic(
+  () => import('@/components/ai/AIDocumentAssistant').then(mod => mod.AIDocumentAssistant),
+  { ssr: false }
+);
 
 // Tipos para la valoración
 interface Property {
@@ -149,6 +155,9 @@ export default function ValoracionIAPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   
+  // Estado para controlar si el componente está montado (evita errores de hidratación)
+  const [isMounted, setIsMounted] = useState(false);
+  
   // Estados
   const [loading, setLoading] = useState(true);
   const [valorando, setValorando] = useState(false);
@@ -172,14 +181,21 @@ export default function ValoracionIAPage() {
     descripcionAdicional: '',
   });
 
+  // Marcar como montado después de la hidratación
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Cargar datos al iniciar
   useEffect(() => {
+    if (!isMounted) return;
+    
     if (status === 'unauthenticated') {
       router.push('/login');
     } else if (status === 'authenticated') {
       fetchAssets();
     }
-  }, [status, router]);
+  }, [status, router, isMounted]);
 
   const fetchAssets = async () => {
     try {
@@ -336,13 +352,16 @@ export default function ValoracionIAPage() {
     }
   };
 
-  if (loading) {
+  // Mostrar loading mientras se monta el componente o se cargan los datos
+  if (!isMounted || loading) {
     return (
       <AuthenticatedLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-muted-foreground">Cargando activos...</p>
+            <p className="text-muted-foreground">
+              {!isMounted ? 'Inicializando...' : 'Cargando activos...'}
+            </p>
           </div>
         </div>
       </AuthenticatedLayout>
