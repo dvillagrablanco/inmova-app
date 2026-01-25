@@ -93,11 +93,17 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error: any) {
-    logger.error('Error fetching tenants:', error);
-    if (error.message === 'No autenticado') {
-      return NextResponse.json({ error: error.message }, { status: 401 });
+    const errorMessage = error?.message || 'Error desconocido';
+    const errorStack = error?.stack || '';
+    logger.error('Error fetching tenants:', { message: errorMessage, stack: errorStack.slice(0, 500) });
+    
+    if (errorMessage === 'No autenticado') {
+      return NextResponse.json({ error: errorMessage }, { status: 401 });
     }
-    return NextResponse.json({ error: 'Error al obtener inquilinos' }, { status: 500 });
+    if (errorMessage === 'Usuario inactivo') {
+      return NextResponse.json({ error: errorMessage }, { status: 403 });
+    }
+    return NextResponse.json({ error: 'Error al obtener inquilinos', details: errorMessage }, { status: 500 });
   }
 }
 

@@ -58,17 +58,25 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(providers, { status: 200 });
     
   } catch (error: any) {
-    logger.error('Error fetching providers:', error);
+    const errorMessage = error?.message || 'Error desconocido';
+    const errorStack = error?.stack || '';
+    logger.error('Error fetching providers:', { message: errorMessage, stack: errorStack.slice(0, 500) });
     
-    if (error.message === 'No autenticado') {
+    if (errorMessage === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },
         { status: 401 }
       );
     }
+    if (errorMessage === 'Usuario inactivo') {
+      return NextResponse.json(
+        { error: 'Usuario inactivo', message: 'Su cuenta está inactiva' },
+        { status: 403 }
+      );
+    }
     
     return NextResponse.json(
-      { error: 'Error interno del servidor', message: 'Error al obtener proveedores' },
+      { error: 'Error interno del servidor', message: errorMessage },
       { status: 500 }
     );
   }

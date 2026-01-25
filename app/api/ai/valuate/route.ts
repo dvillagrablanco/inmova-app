@@ -444,19 +444,25 @@ export async function POST(request: NextRequest) {
     }
 
     // 8. Log de auditoría
-    await prisma.auditLog.create({
-      data: {
-        userId: session.user.id,
-        action: 'AI_VALUATION',
-        entityType: 'UNIT',
-        entityId: validated.unitId || null,
-        details: {
-          address: validated.address,
-          city: validated.city,
-          estimatedValue: valuation.estimatedValue,
+    try {
+      await prisma.auditLog.create({
+        data: {
+          companyId: session.user.companyId,
+          userId: session.user.id,
+          action: 'AI_VALUATION',
+          entityType: 'UNIT',
+          entityId: validated.unitId || null,
+          changes: JSON.stringify({
+            address: validated.address,
+            city: validated.city,
+            estimatedValue: valuation.estimatedValue,
+          }),
         },
-      },
-    });
+      });
+    } catch (auditError) {
+      // No fallar si el audit log falla
+      logger.warn('[AI Valuate] Error en audit log:', auditError);
+    }
 
     // 9. Tracking de uso (Control de costos)
     await trackUsage({
