@@ -114,6 +114,7 @@ export default function EdificioDetallesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const buildingId = params?.id as string;
 
@@ -130,18 +131,34 @@ export default function EdificioDetallesPage() {
       if (status !== 'authenticated' || !buildingId) return;
 
       try {
+        setError(null);
         const response = await fetch(`/api/buildings/${buildingId}`);
         if (response.ok) {
           const data = await response.json();
-          setBuilding(data);
+          // Normalizar datos para evitar errores de tipo
+          const normalizedData: BuildingDetails = {
+            ...data,
+            units: data.units || [],
+            imagenes: data.imagenes || [],
+            etiquetas: data.etiquetas || [],
+            ascensor: data.ascensor ?? false,
+            garaje: data.garaje ?? false,
+            trastero: data.trastero ?? false,
+            piscina: data.piscina ?? false,
+            jardin: data.jardin ?? false,
+          };
+          setBuilding(normalizedData);
         } else if (response.status === 404) {
+          setError('Edificio no encontrado');
           toast.error('Edificio no encontrado');
-          router.push('/edificios');
         } else {
-          toast.error('Error al cargar el edificio');
+          const errorData = await response.json().catch(() => ({}));
+          setError(errorData.error || 'Error al cargar el edificio');
+          toast.error(errorData.error || 'Error al cargar el edificio');
         }
-      } catch (error) {
-        console.error('Error fetching building:', error);
+      } catch (err) {
+        console.error('Error fetching building:', err);
+        setError('Error de conexión al servidor');
         toast.error('Error de conexión');
       } finally {
         setIsLoading(false);
@@ -149,7 +166,7 @@ export default function EdificioDetallesPage() {
     };
 
     fetchBuilding();
-  }, [status, buildingId, router]);
+  }, [status, buildingId]);
 
   const handleDeleteConfirm = async () => {
     if (!building) return;
@@ -246,7 +263,42 @@ export default function EdificioDetallesPage() {
     );
   }
 
-  if (!session || !building) return null;
+  if (!session) return null;
+
+  // Mostrar error si hay alguno
+  if (error) {
+    return (
+      <AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/edificios')}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Volver a Edificios
+            </Button>
+          </div>
+          <Card className="border-destructive">
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Building2 className="h-16 w-16 text-destructive mb-4" />
+                <h2 className="text-2xl font-bold text-destructive mb-2">Error</h2>
+                <p className="text-muted-foreground mb-6">{error}</p>
+                <Button onClick={() => router.push('/edificios')}>
+                  Volver al listado de edificios
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </AuthenticatedLayout>
+    );
+  }
+
+  if (!building) return null;
 
   const tipoBadge = getTipoBadge(building.tipo);
   const metrics = calculateMetrics();
