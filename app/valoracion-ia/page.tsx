@@ -315,11 +315,39 @@ export default function ValoracionIAPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Error al realizar la valoración');
+        throw new Error(error.message || error.error || 'Error al realizar la valoración');
       }
 
       const data = await response.json();
-      setResultado(data);
+      
+      // Validar que la respuesta tiene los campos esperados
+      if (!data.valorEstimado || typeof data.valorEstimado !== 'number') {
+        console.error('Respuesta de valoración inválida:', data);
+        toast.error('La valoración devolvió datos incompletos. Inténtalo de nuevo.');
+        return;
+      }
+      
+      // Asegurar valores por defecto
+      const resultadoValidado = {
+        ...data,
+        valorEstimado: data.valorEstimado || 0,
+        valorMinimo: data.valorMinimo || Math.round(data.valorEstimado * 0.9),
+        valorMaximo: data.valorMaximo || Math.round(data.valorEstimado * 1.1),
+        precioM2: data.precioM2 || Math.round(data.valorEstimado / parseFloat(formData.superficie)),
+        confianza: data.confianza || 70,
+        tendenciaMercado: data.tendenciaMercado || 'estable',
+        porcentajeTendencia: data.porcentajeTendencia || 0,
+        factoresPositivos: data.factoresPositivos || [],
+        factoresNegativos: data.factoresNegativos || [],
+        recomendaciones: data.recomendaciones || [],
+        comparables: data.comparables || [],
+        analisisMercado: data.analisisMercado || '',
+        tiempoEstimadoVenta: data.tiempoEstimadoVenta || '2-4 meses',
+        rentabilidadAlquiler: data.rentabilidadAlquiler || 4.5,
+        alquilerEstimado: data.alquilerEstimado || Math.round(data.valorEstimado * 0.004),
+      };
+      
+      setResultado(resultadoValidado);
       toast.success('Valoración completada');
     } catch (error: any) {
       console.error('Error valorando:', error);
