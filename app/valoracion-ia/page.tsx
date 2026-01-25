@@ -154,7 +154,7 @@ export default function ValoracionIAPage() {
   const [valorando, setValorando] = useState(false);
   const [units, setUnits] = useState<Unit[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
-  const [selectedAsset, setSelectedAsset] = useState<string>('');
+  const [selectedAsset, setSelectedAsset] = useState<string>('manual');
   const [assetType, setAssetType] = useState<'unit' | 'property'>('unit');
   const [resultado, setResultado] = useState<ValoracionResult | null>(null);
   
@@ -209,6 +209,11 @@ export default function ValoracionIAPage() {
   const handleAssetSelect = (assetId: string) => {
     setSelectedAsset(assetId);
     
+    // Si es "manual", no rellenar datos automáticamente
+    if (assetId === 'manual') {
+      return;
+    }
+    
     if (assetType === 'unit') {
       const unit = units.find(u => u.id === assetId);
       if (unit) {
@@ -257,11 +262,11 @@ export default function ValoracionIAPage() {
       let direccion = '';
       let ciudad = '';
       
-      if (selectedAsset && assetType === 'unit') {
+      if (selectedAsset && selectedAsset !== 'manual' && assetType === 'unit') {
         const unit = units.find(u => u.id === selectedAsset);
         direccion = unit?.building?.direccion || '';
         ciudad = unit?.building?.ciudad || 'Madrid';
-      } else if (selectedAsset && assetType === 'property') {
+      } else if (selectedAsset && selectedAsset !== 'manual' && assetType === 'property') {
         const prop = properties.find(p => p.id === selectedAsset);
         direccion = prop?.direccion || '';
         ciudad = prop?.ciudad || 'Madrid';
@@ -280,8 +285,8 @@ export default function ValoracionIAPage() {
           direccion,
           ciudad,
           codigoPostal: '',
-          unitId: assetType === 'unit' ? selectedAsset : undefined,
-          propertyId: assetType === 'property' ? selectedAsset : undefined,
+          unitId: assetType === 'unit' && selectedAsset !== 'manual' ? selectedAsset : undefined,
+          propertyId: assetType === 'property' && selectedAsset !== 'manual' ? selectedAsset : undefined,
         }),
       });
 
@@ -438,7 +443,7 @@ export default function ValoracionIAPage() {
                       <SelectValue placeholder="Selecciona un activo de tu cartera..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">-- Introducir datos manualmente --</SelectItem>
+                      <SelectItem value="manual">-- Introducir datos manualmente --</SelectItem>
                       {assetType === 'unit' ? (
                         units.map((unit) => (
                           <SelectItem key={unit.id} value={unit.id}>
