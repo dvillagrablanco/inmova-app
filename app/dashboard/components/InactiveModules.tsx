@@ -64,7 +64,8 @@ export default function InactiveModules() {
 
   const loadInactiveModules = async () => {
     try {
-      const response = await fetch('/api/modules?status=inactive');
+      // Usar view=available para obtener módulos disponibles (no activados)
+      const response = await fetch('/api/modules?view=available');
       if (response.ok) {
         const data = await response.json();
         setModules(data.modules || []);
