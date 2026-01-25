@@ -72,14 +72,15 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   str_housekeeping: { status: 'beta', name: 'Housekeeping' },
   
   // ============================================
-  // COLIVING - PARCIALMENTE ACTIVO
+  // COLIVING - ACTIVO
   // ============================================
   room_rental: { status: 'active', name: 'Habitaciones' },
   coliving_propiedades: { status: 'active', name: 'Propiedades Coliving' },
-  coliving_comunidad: { status: 'coming_soon', name: 'Comunidad', expectedDate: 'Q2 2026' },
-  coliving_matching: { status: 'coming_soon', name: 'Matching', expectedDate: 'Q2 2026' },
-  coliving_eventos: { status: 'coming_soon', name: 'Eventos', expectedDate: 'Q2 2026' },
-  coliving_reservas: { status: 'coming_soon', name: 'Reservas Coliving', expectedDate: 'Q2 2026' },
+  coliving_comunidad: { status: 'active', name: 'Comunidad' },
+  coliving_matching: { status: 'active', name: 'Matching Coliving' },
+  coliving_eventos: { status: 'active', name: 'Eventos' },
+  coliving_reservas: { status: 'active', name: 'Reservas Coliving' },
+  coliving_paquetes: { status: 'active', name: 'Paquetería' },
   
   // ============================================
   // MÓDULOS COMING SOON - NO FUNCIONALES
@@ -100,22 +101,30 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   viajes_corporativos: { status: 'active', name: 'Viajes Corporativos' },
   workspace: { status: 'active', name: 'Workspace/Coworking' },
   
-  // Verticales Especializadas - PENDIENTES
-  warehouse: { status: 'coming_soon', name: 'Warehouse', expectedDate: 'Q4 2026' },
+  // Verticales Especializadas - PENDIENTES PLACEHOLDER
+  warehouse: { status: 'beta', name: 'Warehouse' },
   hospitality: { status: 'coming_soon', name: 'Hospitality', expectedDate: 'Q4 2026' },
   retail: { status: 'coming_soon', name: 'Retail', expectedDate: 'Q4 2026' },
   
-  // Módulos Avanzados
-  tours_virtuales: { status: 'coming_soon', name: 'Tours Virtuales', expectedDate: 'Q2 2026' },
-  economia_circular: { status: 'coming_soon', name: 'Economía Circular', expectedDate: 'Q3 2026' },
+  // Módulos Avanzados - YA DESARROLLADOS
+  tours_virtuales: { status: 'beta', name: 'Tours Virtuales' },
+  economia_circular: { status: 'beta', name: 'Economía Circular' },
   valoracion_ia: { status: 'active', name: 'Valoración IA' },
-  blockchain: { status: 'coming_soon', name: 'Blockchain', expectedDate: 'Q4 2026' },
-  iot: { status: 'coming_soon', name: 'IoT', expectedDate: 'Q4 2026' },
-  esg: { status: 'coming_soon', name: 'ESG', expectedDate: 'Q3 2026' },
+  blockchain: { status: 'beta', name: 'Blockchain' },
+  iot: { status: 'beta', name: 'IoT' },
+  esg: { status: 'beta', name: 'ESG' },
   
-  // Herramientas
+  // Herramientas - YA DESARROLLADAS
+  licitaciones: { status: 'active', name: 'Licitaciones' },
+  salas_reuniones: { status: 'active', name: 'Salas de Reuniones' },
+  servicios_limpieza: { status: 'active', name: 'Servicios Limpieza' },
+  gestion_incidencias: { status: 'active', name: 'Gestión Incidencias' },
+  verificacion_inquilinos: { status: 'active', name: 'Verificación Inquilinos' },
+  informes: { status: 'active', name: 'Informes' },
+  proyectos_renovacion: { status: 'active', name: 'Proyectos Renovación' },
+  
+  // Herramientas - PENDIENTES PLACEHOLDER
   subastas: { status: 'coming_soon', name: 'Subastas', expectedDate: 'Q3 2026' },
-  licitaciones: { status: 'coming_soon', name: 'Licitaciones', expectedDate: 'Q3 2026' },
   marketplace_proveedores: { status: 'coming_soon', name: 'Marketplace Proveedores', expectedDate: 'Q2 2026' },
   
   // ============================================
@@ -128,49 +137,27 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
 
 /**
  * Rutas que deben ocultarse del sidebar completamente
+ * SOLO incluir páginas que son verdaderos placeholders (ComingSoonPage)
  */
 export const HIDDEN_ROUTES: string[] = [
-  // Verticales pendientes de implementación
-  '/warehouse',
-  '/warehouse/inventory',
-  '/warehouse/locations',
-  '/warehouse/movements',
-  
+  // Verticales placeholder (ComingSoonPage)
   '/hospitality',
   '/retail',
   
-  // Herramientas no implementadas
+  // Herramientas placeholder (ComingSoonPage)
   '/subastas',
-  '/licitaciones',
   '/microtransacciones',
   '/suscripciones',
-  '/impuestos',
-  '/renovaciones',
-  '/proyectos-renovacion',
   '/servicios-concierge',
-  '/servicios-limpieza',
-  '/salas-reuniones',
-  '/turismo-alquiler',
-  '/inspeccion-digital',
-  '/warranty-management',
-  '/gestion-incidencias',
   '/stock-gestion',
   '/sincronizacion-avanzada',
-  '/espacios-coworking',
-  '/verificacion-inquilinos',
-  '/informes',
+  '/warranty-management',
+  '/comunidad', // placeholder general, no coliving
   
-  // Partners Portal - AHORA FUNCIONALES (eliminados del listado oculto)
-  
-  // Portal Inquilino - AHORA FUNCIONALES (eliminadas del listado oculto)
-  
-  // Portal Proveedor - AHORA FUNCIONAL (eliminado del listado oculto)
-  
-  // Otros placeholders
-  '/community',
-  // '/valoracion-ia', // RESTAURADO - funcional en Living Residencial
-  // Herramientas Core - AHORA FUNCIONALES (planificación, estadísticas, automatización)
-  // Usuarios y permisos - AHORA FUNCIONALES (eliminados del listado oculto)
+  // Sub-rutas warehouse (placeholders por desarrollar)
+  '/warehouse/inventory',
+  '/warehouse/locations',
+  '/warehouse/movements',
 ];
 
 /**
@@ -185,6 +172,12 @@ export const BETA_ROUTES: string[] = [
   '/firma-digital',
   '/str/channels',
   '/str-housekeeping',
+  '/tours-virtuales',
+  '/economia-circular',
+  '/blockchain',
+  '/iot',
+  '/esg',
+  '/warehouse',
 ];
 
 /**
