@@ -1,25 +1,34 @@
 /**
  * Hook para detectar media queries y tipos de dispositivo
  * Optimizado para mobile-first approach
+ * 
+ * IMPORTANTE: Usa un estado inicial undefined y solo se actualiza
+ * después del montaje para evitar errores de hidratación de React
  */
 import { useState, useEffect } from 'react';
 
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false);
+  // Iniciar con undefined para evitar mismatch de hidratación
+  // El valor real se obtiene solo en el cliente después del montaje
+  const [matches, setMatches] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
+    // Solo ejecutar en cliente
+    if (typeof window === 'undefined') return;
+    
     const media = window.matchMedia(query);
-    if (media.matches !== matches) {
-      setMatches(media.matches);
-    }
+    
+    // Establecer valor inicial en cliente
+    setMatches(media.matches);
 
-    const listener = () => setMatches(media.matches);
+    const listener = (event: MediaQueryListEvent) => setMatches(event.matches);
     media.addEventListener('change', listener);
     
     return () => media.removeEventListener('change', listener);
-  }, [matches, query]);
+  }, [query]);
 
-  return matches;
+  // Retornar false mientras no esté montado (SSR) para evitar hydration mismatch
+  return matches ?? false;
 }
 
 /**
