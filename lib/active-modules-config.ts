@@ -167,7 +167,7 @@ export const HIDDEN_ROUTES: string[] = [
   
   // Otros placeholders
   '/community',
-  '/valoracion-ia',
+  // '/valoracion-ia', // HABILITADO - Ahora funcional
   // Herramientas Core - AHORA FUNCIONALES (planificación, estadísticas, automatización)
   // Usuarios y permisos - AHORA FUNCIONALES (eliminados del listado oculto)
 ];
