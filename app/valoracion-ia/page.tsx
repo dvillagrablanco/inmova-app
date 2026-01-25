@@ -199,23 +199,43 @@ export default function ValoracionIAPage() {
 
   const fetchAssets = async () => {
     try {
-      const [unitsRes, propsRes] = await Promise.all([
-        fetch('/api/units'),
-        fetch('/api/properties'),
+      const [unitsRes, propsRes] = await Promise.allSettled([
+        fetch('/api/units', { credentials: 'include' }),
+        fetch('/api/properties', { credentials: 'include' }),
       ]);
       
-      if (unitsRes.ok) {
-        const unitsData = await unitsRes.json();
-        setUnits(Array.isArray(unitsData) ? unitsData : []);
+      // Manejar units
+      if (unitsRes.status === 'fulfilled' && unitsRes.value.ok) {
+        try {
+          const unitsData = await unitsRes.value.json();
+          setUnits(Array.isArray(unitsData) ? unitsData : []);
+        } catch (e) {
+          console.warn('Error parsing units response:', e);
+          setUnits([]);
+        }
+      } else {
+        console.warn('Units fetch failed or rejected');
+        setUnits([]);
       }
       
-      if (propsRes.ok) {
-        const propsData = await propsRes.json();
-        setProperties(Array.isArray(propsData) ? propsData : []);
+      // Manejar properties
+      if (propsRes.status === 'fulfilled' && propsRes.value.ok) {
+        try {
+          const propsData = await propsRes.value.json();
+          setProperties(Array.isArray(propsData) ? propsData : []);
+        } catch (e) {
+          console.warn('Error parsing properties response:', e);
+          setProperties([]);
+        }
+      } else {
+        console.warn('Properties fetch failed or rejected');
+        setProperties([]);
       }
     } catch (error) {
-      logger.error('Error fetching assets:', error);
-      toast.error('Error al cargar los activos');
+      // Error crítico - seguir cargando la página sin datos
+      console.error('Error fetching assets:', error);
+      setUnits([]);
+      setProperties([]);
     } finally {
       setLoading(false);
     }
@@ -360,8 +380,33 @@ export default function ValoracionIAPage() {
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
             <p className="text-muted-foreground">
-              {!isMounted ? 'Inicializando...' : 'Cargando activos...'}
+              {!isMounted ? 'Preparando página...' : 'Cargando activos...'}
             </p>
+            {status === 'loading' && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Verificando sesión...
+              </p>
+            )}
+          </div>
+        </div>
+      </AuthenticatedLayout>
+    );
+  }
+  
+  // Si no está autenticado después de montar, mostrar mensaje
+  if (status === 'unauthenticated') {
+    return (
+      <AuthenticatedLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Sesión requerida</h2>
+            <p className="text-muted-foreground mb-4">
+              Necesitas iniciar sesión para acceder a esta página.
+            </p>
+            <Button onClick={() => router.push('/login')}>
+              Iniciar sesión
+            </Button>
           </div>
         </div>
       </AuthenticatedLayout>
