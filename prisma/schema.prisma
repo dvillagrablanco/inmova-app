@@ -1958,6 +1958,7 @@ model Company {
   strBookings          STRBooking[]           @relation
   strChannelSyncs      STRChannelSync[]       @relation
   flippingProjects     FlippingProject[]      @relation
+  flippingChecklists   FlippingChecklist[]    @relation
   constructionProjects ConstructionProject[]  @relation
 
   // Partner Program (comentado - usar sistema Partner B2B existente en línea 1285+)
@@ -8331,6 +8332,40 @@ model FlippingMilestone {
   project FlippingProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@map("flipping_milestones")
+}
+
+// Checklist de análisis de viviendas para flipping
+model FlippingChecklist {
+  id        String @id @default(cuid())
+  companyId String
+
+  // Datos básicos de la propiedad
+  direccion        String
+  referencia       String? // Referencia del portal inmobiliario
+  precioVenta      Float
+  metrosCuadrados  Float
+  fechaVisita      DateTime?
+
+  // Estado del análisis
+  estado     String @default("pendiente") // pendiente, en_proceso, completado, descartado
+  puntuacion Int    @default(0) // 0-100
+
+  // Categorías del checklist con items (JSON)
+  categorias Json // {estructura: {items: [{id, nombre, status, notas, coste}], completado: 0}, ...}
+
+  // Resumen
+  notasGenerales       String @default("") @db.Text
+  costeReformaEstimado Float  @default(0)
+
+  // Metadatos
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([estado])
+  @@map("flipping_checklists")
 }
 
 // ==========================================
