@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -75,6 +77,8 @@ interface Stats {
 }
 
 export default function ObrasPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [projects, setProjects] = useState<ConstructionProject[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -98,9 +102,19 @@ export default function ObrasPage() {
     estado: 'planificacion',
   });
 
+  // Redirigir al login si no hay sesión
   useEffect(() => {
-    loadProjects();
-  }, [filterEstado]);
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/obras');
+    }
+  }, [status, router]);
+
+  // Cargar proyectos solo cuando hay sesión
+  useEffect(() => {
+    if (status === 'authenticated') {
+      loadProjects();
+    }
+  }, [filterEstado, status]);
 
   async function loadProjects() {
     try {
@@ -196,7 +210,8 @@ export default function ObrasPage() {
     }).format(value);
   };
 
-  if (loading) {
+  // Mostrar skeleton mientras carga la sesión o los datos
+  if (status === 'loading' || loading) {
     return (
       <AuthenticatedLayout>
         <div className="space-y-6">
@@ -208,6 +223,11 @@ export default function ObrasPage() {
         </div>
       </AuthenticatedLayout>
     );
+  }
+
+  // Si no hay sesión, no renderizar (el useEffect ya redirige)
+  if (status === 'unauthenticated') {
+    return null;
   }
 
   return (
