@@ -297,16 +297,15 @@ export async function POST(request: NextRequest) {
     }
 
     const isImage = isImageFile(file.type, file.name);
+    const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
     
-    // Log detallado para debugging
-    logger.info('[AI Document Analysis] 📋 Archivo recibido:', {
-      filename: file.name,
-      fileType: file.type,
-      fileSize: file.size,
-      userId: session.user.id,
-      isImage,
-      extension: file.name.split('.').pop()?.toLowerCase(),
-    });
+    // LOG CRÍTICO: Escribir directamente al error log para garantizar visibilidad
+    logger.error(`[AI Document Analysis] 📋 ARCHIVO RECIBIDO - tipo: "${file.type}", nombre: "${file.name}", ext: "${fileExtension}", isImage: ${isImage}, tamaño: ${file.size}`);
+    
+    // Si la extensión sugiere imagen pero isImage es false, hay un problema con el mimeType
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension) && !isImage) {
+      logger.error(`[AI Document Analysis] ⚠️ ADVERTENCIA: Archivo con extensión de imagen pero mimeType no reconocido: ${file.type}`);
+    }
 
     let analysis;
 
