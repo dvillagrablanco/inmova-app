@@ -694,10 +694,11 @@ RESPONDE SIEMPRE EN JSON CON ESTA ESTRUCTURA:
 }`;
 
 /**
- * Analiza una imagen de documento usando Claude Vision
+ * Analiza una imagen o PDF de documento usando Claude Vision
+ * Claude 3 puede analizar tanto imágenes como PDFs directamente
  */
 export async function analyzeImageDocument(
-  imageBase64: string,
+  documentBase64: string,
   mimeType: string,
   filename: string,
   companyInfo: DocumentAnalysisInput['companyInfo']
@@ -708,37 +709,59 @@ export async function analyzeImageDocument(
 
   const startTime = Date.now();
   const maxRetries = 3;
-
-  // Determinar el media type correcto
-  let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/jpeg';
-  if (mimeType.includes('png')) mediaType = 'image/png';
-  else if (mimeType.includes('gif')) mediaType = 'image/gif';
-  else if (mimeType.includes('webp')) mediaType = 'image/webp';
+  
+  // Detectar si es un PDF
+  const isPDF = mimeType === 'application/pdf' || filename.toLowerCase().endsWith('.pdf');
 
   // Función para hacer la llamada a la API con reintentos
   async function callAPI(retryCount: number = 0): Promise<any> {
     try {
-      logger.info('🖼️ Iniciando análisis de imagen con Claude Vision', { 
+      const docType = isPDF ? 'PDF' : 'imagen';
+      logger.info(`🖼️ Iniciando análisis de ${docType} con Claude Vision`, { 
         filename,
         mimeType,
+        isPDF,
         attempt: retryCount + 1
       });
 
+      // Construir el contenido según el tipo de documento
+      let documentContent: any;
+      
+      if (isPDF) {
+        // Para PDFs, usar el tipo "document" de Claude
+        documentContent = {
+          type: 'document',
+          source: {
+            type: 'base64',
+            media_type: 'application/pdf',
+            data: documentBase64,
+          },
+        };
+      } else {
+        // Para imágenes, determinar el media type correcto
+        let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/jpeg';
+        if (mimeType.includes('png')) mediaType = 'image/png';
+        else if (mimeType.includes('gif')) mediaType = 'image/gif';
+        else if (mimeType.includes('webp')) mediaType = 'image/webp';
+        
+        documentContent = {
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: mediaType,
+            data: documentBase64,
+          },
+        };
+      }
+
       return await getAnthropicClient().messages.create({
-        model: 'claude-3-haiku-20240307', // Modelo con capacidad de visión
-        max_tokens: 2048,
+        model: 'claude-3-5-sonnet-20241022', // Modelo con mejor capacidad para documentos
+        max_tokens: 4096,
         messages: [
           {
             role: 'user',
             content: [
-              {
-                type: 'image',
-                source: {
-                  type: 'base64',
-                  media_type: mediaType,
-                  data: imageBase64,
-                },
-              },
+              documentContent,
               {
                 type: 'text',
                 text: IMAGE_ANALYSIS_PROMPT,

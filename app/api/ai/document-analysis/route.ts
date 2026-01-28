@@ -44,6 +44,20 @@ function isImageFile(mimeType: string, filename?: string): boolean {
 }
 
 /**
+ * Verifica si el archivo es un PDF que debe procesarse con visión
+ */
+function isPDFFile(mimeType: string, filename?: string): boolean {
+  if (mimeType === 'application/pdf') {
+    return true;
+  }
+  if (filename) {
+    const ext = filename.toLowerCase().split('.').pop();
+    return ext === 'pdf';
+  }
+  return false;
+}
+
+/**
  * Convierte un archivo a base64
  */
 async function fileToBase64(file: File): Promise<string> {
@@ -297,72 +311,69 @@ export async function POST(request: NextRequest) {
     }
 
     const isImage = isImageFile(file.type, file.name);
+    const isPDF = isPDFFile(file.type, file.name);
     
-    // LOG CRÍTICO: Escribir directamente al error log para garantizar visibilidad
-    // Nota: fileExtension ya está definido más arriba en el código
-    logger.error(`[AI Document Analysis] 📋 ARCHIVO RECIBIDO - tipo: "${file.type}", nombre: "${file.name}", ext: "${fileExtension}", isImage: ${isImage}, tamaño: ${file.size}`);
-    
-    // Si la extensión sugiere imagen pero isImage es false, hay un problema con el mimeType
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension) && !isImage) {
-      logger.error(`[AI Document Analysis] ⚠️ ADVERTENCIA: Archivo con extensión de imagen pero mimeType no reconocido: ${file.type}`);
-    }
+    // LOG: Información del archivo recibido
+    logger.info(`[AI Document Analysis] 📋 ARCHIVO RECIBIDO - tipo: "${file.type}", nombre: "${file.name}", ext: "${fileExtension}", isImage: ${isImage}, isPDF: ${isPDF}, tamaño: ${file.size}`);
 
     let analysis;
 
-    // Si es una imagen, usar análisis con visión de Claude
-    if (isImage) {
-      logger.info('[AI Document Analysis] 🖼️ Detectada IMAGEN - Usando Claude Vision', {
+    // Si es una imagen o PDF, usar análisis con visión de Claude
+    // Claude 3 puede analizar tanto imágenes como PDFs directamente
+    if (isImage || isPDF) {
+      const docType = isImage ? 'IMAGEN' : 'PDF';
+      logger.info(`[AI Document Analysis] 🖼️ Detectado ${docType} - Usando Claude Vision`, {
         mimeType: file.type,
         filename: file.name,
       });
       
       try {
-        const imageBase64 = await fileToBase64(file);
+        const documentBase64 = await fileToBase64(file);
         logger.info('[AI Document Analysis] Base64 generado', { 
-          base64Length: imageBase64.length,
-          first50Chars: imageBase64.substring(0, 50),
+          base64Length: documentBase64.length,
         });
         
+        // Para PDFs, usar el tipo correcto
+        const mediaType = isPDF ? 'application/pdf' : file.type;
+        
         analysis = await analyzeImageDocument(
-          imageBase64,
-          file.type,
+          documentBase64,
+          mediaType,
           file.name,
           companyInfo
         );
-      } catch (imageError: any) {
-        logger.error('[AI Document Analysis] Error en análisis de imagen:', {
-          message: imageError.message,
-          status: imageError.status,
-          error: imageError.error || imageError,
-          stack: imageError.stack,
+      } catch (docError: any) {
+        logger.error(`[AI Document Analysis] Error en análisis de ${docType}:`, {
+          message: docError.message,
+          status: docError.status,
+          error: docError.error || docError,
         });
-        throw imageError;
-      }
-    } else {
-      // Para PDFs y documentos de texto, usar análisis de texto
-      logger.info('[AI Document Analysis] 📄 Detectado DOCUMENTO - Usando análisis de texto');
-      
-      // Verificar si es un PDF de DNI/NIE (probablemente escaneo de imagen)
-      const filenameLower = file.name.toLowerCase();
-      const isProbablyScannedDocument = file.type === 'application/pdf' && 
-        (filenameLower.includes('dni') || filenameLower.includes('nie') || 
-         filenameLower.includes('pasaporte') || filenameLower.includes('carnet'));
-      
-      if (isProbablyScannedDocument) {
-        logger.warn('[AI Document Analysis] ⚠️ PDF de documento de identidad detectado - recomendando imagen directa');
-        // Intentar extraer texto, pero si falla, dar un mensaje específico
-        const extractedText = await extractTextFromFile(file);
         
-        // Si el texto extraído es muy corto, probablemente es un escaneo sin texto
-        if (extractedText.length < 100 || !extractedText.includes('@') && !extractedText.match(/\d{8}[A-Z]/i)) {
-          logger.error('[AI Document Analysis] PDF parece ser un escaneo de imagen sin texto extraíble');
-          return NextResponse.json({
-            error: 'El PDF parece ser un escaneo de imagen. Para documentos de identidad (DNI, NIE, pasaporte), por favor sube directamente la imagen en formato JPG o PNG para mejor análisis.',
-            suggestion: 'Haz una foto del documento o exporta el PDF como imagen y súbelo de nuevo.',
-            code: 'SCANNED_PDF_NOT_SUPPORTED'
-          }, { status: 400 });
+        // Si falla el análisis visual de un PDF, intentar análisis de texto como fallback
+        if (isPDF) {
+          logger.info('[AI Document Analysis] Intentando fallback a análisis de texto para PDF');
+          try {
+            const extractedText = await extractTextFromFile(file);
+            if (extractedText && extractedText.length > 50) {
+              analysis = await analyzeDocument({
+                text: extractedText,
+                filename: file.name,
+                mimeType: file.type,
+                companyInfo,
+              });
+            } else {
+              throw docError; // Re-lanzar el error original si no hay texto
+            }
+          } catch (textError) {
+            throw docError; // Re-lanzar el error original del análisis visual
+          }
+        } else {
+          throw docError;
         }
       }
+    } else {
+      // Para otros documentos de texto (Word, TXT, etc.), usar análisis de texto
+      logger.info('[AI Document Analysis] 📄 Detectado DOCUMENTO DE TEXTO - Usando análisis de texto');
       
       const extractedText = await extractTextFromFile(file);
       
