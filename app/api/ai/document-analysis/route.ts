@@ -341,6 +341,29 @@ export async function POST(request: NextRequest) {
     } else {
       // Para PDFs y documentos de texto, usar análisis de texto
       logger.info('[AI Document Analysis] 📄 Detectado DOCUMENTO - Usando análisis de texto');
+      
+      // Verificar si es un PDF de DNI/NIE (probablemente escaneo de imagen)
+      const filenameLower = file.name.toLowerCase();
+      const isProbablyScannedDocument = file.type === 'application/pdf' && 
+        (filenameLower.includes('dni') || filenameLower.includes('nie') || 
+         filenameLower.includes('pasaporte') || filenameLower.includes('carnet'));
+      
+      if (isProbablyScannedDocument) {
+        logger.warn('[AI Document Analysis] ⚠️ PDF de documento de identidad detectado - recomendando imagen directa');
+        // Intentar extraer texto, pero si falla, dar un mensaje específico
+        const extractedText = await extractTextFromFile(file);
+        
+        // Si el texto extraído es muy corto, probablemente es un escaneo sin texto
+        if (extractedText.length < 100 || !extractedText.includes('@') && !extractedText.match(/\d{8}[A-Z]/i)) {
+          logger.error('[AI Document Analysis] PDF parece ser un escaneo de imagen sin texto extraíble');
+          return NextResponse.json({
+            error: 'El PDF parece ser un escaneo de imagen. Para documentos de identidad (DNI, NIE, pasaporte), por favor sube directamente la imagen en formato JPG o PNG para mejor análisis.',
+            suggestion: 'Haz una foto del documento o exporta el PDF como imagen y súbelo de nuevo.',
+            code: 'SCANNED_PDF_NOT_SUPPORTED'
+          }, { status: 400 });
+        }
+      }
+      
       const extractedText = await extractTextFromFile(file);
       
       analysis = await analyzeDocument({
