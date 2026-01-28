@@ -1,6 +1,6 @@
 /**
  * Coordinador de Agentes IA
- * 
+ *
  * Sistema central que:
  * - Detecta intención y selecciona agente apropiado
  * - Coordina transferencias entre agentes
@@ -18,7 +18,7 @@ import {
   UserContext,
   IntentDetection,
   AgentHandoff,
-  AgentMetrics
+  AgentMetrics,
 } from './types';
 
 // Importar agentes
@@ -27,6 +27,7 @@ import { CustomerServiceAgent } from './customer-service-agent';
 import { CommercialManagementAgent } from './commercial-management-agent';
 import { FinancialAnalysisAgent } from './financial-analysis-agent';
 import { LegalComplianceAgent } from './legal-compliance-agent';
+import { DocumentAssistantAgent } from './document-assistant-agent';
 
 // ============================================================================
 // REGISTRO DE AGENTES
@@ -40,6 +41,7 @@ agentRegistry.set('customer_service', new CustomerServiceAgent());
 agentRegistry.set('commercial_management', new CommercialManagementAgent());
 agentRegistry.set('financial_analysis', new FinancialAnalysisAgent());
 agentRegistry.set('legal_compliance', new LegalComplianceAgent());
+agentRegistry.set('document_assistant', new DocumentAssistantAgent());
 
 // ============================================================================
 // COORDINADOR PRINCIPAL
@@ -80,7 +82,7 @@ export class AgentCoordinator {
 
       // Determinar agente apropiado
       let selectedAgentType: AgentType;
-      
+
       if (preferredAgent && agentRegistry.has(preferredAgent)) {
         // Usar agente preferido si se especifica
         selectedAgentType = preferredAgent;
@@ -107,18 +109,15 @@ export class AgentCoordinator {
         return {
           agentType: selectedAgentType,
           status: 'error',
-          message: 'Este agente no está disponible en este momento. Por favor, intenta con otra consulta o contacta con soporte.',
+          message:
+            'Este agente no está disponible en este momento. Por favor, intenta con otra consulta o contacta con soporte.',
           needsEscalation: true,
-          escalationReason: 'Agente deshabilitado'
+          escalationReason: 'Agente deshabilitado',
         };
       }
 
       // Procesar mensaje con el agente seleccionado
-      const response = await agent.processMessage(
-        message,
-        context,
-        conversationHistory
-      );
+      const response = await agent.processMessage(message, context, conversationHistory);
 
       // Actualizar historial de conversación
       const userMessage: AgentMessage = {
@@ -126,7 +125,7 @@ export class AgentCoordinator {
         role: 'user',
         content: message,
         timestamp: new Date(),
-        metadata: { agentType: selectedAgentType }
+        metadata: { agentType: selectedAgentType },
       };
 
       const assistantMessage: AgentMessage = {
@@ -138,8 +137,8 @@ export class AgentCoordinator {
           agentType: selectedAgentType,
           toolsUsed: response.toolsUsed,
           executionTime: response.executionTime,
-          confidence: response.confidence
-        }
+          confidence: response.confidence,
+        },
       };
 
       conversationHistory.push(userMessage, assistantMessage);
@@ -159,11 +158,7 @@ export class AgentCoordinator {
       );
 
       // Evaluar si necesita transferencia a otro agente
-      const needsHandoff = await this.evaluateHandoffNeed(
-        response,
-        message,
-        selectedAgentType
-      );
+      const needsHandoff = await this.evaluateHandoffNeed(response, message, selectedAgentType);
 
       if (needsHandoff) {
         response.suggestions = response.suggestions || [];
@@ -175,27 +170,29 @@ export class AgentCoordinator {
           priority: 'media',
           actionable: true,
           actionLabel: 'Transferir',
-          actionPayload: { transferTo: needsHandoff.suggestedAgent }
+          actionPayload: { transferTo: needsHandoff.suggestedAgent },
         });
       }
 
-      logger.info(`✅ [Coordinator] Message processed successfully - Agent: ${selectedAgentType} - Time: ${Date.now() - startTime}ms`);
+      logger.info(
+        `✅ [Coordinator] Message processed successfully - Agent: ${selectedAgentType} - Time: ${Date.now() - startTime}ms`
+      );
 
       return response;
-
     } catch (error: any) {
       logger.error('[Coordinator] Error processing message:', error);
-      
+
       return {
         agentType: 'customer_service',
         status: 'error',
-        message: 'Lo siento, hubo un error procesando tu mensaje. Por favor, inténtalo de nuevo o contacta con soporte.',
+        message:
+          'Lo siento, hubo un error procesando tu mensaje. Por favor, inténtalo de nuevo o contacta con soporte.',
         needsEscalation: true,
         escalationReason: 'Error en procesamiento',
         metadata: {
           error: error.message,
-          executionTime: Date.now() - startTime
-        }
+          executionTime: Date.now() - startTime,
+        },
       };
     }
   }
@@ -213,31 +210,31 @@ export class AgentCoordinator {
     // Analizar contexto de conversación previa
     const recentAgents = conversationHistory
       .slice(-3)
-      .map(m => m.metadata?.agentType)
+      .map((m) => m.metadata?.agentType)
       .filter(Boolean);
 
     // Si hay un agente reciente y el mensaje parece continuar el tema, mantener
     if (recentAgents.length > 0) {
       const lastAgent = recentAgents[recentAgents.length - 1] as AgentType;
       const agent = agentRegistry.get(lastAgent);
-      
-      if (agent && await agent.canHandle(message, context)) {
+
+      if (agent && (await agent.canHandle(message, context))) {
         return lastAgent;
       }
     }
 
     // Verificar cada agente en orden de prioridad
     const agentsToCheck: AgentType[] = [
-      'technical_support',    // Prioridad alta para emergencias
-      'legal_compliance',     // Alta por urgencia legal
-      'financial_analysis',   // Media-alta por impacto
+      'technical_support', // Prioridad alta para emergencias
+      'legal_compliance', // Alta por urgencia legal
+      'financial_analysis', // Media-alta por impacto
       'commercial_management', // Media
-      'customer_service'      // Default - maneja consultas generales
+      'customer_service', // Default - maneja consultas generales
     ];
 
     for (const agentType of agentsToCheck) {
       const agent = agentRegistry.get(agentType);
-      if (agent && agent.isEnabled() && await agent.canHandle(message, context)) {
+      if (agent && agent.isEnabled() && (await agent.canHandle(message, context))) {
         return agentType;
       }
     }
@@ -266,16 +263,25 @@ export class AgentCoordinator {
       legal_compliance: ['legal', 'contrato', 'abogado', 'demanda', 'cláusula'],
       financial_analysis: ['financiero', 'rentabilidad', 'roi', 'ingresos', 'gastos'],
       commercial_management: ['venta', 'lead', 'cliente', 'propuesta', 'comercial'],
-      document_assistant: ['documento', 'pdf', 'archivo', 'analizar', 'extraer', 'resumen', 'ocr', 'imagen']
+      document_assistant: [
+        'documento',
+        'pdf',
+        'archivo',
+        'analizar',
+        'extraer',
+        'resumen',
+        'ocr',
+        'imagen',
+      ],
     };
 
     for (const [agentType, keywords] of Object.entries(agentKeywords)) {
       if (agentType !== currentAgent) {
-        if (keywords.some(kw => messageLower.includes(kw))) {
+        if (keywords.some((kw) => messageLower.includes(kw))) {
           return {
             needed: true,
             suggestedAgent: agentType as AgentType,
-            reason: 'Tema relacionado con especialidad de otro agente'
+            reason: 'Tema relacionado con especialidad de otro agente',
           };
         }
       }
@@ -305,7 +311,7 @@ export class AgentCoordinator {
       reason,
       context: {},
       conversationHistory,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     await this.logHandoff(handoff, context);
@@ -324,7 +330,7 @@ export class AgentCoordinator {
       role: 'system',
       content: `Conversación transferida desde ${fromAgent} a ${toAgent}. Razón: ${reason}`,
       timestamp: new Date(),
-      metadata: { handoff: true }
+      metadata: { handoff: true },
     };
 
     conversationHistory.push(systemMessage);
@@ -338,23 +344,18 @@ export class AgentCoordinator {
         handoff: true,
         fromAgent,
         toAgent,
-        reason
-      }
+        reason,
+      },
     };
   }
 
   /**
    * Obtener métricas de agentes
    */
-  async getAgentMetrics(
-    agentType?: AgentType,
-    periodDays: number = 30
-  ): Promise<AgentMetrics[]> {
+  async getAgentMetrics(agentType?: AgentType, periodDays: number = 30): Promise<AgentMetrics[]> {
     const periodStart = new Date(Date.now() - periodDays * 24 * 60 * 60 * 1000);
 
-    const agentTypes = agentType
-      ? [agentType]
-      : Array.from(agentRegistry.keys());
+    const agentTypes = agentType ? [agentType] : Array.from(agentRegistry.keys());
 
     const metrics: AgentMetrics[] = [];
 
@@ -362,26 +363,28 @@ export class AgentCoordinator {
       const interactions = await prisma.agentInteraction.findMany({
         where: {
           agentType: type,
-          timestamp: { gte: periodStart }
-        }
+          timestamp: { gte: periodStart },
+        },
       });
 
-      const successful = interactions.filter(i => i.successful);
-      const escalations = interactions.filter(i => i.escalated);
+      const successful = interactions.filter((i) => i.successful);
+      const escalations = interactions.filter((i) => i.escalated);
 
-      const avgResponseTime = interactions.length > 0
-        ? interactions.reduce((sum, i) => sum + (i.responseTime || 0), 0) / interactions.length
-        : 0;
+      const avgResponseTime =
+        interactions.length > 0
+          ? interactions.reduce((sum, i) => sum + (i.responseTime || 0), 0) / interactions.length
+          : 0;
 
-      const avgConfidence = interactions.length > 0
-        ? interactions.reduce((sum, i) => sum + (i.confidence || 0), 0) / interactions.length
-        : 0;
+      const avgConfidence =
+        interactions.length > 0
+          ? interactions.reduce((sum, i) => sum + (i.confidence || 0), 0) / interactions.length
+          : 0;
 
       // Contar uso de tools
       const toolsUsage: Record<string, number> = {};
-      interactions.forEach(i => {
+      interactions.forEach((i) => {
         if (i.toolsUsed) {
-          (i.toolsUsed as string[]).forEach(tool => {
+          (i.toolsUsed as string[]).forEach((tool) => {
             toolsUsage[tool] = (toolsUsage[tool] || 0) + 1;
           });
         }
@@ -394,12 +397,13 @@ export class AgentCoordinator {
         averageResponseTime: avgResponseTime,
         averageConfidence: avgConfidence,
         toolsUsageCount: toolsUsage,
-        escalationRate: interactions.length > 0 ? (escalations.length / interactions.length) * 100 : 0,
+        escalationRate:
+          interactions.length > 0 ? (escalations.length / interactions.length) * 100 : 0,
         userSatisfactionAvg: 0, // Placeholder - requeriría sistema de feedback
         period: {
           from: periodStart,
-          to: new Date()
-        }
+          to: new Date(),
+        },
       });
     }
 
@@ -423,7 +427,12 @@ export class AgentCoordinator {
   /**
    * Listar agentes disponibles
    */
-  listAvailableAgents(): Array<{ type: AgentType; name: string; description: string; enabled: boolean }> {
+  listAvailableAgents(): Array<{
+    type: AgentType;
+    name: string;
+    description: string;
+    enabled: boolean;
+  }> {
     const agents: Array<any> = [];
 
     for (const [type, agent] of agentRegistry.entries()) {
@@ -433,7 +442,7 @@ export class AgentCoordinator {
         name: config.name,
         description: config.description,
         enabled: agent.isEnabled(),
-        capabilities: config.capabilities
+        capabilities: config.capabilities,
       });
     }
 
@@ -464,8 +473,8 @@ export class AgentCoordinator {
           responseTime: duration,
           confidence: response.confidence || 0,
           timestamp: new Date(),
-          metadata: response.metadata || {}
-        }
+          metadata: response.metadata || {},
+        },
       });
     } catch (error) {
       logger.error('[Coordinator] Error logging interaction:', error);
@@ -476,10 +485,7 @@ export class AgentCoordinator {
   /**
    * Registrar transferencia
    */
-  private async logHandoff(
-    handoff: AgentHandoff,
-    context: UserContext
-  ): Promise<void> {
+  private async logHandoff(handoff: AgentHandoff, context: UserContext): Promise<void> {
     try {
       await prisma.agentHandoff.create({
         data: {
@@ -489,8 +495,8 @@ export class AgentCoordinator {
           userId: context.userId,
           companyId: context.companyId,
           timestamp: handoff.timestamp,
-          conversationContext: handoff.context
-        }
+          conversationContext: handoff.context,
+        },
       });
     } catch (error) {
       logger.error('[Coordinator] Error logging handoff:', error);
@@ -509,7 +515,7 @@ export class AgentCoordinator {
       legal_compliance: 'Legal y Cumplimiento',
       maintenance_preventive: 'Mantenimiento Preventivo',
       document_assistant: 'Asistente Documental',
-      general: 'Asistente General'
+      general: 'Asistente General',
     };
 
     return names[agentType] || agentType;

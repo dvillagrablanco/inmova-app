@@ -1,6 +1,6 @@
 /**
  * Sistema de Agentes IA - Punto de Entrada Principal
- * 
+ *
  * Exporta todos los agentes, tipos y funciones de coordinación
  */
 
@@ -22,6 +22,7 @@ export { CustomerServiceAgent } from './customer-service-agent';
 export { CommercialManagementAgent } from './commercial-management-agent';
 export { FinancialAnalysisAgent } from './financial-analysis-agent';
 export { LegalComplianceAgent } from './legal-compliance-agent';
+export { DocumentAssistantAgent } from './document-assistant-agent';
 
 // ============================================================================
 // COORDINADOR
@@ -31,7 +32,7 @@ export {
   agentCoordinator,
   processAgentMessage,
   getAgentsMetrics,
-  listAgents
+  listAgents,
 } from './agent-coordinator';
 
 // ============================================================================
@@ -50,38 +51,38 @@ export const SYSTEM_INFO = {
     {
       type: 'general',
       name: 'Asistente General',
-      description: 'Coordinador inteligente que dirige al agente especializado más adecuado'
+      description: 'Coordinador inteligente que dirige al agente especializado más adecuado',
     },
     {
       type: 'document_assistant',
       name: 'Asistente Documental',
-      description: 'Análisis, resumen y extracción de información de documentos'
+      description: 'Análisis, resumen y extracción de información de documentos',
     },
     {
       type: 'technical_support',
       name: 'Agente de Servicio Técnico',
-      description: 'Gestión de mantenimiento y soporte técnico'
+      description: 'Gestión de mantenimiento y soporte técnico',
     },
     {
       type: 'customer_service',
       name: 'Agente de Atención al Cliente',
-      description: 'Consultas, quejas y atención al cliente'
+      description: 'Consultas, quejas y atención al cliente',
     },
     {
       type: 'commercial_management',
       name: 'Agente de Gestión Comercial',
-      description: 'Ventas, leads y desarrollo comercial'
+      description: 'Ventas, leads y desarrollo comercial',
     },
     {
       type: 'financial_analysis',
       name: 'Agente de Análisis Financiero',
-      description: 'Análisis financiero y optimización de rentabilidad'
+      description: 'Análisis financiero y optimización de rentabilidad',
     },
     {
       type: 'legal_compliance',
       name: 'Agente de Legal y Cumplimiento',
-      description: 'Aspectos legales y cumplimiento normativo'
-    }
+      description: 'Aspectos legales y cumplimiento normativo',
+    },
   ],
   capabilities: {
     multiAgentCoordination: true,
@@ -89,7 +90,7 @@ export const SYSTEM_INFO = {
     toolCalling: true,
     conversationMemory: true,
     metricsTracking: true,
-    escalationToHuman: true
+    escalationToHuman: true,
   },
-  powered_by: 'Anthropic Claude 3.5 Sonnet'
+  powered_by: 'Anthropic Claude 3.5 Sonnet',
 };
