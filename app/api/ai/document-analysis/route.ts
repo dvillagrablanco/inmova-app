@@ -141,21 +141,35 @@ Fecha de carga: ${new Date().toISOString()}
 function isRealTextContent(text: string): boolean {
   if (!text || text.length < 100) return false;
   
-  // Buscar patrones de basura de PDF
-  const pdfPatterns = /(stream|endstream|endobj|xref|\/Type|\/Page|\/Font|BT|ET|Tf|Td|Tj)/gi;
-  const pdfMatches = (text.match(pdfPatterns) || []).length;
+  // Patrones de código interno de PDF - si hay CUALQUIERA de estos, es basura
+  const pdfCodePatterns = [
+    /\d+\s+\d+\s+obj/i,           // "3 0 obj"
+    /<<\s*\/[A-Z]/i,              // "<< /Filter"
+    /\/FlateDecode/i,             // /FlateDecode
+    /\/Length\s+\d+/i,            // /Length 88
+    /endobj/i,                    // endobj
+    /endstream/i,                 // endstream
+    /\/Type\s*\/Page/i,           // /Type /Page
+    /\/Resources/i,               // /Resources
+    /\/MediaBox/i,                // /MediaBox
+    /xref/i,                      // xref
+    /trailer/i,                   // trailer
+    /startxref/i,                 // startxref
+  ];
   
-  // Buscar palabras reales en español
-  const spanishWords = /(nombre|apellido|fecha|nacimiento|direccion|numero|documento|dni|nie|pasaporte|contrato|alquiler|propiedad|inquilino)/gi;
+  // Si encontramos CUALQUIER patrón de código PDF, no es texto real
+  for (const pattern of pdfCodePatterns) {
+    if (pattern.test(text)) {
+      return false;
+    }
+  }
+  
+  // Buscar palabras reales en español que indiquen contenido de documento
+  const spanishWords = /(nombre|apellido|fecha|nacimiento|direccion|numero|documento|dni|nie|pasaporte|contrato|alquiler|propiedad|inquilino|arrendador|arrendatario|importe|euros)/gi;
   const spanishMatches = (text.match(spanishWords) || []).length;
   
-  // Si hay muchos patrones de PDF y pocas palabras útiles, es basura
-  if (pdfMatches > 5 && spanishMatches < 2) return false;
-  
-  // Contar palabras reales (4+ caracteres)
-  const realWords = text.match(/[a-záéíóúñA-ZÁÉÍÓÚÑ]{4,}/g) || [];
-  
-  return realWords.length >= 15 || spanishMatches >= 2;
+  // Necesitamos al menos 3 palabras relevantes en español
+  return spanishMatches >= 3;
 }
 
 /**
