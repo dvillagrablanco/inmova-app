@@ -50,6 +50,7 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Acta {
   id: string;
@@ -66,7 +67,11 @@ interface Acta {
 
 const ESTADOS_ACTA = [
   { value: 'borrador', label: 'Borrador', color: 'bg-gray-100 text-gray-800' },
-  { value: 'pendiente_aprobacion', label: 'Pendiente Aprobación', color: 'bg-yellow-100 text-yellow-800' },
+  {
+    value: 'pendiente_aprobacion',
+    label: 'Pendiente Aprobación',
+    color: 'bg-yellow-100 text-yellow-800',
+  },
   { value: 'aprobada', label: 'Aprobada', color: 'bg-green-100 text-green-800' },
   { value: 'firmada', label: 'Firmada', color: 'bg-blue-100 text-blue-800' },
 ];
@@ -115,12 +120,14 @@ export default function ActasPage() {
       if (res.ok) {
         const data = await res.json();
         setActas(data.actas || []);
-        setStats(data.stats || {
-          total: 0,
-          borradores: 0,
-          aprobadas: 0,
-          pendientesAprobacion: 0,
-        });
+        setStats(
+          data.stats || {
+            total: 0,
+            borradores: 0,
+            aprobadas: 0,
+            pendientesAprobacion: 0,
+          }
+        );
       }
     } catch (error) {
       console.error('Error fetching actas:', error);
@@ -142,7 +149,7 @@ export default function ActasPage() {
     }
 
     // Parsear orden del día (cada línea es un punto)
-    const ordenDiaLines = formData.ordenDia.split('\n').filter(l => l.trim());
+    const ordenDiaLines = formData.ordenDia.split('\n').filter((l) => l.trim());
     const ordenDia = ordenDiaLines.map((line, idx) => ({
       numero: idx + 1,
       titulo: line.trim(),
@@ -182,11 +189,7 @@ export default function ActasPage() {
 
   const getEstadoBadge = (estado: string) => {
     const e = ESTADOS_ACTA.find((es) => es.value === estado);
-    return e ? (
-      <Badge className={e.color}>{e.label}</Badge>
-    ) : (
-      <Badge>{estado}</Badge>
-    );
+    return e ? <Badge className={e.color}>{e.label}</Badge> : <Badge>{estado}</Badge>;
   };
 
   if (status === 'loading' || loading) {
@@ -215,9 +218,7 @@ export default function ActasPage() {
           </Button>
           <div className="flex-1">
             <h1 className="text-3xl font-bold">Libro de Actas Digital</h1>
-            <p className="text-muted-foreground">
-              Gestión de actas de junta y reuniones
-            </p>
+            <p className="text-muted-foreground">Gestión de actas de junta y reuniones</p>
           </div>
           <Dialog open={showDialog} onOpenChange={setShowDialog}>
             <DialogTrigger asChild>
@@ -251,9 +252,15 @@ export default function ActasPage() {
                       <SelectValue placeholder="Selecciona tipo" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Junta General Ordinaria">Junta General Ordinaria</SelectItem>
-                      <SelectItem value="Junta General Extraordinaria">Junta General Extraordinaria</SelectItem>
-                      <SelectItem value="Reunión de Junta Directiva">Reunión de Junta Directiva</SelectItem>
+                      <SelectItem value="Junta General Ordinaria">
+                        Junta General Ordinaria
+                      </SelectItem>
+                      <SelectItem value="Junta General Extraordinaria">
+                        Junta General Extraordinaria
+                      </SelectItem>
+                      <SelectItem value="Reunión de Junta Directiva">
+                        Reunión de Junta Directiva
+                      </SelectItem>
                       <SelectItem value="Reunión de Comisión">Reunión de Comisión</SelectItem>
                     </SelectContent>
                   </Select>
@@ -363,7 +370,7 @@ export default function ActasPage() {
                     <TableRow key={acta.id}>
                       <TableCell className="font-medium">#{acta.numeroActa}</TableCell>
                       <TableCell>
-                        {format(new Date(acta.fecha), "d MMM yyyy, HH:mm", { locale: es })}
+                        {format(new Date(acta.fecha), 'd MMM yyyy, HH:mm', { locale: es })}
                       </TableCell>
                       <TableCell>{acta.convocatoria}</TableCell>
                       <TableCell>
@@ -391,6 +398,42 @@ export default function ActasPage() {
             </Table>
           </CardContent>
         </Card>
+
+        {/* Asistente IA de Documentos para actas de comunidad */}
+        <AIDocumentAssistant
+          context="documentos"
+          variant="floating"
+          position="bottom-right"
+          onApplyData={(data) => {
+            // Aplicar datos extraídos del acta al formulario
+            if (data.numeroActa) {
+              setNewActa((prev) => ({ ...prev, numeroActa: data.numeroActa }));
+            }
+            if (data.fecha) {
+              const fecha = new Date(data.fecha);
+              if (!isNaN(fecha.getTime())) {
+                setNewActa((prev) => ({ ...prev, fecha: fecha.toISOString().split('T')[0] }));
+              }
+            }
+            if (data.convocatoria || data.tipoConvocatoria) {
+              setNewActa((prev) => ({
+                ...prev,
+                convocatoria: data.convocatoria || data.tipoConvocatoria,
+              }));
+            }
+            if (data.observaciones || data.resumen) {
+              setNewActa((prev) => ({
+                ...prev,
+                observaciones: data.observaciones || data.resumen,
+              }));
+            }
+            // Abrir el diálogo de nueva acta si hay datos
+            if (data.numeroActa || data.fecha) {
+              setShowDialog(true);
+            }
+            toast.success('Datos del acta extraídos. Revise y complete el formulario.');
+          }}
+        />
       </div>
     </AuthenticatedLayout>
   );
