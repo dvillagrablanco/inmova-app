@@ -755,7 +755,7 @@ export async function analyzeImageDocument(
       }
 
       return await getAnthropicClient().messages.create({
-        model: 'claude-3-5-sonnet-20241022', // Modelo con mejor capacidad para documentos
+        model: 'claude-3-haiku-20240307', // Modelo disponible con visión
         max_tokens: 4096,
         messages: [
           {
