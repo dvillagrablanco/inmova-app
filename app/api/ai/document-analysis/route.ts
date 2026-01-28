@@ -115,14 +115,47 @@ Fecha de carga: ${new Date().toISOString()}
       }
     }
     
-    if (extractedText.trim().length > 50) {
-      return basicInfo + '\n\nTexto extraído:\n' + extractedText.trim();
+    // Validar que el texto extraído es REAL y no basura del PDF
+    // Los PDFs de imagen contienen texto como "stream", "endstream", "obj", etc.
+    const pdfGarbagePatterns = /\b(stream|endstream|endobj|xref|trailer|startxref|obj\s+\d|BT|ET|Tf|Td|Tj|TJ|cm|re|f|S|Q|q)\b/gi;
+    const cleanedText = extractedText.replace(pdfGarbagePatterns, '').trim();
+    
+    // Contar palabras reales (3+ caracteres alfabéticos)
+    const realWords = cleanedText.match(/[a-záéíóúñA-ZÁÉÍÓÚÑ]{3,}/g) || [];
+    const hasRealContent = realWords.length >= 10; // Al menos 10 palabras reales
+    
+    if (hasRealContent && cleanedText.length > 100) {
+      return basicInfo + '\n\nTexto extraído:\n' + cleanedText;
     }
   } catch (e) {
     // Si falla la extracción, usar solo info básica
   }
 
   return basicInfo;
+}
+
+/**
+ * Verifica si el texto extraído es contenido real útil para análisis
+ * o si son solo metadatos/basura del PDF
+ */
+function isRealTextContent(text: string): boolean {
+  if (!text || text.length < 100) return false;
+  
+  // Buscar patrones de basura de PDF
+  const pdfPatterns = /(stream|endstream|endobj|xref|\/Type|\/Page|\/Font|BT|ET|Tf|Td|Tj)/gi;
+  const pdfMatches = (text.match(pdfPatterns) || []).length;
+  
+  // Buscar palabras reales en español
+  const spanishWords = /(nombre|apellido|fecha|nacimiento|direccion|numero|documento|dni|nie|pasaporte|contrato|alquiler|propiedad|inquilino)/gi;
+  const spanishMatches = (text.match(spanishWords) || []).length;
+  
+  // Si hay muchos patrones de PDF y pocas palabras útiles, es basura
+  if (pdfMatches > 5 && spanishMatches < 2) return false;
+  
+  // Contar palabras reales (4+ caracteres)
+  const realWords = text.match(/[a-záéíóúñA-ZÁÉÍÓÚÑ]{4,}/g) || [];
+  
+  return realWords.length >= 15 || spanishMatches >= 2;
 }
 
 /**
@@ -357,21 +390,21 @@ export async function POST(request: NextRequest) {
       try {
         const extractedText = await extractTextFromFile(file);
         
-        // El texto extraído debe tener más que solo metadata básica
-        // La metadata básica tiene ~100 caracteres, necesitamos contenido real
+        // Verificar si el texto extraído es contenido REAL y útil
+        // No solo metadatos o basura del PDF
         const hasRealText = extractedText && 
-                           extractedText.length > 200 && 
-                           extractedText.includes('Texto extraído:');
+                           extractedText.includes('Texto extraído:') &&
+                           isRealTextContent(extractedText);
         
-        logger.error('[AI Document Analysis] 📄 Texto extraído del PDF:', { 
+        logger.error('[AI Document Analysis] 📄 Análisis de texto del PDF:', { 
           textLength: extractedText?.length || 0,
           hasRealText,
-          textPreview: extractedText?.substring(0, 300),
+          textPreview: extractedText?.substring(0, 200),
         });
         
         if (hasRealText) {
-          // El PDF tiene texto real, usar análisis de texto
-          logger.info('[AI Document Analysis] PDF con texto - Usando análisis de texto');
+          // El PDF tiene texto real útil, usar análisis de texto
+          logger.info('[AI Document Analysis] PDF con texto REAL - Usando análisis de texto');
           
           analysis = await analyzeDocument({
             text: extractedText,
@@ -380,18 +413,17 @@ export async function POST(request: NextRequest) {
             companyInfo,
           });
         } else {
-          // El PDF es una imagen escaneada (no tiene texto extraíble)
+          // El PDF es una imagen escaneada o no tiene texto útil
           // Enviarlo a Claude Vision como imagen
-          logger.error('[AI Document Analysis] PDF es imagen escaneada - Usando Claude Vision');
+          logger.error('[AI Document Analysis] PDF sin texto útil - Usando Claude Vision como IMAGEN');
           
           const documentBase64 = await fileToBase64(file);
           logger.error('[AI Document Analysis] PDF Base64 generado:', { base64Length: documentBase64.length });
           
-          // Claude Vision puede procesar PDFs como imágenes
-          // Usamos image/png como formato más compatible
+          // Enviar como imagen para que Claude Vision lo analice visualmente
           analysis = await analyzeImageDocument(
             documentBase64,
-            'image/png', // Enviar como imagen
+            'image/png', // Forzar como imagen para análisis visual
             file.name,
             companyInfo
           );
