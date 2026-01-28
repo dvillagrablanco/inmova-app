@@ -361,116 +361,85 @@ export async function POST(request: NextRequest) {
     const isPDF = isPDFFile(file.type, file.name);
     
     // LOG: Información del archivo recibido
-    logger.error(`[AI Document Analysis] 📋 ARCHIVO RECIBIDO - tipo: "${file.type}", nombre: "${file.name}", ext: "${fileExtension}", isImage: ${isImage}, isPDF: ${isPDF}, tamaño: ${file.size}`);
+    logger.info(`[AI Document Analysis] 📋 ARCHIVO: tipo="${file.type}", nombre="${file.name}", isImage=${isImage}, isPDF=${isPDF}`);
 
     let analysis;
 
-    // ESTRATEGIA:
-    // - Imágenes (JPG, PNG, etc.) → Claude Vision (Haiku soporta imágenes)
-    // - PDFs → Análisis de texto (Haiku puede no soportar type:'document' para PDFs)
+    // ESTRATEGIA SIMPLE:
+    // - Imágenes (JPG, PNG, GIF, WebP) → Claude Vision ✅
+    // - PDFs escaneados → Pedir que suba imagen ⚠️
+    // - PDFs con texto → Análisis de texto ✅
+    // - Otros documentos → Análisis de texto ✅
+    
     if (isImage) {
-      logger.info(`[AI Document Analysis] 🖼️ Detectado IMAGEN - Usando Claude Vision`, {
-        mimeType: file.type,
-        filename: file.name,
-      });
+      // ✅ IMÁGENES: Usar Claude Vision directamente
+      logger.info(`[AI Document Analysis] 🖼️ IMAGEN detectada - Usando Claude Vision`);
       
       try {
-        const documentBase64 = await fileToBase64(file);
-        logger.info('[AI Document Analysis] Base64 generado', { 
-          base64Length: documentBase64.length,
-        });
+        const imageBase64 = await fileToBase64(file);
         
         analysis = await analyzeImageDocument(
-          documentBase64,
+          imageBase64,
           file.type,
           file.name,
           companyInfo
         );
-      } catch (docError: any) {
-        logger.error(`[AI Document Analysis] Error en análisis de imagen:`, {
-          message: docError.message,
-          status: docError.status,
-          error: docError.error || docError,
-        });
-        throw docError;
+      } catch (imgError: any) {
+        logger.error(`[AI Document Analysis] Error analizando imagen:`, imgError.message);
+        throw imgError;
       }
     } else if (isPDF) {
-      // Para PDFs: intentar extraer texto primero
-      logger.error(`[AI Document Analysis] 📄 Detectado PDF - Extrayendo texto`, {
-        mimeType: file.type,
-        filename: file.name,
-      });
+      // PDFs: Verificar si tiene texto real o es escaneado
+      const extractedText = await extractTextFromFile(file);
+      const hasRealText = extractedText && 
+                         extractedText.includes('Texto extraído:') &&
+                         isRealTextContent(extractedText);
       
-      try {
-        const extractedText = await extractTextFromFile(file);
-        
-        // Verificar si el texto extraído es contenido REAL y útil
-        // No solo metadatos o basura del PDF
-        const hasRealText = extractedText && 
-                           extractedText.includes('Texto extraído:') &&
-                           isRealTextContent(extractedText);
-        
-        logger.error('[AI Document Analysis] 📄 Análisis de texto del PDF:', { 
-          textLength: extractedText?.length || 0,
-          hasRealText,
-          textPreview: extractedText?.substring(0, 200),
+      logger.info(`[AI Document Analysis] 📄 PDF detectado - hasRealText=${hasRealText}`);
+      
+      if (hasRealText) {
+        // ✅ PDF con texto real: usar análisis de texto
+        analysis = await analyzeDocument({
+          text: extractedText,
+          filename: file.name,
+          mimeType: file.type,
+          companyInfo,
         });
+      } else {
+        // ⚠️ PDF escaneado: Pedir que suba imagen
+        logger.warn('[AI Document Analysis] PDF escaneado - Solicitando imagen');
         
-        if (hasRealText) {
-          // El PDF tiene texto real útil, usar análisis de texto
-          logger.info('[AI Document Analysis] PDF con texto REAL - Usando análisis de texto');
-          
-          analysis = await analyzeDocument({
-            text: extractedText,
-            filename: file.name,
-            mimeType: file.type,
-            companyInfo,
-          });
-        } else {
-          // El PDF es una imagen escaneada (no tiene texto extraíble)
-          // Claude Haiku no puede procesar PDFs directamente
-          // Retornar mensaje pidiendo que suba una imagen
-          logger.error('[AI Document Analysis] PDF escaneado detectado - Pidiendo imagen');
-          
-          return NextResponse.json({
-            classification: {
-              category: 'dni_nie',
-              confidence: 0.5,
-              specificType: 'Documento de identidad (PDF escaneado)',
-              reasoning: 'PDF detectado como imagen escaneada',
-            },
-            ownershipValidation: {
-              isOwned: false,
-              detectedCIF: null,
-              detectedCompanyName: null,
-              matchesCIF: false,
-              matchesName: false,
-              confidence: 0,
-              notes: 'No se pudo analizar el contenido',
-            },
-            extractedFields: [],
-            summary: 'El archivo PDF parece ser un documento escaneado (imagen).',
-            warnings: [
-              '⚠️ El PDF contiene una imagen escaneada que no podemos procesar directamente.',
-              '📷 Por favor, sube el documento como IMAGEN (JPG, PNG) en lugar de PDF.',
-              '💡 Consejo: Toma una foto del documento o exporta el PDF como imagen.',
-            ],
-            suggestedActions: [],
-            sensitiveData: { hasSensitive: true, types: ['documento_identidad'] },
-            processingMetadata: {
-              tokensUsed: 0,
-              processingTimeMs: Date.now() - Date.now(),
-              modelUsed: 'none',
-            },
-          });
-        }
-      } catch (pdfError: any) {
-        logger.error(`[AI Document Analysis] Error procesando PDF:`, {
-          message: pdfError.message,
-          status: pdfError.status,
-          error: pdfError,
+        return NextResponse.json({
+          classification: {
+            category: 'dni_nie',
+            confidence: 0.5,
+            specificType: 'Documento escaneado',
+            reasoning: 'PDF sin texto extraíble',
+          },
+          ownershipValidation: {
+            isOwned: false,
+            detectedCIF: null,
+            detectedCompanyName: null,
+            matchesCIF: false,
+            matchesName: false,
+            confidence: 0,
+            notes: 'Documento escaneado',
+          },
+          extractedFields: [],
+          summary: '📷 Por favor, sube una FOTO del documento (JPG o PNG) en lugar de PDF.',
+          warnings: [
+            '⚠️ Este PDF es un documento escaneado y no podemos leer su contenido.',
+            '📷 SOLUCIÓN: Sube el DNI/documento como imagen JPG o PNG.',
+            '💡 Puedes tomar una foto con el móvil o exportar el PDF como imagen.',
+          ],
+          suggestedActions: [],
+          sensitiveData: { hasSensitive: true, types: ['documento_identidad'] },
+          processingMetadata: {
+            tokensUsed: 0,
+            processingTimeMs: 0,
+            modelUsed: 'none',
+          },
         });
-        throw pdfError;
       }
     } else {
       // Para otros documentos de texto (Word, TXT, etc.), usar análisis de texto

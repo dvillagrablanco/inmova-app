@@ -718,11 +718,12 @@ RESPONDE SIEMPRE EN JSON CON ESTA ESTRUCTURA:
 }`;
 
 /**
- * Analiza una imagen o PDF de documento usando Claude Vision
- * Claude 3 puede analizar tanto imágenes como PDFs directamente
+ * Analiza una IMAGEN de documento usando Claude Vision
+ * IMPORTANTE: Solo funciona con imágenes reales (JPG, PNG, GIF, WebP)
+ * NO funciona con PDFs - los PDFs deben ser rechazados antes de llamar esta función
  */
 export async function analyzeImageDocument(
-  documentBase64: string,
+  imageBase64: string,
   mimeType: string,
   filename: string,
   companyInfo: DocumentAnalysisInput['companyInfo']
@@ -734,69 +735,41 @@ export async function analyzeImageDocument(
   const startTime = Date.now();
   const maxRetries = 3;
   
-  // Detectar tipo de documento basado en el contenido real, no el mimeType pasado
-  // Si el filename es .pdf, SIEMPRE tratarlo como PDF para usar el tipo correcto en Claude
-  const isPDFFile = filename.toLowerCase().endsWith('.pdf');
-  const isImageMimeType = !isPDFFile && mimeType.startsWith('image/');
-  const isPDF = isPDFFile || mimeType === 'application/pdf';
-  
-  logger.error('🖼️ [analyzeImageDocument] Configuración:', {
-    mimeType,
+  logger.info('🖼️ Iniciando análisis de imagen con Claude Vision', { 
     filename,
-    isPDFFile,
-    isImageMimeType,
-    isPDF,
+    mimeType 
   });
+
+  // Determinar el media type correcto para la imagen
+  let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/jpeg';
+  if (mimeType.includes('png')) mediaType = 'image/png';
+  else if (mimeType.includes('gif')) mediaType = 'image/gif';
+  else if (mimeType.includes('webp')) mediaType = 'image/webp';
 
   // Función para hacer la llamada a la API con reintentos
   async function callAPI(retryCount: number = 0): Promise<any> {
     try {
-      const docType = isPDF ? 'PDF' : 'imagen';
-      logger.info(`🖼️ Iniciando análisis de ${docType} con Claude Vision`, { 
+      logger.info(`🖼️ Enviando imagen a Claude Vision`, { 
         filename,
-        mimeType,
-        isPDF,
+        mediaType,
         attempt: retryCount + 1
       });
 
-      // Construir el contenido según el tipo de documento
-      let documentContent: any;
-      
-      if (isPDF) {
-        // Para PDFs, usar el tipo "document" de Claude
-        documentContent = {
-          type: 'document',
-          source: {
-            type: 'base64',
-            media_type: 'application/pdf',
-            data: documentBase64,
-          },
-        };
-      } else {
-        // Para imágenes, determinar el media type correcto
-        let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/jpeg';
-        if (mimeType.includes('png')) mediaType = 'image/png';
-        else if (mimeType.includes('gif')) mediaType = 'image/gif';
-        else if (mimeType.includes('webp')) mediaType = 'image/webp';
-        
-        documentContent = {
-          type: 'image',
-          source: {
-            type: 'base64',
-            media_type: mediaType,
-            data: documentBase64,
-          },
-        };
-      }
-
       return await getAnthropicClient().messages.create({
-        model: 'claude-3-haiku-20240307', // Modelo disponible con visión
-        max_tokens: 4096,
+        model: 'claude-3-haiku-20240307',
+        max_tokens: 2048,
         messages: [
           {
             role: 'user',
             content: [
-              documentContent,
+              {
+                type: 'image',
+                source: {
+                  type: 'base64',
+                  media_type: mediaType,
+                  data: imageBase64,
+                },
+              },
               {
                 type: 'text',
                 text: IMAGE_ANALYSIS_PROMPT,
@@ -808,7 +781,7 @@ export async function analyzeImageDocument(
     } catch (error: any) {
       // Reintentar si es error de servidor sobrecargado (529) o error temporal (500-599)
       if ((error.status === 529 || (error.status >= 500 && error.status < 600)) && retryCount < maxRetries - 1) {
-        const waitTime = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s, 4s
+        const waitTime = Math.pow(2, retryCount) * 1000;
         logger.warn(`⚠️ Servidor sobrecargado, reintentando en ${waitTime/1000}s...`, { attempt: retryCount + 1 });
         await new Promise(resolve => setTimeout(resolve, waitTime));
         return callAPI(retryCount + 1);
