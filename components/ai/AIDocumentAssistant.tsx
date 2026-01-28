@@ -306,11 +306,12 @@ export function AIDocumentAssistant({
   };
 
   // Posiciones para el botón flotante
-  // NOTA: bottom-24 en móvil para evitar solapamiento con BottomNavigation
+  // NOTA: bottom-36 en móvil para evitar solapamiento con BottomNavigation (64px) y Crisp chat
+  // En desktop: bottom-24 para dejar espacio al widget de Crisp
   // z-[60] para estar por encima de otros elementos flotantes
   const positionClasses: Record<string, string> = {
-    'bottom-right': 'fixed bottom-24 md:bottom-6 right-6',
-    'bottom-left': 'fixed bottom-24 md:bottom-6 left-6',
+    'bottom-right': 'fixed bottom-36 md:bottom-24 right-6',
+    'bottom-left': 'fixed bottom-36 md:bottom-24 left-6',
     'top-right': 'fixed top-20 right-6',
     'top-left': 'fixed top-20 left-6',
   };

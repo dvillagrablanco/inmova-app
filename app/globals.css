@@ -1704,4 +1704,35 @@ select[aria-invalid='true']:focus {
     width: 48px !important;
     height: 48px !important;
   }
+
+  /* Crisp Chat Widget en móvil - mover arriba del bottom nav */
+  .crisp-client,
+  #crisp-chatbox,
+  .crisp-client .crisp-1wfoh4l {
+    bottom: 80px !important;
+    right: 16px !important;
+  }
+  
+  .crisp-client .crisp-kquevr,
+  .crisp-client [data-chat-status] {
+    bottom: 80px !important;
+  }
+}
+
+/* Crisp Chat Widget - ajustes globales para evitar solapamiento */
+@media (max-width: 768px) {
+  /* Mover el botón de Crisp arriba de la barra de navegación */
+  .crisp-client .crisp-1wfoh4l,
+  .crisp-client .crisp-kquevr,
+  #crisp-chatbox [data-visible="true"] {
+    bottom: 80px !important;
+    z-index: 40 !important;
+  }
+  
+  /* Mover la ventana de chat de Crisp */
+  .crisp-client .crisp-1byxlxj,
+  .crisp-client .crisp-1rf4xdh {
+    bottom: 140px !important;
+    max-height: 60vh !important;
+  }
 }
