@@ -173,9 +173,9 @@ function basicAnalysis(filename: string, fileType: string) {
 }
 
 export async function POST(request: NextRequest) {
-  // Log inicial para ver si la petición llega
+  // Log inicial para ver si la petición llega (usando console.error para que PM2 lo capture)
   const requestTimestamp = new Date().toISOString();
-  console.log(`${requestTimestamp}: [AI Document Analysis] 🚀 PETICIÓN RECIBIDA`);
+  console.error(`${requestTimestamp}: [INFO] [AI Document Analysis] 🚀 PETICIÓN RECIBIDA`);
   
   try {
     // Verificar autenticación
@@ -192,15 +192,15 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File | null;
     const context = formData.get('context') as string || 'general';
 
-    // LOG CRÍTICO: Ver qué archivo está llegando
+    // LOG CRÍTICO: Ver qué archivo está llegando (usando console.error para PM2)
     const timestamp = new Date().toISOString();
-    console.log(`${timestamp}: [AI Document Analysis] 📥 ARCHIVO RECIBIDO:`, {
+    console.error(`${timestamp}: [INFO] [AI Document Analysis] 📥 ARCHIVO RECIBIDO:`, JSON.stringify({
       filename: file?.name,
       type: file?.type,
       size: file?.size,
       context,
       hasFile: !!file,
-    });
+    }));
 
     if (!file) {
       return NextResponse.json(
@@ -223,23 +223,23 @@ export async function POST(request: NextRequest) {
       'application/octet-stream', // Para cuando el navegador no detecta el tipo
     ];
 
-    // LOG: Verificación de tipo
+    // LOG: Verificación de tipo (usando console.error para PM2)
     const isTypeAllowed = allowedTypes.includes(file.type);
-    console.log(`${timestamp}: [AI Document Analysis] 📋 Verificación de tipo:`, {
+    console.error(`${timestamp}: [INFO] [AI Document Analysis] 📋 Verificación de tipo:`, JSON.stringify({
       fileType: file.type,
       isAllowed: isTypeAllowed,
       extension: file.name.split('.').pop()?.toLowerCase(),
-    });
+    }));
 
     // Si el tipo no está en la lista pero la extensión sugiere que es válido, permitir
     const validExtensions = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'doc', 'docx', 'txt'];
     const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
     
     if (!isTypeAllowed && !validExtensions.includes(fileExtension)) {
-      console.log(`${timestamp}: [AI Document Analysis] ❌ Tipo de archivo rechazado:`, {
+      console.error(`${timestamp}: [INFO] [AI Document Analysis] ❌ Tipo de archivo rechazado:`, JSON.stringify({
         type: file.type,
         extension: fileExtension,
-      });
+      }));
       return NextResponse.json(
         { error: 'Tipo de archivo no permitido' },
         { status: 400 }
