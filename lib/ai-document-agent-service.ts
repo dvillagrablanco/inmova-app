@@ -734,14 +734,16 @@ export async function analyzeImageDocument(
   const startTime = Date.now();
   const maxRetries = 3;
   
-  // IMPORTANTE: Si el mimeType es de imagen, tratarlo como imagen aunque el filename sea .pdf
-  // Esto permite enviar PDFs escaneados como imágenes a Claude Vision
-  const isImageMimeType = mimeType.startsWith('image/');
-  const isPDF = !isImageMimeType && (mimeType === 'application/pdf' || filename.toLowerCase().endsWith('.pdf'));
+  // Detectar tipo de documento basado en el contenido real, no el mimeType pasado
+  // Si el filename es .pdf, SIEMPRE tratarlo como PDF para usar el tipo correcto en Claude
+  const isPDFFile = filename.toLowerCase().endsWith('.pdf');
+  const isImageMimeType = !isPDFFile && mimeType.startsWith('image/');
+  const isPDF = isPDFFile || mimeType === 'application/pdf';
   
   logger.error('🖼️ [analyzeImageDocument] Configuración:', {
     mimeType,
     filename,
+    isPDFFile,
     isImageMimeType,
     isPDF,
   });

@@ -427,20 +427,42 @@ export async function POST(request: NextRequest) {
             companyInfo,
           });
         } else {
-          // El PDF es una imagen escaneada o no tiene texto útil
-          // Enviarlo a Claude Vision como imagen
-          logger.error('[AI Document Analysis] PDF sin texto útil - Usando Claude Vision como IMAGEN');
+          // El PDF es una imagen escaneada (no tiene texto extraíble)
+          // Claude Haiku no puede procesar PDFs directamente
+          // Retornar mensaje pidiendo que suba una imagen
+          logger.error('[AI Document Analysis] PDF escaneado detectado - Pidiendo imagen');
           
-          const documentBase64 = await fileToBase64(file);
-          logger.error('[AI Document Analysis] PDF Base64 generado:', { base64Length: documentBase64.length });
-          
-          // Enviar como imagen para que Claude Vision lo analice visualmente
-          analysis = await analyzeImageDocument(
-            documentBase64,
-            'image/png', // Forzar como imagen para análisis visual
-            file.name,
-            companyInfo
-          );
+          return NextResponse.json({
+            classification: {
+              category: 'dni_nie',
+              confidence: 0.5,
+              specificType: 'Documento de identidad (PDF escaneado)',
+              reasoning: 'PDF detectado como imagen escaneada',
+            },
+            ownershipValidation: {
+              isOwned: false,
+              detectedCIF: null,
+              detectedCompanyName: null,
+              matchesCIF: false,
+              matchesName: false,
+              confidence: 0,
+              notes: 'No se pudo analizar el contenido',
+            },
+            extractedFields: [],
+            summary: 'El archivo PDF parece ser un documento escaneado (imagen).',
+            warnings: [
+              '⚠️ El PDF contiene una imagen escaneada que no podemos procesar directamente.',
+              '📷 Por favor, sube el documento como IMAGEN (JPG, PNG) en lugar de PDF.',
+              '💡 Consejo: Toma una foto del documento o exporta el PDF como imagen.',
+            ],
+            suggestedActions: [],
+            sensitiveData: { hasSensitive: true, types: ['documento_identidad'] },
+            processingMetadata: {
+              tokensUsed: 0,
+              processingTimeMs: Date.now() - Date.now(),
+              modelUsed: 'none',
+            },
+          });
         }
       } catch (pdfError: any) {
         logger.error(`[AI Document Analysis] Error procesando PDF:`, {
