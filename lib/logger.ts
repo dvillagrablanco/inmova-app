@@ -169,9 +169,12 @@ const logger = {
     const sanitizedMessage = typeof message === 'string' ? sanitizeString(message) : message;
 
     if (typeof window !== 'undefined') {
-      console.info(sanitizedMessage, sanitizedMeta);
+      console.log(sanitizedMessage, sanitizedMeta);
     } else {
-      console.info(`[INFO] ${sanitizedMessage}`, sanitizedMeta);
+      // Usar console.log en vez de console.info para mejor compatibilidad con PM2
+      const timestamp = new Date().toISOString();
+      const metaStr = sanitizedMeta ? ' ' + JSON.stringify(sanitizedMeta) : '';
+      console.log(`${timestamp}: [INFO] ${sanitizedMessage}${metaStr}`);
     }
   },
   debug: (message: string, meta?: any) => {
