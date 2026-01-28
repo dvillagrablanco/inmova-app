@@ -297,9 +297,9 @@ export async function POST(request: NextRequest) {
     }
 
     const isImage = isImageFile(file.type, file.name);
-    const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
     
     // LOG CRÍTICO: Escribir directamente al error log para garantizar visibilidad
+    // Nota: fileExtension ya está definido más arriba en el código
     logger.error(`[AI Document Analysis] 📋 ARCHIVO RECIBIDO - tipo: "${file.type}", nombre: "${file.name}", ext: "${fileExtension}", isImage: ${isImage}, tamaño: ${file.size}`);
     
     // Si la extensión sugiere imagen pero isImage es false, hay un problema con el mimeType
