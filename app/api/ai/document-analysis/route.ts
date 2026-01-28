@@ -66,6 +66,70 @@ async function fileToBase64(file: File): Promise<string> {
   return buffer.toString('base64');
 }
 
+/**
+ * Convierte un PDF a imagen PNG usando pdfjs-dist y canvas
+ * Renderiza la primera página del PDF como imagen
+ */
+async function convertPDFToImage(file: File): Promise<{ base64: string; mimeType: string }> {
+  try {
+    // Importar dinámicamente para evitar problemas de SSR
+    const pdfjsLib = await import('pdfjs-dist');
+    const { createCanvas } = await import('canvas');
+    
+    // Configurar worker (usar fake worker para servidor)
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+    
+    // Leer el PDF
+    const arrayBuffer = await file.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+    
+    // Cargar el documento PDF
+    const loadingTask = pdfjsLib.getDocument({
+      data: uint8Array,
+      useSystemFonts: true,
+      disableFontFace: true,
+    });
+    
+    const pdfDoc = await loadingTask.promise;
+    
+    // Obtener la primera página
+    const page = await pdfDoc.getPage(1);
+    
+    // Configurar escala para buena calidad (2x para mejor OCR)
+    const scale = 2.0;
+    const viewport = page.getViewport({ scale });
+    
+    // Crear canvas con las dimensiones del PDF
+    const canvas = createCanvas(viewport.width, viewport.height);
+    const context = canvas.getContext('2d');
+    
+    // Renderizar la página en el canvas
+    await page.render({
+      canvasContext: context as any,
+      viewport: viewport,
+    }).promise;
+    
+    // Convertir canvas a PNG base64
+    const pngBuffer = canvas.toBuffer('image/png');
+    const base64 = pngBuffer.toString('base64');
+    
+    logger.info('[PDF to Image] Conversión exitosa', {
+      filename: file.name,
+      originalSize: file.size,
+      imageSize: pngBuffer.length,
+      dimensions: `${viewport.width}x${viewport.height}`,
+    });
+    
+    return {
+      base64,
+      mimeType: 'image/png',
+    };
+  } catch (error: any) {
+    logger.error('[PDF to Image] Error convirtiendo PDF:', error.message);
+    throw new Error(`No se pudo convertir el PDF a imagen: ${error.message}`);
+  }
+}
+
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -406,40 +470,57 @@ export async function POST(request: NextRequest) {
           companyInfo,
         });
       } else {
-        // ⚠️ PDF escaneado: Pedir que suba imagen
-        logger.warn('[AI Document Analysis] PDF escaneado - Solicitando imagen');
+        // 🔄 PDF escaneado: Convertir a imagen y usar Claude Vision
+        logger.info('[AI Document Analysis] 📄 PDF escaneado - Convirtiendo a imagen...');
         
-        return NextResponse.json({
-          classification: {
-            category: 'dni_nie',
-            confidence: 0.5,
-            specificType: 'Documento escaneado',
-            reasoning: 'PDF sin texto extraíble',
-          },
-          ownershipValidation: {
-            isOwned: false,
-            detectedCIF: null,
-            detectedCompanyName: null,
-            matchesCIF: false,
-            matchesName: false,
-            confidence: 0,
-            notes: 'Documento escaneado',
-          },
-          extractedFields: [],
-          summary: '📷 Por favor, sube una FOTO del documento (JPG o PNG) en lugar de PDF.',
-          warnings: [
-            '⚠️ Este PDF es un documento escaneado y no podemos leer su contenido.',
-            '📷 SOLUCIÓN: Sube el DNI/documento como imagen JPG o PNG.',
-            '💡 Puedes tomar una foto con el móvil o exportar el PDF como imagen.',
-          ],
-          suggestedActions: [],
-          sensitiveData: { hasSensitive: true, types: ['documento_identidad'] },
-          processingMetadata: {
-            tokensUsed: 0,
-            processingTimeMs: 0,
-            modelUsed: 'none',
-          },
-        });
+        try {
+          // Convertir PDF a imagen PNG
+          const { base64: imageBase64, mimeType: imageMimeType } = await convertPDFToImage(file);
+          
+          logger.info('[AI Document Analysis] ✅ PDF convertido a imagen - Analizando con Claude Vision');
+          
+          // Analizar la imagen con Claude Vision
+          analysis = await analyzeImageDocument(
+            imageBase64,
+            imageMimeType,
+            file.name.replace('.pdf', '.png'),
+            companyInfo
+          );
+        } catch (convError: any) {
+          logger.error('[AI Document Analysis] Error convirtiendo PDF:', convError.message);
+          
+          // Fallback: mensaje de error amigable
+          return NextResponse.json({
+            classification: {
+              category: 'dni_nie',
+              confidence: 0.5,
+              specificType: 'Documento escaneado',
+              reasoning: 'Error al procesar PDF',
+            },
+            ownershipValidation: {
+              isOwned: false,
+              detectedCIF: null,
+              detectedCompanyName: null,
+              matchesCIF: false,
+              matchesName: false,
+              confidence: 0,
+              notes: 'No se pudo procesar',
+            },
+            extractedFields: [],
+            summary: 'No se pudo procesar el PDF. Por favor, intenta subir una imagen JPG o PNG.',
+            warnings: [
+              `⚠️ Error procesando PDF: ${convError.message}`,
+              '📷 Alternativa: Sube el documento como imagen JPG o PNG.',
+            ],
+            suggestedActions: [],
+            sensitiveData: { hasSensitive: true, types: ['documento_identidad'] },
+            processingMetadata: {
+              tokensUsed: 0,
+              processingTimeMs: 0,
+              modelUsed: 'none',
+            },
+          });
+        }
       }
     } else {
       // Para otros documentos de texto (Word, TXT, etc.), usar análisis de texto
