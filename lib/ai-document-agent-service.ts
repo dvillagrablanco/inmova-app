@@ -699,42 +699,60 @@ export async function analyzeImageDocument(
   }
 
   const startTime = Date.now();
+  const maxRetries = 3;
+
+  // Determinar el media type correcto
+  let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/jpeg';
+  if (mimeType.includes('png')) mediaType = 'image/png';
+  else if (mimeType.includes('gif')) mediaType = 'image/gif';
+  else if (mimeType.includes('webp')) mediaType = 'image/webp';
+
+  // Función para hacer la llamada a la API con reintentos
+  async function callAPI(retryCount: number = 0): Promise<any> {
+    try {
+      logger.info('🖼️ Iniciando análisis de imagen con Claude Vision', { 
+        filename,
+        mimeType,
+        attempt: retryCount + 1
+      });
+
+      return await getAnthropicClient().messages.create({
+        model: 'claude-3-haiku-20240307', // Modelo con capacidad de visión
+        max_tokens: 2048,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'image',
+                source: {
+                  type: 'base64',
+                  media_type: mediaType,
+                  data: imageBase64,
+                },
+              },
+              {
+                type: 'text',
+                text: IMAGE_ANALYSIS_PROMPT,
+              },
+            ],
+          },
+        ],
+      });
+    } catch (error: any) {
+      // Reintentar si es error de servidor sobrecargado (529) o error temporal (500-599)
+      if ((error.status === 529 || (error.status >= 500 && error.status < 600)) && retryCount < maxRetries - 1) {
+        const waitTime = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s, 4s
+        logger.warn(`⚠️ Servidor sobrecargado, reintentando en ${waitTime/1000}s...`, { attempt: retryCount + 1 });
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        return callAPI(retryCount + 1);
+      }
+      throw error;
+    }
+  }
 
   try {
-    logger.info('🖼️ Iniciando análisis de imagen con Claude Vision', { 
-      filename,
-      mimeType 
-    });
-
-    // Determinar el media type correcto
-    let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/jpeg';
-    if (mimeType.includes('png')) mediaType = 'image/png';
-    else if (mimeType.includes('gif')) mediaType = 'image/gif';
-    else if (mimeType.includes('webp')) mediaType = 'image/webp';
-
-    const response = await getAnthropicClient().messages.create({
-      model: 'claude-3-5-sonnet-20241022', // Modelo con mejor capacidad de visión
-      max_tokens: 2048,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'image',
-              source: {
-                type: 'base64',
-                media_type: mediaType,
-                data: imageBase64,
-              },
-            },
-            {
-              type: 'text',
-              text: IMAGE_ANALYSIS_PROMPT,
-            },
-          ],
-        },
-      ],
-    });
+    const response = await callAPI();
 
     const content = response.content[0];
     if (content.type === 'text') {
@@ -791,7 +809,7 @@ export async function analyzeImageDocument(
           processingMetadata: {
             tokensUsed: response.usage?.input_tokens || 0,
             processingTimeMs,
-            modelUsed: 'claude-3-5-sonnet-20241022',
+            modelUsed: 'claude-3-haiku-20240307',
           },
         };
       }
