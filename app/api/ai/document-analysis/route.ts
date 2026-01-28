@@ -243,30 +243,51 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const isImage = isImageFile(file.type);
+    
     logger.info('[AI Document Analysis] Iniciando análisis con IA', {
       filename: file.name,
       fileType: file.type,
       fileSize: file.size,
       userId: session.user.id,
-      isImage: isImageFile(file.type),
+      isImage,
+      detectedMimeType: file.type,
     });
 
     let analysis;
 
     // Si es una imagen, usar análisis con visión de Claude
-    if (isImageFile(file.type)) {
-      logger.info('[AI Document Analysis] Usando Claude Vision para análisis de imagen');
+    if (isImage) {
+      logger.info('[AI Document Analysis] 🖼️ Detectada IMAGEN - Usando Claude Vision', {
+        mimeType: file.type,
+        filename: file.name,
+      });
       
-      const imageBase64 = await fileToBase64(file);
-      
-      analysis = await analyzeImageDocument(
-        imageBase64,
-        file.type,
-        file.name,
-        companyInfo
-      );
+      try {
+        const imageBase64 = await fileToBase64(file);
+        logger.info('[AI Document Analysis] Base64 generado', { 
+          base64Length: imageBase64.length,
+          first50Chars: imageBase64.substring(0, 50),
+        });
+        
+        analysis = await analyzeImageDocument(
+          imageBase64,
+          file.type,
+          file.name,
+          companyInfo
+        );
+      } catch (imageError: any) {
+        logger.error('[AI Document Analysis] Error en análisis de imagen:', {
+          message: imageError.message,
+          status: imageError.status,
+          error: imageError.error || imageError,
+          stack: imageError.stack,
+        });
+        throw imageError;
+      }
     } else {
       // Para PDFs y documentos de texto, usar análisis de texto
+      logger.info('[AI Document Analysis] 📄 Detectado DOCUMENTO - Usando análisis de texto');
       const extractedText = await extractTextFromFile(file);
       
       analysis = await analyzeDocument({

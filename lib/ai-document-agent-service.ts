@@ -503,7 +503,15 @@ export async function extractDocumentData(
 
     throw new Error('No se pudieron extraer los datos');
   } catch (error: any) {
-    logger.error('❌ Error extrayendo datos:', error);
+    // Mejorar el logging del error
+    const errorDetails = {
+      message: error.message,
+      status: error.status,
+      type: error.error?.type,
+      errorMessage: error.error?.error?.message,
+      requestId: error.error?.request_id,
+    };
+    logger.error('❌ Error extrayendo datos:', errorDetails);
     throw error;
   }
 }
@@ -817,8 +825,25 @@ export async function analyzeImageDocument(
 
     throw new Error('No se pudo parsear la respuesta del análisis de imagen');
   } catch (error: any) {
-    logger.error('❌ Error analizando imagen:', error);
-    throw error;
+    // Mejorar el logging del error para mostrar detalles completos
+    const errorDetails = {
+      message: error.message,
+      status: error.status,
+      statusText: error.statusText,
+      type: error.error?.type,
+      errorType: error.error?.error?.type,
+      errorMessage: error.error?.error?.message,
+      requestId: error.error?.request_id || error.requestID,
+      stack: error.stack?.substring(0, 500),
+    };
+    logger.error('❌ Error analizando imagen:', errorDetails);
+    
+    // Re-lanzar con mensaje más descriptivo
+    const errorMsg = error.error?.error?.message || error.message || 'Error desconocido';
+    const newError = new Error(`Error de Claude Vision: ${errorMsg}`);
+    (newError as any).status = error.status;
+    (newError as any).originalError = error;
+    throw newError;
   }
 }
 
