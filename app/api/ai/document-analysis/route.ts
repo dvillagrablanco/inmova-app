@@ -188,6 +188,16 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File | null;
     const context = formData.get('context') as string || 'general';
 
+    // LOG CRÍTICO: Ver qué archivo está llegando
+    const timestamp = new Date().toISOString();
+    console.log(`${timestamp}: [AI Document Analysis] 📥 ARCHIVO RECIBIDO:`, {
+      filename: file?.name,
+      type: file?.type,
+      size: file?.size,
+      context,
+      hasFile: !!file,
+    });
+
     if (!file) {
       return NextResponse.json(
         { error: 'No se proporcionó ningún archivo' },
@@ -195,18 +205,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verificar tipo de archivo
+    // Verificar tipo de archivo - Incluir más tipos de imagen
     const allowedTypes = [
       'application/pdf',
       'image/jpeg',
       'image/png',
       'image/jpg',
+      'image/gif',
+      'image/webp',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'text/plain',
+      'application/octet-stream', // Para cuando el navegador no detecta el tipo
     ];
 
-    if (!allowedTypes.includes(file.type)) {
+    // LOG: Verificación de tipo
+    const isTypeAllowed = allowedTypes.includes(file.type);
+    console.log(`${timestamp}: [AI Document Analysis] 📋 Verificación de tipo:`, {
+      fileType: file.type,
+      isAllowed: isTypeAllowed,
+      extension: file.name.split('.').pop()?.toLowerCase(),
+    });
+
+    // Si el tipo no está en la lista pero la extensión sugiere que es válido, permitir
+    const validExtensions = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'doc', 'docx', 'txt'];
+    const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
+    
+    if (!isTypeAllowed && !validExtensions.includes(fileExtension)) {
+      console.log(`${timestamp}: [AI Document Analysis] ❌ Tipo de archivo rechazado:`, {
+        type: file.type,
+        extension: fileExtension,
+      });
       return NextResponse.json(
         { error: 'Tipo de archivo no permitido' },
         { status: 400 }
