@@ -173,6 +173,10 @@ function basicAnalysis(filename: string, fileType: string) {
 }
 
 export async function POST(request: NextRequest) {
+  // Log inicial para ver si la petición llega
+  const requestTimestamp = new Date().toISOString();
+  console.log(`${requestTimestamp}: [AI Document Analysis] 🚀 PETICIÓN RECIBIDA`);
+  
   try {
     // Verificar autenticación
     const session = await getServerSession(authOptions);
