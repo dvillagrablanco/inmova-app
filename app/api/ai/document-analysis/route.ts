@@ -22,9 +22,25 @@ import logger from '@/lib/logger';
 
 /**
  * Verifica si el archivo es una imagen que puede ser analizada con visión
+ * También verifica por extensión como fallback
  */
-function isImageFile(mimeType: string): boolean {
-  return ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'].includes(mimeType);
+function isImageFile(mimeType: string, filename?: string): boolean {
+  // Verificar por mimeType
+  const imageMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  if (imageMimeTypes.includes(mimeType?.toLowerCase())) {
+    return true;
+  }
+  
+  // Fallback: verificar por extensión de archivo
+  if (filename) {
+    const ext = filename.toLowerCase().split('.').pop();
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    if (ext && imageExtensions.includes(ext)) {
+      return true;
+    }
+  }
+  
+  return false;
 }
 
 /**
@@ -243,15 +259,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const isImage = isImageFile(file.type);
+    const isImage = isImageFile(file.type, file.name);
     
-    logger.info('[AI Document Analysis] Iniciando análisis con IA', {
+    // Log detallado para debugging
+    logger.info('[AI Document Analysis] 📋 Archivo recibido:', {
       filename: file.name,
       fileType: file.type,
       fileSize: file.size,
       userId: session.user.id,
       isImage,
-      detectedMimeType: file.type,
+      extension: file.name.split('.').pop()?.toLowerCase(),
     });
 
     let analysis;
