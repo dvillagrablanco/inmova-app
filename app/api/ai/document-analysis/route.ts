@@ -173,9 +173,13 @@ function basicAnalysis(filename: string, fileType: string) {
 }
 
 export async function POST(request: NextRequest) {
-  // Log inicial para ver si la petición llega (usando console.error para que PM2 lo capture)
+  // Log inicial usando process.stdout directamente para garantizar captura por PM2
   const requestTimestamp = new Date().toISOString();
-  console.error(`${requestTimestamp}: [INFO] [AI Document Analysis] 🚀 PETICIÓN RECIBIDA`);
+  try {
+    process.stdout.write(`${requestTimestamp}: [INFO] [AI Document Analysis] 🚀 PETICIÓN RECIBIDA\n`);
+  } catch (e) {
+    // Fallback si process.stdout no está disponible
+  }
   
   try {
     // Verificar autenticación
