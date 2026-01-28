@@ -314,15 +314,15 @@ export async function POST(request: NextRequest) {
     const isPDF = isPDFFile(file.type, file.name);
     
     // LOG: Información del archivo recibido
-    logger.info(`[AI Document Analysis] 📋 ARCHIVO RECIBIDO - tipo: "${file.type}", nombre: "${file.name}", ext: "${fileExtension}", isImage: ${isImage}, isPDF: ${isPDF}, tamaño: ${file.size}`);
+    logger.error(`[AI Document Analysis] 📋 ARCHIVO RECIBIDO - tipo: "${file.type}", nombre: "${file.name}", ext: "${fileExtension}", isImage: ${isImage}, isPDF: ${isPDF}, tamaño: ${file.size}`);
 
     let analysis;
 
-    // Si es una imagen o PDF, usar análisis con visión de Claude
-    // Claude 3 puede analizar tanto imágenes como PDFs directamente
-    if (isImage || isPDF) {
-      const docType = isImage ? 'IMAGEN' : 'PDF';
-      logger.info(`[AI Document Analysis] 🖼️ Detectado ${docType} - Usando Claude Vision`, {
+    // ESTRATEGIA:
+    // - Imágenes (JPG, PNG, etc.) → Claude Vision (Haiku soporta imágenes)
+    // - PDFs → Análisis de texto (Haiku puede no soportar type:'document' para PDFs)
+    if (isImage) {
+      logger.info(`[AI Document Analysis] 🖼️ Detectado IMAGEN - Usando Claude Vision`, {
         mimeType: file.type,
         filename: file.name,
       });
@@ -333,43 +333,60 @@ export async function POST(request: NextRequest) {
           base64Length: documentBase64.length,
         });
         
-        // Para PDFs, usar el tipo correcto
-        const mediaType = isPDF ? 'application/pdf' : file.type;
-        
         analysis = await analyzeImageDocument(
           documentBase64,
-          mediaType,
+          file.type,
           file.name,
           companyInfo
         );
       } catch (docError: any) {
-        logger.error(`[AI Document Analysis] Error en análisis de ${docType}:`, {
+        logger.error(`[AI Document Analysis] Error en análisis de imagen:`, {
           message: docError.message,
           status: docError.status,
           error: docError.error || docError,
         });
+        throw docError;
+      }
+    } else if (isPDF) {
+      // Para PDFs: usar análisis de texto primero (más confiable con Haiku)
+      logger.info(`[AI Document Analysis] 📄 Detectado PDF - Extrayendo texto`, {
+        mimeType: file.type,
+        filename: file.name,
+      });
+      
+      try {
+        const extractedText = await extractTextFromFile(file);
         
-        // Si falla el análisis visual de un PDF, intentar análisis de texto como fallback
-        if (isPDF) {
-          logger.info('[AI Document Analysis] Intentando fallback a análisis de texto para PDF');
-          try {
-            const extractedText = await extractTextFromFile(file);
-            if (extractedText && extractedText.length > 50) {
-              analysis = await analyzeDocument({
-                text: extractedText,
-                filename: file.name,
-                mimeType: file.type,
-                companyInfo,
-              });
-            } else {
-              throw docError; // Re-lanzar el error original si no hay texto
-            }
-          } catch (textError) {
-            throw docError; // Re-lanzar el error original del análisis visual
-          }
+        if (extractedText && extractedText.length > 50) {
+          logger.info('[AI Document Analysis] Texto extraído del PDF', { 
+            textLength: extractedText.length,
+          });
+          
+          analysis = await analyzeDocument({
+            text: extractedText,
+            filename: file.name,
+            mimeType: file.type,
+            companyInfo,
+          });
         } else {
-          throw docError;
+          // Si el PDF no tiene texto extraíble (es una imagen escaneada),
+          // intentar con Claude Vision como imagen
+          logger.info('[AI Document Analysis] PDF sin texto - Intentando como imagen');
+          
+          const documentBase64 = await fileToBase64(file);
+          analysis = await analyzeImageDocument(
+            documentBase64,
+            'image/jpeg', // Tratar como imagen
+            file.name,
+            companyInfo
+          );
         }
+      } catch (pdfError: any) {
+        logger.error(`[AI Document Analysis] Error procesando PDF:`, {
+          message: pdfError.message,
+          status: pdfError.status,
+        });
+        throw pdfError;
       }
     } else {
       // Para otros documentos de texto (Word, TXT, etc.), usar análisis de texto
