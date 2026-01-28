@@ -14,10 +14,31 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { 
   analyzeDocument, 
+  analyzeImageDocument,
   isAIConfigured,
   DocumentAnalysisInput,
 } from '@/lib/ai-document-agent-service';
 import logger from '@/lib/logger';
+
+/**
+ * Verifica si el archivo es una imagen que puede ser analizada con visión
+ */
+function isImageFile(mimeType: string): boolean {
+  return ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'].includes(mimeType);
+}
+
+/**
+ * Convierte un archivo a base64
+ */
+async function fileToBase64(file: File): Promise<string> {
+  const arrayBuffer = await file.arrayBuffer();
+  const uint8Array = new Uint8Array(arrayBuffer);
+  let binary = '';
+  for (let i = 0; i < uint8Array.length; i++) {
+    binary += String.fromCharCode(uint8Array[i]);
+  }
+  return btoa(binary);
+}
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -196,9 +217,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(basicResult);
     }
 
-    // Extraer texto del archivo
-    const extractedText = await extractTextFromFile(file);
-
     // Obtener información de la empresa del usuario
     let companyInfo: DocumentAnalysisInput['companyInfo'] = {
       cif: null,
@@ -229,20 +247,39 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Analizar documento con IA real
     logger.info('[AI Document Analysis] Iniciando análisis con IA', {
       filename: file.name,
       fileType: file.type,
       fileSize: file.size,
       userId: session.user.id,
+      isImage: isImageFile(file.type),
     });
 
-    const analysis = await analyzeDocument({
-      text: extractedText,
-      filename: file.name,
-      mimeType: file.type,
-      companyInfo,
-    });
+    let analysis;
+
+    // Si es una imagen, usar análisis con visión de Claude
+    if (isImageFile(file.type)) {
+      logger.info('[AI Document Analysis] Usando Claude Vision para análisis de imagen');
+      
+      const imageBase64 = await fileToBase64(file);
+      
+      analysis = await analyzeImageDocument(
+        imageBase64,
+        file.type,
+        file.name,
+        companyInfo
+      );
+    } else {
+      // Para PDFs y documentos de texto, usar análisis de texto
+      const extractedText = await extractTextFromFile(file);
+      
+      analysis = await analyzeDocument({
+        text: extractedText,
+        filename: file.name,
+        mimeType: file.type,
+        companyInfo,
+      });
+    }
 
     logger.info('[AI Document Analysis] Análisis completado', {
       filename: file.name,

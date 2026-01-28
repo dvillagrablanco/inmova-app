@@ -56,6 +56,8 @@ export interface DocumentAnalysisInput {
     nombre: string;
     direccion?: string | null;
   };
+  /** Imagen en base64 para análisis con visión */
+  imageBase64?: string;
 }
 
 export interface ExtractedField {
@@ -622,6 +624,221 @@ export async function analyzeDocument(
 }
 
 // ============================================================================
+// ANÁLISIS DE IMÁGENES CON VISIÓN
+// ============================================================================
+
+/**
+ * Prompt para análisis de imágenes de documentos de identidad
+ */
+const IMAGE_ANALYSIS_PROMPT = `Eres un experto en extracción de datos de documentos de identidad españoles.
+
+TAREA: Analiza esta imagen de un documento y extrae todos los datos visibles.
+
+TIPOS DE DOCUMENTOS A DETECTAR:
+- DNI español (Documento Nacional de Identidad)
+- NIE (Número de Identidad de Extranjero)  
+- Pasaporte
+- Tarjeta de residencia
+- Permiso de conducir
+
+DATOS A EXTRAER:
+1. Tipo de documento (dni, nie, pasaporte, permiso_conducir, otro)
+2. Número del documento
+3. Nombre completo
+4. Apellidos
+5. Fecha de nacimiento (formato YYYY-MM-DD)
+6. Fecha de caducidad (formato YYYY-MM-DD)
+7. Nacionalidad
+8. Sexo (M/F)
+9. Lugar de nacimiento
+10. Dirección (si está visible)
+
+IMPORTANTE:
+- Si un campo no es legible o no está presente, usa null
+- Los números de DNI españoles tienen 8 dígitos + 1 letra
+- Los NIE tienen formato X/Y/Z + 7 dígitos + letra
+- Las fechas deben estar en formato ISO (YYYY-MM-DD)
+
+RESPONDE SIEMPRE EN JSON CON ESTA ESTRUCTURA:
+{
+  "classification": {
+    "category": "dni_nie",
+    "confidence": 0.0-1.0,
+    "specificType": "DNI español / NIE / Pasaporte / etc",
+    "reasoning": "explicación breve"
+  },
+  "extractedFields": [
+    {"fieldName": "nombreCompleto", "fieldValue": "valor", "dataType": "tenant_info", "confidence": 0.0-1.0, "targetEntity": "Tenant", "targetField": "nombre"},
+    {"fieldName": "dni", "fieldValue": "valor", "dataType": "tenant_info", "confidence": 0.0-1.0, "targetEntity": "Tenant", "targetField": "documentoIdentidad"},
+    {"fieldName": "fechaNacimiento", "fieldValue": "YYYY-MM-DD", "dataType": "tenant_info", "confidence": 0.0-1.0, "targetEntity": "Tenant", "targetField": "fechaNacimiento"},
+    {"fieldName": "nacionalidad", "fieldValue": "valor", "dataType": "tenant_info", "confidence": 0.0-1.0, "targetEntity": "Tenant", "targetField": "nacionalidad"},
+    {"fieldName": "fechaCaducidad", "fieldValue": "YYYY-MM-DD", "dataType": "tenant_info", "confidence": 0.0-1.0},
+    {"fieldName": "sexo", "fieldValue": "M/F", "dataType": "tenant_info", "confidence": 0.0-1.0},
+    {"fieldName": "lugarNacimiento", "fieldValue": "valor", "dataType": "tenant_info", "confidence": 0.0-1.0},
+    {"fieldName": "direccion", "fieldValue": "valor", "dataType": "tenant_info", "confidence": 0.0-1.0}
+  ],
+  "summary": "Resumen del documento analizado",
+  "warnings": ["lista de advertencias si las hay"],
+  "sensitiveData": {
+    "hasSensitive": true,
+    "types": ["datos_personales", "documento_identidad"]
+  }
+}`;
+
+/**
+ * Analiza una imagen de documento usando Claude Vision
+ */
+export async function analyzeImageDocument(
+  imageBase64: string,
+  mimeType: string,
+  filename: string,
+  companyInfo: DocumentAnalysisInput['companyInfo']
+): Promise<DocumentAnalysisResult> {
+  if (!isAIConfigured()) {
+    throw new Error('AI Document Agent no configurado. Configure ANTHROPIC_API_KEY.');
+  }
+
+  const startTime = Date.now();
+
+  try {
+    logger.info('🖼️ Iniciando análisis de imagen con Claude Vision', { 
+      filename,
+      mimeType 
+    });
+
+    // Determinar el media type correcto
+    let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/jpeg';
+    if (mimeType.includes('png')) mediaType = 'image/png';
+    else if (mimeType.includes('gif')) mediaType = 'image/gif';
+    else if (mimeType.includes('webp')) mediaType = 'image/webp';
+
+    const response = await getAnthropicClient().messages.create({
+      model: 'claude-3-5-sonnet-20241022', // Modelo con mejor capacidad de visión
+      max_tokens: 2048,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: mediaType,
+                data: imageBase64,
+              },
+            },
+            {
+              type: 'text',
+              text: IMAGE_ANALYSIS_PROMPT,
+            },
+          ],
+        },
+      ],
+    });
+
+    const content = response.content[0];
+    if (content.type === 'text') {
+      // Extraer JSON de la respuesta
+      const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const result = JSON.parse(jsonMatch[0]);
+        
+        const processingTimeMs = Date.now() - startTime;
+        
+        logger.info('✅ Análisis de imagen completado', {
+          filename,
+          category: result.classification?.category,
+          fieldsExtracted: result.extractedFields?.length || 0,
+          processingTimeMs,
+        });
+
+        return {
+          classification: result.classification || {
+            category: 'dni_nie' as DocumentImportCategory,
+            confidence: 0.8,
+            specificType: 'Documento de identidad',
+            reasoning: 'Análisis de imagen',
+          },
+          ownershipValidation: {
+            isOwned: false,
+            detectedCIF: null,
+            detectedCompanyName: null,
+            matchesCIF: false,
+            matchesName: false,
+            confidence: 0.9,
+            notes: 'Documento de identidad de tercero (potencial inquilino)',
+          },
+          extractedFields: (result.extractedFields || []).map((f: any) => ({
+            ...f,
+            dataType: f.dataType || 'tenant_info',
+          })),
+          summary: result.summary || `Documento de identidad analizado: ${filename}`,
+          warnings: result.warnings || [],
+          suggestedActions: [
+            {
+              action: 'create' as const,
+              entity: 'Tenant',
+              description: 'Crear nuevo inquilino con los datos extraídos',
+              data: extractTenantDataFromFields(result.extractedFields || []),
+              confidence: 0.85,
+              requiresReview: true,
+            },
+          ],
+          sensitiveData: result.sensitiveData || {
+            hasSensitive: true,
+            types: ['datos_personales', 'documento_identidad'],
+          },
+          processingMetadata: {
+            tokensUsed: response.usage?.input_tokens || 0,
+            processingTimeMs,
+            modelUsed: 'claude-3-5-sonnet-20241022',
+          },
+        };
+      }
+    }
+
+    throw new Error('No se pudo parsear la respuesta del análisis de imagen');
+  } catch (error: any) {
+    logger.error('❌ Error analizando imagen:', error);
+    throw error;
+  }
+}
+
+/**
+ * Extrae datos de inquilino de los campos extraídos
+ */
+function extractTenantDataFromFields(fields: any[]): Record<string, any> {
+  const data: Record<string, any> = {};
+  
+  for (const field of fields) {
+    if (field.targetField && field.fieldValue) {
+      data[field.targetField] = field.fieldValue;
+    } else if (field.fieldName && field.fieldValue) {
+      // Mapear nombres de campo comunes
+      const fieldMappings: Record<string, string> = {
+        nombreCompleto: 'nombre',
+        nombre: 'nombre',
+        apellidos: 'nombre', // Se concatenará
+        dni: 'documentoIdentidad',
+        nie: 'documentoIdentidad',
+        numeroDocumento: 'documentoIdentidad',
+        fechaNacimiento: 'fechaNacimiento',
+        nacionalidad: 'nacionalidad',
+        email: 'email',
+        telefono: 'telefono',
+      };
+      
+      const mappedField = fieldMappings[field.fieldName];
+      if (mappedField) {
+        data[mappedField] = field.fieldValue;
+      }
+    }
+  }
+  
+  return data;
+}
+
+// ============================================================================
 // FUNCIONES AUXILIARES
 // ============================================================================
 
@@ -701,5 +918,6 @@ export default {
   extractDocumentData,
   generateSuggestedActions,
   analyzeDocument,
+  analyzeImageDocument,
   calculateStringSimilarity,
 };
