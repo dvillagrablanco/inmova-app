@@ -348,8 +348,8 @@ export async function POST(request: NextRequest) {
         throw docError;
       }
     } else if (isPDF) {
-      // Para PDFs: usar análisis de texto primero (más confiable con Haiku)
-      logger.info(`[AI Document Analysis] 📄 Detectado PDF - Extrayendo texto`, {
+      // Para PDFs: intentar extraer texto primero
+      logger.error(`[AI Document Analysis] 📄 Detectado PDF - Extrayendo texto`, {
         mimeType: file.type,
         filename: file.name,
       });
@@ -357,10 +357,21 @@ export async function POST(request: NextRequest) {
       try {
         const extractedText = await extractTextFromFile(file);
         
-        if (extractedText && extractedText.length > 50) {
-          logger.info('[AI Document Analysis] Texto extraído del PDF', { 
-            textLength: extractedText.length,
-          });
+        // El texto extraído debe tener más que solo metadata básica
+        // La metadata básica tiene ~100 caracteres, necesitamos contenido real
+        const hasRealText = extractedText && 
+                           extractedText.length > 200 && 
+                           extractedText.includes('Texto extraído:');
+        
+        logger.error('[AI Document Analysis] 📄 Texto extraído del PDF:', { 
+          textLength: extractedText?.length || 0,
+          hasRealText,
+          textPreview: extractedText?.substring(0, 300),
+        });
+        
+        if (hasRealText) {
+          // El PDF tiene texto real, usar análisis de texto
+          logger.info('[AI Document Analysis] PDF con texto - Usando análisis de texto');
           
           analysis = await analyzeDocument({
             text: extractedText,
@@ -369,14 +380,18 @@ export async function POST(request: NextRequest) {
             companyInfo,
           });
         } else {
-          // Si el PDF no tiene texto extraíble (es una imagen escaneada),
-          // intentar con Claude Vision como imagen
-          logger.info('[AI Document Analysis] PDF sin texto - Intentando como imagen');
+          // El PDF es una imagen escaneada (no tiene texto extraíble)
+          // Enviarlo a Claude Vision como imagen
+          logger.error('[AI Document Analysis] PDF es imagen escaneada - Usando Claude Vision');
           
           const documentBase64 = await fileToBase64(file);
+          logger.error('[AI Document Analysis] PDF Base64 generado:', { base64Length: documentBase64.length });
+          
+          // Claude Vision puede procesar PDFs como imágenes
+          // Usamos image/png como formato más compatible
           analysis = await analyzeImageDocument(
             documentBase64,
-            'image/jpeg', // Tratar como imagen
+            'image/png', // Enviar como imagen
             file.name,
             companyInfo
           );
@@ -385,6 +400,7 @@ export async function POST(request: NextRequest) {
         logger.error(`[AI Document Analysis] Error procesando PDF:`, {
           message: pdfError.message,
           status: pdfError.status,
+          error: pdfError,
         });
         throw pdfError;
       }

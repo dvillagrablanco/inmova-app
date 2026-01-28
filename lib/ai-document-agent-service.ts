@@ -458,10 +458,23 @@ export async function extractDocumentData(
     throw new Error('AI Document Agent no configurado. Configure ANTHROPIC_API_KEY.');
   }
 
+  // Log para diagnóstico
+  logger.error('📄 [extractDocumentData] Iniciando con:', {
+    textLength: text?.length || 0,
+    textPreview: text?.substring(0, 200),
+    documentType,
+  });
+
   try {
+    const truncatedText = truncateText(text, 10000);
     const prompt = EXTRACTION_PROMPT
       .replace('{document_type}', documentType)
-      .replace('{document_text}', truncateText(text, 10000));
+      .replace('{document_text}', truncatedText);
+
+    logger.error('📄 [extractDocumentData] Enviando a Claude:', {
+      promptLength: prompt.length,
+      truncatedTextLength: truncatedText.length,
+    });
 
     const response = await getAnthropicClient().messages.create({
       model: DEFAULT_MODEL,
@@ -471,6 +484,13 @@ export async function extractDocumentData(
     });
 
     const content = response.content[0];
+    
+    logger.error('📄 [extractDocumentData] Respuesta de Claude:', {
+      contentType: content.type,
+      textLength: content.type === 'text' ? content.text.length : 0,
+      textPreview: content.type === 'text' ? content.text.substring(0, 300) : 'N/A',
+    });
+
     if (content.type === 'text') {
       const jsonMatch = content.text.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
@@ -498,6 +518,10 @@ export async function extractDocumentData(
           warnings: result.warnings || [],
           sensitiveData: result.sensitiveData || { hasSensitive: false, types: [] },
         };
+      } else {
+        logger.error('📄 [extractDocumentData] No se encontró JSON en respuesta:', {
+          fullText: content.text.substring(0, 500),
+        });
       }
     }
 
@@ -710,8 +734,17 @@ export async function analyzeImageDocument(
   const startTime = Date.now();
   const maxRetries = 3;
   
-  // Detectar si es un PDF
-  const isPDF = mimeType === 'application/pdf' || filename.toLowerCase().endsWith('.pdf');
+  // IMPORTANTE: Si el mimeType es de imagen, tratarlo como imagen aunque el filename sea .pdf
+  // Esto permite enviar PDFs escaneados como imágenes a Claude Vision
+  const isImageMimeType = mimeType.startsWith('image/');
+  const isPDF = !isImageMimeType && (mimeType === 'application/pdf' || filename.toLowerCase().endsWith('.pdf'));
+  
+  logger.error('🖼️ [analyzeImageDocument] Configuración:', {
+    mimeType,
+    filename,
+    isImageMimeType,
+    isPDF,
+  });
 
   // Función para hacer la llamada a la API con reintentos
   async function callAPI(retryCount: number = 0): Promise<any> {
