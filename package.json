@@ -233,6 +233,7 @@
     "otpauth": "^9.4.1",
     "papaparse": "^5.5.3",
     "pdf-parse": "^2.4.5",
+    "pdf-to-png-converter": "^3.11.0",
     "pdfkit": "^0.17.2",
     "postcss": "8.4.30",
     "puppeteer": "^23.11.1",

@@ -67,57 +67,42 @@ async function fileToBase64(file: File): Promise<string> {
 }
 
 /**
- * Convierte un PDF a imagen PNG usando pdfjs-dist y canvas
- * Renderiza la primera página del PDF como imagen
+ * Convierte un PDF a imagen PNG usando pdf-to-png-converter
+ * Compatible con Node.js sin dependencias de DOM
  */
 async function convertPDFToImage(file: File): Promise<{ base64: string; mimeType: string }> {
   try {
-    // Importar dinámicamente para evitar problemas de SSR
-    const pdfjsLib = await import('pdfjs-dist');
-    const { createCanvas } = await import('canvas');
+    // Importar dinámicamente
+    const { pdfToPng } = await import('pdf-to-png-converter');
     
-    // Configurar worker (usar fake worker para servidor)
-    pdfjsLib.GlobalWorkerOptions.workerSrc = '';
-    
-    // Leer el PDF
+    // Leer el PDF como Buffer
     const arrayBuffer = await file.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
+    const pdfBuffer = Buffer.from(arrayBuffer);
     
-    // Cargar el documento PDF
-    const loadingTask = pdfjsLib.getDocument({
-      data: uint8Array,
-      useSystemFonts: true,
-      disableFontFace: true,
+    logger.info('[PDF to Image] Iniciando conversión...', {
+      filename: file.name,
+      size: file.size,
     });
     
-    const pdfDoc = await loadingTask.promise;
+    // Convertir PDF a PNG (solo primera página)
+    const pngPages = await pdfToPng(pdfBuffer, {
+      viewportScale: 2.0, // Alta resolución para mejor OCR
+      pagesToProcess: [1], // Solo primera página
+      strictPagesToProcess: false,
+    });
     
-    // Obtener la primera página
-    const page = await pdfDoc.getPage(1);
+    if (!pngPages || pngPages.length === 0) {
+      throw new Error('No se pudo convertir ninguna página del PDF');
+    }
     
-    // Configurar escala para buena calidad (2x para mejor OCR)
-    const scale = 2.0;
-    const viewport = page.getViewport({ scale });
-    
-    // Crear canvas con las dimensiones del PDF
-    const canvas = createCanvas(viewport.width, viewport.height);
-    const context = canvas.getContext('2d');
-    
-    // Renderizar la página en el canvas
-    await page.render({
-      canvasContext: context as any,
-      viewport: viewport,
-    }).promise;
-    
-    // Convertir canvas a PNG base64
-    const pngBuffer = canvas.toBuffer('image/png');
-    const base64 = pngBuffer.toString('base64');
+    const firstPage = pngPages[0];
+    const base64 = firstPage.content.toString('base64');
     
     logger.info('[PDF to Image] Conversión exitosa', {
       filename: file.name,
       originalSize: file.size,
-      imageSize: pngBuffer.length,
-      dimensions: `${viewport.width}x${viewport.height}`,
+      imageSize: firstPage.content.length,
+      dimensions: `${firstPage.width}x${firstPage.height}`,
     });
     
     return {
