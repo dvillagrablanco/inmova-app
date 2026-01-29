@@ -67,49 +67,82 @@ async function fileToBase64(file: File): Promise<string> {
 }
 
 /**
- * Convierte un PDF a imagen PNG usando pdf-to-png-converter
- * Compatible con Node.js sin dependencias de DOM
+ * Convierte un PDF a imagen PNG usando pdftoppm (poppler-utils)
+ * Requiere que poppler-utils esté instalado en el servidor
  */
 async function convertPDFToImage(file: File): Promise<{ base64: string; mimeType: string }> {
+  const { spawn } = await import('child_process');
+  const { writeFile, readFile, unlink, mkdir } = await import('fs/promises');
+  const { join } = await import('path');
+  const os = await import('os');
+  
+  const tmpDir = os.tmpdir();
+  const timestamp = Date.now();
+  const pdfPath = join(tmpDir, `pdf_${timestamp}.pdf`);
+  const outputPrefix = join(tmpDir, `img_${timestamp}`);
+  const outputPath = `${outputPrefix}-1.png`;
+  
   try {
-    // Importar dinámicamente
-    const { pdfToPng } = await import('pdf-to-png-converter');
-    
-    // Leer el PDF como Buffer
+    // Guardar PDF temporalmente
     const arrayBuffer = await file.arrayBuffer();
     const pdfBuffer = Buffer.from(arrayBuffer);
+    await writeFile(pdfPath, pdfBuffer);
     
-    logger.info('[PDF to Image] Iniciando conversión...', {
+    logger.info('[PDF to Image] Iniciando conversión con pdftoppm...', {
       filename: file.name,
       size: file.size,
     });
     
-    // Convertir PDF a PNG (solo primera página)
-    const pngPages = await pdfToPng(pdfBuffer, {
-      viewportScale: 2.0, // Alta resolución para mejor OCR
-      pagesToProcess: [1], // Solo primera página
-      strictPagesToProcess: false,
+    // Convertir PDF a PNG usando pdftoppm
+    await new Promise<void>((resolve, reject) => {
+      const proc = spawn('pdftoppm', [
+        '-png',           // Formato PNG
+        '-f', '1',        // Primera página
+        '-l', '1',        // Hasta primera página
+        '-r', '200',      // Resolución 200 DPI
+        pdfPath,
+        outputPrefix
+      ]);
+      
+      let stderr = '';
+      proc.stderr.on('data', (data) => { stderr += data.toString(); });
+      
+      proc.on('close', (code) => {
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error(`pdftoppm falló (code ${code}): ${stderr}`));
+        }
+      });
+      
+      proc.on('error', (err) => {
+        reject(new Error(`No se pudo ejecutar pdftoppm: ${err.message}. ¿Está instalado poppler-utils?`));
+      });
     });
     
-    if (!pngPages || pngPages.length === 0) {
-      throw new Error('No se pudo convertir ninguna página del PDF');
-    }
-    
-    const firstPage = pngPages[0];
-    const base64 = firstPage.content.toString('base64');
+    // Leer imagen generada
+    const imageBuffer = await readFile(outputPath);
+    const base64 = imageBuffer.toString('base64');
     
     logger.info('[PDF to Image] Conversión exitosa', {
       filename: file.name,
       originalSize: file.size,
-      imageSize: firstPage.content.length,
-      dimensions: `${firstPage.width}x${firstPage.height}`,
+      imageSize: imageBuffer.length,
     });
+    
+    // Limpiar archivos temporales
+    await unlink(pdfPath).catch(() => {});
+    await unlink(outputPath).catch(() => {});
     
     return {
       base64,
       mimeType: 'image/png',
     };
   } catch (error: any) {
+    // Limpiar archivos temporales en caso de error
+    await unlink(pdfPath).catch(() => {});
+    await unlink(outputPath).catch(() => {});
+    
     logger.error('[PDF to Image] Error convirtiendo PDF:', error.message);
     throw new Error(`No se pudo convertir el PDF a imagen: ${error.message}`);
   }
