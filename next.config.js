@@ -21,6 +21,14 @@ const nextConfig = {
         : false,
   },
 
+  // Paquetes externos del servidor (no bundlear, cargar desde node_modules)
+  serverExternalPackages: [
+    'pdf-to-png-converter',
+    '@napi-rs/canvas',
+    'canvas',
+    'pdfjs-dist',
+  ],
+
   // Experimental features
   experimental: {
     serverActions: {
