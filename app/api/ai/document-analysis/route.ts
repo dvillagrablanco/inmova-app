@@ -271,6 +271,55 @@ function getDataTypeFromCategory(category: string): string {
 }
 
 /**
+ * Convierte un PDF a imagen PNG usando pdftoppm
+ */
+async function convertPDFToImage(file: File): Promise<string> {
+  const { spawn } = await import('child_process');
+  const { writeFile, readFile, unlink } = await import('fs/promises');
+  const { join } = await import('path');
+  const os = await import('os');
+  
+  const tmpDir = os.tmpdir();
+  const timestamp = Date.now();
+  const pdfPath = join(tmpDir, `pdf_${timestamp}.pdf`);
+  const outputPrefix = join(tmpDir, `img_${timestamp}`);
+  const outputPath = `${outputPrefix}-1.png`;
+  
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfBuffer = Buffer.from(arrayBuffer);
+    await writeFile(pdfPath, pdfBuffer);
+    
+    logger.info('[PDF to Image] Convirtiendo PDF...', { filename: file.name });
+    
+    await new Promise<void>((resolve, reject) => {
+      const proc = spawn('pdftoppm', ['-png', '-f', '1', '-l', '1', '-r', '150', pdfPath, outputPrefix]);
+      let stderr = '';
+      proc.stderr.on('data', (data) => { stderr += data.toString(); });
+      proc.on('close', (code) => {
+        if (code === 0) resolve();
+        else reject(new Error(`pdftoppm falló: ${stderr}`));
+      });
+      proc.on('error', (err) => reject(err));
+    });
+    
+    const imageBuffer = await readFile(outputPath);
+    const base64 = imageBuffer.toString('base64');
+    
+    logger.info('[PDF to Image] Conversión exitosa', { filename: file.name });
+    
+    await unlink(pdfPath).catch(() => {});
+    await unlink(outputPath).catch(() => {});
+    
+    return base64;
+  } catch (error: any) {
+    await unlink(pdfPath).catch(() => {});
+    await unlink(outputPath).catch(() => {});
+    throw error;
+  }
+}
+
+/**
  * Analiza un documento (imagen o PDF) usando Claude Vision
  */
 async function analyzeDocumentWithVision(
@@ -285,47 +334,38 @@ async function analyzeDocumentWithVision(
   }
   
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const base64Data = await fileToBase64(file);
   const isPDF = isPDFFile(file);
   
-  // Determinar el tipo de contenido para Claude
-  let contentBlock: any;
+  // Para PDFs: convertir a imagen primero (más compatible con todos los modelos)
+  // Para imágenes: usar directamente
+  let base64Data: string;
+  let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/png';
   
   if (isPDF) {
-    // Para PDFs, usar el tipo document de Claude
-    contentBlock = {
-      type: 'document',
-      source: {
-        type: 'base64',
-        media_type: 'application/pdf',
-        data: base64Data,
-      },
-    };
-    logger.info('[Vision Analysis] Procesando PDF con Claude', {
-      filename: file.name,
-      fileSize: file.size,
-    });
+    logger.info('[Vision Analysis] PDF detectado - convirtiendo a imagen', { filename: file.name });
+    base64Data = await convertPDFToImage(file);
+    mediaType = 'image/png';
   } else {
-    // Para imágenes
-    let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/jpeg';
-    if (file.type === 'image/png') mediaType = 'image/png';
+    base64Data = await fileToBase64(file);
+    if (file.type === 'image/jpeg' || file.type === 'image/jpg') mediaType = 'image/jpeg';
     else if (file.type === 'image/gif') mediaType = 'image/gif';
     else if (file.type === 'image/webp') mediaType = 'image/webp';
-    
-    contentBlock = {
-      type: 'image',
-      source: {
-        type: 'base64',
-        media_type: mediaType,
-        data: base64Data,
-      },
-    };
-    logger.info('[Vision Analysis] Procesando imagen con Claude Vision', {
-      filename: file.name,
-      fileType: file.type,
-      fileSize: file.size,
-    });
   }
+  
+  const contentBlock = {
+    type: 'image',
+    source: {
+      type: 'base64',
+      media_type: mediaType,
+      data: base64Data,
+    },
+  };
+  
+  logger.info('[Vision Analysis] Enviando a Claude Vision', {
+    filename: file.name,
+    isPDF,
+    mediaType,
+  });
   
   const prompt = getVisionPromptForContext(context, companyInfo);
 
@@ -339,10 +379,9 @@ async function analyzeDocumentWithVision(
 
   const startTime = Date.now();
   
-  // claude-3-5-sonnet soporta PDFs directamente
-  // Si falla, se usará conversión a imagen como fallback
+  // Usar claude-3-haiku para imágenes (rápido y confiable)
   const response = await client.messages.create({
-    model: 'claude-3-5-sonnet-latest',
+    model: 'claude-3-haiku-20240307',
     max_tokens: 4096,
     messages: [
       {
