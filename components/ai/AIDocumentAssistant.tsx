@@ -368,11 +368,22 @@ export function AIDocumentAssistant({
         
         // CRÍTICO: Abrir diálogo de revisión automáticamente para mejor UX
         // Se abre inmediatamente para que el usuario vea los datos extraídos
+        console.log('[AIDocumentAssistant] Verificando si abrir diálogo...', {
+          hasOnApplyData: !!onApplyData,
+          fieldsCount: analysis.extractedFields.length,
+          analysisExists: !!analysis
+        });
+        
         if (onApplyData && analysis.extractedFields.length > 0) {
-          console.log('[AIDocumentAssistant] Abriendo diálogo de revisión automáticamente...');
-          setPendingReviewFile(updatedFile);
-          setReviewDialogOpen(true);
+          console.log('[AIDocumentAssistant] ✅ Abriendo diálogo de revisión automáticamente...');
+          // Usar setTimeout para asegurar que el estado se ha actualizado
+          setTimeout(() => {
+            console.log('[AIDocumentAssistant] Ejecutando apertura del diálogo...');
+            setPendingReviewFile(updatedFile);
+            setReviewDialogOpen(true);
+          }, 100);
         } else {
+          console.log('[AIDocumentAssistant] ⚠️ NO abriendo diálogo - onApplyData:', !!onApplyData, 'fields:', analysis.extractedFields.length);
           // Si no hay onApplyData, hacer scroll al panel de resultados
           setTimeout(() => {
             resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });

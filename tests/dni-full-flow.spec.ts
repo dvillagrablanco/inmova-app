@@ -21,6 +21,13 @@ test.describe('Flujo Completo DNI → Formulario', () => {
   test('DNI-FLOW: Debe mostrar datos extraídos y permitir aplicarlos al formulario', async ({ page }) => {
     // Configurar timeout largo para este test
     test.setTimeout(180000);
+    
+    // Capturar logs de la consola del navegador
+    page.on('console', msg => {
+      if (msg.text().includes('AIDocumentAssistant')) {
+        console.log(`[BROWSER] ${msg.text()}`);
+      }
+    });
 
     // ========================================
     // PASO 1: Login
