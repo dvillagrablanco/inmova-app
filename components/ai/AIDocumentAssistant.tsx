@@ -210,11 +210,26 @@ export function AIDocumentAssistant({
         body: formData,
       });
 
+      console.log('[AIDocumentAssistant] Response status:', response.status);
+      console.log('[AIDocumentAssistant] Response ok:', response.ok);
+
       if (!response.ok) {
-        throw new Error('Error al analizar el documento');
+        const errorText = await response.text();
+        console.error('[AIDocumentAssistant] Error response:', errorText);
+        throw new Error(`Error al analizar el documento: ${response.status}`);
       }
 
-      const analysis: DocumentAnalysis = await response.json();
+      const analysisText = await response.text();
+      console.log('[AIDocumentAssistant] Response text length:', analysisText.length);
+      
+      let analysis: DocumentAnalysis;
+      try {
+        analysis = JSON.parse(analysisText);
+        console.log('[AIDocumentAssistant] Parsed analysis:', analysis.classification?.category, analysis.summary?.substring(0, 50));
+      } catch (parseError) {
+        console.error('[AIDocumentAssistant] JSON parse error:', parseError);
+        throw new Error('Error al procesar la respuesta del servidor');
+      }
 
       // Actualizar progreso
       setUploadedFiles(prev =>
