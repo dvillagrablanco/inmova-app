@@ -239,6 +239,9 @@ export function AIDocumentAssistant({
   
   // Referencia para cancelar procesamiento
   const processingRef = useRef<Map<string, boolean>>(new Map());
+  
+  // Referencia para el panel de resultados (para scroll automático)
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   // Manejar selección de archivos
   const handleFileSelect = useCallback((files: FileList | null) => {
@@ -362,6 +365,19 @@ export function AIDocumentAssistant({
         // Seleccionar automáticamente el archivo recién procesado
         const updatedFile = { ...uploadedFile, status: 'completed' as const, progress: 100, analysis };
         setSelectedFile(updatedFile);
+        
+        // Hacer scroll al panel de resultados
+        setTimeout(() => {
+          resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 500);
+        
+        // NUEVO: Abrir diálogo de revisión automáticamente si hay callback para aplicar datos
+        if (onApplyData && analysis.extractedFields.length > 0) {
+          setTimeout(() => {
+            setPendingReviewFile(updatedFile);
+            setReviewDialogOpen(true);
+          }, 1000);
+        }
 
       } catch (fetchError: any) {
         clearInterval(progressInterval);
@@ -773,7 +789,7 @@ export function AIDocumentAssistant({
 
           {/* Detalle del archivo seleccionado */}
           {selectedFile?.status === 'completed' && selectedFile.analysis && (
-            <Card className="border-violet-200 dark:border-violet-800">
+            <Card ref={resultsRef} className="border-violet-200 dark:border-violet-800 scroll-mt-4">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <FileSearch className="h-4 w-4" />

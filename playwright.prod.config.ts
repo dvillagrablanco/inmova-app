@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  testMatch: ['document-assistant-dni.spec.ts', 'api-document-analysis.spec.ts'],
+  testMatch: ['document-assistant-dni.spec.ts', 'api-document-analysis.spec.ts', 'dni-full-flow.spec.ts'],
   timeout: 120000,
   use: {
     baseURL: 'https://inmovaapp.com',
