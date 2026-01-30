@@ -14,17 +14,94 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { 
   analyzeDocument, 
-  analyzeImageDocument,
   isAIConfigured,
   DocumentAnalysisInput,
 } from '@/lib/ai-document-agent-service';
 import logger from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
- * Verifica si el archivo es una imagen que puede ser analizada con visión
+ * Verifica si el archivo es una imagen
  */
-function isImageFile(mimeType: string): boolean {
-  return ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'].includes(mimeType);
+function isImageFile(file: File): boolean {
+  // Verificar por tipo MIME
+  if (file.type && file.type.startsWith('image/')) {
+    return true;
+  }
+  
+  // Verificar por extensión del nombre del archivo (fallback importante)
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff', '.heic', '.heif'];
+  const fileName = (file.name || '').toLowerCase();
+  if (imageExtensions.some(ext => fileName.endsWith(ext))) {
+    return true;
+  }
+  
+  // Si el tipo MIME incluye 'image' en cualquier parte
+  if (file.type && file.type.includes('image')) {
+    return true;
+  }
+  
+  return false;
+}
+
+/**
+ * Verifica si el archivo es un PDF
+ */
+function isPDFFile(file: File): boolean {
+  if (file.type === 'application/pdf') {
+    return true;
+  }
+  const fileName = (file.name || '').toLowerCase();
+  return fileName.endsWith('.pdf');
+}
+
+/**
+ * Verifica si el archivo debe usar Claude Vision (imágenes o PDFs)
+ */
+function shouldUseVision(file: File): boolean {
+  return isImageFile(file) || isPDFFile(file);
+}
+
+/**
+ * Verifica si el archivo es una imagen por sus bytes mágicos (magic numbers)
+ */
+async function isImageByMagicBytes(file: File): Promise<boolean> {
+  try {
+    const buffer = await file.slice(0, 12).arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    
+    // JPEG: FF D8 FF
+    if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) {
+      return true;
+    }
+    
+    // PNG: 89 50 4E 47 0D 0A 1A 0A
+    if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) {
+      return true;
+    }
+    
+    // GIF: 47 49 46 38
+    if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38) {
+      return true;
+    }
+    
+    // WebP: 52 49 46 46 ... 57 45 42 50
+    if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+        bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) {
+      return true;
+    }
+    
+    // BMP: 42 4D
+    if (bytes[0] === 0x42 && bytes[1] === 0x4D) {
+      return true;
+    }
+    
+    return false;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -40,12 +117,571 @@ async function fileToBase64(file: File): Promise<string> {
   return btoa(binary);
 }
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+/**
+ * Genera el prompt de Vision según el contexto
+ */
+function getVisionPromptForContext(
+  context: string,
+  companyInfo: { cif: string | null; nombre: string; direccion: string | null }
+): string {
+  const basePrompt = `Analiza esta imagen de documento y extrae toda la información visible.
+
+CONTEXTO:
+- Empresa del usuario: ${companyInfo.nombre}
+- CIF de la empresa: ${companyInfo.cif || 'No proporcionado'}
+- Contexto de uso: ${context}
+
+INSTRUCCIONES:
+1. Identifica el tipo de documento
+2. Extrae TODOS los datos visibles de forma estructurada
+3. Usa el formato de campo más apropiado (fechas en YYYY-MM-DD, números sin formato)
+
+`;
+
+  // Instrucciones específicas según contexto
+  const contextInstructions: Record<string, string> = {
+    inquilinos: `PARA DOCUMENTOS DE INQUILINOS, busca especialmente:
+- Documentos de identidad (DNI, NIE, Pasaporte): nombre completo, número, fecha nacimiento, nacionalidad, sexo, dirección
+- Nóminas: nombre, empresa, salario bruto/neto, fecha
+- Contratos laborales: nombre, empresa, cargo, salario, fecha inicio
+- Certificados de empadronamiento: nombre, dirección, fecha
+- Referencias bancarias: nombre, banco, número cuenta (parcial)`,
+
+    contratos: `PARA DOCUMENTOS DE CONTRATOS, busca especialmente:
+- Contratos de arrendamiento: dirección inmueble, fecha inicio/fin, renta mensual, fianza, partes (arrendador/arrendatario con DNI)
+- Anexos de contrato: modificaciones, cláusulas adicionales
+- Inventarios: lista de elementos, estado
+- Actas de entrega de llaves: fecha, firmas`,
+
+    propiedades: `PARA DOCUMENTOS DE PROPIEDADES, busca especialmente:
+- Escrituras: dirección, referencia catastral, superficie, propietario, fecha
+- Notas simples del registro: finca, titular, cargas
+- Certificados energéticos: calificación, consumo, emisiones
+- IBI/Catastro: referencia catastral, valor catastral, dirección
+- Planos: superficie, distribución, habitaciones`,
+
+    seguros: `PARA DOCUMENTOS DE SEGUROS, busca especialmente:
+- Pólizas: número póliza, aseguradora, tomador, dirección asegurada, coberturas, prima, fecha vigencia
+- Recibos: número recibo, importe, periodo
+- Partes de siniestro: fecha siniestro, descripción, daños`,
+
+    facturas: `PARA FACTURAS Y DOCUMENTOS FINANCIEROS, busca especialmente:
+- Facturas: número factura, emisor (nombre, CIF), receptor, fecha, concepto, base imponible, IVA, total
+- Recibos de suministros: compañía, dirección, periodo, consumo, importe
+- Justificantes de pago: fecha, importe, concepto, ordenante, beneficiario`,
+
+    garantias: `PARA DOCUMENTOS DE GARANTÍAS, busca especialmente:
+- Avales bancarios: banco, importe, beneficiario, vigencia
+- Depósitos: importe, fecha, organismo
+- Seguros de impago: aseguradora, cobertura, prima`,
+
+    incidencias: `PARA DOCUMENTOS DE INCIDENCIAS/MANTENIMIENTO, busca especialmente:
+- Presupuestos: proveedor, concepto, importe, fecha
+- Facturas de reparación: descripción trabajo, materiales, mano de obra, total
+- Informes técnicos: fecha, descripción, conclusiones`,
+
+    general: `TIPOS DE DOCUMENTOS A IDENTIFICAR:
+- Documentos de identidad (DNI, NIE, Pasaporte)
+- Contratos (arrendamiento, compraventa, laboral)
+- Documentos de propiedad (escrituras, notas simples)
+- Documentos financieros (facturas, recibos, nóminas)
+- Certificados (energético, empadronamiento)
+- Seguros (pólizas, recibos)
+- Documentos técnicos (informes, presupuestos)`,
+  };
+
+  const specificInstructions = contextInstructions[context] || contextInstructions.general;
+
+  return basePrompt + specificInstructions + `
+
+CATEGORÍAS DE DOCUMENTO:
+- dni_nie: Documentos de identidad (DNI, NIE, Pasaporte)
+- contrato_alquiler: Contratos de arrendamiento
+- contrato_compraventa: Contratos de compraventa
+- escritura_propiedad: Escrituras y documentos notariales
+- factura: Facturas y recibos
+- nomina: Nóminas y documentos laborales
+- seguro: Pólizas y documentos de seguros
+- certificado_energetico: Certificados de eficiencia energética
+- nota_simple: Notas simples del registro
+- catastro: Documentos catastrales
+- presupuesto: Presupuestos
+- otro: Otros documentos
+
+RESPONDE EN FORMATO JSON:
+{
+  "documentType": "descripción del tipo de documento",
+  "classification": {
+    "category": "categoria_del_documento",
+    "confidence": 0.0-1.0,
+    "specificType": "tipo específico detallado"
+  },
+  "extractedFields": [
+    {
+      "fieldName": "nombre_del_campo_en_snake_case",
+      "fieldValue": "valor extraído",
+      "confidence": 0.0-1.0,
+      "dataType": "string|number|date|currency|percentage"
+    }
+  ],
+  "summary": "resumen breve del documento y su contenido principal",
+  "warnings": ["advertencias si hay datos ilegibles, incompletos o sospechosos"],
+  "suggestedEntity": "Tenant|Property|Contract|Insurance|Provider|Invoice"
+}`;
+}
 
 /**
- * Extrae texto de un archivo (PDF, imagen, texto)
- * En producción, esto debería usar un servicio OCR como AWS Textract o Google Vision
+ * Determina la entidad objetivo según la categoría del documento
+ */
+function getTargetEntityFromCategory(category: string): string {
+  const entityMapping: Record<string, string> = {
+    dni_nie: 'Tenant',
+    contrato_alquiler: 'Contract',
+    contrato_compraventa: 'Contract',
+    escritura_propiedad: 'Property',
+    factura: 'Invoice',
+    nomina: 'Tenant',
+    seguro: 'Insurance',
+    certificado_energetico: 'Property',
+    nota_simple: 'Property',
+    catastro: 'Property',
+    presupuesto: 'Provider',
+  };
+  return entityMapping[category] || 'Document';
+}
+
+/**
+ * Determina el dataType según la categoría del documento
+ */
+function getDataTypeFromCategory(category: string): string {
+  const dataTypeMapping: Record<string, string> = {
+    dni_nie: 'tenant_info',
+    contrato_alquiler: 'contract_info',
+    contrato_compraventa: 'contract_info',
+    escritura_propiedad: 'property_info',
+    factura: 'financial_info',
+    nomina: 'tenant_info',
+    seguro: 'insurance_info',
+    certificado_energetico: 'energy_info',
+    nota_simple: 'property_info',
+    catastro: 'property_info',
+    presupuesto: 'provider_info',
+  };
+  return dataTypeMapping[category] || 'property_info';
+}
+
+/**
+ * Analiza un documento (imagen o PDF) usando Claude Vision
+ */
+async function analyzeDocumentWithVision(
+  file: File,
+  companyInfo: { cif: string | null; nombre: string; direccion: string | null },
+  context: string = 'general'
+): Promise<any> {
+  const Anthropic = (await import('@anthropic-ai/sdk')).default;
+  
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error('ANTHROPIC_API_KEY no configurada');
+  }
+  
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const base64Data = await fileToBase64(file);
+  const isPDF = isPDFFile(file);
+  
+  // Determinar el tipo de contenido para Claude
+  let contentBlock: any;
+  
+  if (isPDF) {
+    // Para PDFs, usar el tipo document de Claude
+    contentBlock = {
+      type: 'document',
+      source: {
+        type: 'base64',
+        media_type: 'application/pdf',
+        data: base64Data,
+      },
+    };
+    logger.info('[Vision Analysis] Procesando PDF con Claude', {
+      filename: file.name,
+      fileSize: file.size,
+    });
+  } else {
+    // Para imágenes
+    let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/jpeg';
+    if (file.type === 'image/png') mediaType = 'image/png';
+    else if (file.type === 'image/gif') mediaType = 'image/gif';
+    else if (file.type === 'image/webp') mediaType = 'image/webp';
+    
+    contentBlock = {
+      type: 'image',
+      source: {
+        type: 'base64',
+        media_type: mediaType,
+        data: base64Data,
+      },
+    };
+    logger.info('[Vision Analysis] Procesando imagen con Claude Vision', {
+      filename: file.name,
+      fileType: file.type,
+      fileSize: file.size,
+    });
+  }
+  
+  const prompt = getVisionPromptForContext(context, companyInfo);
+
+  logger.info('[Vision Analysis] Enviando a Claude para análisis', {
+    filename: file.name,
+    fileType: file.type,
+    fileSize: file.size,
+    context,
+    isPDF,
+  });
+
+  const startTime = Date.now();
+  
+  const response = await client.messages.create({
+    model: 'claude-3-5-sonnet-20241022',
+    max_tokens: 4096,
+    messages: [
+      {
+        role: 'user',
+        content: [
+          contentBlock,
+          {
+            type: 'text',
+            text: prompt,
+          },
+        ],
+      },
+    ],
+  });
+
+  const processingTimeMs = Date.now() - startTime;
+  const content = response.content[0];
+  
+  if (content.type === 'text') {
+    // Extraer JSON de la respuesta
+    const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const result = JSON.parse(jsonMatch[0]);
+      const category = result.classification?.category || 'otro';
+      const targetEntity = result.suggestedEntity || getTargetEntityFromCategory(category);
+      const dataType = getDataTypeFromCategory(category);
+      
+      logger.info('[Vision Analysis] Análisis completado', {
+        documentType: result.documentType,
+        category,
+        fieldsExtracted: result.extractedFields?.length || 0,
+        processingTimeMs,
+      });
+      
+      // Detectar si tiene datos sensibles
+      const sensitiveCategories = ['dni_nie', 'nomina', 'contrato_alquiler'];
+      const hasSensitive = sensitiveCategories.includes(category);
+      const sensitiveTypes: string[] = [];
+      if (category === 'dni_nie') sensitiveTypes.push('documento_identidad');
+      if (category === 'nomina') sensitiveTypes.push('datos_financieros', 'datos_laborales');
+      if (category === 'contrato_alquiler') sensitiveTypes.push('datos_personales', 'datos_financieros');
+      
+      // Mapear campos extraídos
+      const extractedFields = (result.extractedFields || []).map((f: any) => ({
+        fieldName: f.fieldName,
+        fieldValue: f.fieldValue,
+        dataType: f.dataType || dataType,
+        confidence: f.confidence || 0.8,
+        targetEntity,
+        targetField: mapFieldNameToTarget(f.fieldName, category),
+      }));
+      
+      // Generar acciones sugeridas basadas en los campos extraídos
+      const suggestedActions = generateSuggestedActions(extractedFields, category, targetEntity);
+      
+      return {
+        classification: {
+          category,
+          confidence: result.classification?.confidence || 0.85,
+          specificType: result.classification?.specificType || result.documentType || 'Documento',
+          reasoning: `Análisis mediante Claude Vision (contexto: ${context})`,
+        },
+        ownershipValidation: {
+          isOwned: true,
+          detectedCIF: extractCIF(result.extractedFields),
+          detectedCompanyName: extractCompanyName(result.extractedFields),
+          matchesCIF: false,
+          matchesName: false,
+          confidence: 0.7,
+          notes: `Documento analizado en contexto: ${context}`,
+        },
+        extractedFields,
+        summary: result.summary || 'Documento analizado con visión artificial',
+        warnings: result.warnings || [],
+        suggestedActions,
+        sensitiveData: {
+          hasSensitive,
+          types: sensitiveTypes,
+        },
+        processingMetadata: {
+          tokensUsed: response.usage?.output_tokens || 0,
+          processingTimeMs,
+          modelUsed: 'claude-3-5-sonnet-vision',
+        },
+      };
+    }
+  }
+  
+  throw new Error('No se pudo procesar la respuesta de visión');
+}
+
+/**
+ * Extrae CIF de los campos si existe
+ */
+function extractCIF(fields: any[]): string | null {
+  if (!fields) return null;
+  const cifField = fields.find((f: any) => 
+    f.fieldName?.toLowerCase().includes('cif') || 
+    f.fieldName?.toLowerCase().includes('nif_empresa')
+  );
+  return cifField?.fieldValue || null;
+}
+
+/**
+ * Extrae nombre de empresa de los campos si existe
+ */
+function extractCompanyName(fields: any[]): string | null {
+  if (!fields) return null;
+  const nameField = fields.find((f: any) => 
+    f.fieldName?.toLowerCase().includes('empresa') || 
+    f.fieldName?.toLowerCase().includes('razon_social') ||
+    f.fieldName?.toLowerCase().includes('emisor')
+  );
+  return nameField?.fieldValue || null;
+}
+
+/**
+ * Genera acciones sugeridas basadas en los campos extraídos
+ */
+function generateSuggestedActions(
+  fields: any[],
+  category: string,
+  targetEntity: string
+): Array<{
+  action: 'create' | 'update' | 'link';
+  entity: string;
+  description: string;
+  data: Record<string, any>;
+  confidence: number;
+  requiresReview: boolean;
+}> {
+  const actions: any[] = [];
+  
+  if (fields.length === 0) return actions;
+  
+  // Construir datos del objeto
+  const data: Record<string, any> = {};
+  fields.forEach(f => {
+    if (f.targetField && f.fieldValue) {
+      data[f.targetField] = f.fieldValue;
+    }
+  });
+  
+  if (Object.keys(data).length > 0) {
+    actions.push({
+      action: 'create',
+      entity: targetEntity,
+      description: `Crear/actualizar ${targetEntity} con datos extraídos del documento`,
+      data,
+      confidence: 0.8,
+      requiresReview: true,
+    });
+  }
+  
+  return actions;
+}
+
+/**
+ * Mapea nombres de campo extraídos a campos del sistema según categoría
+ */
+function mapFieldNameToTarget(fieldName: string, category: string = 'general'): string {
+  // Mapeo base para todos los documentos
+  const baseMapping: Record<string, string> = {
+    // Datos personales
+    'nombre_completo': 'nombreCompleto',
+    'nombre': 'nombreCompleto',
+    'apellidos': 'apellidos',
+    'primer_apellido': 'primerApellido',
+    'segundo_apellido': 'segundoApellido',
+    'dni': 'documentoIdentidad',
+    'nie': 'documentoIdentidad',
+    'numero_documento': 'documentoIdentidad',
+    'pasaporte': 'documentoIdentidad',
+    'fecha_nacimiento': 'fechaNacimiento',
+    'nacionalidad': 'nacionalidad',
+    'email': 'email',
+    'correo': 'email',
+    'telefono': 'telefono',
+    'movil': 'telefono',
+    'direccion': 'direccion',
+    'domicilio': 'direccion',
+    'sexo': 'sexo',
+    'genero': 'sexo',
+    'estado_civil': 'estadoCivil',
+    'profesion': 'profesion',
+    'ocupacion': 'profesion',
+    
+    // Datos financieros
+    'salario': 'ingresosMensuales',
+    'salario_bruto': 'salarioBruto',
+    'salario_neto': 'salarioNeto',
+    'ingresos': 'ingresosMensuales',
+    'ingresos_mensuales': 'ingresosMensuales',
+    'iban': 'iban',
+    'cuenta_bancaria': 'cuentaBancaria',
+    'banco': 'banco',
+    
+    // Datos de empresa
+    'cif': 'cif',
+    'nif_empresa': 'cif',
+    'razon_social': 'razonSocial',
+    'nombre_empresa': 'nombreEmpresa',
+    'empresa': 'empresa',
+  };
+  
+  // Mapeos específicos por categoría
+  const categoryMappings: Record<string, Record<string, string>> = {
+    contrato_alquiler: {
+      'direccion_inmueble': 'direccionInmueble',
+      'direccion_vivienda': 'direccionInmueble',
+      'fecha_inicio': 'fechaInicio',
+      'fecha_fin': 'fechaFin',
+      'fecha_vencimiento': 'fechaFin',
+      'renta': 'precioAlquiler',
+      'renta_mensual': 'precioAlquiler',
+      'precio_alquiler': 'precioAlquiler',
+      'fianza': 'fianza',
+      'deposito': 'deposito',
+      'arrendador': 'arrendador',
+      'propietario': 'propietario',
+      'arrendatario': 'arrendatario',
+      'inquilino': 'inquilino',
+      'dni_arrendador': 'dniArrendador',
+      'dni_arrendatario': 'dniArrendatario',
+      'duracion': 'duracion',
+      'prorroga': 'prorroga',
+    },
+    escritura_propiedad: {
+      'referencia_catastral': 'referenciaCatastral',
+      'superficie': 'superficie',
+      'metros_cuadrados': 'superficie',
+      'm2': 'superficie',
+      'superficie_construida': 'superficieConstruida',
+      'superficie_util': 'superficieUtil',
+      'fecha_escritura': 'fechaEscritura',
+      'notario': 'notario',
+      'protocolo': 'numeroProtocolo',
+      'precio_compra': 'precioCompra',
+      'valor_escritura': 'valorEscritura',
+    },
+    nota_simple: {
+      'finca': 'numeroFinca',
+      'numero_finca': 'numeroFinca',
+      'titular': 'titular',
+      'propietario': 'propietario',
+      'cargas': 'cargas',
+      'hipoteca': 'hipoteca',
+    },
+    certificado_energetico: {
+      'calificacion': 'calificacionEnergetica',
+      'calificacion_energetica': 'calificacionEnergetica',
+      'consumo': 'consumoEnergetico',
+      'emisiones': 'emisiones',
+      'fecha_emision': 'fechaEmision',
+      'fecha_validez': 'fechaValidez',
+    },
+    factura: {
+      'numero_factura': 'numeroFactura',
+      'fecha_factura': 'fechaFactura',
+      'fecha_emision': 'fechaEmision',
+      'emisor': 'emisor',
+      'receptor': 'receptor',
+      'concepto': 'concepto',
+      'descripcion': 'descripcion',
+      'base_imponible': 'baseImponible',
+      'iva': 'iva',
+      'tipo_iva': 'tipoIva',
+      'total': 'total',
+      'importe_total': 'importeTotal',
+    },
+    seguro: {
+      'numero_poliza': 'numeroPoliza',
+      'aseguradora': 'aseguradora',
+      'compania': 'aseguradora',
+      'tomador': 'tomador',
+      'asegurado': 'asegurado',
+      'direccion_asegurada': 'direccionAsegurada',
+      'cobertura': 'cobertura',
+      'coberturas': 'coberturas',
+      'prima': 'prima',
+      'prima_anual': 'primaAnual',
+      'fecha_efecto': 'fechaEfecto',
+      'fecha_vencimiento': 'fechaVencimiento',
+      'capital_asegurado': 'capitalAsegurado',
+    },
+    nomina: {
+      'periodo': 'periodo',
+      'mes': 'mes',
+      'año': 'año',
+      'salario_base': 'salarioBase',
+      'complementos': 'complementos',
+      'retenciones': 'retenciones',
+      'irpf': 'irpf',
+      'seguridad_social': 'seguridadSocial',
+      'liquido': 'liquido',
+      'neto_a_percibir': 'netoPercibir',
+      'categoria': 'categoria',
+      'puesto': 'puesto',
+      'antiguedad': 'antiguedad',
+    },
+    catastro: {
+      'referencia_catastral': 'referenciaCatastral',
+      'valor_catastral': 'valorCatastral',
+      'uso': 'uso',
+      'clase': 'clase',
+      'superficie_suelo': 'superficieSuelo',
+      'superficie_construida': 'superficieConstruida',
+      'año_construccion': 'añoConstruccion',
+    },
+    presupuesto: {
+      'numero_presupuesto': 'numeroPresupuesto',
+      'fecha_presupuesto': 'fechaPresupuesto',
+      'proveedor': 'proveedor',
+      'concepto': 'concepto',
+      'descripcion_trabajos': 'descripcionTrabajos',
+      'materiales': 'materiales',
+      'mano_obra': 'manoObra',
+      'total': 'total',
+      'validez': 'validez',
+    },
+  };
+  
+  const lowerName = fieldName.toLowerCase().replace(/\s+/g, '_');
+  
+  // Primero buscar en mapeo específico de categoría
+  if (categoryMappings[category] && categoryMappings[category][lowerName]) {
+    return categoryMappings[category][lowerName];
+  }
+  
+  // Luego buscar en mapeo base
+  if (baseMapping[lowerName]) {
+    return baseMapping[lowerName];
+  }
+  
+  // Si no se encuentra, convertir a camelCase
+  return lowerName.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+}
+
+/**
+ * Extrae texto de un archivo (PDF, documento de texto)
+ * Para imágenes, se usa Claude Vision directamente
  */
 async function extractTextFromFile(file: File): Promise<string> {
   // Para archivos de texto
@@ -53,8 +689,12 @@ async function extractTextFromFile(file: File): Promise<string> {
     return await file.text();
   }
 
+  // Para imágenes, retornar solo info básica (se procesará con Vision)
+  if (isImageFile(file)) {
+    return `[IMAGEN: ${file.name}] - Este archivo se procesará con análisis de visión.`;
+  }
+
   // Para PDFs y documentos - usar el nombre del archivo como contexto básico
-  // En producción, aquí se integraría con un servicio OCR
   const basicInfo = `
 Nombre de archivo: ${file.name}
 Tipo MIME: ${file.type}
@@ -63,22 +703,18 @@ Fecha de carga: ${new Date().toISOString()}
   `.trim();
 
   // Si el archivo es un PDF o documento, intentar leer como texto
-  // (muchos PDFs generados digitalmente contienen texto extraíble)
   try {
     const arrayBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
     
-    // Buscar texto legible en el buffer (para PDFs con texto)
     let extractedText = '';
     let textChars: number[] = [];
     
     for (let i = 0; i < uint8Array.length && extractedText.length < 50000; i++) {
       const byte = uint8Array[i];
-      // Caracteres ASCII imprimibles y espacios
       if ((byte >= 32 && byte <= 126) || byte === 10 || byte === 13) {
         textChars.push(byte);
       } else if (textChars.length > 10) {
-        // Si tenemos una secuencia de caracteres legibles, añadirla
         const text = String.fromCharCode(...textChars);
         if (text.trim().length > 5 && /[a-zA-Z0-9áéíóúñÁÉÍÓÚÑ]/.test(text)) {
           extractedText += text + ' ';
@@ -183,6 +819,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // LOG DETALLADO DEL ARCHIVO RECIBIDO
+    logger.info('[AI Document Analysis] 📥 Archivo recibido', {
+      fileName: file.name,
+      fileType: file.type,
+      fileSize: file.size,
+      context,
+      isImageByType: file.type.startsWith('image/'),
+      isImageByExtension: ['.jpg', '.jpeg', '.png', '.gif', '.webp'].some(ext => 
+        file.name.toLowerCase().endsWith(ext)
+      ),
+    });
+
     // Verificar tipo de archivo
     const allowedTypes = [
       'application/pdf',
@@ -214,8 +862,15 @@ export async function POST(request: NextRequest) {
     if (!isAIConfigured()) {
       logger.warn('[AI Document Analysis] ANTHROPIC_API_KEY no configurado, usando análisis básico');
       const basicResult = basicAnalysis(file.name, file.type);
+      basicResult.warnings.push(
+        '⚠️ IA no configurada: Para análisis inteligente de documentos, configure ANTHROPIC_API_KEY en el servidor.'
+      );
+      basicResult.summary = 'Análisis básico (sin IA). Configure ANTHROPIC_API_KEY para extracción automática de datos.';
       return NextResponse.json(basicResult);
     }
+
+    // Extraer texto del archivo
+    const extractedText = await extractTextFromFile(file);
 
     // Obtener información de la empresa del usuario
     let companyInfo: DocumentAnalysisInput['companyInfo'] = {
@@ -247,74 +902,70 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Analizar documento con IA real
+    // Determinar si usar Vision (para imágenes y PDFs)
+    const isPDF = isPDFFile(file);
+    let isImage = isImageFile(file);
+    
+    // Si no se detectó como imagen por tipo/extensión, verificar por magic bytes
+    if (!isImage && !isPDF) {
+      isImage = await isImageByMagicBytes(file);
+      if (isImage) {
+        logger.info('[AI Document Analysis] 🔍 Imagen detectada por magic bytes', {
+          filename: file.name,
+          declaredType: file.type,
+        });
+      }
+    }
+    
+    // Usar Vision para imágenes y PDFs
+    const useVision = isImage || isPDF;
+    
     logger.info('[AI Document Analysis] Iniciando análisis con IA', {
       filename: file.name,
       fileType: file.type,
       fileSize: file.size,
       userId: session.user.id,
-      isImage: isImageFile(file.type),
+      isImage,
+      isPDF,
+      useVision,
+      context,
     });
 
-    let analysis;
-
-    // Si es una imagen, usar análisis con visión de Claude
-    if (isImageFile(file.type)) {
-      logger.info('[AI Document Analysis] Usando Claude Vision para análisis de imagen');
-      
-      const imageBase64 = await fileToBase64(file);
-      
-      analysis = await analyzeImageDocument(
-        imageBase64,
-        file.type,
-        file.name,
-        companyInfo
-      );
-    } else if (file.type === 'application/pdf') {
-      // Para PDFs escaneados (como DNIs), pedir imagen
-      // Los PDFs escaneados no tienen texto extraíble útil
-      logger.info('[AI Document Analysis] PDF detectado - solicitando imagen');
-      
-      return NextResponse.json({
-        classification: {
-          category: 'dni_nie',
-          confidence: 0.5,
-          specificType: 'Documento de identidad (PDF)',
-          reasoning: 'PDF detectado - se requiere imagen para análisis completo',
-        },
-        ownershipValidation: {
-          isOwned: true,
-          detectedCIF: null,
-          detectedCompanyName: null,
-          matchesCIF: false,
-          matchesName: false,
-          confidence: 0.3,
-          notes: 'Sube una foto/imagen del documento para análisis completo',
-        },
-        extractedFields: [],
-        summary: '📷 Para analizar documentos de identidad (DNI/NIE), por favor sube una FOTO o IMAGEN (JPG, PNG) en lugar de PDF. Esto permite un análisis más preciso.',
-        warnings: [
-          '⚠️ Los PDFs escaneados no permiten extracción de datos precisa.',
-          '📷 Sube una foto directa del documento (JPG o PNG) para mejor análisis.',
-        ],
-        suggestedActions: ['Subir imagen JPG/PNG del documento'],
-        sensitiveData: { hasSensitive: true, types: ['documento_identidad'] },
-        processingMetadata: {
-          tokensUsed: 0,
-          processingTimeMs: 50,
-          modelUsed: 'pdf-detection',
-        },
-      });
-    } else {
-      // Para documentos de texto (Word, TXT, etc.), usar análisis de texto
-      const extractedText = await extractTextFromFile(file);
-      
-      analysis = await analyzeDocument({
-        text: extractedText,
+    // Si es imagen o PDF, usar Claude Vision
+    if (useVision) {
+      logger.info('[AI Document Analysis] 🖼️ USANDO CLAUDE VISION', { 
+        context,
         filename: file.name,
-        mimeType: file.type,
-        companyInfo,
+        fileType: file.type,
+        isPDF,
+        isImage,
       });
+      const visionAnalysis = await analyzeDocumentWithVision(file, companyInfo, context);
+      
+      logger.info('[AI Document Analysis] Análisis de visión completado', {
+        filename: file.name,
+        context,
+        category: visionAnalysis.classification?.category,
+        fieldsExtracted: visionAnalysis.extractedFields?.length || 0,
+      });
+      
+      return NextResponse.json(visionAnalysis);
     }
+
+    // Para documentos de texto/PDF, usar el análisis tradicional
+    logger.info('[AI Document Analysis] 📄 Usando análisis de TEXTO (no Vision)', {
+      filename: file.name,
+      fileType: file.type,
+      textLength: extractedText.length,
+    });
+    
+    const analysis = await analyzeDocument({
+      text: extractedText,
+      filename: file.name,
+      mimeType: file.type,
+      companyInfo,
+    });
 
     logger.info('[AI Document Analysis] Análisis completado', {
       filename: file.name,
@@ -325,22 +976,58 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(analysis);
   } catch (error: any) {
-    logger.error('[AI Document Analysis] Error:', error);
+    const errorMessage = error?.message || error?.toString() || 'Error desconocido';
+    const errorDetails = {
+      message: errorMessage,
+      name: error?.name,
+      status: error?.status,
+      code: error?.code,
+    };
     
-    // Si hay error con la IA, intentar análisis básico como fallback
-    const formData = await request.formData().catch(() => null);
-    const file = formData?.get('file') as File | null;
+    logger.error('[AI Document Analysis] Error:', errorDetails);
     
-    if (file) {
-      logger.warn('[AI Document Analysis] Usando análisis básico como fallback');
-      const basicResult = basicAnalysis(file.name, file.type);
-      basicResult.warnings.push(`Error en IA: ${error.message}`);
-      return NextResponse.json(basicResult);
+    // Registrar el error en el sistema de tracking
+    try {
+      const { trackError } = await import('@/lib/error-tracker');
+      await trackError(error, {
+        source: 'api',
+        route: '/api/ai/document-analysis',
+        severity: 'high',
+        metadata: { errorDetails },
+      });
+    } catch (e) {
+      // Ignorar errores de tracking
     }
     
-    return NextResponse.json(
-      { error: 'Error al analizar el documento', details: error.message },
-      { status: 500 }
-    );
+    // Retornar análisis básico como fallback con mensaje de error claro
+    return NextResponse.json({
+      classification: {
+        category: 'otro',
+        confidence: 0,
+        specificType: 'Error en análisis',
+        reasoning: `No se pudo analizar el documento: ${errorMessage}`,
+      },
+      ownershipValidation: {
+        isOwned: false,
+        detectedCIF: null,
+        detectedCompanyName: null,
+        matchesCIF: false,
+        matchesName: false,
+        confidence: 0,
+        notes: 'Error en el análisis',
+      },
+      extractedFields: [],
+      summary: `Error: ${errorMessage}`,
+      warnings: [`Error en análisis de IA: ${errorMessage}`],
+      suggestedActions: [],
+      sensitiveData: { hasSensitive: false, types: [] },
+      processingMetadata: {
+        tokensUsed: 0,
+        processingTimeMs: 0,
+        modelUsed: 'error-fallback',
+      },
+      error: true,
+      errorMessage,
+    });
   }
 }
