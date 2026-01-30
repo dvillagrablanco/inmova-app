@@ -137,9 +137,27 @@ test.describe('Flujo Completo DNI → Formulario', () => {
       console.log('⚠️ Error esperando API:', e.message);
     }
     
-    // Esperar a que se complete el procesamiento visual
-    await page.waitForTimeout(3000);
+    // Esperar a que se complete el procesamiento visual y el diálogo se abra
+    console.log('⏳ Esperando que se abra el diálogo de revisión (5s)...');
+    await page.waitForTimeout(5000);
     await page.screenshot({ path: 'test-results/flow-04-procesamiento-completado.png', fullPage: true });
+    
+    // Verificar si el diálogo de revisión se abrió automáticamente
+    const reviewDialogAuto = page.locator('[role="dialog"]').filter({
+      hasText: /Revisar Datos|Datos Extraídos/i
+    }).first();
+    
+    if (await reviewDialogAuto.isVisible({ timeout: 3000 }).catch(() => false)) {
+      console.log('✅ ¡Diálogo de revisión se abrió automáticamente!');
+      await page.screenshot({ path: 'test-results/flow-04b-dialogo-auto.png', fullPage: true });
+      
+      // Verificar campos en el diálogo
+      const fieldsInDialog = reviewDialogAuto.locator('[class*="rounded"]');
+      const fieldCount = await fieldsInDialog.count();
+      console.log(`   Campos en diálogo: ${fieldCount}`);
+    } else {
+      console.log('⚠️ Diálogo de revisión NO se abrió automáticamente');
+    }
 
     // ========================================
     // PASO 6: Verificar que el archivo aparece como completado

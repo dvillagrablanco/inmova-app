@@ -366,17 +366,17 @@ export function AIDocumentAssistant({
         const updatedFile = { ...uploadedFile, status: 'completed' as const, progress: 100, analysis };
         setSelectedFile(updatedFile);
         
-        // Hacer scroll al panel de resultados
-        setTimeout(() => {
-          resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 500);
-        
-        // NUEVO: Abrir diálogo de revisión automáticamente si hay callback para aplicar datos
+        // CRÍTICO: Abrir diálogo de revisión automáticamente para mejor UX
+        // Se abre inmediatamente para que el usuario vea los datos extraídos
         if (onApplyData && analysis.extractedFields.length > 0) {
+          console.log('[AIDocumentAssistant] Abriendo diálogo de revisión automáticamente...');
+          setPendingReviewFile(updatedFile);
+          setReviewDialogOpen(true);
+        } else {
+          // Si no hay onApplyData, hacer scroll al panel de resultados
           setTimeout(() => {
-            setPendingReviewFile(updatedFile);
-            setReviewDialogOpen(true);
-          }, 1000);
+            resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 500);
         }
 
       } catch (fetchError: any) {
