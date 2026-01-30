@@ -423,8 +423,20 @@ async function analyzeDocumentWithVision(
       if (category === 'nomina') sensitiveTypes.push('datos_financieros', 'datos_laborales');
       if (category === 'contrato_alquiler') sensitiveTypes.push('datos_personales', 'datos_financieros');
       
-      // Mapear campos extraídos
-      const extractedFields = (result.extractedFields || []).map((f: any) => ({
+      // Mapear campos extraídos - manejar tanto array como objeto
+      let rawFields = result.extractedFields || [];
+      
+      // Si extractedFields es un objeto (no array), convertirlo a array
+      if (!Array.isArray(rawFields) && typeof rawFields === 'object') {
+        console.error('[Vision Analysis] 🔄 Convirtiendo extractedFields de objeto a array');
+        rawFields = Object.entries(rawFields).map(([key, value]) => ({
+          fieldName: key,
+          fieldValue: value,
+          confidence: 0.9,
+        }));
+      }
+      
+      const extractedFields = rawFields.map((f: any) => ({
         fieldName: f.fieldName,
         fieldValue: f.fieldValue,
         dataType: f.dataType || dataType,
@@ -432,6 +444,8 @@ async function analyzeDocumentWithVision(
         targetEntity,
         targetField: mapFieldNameToTarget(f.fieldName, category),
       }));
+      
+      console.error('[Vision Analysis] ✅ Campos extraídos:', extractedFields.length);
       
       // Generar acciones sugeridas basadas en los campos extraídos
       const suggestedActions = generateSuggestedActions(extractedFields, category, targetEntity);
@@ -544,16 +558,16 @@ function generateSuggestedActions(
 function mapFieldNameToTarget(fieldName: string, category: string = 'general'): string {
   // Mapeo base para todos los documentos
   const baseMapping: Record<string, string> = {
-    // Datos personales
+    // Datos personales - español
     'nombre_completo': 'nombreCompleto',
-    'nombre': 'nombreCompleto',
+    'nombre': 'nombre',
     'apellidos': 'apellidos',
     'primer_apellido': 'primerApellido',
     'segundo_apellido': 'segundoApellido',
-    'dni': 'documentoIdentidad',
-    'nie': 'documentoIdentidad',
-    'numero_documento': 'documentoIdentidad',
-    'pasaporte': 'documentoIdentidad',
+    'dni': 'dni',
+    'nie': 'dni',
+    'numero_documento': 'dni',
+    'pasaporte': 'dni',
     'fecha_nacimiento': 'fechaNacimiento',
     'nacionalidad': 'nacionalidad',
     'email': 'email',
@@ -567,6 +581,31 @@ function mapFieldNameToTarget(fieldName: string, category: string = 'general'): 
     'estado_civil': 'estadoCivil',
     'profesion': 'profesion',
     'ocupacion': 'profesion',
+    
+    // Datos personales - inglés (como devuelve Claude a veces)
+    'name': 'nombre',
+    'fullName': 'nombre',
+    'full_name': 'nombre',
+    'firstName': 'nombre',
+    'lastName': 'apellidos',
+    'surname': 'apellidos',
+    'documentNumber': 'dni',
+    'document_number': 'dni',
+    'idNumber': 'dni',
+    'id_number': 'dni',
+    'birthDate': 'fechaNacimiento',
+    'birth_date': 'fechaNacimiento',
+    'dateOfBirth': 'fechaNacimiento',
+    'nationality': 'nacionalidad',
+    'sex': 'sexo',
+    'gender': 'sexo',
+    'address': 'direccion',
+    'issueDate': 'fechaExpedicion',
+    'issue_date': 'fechaExpedicion',
+    'expirationDate': 'fechaCaducidad',
+    'expiration_date': 'fechaCaducidad',
+    'expiryDate': 'fechaCaducidad',
+    'expiry_date': 'fechaCaducidad',
     
     // Datos financieros
     'salario': 'ingresosMensuales',
