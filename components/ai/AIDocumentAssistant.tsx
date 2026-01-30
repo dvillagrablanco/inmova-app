@@ -252,6 +252,20 @@ export function AIDocumentAssistant({
     } catch (error: any) {
       console.error('Error procesando documento:', error);
 
+      // Enviar error al servidor para logging
+      try {
+        fetch('/api/ai/document-analysis/log-error', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            error: error.message,
+            stack: error.stack,
+            filename: file.name,
+            timestamp: new Date().toISOString(),
+          }),
+        }).catch(() => {});
+      } catch {}
+
       setUploadedFiles(prev =>
         prev.map(f =>
           f.file === file
