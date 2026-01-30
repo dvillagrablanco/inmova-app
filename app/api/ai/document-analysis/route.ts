@@ -339,8 +339,10 @@ async function analyzeDocumentWithVision(
 
   const startTime = Date.now();
   
+  // claude-3-5-sonnet soporta PDFs directamente
+  // Si falla, se usará conversión a imagen como fallback
   const response = await client.messages.create({
-    model: 'claude-3-haiku-20240307',
+    model: 'claude-3-5-sonnet-latest',
     max_tokens: 4096,
     messages: [
       {
