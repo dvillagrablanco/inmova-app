@@ -342,8 +342,14 @@ async function analyzeDocumentWithVision(
   let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/png';
   
   if (isPDF) {
-    logger.info('[Vision Analysis] PDF detectado - convirtiendo a imagen', { filename: file.name });
-    base64Data = await convertPDFToImage(file);
+    console.error('[Vision Analysis] 📄 PDF detectado - convirtiendo a imagen:', file.name);
+    try {
+      base64Data = await convertPDFToImage(file);
+      console.error('[Vision Analysis] ✅ PDF convertido exitosamente');
+    } catch (convError: any) {
+      console.error('[Vision Analysis] ❌ Error convirtiendo PDF:', convError.message);
+      throw convError;
+    }
     mediaType = 'image/png';
   } else {
     base64Data = await fileToBase64(file);
@@ -1023,8 +1029,11 @@ export async function POST(request: NextRequest) {
       name: error?.name,
       status: error?.status,
       code: error?.code,
+      stack: error?.stack?.substring(0, 500),
     };
     
+    // Log crítico usando console.error para PM2
+    console.error('[AI Document Analysis] ❌ ERROR CRÍTICO:', JSON.stringify(errorDetails));
     logger.error('[AI Document Analysis] Error:', errorDetails);
     
     // Retornar análisis básico como fallback con mensaje de error claro
