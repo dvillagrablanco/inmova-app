@@ -403,8 +403,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar si IA está configurada
-    if (!isAIConfigured()) {
-      logger.warn('[AI Document Analysis] ANTHROPIC_API_KEY no configurado, usando análisis básico');
+    const aiConfigured = isAIConfigured();
+    console.error(`${timestamp}: [INFO] [AI Document Analysis] 🤖 IA configurada: ${aiConfigured}`);
+    
+    if (!aiConfigured) {
+      console.error(`${timestamp}: [WARN] [AI Document Analysis] ANTHROPIC_API_KEY no configurado`);
       const basicResult = basicAnalysis(file.name, file.type);
       return NextResponse.json(basicResult);
     }
@@ -415,6 +418,8 @@ export async function POST(request: NextRequest) {
       nombre: session.user.name || 'Usuario',
       direccion: null,
     };
+
+    console.error(`${timestamp}: [INFO] [AI Document Analysis] 👤 Usuario companyId: ${session.user.companyId || 'ninguno'}`);
 
     // Intentar obtener info de la empresa del usuario
     if (session.user.companyId) {
@@ -434,8 +439,9 @@ export async function POST(request: NextRequest) {
             direccion: company.direccion || null,
           };
         }
-      } catch (e) {
-        logger.warn('[AI Document Analysis] No se pudo obtener info de empresa');
+        console.error(`${timestamp}: [INFO] [AI Document Analysis] 🏢 Empresa obtenida: ${company?.nombre || 'no encontrada'}`);
+      } catch (e: any) {
+        console.error(`${timestamp}: [ERROR] [AI Document Analysis] Error obteniendo empresa: ${e.message}`);
       }
     }
 
@@ -443,22 +449,25 @@ export async function POST(request: NextRequest) {
     const isPDF = isPDFFile(file.type, file.name);
     
     // LOG: Información del archivo recibido
-    logger.info(`[AI Document Analysis] 📋 ARCHIVO: tipo="${file.type}", nombre="${file.name}", isImage=${isImage}, isPDF=${isPDF}`);
+    console.error(`${timestamp}: [INFO] [AI Document Analysis] 📋 ARCHIVO: tipo="${file.type}", nombre="${file.name}", isImage=${isImage}, isPDF=${isPDF}`);
 
     let analysis;
 
     // ESTRATEGIA SIMPLE:
     // - Imágenes (JPG, PNG, GIF, WebP) → Claude Vision ✅
-    // - PDFs escaneados → Pedir que suba imagen ⚠️
+    // - PDFs escaneados → Convertir a imagen → Claude Vision ✅
     // - PDFs con texto → Análisis de texto ✅
     // - Otros documentos → Análisis de texto ✅
     
+    console.error(`${timestamp}: [INFO] [AI Document Analysis] 🔄 Iniciando análisis...`);
+    
     if (isImage) {
       // ✅ IMÁGENES: Usar Claude Vision directamente
-      logger.info(`[AI Document Analysis] 🖼️ IMAGEN detectada - Usando Claude Vision`);
+      console.error(`${timestamp}: [INFO] [AI Document Analysis] 🖼️ IMAGEN detectada - Usando Claude Vision`);
       
       try {
         const imageBase64 = await fileToBase64(file);
+        console.error(`${timestamp}: [INFO] [AI Document Analysis] 📤 Enviando imagen a Claude...`);
         
         analysis = await analyzeImageDocument(
           imageBase64,
@@ -466,36 +475,40 @@ export async function POST(request: NextRequest) {
           file.name,
           companyInfo
         );
+        console.error(`${timestamp}: [INFO] [AI Document Analysis] ✅ Análisis de imagen completado`);
       } catch (imgError: any) {
-        logger.error(`[AI Document Analysis] Error analizando imagen:`, imgError.message);
+        console.error(`${timestamp}: [ERROR] [AI Document Analysis] Error analizando imagen: ${imgError.message}`);
         throw imgError;
       }
     } else if (isPDF) {
       // PDFs: Verificar si tiene texto real o es escaneado
+      console.error(`${timestamp}: [INFO] [AI Document Analysis] 📄 PDF detectado - Extrayendo texto...`);
       const extractedText = await extractTextFromFile(file);
       const hasRealText = extractedText && 
                          extractedText.includes('Texto extraído:') &&
                          isRealTextContent(extractedText);
       
-      logger.info(`[AI Document Analysis] 📄 PDF detectado - hasRealText=${hasRealText}`);
+      console.error(`${timestamp}: [INFO] [AI Document Analysis] 📄 PDF hasRealText=${hasRealText}`);
       
       if (hasRealText) {
         // ✅ PDF con texto real: usar análisis de texto
+        console.error(`${timestamp}: [INFO] [AI Document Analysis] 📝 Analizando texto del PDF...`);
         analysis = await analyzeDocument({
           text: extractedText,
           filename: file.name,
           mimeType: file.type,
           companyInfo,
         });
+        console.error(`${timestamp}: [INFO] [AI Document Analysis] ✅ Análisis de texto completado`);
       } else {
         // 🔄 PDF escaneado: Convertir a imagen y usar Claude Vision
-        logger.info('[AI Document Analysis] 📄 PDF escaneado - Convirtiendo a imagen...');
+        console.error(`${timestamp}: [INFO] [AI Document Analysis] 🔄 PDF escaneado - Convirtiendo a imagen con pdftoppm...`);
         
         try {
           // Convertir PDF a imagen PNG
           const { base64: imageBase64, mimeType: imageMimeType } = await convertPDFToImage(file);
           
-          logger.info('[AI Document Analysis] ✅ PDF convertido a imagen - Analizando con Claude Vision');
+          console.error(`${timestamp}: [INFO] [AI Document Analysis] ✅ PDF convertido - Enviando a Claude Vision...`);
           
           // Analizar la imagen con Claude Vision
           analysis = await analyzeImageDocument(
@@ -504,8 +517,9 @@ export async function POST(request: NextRequest) {
             file.name.replace('.pdf', '.png'),
             companyInfo
           );
+          console.error(`${timestamp}: [INFO] [AI Document Analysis] ✅ Análisis de PDF completado`);
         } catch (convError: any) {
-          logger.error('[AI Document Analysis] Error convirtiendo PDF:', convError.message);
+          console.error(`${timestamp}: [ERROR] [AI Document Analysis] Error convirtiendo PDF: ${convError.message}`);
           
           // Fallback: mensaje de error amigable
           return NextResponse.json({
