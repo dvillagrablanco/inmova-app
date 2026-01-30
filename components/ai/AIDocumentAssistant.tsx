@@ -223,73 +223,17 @@ export function AIDocumentAssistant({
       formData.append('file', file);
       formData.append('context', context);
 
-      // Timeout extendido para análisis de documentos (puede tardar hasta 60s)
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 segundos
-
+      // Fetch simple (sin AbortController que causa problemas en iOS Safari)
       const response = await fetch('/api/ai/document-analysis', {
         method: 'POST',
         body: formData,
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      // Log detallado de la respuesta para debugging
-      const cfRay = response.headers.get('cf-ray');
-      const server = response.headers.get('server');
-      console.log('[AIDocumentAssistant] Response:', {
-        status: response.status,
-        ok: response.ok,
-        statusText: response.statusText,
-        cfRay: cfRay,
-        server: server,
-        url: response.url,
-        type: response.type,
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('[AIDocumentAssistant] Error response:', {
-          status: response.status,
-          text: errorText,
-          cfRay: cfRay,
-        });
-
-        // Enviar error detallado al servidor
-        try {
-          fetch('/api/ai/document-analysis/log-error', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              error: `HTTP ${response.status}: ${response.statusText}`,
-              responseText: errorText.substring(0, 500),
-              cfRay: cfRay,
-              server: server,
-              filename: file.name,
-              timestamp: new Date().toISOString(),
-            }),
-          }).catch(() => {});
-        } catch {}
-
-        throw new Error(`Error al analizar el documento: ${response.status}`);
+        throw new Error('Error al analizar el documento');
       }
 
-      const analysisText = await response.text();
-      console.log('[AIDocumentAssistant] Response text length:', analysisText.length);
-
-      let analysis: DocumentAnalysis;
-      try {
-        analysis = JSON.parse(analysisText);
-        console.log(
-          '[AIDocumentAssistant] Parsed analysis:',
-          analysis.classification?.category,
-          analysis.summary?.substring(0, 50)
-        );
-      } catch (parseError) {
-        console.error('[AIDocumentAssistant] JSON parse error:', parseError);
-        throw new Error('Error al procesar la respuesta del servidor');
-      }
+      const analysis: DocumentAnalysis = await response.json();
 
       // Actualizar progreso
       setUploadedFiles((prev) =>
@@ -313,33 +257,12 @@ export function AIDocumentAssistant({
     } catch (error: any) {
       console.error('Error procesando documento:', error);
 
-      // Manejar timeout/abort específicamente
-      let errorMessage = error.message;
-      if (error.name === 'AbortError') {
-        errorMessage = 'El análisis tardó demasiado. Por favor, intenta de nuevo.';
-      }
-
-      // Enviar error al servidor para logging
-      try {
-        fetch('/api/ai/document-analysis/log-error', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            error: errorMessage,
-            originalError: error.message,
-            stack: error.stack,
-            filename: file.name,
-            timestamp: new Date().toISOString(),
-          }),
-        }).catch(() => {});
-      } catch {}
-
       setUploadedFiles((prev) =>
-        prev.map((f) => (f.file === file ? { ...f, status: 'error', error: errorMessage } : f))
+        prev.map((f) => (f.file === file ? { ...f, status: 'error', error: error.message } : f))
       );
 
       toast.error('Error al analizar documento', {
-        description: errorMessage,
+        description: error.message,
       });
     }
   };
