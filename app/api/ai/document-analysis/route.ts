@@ -568,12 +568,16 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    logger.info('[AI Document Analysis] Análisis completado', {
+    console.error(`${timestamp}: [INFO] [AI Document Analysis] ✅ ANÁLISIS COMPLETADO:`, JSON.stringify({
       filename: file.name,
       category: analysis.classification.category,
       confidence: analysis.classification.confidence,
-      processingTimeMs: analysis.processingMetadata.processingTimeMs,
-    });
+      summary: analysis.summary?.substring(0, 100),
+      fieldsCount: analysis.extractedFields?.length || 0,
+    }));
+
+    // Log del resultado completo para debug
+    console.error(`${timestamp}: [DEBUG] [AI Document Analysis] 📤 ENVIANDO RESPUESTA AL CLIENTE`);
 
     return NextResponse.json(analysis);
   } catch (error: any) {
