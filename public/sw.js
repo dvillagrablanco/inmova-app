@@ -8,7 +8,7 @@
  * - Precaching de assets críticos
  */
 
-const CACHE_VERSION = 'v3.0.1-20260108b';
+const CACHE_VERSION = 'v3.1.0-20260130';
 const CACHE_NAME = `inmova-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `inmova-runtime-${CACHE_VERSION}`;
 const IMAGES_CACHE = `inmova-images-${CACHE_VERSION}`;
@@ -93,6 +93,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // ============================================================================
+  // CRITICAL: Skip Service Worker completely for AI/Document processing APIs
+  // These requests can take 10-30+ seconds and MUST NOT be intercepted
+  // ============================================================================
+  if (url.pathname.startsWith('/api/ai/') || 
+      url.pathname.includes('document-analysis') ||
+      url.pathname.includes('vision') ||
+      url.pathname.includes('claude')) {
+    // Let the browser handle these requests directly without SW intervention
+    return;
+  }
+
+  // Skip POST requests to API (they don't benefit from caching)
+  if (request.method === 'POST' && url.pathname.startsWith('/api/')) {
+    return;
+  }
+
   // Determine strategy based on request type
   let strategy = CACHE_STRATEGIES.NETWORK_FIRST;
 
@@ -102,7 +119,7 @@ self.addEventListener('fetch', (event) => {
     // Scripts y styles: network first para asegurar actualizaciones
     strategy = CACHE_STRATEGIES.NETWORK_FIRST;
   } else if (url.pathname.startsWith('/api/')) {
-    // API requests: network first with timeout
+    // API GET requests: network first with timeout
     strategy = CACHE_STRATEGIES.NETWORK_FIRST;
   } else if (url.pathname.startsWith('/_next/static/')) {
     // Next.js static assets: network first para asegurar actualizaciones
@@ -154,7 +171,8 @@ async function cacheFirst(request) {
 }
 
 // Network First: Try network, fallback to cache
-async function networkFirst(request, timeout = 3000) {
+// Timeout increased to 15s for API requests (default was 3s which caused issues)
+async function networkFirst(request, timeout = 15000) {
   try {
     const networkPromise = fetch(request);
     const timeoutPromise = new Promise((_, reject) =>
@@ -163,7 +181,8 @@ async function networkFirst(request, timeout = 3000) {
 
     const response = await Promise.race([networkPromise, timeoutPromise]);
 
-    if (response.ok) {
+    // Only cache GET requests with successful responses
+    if (response.ok && request.method === 'GET') {
       const cache = await caches.open(RUNTIME_CACHE);
       cache.put(request, response.clone());
     }

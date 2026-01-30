@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -37,6 +37,7 @@ import {
   Info,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { DataReviewDialog } from './DataReviewDialog';
 
 // Tipos para el análisis de documentos
 interface ExtractedField {
@@ -169,6 +170,56 @@ const categoryNames: Record<string, string> = {
   otro: 'Otro documento',
 };
 
+// Configuración de fetch con timeout y reintentos
+const FETCH_CONFIG = {
+  timeout: 90000, // 90 segundos de timeout (el procesamiento de IA puede tardar)
+  maxRetries: 2, // Máximo 2 reintentos
+  retryDelay: 2000, // 2 segundos entre reintentos
+};
+
+// Función auxiliar para fetch con timeout y reintentos
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  config = FETCH_CONFIG
+): Promise<Response> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), config.timeout);
+
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      // Si es error 5xx, reintentar
+      if (response.status >= 500 && attempt < config.maxRetries) {
+        console.warn(`[AIDocumentAssistant] Intento ${attempt + 1} falló con ${response.status}, reintentando...`);
+        await new Promise((resolve) => setTimeout(resolve, config.retryDelay));
+        continue;
+      }
+
+      return response;
+    } catch (error: any) {
+      lastError = error;
+      
+      // Si es abort por timeout o error de red, reintentar
+      if (attempt < config.maxRetries) {
+        console.warn(`[AIDocumentAssistant] Intento ${attempt + 1} error: ${error.message}, reintentando...`);
+        await new Promise((resolve) => setTimeout(resolve, config.retryDelay));
+        continue;
+      }
+    }
+  }
+
+  throw lastError || new Error('Error de conexión después de varios intentos');
+}
+
 export function AIDocumentAssistant({
   context,
   onAnalysisComplete,
@@ -181,6 +232,13 @@ export function AIDocumentAssistant({
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  
+  // Estado para el diálogo de revisión de datos
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [pendingReviewFile, setPendingReviewFile] = useState<UploadedFile | null>(null);
+  
+  // Referencia para cancelar procesamiento
+  const processingRef = useRef<Map<string, boolean>>(new Map());
 
   // Manejar selección de archivos
   const handleFileSelect = useCallback((files: FileList | null) => {
@@ -198,72 +256,161 @@ export function AIDocumentAssistant({
     newFiles.forEach((uploadedFile) => {
       processFile(uploadedFile);
     });
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [context]);
 
-  // Procesar un archivo
+  // Procesar un archivo con timeout largo y reintentos
   const processFile = async (uploadedFile: UploadedFile) => {
     const { file } = uploadedFile;
+    const fileKey = `${file.name}-${file.size}`;
+
+    // Marcar como en procesamiento
+    processingRef.current.set(fileKey, true);
 
     // Actualizar estado a "uploading"
     setUploadedFiles((prev) =>
-      prev.map((f) => (f.file === file ? { ...f, status: 'uploading', progress: 20 } : f))
+      prev.map((f) => (f.file === file ? { ...f, status: 'uploading', progress: 10 } : f))
     );
 
     try {
       // Simular lectura del archivo
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // Verificar si fue cancelado
+      if (!processingRef.current.get(fileKey)) {
+        return;
+      }
 
       // Actualizar a "analyzing"
       setUploadedFiles((prev) =>
-        prev.map((f) => (f.file === file ? { ...f, status: 'analyzing', progress: 50 } : f))
+        prev.map((f) => (f.file === file ? { ...f, status: 'analyzing', progress: 30 } : f))
       );
 
-      // Llamar a la API de análisis
+      // Crear FormData
       const formData = new FormData();
       formData.append('file', file);
       formData.append('context', context);
 
-      // Fetch simple (sin AbortController que causa problemas en iOS Safari)
-      const response = await fetch('/api/ai/document-analysis', {
-        method: 'POST',
-        body: formData,
+      // Mostrar toast de progreso
+      const toastId = toast.loading('Analizando documento con IA...', {
+        description: `Procesando: ${file.name}`,
       });
 
-      if (!response.ok) {
-        throw new Error('Error al analizar el documento');
-      }
+      // Actualizar progreso durante el análisis
+      const progressInterval = setInterval(() => {
+        setUploadedFiles((prev) =>
+          prev.map((f) => {
+            if (f.file === file && f.status === 'analyzing' && f.progress < 85) {
+              return { ...f, progress: Math.min(f.progress + 5, 85) };
+            }
+            return f;
+          })
+        );
+      }, 1000);
 
-      const analysis: DocumentAnalysis = await response.json();
+      try {
+        // Llamar a la API con timeout largo y reintentos
+        const response = await fetchWithRetry('/api/ai/document-analysis', {
+          method: 'POST',
+          body: formData,
+        });
 
-      // Actualizar progreso
-      setUploadedFiles((prev) =>
-        prev.map((f) =>
-          f.file === file ? { ...f, status: 'completed', progress: 100, analysis } : f
-        )
-      );
+        clearInterval(progressInterval);
 
-      // Notificar éxito
-      toast.success(
-        `Documento analizado: ${categoryNames[analysis.classification.category] || 'Documento'}`,
-        {
-          description: analysis.summary.substring(0, 100) + '...',
+        // Verificar si fue cancelado
+        if (!processingRef.current.get(fileKey)) {
+          toast.dismiss(toastId);
+          return;
         }
-      );
 
-      // Callback
-      if (onAnalysisComplete) {
-        onAnalysisComplete(analysis, file);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+        }
+
+        const analysis: DocumentAnalysis = await response.json();
+
+        // Verificar que la respuesta sea válida
+        if (!analysis || !analysis.extractedFields) {
+          throw new Error('Respuesta de análisis inválida');
+        }
+
+        // Actualizar archivo con éxito
+        setUploadedFiles((prev) =>
+          prev.map((f) =>
+            f.file === file ? { ...f, status: 'completed', progress: 100, analysis } : f
+          )
+        );
+
+        // Cerrar toast de carga
+        toast.dismiss(toastId);
+
+        // Notificar éxito
+        const categoryName = categoryNames[analysis.classification.category] || 'Documento';
+        const fieldsCount = analysis.extractedFields.length;
+        
+        toast.success(`${categoryName} analizado correctamente`, {
+          description: `Se extrajeron ${fieldsCount} campos. Haz clic en "Revisar datos" para aplicarlos.`,
+          duration: 5000,
+        });
+
+        // Callback
+        if (onAnalysisComplete) {
+          onAnalysisComplete(analysis, file);
+        }
+
+        // Seleccionar automáticamente el archivo recién procesado
+        const updatedFile = { ...uploadedFile, status: 'completed' as const, progress: 100, analysis };
+        setSelectedFile(updatedFile);
+
+      } catch (fetchError: any) {
+        clearInterval(progressInterval);
+        toast.dismiss(toastId);
+        throw fetchError;
       }
+
     } catch (error: any) {
-      console.error('Error procesando documento:', error);
+      console.error('[AIDocumentAssistant] Error procesando documento:', error);
+
+      // Mensaje de error más descriptivo
+      let errorMessage = 'Error al analizar el documento';
+      if (error.name === 'AbortError') {
+        errorMessage = 'El análisis tardó demasiado. Intenta con un archivo más pequeño.';
+      } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        errorMessage = 'Error de conexión. Verifica tu internet e intenta de nuevo.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
 
       setUploadedFiles((prev) =>
-        prev.map((f) => (f.file === file ? { ...f, status: 'error', error: error.message } : f))
+        prev.map((f) => (f.file === file ? { ...f, status: 'error', error: errorMessage, progress: 0 } : f))
       );
 
       toast.error('Error al analizar documento', {
-        description: error.message,
+        description: errorMessage,
+        action: {
+          label: 'Reintentar',
+          onClick: () => retryFile(file),
+        },
       });
+    } finally {
+      processingRef.current.delete(fileKey);
+    }
+  };
+
+  // Reintentar análisis de un archivo
+  const retryFile = (file: File) => {
+    // Resetear estado del archivo
+    setUploadedFiles((prev) =>
+      prev.map((f) =>
+        f.file === file ? { ...f, status: 'pending', progress: 0, error: undefined, analysis: undefined } : f
+      )
+    );
+
+    // Buscar el UploadedFile correspondiente
+    const uploadedFile = uploadedFiles.find((f) => f.file === file);
+    if (uploadedFile) {
+      processFile({ ...uploadedFile, status: 'pending', progress: 0 });
     }
   };
 
@@ -295,8 +442,34 @@ export function AIDocumentAssistant({
     }
   };
 
-  // Aplicar datos extraídos
-  const applyExtractedData = (analysis: DocumentAnalysis) => {
+  // Abrir diálogo de revisión de datos
+  const openDataReview = (uploadedFile: UploadedFile) => {
+    if (!uploadedFile.analysis) {
+      toast.error('No hay datos para revisar');
+      return;
+    }
+
+    if (!onApplyData) {
+      toast.info('La función de aplicar datos no está configurada en este contexto');
+      return;
+    }
+
+    setPendingReviewFile(uploadedFile);
+    setReviewDialogOpen(true);
+  };
+
+  // Aplicar datos confirmados del diálogo de revisión
+  const handleConfirmData = (selectedFields: Record<string, string>) => {
+    if (!onApplyData) {
+      return;
+    }
+
+    onApplyData(selectedFields);
+    setPendingReviewFile(null);
+  };
+
+  // Aplicar datos extraídos directamente (sin revisión - para casos especiales)
+  const applyExtractedDataDirect = (analysis: DocumentAnalysis) => {
     if (!onApplyData) {
       toast.info('Función de aplicar datos no configurada');
       return;
@@ -676,17 +849,19 @@ export function AIDocumentAssistant({
                   {onApplyData && selectedFile.analysis.extractedFields.length > 0 && (
                     <Button
                       size="sm"
-                      className="flex-1 bg-gradient-to-r from-violet-500 to-purple-500"
-                      onClick={() => applyExtractedData(selectedFile.analysis!)}
+                      className="flex-1 bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
+                      onClick={() => openDataReview(selectedFile)}
                     >
-                      <Zap className="h-4 w-4 mr-1" />
-                      Aplicar datos
+                      <CheckCircle2 className="h-4 w-4 mr-1" />
+                      Revisar y aplicar datos
                     </Button>
                   )}
-                  <Button size="sm" variant="outline" className="flex-1">
-                    <Eye className="h-4 w-4 mr-1" />
-                    Ver detalle
-                  </Button>
+                  {!onApplyData && selectedFile.analysis.extractedFields.length > 0 && (
+                    <Button size="sm" variant="outline" className="flex-1">
+                      <Eye className="h-4 w-4 mr-1" />
+                      Ver datos extraídos
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -705,6 +880,21 @@ export function AIDocumentAssistant({
           </div>
         </SheetFooter>
       </SheetContent>
+
+      {/* Diálogo de revisión de datos extraídos */}
+      {pendingReviewFile?.analysis && (
+        <DataReviewDialog
+          isOpen={reviewDialogOpen}
+          onClose={() => {
+            setReviewDialogOpen(false);
+            setPendingReviewFile(null);
+          }}
+          extractedFields={pendingReviewFile.analysis.extractedFields}
+          documentName={pendingReviewFile.file.name}
+          documentType={categoryNames[pendingReviewFile.analysis.classification.category] || 'Documento'}
+          onConfirm={handleConfirmData}
+        />
+      )}
     </Sheet>
   );
 }
