@@ -986,19 +986,6 @@ export async function POST(request: NextRequest) {
     
     logger.error('[AI Document Analysis] Error:', errorDetails);
     
-    // Registrar el error en el sistema de tracking
-    try {
-      const { trackError } = await import('@/lib/error-tracker');
-      await trackError(error, {
-        source: 'api',
-        route: '/api/ai/document-analysis',
-        severity: 'high',
-        metadata: { errorDetails },
-      });
-    } catch (e) {
-      // Ignorar errores de tracking
-    }
-    
     // Retornar análisis básico como fallback con mensaje de error claro
     return NextResponse.json({
       classification: {
