@@ -367,25 +367,14 @@ async function analyzeDocumentWithVision(
     },
   };
   
-  logger.info('[Vision Analysis] Enviando a Claude Vision', {
-    filename: file.name,
-    isPDF,
-    mediaType,
-  });
+  console.error('[Vision Analysis] 📤 Enviando a Claude Vision:', file.name, 'isPDF:', isPDF);
   
   const prompt = getVisionPromptForContext(context, companyInfo);
-
-  logger.info('[Vision Analysis] Enviando a Claude para análisis', {
-    filename: file.name,
-    fileType: file.type,
-    fileSize: file.size,
-    context,
-    isPDF,
-  });
 
   const startTime = Date.now();
   
   // Usar claude-3-haiku para imágenes (rápido y confiable)
+  console.error('[Vision Analysis] 🤖 Llamando a Claude API...');
   const response = await client.messages.create({
     model: 'claude-3-haiku-20240307',
     max_tokens: 4096,
@@ -404,12 +393,16 @@ async function analyzeDocumentWithVision(
   });
 
   const processingTimeMs = Date.now() - startTime;
+  console.error('[Vision Analysis] ✅ Claude respondió en', processingTimeMs, 'ms');
+  
   const content = response.content[0];
   
   if (content.type === 'text') {
+    console.error('[Vision Analysis] 📝 Procesando respuesta de texto...');
     // Extraer JSON de la respuesta
     const jsonMatch = content.text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
+      console.error('[Vision Analysis] ✅ JSON encontrado en respuesta');
       const result = JSON.parse(jsonMatch[0]);
       const category = result.classification?.category || 'otro';
       const targetEntity = result.suggestedEntity || getTargetEntityFromCategory(category);
