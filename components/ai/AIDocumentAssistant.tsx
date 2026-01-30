@@ -15,19 +15,8 @@ import {
   SheetTrigger,
   SheetFooter,
 } from '@/components/ui/sheet';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Brain,
   Upload,
@@ -102,7 +91,15 @@ interface UploadedFile {
 
 interface AIDocumentAssistantProps {
   /** Contexto donde se usa el asistente (contratos, inquilinos, etc.) */
-  context: 'contratos' | 'inquilinos' | 'seguros' | 'propiedades' | 'documentos' | 'facturas' | 'proveedores' | 'general';
+  context:
+    | 'contratos'
+    | 'inquilinos'
+    | 'seguros'
+    | 'propiedades'
+    | 'documentos'
+    | 'facturas'
+    | 'proveedores'
+    | 'general';
   /** Callback cuando se completa el análisis de un documento */
   onAnalysisComplete?: (analysis: DocumentAnalysis, file: File) => void;
   /** Callback para aplicar los datos extraídos a un formulario */
@@ -120,8 +117,33 @@ const contextCategories: Record<string, string[]> = {
   contratos: ['contrato_alquiler', 'inventario', 'fianza', 'dni_nie'],
   inquilinos: ['dni_nie', 'contrato_alquiler', 'recibo_pago', 'fianza'],
   seguros: ['seguro', 'factura', 'recibo_pago'],
-  propiedades: ['escritura_propiedad', 'nota_simple', 'certificado_energetico', 'ite_iee', 'licencia', 'plano', 'foto_inmueble'],
-  documentos: ['escritura_propiedad', 'contrato_alquiler', 'dni_nie', 'factura', 'seguro', 'certificado_energetico', 'acta_comunidad', 'recibo_pago', 'nota_simple', 'ite_iee', 'licencia', 'fianza', 'inventario', 'foto_inmueble', 'plano', 'otro'],
+  propiedades: [
+    'escritura_propiedad',
+    'nota_simple',
+    'certificado_energetico',
+    'ite_iee',
+    'licencia',
+    'plano',
+    'foto_inmueble',
+  ],
+  documentos: [
+    'escritura_propiedad',
+    'contrato_alquiler',
+    'dni_nie',
+    'factura',
+    'seguro',
+    'certificado_energetico',
+    'acta_comunidad',
+    'recibo_pago',
+    'nota_simple',
+    'ite_iee',
+    'licencia',
+    'fianza',
+    'inventario',
+    'foto_inmueble',
+    'plano',
+    'otro',
+  ],
   facturas: ['factura', 'recibo_pago'],
   proveedores: ['factura', 'contrato', 'licencia'],
   general: ['otro'],
@@ -164,16 +186,16 @@ export function AIDocumentAssistant({
   const handleFileSelect = useCallback((files: FileList | null) => {
     if (!files) return;
 
-    const newFiles: UploadedFile[] = Array.from(files).map(file => ({
+    const newFiles: UploadedFile[] = Array.from(files).map((file) => ({
       file,
       status: 'pending',
       progress: 0,
     }));
 
-    setUploadedFiles(prev => [...prev, ...newFiles]);
+    setUploadedFiles((prev) => [...prev, ...newFiles]);
 
     // Procesar cada archivo
-    newFiles.forEach(uploadedFile => {
+    newFiles.forEach((uploadedFile) => {
       processFile(uploadedFile);
     });
   }, []);
@@ -183,21 +205,17 @@ export function AIDocumentAssistant({
     const { file } = uploadedFile;
 
     // Actualizar estado a "uploading"
-    setUploadedFiles(prev =>
-      prev.map(f =>
-        f.file === file ? { ...f, status: 'uploading', progress: 20 } : f
-      )
+    setUploadedFiles((prev) =>
+      prev.map((f) => (f.file === file ? { ...f, status: 'uploading', progress: 20 } : f))
     );
 
     try {
       // Simular lectura del archivo
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Actualizar a "analyzing"
-      setUploadedFiles(prev =>
-        prev.map(f =>
-          f.file === file ? { ...f, status: 'analyzing', progress: 50 } : f
-        )
+      setUploadedFiles((prev) =>
+        prev.map((f) => (f.file === file ? { ...f, status: 'analyzing', progress: 50 } : f))
       );
 
       // Llamar a la API de análisis
@@ -208,49 +226,85 @@ export function AIDocumentAssistant({
       // Timeout extendido para análisis de documentos (puede tardar hasta 60s)
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 segundos
-      
+
       const response = await fetch('/api/ai/document-analysis', {
         method: 'POST',
         body: formData,
         signal: controller.signal,
       });
-      
+
       clearTimeout(timeoutId);
 
-      console.log('[AIDocumentAssistant] Response status:', response.status);
-      console.log('[AIDocumentAssistant] Response ok:', response.ok);
+      // Log detallado de la respuesta para debugging
+      const cfRay = response.headers.get('cf-ray');
+      const server = response.headers.get('server');
+      console.log('[AIDocumentAssistant] Response:', {
+        status: response.status,
+        ok: response.ok,
+        statusText: response.statusText,
+        cfRay: cfRay,
+        server: server,
+        url: response.url,
+        type: response.type,
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('[AIDocumentAssistant] Error response:', errorText);
+        console.error('[AIDocumentAssistant] Error response:', {
+          status: response.status,
+          text: errorText,
+          cfRay: cfRay,
+        });
+
+        // Enviar error detallado al servidor
+        try {
+          fetch('/api/ai/document-analysis/log-error', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              error: `HTTP ${response.status}: ${response.statusText}`,
+              responseText: errorText.substring(0, 500),
+              cfRay: cfRay,
+              server: server,
+              filename: file.name,
+              timestamp: new Date().toISOString(),
+            }),
+          }).catch(() => {});
+        } catch {}
+
         throw new Error(`Error al analizar el documento: ${response.status}`);
       }
 
       const analysisText = await response.text();
       console.log('[AIDocumentAssistant] Response text length:', analysisText.length);
-      
+
       let analysis: DocumentAnalysis;
       try {
         analysis = JSON.parse(analysisText);
-        console.log('[AIDocumentAssistant] Parsed analysis:', analysis.classification?.category, analysis.summary?.substring(0, 50));
+        console.log(
+          '[AIDocumentAssistant] Parsed analysis:',
+          analysis.classification?.category,
+          analysis.summary?.substring(0, 50)
+        );
       } catch (parseError) {
         console.error('[AIDocumentAssistant] JSON parse error:', parseError);
         throw new Error('Error al procesar la respuesta del servidor');
       }
 
       // Actualizar progreso
-      setUploadedFiles(prev =>
-        prev.map(f =>
-          f.file === file
-            ? { ...f, status: 'completed', progress: 100, analysis }
-            : f
+      setUploadedFiles((prev) =>
+        prev.map((f) =>
+          f.file === file ? { ...f, status: 'completed', progress: 100, analysis } : f
         )
       );
 
       // Notificar éxito
-      toast.success(`Documento analizado: ${categoryNames[analysis.classification.category] || 'Documento'}`, {
-        description: analysis.summary.substring(0, 100) + '...',
-      });
+      toast.success(
+        `Documento analizado: ${categoryNames[analysis.classification.category] || 'Documento'}`,
+        {
+          description: analysis.summary.substring(0, 100) + '...',
+        }
+      );
 
       // Callback
       if (onAnalysisComplete) {
@@ -280,12 +334,8 @@ export function AIDocumentAssistant({
         }).catch(() => {});
       } catch {}
 
-      setUploadedFiles(prev =>
-        prev.map(f =>
-          f.file === file
-            ? { ...f, status: 'error', error: errorMessage }
-            : f
-        )
+      setUploadedFiles((prev) =>
+        prev.map((f) => (f.file === file ? { ...f, status: 'error', error: errorMessage } : f))
       );
 
       toast.error('Error al analizar documento', {
@@ -305,15 +355,18 @@ export function AIDocumentAssistant({
     setIsDragging(false);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    handleFileSelect(e.dataTransfer.files);
-  }, [handleFileSelect]);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      handleFileSelect(e.dataTransfer.files);
+    },
+    [handleFileSelect]
+  );
 
   // Eliminar archivo
   const removeFile = (file: File) => {
-    setUploadedFiles(prev => prev.filter(f => f.file !== file));
+    setUploadedFiles((prev) => prev.filter((f) => f.file !== file));
     if (selectedFile?.file === file) {
       setSelectedFile(null);
     }
@@ -328,7 +381,7 @@ export function AIDocumentAssistant({
 
     // Convertir campos extraídos a objeto
     const data: Record<string, any> = {};
-    analysis.extractedFields.forEach(field => {
+    analysis.extractedFields.forEach((field) => {
       if (field.targetField) {
         data[field.targetField] = field.fieldValue;
       } else {
@@ -343,9 +396,10 @@ export function AIDocumentAssistant({
   // Renderizar estadísticas de archivos
   const stats = {
     total: uploadedFiles.length,
-    completed: uploadedFiles.filter(f => f.status === 'completed').length,
-    analyzing: uploadedFiles.filter(f => f.status === 'analyzing' || f.status === 'uploading').length,
-    errors: uploadedFiles.filter(f => f.status === 'error').length,
+    completed: uploadedFiles.filter((f) => f.status === 'completed').length,
+    analyzing: uploadedFiles.filter((f) => f.status === 'analyzing' || f.status === 'uploading')
+      .length,
+    errors: uploadedFiles.filter((f) => f.status === 'error').length,
   };
 
   // Posiciones para el botón flotante
@@ -412,9 +466,7 @@ export function AIDocumentAssistant({
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        {renderTrigger()}
-      </SheetTrigger>
+      <SheetTrigger asChild>{renderTrigger()}</SheetTrigger>
 
       <SheetContent className="w-full sm:max-w-xl bg-white dark:bg-gray-950 border-l shadow-xl">
         <SheetHeader className="space-y-3">
@@ -424,14 +476,14 @@ export function AIDocumentAssistant({
             </div>
             <span className="text-lg">Asistente IA</span>
           </SheetTitle>
-          
+
           {/* Badge de Claude - Separado para mejor visualización móvil */}
           <div className="flex flex-wrap items-center gap-2">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Badge 
-                    variant="outline" 
+                  <Badge
+                    variant="outline"
                     className="text-xs cursor-pointer hover:bg-violet-50 bg-white dark:bg-gray-900"
                     onClick={() => window.open('/admin/integraciones-plataforma/ia', '_blank')}
                   >
@@ -445,9 +497,9 @@ export function AIDocumentAssistant({
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               className="h-6 text-xs bg-white dark:bg-gray-900"
               onClick={() => window.open('/admin/ai-agents', '_blank')}
             >
@@ -455,7 +507,7 @@ export function AIDocumentAssistant({
               Ver Agentes
             </Button>
           </div>
-          
+
           <SheetDescription className="text-sm">
             Sube documentos para clasificación automática y extracción de datos con IA
           </SheetDescription>
@@ -474,9 +526,7 @@ export function AIDocumentAssistant({
             onDrop={handleDrop}
           >
             <Upload className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
-            <p className="text-sm font-medium mb-1">
-              Arrastra documentos aquí
-            </p>
+            <p className="text-sm font-medium mb-1">Arrastra documentos aquí</p>
             <p className="text-xs text-muted-foreground mb-3">
               PDF, imágenes (JPG, PNG) o documentos de texto
             </p>
@@ -505,7 +555,7 @@ export function AIDocumentAssistant({
               Documentos recomendados para {context}:
             </p>
             <div className="flex flex-wrap gap-1">
-              {contextCategories[context]?.slice(0, 6).map(cat => (
+              {contextCategories[context]?.slice(0, 6).map((cat) => (
                 <Badge key={cat} variant="secondary" className="text-xs">
                   {categoryNames[cat]}
                 </Badge>
@@ -523,11 +573,7 @@ export function AIDocumentAssistant({
                   Documentos ({stats.completed}/{stats.total} analizados)
                 </h4>
                 {stats.total > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setUploadedFiles([])}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => setUploadedFiles([])}>
                     Limpiar todo
                   </Button>
                 )}
@@ -548,13 +594,15 @@ export function AIDocumentAssistant({
                       <CardContent className="p-3">
                         <div className="flex items-center gap-3">
                           {/* Icono de estado */}
-                          <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                            uploadedFile.status === 'completed'
-                              ? 'bg-green-100 dark:bg-green-900/30'
-                              : uploadedFile.status === 'error'
-                              ? 'bg-red-100 dark:bg-red-900/30'
-                              : 'bg-violet-100 dark:bg-violet-900/30'
-                          }`}>
+                          <div
+                            className={`h-10 w-10 rounded-lg flex items-center justify-center ${
+                              uploadedFile.status === 'completed'
+                                ? 'bg-green-100 dark:bg-green-900/30'
+                                : uploadedFile.status === 'error'
+                                  ? 'bg-red-100 dark:bg-red-900/30'
+                                  : 'bg-violet-100 dark:bg-violet-900/30'
+                            }`}
+                          >
                             {uploadedFile.status === 'completed' ? (
                               <CheckCircle2 className="h-5 w-5 text-green-600" />
                             ) : uploadedFile.status === 'error' ? (
@@ -568,24 +616,19 @@ export function AIDocumentAssistant({
 
                           {/* Info del archivo */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">
-                              {uploadedFile.file.name}
-                            </p>
+                            <p className="text-sm font-medium truncate">{uploadedFile.file.name}</p>
                             <div className="flex items-center gap-2">
                               {uploadedFile.status === 'completed' && uploadedFile.analysis && (
                                 <Badge variant="outline" className="text-xs">
-                                  {categoryNames[uploadedFile.analysis.classification.category] || 'Documento'}
+                                  {categoryNames[uploadedFile.analysis.classification.category] ||
+                                    'Documento'}
                                 </Badge>
                               )}
                               {uploadedFile.status === 'analyzing' && (
-                                <span className="text-xs text-muted-foreground">
-                                  Analizando...
-                                </span>
+                                <span className="text-xs text-muted-foreground">Analizando...</span>
                               )}
                               {uploadedFile.status === 'error' && (
-                                <span className="text-xs text-red-600">
-                                  {uploadedFile.error}
-                                </span>
+                                <span className="text-xs text-red-600">{uploadedFile.error}</span>
                               )}
                             </div>
                           </div>
@@ -597,8 +640,8 @@ export function AIDocumentAssistant({
                                 uploadedFile.analysis.classification.confidence >= 0.9
                                   ? 'bg-green-500'
                                   : uploadedFile.analysis.classification.confidence >= 0.7
-                                  ? 'bg-amber-500'
-                                  : 'bg-red-500'
+                                    ? 'bg-amber-500'
+                                    : 'bg-red-500'
                               }
                             >
                               {Math.round(uploadedFile.analysis.classification.confidence * 100)}%
@@ -620,7 +663,8 @@ export function AIDocumentAssistant({
                         </div>
 
                         {/* Barra de progreso */}
-                        {(uploadedFile.status === 'uploading' || uploadedFile.status === 'analyzing') && (
+                        {(uploadedFile.status === 'uploading' ||
+                          uploadedFile.status === 'analyzing') && (
                           <Progress value={uploadedFile.progress} className="h-1 mt-2" />
                         )}
                       </CardContent>
@@ -647,9 +691,7 @@ export function AIDocumentAssistant({
                     <Tag className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">Tipo:</span>
                   </div>
-                  <Badge>
-                    {categoryNames[selectedFile.analysis.classification.category]}
-                  </Badge>
+                  <Badge>{categoryNames[selectedFile.analysis.classification.category]}</Badge>
                 </div>
 
                 {/* Validación de propiedad */}
@@ -658,8 +700,14 @@ export function AIDocumentAssistant({
                     <Shield className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">Propiedad:</span>
                   </div>
-                  <Badge variant={selectedFile.analysis.ownershipValidation.isOwned ? 'default' : 'secondary'}>
-                    {selectedFile.analysis.ownershipValidation.isOwned ? 'De la empresa' : 'Terceros'}
+                  <Badge
+                    variant={
+                      selectedFile.analysis.ownershipValidation.isOwned ? 'default' : 'secondary'
+                    }
+                  >
+                    {selectedFile.analysis.ownershipValidation.isOwned
+                      ? 'De la empresa'
+                      : 'Terceros'}
                   </Badge>
                 </div>
 

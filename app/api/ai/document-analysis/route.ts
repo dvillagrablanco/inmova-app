@@ -1,9 +1,9 @@
 /**
  * API Route: Análisis de Documentos con IA
- * 
+ *
  * Endpoint para analizar documentos usando el AI Document Agent Service.
  * Soporta subida de archivos y análisis de texto.
- * 
+ *
  * Usa el servicio real de Anthropic Claude cuando ANTHROPIC_API_KEY está configurado,
  * con fallback a análisis básico si no está disponible.
  */
@@ -12,8 +12,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { 
-  analyzeDocument, 
+import {
+  analyzeDocument,
   analyzeImageDocument,
   isAIConfigured,
   DocumentAnalysisInput,
@@ -30,7 +30,7 @@ function isImageFile(mimeType: string, filename?: string): boolean {
   if (imageMimeTypes.includes(mimeType?.toLowerCase())) {
     return true;
   }
-  
+
   // Fallback: verificar por extensión de archivo
   if (filename) {
     const ext = filename.toLowerCase().split('.').pop();
@@ -39,7 +39,7 @@ function isImageFile(mimeType: string, filename?: string): boolean {
       return true;
     }
   }
-  
+
   return false;
 }
 
@@ -75,38 +75,43 @@ async function convertPDFToImage(file: File): Promise<{ base64: string; mimeType
   const { writeFile, readFile, unlink, mkdir } = await import('fs/promises');
   const { join } = await import('path');
   const os = await import('os');
-  
+
   const tmpDir = os.tmpdir();
   const timestamp = Date.now();
   const pdfPath = join(tmpDir, `pdf_${timestamp}.pdf`);
   const outputPrefix = join(tmpDir, `img_${timestamp}`);
   const outputPath = `${outputPrefix}-1.png`;
-  
+
   try {
     // Guardar PDF temporalmente
     const arrayBuffer = await file.arrayBuffer();
     const pdfBuffer = Buffer.from(arrayBuffer);
     await writeFile(pdfPath, pdfBuffer);
-    
+
     logger.info('[PDF to Image] Iniciando conversión con pdftoppm...', {
       filename: file.name,
       size: file.size,
     });
-    
+
     // Convertir PDF a PNG usando pdftoppm
     await new Promise<void>((resolve, reject) => {
       const proc = spawn('pdftoppm', [
-        '-png',           // Formato PNG
-        '-f', '1',        // Primera página
-        '-l', '1',        // Hasta primera página
-        '-r', '200',      // Resolución 200 DPI
+        '-png', // Formato PNG
+        '-f',
+        '1', // Primera página
+        '-l',
+        '1', // Hasta primera página
+        '-r',
+        '200', // Resolución 200 DPI
         pdfPath,
-        outputPrefix
+        outputPrefix,
       ]);
-      
+
       let stderr = '';
-      proc.stderr.on('data', (data) => { stderr += data.toString(); });
-      
+      proc.stderr.on('data', (data) => {
+        stderr += data.toString();
+      });
+
       proc.on('close', (code) => {
         if (code === 0) {
           resolve();
@@ -114,26 +119,28 @@ async function convertPDFToImage(file: File): Promise<{ base64: string; mimeType
           reject(new Error(`pdftoppm falló (code ${code}): ${stderr}`));
         }
       });
-      
+
       proc.on('error', (err) => {
-        reject(new Error(`No se pudo ejecutar pdftoppm: ${err.message}. ¿Está instalado poppler-utils?`));
+        reject(
+          new Error(`No se pudo ejecutar pdftoppm: ${err.message}. ¿Está instalado poppler-utils?`)
+        );
       });
     });
-    
+
     // Leer imagen generada
     const imageBuffer = await readFile(outputPath);
     const base64 = imageBuffer.toString('base64');
-    
+
     logger.info('[PDF to Image] Conversión exitosa', {
       filename: file.name,
       originalSize: file.size,
       imageSize: imageBuffer.length,
     });
-    
+
     // Limpiar archivos temporales
     await unlink(pdfPath).catch(() => {});
     await unlink(outputPath).catch(() => {});
-    
+
     return {
       base64,
       mimeType: 'image/png',
@@ -142,7 +149,7 @@ async function convertPDFToImage(file: File): Promise<{ base64: string; mimeType
     // Limpiar archivos temporales en caso de error
     await unlink(pdfPath).catch(() => {});
     await unlink(outputPath).catch(() => {});
-    
+
     logger.error('[PDF to Image] Error convirtiendo PDF:', error.message);
     throw new Error(`No se pudo convertir el PDF a imagen: ${error.message}`);
   }
@@ -150,6 +157,7 @@ async function convertPDFToImage(file: File): Promise<{ base64: string; mimeType
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+export const maxDuration = 60; // Máximo 60 segundos para esta API
 
 /**
  * Extrae texto de un archivo (PDF, imagen, texto)
@@ -175,11 +183,11 @@ Fecha de carga: ${new Date().toISOString()}
   try {
     const arrayBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
-    
+
     // Buscar texto legible en el buffer (para PDFs con texto)
     let extractedText = '';
     let textChars: number[] = [];
-    
+
     for (let i = 0; i < uint8Array.length && extractedText.length < 50000; i++) {
       const byte = uint8Array[i];
       // Caracteres ASCII imprimibles y espacios
@@ -196,16 +204,17 @@ Fecha de carga: ${new Date().toISOString()}
         textChars = [];
       }
     }
-    
+
     // Validar que el texto extraído es REAL y no basura del PDF
     // Los PDFs de imagen contienen texto como "stream", "endstream", "obj", etc.
-    const pdfGarbagePatterns = /\b(stream|endstream|endobj|xref|trailer|startxref|obj\s+\d|BT|ET|Tf|Td|Tj|TJ|cm|re|f|S|Q|q)\b/gi;
+    const pdfGarbagePatterns =
+      /\b(stream|endstream|endobj|xref|trailer|startxref|obj\s+\d|BT|ET|Tf|Td|Tj|TJ|cm|re|f|S|Q|q)\b/gi;
     const cleanedText = extractedText.replace(pdfGarbagePatterns, '').trim();
-    
+
     // Contar palabras reales (3+ caracteres alfabéticos)
     const realWords = cleanedText.match(/[a-záéíóúñA-ZÁÉÍÓÚÑ]{3,}/g) || [];
     const hasRealContent = realWords.length >= 10; // Al menos 10 palabras reales
-    
+
     if (hasRealContent && cleanedText.length > 100) {
       return basicInfo + '\n\nTexto extraído:\n' + cleanedText;
     }
@@ -222,34 +231,35 @@ Fecha de carga: ${new Date().toISOString()}
  */
 function isRealTextContent(text: string): boolean {
   if (!text || text.length < 100) return false;
-  
+
   // Patrones de código interno de PDF - si hay CUALQUIERA de estos, es basura
   const pdfCodePatterns = [
-    /\d+\s+\d+\s+obj/i,           // "3 0 obj"
-    /<<\s*\/[A-Z]/i,              // "<< /Filter"
-    /\/FlateDecode/i,             // /FlateDecode
-    /\/Length\s+\d+/i,            // /Length 88
-    /endobj/i,                    // endobj
-    /endstream/i,                 // endstream
-    /\/Type\s*\/Page/i,           // /Type /Page
-    /\/Resources/i,               // /Resources
-    /\/MediaBox/i,                // /MediaBox
-    /xref/i,                      // xref
-    /trailer/i,                   // trailer
-    /startxref/i,                 // startxref
+    /\d+\s+\d+\s+obj/i, // "3 0 obj"
+    /<<\s*\/[A-Z]/i, // "<< /Filter"
+    /\/FlateDecode/i, // /FlateDecode
+    /\/Length\s+\d+/i, // /Length 88
+    /endobj/i, // endobj
+    /endstream/i, // endstream
+    /\/Type\s*\/Page/i, // /Type /Page
+    /\/Resources/i, // /Resources
+    /\/MediaBox/i, // /MediaBox
+    /xref/i, // xref
+    /trailer/i, // trailer
+    /startxref/i, // startxref
   ];
-  
+
   // Si encontramos CUALQUIER patrón de código PDF, no es texto real
   for (const pattern of pdfCodePatterns) {
     if (pattern.test(text)) {
       return false;
     }
   }
-  
+
   // Buscar palabras reales en español que indiquen contenido de documento
-  const spanishWords = /(nombre|apellido|fecha|nacimiento|direccion|numero|documento|dni|nie|pasaporte|contrato|alquiler|propiedad|inquilino|arrendador|arrendatario|importe|euros)/gi;
+  const spanishWords =
+    /(nombre|apellido|fecha|nacimiento|direccion|numero|documento|dni|nie|pasaporte|contrato|alquiler|propiedad|inquilino|arrendador|arrendatario|importe|euros)/gi;
   const spanishMatches = (text.match(spanishWords) || []).length;
-  
+
   // Necesitamos al menos 3 palabras relevantes en español
   return spanishMatches >= 3;
 }
@@ -259,10 +269,10 @@ function isRealTextContent(text: string): boolean {
  */
 function basicAnalysis(filename: string, fileType: string) {
   const lowerName = filename.toLowerCase();
-  
+
   let category = 'otro';
   let specificType = 'Documento general';
-  
+
   if (lowerName.includes('contrato') || lowerName.includes('alquiler')) {
     category = 'contrato_alquiler';
     specificType = 'Contrato de arrendamiento';
@@ -319,41 +329,40 @@ export async function POST(request: NextRequest) {
   // Log inicial usando process.stdout directamente para garantizar captura por PM2
   const requestTimestamp = new Date().toISOString();
   try {
-    process.stdout.write(`${requestTimestamp}: [INFO] [AI Document Analysis] 🚀 PETICIÓN RECIBIDA\n`);
+    process.stdout.write(
+      `${requestTimestamp}: [INFO] [AI Document Analysis] 🚀 PETICIÓN RECIBIDA\n`
+    );
   } catch (e) {
     // Fallback si process.stdout no está disponible
   }
-  
+
   try {
     // Verificar autenticación
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Obtener el archivo del FormData
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
-    const context = formData.get('context') as string || 'general';
+    const context = (formData.get('context') as string) || 'general';
 
     // LOG CRÍTICO: Ver qué archivo está llegando (usando console.error para PM2)
     const timestamp = new Date().toISOString();
-    console.error(`${timestamp}: [INFO] [AI Document Analysis] 📥 ARCHIVO RECIBIDO:`, JSON.stringify({
-      filename: file?.name,
-      type: file?.type,
-      size: file?.size,
-      context,
-      hasFile: !!file,
-    }));
+    console.error(
+      `${timestamp}: [INFO] [AI Document Analysis] 📥 ARCHIVO RECIBIDO:`,
+      JSON.stringify({
+        filename: file?.name,
+        type: file?.type,
+        size: file?.size,
+        context,
+        hasFile: !!file,
+      })
+    );
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'No se proporcionó ningún archivo' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No se proporcionó ningún archivo' }, { status: 400 });
     }
 
     // Verificar tipo de archivo - Incluir más tipos de imagen
@@ -372,25 +381,28 @@ export async function POST(request: NextRequest) {
 
     // LOG: Verificación de tipo (usando console.error para PM2)
     const isTypeAllowed = allowedTypes.includes(file.type);
-    console.error(`${timestamp}: [INFO] [AI Document Analysis] 📋 Verificación de tipo:`, JSON.stringify({
-      fileType: file.type,
-      isAllowed: isTypeAllowed,
-      extension: file.name.split('.').pop()?.toLowerCase(),
-    }));
+    console.error(
+      `${timestamp}: [INFO] [AI Document Analysis] 📋 Verificación de tipo:`,
+      JSON.stringify({
+        fileType: file.type,
+        isAllowed: isTypeAllowed,
+        extension: file.name.split('.').pop()?.toLowerCase(),
+      })
+    );
 
     // Si el tipo no está en la lista pero la extensión sugiere que es válido, permitir
     const validExtensions = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'doc', 'docx', 'txt'];
     const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
-    
+
     if (!isTypeAllowed && !validExtensions.includes(fileExtension)) {
-      console.error(`${timestamp}: [INFO] [AI Document Analysis] ❌ Tipo de archivo rechazado:`, JSON.stringify({
-        type: file.type,
-        extension: fileExtension,
-      }));
-      return NextResponse.json(
-        { error: 'Tipo de archivo no permitido' },
-        { status: 400 }
+      console.error(
+        `${timestamp}: [INFO] [AI Document Analysis] ❌ Tipo de archivo rechazado:`,
+        JSON.stringify({
+          type: file.type,
+          extension: fileExtension,
+        })
       );
+      return NextResponse.json({ error: 'Tipo de archivo no permitido' }, { status: 400 });
     }
 
     // Verificar tamaño (máximo 10MB)
@@ -405,7 +417,7 @@ export async function POST(request: NextRequest) {
     // Verificar si IA está configurada
     const aiConfigured = isAIConfigured();
     console.error(`${timestamp}: [INFO] [AI Document Analysis] 🤖 IA configurada: ${aiConfigured}`);
-    
+
     if (!aiConfigured) {
       console.error(`${timestamp}: [WARN] [AI Document Analysis] ANTHROPIC_API_KEY no configurado`);
       const basicResult = basicAnalysis(file.name, file.type);
@@ -419,7 +431,9 @@ export async function POST(request: NextRequest) {
       direccion: null,
     };
 
-    console.error(`${timestamp}: [INFO] [AI Document Analysis] 👤 Usuario companyId: ${session.user.companyId || 'ninguno'}`);
+    console.error(
+      `${timestamp}: [INFO] [AI Document Analysis] 👤 Usuario companyId: ${session.user.companyId || 'ninguno'}`
+    );
 
     // Intentar obtener info de la empresa del usuario
     if (session.user.companyId) {
@@ -439,17 +453,23 @@ export async function POST(request: NextRequest) {
             direccion: company.direccion || null,
           };
         }
-        console.error(`${timestamp}: [INFO] [AI Document Analysis] 🏢 Empresa obtenida: ${company?.nombre || 'no encontrada'}`);
+        console.error(
+          `${timestamp}: [INFO] [AI Document Analysis] 🏢 Empresa obtenida: ${company?.nombre || 'no encontrada'}`
+        );
       } catch (e: any) {
-        console.error(`${timestamp}: [ERROR] [AI Document Analysis] Error obteniendo empresa: ${e.message}`);
+        console.error(
+          `${timestamp}: [ERROR] [AI Document Analysis] Error obteniendo empresa: ${e.message}`
+        );
       }
     }
 
     const isImage = isImageFile(file.type, file.name);
     const isPDF = isPDFFile(file.type, file.name);
-    
+
     // LOG: Información del archivo recibido
-    console.error(`${timestamp}: [INFO] [AI Document Analysis] 📋 ARCHIVO: tipo="${file.type}", nombre="${file.name}", isImage=${isImage}, isPDF=${isPDF}`);
+    console.error(
+      `${timestamp}: [INFO] [AI Document Analysis] 📋 ARCHIVO: tipo="${file.type}", nombre="${file.name}", isImage=${isImage}, isPDF=${isPDF}`
+    );
 
     let analysis;
 
@@ -458,38 +478,44 @@ export async function POST(request: NextRequest) {
     // - PDFs escaneados → Convertir a imagen → Claude Vision ✅
     // - PDFs con texto → Análisis de texto ✅
     // - Otros documentos → Análisis de texto ✅
-    
+
     console.error(`${timestamp}: [INFO] [AI Document Analysis] 🔄 Iniciando análisis...`);
-    
+
     if (isImage) {
       // ✅ IMÁGENES: Usar Claude Vision directamente
-      console.error(`${timestamp}: [INFO] [AI Document Analysis] 🖼️ IMAGEN detectada - Usando Claude Vision`);
-      
+      console.error(
+        `${timestamp}: [INFO] [AI Document Analysis] 🖼️ IMAGEN detectada - Usando Claude Vision`
+      );
+
       try {
         const imageBase64 = await fileToBase64(file);
         console.error(`${timestamp}: [INFO] [AI Document Analysis] 📤 Enviando imagen a Claude...`);
-        
-        analysis = await analyzeImageDocument(
-          imageBase64,
-          file.type,
-          file.name,
-          companyInfo
+
+        analysis = await analyzeImageDocument(imageBase64, file.type, file.name, companyInfo);
+        console.error(
+          `${timestamp}: [INFO] [AI Document Analysis] ✅ Análisis de imagen completado`
         );
-        console.error(`${timestamp}: [INFO] [AI Document Analysis] ✅ Análisis de imagen completado`);
       } catch (imgError: any) {
-        console.error(`${timestamp}: [ERROR] [AI Document Analysis] Error analizando imagen: ${imgError.message}`);
+        console.error(
+          `${timestamp}: [ERROR] [AI Document Analysis] Error analizando imagen: ${imgError.message}`
+        );
         throw imgError;
       }
     } else if (isPDF) {
       // PDFs: Verificar si tiene texto real o es escaneado
-      console.error(`${timestamp}: [INFO] [AI Document Analysis] 📄 PDF detectado - Extrayendo texto...`);
+      console.error(
+        `${timestamp}: [INFO] [AI Document Analysis] 📄 PDF detectado - Extrayendo texto...`
+      );
       const extractedText = await extractTextFromFile(file);
-      const hasRealText = extractedText && 
-                         extractedText.includes('Texto extraído:') &&
-                         isRealTextContent(extractedText);
-      
-      console.error(`${timestamp}: [INFO] [AI Document Analysis] 📄 PDF hasRealText=${hasRealText}`);
-      
+      const hasRealText =
+        extractedText &&
+        extractedText.includes('Texto extraído:') &&
+        isRealTextContent(extractedText);
+
+      console.error(
+        `${timestamp}: [INFO] [AI Document Analysis] 📄 PDF hasRealText=${hasRealText}`
+      );
+
       if (hasRealText) {
         // ✅ PDF con texto real: usar análisis de texto
         console.error(`${timestamp}: [INFO] [AI Document Analysis] 📝 Analizando texto del PDF...`);
@@ -499,17 +525,23 @@ export async function POST(request: NextRequest) {
           mimeType: file.type,
           companyInfo,
         });
-        console.error(`${timestamp}: [INFO] [AI Document Analysis] ✅ Análisis de texto completado`);
+        console.error(
+          `${timestamp}: [INFO] [AI Document Analysis] ✅ Análisis de texto completado`
+        );
       } else {
         // 🔄 PDF escaneado: Convertir a imagen y usar Claude Vision
-        console.error(`${timestamp}: [INFO] [AI Document Analysis] 🔄 PDF escaneado - Convirtiendo a imagen con pdftoppm...`);
-        
+        console.error(
+          `${timestamp}: [INFO] [AI Document Analysis] 🔄 PDF escaneado - Convirtiendo a imagen con pdftoppm...`
+        );
+
         try {
           // Convertir PDF a imagen PNG
           const { base64: imageBase64, mimeType: imageMimeType } = await convertPDFToImage(file);
-          
-          console.error(`${timestamp}: [INFO] [AI Document Analysis] ✅ PDF convertido - Enviando a Claude Vision...`);
-          
+
+          console.error(
+            `${timestamp}: [INFO] [AI Document Analysis] ✅ PDF convertido - Enviando a Claude Vision...`
+          );
+
           // Analizar la imagen con Claude Vision
           analysis = await analyzeImageDocument(
             imageBase64,
@@ -517,10 +549,14 @@ export async function POST(request: NextRequest) {
             file.name.replace('.pdf', '.png'),
             companyInfo
           );
-          console.error(`${timestamp}: [INFO] [AI Document Analysis] ✅ Análisis de PDF completado`);
+          console.error(
+            `${timestamp}: [INFO] [AI Document Analysis] ✅ Análisis de PDF completado`
+          );
         } catch (convError: any) {
-          console.error(`${timestamp}: [ERROR] [AI Document Analysis] Error convirtiendo PDF: ${convError.message}`);
-          
+          console.error(
+            `${timestamp}: [ERROR] [AI Document Analysis] Error convirtiendo PDF: ${convError.message}`
+          );
+
           // Fallback: mensaje de error amigable
           return NextResponse.json({
             classification: {
@@ -556,10 +592,12 @@ export async function POST(request: NextRequest) {
       }
     } else {
       // Para otros documentos de texto (Word, TXT, etc.), usar análisis de texto
-      logger.info('[AI Document Analysis] 📄 Detectado DOCUMENTO DE TEXTO - Usando análisis de texto');
-      
+      logger.info(
+        '[AI Document Analysis] 📄 Detectado DOCUMENTO DE TEXTO - Usando análisis de texto'
+      );
+
       const extractedText = await extractTextFromFile(file);
-      
+
       analysis = await analyzeDocument({
         text: extractedText,
         filename: file.name,
@@ -568,32 +606,39 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    console.error(`${timestamp}: [INFO] [AI Document Analysis] ✅ ANÁLISIS COMPLETADO:`, JSON.stringify({
-      filename: file.name,
-      category: analysis.classification.category,
-      confidence: analysis.classification.confidence,
-      summary: analysis.summary?.substring(0, 100),
-      fieldsCount: analysis.extractedFields?.length || 0,
-    }));
+    console.error(
+      `${timestamp}: [INFO] [AI Document Analysis] ✅ ANÁLISIS COMPLETADO:`,
+      JSON.stringify({
+        filename: file.name,
+        category: analysis.classification.category,
+        confidence: analysis.classification.confidence,
+        summary: analysis.summary?.substring(0, 100),
+        fieldsCount: analysis.extractedFields?.length || 0,
+      })
+    );
 
     // Log del resultado completo para debug
     console.error(`${timestamp}: [DEBUG] [AI Document Analysis] 📤 ENVIANDO RESPUESTA AL CLIENTE`);
 
-    return NextResponse.json(analysis);
+    // Usar header para indicar que la respuesta debe esperarse
+    const response = NextResponse.json(analysis);
+    response.headers.set('X-Accel-Buffering', 'no'); // Deshabilitar buffer en Nginx
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    return response;
   } catch (error: any) {
     logger.error('[AI Document Analysis] Error:', error);
-    
+
     // Si hay error con la IA, intentar análisis básico como fallback
     const formData = await request.formData().catch(() => null);
     const file = formData?.get('file') as File | null;
-    
+
     if (file) {
       logger.warn('[AI Document Analysis] Usando análisis básico como fallback');
       const basicResult = basicAnalysis(file.name, file.type);
       basicResult.warnings.push(`Error en IA: ${error.message}`);
       return NextResponse.json(basicResult);
     }
-    
+
     return NextResponse.json(
       { error: 'Error al analizar el documento', details: error.message },
       { status: 500 }
