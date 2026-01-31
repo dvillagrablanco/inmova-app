@@ -37,7 +37,7 @@ import {
 import Link from 'next/link';
 import SmartOnboardingWizard from '@/components/automation/SmartOnboardingWizard';
 import ProactiveSuggestions from '@/components/automation/ProactiveSuggestions';
-import IntelligentSupportChatbot from '@/components/automation/IntelligentSupportChatbot';
+// IntelligentSupportChatbot se renderiza desde AuthenticatedLayout
 import InactiveModules from './components/InactiveModules';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { VerticalSpecificWidgets } from '@/components/dashboard/VerticalSpecificWidgets';
@@ -286,8 +286,7 @@ function DashboardPageContent() {
           </div>
         </div>
 
-        {/* Chatbot de soporte */}
-        <IntelligentSupportChatbot />
+        {/* Chatbot de soporte - Ya se renderiza en AuthenticatedLayout */}
       </AuthenticatedLayout>
     );
   }
@@ -714,8 +713,7 @@ function DashboardPageContent() {
       />
 
       {/* Chatbot inteligente de soporte 24/7 - Sistema automatizado sin intervención humana */}
-      {/* AIAssistant eliminado para evitar duplicación con IntelligentSupportChatbot */}
-      <IntelligentSupportChatbot />
+      {/* Chatbot se renderiza desde AuthenticatedLayout para evitar duplicación */}
 
       {/* Onboarding Tour Guiado */}
       <OnboardingTour role={session?.user?.role} />
