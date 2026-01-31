@@ -151,7 +151,7 @@ export function TenantFormAIAssistant({ formData, onSuggestion }: TenantFormAIAs
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            className="fixed bottom-[152px] right-6 z-40"
+            className="fixed bottom-[152px] right-6 z-40 hidden md:block"
           >
             <Button
               onClick={() => setIsOpen(true)}
@@ -175,7 +175,7 @@ export function TenantFormAIAssistant({ formData, onSuggestion }: TenantFormAIAs
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-[152px] right-6 z-40 w-96 max-w-[calc(100vw-3rem)]"
+            className="fixed bottom-[152px] right-6 z-40 w-96 max-w-[calc(100vw-3rem)] hidden md:block"
           >
             <Card className="h-[450px] flex flex-col shadow-2xl border-violet-200">
               <CardHeader className="flex-shrink-0 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-t-lg py-3">

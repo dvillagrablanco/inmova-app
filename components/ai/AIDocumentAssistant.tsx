@@ -680,9 +680,9 @@ export function AIDocumentAssistant({
       );
     }
 
-    // Floating
+    // Floating - Oculto en móvil para evitar solapamiento con chatbot principal
     return (
-      <div className={`${positionClasses[position]} z-[60]`}>
+      <div className={`${positionClasses[position]} z-[60] hidden md:block`}>
         <Button
           size="lg"
           className="h-14 w-14 rounded-full shadow-xl bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-500 hover:shadow-2xl hover:scale-105 transition-all animate-pulse-slow"
