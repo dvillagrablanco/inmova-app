@@ -105,12 +105,20 @@ interface AIDocumentAssistantProps {
   onAnalysisComplete?: (analysis: DocumentAnalysis, file: File) => void;
   /** Callback para aplicar los datos extraídos a un formulario */
   onApplyData?: (data: Record<string, any>) => void;
+  /** Callback cuando se guarda un documento (devuelve el documentId) */
+  onDocumentSaved?: (documentId: string, file: File) => void;
   /** Si está expandido por defecto */
   defaultOpen?: boolean;
   /** Variante del botón */
   variant?: 'floating' | 'inline' | 'minimal';
   /** Posición del botón flotante */
   position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+  /** ID de la entidad a la que asociar documentos (inquilino, propiedad, etc.) */
+  entityId?: string;
+  /** Tipo de entidad para el almacenamiento */
+  entityType?: 'tenant' | 'property' | 'contract' | 'user';
+  /** Guardar documento automáticamente al aplicar datos */
+  autoSaveDocument?: boolean;
 }
 
 // Mapeo de contexto a categorías de documentos relevantes
@@ -199,7 +207,9 @@ async function fetchWithRetry(
 
       // Si es error 5xx, reintentar
       if (response.status >= 500 && attempt < config.maxRetries) {
-        console.warn(`[AIDocumentAssistant] Intento ${attempt + 1} falló con ${response.status}, reintentando...`);
+        console.warn(
+          `[AIDocumentAssistant] Intento ${attempt + 1} falló con ${response.status}, reintentando...`
+        );
         await new Promise((resolve) => setTimeout(resolve, config.retryDelay));
         continue;
       }
@@ -207,10 +217,12 @@ async function fetchWithRetry(
       return response;
     } catch (error: any) {
       lastError = error;
-      
+
       // Si es abort por timeout o error de red, reintentar
       if (attempt < config.maxRetries) {
-        console.warn(`[AIDocumentAssistant] Intento ${attempt + 1} error: ${error.message}, reintentando...`);
+        console.warn(
+          `[AIDocumentAssistant] Intento ${attempt + 1} error: ${error.message}, reintentando...`
+        );
         await new Promise((resolve) => setTimeout(resolve, config.retryDelay));
         continue;
       }
@@ -224,43 +236,53 @@ export function AIDocumentAssistant({
   context,
   onAnalysisComplete,
   onApplyData,
+  onDocumentSaved,
   defaultOpen = false,
   variant = 'floating',
   position = 'bottom-right',
+  entityId,
+  entityType,
+  autoSaveDocument = true,
 }: AIDocumentAssistantProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  
+
   // Estado para el diálogo de revisión de datos
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [pendingReviewFile, setPendingReviewFile] = useState<UploadedFile | null>(null);
-  
+
+  // Estado para guardar documento
+  const [isSavingDocument, setIsSavingDocument] = useState(false);
+
   // Referencia para cancelar procesamiento
   const processingRef = useRef<Map<string, boolean>>(new Map());
-  
+
   // Referencia para el panel de resultados (para scroll automático)
   const resultsRef = useRef<HTMLDivElement>(null);
 
   // Manejar selección de archivos
-  const handleFileSelect = useCallback((files: FileList | null) => {
-    if (!files) return;
+  const handleFileSelect = useCallback(
+    (files: FileList | null) => {
+      if (!files) return;
 
-    const newFiles: UploadedFile[] = Array.from(files).map((file) => ({
-      file,
-      status: 'pending',
-      progress: 0,
-    }));
+      const newFiles: UploadedFile[] = Array.from(files).map((file) => ({
+        file,
+        status: 'pending',
+        progress: 0,
+      }));
 
-    setUploadedFiles((prev) => [...prev, ...newFiles]);
+      setUploadedFiles((prev) => [...prev, ...newFiles]);
 
-    // Procesar cada archivo
-    newFiles.forEach((uploadedFile) => {
-      processFile(uploadedFile);
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [context]);
+      // Procesar cada archivo
+      newFiles.forEach((uploadedFile) => {
+        processFile(uploadedFile);
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [context]
+  );
 
   // Procesar un archivo con timeout largo y reintentos
   const processFile = async (uploadedFile: UploadedFile) => {
@@ -351,7 +373,7 @@ export function AIDocumentAssistant({
         // Notificar éxito
         const categoryName = categoryNames[analysis.classification.category] || 'Documento';
         const fieldsCount = analysis.extractedFields.length;
-        
+
         toast.success(`${categoryName} analizado correctamente`, {
           description: `Se extrajeron ${fieldsCount} campos. Haz clic en "Revisar datos" para aplicarlos.`,
           duration: 5000,
@@ -363,9 +385,14 @@ export function AIDocumentAssistant({
         }
 
         // Seleccionar automáticamente el archivo recién procesado
-        const updatedFile = { ...uploadedFile, status: 'completed' as const, progress: 100, analysis };
+        const updatedFile = {
+          ...uploadedFile,
+          status: 'completed' as const,
+          progress: 100,
+          analysis,
+        };
         setSelectedFile(updatedFile);
-        
+
         // CRÍTICO: Abrir diálogo de revisión automáticamente para mejor UX
         // Se abre inmediatamente para que el usuario vea los datos extraídos
         if (onApplyData && analysis.extractedFields.length > 0) {
@@ -380,13 +407,11 @@ export function AIDocumentAssistant({
             resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }, 500);
         }
-
       } catch (fetchError: any) {
         clearInterval(progressInterval);
         toast.dismiss(toastId);
         throw fetchError;
       }
-
     } catch (error: any) {
       console.error('[AIDocumentAssistant] Error procesando documento:', error);
 
@@ -394,14 +419,19 @@ export function AIDocumentAssistant({
       let errorMessage = 'Error al analizar el documento';
       if (error.name === 'AbortError') {
         errorMessage = 'El análisis tardó demasiado. Intenta con un archivo más pequeño.';
-      } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+      } else if (
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('NetworkError')
+      ) {
         errorMessage = 'Error de conexión. Verifica tu internet e intenta de nuevo.';
       } else if (error.message) {
         errorMessage = error.message;
       }
 
       setUploadedFiles((prev) =>
-        prev.map((f) => (f.file === file ? { ...f, status: 'error', error: errorMessage, progress: 0 } : f))
+        prev.map((f) =>
+          f.file === file ? { ...f, status: 'error', error: errorMessage, progress: 0 } : f
+        )
       );
 
       toast.error('Error al analizar documento', {
@@ -421,7 +451,9 @@ export function AIDocumentAssistant({
     // Resetear estado del archivo
     setUploadedFiles((prev) =>
       prev.map((f) =>
-        f.file === file ? { ...f, status: 'pending', progress: 0, error: undefined, analysis: undefined } : f
+        f.file === file
+          ? { ...f, status: 'pending', progress: 0, error: undefined, analysis: undefined }
+          : f
       )
     );
 
@@ -476,13 +508,89 @@ export function AIDocumentAssistant({
     setReviewDialogOpen(true);
   };
 
+  // Función para guardar el documento en el almacenamiento
+  const saveDocumentToStorage = async (
+    file: File,
+    docEntityId?: string
+  ): Promise<string | null> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', context === 'inquilinos' ? 'tenants' : context);
+
+    // Usar el entityId proporcionado o el de props
+    const targetEntityId = docEntityId || entityId;
+    const targetEntityType =
+      entityType ||
+      (context === 'inquilinos'
+        ? 'tenant'
+        : context === 'contratos'
+          ? 'contract'
+          : context === 'propiedades'
+            ? 'property'
+            : undefined);
+
+    if (targetEntityType) {
+      formData.append('entityType', targetEntityType);
+    }
+    if (targetEntityId) {
+      formData.append('entityId', targetEntityId);
+    }
+
+    try {
+      const response = await fetch('/api/upload/private', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || errorData.error || 'Error al guardar documento');
+      }
+
+      const data = await response.json();
+      return data.documentId || data.key;
+    } catch (error: any) {
+      console.error('[AIDocumentAssistant] Error guardando documento:', error);
+      throw error;
+    }
+  };
+
   // Aplicar datos confirmados del diálogo de revisión
-  const handleConfirmData = (selectedFields: Record<string, string>) => {
+  const handleConfirmData = async (selectedFields: Record<string, string>) => {
     if (!onApplyData) {
       return;
     }
 
+    // Aplicar datos al formulario
     onApplyData(selectedFields);
+
+    // Si autoSaveDocument está activado, guardar el documento
+    if (autoSaveDocument && pendingReviewFile) {
+      setIsSavingDocument(true);
+
+      try {
+        const documentId = await saveDocumentToStorage(pendingReviewFile.file);
+
+        if (documentId) {
+          toast.success('Documento guardado correctamente', {
+            description: 'El documento se ha vinculado al perfil',
+          });
+
+          if (onDocumentSaved) {
+            onDocumentSaved(documentId, pendingReviewFile.file);
+          }
+        }
+      } catch (error: any) {
+        // No bloquear la aplicación de datos si falla el guardado
+        console.error('[AIDocumentAssistant] Error guardando documento:', error);
+        toast.warning('Datos aplicados, pero hubo un problema guardando el documento', {
+          description: error.message || 'Puedes intentar subirlo manualmente',
+        });
+      } finally {
+        setIsSavingDocument(false);
+      }
+    }
+
     setPendingReviewFile(null);
   };
 
@@ -909,7 +1017,9 @@ export function AIDocumentAssistant({
           }}
           extractedFields={pendingReviewFile.analysis.extractedFields}
           documentName={pendingReviewFile.file.name}
-          documentType={categoryNames[pendingReviewFile.analysis.classification.category] || 'Documento'}
+          documentType={
+            categoryNames[pendingReviewFile.analysis.classification.category] || 'Documento'
+          }
           onConfirm={handleConfirmData}
         />
       )}

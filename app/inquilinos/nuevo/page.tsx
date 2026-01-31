@@ -553,6 +553,8 @@ export default function NuevoInquilinoPage() {
           context="inquilinos"
           variant="floating"
           position="bottom-right"
+          entityType="tenant"
+          autoSaveDocument={true}
           onApplyData={(data) => {
             // Aplicar datos extraídos del documento DNI/NIE al formulario
             if (data.nombreCompleto || data.nombre) {
@@ -590,6 +592,20 @@ export default function NuevoInquilinoPage() {
               setFormData((prev) => ({ ...prev, telefono: data.telefono }));
             }
             toast.success('Datos del documento aplicados al formulario');
+          }}
+          onDocumentSaved={(documentId, file) => {
+            // Añadir el documento guardado a la lista de documentos del formulario
+            setDocuments((prev) => [
+              ...prev,
+              {
+                id: documentId,
+                name: file.name,
+                type: file.type,
+                url: `/api/documents/${documentId}/download`,
+                uploading: false,
+                progress: 100,
+              },
+            ]);
           }}
         />
       </div>
