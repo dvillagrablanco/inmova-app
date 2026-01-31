@@ -220,49 +220,48 @@ export function DataReviewDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-violet-500" />
+      <DialogContent className="w-[95vw] max-w-lg max-h-[85vh] overflow-hidden flex flex-col p-4 sm:p-6">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-violet-500" />
             Revisar Datos Extraídos
           </DialogTitle>
-          <DialogDescription>
-            Verifica los datos extraídos del documento <strong>{documentName}</strong>.
-            Puedes editar o deseleccionar campos antes de aplicarlos al formulario.
+          <DialogDescription className="text-xs sm:text-sm">
+            Verifica los datos del documento <strong className="text-violet-600">{documentName}</strong>.
           </DialogDescription>
         </DialogHeader>
 
-        {/* Información del documento */}
-        <div className="flex items-center gap-2 p-3 bg-violet-50 dark:bg-violet-950/30 rounded-lg">
-          <FileText className="h-5 w-5 text-violet-600" />
+        {/* Información del documento - más compacto en móvil */}
+        <div className="flex items-center gap-2 p-2 sm:p-3 bg-violet-50 dark:bg-violet-950/30 rounded-lg">
+          <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-violet-600 shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{documentName}</p>
+            <p className="text-xs sm:text-sm font-medium truncate">{documentName}</p>
             <p className="text-xs text-muted-foreground">{documentType}</p>
           </div>
-          <Badge variant="outline" className="text-xs">
-            {totalCount} campos detectados
+          <Badge variant="outline" className="text-xs shrink-0">
+            {totalCount} campos
           </Badge>
         </div>
 
-        {/* Controles de selección */}
-        <div className="flex items-center justify-between px-1">
+        {/* Controles de selección - compacto */}
+        <div className="flex items-center justify-between px-1 py-1">
           <div className="flex items-center gap-2">
             <Checkbox
               id="select-all"
               checked={selectedCount === totalCount && totalCount > 0}
               onCheckedChange={(checked) => toggleAll(!!checked)}
             />
-            <Label htmlFor="select-all" className="text-sm cursor-pointer">
-              {selectedCount === totalCount ? 'Deseleccionar todos' : 'Seleccionar todos'}
+            <Label htmlFor="select-all" className="text-xs sm:text-sm cursor-pointer">
+              {selectedCount === totalCount ? 'Deseleccionar' : 'Seleccionar todos'}
             </Label>
           </div>
-          <Badge variant="secondary">
-            {selectedCount}/{totalCount} seleccionados
+          <Badge variant="secondary" className="text-xs">
+            {selectedCount}/{totalCount}
           </Badge>
         </div>
 
-        {/* Lista de campos */}
-        <ScrollArea className="flex-1 pr-4 -mr-4">
+        {/* Lista de campos - altura fija para móvil */}
+        <ScrollArea className="h-[40vh] sm:h-[45vh] min-h-[200px] pr-2 -mr-2">
           <div className="space-y-2 py-2">
             {extractedFields.map((field, index) => {
               const fieldKey = field.targetField || field.fieldName;
@@ -275,38 +274,38 @@ export function DataReviewDialog({
               return (
                 <div
                   key={index}
-                  className={`p-3 rounded-lg border transition-all ${
+                  className={`p-2 sm:p-3 rounded-lg border transition-all ${
                     isSelected
                       ? 'border-violet-300 bg-violet-50/50 dark:bg-violet-950/20'
                       : 'border-gray-200 dark:border-gray-800 opacity-60'
                   }`}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-2 sm:gap-3">
                     {/* Checkbox */}
                     <Checkbox
                       checked={isSelected}
                       onCheckedChange={() => toggleFieldSelection(fieldKey)}
-                      className="mt-1"
+                      className="mt-0.5 sm:mt-1"
                     />
 
-                    {/* Icono */}
-                    <div className="h-8 w-8 rounded-md bg-gray-100 dark:bg-gray-800 flex items-center justify-center shrink-0">
+                    {/* Icono - oculto en móvil pequeño */}
+                    <div className="hidden sm:flex h-8 w-8 rounded-md bg-gray-100 dark:bg-gray-800 items-center justify-center shrink-0">
                       <Icon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </div>
 
                     {/* Contenido */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Label className="text-sm font-medium">{label}</Label>
+                      <div className="flex items-center gap-1 sm:gap-2 mb-0.5 sm:mb-1 flex-wrap">
+                        <Label className="text-xs sm:text-sm font-medium">{label}</Label>
                         {/* Badge de confianza */}
                         <Badge
                           variant="outline"
-                          className={`text-xs ${
+                          className={`text-[10px] sm:text-xs px-1.5 py-0 ${
                             confidence >= 0.9
-                              ? 'border-green-500 text-green-700'
+                              ? 'border-green-500 text-green-700 bg-green-50'
                               : confidence >= 0.7
-                                ? 'border-amber-500 text-amber-700'
-                                : 'border-red-500 text-red-700'
+                                ? 'border-amber-500 text-amber-700 bg-amber-50'
+                                : 'border-red-500 text-red-700 bg-red-50'
                           }`}
                         >
                           {Math.round(confidence * 100)}%
@@ -315,24 +314,25 @@ export function DataReviewDialog({
 
                       {/* Valor editable */}
                       {isEditing ? (
-                        <div className="flex gap-2">
+                        <div className="flex gap-1 sm:gap-2">
                           <Input
                             value={editableFields[fieldKey] || ''}
                             onChange={(e) => handleFieldChange(fieldKey, e.target.value)}
-                            className="h-8 text-sm"
+                            className="h-7 sm:h-8 text-xs sm:text-sm"
                             autoFocus
                           />
                           <Button
                             size="sm"
                             variant="ghost"
+                            className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                             onClick={() => setEditingField(null)}
                           >
-                            <CheckCircle2 className="h-4 w-4" />
+                            <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           </Button>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                        <div className="flex items-center gap-1 sm:gap-2">
+                          <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 truncate max-w-[180px] sm:max-w-none">
                             {editableFields[fieldKey] || '-'}
                           </p>
                           <Button
@@ -361,17 +361,17 @@ export function DataReviewDialog({
           </div>
         </ScrollArea>
 
-        <DialogFooter className="flex gap-2 pt-4 border-t">
-          <Button variant="outline" onClick={onClose}>
+        <DialogFooter className="flex flex-row gap-2 pt-3 sm:pt-4 border-t mt-2">
+          <Button variant="outline" onClick={onClose} className="flex-1 sm:flex-none h-9 sm:h-10 text-xs sm:text-sm">
             Cancelar
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={selectedCount === 0}
-            className="bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
+            className="flex-1 sm:flex-none h-9 sm:h-10 text-xs sm:text-sm bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
           >
-            <CheckCircle2 className="h-4 w-4 mr-2" />
-            Aplicar {selectedCount} {selectedCount === 1 ? 'campo' : 'campos'}
+            <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            Aplicar {selectedCount} campos
           </Button>
         </DialogFooter>
       </DialogContent>
