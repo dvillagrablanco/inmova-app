@@ -633,12 +633,16 @@ export function AIDocumentAssistant({
   };
 
   // Posiciones para el botón flotante
-  // NOTA: bottom-36 en móvil para evitar solapamiento con BottomNavigation (64px) y Crisp chat
-  // En desktop: bottom-24 para dejar espacio al widget de Crisp
+  // NOTA: Organizados verticalmente para evitar solapamiento
+  // Stack de widgets flotantes (de abajo hacia arriba):
+  // - bottom-6: IntelligentSupportChatbot (chatbot principal) ~64px
+  // - bottom-[88px]: AIDocumentAssistant (este componente) ~48px
+  // - bottom-[152px]: TenantFormAIAssistant ~48px
+  // - bottom-[216px]: FloatingTourButton/ContextualHelp (solo desktop)
   // z-[60] para estar por encima de otros elementos flotantes
   const positionClasses: Record<string, string> = {
-    'bottom-right': 'fixed bottom-36 md:bottom-24 right-6',
-    'bottom-left': 'fixed bottom-36 md:bottom-24 left-6',
+    'bottom-right': 'fixed bottom-[88px] right-6',
+    'bottom-left': 'fixed bottom-[88px] left-6',
     'top-right': 'fixed top-20 right-6',
     'top-left': 'fixed top-20 left-6',
   };

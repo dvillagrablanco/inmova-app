@@ -151,14 +151,14 @@ export function TenantFormAIAssistant({ formData, onSuggestion }: TenantFormAIAs
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            className="fixed bottom-24 right-6 z-40"
+            className="fixed bottom-[152px] right-6 z-40"
           >
             <Button
               onClick={() => setIsOpen(true)}
-              className="h-14 w-14 rounded-full shadow-lg bg-gradient-to-br from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
+              className="h-12 w-12 rounded-full shadow-lg bg-gradient-to-br from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
               title="Asistente IA para formulario"
             >
-              <Sparkles className="h-6 w-6" />
+              <Sparkles className="h-5 w-5" />
             </Button>
             <span className="absolute -top-1 -right-1 flex h-4 w-4">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
@@ -175,7 +175,7 @@ export function TenantFormAIAssistant({ formData, onSuggestion }: TenantFormAIAs
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-24 right-6 z-40 w-96 max-w-[calc(100vw-3rem)]"
+            className="fixed bottom-[152px] right-6 z-40 w-96 max-w-[calc(100vw-3rem)]"
           >
             <Card className="h-[450px] flex flex-col shadow-2xl border-violet-200">
               <CardHeader className="flex-shrink-0 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-t-lg py-3">
