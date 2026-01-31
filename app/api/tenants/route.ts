@@ -113,12 +113,22 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     
-    // Preparar datos: convertir nombreCompleto a nombre/apellidos si es necesario
+    // Preparar datos: convertir nombre completo a nombre/apellidos si es necesario
     let dataToValidate = { ...body };
-    if (body.nombreCompleto && !body.nombre) {
-      const [nombre, ...apellidos] = body.nombreCompleto.trim().split(' ');
-      dataToValidate.nombre = nombre;
-      dataToValidate.apellidos = apellidos.join(' ') || nombre;
+    
+    // Si viene nombreCompleto o nombre contiene espacios y no hay apellidos
+    const nombreCompleto = body.nombreCompleto || body.nombre;
+    if (nombreCompleto && !body.apellidos) {
+      const partes = nombreCompleto.trim().split(' ');
+      if (partes.length >= 2) {
+        // Si hay 2 o más palabras, la primera es nombre y el resto apellidos
+        dataToValidate.nombre = partes[0];
+        dataToValidate.apellidos = partes.slice(1).join(' ');
+      } else {
+        // Si solo hay una palabra, usarla para ambos
+        dataToValidate.nombre = nombreCompleto;
+        dataToValidate.apellidos = nombreCompleto;
+      }
     }
     
     // Validación con Zod
