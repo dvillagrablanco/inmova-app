@@ -556,41 +556,72 @@ export default function NuevoInquilinoPage() {
           entityType="tenant"
           autoSaveDocument={true}
           onApplyData={(data) => {
+            console.log('[Inquilino] Datos recibidos para aplicar:', data);
+            
             // Aplicar datos extraídos del documento DNI/NIE al formulario
-            if (data.nombreCompleto || data.nombre) {
-              setFormData((prev) => ({ ...prev, nombre: data.nombreCompleto || data.nombre }));
+            const nombre = data.nombreCompleto || data.nombre || data.fullName || data.name;
+            if (nombre) {
+              setFormData((prev) => ({ ...prev, nombre }));
+              console.log('[Inquilino] Nombre aplicado:', nombre);
             }
-            if (data.dni || data.numeroDocumento || data.documentoIdentidad) {
+            
+            const docIdentidad = data.dni || data.nie || data.numeroDocumento || data.documentoIdentidad || data.documentNumber;
+            if (docIdentidad) {
               setFormData((prev) => ({
                 ...prev,
-                documentoIdentidad: data.dni || data.numeroDocumento || data.documentoIdentidad,
+                documentoIdentidad: docIdentidad,
               }));
+              console.log('[Inquilino] Documento aplicado:', docIdentidad);
             }
-            if (data.fechaNacimiento) {
-              // Formatear fecha para input type="date" (YYYY-MM-DD)
-              const fecha = new Date(data.fechaNacimiento);
-              if (!isNaN(fecha.getTime())) {
-                setFormData((prev) => ({
-                  ...prev,
-                  fechaNacimiento: fecha.toISOString().split('T')[0],
-                }));
+            
+            // Manejar diferentes formatos de fecha
+            const fechaRaw = data.fechaNacimiento || data.birthDate || data.dateOfBirth;
+            if (fechaRaw) {
+              let fechaFormateada = fechaRaw;
+              
+              // Si ya está en formato YYYY-MM-DD, usarlo directamente
+              if (/^\d{4}-\d{2}-\d{2}$/.test(fechaRaw)) {
+                fechaFormateada = fechaRaw;
+              } 
+              // Si está en formato DD/MM/YYYY o DD-MM-YYYY
+              else if (/^\d{2}[/-]\d{2}[/-]\d{4}$/.test(fechaRaw)) {
+                const parts = fechaRaw.split(/[/-]/);
+                fechaFormateada = `${parts[2]}-${parts[1]}-${parts[0]}`;
               }
+              // Intentar parsear como fecha
+              else {
+                const fecha = new Date(fechaRaw);
+                if (!isNaN(fecha.getTime())) {
+                  fechaFormateada = fecha.toISOString().split('T')[0];
+                }
+              }
+              
+              setFormData((prev) => ({
+                ...prev,
+                fechaNacimiento: fechaFormateada,
+              }));
+              console.log('[Inquilino] Fecha nacimiento aplicada:', fechaFormateada);
             }
-            if (data.nacionalidad) {
-              setFormData((prev) => ({ ...prev, nacionalidad: data.nacionalidad }));
+            
+            if (data.nacionalidad || data.nationality) {
+              setFormData((prev) => ({ ...prev, nacionalidad: data.nacionalidad || data.nationality }));
             }
-            if (data.tipoDocumento) {
-              const tipo = data.tipoDocumento.toLowerCase();
+            
+            if (data.tipoDocumento || data.documentType) {
+              const tipo = (data.tipoDocumento || data.documentType || '').toLowerCase();
               if (['dni', 'nie', 'pasaporte'].includes(tipo)) {
                 setFormData((prev) => ({ ...prev, tipoDocumento: tipo }));
               }
             }
-            if (data.email) {
-              setFormData((prev) => ({ ...prev, email: data.email }));
+            
+            if (data.email || data.correo) {
+              setFormData((prev) => ({ ...prev, email: data.email || data.correo }));
             }
-            if (data.telefono) {
-              setFormData((prev) => ({ ...prev, telefono: data.telefono }));
+            
+            if (data.telefono || data.phone) {
+              setFormData((prev) => ({ ...prev, telefono: data.telefono || data.phone }));
             }
+            
             toast.success('Datos del documento aplicados al formulario');
           }}
           onDocumentSaved={(documentId, file) => {
