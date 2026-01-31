@@ -48,7 +48,18 @@ const getStorageMode = (): StorageMode => {
 // Validación
 const uploadSchema = z.object({
   folder: z
-    .enum(['contratos', 'dni', 'documentos', 'facturas', 'tenants', 'inquilinos'])
+    .enum([
+      'contratos',
+      'dni',
+      'documentos',
+      'facturas',
+      'tenants',
+      'inquilinos',
+      'seguros',
+      'propiedades',
+      'proveedores',
+      'general',
+    ])
     .optional()
     .default('documentos'),
   entityType: z.enum(['property', 'contract', 'tenant', 'user']).optional(),
