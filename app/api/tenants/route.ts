@@ -149,12 +149,12 @@ export async function POST(req: NextRequest) {
     const validatedData = validationResult.data;
     
     // Combinar nombre y apellidos de vuelta a nombreCompleto para la BD
-    const nombreCompleto = `${validatedData.nombre} ${validatedData.apellidos}`.trim();
+    const nombreCompletoFinal = `${validatedData.nombre} ${validatedData.apellidos}`.trim();
 
     const tenant = await prisma.tenant.create({
       data: {
         companyId: user.companyId,
-        nombreCompleto,
+        nombreCompleto: nombreCompletoFinal,
         dni: validatedData.dni || '',
         email: validatedData.email,
         telefono: validatedData.telefono,
