@@ -668,11 +668,15 @@ export function AIDocumentAssistant({
 
     if (variant === 'inline') {
       return (
-        <Button variant="outline" className="gap-2">
-          <Brain className="h-4 w-4" />
-          Analizar con IA
+        <Button 
+          variant="outline" 
+          className="w-full gap-2 border-violet-300 dark:border-violet-700 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 hover:from-violet-100 hover:to-purple-100 dark:hover:from-violet-900/40 dark:hover:to-purple-900/40 text-violet-700 dark:text-violet-300"
+        >
+          <Brain className="h-4 w-4 text-violet-600" />
+          <span className="font-medium">Escanear DNI/Documento con IA</span>
+          <Sparkles className="h-3 w-3 text-amber-500" />
           {stats.analyzing > 0 && (
-            <Badge variant="secondary" className="ml-1">
+            <Badge variant="secondary" className="ml-1 bg-violet-500 text-white">
               {stats.analyzing}
             </Badge>
           )}

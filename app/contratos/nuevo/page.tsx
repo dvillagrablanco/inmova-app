@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
-import { FileText, Home, ArrowLeft, Save, Upload, X, Loader2 } from 'lucide-react';
+import { FileText, Home, ArrowLeft, Save, Upload, X, Loader2, Brain, Sparkles } from 'lucide-react';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 import { Button } from '@/components/ui/button';
 import { ButtonWithLoading } from '@/components/ui/button-with-loading';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
@@ -412,6 +413,75 @@ export default function NuevoContratoPage() {
                             Sube el contrato firmado, anexos, documentos de identidad, etc.
                           </p>
                           
+                          {/* Botón de Escaneo con IA - Visible en todas las pantallas */}
+                          <AIDocumentAssistant
+                            context="contratos"
+                            variant="inline"
+                            position="bottom-right"
+                            entityType="contract"
+                            autoSaveDocument={true}
+                            onApplyData={(data) => {
+                              console.log('[Contrato] Datos recibidos:', JSON.stringify(data, null, 2));
+                              const updates: Partial<typeof formData> = {};
+                              
+                              // Fecha de inicio
+                              if (data.fechaInicio || data.startDate) {
+                                const fechaRaw = data.fechaInicio || data.startDate;
+                                if (/^\d{4}-\d{2}-\d{2}$/.test(fechaRaw)) {
+                                  updates.fechaInicio = fechaRaw;
+                                } else if (/^\d{2}[/-]\d{2}[/-]\d{4}$/.test(fechaRaw)) {
+                                  const parts = fechaRaw.split(/[/-]/);
+                                  updates.fechaInicio = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                                }
+                              }
+                              
+                              // Fecha de fin
+                              if (data.fechaFin || data.endDate) {
+                                const fechaRaw = data.fechaFin || data.endDate;
+                                if (/^\d{4}-\d{2}-\d{2}$/.test(fechaRaw)) {
+                                  updates.fechaFin = fechaRaw;
+                                } else if (/^\d{2}[/-]\d{2}[/-]\d{4}$/.test(fechaRaw)) {
+                                  const parts = fechaRaw.split(/[/-]/);
+                                  updates.fechaFin = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                                }
+                              }
+                              
+                              // Renta mensual
+                              if (data.rentaMensual || data.monthlyRent || data.precio) {
+                                const renta = data.rentaMensual || data.monthlyRent || data.precio;
+                                const rentaNum = parseFloat(String(renta).replace(/[^0-9,.]/g, '').replace(',', '.'));
+                                if (!isNaN(rentaNum)) {
+                                  updates.rentaMensual = rentaNum;
+                                }
+                              }
+                              
+                              // Depósito/Fianza
+                              if (data.deposito || data.fianza || data.deposit) {
+                                const deposito = data.deposito || data.fianza || data.deposit;
+                                const depositoNum = parseFloat(String(deposito).replace(/[^0-9,.]/g, '').replace(',', '.'));
+                                if (!isNaN(depositoNum)) {
+                                  updates.deposito = depositoNum;
+                                }
+                              }
+                              
+                              if (Object.keys(updates).length > 0) {
+                                setFormData((prev) => ({ ...prev, ...updates }));
+                                toast.success(`${Object.keys(updates).length} campos del contrato aplicados`);
+                              }
+                            }}
+                            onDocumentSaved={(documentId, file) => {
+                              setDocuments((prev) => [...prev, {
+                                id: documentId,
+                                name: file.name,
+                                type: file.type,
+                                url: `/api/documents/${documentId}/download`,
+                                uploading: false,
+                                progress: 100,
+                              }]);
+                            }}
+                          />
+                          
+                          {/* Área de upload manual */}
                           <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-primary/50 transition-colors">
                             <label htmlFor="contract-doc-upload" className="cursor-pointer">
                               <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />

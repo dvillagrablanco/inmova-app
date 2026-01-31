@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
-import { UserPlus, Home, ArrowLeft, Save, Upload, FileText, X, Loader2 } from 'lucide-react';
+import { UserPlus, Home, ArrowLeft, Save, Upload, FileText, X, Loader2, Brain, Sparkles } from 'lucide-react';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -397,6 +398,63 @@ export default function NuevoCandidatoPage() {
                     Sube documentos como DNI, nóminas, referencias, contrato de trabajo, etc.
                   </p>
 
+                  {/* Botón de Escaneo con IA - Visible en todas las pantallas */}
+                  <AIDocumentAssistant
+                    context="inquilinos"
+                    variant="inline"
+                    position="bottom-right"
+                    entityType="tenant"
+                    autoSaveDocument={true}
+                    onApplyData={(data) => {
+                      console.log('[Candidato] Datos recibidos:', JSON.stringify(data, null, 2));
+                      const updates: Partial<typeof formData> = {};
+                      
+                      // Nombre
+                      const nombre = data.nombreCompleto || data.nombre || data.fullName || data.name;
+                      if (nombre) updates.nombre = nombre;
+                      
+                      // Email
+                      if (data.email || data.correo) updates.email = data.email || data.correo;
+                      
+                      // Teléfono
+                      if (data.telefono || data.phone) updates.telefono = data.telefono || data.phone;
+                      
+                      // DNI/NIE
+                      const docIdentidad = data.dni || data.nie || data.numeroDocumento || data.documentoIdentidad;
+                      if (docIdentidad) updates.dni = docIdentidad;
+                      
+                      // Ocupación
+                      if (data.ocupacion || data.profession || data.trabajo) {
+                        updates.ocupacion = data.ocupacion || data.profession || data.trabajo;
+                      }
+                      
+                      // Ingresos
+                      if (data.ingresosMensuales || data.ingresos || data.income) {
+                        const ingresosStr = data.ingresosMensuales || data.ingresos || data.income;
+                        const ingresosNum = parseFloat(String(ingresosStr).replace(/[^0-9,.]/g, '').replace(',', '.'));
+                        if (!isNaN(ingresosNum)) {
+                          updates.ingresosMensuales = ingresosNum;
+                        }
+                      }
+                      
+                      if (Object.keys(updates).length > 0) {
+                        setFormData((prev) => ({ ...prev, ...updates }));
+                        toast.success(`${Object.keys(updates).length} campos del candidato aplicados`);
+                      }
+                    }}
+                    onDocumentSaved={(documentId, file) => {
+                      setDocuments((prev) => [...prev, {
+                        id: documentId,
+                        name: file.name,
+                        type: file.type,
+                        url: `/api/documents/${documentId}/download`,
+                        uploading: false,
+                        progress: 100,
+                      }]);
+                    }}
+                  />
+
+                  {/* Área de upload manual */}
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
                     <label htmlFor="candidate-doc-upload" className="cursor-pointer">
                       <Upload className="mx-auto h-10 w-10 text-gray-400 mb-2" />

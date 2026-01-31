@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import dynamic from 'next/dynamic';
 
-import { Users, Home, ArrowLeft, Save, Upload, FileText, X, Loader2 } from 'lucide-react';
+import { Users, Home, ArrowLeft, Save, Upload, FileText, X, Loader2, Brain, Sparkles } from 'lucide-react';
 
 // Cargar el asistente de IA de forma dinámica para evitar problemas de SSR
 const TenantFormAIAssistant = dynamic(
@@ -380,7 +380,101 @@ export default function NuevoInquilinoPage() {
                         Sube documentos como DNI, nóminas, contrato de trabajo, etc.
                       </p>
 
-                      {/* Área de upload */}
+                      {/* Botón de Escaneo con IA - Visible en todas las pantallas incluyendo móvil */}
+                      <AIDocumentAssistant
+                        context="inquilinos"
+                        variant="inline"
+                        position="bottom-right"
+                        entityType="tenant"
+                        autoSaveDocument={true}
+                        onApplyData={(data) => {
+                          console.log('[Inquilino] Datos recibidos para aplicar:', JSON.stringify(data, null, 2));
+                          
+                          const updates: Partial<typeof formData> = {};
+                          
+                          // Nombre completo
+                          const nombre = data.nombreCompleto || data.nombre || data.fullName || data.name;
+                          if (nombre) {
+                            updates.nombre = nombre;
+                            console.log('[Inquilino] Nombre:', nombre);
+                          }
+                          
+                          // Documento de identidad
+                          const docIdentidad = data.dni || data.nie || data.numeroDocumento || data.documentoIdentidad || data.documentNumber;
+                          if (docIdentidad) {
+                            updates.documentoIdentidad = docIdentidad;
+                            console.log('[Inquilino] DNI:', docIdentidad);
+                          }
+                          
+                          // Fecha de nacimiento
+                          const fechaRaw = data.fechaNacimiento || data.birthDate || data.dateOfBirth;
+                          if (fechaRaw) {
+                            let fechaFormateada = fechaRaw;
+                            
+                            if (/^\d{4}-\d{2}-\d{2}$/.test(fechaRaw)) {
+                              fechaFormateada = fechaRaw;
+                            } else if (/^\d{2}[/-]\d{2}[/-]\d{4}$/.test(fechaRaw)) {
+                              const parts = fechaRaw.split(/[/-]/);
+                              fechaFormateada = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                            } else {
+                              const fecha = new Date(fechaRaw);
+                              if (!isNaN(fecha.getTime())) {
+                                fechaFormateada = fecha.toISOString().split('T')[0];
+                              }
+                            }
+                            updates.fechaNacimiento = fechaFormateada;
+                            console.log('[Inquilino] Fecha:', fechaFormateada);
+                          }
+                          
+                          // Nacionalidad
+                          if (data.nacionalidad || data.nationality) {
+                            updates.nacionalidad = data.nacionalidad || data.nationality;
+                          }
+                          
+                          // Tipo de documento
+                          if (data.tipoDocumento || data.documentType) {
+                            const tipo = (data.tipoDocumento || data.documentType || '').toLowerCase();
+                            if (['dni', 'nie', 'pasaporte'].includes(tipo)) {
+                              updates.tipoDocumento = tipo;
+                            }
+                          }
+                          
+                          // Email
+                          if (data.email || data.correo) {
+                            updates.email = data.email || data.correo;
+                          }
+                          
+                          // Teléfono
+                          if (data.telefono || data.phone) {
+                            updates.telefono = data.telefono || data.phone;
+                          }
+                          
+                          console.log('[Inquilino] Updates a aplicar:', JSON.stringify(updates, null, 2));
+                          
+                          if (Object.keys(updates).length > 0) {
+                            setFormData((prev) => {
+                              const newData = { ...prev, ...updates };
+                              console.log('[Inquilino] FormData actualizado:', JSON.stringify(newData, null, 2));
+                              return newData;
+                            });
+                            toast.success(`${Object.keys(updates).length} campos aplicados al formulario`);
+                          } else {
+                            toast.warning('No se encontraron campos para aplicar');
+                          }
+                        }}
+                        onDocumentSaved={(documentId, file) => {
+                          setDocuments((prev) => [...prev, {
+                            id: documentId,
+                            name: file.name,
+                            type: file.type,
+                            url: `/api/documents/${documentId}/download`,
+                            uploading: false,
+                            progress: 100,
+                          }]);
+                        }}
+                      />
+
+                      {/* Área de upload manual */}
                       <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-primary/50 transition-colors">
                         <label htmlFor="doc-upload" className="cursor-pointer">
                           <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
@@ -545,108 +639,10 @@ export default function NuevoInquilinoPage() {
           />
         </form>
 
-        {/* Asistente IA para el formulario */}
+        {/* Asistente IA para el formulario - Oculto en móvil para evitar solapamiento */}
         <TenantFormAIAssistant formData={formData} />
-
-        {/* Asistente IA de Documentos para DNI/NIE */}
-        <AIDocumentAssistant
-          context="inquilinos"
-          variant="floating"
-          position="bottom-right"
-          entityType="tenant"
-          autoSaveDocument={true}
-          onApplyData={(data) => {
-            console.log('[Inquilino] Datos recibidos para aplicar:', JSON.stringify(data, null, 2));
-            
-            // Construir objeto con todos los cambios de una vez
-            const updates: Partial<typeof formData> = {};
-            
-            // Nombre
-            const nombre = data.nombreCompleto || data.nombre || data.fullName || data.name;
-            if (nombre) {
-              updates.nombre = nombre;
-              console.log('[Inquilino] Nombre:', nombre);
-            }
-            
-            // Documento de identidad
-            const docIdentidad = data.dni || data.nie || data.numeroDocumento || data.documentoIdentidad || data.documentNumber;
-            if (docIdentidad) {
-              updates.documentoIdentidad = docIdentidad;
-              console.log('[Inquilino] DNI:', docIdentidad);
-            }
-            
-            // Fecha de nacimiento
-            const fechaRaw = data.fechaNacimiento || data.birthDate || data.dateOfBirth;
-            if (fechaRaw) {
-              let fechaFormateada = fechaRaw;
-              
-              if (/^\d{4}-\d{2}-\d{2}$/.test(fechaRaw)) {
-                fechaFormateada = fechaRaw;
-              } else if (/^\d{2}[/-]\d{2}[/-]\d{4}$/.test(fechaRaw)) {
-                const parts = fechaRaw.split(/[/-]/);
-                fechaFormateada = `${parts[2]}-${parts[1]}-${parts[0]}`;
-              } else {
-                const fecha = new Date(fechaRaw);
-                if (!isNaN(fecha.getTime())) {
-                  fechaFormateada = fecha.toISOString().split('T')[0];
-                }
-              }
-              updates.fechaNacimiento = fechaFormateada;
-              console.log('[Inquilino] Fecha:', fechaFormateada);
-            }
-            
-            // Nacionalidad
-            if (data.nacionalidad || data.nationality) {
-              updates.nacionalidad = data.nacionalidad || data.nationality;
-            }
-            
-            // Tipo de documento
-            if (data.tipoDocumento || data.documentType) {
-              const tipo = (data.tipoDocumento || data.documentType || '').toLowerCase();
-              if (['dni', 'nie', 'pasaporte'].includes(tipo)) {
-                updates.tipoDocumento = tipo;
-              }
-            }
-            
-            // Email
-            if (data.email || data.correo) {
-              updates.email = data.email || data.correo;
-            }
-            
-            // Teléfono
-            if (data.telefono || data.phone) {
-              updates.telefono = data.telefono || data.phone;
-            }
-            
-            console.log('[Inquilino] Updates a aplicar:', JSON.stringify(updates, null, 2));
-            
-            // Aplicar todos los cambios de una vez
-            if (Object.keys(updates).length > 0) {
-              setFormData((prev) => {
-                const newData = { ...prev, ...updates };
-                console.log('[Inquilino] FormData actualizado:', JSON.stringify(newData, null, 2));
-                return newData;
-              });
-              toast.success(`${Object.keys(updates).length} campos aplicados al formulario`);
-            } else {
-              toast.warning('No se encontraron campos para aplicar');
-            }
-          }}
-          onDocumentSaved={(documentId, file) => {
-            // Añadir el documento guardado a la lista de documentos del formulario
-            setDocuments((prev) => [
-              ...prev,
-              {
-                id: documentId,
-                name: file.name,
-                type: file.type,
-                url: `/api/documents/${documentId}/download`,
-                uploading: false,
-                progress: 100,
-              },
-            ]);
-          }}
-        />
+        
+        {/* Nota: AIDocumentAssistant ahora está integrado en la sección de Documentos del formulario (variant="inline") */}
       </div>
     </AuthenticatedLayout>
   );
