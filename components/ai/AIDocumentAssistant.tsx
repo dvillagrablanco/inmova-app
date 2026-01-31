@@ -374,9 +374,17 @@ export function AIDocumentAssistant({
         const categoryName = categoryNames[analysis.classification.category] || 'Documento';
         const fieldsCount = analysis.extractedFields.length;
 
+        // Toast con botón de acción para abrir el diálogo
         toast.success(`${categoryName} analizado correctamente`, {
-          description: `Se extrajeron ${fieldsCount} campos. Haz clic en "Revisar datos" para aplicarlos.`,
-          duration: 5000,
+          description: `Se extrajeron ${fieldsCount} campos.`,
+          duration: 8000,
+          action: onApplyData && fieldsCount > 0 ? {
+            label: 'Aplicar datos',
+            onClick: () => {
+              setPendingReviewFile(updatedFile);
+              setReviewDialogOpen(true);
+            },
+          } : undefined,
         });
 
         // Callback
@@ -889,6 +897,24 @@ export function AIDocumentAssistant({
                           uploadedFile.status === 'analyzing') && (
                           <Progress value={uploadedFile.progress} className="h-1 mt-2" />
                         )}
+
+                        {/* Botón de aplicar datos - visible directamente en cada documento analizado */}
+                        {uploadedFile.status === 'completed' &&
+                          uploadedFile.analysis &&
+                          uploadedFile.analysis.extractedFields.length > 0 &&
+                          onApplyData && (
+                            <Button
+                              size="sm"
+                              className="w-full mt-2 bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openDataReview(uploadedFile);
+                              }}
+                            >
+                              <Sparkles className="h-4 w-4 mr-1" />
+                              Revisar y aplicar {uploadedFile.analysis.extractedFields.length} campos
+                            </Button>
+                          )}
                       </CardContent>
                     </Card>
                   ))}
