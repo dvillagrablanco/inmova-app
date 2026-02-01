@@ -125,6 +125,118 @@ async function handleFunctionCall(
   
   switch (name) {
     // --------------------------------------------------------------------------
+    // FUNCIONES DEL RECEPCIONISTA (TRANSFERENCIAS)
+    // --------------------------------------------------------------------------
+    case 'transfer_to_agent':
+      // Mapeo de agentes a sus IDs en Vapi
+      const agentMapping: Record<string, string> = {
+        sales: 'inmova-sales-agent',
+        customer_service: 'inmova-customer-service-agent',
+        incidents: 'inmova-incidents-agent',
+        valuations: 'inmova-valuations-agent',
+        acquisition: 'inmova-acquisition-agent',
+        coliving: 'inmova-coliving-agent',
+        communities: 'inmova-communities-agent',
+      };
+      
+      const agentNames: Record<string, string> = {
+        sales: 'Elena',
+        customer_service: 'María',
+        incidents: 'Carlos',
+        valuations: 'Patricia',
+        acquisition: 'Roberto',
+        coliving: 'Laura',
+        communities: 'Antonio',
+      };
+
+      const targetAgentId = agentMapping[parameters.targetAgent];
+      const targetAgentName = agentNames[parameters.targetAgent] || parameters.targetAgent;
+      
+      return {
+        success: true,
+        transfer: true,
+        targetAssistantId: targetAgentId,
+        message: `Te transfiero con ${targetAgentName}, nuestro especialista en ${parameters.reason}. Un momento por favor.`,
+        metadata: {
+          customerName: parameters.customerName,
+          customerPhone: parameters.customerPhone,
+          summary: parameters.summary,
+          originalAgent: 'receptionist',
+        },
+      };
+    
+    case 'get_business_hours':
+      const hours: Record<string, { schedule: string; note: string }> = {
+        ventas: { schedule: 'L-V 9:00-21:00, S 10:00-14:00', note: 'Asesoramiento comercial' },
+        soporte: { schedule: 'L-V 8:00-20:00', note: 'Atención al cliente' },
+        tecnico: { schedule: '24/7 emergencias', note: 'L-V 8:00-20:00 consultas generales' },
+        valoraciones: { schedule: 'L-V 9:00-19:00', note: 'Tasaciones e informes' },
+        captacion: { schedule: 'L-V 9:00-21:00', note: 'Propietarios' },
+        coliving: { schedule: 'L-V 10:00-20:00', note: 'Espacios compartidos' },
+        comunidades: { schedule: 'L-V 9:00-18:00', note: 'Administración de fincas' },
+        general: { schedule: '24/7 con IA', note: 'Agentes humanos L-V 9:00-21:00' },
+      };
+      
+      const dept = parameters.department || 'general';
+      const deptHours = hours[dept] || hours.general;
+      
+      return {
+        success: true,
+        department: dept,
+        schedule: deptHours.schedule,
+        note: deptHours.note,
+        message: `El departamento de ${dept} atiende ${deptHours.schedule}. ${deptHours.note}.`,
+      };
+    
+    case 'leave_message':
+      // Aquí integrarías con tu sistema de mensajes/tickets
+      return {
+        success: true,
+        messageId: `MSG-${Date.now()}`,
+        message: `He registrado tu mensaje para el departamento de ${parameters.department}. Te llamaremos ${parameters.preferredContactTime || 'lo antes posible'}. ¿Hay algo más en lo que pueda ayudarte?`,
+        details: {
+          customerName: parameters.customerName,
+          customerPhone: parameters.customerPhone,
+          customerEmail: parameters.customerEmail,
+          department: parameters.department,
+          urgency: parameters.urgency || 'media',
+        },
+      };
+    
+    case 'get_office_location':
+      return {
+        success: true,
+        offices: [
+          {
+            city: 'Madrid',
+            address: 'Calle Gran Vía 123, 28013 Madrid',
+            phone: '+34 91 XXX XX XX',
+            hours: 'L-V 9:00-19:00',
+          },
+          {
+            city: 'Barcelona',
+            address: 'Passeig de Gràcia 45, 08007 Barcelona',
+            phone: '+34 93 XXX XX XX',
+            hours: 'L-V 9:00-19:00',
+          },
+        ],
+        message: 'Tenemos oficinas en Madrid y Barcelona. ¿Cuál te queda más cerca?',
+      };
+    
+    case 'check_appointment_availability':
+      // Simular disponibilidad
+      return {
+        success: true,
+        available: true,
+        slots: [
+          { date: parameters.preferredDate || 'mañana', time: '10:00' },
+          { date: parameters.preferredDate || 'mañana', time: '12:00' },
+          { date: parameters.preferredDate || 'mañana', time: '16:00' },
+        ],
+        message: `Tengo disponibilidad para una cita ${parameters.appointmentType || 'telefónica'} el ${parameters.preferredDate || 'mañana'}. ¿A qué hora te vendría mejor: 10:00, 12:00 o 16:00?`,
+      };
+    
+    // --------------------------------------------------------------------------
     // FUNCIONES COMPARTIDAS
     // --------------------------------------------------------------------------
     case 'transfer_to_human':

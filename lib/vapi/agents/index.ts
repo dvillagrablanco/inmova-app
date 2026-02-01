@@ -1158,10 +1158,17 @@ export const COMMUNITIES_AGENT: AgentConfig = {
 };
 
 // ============================================================================
+// IMPORTAR AGENTE RECEPCIONISTA
+// ============================================================================
+
+import { RECEPTIONIST_AGENT, DEPARTMENT_TO_AGENT, BUSINESS_HOURS } from './receptionist';
+
+// ============================================================================
 // EXPORTAR TODOS LOS AGENTES
 // ============================================================================
 
 export const ALL_AGENTS: AgentConfig[] = [
+  RECEPTIONIST_AGENT, // Agente principal para llamadas entrantes
   SALES_AGENT,
   CUSTOMER_SERVICE_AGENT,
   INCIDENTS_AGENT,
@@ -1172,6 +1179,7 @@ export const ALL_AGENTS: AgentConfig[] = [
 ];
 
 export const AGENTS_BY_TYPE: Record<string, AgentConfig> = {
+  receptionist: RECEPTIONIST_AGENT,
   sales: SALES_AGENT,
   customer_service: CUSTOMER_SERVICE_AGENT,
   incidents: INCIDENTS_AGENT,
@@ -1188,3 +1196,67 @@ export function getAgentByType(type: string): AgentConfig | undefined {
 export function getAgentById(id: string): AgentConfig | undefined {
   return ALL_AGENTS.find(agent => agent.id === id);
 }
+
+// ============================================================================
+// MAPEO DE AGENTES POR SECCIÓN DE LA APP
+// ============================================================================
+
+/**
+ * Define qué agente se muestra en cada sección del dashboard
+ */
+export const AGENT_BY_SECTION: Record<string, string> = {
+  // Dashboard principal
+  '/dashboard': 'receptionist',
+  
+  // Ventas y propiedades
+  '/dashboard/properties': 'sales',
+  '/dashboard/properties/new': 'acquisition',
+  
+  // Inquilinos y contratos
+  '/dashboard/tenants': 'customer_service',
+  '/dashboard/contracts': 'customer_service',
+  '/dashboard/payments': 'customer_service',
+  '/dashboard/messages': 'customer_service',
+  
+  // Incidencias y mantenimiento
+  '/dashboard/maintenance': 'incidents',
+  
+  // Valoraciones
+  '/dashboard/herramientas': 'valuations',
+  '/dashboard/analytics': 'valuations',
+  
+  // Propietarios
+  '/(dashboard)/dashboard-propietarios': 'acquisition',
+  
+  // Coliving y media estancia
+  '/(dashboard)/coliving': 'coliving',
+  '/(dashboard)/media-estancia': 'coliving',
+  
+  // Comunidades y administración de fincas
+  '/dashboard/community': 'communities',
+  '/(dashboard)/admin-fincas': 'communities',
+  '/(dashboard)/traditional-rental/communities': 'communities',
+};
+
+/**
+ * Obtiene el agente apropiado para una ruta específica
+ */
+export function getAgentForRoute(pathname: string): AgentConfig {
+  // Buscar coincidencia exacta primero
+  if (AGENT_BY_SECTION[pathname]) {
+    return AGENTS_BY_TYPE[AGENT_BY_SECTION[pathname]];
+  }
+  
+  // Buscar coincidencia parcial
+  for (const [route, agentType] of Object.entries(AGENT_BY_SECTION)) {
+    if (pathname.startsWith(route)) {
+      return AGENTS_BY_TYPE[agentType];
+    }
+  }
+  
+  // Por defecto, devolver el recepcionista
+  return RECEPTIONIST_AGENT;
+}
+
+// Exportar utilidades del recepcionista
+export { RECEPTIONIST_AGENT, DEPARTMENT_TO_AGENT, BUSINESS_HOURS };
