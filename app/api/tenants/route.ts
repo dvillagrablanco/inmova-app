@@ -169,6 +169,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(tenant, { status: 201 });
   } catch (error: any) {
     logger.error('Error creating tenant:', error);
+    if (error?.code === 'P2002') {
+      const target = Array.isArray(error?.meta?.target) ? error.meta.target.join(', ') : 'campo';
+      return NextResponse.json(
+        { error: `Registro duplicado en ${target}` },
+        { status: 409 }
+      );
+    }
     if (error.message?.includes('permiso')) {
       return forbiddenResponse(error.message);
     }
