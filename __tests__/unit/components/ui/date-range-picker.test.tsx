@@ -1,54 +1,41 @@
+import { format } from 'date-fns';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
+import type { DateRange } from 'react-day-picker';
 
 describe('DateRangePicker', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<DateRangePicker {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  const emptyRange = {} as DateRange;
+
+  it('renderiza el placeholder cuando no hay fechas', () => {
+    render(
+      <DateRangePicker value={emptyRange} onChange={vi.fn()} />
+    );
+
+    expect(
+      screen.getByRole('button', { name: /Pick a date range/i })
+    ).toBeInTheDocument();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<DateRangePicker {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+  it('renderiza el rango formateado cuando hay fechas', () => {
+    const from = new Date(2024, 0, 10);
+    const to = new Date(2024, 0, 20);
+    const value: DateRange = { from, to };
+
+    render(<DateRangePicker value={value} onChange={vi.fn()} />);
+
+    const expected = `${format(from, 'LLL dd, y')} - ${format(
+      to,
+      'LLL dd, y'
+    )}`;
+    expect(screen.getByText(expected)).toBeInTheDocument();
   });
 
-  it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<DateRangePicker onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
-  });
+  it('muestra el boton con label accesible', () => {
+    render(
+      <DateRangePicker value={emptyRange} onChange={vi.fn()} />
+    );
 
-  it('should be accessible', () => {
-    render(<DateRangePicker />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    expect(screen.getByRole('button')).toBeInTheDocument();
   });
 });
