@@ -233,15 +233,17 @@ describe('🏠 Units API - GET Endpoint', () => {
     expect(response.status).toBe(401);
   });
 
-  test('❌ Debe retornar 400 sin companyId', async () => {
+  test('❌ Debe retornar lista vacía sin companyId', async () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: { id: 'user-123' }, // Sin companyId
     });
 
     const req = new NextRequest('http://localhost:3000/api/units');
     const response = await GET(req);
-
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(Array.isArray(data)).toBe(true);
+    expect(data).toHaveLength(0);
   });
 
   test('❌ Debe manejar error de base de datos', async () => {
