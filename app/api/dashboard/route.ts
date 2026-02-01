@@ -11,6 +11,9 @@ export async function GET() {
   try {
     const user = await requireAuth();
     const companyId = user.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
+    }
 
     // Obtener información de la empresa
     const company = await prisma.company.findUnique({

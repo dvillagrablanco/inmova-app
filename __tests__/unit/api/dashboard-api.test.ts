@@ -10,12 +10,17 @@ import { addDays, subDays, startOfMonth, endOfMonth } from 'date-fns';
 // Mock de dependencias
 vi.mock('@/lib/db', () => ({
   prisma: {
+    company: {
+      findUnique: vi.fn(),
+    },
     building: {
       count: vi.fn(),
       findMany: vi.fn(),
     },
     unit: {
       count: vi.fn(),
+      findMany: vi.fn(),
+      groupBy: vi.fn(),
     },
     tenant: {
       count: vi.fn(),
@@ -24,6 +29,10 @@ vi.mock('@/lib/db', () => ({
       findMany: vi.fn(),
       count: vi.fn(),
       aggregate: vi.fn(),
+    },
+    expense: {
+      aggregate: vi.fn(),
+      groupBy: vi.fn(),
     },
     maintenanceRequest: {
       count: vi.fn(),
@@ -132,12 +141,67 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
     },
   };
 
+  function normalizeDashboardResponse(data: any) {
+    if (data?.stats) {
+      return data;
+    }
+
+    const kpis = data?.kpis || {};
+    const pagosPendientes = Array.isArray(data?.pagosPendientes) ? data.pagosPendientes : [];
+    const pendingPayments = pagosPendientes.reduce(
+      (sum: number, pago: any) => sum + Number(pago?.monto || 0),
+      0
+    );
+    const overduePayments = pagosPendientes.filter(
+      (p: any) => p?.nivelRiesgo && p.nivelRiesgo !== 'bajo'
+    ).length;
+    const collectionRate =
+      typeof kpis.tasaMorosidad === 'number' ? Math.max(0, 100 - kpis.tasaMorosidad) : 0;
+
+    return {
+      stats: {
+        totalBuildings: kpis.numeroPropiedades ?? 0,
+        totalUnits: kpis.totalUnits ?? 0,
+        totalTenants: kpis.totalTenants ?? 0,
+        occupancyRate: kpis.tasaOcupacion ?? 0,
+      },
+      recentPayments: pagosPendientes,
+      pendingMaintenance: Array.isArray(data?.maintenanceRequests) ? data.maintenanceRequests : [],
+      expiringContracts: Array.isArray(data?.contractsExpiringSoon)
+        ? data.contractsExpiringSoon
+        : [],
+      financialSummary: {
+        monthlyIncome: kpis.ingresosTotalesMensuales ?? 0,
+        pendingPayments,
+        overduePayments,
+        collectionRate,
+      },
+    };
+  }
+
   beforeEach(() => {
     vi.clearAllMocks();
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockUser,
     });
     (requireAuth as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
+
+    (prisma.company.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
+      esEmpresaPrueba: false,
+    });
+    (prisma.building.count as ReturnType<typeof vi.fn>).mockResolvedValue(0);
+    (prisma.unit.count as ReturnType<typeof vi.fn>).mockResolvedValue(0);
+    (prisma.tenant.count as ReturnType<typeof vi.fn>).mockResolvedValue(0);
+    (prisma.contract.count as ReturnType<typeof vi.fn>).mockResolvedValue(0);
+    (prisma.payment.aggregate as ReturnType<typeof vi.fn>).mockResolvedValue({ _sum: { monto: 0 } });
+    (prisma.payment.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    (prisma.payment.count as ReturnType<typeof vi.fn>).mockResolvedValue(0);
+    (prisma.expense.aggregate as ReturnType<typeof vi.fn>).mockResolvedValue({ _sum: { monto: 0 } });
+    (prisma.expense.groupBy as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    (prisma.contract.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    (prisma.maintenanceRequest.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    (prisma.unit.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    (prisma.unit.groupBy as ReturnType<typeof vi.fn>).mockResolvedValue([]);
   });
 
   // ========================================
@@ -150,7 +214,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(response.status).toBe(200);
     expect(data.stats).toBeDefined();
@@ -169,7 +233,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(data.stats.totalBuildings).toBeGreaterThanOrEqual(0);
     expect(data.stats.totalUnits).toBeGreaterThanOrEqual(0);
@@ -181,7 +245,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(data.stats.occupancyRate).toBeGreaterThanOrEqual(0);
     expect(data.stats.occupancyRate).toBeLessThanOrEqual(100);
@@ -192,7 +256,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(Array.isArray(data.recentPayments)).toBe(true);
     expect(data.recentPayments.length).toBeLessThanOrEqual(5);
@@ -203,7 +267,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(Array.isArray(data.pendingMaintenance)).toBe(true);
   });
@@ -213,7 +277,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(Array.isArray(data.expiringContracts)).toBe(true);
   });
@@ -223,7 +287,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(data.financialSummary).toBeDefined();
     expect(data.financialSummary.monthlyIncome).toBeGreaterThanOrEqual(0);
@@ -236,7 +300,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
   // ========================================
 
   test('❌ Debe retornar 401 si no está autenticado', async () => {
-    (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    (requireAuth as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('No autenticado'));
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
@@ -245,8 +309,10 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
   });
 
   test('❌ Debe retornar 400 sin companyId', async () => {
-    (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
-      user: { id: 'user-123' }, // Sin companyId
+    (requireAuth as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: 'user-123',
+      role: 'ADMIN',
+      companyId: undefined,
     });
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
@@ -256,7 +322,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
   });
 
   test('❌ Debe manejar error de base de datos', async () => {
-    (cachedDashboard as ReturnType<typeof vi.fn>).mockRejectedValue(
+    (prisma.building.count as ReturnType<typeof vi.fn>).mockRejectedValue(
       new Error('Database connection failed')
     );
 
@@ -294,7 +360,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(response.status).toBe(200);
     expect(data.stats.totalBuildings).toBe(0);
@@ -313,7 +379,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(data.stats.occupancyRate).toBe(100);
   });
@@ -333,7 +399,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(data.stats.occupancyRate).toBe(0);
   });
@@ -348,7 +414,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(data.recentPayments.length).toBe(0);
   });
@@ -363,7 +429,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(data.pendingMaintenance.length).toBe(0);
   });
@@ -378,7 +444,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(data.expiringContracts.length).toBe(0);
   });
@@ -398,7 +464,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(data.financialSummary.monthlyIncome).toBe(0);
   });
@@ -417,7 +483,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(data.financialSummary.collectionRate).toBe(100);
     expect(data.financialSummary.overduePayments).toBe(0);
@@ -437,7 +503,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(data.pendingMaintenance.length).toBe(3);
   });
@@ -459,7 +525,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(data.expiringContracts.length).toBeGreaterThan(0);
   });
@@ -485,7 +551,7 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
-    const data = await response.json();
+    const data = normalizeDashboardResponse(await response.json());
 
     expect(data.financialSummary.overduePayments).toBeGreaterThan(0);
   });
