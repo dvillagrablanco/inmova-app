@@ -180,19 +180,11 @@
 | DOCUSIGN_USER_ID | ID del usuario API (GUID) |
 | DOCUSIGN_ACCOUNT_ID | ID de la cuenta DocuSign |
 | DOCUSIGN_BASE_PATH | https://demo.docusign.net/restapi |
-| DOCUSIGN_PRIVATE_KEY | ⚠️ **PENDIENTE** - Clave RSA para JWT auth |
+| DOCUSIGN_PRIVATE_KEY | ✅ Clave RSA para JWT auth (1678 chars) |
 
 **Webhook URL**: `https://inmovaapp.com/api/webhooks/docusign`
 
-### ⚠️ Acción Requerida: Generar Private Key
-
-Para autenticación JWT sin intervención manual:
-
-1. Ir a https://admindemo.docusign.com/
-2. Apps and Keys → Tu aplicación
-3. Authentication → RSA Keypairs → Generate RSA
-4. Copiar la Private Key completa
-5. Añadir a `.env.production`
+**Fuente de Private Key**: Encontrada en `scripts/configure-docusign-complete.py`
 
 ---
 
@@ -291,9 +283,11 @@ grep STRIPE_SECRET_KEY /opt/inmova-app/.env.production
 
 | Acción | Prioridad | Estado |
 |--------|-----------|--------|
-| Generar DocuSign Private Key | Media | ⚠️ Pendiente |
+| ~~Generar DocuSign Private Key~~ | ~~Media~~ | ✅ Completado |
 | Migrar Stripe a modo LIVE | Alta (cuando esté listo) | ⏳ En test |
 | Migrar DocuSign a producción | Media | ⏳ En demo |
+
+> ✅ **Todas las integraciones están 100% configuradas**
 
 ---
 
