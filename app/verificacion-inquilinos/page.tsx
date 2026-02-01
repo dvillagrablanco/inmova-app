@@ -103,66 +103,26 @@ export default function VerificacionInquilinosPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      // Mock data
-      const mockRequests: VerificationRequest[] = [
-        {
-          id: 'v1',
-          tenantName: 'María García López',
-          tenantEmail: 'maria.garcia@email.com',
-          tenantPhone: '+34 612 345 678',
-          propertyName: 'Piso C/ Mayor 45, 3ºA',
-          requestDate: '2025-01-20',
-          status: 'completed',
-          score: 85,
-          checks: {
-            identity: 'verified',
-            credit: 'verified',
-            employment: 'verified',
-            references: 'verified',
-            background: 'clear',
-          },
-          documents: ['DNI', 'Nóminas', 'Contrato laboral'],
-        },
-        {
-          id: 'v2',
-          tenantName: 'Juan Martínez',
-          tenantEmail: 'juan.martinez@email.com',
-          tenantPhone: '+34 623 456 789',
-          propertyName: 'Apartamento Playa Bloque 2',
-          requestDate: '2025-01-22',
-          status: 'in_progress',
-          score: 72,
-          checks: {
-            identity: 'verified',
-            credit: 'warning',
-            employment: 'verified',
-            references: 'pending',
-            background: 'clear',
-          },
-          documents: ['DNI', 'Declaración IRPF'],
-          notes: 'Pendiente referencias del anterior arrendador',
-        },
-        {
-          id: 'v3',
-          tenantName: 'Ana Rodríguez',
-          tenantEmail: 'ana.r@email.com',
-          tenantPhone: '+34 634 567 890',
-          propertyName: 'Estudio Centro 1ºB',
-          requestDate: '2025-01-23',
-          status: 'pending',
-          checks: {
-            identity: 'pending',
-            credit: 'pending',
-            employment: 'pending',
-            references: 'pending',
-            background: 'pending',
-          },
-          documents: [],
-        },
-      ];
-      setRequests(mockRequests);
+      
+      // Obtener datos desde la API
+      const response = await fetch('/api/verificacion-inquilinos');
+      
+      if (!response.ok) {
+        throw new Error('Error al obtener verificaciones');
+      }
+      
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        setRequests(result.data);
+      } else {
+        // Si no hay datos, mostrar lista vacía
+        setRequests([]);
+      }
     } catch (error) {
+      console.error('Error al cargar verificaciones:', error);
       toast.error('Error al cargar verificaciones');
+      setRequests([]);
     } finally {
       setLoading(false);
     }

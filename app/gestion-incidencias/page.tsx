@@ -132,74 +132,70 @@ export default function GestionIncidenciasPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const mockIncidents: Incident[] = [
-        {
-          id: 'i1',
-          title: 'Fuga de agua en baño',
-          description: 'Hay una fuga de agua debajo del lavabo del baño principal',
-          category: 'plumbing',
-          priority: 'high',
-          status: 'in_progress',
-          propertyName: 'Edificio Centro',
-          unitNumber: '3A',
-          reportedBy: 'María García',
-          reportedAt: '2025-01-22T10:30:00',
-          assignedTo: 'Fontanería López',
-          slaDeadline: '2025-01-23T10:30:00',
-          comments: [
-            { author: 'Fontanería López', text: 'En camino, llegamos en 30 min', date: '2025-01-22T11:00:00' },
-          ],
-        },
-        {
-          id: 'i2',
-          title: 'Aire acondicionado no funciona',
-          description: 'El AC de la sala de estar no enciende',
-          category: 'hvac',
-          priority: 'medium',
-          status: 'assigned',
-          propertyName: 'Residencial Playa',
-          unitNumber: '2B',
-          reportedBy: 'Juan Martínez',
-          reportedAt: '2025-01-21T15:00:00',
-          assignedTo: 'Clima Tech',
-          slaDeadline: '2025-01-24T15:00:00',
-          comments: [],
-        },
-        {
-          id: 'i3',
-          title: 'Enchufe sin corriente',
-          description: 'El enchufe de la cocina no tiene corriente',
-          category: 'electrical',
-          priority: 'critical',
-          status: 'open',
-          propertyName: 'Piso Centro',
-          unitNumber: '1C',
-          reportedBy: 'Ana López',
-          reportedAt: '2025-01-23T08:00:00',
-          slaDeadline: '2025-01-23T12:00:00',
-          comments: [],
-        },
-        {
-          id: 'i4',
-          title: 'Cerradura puerta principal',
-          description: 'La cerradura de la puerta principal está trabada',
-          category: 'security',
-          priority: 'high',
-          status: 'resolved',
-          propertyName: 'Edificio Norte',
-          unitNumber: '5D',
-          reportedBy: 'Carlos Ruiz',
-          reportedAt: '2025-01-20T18:00:00',
-          assignedTo: 'Cerrajería 24h',
-          resolvedAt: '2025-01-20T20:30:00',
-          comments: [
-            { author: 'Cerrajería 24h', text: 'Cerradura reemplazada, problema resuelto', date: '2025-01-20T20:30:00' },
-          ],
-        },
-      ];
-      setIncidents(mockIncidents);
+      
+      // Obtener datos desde la API de mantenimiento
+      const response = await fetch('/api/maintenance');
+      
+      if (!response.ok) {
+        throw new Error('Error al obtener incidencias');
+      }
+      
+      const data = await response.json();
+      
+      // Mapear los datos de MaintenanceRequest a Incident
+      const mappedIncidents: Incident[] = (Array.isArray(data) ? data : data.data || []).map((req: any) => {
+        // Mapear prioridad
+        const priorityMap: Record<string, 'low' | 'medium' | 'high' | 'critical'> = {
+          baja: 'low',
+          media: 'medium',
+          alta: 'high',
+          urgente: 'critical',
+        };
+        
+        // Mapear estado
+        const statusMap: Record<string, 'open' | 'assigned' | 'in_progress' | 'resolved' | 'closed'> = {
+          pendiente: 'open',
+          asignado: 'assigned',
+          en_progreso: 'in_progress',
+          completado: 'resolved',
+          cancelado: 'closed',
+        };
+        
+        // Inferir categoría del título
+        const inferCategory = (title: string, desc: string): string => {
+          const text = `${title} ${desc}`.toLowerCase();
+          if (text.includes('agua') || text.includes('fuga') || text.includes('tubería') || text.includes('fontaner')) return 'plumbing';
+          if (text.includes('eléctric') || text.includes('enchufe') || text.includes('luz') || text.includes('interruptor')) return 'electrical';
+          if (text.includes('aire') || text.includes('calefacción') || text.includes('clima')) return 'hvac';
+          if (text.includes('puerta') || text.includes('cerradura') || text.includes('seguridad')) return 'security';
+          if (text.includes('limpieza') || text.includes('pintura')) return 'cleaning';
+          if (text.includes('estructura') || text.includes('grieta') || text.includes('techo')) return 'structural';
+          return 'other';
+        };
+        
+        return {
+          id: req.id,
+          title: req.titulo,
+          description: req.descripcion,
+          category: inferCategory(req.titulo, req.descripcion),
+          priority: priorityMap[req.prioridad] || 'medium',
+          status: statusMap[req.estado] || 'open',
+          propertyName: req.unit?.building?.nombre || 'Sin edificio',
+          unitNumber: req.unit?.numero || 'Sin unidad',
+          reportedBy: req.unit?.tenant?.nombreCompleto || 'Sistema',
+          reportedAt: req.fechaSolicitud || new Date().toISOString(),
+          assignedTo: req.provider?.nombre,
+          resolvedAt: req.fechaCompletada,
+          slaDeadline: req.fechaProgramada,
+          comments: req.comentarios ? [{ author: 'Sistema', text: req.comentarios, date: req.updatedAt }] : [],
+        };
+      });
+      
+      setIncidents(mappedIncidents);
     } catch (error) {
+      console.error('Error al cargar incidencias:', error);
       toast.error('Error al cargar incidencias');
+      setIncidents([]);
     } finally {
       setLoading(false);
     }

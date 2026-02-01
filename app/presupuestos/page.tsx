@@ -156,7 +156,35 @@ export default function PresupuestosPage() {
       const response = await fetch('/api/budgets');
       if (response.ok) {
         const data = await response.json();
-        setBudgets(data.budgets || data || []);
+        const rawBudgets = data.budgets || data || [];
+        
+        // Mapear ProviderQuote a Budget
+        const mappedBudgets: Budget[] = rawBudgets.map((q: any) => ({
+          id: q.id,
+          numero: `PRES-${q.id?.slice(-6)?.toUpperCase() || '000000'}`,
+          titulo: q.titulo,
+          descripcion: q.descripcion,
+          tipo: 'mantenimiento' as const, // Default
+          estado: mapEstado(q.estado),
+          proveedor: q.provider ? { id: q.providerId, nombre: q.provider.nombre } : undefined,
+          cliente: q.workOrder ? { id: q.workOrderId, nombre: q.workOrder.titulo } : undefined,
+          fechaCreacion: new Date(q.createdAt),
+          fechaValidez: new Date(q.fechaVencimiento || Date.now()),
+          items: Array.isArray(q.conceptos) ? q.conceptos.map((c: any, idx: number) => ({
+            id: `item-${idx}`,
+            concepto: c.descripcion || c.concepto || '',
+            cantidad: c.cantidad || 1,
+            unidad: c.unidad || 'ud',
+            precioUnitario: c.precioUnitario || 0,
+            total: c.total || 0,
+          })) : [],
+          subtotal: q.subtotal || 0,
+          iva: q.montoIva || q.iva || 0,
+          total: q.total || 0,
+          notas: q.notas,
+        }));
+        
+        setBudgets(mappedBudgets);
       } else {
         console.error('Error fetching budgets');
         setBudgets([]);
@@ -168,6 +196,18 @@ export default function PresupuestosPage() {
     } finally {
       setLoading(false);
     }
+  };
+  
+  // Helper para mapear estado de API a estado de UI
+  const mapEstado = (apiEstado: string): Budget['estado'] => {
+    const estadoMap: Record<string, Budget['estado']> = {
+      'pendiente': 'enviado',
+      'aprobado': 'aprobado',
+      'rechazado': 'rechazado',
+      'borrador': 'borrador',
+      'facturado': 'facturado',
+    };
+    return estadoMap[apiEstado] || 'borrador';
   };
 
   const stats = useMemo(() => {

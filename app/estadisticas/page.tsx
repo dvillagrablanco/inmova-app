@@ -47,63 +47,16 @@ interface StatCard {
   color: string;
 }
 
-const STATS: StatCard[] = [
-  {
-    title: 'Propiedades Totales',
-    value: '156',
-    change: 8,
-    trend: 'up',
-    icon: Building2,
-    color: 'text-blue-500',
-  },
-  {
-    title: 'Ocupación Media',
-    value: '92.4%',
-    change: 3.2,
-    trend: 'up',
-    icon: Percent,
-    color: 'text-green-500',
-  },
-  {
-    title: 'Ingresos Mensuales',
-    value: '€124,500',
-    change: 12.5,
-    trend: 'up',
-    icon: Euro,
-    color: 'text-emerald-500',
-  },
-  {
-    title: 'Inquilinos Activos',
-    value: '312',
-    change: -2.1,
-    trend: 'down',
-    icon: Users,
-    color: 'text-purple-500',
-  },
-];
+// Los stats se calculan dinámicamente desde la API
+interface SummaryData {
+  totalBuildings: number;
+  totalUnits: number;
+  occupiedUnits: number;
+  occupancyRate: number;
+  totalIncome: number;
+}
 
-// Datos mock (cargados desde API /api/estadisticas en producción)
-const MONTHLY_DATA = [
-  { mes: 'Jul', ingresos: 118500, ocupacion: 89 },
-  { mes: 'Ago', ingresos: 121200, ocupacion: 90 },
-  { mes: 'Sep', ingresos: 119800, ocupacion: 91 },
-  { mes: 'Oct', ingresos: 122500, ocupacion: 92 },
-  { mes: 'Nov', ingresos: 123800, ocupacion: 91 },
-  { mes: 'Dic', ingresos: 124500, ocupacion: 92 },
-];
-
-const PROPERTY_TYPES = [
-  { tipo: 'Apartamentos', count: 89, ocupacion: 94, ingresos: 68500 },
-  { tipo: 'Pisos', count: 45, ocupacion: 91, ingresos: 38200 },
-  { tipo: 'Estudios', count: 22, ocupacion: 88, ingresos: 17800 },
-];
-
-const TOP_PROPERTIES = [
-  { nombre: 'Edificio Centro', unidades: 24, ocupacion: 96, ingresos: 28500 },
-  { nombre: 'Residencial Playa', unidades: 18, ocupacion: 94, ingresos: 24200 },
-  { nombre: 'Apartamentos Norte', unidades: 32, ocupacion: 91, ingresos: 35800 },
-  { nombre: 'Torres del Mar', unidades: 15, ocupacion: 93, ingresos: 18900 },
-];
+// Datos cargados desde API /api/estadisticas
 
 export default function EstadisticasPage() {
   const [loading, setLoading] = useState(true);
@@ -111,6 +64,13 @@ export default function EstadisticasPage() {
   const [monthlyData, setMonthlyData] = useState<{mes: string; ingresos: number; ocupacion: number}[]>([]);
   const [propertyTypes, setPropertyTypes] = useState<{tipo: string; count: number; ocupacion: number; ingresos: number}[]>([]);
   const [topProperties, setTopProperties] = useState<{nombre: string; unidades: number; ocupacion: number; ingresos: number}[]>([]);
+  const [summary, setSummary] = useState<SummaryData>({
+    totalBuildings: 0,
+    totalUnits: 0,
+    occupiedUnits: 0,
+    occupancyRate: 0,
+    totalIncome: 0,
+  });
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -121,6 +81,13 @@ export default function EstadisticasPage() {
           setMonthlyData(result.data?.monthlyData || []);
           setPropertyTypes(result.data?.propertyTypes || []);
           setTopProperties(result.data?.topProperties || []);
+          setSummary(result.data?.summary || {
+            totalBuildings: 0,
+            totalUnits: 0,
+            occupiedUnits: 0,
+            occupancyRate: 0,
+            totalIncome: 0,
+          });
         }
       } catch (error) {
         console.error('Error fetching statistics:', error);
@@ -130,6 +97,42 @@ export default function EstadisticasPage() {
     };
     fetchStats();
   }, []);
+  
+  // Generar stats cards dinámicos
+  const STATS: StatCard[] = [
+    {
+      title: 'Edificios Totales',
+      value: summary.totalBuildings.toString(),
+      change: 0,
+      trend: 'neutral',
+      icon: Building2,
+      color: 'text-blue-500',
+    },
+    {
+      title: 'Ocupación Media',
+      value: `${summary.occupancyRate}%`,
+      change: 0,
+      trend: summary.occupancyRate > 85 ? 'up' : 'down',
+      icon: Percent,
+      color: 'text-green-500',
+    },
+    {
+      title: 'Ingresos (6 meses)',
+      value: `€${summary.totalIncome.toLocaleString('es-ES')}`,
+      change: 0,
+      trend: 'up',
+      icon: Euro,
+      color: 'text-emerald-500',
+    },
+    {
+      title: 'Unidades Ocupadas',
+      value: `${summary.occupiedUnits}/${summary.totalUnits}`,
+      change: 0,
+      trend: 'neutral',
+      icon: Users,
+      color: 'text-purple-500',
+    },
+  ];
 
   const handleExport = () => {
     toast.success('Exportando estadísticas...');

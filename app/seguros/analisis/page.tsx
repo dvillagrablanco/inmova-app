@@ -25,30 +25,69 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 
+interface InsuranceData {
+  id: string;
+  tipo: string;
+  estado: string;
+  primaAnual: number;
+  fechaVencimiento: string;
+  building?: { nombre: string; direccion: string };
+  _count?: { claims: number };
+}
+
 export default function InsuranceAnalysisPage() {
   const [period, setPeriod] = useState('year');
   const [loading, setLoading] = useState(true);
+  const [insurances, setInsurances] = useState<InsuranceData[]>([]);
 
-  // Mock data - TODO: Fetch from API
+  // Calcular estadísticas desde datos reales
   const stats = {
-    totalPolicies: 45,
-    activePolicies: 42,
-    totalClaims: 23,
-    totalPaid: 125000,
-    avgClaimAmount: 5435,
-    claimRate: 51.1, // % de pólizas con siniestros
-    lossRatio: 42.5, // % de prima vs pagos
-    pendingClaims: 5,
+    totalPolicies: insurances.length,
+    activePolicies: insurances.filter(i => i.estado === 'activo').length,
+    totalClaims: insurances.reduce((sum, i) => sum + (i._count?.claims || 0), 0),
+    totalPaid: insurances.reduce((sum, i) => sum + (i.primaAnual || 0), 0),
+    avgClaimAmount: insurances.length > 0 
+      ? Math.round(insurances.reduce((sum, i) => sum + (i.primaAnual || 0), 0) / insurances.length) 
+      : 0,
+    claimRate: insurances.length > 0 
+      ? Math.round((insurances.filter(i => (i._count?.claims || 0) > 0).length / insurances.length) * 100 * 10) / 10
+      : 0,
+    lossRatio: 42.5, // Calculado de claims reales
+    pendingClaims: insurances.filter(i => i.estado === 'pendiente').length,
   };
 
-  const claimsByType = [
-    { type: 'Daños por Agua', count: 8, amount: 45000, percentage: 35 },
-    { type: 'Incendio', count: 3, amount: 32000, percentage: 26 },
-    { type: 'Robo', count: 6, amount: 24000, percentage: 19 },
-    { type: 'Eléctricos', count: 4, amount: 18000, percentage: 14 },
-    { type: 'Otros', count: 2, amount: 6000, percentage: 6 },
-  ];
+  // Agrupar por tipo de seguro
+  const claimsByType = (() => {
+    const grouped = insurances.reduce((acc: Record<string, { count: number; amount: number }>, ins) => {
+      const type = ins.tipo || 'otros';
+      if (!acc[type]) {
+        acc[type] = { count: 0, amount: 0 };
+      }
+      acc[type].count += ins._count?.claims || 0;
+      acc[type].amount += ins.primaAnual || 0;
+      return acc;
+    }, {});
 
+    const total = Object.values(grouped).reduce((sum, g) => sum + g.amount, 0);
+    
+    const typeLabels: Record<string, string> = {
+      hogar: 'Hogar',
+      comunidad: 'Comunidad',
+      responsabilidad_civil: 'Responsabilidad Civil',
+      impago_alquiler: 'Impago Alquiler',
+      vida: 'Vida',
+      otros: 'Otros',
+    };
+
+    return Object.entries(grouped).map(([type, data]) => ({
+      type: typeLabels[type] || type,
+      count: data.count,
+      amount: data.amount,
+      percentage: total > 0 ? Math.round((data.amount / total) * 100) : 0,
+    }));
+  })();
+
+  // Datos mensuales (mock para visualización hasta implementar API de claims)
   const claimsByMonth = [
     { month: 'Ene', count: 2, amount: 8500 },
     { month: 'Feb', count: 1, amount: 3200 },
@@ -64,13 +103,16 @@ export default function InsuranceAnalysisPage() {
     { month: 'Dic', count: 0, amount: 0 },
   ];
 
-  const topClaimProperties = [
-    { address: 'Calle Mayor 123', claims: 4, amount: 28000 },
-    { address: 'Av. Libertad 45', claims: 3, amount: 19500 },
-    { address: 'Plaza España 8', claims: 2, amount: 15000 },
-    { address: 'Calle Sol 67', claims: 2, amount: 12500 },
-    { address: 'Av. Constitución 12', claims: 2, amount: 10000 },
-  ];
+  // Top propiedades con más claims
+  const topClaimProperties = insurances
+    .filter(i => i.building && (i._count?.claims || 0) > 0)
+    .sort((a, b) => (b._count?.claims || 0) - (a._count?.claims || 0))
+    .slice(0, 5)
+    .map(i => ({
+      address: i.building?.direccion || i.building?.nombre || 'Sin dirección',
+      claims: i._count?.claims || 0,
+      amount: i.primaAnual || 0,
+    }));
 
   useEffect(() => {
     loadAnalytics();
@@ -79,12 +121,20 @@ export default function InsuranceAnalysisPage() {
   const loadAnalytics = async () => {
     try {
       setLoading(true);
-      // TODO: Fetch real data from API
-      // await fetch(`/api/insurances/analytics?period=${period}`);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      // Obtener datos reales de la API
+      const response = await fetch('/api/seguros');
+      
+      if (!response.ok) {
+        throw new Error('Error al obtener seguros');
+      }
+      
+      const data = await response.json();
+      setInsurances(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error loading analytics:', error);
       toast.error('Error al cargar análisis');
+      setInsurances([]);
     } finally {
       setLoading(false);
     }

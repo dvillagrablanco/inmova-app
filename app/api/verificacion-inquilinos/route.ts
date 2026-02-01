@@ -40,44 +40,74 @@ export async function GET(request: NextRequest) {
     let verifications: VerificationRequest[] = [];
 
     try {
-      // Intentar obtener de candidatos/inquilinos potenciales
-      const candidates = await prisma.tenant.findMany({
+      // Obtener inquilinos de la base de datos
+      const tenants = await prisma.tenant.findMany({
         where: {
           companyId: session.user.companyId,
-          // Filtrar por estado si se proporciona
+          isDemo: false, // Excluir datos de demo
         },
         select: {
           id: true,
-          firstName: true,
-          lastName: true,
+          nombreCompleto: true,
           email: true,
-          phone: true,
-          idVerified: true,
-          creditScore: true,
+          telefono: true,
+          dni: true,
+          scoring: true,
+          nivelRiesgo: true,
           createdAt: true,
+          contracts: {
+            select: {
+              unit: {
+                select: {
+                  numero: true,
+                  building: {
+                    select: { nombre: true }
+                  }
+                }
+              }
+            },
+            take: 1,
+          }
         },
         take: 50,
         orderBy: { createdAt: 'desc' },
       });
 
-      verifications = candidates.map(candidate => ({
-        id: candidate.id,
-        tenantName: `${candidate.firstName || ''} ${candidate.lastName || ''}`.trim() || 'Sin nombre',
-        tenantEmail: candidate.email || '',
-        tenantPhone: candidate.phone || '',
-        propertyName: 'Pendiente asignar',
-        requestDate: candidate.createdAt?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
-        status: candidate.idVerified ? 'completed' : 'pending',
-        score: candidate.creditScore || undefined,
-        checks: {
-          identity: candidate.idVerified ? 'verified' : 'pending',
-          credit: candidate.creditScore ? (candidate.creditScore > 600 ? 'verified' : 'warning') : 'pending',
-          employment: 'pending',
-          references: 'pending',
-          background: 'pending',
-        },
-        documents: candidate.idVerified ? ['DNI'] : [],
-      }));
+      verifications = tenants.map(tenant => {
+        const contract = tenant.contracts?.[0];
+        const propertyName = contract 
+          ? `${contract.unit?.building?.nombre || 'Edificio'} - ${contract.unit?.numero || 'Unidad'}`
+          : 'Sin asignar';
+        
+        // Determinar estado basado en scoring y datos
+        let verificationStatus: 'pending' | 'in_progress' | 'completed' | 'rejected' = 'pending';
+        if (tenant.scoring >= 70) {
+          verificationStatus = 'completed';
+        } else if (tenant.scoring >= 40) {
+          verificationStatus = 'in_progress';
+        } else if (tenant.dni) {
+          verificationStatus = 'in_progress';
+        }
+
+        return {
+          id: tenant.id,
+          tenantName: tenant.nombreCompleto || 'Sin nombre',
+          tenantEmail: tenant.email || '',
+          tenantPhone: tenant.telefono || '',
+          propertyName,
+          requestDate: tenant.createdAt?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
+          status: verificationStatus,
+          score: tenant.scoring || undefined,
+          checks: {
+            identity: tenant.dni ? 'verified' : 'pending',
+            credit: tenant.scoring >= 60 ? 'verified' : (tenant.scoring >= 40 ? 'warning' : 'pending'),
+            employment: tenant.scoring >= 50 ? 'verified' : 'pending',
+            references: tenant.scoring >= 70 ? 'verified' : 'pending',
+            background: tenant.nivelRiesgo === 'bajo' ? 'clear' : (tenant.nivelRiesgo === 'alto' ? 'issues' : 'pending'),
+          },
+          documents: tenant.dni ? ['DNI'] : [],
+        };
+      });
     } catch (dbError) {
       console.warn('[API Verificación] Error BD, usando datos mock:', dbError);
       // Datos mock
