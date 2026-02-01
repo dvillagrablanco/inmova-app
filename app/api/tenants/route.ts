@@ -10,6 +10,9 @@ export const runtime = 'nodejs';
 export async function GET(req: NextRequest) {
   try {
     const user = await requireAuth();
+    if (!user) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
     const isSuperAdmin = user.role === 'super_admin' || user.role === 'soporte';
 
     // Obtener parámetros de paginación
