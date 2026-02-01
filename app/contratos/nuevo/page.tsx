@@ -33,7 +33,6 @@ import logger, { logError } from '@/lib/logger';
 import { BackButton } from '@/components/ui/back-button';
 import { MobileFormWizard, FormStep } from '@/components/ui/mobile-form-wizard';
 import { Badge } from '@/components/ui/badge';
-import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Unit {
   id: string;
@@ -590,21 +589,8 @@ export default function NuevoContratoPage() {
                 }
               />
             </form>
-
-            {/* Asistente IA de Documentos */}
-            <AIDocumentAssistant 
-              context="contratos"
-              variant="floating"
-              position="bottom-right"
-              onApplyData={(data) => {
-                // Aplicar datos extraídos del documento al formulario
-                if (data.rentaMensual) setFormData(prev => ({ ...prev, rentaMensual: data.rentaMensual }));
-                if (data.deposito) setFormData(prev => ({ ...prev, deposito: data.deposito }));
-                if (data.fechaInicio) setFormData(prev => ({ ...prev, fechaInicio: data.fechaInicio }));
-                if (data.fechaFin) setFormData(prev => ({ ...prev, fechaFin: data.fechaFin }));
-                toast.success('Datos del documento aplicados al formulario');
-              }}
-            />
+            
+            {/* Nota: AIDocumentAssistant inline está en la sección de Documentos del formulario */}
           </div>
         </AuthenticatedLayout>
   );

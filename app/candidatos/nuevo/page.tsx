@@ -30,7 +30,6 @@ import {
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
 import { Badge } from '@/components/ui/badge';
-import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Unit {
   id: string;
@@ -539,40 +538,7 @@ export default function NuevoCandidatoPage() {
           </CardContent>
         </Card>
 
-        {/* Asistente IA de Documentos para DNI/NIE del candidato */}
-        <AIDocumentAssistant
-          context="inquilinos"
-          variant="floating"
-          position="bottom-right"
-          onApplyData={(data) => {
-            // Aplicar datos extraídos del documento DNI/NIE al formulario
-            if (data.nombreCompleto || data.nombre) {
-              setFormData((prev) => ({ ...prev, nombre: data.nombreCompleto || data.nombre }));
-            }
-            if (data.dni || data.numeroDocumento) {
-              setFormData((prev) => ({
-                ...prev,
-                documentoIdentidad: data.dni || data.numeroDocumento,
-              }));
-            }
-            if (data.email) {
-              setFormData((prev) => ({ ...prev, email: data.email }));
-            }
-            if (data.telefono) {
-              setFormData((prev) => ({ ...prev, telefono: data.telefono }));
-            }
-            if (data.profesion || data.ocupacion) {
-              setFormData((prev) => ({ ...prev, profesion: data.profesion || data.ocupacion }));
-            }
-            if (data.ingresos || data.ingresosMensuales) {
-              setFormData((prev) => ({
-                ...prev,
-                ingresosMensuales: data.ingresos || data.ingresosMensuales,
-              }));
-            }
-            toast.success('Datos del documento aplicados al formulario');
-          }}
-        />
+        {/* Nota: AIDocumentAssistant inline está en la sección de Documentos del formulario */}
       </div>
     </AuthenticatedLayout>
   );
