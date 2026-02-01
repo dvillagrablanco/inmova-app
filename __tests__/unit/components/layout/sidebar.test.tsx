@@ -1,75 +1,111 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Sidebar } from '@/components/layout/sidebar';
 
+const mockPush = vi.fn();
+const mockSignOut = vi.fn();
+
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/dashboard',
+  useRouter: () => ({
+    push: mockPush,
+    prefetch: vi.fn(),
+  }),
+}));
+
+vi.mock('next-auth/react', () => ({
+  useSession: () => ({ data: null, status: 'unauthenticated' }),
+  signOut: mockSignOut,
+}));
+
+vi.mock('@/lib/hooks/usePermissions', () => ({
+  usePermissions: () => ({ role: 'administrador' }),
+}));
+
+vi.mock('@/lib/hooks/useBranding', () => ({
+  useBranding: () => ({ appName: 'INMOVA', logo: '/inmova-logo-icon.jpg' }),
+}));
+
+vi.mock('@/lib/hooks/admin/useSelectedCompany', () => ({
+  useSelectedCompany: () => ({ selectedCompany: null, selectCompany: vi.fn() }),
+}));
+
 describe('Sidebar', () => {
+  const mockFetch = vi.fn();
+
+  beforeEach(() => {
+    mockPush.mockClear();
+    mockSignOut.mockClear();
+    mockFetch.mockImplementation((url: string) => {
+      if (url.includes('/api/company/vertical')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ vertical: 'residencial' }),
+        });
+      }
+      if (url.includes('/api/modules/active')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ activeModules: [] }),
+        });
+      }
+      return Promise.resolve({ ok: false, json: async () => ({}) });
+    });
+    vi.stubGlobal('fetch', mockFetch);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<Sidebar {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+    render(<Sidebar />);
+
+    expect(
+      screen.getByRole('complementary', { name: 'Navegación principal' })
+    ).toBeInTheDocument();
   });
 
   it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<Sidebar {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+    const onNavigate = vi.fn();
+    render(<Sidebar onNavigate={onNavigate} />);
+
+    expect(screen.getByPlaceholderText('Buscar página...')).toBeInTheDocument();
   });
 
   it('should handle user interactions', async () => {
     render(<Sidebar />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
+
+    const searchInput = screen.getByPlaceholderText('Buscar página...');
+    fireEvent.change(searchInput, { target: { value: 'contratos' } });
+
+    await waitFor(() => {
+      expect(searchInput).toHaveValue('contratos');
+    });
   });
 
   it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<Sidebar onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
+    render(<Sidebar />);
+
+    fireEvent.click(screen.getByText('Iniciar Sesión'));
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/login');
+    });
   });
 
   it('should execute side effects', async () => {
     render(<Sidebar />);
-    
-    // TODO: Verificar efectos
+
     await waitFor(() => {
-      // expect(something).toBe(true);
+      expect(mockFetch).toHaveBeenCalledWith('/api/company/vertical');
+      expect(mockFetch).toHaveBeenCalledWith('/api/modules/active');
     });
   });
 
   it('should be accessible', () => {
     render(<Sidebar />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+
+    expect(screen.getByRole('button', { name: 'Toggle mobile menu' })).toBeInTheDocument();
   });
 });
