@@ -178,7 +178,7 @@ describe('📝 Contracts API - GET Endpoint', () => {
   // ========================================
 
   test('⚠️ Debe manejar lista vacía de contratos', async () => {
-    (prisma.contract.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    (cachedContracts as ReturnType<typeof vi.fn>).mockResolvedValue([]);
 
     const req = new NextRequest('http://localhost:3000/api/contracts');
     const response = await GET(req);
