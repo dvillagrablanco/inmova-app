@@ -200,6 +200,11 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     }
   } else if (reportData.tipo === 'mantenimiento') {
     const { totalSolicitudes, pendientes, enProgreso, completadas, costoTotal } = reportData.datos;
+    const totalSolicitudesValue = typeof totalSolicitudes === 'number' ? totalSolicitudes : 0;
+    const pendientesValue = typeof pendientes === 'number' ? pendientes : 0;
+    const enProgresoValue = typeof enProgreso === 'number' ? enProgreso : 0;
+    const completadasValue = typeof completadas === 'number' ? completadas : 0;
+    const costoTotalValue = typeof costoTotal === 'number' ? costoTotal : 0;
     
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
@@ -210,15 +215,15 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     // KPIs
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Total de solicitudes: ${totalSolicitudes}`, 15, yPos);
+    doc.text(`Total de solicitudes: ${totalSolicitudesValue}`, 15, yPos);
     yPos += 8;
-    doc.text(`Pendientes: ${pendientes}`, 15, yPos);
+    doc.text(`Pendientes: ${pendientesValue}`, 15, yPos);
     yPos += 8;
-    doc.text(`En progreso: ${enProgreso}`, 15, yPos);
+    doc.text(`En progreso: ${enProgresoValue}`, 15, yPos);
     yPos += 8;
-    doc.text(`Completadas: ${completadas}`, 15, yPos);
+    doc.text(`Completadas: ${completadasValue}`, 15, yPos);
     yPos += 8;
-    doc.text(`Costo total: ${costoTotal.toFixed(2)} €`, 15, yPos);
+    doc.text(`Costo total: ${costoTotalValue.toFixed(2)} €`, 15, yPos);
     yPos += 12;
     
     // Tabla de solicitudes recientes
