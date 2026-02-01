@@ -98,16 +98,6 @@ describe('📝 Contracts API - GET Endpoint', () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockUser,
     });
-    (contractCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
-      success: true,
-      data: {
-        ...validContractData,
-        rentaMensual: validContractData.renta,
-        diaCobranza: 1,
-        clausulasEspeciales: '',
-        renovacionAutomatica: false,
-      },
-    });
   });
 
   // ========================================
@@ -247,6 +237,16 @@ describe('📝 Contracts API - POST Endpoint', () => {
     vi.clearAllMocks();
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockUser,
+    });
+    (contractCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
+      success: true,
+      data: {
+        ...validContractData,
+        rentaMensual: validContractData.renta,
+        diaCobranza: 1,
+        clausulasEspeciales: '',
+        renovacionAutomatica: false,
+      },
     });
   });
 
