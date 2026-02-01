@@ -58,6 +58,8 @@ describe('MultiFileUpload', () => {
   it('should be accessible', () => {
     render(<MultiFileUpload />);
 
-    expect(screen.getByText('Subir Archivos')).toBeInTheDocument();
+    expect(
+      screen.getByText('Arrastra archivos aquí o haz clic para seleccionar')
+    ).toBeInTheDocument();
   });
 });
