@@ -1,66 +1,113 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CouponInput } from '@/components/ui/coupon-input';
 
 describe('CouponInput', () => {
+  const mockFetch = vi.fn();
+
+  beforeEach(() => {
+    vi.stubGlobal('fetch', mockFetch);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<CouponInput {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+    render(
+      <CouponInput
+        amount={100}
+        onCouponApplied={vi.fn()}
+        onCouponRemoved={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText('¿Tienes un cupón?')).toBeInTheDocument();
   });
 
   it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<CouponInput {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+    render(
+      <CouponInput
+        amount={100}
+        userId="user-1"
+        onCouponApplied={vi.fn()}
+        onCouponRemoved={vi.fn()}
+      />
+    );
+
+    expect(screen.getByPlaceholderText('Ingresa el código')).toBeInTheDocument();
   });
 
   it('should handle user interactions', async () => {
-    render(<CouponInput />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
+    const onCouponApplied = vi.fn();
+    const onCouponRemoved = vi.fn();
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        valido: true,
+        codigo: 'PROMO10',
+        tipo: 'PERCENTAGE',
+        valor: 10,
+        descuento: 10,
+        montoFinal: 90,
+      }),
+    });
+
+    render(
+      <CouponInput
+        amount={100}
+        onCouponApplied={onCouponApplied}
+        onCouponRemoved={onCouponRemoved}
+      />
+    );
+
+    fireEvent.change(screen.getByPlaceholderText('Ingresa el código'), {
+      target: { value: 'promo10' },
+    });
+    fireEvent.click(screen.getByText('Aplicar'));
+
+    await waitFor(() => {
+      expect(onCouponApplied).toHaveBeenCalled();
+    });
   });
 
   it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<CouponInput onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
+    const onCouponApplied = vi.fn();
+    const onCouponRemoved = vi.fn();
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ valido: false, message: 'Cupón inválido' }),
+    });
+
+    render(
+      <CouponInput
+        amount={100}
+        onCouponApplied={onCouponApplied}
+        onCouponRemoved={onCouponRemoved}
+      />
+    );
+
+    fireEvent.change(screen.getByPlaceholderText('Ingresa el código'), {
+      target: { value: 'invalid' },
+    });
+    fireEvent.click(screen.getByText('Aplicar'));
+
+    await waitFor(() => {
+      expect(onCouponApplied).not.toHaveBeenCalled();
+    });
   });
 
   it('should be accessible', () => {
-    render(<CouponInput />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    render(
+      <CouponInput
+        amount={100}
+        onCouponApplied={vi.fn()}
+        onCouponRemoved={vi.fn()}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: 'Aplicar' })).toBeInTheDocument();
   });
 });

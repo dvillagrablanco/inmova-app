@@ -2,65 +2,58 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ExportButton } from '@/components/ui/export-button';
 
+vi.mock('@/lib/export-utils', () => ({
+  exportToCSV: vi.fn(),
+  exportToExcel: vi.fn(),
+  exportToPDF: vi.fn(),
+}));
+
+const baseProps = {
+  data: [{ id: 1, name: 'Item 1' }],
+  columns: [{ key: 'name', label: 'Nombre' }],
+  filename: 'export',
+};
+
 describe('ExportButton', () => {
   it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<ExportButton {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+    render(<ExportButton {...baseProps} />);
+
+    expect(screen.getByRole('button', { name: 'Exportar' })).toBeInTheDocument();
   });
 
   it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<ExportButton {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+    render(<ExportButton {...baseProps} disabled />);
+
+    expect(screen.getByRole('button', { name: 'Exportar' })).toBeDisabled();
   });
 
   it('should handle user interactions', async () => {
-    render(<ExportButton />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
+    const { exportToCSV } = await import('@/lib/export-utils');
+    render(<ExportButton {...baseProps} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Exportar' }));
+    fireEvent.click(screen.getByText('Exportar a CSV'));
+
+    await waitFor(() => {
+      expect(exportToCSV).toHaveBeenCalled();
+    });
   });
 
   it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<ExportButton onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
+    const { exportToPDF } = await import('@/lib/export-utils');
+    render(<ExportButton {...baseProps} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Exportar' }));
+    fireEvent.click(screen.getByText('Exportar a PDF'));
+
+    await waitFor(() => {
+      expect(exportToPDF).toHaveBeenCalled();
+    });
   });
 
   it('should be accessible', () => {
-    render(<ExportButton />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    render(<ExportButton {...baseProps} />);
+
+    expect(screen.getByRole('button', { name: 'Exportar' })).toBeInTheDocument();
   });
 });
