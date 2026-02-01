@@ -137,9 +137,9 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
         head: [['Edificio', 'Total', 'Ocupadas', 'Disponibles', 'Ocupación']],
         body: reportData.datos.edificios.map((ed: any) => [
           ed.nombre,
-          ed.total.toString(),
-          ed.ocupadas.toString(),
-          ed.disponibles.toString(),
+          Number(ed.total ?? 0).toString(),
+          Number(ed.ocupadas ?? 0).toString(),
+          Number(ed.disponibles ?? 0).toString(),
           `${Number(ed.tasaOcupacion ?? 0).toFixed(1)}%`,
         ]),
         theme: 'striped',
