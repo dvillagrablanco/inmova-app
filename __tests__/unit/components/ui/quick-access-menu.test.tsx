@@ -2,62 +2,62 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QuickAccessMenu } from '@/components/ui/quick-access-menu';
 
+const mockPush = vi.fn();
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
+
 describe('QuickAccessMenu', () => {
   it('should render without crashing', () => {
-    
-    
-    render(<QuickAccessMenu  />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+    render(<QuickAccessMenu />);
+
+    expect(screen.getByText(/Búsqueda rápida/i)).toBeInTheDocument();
   });
 
   it('should handle user interactions', async () => {
     render(<QuickAccessMenu />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
+
+    fireEvent.click(screen.getByRole('button'));
+
+    await waitFor(() => {
+      expect(
+        screen.getByPlaceholderText('Buscar acciones, páginas, módulos...')
+      ).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Dashboard'));
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/dashboard');
+    });
   });
 
   it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<QuickAccessMenu onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
+    render(<QuickAccessMenu />);
+
+    fireEvent.keyDown(document, { key: 'k', metaKey: true });
+
+    await waitFor(() => {
+      expect(
+        screen.getByPlaceholderText('Buscar acciones, páginas, módulos...')
+      ).toBeInTheDocument();
+    });
   });
 
   it('should execute side effects', async () => {
     render(<QuickAccessMenu />);
-    
-    // TODO: Verificar efectos
+
+    fireEvent.click(screen.getByRole('button'));
+
     await waitFor(() => {
-      // expect(something).toBe(true);
+      expect(screen.getByText('Crear nuevo edificio')).toBeInTheDocument();
     });
   });
 
   it('should be accessible', () => {
     render(<QuickAccessMenu />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+
+    expect(screen.getByRole('button')).toBeInTheDocument();
   });
 });
