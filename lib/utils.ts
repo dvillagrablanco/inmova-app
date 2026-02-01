@@ -95,8 +95,12 @@ export function isValidEmail(email: string): boolean {
 }
 
 export function isValidPhone(phone: string): boolean {
-  const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/;
-  return phoneRegex.test(phone);
+  const normalized = phone.trim();
+  if (!/^[+\d().\s-]+$/.test(normalized)) {
+    return false;
+  }
+  const digits = normalized.replace(/\D/g, '');
+  return digits.length >= 7 && digits.length <= 15;
 }
 
 export function getInitials(name: string): string {
