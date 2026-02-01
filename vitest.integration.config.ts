@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config';
+import path from 'path';
 
 process.env.INTEGRATION_TESTS = 'true';
 
@@ -12,5 +13,10 @@ export default defineConfig({
     hookTimeout: 30000,
     threads: false,
     reporters: ['default'],
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './'),
+    },
   },
 });
