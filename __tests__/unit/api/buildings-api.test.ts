@@ -394,7 +394,7 @@ describe('🏢 Buildings API - POST Endpoint', () => {
   });
 
   test('❌ Debe retornar 401 sin autenticación', async () => {
-    (requireAuth as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('No autenticado'));
+    (requirePermission as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('No autenticado'));
 
     const req = new NextRequest('http://localhost:3000/api/buildings', {
       method: 'POST',
