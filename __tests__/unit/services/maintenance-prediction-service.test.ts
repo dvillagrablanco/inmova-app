@@ -11,6 +11,9 @@ vi.mock('@/lib/db', () => ({
     maintenanceHistory: {
       findMany: vi.fn(),
     },
+    maintenanceFailurePrediction: {
+      create: vi.fn(),
+    },
   },
 }));
 
@@ -62,9 +65,9 @@ describe('🔧 Maintenance Prediction Service', () => {
     const predictions = await predictEquipmentFailures('company-123');
 
     if (predictions.length > 0) {
-      expect(predictions[0]).toHaveProperty('probabilidad');
-      expect(predictions[0].probabilidad).toBeGreaterThanOrEqual(0);
-      expect(predictions[0].probabilidad).toBeLessThanOrEqual(95);
+      expect(predictions[0]).toHaveProperty('probabilidadFalla');
+      expect(predictions[0].probabilidadFalla).toBeGreaterThanOrEqual(0);
+      expect(predictions[0].probabilidadFalla).toBeLessThanOrEqual(95);
     }
   });
 
@@ -75,7 +78,8 @@ describe('🔧 Maintenance Prediction Service', () => {
 
     if (predictions.length > 0) {
       expect(predictions[0]).toHaveProperty('factoresRiesgo');
-      expect(Array.isArray(predictions[0].factoresRiesgo)).toBe(true);
+      const factores = JSON.parse(predictions[0].factoresRiesgo || '[]');
+      expect(Array.isArray(factores)).toBe(true);
     }
   });
 
@@ -86,19 +90,20 @@ describe('🔧 Maintenance Prediction Service', () => {
 
     if (predictions.length > 0) {
       expect(predictions[0]).toHaveProperty('recomendaciones');
-      expect(Array.isArray(predictions[0].recomendaciones)).toBe(true);
-      expect(predictions[0].recomendaciones.length).toBeGreaterThan(0);
+      const recomendaciones = JSON.parse(predictions[0].recomendaciones || '[]');
+      expect(Array.isArray(recomendaciones)).toBe(true);
+      expect(recomendaciones.length).toBeGreaterThan(0);
     }
   });
 
-  test('✅ Debe calcular intervalo promedio entre fallas', async () => {
+  test('✅ Debe calcular días estimados', async () => {
     (prisma.maintenanceHistory.findMany as ReturnType<typeof vi.fn>).mockResolvedValue(mockHistory);
 
     const predictions = await predictEquipmentFailures('company-123');
 
     if (predictions.length > 0) {
-      expect(predictions[0]).toHaveProperty('intervaloPromedio');
-      expect(typeof predictions[0].intervaloPromedio).toBe('number');
+      expect(predictions[0]).toHaveProperty('diasEstimados');
+      expect(typeof predictions[0].diasEstimados).toBe('number');
     }
   });
 
@@ -174,7 +179,8 @@ describe('🔧 Maintenance Prediction Service', () => {
     const predictions = await predictEquipmentFailures('company-123');
 
     if (predictions.length > 0) {
-      expect(predictions[0].factoresRiesgo).toContain('Costos de reparación elevados');
+      const factores = JSON.parse(predictions[0].factoresRiesgo || '[]');
+      expect(factores).toContain('Costos de reparación elevados');
     }
   });
 
@@ -198,7 +204,8 @@ describe('🔧 Maintenance Prediction Service', () => {
     const predictions = await predictEquipmentFailures('company-123');
 
     if (predictions.length > 0) {
-      expect(predictions[0].factoresRiesgo).toContain('Alto historial de fallas');
+      const factores = JSON.parse(predictions[0].factoresRiesgo || '[]');
+      expect(factores).toContain('Alto historial de fallas');
     }
   });
 
@@ -221,7 +228,8 @@ describe('🔧 Maintenance Prediction Service', () => {
     const predictions = await predictEquipmentFailures('company-123');
 
     if (predictions.length > 0) {
-      expect(predictions[0].intervaloPromedio).toBeLessThan(90);
+      const factores = JSON.parse(predictions[0].factoresRiesgo || '[]');
+      expect(factores).toContain('Intervalos cortos entre fallas');
     }
   });
 
@@ -231,9 +239,9 @@ describe('🔧 Maintenance Prediction Service', () => {
     const predictions = await predictEquipmentFailures('company-123');
 
     if (predictions.length > 0) {
-      expect(predictions[0]).toHaveProperty('nivelConfianza');
-      expect(predictions[0].nivelConfianza).toBeGreaterThanOrEqual(0);
-      expect(predictions[0].nivelConfianza).toBeLessThanOrEqual(1);
+      expect(predictions[0]).toHaveProperty('confianza');
+      expect(predictions[0].confianza).toBeGreaterThanOrEqual(0);
+      expect(predictions[0].confianza).toBeLessThanOrEqual(1);
     }
   });
 
@@ -243,7 +251,7 @@ describe('🔧 Maintenance Prediction Service', () => {
     const predictions = await predictEquipmentFailures('company-123');
 
     if (predictions.length > 0) {
-      expect(predictions[0]).toHaveProperty('fechaEstimada');
+      expect(predictions[0]).toHaveProperty('fechaObjetivo');
     }
   });
 
@@ -266,7 +274,7 @@ describe('🔧 Maintenance Prediction Service', () => {
     const predictions = await predictEquipmentFailures('company-123');
 
     if (predictions.length > 0) {
-      expect(predictions[0].probabilidad).toBeLessThanOrEqual(95);
+      expect(predictions[0].probabilidadFalla).toBeLessThanOrEqual(95);
     }
   });
 });
