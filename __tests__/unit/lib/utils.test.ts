@@ -36,7 +36,7 @@ describe('🛠️ Utils - Formatting Functions', () => {
   });
 
   test('⚠️ formatDuration() con valores negativos', () => {
-    expect(formatDuration(-60)).toBe('00:-1:00');
+    expect(formatDuration(-60)).toBe('00:00:00');
   });
 
   test('✅ formatCurrency() debe formatear moneda', () => {
