@@ -332,9 +332,7 @@ describe('🏠 Tenants API - POST Endpoint', () => {
   });
 
   test('❌ Debe retornar 401 si no está autenticado', async () => {
-    (requireAuth as ReturnType<typeof vi.fn>).mockImplementation(() => {
-      throw new Error('No autenticado');
-    });
+    (requireAuth as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
     const req = new NextRequest('http://localhost:3000/api/tenants', {
       method: 'POST',
