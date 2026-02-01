@@ -36,6 +36,8 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '15');
     const skip = (page - 1) * limit;
     const filterCompanyId = searchParams.get('companyId');
+    const estado = searchParams.get('estado');
+    const tenantId = searchParams.get('tenantId');
 
     // Determinar el filtro de empresa
     const whereCompanyId = isSuperAdmin 
@@ -43,18 +45,27 @@ export async function GET(req: NextRequest) {
       : companyId;
 
     // Construir where clause
-    const whereClause = whereCompanyId ? {
-      unit: {
-        building: {
-          companyId: whereCompanyId,
-        },
-      },
-    } : {};
+    const whereClause: any = whereCompanyId
+      ? {
+          unit: {
+            building: {
+              companyId: whereCompanyId,
+            },
+          },
+        }
+      : {};
+    if (estado) {
+      whereClause.estado = estado;
+    }
+    if (tenantId) {
+      whereClause.tenantId = tenantId;
+    }
 
     // Si no hay paginación solicitada, usar cache si tiene companyId
     const usePagination = searchParams.has('page') || searchParams.has('limit');
+    const hasFilters = Boolean(estado || tenantId);
 
-    if (!usePagination && whereCompanyId) {
+    if (!usePagination && !hasFilters && whereCompanyId) {
       // Usar datos cacheados
       const contractsWithExpiration = await cachedContracts(whereCompanyId);
       return NextResponse.json(contractsWithExpiration);
@@ -65,7 +76,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json([]);
     }
 
-    // Paginación activada: consulta directa
+    // Consulta directa (con o sin paginación)
     const [contracts, total] = await Promise.all([
       prisma.contract.findMany({
         where: whereClause,
@@ -84,12 +95,14 @@ export async function GET(req: NextRequest) {
           tenant: true,
         },
         orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
+        skip: usePagination ? skip : undefined,
+        take: usePagination ? limit : undefined,
       }),
-      prisma.contract.count({
-        where: whereClause,
-      }),
+      usePagination
+        ? prisma.contract.count({
+            where: whereClause,
+          })
+        : Promise.resolve(contracts.length),
     ]);
 
     // Calcular días hasta vencimiento y convertir valores Decimal
@@ -118,16 +131,20 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    return NextResponse.json({
-      data: contractsWithExpiration,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-        hasMore: skip + limit < total,
-      },
-    });
+    if (usePagination) {
+      return NextResponse.json({
+        data: contractsWithExpiration,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+          hasMore: skip + limit < total,
+        },
+      });
+    }
+
+    return NextResponse.json(contractsWithExpiration);
   } catch (error) {
     logger.error('Error fetching contracts:', error);
     return NextResponse.json({ error: 'Error al obtener contratos' }, { status: 500 });
