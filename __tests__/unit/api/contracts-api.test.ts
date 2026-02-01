@@ -288,7 +288,7 @@ describe('📝 Contracts API - POST Endpoint', () => {
     }
   });
 
-  test('✅ Debe asignar companyId del usuario', async () => {
+  test('✅ Debe asignar unitId y tenantId del contrato', async () => {
     (prisma.contract.create as ReturnType<typeof vi.fn>).mockResolvedValue({
       id: 'contract-new',
       ...validContractData,
@@ -306,7 +306,8 @@ describe('📝 Contracts API - POST Endpoint', () => {
       expect(prisma.contract.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            companyId: mockUser.companyId,
+            unitId: validContractData.unitId,
+            tenantId: validContractData.tenantId,
           }),
         })
       );
