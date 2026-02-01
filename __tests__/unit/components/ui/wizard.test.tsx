@@ -3,73 +3,83 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Wizard } from '@/components/ui/wizard';
 
 describe('Wizard', () => {
+  const steps = [
+    {
+      id: 'step-1',
+      title: 'Paso 1',
+      fields: <div>Contenido 1</div>,
+    },
+    {
+      id: 'step-2',
+      title: 'Paso 2',
+      fields: <div>Contenido 2</div>,
+    },
+  ];
+
   it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<Wizard {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+    const onComplete = vi.fn().mockResolvedValue(undefined);
+
+    render(<Wizard steps={steps} onComplete={onComplete} title="Asistente" />);
+
+    expect(screen.getByText('Asistente')).toBeInTheDocument();
+    expect(screen.getByText('Paso 1')).toBeInTheDocument();
   });
 
   it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<Wizard {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+    const onComplete = vi.fn().mockResolvedValue(undefined);
+
+    render(
+      <Wizard
+        steps={steps}
+        onComplete={onComplete}
+        title="Asistente"
+        description="Descripción del asistente"
+      />
+    );
+
+    expect(screen.getByText('Descripción del asistente')).toBeInTheDocument();
   });
 
   it('should handle user interactions', async () => {
-    render(<Wizard />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
+    const onComplete = vi.fn().mockResolvedValue(undefined);
+    render(<Wizard steps={steps} onComplete={onComplete} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Siguiente/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Paso 2')).toBeInTheDocument();
+    });
   });
 
   it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<Wizard onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
+    const onComplete = vi.fn().mockResolvedValue(undefined);
+    render(<Wizard steps={steps} onComplete={onComplete} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Siguiente/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Finalizar/i }));
+
+    await waitFor(() => {
+      expect(onComplete).toHaveBeenCalled();
+    });
   });
 
   it('should execute side effects', async () => {
-    render(<Wizard />);
-    
-    // TODO: Verificar efectos
+    const onComplete = vi.fn().mockResolvedValue(undefined);
+    const onCancel = vi.fn();
+
+    render(<Wizard steps={steps} onComplete={onComplete} onCancel={onCancel} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Cancelar/i }));
+
     await waitFor(() => {
-      // expect(something).toBe(true);
+      expect(onCancel).toHaveBeenCalled();
     });
   });
 
   it('should be accessible', () => {
-    render(<Wizard />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    const onComplete = vi.fn().mockResolvedValue(undefined);
+    render(<Wizard steps={steps} onComplete={onComplete} />);
+
+    expect(screen.getByRole('button', { name: /Siguiente/i })).toBeInTheDocument();
   });
 });
