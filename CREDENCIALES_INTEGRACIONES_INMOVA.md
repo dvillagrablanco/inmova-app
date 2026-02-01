@@ -24,11 +24,12 @@
 | 8 | IA (Anthropic Claude) | ✅ | 1 |
 | 9 | Cache (Redis) | ✅ | 1 |
 | 10 | Monitoreo (Sentry) | ✅ | 1 |
-| 11 | Firma Digital (DocuSign) | ✅ | 4 |
+| 11 | Firma Digital (DocuSign) | ✅ | 5 |
 | 12 | SMS (Twilio) | ✅ | 3 |
 | 13 | Firma Digital (Signaturit) | ✅ | 1 |
+| 14 | **Agentes IA Voz (Vapi)** | ✅ | 3 |
 
-**Total**: 13 integraciones, 36 variables de entorno
+**Total**: 14 integraciones, 39 variables de entorno
 
 ---
 
@@ -233,6 +234,55 @@ grep TWILIO /opt/inmova-app/.env.production
 
 ---
 
+## 1️⃣4️⃣ Agentes IA de Voz (Vapi)
+
+**Servicio**: Vapi (Voice AI Platform)  
+**Dashboard**: https://dashboard.vapi.ai/  
+**Voz**: ElevenLabs - Sarah (Multilingual v2)  
+**Modelo**: Claude 3.5 Sonnet
+
+| Variable | Valor |
+|----------|-------|
+| VAPI_API_KEY | `d79a1bac-c0bd-4dc4-8ddd-2b5e55a3210c` |
+| VAPI_PRIVATE_KEY | `7e045d23-d354-409f-a5b3-0bdc8096a079` |
+| VAPI_WEBHOOK_SECRET | Configurado |
+
+**Webhook URL**: `https://inmovaapp.com/api/vapi/webhook`
+
+### Agentes IA Disponibles (7)
+
+| Agente | Rol | Especialidad |
+|--------|-----|--------------|
+| Elena | Asesora Comercial | Ventas inmobiliarias, captación de leads |
+| María | Atención al Cliente | Soporte a inquilinos, consultas |
+| Carlos | Técnico de Incidencias | Gestión y triaje de averías |
+| Patricia | Tasadora Inmobiliaria | Valoraciones, análisis de mercado |
+| Roberto | Captador de Propiedades | Captación de inmuebles |
+| Laura | Especialista Coliving | Espacios compartidos, comunidades |
+| Antonio | Administrador de Fincas | Comunidades de propietarios |
+
+### Configuración de Voz (ElevenLabs)
+
+| Parámetro | Valor | Descripción |
+|-----------|-------|-------------|
+| Model | eleven_multilingual_v2 | Más natural |
+| Voice | Sarah | Madura, reconfortante |
+| Stability | 0.4 | Más variación = más humana |
+| Style | 0.3 | Expresividad emocional |
+| Language | es | Español |
+
+### Endpoints API
+
+| Endpoint | Descripción |
+|----------|-------------|
+| GET /api/vapi/assistants | Listar asistentes |
+| POST /api/vapi/assistants | Crear asistente |
+| GET /api/vapi/calls | Listar llamadas |
+| POST /api/vapi/calls | Iniciar llamada |
+| POST /api/vapi/webhook | Webhook de eventos |
+
+---
+
 ## 📋 Variables Adicionales
 
 | Variable | Valor |
@@ -257,6 +307,7 @@ grep TWILIO /opt/inmova-app/.env.production
 | DocuSign (Demo) | https://admindemo.docusign.com/ |
 | Twilio | https://console.twilio.com/ |
 | Signaturit | https://app.signaturit.com/ |
+| **Vapi** | https://dashboard.vapi.ai/ |
 | Gmail App Passwords | https://myaccount.google.com/apppasswords |
 
 ### URLs de la Aplicación
@@ -269,6 +320,9 @@ grep TWILIO /opt/inmova-app/.env.production
 | Webhook DocuSign | https://inmovaapp.com/api/webhooks/docusign |
 | Webhook Signaturit | https://inmovaapp.com/api/webhooks/signaturit |
 | Webhook Twilio | https://inmovaapp.com/api/webhooks/twilio |
+| **Webhook Vapi** | https://inmovaapp.com/api/vapi/webhook |
+| **API Vapi Asistentes** | https://inmovaapp.com/api/vapi/assistants |
+| **API Vapi Llamadas** | https://inmovaapp.com/api/vapi/calls |
 
 ---
 
@@ -335,6 +389,7 @@ Las credenciales están respaldadas en el servidor:
 | 01/02/2026 | Añadidas NEXT_PUBLIC_APP_URL y NEXT_PUBLIC_SENTRY_DSN |
 | 01/02/2026 | Configurada DocuSign Private Key (1678 chars) |
 | 01/02/2026 | Creado backup completo en `/root/inmova-credentials-backup/` |
+| 01/02/2026 | **Añadido Vapi** - 7 agentes IA de voz comerciales |
 
 ---
 
