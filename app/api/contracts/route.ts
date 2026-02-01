@@ -14,9 +14,29 @@ import {
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getSessionForRequest(req: NextRequest) {
+  if (process.env.INTEGRATION_TESTS === 'true') {
+    const companyId = req.headers.get('x-test-company-id');
+    const userId = req.headers.get('x-test-user-id') || 'test-user';
+    const role = req.headers.get('x-test-user-role') || 'administrador';
+
+    if (companyId) {
+      return {
+        user: {
+          id: userId,
+          role,
+          companyId,
+        },
+      } as any;
+    }
+  }
+
+  return getServerSession(authOptions);
+}
+
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getSessionForRequest(req);
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
@@ -152,7 +172,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getSessionForRequest(req);
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }

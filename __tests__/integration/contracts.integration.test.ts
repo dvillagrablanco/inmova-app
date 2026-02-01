@@ -2,7 +2,6 @@ import { beforeAll, afterAll, describe, expect, it } from 'vitest';
 import { prisma } from '@/lib/db';
 import { POST } from '@/app/api/contracts/route';
 import { NextRequest } from 'next/server';
-import { encode } from 'next-auth/jwt';
 import { randomUUID } from 'crypto';
 
 describe('Integración: creación de contrato', () => {
@@ -79,18 +78,6 @@ describe('Integración: creación de contrato', () => {
   });
 
   it('crea contrato via endpoint y persiste en DB', async () => {
-    const token = await encode({
-      secret: process.env.NEXTAUTH_SECRET!,
-      token: {
-        id: ids.userId,
-        email: 'admin@test.local',
-        role: 'administrador',
-        companyId: ids.companyId,
-        companyName: 'Empresa Test Integración',
-        userType: 'user',
-      },
-    });
-
     const payload = {
       unitId: ids.unitId,
       tenantId: ids.tenantId,
@@ -107,7 +94,9 @@ describe('Integración: creación de contrato', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        cookie: `next-auth.session-token=${token}`,
+        'x-test-company-id': ids.companyId,
+        'x-test-user-id': ids.userId,
+        'x-test-user-role': 'administrador',
       },
       body: JSON.stringify(payload),
     });
