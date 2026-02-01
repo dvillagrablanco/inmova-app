@@ -474,16 +474,11 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
   });
 
   test('⚠️ Debe manejar múltiples mantenimientos urgentes', async () => {
-    const urgentMaintenance = {
-      ...mockDashboardData,
-      pendingMaintenance: [
-        { id: '1', prioridad: 'urgente', tipo: 'Plomería' },
-        { id: '2', prioridad: 'urgente', tipo: 'Eléctrico' },
-        { id: '3', prioridad: 'urgente', tipo: 'Estructura' },
-      ],
-    };
-
-    (cachedDashboard as ReturnType<typeof vi.fn>).mockResolvedValue(urgentMaintenance);
+    (prisma.maintenanceRequest.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([
+      { id: '1', prioridad: 'urgente', tipo: 'Plomería' },
+      { id: '2', prioridad: 'urgente', tipo: 'Eléctrico' },
+      { id: '3', prioridad: 'urgente', tipo: 'Estructura' },
+    ]);
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
@@ -494,18 +489,14 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
 
   test('⚠️ Debe manejar contratos venciendo hoy', async () => {
     const today = new Date();
-    const expiringToday = {
-      ...mockDashboardData,
-      expiringContracts: [
-        {
-          id: 'contract-urgent',
-          fechaFin: today,
-          tenant: { nombre: 'Urgente' },
-        },
-      ],
-    };
-
-    (cachedDashboard as ReturnType<typeof vi.fn>).mockResolvedValue(expiringToday);
+    (prisma.contract.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([
+      {
+        id: 'contract-urgent',
+        fechaFin: today,
+        tenant: { nombreCompleto: 'Urgente' },
+        unit: { numero: '101', building: { nombre: 'Edificio A' } },
+      },
+    ]);
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
@@ -515,23 +506,19 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
   });
 
   test('⚠️ Debe manejar pagos atrasados', async () => {
-    const overduePayments = {
-      ...mockDashboardData,
-      recentPayments: [
-        {
-          id: 'payment-overdue',
-          estado: 'atrasado',
-          fechaVencimiento: subDays(new Date(), 15),
-          monto: 1200,
+    (prisma.payment.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([
+      {
+        id: 'payment-overdue',
+        periodo: '2026-01',
+        monto: 1200,
+        estado: 'pendiente',
+        fechaVencimiento: subDays(new Date(), 20),
+        contract: {
+          tenant: { nombreCompleto: 'Moroso' },
+          unit: { numero: '202', building: { nombre: 'Edificio B' } },
         },
-      ],
-      financialSummary: {
-        ...mockDashboardData.financialSummary,
-        overduePayments: 15000,
       },
-    };
-
-    (cachedDashboard as ReturnType<typeof vi.fn>).mockResolvedValue(overduePayments);
+    ]);
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
