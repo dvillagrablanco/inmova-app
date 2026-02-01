@@ -16,6 +16,9 @@ vi.mock('@/lib/db', () => ({
       update: vi.fn(),
       delete: vi.fn(),
     },
+    user: {
+      findUnique: vi.fn(),
+    },
   },
 }));
 
@@ -30,7 +33,7 @@ vi.mock('@/lib/logger', () => ({
 
 vi.mock('@/lib/validations', () => ({
   taskCreateSchema: {
-    safeParse: vi.fn(),
+    parse: vi.fn(),
   },
 }));
 
@@ -197,9 +200,10 @@ describe('✅ Tasks API - POST', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (requirePermission as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
-    (taskCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
-      success: true,
-      data: validTaskData,
+    (taskCreateSchema.parse as ReturnType<typeof vi.fn>).mockReturnValue(validTaskData);
+    (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: validTaskData.asignadoA,
+      companyId: mockUser.companyId,
     });
   });
 
