@@ -9,7 +9,12 @@ export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await requireAuth();
+    let user;
+    try {
+      user = await requireAuth();
+    } catch {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
     if (!user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
