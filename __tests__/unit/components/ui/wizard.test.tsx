@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Wizard } from '@/components/ui/wizard';
 
@@ -15,6 +15,19 @@ describe('Wizard', () => {
       fields: <div>Contenido 2</div>,
     },
   ];
+
+  beforeEach(() => {
+    window.matchMedia = vi.fn().mockImplementation(() => ({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      onchange: null,
+      dispatchEvent: vi.fn(),
+      media: '',
+    }));
+  });
 
   it('should render without crashing', () => {
     const onComplete = vi.fn().mockResolvedValue(undefined);
