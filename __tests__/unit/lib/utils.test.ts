@@ -169,7 +169,7 @@ describe('🛠️ Utils - String Functions', () => {
     expect(getInitials('John Doe')).toBe('JD');
     expect(getInitials('Alice')).toBe('AL');
     expect(getInitials('María García López')).toBe('ML');
-    expect(getInitials('Bob Smith Jr')).toBe('BR');
+    expect(getInitials('Bob Smith Jr')).toBe('BJ');
   });
 
   test('⚠️ getInitials() con nombres vacíos', () => {
