@@ -1,75 +1,70 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EnhancedGlobalSearch } from '@/components/ui/enhanced-global-search';
 
+const mockPush = vi.fn();
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+}));
+
 describe('EnhancedGlobalSearch', () => {
+  beforeEach(() => {
+    mockPush.mockClear();
+    localStorage.clear();
+  });
+
   it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<EnhancedGlobalSearch {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+    render(<EnhancedGlobalSearch />);
+
+    expect(screen.getByText('Buscar...')).toBeInTheDocument();
   });
 
   it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<EnhancedGlobalSearch {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+    render(<EnhancedGlobalSearch open />);
+
+    expect(
+      screen.getByPlaceholderText('Buscar en INMOVA... (Usa @, #, $, / para filtrar)')
+    ).toBeInTheDocument();
   });
 
   it('should handle user interactions', async () => {
     render(<EnhancedGlobalSearch />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
+
+    fireEvent.click(screen.getByRole('button', { name: /Buscar\.\.\./i }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByPlaceholderText('Buscar en INMOVA... (Usa @, #, $, / para filtrar)')
+      ).toBeInTheDocument();
+    });
   });
 
   it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<EnhancedGlobalSearch onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
+    const onOpenChange = vi.fn();
+    render(<EnhancedGlobalSearch open={false} onOpenChange={onOpenChange} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Buscar\.\.\./i }));
+
+    await waitFor(() => {
+      expect(onOpenChange).toHaveBeenCalledWith(true);
+    });
   });
 
   it('should execute side effects', async () => {
-    render(<EnhancedGlobalSearch />);
-    
-    // TODO: Verificar efectos
+    localStorage.setItem('recentSearches', JSON.stringify(['alquiler']));
+    render(<EnhancedGlobalSearch open />);
+
     await waitFor(() => {
-      // expect(something).toBe(true);
+      expect(screen.getByText('Búsquedas Recientes')).toBeInTheDocument();
     });
   });
 
   it('should be accessible', () => {
     render(<EnhancedGlobalSearch />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+
+    expect(screen.getByRole('button', { name: /Buscar\.\.\./i })).toBeInTheDocument();
   });
 });
