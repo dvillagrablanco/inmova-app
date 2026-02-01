@@ -69,6 +69,11 @@ describe('Wizard', () => {
     render(<Wizard steps={steps} onComplete={onComplete} />);
 
     fireEvent.click(screen.getByRole('button', { name: /Siguiente/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Paso 2')).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByRole('button', { name: /Finalizar/i }));
 
     await waitFor(() => {
