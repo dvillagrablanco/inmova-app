@@ -1,54 +1,40 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import { FormFieldWrapper } from '@/components/ui/form-field-wrapper';
 
 describe('FormFieldWrapper', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<FormFieldWrapper {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  const renderField = (props?: Partial<Parameters<typeof FormFieldWrapper>[0]>) =>
+    render(
+      <FormFieldWrapper label="Email" htmlFor="email" {...props}>
+        <input id="email" type="email" />
+      </FormFieldWrapper>
+    );
+
+  it('renderiza etiqueta y campo', () => {
+    renderField();
+
+    expect(screen.getByText('Email')).toBeInTheDocument();
+    expect(screen.getByLabelText('Email')).toBeInTheDocument();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<FormFieldWrapper {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+  it('muestra indicador requerido y opcional', () => {
+    renderField({ required: true, optional: true });
+
+    expect(screen.getByLabelText('requerido')).toBeInTheDocument();
+    expect(screen.getByText('(Opcional)')).toBeInTheDocument();
   });
 
-  it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<FormFieldWrapper onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
+  it('muestra hint cuando no hay error', () => {
+    renderField({ hint: 'Ayuda contextual' });
+
+    expect(screen.getByText('Ayuda contextual')).toBeInTheDocument();
   });
 
-  it('should be accessible', () => {
-    render(<FormFieldWrapper />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+  it('muestra error y oculta hint', () => {
+    renderField({ error: 'Campo requerido', hint: 'Ayuda contextual' });
+
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(screen.getByText('Campo requerido')).toBeInTheDocument();
+    expect(screen.queryByText('Ayuda contextual')).not.toBeInTheDocument();
   });
 });
