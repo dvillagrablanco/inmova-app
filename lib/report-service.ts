@@ -73,6 +73,8 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
   
   if (reportData.tipo === 'morosidad') {
     const { pagosPendientes, totalMorosidad, inquilinos } = reportData.datos;
+    const pagosPendientesValue = typeof pagosPendientes === 'number' ? pagosPendientes : 0;
+    const totalMorosidadValue = typeof totalMorosidad === 'number' ? totalMorosidad : 0;
     
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
@@ -83,9 +85,9 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     // KPIs
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Total de pagos pendientes: ${pagosPendientes}`, 15, yPos);
+    doc.text(`Total de pagos pendientes: ${pagosPendientesValue}`, 15, yPos);
     yPos += 8;
-    doc.text(`Importe total adeudado: ${totalMorosidad.toFixed(2)} €`, 15, yPos);
+    doc.text(`Importe total adeudado: ${totalMorosidadValue.toFixed(2)} €`, 15, yPos);
     yPos += 12;
     
     // Tabla de inquilinos morosos
@@ -96,8 +98,8 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
         body: inquilinos.map((inq: any) => [
           inq.nombreCompleto,
           inq.unidad,
-          `${inq.importe.toFixed(2)} €`,
-          inq.diasAtraso.toString(),
+          `${Number(inq.importe ?? 0).toFixed(2)} €`,
+          Number(inq.diasAtraso ?? 0).toString(),
         ]),
         theme: 'striped',
         headStyles: {
