@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AdvancedFilters } from '@/components/ui/advanced-filters';
 
@@ -23,14 +23,6 @@ describe('AdvancedFilters', () => {
 
   const baseValues = { search: '', estado: 'all' };
 
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it('should render without crashing', () => {
     const onChange = vi.fn();
     render(<AdvancedFilters filters={filters} values={baseValues} onChange={onChange} />);
@@ -52,8 +44,6 @@ describe('AdvancedFilters', () => {
     fireEvent.change(screen.getByPlaceholderText('Buscar nombre'), {
       target: { value: 'Juan' },
     });
-
-    vi.advanceTimersByTime(300);
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({ ...baseValues, search: 'Juan' });
