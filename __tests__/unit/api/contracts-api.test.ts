@@ -36,6 +36,12 @@ vi.mock('@/lib/logger', () => ({
   logError: vi.fn(),
 }));
 
+vi.mock('@/lib/validations', () => ({
+  contractCreateSchema: {
+    safeParse: vi.fn(),
+  },
+}));
+
 vi.mock('next-auth', () => ({
   getServerSession: vi.fn(),
 }));
@@ -50,6 +56,7 @@ vi.mock('@/lib/api-cache-helpers', () => ({
 import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { cachedContracts } from '@/lib/api-cache-helpers';
+import { contractCreateSchema } from '@/lib/validations';
 import { GET, POST } from '@/app/api/contracts/route';
 
 describe('📝 Contracts API - GET Endpoint', () => {
@@ -90,6 +97,16 @@ describe('📝 Contracts API - GET Endpoint', () => {
     vi.clearAllMocks();
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockUser,
+    });
+    (contractCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
+      success: true,
+      data: {
+        ...validContractData,
+        rentaMensual: validContractData.renta,
+        diaCobranza: 1,
+        clausulasEspeciales: '',
+        renovacionAutomatica: false,
+      },
     });
   });
 
@@ -299,6 +316,10 @@ describe('📝 Contracts API - POST Endpoint', () => {
       fechaInicio: '2027-01-01',
       fechaFin: '2026-01-01',
     };
+    (contractCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
+      success: false,
+      error: { errors: [{ path: ['fechaInicio'], message: 'Fecha inválida' }] },
+    });
 
     const req = new NextRequest('http://localhost:3000/api/contracts', {
       method: 'POST',
@@ -315,6 +336,10 @@ describe('📝 Contracts API - POST Endpoint', () => {
       ...validContractData,
       renta: -1000,
     };
+    (contractCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
+      success: false,
+      error: { errors: [{ path: ['rentaMensual'], message: 'Renta inválida' }] },
+    });
 
     const req = new NextRequest('http://localhost:3000/api/contracts', {
       method: 'POST',
@@ -331,6 +356,10 @@ describe('📝 Contracts API - POST Endpoint', () => {
       ...validContractData,
       renta: 0,
     };
+    (contractCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
+      success: false,
+      error: { errors: [{ path: ['rentaMensual'], message: 'Renta inválida' }] },
+    });
 
     const req = new NextRequest('http://localhost:3000/api/contracts', {
       method: 'POST',
@@ -347,6 +376,10 @@ describe('📝 Contracts API - POST Endpoint', () => {
       ...validContractData,
       deposito: -500,
     };
+    (contractCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
+      success: false,
+      error: { errors: [{ path: ['deposito'], message: 'Depósito inválido' }] },
+    });
 
     const req = new NextRequest('http://localhost:3000/api/contracts', {
       method: 'POST',
@@ -475,6 +508,10 @@ describe('📝 Contracts API - POST Endpoint', () => {
       tenantId: 'tenant-1',
       renta: 1200,
     };
+    (contractCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
+      success: false,
+      error: { errors: [{ path: ['unitId'], message: 'unitId requerido' }] },
+    });
 
     const req = new NextRequest('http://localhost:3000/api/contracts', {
       method: 'POST',
