@@ -77,33 +77,32 @@ export async function GET(req: NextRequest) {
     }
 
     // Consulta directa (con o sin paginación)
-    const [contracts, total] = await Promise.all([
-      prisma.contract.findMany({
-        where: whereClause,
-        include: {
-          unit: {
-            include: {
-              building: {
-                include: {
-                  company: {
-                    select: { id: true, nombre: true },
-                  },
+    const contracts = await prisma.contract.findMany({
+      where: whereClause,
+      include: {
+        unit: {
+          include: {
+            building: {
+              include: {
+                company: {
+                  select: { id: true, nombre: true },
                 },
               },
             },
           },
-          tenant: true,
         },
-        orderBy: { createdAt: 'desc' },
-        skip: usePagination ? skip : undefined,
-        take: usePagination ? limit : undefined,
-      }),
-      usePagination
-        ? prisma.contract.count({
-            where: whereClause,
-          })
-        : Promise.resolve(contracts.length),
-    ]);
+        tenant: true,
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: usePagination ? skip : undefined,
+      take: usePagination ? limit : undefined,
+    });
+
+    const total = usePagination
+      ? await prisma.contract.count({
+          where: whereClause,
+        })
+      : contracts.length;
 
     // Calcular días hasta vencimiento y convertir valores Decimal
     const contractsWithExpiration = contracts.map(contract => {
