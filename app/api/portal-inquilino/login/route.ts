@@ -7,10 +7,26 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'fallback-secret-key';
+const JWT_SECRET = process.env.TENANT_JWT_SECRET || process.env.NEXTAUTH_SECRET;
+
+function getJwtSecret() {
+  if (!JWT_SECRET) {
+    logger.error('[Tenant Auth] JWT secret no configurado');
+    return null;
+  }
+  return JWT_SECRET;
+}
 
 export async function POST(request: Request) {
   try {
+    const jwtSecret = getJwtSecret();
+    if (!jwtSecret) {
+      return NextResponse.json(
+        { error: 'Autenticación no configurada' },
+        { status: 500 }
+      );
+    }
+
     const { email, password } = await request.json();
 
     if (!email || !password) {
@@ -49,7 +65,7 @@ export async function POST(request: Request) {
         email: tenant.email,
         nombre: tenant.nombreCompleto,
       },
-      JWT_SECRET,
+      jwtSecret,
       { expiresIn: '7d' }
     );
 

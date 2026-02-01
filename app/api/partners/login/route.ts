@@ -7,10 +7,26 @@ import jwt from 'jsonwebtoken';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key-partners';
+const JWT_SECRET = process.env.PARTNER_JWT_SECRET || process.env.NEXTAUTH_SECRET;
+
+function getJwtSecret() {
+  if (!JWT_SECRET) {
+    logger.error('[Partners Auth] JWT secret no configurado');
+    return null;
+  }
+  return JWT_SECRET;
+}
 // POST /api/partners/login - Login de Partner
 export async function POST(request: NextRequest) {
   try {
+    const jwtSecret = getJwtSecret();
+    if (!jwtSecret) {
+      return NextResponse.json(
+        { error: 'Autenticación no configurada' },
+        { status: 500 }
+      );
+    }
+
     const { email, password } = await request.json();
     if (!email || !password) {
       return NextResponse.json(
@@ -51,7 +67,7 @@ export async function POST(request: NextRequest) {
         nombre: partner.nombre,
         tipo: partner.tipo,
       },
-      JWT_SECRET,
+      jwtSecret,
       { expiresIn: '7d' }
     );
     // No devolver el password
