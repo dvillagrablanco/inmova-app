@@ -6,6 +6,14 @@ vi.mock('next/dynamic', () => ({
   default: () => () => null,
 }));
 
+vi.mock('@/lib/hooks/useMediaQuery', () => ({
+  useIsMobile: () => false,
+  useMediaQuery: () => false,
+  useIsTablet: () => false,
+  useIsDesktop: () => true,
+  useDeviceType: () => 'desktop',
+}));
+
 vi.mock('@/components/layout/sidebar', () => ({
   Sidebar: () => <aside>Sidebar</aside>,
 }));
