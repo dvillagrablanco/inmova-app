@@ -110,6 +110,7 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     }
   } else if (reportData.tipo === 'ocupacion') {
     const { totalUnidades, unidadesOcupadas, tasaOcupacion, unidadesDisponibles } = reportData.datos;
+    const tasaOcupacionValue = typeof tasaOcupacion === 'number' ? tasaOcupacion : 0;
     
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
@@ -126,7 +127,7 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     yPos += 8;
     doc.text(`Unidades disponibles: ${unidadesDisponibles}`, 15, yPos);
     yPos += 8;
-    doc.text(`Tasa de ocupación: ${tasaOcupacion.toFixed(1)}%`, 15, yPos);
+    doc.text(`Tasa de ocupación: ${tasaOcupacionValue.toFixed(1)}%`, 15, yPos);
     yPos += 12;
     
     // Tabla de edificios
@@ -139,7 +140,7 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
           ed.total.toString(),
           ed.ocupadas.toString(),
           ed.disponibles.toString(),
-          `${ed.tasaOcupacion.toFixed(1)}%`,
+          `${Number(ed.tasaOcupacion ?? 0).toFixed(1)}%`,
         ]),
         theme: 'striped',
         headStyles: {
