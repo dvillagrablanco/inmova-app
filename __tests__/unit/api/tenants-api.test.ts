@@ -80,16 +80,6 @@ describe('🏠 Tenants API - GET Endpoint', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (requireAuth as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
-    (requirePermission as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
-    (tenantCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
-      success: true,
-      data: {
-        ...validTenantData,
-        nombre: 'Pedro',
-        apellidos: 'López',
-        notasInternas: '',
-      },
-    });
   });
 
   // ========================================
@@ -256,6 +246,16 @@ describe('🏠 Tenants API - POST Endpoint', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (requireAuth as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
+    (requirePermission as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
+    (tenantCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
+      success: true,
+      data: {
+        ...validTenantData,
+        nombre: 'Pedro',
+        apellidos: 'López',
+        notasInternas: '',
+      },
+    });
   });
 
   // ========================================
