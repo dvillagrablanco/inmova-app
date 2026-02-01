@@ -17,6 +17,9 @@ vi.mock('@/lib/db', () => ({
       update: vi.fn(),
       delete: vi.fn(),
     },
+    unit: {
+      update: vi.fn(),
+    },
   },
 }));
 
@@ -247,6 +250,10 @@ describe('📝 Contracts API - POST Endpoint', () => {
         clausulasEspeciales: '',
         renovacionAutomatica: false,
       },
+    });
+    (prisma.unit.update as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: validContractData.unitId,
+      estado: 'ocupada',
     });
   });
 
