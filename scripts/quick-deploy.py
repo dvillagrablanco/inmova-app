@@ -7,8 +7,11 @@ import sys
 import time
 import os
 
-# Añadir paramiko al path
-sys.path.insert(0, '/home/ubuntu/.local/lib/python3.12/site-packages')
+# Añadir paramiko al path (instalado vía pip --user)
+import site
+user_site = site.getusersitepackages()
+if user_site not in sys.path:
+    sys.path.insert(0, user_site)
 
 import paramiko
 
