@@ -367,15 +367,8 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
   });
 
   test('⚠️ Debe manejar 100% de ocupación', async () => {
-    const fullOccupancy = {
-      ...mockDashboardData,
-      stats: {
-        ...mockDashboardData.stats,
-        occupancyRate: 100,
-      },
-    };
-
-    (cachedDashboard as ReturnType<typeof vi.fn>).mockResolvedValue(fullOccupancy);
+    (prisma.unit.count as ReturnType<typeof vi.fn>).mockResolvedValue(10);
+    (prisma.contract.count as ReturnType<typeof vi.fn>).mockResolvedValue(10);
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
@@ -385,17 +378,8 @@ describe('📊 Dashboard API - GET Endpoint (Comprehensive)', () => {
   });
 
   test('⚠️ Debe manejar 0% de ocupación', async () => {
-    const zeroOccupancy = {
-      ...mockDashboardData,
-      stats: {
-        ...mockDashboardData.stats,
-        totalUnits: 100,
-        totalTenants: 0,
-        occupancyRate: 0,
-      },
-    };
-
-    (cachedDashboard as ReturnType<typeof vi.fn>).mockResolvedValue(zeroOccupancy);
+    (prisma.unit.count as ReturnType<typeof vi.fn>).mockResolvedValue(10);
+    (prisma.contract.count as ReturnType<typeof vi.fn>).mockResolvedValue(0);
 
     const req = new NextRequest('http://localhost:3000/api/dashboard');
     const response = await GET(req);
