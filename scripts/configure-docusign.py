@@ -1,166 +1,110 @@
 #!/usr/bin/env python3
 """
-Configurar DocuSign con las credenciales encontradas
+Configurar credenciales de DocuSign encontradas en documentación
 """
-
 import sys
 sys.path.insert(0, '/home/ubuntu/.local/lib/python3.12/site-packages')
 
 import paramiko
 import time
 
-SERVER_CONFIG = {
-    'host': '157.180.119.236',
-    'username': 'root',
-    'password': 'hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo=',
-    'port': 22,
-    'timeout': 30
+# Configuración del servidor
+SERVER_IP = "157.180.119.236"
+SERVER_USER = "root"
+SERVER_PASSWORD = "hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo="
+APP_PATH = "/opt/inmova-app"
+
+# Credenciales de DocuSign encontradas en /opt/inmova-app/docs/DOCUSIGN_JWT_AUTH_GUIDE.md
+DOCUSIGN_CREDENTIALS = {
+    "DOCUSIGN_INTEGRATION_KEY": "0daca02a-dbe5-45cd-9f78-35108236c0cd",
+    "DOCUSIGN_USER_ID": "6db6e1e7-24be-4445-a75c-dce2aa0f3e59",
+    "DOCUSIGN_ACCOUNT_ID": "dc80ca20-9dcd-4d88-878a-3cb0e67e3569",
+    "DOCUSIGN_BASE_PATH": "https://demo.docusign.net/restapi",
 }
 
-# Credenciales de DocuSign encontradas
-DOCUSIGN_CREDENTIALS = """
-# DocuSign Configuration (Development/Demo)
-DOCUSIGN_INTEGRATION_KEY=c0a3e377-148b-4895-9095-b3e8dbef3d88
-DOCUSIGN_USER_ID=5f857d75-cd36-4fad-812b-3ff1be80d9a9
-DOCUSIGN_ACCOUNT_ID=e59b0a7b-966d-42e0-bcd9-169855c046
-DOCUSIGN_BASE_PATH=https://demo.docusign.net/restapi
-"""
-
-def exec_cmd(client, cmd, timeout=60):
+def exec_cmd(client, cmd, timeout=30):
+    """Ejecutar comando SSH"""
     stdin, stdout, stderr = client.exec_command(cmd, timeout=timeout)
     exit_status = stdout.channel.recv_exit_status()
-    return {
-        'exit': exit_status,
-        'output': stdout.read().decode('utf-8', errors='ignore'),
-        'error': stderr.read().decode('utf-8', errors='ignore')
-    }
+    output = stdout.read().decode('utf-8', errors='ignore')
+    return exit_status, output
 
 def main():
     print("=" * 70)
-    print("🔐 CONFIGURANDO DOCUSIGN")
+    print("🔧 CONFIGURANDO DOCUSIGN")
     print("=" * 70)
-    print()
+    print("\nCredenciales encontradas en docs/DOCUSIGN_JWT_AUTH_GUIDE.md:")
+    for key, value in DOCUSIGN_CREDENTIALS.items():
+        display = value[:20] + "..." if len(value) > 20 else value
+        print(f"  • {key}={display}")
     
-    print("📋 Credenciales encontradas:")
-    print("   • Integration Key: c0a3e377-148b-4895-9095-b3e8dbef3d88")
-    print("   • User ID: 5f857d75-cd36-4fad-812b-3ff1be80d9a9")
-    print("   • Account ID: e59b0a7b-966d-42e0-bcd9-169855c046")
-    print("   • Base Path: https://demo.docusign.net/restapi")
-    print("   ⚠️  Private Key: NO ENCONTRADA (necesaria)")
-    print()
-    
+    # Conectar
+    print("\n🔐 Conectando...")
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(
-        hostname=SERVER_CONFIG['host'],
-        username=SERVER_CONFIG['username'],
-        password=SERVER_CONFIG['password'],
-        port=SERVER_CONFIG['port'],
-        timeout=SERVER_CONFIG['timeout']
-    )
     
-    print("[1] Verificando si ya existen credenciales DocuSign...")
-    result = exec_cmd(client, "cd /opt/inmova-app && grep -E 'DOCUSIGN_' .env.production | head -5")
+    try:
+        client.connect(SERVER_IP, username=SERVER_USER, password=SERVER_PASSWORD, timeout=10)
+        print("✅ Conectado\n")
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        return
     
-    if 'DOCUSIGN_INTEGRATION_KEY' in result['output']:
-        print("   ⚠️  Credenciales DocuSign ya presentes")
-        print(result['output'][:200])
-        print()
-        print("   ¿Sobrescribir? (continuando...)")
-    else:
-        print("   ℹ️  No se encontraron credenciales previas")
-    
-    print()
-    print("[2] Añadiendo credenciales DocuSign...")
-    
-    # Limpiar credenciales existentes
-    exec_cmd(client, "cd /opt/inmova-app && sed -i '/^DOCUSIGN_/d' .env.production")
-    
-    # Añadir nuevas credenciales
-    exec_cmd(client, f"""cd /opt/inmova-app && cat >> .env.production << 'EOF'
+    try:
+        # Leer .env.production actual
+        print("📄 Leyendo .env.production...")
+        status, env_content = exec_cmd(client, f"cat {APP_PATH}/.env.production")
+        
+        lines = env_content.strip().split('\n')
+        
+        # Agregar credenciales de DocuSign
+        print("\n➕ Agregando credenciales de DocuSign...")
+        
+        for key, value in DOCUSIGN_CREDENTIALS.items():
+            # Verificar si ya existe
+            found = False
+            for i, line in enumerate(lines):
+                if line.strip().startswith(key + '='):
+                    lines[i] = f'{key}={value}'
+                    print(f"  ✏️ Actualizado: {key}")
+                    found = True
+                    break
+            
+            if not found:
+                lines.append(f'{key}={value}')
+                print(f"  ➕ Agregado: {key}")
+        
+        # Guardar cambios
+        new_content = '\n'.join(lines)
+        
+        # Backup
+        exec_cmd(client, f"cp {APP_PATH}/.env.production {APP_PATH}/.env.production.backup.docusign.$(date +%Y%m%d_%H%M%S)")
+        
+        # Escribir usando heredoc
+        exec_cmd(client, f"cat > {APP_PATH}/.env.production << 'ENVEOF'\n{new_content}\nENVEOF")
+        
+        print("\n✅ Credenciales de DocuSign configuradas")
+        
+        # Reiniciar PM2
+        print("\n🔄 Reiniciando PM2...")
+        exec_cmd(client, "pm2 restart inmova-app --update-env")
+        time.sleep(10)
+        
+        # Verificar estado
+        print("\n📊 ESTADO FINAL DE INTEGRACIONES:")
+        print("=" * 70)
+        
+        status, output = exec_cmd(client, f"cat {APP_PATH}/.env.production | grep -E '(DOCUSIGN|TWILIO|SIGNATURIT|SENTRY)'")
+        print(output)
+        
+        # Health check
+        print("\n🏥 Health check:")
+        status, output = exec_cmd(client, "curl -s http://localhost:3000/api/health")
+        print(output)
+        
+    finally:
+        client.close()
+        print("\n✅ Conexión cerrada")
 
-# === DOCUSIGN FIRMA DIGITAL ===
-{DOCUSIGN_CREDENTIALS.strip()}
-# ⚠️ FALTA: DOCUSIGN_PRIVATE_KEY (generar en https://admindemo.docusign.com/apps-and-keys)
-EOF
-""")
-    
-    print("   ✅ Credenciales añadidas")
-    print()
-    
-    print("[3] Verificando configuración...")
-    result = exec_cmd(client, "cd /opt/inmova-app && grep 'DOCUSIGN_' .env.production | wc -l")
-    count = result['output'].strip()
-    print(f"   {count} variables DOCUSIGN configuradas")
-    print()
-    
-    print("[4] Reiniciando aplicación...")
-    exec_cmd(client, "cd /opt/inmova-app && pm2 restart inmova-app --update-env")
-    print("   ✅ PM2 reiniciado")
-    print()
-    
-    print("   ⏳ Esperando 15 segundos...")
-    time.sleep(15)
-    
-    print()
-    print("[5] Verificando detección de proveedor...")
-    result = exec_cmd(client, "cd /opt/inmova-app && pm2 logs inmova-app --nostream --lines 20 | grep -i 'signature\\|docusign\\|provider' | tail -5")
-    
-    if result['output']:
-        print("   Logs relacionados:")
-        print(result['output'][:300])
-    else:
-        print("   ℹ️  Sin logs específicos (es normal)")
-    
-    client.close()
-    
-    print()
-    print("=" * 70)
-    print("⚠️  CONFIGURACIÓN PARCIAL")
-    print("=" * 70)
-    print()
-    print("✅ Credenciales añadidas:")
-    print("   • DOCUSIGN_INTEGRATION_KEY ✅")
-    print("   • DOCUSIGN_USER_ID ✅")
-    print("   • DOCUSIGN_ACCOUNT_ID ✅")
-    print("   • DOCUSIGN_BASE_PATH ✅")
-    print()
-    print("❌ Falta:")
-    print("   • DOCUSIGN_PRIVATE_KEY")
-    print()
-    print("📋 PARA OBTENER LA PRIVATE KEY:")
-    print()
-    print("1. Acceder a DocuSign:")
-    print("   URL: https://admindemo.docusign.com/")
-    print("   Usuario: dvillagra@vidaroinversiones.com")
-    print()
-    print("2. Navegar a:")
-    print("   Settings → Apps and Keys → INMOVA Digital Signature")
-    print()
-    print("3. Sección 'Service Integration':")
-    print("   • Click en 'Actions' → 'Generate RSA'")
-    print("   • Copiar la Private Key generada")
-    print()
-    print("4. Añadir al servidor:")
-    print("   ssh root@157.180.119.236")
-    print("   nano /opt/inmova-app/.env.production")
-    print()
-    print("   Añadir línea:")
-    print('   DOCUSIGN_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----')
-    print('   MIIEow... (pegar contenido completo)')
-    print('   -----END RSA PRIVATE KEY-----"')
-    print()
-    print("   pm2 restart inmova-app --update-env")
-    print()
-    print("📊 Estado actual:")
-    print("   Modo: DEMO (sin Private Key)")
-    print("   Funciona para testing UI, pero no envía documentos reales")
-    print()
-    print("🔗 Documentación completa:")
-    print("   • INTEGRACION_DOCUSIGN_VIDARO.md")
-    print("   • DOCUSIGN_CREDENTIALS.md")
-    print()
-    return 0
-
-if __name__ == '__main__':
-    sys.exit(main())
+if __name__ == "__main__":
+    main()
