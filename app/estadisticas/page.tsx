@@ -208,8 +208,8 @@ export default function EstadisticasPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {MONTHLY_DATA.map((data, index) => {
-                const prevData = MONTHLY_DATA[index - 1];
+              {monthlyData.map((data, index) => {
+                const prevData = monthlyData[index - 1];
                 const change = prevData 
                   ? ((data.ingresos - prevData.ingresos) / prevData.ingresos * 100).toFixed(1)
                   : 0;
@@ -251,7 +251,7 @@ export default function EstadisticasPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {PROPERTY_TYPES.map((type) => (
+              {propertyTypes.map((type) => (
                 <div key={type.tipo} className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="font-medium">{type.tipo}</span>
@@ -296,7 +296,7 @@ export default function EstadisticasPage() {
                 </tr>
               </thead>
               <tbody>
-                {TOP_PROPERTIES.map((prop, index) => (
+                {topProperties.map((prop, index) => (
                   <tr key={prop.nombre} className="border-t">
                     <td className="py-3">
                       <div className="flex items-center gap-2">
