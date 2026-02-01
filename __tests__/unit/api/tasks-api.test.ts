@@ -240,7 +240,7 @@ describe('✅ Tasks API - POST', () => {
   });
 
   test('❌ Sin permisos retorna 401/403', async () => {
-    (requirePermission as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Forbidden'));
+    (requirePermission as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('permiso'));
 
     const req = new NextRequest('http://localhost:3000/api/tasks', {
       method: 'POST',
