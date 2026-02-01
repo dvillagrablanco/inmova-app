@@ -153,6 +153,10 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     }
   } else if (reportData.tipo === 'ingresos') {
     const { ingresosBrutos, gastos, ingresosNetos, rentabilidad } = reportData.datos;
+    const ingresosBrutosValue = typeof ingresosBrutos === 'number' ? ingresosBrutos : 0;
+    const gastosValue = typeof gastos === 'number' ? gastos : 0;
+    const ingresosNetosValue = typeof ingresosNetos === 'number' ? ingresosNetos : 0;
+    const rentabilidadValue = typeof rentabilidad === 'number' ? rentabilidad : 0;
     
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
@@ -163,13 +167,13 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     // KPIs
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Ingresos brutos: ${ingresosBrutos.toFixed(2)} €`, 15, yPos);
+    doc.text(`Ingresos brutos: ${ingresosBrutosValue.toFixed(2)} €`, 15, yPos);
     yPos += 8;
-    doc.text(`Gastos: ${gastos.toFixed(2)} €`, 15, yPos);
+    doc.text(`Gastos: ${gastosValue.toFixed(2)} €`, 15, yPos);
     yPos += 8;
-    doc.text(`Ingresos netos: ${ingresosNetos.toFixed(2)} €`, 15, yPos);
+    doc.text(`Ingresos netos: ${ingresosNetosValue.toFixed(2)} €`, 15, yPos);
     yPos += 8;
-    doc.text(`Rentabilidad: ${rentabilidad.toFixed(1)}%`, 15, yPos);
+    doc.text(`Rentabilidad: ${rentabilidadValue.toFixed(1)}%`, 15, yPos);
     yPos += 12;
     
     // Desglose mensual si existe
