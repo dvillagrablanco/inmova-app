@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { stripe } from '@/lib/stripe-config';
+import { getStripe } from '@/lib/stripe-config';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -10,7 +10,7 @@ export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if Stripe is configured
+    const stripe = getStripe();
     if (!stripe) {
       return NextResponse.json(
         { error: 'Stripe no está configurado en este momento' },

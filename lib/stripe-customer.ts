@@ -1,4 +1,4 @@
-import { stripe } from './stripe-config';
+import { getStripe } from './stripe-config';
 import { prisma } from './db';
 
 export async function getOrCreateStripeCustomer(
@@ -6,6 +6,7 @@ export async function getOrCreateStripeCustomer(
   email: string,
   name: string
 ): Promise<string> {
+  const stripe = getStripe();
   // Check if Stripe is configured
   if (!stripe) {
     throw new Error('Stripe no está configurado');
@@ -43,6 +44,7 @@ export async function getOrCreateStripeCustomer(
 }
 
 export async function deleteStripeCustomer(tenantId: string): Promise<void> {
+  const stripe = getStripe();
   // Check if Stripe is configured
   if (!stripe) {
     throw new Error('Stripe no está configurado');
