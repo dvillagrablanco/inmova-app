@@ -41,7 +41,7 @@
     "audit:deployment": "node scripts/pre-deployment-audit.js",
     "prepare": "husky",
     "test:coverage": "vitest run --coverage",
-    "test:integration": "yarn vitest run --config vitest.integration.config.ts",
+    "test:integration": "./node_modules/.bin/vitest run --config vitest.integration.config.ts",
     "coverage:verify": "./scripts/coverage-verify.sh",
     "coverage:report": "vitest run --coverage && open coverage/index.html",
     "coverage:missing": "vitest run --coverage && grep -r \"0%\" coverage/lcov-report",
