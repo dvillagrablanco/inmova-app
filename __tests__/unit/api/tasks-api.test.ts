@@ -3,6 +3,7 @@
  */
 
 import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { z } from 'zod';
 import { NextRequest } from 'next/server';
 
 // Mocks
@@ -222,9 +223,10 @@ describe('✅ Tasks API - POST', () => {
   });
 
   test('❌ Debe rechazar datos inválidos', async () => {
-    (taskCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
-      success: false,
-      error: { errors: [{ path: ['titulo'], message: 'Required' }] },
+    (taskCreateSchema.parse as ReturnType<typeof vi.fn>).mockImplementation(() => {
+      throw new z.ZodError([
+        { code: 'custom', path: ['titulo'], message: 'Required' } as any,
+      ]);
     });
 
     const req = new NextRequest('http://localhost:3000/api/tasks', {
