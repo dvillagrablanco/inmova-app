@@ -7,7 +7,7 @@ import logger from './logger';
  */
 const isBuildTime =
   process.env.NEXT_PHASE === 'phase-production-build' ||
-  process.env.NODE_ENV === 'test' ||
+  (process.env.NODE_ENV === 'test' && process.env.INTEGRATION_TESTS !== 'true') ||
   typeof window !== 'undefined';
 
 /**
