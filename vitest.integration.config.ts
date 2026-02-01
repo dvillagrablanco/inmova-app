@@ -7,7 +7,7 @@ export default defineConfig({
     environment: 'node',
     globals: true,
     setupFiles: ['./vitest.integration.setup.ts'],
-    include: ['__tests__/integration/**/*.test.ts'],
+    include: ['__tests__/integration/**/*.integration.test.ts'],
     testTimeout: 30000,
     hookTimeout: 30000,
     threads: false,
