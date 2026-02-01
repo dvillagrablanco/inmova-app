@@ -174,17 +174,28 @@
 **Ambiente**: Demo/Sandbox  
 **Dashboard**: https://admindemo.docusign.com/
 
-| Variable | Descripción |
-|----------|-------------|
-| DOCUSIGN_INTEGRATION_KEY | ID de integración (GUID) |
-| DOCUSIGN_USER_ID | ID del usuario API (GUID) |
-| DOCUSIGN_ACCOUNT_ID | ID de la cuenta DocuSign |
-| DOCUSIGN_BASE_PATH | https://demo.docusign.net/restapi |
-| DOCUSIGN_PRIVATE_KEY | ✅ Clave RSA para JWT auth (1678 chars) |
+| Variable | Valor |
+|----------|-------|
+| DOCUSIGN_INTEGRATION_KEY | `0daca02a-dbe5-45cd-9f78-35108236c0cd` |
+| DOCUSIGN_USER_ID | `6db6e1e7-24be-4445-a75c-dce2aa0f3e59` |
+| DOCUSIGN_ACCOUNT_ID | `dc80ca20-9dcd-4d88-878a-3cb0e67e3569` |
+| DOCUSIGN_BASE_PATH | `https://demo.docusign.net/restapi` |
+| DOCUSIGN_PRIVATE_KEY | ✅ RSA Key (1678 chars) - Ver servidor |
 
 **Webhook URL**: `https://inmovaapp.com/api/webhooks/docusign`
 
-**Fuente de Private Key**: Encontrada en `scripts/configure-docusign-complete.py`
+### Detalles de la Private Key
+
+- **Longitud**: 1678 caracteres
+- **Tipo**: RSA PRIVATE KEY
+- **Ubicación en servidor**: `/opt/inmova-app/.env.production`
+- **Fuente original**: `scripts/configure-docusign-complete.py`
+
+Para obtener la Private Key completa:
+```bash
+ssh root@157.180.119.236
+grep DOCUSIGN_PRIVATE_KEY /opt/inmova-app/.env.production
+```
 
 ---
 
@@ -193,13 +204,19 @@
 **Servicio**: Twilio  
 **Dashboard**: https://console.twilio.com/
 
-| Variable | Descripción |
-|----------|-------------|
-| TWILIO_ACCOUNT_SID | ID de cuenta (AC...) |
-| TWILIO_AUTH_TOKEN | Token de autenticación |
-| TWILIO_PHONE_NUMBER | Número de teléfono remitente |
+| Variable | Valor |
+|----------|-------|
+| TWILIO_ACCOUNT_SID | `AC1a49475...` (32 chars) |
+| TWILIO_AUTH_TOKEN | Configurado (32 chars) |
+| TWILIO_PHONE_NUMBER | `+34600000000` |
 
 **Webhook URL**: `https://inmovaapp.com/api/webhooks/twilio`
+
+Para obtener credenciales completas:
+```bash
+ssh root@157.180.119.236
+grep TWILIO /opt/inmova-app/.env.production
+```
 
 ---
 
@@ -261,8 +278,11 @@
 # Conectar al servidor
 ssh root@157.180.119.236
 
-# Ver todas las credenciales
+# Ver todas las credenciales (archivo principal)
 cat /opt/inmova-app/.env.production
+
+# Ver backup formateado con todas las credenciales
+cat /root/inmova-credentials-backup/CREDENCIALES_COMPLETAS_LATEST.txt
 
 # O ver una específica
 grep STRIPE_SECRET_KEY /opt/inmova-app/.env.production
@@ -270,11 +290,26 @@ grep STRIPE_SECRET_KEY /opt/inmova-app/.env.production
 
 ---
 
+## 💾 Backup de Credenciales
+
+Las credenciales están respaldadas en el servidor:
+
+| Ubicación | Descripción |
+|-----------|-------------|
+| `/opt/inmova-app/.env.production` | Archivo activo en uso |
+| `/root/inmova-credentials-backup/` | Directorio de backups |
+| `CREDENCIALES_COMPLETAS_LATEST.txt` | Backup formateado actual |
+| `CREDENCIALES_COMPLETAS_*.txt` | Backups con timestamp |
+
+**Permisos**: Solo root puede acceder (chmod 600)
+
+---
+
 ## ⚠️ Notas de Seguridad
 
 1. **Las credenciales completas NO están en este documento** - están solo en el servidor
 2. **Rotar credenciales** periódicamente (recomendado cada 90 días)
-3. **Backup** del archivo `.env.production` en ubicación segura
+3. **Backup** del archivo `.env.production` ya creado en `/root/inmova-credentials-backup/`
 4. **No commitear** credenciales a Git
 
 ---
@@ -298,6 +333,8 @@ grep STRIPE_SECRET_KEY /opt/inmova-app/.env.production
 | 01/02/2026 | Documento inicial con 13 integraciones |
 | 01/02/2026 | Añadidos webhooks de DocuSign y Twilio |
 | 01/02/2026 | Añadidas NEXT_PUBLIC_APP_URL y NEXT_PUBLIC_SENTRY_DSN |
+| 01/02/2026 | Configurada DocuSign Private Key (1678 chars) |
+| 01/02/2026 | Creado backup completo en `/root/inmova-credentials-backup/` |
 
 ---
 
