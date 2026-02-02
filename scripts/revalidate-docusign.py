@@ -42,6 +42,15 @@ def extract_from_doc(doc_text: str, key: str) -> str | None:
     return None
 
 
+def normalize_base_path(value: str | None) -> str | None:
+    if not value:
+        return None
+    base = value.strip().rstrip("/")
+    if base.endswith("/restapi"):
+        return base
+    return f"{base}/restapi"
+
+
 def extract_server_config(script_text: str) -> dict[str, str]:
     def grab(pattern: str) -> str:
         match = re.search(pattern, script_text)
@@ -127,12 +136,24 @@ def main() -> int:
 
     signer_email = None
     signer_name = None
+    fallback = None
     if DOC_DOCUSIGN.exists():
         docusign_text = read_text(DOC_DOCUSIGN)
         email_match = re.search(r"\*\*Usuario\*\*:\s*([^\s]+)", docusign_text)
         name_match = re.search(r"\*\*Nombre\*\*:\s*(.+)", docusign_text)
         signer_email = email_match.group(1).strip() if email_match else None
         signer_name = name_match.group(1).strip() if name_match else None
+        fallback = {
+            "DOCUSIGN_INTEGRATION_KEY": extract_from_doc(docusign_text, "DOCUSIGN_INTEGRATION_KEY"),
+            "DOCUSIGN_USER_ID": extract_from_doc(docusign_text, "DOCUSIGN_USER_ID"),
+            "DOCUSIGN_ACCOUNT_ID": extract_from_doc(docusign_text, "DOCUSIGN_ACCOUNT_ID")
+            or extract_from_doc(docusign_text, "DOCUSIGN_API_ACCOUNT_ID"),
+            "DOCUSIGN_BASE_PATH": normalize_base_path(
+                extract_from_doc(docusign_text, "DOCUSIGN_BASE_URI")
+                or extract_from_doc(docusign_text, "DOCUSIGN_BASE_PATH")
+                or "https://demo.docusign.net"
+            ),
+        }
 
     if not signer_email or not signer_name:
         print("❌ No se encontró firmante de prueba en DOCUSIGN_CREDENTIALS.md")
@@ -398,14 +419,19 @@ main();
             timeout=30,
         )
 
-        cmd = (
-            f"cd {server['app_path']} && "
-            f"DOCUSIGN_TEST_SIGNER_EMAIL={shell_escape(signer_email)} "
-            f"DOCUSIGN_TEST_SIGNER_NAME={shell_escape(signer_name)} "
-            "node /tmp/inmova-docusign-send.js"
-        )
+        def run_docusign(overrides: dict[str, str] | None = None) -> tuple[int, str, str]:
+            env_parts = [
+                f"DOCUSIGN_TEST_SIGNER_EMAIL={shell_escape(signer_email)}",
+                f"DOCUSIGN_TEST_SIGNER_NAME={shell_escape(signer_name)}",
+            ]
+            if overrides:
+                for key, value in overrides.items():
+                    if value:
+                        env_parts.append(f"{key}={shell_escape(value)}")
+            cmd = f"cd {server['app_path']} && " + " ".join(env_parts) + " node /tmp/inmova-docusign-send.js"
+            return exec_cmd(client, cmd, timeout=120)
 
-        status, output, error = exec_cmd(client, cmd, timeout=120)
+        status, output, error = run_docusign()
         output = output.strip()
         error = error.strip()
 
@@ -418,15 +444,77 @@ main();
             print(f"  {error[:500]}")
         print(f"  Exit status: {status}")
 
-        if status != 0:
-            print("❌ Error al enviar envelope")
-            return 1
-
-        if "JWT_OK" in output and "ENVELOPE_SENT" in output:
+        if status == 0 and "JWT_OK" in output and "ENVELOPE_SENT" in output:
             print("✅ JWT OK y envelope enviado")
             return 0
 
-        print("⚠️ JWT no confirmado o envelope no enviado")
+        if "issuer_not_found" in output or "invalid_grant" in output:
+            if fallback and all(fallback.values()):
+                print("🔁 Reintentando con credenciales alternas de DOCUSIGN_CREDENTIALS.md...")
+                fallback_private = private_key_text.replace("\n", "\\n") if private_key_text else None
+                fallback_overrides = {
+                    "DOCUSIGN_INTEGRATION_KEY": fallback.get("DOCUSIGN_INTEGRATION_KEY"),
+                    "DOCUSIGN_USER_ID": fallback.get("DOCUSIGN_USER_ID"),
+                    "DOCUSIGN_ACCOUNT_ID": fallback.get("DOCUSIGN_ACCOUNT_ID"),
+                    "DOCUSIGN_BASE_PATH": fallback.get("DOCUSIGN_BASE_PATH"),
+                }
+                if fallback_private:
+                    fallback_overrides["DOCUSIGN_PRIVATE_KEY"] = fallback_private
+
+                status, output, error = run_docusign(fallback_overrides)
+                output = output.strip()
+                error = error.strip()
+
+                print("🧾 Resultado DocuSign (fallback):")
+                if output:
+                    for line in output.splitlines():
+                        print(f"  {line}")
+                if error:
+                    print("  STDERR:")
+                    print(f"  {error[:500]}")
+                print(f"  Exit status: {status}")
+
+                if status == 0 and "JWT_OK" in output and "ENVELOPE_SENT" in output:
+                    print("✅ JWT OK y envelope enviado (fallback)")
+                    # Persistir fallback en .env.production
+                    lines = env_content.splitlines()
+                    def upsert_fallback(key: str, value: str) -> None:
+                        nonlocal lines
+                        found = False
+                        for i, line in enumerate(lines):
+                            if line.strip().startswith(f"{key}="):
+                                lines[i] = f"{key}={value}"
+                                found = True
+                                break
+                        if not found:
+                            lines.append(f"{key}={value}")
+
+                    for key, value in fallback.items():
+                        upsert_fallback(key, value)  # type: ignore[arg-type]
+                    if fallback_private:
+                        upsert_fallback("DOCUSIGN_PRIVATE_KEY", f"\"{fallback_private}\"")
+
+                    new_content = "\n".join(lines)
+                    exec_cmd(
+                        client,
+                        "cat > /tmp/inmova_env_update.txt << 'ENVEOF'\n{0}\nENVEOF".format(
+                            new_content
+                        ),
+                        timeout=30,
+                    )
+                    exec_cmd(
+                        client,
+                        f"cp /tmp/inmova_env_update.txt {server['app_path']}/.env.production",
+                        timeout=30,
+                    )
+                    exec_cmd(
+                        client,
+                        f"cd {server['app_path']} && pm2 restart inmova-app --update-env",
+                        timeout=60,
+                    )
+                    return 0
+
+        print("❌ Error al enviar envelope")
         return 1
     finally:
         client.close()
