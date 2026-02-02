@@ -112,13 +112,16 @@ export default defineConfig({
     // Bail early on errors (para CI/CD)
     bail: 1,
 
+    // Test inclusions
+    include: ['**/__tests__/**/*.test.{ts,tsx}', 'tests/integration/**/*.test.{ts,tsx}'],
+
     // Test exclusions
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
       '**/.next/**',
       '**/e2e/**', // Excluir tests E2E de Playwright
-      '**/tests/**', // Excluir specs de Playwright en /tests
+      '**/tests/**/*.spec.{ts,tsx}', // Excluir specs Playwright en /tests
       '**/playwright-report/**',
       '**/*.e2e.{ts,tsx}',
     ],
