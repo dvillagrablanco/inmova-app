@@ -39,6 +39,7 @@ vi.mock('@/lib/logger', () => ({
 vi.mock('@/lib/validations', () => ({
   tenantCreateSchema: {
     parse: vi.fn((data) => data),
+    safeParse: vi.fn((data) => ({ success: true, data })),
   },
 }));
 
