@@ -15,6 +15,7 @@ import {
   ArrowLeft,
   Save,
   Info,
+  Upload,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -71,14 +72,14 @@ export default function EditarPropiedadPage() {
     planta: '',
     orientacion: '',
     rentaMensual: '',
-    
+
     // Características
     aireAcondicionado: false,
     calefaccion: false,
     terraza: false,
     balcon: false,
     amueblado: false,
-    
+
     // Opcional
     tourVirtual: '',
   });
@@ -107,7 +108,7 @@ export default function EditarPropiedadPage() {
         const propertyResponse = await fetch(`/api/units/${propertyId}`);
         if (propertyResponse.ok) {
           const property = await propertyResponse.json();
-          
+
           // Pre-llenar formulario
           setFormData({
             numero: property.numero || '',
@@ -128,7 +129,7 @@ export default function EditarPropiedadPage() {
             amueblado: property.amueblado || false,
             tourVirtual: property.tourVirtual || '',
           });
-          
+
           // Cargar fotos existentes
           if (property.imagenes && Array.isArray(property.imagenes)) {
             setPhotos(property.imagenes);
@@ -276,9 +277,7 @@ export default function EditarPropiedadPage() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href={`/propiedades/${propertyId}`}>
-                  Detalles
-                </BreadcrumbLink>
+                <BreadcrumbLink href={`/propiedades/${propertyId}`}>Detalles</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
