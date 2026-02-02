@@ -22,6 +22,8 @@ vi.mock('@/lib/db', () => ({
         payment: {
           create: vi.fn(),
           createMany: vi.fn(),
+          findUnique: vi.fn(),
+          update: vi.fn(),
         },
         notification: {
           create: vi.fn(),
@@ -43,6 +45,8 @@ vi.mock('@/lib/db', () => ({
     payment: {
       create: vi.fn(),
       createMany: vi.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn(),
     },
     notification: {
       create: vi.fn(),
