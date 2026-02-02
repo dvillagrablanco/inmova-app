@@ -17,6 +17,9 @@ vi.mock('@/lib/db', () => ({
       update: vi.fn(),
       delete: vi.fn(),
     },
+    unit: {
+      update: vi.fn(),
+    },
   },
 }));
 
@@ -90,6 +93,9 @@ describe('📝 Contracts API - GET Endpoint', () => {
     vi.clearAllMocks();
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockUser,
+    });
+    (prisma.unit.update as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: validContractData.unitId,
     });
   });
 
