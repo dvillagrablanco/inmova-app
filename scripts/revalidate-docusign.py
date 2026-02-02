@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOC_INTEGRACIONES = ROOT / "CREDENCIALES_INTEGRACIONES_INMOVA.md"
 DOC_DOCUSIGN = ROOT / "DOCUSIGN_CREDENTIALS.md"
 SERVER_SCRIPT = ROOT / "scripts" / "configure-docusign.py"
+DOCUSIGN_PRIVATE_KEY_SCRIPT = ROOT / "scripts" / "configure-docusign-complete.py"
 
 
 def read_text(path: Path) -> str:
@@ -54,6 +55,17 @@ def extract_server_config(script_text: str) -> dict[str, str]:
         "password": grab(r'SERVER_PASSWORD\s*=\s*"([^"]+)"'),
         "app_path": grab(r'APP_PATH\s*=\s*"([^"]+)"'),
     }
+
+
+def extract_private_key(script_text: str) -> str | None:
+    match = re.search(
+        r'DOCUSIGN_PRIVATE_KEY\s*=\s*"""(.*?)"""',
+        script_text,
+        re.DOTALL,
+    )
+    if not match:
+        return None
+    return match.group(1).strip()
 
 
 def mask(value: str | None) -> str:
@@ -97,6 +109,9 @@ def main() -> int:
 
     integraciones_text = read_text(DOC_INTEGRACIONES)
     server_text = read_text(SERVER_SCRIPT)
+    private_key_text = None
+    if DOCUSIGN_PRIVATE_KEY_SCRIPT.exists():
+        private_key_text = extract_private_key(read_text(DOCUSIGN_PRIVATE_KEY_SCRIPT))
 
     expected = {
         "DOCUSIGN_INTEGRATION_KEY": extract_from_doc(integraciones_text, "DOCUSIGN_INTEGRATION_KEY"),
@@ -158,9 +173,13 @@ def main() -> int:
                 needs_update = True
 
         private_key = env_vars.get("DOCUSIGN_PRIVATE_KEY", "")
+        normalized_env_key = private_key.replace("\\n", "\n")
         if not private_key or len(private_key) < 200:
             print("❌ DOCUSIGN_PRIVATE_KEY ausente o inválida en servidor")
             return 1
+        if private_key_text and private_key_text.strip() != normalized_env_key.strip():
+            print("⚠️ DOCUSIGN_PRIVATE_KEY no coincide con documentación local, actualizando...")
+            needs_update = True
 
         if needs_update:
             print("🛠️ Actualizando credenciales DocuSign en servidor...")
@@ -179,6 +198,9 @@ def main() -> int:
 
             for key, value in expected.items():
                 upsert(key, value)  # type: ignore[arg-type]
+            if private_key_text:
+                escaped_key = private_key_text.replace("\n", "\\n")
+                upsert("DOCUSIGN_PRIVATE_KEY", f"\"{escaped_key}\"")
 
             new_content = "\n".join(lines)
             exec_cmd(
@@ -295,7 +317,10 @@ async function main() {
 
     const tokenData = await tokenResponse.json();
     if (!tokenResponse.ok) {
-      console.log('ERROR', tokenData.error || tokenData.error_description || tokenResponse.status);
+      const msg = tokenData.error_description
+        ? `${tokenData.error || 'error'}:${tokenData.error_description}`
+        : (tokenData.error || tokenResponse.status);
+      console.log('ERROR', msg);
       process.exit(1);
     }
 
