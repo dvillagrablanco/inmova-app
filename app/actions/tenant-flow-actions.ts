@@ -40,7 +40,7 @@ export async function createPropertyAction(
 
     const validated = unitCreateSchema.safeParse(payload);
     if (!validated.success) {
-      return { success: false, error: 'Datos inválidos al crear propiedad' };
+      return { success: false, error: 'Datos invalidos al crear propiedad' };
     }
 
     const unit = await prisma.unit.create({
@@ -105,7 +105,7 @@ export async function createTenantAction(
 
     const validated = tenantCreateSchema.safeParse(payload);
     if (!validated.success) {
-      return { success: false, error: 'Datos inválidos al crear inquilino' };
+      return { success: false, error: 'Datos invalidos al crear inquilino' };
     }
 
     const tenant = await prisma.tenant.create({

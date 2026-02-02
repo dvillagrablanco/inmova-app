@@ -4,14 +4,14 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
-import { prisma } from '@/lib/db';
-import {
-  assignTenantToPropertyAction,
-  createPropertyAction,
-  createTenantAction,
-} from '@/app/actions/tenant-flow-actions';
+import { PrismaClient } from '@prisma/client';
 
-describe('🔒 Módulo Crítico 1: Flujo de Inquilinos y Propiedades', () => {
+type ActionsModule = typeof import('@/app/actions/tenant-flow-actions');
+
+let prisma: PrismaClient;
+let actions: ActionsModule;
+
+describe('Modulo Critico 1: Flujo de Inquilinos y Propiedades', () => {
   const companyId = crypto.randomUUID();
   const buildingId = crypto.randomUUID();
   const suffix = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
@@ -42,8 +42,12 @@ describe('🔒 Módulo Crítico 1: Flujo de Inquilinos y Propiedades', () => {
     }
 
     if (!process.env.DATABASE_URL) {
-      throw new Error('DATABASE_URL no configurado para tests de integración');
+      throw new Error('DATABASE_URL no configurado para tests de integracion');
     }
+
+    prisma = new PrismaClient();
+    (globalThis as { prisma?: PrismaClient }).prisma = prisma;
+    actions = await import('@/app/actions/tenant-flow-actions');
 
     await prisma.$connect();
 
@@ -77,9 +81,10 @@ describe('🔒 Módulo Crítico 1: Flujo de Inquilinos y Propiedades', () => {
     await prisma.building.delete({ where: { id: buildingId } }).catch(() => null);
     await prisma.company.delete({ where: { id: companyId } }).catch(() => null);
     await prisma.$disconnect();
+    (globalThis as { prisma?: PrismaClient }).prisma = undefined;
   });
 
-  test('✅ Crear propiedad, crear inquilino, asignar y guardar', async () => {
+  test('Crear propiedad, crear inquilino, asignar y guardar', async () => {
     const propertyForm = new FormData();
     propertyForm.set('buildingId', buildingId);
     propertyForm.set('numero', `A-${suffix}`);
@@ -89,7 +94,7 @@ describe('🔒 Módulo Crítico 1: Flujo de Inquilinos y Propiedades', () => {
     propertyForm.set('rentaMensual', '1200');
 
     // Simula clic en "Guardar" (server action de propiedad)
-    const propertyResult = await createPropertyAction(propertyForm);
+    const propertyResult = await actions.createPropertyAction(propertyForm);
     expect(propertyResult.success).toBe(true);
     if (!propertyResult.success) {
       throw new Error(propertyResult.error);
@@ -100,15 +105,15 @@ describe('🔒 Módulo Crítico 1: Flujo de Inquilinos y Propiedades', () => {
     const tenantForm = new FormData();
     tenantForm.set('companyId', companyId);
     tenantForm.set('nombre', 'Juan');
-    tenantForm.set('apellidos', 'Pérez');
+    tenantForm.set('apellidos', 'Perez');
     tenantForm.set('email', email);
     tenantForm.set('telefono', '+34600000000');
     tenantForm.set('dni', dni);
     tenantForm.set('fechaNacimiento', new Date('1990-01-01').toISOString());
-    tenantForm.set('nacionalidad', 'Española');
+    tenantForm.set('nacionalidad', 'Espanola');
     tenantForm.set('ingresosMensuales', '2500');
 
-    const tenantResult = await createTenantAction(tenantForm);
+    const tenantResult = await actions.createTenantAction(tenantForm);
     expect(tenantResult.success).toBe(true);
     if (!tenantResult.success) {
       throw new Error(tenantResult.error);
@@ -120,7 +125,7 @@ describe('🔒 Módulo Crítico 1: Flujo de Inquilinos y Propiedades', () => {
     assignForm.set('unitId', unitId);
     assignForm.set('tenantId', tenantId);
 
-    const assignResult = await assignTenantToPropertyAction(assignForm);
+    const assignResult = await actions.assignTenantToPropertyAction(assignForm);
     expect(assignResult.success).toBe(true);
     if (!assignResult.success) {
       throw new Error(assignResult.error);

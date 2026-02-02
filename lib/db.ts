@@ -5,10 +5,10 @@ import logger from './logger';
  * Detectar si estamos en build-time
  * Durante el build de Next.js, evitamos inicializar Prisma
  */
+const allowTestDb = process.env.ALLOW_TEST_DB === 'true';
 const isBuildTime =
   process.env.NEXT_PHASE === 'phase-production-build' ||
-  process.env.NODE_ENV === 'test' ||
-  typeof window !== 'undefined';
+  (!allowTestDb && (process.env.NODE_ENV === 'test' || typeof window !== 'undefined'));
 
 /**
  * Configuración del cliente Prisma
