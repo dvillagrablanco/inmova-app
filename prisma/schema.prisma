@@ -15064,7 +15064,7 @@ model WebVitals {
   ipAddress      String?
   createdAt      DateTime @default(now())
 
-  @@index([metric, createdAt(sort: Desc)])
+  @@index([metric, createdAt])
   @@index([rating])
   @@index([url])
   @@map("web_vitals")

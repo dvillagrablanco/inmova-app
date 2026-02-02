@@ -44,12 +44,16 @@ const { chromium } = require('playwright');
   
   try {
     console.log('Paso 1: Navegando a login...');
-    await page.goto('http://localhost:3000/login', { waitUntil: 'networkidle', timeout: 30000 });
+    await page.goto('http://localhost:3000/login', { waitUntil: 'domcontentloaded', timeout: 30000 });
     console.log('✓ Página cargada:', page.url());
     
     console.log('Paso 2: Llenando formulario...');
-    await page.fill('input[name="email"]', 'socio@ewoorker.com');
-    await page.fill('input[name="password"]', 'Ewoorker2025!Socio');
+    const emailSelector = 'input[type="email"], input[name="email"], input[placeholder*="email" i], input[placeholder*="correo" i]';
+    const passwordSelector = 'input[type="password"], input[name="password"]';
+    
+    await page.waitForSelector(emailSelector, { timeout: 15000 });
+    await page.fill(emailSelector, 'socio@ewoorker.com');
+    await page.fill(passwordSelector, 'Ewoorker2025!Socio');
     console.log('✓ Credenciales ingresadas');
     
     console.log('Paso 3: Enviando...');
@@ -70,7 +74,7 @@ const { chromium } = require('playwright');
       
       // Navegar al panel del socio
       console.log('Paso 4: Navegando al panel...');
-      await page.goto('http://localhost:3000/ewoorker/admin-socio', { waitUntil: 'networkidle' });
+      await page.goto('http://localhost:3000/ewoorker/admin-socio', { waitUntil: 'domcontentloaded' });
       console.log('Panel URL:', page.url());
       
       if (!page.url().includes('error') && !page.url().includes('/login')) {

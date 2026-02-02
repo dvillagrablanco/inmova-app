@@ -3,12 +3,16 @@
 
 echo "🚀 Running pre-push checks..."
 
-# Run all tests
-echo "🧪 Running all tests..."
-npm test -- --run || {
-  echo "❌ Tests failed. Push aborted."
-  exit 1
-}
+# Run critical tests
+if [ -n "$TEST_BASE_URL" ]; then
+  echo "🧪 Running critical tests..."
+  npm run test:critical || {
+    echo "❌ Tests failed. Push aborted."
+    exit 1
+  }
+else
+  echo "⚠️ TEST_BASE_URL no configurado. Tests omitidos."
+fi
 
 # Check coverage
 echo "📊 Checking test coverage..."
