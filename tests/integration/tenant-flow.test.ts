@@ -34,6 +34,10 @@ describe('Modulo Critico 1: Flujo de Inquilinos y Propiedades', () => {
       }
     };
 
+    if (process.env.TEST_DATABASE_URL) {
+      process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
+    }
+
     if (!process.env.DATABASE_URL) {
       const root = process.cwd();
       loadEnvFile(path.join(root, '.env.coolify'));
