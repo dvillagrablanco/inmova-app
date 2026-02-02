@@ -40,6 +40,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PhotoUploader } from '@/components/property/PhotoUploader';
+import { z } from 'zod';
 
 interface Building {
   id: string;
@@ -47,6 +48,26 @@ interface Building {
   direccion: string;
   ciudad: string;
 }
+
+const propertyFormSchema = z.object({
+  numero: z.string().min(1, 'Numero requerido'),
+  buildingId: z.string().min(1, 'Edificio requerido'),
+  tipo: z.string().min(1, 'Tipo requerido'),
+  estado: z.string().min(1, 'Estado requerido'),
+  superficie: z.number().positive('Superficie requerida'),
+  rentaMensual: z.number().positive('Renta requerida'),
+  superficieUtil: z.number().positive().nullable().optional(),
+  habitaciones: z.number().int().nonnegative().nullable().optional(),
+  banos: z.number().int().nonnegative().nullable().optional(),
+  planta: z.number().int().nullable().optional(),
+  orientacion: z.string().nullable().optional(),
+  aireAcondicionado: z.boolean(),
+  calefaccion: z.boolean(),
+  terraza: z.boolean(),
+  balcon: z.boolean(),
+  amueblado: z.boolean(),
+  tourVirtual: z.string().nullable().optional(),
+});
 
 export default function EditarPropiedadPage() {
   const router = useRouter();
@@ -102,6 +123,8 @@ export default function EditarPropiedadPage() {
         if (buildingsResponse.ok) {
           const buildingsData = await buildingsResponse.json();
           setBuildings(buildingsData);
+        } else {
+          toast.error('Error de conexión');
         }
 
         // Cargar propiedad existente
@@ -138,7 +161,7 @@ export default function EditarPropiedadPage() {
           toast.error('Propiedad no encontrada');
           router.push('/propiedades');
         } else {
-          toast.error('Error al cargar la propiedad');
+          toast.error('Error de conexión');
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -151,7 +174,7 @@ export default function EditarPropiedadPage() {
     fetchData();
   }, [status, propertyId, router]);
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -159,30 +182,8 @@ export default function EditarPropiedadPage() {
     setFormData((prev) => ({ ...prev, [field]: checked }));
   };
 
-  const validateForm = () => {
-    if (!formData.numero.trim()) {
-      toast.error('El número de unidad es obligatorio');
-      return false;
-    }
-    if (!formData.buildingId) {
-      toast.error('Debes seleccionar un edificio');
-      return false;
-    }
-    if (!formData.superficie || parseFloat(formData.superficie) <= 0) {
-      toast.error('La superficie debe ser mayor a 0');
-      return false;
-    }
-    if (!formData.rentaMensual || parseFloat(formData.rentaMensual) <= 0) {
-      toast.error('La renta mensual debe ser mayor a 0');
-      return false;
-    }
-    return true;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) return;
 
     setIsLoading(true);
 
@@ -207,18 +208,24 @@ export default function EditarPropiedadPage() {
         tourVirtual: formData.tourVirtual.trim() || null,
       };
 
+      const parsed = propertyFormSchema.safeParse(payload);
+      if (!parsed.success) {
+        toast.error(parsed.error.errors[0]?.message || 'Datos invalidos');
+        setIsLoading(false);
+        return;
+      }
+
       const response = await fetch(`/api/units/${propertyId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(parsed.data),
       });
 
       if (response.ok) {
         toast.success('¡Propiedad actualizada exitosamente!');
         router.push(`/propiedades/${propertyId}`);
       } else {
-        const error = await response.json();
-        toast.error(error.error || 'Error al actualizar la propiedad');
+        toast.error('Error de conexión');
       }
     } catch (error) {
       console.error('Error updating property:', error);

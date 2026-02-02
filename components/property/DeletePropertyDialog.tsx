@@ -49,8 +49,7 @@ export function DeletePropertyDialog({
         router.push('/propiedades');
         router.refresh();
       } else {
-        const error = await response.json();
-        toast.error(error.error || 'Error al eliminar la propiedad');
+        toast.error('Error de conexión');
       }
     } catch (error) {
       console.error('Delete error:', error);
@@ -64,12 +63,7 @@ export function DeletePropertyDialog({
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
-        <Button
-          variant={variant}
-          size={size}
-          className={className}
-          disabled={isDeleting}
-        >
+        <Button variant={variant} size={size} className={className} disabled={isDeleting}>
           <Trash2 className="h-4 w-4 mr-2" />
           Eliminar
         </Button>

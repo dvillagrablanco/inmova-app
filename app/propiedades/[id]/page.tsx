@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Badge, type BadgeProps } from '@/components/ui/badge';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -115,7 +115,7 @@ export default function PropiedadDetallesPage() {
           toast.error('Propiedad no encontrada');
           router.push('/propiedades');
         } else {
-          toast.error('Error al cargar la propiedad');
+          toast.error('Error de conexión');
         }
       } catch (error) {
         console.error('Error fetching property:', error);
@@ -129,7 +129,7 @@ export default function PropiedadDetallesPage() {
   }, [status, propertyId, router]);
 
   const getEstadoBadge = (estado: string) => {
-    const badges: Record<string, { variant: any; label: string }> = {
+    const badges: Record<string, { variant: BadgeProps['variant']; label: string }> = {
       ocupada: { variant: 'default', label: 'Ocupada' },
       disponible: { variant: 'secondary', label: 'Disponible' },
       en_mantenimiento: { variant: 'outline', label: 'Mantenimiento' },
@@ -244,7 +244,10 @@ export default function PropiedadDetallesPage() {
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.push(`/propiedades/${property.id}/editar`)}>
+            <Button
+              variant="outline"
+              onClick={() => router.push(`/propiedades/${property.id}/editar`)}
+            >
               <Edit className="mr-2 h-4 w-4" />
               Editar
             </Button>
@@ -495,11 +498,11 @@ export default function PropiedadDetallesPage() {
                   variant="outline"
                   className="w-full justify-start"
                   onClick={() => {
-                    const roi = property?.price 
-                      ? `ROI estimado: ${((property.price * 12 * 0.85) / (property.price * 120) * 100).toFixed(2)}% anual` 
+                    const roi = property?.price
+                      ? `ROI estimado: ${(((property.price * 12 * 0.85) / (property.price * 120)) * 100).toFixed(2)}% anual`
                       : 'Sin datos de precio';
                     toast.success(roi, {
-                      description: 'Cálculo basado en ocupación del 85% y precio mensual actual.'
+                      description: 'Cálculo basado en ocupación del 85% y precio mensual actual.',
                     });
                   }}
                 >
