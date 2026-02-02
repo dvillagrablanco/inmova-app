@@ -14,6 +14,33 @@ import {
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+function mapContractsWithExpiration(contracts: any[]) {
+  return contracts.map((contract) => {
+    const daysUntilExpiration = Math.ceil(
+      (new Date(contract.fechaFin).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return {
+      id: contract.id,
+      unitId: contract.unitId,
+      tenantId: contract.tenantId,
+      fechaInicio: contract.fechaInicio,
+      fechaFin: contract.fechaFin,
+      rentaMensual: Number(contract.rentaMensual || 0),
+      deposito: Number(contract.deposito || 0),
+      estado: contract.estado,
+      tipo: contract.tipo,
+      diaPago: contract.diaPago,
+      clausulasAdicionales: contract.clausulasAdicionales,
+      renovacionAutomatica: contract.renovacionAutomatica,
+      unit: contract.unit,
+      tenant: contract.tenant,
+      createdAt: contract.createdAt,
+      updatedAt: contract.updatedAt,
+      diasHastaVencimiento: daysUntilExpiration,
+    };
+  });
+}
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -81,6 +108,30 @@ export async function GET(req: NextRequest) {
       return NextResponse.json([]);
     }
 
+    if (!usePagination && hasFilters) {
+      const contracts = await prisma.contract.findMany({
+        where: whereClause,
+        include: {
+          unit: {
+            include: {
+              building: {
+                include: {
+                  company: {
+                    select: { id: true, nombre: true },
+                  },
+                },
+              },
+            },
+          },
+          tenant: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      const contractsWithExpiration = mapContractsWithExpiration(contracts);
+      return NextResponse.json(contractsWithExpiration);
+    }
+
     // Paginación activada: consulta directa
     const [contracts, total] = await Promise.all([
       prisma.contract.findMany({
@@ -108,31 +159,7 @@ export async function GET(req: NextRequest) {
       }),
     ]);
 
-    // Calcular días hasta vencimiento y convertir valores Decimal
-    const contractsWithExpiration = contracts.map((contract) => {
-      const daysUntilExpiration = Math.ceil(
-        (new Date(contract.fechaFin).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-      );
-      return {
-        id: contract.id,
-        unitId: contract.unitId,
-        tenantId: contract.tenantId,
-        fechaInicio: contract.fechaInicio,
-        fechaFin: contract.fechaFin,
-        rentaMensual: Number(contract.rentaMensual || 0),
-        deposito: Number(contract.deposito || 0),
-        estado: contract.estado,
-        tipo: contract.tipo,
-        diaPago: contract.diaPago,
-        clausulasAdicionales: contract.clausulasAdicionales,
-        renovacionAutomatica: contract.renovacionAutomatica,
-        unit: contract.unit,
-        tenant: contract.tenant,
-        createdAt: contract.createdAt,
-        updatedAt: contract.updatedAt,
-        diasHastaVencimiento: daysUntilExpiration,
-      };
-    });
+    const contractsWithExpiration = mapContractsWithExpiration(contracts);
 
     return NextResponse.json({
       data: contractsWithExpiration,
