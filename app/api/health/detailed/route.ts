@@ -15,11 +15,11 @@ export async function GET() {
     const session = await getServerSession(authOptions);
 
     // Solo admins pueden ver el health check detallado
-    if (!session || (session.user.role !== 'administrador' && session.user.role !== 'super_admin')) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    if (
+      !session ||
+      (session.user.role !== 'administrador' && session.user.role !== 'super_admin')
+    ) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const uptime = process.uptime();
@@ -50,8 +50,7 @@ export async function GET() {
       // Payments
       stripe: {
         configured:
-          !!process.env.STRIPE_SECRET_KEY &&
-          !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+          !!process.env.STRIPE_SECRET_KEY && !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
         webhook: !!process.env.STRIPE_WEBHOOK_SECRET,
         mode: process.env.STRIPE_SECRET_KEY?.includes('test') ? 'test' : 'live',
       },
@@ -59,9 +58,7 @@ export async function GET() {
       // Email
       smtp: {
         configured:
-          !!process.env.SMTP_HOST &&
-          !!process.env.SMTP_USER &&
-          !!process.env.SMTP_PASSWORD,
+          !!process.env.SMTP_HOST && !!process.env.SMTP_USER && !!process.env.SMTP_PASSWORD,
         host: process.env.SMTP_HOST,
         user: process.env.SMTP_USER,
       },
@@ -69,7 +66,7 @@ export async function GET() {
       // Digital Signature
       signaturit: {
         configured: !!process.env.SIGNATURIT_API_KEY,
-        environment: process.env.SIGNATURIT_ENVIRONMENT || 'not-set',
+        environment: process.env.SIGNATURIT_ENV || process.env.SIGNATURIT_ENVIRONMENT || 'not-set',
       },
       docusign: {
         configured:
@@ -80,8 +77,7 @@ export async function GET() {
 
       // SMS/WhatsApp
       twilio: {
-        configured:
-          !!process.env.TWILIO_ACCOUNT_SID && !!process.env.TWILIO_AUTH_TOKEN,
+        configured: !!process.env.TWILIO_ACCOUNT_SID && !!process.env.TWILIO_AUTH_TOKEN,
         hasPhoneNumber: !!process.env.TWILIO_PHONE_NUMBER,
       },
 
@@ -115,9 +111,7 @@ export async function GET() {
     const configuredIntegrations = Object.values(checks).filter(
       (check: any) => check.configured === true
     ).length;
-    const configurationPercentage = Math.round(
-      (configuredIntegrations / totalIntegrations) * 100
-    );
+    const configurationPercentage = Math.round((configuredIntegrations / totalIntegrations) * 100);
 
     return NextResponse.json(
       {

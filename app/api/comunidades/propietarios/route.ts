@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const createPropietarioSchema = z.object({
   buildingId: z.string().min(1),
@@ -54,10 +55,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!targetBuildingId) {
-      return NextResponse.json(
-        { error: 'Se requiere buildingId o comunidadId' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Se requiere buildingId o comunidadId' }, { status: 400 });
     }
 
     // Obtener unidades con propietarios (usando el modelo de Owner)
@@ -97,7 +95,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Formatear respuesta combinando datos
-    const propietarios = owners.map(owner => ({
+    const propietarios = owners.map((owner) => ({
       id: owner.id,
       nombre: owner.nombre || '',
       apellidos: owner.apellidos || '',
@@ -115,13 +113,13 @@ export async function GET(request: NextRequest) {
     const stats = {
       totalPropietarios: propietarios.length,
       totalUnidades: unidades.length,
-      unidadesOcupadas: unidades.filter(u => u.contracts?.length > 0).length,
-      unidadesDisponibles: unidades.filter(u => !u.contracts?.length).length,
+      unidadesOcupadas: unidades.filter((u) => u.contracts?.length > 0).length,
+      unidadesDisponibles: unidades.filter((u) => !u.contracts?.length).length,
     };
 
     return NextResponse.json({
       propietarios,
-      unidades: unidades.map(u => ({
+      unidades: unidades.map((u) => ({
         id: u.id,
         unitNumber: u.unitNumber,
         type: u.type,

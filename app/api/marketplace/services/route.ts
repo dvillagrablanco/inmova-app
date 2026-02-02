@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
@@ -30,10 +31,7 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: [
-        { destacado: 'desc' },
-        { createdAt: 'desc' },
-      ],
+      orderBy: [{ destacado: 'desc' }, { createdAt: 'desc' }],
     });
 
     // Transformar al formato esperado por el frontend
@@ -41,13 +39,15 @@ export async function GET(request: NextRequest) {
       id: service.id,
       name: service.nombre,
       category: service.categoria.toLowerCase(),
-      provider: service.provider ? {
-        id: service.provider.id,
-        name: service.provider.nombre,
-        verified: true,
-        rating: service.provider.rating || 0,
-        reviews: 0,
-      } : null,
+      provider: service.provider
+        ? {
+            id: service.provider.id,
+            name: service.provider.nombre,
+            verified: true,
+            rating: service.provider.rating || 0,
+            reviews: 0,
+          }
+        : null,
       description: service.descripcion,
       price: service.precioBase || service.precio || 0,
       priceType: service.tipoPrecio || 'fixed',
@@ -59,9 +59,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(formattedServices);
   } catch (error) {
     logger.error('Error fetching marketplace services:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener servicios' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener servicios' }, { status: 500 });
   }
 }

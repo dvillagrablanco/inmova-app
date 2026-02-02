@@ -1,6 +1,6 @@
 /**
  * API Endpoint: Encontrar Matches para Inquilino
- * 
+ *
  * POST /api/matching/find
  */
 
@@ -13,6 +13,7 @@ import logger from '@/lib/logger';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // ============================================================================
 // VALIDACIÓN CON ZOD
@@ -35,33 +36,27 @@ export async function POST(req: NextRequest) {
       // 1. Autenticación
       const session = await getServerSession(authOptions);
       if (!session || !session.user) {
-        return NextResponse.json(
-          { error: 'No autorizado' },
-          { status: 401 }
-        );
+        return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
       }
 
       const companyId = session.user.companyId;
       if (!companyId) {
-        return NextResponse.json(
-          { error: 'Company ID no encontrado' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
       }
 
       // 2. Parsear y validar body
       const body = await req.json();
-      
+
       const validationResult = findMatchesSchema.safeParse(body);
-      
+
       if (!validationResult.success) {
         const errors = validationResult.error.errors.map((err) => ({
           field: err.path.join('.'),
           message: err.message,
         }));
-        
+
         logger.warn('Validation error in matching:', { errors });
-        
+
         return NextResponse.json(
           {
             error: 'Datos inválidos',
@@ -140,12 +135,10 @@ export async function POST(req: NextRequest) {
               cons: m.cons,
             })),
             totalMatches: matches.length,
-            avgScore: matches.length > 0
-              ? Math.round(
-                  matches.reduce((sum, m) => sum + m.matchScore, 0) /
-                    matches.length
-                )
-              : 0,
+            avgScore:
+              matches.length > 0
+                ? Math.round(matches.reduce((sum, m) => sum + m.matchScore, 0) / matches.length)
+                : 0,
           },
           message: `${matches.length} matches encontrados`,
         },

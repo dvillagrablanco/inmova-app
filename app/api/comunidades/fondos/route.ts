@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const createFondoSchema = z.object({
   buildingId: z.string().min(1),
@@ -80,19 +81,20 @@ export async function GET(request: NextRequest) {
     );
 
     return NextResponse.json({
-      fondos: fondos.map(f => ({
+      fondos: fondos.map((f) => ({
         ...f,
         movimientos: f.movimientos as any[],
-        porcentajeObjetivo: f.saldoObjetivo 
+        porcentajeObjetivo: f.saldoObjetivo
           ? Math.round((f.saldoActual / f.saldoObjetivo) * 100)
           : null,
       })),
       stats: {
         totalFondos: fondos.length,
         ...totales,
-        porcentajeGlobal: totales.objetivoTotal > 0
-          ? Math.round((totales.saldoTotal / totales.objetivoTotal) * 100)
-          : 100,
+        porcentajeGlobal:
+          totales.objetivoTotal > 0
+            ? Math.round((totales.saldoTotal / totales.objetivoTotal) * 100)
+            : 100,
       },
     });
   } catch (error: any) {
@@ -129,9 +131,8 @@ export async function POST(request: NextRequest) {
       }
 
       // Calcular nuevo saldo
-      const importeAjustado = validated.tipo === 'gasto' 
-        ? -Math.abs(validated.importe)
-        : Math.abs(validated.importe);
+      const importeAjustado =
+        validated.tipo === 'gasto' ? -Math.abs(validated.importe) : Math.abs(validated.importe);
 
       const nuevoSaldo = fondo.saldoActual + importeAjustado;
 
@@ -160,12 +161,14 @@ export async function POST(request: NextRequest) {
         data: {
           saldoActual: nuevoSaldo,
           movimientos,
-          totalAportaciones: validated.tipo === 'aportacion'
-            ? fondo.totalAportaciones + Math.abs(validated.importe)
-            : fondo.totalAportaciones,
-          totalGastos: validated.tipo === 'gasto'
-            ? fondo.totalGastos + Math.abs(validated.importe)
-            : fondo.totalGastos,
+          totalAportaciones:
+            validated.tipo === 'aportacion'
+              ? fondo.totalAportaciones + Math.abs(validated.importe)
+              : fondo.totalAportaciones,
+          totalGastos:
+            validated.tipo === 'gasto'
+              ? fondo.totalGastos + Math.abs(validated.importe)
+              : fondo.totalGastos,
         },
       });
 

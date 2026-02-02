@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
@@ -70,9 +71,10 @@ export async function GET(request: NextRequest) {
 
     // Si hay datos de mercado estáticos, usarlos como base
     const latestMarketData = marketDataQuery[0];
-    const avgUserPrice = listings.length > 0
-      ? listings.reduce((sum, l) => sum + (l.precioActual || l.precioBase), 0) / listings.length
-      : 0;
+    const avgUserPrice =
+      listings.length > 0
+        ? listings.reduce((sum, l) => sum + (l.precioActual || l.precioBase), 0) / listings.length
+        : 0;
 
     const avgMarketPrice = latestMarketData?.precioPromedio || avgUserPrice || 100;
     const occupancy = latestMarketData?.tasaOcupacion || 70;
@@ -81,10 +83,10 @@ export async function GET(request: NextRequest) {
     const marketData = Array.from({ length: period }, (_, i) => {
       const date = new Date();
       date.setDate(date.getDate() - (period - i - 1));
-      
+
       // Variación natural de ±5% sobre el precio base
       const variation = 0.95 + Math.random() * 0.1;
-      
+
       return {
         date: date.toISOString().split('T')[0],
         myPrice: avgUserPrice > 0 ? avgUserPrice * variation : null,
@@ -96,9 +98,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(marketData);
   } catch (error) {
     logger.error('Error fetching market data:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener datos de mercado' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener datos de mercado' }, { status: 500 });
   }
 }

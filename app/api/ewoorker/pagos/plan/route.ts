@@ -1,9 +1,10 @@
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import prisma from "@/lib/prisma";
+import prisma from '@/lib/prisma';
 
 import logger from '@/lib/logger';
 export async function GET(request: NextRequest) {
@@ -11,21 +12,18 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user?.id) {
-      return NextResponse.json(
-        { error: "No autenticado" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { companyId: true }
+      select: { companyId: true },
     });
 
     if (!user?.companyId) {
       return NextResponse.json({
-        planActual: "OBRERO_FREE",
-        fechaProximoPago: null
+        planActual: 'OBRERO_FREE',
+        fechaProximoPago: null,
       });
     }
 
@@ -34,28 +32,24 @@ export async function GET(request: NextRequest) {
       select: {
         planActual: true,
         fechaProximoPago: true,
-        stripeSubscriptionId: true
-      }
+        stripeSubscriptionId: true,
+      },
     });
 
     if (!perfil) {
       return NextResponse.json({
-        planActual: "OBRERO_FREE",
-        fechaProximoPago: null
+        planActual: 'OBRERO_FREE',
+        fechaProximoPago: null,
       });
     }
 
     return NextResponse.json({
       planActual: perfil.planActual,
       fechaProximoPago: perfil.fechaProximoPago,
-      tieneSubscripcion: !!perfil.stripeSubscriptionId
+      tieneSubscripcion: !!perfil.stripeSubscriptionId,
     });
-
   } catch (error) {
-    logger.error("[EWOORKER_PLAN_INFO]", error);
-    return NextResponse.json(
-      { error: "Error al obtener info del plan" },
-      { status: 500 }
-    );
+    logger.error('[EWOORKER_PLAN_INFO]', error);
+    return NextResponse.json({ error: 'Error al obtener info del plan' }, { status: 500 });
   }
 }
