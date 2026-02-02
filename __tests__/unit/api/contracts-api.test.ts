@@ -94,9 +94,6 @@ describe('📝 Contracts API - GET Endpoint', () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockUser,
     });
-    (prisma.unit.update as ReturnType<typeof vi.fn>).mockResolvedValue({
-      id: validContractData.unitId,
-    });
   });
 
   // ========================================
@@ -241,6 +238,9 @@ describe('📝 Contracts API - POST Endpoint', () => {
     vi.clearAllMocks();
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockUser,
+    });
+    (prisma.unit.update as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: validContractData.unitId,
     });
   });
 
