@@ -17,6 +17,9 @@ vi.mock('@/lib/db', () => ({
       update: vi.fn(),
       delete: vi.fn(),
     },
+    unit: {
+      update: vi.fn(),
+    },
   },
 }));
 
@@ -36,6 +39,12 @@ vi.mock('@/lib/logger', () => ({
   logError: vi.fn(),
 }));
 
+vi.mock('@/lib/validations', () => ({
+  contractCreateSchema: {
+    safeParse: vi.fn(),
+  },
+}));
+
 vi.mock('next-auth', () => ({
   getServerSession: vi.fn(),
 }));
@@ -50,6 +59,7 @@ vi.mock('@/lib/api-cache-helpers', () => ({
 import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { cachedContracts } from '@/lib/api-cache-helpers';
+import { contractCreateSchema } from '@/lib/validations';
 import { GET, POST } from '@/app/api/contracts/route';
 
 describe('📝 Contracts API - GET Endpoint', () => {
@@ -178,7 +188,7 @@ describe('📝 Contracts API - GET Endpoint', () => {
   // ========================================
 
   test('⚠️ Debe manejar lista vacía de contratos', async () => {
-    (prisma.contract.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    (cachedContracts as ReturnType<typeof vi.fn>).mockResolvedValue([]);
 
     const req = new NextRequest('http://localhost:3000/api/contracts');
     const response = await GET(req);
@@ -231,6 +241,20 @@ describe('📝 Contracts API - POST Endpoint', () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockUser,
     });
+    (contractCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
+      success: true,
+      data: {
+        ...validContractData,
+        rentaMensual: validContractData.renta,
+        diaCobranza: 1,
+        clausulasEspeciales: '',
+        renovacionAutomatica: false,
+      },
+    });
+    (prisma.unit.update as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: validContractData.unitId,
+      estado: 'ocupada',
+    });
   });
 
   // ========================================
@@ -264,7 +288,7 @@ describe('📝 Contracts API - POST Endpoint', () => {
     }
   });
 
-  test('✅ Debe asignar companyId del usuario', async () => {
+  test('✅ Debe asignar unitId y tenantId del contrato', async () => {
     (prisma.contract.create as ReturnType<typeof vi.fn>).mockResolvedValue({
       id: 'contract-new',
       ...validContractData,
@@ -282,7 +306,8 @@ describe('📝 Contracts API - POST Endpoint', () => {
       expect(prisma.contract.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            companyId: mockUser.companyId,
+            unitId: validContractData.unitId,
+            tenantId: validContractData.tenantId,
           }),
         })
       );
@@ -299,6 +324,10 @@ describe('📝 Contracts API - POST Endpoint', () => {
       fechaInicio: '2027-01-01',
       fechaFin: '2026-01-01',
     };
+    (contractCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
+      success: false,
+      error: { errors: [{ path: ['fechaInicio'], message: 'Fecha inválida' }] },
+    });
 
     const req = new NextRequest('http://localhost:3000/api/contracts', {
       method: 'POST',
@@ -315,6 +344,10 @@ describe('📝 Contracts API - POST Endpoint', () => {
       ...validContractData,
       renta: -1000,
     };
+    (contractCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
+      success: false,
+      error: { errors: [{ path: ['rentaMensual'], message: 'Renta inválida' }] },
+    });
 
     const req = new NextRequest('http://localhost:3000/api/contracts', {
       method: 'POST',
@@ -331,6 +364,10 @@ describe('📝 Contracts API - POST Endpoint', () => {
       ...validContractData,
       renta: 0,
     };
+    (contractCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
+      success: false,
+      error: { errors: [{ path: ['rentaMensual'], message: 'Renta inválida' }] },
+    });
 
     const req = new NextRequest('http://localhost:3000/api/contracts', {
       method: 'POST',
@@ -347,6 +384,10 @@ describe('📝 Contracts API - POST Endpoint', () => {
       ...validContractData,
       deposito: -500,
     };
+    (contractCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
+      success: false,
+      error: { errors: [{ path: ['deposito'], message: 'Depósito inválido' }] },
+    });
 
     const req = new NextRequest('http://localhost:3000/api/contracts', {
       method: 'POST',
@@ -475,6 +516,10 @@ describe('📝 Contracts API - POST Endpoint', () => {
       tenantId: 'tenant-1',
       renta: 1200,
     };
+    (contractCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
+      success: false,
+      error: { errors: [{ path: ['unitId'], message: 'unitId requerido' }] },
+    });
 
     const req = new NextRequest('http://localhost:3000/api/contracts', {
       method: 'POST',

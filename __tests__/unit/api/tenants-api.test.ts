@@ -38,12 +38,13 @@ vi.mock('@/lib/logger', () => ({
 
 vi.mock('@/lib/validations', () => ({
   tenantCreateSchema: {
-    parse: vi.fn((data) => data),
+    safeParse: vi.fn(),
   },
 }));
 
 import { prisma } from '@/lib/db';
-import { requireAuth } from '@/lib/permissions';
+import { requireAuth, requirePermission } from '@/lib/permissions';
+import { tenantCreateSchema } from '@/lib/validations';
 import { GET, POST } from '@/app/api/tenants/route';
 
 describe('🏠 Tenants API - GET Endpoint', () => {
@@ -142,7 +143,7 @@ describe('🏠 Tenants API - GET Endpoint', () => {
   // ========================================
 
   test('❌ Debe retornar 401 si no está autenticado', async () => {
-    (requireAuth as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('No autenticado'));
+    (requireAuth as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
     const req = new NextRequest('http://localhost:3000/api/tenants');
     const response = await GET(req);
@@ -245,6 +246,16 @@ describe('🏠 Tenants API - POST Endpoint', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (requireAuth as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
+    (requirePermission as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
+    (tenantCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
+      success: true,
+      data: {
+        ...validTenantData,
+        nombre: 'Pedro',
+        apellidos: 'López',
+        notasInternas: '',
+      },
+    });
   });
 
   // ========================================
@@ -321,7 +332,7 @@ describe('🏠 Tenants API - POST Endpoint', () => {
   });
 
   test('❌ Debe retornar 401 si no está autenticado', async () => {
-    (requireAuth as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('No autenticado'));
+    (requirePermission as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('No autenticado'));
 
     const req = new NextRequest('http://localhost:3000/api/tenants', {
       method: 'POST',

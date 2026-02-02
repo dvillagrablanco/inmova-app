@@ -3,73 +3,89 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AdvancedFilters } from '@/components/ui/advanced-filters';
 
 describe('AdvancedFilters', () => {
+  const filters = [
+    {
+      id: 'search',
+      label: 'Nombre',
+      type: 'search' as const,
+      placeholder: 'Buscar nombre',
+    },
+    {
+      id: 'estado',
+      label: 'Estado',
+      type: 'select' as const,
+      options: [
+        { value: 'activo', label: 'Activo' },
+        { value: 'inactivo', label: 'Inactivo' },
+      ],
+    },
+  ];
+
+  const baseValues = { search: '', estado: 'all' };
+
   it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<AdvancedFilters {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+    const onChange = vi.fn();
+    render(<AdvancedFilters filters={filters} values={baseValues} onChange={onChange} />);
+
+    expect(screen.getByPlaceholderText('Buscar nombre')).toBeInTheDocument();
   });
 
   it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<AdvancedFilters {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+    const onChange = vi.fn();
+    render(<AdvancedFilters filters={filters} values={baseValues} onChange={onChange} />);
+
+    expect(screen.getByText('Filtros')).toBeInTheDocument();
   });
 
   it('should handle user interactions', async () => {
-    render(<AdvancedFilters />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
+    const onChange = vi.fn();
+    render(<AdvancedFilters filters={filters} values={baseValues} onChange={onChange} />);
+
+    fireEvent.change(screen.getByPlaceholderText('Buscar nombre'), {
+      target: { value: 'Juan' },
+    });
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith({ ...baseValues, search: 'Juan' });
+    });
   });
 
   it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<AdvancedFilters onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
+    const onChange = vi.fn();
+    const onReset = vi.fn();
+    const values = { search: 'Juan', estado: 'activo' };
+
+    render(
+      <AdvancedFilters
+        filters={filters}
+        values={values}
+        onChange={onChange}
+        onReset={onReset}
+      />
+    );
+
+    fireEvent.click(screen.getByText('Limpiar filtros'));
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith({ search: '', estado: 'all' });
+      expect(onReset).toHaveBeenCalled();
+    });
   });
 
   it('should execute side effects', async () => {
-    render(<AdvancedFilters />);
-    
-    // TODO: Verificar efectos
+    const onChange = vi.fn();
+    const values = { search: '', estado: 'activo' };
+    render(<AdvancedFilters filters={filters} values={values} onChange={onChange} />);
+
     await waitFor(() => {
-      // expect(something).toBe(true);
+      expect(screen.getByText('Activo')).toBeInTheDocument();
     });
   });
 
   it('should be accessible', () => {
-    render(<AdvancedFilters />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    const onChange = vi.fn();
+    render(<AdvancedFilters filters={filters} values={baseValues} onChange={onChange} />);
+
+    expect(screen.getByLabelText('Nombre')).toBeInTheDocument();
   });
 });

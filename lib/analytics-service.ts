@@ -676,14 +676,25 @@ export async function analyzeTenantBehavior(tenantId: string) {
  */
 export async function trackEvent(
   eventName: string,
-  data: Record<string, any>,
+  data?: Record<string, any>,
   userId?: string,
   companyId?: string
 ) {
+  if (typeof window !== 'undefined') {
+    if (window.gtag) {
+      window.gtag('event', eventName, data);
+      console.log('[Analytics] Event sent', { eventName, data });
+      return { success: true, event: eventName };
+    }
+    console.warn('[Analytics] gtag not available');
+    return { success: false, error: 'gtag not available' };
+  }
+
   try {
+    const eventData = data ?? {};
     logger.info(`[Analytics Event] ${eventName}`, {
       event: eventName,
-      data,
+      data: eventData,
       userId,
       companyId,
       timestamp: new Date().toISOString(),
@@ -694,7 +705,7 @@ export async function trackEvent(
       await prisma.analyticsEvent.create({
         data: {
           eventName,
-          eventData: data,
+          eventData,
           userId,
           companyId,
           timestamp: new Date(),
@@ -711,6 +722,67 @@ export async function trackEvent(
   }
 }
 
+export function trackPageView(path: string, title?: string) {
+  if (typeof window === 'undefined' || !window.gtag) {
+    console.warn('[Analytics] gtag not available');
+    return;
+  }
+  const pageTitle = title ?? (typeof document !== 'undefined' ? document.title : undefined);
+  window.gtag('event', 'page_view', {
+    page_path: path,
+    page_title: pageTitle,
+  });
+  console.log('[Analytics] Page view', { path, pageTitle });
+}
+
+export function trackOnboardingStart(userId: string, vertical?: string, experienceLevel?: string) {
+  if (typeof window === 'undefined' || !window.gtag) {
+    console.warn('[Analytics] gtag not available');
+    return;
+  }
+  window.gtag('event', 'onboarding_start', {
+    user_id: userId,
+    vertical,
+    experience_level: experienceLevel,
+  });
+}
+
+export function trackOnboardingTaskComplete(taskId: string, taskTitle: string, progress: number) {
+  if (typeof window === 'undefined' || !window.gtag) {
+    console.warn('[Analytics] gtag not available');
+    return;
+  }
+  window.gtag('event', 'onboarding_task_complete', {
+    task_id: taskId,
+    task_title: taskTitle,
+    progress_percentage: progress,
+  });
+}
+
+export function trackOnboardingTaskSkip(taskId: string, taskTitle: string, progress: number) {
+  if (typeof window === 'undefined' || !window.gtag) {
+    console.warn('[Analytics] gtag not available');
+    return;
+  }
+  window.gtag('event', 'onboarding_task_skip', {
+    task_id: taskId,
+    task_title: taskTitle,
+    progress_percentage: progress,
+  });
+}
+
+export function trackOnboardingComplete(userId: string, timeSpent: number, tasksCompleted: number) {
+  if (typeof window === 'undefined' || !window.gtag) {
+    console.warn('[Analytics] gtag not available');
+    return;
+  }
+  window.gtag('event', 'onboarding_complete', {
+    user_id: userId,
+    time_spent: timeSpent,
+    tasks_completed: tasksCompleted,
+  });
+}
+
 export default {
   trackAPIRequest,
   trackAIUsage,
@@ -723,4 +795,9 @@ export default {
   generateAnalyticsSnapshot,
   analyzeTenantBehavior,
   trackEvent,
+  trackPageView,
+  trackOnboardingStart,
+  trackOnboardingTaskComplete,
+  trackOnboardingTaskSkip,
+  trackOnboardingComplete,
 };

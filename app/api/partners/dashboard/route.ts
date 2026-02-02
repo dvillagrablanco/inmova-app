@@ -5,16 +5,25 @@ import jwt from 'jsonwebtoken';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key-partners';
+const JWT_SECRET = process.env.PARTNER_JWT_SECRET || process.env.NEXTAUTH_SECRET;
+
+function getJwtSecret() {
+  if (!JWT_SECRET) {
+    logger.error('[Partners Auth] JWT secret no configurado');
+    return null;
+  }
+  return JWT_SECRET;
+}
+
 // Función para verificar el token
-function verifyToken(request: NextRequest) {
+function verifyToken(request: NextRequest, jwtSecret: string) {
   const authHeader = request.headers.get('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return null;
   }
   const token = authHeader.substring(7);
   try {
-    return jwt.verify(token, JWT_SECRET) as any;
+    return jwt.verify(token, jwtSecret) as any;
   } catch {
     return null;
   }
@@ -22,8 +31,16 @@ function verifyToken(request: NextRequest) {
 // GET /api/partners/dashboard - Dashboard con métricas del Partner
 export async function GET(request: NextRequest) {
   try {
+    const jwtSecret = getJwtSecret();
+    if (!jwtSecret) {
+      return NextResponse.json(
+        { error: 'Autenticación no configurada' },
+        { status: 500 }
+      );
+    }
+
     // Verificar autenticación
-    const decoded = verifyToken(request);
+    const decoded = verifyToken(request, jwtSecret);
     if (!decoded || !decoded.partnerId) {
       return NextResponse.json(
         { error: 'No autorizado' },

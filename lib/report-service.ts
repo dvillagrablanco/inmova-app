@@ -73,6 +73,8 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
   
   if (reportData.tipo === 'morosidad') {
     const { pagosPendientes, totalMorosidad, inquilinos } = reportData.datos;
+    const pagosPendientesValue = typeof pagosPendientes === 'number' ? pagosPendientes : 0;
+    const totalMorosidadValue = typeof totalMorosidad === 'number' ? totalMorosidad : 0;
     
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
@@ -83,9 +85,9 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     // KPIs
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Total de pagos pendientes: ${pagosPendientes}`, 15, yPos);
+    doc.text(`Total de pagos pendientes: ${pagosPendientesValue}`, 15, yPos);
     yPos += 8;
-    doc.text(`Importe total adeudado: ${totalMorosidad.toFixed(2)} €`, 15, yPos);
+    doc.text(`Importe total adeudado: ${totalMorosidadValue.toFixed(2)} €`, 15, yPos);
     yPos += 12;
     
     // Tabla de inquilinos morosos
@@ -96,8 +98,8 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
         body: inquilinos.map((inq: any) => [
           inq.nombreCompleto,
           inq.unidad,
-          `${inq.importe.toFixed(2)} €`,
-          inq.diasAtraso.toString(),
+          `${Number(inq.importe ?? 0).toFixed(2)} €`,
+          Number(inq.diasAtraso ?? 0).toString(),
         ]),
         theme: 'striped',
         headStyles: {
@@ -110,6 +112,7 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     }
   } else if (reportData.tipo === 'ocupacion') {
     const { totalUnidades, unidadesOcupadas, tasaOcupacion, unidadesDisponibles } = reportData.datos;
+    const tasaOcupacionValue = typeof tasaOcupacion === 'number' ? tasaOcupacion : 0;
     
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
@@ -126,7 +129,7 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     yPos += 8;
     doc.text(`Unidades disponibles: ${unidadesDisponibles}`, 15, yPos);
     yPos += 8;
-    doc.text(`Tasa de ocupación: ${tasaOcupacion.toFixed(1)}%`, 15, yPos);
+    doc.text(`Tasa de ocupación: ${tasaOcupacionValue.toFixed(1)}%`, 15, yPos);
     yPos += 12;
     
     // Tabla de edificios
@@ -136,10 +139,10 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
         head: [['Edificio', 'Total', 'Ocupadas', 'Disponibles', 'Ocupación']],
         body: reportData.datos.edificios.map((ed: any) => [
           ed.nombre,
-          ed.total.toString(),
-          ed.ocupadas.toString(),
-          ed.disponibles.toString(),
-          `${ed.tasaOcupacion.toFixed(1)}%`,
+          Number(ed.total ?? 0).toString(),
+          Number(ed.ocupadas ?? 0).toString(),
+          Number(ed.disponibles ?? 0).toString(),
+          `${Number(ed.tasaOcupacion ?? 0).toFixed(1)}%`,
         ]),
         theme: 'striped',
         headStyles: {
@@ -152,6 +155,10 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     }
   } else if (reportData.tipo === 'ingresos') {
     const { ingresosBrutos, gastos, ingresosNetos, rentabilidad } = reportData.datos;
+    const ingresosBrutosValue = typeof ingresosBrutos === 'number' ? ingresosBrutos : 0;
+    const gastosValue = typeof gastos === 'number' ? gastos : 0;
+    const ingresosNetosValue = typeof ingresosNetos === 'number' ? ingresosNetos : 0;
+    const rentabilidadValue = typeof rentabilidad === 'number' ? rentabilidad : 0;
     
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
@@ -162,13 +169,13 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     // KPIs
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Ingresos brutos: ${ingresosBrutos.toFixed(2)} €`, 15, yPos);
+    doc.text(`Ingresos brutos: ${ingresosBrutosValue.toFixed(2)} €`, 15, yPos);
     yPos += 8;
-    doc.text(`Gastos: ${gastos.toFixed(2)} €`, 15, yPos);
+    doc.text(`Gastos: ${gastosValue.toFixed(2)} €`, 15, yPos);
     yPos += 8;
-    doc.text(`Ingresos netos: ${ingresosNetos.toFixed(2)} €`, 15, yPos);
+    doc.text(`Ingresos netos: ${ingresosNetosValue.toFixed(2)} €`, 15, yPos);
     yPos += 8;
-    doc.text(`Rentabilidad: ${rentabilidad.toFixed(1)}%`, 15, yPos);
+    doc.text(`Rentabilidad: ${rentabilidadValue.toFixed(1)}%`, 15, yPos);
     yPos += 12;
     
     // Desglose mensual si existe
@@ -193,6 +200,11 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     }
   } else if (reportData.tipo === 'mantenimiento') {
     const { totalSolicitudes, pendientes, enProgreso, completadas, costoTotal } = reportData.datos;
+    const totalSolicitudesValue = typeof totalSolicitudes === 'number' ? totalSolicitudes : 0;
+    const pendientesValue = typeof pendientes === 'number' ? pendientes : 0;
+    const enProgresoValue = typeof enProgreso === 'number' ? enProgreso : 0;
+    const completadasValue = typeof completadas === 'number' ? completadas : 0;
+    const costoTotalValue = typeof costoTotal === 'number' ? costoTotal : 0;
     
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
@@ -203,15 +215,15 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     // KPIs
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Total de solicitudes: ${totalSolicitudes}`, 15, yPos);
+    doc.text(`Total de solicitudes: ${totalSolicitudesValue}`, 15, yPos);
     yPos += 8;
-    doc.text(`Pendientes: ${pendientes}`, 15, yPos);
+    doc.text(`Pendientes: ${pendientesValue}`, 15, yPos);
     yPos += 8;
-    doc.text(`En progreso: ${enProgreso}`, 15, yPos);
+    doc.text(`En progreso: ${enProgresoValue}`, 15, yPos);
     yPos += 8;
-    doc.text(`Completadas: ${completadas}`, 15, yPos);
+    doc.text(`Completadas: ${completadasValue}`, 15, yPos);
     yPos += 8;
-    doc.text(`Costo total: ${costoTotal.toFixed(2)} €`, 15, yPos);
+    doc.text(`Costo total: ${costoTotalValue.toFixed(2)} €`, 15, yPos);
     yPos += 12;
     
     // Tabla de solicitudes recientes

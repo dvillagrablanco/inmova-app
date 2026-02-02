@@ -1,63 +1,84 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { VersionBadge } from '@/components/ui/version-badge';
 
 describe('VersionBadge', () => {
-  it('should render without crashing', () => {
-    
-    
-    render(<VersionBadge  />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  const mockFetch = vi.fn();
+
+  beforeEach(() => {
+    mockFetch.mockResolvedValue({
+      json: async () => ({
+        success: true,
+        data: {
+          version: '1.0.0',
+          buildTime: '2025-01-01T00:00:00Z',
+          gitCommit: 'abcdef123456',
+          deploymentId: 'deploy-1',
+          environment: 'development',
+          isProduction: false,
+        },
+      }),
+    });
+    vi.stubGlobal('fetch', mockFetch);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('should render without crashing', async () => {
+    render(<VersionBadge />);
+
+    await waitFor(() => {
+      expect(screen.getByText('v1.0.0')).toBeInTheDocument();
+    });
   });
 
   it('should handle user interactions', async () => {
     render(<VersionBadge />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
+
+    await waitFor(() => {
+      expect(screen.getByText('v1.0.0')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('v1.0.0'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Información de Versión')).toBeInTheDocument();
+    });
   });
 
   it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<VersionBadge onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    render(<VersionBadge />);
+
+    await waitFor(() => {
+      expect(screen.getByText('v1.0.0')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('v1.0.0'));
+    fireEvent.click(screen.getByText('📋 Copiar información'));
+
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalled();
+    });
   });
 
   it('should execute side effects', async () => {
     render(<VersionBadge />);
-    
-    // TODO: Verificar efectos
+
     await waitFor(() => {
-      // expect(something).toBe(true);
+      expect(mockFetch).toHaveBeenCalledWith('/api/version');
     });
   });
 
-  it('should be accessible', () => {
+  it('should be accessible', async () => {
     render(<VersionBadge />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+
+    await waitFor(() => {
+      expect(screen.getByText('v1.0.0')).toBeInTheDocument();
+    });
   });
 });

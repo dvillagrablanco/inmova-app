@@ -1,47 +1,52 @@
+import type { ReactNode } from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ContextualHelp } from '@/components/ui/contextual-help';
 
+vi.mock('@/components/ui/dialog', () => ({
+  Dialog: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  DialogContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  DialogDescription: ({ children }: { children: ReactNode }) => <p>{children}</p>,
+  DialogHeader: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  DialogTitle: ({ children }: { children: ReactNode }) => <h2>{children}</h2>,
+  DialogTrigger: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+}));
+
 describe('ContextualHelp', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<ContextualHelp {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  const baseProps = {
+    module: 'CRM',
+    title: 'Ayuda de CRM',
+    description: 'Guia rapida para comenzar',
+    sections: [
+      {
+        title: 'Seccion 1',
+        content: 'Contenido de la seccion',
+        tips: ['Tip 1'],
+      },
+    ],
+  };
+
+  it('renderiza titulo, descripcion y secciones', () => {
+    render(<ContextualHelp {...baseProps} />);
+
+    expect(screen.getByText('Ayuda de CRM')).toBeInTheDocument();
+    expect(screen.getByText('Guia rapida para comenzar')).toBeInTheDocument();
+    expect(screen.getByText('Seccion 1')).toBeInTheDocument();
+    expect(screen.getByText('Contenido de la seccion')).toBeInTheDocument();
+    expect(screen.getByText('Tip 1')).toBeInTheDocument();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<ContextualHelp {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
-  });
+  it('ejecuta acciones rapidas', () => {
+    const action = vi.fn();
 
-  it('should handle user interactions', async () => {
-    render(<ContextualHelp />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
-  });
+    render(
+      <ContextualHelp
+        {...baseProps}
+        quickActions={[{ label: 'Crear', action }]}
+      />
+    );
 
-  it('should be accessible', () => {
-    render(<ContextualHelp />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    fireEvent.click(screen.getByText('Crear'));
+    expect(action).toHaveBeenCalledTimes(1);
   });
 });

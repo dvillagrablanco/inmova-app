@@ -3,64 +3,65 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AccessibleInputField } from '@/components/forms/AccessibleFormField';
 
 describe('AccessibleInputField', () => {
+  const baseProps = {
+    id: 'nombre',
+    name: 'nombre',
+    label: 'Nombre',
+    value: '',
+    onChange: vi.fn(),
+  };
+
   it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<AccessibleInputField {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+    render(<AccessibleInputField {...baseProps} />);
+
+    expect(screen.getByText('Nombre')).toBeInTheDocument();
   });
 
   it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<AccessibleInputField {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+    render(
+      <AccessibleInputField
+        {...baseProps}
+        required
+        helpText="Campo obligatorio"
+      />
+    );
+
+    expect(screen.getByText('Campo obligatorio')).toBeInTheDocument();
+    expect(screen.getByLabelText('requerido')).toBeInTheDocument();
   });
 
   it('should handle user interactions', async () => {
-    render(<AccessibleInputField />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
+    const onChange = vi.fn();
+    render(<AccessibleInputField {...baseProps} onChange={onChange} />);
+
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Juan' } });
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith('Juan');
+    });
   });
 
   it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<AccessibleInputField onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
+    const onChange = vi.fn();
+    render(
+      <AccessibleInputField
+        {...baseProps}
+        onChange={onChange}
+        type="password"
+        value="secreto"
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Mostrar contraseña/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('textbox')).toHaveAttribute('type', 'text');
+    });
   });
 
   it('should be accessible', () => {
-    render(<AccessibleInputField />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    render(<AccessibleInputField {...baseProps} error="Campo requerido" />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Campo requerido');
   });
 });

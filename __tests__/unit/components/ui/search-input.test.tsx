@@ -4,72 +4,69 @@ import { SearchInput } from '@/components/ui/search-input';
 
 describe('SearchInput', () => {
   it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<SearchInput {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+    const onChange = vi.fn();
+
+    render(<SearchInput value="" onChange={onChange} />);
+
+    expect(screen.getByRole('searchbox')).toBeInTheDocument();
   });
 
   it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<SearchInput {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+    const onChange = vi.fn();
+    render(
+      <SearchInput
+        value=""
+        onChange={onChange}
+        placeholder="Buscar contratos"
+        aria-label="Buscar contratos"
+      />
+    );
+
+    expect(screen.getByPlaceholderText('Buscar contratos')).toBeInTheDocument();
   });
 
   it('should handle user interactions', async () => {
-    render(<SearchInput />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
+    const onChange = vi.fn();
+    render(<SearchInput value="" onChange={onChange} debounceMs={0} />);
+
+    fireEvent.change(screen.getByRole('searchbox'), {
+      target: { value: 'test' },
+    });
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith('test');
+    });
   });
 
   it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<SearchInput onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
+    const onChange = vi.fn();
+    const onClear = vi.fn();
+
+    render(<SearchInput value="hola" onChange={onChange} onClear={onClear} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Limpiar búsqueda' }));
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith('');
+      expect(onClear).toHaveBeenCalled();
+    });
   });
 
   it('should execute side effects', async () => {
-    render(<SearchInput />);
-    
-    // TODO: Verificar efectos
+    const onChange = vi.fn();
+    const { rerender } = render(<SearchInput value="uno" onChange={onChange} />);
+
+    rerender(<SearchInput value="dos" onChange={onChange} />);
+
     await waitFor(() => {
-      // expect(something).toBe(true);
+      expect(screen.getByRole('searchbox')).toHaveValue('dos');
     });
   });
 
   it('should be accessible', () => {
-    render(<SearchInput />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    const onChange = vi.fn();
+    render(<SearchInput value="" onChange={onChange} aria-label="Buscar elementos" />);
+
+    expect(screen.getByRole('searchbox', { name: 'Buscar elementos' })).toBeInTheDocument();
   });
 });

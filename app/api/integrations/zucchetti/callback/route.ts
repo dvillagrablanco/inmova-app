@@ -30,10 +30,15 @@ const ZUCCHETTI_CONFIG = {
 
 // Clave de encriptación para tokens
 const ENCRYPTION_KEY =
-  process.env.ZUCCHETTI_ENCRYPTION_KEY ||
-  process.env.NEXTAUTH_SECRET ||
-  'zucchetti-encryption-key-32bytes!';
+  process.env.ZUCCHETTI_ENCRYPTION_KEY || process.env.NEXTAUTH_SECRET;
 const ALGORITHM = 'aes-256-cbc';
+
+function getEncryptionKey(): string {
+  if (!ENCRYPTION_KEY) {
+    throw new Error('Zucchetti encryption key no configurada');
+  }
+  return ENCRYPTION_KEY;
+}
 
 // ═══════════════════════════════════════════════════════════════
 // ENCRIPTACIÓN DE TOKENS
@@ -41,7 +46,7 @@ const ALGORITHM = 'aes-256-cbc';
 
 function encrypt(text: string): string {
   const iv = crypto.randomBytes(16);
-  const key = Buffer.from(ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32));
+  const key = Buffer.from(getEncryptionKey().padEnd(32, '0').slice(0, 32));
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
   let encrypted = cipher.update(text, 'utf8', 'hex');
   encrypted += cipher.final('hex');
@@ -54,7 +59,7 @@ function decrypt(text: string): string {
     if (parts.length !== 2) return text;
     const iv = Buffer.from(parts[0], 'hex');
     const encrypted = parts[1];
-    const key = Buffer.from(ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32));
+    const key = Buffer.from(getEncryptionKey().padEnd(32, '0').slice(0, 32));
     const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');

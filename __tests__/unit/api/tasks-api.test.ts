@@ -3,6 +3,7 @@
  */
 
 import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { z } from 'zod';
 import { NextRequest } from 'next/server';
 
 // Mocks
@@ -15,6 +16,9 @@ vi.mock('@/lib/db', () => ({
       create: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
+    },
+    user: {
+      findUnique: vi.fn(),
     },
   },
 }));
@@ -30,7 +34,7 @@ vi.mock('@/lib/logger', () => ({
 
 vi.mock('@/lib/validations', () => ({
   taskCreateSchema: {
-    safeParse: vi.fn(),
+    parse: vi.fn(),
   },
 }));
 
@@ -197,9 +201,10 @@ describe('✅ Tasks API - POST', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (requirePermission as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
-    (taskCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
-      success: true,
-      data: validTaskData,
+    (taskCreateSchema.parse as ReturnType<typeof vi.fn>).mockReturnValue(validTaskData);
+    (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: validTaskData.asignadoA,
+      companyId: mockUser.companyId,
     });
   });
 
@@ -218,9 +223,10 @@ describe('✅ Tasks API - POST', () => {
   });
 
   test('❌ Debe rechazar datos inválidos', async () => {
-    (taskCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
-      success: false,
-      error: { errors: [{ path: ['titulo'], message: 'Required' }] },
+    (taskCreateSchema.parse as ReturnType<typeof vi.fn>).mockImplementation(() => {
+      throw new z.ZodError([
+        { code: 'custom', path: ['titulo'], message: 'Required' } as any,
+      ]);
     });
 
     const req = new NextRequest('http://localhost:3000/api/tasks', {
@@ -234,7 +240,7 @@ describe('✅ Tasks API - POST', () => {
   });
 
   test('❌ Sin permisos retorna 401/403', async () => {
-    (requirePermission as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Forbidden'));
+    (requirePermission as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('permiso'));
 
     const req = new NextRequest('http://localhost:3000/api/tasks', {
       method: 'POST',

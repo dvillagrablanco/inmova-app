@@ -4,63 +4,56 @@ import { PasswordGenerator } from '@/components/ui/password-generator';
 
 describe('PasswordGenerator', () => {
   it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<PasswordGenerator {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+    const onChange = vi.fn();
+    render(<PasswordGenerator value="" onChange={onChange} />);
+
+    expect(screen.getByText('Contraseña')).toBeInTheDocument();
   });
 
   it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<PasswordGenerator {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+    const onChange = vi.fn();
+    render(<PasswordGenerator value="" onChange={onChange} label="Clave" required />);
+
+    expect(screen.getByText('Clave')).toBeInTheDocument();
+    expect(screen.getByText('*')).toBeInTheDocument();
   });
 
   it('should handle user interactions', async () => {
-    render(<PasswordGenerator />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
+    const onChange = vi.fn();
+    render(<PasswordGenerator value="" onChange={onChange} />);
+
+    fireEvent.click(screen.getByTitle('Generar contraseña segura'));
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalled();
+      const [generated] = onChange.mock.calls[0];
+      expect(typeof generated).toBe('string');
+      expect(generated.length).toBe(16);
+    });
   });
 
   it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<PasswordGenerator onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
+    const onChange = vi.fn();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, {
+      clipboard: { writeText },
+    });
+
+    render(<PasswordGenerator value="Abc123!@#" onChange={onChange} />);
+
+    fireEvent.click(screen.getByTitle('Copiar contraseña'));
+
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalledWith('Abc123!@#');
+    });
   });
 
   it('should be accessible', () => {
-    render(<PasswordGenerator />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    const onChange = vi.fn();
+    render(<PasswordGenerator value="" onChange={onChange} />);
+
+    expect(
+      screen.getByPlaceholderText('Introduce o genera una contraseña segura')
+    ).toBeInTheDocument();
   });
 });

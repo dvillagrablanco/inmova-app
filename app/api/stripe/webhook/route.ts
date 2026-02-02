@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import { stripe, formatAmountFromStripe, STRIPE_WEBHOOK_SECRET } from '@/lib/stripe-config';
+import { getStripe, formatAmountFromStripe, STRIPE_WEBHOOK_SECRET } from '@/lib/stripe-config';
 import { prisma } from '@/lib/db';
 import Stripe from 'stripe';
 import logger, { logError } from '@/lib/logger';
@@ -10,6 +10,7 @@ export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   // Check if Stripe is configured
+  const stripe = getStripe();
   if (!stripe) {
     return NextResponse.json(
       { error: 'Stripe no está configurado en este momento' },

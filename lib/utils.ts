@@ -6,9 +6,13 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatDuration(seconds: number): string {
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const remainingSeconds = seconds % 60
+  if (!Number.isFinite(seconds)) {
+    return '00:00:00'
+  }
+  const safeSeconds = Math.max(0, Math.floor(seconds))
+  const hours = Math.floor(safeSeconds / 3600)
+  const minutes = Math.floor((safeSeconds % 3600) / 60)
+  const remainingSeconds = safeSeconds % 60
 
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
 }
@@ -91,8 +95,12 @@ export function isValidEmail(email: string): boolean {
 }
 
 export function isValidPhone(phone: string): boolean {
-  const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/;
-  return phoneRegex.test(phone);
+  const normalized = phone.trim();
+  if (!/^[+\d().\s-]+$/.test(normalized)) {
+    return false;
+  }
+  const digits = normalized.replace(/\D/g, '');
+  return digits.length >= 7 && digits.length <= 15;
 }
 
 export function getInitials(name: string): string {
@@ -104,7 +112,7 @@ export function getInitials(name: string): string {
 }
 
 export function pluralize(count: number, singular: string, plural?: string): string {
-  if (count === 1) return singular;
+  if (Math.abs(count) === 1) return singular;
   return plural || `${singular}s`;
 }
 

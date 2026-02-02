@@ -1,63 +1,48 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import { AnimatedStat } from '@/components/ui/animated-stat';
 
 describe('AnimatedStat', () => {
+  beforeEach(() => {
+    window.matchMedia = vi.fn().mockImplementation(() => ({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      onchange: null,
+      dispatchEvent: vi.fn(),
+      media: '',
+    }));
+  });
+
   it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<AnimatedStat {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+    render(<AnimatedStat title="Ingresos" value={1200} />);
+
+    expect(screen.getByText('Ingresos')).toBeInTheDocument();
   });
 
   it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<AnimatedStat {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+    render(<AnimatedStat title="Ocupación" value={85.5} suffix="%" decimals={1} />);
+
+    expect(screen.getByText('Ocupación')).toBeInTheDocument();
   });
 
-  it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<AnimatedStat onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
+  it('should handle form submission', () => {
+    render(<AnimatedStat title="Crecimiento" value={10} trend={5} />);
+
+    expect(screen.getByText(/↗/)).toBeInTheDocument();
   });
 
-  it('should execute side effects', async () => {
-    render(<AnimatedStat />);
-    
-    // TODO: Verificar efectos
-    await waitFor(() => {
-      // expect(something).toBe(true);
-    });
+  it('should execute side effects', () => {
+    render(<AnimatedStat title="Gastos" value={300} prefix="€" />);
+
+    expect(screen.getByText('Gastos')).toBeInTheDocument();
   });
 
   it('should be accessible', () => {
-    render(<AnimatedStat />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    render(<AnimatedStat title="Contratos" value={12} />);
+
+    expect(screen.getByText('Contratos')).toBeInTheDocument();
   });
 });

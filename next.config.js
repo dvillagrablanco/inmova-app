@@ -2,11 +2,6 @@ const path = require('path');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Proporcionar DATABASE_URL dummy para el build si no existe
-  env: {
-    DATABASE_URL: process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/db',
-  },
-
   // Performance y estabilidad
   reactStrictMode: true,
   productionBrowserSourceMaps: false,
@@ -49,10 +44,12 @@ const nextConfig = {
 
   // Build configuration
   typescript: {
-    ignoreBuildErrors: true, // Deshabilitado temporalmente por errores legacy de enums
+    // Solo permitir ignorar errores con override explícito
+    ignoreBuildErrors: process.env.ALLOW_BUILD_ERRORS === 'true',
   },
   eslint: {
-    ignoreDuringBuilds: true, // Deshabilitado temporalmente
+    // Solo permitir ignorar errores con override explícito
+    ignoreDuringBuilds: process.env.ALLOW_BUILD_ERRORS === 'true',
   },
 
   // Image optimization - Optimizado para producción
