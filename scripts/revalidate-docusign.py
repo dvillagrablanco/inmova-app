@@ -214,7 +214,24 @@ def main() -> int:
 
         node_script = r"""
 const crypto = require('crypto');
-require('dotenv').config({ path: '/opt/inmova-app/.env.production' });
+const fs = require('fs');
+
+function loadEnv(path) {
+  try {
+    const content = fs.readFileSync(path, 'utf8');
+    for (const line of content.split(/\r?\n/)) {
+      if (!line || line.startsWith('#') || !line.includes('=')) continue;
+      const [key, ...rest] = line.split('=');
+      const value = rest.join('=').replace(/^"|"$/g, '').replace(/^'|'$/g, '');
+      if (!process.env[key]) process.env[key] = value;
+    }
+  } catch (err) {
+    console.log('ERROR', 'env_read_failed');
+    process.exit(1);
+  }
+}
+
+loadEnv('/opt/inmova-app/.env.production');
 
 const integrationKey = process.env.DOCUSIGN_INTEGRATION_KEY;
 const userId = process.env.DOCUSIGN_USER_ID;
