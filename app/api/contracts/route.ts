@@ -4,11 +4,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
 import { contractCreateSchema } from '@/lib/validations';
-import { 
-  cachedContracts, 
-  invalidateContractsCache, 
-  invalidateUnitsCache, 
-  invalidateDashboardCache 
+import {
+  cachedContracts,
+  invalidateContractsCache,
+  invalidateUnitsCache,
+  invalidateDashboardCache,
 } from '@/lib/api-cache-helpers';
 
 export const dynamic = 'force-dynamic';
@@ -30,31 +30,47 @@ export async function GET(req: NextRequest) {
       return NextResponse.json([]);
     }
 
-    // Obtener parámetros de paginación
+    // Obtener parámetros de paginación y filtros
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '15');
     const skip = (page - 1) * limit;
     const filterCompanyId = searchParams.get('companyId');
+    const estado = searchParams.get('estado');
+    const tenantId = searchParams.get('tenantId');
+
+    if (estado) {
+      const estadosValidos = new Set(['activo', 'finalizado', 'cancelado', 'pendiente']);
+      if (!estadosValidos.has(estado)) {
+        return NextResponse.json({ error: 'Estado inválido' }, { status: 400 });
+      }
+    }
 
     // Determinar el filtro de empresa
-    const whereCompanyId = isSuperAdmin 
-      ? (filterCompanyId || undefined) 
-      : companyId;
+    const whereCompanyId = isSuperAdmin ? filterCompanyId || undefined : companyId;
 
     // Construir where clause
-    const whereClause = whereCompanyId ? {
-      unit: {
-        building: {
-          companyId: whereCompanyId,
-        },
-      },
-    } : {};
+    const whereClause = whereCompanyId
+      ? {
+          unit: {
+            building: {
+              companyId: whereCompanyId,
+            },
+          },
+        }
+      : {};
+    if (estado) {
+      (whereClause as any).estado = estado;
+    }
+    if (tenantId) {
+      (whereClause as any).tenantId = tenantId;
+    }
 
-    // Si no hay paginación solicitada, usar cache si tiene companyId
+    // Si no hay paginación ni filtros, usar cache si tiene companyId
     const usePagination = searchParams.has('page') || searchParams.has('limit');
+    const hasFilters = Boolean(estado || tenantId);
 
-    if (!usePagination && whereCompanyId) {
+    if (!usePagination && !hasFilters && whereCompanyId) {
       // Usar datos cacheados
       const contractsWithExpiration = await cachedContracts(whereCompanyId);
       return NextResponse.json(contractsWithExpiration);
@@ -93,7 +109,7 @@ export async function GET(req: NextRequest) {
     ]);
 
     // Calcular días hasta vencimiento y convertir valores Decimal
-    const contractsWithExpiration = contracts.map(contract => {
+    const contractsWithExpiration = contracts.map((contract) => {
       const daysUntilExpiration = Math.ceil(
         (new Date(contract.fechaFin).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
       );
@@ -142,20 +158,17 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    
+
     // Validación con Zod
     const validationResult = contractCreateSchema.safeParse(body);
-    
+
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => ({
+      const errors = validationResult.error.errors.map((err) => ({
         field: err.path.join('.'),
-        message: err.message
+        message: err.message,
       }));
       logger.warn('Validation error creating contract:', { errors });
-      return NextResponse.json(
-        { error: 'Datos inv\u00e1lidos', details: errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos inv\u00e1lidos', details: errors }, { status: 400 });
     }
 
     const validatedData = validationResult.data;
