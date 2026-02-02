@@ -163,9 +163,7 @@ describe('📝 Contracts API - GET Endpoint', () => {
   });
 
   test('❌ Debe manejar error de base de datos', async () => {
-    (prisma.contract.findMany as ReturnType<typeof vi.fn>).mockRejectedValue(
-      new Error('Database error')
-    );
+    (cachedContracts as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Database error'));
 
     const req = new NextRequest('http://localhost:3000/api/contracts');
     const response = await GET(req);
