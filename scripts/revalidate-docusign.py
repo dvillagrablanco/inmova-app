@@ -210,37 +210,10 @@ def main() -> int:
         else:
             print("✅ Credenciales ya estaban correctas")
 
-        print("🧪 Verificando SDK DocuSign...")
-        status, out, err = exec_cmd(
-            client,
-            "node -e \"try{require('docusign-esign');console.log('OK')}catch(e){console.log('MISSING')}\"",
-            timeout=20,
-        )
-        if "MISSING" in out:
-            print("📦 Instalando docusign-esign (no-save)...")
-            status, install_out, install_err = exec_cmd(
-                client,
-                f"cd {server['app_path']} && npm install docusign-esign --no-save",
-                timeout=600,
-            )
-            if status != 0:
-                print("❌ Error instalando docusign-esign")
-                print(install_err[:500])
-                return 1
-
-            status, out, err = exec_cmd(
-                client,
-                "node -e \"try{require('docusign-esign');console.log('OK')}catch(e){console.log('MISSING')}\"",
-                timeout=20,
-            )
-            if "MISSING" in out:
-                print("❌ docusign-esign sigue sin estar disponible")
-                return 1
-
         print("🚀 Ejecutando JWT + envío de envelope...")
 
         node_script = r"""
-const docusign = require('docusign-esign');
+const crypto = require('crypto');
 require('dotenv').config({ path: '/opt/inmova-app/.env.production' });
 
 const integrationKey = process.env.DOCUSIGN_INTEGRATION_KEY;
@@ -253,8 +226,16 @@ const signerEmail = process.env.DOCUSIGN_TEST_SIGNER_EMAIL;
 const signerName = process.env.DOCUSIGN_TEST_SIGNER_NAME;
 
 function getOAuthBasePath() {
-  if ((basePath || '').includes('demo')) return 'account-d.docusign.com';
-  return 'account.docusign.com';
+  if ((basePath || '').includes('demo')) return 'https://account-d.docusign.com';
+  return 'https://account.docusign.com';
+}
+
+function base64url(input) {
+  return Buffer.from(input)
+    .toString('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
 }
 
 async function main() {
@@ -268,57 +249,95 @@ async function main() {
       process.exit(3);
     }
 
-    const apiClient = new docusign.ApiClient();
-    apiClient.setOAuthBasePath(getOAuthBasePath());
-    apiClient.setBasePath(basePath);
+    const now = Math.floor(Date.now() / 1000);
+    const header = { alg: 'RS256', typ: 'JWT' };
+    const payload = {
+      iss: integrationKey,
+      sub: userId,
+      aud: getOAuthBasePath().replace('https://', ''),
+      iat: now,
+      exp: now + 3600,
+      scope: 'signature impersonation',
+    };
 
-    const results = await apiClient.requestJWTUserToken(
-      integrationKey,
-      userId,
-      ['signature', 'impersonation'],
-      privateKey,
-      3600
-    );
+    const jwtHeaderPayload = `${base64url(JSON.stringify(header))}.${base64url(JSON.stringify(payload))}`;
+    const signer = crypto.createSign('RSA-SHA256');
+    signer.update(jwtHeaderPayload);
+    signer.end();
+    const signature = signer.sign(privateKey);
+    const jwt = `${jwtHeaderPayload}.${base64url(signature)}`;
 
-    const accessToken = results.body.access_token;
-    apiClient.addDefaultHeader('Authorization', 'Bearer ' + accessToken);
+    const tokenResponse = await fetch(`${getOAuthBasePath()}/oauth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        assertion: jwt,
+      }).toString(),
+    });
+
+    const tokenData = await tokenResponse.json();
+    if (!tokenResponse.ok) {
+      console.log('ERROR', tokenData.error || tokenData.error_description || tokenResponse.status);
+      process.exit(1);
+    }
+
+    const accessToken = tokenData.access_token;
     console.log('JWT_OK');
 
     const docContent = 'Documento de prueba Inmova\\n\\nfirma\\n';
     const docBase64 = Buffer.from(docContent, 'utf8').toString('base64');
 
-    const doc = new docusign.Document();
-    doc.documentBase64 = docBase64;
-    doc.name = 'inmova-test.txt';
-    doc.fileExtension = 'txt';
-    doc.documentId = '1';
+    const envelopeDefinition = {
+      emailSubject: 'Inmova - Prueba DocuSign',
+      emailBlurb: 'Documento de prueba Inmova (automatizado).',
+      documents: [
+        {
+          documentBase64: docBase64,
+          name: 'inmova-test.txt',
+          fileExtension: 'txt',
+          documentId: '1',
+        },
+      ],
+      recipients: {
+        signers: [
+          {
+            email: signerEmail,
+            name: signerName,
+            recipientId: '1',
+            routingOrder: '1',
+            tabs: {
+              signHereTabs: [
+                {
+                  anchorString: 'firma',
+                  anchorUnits: 'pixels',
+                  anchorYOffset: '10',
+                  anchorXOffset: '20',
+                },
+              ],
+            },
+          },
+        ],
+      },
+      status: 'sent',
+    };
 
-    const signHere = docusign.SignHere.constructFromObject({
-      anchorString: 'firma',
-      anchorUnits: 'pixels',
-      anchorYOffset: '10',
-      anchorXOffset: '20',
+    const envelopeResponse = await fetch(`${basePath}/v2.1/accounts/${accountId}/envelopes`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(envelopeDefinition),
     });
 
-    const signer = docusign.Signer.constructFromObject({
-      email: signerEmail,
-      name: signerName,
-      recipientId: '1',
-      routingOrder: '1',
-      tabs: docusign.Tabs.constructFromObject({ signHereTabs: [signHere] }),
-    });
+    const envelopeData = await envelopeResponse.json();
+    if (!envelopeResponse.ok) {
+      console.log('ERROR', envelopeData.errorCode || envelopeData.message || envelopeResponse.status);
+      process.exit(1);
+    }
 
-    const envelopeDefinition = new docusign.EnvelopeDefinition();
-    envelopeDefinition.emailSubject = 'Inmova - Prueba DocuSign';
-    envelopeDefinition.emailBlurb = 'Documento de prueba Inmova (automatizado).';
-    envelopeDefinition.documents = [doc];
-    envelopeDefinition.recipients = docusign.Recipients.constructFromObject({ signers: [signer] });
-    envelopeDefinition.status = 'sent';
-
-    const envelopesApi = new docusign.EnvelopesApi(apiClient);
-    const result = await envelopesApi.createEnvelope(accountId, { envelopeDefinition });
-
-    console.log('ENVELOPE_SENT', result.envelopeId || '');
+    console.log('ENVELOPE_SENT', envelopeData.envelopeId || '');
   } catch (err) {
     const msg = err && err.message ? err.message : String(err);
     console.log('ERROR', msg);
