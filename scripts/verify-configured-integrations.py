@@ -77,12 +77,12 @@ ALL_INTEGRATIONS = {
 
 # Placeholders conocidos a ignorar
 PLACEHOLDERS = [
-    "your_", "YOUR_", "xxx", "XXX", "placeholder", "PLACEHOLDER",
+    "your_", "YOUR_", "your", "YOUR", "xxx", "XXX", "placeholder", "PLACEHOLDER",
     "example", "EXAMPLE", "test_key", "TEST_KEY", "<", ">",
     "tu_", "TU_", "cambiar", "CAMBIAR", "aqui", "AQUI"
 ]
 
-def is_placeholder(value):
+def is_placeholder(value, key=None):
     """Verificar si un valor es un placeholder"""
     if not value:
         return True
@@ -90,6 +90,9 @@ def is_placeholder(value):
     for ph in PLACEHOLDERS:
         if ph.lower() in value_lower:
             return True
+    # Permitir valores cortos conocidos
+    if key in {"AWS_REGION"}:
+        return False
     # También verificar si es muy corto (probablemente inválido)
     if len(value) < 10 and not value.startswith("G-"):  # GA IDs son cortos
         return True
@@ -192,7 +195,7 @@ def main():
                 value = all_vars.get(var, "")
                 if value:
                     required_found += 1
-                    if not is_placeholder(value):
+                    if not is_placeholder(value, var):
                         required_valid += 1
                         # Mostrar parcialmente el valor
                         if len(value) > 20:
@@ -209,7 +212,7 @@ def main():
             optional_details = []
             for var in optional:
                 value = all_vars.get(var, "")
-                if value and not is_placeholder(value):
+                if value and not is_placeholder(value, var):
                     if len(value) > 20:
                         display = value[:8] + "..." + value[-4:]
                     else:
