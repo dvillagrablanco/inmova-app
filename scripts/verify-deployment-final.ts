@@ -17,15 +17,25 @@ interface TestResult {
 async function testPage(page: Page, path: string): Promise<TestResult> {
   const start = Date.now();
   try {
-    const response = await page.goto(`${BASE_URL}${path}`, {
+    const url = `${BASE_URL}${path}`;
+    const response = await page.goto(url, {
       waitUntil: 'domcontentloaded',
       timeout: 30000,
     });
 
-    const status = response?.status() || 0;
+    let status = response?.status() || 0;
     const time = Date.now() - start;
 
     if (!response) {
+      try {
+        const probe = await page.request.get(url, { timeout: 15000 });
+        status = probe.status();
+      } catch {
+        // mantener status = 0
+      }
+    }
+
+    if (status === 0) {
       const finalUrl = page.url();
       if (finalUrl.includes('/login')) {
         return { page: path, status: 'OK', httpCode: 302, time };
