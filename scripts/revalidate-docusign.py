@@ -211,18 +211,31 @@ def main() -> int:
             print("✅ Credenciales ya estaban correctas")
 
         print("🧪 Verificando SDK DocuSign...")
-        status, out, _ = exec_cmd(
+        status, out, err = exec_cmd(
             client,
             "node -e \"try{require('docusign-esign');console.log('OK')}catch(e){console.log('MISSING')}\"",
             timeout=20,
         )
         if "MISSING" in out:
             print("📦 Instalando docusign-esign (no-save)...")
-            exec_cmd(
+            status, install_out, install_err = exec_cmd(
                 client,
                 f"cd {server['app_path']} && npm install docusign-esign --no-save",
                 timeout=600,
             )
+            if status != 0:
+                print("❌ Error instalando docusign-esign")
+                print(install_err[:500])
+                return 1
+
+            status, out, err = exec_cmd(
+                client,
+                "node -e \"try{require('docusign-esign');console.log('OK')}catch(e){console.log('MISSING')}\"",
+                timeout=20,
+            )
+            if "MISSING" in out:
+                print("❌ docusign-esign sigue sin estar disponible")
+                return 1
 
         print("🚀 Ejecutando JWT + envío de envelope...")
 
