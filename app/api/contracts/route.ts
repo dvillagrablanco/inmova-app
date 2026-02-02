@@ -99,7 +99,7 @@ export async function GET(req: NextRequest) {
 
     if (!usePagination && !hasFilters && whereCompanyId) {
       // Usar datos cacheados
-      const contractsWithExpiration = await cachedContracts(whereCompanyId);
+      const contractsWithExpiration = (await cachedContracts(whereCompanyId)) || [];
       return NextResponse.json(contractsWithExpiration);
     }
 
