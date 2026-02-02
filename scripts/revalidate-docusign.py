@@ -333,10 +333,16 @@ main();
 
         status, output, error = exec_cmd(client, cmd, timeout=120)
         output = output.strip()
+        error = error.strip()
 
         print("🧾 Resultado DocuSign:")
-        for line in output.splitlines():
-            print(f"  {line}")
+        if output:
+            for line in output.splitlines():
+                print(f"  {line}")
+        if error:
+            print("  STDERR:")
+            print(f"  {error[:500]}")
+        print(f"  Exit status: {status}")
 
         if status != 0:
             print("❌ Error al enviar envelope")
