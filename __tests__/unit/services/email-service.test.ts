@@ -27,7 +27,7 @@ describe('📧 Email Service - Unit Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    process.env.NODE_ENV = 'production';
+    process.env.NODE_ENV = 'test';
     process.env.SMTP_USER = 'smtp-user';
     process.env.SMTP_PASSWORD = 'smtp-pass';
     process.env.SMTP_HOST = 'smtp.example.com';

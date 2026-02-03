@@ -180,6 +180,46 @@ exports[`📸 Button Snapshots > ✅ Snapshot: Button sizes 3`] = `
 </button>
 `;
 
+exports[`📸 Card Snapshots > ✅ Snapshot: Card complete 1`] = `
+<div
+  class="rounded-lg border bg-card text-card-foreground shadow-sm"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6"
+  >
+    <h3
+      class="text-2xl font-semibold leading-none tracking-tight"
+    >
+      Card Title
+    </h3>
+    <div
+      class="text-sm text-muted-foreground"
+    >
+      This is a card description
+    </div>
+  </div>
+  <div
+    class="p-6 pt-0"
+  >
+    <p>
+      Card content goes here
+    </p>
+  </div>
+</div>
+`;
+
+exports[`📸 Card Snapshots > ✅ Snapshot: Card simple 1`] = `
+<div
+  class="rounded-lg border bg-card text-card-foreground shadow-sm"
+>
+  <div
+    class="p-6 pt-0"
+  >
+    Simple card
+  </div>
+</div>
+`;
+
 exports[`📸 Card Snapshots > ✅ Snapshot: Card with custom className 1`] = `
 <div
   class="rounded-lg border text-card-foreground shadow-sm bg-blue-500"
@@ -358,6 +398,34 @@ exports[`📸 Input Snapshots > ✅ Snapshot: Input disabled 1`] = `
   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
   disabled=""
   placeholder="Disabled"
+/>
+`;
+
+exports[`📸 Input Snapshots > ✅ Snapshot: Input types 1`] = `
+<input
+  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+  type="text"
+/>
+`;
+
+exports[`📸 Input Snapshots > ✅ Snapshot: Input types 2`] = `
+<input
+  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+  type="email"
+/>
+`;
+
+exports[`📸 Input Snapshots > ✅ Snapshot: Input types 3`] = `
+<input
+  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+  type="password"
+/>
+`;
+
+exports[`📸 Input Snapshots > ✅ Snapshot: Input types 4`] = `
+<input
+  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+  type="number"
 />
 `;
 
