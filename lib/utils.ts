@@ -27,13 +27,15 @@ export function formatCurrency(
   currency: string = 'EUR',
   locale: string = 'es-ES'
 ): string {
-  return new Intl.NumberFormat(locale, {
+  const formatted = new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
     useGrouping: true,
   }).format(amount);
+
+  return formatted.replace(/\u00a0/g, ' ');
 }
 
 export function formatDate(
