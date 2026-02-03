@@ -213,7 +213,7 @@ export const paymentCreateSchema = z.object({
     .min(1, 'El concepto es requerido')
     .max(500, 'El concepto no puede exceder 500 caracteres')
     .trim(),
-  estado: z.enum(['pendiente', 'pagado', 'atrasado']).optional().default('pendiente'),
+  estado: z.enum(['pendiente', 'pagado', 'atrasado', 'cancelado']).optional().default('pendiente'),
   metodoPago: z
     .enum(['efectivo', 'transferencia', 'tarjeta', 'cheque', 'domiciliacion', 'otro'])
     .optional(),
