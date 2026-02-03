@@ -67,7 +67,9 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
   // ============================================
 
   if (reportData.tipo === 'morosidad') {
-    const { pagosPendientes, totalMorosidad, inquilinos } = reportData.datos;
+    const pagosPendientes = reportData.datos?.pagosPendientes ?? 0;
+    const totalMorosidad = reportData.datos?.totalMorosidad ?? 0;
+    const inquilinos = reportData.datos?.inquilinos ?? [];
 
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
@@ -91,8 +93,8 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
         body: inquilinos.map((inq: any) => [
           inq.nombreCompleto,
           inq.unidad,
-          `${inq.importe.toFixed(2)} €`,
-          inq.diasAtraso.toString(),
+          `${Number(inq.importe ?? 0).toFixed(2)} €`,
+          Number(inq.diasAtraso ?? 0).toString(),
         ]),
         theme: 'striped',
         headStyles: {
@@ -104,13 +106,13 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
       });
     }
   } else if (reportData.tipo === 'ocupacion') {
-    const totalUnidades = reportData.datos.totalUnidades ?? 0;
-    const unidadesOcupadas = reportData.datos.unidadesOcupadas ?? 0;
+    const totalUnidades = reportData.datos?.totalUnidades ?? 0;
+    const unidadesOcupadas = reportData.datos?.unidadesOcupadas ?? 0;
     const unidadesDisponibles =
-      reportData.datos.unidadesDisponibles ?? Math.max(totalUnidades - unidadesOcupadas, 0);
+      reportData.datos?.unidadesDisponibles ?? Math.max(totalUnidades - unidadesOcupadas, 0);
     const tasaOcupacion =
-      reportData.datos.tasaOcupacion ??
-      reportData.datos.porcentajeOcupacion ??
+      reportData.datos?.tasaOcupacion ??
+      reportData.datos?.porcentajeOcupacion ??
       (totalUnidades > 0 ? (unidadesOcupadas / totalUnidades) * 100 : 0);
 
     doc.setFontSize(14);
@@ -132,7 +134,7 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     yPos += 12;
 
     // Tabla de edificios
-    if (reportData.datos.edificios && reportData.datos.edificios.length > 0) {
+    if (reportData.datos?.edificios && reportData.datos.edificios.length > 0) {
       autoTable(doc, {
         startY: yPos,
         head: [['Edificio', 'Total', 'Ocupadas', 'Disponibles', 'Ocupación']],
@@ -227,7 +229,10 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     yPos += 12;
 
     // Tabla de solicitudes recientes
-    if (reportData.datos.solicitudesRecientes && reportData.datos.solicitudesRecientes.length > 0) {
+    if (
+      reportData.datos?.solicitudesRecientes &&
+      reportData.datos.solicitudesRecientes.length > 0
+    ) {
       autoTable(doc, {
         startY: yPos,
         head: [['Título', 'Unidad', 'Estado', 'Prioridad', 'Costo']],
@@ -279,16 +284,16 @@ export const generateReportCSV = (reportData: ReportData): string => {
 
   if (reportData.tipo === 'morosidad') {
     csv += 'Inquilino,Unidad,Importe,Días atraso\n';
-    if (reportData.datos.inquilinos) {
+    if (reportData.datos?.inquilinos) {
       reportData.datos.inquilinos.forEach((inq: any) => {
-        csv += `${inq.nombreCompleto},${inq.unidad},${inq.importe.toFixed(2)},${inq.diasAtraso}\n`;
+        csv += `${inq.nombreCompleto},${inq.unidad},${Number(inq.importe ?? 0).toFixed(2)},${inq.diasAtraso}\n`;
       });
     }
   } else if (reportData.tipo === 'ocupacion') {
     csv += 'Edificio,Total,Ocupadas,Disponibles,Ocupación (%)\n';
-    if (reportData.datos.edificios) {
+    if (reportData.datos?.edificios) {
       reportData.datos.edificios.forEach((ed: any) => {
-        csv += `${ed.nombre},${ed.total},${ed.ocupadas},${ed.disponibles},${ed.tasaOcupacion.toFixed(1)}\n`;
+        csv += `${ed.nombre},${ed.total},${ed.ocupadas},${ed.disponibles},${Number(ed.tasaOcupacion ?? 0).toFixed(1)}\n`;
       });
     }
   } else if (reportData.tipo === 'ingresos') {
@@ -300,7 +305,7 @@ export const generateReportCSV = (reportData: ReportData): string => {
     }
   } else if (reportData.tipo === 'mantenimiento') {
     csv += 'Título,Unidad,Estado,Prioridad,Costo\n';
-    if (reportData.datos.solicitudesRecientes) {
+    if (reportData.datos?.solicitudesRecientes) {
       reportData.datos.solicitudesRecientes.forEach((sol: any) => {
         csv += `${sol.titulo},${sol.unidad},${sol.estado},${sol.prioridad},${sol.costo ? sol.costo.toFixed(2) : 'N/A'}\n`;
       });
