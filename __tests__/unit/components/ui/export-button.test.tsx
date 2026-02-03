@@ -35,13 +35,13 @@ describe('ExportButton', () => {
   it('should render without crashing', () => {
     render(<ExportButton data={data} columns={columns} filename="export" />);
 
-    expect(screen.getByRole('button', { name: /exportar/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^exportar$/i })).toBeInTheDocument();
   });
 
   it('should open menu and allow export selection', () => {
     render(<ExportButton data={data} columns={columns} filename="export" />);
 
-    fireEvent.click(screen.getByRole('button', { name: /exportar/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^exportar$/i }));
 
     expect(screen.getByText('Exportar a CSV')).toBeInTheDocument();
     expect(screen.getByText('Exportar a Excel')).toBeInTheDocument();
@@ -51,6 +51,6 @@ describe('ExportButton', () => {
   it('should be accessible', () => {
     render(<ExportButton data={data} columns={columns} filename="export" />);
 
-    expect(screen.getByRole('button', { name: /exportar/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^exportar$/i })).toBeInTheDocument();
   });
 });
