@@ -13,14 +13,22 @@ export function useMediaQuery(query: string): boolean {
     }
 
     const media = window.matchMedia(query);
+    if (!media) return;
+
     if (media.matches !== matches) {
       setMatches(media.matches);
     }
 
     const listener = () => setMatches(media.matches);
-    media.addEventListener('change', listener);
+    if (typeof media.addEventListener === 'function') {
+      media.addEventListener('change', listener);
+      return () => media.removeEventListener('change', listener);
+    }
 
-    return () => media.removeEventListener('change', listener);
+    if (typeof media.addListener === 'function') {
+      media.addListener(listener);
+      return () => media.removeListener(listener);
+    }
   }, [matches, query]);
 
   return matches;
