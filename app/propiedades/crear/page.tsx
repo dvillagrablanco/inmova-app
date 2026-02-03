@@ -264,6 +264,50 @@ export default function CrearPropiedadPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          <AIDocumentAssistant
+            context="propiedades"
+            variant="inline"
+            position="bottom-right"
+            onApplyData={(data) => {
+              if (data.numero) {
+                setFormData((prev) => ({ ...prev, numero: String(data.numero) }));
+              }
+              if (data.superficie || data.metrosCuadrados) {
+                setFormData((prev) => ({
+                  ...prev,
+                  superficie: String(data.superficie || data.metrosCuadrados),
+                }));
+              }
+              if (data.superficieUtil || data.metrosUtiles) {
+                setFormData((prev) => ({
+                  ...prev,
+                  superficieUtil: String(data.superficieUtil || data.metrosUtiles),
+                }));
+              }
+              if (data.habitaciones) {
+                setFormData((prev) => ({ ...prev, habitaciones: String(data.habitaciones) }));
+              }
+              if (data.banos || data.baños) {
+                setFormData((prev) => ({ ...prev, banos: String(data.banos || data.baños) }));
+              }
+              if (data.planta) {
+                setFormData((prev) => ({ ...prev, planta: String(data.planta) }));
+              }
+              if (data.orientacion) {
+                setFormData((prev) => ({ ...prev, orientacion: String(data.orientacion) }));
+              }
+              if (data.rentaMensual || data.precio || data.alquiler) {
+                setFormData((prev) => ({
+                  ...prev,
+                  rentaMensual: String(data.rentaMensual || data.precio || data.alquiler),
+                }));
+              }
+              if (data.descripcion) {
+                setFormData((prev) => ({ ...prev, descripcion: String(data.descripcion) }));
+              }
+              toast.success('Datos del documento aplicados al formulario');
+            }}
+          />
           {/* Información Básica */}
           <Card>
             <CardHeader>
@@ -645,21 +689,6 @@ export default function CrearPropiedadPage() {
           </div>
         </form>
       </div>
-
-      {/* Asistente IA de Documentos - Para escrituras, certificados, etc. */}
-      <AIDocumentAssistant
-        context="propiedades"
-        variant="floating"
-        position="bottom-right"
-        onApplyData={(data) => {
-          // Aplicar datos extraídos del documento al formulario
-          if (data.superficie) setFormData((prev) => ({ ...prev, superficie: data.superficie }));
-          if (data.habitaciones)
-            setFormData((prev) => ({ ...prev, habitaciones: data.habitaciones }));
-          if (data.banos) setFormData((prev) => ({ ...prev, banos: data.banos }));
-          toast.success('Datos del documento aplicados al formulario');
-        }}
-      />
     </AuthenticatedLayout>
   );
 }

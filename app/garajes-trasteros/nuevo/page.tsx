@@ -190,6 +190,38 @@ export default function NuevoGarajeTrasteroPage() {
               <CardTitle>Información del Espacio</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              <AIDocumentAssistant
+                context="propiedades"
+                variant="inline"
+                position="bottom-right"
+                onApplyData={(data) => {
+                  if (data.numero || data.numeroPlaza) {
+                    setFormData((prev) => ({ ...prev, numero: data.numero || data.numeroPlaza }));
+                  }
+                  if (data.superficie || data.metrosCuadrados) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      superficie: data.superficie || data.metrosCuadrados,
+                    }));
+                  }
+                  if (data.planta || data.piso) {
+                    setFormData((prev) => ({ ...prev, planta: data.planta || data.piso }));
+                  }
+                  if (data.precio || data.alquiler || data.rentaMensual) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      rentaMensual: data.precio || data.alquiler || data.rentaMensual,
+                    }));
+                  }
+                  if (data.orientacion) {
+                    setFormData((prev) => ({ ...prev, orientacion: data.orientacion }));
+                  }
+                  if (data.descripcion) {
+                    setFormData((prev) => ({ ...prev, descripcion: data.descripcion }));
+                  }
+                  toast.success('Datos aplicados al formulario');
+                }}
+              />
               {/* Tipo de Espacio */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
@@ -365,35 +397,6 @@ export default function NuevoGarajeTrasteroPage() {
             </CardContent>
           </Card>
         </form>
-
-        {/* Asistente IA de Documentos para garajes/trasteros */}
-        <AIDocumentAssistant
-          context="propiedades"
-          variant="floating"
-          position="bottom-right"
-          onApplyData={(data) => {
-            // Aplicar datos extraídos del documento al formulario
-            if (data.numero || data.numeroPlaza) {
-              setFormData((prev) => ({ ...prev, numero: data.numero || data.numeroPlaza }));
-            }
-            if (data.superficie || data.metrosCuadrados) {
-              setFormData((prev) => ({
-                ...prev,
-                superficie: data.superficie || data.metrosCuadrados,
-              }));
-            }
-            if (data.planta || data.piso) {
-              setFormData((prev) => ({ ...prev, planta: data.planta || data.piso }));
-            }
-            if (data.precio || data.alquiler) {
-              setFormData((prev) => ({ ...prev, precio: data.precio || data.alquiler }));
-            }
-            if (data.descripcion || data.notas) {
-              setFormData((prev) => ({ ...prev, descripcion: data.descripcion || data.notas }));
-            }
-            toast.success('Datos del documento aplicados al formulario');
-          }}
-        />
       </div>
     </AuthenticatedLayout>
   );

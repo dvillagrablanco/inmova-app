@@ -87,6 +87,20 @@ export default function ImportarContratosPage() {
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
 
+  const applyImportHints = (data: Record<string, any>) => {
+    const source = data.sourceSystem || data.sistemaOrigen || data.origen;
+    if (source) {
+      const normalized = String(source).toLowerCase();
+      if (normalized.includes('excel')) {
+        setSourceSystem('excel_export');
+      } else if (normalized.includes('csv') || normalized.includes('generic')) {
+        setSourceSystem('generic_csv');
+      } else {
+        setSourceSystem('other_system');
+      }
+    }
+  };
+
   if (status === 'loading') {
     return (
       <AuthenticatedLayout>
@@ -259,6 +273,12 @@ export default function ImportarContratosPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <AIDocumentAssistant
+            context="contratos"
+            variant="inline"
+            position="bottom-right"
+            onApplyData={applyImportHints}
+          />
           <div>
             <Label htmlFor="sourceSystem">Sistema de Origen</Label>
             <Select value={sourceSystem} onValueChange={setSourceSystem}>
@@ -694,13 +714,6 @@ export default function ImportarContratosPage() {
         {currentStep === 'import' && renderImportStep()}
         {currentStep === 'results' && renderResultsStep()}
       </div>
-
-      {/* Asistente IA de Documentos - Para analizar contratos antes de importar */}
-      <AIDocumentAssistant 
-        context="contratos"
-        variant="floating"
-        position="bottom-right"
-      />
     </AuthenticatedLayout>
   );
 }

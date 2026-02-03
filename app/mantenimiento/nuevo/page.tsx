@@ -167,6 +167,48 @@ export default function NuevaMantenimientoPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+              <AIDocumentAssistant
+                context="facturas"
+                variant="inline"
+                position="bottom-right"
+                onApplyData={(data) => {
+                  if (data.titulo || data.descripcionServicio) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      titulo: data.titulo || data.descripcionServicio,
+                    }));
+                  }
+                  if (data.descripcion || data.detallesTrabajo) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      descripcion: data.descripcion || data.detallesTrabajo,
+                    }));
+                  }
+                  if (data.tipo || data.tipoServicio) {
+                    const tipo = String(data.tipo || data.tipoServicio).toLowerCase();
+                    if (
+                      [
+                        'fontaneria',
+                        'electricidad',
+                        'pintura',
+                        'carpinteria',
+                        'limpieza',
+                        'jardineria',
+                        'general',
+                      ].includes(tipo)
+                    ) {
+                      setFormData((prev) => ({ ...prev, tipo }));
+                    }
+                  }
+                  if (data.prioridad || data.urgencia) {
+                    const prioridad = String(data.prioridad || data.urgencia).toLowerCase();
+                    if (['baja', 'media', 'alta', 'urgente'].includes(prioridad)) {
+                      setFormData((prev) => ({ ...prev, prioridad }));
+                    }
+                  }
+                  toast.success('Datos aplicados a la solicitud');
+                }}
+              />
               <div className="grid gap-6 md:grid-cols-2">
                 {/* Unidad */}
                 <div className="space-y-2 md:col-span-2">
@@ -284,44 +326,6 @@ export default function NuevaMantenimientoPage() {
             </form>
           </CardContent>
         </Card>
-
-        {/* Asistente IA de Documentos para facturas, presupuestos, etc. */}
-        <AIDocumentAssistant
-          context="facturas"
-          variant="floating"
-          position="bottom-right"
-          onApplyData={(data) => {
-            // Aplicar datos extraídos del documento al formulario
-            if (data.titulo || data.descripcionServicio) {
-              setFormData((prev) => ({ ...prev, titulo: data.titulo || data.descripcionServicio }));
-            }
-            if (data.descripcion || data.detallesTrabajo) {
-              setFormData((prev) => ({
-                ...prev,
-                descripcion: data.descripcion || data.detallesTrabajo,
-              }));
-            }
-            if (data.tipo || data.tipoServicio) {
-              const tipo = (data.tipo || data.tipoServicio).toLowerCase();
-              if (
-                [
-                  'fontaneria',
-                  'electricidad',
-                  'carpinteria',
-                  'pintura',
-                  'limpieza',
-                  'jardineria',
-                  'cerrajeria',
-                  'climatizacion',
-                  'general',
-                ].includes(tipo)
-              ) {
-                setFormData((prev) => ({ ...prev, tipo }));
-              }
-            }
-            toast.success('Datos del documento aplicados al formulario');
-          }}
-        />
       </div>
     </AuthenticatedLayout>
   );

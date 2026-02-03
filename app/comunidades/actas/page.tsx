@@ -101,6 +101,18 @@ export default function ActasPage() {
     ordenDia: '',
   });
 
+  const toLocalDateTimeInput = (value: unknown) => {
+    if (!value) return '';
+    const raw = String(value).trim();
+    if (!raw) return '';
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(raw)) return raw;
+    const parsed = new Date(raw);
+    if (!isNaN(parsed.getTime())) {
+      return parsed.toISOString().slice(0, 16);
+    }
+    return '';
+  };
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
@@ -233,6 +245,32 @@ export default function ActasPage() {
                 <DialogDescription>Crea una nueva acta de reunión</DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
+                <AIDocumentAssistant
+                  context="documentos"
+                  variant="inline"
+                  position="bottom-right"
+                  onApplyData={(data) => {
+                    const fecha = toLocalDateTimeInput(
+                      data.fecha || data.fechaReunion || data.fechaConvocatoria
+                    );
+                    if (fecha) {
+                      setFormData((prev) => ({ ...prev, fecha }));
+                    }
+                    if (data.convocatoria || data.tipoConvocatoria) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        convocatoria: data.convocatoria || data.tipoConvocatoria,
+                      }));
+                    }
+                    if (data.ordenDia) {
+                      const orden = Array.isArray(data.ordenDia)
+                        ? data.ordenDia.join('\n')
+                        : String(data.ordenDia);
+                      setFormData((prev) => ({ ...prev, ordenDia: orden }));
+                    }
+                    toast.success('Datos aplicados al acta');
+                  }}
+                />
                 <div className="grid gap-2">
                   <Label htmlFor="fecha">Fecha de la Reunión *</Label>
                   <Input
@@ -398,42 +436,6 @@ export default function ActasPage() {
             </Table>
           </CardContent>
         </Card>
-
-        {/* Asistente IA de Documentos para actas de comunidad */}
-        <AIDocumentAssistant
-          context="documentos"
-          variant="floating"
-          position="bottom-right"
-          onApplyData={(data) => {
-            // Aplicar datos extraídos del acta al formulario
-            if (data.numeroActa) {
-              setNewActa((prev) => ({ ...prev, numeroActa: data.numeroActa }));
-            }
-            if (data.fecha) {
-              const fecha = new Date(data.fecha);
-              if (!isNaN(fecha.getTime())) {
-                setNewActa((prev) => ({ ...prev, fecha: fecha.toISOString().split('T')[0] }));
-              }
-            }
-            if (data.convocatoria || data.tipoConvocatoria) {
-              setNewActa((prev) => ({
-                ...prev,
-                convocatoria: data.convocatoria || data.tipoConvocatoria,
-              }));
-            }
-            if (data.observaciones || data.resumen) {
-              setNewActa((prev) => ({
-                ...prev,
-                observaciones: data.observaciones || data.resumen,
-              }));
-            }
-            // Abrir el diálogo de nueva acta si hay datos
-            if (data.numeroActa || data.fecha) {
-              setShowDialog(true);
-            }
-            toast.success('Datos del acta extraídos. Revise y complete el formulario.');
-          }}
-        />
       </div>
     </AuthenticatedLayout>
   );

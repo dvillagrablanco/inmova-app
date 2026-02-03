@@ -169,6 +169,42 @@ export default function NuevoPagoPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+              <AIDocumentAssistant
+                context="facturas"
+                variant="inline"
+                position="bottom-right"
+                onApplyData={(data) => {
+                  // Aplicar datos extraídos del documento (factura, recibo) al formulario
+                  if (data.monto || data.importe || data.total) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      monto: data.monto || data.importe || data.total,
+                    }));
+                  }
+                  if (data.fechaPago || data.fecha) {
+                    const fecha = new Date(data.fechaPago || data.fecha);
+                    if (!isNaN(fecha.getTime())) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        fechaPago: fecha.toISOString().split('T')[0],
+                      }));
+                    }
+                  }
+                  if (data.fechaVencimiento) {
+                    const fecha = new Date(data.fechaVencimiento);
+                    if (!isNaN(fecha.getTime())) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        fechaVencimiento: fecha.toISOString().split('T')[0],
+                      }));
+                    }
+                  }
+                  if (data.periodo || data.concepto) {
+                    setFormData((prev) => ({ ...prev, periodo: data.periodo || data.concepto }));
+                  }
+                  toast.success('Datos aplicados al formulario de pago');
+                }}
+              />
               <div className="grid gap-6 md:grid-cols-2">
                 {/* Contrato */}
                 <div className="space-y-2 md:col-span-2">
@@ -309,44 +345,6 @@ export default function NuevoPagoPage() {
             </form>
           </CardContent>
         </Card>
-
-        {/* Asistente IA de Documentos para facturas y recibos */}
-        <AIDocumentAssistant
-          context="facturas"
-          variant="floating"
-          position="bottom-right"
-          onApplyData={(data) => {
-            // Aplicar datos extraídos del documento (factura, recibo) al formulario
-            if (data.monto || data.importe || data.total) {
-              setFormData((prev) => ({ ...prev, monto: data.monto || data.importe || data.total }));
-            }
-            if (data.fechaPago || data.fecha) {
-              const fecha = new Date(data.fechaPago || data.fecha);
-              if (!isNaN(fecha.getTime())) {
-                setFormData((prev) => ({ ...prev, fechaPago: fecha.toISOString().split('T')[0] }));
-              }
-            }
-            if (data.fechaVencimiento) {
-              const fecha = new Date(data.fechaVencimiento);
-              if (!isNaN(fecha.getTime())) {
-                setFormData((prev) => ({
-                  ...prev,
-                  fechaVencimiento: fecha.toISOString().split('T')[0],
-                }));
-              }
-            }
-            if (data.periodo || data.concepto) {
-              setFormData((prev) => ({ ...prev, periodo: data.periodo || data.concepto }));
-            }
-            if (data.metodoPago) {
-              const metodo = data.metodoPago.toLowerCase();
-              if (['transferencia', 'efectivo', 'tarjeta', 'domiciliacion'].includes(metodo)) {
-                setFormData((prev) => ({ ...prev, metodoPago: metodo }));
-              }
-            }
-            toast.success('Datos del documento aplicados al formulario');
-          }}
-        />
       </div>
     </AuthenticatedLayout>
   );

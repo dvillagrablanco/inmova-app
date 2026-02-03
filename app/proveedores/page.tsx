@@ -302,6 +302,35 @@ export default function ProveedoresPage() {
                   <DialogTitle>Nuevo Proveedor</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  <AIDocumentAssistant
+                    context="proveedores"
+                    variant="inline"
+                    position="bottom-right"
+                    onApplyData={(data) => {
+                      if (data.nombreProveedor || data.razonSocial || data.nombre) {
+                        setForm((prev) => ({
+                          ...prev,
+                          nombre: data.nombreProveedor || data.razonSocial || data.nombre,
+                        }));
+                      }
+                      if (data.telefono) {
+                        setForm((prev) => ({ ...prev, telefono: data.telefono }));
+                      }
+                      if (data.email) {
+                        setForm((prev) => ({ ...prev, email: data.email }));
+                      }
+                      if (data.direccion) {
+                        setForm((prev) => ({ ...prev, direccion: data.direccion }));
+                      }
+                      if (data.tipo || data.servicio) {
+                        setForm((prev) => ({ ...prev, tipo: data.tipo || data.servicio }));
+                      }
+                      if (data.notas || data.observaciones) {
+                        setForm((prev) => ({ ...prev, notas: data.notas || data.observaciones }));
+                      }
+                      toast.success('Datos aplicados al proveedor');
+                    }}
+                  />
                   <div>
                     <Label htmlFor="nombre">Nombre *</Label>
                     <Input
@@ -387,6 +416,35 @@ export default function ProveedoresPage() {
               <DialogTitle>Editar Proveedor</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleUpdate} className="space-y-4">
+              <AIDocumentAssistant
+                context="proveedores"
+                variant="inline"
+                position="bottom-right"
+                onApplyData={(data) => {
+                  if (data.nombreProveedor || data.razonSocial || data.nombre) {
+                    setEditForm((prev) => ({
+                      ...prev,
+                      nombre: data.nombreProveedor || data.razonSocial || data.nombre,
+                    }));
+                  }
+                  if (data.telefono) {
+                    setEditForm((prev) => ({ ...prev, telefono: data.telefono }));
+                  }
+                  if (data.email) {
+                    setEditForm((prev) => ({ ...prev, email: data.email }));
+                  }
+                  if (data.direccion) {
+                    setEditForm((prev) => ({ ...prev, direccion: data.direccion }));
+                  }
+                  if (data.tipo || data.servicio) {
+                    setEditForm((prev) => ({ ...prev, tipo: data.tipo || data.servicio }));
+                  }
+                  if (data.notas || data.observaciones) {
+                    setEditForm((prev) => ({ ...prev, notas: data.notas || data.observaciones }));
+                  }
+                  toast.success('Datos aplicados al proveedor');
+                }}
+              />
               <div>
                 <Label htmlFor="edit-nombre">Nombre *</Label>
                 <Input
@@ -646,42 +704,6 @@ export default function ProveedoresPage() {
             ))
           )}
         </div>
-
-        {/* Asistente IA de Documentos para facturas y documentos de proveedores */}
-        <AIDocumentAssistant
-          context="proveedores"
-          variant="floating"
-          position="bottom-right"
-          onApplyData={(data) => {
-            // Aplicar datos extraídos del documento al formulario de proveedor
-            if (data.nombreProveedor || data.razonSocial || data.nombre) {
-              setForm((prev) => ({
-                ...prev,
-                nombre: data.nombreProveedor || data.razonSocial || data.nombre,
-              }));
-            }
-            if (data.telefono) {
-              setForm((prev) => ({ ...prev, telefono: data.telefono }));
-            }
-            if (data.email) {
-              setForm((prev) => ({ ...prev, email: data.email }));
-            }
-            if (data.direccion) {
-              setForm((prev) => ({ ...prev, direccion: data.direccion }));
-            }
-            if (data.tipoServicio || data.especialidad) {
-              setForm((prev) => ({ ...prev, tipo: data.tipoServicio || data.especialidad }));
-            }
-            if (data.notas || data.observaciones) {
-              setForm((prev) => ({ ...prev, notas: data.notas || data.observaciones }));
-            }
-            // Abrir el diálogo de nuevo proveedor si hay datos
-            if (data.nombreProveedor || data.razonSocial || data.nombre) {
-              setOpenDialog(true);
-            }
-            toast.success('Datos del documento aplicados. Revise y complete el formulario.');
-          }}
-        />
       </div>
     </AuthenticatedLayout>
   );
