@@ -100,15 +100,15 @@ describe('Utils', () => {
 
   describe('pluralize', () => {
     it('returns singular for count 1', () => {
-      expect(pluralize(1, 'building')).toBe('1 building');
+      expect(pluralize(1, 'building')).toBe('building');
     });
 
     it('returns plural for count > 1', () => {
-      expect(pluralize(2, 'building')).toBe('2 buildings');
+      expect(pluralize(2, 'building')).toBe('buildings');
     });
 
     it('uses custom plural form', () => {
-      expect(pluralize(2, 'property', 'properties')).toBe('2 properties');
+      expect(pluralize(2, 'property', 'properties')).toBe('properties');
     });
   });
 
