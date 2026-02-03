@@ -1,19 +1,18 @@
 /**
  * API Route: Webhook de Signaturit
  * POST /api/webhooks/signaturit
- * 
+ *
  * Recibe notificaciones de Signaturit cuando:
  * - Un documento es firmado
  * - Un documento es rechazado
  * - Un documento expira
  * - Cualquier cambio de estado
- * 
+ *
  * Documentación: https://docs.signaturit.com/api/v3/#webhooks
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import * as SignaturitService from '@/lib/signaturit-service';
-import { SignatureStatus } from '@/lib/signaturit-service';
 import { prisma } from '@/lib/db';
 import * as S3Service from '@/lib/aws-s3-service';
 
@@ -23,7 +22,7 @@ export const runtime = 'nodejs';
 
 /**
  * POST /api/webhooks/signaturit
- * 
+ *
  * Signaturit envía eventos en este formato:
  * {
  *   event: 'signature_ready' | 'signature_completed' | 'signature_declined' | 'signature_expired',
@@ -47,68 +46,73 @@ export async function POST(request: NextRequest) {
     const event = body.event;
     const data = body.data;
 
-    console.log('[Signaturit Webhook] Event received:', event, 'ID:', data.id);
+    logger.info('[Signaturit Webhook] Event received', { event, signatureId: data.id });
 
     // 3. Verificar firma del webhook (usando webhook secret global de Inmova)
     const isValid = SignaturitService.verifyWebhookSignature(bodyText, signature);
-    
+
     if (!isValid && process.env.NODE_ENV === 'production') {
       logger.error('[Signaturit Webhook] Invalid signature');
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
-    // 4. Buscar contrato asociado
-    const contract = await prisma.contract.findFirst({
-      where: { signatureId: data.id },
+    // 4. Buscar firma/ documento asociado
+    const signatureRecord = await prisma.contractSignature.findFirst({
+      where: { externalId: data.id },
       include: {
-        unit: {
+        contract: {
           include: {
-            building: true,
+            unit: {
+              include: {
+                building: true,
+              },
+            },
+            tenant: true,
           },
         },
-        tenant: true,
       },
     });
 
-    if (!contract) {
-      logger.warn('[Signaturit Webhook] Contract not found for signature:', data.id);
-      return NextResponse.json({ received: true, warning: 'Contract not found' });
+    const documento = await prisma.documentoFirma.findFirst({
+      where: { signaturitId: data.id },
+    });
+
+    if (!signatureRecord && !documento) {
+      logger.warn('[Signaturit Webhook] Signature not found:', data.id);
+      return NextResponse.json({ received: true, warning: 'Signature not found' });
     }
 
     // 5. Procesar evento según tipo
     switch (event) {
       case 'signature_ready':
-        await handleSignatureReady(contract, data);
+        await handleSignatureReady(signatureRecord, documento, data);
         break;
 
       case 'signature_completed':
-        await handleSignatureCompleted(contract, data);
+        await handleSignatureCompleted(signatureRecord, documento, data);
         break;
 
       case 'signature_declined':
-        await handleSignatureDeclined(contract, data);
+        await handleSignatureDeclined(signatureRecord, documento, data);
         break;
 
       case 'signature_expired':
-        await handleSignatureExpired(contract, data);
+        await handleSignatureExpired(signatureRecord, documento, data);
         break;
 
       case 'signature_canceled':
-        await handleSignatureCanceled(contract, data);
+        await handleSignatureCanceled(signatureRecord, documento, data);
         break;
 
       default:
-        console.log('[Signaturit Webhook] Unknown event:', event);
+        logger.warn('[Signaturit Webhook] Unknown event', { event, signatureId: data.id });
     }
 
     // 6. Respuesta OK (Signaturit requiere 200 OK)
     return NextResponse.json({ received: true });
   } catch (error: any) {
     logger.error('[Signaturit Webhook] Error:', error);
-    
+
     // Retornar 200 para que Signaturit no reintente
     // (ya logueamos el error)
     return NextResponse.json({ received: true, error: error.message });
@@ -119,26 +123,40 @@ export async function POST(request: NextRequest) {
  * Maneja evento: signature_ready
  * El documento está listo para ser firmado
  */
-async function handleSignatureReady(contract: any, data: any) {
+async function handleSignatureReady(signatureRecord: any | null, documento: any | null, data: any) {
   try {
-    await prisma.contract.update({
-      where: { id: contract.id },
-      data: {
-        signatureStatus: 'READY',
-      },
-    });
+    if (signatureRecord) {
+      await prisma.contractSignature.update({
+        where: { id: signatureRecord.id },
+        data: {
+          status: 'PENDING',
+          sentAt: signatureRecord.sentAt || new Date(),
+        },
+      });
+    }
+
+    if (documento) {
+      await prisma.documentoFirma.update({
+        where: { id: documento.id },
+        data: {
+          estado: 'PENDING',
+        },
+      });
+    }
 
     // Log de auditoría
-    await prisma.auditLog.create({
-      data: {
-        action: 'SIGNATURE_READY',
-        entityType: 'CONTRACT',
-        entityId: contract.id,
-        details: { signatureId: data.id },
-      },
-    });
+    if (signatureRecord?.contractId) {
+      await prisma.auditLog.create({
+        data: {
+          action: 'SIGNATURE_READY',
+          entityType: 'CONTRACT',
+          entityId: signatureRecord.contractId,
+          details: { signatureId: data.id },
+        },
+      });
+    }
 
-    console.log('[Signaturit] Signature ready:', data.id);
+    logger.info('[Signaturit] Signature ready', { signatureId: data.id });
   } catch (error: any) {
     logger.error('[handleSignatureReady] Error:', error);
   }
@@ -148,52 +166,63 @@ async function handleSignatureReady(contract: any, data: any) {
  * Maneja evento: signature_completed
  * Todos los firmantes han firmado el documento
  */
-async function handleSignatureCompleted(contract: any, data: any) {
+async function handleSignatureCompleted(
+  signatureRecord: any | null,
+  documento: any | null,
+  data: any
+) {
   try {
-    // 1. Actualizar estado del contrato
-    await prisma.contract.update({
-      where: { id: contract.id },
-      data: {
-        signatureStatus: 'COMPLETED',
-        signatureCompletedAt: new Date(),
-        estado: 'ACTIVO', // Activar contrato
-      },
-    });
+    if (signatureRecord) {
+      await prisma.contractSignature.update({
+        where: { id: signatureRecord.id },
+        data: {
+          status: 'SIGNED',
+          completedAt: new Date(),
+        },
+      });
+    }
 
-    // 2. Descargar documento firmado y guardarlo en S3 (si está configurado)
+    if (signatureRecord?.contractId) {
+      await prisma.contract.update({
+        where: { id: signatureRecord.contractId },
+        data: {
+          estado: 'activo',
+        },
+      });
+    }
+
+    let signedUrl: string | undefined;
+    let certificateUrl: string | undefined;
+
     if (S3Service.isS3Configured() && data.documents && data.documents.length > 0) {
       try {
         const documentId = data.documents[0].id;
-        const signedPdf = await SignaturitService.downloadSignedDocument(
-          data.id,
-          documentId
-        );
+        const signedPdf = await SignaturitService.downloadSignedDocument(data.id, documentId);
 
         if (signedPdf) {
           const uploadResult = await S3Service.uploadToS3(
             signedPdf,
             'contracts/signed',
             'pdf',
-            `contract-${contract.id}-signed.pdf`,
+            `contract-${signatureRecord?.contractId || data.id}-signed.pdf`,
             'application/pdf'
           );
 
           if (uploadResult.success) {
-            await prisma.contract.update({
-              where: { id: contract.id },
-              data: {
-                signedDocumentUrl: uploadResult.url,
-              },
-            });
+            signedUrl = uploadResult.url;
+            if (signatureRecord) {
+              await prisma.contractSignature.update({
+                where: { id: signatureRecord.id },
+                data: { completedUrl: uploadResult.url },
+              });
+            }
           }
         }
       } catch (error) {
         logger.error('[handleSignatureCompleted] Error downloading signed document:', error);
-        // No fallar el webhook por esto
       }
     }
 
-    // 3. Descargar certificado de firma
     if (S3Service.isS3Configured()) {
       try {
         const certificate = await SignaturitService.downloadCertificate(data.id);
@@ -203,17 +232,12 @@ async function handleSignatureCompleted(contract: any, data: any) {
             certificate,
             'contracts/certificates',
             'pdf',
-            `contract-${contract.id}-certificate.pdf`,
+            `contract-${signatureRecord?.contractId || data.id}-certificate.pdf`,
             'application/pdf'
           );
 
           if (uploadResult.success) {
-            await prisma.contract.update({
-              where: { id: contract.id },
-              data: {
-                certificateUrl: uploadResult.url,
-              },
-            });
+            certificateUrl = uploadResult.url;
           }
         }
       } catch (error) {
@@ -221,26 +245,41 @@ async function handleSignatureCompleted(contract: any, data: any) {
       }
     }
 
-    // 4. Log de auditoría
-    await prisma.auditLog.create({
-      data: {
-        action: 'SIGNATURE_COMPLETED',
-        entityType: 'CONTRACT',
-        entityId: contract.id,
-        details: {
-          signatureId: data.id,
-          signers: data.signers?.map((s: any) => ({
-            email: s.email,
-            signedAt: s.signed_at,
-          })),
+    if (documento) {
+      await prisma.documentoFirma.update({
+        where: { id: documento.id },
+        data: {
+          estado: 'SIGNED',
+          completadoEn: new Date(),
+          urlFirmado: signedUrl || documento.urlFirmado,
+          certificado: certificateUrl || documento.certificado,
         },
-      },
-    });
+      });
 
-    // 5. Enviar notificación al propietario (opcional)
-    // await sendContractSignedNotification(contract);
+      await prisma.firmante.updateMany({
+        where: { documentoId: documento.id },
+        data: { estado: 'firmado', firmadoEn: new Date() },
+      });
+    }
 
-    console.log('[Signaturit] Signature completed:', data.id);
+    if (signatureRecord?.contractId) {
+      await prisma.auditLog.create({
+        data: {
+          action: 'SIGNATURE_COMPLETED',
+          entityType: 'CONTRACT',
+          entityId: signatureRecord.contractId,
+          details: {
+            signatureId: data.id,
+            signers: data.signers?.map((s: any) => ({
+              email: s.email,
+              signedAt: s.signed_at,
+            })),
+          },
+        },
+      });
+    }
+
+    logger.info('[Signaturit] Signature completed', { signatureId: data.id });
   } catch (error: any) {
     logger.error('[handleSignatureCompleted] Error:', error);
   }
@@ -250,33 +289,56 @@ async function handleSignatureCompleted(contract: any, data: any) {
  * Maneja evento: signature_declined
  * Un firmante ha rechazado el documento
  */
-async function handleSignatureDeclined(contract: any, data: any) {
+async function handleSignatureDeclined(
+  signatureRecord: any | null,
+  documento: any | null,
+  data: any
+) {
   try {
-    await prisma.contract.update({
-      where: { id: contract.id },
-      data: {
-        signatureStatus: 'DECLINED',
-        estado: 'BORRADOR', // Volver a borrador
-      },
-    });
+    if (signatureRecord) {
+      await prisma.contractSignature.update({
+        where: { id: signatureRecord.id },
+        data: { status: 'DECLINED' },
+      });
+    }
 
-    // Log de auditoría
-    await prisma.auditLog.create({
-      data: {
-        action: 'SIGNATURE_DECLINED',
-        entityType: 'CONTRACT',
-        entityId: contract.id,
-        details: {
-          signatureId: data.id,
-          reason: data.decline_reason,
+    if (signatureRecord?.contractId) {
+      await prisma.contract.update({
+        where: { id: signatureRecord.contractId },
+        data: { estado: 'borrador' },
+      });
+    }
+
+    if (documento) {
+      await prisma.documentoFirma.update({
+        where: { id: documento.id },
+        data: {
+          estado: 'DECLINED',
+          motivoCancelacion: data.decline_reason || 'Rechazado por firmante',
         },
-      },
-    });
+      });
 
-    // Notificar al propietario
-    // await sendContractDeclinedNotification(contract);
+      await prisma.firmante.updateMany({
+        where: { documentoId: documento.id, estado: 'pendiente' },
+        data: { estado: 'rechazado', rechazadoEn: new Date() },
+      });
+    }
 
-    console.log('[Signaturit] Signature declined:', data.id);
+    if (signatureRecord?.contractId) {
+      await prisma.auditLog.create({
+        data: {
+          action: 'SIGNATURE_DECLINED',
+          entityType: 'CONTRACT',
+          entityId: signatureRecord.contractId,
+          details: {
+            signatureId: data.id,
+            reason: data.decline_reason,
+          },
+        },
+      });
+    }
+
+    logger.info('[Signaturit] Signature declined', { signatureId: data.id });
   } catch (error: any) {
     logger.error('[handleSignatureDeclined] Error:', error);
   }
@@ -286,30 +348,45 @@ async function handleSignatureDeclined(contract: any, data: any) {
  * Maneja evento: signature_expired
  * La firma ha expirado sin completarse
  */
-async function handleSignatureExpired(contract: any, data: any) {
+async function handleSignatureExpired(
+  signatureRecord: any | null,
+  documento: any | null,
+  data: any
+) {
   try {
-    await prisma.contract.update({
-      where: { id: contract.id },
-      data: {
-        signatureStatus: 'EXPIRED',
-        estado: 'BORRADOR',
-      },
-    });
+    if (signatureRecord) {
+      await prisma.contractSignature.update({
+        where: { id: signatureRecord.id },
+        data: { status: 'EXPIRED' },
+      });
+    }
 
-    // Log de auditoría
-    await prisma.auditLog.create({
-      data: {
-        action: 'SIGNATURE_EXPIRED',
-        entityType: 'CONTRACT',
-        entityId: contract.id,
-        details: { signatureId: data.id },
-      },
-    });
+    if (signatureRecord?.contractId) {
+      await prisma.contract.update({
+        where: { id: signatureRecord.contractId },
+        data: { estado: 'borrador' },
+      });
+    }
 
-    // Notificar al propietario
-    // await sendContractExpiredNotification(contract);
+    if (documento) {
+      await prisma.documentoFirma.update({
+        where: { id: documento.id },
+        data: { estado: 'EXPIRED' },
+      });
+    }
 
-    console.log('[Signaturit] Signature expired:', data.id);
+    if (signatureRecord?.contractId) {
+      await prisma.auditLog.create({
+        data: {
+          action: 'SIGNATURE_EXPIRED',
+          entityType: 'CONTRACT',
+          entityId: signatureRecord.contractId,
+          details: { signatureId: data.id },
+        },
+      });
+    }
+
+    logger.info('[Signaturit] Signature expired', { signatureId: data.id });
   } catch (error: any) {
     logger.error('[handleSignatureExpired] Error:', error);
   }
@@ -319,27 +396,48 @@ async function handleSignatureExpired(contract: any, data: any) {
  * Maneja evento: signature_canceled
  * La firma ha sido cancelada
  */
-async function handleSignatureCanceled(contract: any, data: any) {
+async function handleSignatureCanceled(
+  signatureRecord: any | null,
+  documento: any | null,
+  data: any
+) {
   try {
-    await prisma.contract.update({
-      where: { id: contract.id },
-      data: {
-        signatureStatus: 'CANCELED',
-        estado: 'BORRADOR',
-      },
-    });
+    if (signatureRecord) {
+      await prisma.contractSignature.update({
+        where: { id: signatureRecord.id },
+        data: { status: 'CANCELLED' },
+      });
+    }
 
-    // Log de auditoría
-    await prisma.auditLog.create({
-      data: {
-        action: 'SIGNATURE_CANCELED',
-        entityType: 'CONTRACT',
-        entityId: contract.id,
-        details: { signatureId: data.id },
-      },
-    });
+    if (signatureRecord?.contractId) {
+      await prisma.contract.update({
+        where: { id: signatureRecord.contractId },
+        data: { estado: 'borrador' },
+      });
+    }
 
-    console.log('[Signaturit] Signature canceled:', data.id);
+    if (documento) {
+      await prisma.documentoFirma.update({
+        where: { id: documento.id },
+        data: {
+          estado: 'CANCELLED',
+          canceladoEn: new Date(),
+        },
+      });
+    }
+
+    if (signatureRecord?.contractId) {
+      await prisma.auditLog.create({
+        data: {
+          action: 'SIGNATURE_CANCELED',
+          entityType: 'CONTRACT',
+          entityId: signatureRecord.contractId,
+          details: { signatureId: data.id },
+        },
+      });
+    }
+
+    logger.info('[Signaturit] Signature canceled', { signatureId: data.id });
   } catch (error: any) {
     logger.error('[handleSignatureCanceled] Error:', error);
   }
