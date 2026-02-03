@@ -1,6 +1,6 @@
 /**
  * Servicio de Envío de Emails
- * 
+ *
  * Gestiona el envío de correos electrónicos transaccionales y de marketing
  */
 
@@ -42,7 +42,16 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
       console.log('[EMAIL] (DEMO) Asunto:', options.subject);
       return true;
     }
-    
+
+    if (
+      !options.to ||
+      (Array.isArray(options.to) && options.to.length === 0) ||
+      (typeof options.to === 'string' && options.to.trim() === '')
+    ) {
+      logger.warn('[EMAIL] Destinatario vacío, email no enviado');
+      return false;
+    }
+
     const mailOptions = {
       from: options.from || `"INMOVA" <${process.env.SMTP_USER}>`,
       to: Array.isArray(options.to) ? options.to.join(', ') : options.to,
@@ -51,8 +60,14 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
       replyTo: options.replyTo,
       attachments: options.attachments,
     };
-    
-    await transporter.sendMail(mailOptions);
+
+    const result = await transporter.sendMail(mailOptions);
+
+    if (Array.isArray(result?.rejected) && result.rejected.length > 0) {
+      logger.warn('[EMAIL] Destinatarios rechazados:', result.rejected);
+      return false;
+    }
+
     console.log('[EMAIL] Email enviado exitosamente a:', options.to);
     return true;
   } catch (error) {
@@ -79,7 +94,7 @@ export async function sendWelcomeEmail(to: string, nombre: string) {
       </p>
     </div>
   `;
-  
+
   return await sendEmail({
     to,
     subject: '¡Bienvenido a INMOVA!',

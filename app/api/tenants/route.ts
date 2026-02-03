@@ -14,7 +14,17 @@ export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await requireAuth();
+    let user;
+    try {
+      user = await requireAuth();
+    } catch (error: any) {
+      const message = error?.message || 'No autenticado';
+      const normalized = String(message).toLowerCase();
+      if (normalized.includes('usuario inactivo')) {
+        return NextResponse.json({ error: message }, { status: 403 });
+      }
+      return NextResponse.json({ error: message }, { status: 401 });
+    }
     const isSuperAdmin = user.role === 'super_admin' || user.role === 'soporte';
 
     // Obtener parámetros de paginación
@@ -119,7 +129,20 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await requirePermission('create');
+    let user;
+    try {
+      user = await requirePermission('create');
+    } catch (error: any) {
+      const message = error?.message || 'No autenticado';
+      const normalized = String(message).toLowerCase();
+      if (normalized.includes('permiso')) {
+        return forbiddenResponse(message);
+      }
+      if (normalized.includes('no autenticado')) {
+        return NextResponse.json({ error: message }, { status: 401 });
+      }
+      return forbiddenResponse(message);
+    }
     if (!user.companyId) {
       return badRequestResponse('Empresa no configurada');
     }
@@ -181,12 +204,18 @@ export async function POST(req: NextRequest) {
     if (error.message?.includes('permiso')) {
       return forbiddenResponse(error.message);
     }
-    if (error?.code === 'P2002' && Array.isArray(error?.meta?.target)) {
-      if (error.meta.target.includes('email')) {
+    if (error?.code === 'P2002') {
+      const target = error?.meta?.target;
+      const targets = Array.isArray(target) ? target : target ? [target] : [];
+      if (targets.map((t: any) => String(t).toLowerCase()).includes('email')) {
         return NextResponse.json({ error: 'email duplicado' }, { status: 409 });
       }
     }
-    if (error.message === 'No autenticado') {
+    if (
+      String(error.message || '')
+        .toLowerCase()
+        .includes('no autenticado')
+    ) {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
     return NextResponse.json({ error: 'Error al crear inquilino' }, { status: 500 });
