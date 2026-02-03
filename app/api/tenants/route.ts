@@ -182,7 +182,7 @@ export async function POST(req: NextRequest) {
     }
     if (error?.code === 'P2002' && Array.isArray(error?.meta?.target)) {
       if (error.meta.target.includes('email')) {
-        return NextResponse.json({ error: 'Email duplicado' }, { status: 409 });
+        return NextResponse.json({ error: 'email duplicado' }, { status: 409 });
       }
     }
     if (error.message === 'No autenticado') {
