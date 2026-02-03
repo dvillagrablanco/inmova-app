@@ -1,54 +1,42 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 
+vi.mock('@/components/ui/calendar', () => ({
+  Calendar: ({ onSelect }: { onSelect: (value: any) => void }) => (
+    <button
+      type="button"
+      onClick={() => onSelect({ from: new Date(2025, 0, 1), to: new Date(2025, 0, 2) })}
+    >
+      Calendar
+    </button>
+  ),
+}));
+
 describe('DateRangePicker', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<DateRangePicker {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  it('muestra el placeholder cuando no hay fechas', () => {
+    render(<DateRangePicker value={{ from: undefined, to: undefined }} onChange={vi.fn()} />);
+
+    expect(screen.getByText(/pick a date range/i)).toBeInTheDocument();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<DateRangePicker {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+  it('dispara onChange al seleccionar un rango', () => {
+    const onChange = vi.fn();
+    render(<DateRangePicker value={{ from: undefined, to: undefined }} onChange={onChange} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /calendar/i }));
+    expect(onChange).toHaveBeenCalled();
   });
 
-  it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<DateRangePicker onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
-  });
+  it('acepta className personalizado', () => {
+    render(
+      <DateRangePicker
+        value={{ from: undefined, to: undefined }}
+        onChange={vi.fn()}
+        className="custom-class"
+      />
+    );
 
-  it('should be accessible', () => {
-    render(<DateRangePicker />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    expect(document.querySelector('.custom-class')).toBeTruthy();
   });
 });
