@@ -11,6 +11,9 @@ vi.mock('@/lib/db', () => ({
     maintenanceHistory: {
       findMany: vi.fn(),
     },
+    maintenanceFailurePrediction: {
+      create: vi.fn(),
+    },
   },
 }));
 
