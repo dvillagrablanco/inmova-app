@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { SearchInput } from '@/components/ui/search-input';
 
 describe('SearchInput', () => {
@@ -23,9 +23,11 @@ describe('SearchInput', () => {
     const input = screen.getByRole('searchbox');
     fireEvent.change(input, { target: { value: 'casa' } });
 
-    vi.advanceTimersByTime(200);
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
 
-    expect(onChange).toHaveBeenCalledWith('casa');
+    expect(onChange).toHaveBeenLastCalledWith('casa');
     vi.useRealTimers();
   });
 
