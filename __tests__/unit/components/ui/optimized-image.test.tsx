@@ -1,47 +1,17 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 
 describe('OptimizedImage', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<OptimizedImage {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  it('renderiza la imagen con alt', () => {
+    render(<OptimizedImage src="/test.jpg" alt="Foto de prueba" width={400} height={300} />);
+
+    expect(screen.getByAltText('Foto de prueba')).toBeInTheDocument();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<OptimizedImage {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
-  });
+  it('muestra el placeholder de carga', () => {
+    render(<OptimizedImage src="/test.jpg" alt="Foto" width={400} height={300} />);
 
-  it('should handle user interactions', async () => {
-    render(<OptimizedImage />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
-  });
-
-  it('should be accessible', () => {
-    render(<OptimizedImage />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    expect(document.querySelector('.animate-pulse')).toBeTruthy();
   });
 });
