@@ -160,7 +160,10 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
       });
     }
   } else if (reportData.tipo === 'ingresos') {
-    const { ingresosBrutos, gastos, ingresosNetos, rentabilidad } = reportData.datos;
+    const ingresosBrutos = reportData.datos?.ingresosBrutos ?? 0;
+    const gastos = reportData.datos?.gastos ?? 0;
+    const ingresosNetos = reportData.datos?.ingresosNetos ?? 0;
+    const rentabilidad = reportData.datos?.rentabilidad ?? 0;
 
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
@@ -171,25 +174,25 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     // KPIs
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Ingresos brutos: ${ingresosBrutos.toFixed(2)} €`, 15, yPos);
+    doc.text(`Ingresos brutos: ${Number(ingresosBrutos).toFixed(2)} €`, 15, yPos);
     yPos += 8;
-    doc.text(`Gastos: ${gastos.toFixed(2)} €`, 15, yPos);
+    doc.text(`Gastos: ${Number(gastos).toFixed(2)} €`, 15, yPos);
     yPos += 8;
-    doc.text(`Ingresos netos: ${ingresosNetos.toFixed(2)} €`, 15, yPos);
+    doc.text(`Ingresos netos: ${Number(ingresosNetos).toFixed(2)} €`, 15, yPos);
     yPos += 8;
-    doc.text(`Rentabilidad: ${rentabilidad.toFixed(1)}%`, 15, yPos);
+    doc.text(`Rentabilidad: ${Number(rentabilidad).toFixed(1)}%`, 15, yPos);
     yPos += 12;
 
     // Desglose mensual si existe
-    if (reportData.datos.desgloseMensual && reportData.datos.desgloseMensual.length > 0) {
+    if (reportData.datos?.desgloseMensual && reportData.datos.desgloseMensual.length > 0) {
       autoTable(doc, {
         startY: yPos,
         head: [['Mes', 'Ingresos', 'Gastos', 'Neto']],
         body: reportData.datos.desgloseMensual.map((mes: any) => [
           mes.mes,
-          `${mes.ingresos.toFixed(2)} €`,
-          `${mes.gastos.toFixed(2)} €`,
-          `${mes.neto.toFixed(2)} €`,
+          `${Number(mes.ingresos ?? 0).toFixed(2)} €`,
+          `${Number(mes.gastos ?? 0).toFixed(2)} €`,
+          `${Number(mes.neto ?? 0).toFixed(2)} €`,
         ]),
         theme: 'striped',
         headStyles: {
@@ -290,9 +293,9 @@ export const generateReportCSV = (reportData: ReportData): string => {
     }
   } else if (reportData.tipo === 'ingresos') {
     csv += 'Mes,Ingresos,Gastos,Neto\n';
-    if (reportData.datos.desgloseMensual) {
+    if (reportData.datos?.desgloseMensual) {
       reportData.datos.desgloseMensual.forEach((mes: any) => {
-        csv += `${mes.mes},${mes.ingresos.toFixed(2)},${mes.gastos.toFixed(2)},${mes.neto.toFixed(2)}\n`;
+        csv += `${mes.mes},${Number(mes.ingresos ?? 0).toFixed(2)},${Number(mes.gastos ?? 0).toFixed(2)},${Number(mes.neto ?? 0).toFixed(2)}\n`;
       });
     }
   } else if (reportData.tipo === 'mantenimiento') {
