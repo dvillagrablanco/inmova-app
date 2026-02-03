@@ -3,6 +3,32 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import { MobileDrawer } from '@/components/ui/mobile-drawer';
 
+vi.mock('@headlessui/react', () => {
+  const Dialog = function DialogMock({ children }: any) {
+    return <div>{children}</div>;
+  };
+  Dialog.displayName = 'Dialog';
+  Dialog.Panel = function DialogPanelMock({ children }: any) {
+    return <div>{children}</div>;
+  };
+  Dialog.Panel.displayName = 'Dialog.Panel';
+  Dialog.Title = function DialogTitleMock({ children }: any) {
+    return <h2>{children}</h2>;
+  };
+  Dialog.Title.displayName = 'Dialog.Title';
+
+  const Transition = function TransitionMock({ children }: any) {
+    return <div>{children}</div>;
+  };
+  Transition.displayName = 'Transition';
+  Transition.Child = function TransitionChildMock({ children }: any) {
+    return <div>{children}</div>;
+  };
+  Transition.Child.displayName = 'Transition.Child';
+
+  return { Dialog, Transition };
+});
+
 describe('MobileDrawer', () => {
   const renderDrawer = (overrides: Partial<ComponentProps<typeof MobileDrawer>> = {}) => {
     const onClose = vi.fn();
