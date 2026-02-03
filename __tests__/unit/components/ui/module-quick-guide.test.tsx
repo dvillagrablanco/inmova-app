@@ -1,56 +1,31 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ModuleQuickGuide } from '@/components/ui/module-quick-guide';
 
+const steps = [
+  { title: 'Paso 1', description: 'Descripción 1' },
+  { title: 'Paso 2', description: 'Descripción 2' },
+];
+
 describe('ModuleQuickGuide', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<ModuleQuickGuide {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  beforeEach(() => {
+    localStorage.clear();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<ModuleQuickGuide {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+  it('renderiza el nombre del módulo y los pasos', () => {
+    render(<ModuleQuickGuide moduleId="propiedades" moduleName="Propiedades" steps={steps} />);
+
+    expect(screen.getByText(/guía rápida: propiedades/i)).toBeInTheDocument();
+    expect(screen.getByText('Paso 1')).toBeInTheDocument();
+    expect(screen.getByText('Paso 2')).toBeInTheDocument();
   });
 
-  it('should handle user interactions', async () => {
-    render(<ModuleQuickGuide />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
-  });
+  it('permite marcar un paso como completado', () => {
+    render(<ModuleQuickGuide moduleId="propiedades" moduleName="Propiedades" steps={steps} />);
 
-  it('should execute side effects', async () => {
-    render(<ModuleQuickGuide />);
-    
-    // TODO: Verificar efectos
-    await waitFor(() => {
-      // expect(something).toBe(true);
-    });
-  });
+    const toggle = screen.getByRole('button', { name: /marcar paso 1 como completado/i });
+    fireEvent.click(toggle);
 
-  it('should be accessible', () => {
-    render(<ModuleQuickGuide />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    expect(toggle).toHaveAttribute('aria-pressed', 'true');
   });
 });
