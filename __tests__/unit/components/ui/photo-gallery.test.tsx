@@ -27,20 +27,20 @@ describe('PhotoGallery', () => {
   it('should render with props', async () => {
     render(<PhotoGallery {...baseProps} canEdit />);
 
-    expect(await screen.findByText('Subir Foto')).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /^subir foto$/i })).toBeInTheDocument();
   });
 
   it('should handle user interactions', async () => {
     render(<PhotoGallery {...baseProps} canEdit />);
 
-    fireEvent.click(await screen.findByText('Subir Foto'));
-    expect(await screen.findByText('Subir Foto')).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('button', { name: /^subir foto$/i }));
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
   });
 
   it('should handle form submission', async () => {
     render(<PhotoGallery {...baseProps} canEdit />);
 
-    fireEvent.click(await screen.findByText('Subir Foto'));
+    fireEvent.click(await screen.findByRole('button', { name: /^subir foto$/i }));
     expect(await screen.findByLabelText('Archivo')).toBeInTheDocument();
   });
 
