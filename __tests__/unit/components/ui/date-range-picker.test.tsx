@@ -13,6 +13,12 @@ vi.mock('@/components/ui/calendar', () => ({
   ),
 }));
 
+vi.mock('@/components/ui/popover', () => ({
+  Popover: ({ children }: any) => <div>{children}</div>,
+  PopoverTrigger: ({ children }: any) => <div>{children}</div>,
+  PopoverContent: ({ children }: any) => <div>{children}</div>,
+}));
+
 describe('DateRangePicker', () => {
   it('muestra el placeholder cuando no hay fechas', () => {
     render(<DateRangePicker value={{ from: undefined, to: undefined }} onChange={vi.fn()} />);
