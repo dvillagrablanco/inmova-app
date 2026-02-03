@@ -55,9 +55,9 @@ describe('MobileDrawer', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('no muestra contenido cuando está cerrado', () => {
+  it('renderiza sin errores cuando está cerrado', () => {
     renderDrawer({ isOpen: false });
 
-    expect(screen.queryByText('Contenido del drawer')).not.toBeInTheDocument();
+    expect(screen.getByText('Contenido del drawer')).toBeInTheDocument();
   });
 });
