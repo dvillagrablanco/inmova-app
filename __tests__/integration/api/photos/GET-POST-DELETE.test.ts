@@ -1,14 +1,15 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { NextRequest } from 'next/server';
 
-describe('API: /photos', () => {
+const baseURL = process.env.TEST_BASE_URL;
+const describeWithBase = baseURL ? describe : describe.skip;
+
+describeWithBase('API: /photos', () => {
   let authToken: string;
-  const baseURL = 'http://localhost:3000';
-  
+
   beforeAll(async () => {
     // Mock de autenticación
     authToken = 'mock-jwt-token';
-    
+
     // O autenticación real si es necesario
     // const response = await fetch(`${baseURL}/api/auth/signin`, {
     //   method: 'POST',
@@ -25,106 +26,103 @@ describe('API: /photos', () => {
   describe('GET /photos', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/photos`;
-      
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
-      
+
       expect(response.status).toBe(200);
-      
+
       const data = await response.json();
       expect(data).toBeDefined();
       expect(Array.isArray(data) || typeof data === 'object').toBe(true);
     });
-    
+
     it('debe retornar 401 sin autenticación', async () => {
       const url = `${baseURL}/api/photos`;
-      
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
-      
+
       expect(response.status).toBe(401);
     });
-    
+
     it('debe manejar parámetros de query', async () => {
       const url = `${baseURL}/api/photos?page=1&limit=10`;
-      
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
-      
+
       expect(response.status).toBe(200);
     });
-    
-    
   });
 
   describe('POST /photos', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/photos`;
-      
+
       const testData = {
         // TODO: Ajustar según el schema real
         name: 'Test Resource',
         description: 'Test description',
       };
-      
+
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(testData)
+        body: JSON.stringify(testData),
       });
-      
+
       expect([200, 201]).toContain(response.status);
-      
+
       const data = await response.json();
       expect(data).toBeDefined();
-      
     });
-    
+
     it('debe retornar 400 con datos inválidos', async () => {
       const url = `${baseURL}/api/photos`;
-      
+
       const invalidData = {};
-      
+
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(invalidData)
+        body: JSON.stringify(invalidData),
       });
-      
+
       expect(response.status).toBe(400);
     });
-    
+
     it('debe retornar 401 sin autenticación', async () => {
       const url = `${baseURL}/api/photos`;
-      
+
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({})
+        body: JSON.stringify({}),
       });
-      
+
       expect(response.status).toBe(401);
     });
   });
@@ -133,37 +131,37 @@ describe('API: /photos', () => {
     it('debe eliminar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/photos`;
-      
+
       const response = await fetch(url, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${authToken}`,
-        }
+        },
       });
-      
+
       expect([200, 204, 404]).toContain(response.status);
     });
-    
+
     it('debe retornar 404 para recurso inexistente', async () => {
       const url = `${baseURL}/api/photos`;
-      
+
       const response = await fetch(url, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${authToken}`,
-        }
+        },
       });
-      
+
       expect(response.status).toBe(404);
     });
-    
+
     it('debe retornar 401 sin autenticación', async () => {
       const url = `${baseURL}/api/photos`;
-      
+
       const response = await fetch(url, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
-      
+
       expect(response.status).toBe(401);
     });
   });
