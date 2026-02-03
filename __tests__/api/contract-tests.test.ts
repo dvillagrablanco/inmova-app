@@ -8,6 +8,7 @@
 import { describe, it, expect } from 'vitest';
 
 const BASE_URL = process.env.TEST_BASE_URL;
+const baseUrl = BASE_URL || '';
 const describeIf = BASE_URL ? describe : describe.skip;
 
 describeIf('🔗 API Contract Tests', () => {
@@ -67,7 +68,7 @@ describeIf('🔗 API Contract Tests', () => {
   });
 });
 
-describe('📝 API Response Format Consistency', () => {
+describeIf('📝 API Response Format Consistency', () => {
   it('APIs de error devuelven { error: string }', async () => {
     // Test con endpoint que requiere auth
     const response = await fetch(`${baseUrl}/api/admin/companies`);
