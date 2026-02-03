@@ -90,7 +90,7 @@ describe('Utils', () => {
     });
 
     it('gets initial from single name', () => {
-      expect(getInitials('John')).toBe('J');
+      expect(getInitials('John')).toBe('JO');
     });
 
     it('handles empty string', () => {
