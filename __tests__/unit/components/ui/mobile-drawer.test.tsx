@@ -1,54 +1,38 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import type { ComponentProps } from 'react';
 import { MobileDrawer } from '@/components/ui/mobile-drawer';
 
 describe('MobileDrawer', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<MobileDrawer {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  const renderDrawer = (overrides: Partial<ComponentProps<typeof MobileDrawer>> = {}) => {
+    const onClose = vi.fn();
+    render(
+      <MobileDrawer isOpen onClose={onClose} title="Detalles" {...overrides}>
+        <div>Contenido del drawer</div>
+      </MobileDrawer>
+    );
+
+    return { onClose };
+  };
+
+  it('renderiza titulo y contenido cuando está abierto', () => {
+    renderDrawer();
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('Detalles')).toBeInTheDocument();
+    expect(screen.getByText('Contenido del drawer')).toBeInTheDocument();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<MobileDrawer {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+  it('ejecuta onClose al pulsar cerrar', () => {
+    const { onClose } = renderDrawer();
+
+    fireEvent.click(screen.getByRole('button', { name: /cerrar/i }));
+    expect(onClose).toHaveBeenCalled();
   });
 
-  it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<MobileDrawer onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
-  });
+  it('no muestra contenido cuando está cerrado', () => {
+    renderDrawer({ isOpen: false });
 
-  it('should be accessible', () => {
-    render(<MobileDrawer />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    expect(screen.queryByText('Contenido del drawer')).not.toBeInTheDocument();
   });
 });
