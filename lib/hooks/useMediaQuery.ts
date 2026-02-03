@@ -8,6 +8,10 @@ export function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(false);
 
   useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return;
+    }
+
     const media = window.matchMedia(query);
     if (media.matches !== matches) {
       setMatches(media.matches);
@@ -15,7 +19,7 @@ export function useMediaQuery(query: string): boolean {
 
     const listener = () => setMatches(media.matches);
     media.addEventListener('change', listener);
-    
+
     return () => media.removeEventListener('change', listener);
   }, [matches, query]);
 
@@ -49,7 +53,7 @@ export function useIsDesktop() {
 export function useDeviceType(): 'mobile' | 'tablet' | 'desktop' {
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
-  
+
   if (isMobile) return 'mobile';
   if (isTablet) return 'tablet';
   return 'desktop';
