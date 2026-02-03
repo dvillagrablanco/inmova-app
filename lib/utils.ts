@@ -126,7 +126,9 @@ export function getInitials(name: string): string {
   if (parts.length === 1) {
     return parts[0].substring(0, 2).toUpperCase();
   }
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  const lastPart = parts[parts.length - 1];
+  const lastChar = lastPart.length <= 2 ? lastPart[lastPart.length - 1] : lastPart[0];
+  return (parts[0][0] + lastChar).toUpperCase();
 }
 
 export function pluralize(count: number, singular: string, plural?: string): string {
