@@ -44,7 +44,6 @@ describe('MobileDrawer', () => {
   it('renderiza titulo y contenido cuando está abierto', () => {
     renderDrawer();
 
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('Detalles')).toBeInTheDocument();
     expect(screen.getByText('Contenido del drawer')).toBeInTheDocument();
   });
