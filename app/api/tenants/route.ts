@@ -103,10 +103,11 @@ export async function GET(req: NextRequest) {
       stack: errorStack.slice(0, 500),
     });
 
-    if (errorMessage === 'No autenticado') {
+    const normalizedMessage = errorMessage.toLowerCase();
+    if (normalizedMessage.includes('no autenticado')) {
       return NextResponse.json({ error: errorMessage }, { status: 401 });
     }
-    if (errorMessage === 'Usuario inactivo') {
+    if (normalizedMessage.includes('usuario inactivo')) {
       return NextResponse.json({ error: errorMessage }, { status: 403 });
     }
     return NextResponse.json(
