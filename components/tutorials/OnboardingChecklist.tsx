@@ -22,7 +22,7 @@ import {
   Settings,
   Trophy,
   Sparkles,
-  ArrowRight
+  ArrowRight,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
@@ -53,7 +53,7 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
       icon: User,
       route: '/configuracion',
       isCompleted: false,
-      estimatedTime: 2
+      estimatedTime: 2,
     },
     {
       id: 'add-property',
@@ -62,7 +62,7 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
       icon: Building2,
       route: '/edificios',
       isCompleted: false,
-      estimatedTime: 5
+      estimatedTime: 5,
     },
     {
       id: 'add-tenant',
@@ -71,7 +71,7 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
       icon: Users,
       route: '/inquilinos',
       isCompleted: false,
-      estimatedTime: 3
+      estimatedTime: 3,
     },
     {
       id: 'create-contract',
@@ -80,7 +80,7 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
       icon: FileText,
       route: '/contratos',
       isCompleted: false,
-      estimatedTime: 7
+      estimatedTime: 7,
     },
     {
       id: 'customize-experience',
@@ -89,8 +89,8 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
       icon: Settings,
       route: '/configuracion',
       isCompleted: false,
-      estimatedTime: 2
-    }
+      estimatedTime: 2,
+    },
   ]);
 
   const router = useRouter();
@@ -104,10 +104,10 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
           const data = await response.json();
           // Verificar que checklist sea un array antes de usar .includes()
           if (Array.isArray(data.checklist)) {
-            setChecklist(prev =>
-              prev.map(item => ({
+            setChecklist((prev) =>
+              prev.map((item) => ({
                 ...item,
-                isCompleted: data.checklist.includes(item.id)
+                isCompleted: data.checklist.includes(item.id),
               }))
             );
           }
@@ -127,7 +127,7 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
   const handleMarkComplete = async (itemId: string, e: React.MouseEvent) => {
     e.stopPropagation();
 
-    const updatedChecklist = checklist.map(item =>
+    const updatedChecklist = checklist.map((item) =>
       item.id === itemId ? { ...item, isCompleted: !item.isCompleted } : item
     );
 
@@ -139,22 +139,22 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          completedItems: updatedChecklist.filter(i => i.isCompleted).map(i => i.id)
-        })
+          completedItems: updatedChecklist.filter((i) => i.isCompleted).map((i) => i.id),
+        }),
       });
     } catch (error) {
       console.error('Error saving checklist:', error);
     }
   };
 
-  const completedCount = checklist.filter(item => item.isCompleted).length;
+  const completedCount = checklist.filter((item) => item.isCompleted).length;
   const progress = (completedCount / checklist.length) * 100;
   const isComplete = completedCount === checklist.length;
 
   if (isMinimized) {
     return (
       // Posicionado en la izquierda para no solapar con chatbot
-      <div className="fixed bottom-4 left-4 z-40 lg:bottom-6 lg:left-6">
+      <div className="fixed bottom-24 left-4 z-40 md:bottom-4 lg:bottom-6 lg:left-6">
         <Button
           onClick={() => setIsMinimized(false)}
           className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-xl hover:shadow-2xl transition-all"
@@ -175,7 +175,7 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 20, scale: 0.95 }}
         // Posicionado en la izquierda para no solapar con chatbot
-        className="fixed bottom-4 left-4 z-40 w-80 lg:w-96 lg:bottom-6 lg:left-6 max-h-[80vh]"
+        className="fixed bottom-24 left-4 z-40 w-80 lg:w-96 md:bottom-4 lg:bottom-6 lg:left-6 max-h-[80vh]"
       >
         <Card className="bg-white shadow-2xl border-2 border-indigo-200">
           {/* Header */}
@@ -183,11 +183,7 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                  {isComplete ? (
-                    <Trophy className="w-5 h-5" />
-                  ) : (
-                    <Sparkles className="w-5 h-5" />
-                  )}
+                  {isComplete ? <Trophy className="w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
                 </div>
                 <div>
                   <h3 className="font-bold text-lg">
@@ -245,7 +241,8 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
                 </div>
                 <h4 className="text-xl font-bold text-gray-900 mb-2">¡Enhorabuena!</h4>
                 <p className="text-gray-600 mb-4">
-                  Has completado todos los pasos iniciales. Ya estás listo para gestionar tus propiedades como un profesional.
+                  Has completado todos los pasos iniciales. Ya estás listo para gestionar tus
+                  propiedades como un profesional.
                 </p>
                 <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0">
                   <Sparkles className="w-3 h-3 mr-1" />
@@ -285,18 +282,24 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <Icon className={`w-4 h-4 flex-shrink-0 ${
-                              item.isCompleted ? 'text-green-600' : 'text-gray-400'
-                            }`} />
-                            <h4 className={`font-semibold text-sm ${
-                              item.isCompleted ? 'text-green-900' : 'text-gray-900'
-                            }`}>
+                            <Icon
+                              className={`w-4 h-4 flex-shrink-0 ${
+                                item.isCompleted ? 'text-green-600' : 'text-gray-400'
+                              }`}
+                            />
+                            <h4
+                              className={`font-semibold text-sm ${
+                                item.isCompleted ? 'text-green-900' : 'text-gray-900'
+                              }`}
+                            >
                               {item.title}
                             </h4>
                           </div>
-                          <p className={`text-xs ${
-                            item.isCompleted ? 'text-green-700' : 'text-gray-600'
-                          }`}>
+                          <p
+                            className={`text-xs ${
+                              item.isCompleted ? 'text-green-700' : 'text-gray-600'
+                            }`}
+                          >
                             {item.description}
                           </p>
                           {!item.isCompleted && (
@@ -323,7 +326,8 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
           {!isComplete && (
             <div className="border-t p-3 bg-gray-50">
               <p className="text-xs text-gray-600 text-center">
-                💡 <strong>Consejo:</strong> Completa estos pasos para aprovechar al máximo la plataforma
+                💡 <strong>Consejo:</strong> Completa estos pasos para aprovechar al máximo la
+                plataforma
               </p>
             </div>
           )}

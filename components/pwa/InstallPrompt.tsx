@@ -29,7 +29,7 @@ export function InstallPrompt() {
   useEffect(() => {
     // ✅ FIX: Guard SSR - solo ejecutar en browser
     if (typeof window === 'undefined') return;
-    
+
     // Check if already installed
     if (
       window.matchMedia('(display-mode: standalone)').matches ||
@@ -107,7 +107,7 @@ export function InstallPrompt() {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:w-96 animate-slide-up">
+    <div className="fixed bottom-24 left-4 right-4 z-50 md:bottom-4 md:left-auto md:w-96 animate-slide-up">
       <Card>
         <CardContent className="p-4">
           <div className="flex items-start gap-3">

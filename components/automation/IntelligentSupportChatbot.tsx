@@ -24,7 +24,7 @@ import {
   AlertTriangle,
   Zap,
   Heart,
-  ThumbsUp
+  ThumbsUp,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -72,8 +72,8 @@ export default function IntelligentSupportChatbot() {
       id: '1',
       sender: 'bot',
       text: '¡Hola! Soy tu asistente inteligente de INMOVA. ¿En qué puedo ayudarte hoy? 🚀',
-      timestamp: new Date()
-    }
+      timestamp: new Date(),
+    },
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -94,18 +94,18 @@ export default function IntelligentSupportChatbot() {
       id: Date.now().toString(),
       sender: 'user',
       text: inputValue,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputValue('');
     setIsTyping(true);
 
     try {
       // Preparar historial de conversación para análisis de contexto
-      const conversationHistory = messages.map(msg => ({
+      const conversationHistory = messages.map((msg) => ({
         sender: msg.sender,
-        text: msg.text
+        text: msg.text,
       }));
 
       const res = await fetch('/api/support/chatbot', {
@@ -114,13 +114,13 @@ export default function IntelligentSupportChatbot() {
         body: JSON.stringify({
           action: 'ask',
           question: inputValue,
-          conversationHistory
-        })
+          conversationHistory,
+        }),
       });
 
       if (res.ok) {
         const data = await res.json();
-        
+
         const botMessage: Message = {
           id: (Date.now() + 1).toString(),
           sender: 'bot',
@@ -129,10 +129,10 @@ export default function IntelligentSupportChatbot() {
           confidence: data.confidence,
           suggestedActions: data.suggestedActions,
           relatedArticles: data.relatedArticles,
-          sentimentAnalysis: data.sentimentAnalysis
+          sentimentAnalysis: data.sentimentAnalysis,
         };
 
-        setMessages(prev => [...prev, botMessage]);
+        setMessages((prev) => [...prev, botMessage]);
       } else {
         throw new Error('Error en la respuesta');
       }
@@ -142,9 +142,9 @@ export default function IntelligentSupportChatbot() {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
         text: 'Lo siento, he tenido un problema. ¿Podrías intentarlo de nuevo?',
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsTyping(false);
     }
@@ -172,21 +172,21 @@ export default function IntelligentSupportChatbot() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'get_article',
-          articleId: article.id
-        })
+          articleId: article.id,
+        }),
       });
 
       if (res.ok) {
         const { article: fullArticle } = await res.json();
-        
+
         const articleMessage: Message = {
           id: Date.now().toString(),
           sender: 'bot',
           text: `Aquí está el artículo completo:\n\n## ${fullArticle.title}\n\n${fullArticle.excerpt}\n\n[Ver artículo completo](/knowledge-base?article=${fullArticle.id})`,
-          timestamp: new Date()
+          timestamp: new Date(),
         };
 
-        setMessages(prev => [...prev, articleMessage]);
+        setMessages((prev) => [...prev, articleMessage]);
       }
     } catch (error) {
       logger.error('Error fetching article:', error);
@@ -210,40 +210,44 @@ export default function IntelligentSupportChatbot() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             whileHover={{ scale: 1.05 }}
-            className="fixed bottom-6 right-6 z-50"
+            className="fixed bottom-6 right-6 z-50 inmova-chatbot-button"
           >
             <Button
               size="lg"
               onClick={() => setIsOpen(true)}
-              className="h-16 w-16 rounded-full shadow-2xl hover:shadow-3xl transition-all bg-gradient-to-br from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white border-2 border-white relative overflow-hidden group"
+              className="h-12 w-12 md:h-16 md:w-16 rounded-full shadow-2xl hover:shadow-3xl transition-all bg-gradient-to-br from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white border-2 border-white relative overflow-hidden group"
               aria-label="Abrir chat de asistencia"
             >
               {/* Efecto de brillo en hover */}
               <div className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors" />
-              
+
               {/* Emoticono del asistente */}
-              <span className="text-3xl relative z-10 group-hover:scale-110 transition-transform" role="img" aria-label="Asistente">
+              <span
+                className="text-2xl md:text-3xl relative z-10 group-hover:scale-110 transition-transform"
+                role="img"
+                aria-label="Asistente"
+              >
                 🤖
               </span>
             </Button>
-            
+
             {/* Indicador de disponibilidad pulsante */}
             <motion.div
-              animate={{ 
+              animate={{
                 scale: [1, 1.3, 1],
-                opacity: [1, 0.7, 1]
+                opacity: [1, 0.7, 1],
               }}
-              transition={{ 
-                repeat: Infinity, 
+              transition={{
+                repeat: Infinity,
                 duration: 2,
-                ease: "easeInOut"
+                ease: 'easeInOut',
               }}
               className="absolute -top-1 -right-1 h-5 w-5 bg-green-500 rounded-full border-3 border-white shadow-lg"
               aria-label="En línea"
             >
               <span className="sr-only">Asistente disponible</span>
             </motion.div>
-            
+
             {/* Tooltip informativo */}
             <motion.div
               initial={{ opacity: 0, x: 10 }}
@@ -265,9 +269,9 @@ export default function IntelligentSupportChatbot() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-50 w-full max-w-md"
+            className="fixed bottom-24 left-4 right-4 z-50 w-full max-w-none md:bottom-6 md:left-auto md:right-6 md:max-w-md inmova-chatbot-panel"
           >
-            <Card className="h-[600px] flex flex-col shadow-2xl">
+            <Card className="h-[70vh] md:h-[600px] flex flex-col shadow-2xl">
               <CardHeader className="flex-shrink-0 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -303,25 +307,31 @@ export default function IntelligentSupportChatbot() {
                         message.sender === 'user' ? 'flex-row-reverse' : ''
                       }`}
                     >
-                      <div className={`flex-shrink-0 ${
-                        message.sender === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted'
-                      } p-2 rounded-full h-8 w-8 flex items-center justify-center`}>
+                      <div
+                        className={`flex-shrink-0 ${
+                          message.sender === 'user'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted'
+                        } p-2 rounded-full h-8 w-8 flex items-center justify-center`}
+                      >
                         {message.sender === 'user' ? (
                           <User className="h-4 w-4" />
                         ) : (
                           <Bot className="h-4 w-4" />
                         )}
                       </div>
-                      <div className={`flex-1 ${
-                        message.sender === 'user' ? 'items-end' : 'items-start'
-                      } flex flex-col gap-2`}>
-                        <div className={`${
-                          message.sender === 'user'
-                            ? 'bg-primary text-primary-foreground ml-auto'
-                            : 'bg-muted'
-                        } rounded-lg p-3 max-w-[85%]`}>
+                      <div
+                        className={`flex-1 ${
+                          message.sender === 'user' ? 'items-end' : 'items-start'
+                        } flex flex-col gap-2`}
+                      >
+                        <div
+                          className={`${
+                            message.sender === 'user'
+                              ? 'bg-primary text-primary-foreground ml-auto'
+                              : 'bg-muted'
+                          } rounded-lg p-3 max-w-[85%]`}
+                        >
                           <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                           {message.confidence && message.confidence < 0.7 && (
                             <Badge variant="outline" className="mt-2 text-xs">
@@ -340,53 +350,67 @@ export default function IntelligentSupportChatbot() {
                             </div>
                             <div className="flex flex-wrap gap-1.5">
                               {/* Sentimiento */}
-                              <Badge 
+                              <Badge
                                 variant={
-                                  message.sentimentAnalysis.sentiment === 'positive' 
-                                    ? 'default' 
-                                    : message.sentimentAnalysis.sentiment === 'negative' 
-                                    ? 'destructive' 
-                                    : 'secondary'
+                                  message.sentimentAnalysis.sentiment === 'positive'
+                                    ? 'default'
+                                    : message.sentimentAnalysis.sentiment === 'negative'
+                                      ? 'destructive'
+                                      : 'secondary'
                                 }
                                 className="text-xs flex items-center gap-1"
                               >
-                                {message.sentimentAnalysis.sentiment === 'positive' && <Smile className="h-3 w-3" />}
-                                {message.sentimentAnalysis.sentiment === 'neutral' && <Meh className="h-3 w-3" />}
-                                {message.sentimentAnalysis.sentiment === 'negative' && <Frown className="h-3 w-3" />}
-                                {message.sentimentAnalysis.sentiment === 'positive' ? 'Positivo' : 
-                                 message.sentimentAnalysis.sentiment === 'negative' ? 'Negativo' : 'Neutral'}
+                                {message.sentimentAnalysis.sentiment === 'positive' && (
+                                  <Smile className="h-3 w-3" />
+                                )}
+                                {message.sentimentAnalysis.sentiment === 'neutral' && (
+                                  <Meh className="h-3 w-3" />
+                                )}
+                                {message.sentimentAnalysis.sentiment === 'negative' && (
+                                  <Frown className="h-3 w-3" />
+                                )}
+                                {message.sentimentAnalysis.sentiment === 'positive'
+                                  ? 'Positivo'
+                                  : message.sentimentAnalysis.sentiment === 'negative'
+                                    ? 'Negativo'
+                                    : 'Neutral'}
                               </Badge>
-                              
+
                               {/* Urgencia */}
                               {message.sentimentAnalysis.urgency !== 'low' && (
-                                <Badge 
+                                <Badge
                                   variant={
-                                    message.sentimentAnalysis.urgency === 'critical' 
-                                      ? 'destructive' 
+                                    message.sentimentAnalysis.urgency === 'critical'
+                                      ? 'destructive'
                                       : message.sentimentAnalysis.urgency === 'high'
-                                      ? 'default'
-                                      : 'outline'
+                                        ? 'default'
+                                        : 'outline'
                                   }
                                   className="text-xs flex items-center gap-1"
                                 >
-                                  {(message.sentimentAnalysis.urgency === 'critical' || 
-                                    message.sentimentAnalysis.urgency === 'high') && 
-                                    <AlertTriangle className="h-3 w-3" />}
-                                  {message.sentimentAnalysis.urgency === 'critical' ? 'Crítico' :
-                                   message.sentimentAnalysis.urgency === 'high' ? 'Alta Urgencia' : 'Moderado'}
+                                  {(message.sentimentAnalysis.urgency === 'critical' ||
+                                    message.sentimentAnalysis.urgency === 'high') && (
+                                    <AlertTriangle className="h-3 w-3" />
+                                  )}
+                                  {message.sentimentAnalysis.urgency === 'critical'
+                                    ? 'Crítico'
+                                    : message.sentimentAnalysis.urgency === 'high'
+                                      ? 'Alta Urgencia'
+                                      : 'Moderado'}
                                 </Badge>
                               )}
-                              
+
                               {/* Emociones detectadas */}
-                              {message.sentimentAnalysis.emotions && message.sentimentAnalysis.emotions.length > 0 && (
-                                <Badge variant="outline" className="text-xs">
-                                  {message.sentimentAnalysis.emotions.slice(0, 2).join(', ')}
-                                </Badge>
-                              )}
+                              {message.sentimentAnalysis.emotions &&
+                                message.sentimentAnalysis.emotions.length > 0 && (
+                                  <Badge variant="outline" className="text-xs">
+                                    {message.sentimentAnalysis.emotions.slice(0, 2).join(', ')}
+                                  </Badge>
+                                )}
                             </div>
                           </div>
                         )}
-                        
+
                         {/* Acciones sugeridas */}
                         {message.suggestedActions && message.suggestedActions.length > 0 && (
                           <div className="flex flex-wrap gap-2 mt-2">
@@ -399,8 +423,12 @@ export default function IntelligentSupportChatbot() {
                                 className="text-xs"
                               >
                                 {action.icon === 'Ticket' && <Ticket className="mr-1 h-3 w-3" />}
-                                {action.icon === 'BookOpen' && <BookOpen className="mr-1 h-3 w-3" />}
-                                {action.icon === 'ExternalLink' && <ExternalLink className="mr-1 h-3 w-3" />}
+                                {action.icon === 'BookOpen' && (
+                                  <BookOpen className="mr-1 h-3 w-3" />
+                                )}
+                                {action.icon === 'ExternalLink' && (
+                                  <ExternalLink className="mr-1 h-3 w-3" />
+                                )}
                                 {action.label}
                               </Button>
                             ))}
@@ -442,7 +470,7 @@ export default function IntelligentSupportChatbot() {
                         <span className="text-xs text-muted-foreground">
                           {message.timestamp.toLocaleTimeString('es-ES', {
                             hour: '2-digit',
-                            minute: '2-digit'
+                            minute: '2-digit',
                           })}
                         </span>
                       </div>
