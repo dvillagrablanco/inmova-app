@@ -1,66 +1,43 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ExportButton } from '@/components/ui/export-button';
 
+vi.mock('@/lib/export-utils', () => ({
+  exportToCSV: vi.fn(),
+  exportToExcel: vi.fn(),
+  exportToPDF: vi.fn(),
+}));
+
+vi.mock('sonner', () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
 describe('ExportButton', () => {
+  const data = [{ id: 1, name: 'Item' }];
+  const columns = [{ key: 'name', label: 'Nombre' }];
+
   it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<ExportButton {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+    render(<ExportButton data={data} columns={columns} filename="export" />);
+
+    expect(screen.getByRole('button', { name: /exportar/i })).toBeInTheDocument();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<ExportButton {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
-  });
+  it('should open menu and allow export selection', () => {
+    render(<ExportButton data={data} columns={columns} filename="export" />);
 
-  it('should handle user interactions', async () => {
-    render(<ExportButton />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
-  });
+    fireEvent.click(screen.getByRole('button', { name: /exportar/i }));
 
-  it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<ExportButton onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
+    expect(screen.getByText('Exportar a CSV')).toBeInTheDocument();
+    expect(screen.getByText('Exportar a Excel')).toBeInTheDocument();
+    expect(screen.getByText('Exportar a PDF')).toBeInTheDocument();
   });
 
   it('should be accessible', () => {
-    render(<ExportButton />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    render(<ExportButton data={data} columns={columns} filename="export" />);
+
+    expect(screen.getByRole('button', { name: /exportar/i })).toBeInTheDocument();
   });
 });
