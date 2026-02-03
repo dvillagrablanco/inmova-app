@@ -1,6 +1,14 @@
+import React from 'react';
 import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Wizard } from '@/components/ui/wizard';
+
+vi.mock('framer-motion', () => ({
+  motion: {
+    div: (props: React.HTMLAttributes<HTMLDivElement>) => <div {...props} />,
+  },
+  AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
 
 describe('Wizard', () => {
   beforeAll(() => {
