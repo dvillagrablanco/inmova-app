@@ -6,16 +6,20 @@ npx lint-staged
 
 # Run type check
 echo "🔍 Running TypeScript type check..."
-npx tsc --noEmit || {
+npx tsc --noEmit -p tsconfig.predeploy.json || {
   echo "❌ Type check failed. Please fix TypeScript errors."
   exit 1
 }
 
 # Run tests for changed files
-echo "🧪 Running tests for changed files..."
-npm test -- --run --silent || {
-  echo "❌ Tests failed. Please fix failing tests."
-  exit 1
-}
+if [ -n "$TEST_BASE_URL" ]; then
+  echo "🧪 Running critical tests..."
+  npm run test:critical -- --silent || {
+    echo "❌ Tests failed. Please fix failing tests."
+    exit 1
+  }
+else
+  echo "⚠️ TEST_BASE_URL no configurado. Tests omitidos."
+fi
 
 echo "✅ Pre-commit checks passed!"

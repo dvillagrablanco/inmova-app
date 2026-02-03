@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
@@ -16,11 +17,7 @@ export async function GET(request: NextRequest) {
     const companyId = session.user.companyId;
 
     // Calcular estadísticas reales desde la base de datos
-    const [
-      totalServices,
-      totalBookings,
-      bookingsWithRevenue,
-    ] = await Promise.all([
+    const [totalServices, totalBookings, bookingsWithRevenue] = await Promise.all([
       // Total de servicios activos
       prisma.marketplaceService.count({
         where: {
@@ -62,9 +59,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(stats);
   } catch (error) {
     logger.error('Error fetching marketplace stats:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener estadísticas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener estadísticas' }, { status: 500 });
   }
 }

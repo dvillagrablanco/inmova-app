@@ -16,6 +16,7 @@ interface DeleteConfirmationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
+  isLoading?: boolean;
   title?: string;
   description?: string;
   itemName?: string;
@@ -25,6 +26,7 @@ export function DeleteConfirmationDialog({
   open,
   onOpenChange,
   onConfirm,
+  isLoading = false,
   title = '¿Estás seguro?',
   description,
   itemName,
@@ -41,17 +43,16 @@ export function DeleteConfirmationDialog({
             <Trash2 className="h-5 w-5" />
             <AlertDialogTitle>{title}</AlertDialogTitle>
           </div>
-          <AlertDialogDescription>
-            {description || defaultDescription}
-          </AlertDialogDescription>
+          <AlertDialogDescription>{description || defaultDescription}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
+            disabled={isLoading}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            Eliminar
+            {isLoading ? 'Eliminando...' : 'Eliminar'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const createIncidenciaSchema = z.object({
   buildingId: z.string().min(1),
@@ -19,7 +20,9 @@ const createIncidenciaSchema = z.object({
 });
 
 const updateIncidenciaSchema = z.object({
-  estado: z.enum(['abierta', 'en_proceso', 'pendiente_respuesta', 'resuelta', 'cerrada']).optional(),
+  estado: z
+    .enum(['abierta', 'en_proceso', 'pendiente_respuesta', 'resuelta', 'cerrada'])
+    .optional(),
   prioridad: z.enum(['baja', 'media', 'alta', 'urgente']).optional(),
   asignadoA: z.string().optional(),
   solucion: z.string().optional(),
@@ -71,10 +74,7 @@ export async function GET(request: NextRequest) {
             select: { id: true, name: true },
           },
         },
-        orderBy: [
-          { prioridad: 'desc' },
-          { fechaReporte: 'desc' },
-        ],
+        orderBy: [{ prioridad: 'desc' }, { fechaReporte: 'desc' }],
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -82,13 +82,17 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Estadísticas
-    const statsWhere = targetBuildingId ? { companyId, buildingId: targetBuildingId } : { companyId };
-    
+    const statsWhere = targetBuildingId
+      ? { companyId, buildingId: targetBuildingId }
+      : { companyId };
+
     const [abiertas, enProceso, resueltas, urgentes] = await Promise.all([
       prisma.communityIncident.count({ where: { ...statsWhere, estado: 'abierta' } }),
       prisma.communityIncident.count({ where: { ...statsWhere, estado: 'en_proceso' } }),
       prisma.communityIncident.count({ where: { ...statsWhere, estado: 'resuelta' } }),
-      prisma.communityIncident.count({ where: { ...statsWhere, prioridad: 'urgente', estado: { notIn: ['resuelta', 'cerrada'] } } }),
+      prisma.communityIncident.count({
+        where: { ...statsWhere, prioridad: 'urgente', estado: { notIn: ['resuelta', 'cerrada'] } },
+      }),
     ]);
 
     // Tiempo medio de resolución (últimos 30 días)
@@ -102,14 +106,16 @@ export async function GET(request: NextRequest) {
       select: { fechaReporte: true, fechaResolucion: true },
     });
 
-    const tiempoMedioResolucion = resolucionesRecientes.length > 0
-      ? Math.round(
-          resolucionesRecientes.reduce((acc, i) => {
-            const diff = (i.fechaResolucion!.getTime() - i.fechaReporte.getTime()) / (1000 * 60 * 60 * 24);
-            return acc + diff;
-          }, 0) / resolucionesRecientes.length
-        )
-      : 0;
+    const tiempoMedioResolucion =
+      resolucionesRecientes.length > 0
+        ? Math.round(
+            resolucionesRecientes.reduce((acc, i) => {
+              const diff =
+                (i.fechaResolucion!.getTime() - i.fechaReporte.getTime()) / (1000 * 60 * 60 * 24);
+              return acc + diff;
+            }, 0) / resolucionesRecientes.length
+          )
+        : 0;
 
     return NextResponse.json({
       incidencias,
@@ -223,7 +229,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const updateData: any = { ...validated };
-    
+
     // Si se marca como resuelta, registrar fecha
     if (validated.estado === 'resuelta' && existing.estado !== 'resuelta') {
       updateData.fechaResolucion = new Date();

@@ -6,17 +6,22 @@ import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const createVotacionSchema = z.object({
   buildingId: z.string().min(1),
   titulo: z.string().min(1),
   descripcion: z.string().min(1),
   tipo: z.enum(['ordinaria', 'extraordinaria', 'urgente']),
-  opciones: z.array(z.object({
-    id: z.string(),
-    texto: z.string(),
-    votos: z.number().default(0),
-  })).min(2),
+  opciones: z
+    .array(
+      z.object({
+        id: z.string(),
+        texto: z.string(),
+        votos: z.number().default(0),
+      })
+    )
+    .min(2),
   requiereQuorum: z.boolean().default(true),
   quorumRequerido: z.number().min(0).max(100).default(50),
   fechaCierre: z.string().datetime(),
@@ -91,15 +96,15 @@ export async function GET(request: NextRequest) {
     ]);
 
     return NextResponse.json({
-      votaciones: votaciones.map(v => ({
+      votaciones: votaciones.map((v) => ({
         ...v,
         opciones: v.opciones as any[],
-        participacion: v.totalElegibles > 0 
-          ? Math.round((v.totalVotos / v.totalElegibles) * 100) 
-          : 0,
-        quorumAlcanzado: v.totalElegibles > 0
-          ? (v.totalVotos / v.totalElegibles) * 100 >= v.quorumRequerido
-          : false,
+        participacion:
+          v.totalElegibles > 0 ? Math.round((v.totalVotos / v.totalElegibles) * 100) : 0,
+        quorumAlcanzado:
+          v.totalElegibles > 0
+            ? (v.totalVotos / v.totalElegibles) * 100 >= v.quorumRequerido
+            : false,
       })),
       pagination: {
         page,
@@ -158,8 +163,8 @@ export async function POST(request: NextRequest) {
 
       // Actualizar votos
       const opciones = votacion.opciones as any[];
-      const opcionIndex = opciones.findIndex(o => o.id === validated.opcionId);
-      
+      const opcionIndex = opciones.findIndex((o) => o.id === validated.opcionId);
+
       if (opcionIndex === -1) {
         return NextResponse.json({ error: 'Opción no válida' }, { status: 400 });
       }
@@ -174,7 +179,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      return NextResponse.json({ 
+      return NextResponse.json({
         votacion: updated,
         message: 'Voto registrado correctamente',
       });

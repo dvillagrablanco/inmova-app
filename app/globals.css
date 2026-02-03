@@ -9,144 +9,144 @@
 @layer base {
   /* Desktop - sidebar siempre visible */
   @media (min-width: 1024px) {
-  .mobile-sidebar {
-    transform: translateX(0) !important;
+    .mobile-sidebar {
+      transform: translateX(0) !important;
+    }
+
+    .mobile-overlay {
+      display: none !important;
+    }
+
+    label[for='mobile-menu-toggle'] {
+      display: none !important;
+    }
+
+    #mobile-menu-toggle {
+      display: none !important;
+    }
   }
 
-  .mobile-overlay {
-    display: none !important;
+  /* Mobile - controlar con checkbox */
+  @media (max-width: 1023px) {
+    /* Cuando el checkbox está checked, abrir menú */
+    #mobile-menu-toggle:checked ~ .mobile-sidebar {
+      transform: translateX(0) !important;
+    }
+
+    #mobile-menu-toggle:checked ~ .mobile-overlay {
+      display: block !important;
+    }
+
+    #mobile-menu-toggle:checked ~ label[for='mobile-menu-toggle'] .menu-icon-open {
+      display: none;
+    }
+
+    #mobile-menu-toggle:checked ~ label[for='mobile-menu-toggle'] .menu-icon-close {
+      display: block !important;
+    }
+
+    /* Prevenir scroll cuando el menú está abierto */
+    #mobile-menu-toggle:checked ~ * {
+      overflow: hidden;
+    }
   }
 
-  label[for='mobile-menu-toggle'] {
-    display: none !important;
+  /* Asegurar que el sidebar sea scrolleable en móviles */
+  @media (max-width: 1023px) {
+    /* Prevenir scroll del body cuando el sidebar está abierto */
+    body.sidebar-open {
+      overflow: hidden !important;
+      position: fixed !important;
+      width: 100% !important;
+      height: 100vh !important;
+      touch-action: none;
+    }
+
+    /* Optimizar scroll táctil del sidebar */
+    [data-sidebar-nav] {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      scroll-behavior: smooth;
+      touch-action: pan-y;
+    }
+
+    /* Asegurar que el scrollbar sea visible pero sutil */
+    [data-sidebar-nav]::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    [data-sidebar-nav]::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    [data-sidebar-nav]::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+    }
+
+    [data-sidebar-nav]::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Mejorar el botón del menú en móvil */
+    button[aria-label*='menú'] {
+      z-index: 100;
+      pointer-events: auto;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+
+    /* Asegurar que el sidebar tenga el z-index correcto */
+    aside[aria-label='Navegación principal'] {
+      z-index: 90;
+      will-change: transform;
+    }
+
+    /* Overlay debe estar detrás del sidebar pero delante del contenido */
+    .sidebar-overlay {
+      z-index: 80;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      pointer-events: auto;
+    }
   }
 
-  #mobile-menu-toggle {
-    display: none !important;
-  }
-}
-
-/* Mobile - controlar con checkbox */
-@media (max-width: 1023px) {
-  /* Cuando el checkbox está checked, abrir menú */
-  #mobile-menu-toggle:checked ~ .mobile-sidebar {
-    transform: translateX(0) !important;
+  /* Mejorar la animación de entrada del sidebar */
+  @media (prefers-reduced-motion: no-preference) {
+    aside[aria-label='Navegación principal'] {
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
   }
 
-  #mobile-menu-toggle:checked ~ .mobile-overlay {
-    display: block !important;
+  /* Animación reducida para usuarios que la prefieren */
+  @media (prefers-reduced-motion: reduce) {
+    aside[aria-label='Navegación principal'] {
+      transition: transform 0.15s ease-out;
+    }
   }
 
-  #mobile-menu-toggle:checked ~ label[for='mobile-menu-toggle'] .menu-icon-open {
-    display: none;
-  }
+  /* Asegurar que el contenido no se desplace cuando el menú está abierto */
+  @media (max-width: 1023px) {
+    body.sidebar-open > * {
+      overflow: hidden;
+    }
 
-  #mobile-menu-toggle:checked ~ label[for='mobile-menu-toggle'] .menu-icon-close {
-    display: block !important;
-  }
+    /* Prevenir zoom en iOS */
+    input[type='text'],
+    input[type='search'],
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
 
-  /* Prevenir scroll cuando el menú está abierto */
-  #mobile-menu-toggle:checked ~ * {
-    overflow: hidden;
+    /* Mejorar táctil en enlaces de navegación */
+    nav a {
+      -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
+      touch-action: manipulation;
+    }
   }
-}
-
-/* Asegurar que el sidebar sea scrolleable en móviles */
-@media (max-width: 1023px) {
-  /* Prevenir scroll del body cuando el sidebar está abierto */
-  body.sidebar-open {
-    overflow: hidden !important;
-    position: fixed !important;
-    width: 100% !important;
-    height: 100vh !important;
-    touch-action: none;
-  }
-
-  /* Optimizar scroll táctil del sidebar */
-  [data-sidebar-nav] {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    scroll-behavior: smooth;
-    touch-action: pan-y;
-  }
-
-  /* Asegurar que el scrollbar sea visible pero sutil */
-  [data-sidebar-nav]::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  [data-sidebar-nav]::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  [data-sidebar-nav]::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-  }
-
-  [data-sidebar-nav]::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
-  }
-
-  /* Mejorar el botón del menú en móvil */
-  button[aria-label*='menú'] {
-    z-index: 100;
-    pointer-events: auto;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-    user-select: none;
-  }
-
-  /* Asegurar que el sidebar tenga el z-index correcto */
-  aside[aria-label='Navegación principal'] {
-    z-index: 90;
-    will-change: transform;
-  }
-
-  /* Overlay debe estar detrás del sidebar pero delante del contenido */
-  .sidebar-overlay {
-    z-index: 80;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    pointer-events: auto;
-  }
-}
-
-/* Mejorar la animación de entrada del sidebar */
-@media (prefers-reduced-motion: no-preference) {
-  aside[aria-label='Navegación principal'] {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-}
-
-/* Animación reducida para usuarios que la prefieren */
-@media (prefers-reduced-motion: reduce) {
-  aside[aria-label='Navegación principal'] {
-    transition: transform 0.15s ease-out;
-  }
-}
-
-/* Asegurar que el contenido no se desplace cuando el menú está abierto */
-@media (max-width: 1023px) {
-  body.sidebar-open > * {
-    overflow: hidden;
-  }
-
-  /* Prevenir zoom en iOS */
-  input[type='text'],
-  input[type='search'],
-  select,
-  textarea {
-    font-size: 16px !important;
-  }
-
-  /* Mejorar táctil en enlaces de navegación */
-  nav a {
-    -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
-    touch-action: manipulation;
-  }
-}
 
   /* Asegurar que funcione en modo incógnito (sin depender de localStorage) */
   @supports not (overflow: clip) {
@@ -206,7 +206,7 @@
 
   /* Bottom navigation: limitar ancho de items */
   .mobile-nav button,
-  nav[class*="bottom"] button,
+  nav[class*='bottom'] button,
   .bottom-nav button,
   .bottom-nav a,
   .bottom-nav-item {
@@ -217,8 +217,8 @@
   }
 
   /* Botones inline-flex con muchas clases: forzar límites */
-  button[class*="inline-flex"][class*="items-center"][class*="justify-center"],
-  button[class*="whitespace-nowrap"] {
+  button[class*='inline-flex'][class*='items-center'][class*='justify-center'],
+  button[class*='whitespace-nowrap'] {
     max-width: 100% !important;
     white-space: normal !important;
     overflow: hidden;
@@ -226,14 +226,14 @@
   }
 
   /* Contenedores flex con gap: prevenir overflow */
-  .flex[class*="gap-"] {
+  .flex[class*='gap-'] {
     gap: 0.5rem !important;
     flex-wrap: wrap;
   }
 
   /* Fix para toaster (notificaciones) */
   .toaster,
-  [class*="toaster"] {
+  [class*='toaster'] {
     max-width: calc(100vw - 2rem) !important;
     left: 1rem !important;
     right: 1rem !important;
@@ -1628,17 +1628,20 @@ select[aria-invalid='true']:focus {
   }
 
   /* Chatbot Inmova - Posición encima de Crisp */
-  .inmova-chatbot-button,
-  [class*="IntelligentChatbot"] button,
-  .fixed.bottom-4.right-4.z-50 {
+  .inmova-chatbot-button {
     bottom: 100px !important;
+    right: 24px !important;
+  }
+
+  .inmova-chatbot-panel {
+    bottom: 120px !important;
     right: 24px !important;
   }
 
   /* WhatsApp Button - Posición más arriba */
   .whatsapp-button,
-  [aria-label*="WhatsApp"],
-  a[href*="wa.me"] {
+  [aria-label*='WhatsApp'],
+  a[href*='wa.me'] {
     bottom: 176px !important;
     right: 24px !important;
   }
@@ -1664,7 +1667,7 @@ select[aria-invalid='true']:focus {
     bottom: 80px !important;
     right: 16px !important;
   }
-  
+
   /* Botón flotante de Crisp */
   .crisp-client .crisp-kquevr,
   .crisp-client .cc-kquevr,
@@ -1674,7 +1677,7 @@ select[aria-invalid='true']:focus {
     width: 48px !important;
     height: 48px !important;
   }
-  
+
   /* Ventana de chat de Crisp en móvil */
   .crisp-client .crisp-1rf4xdh {
     bottom: 140px !important;
@@ -1686,9 +1689,7 @@ select[aria-invalid='true']:focus {
   }
 
   /* Chatbot Inmova en móvil - arriba del nav */
-  .inmova-chatbot-button,
-  [class*="IntelligentChatbot"] button,
-  .fixed.bottom-4.right-4.z-50 {
+  .inmova-chatbot-button {
     bottom: 80px !important;
     right: 76px !important;
     width: 48px !important;
@@ -1697,8 +1698,8 @@ select[aria-invalid='true']:focus {
 
   /* WhatsApp en móvil */
   .whatsapp-button,
-  [aria-label*="WhatsApp"],
-  a[href*="wa.me"] {
+  [aria-label*='WhatsApp'],
+  a[href*='wa.me'] {
     bottom: 80px !important;
     right: 136px !important;
     width: 48px !important;
@@ -1712,7 +1713,7 @@ select[aria-invalid='true']:focus {
     bottom: 80px !important;
     right: 16px !important;
   }
-  
+
   .crisp-client .crisp-kquevr,
   .crisp-client [data-chat-status] {
     bottom: 80px !important;
@@ -1724,11 +1725,11 @@ select[aria-invalid='true']:focus {
   /* Mover el botón de Crisp arriba de la barra de navegación */
   .crisp-client .crisp-1wfoh4l,
   .crisp-client .crisp-kquevr,
-  #crisp-chatbox [data-visible="true"] {
+  #crisp-chatbox [data-visible='true'] {
     bottom: 80px !important;
     z-index: 40 !important;
   }
-  
+
   /* Mover la ventana de chat de Crisp */
   .crisp-client .crisp-1byxlxj,
   .crisp-client .crisp-1rf4xdh {

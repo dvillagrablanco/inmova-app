@@ -173,6 +173,61 @@ export default function NuevaUnidadPage() {
                 description: 'Selecciona el edificio y define la identificación',
                 fields: (
                   <div className="space-y-4">
+                    <AIDocumentAssistant
+                      context="propiedades"
+                      variant="inline"
+                      position="bottom-right"
+                      onApplyData={(data) => {
+                        if (data.numero || data.numeroUnidad) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            numero: data.numero || data.numeroUnidad,
+                          }));
+                        }
+                        if (data.tipo || data.tipoVivienda) {
+                          const tipo = String(data.tipo || data.tipoVivienda).toLowerCase();
+                          if (
+                            [
+                              'apartamento',
+                              'estudio',
+                              'piso',
+                              'duplex',
+                              'atico',
+                              'local',
+                              'oficina',
+                              'habitacion',
+                            ].includes(tipo)
+                          ) {
+                            setFormData((prev) => ({ ...prev, tipo }));
+                          }
+                        }
+                        if (data.superficie || data.metrosCuadrados) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            superficie: data.superficie || data.metrosCuadrados,
+                          }));
+                        }
+                        if (data.habitaciones) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            habitaciones: String(data.habitaciones),
+                          }));
+                        }
+                        if (data.banos || data.baños) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            banos: String(data.banos || data.baños),
+                          }));
+                        }
+                        if (data.precio || data.rentaMensual || data.alquiler) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            precio: String(data.precio || data.rentaMensual || data.alquiler),
+                          }));
+                        }
+                        toast.success('Datos aplicados a la unidad');
+                      }}
+                    />
                     {/* Edificio */}
                     <div className="space-y-2">
                       <Label htmlFor="edificioId">Edificio *</Label>
@@ -360,55 +415,6 @@ export default function NuevaUnidadPage() {
             }
           />
         </form>
-
-        {/* Asistente IA de Documentos para propiedades/unidades */}
-        <AIDocumentAssistant
-          context="propiedades"
-          variant="floating"
-          position="bottom-right"
-          onApplyData={(data) => {
-            // Aplicar datos extraídos del documento al formulario
-            if (data.numero || data.numeroUnidad) {
-              setFormData((prev) => ({ ...prev, numero: data.numero || data.numeroUnidad }));
-            }
-            if (data.tipo || data.tipoVivienda) {
-              const tipo = (data.tipo || data.tipoVivienda).toLowerCase();
-              if (
-                [
-                  'apartamento',
-                  'estudio',
-                  'piso',
-                  'duplex',
-                  'atico',
-                  'local',
-                  'oficina',
-                  'habitacion',
-                ].includes(tipo)
-              ) {
-                setFormData((prev) => ({ ...prev, tipo }));
-              }
-            }
-            if (data.superficie || data.metrosCuadrados) {
-              setFormData((prev) => ({
-                ...prev,
-                superficie: data.superficie || data.metrosCuadrados,
-              }));
-            }
-            if (data.habitaciones || data.dormitorios) {
-              setFormData((prev) => ({
-                ...prev,
-                habitaciones: data.habitaciones || data.dormitorios,
-              }));
-            }
-            if (data.banos) {
-              setFormData((prev) => ({ ...prev, banos: data.banos }));
-            }
-            if (data.precio || data.alquiler) {
-              setFormData((prev) => ({ ...prev, precio: data.precio || data.alquiler }));
-            }
-            toast.success('Datos del documento aplicados al formulario');
-          }}
-        />
       </div>
     </AuthenticatedLayout>
   );

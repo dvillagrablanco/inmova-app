@@ -6,7 +6,18 @@ import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import dynamic from 'next/dynamic';
 
-import { Users, Home, ArrowLeft, Save, Upload, FileText, X, Loader2, Brain, Sparkles } from 'lucide-react';
+import {
+  Users,
+  Home,
+  ArrowLeft,
+  Save,
+  Upload,
+  FileText,
+  X,
+  Loader2,
+  Brain,
+  Sparkles,
+} from 'lucide-react';
 
 // Cargar el asistente de IA de forma dinámica para evitar problemas de SSR
 const TenantFormAIAssistant = dynamic(
@@ -39,6 +50,7 @@ import { BackButton } from '@/components/ui/back-button';
 import { MobileFormWizard, FormStep } from '@/components/ui/mobile-form-wizard';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { z } from 'zod';
 
 interface UploadedDocument {
   id: string;
@@ -48,6 +60,31 @@ interface UploadedDocument {
   uploading?: boolean;
   progress?: number;
 }
+
+interface TenantRequestBody {
+  nombreCompleto: string;
+  email: string;
+  telefono: string;
+  dni?: string;
+  fechaNacimiento?: string;
+  nacionalidad?: string;
+  estadoCivil?: string;
+  profesion?: string;
+  ingresosMensuales?: number;
+}
+
+const tenantFormSchema = z.object({
+  nombre: z.string().min(1, 'Nombre requerido'),
+  email: z.string().email('Email invalido'),
+  telefono: z.string().min(1, 'Telefono requerido'),
+  tipoDocumento: z.enum(['dni', 'nie', 'pasaporte']),
+  documentoIdentidad: z.string().min(1, 'Documento requerido'),
+  fechaNacimiento: z.string().optional(),
+  nacionalidad: z.string().optional(),
+  estadoCivil: z.string().optional(),
+  profesion: z.string().optional(),
+  ingresosMensuales: z.string().optional(),
+});
 
 export default function NuevoInquilinoPage() {
   const router = useRouter();
@@ -144,9 +181,11 @@ export default function NuevoInquilinoPage() {
 
           throw new Error(errorMessage);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : `Error al subir ${file.name}`;
+        console.error('Error uploading document:', errorMessage);
         setDocuments((prev) => prev.filter((d) => d.id !== docId));
-        toast.error(error.message || `Error al subir ${file.name}`);
+        toast.error('Error de conexión');
       }
     }
     // Reset input
@@ -162,35 +201,68 @@ export default function NuevoInquilinoPage() {
     setIsLoading(true);
 
     try {
+      const parsed = tenantFormSchema.safeParse({
+        nombre: formData.nombre.trim(),
+        email: formData.email.trim(),
+        telefono: formData.telefono.trim(),
+        tipoDocumento: formData.tipoDocumento,
+        documentoIdentidad: formData.documentoIdentidad.trim(),
+        fechaNacimiento: formData.fechaNacimiento || undefined,
+        nacionalidad: formData.nacionalidad.trim() || undefined,
+        estadoCivil: formData.estadoCivil || undefined,
+        profesion: formData.profesion.trim() || undefined,
+        ingresosMensuales: formData.ingresosMensuales,
+      });
+
+      if (!parsed.success) {
+        toast.error(parsed.error.errors[0]?.message || 'Datos invalidos');
+        setIsLoading(false);
+        return;
+      }
+
+      const ingresosMensuales =
+        parsed.data.ingresosMensuales && parsed.data.ingresosMensuales.trim()
+          ? parseFloat(parsed.data.ingresosMensuales)
+          : undefined;
+
+      if (parsed.data.ingresosMensuales && Number.isNaN(ingresosMensuales)) {
+        toast.error('Ingresos invalidos');
+        setIsLoading(false);
+        return;
+      }
+
+      const requestBody: TenantRequestBody = {
+        nombreCompleto: parsed.data.nombre,
+        email: parsed.data.email,
+        telefono: parsed.data.telefono,
+        fechaNacimiento: parsed.data.fechaNacimiento
+          ? new Date(parsed.data.fechaNacimiento).toISOString()
+          : undefined,
+        nacionalidad: parsed.data.nacionalidad,
+        estadoCivil: parsed.data.estadoCivil,
+        profesion: parsed.data.profesion,
+        ingresosMensuales,
+      };
+
+      if (parsed.data.tipoDocumento === 'dni') {
+        requestBody.dni = parsed.data.documentoIdentidad;
+      }
+
       const response = await fetch('/api/tenants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nombre: formData.nombre,
-          email: formData.email,
-          telefono: formData.telefono,
-          documentoIdentidad: formData.documentoIdentidad,
-          tipoDocumento: formData.tipoDocumento,
-          fechaNacimiento: formData.fechaNacimiento
-            ? new Date(formData.fechaNacimiento).toISOString()
-            : undefined,
-          nacionalidad: formData.nacionalidad,
-          estadoCivil: formData.estadoCivil,
-          profesion: formData.profesion,
-          ingresosMensuales: parseFloat(formData.ingresosMensuales),
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (response.ok) {
         toast.success('Inquilino creado correctamente');
         router.push('/inquilinos');
       } else {
-        const error = await response.json();
-        toast.error(error.error || 'Error al crear el inquilino');
+        toast.error('Error de conexión');
       }
     } catch (error) {
       logger.error('Error:', error);
-      toast.error('Error al crear el inquilino');
+      toast.error('Error de conexión');
     } finally {
       setIsLoading(false);
     }
@@ -388,29 +460,39 @@ export default function NuevoInquilinoPage() {
                         entityType="tenant"
                         autoSaveDocument={true}
                         onApplyData={(data) => {
-                          console.log('[Inquilino] Datos recibidos para aplicar:', JSON.stringify(data, null, 2));
-                          
+                          console.log(
+                            '[Inquilino] Datos recibidos para aplicar:',
+                            JSON.stringify(data, null, 2)
+                          );
+
                           const updates: Partial<typeof formData> = {};
-                          
+
                           // Nombre completo
-                          const nombre = data.nombreCompleto || data.nombre || data.fullName || data.name;
+                          const nombre =
+                            data.nombreCompleto || data.nombre || data.fullName || data.name;
                           if (nombre) {
                             updates.nombre = nombre;
                             console.log('[Inquilino] Nombre:', nombre);
                           }
-                          
+
                           // Documento de identidad
-                          const docIdentidad = data.dni || data.nie || data.numeroDocumento || data.documentoIdentidad || data.documentNumber;
+                          const docIdentidad =
+                            data.dni ||
+                            data.nie ||
+                            data.numeroDocumento ||
+                            data.documentoIdentidad ||
+                            data.documentNumber;
                           if (docIdentidad) {
                             updates.documentoIdentidad = docIdentidad;
                             console.log('[Inquilino] DNI:', docIdentidad);
                           }
-                          
+
                           // Fecha de nacimiento
-                          const fechaRaw = data.fechaNacimiento || data.birthDate || data.dateOfBirth;
+                          const fechaRaw =
+                            data.fechaNacimiento || data.birthDate || data.dateOfBirth;
                           if (fechaRaw) {
                             let fechaFormateada = fechaRaw;
-                            
+
                             if (/^\d{4}-\d{2}-\d{2}$/.test(fechaRaw)) {
                               fechaFormateada = fechaRaw;
                             } else if (/^\d{2}[/-]\d{2}[/-]\d{4}$/.test(fechaRaw)) {
@@ -425,52 +507,67 @@ export default function NuevoInquilinoPage() {
                             updates.fechaNacimiento = fechaFormateada;
                             console.log('[Inquilino] Fecha:', fechaFormateada);
                           }
-                          
+
                           // Nacionalidad
                           if (data.nacionalidad || data.nationality) {
                             updates.nacionalidad = data.nacionalidad || data.nationality;
                           }
-                          
+
                           // Tipo de documento
                           if (data.tipoDocumento || data.documentType) {
-                            const tipo = (data.tipoDocumento || data.documentType || '').toLowerCase();
+                            const tipo = (
+                              data.tipoDocumento ||
+                              data.documentType ||
+                              ''
+                            ).toLowerCase();
                             if (['dni', 'nie', 'pasaporte'].includes(tipo)) {
                               updates.tipoDocumento = tipo;
                             }
                           }
-                          
+
                           // Email
                           if (data.email || data.correo) {
                             updates.email = data.email || data.correo;
                           }
-                          
+
                           // Teléfono
                           if (data.telefono || data.phone) {
                             updates.telefono = data.telefono || data.phone;
                           }
-                          
-                          console.log('[Inquilino] Updates a aplicar:', JSON.stringify(updates, null, 2));
-                          
+
+                          console.log(
+                            '[Inquilino] Updates a aplicar:',
+                            JSON.stringify(updates, null, 2)
+                          );
+
                           if (Object.keys(updates).length > 0) {
                             setFormData((prev) => {
                               const newData = { ...prev, ...updates };
-                              console.log('[Inquilino] FormData actualizado:', JSON.stringify(newData, null, 2));
+                              console.log(
+                                '[Inquilino] FormData actualizado:',
+                                JSON.stringify(newData, null, 2)
+                              );
                               return newData;
                             });
-                            toast.success(`${Object.keys(updates).length} campos aplicados al formulario`);
+                            toast.success(
+                              `${Object.keys(updates).length} campos aplicados al formulario`
+                            );
                           } else {
                             toast.warning('No se encontraron campos para aplicar');
                           }
                         }}
                         onDocumentSaved={(documentId, file) => {
-                          setDocuments((prev) => [...prev, {
-                            id: documentId,
-                            name: file.name,
-                            type: file.type,
-                            url: `/api/documents/${documentId}/download`,
-                            uploading: false,
-                            progress: 100,
-                          }]);
+                          setDocuments((prev) => [
+                            ...prev,
+                            {
+                              id: documentId,
+                              name: file.name,
+                              type: file.type,
+                              url: `/api/documents/${documentId}/download`,
+                              uploading: false,
+                              progress: 100,
+                            },
+                          ]);
                         }}
                       />
 
@@ -641,7 +738,7 @@ export default function NuevoInquilinoPage() {
 
         {/* Asistente IA para el formulario - Oculto en móvil para evitar solapamiento */}
         <TenantFormAIAssistant formData={formData} />
-        
+
         {/* Nota: AIDocumentAssistant ahora está integrado en la sección de Documentos del formulario (variant="inline") */}
       </div>
     </AuthenticatedLayout>

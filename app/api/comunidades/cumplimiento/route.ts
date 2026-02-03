@@ -6,10 +6,19 @@ import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const createDocumentoSchema = z.object({
   buildingId: z.string().min(1),
-  tipo: z.enum(['cee', 'ite', 'cedula_habitabilidad', 'seguro', 'licencia', 'modelo_fiscal', 'otro']),
+  tipo: z.enum([
+    'cee',
+    'ite',
+    'cedula_habitabilidad',
+    'seguro',
+    'licencia',
+    'modelo_fiscal',
+    'otro',
+  ]),
   nombre: z.string().min(1),
   fechaEmision: z.string().datetime().optional(),
   fechaVencimiento: z.string().datetime().optional(),
@@ -59,10 +68,10 @@ export async function GET(request: NextRequest) {
     });
 
     // Calcular estado de cumplimiento por edificio
-    const cumplimiento = buildings.map(building => {
+    const cumplimiento = buildings.map((building) => {
       const añoConstruccion = building.yearBuilt || 2000;
       const antiguedad = new Date().getFullYear() - añoConstruccion;
-      
+
       // ITE obligatoria para edificios >50 años
       const requiereITE = antiguedad >= 50;
       // CEE obligatoria para alquiler/venta
@@ -101,7 +110,7 @@ export async function GET(request: NextRequest) {
     // Estadísticas generales
     const stats = {
       totalEdificios: buildings.length,
-      requierenITE: cumplimiento.filter(c => c.documentos.ite.requerido).length,
+      requierenITE: cumplimiento.filter((c) => c.documentos.ite.requerido).length,
       documentosPendientes: cumplimiento.length * 4, // Simplificado
       proximosVencimientos: 0,
     };
@@ -142,14 +151,17 @@ export async function POST(request: NextRequest) {
 
     // Por ahora retornamos éxito (el modelo específico de documentos de cumplimiento
     // se puede crear cuando sea necesario)
-    return NextResponse.json({
-      message: 'Documento registrado correctamente',
-      documento: {
-        id: `doc_${Date.now()}`,
-        ...validated,
-        buildingName: building.name,
+    return NextResponse.json(
+      {
+        message: 'Documento registrado correctamente',
+        documento: {
+          id: `doc_${Date.now()}`,
+          ...validated,
+          buildingName: building.name,
+        },
       },
-    }, { status: 201 });
+      { status: 201 }
+    );
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

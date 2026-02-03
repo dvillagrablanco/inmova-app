@@ -1,15 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { requireAuth, requirePermission, forbiddenResponse, badRequestResponse } from '@/lib/permissions';
+import {
+  requireAuth,
+  requirePermission,
+  forbiddenResponse,
+  badRequestResponse,
+} from '@/lib/permissions';
 import logger, { logError } from '@/lib/logger';
 import { tenantCreateSchema } from '@/lib/validations';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const normalizeMessage = (message: unknown) => String(message || '').toLowerCase();
+const isAuthError = (message: string) => {
+  const normalized = normalizeMessage(message);
+  return (
+    normalized.includes('no autenticado') ||
+    normalized.includes('unauthorized') ||
+    normalized.includes('not authenticated') ||
+    normalized.includes('token inválido') ||
+    normalized.includes('token invalido')
+  );
+};
+
 export async function GET(req: NextRequest) {
   try {
-    const user = await requireAuth();
+    let user;
+    try {
+      user = await requireAuth();
+    } catch (error: any) {
+      const message = error?.message || 'No autenticado';
+      const normalized = normalizeMessage(message);
+      if (normalized.includes('usuario inactivo')) {
+        return NextResponse.json({ error: message }, { status: 403 });
+      }
+      if (isAuthError(message)) {
+        return NextResponse.json({ error: message }, { status: 401 });
+      }
+      return NextResponse.json({ error: message }, { status: 401 });
+    }
     const isSuperAdmin = user.role === 'super_admin' || user.role === 'soporte';
 
     // Obtener parámetros de paginación
@@ -20,9 +50,7 @@ export async function GET(req: NextRequest) {
     const filterCompanyId = searchParams.get('companyId');
 
     // Determinar el filtro de empresa
-    const whereCompanyId = isSuperAdmin 
-      ? (filterCompanyId || undefined) 
-      : user.companyId;
+    const whereCompanyId = isSuperAdmin ? filterCompanyId || undefined : user.companyId;
 
     // Si el usuario no es super_admin y no tiene companyId, retornar vacío
     if (!isSuperAdmin && !user.companyId) {
@@ -95,27 +123,50 @@ export async function GET(req: NextRequest) {
   } catch (error: any) {
     const errorMessage = error?.message || 'Error desconocido';
     const errorStack = error?.stack || '';
-    logger.error('Error fetching tenants:', { message: errorMessage, stack: errorStack.slice(0, 500) });
-    
-    if (errorMessage === 'No autenticado') {
+    logger.error('Error fetching tenants:', {
+      message: errorMessage,
+      stack: errorStack.slice(0, 500),
+    });
+
+    const normalizedMessage = normalizeMessage(errorMessage);
+    if (isAuthError(errorMessage)) {
       return NextResponse.json({ error: errorMessage }, { status: 401 });
     }
-    if (errorMessage === 'Usuario inactivo') {
+    if (normalizedMessage.includes('usuario inactivo')) {
       return NextResponse.json({ error: errorMessage }, { status: 403 });
     }
-    return NextResponse.json({ error: 'Error al obtener inquilinos', details: errorMessage }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error al obtener inquilinos', details: errorMessage },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await requirePermission('create');
+    let user;
+    try {
+      user = await requirePermission('create');
+    } catch (error: any) {
+      const message = error?.message || 'No autenticado';
+      const normalized = normalizeMessage(message);
+      if (isAuthError(message)) {
+        return NextResponse.json({ error: message }, { status: 401 });
+      }
+      if (normalized.includes('permiso') || normalized.includes('forbidden')) {
+        return forbiddenResponse(message);
+      }
+      return forbiddenResponse(message);
+    }
+    if (!user.companyId) {
+      return badRequestResponse('Empresa no configurada');
+    }
 
     const body = await req.json();
-    
+
     // Preparar datos: convertir nombre completo a nombre/apellidos si es necesario
     let dataToValidate = { ...body };
-    
+
     // Si viene nombreCompleto o nombre contiene espacios y no hay apellidos
     const nombreCompleto = body.nombreCompleto || body.nombre;
     if (nombreCompleto && !body.apellidos) {
@@ -130,24 +181,21 @@ export async function POST(req: NextRequest) {
         dataToValidate.apellidos = nombreCompleto;
       }
     }
-    
+
     // Validación con Zod
     const validationResult = tenantCreateSchema.safeParse(dataToValidate);
-    
+
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => ({
+      const errors = validationResult.error.errors.map((err) => ({
         field: err.path.join('.'),
-        message: err.message
+        message: err.message,
       }));
       logger.warn('Validation error creating tenant:', { errors });
-      return NextResponse.json(
-        { error: 'Datos inv\u00e1lidos', details: errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos inv\u00e1lidos', details: errors }, { status: 400 });
     }
 
     const validatedData = validationResult.data;
-    
+
     // Combinar nombre y apellidos de vuelta a nombreCompleto para la BD
     const nombreCompletoFinal = `${validatedData.nombre} ${validatedData.apellidos}`.trim();
 
@@ -158,7 +206,9 @@ export async function POST(req: NextRequest) {
         dni: validatedData.dni || '',
         email: validatedData.email,
         telefono: validatedData.telefono,
-        fechaNacimiento: validatedData.fechaNacimiento ? new Date(validatedData.fechaNacimiento) : new Date(),
+        fechaNacimiento: validatedData.fechaNacimiento
+          ? new Date(validatedData.fechaNacimiento)
+          : new Date(),
         notas: validatedData.notasInternas || '',
       },
     });
@@ -169,7 +219,21 @@ export async function POST(req: NextRequest) {
     if (error.message?.includes('permiso')) {
       return forbiddenResponse(error.message);
     }
-    if (error.message === 'No autenticado') {
+    if (error?.code === 'P2002') {
+      const target = error?.meta?.target;
+      const targets = Array.isArray(target) ? target : target ? [target] : [];
+      const targetText = targets.map((t: any) => String(t).toLowerCase()).join(' ');
+      const messageText = normalizeMessage(error?.message);
+      const isEmailDuplicate =
+        targetText.includes('email') ||
+        messageText.includes('email') ||
+        messageText.includes('correo');
+      return NextResponse.json(
+        { error: isEmailDuplicate ? 'email duplicado' : 'registro duplicado' },
+        { status: 409 }
+      );
+    }
+    if (isAuthError(error?.message)) {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
     return NextResponse.json({ error: 'Error al crear inquilino' }, { status: 500 });

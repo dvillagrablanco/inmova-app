@@ -1,35 +1,38 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 
+vi.mock('@/components/ui/alert-dialog', () => ({
+  AlertDialog: ({ children }: any) => <div>{children}</div>,
+  AlertDialogContent: ({ children }: any) => <div>{children}</div>,
+  AlertDialogHeader: ({ children }: any) => <div>{children}</div>,
+  AlertDialogFooter: ({ children }: any) => <div>{children}</div>,
+  AlertDialogTitle: ({ children }: any) => <h2>{children}</h2>,
+  AlertDialogDescription: ({ children }: any) => <p>{children}</p>,
+  AlertDialogAction: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+  AlertDialogCancel: ({ children }: any) => <button>{children}</button>,
+}));
+
 describe('DeleteConfirmationDialog', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<DeleteConfirmationDialog {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  it('renderiza título y descripción', () => {
+    render(
+      <DeleteConfirmationDialog
+        open
+        onOpenChange={vi.fn()}
+        onConfirm={vi.fn()}
+        itemName="el documento"
+      />
+    );
+
+    expect(screen.getByText('¿Estás seguro?')).toBeInTheDocument();
+    expect(screen.getByText(/eliminará permanentemente el documento/i)).toBeInTheDocument();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<DeleteConfirmationDialog {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
-  });
+  it('ejecuta onConfirm al eliminar', () => {
+    const onConfirm = vi.fn();
+    render(<DeleteConfirmationDialog open onOpenChange={vi.fn()} onConfirm={onConfirm} />);
 
-  it('should be accessible', () => {
-    render(<DeleteConfirmationDialog />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    fireEvent.click(screen.getByRole('button', { name: /eliminar/i }));
+    expect(onConfirm).toHaveBeenCalled();
   });
 });

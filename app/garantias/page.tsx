@@ -126,7 +126,7 @@ interface Contract {
 export default function GarantiasPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  
+
   // Estados
   const [loading, setLoading] = useState(true);
   const [warranties, setWarranties] = useState<Warranty[]>([]);
@@ -138,7 +138,7 @@ export default function GarantiasPage() {
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [showDeductionDialog, setShowDeductionDialog] = useState(false);
   const [showReturnDialog, setShowReturnDialog] = useState(false);
-  
+
   // Formulario nueva garantía
   const [newWarranty, setNewWarranty] = useState({
     contractId: '',
@@ -150,7 +150,7 @@ export default function GarantiasPage() {
     policyNumber: '',
     notes: '',
   });
-  
+
   // Formulario deducción
   const [newDeduction, setNewDeduction] = useState({
     amount: '',
@@ -168,15 +168,15 @@ export default function GarantiasPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      
+
       // Cargar garantías desde la API real
       const response = await fetch('/api/garantias');
       if (!response.ok) {
         throw new Error('Error al cargar las garantías');
       }
-      
+
       const result = await response.json();
-      
+
       if (result.success && result.data) {
         // Transformar datos de la API al formato esperado por el componente
         const formattedWarranties: Warranty[] = result.data.map((w: any) => ({
@@ -199,53 +199,58 @@ export default function GarantiasPage() {
           bankName: w.bankName,
           insuranceCompany: w.insuranceCompany,
           policyNumber: w.policyNumber,
-          documents: Array.isArray(w.documents) ? w.documents.map((d: any, idx: number) => ({
-            id: d.id || `doc-${idx}`,
-            name: d.name || d.fileName || 'Documento',
-            type: d.type || 'pdf',
-            url: d.url || '#',
-            uploadedAt: d.uploadedAt || d.createdAt || new Date().toISOString(),
-          })) : [],
-          deductions: Array.isArray(w.deductions) ? w.deductions.map((d: any, idx: number) => ({
-            id: d.id || `ded-${idx}`,
-            amount: d.amount || 0,
-            reason: d.reason || 'Deducción',
-            date: d.date || new Date().toISOString(),
-            approved: d.approved ?? true,
-            approvedBy: d.approvedBy,
-          })) : [],
+          documents: Array.isArray(w.documents)
+            ? w.documents.map((d: any, idx: number) => ({
+                id: d.id || `doc-${idx}`,
+                name: d.name || d.fileName || 'Documento',
+                type: d.type || 'pdf',
+                url: d.url || '#',
+                uploadedAt: d.uploadedAt || d.createdAt || new Date().toISOString(),
+              }))
+            : [],
+          deductions: Array.isArray(w.deductions)
+            ? w.deductions.map((d: any, idx: number) => ({
+                id: d.id || `ded-${idx}`,
+                amount: d.amount || 0,
+                reason: d.reason || 'Deducción',
+                date: d.date || new Date().toISOString(),
+                approved: d.approved ?? true,
+                approvedBy: d.approvedBy,
+              }))
+            : [],
           notes: w.notes,
           createdAt: w.createdAt || new Date().toISOString(),
           updatedAt: w.updatedAt || new Date().toISOString(),
         }));
-        
+
         setWarranties(formattedWarranties);
       } else {
         setWarranties([]);
       }
-      
+
       // Cargar contratos sin garantía para el selector
       const contractsResponse = await fetch('/api/contracts?status=activo&limit=50');
       if (contractsResponse.ok) {
         const contractsResult = await contractsResponse.json();
         const contractsData = contractsResult.data || contractsResult || [];
-        
+
         // Filtrar contratos que no tienen garantía registrada
         const existingContractIds = new Set(result.data?.map((w: any) => w.contractId) || []);
-        
+
         const availableContracts = contractsData
           .filter((c: any) => !existingContractIds.has(c.id))
           .map((c: any) => ({
             id: c.id,
             tenantName: c.tenant?.nombreCompleto || c.tenantName || 'Sin inquilino',
-            propertyName: c.unit?.numero ? `${c.unit.building?.nombre || ''} - ${c.unit.numero}` : c.propertyName || 'Sin propiedad',
+            propertyName: c.unit?.numero
+              ? `${c.unit.building?.nombre || ''} - ${c.unit.numero}`
+              : c.propertyName || 'Sin propiedad',
             startDate: c.fechaInicio || c.startDate || '',
             endDate: c.fechaFin || c.endDate || '',
           }));
-        
+
         setContracts(availableContracts);
       }
-      
     } catch (error) {
       console.error('Error cargando datos:', error);
       toast.error('Error al cargar las garantías');
@@ -256,27 +261,30 @@ export default function GarantiasPage() {
   };
 
   // Filtrar garantías
-  const filteredWarranties = warranties.filter(w => {
-    const matchesSearch = 
+  const filteredWarranties = warranties.filter((w) => {
+    const matchesSearch =
       w.tenantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       w.propertyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       w.propertyAddress.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesStatus = filterStatus === 'all' || w.status === filterStatus;
     const matchesType = filterType === 'all' || w.type === filterType;
-    
+
     return matchesSearch && matchesStatus && matchesType;
   });
 
   // Estadísticas
   const stats = {
     total: warranties.length,
-    totalAmount: warranties.filter(w => w.status === 'active').reduce((sum, w) => sum + w.amount, 0),
-    active: warranties.filter(w => w.status === 'active').length,
-    pendingReturn: warranties.filter(w => w.status === 'pending_return').length,
-    returned: warranties.filter(w => w.status === 'returned').length,
-    totalDeductions: warranties.reduce((sum, w) => 
-      sum + w.deductions.reduce((s, d) => s + d.amount, 0), 0
+    totalAmount: warranties
+      .filter((w) => w.status === 'active')
+      .reduce((sum, w) => sum + w.amount, 0),
+    active: warranties.filter((w) => w.status === 'active').length,
+    pendingReturn: warranties.filter((w) => w.status === 'pending_return').length,
+    returned: warranties.filter((w) => w.status === 'returned').length,
+    totalDeductions: warranties.reduce(
+      (sum, w) => sum + w.deductions.reduce((s, d) => s + d.amount, 0),
+      0
     ),
   };
 
@@ -284,10 +292,22 @@ export default function GarantiasPage() {
   const getStatusBadge = (status: string) => {
     const config: Record<string, { className: string; label: string; icon: any }> = {
       active: { className: 'bg-green-500 hover:bg-green-600', label: 'Activa', icon: CheckCircle },
-      pending_return: { className: 'bg-yellow-500 hover:bg-yellow-600', label: 'Pendiente Devolución', icon: Clock },
-      returned: { className: 'bg-blue-500 hover:bg-blue-600', label: 'Devuelta', icon: CheckCircle },
+      pending_return: {
+        className: 'bg-yellow-500 hover:bg-yellow-600',
+        label: 'Pendiente Devolución',
+        icon: Clock,
+      },
+      returned: {
+        className: 'bg-blue-500 hover:bg-blue-600',
+        label: 'Devuelta',
+        icon: CheckCircle,
+      },
       deducted: { className: 'bg-red-500 hover:bg-red-600', label: 'Deducida', icon: AlertCircle },
-      partial_return: { className: 'bg-orange-500 hover:bg-orange-600', label: 'Devolución Parcial', icon: AlertTriangle },
+      partial_return: {
+        className: 'bg-orange-500 hover:bg-orange-600',
+        label: 'Devolución Parcial',
+        icon: AlertTriangle,
+      },
     };
     const { className, label, icon: Icon } = config[status] || config.active;
     return (
@@ -301,10 +321,26 @@ export default function GarantiasPage() {
   // Badges de tipo
   const getTypeBadge = (type: string) => {
     const config: Record<string, { className: string; label: string; icon: any }> = {
-      cash: { className: 'bg-emerald-100 text-emerald-800 border-emerald-200', label: 'Efectivo', icon: Banknote },
-      bank_guarantee: { className: 'bg-purple-100 text-purple-800 border-purple-200', label: 'Aval Bancario', icon: CreditCard },
-      insurance: { className: 'bg-blue-100 text-blue-800 border-blue-200', label: 'Seguro Caución', icon: ShieldCheck },
-      aval_personal: { className: 'bg-amber-100 text-amber-800 border-amber-200', label: 'Aval Personal', icon: User },
+      cash: {
+        className: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+        label: 'Efectivo',
+        icon: Banknote,
+      },
+      bank_guarantee: {
+        className: 'bg-purple-100 text-purple-800 border-purple-200',
+        label: 'Aval Bancario',
+        icon: CreditCard,
+      },
+      insurance: {
+        className: 'bg-blue-100 text-blue-800 border-blue-200',
+        label: 'Seguro Caución',
+        icon: ShieldCheck,
+      },
+      aval_personal: {
+        className: 'bg-amber-100 text-amber-800 border-amber-200',
+        label: 'Aval Personal',
+        icon: User,
+      },
     };
     const { className, label, icon: Icon } = config[type] || config.cash;
     return (
@@ -344,14 +380,14 @@ export default function GarantiasPage() {
       toast.error('Completa los campos obligatorios');
       return;
     }
-    
+
     try {
       // Mapear tipo de frontend a tipo de API
       const typeMap: Record<string, string> = {
-        'cash': 'legal',
-        'bank_guarantee': 'aval_bancario',
-        'insurance': 'seguro_caucion',
-        'aval_personal': 'aval_personal',
+        cash: 'legal',
+        bank_guarantee: 'aval_bancario',
+        insurance: 'seguro_caucion',
+        aval_personal: 'aval_personal',
       };
 
       const response = await fetch('/api/garantias', {
@@ -398,7 +434,7 @@ export default function GarantiasPage() {
       toast.error('Completa todos los campos');
       return;
     }
-    
+
     try {
       const response = await fetch(`/api/garantias/${selectedWarranty.id}`, {
         method: 'PUT',
@@ -429,7 +465,7 @@ export default function GarantiasPage() {
   // Procesar devolución
   const handleProcessReturn = async () => {
     if (!selectedWarranty) return;
-    
+
     try {
       const returnAmount = getReturnAmount(selectedWarranty);
 
@@ -503,12 +539,10 @@ export default function GarantiasPage() {
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold">Gestión de Garantías</h1>
-              <p className="text-muted-foreground">
-                Control de fianzas, avales y devoluciones
-              </p>
+              <p className="text-muted-foreground">Control de fianzas, avales y devoluciones</p>
             </div>
           </div>
-          
+
           <Dialog open={showNewDialog} onOpenChange={setShowNewDialog}>
             <DialogTrigger asChild>
               <Button>
@@ -524,9 +558,66 @@ export default function GarantiasPage() {
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
+                <AIDocumentAssistant
+                  context="documentos"
+                  variant="inline"
+                  position="bottom-right"
+                  onApplyData={(data) => {
+                    if (data.amount || data.importe || data.monto) {
+                      setNewWarranty((prev) => ({
+                        ...prev,
+                        amount: String(data.amount || data.importe || data.monto),
+                      }));
+                    }
+                    if (data.depositDate || data.fechaDeposito || data.fecha) {
+                      const fecha = new Date(data.depositDate || data.fechaDeposito || data.fecha);
+                      if (!isNaN(fecha.getTime())) {
+                        setNewWarranty((prev) => ({
+                          ...prev,
+                          depositDate: fecha.toISOString().split('T')[0],
+                        }));
+                      }
+                    }
+                    if (data.bankName || data.entidadBancaria) {
+                      setNewWarranty((prev) => ({
+                        ...prev,
+                        bankName: data.bankName || data.entidadBancaria,
+                      }));
+                    }
+                    if (data.insuranceCompany || data.aseguradora) {
+                      setNewWarranty((prev) => ({
+                        ...prev,
+                        insuranceCompany: data.insuranceCompany || data.aseguradora,
+                      }));
+                    }
+                    if (data.policyNumber || data.numeroPoliza || data.poliza) {
+                      setNewWarranty((prev) => ({
+                        ...prev,
+                        policyNumber: data.policyNumber || data.numeroPoliza || data.poliza,
+                      }));
+                    }
+                    if (data.type || data.tipo) {
+                      const tipo = String(data.type || data.tipo).toLowerCase();
+                      if (tipo.includes('banco') || tipo.includes('aval')) {
+                        setNewWarranty((prev) => ({ ...prev, type: 'bank_guarantee' }));
+                      } else if (tipo.includes('seguro')) {
+                        setNewWarranty((prev) => ({ ...prev, type: 'insurance' }));
+                      } else if (tipo.includes('efectivo') || tipo.includes('cash')) {
+                        setNewWarranty((prev) => ({ ...prev, type: 'cash' }));
+                      }
+                    }
+                    if (data.notas || data.observaciones) {
+                      setNewWarranty((prev) => ({
+                        ...prev,
+                        notes: data.notas || data.observaciones,
+                      }));
+                    }
+                    toast.success('Datos aplicados a la garantía');
+                  }}
+                />
                 <div className="space-y-2">
                   <Label>Contrato *</Label>
-                  <Select 
+                  <Select
                     value={newWarranty.contractId}
                     onValueChange={(v) => setNewWarranty({ ...newWarranty, contractId: v })}
                   >
@@ -534,7 +625,7 @@ export default function GarantiasPage() {
                       <SelectValue placeholder="Selecciona un contrato" />
                     </SelectTrigger>
                     <SelectContent>
-                      {contracts.map(c => (
+                      {contracts.map((c) => (
                         <SelectItem key={c.id} value={c.id}>
                           {c.tenantName} - {c.propertyName}
                         </SelectItem>
@@ -542,7 +633,7 @@ export default function GarantiasPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Importe (€) *</Label>
@@ -555,7 +646,7 @@ export default function GarantiasPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Tipo *</Label>
-                    <Select 
+                    <Select
                       value={newWarranty.type}
                       onValueChange={(v: any) => setNewWarranty({ ...newWarranty, type: v })}
                     >
@@ -571,16 +662,18 @@ export default function GarantiasPage() {
                     </Select>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label>Fecha de Depósito</Label>
                   <Input
                     type="date"
                     value={newWarranty.depositDate}
-                    onChange={(e) => setNewWarranty({ ...newWarranty, depositDate: e.target.value })}
+                    onChange={(e) =>
+                      setNewWarranty({ ...newWarranty, depositDate: e.target.value })
+                    }
                   />
                 </div>
-                
+
                 {newWarranty.type === 'bank_guarantee' && (
                   <div className="space-y-2">
                     <Label>Entidad Bancaria</Label>
@@ -591,7 +684,7 @@ export default function GarantiasPage() {
                     />
                   </div>
                 )}
-                
+
                 {newWarranty.type === 'insurance' && (
                   <>
                     <div className="space-y-2">
@@ -599,7 +692,9 @@ export default function GarantiasPage() {
                       <Input
                         placeholder="Mapfre, Allianz..."
                         value={newWarranty.insuranceCompany}
-                        onChange={(e) => setNewWarranty({ ...newWarranty, insuranceCompany: e.target.value })}
+                        onChange={(e) =>
+                          setNewWarranty({ ...newWarranty, insuranceCompany: e.target.value })
+                        }
                       />
                     </div>
                     <div className="space-y-2">
@@ -607,12 +702,14 @@ export default function GarantiasPage() {
                       <Input
                         placeholder="POL-2025-XXXXX"
                         value={newWarranty.policyNumber}
-                        onChange={(e) => setNewWarranty({ ...newWarranty, policyNumber: e.target.value })}
+                        onChange={(e) =>
+                          setNewWarranty({ ...newWarranty, policyNumber: e.target.value })
+                        }
                       />
                     </div>
                   </>
                 )}
-                
+
                 <div className="space-y-2">
                   <Label>Notas</Label>
                   <Textarea
@@ -626,9 +723,7 @@ export default function GarantiasPage() {
                 <Button variant="outline" onClick={() => setShowNewDialog(false)}>
                   Cancelar
                 </Button>
-                <Button onClick={handleCreateWarranty}>
-                  Registrar Garantía
-                </Button>
+                <Button onClick={handleCreateWarranty}>Registrar Garantía</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -638,40 +733,52 @@ export default function GarantiasPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Garantías</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Garantías
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">{stats.total}</div>
               <p className="text-xs text-muted-foreground">{stats.active} activas</p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Importe Total</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Importe Total
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-600">{formatCurrency(stats.totalAmount)}</div>
+              <div className="text-3xl font-bold text-green-600">
+                {formatCurrency(stats.totalAmount)}
+              </div>
               <p className="text-xs text-muted-foreground">En garantías activas</p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Pendientes Devolución</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Pendientes Devolución
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-yellow-600">{stats.pendingReturn}</div>
               <p className="text-xs text-muted-foreground">Requieren procesamiento</p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Deducciones</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Deducciones
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-red-600">{formatCurrency(stats.totalDeductions)}</div>
+              <div className="text-3xl font-bold text-red-600">
+                {formatCurrency(stats.totalDeductions)}
+              </div>
               <p className="text-xs text-muted-foreground">Por daños/impagos</p>
             </CardContent>
           </Card>
@@ -772,19 +879,23 @@ export default function GarantiasPage() {
                             Ver detalles
                           </DropdownMenuItem>
                           {warranty.status === 'active' && (
-                            <DropdownMenuItem onClick={() => {
-                              setSelectedWarranty(warranty);
-                              setShowDeductionDialog(true);
-                            }}>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedWarranty(warranty);
+                                setShowDeductionDialog(true);
+                              }}
+                            >
                               <AlertTriangle className="h-4 w-4 mr-2" />
                               Añadir deducción
                             </DropdownMenuItem>
                           )}
                           {warranty.status === 'pending_return' && (
-                            <DropdownMenuItem onClick={() => {
-                              setSelectedWarranty(warranty);
-                              setShowReturnDialog(true);
-                            }}>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedWarranty(warranty);
+                                setShowReturnDialog(true);
+                              }}
+                            >
                               <DollarSign className="h-4 w-4 mr-2" />
                               Procesar devolución
                             </DropdownMenuItem>
@@ -810,7 +921,9 @@ export default function GarantiasPage() {
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">A Devolver</p>
-                      <p className="text-lg font-bold text-green-600">{formatCurrency(getReturnAmount(warranty))}</p>
+                      <p className="text-lg font-bold text-green-600">
+                        {formatCurrency(getReturnAmount(warranty))}
+                      </p>
                     </div>
                   </div>
 
@@ -822,12 +935,19 @@ export default function GarantiasPage() {
                       </p>
                       <div className="space-y-2">
                         {warranty.deductions.map((ded) => (
-                          <div key={ded.id} className="flex items-center justify-between p-2 bg-red-50 border border-red-100 rounded">
+                          <div
+                            key={ded.id}
+                            className="flex items-center justify-between p-2 bg-red-50 border border-red-100 rounded"
+                          >
                             <div>
                               <p className="text-sm font-medium">{ded.reason}</p>
-                              <p className="text-xs text-muted-foreground">{formatDate(ded.date)}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatDate(ded.date)}
+                              </p>
                             </div>
-                            <p className="text-sm font-bold text-red-600">-{formatCurrency(ded.amount)}</p>
+                            <p className="text-sm font-bold text-red-600">
+                              -{formatCurrency(ded.amount)}
+                            </p>
                           </div>
                         ))}
                       </div>
@@ -842,7 +962,11 @@ export default function GarantiasPage() {
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {warranty.documents.map((doc) => (
-                          <Badge key={doc.id} variant="outline" className="cursor-pointer hover:bg-muted">
+                          <Badge
+                            key={doc.id}
+                            variant="outline"
+                            className="cursor-pointer hover:bg-muted"
+                          >
                             <FileText className="h-3 w-3 mr-1" />
                             {doc.name}
                           </Badge>
@@ -861,9 +985,7 @@ export default function GarantiasPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Añadir Deducción</DialogTitle>
-              <DialogDescription>
-                Registra una deducción por daños o impagos
-              </DialogDescription>
+              <DialogDescription>Registra una deducción por daños o impagos</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
@@ -889,7 +1011,8 @@ export default function GarantiasPage() {
                     <strong>Garantía:</strong> {formatCurrency(selectedWarranty.amount)}
                   </p>
                   <p className="text-sm">
-                    <strong>Deducciones previas:</strong> {formatCurrency(
+                    <strong>Deducciones previas:</strong>{' '}
+                    {formatCurrency(
                       selectedWarranty.deductions.reduce((sum, d) => sum + d.amount, 0)
                     )}
                   </p>
@@ -903,9 +1026,7 @@ export default function GarantiasPage() {
               <Button variant="outline" onClick={() => setShowDeductionDialog(false)}>
                 Cancelar
               </Button>
-              <Button onClick={handleAddDeduction}>
-                Añadir Deducción
-              </Button>
+              <Button onClick={handleAddDeduction}>Añadir Deducción</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -915,9 +1036,7 @@ export default function GarantiasPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Procesar Devolución</DialogTitle>
-              <DialogDescription>
-                Confirma la devolución de la garantía
-              </DialogDescription>
+              <DialogDescription>Confirma la devolución de la garantía</DialogDescription>
             </DialogHeader>
             {selectedWarranty && (
               <div className="space-y-4 py-4">
@@ -933,9 +1052,12 @@ export default function GarantiasPage() {
                   </div>
                   <div className="flex justify-between text-red-600">
                     <span>Total deducciones:</span>
-                    <span>-{formatCurrency(
-                      selectedWarranty.deductions.reduce((sum, d) => sum + d.amount, 0)
-                    )}</span>
+                    <span>
+                      -
+                      {formatCurrency(
+                        selectedWarranty.deductions.reduce((sum, d) => sum + d.amount, 0)
+                      )}
+                    </span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-bold text-green-600">
@@ -962,16 +1084,6 @@ export default function GarantiasPage() {
           </DialogContent>
         </Dialog>
       </div>
-
-      {/* Asistente IA de Documentos */}
-      <AIDocumentAssistant 
-        context="documentos"
-        variant="floating"
-        position="bottom-right"
-        onAnalysisComplete={(analysis, file) => {
-          toast.success(`Documento "${file.name}" analizado correctamente`);
-        }}
-      />
     </AuthenticatedLayout>
   );
 }

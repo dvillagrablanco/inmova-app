@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -58,6 +58,7 @@ import Image from 'next/image';
 import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
 import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
+import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 
 interface Property {
   id: string;
@@ -95,7 +96,10 @@ export default function PropiedadesPage() {
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<string>('all');
@@ -124,7 +128,7 @@ export default function PropiedadesPage() {
           setProperties(data);
           setFilteredProperties(data);
         } else {
-          toast.error('Error al cargar propiedades');
+          toast.error('Error de conexión');
         }
       } catch (error) {
         console.error('Error fetching properties:', error);
@@ -172,9 +176,7 @@ export default function PropiedadesPage() {
 
     // Filtro por habitaciones mínimas
     if (habitacionesMin) {
-      filtered = filtered.filter(
-        (prop) => (prop.habitaciones || 0) >= parseInt(habitacionesMin)
-      );
+      filtered = filtered.filter((prop) => (prop.habitaciones || 0) >= parseInt(habitacionesMin));
     }
 
     // Aplicar ordenamiento
@@ -209,15 +211,25 @@ export default function PropiedadesPage() {
     }
 
     setFilteredProperties(sorted);
-  }, [searchTerm, estadoFilter, tipoFilter, precioMin, precioMax, habitacionesMin, sortBy, properties]);
+  }, [
+    searchTerm,
+    estadoFilter,
+    tipoFilter,
+    precioMin,
+    precioMax,
+    habitacionesMin,
+    sortBy,
+    properties,
+  ]);
 
   // Funciones de utilidad
   const getEstadoBadge = (estado: string) => {
-    const badges: Record<string, { variant: any; label: string; color: string }> = {
-      ocupada: { variant: 'default', label: 'Ocupada', color: 'bg-green-500' },
-      disponible: { variant: 'secondary', label: 'Disponible', color: 'bg-blue-500' },
-      en_mantenimiento: { variant: 'outline', label: 'Mantenimiento', color: 'bg-yellow-500' },
-    };
+    const badges: Record<string, { variant: BadgeProps['variant']; label: string; color: string }> =
+      {
+        ocupada: { variant: 'default', label: 'Ocupada', color: 'bg-green-500' },
+        disponible: { variant: 'secondary', label: 'Disponible', color: 'bg-blue-500' },
+        en_mantenimiento: { variant: 'outline', label: 'Mantenimiento', color: 'bg-yellow-500' },
+      };
     return badges[estado] || { variant: 'default', label: estado, color: 'bg-gray-500' };
   };
 
@@ -246,12 +258,40 @@ export default function PropiedadesPage() {
     }
   };
 
+  const handleDeleteClick = (property: Property) => {
+    setPropertyToDelete(property);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!propertyToDelete) return;
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/units/${propertyToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('delete_failed');
+      }
+
+      setProperties((prev) => prev.filter((prop) => prop.id !== propertyToDelete.id));
+      toast.success('Propiedad eliminada correctamente');
+    } catch (error) {
+      console.error('Error deleting property:', error);
+      toast.error('Error de conexión');
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setPropertyToDelete(null);
+    }
+  };
+
   // Estadísticas
   const totalProperties = properties.length;
   const ocupadas = properties.filter((p) => p.estado === 'ocupada').length;
   const disponibles = properties.filter((p) => p.estado === 'disponible').length;
-  const ocupacionRate =
-    totalProperties > 0 ? Math.round((ocupadas / totalProperties) * 100) : 0;
+  const ocupacionRate = totalProperties > 0 ? Math.round((ocupadas / totalProperties) * 100) : 0;
   const ingresosMensuales = properties
     .filter((p) => p.estado === 'ocupada')
     .reduce((sum, p) => sum + p.rentaMensual, 0);
@@ -314,20 +354,15 @@ export default function PropiedadesPage() {
     <AuthenticatedLayout>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Smart Breadcrumbs */}
-        <SmartBreadcrumbs
-          totalCount={totalProperties}
-          showBackButton={true}
-        />
+        <SmartBreadcrumbs totalCount={totalProperties} showBackButton={true} />
 
         {/* Header con Quick Actions */}
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Gestión de Propiedades</h1>
-            <p className="text-muted-foreground">
-              Administra tu portfolio inmobiliario completo
-            </p>
+            <p className="text-muted-foreground">Administra tu portfolio inmobiliario completo</p>
           </div>
-          
+
           {/* Quick Actions */}
           <ContextualQuickActions />
         </div>
@@ -529,7 +564,8 @@ export default function PropiedadesPage() {
             {/* Contador de resultados */}
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                {filteredProperties.length} {filteredProperties.length === 1 ? 'propiedad' : 'propiedades'}{' '}
+                {filteredProperties.length}{' '}
+                {filteredProperties.length === 1 ? 'propiedad' : 'propiedades'}{' '}
                 {hasActiveFilters && `de ${totalProperties} totales`}
               </p>
             </div>
@@ -677,7 +713,7 @@ export default function PropiedadesPage() {
                                 className="text-red-600"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  toast.error('Función en desarrollo');
+                                  handleDeleteClick(property);
                                 }}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
@@ -826,12 +862,21 @@ export default function PropiedadesPage() {
           </>
         )}
 
-        {/* Asistente IA de Documentos */}
-        <AIDocumentAssistant 
-          context="propiedades"
-          variant="floating"
-          position="bottom-right"
+        <DeleteConfirmationDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          onConfirm={handleDeleteConfirm}
+          isLoading={isDeleting}
+          title="¿Eliminar propiedad?"
+          itemName={
+            propertyToDelete
+              ? `${propertyToDelete.building.nombre} - ${propertyToDelete.numero}`
+              : undefined
+          }
         />
+
+        {/* Asistente IA de Documentos */}
+        <AIDocumentAssistant context="propiedades" variant="floating" position="bottom-right" />
       </div>
     </AuthenticatedLayout>
   );

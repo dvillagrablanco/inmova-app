@@ -18,12 +18,20 @@ vi.mock('@/lib/logger', () => ({
   },
 }));
 
+import { sendEmail } from '@/lib/email-service';
+
 describe('📧 Email Service - Unit Tests', () => {
   let mockSendMail: ReturnType<typeof vi.fn>;
   let mockTransporter: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    process.env.NODE_ENV = 'test';
+    process.env.SMTP_USER = 'smtp-user';
+    process.env.SMTP_PASSWORD = 'smtp-pass';
+    process.env.SMTP_HOST = 'smtp.example.com';
+    process.env.SMTP_PORT = '587';
 
     // Mock del método sendMail
     mockSendMail = vi.fn().mockResolvedValue({
@@ -50,14 +58,18 @@ describe('📧 Email Service - Unit Tests', () => {
       from: 'noreply@inmova.app',
       to: 'user@example.com',
       subject: 'Test Email',
-      text: 'This is a test email',
+      html: '<p>This is a test email</p>',
     };
 
-    const result = await mockTransporter.sendMail(emailData);
+    const result = await sendEmail(emailData);
 
-    expect(result.messageId).toBe('test-message-id-123');
-    expect(result.accepted).toContain('recipient@example.com');
-    expect(mockSendMail).toHaveBeenCalledWith(emailData);
+    expect(result).toBe(true);
+    expect(mockSendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: emailData.to,
+        subject: emailData.subject,
+      })
+    );
   });
 
   test('✅ Debe enviar email con HTML', async () => {
@@ -68,9 +80,9 @@ describe('📧 Email Service - Unit Tests', () => {
       html: '<h1>Welcome!</h1><p>Thanks for signing up.</p>',
     };
 
-    const result = await mockTransporter.sendMail(emailData);
+    const result = await sendEmail(emailData);
 
-    expect(result.messageId).toBeDefined();
+    expect(result).toBe(true);
     expect(mockSendMail).toHaveBeenCalledWith(
       expect.objectContaining({
         html: expect.stringContaining('<h1>Welcome!</h1>'),
@@ -83,7 +95,7 @@ describe('📧 Email Service - Unit Tests', () => {
       from: 'noreply@inmova.app',
       to: 'user@example.com',
       subject: 'Contract Document',
-      text: 'Please find attached your contract.',
+      html: '<p>Please find attached your contract.</p>',
       attachments: [
         {
           filename: 'contract.pdf',
@@ -92,9 +104,9 @@ describe('📧 Email Service - Unit Tests', () => {
       ],
     };
 
-    const result = await mockTransporter.sendMail(emailData);
+    const result = await sendEmail(emailData);
 
-    expect(result.messageId).toBeDefined();
+    expect(result).toBe(true);
     expect(mockSendMail).toHaveBeenCalledWith(
       expect.objectContaining({
         attachments: expect.arrayContaining([
@@ -109,15 +121,15 @@ describe('📧 Email Service - Unit Tests', () => {
       from: 'noreply@inmova.app',
       to: ['user1@example.com', 'user2@example.com', 'user3@example.com'],
       subject: 'Team Notification',
-      text: 'This is a team notification.',
+      html: '<p>This is a team notification.</p>',
     };
 
-    const result = await mockTransporter.sendMail(emailData);
+    const result = await sendEmail(emailData);
 
-    expect(result.messageId).toBeDefined();
+    expect(result).toBe(true);
     expect(mockSendMail).toHaveBeenCalledWith(
       expect.objectContaining({
-        to: expect.arrayContaining(['user1@example.com', 'user2@example.com', 'user3@example.com']),
+        to: expect.stringContaining('user1@example.com'),
       })
     );
   });
@@ -131,12 +143,13 @@ describe('📧 Email Service - Unit Tests', () => {
       from: 'noreply@inmova.app',
       to: 'user@example.com',
       subject: 'Test',
-      text: 'Test',
+      html: '<p>Test</p>',
     };
 
     mockSendMail.mockRejectedValue(new Error('SMTP connection failed'));
 
-    await expect(mockTransporter.sendMail(emailData)).rejects.toThrow('SMTP connection failed');
+    const result = await sendEmail(emailData);
+    expect(result).toBe(false);
   });
 
   test('❌ Debe manejar destinatario inválido', async () => {
@@ -146,28 +159,27 @@ describe('📧 Email Service - Unit Tests', () => {
       rejected: ['invalid@example.com'],
     });
 
-    const result = await mockTransporter.sendMail({
+    const result = await sendEmail({
       from: 'noreply@inmova.app',
       to: 'invalid@example.com',
       subject: 'Test',
-      text: 'Test',
+      html: '<p>Test</p>',
     });
 
-    expect(result.rejected).toContain('invalid@example.com');
-    expect(result.accepted.length).toBe(0);
+    expect(result).toBe(false);
   });
 
   test('❌ Debe manejar timeout de conexión', async () => {
     mockSendMail.mockRejectedValue(new Error('Connection timeout'));
 
-    await expect(
-      mockTransporter.sendMail({
-        from: 'noreply@inmova.app',
-        to: 'user@example.com',
-        subject: 'Test',
-        text: 'Test',
-      })
-    ).rejects.toThrow('Connection timeout');
+    const result = await sendEmail({
+      from: 'noreply@inmova.app',
+      to: 'user@example.com',
+      subject: 'Test',
+      html: '<p>Test</p>',
+    });
+
+    expect(result).toBe(false);
   });
 
   // ========================================
@@ -178,23 +190,22 @@ describe('📧 Email Service - Unit Tests', () => {
     const emailData = {
       from: 'noreply@inmova.app',
       subject: 'Test',
-      text: 'Test without recipient',
+      html: '<p>Test without recipient</p>',
     };
 
-    // En un escenario real, esto debería validarse antes de llamar sendMail
-    await expect(mockTransporter.sendMail(emailData)).resolves.toBeDefined();
-    expect(mockSendMail).toHaveBeenCalled();
+    const result = await sendEmail(emailData as any);
+    expect(result).toBe(false);
   });
 
   test('⚠️ Debe manejar email con subject vacío', async () => {
-    const result = await mockTransporter.sendMail({
+    const result = await sendEmail({
       from: 'noreply@inmova.app',
       to: 'user@example.com',
       subject: '',
-      text: 'Email without subject',
+      html: '<p>Email without subject</p>',
     });
 
-    expect(result.messageId).toBeDefined();
+    expect(result).toBe(true);
   });
 
   test('⚠️ Debe manejar email con caracteres especiales en subject', async () => {
@@ -202,11 +213,11 @@ describe('📧 Email Service - Unit Tests', () => {
       from: 'noreply@inmova.app',
       to: 'user@example.com',
       subject: '¡Bienvenido! 🎉 Welcome to Inmova 中文',
-      text: 'Test',
+      html: '<p>Test</p>',
     };
 
-    const result = await mockTransporter.sendMail(emailData);
-    expect(result.messageId).toBeDefined();
+    const result = await sendEmail(emailData);
+    expect(result).toBe(true);
   });
 
   test('⚠️ Debe manejar HTML con scripts (potencial XSS)', async () => {
@@ -217,9 +228,8 @@ describe('📧 Email Service - Unit Tests', () => {
       html: '<script>alert("XSS")</script><p>Safe content</p>',
     };
 
-    // El servicio de email NO debe sanitizar - eso debe hacerse antes
-    const result = await mockTransporter.sendMail(emailData);
-    expect(result.messageId).toBeDefined();
+    const result = await sendEmail(emailData);
+    expect(result).toBe(true);
   });
 
   test('⚠️ Debe manejar adjuntos grandes', async () => {
@@ -227,7 +237,7 @@ describe('📧 Email Service - Unit Tests', () => {
       from: 'noreply@inmova.app',
       to: 'user@example.com',
       subject: 'Large Attachment',
-      text: 'File attached',
+      html: '<p>File attached</p>',
       attachments: [
         {
           filename: 'large-file.pdf',
@@ -237,8 +247,8 @@ describe('📧 Email Service - Unit Tests', () => {
       ],
     };
 
-    const result = await mockTransporter.sendMail(emailData);
-    expect(result.messageId).toBeDefined();
+    const result = await sendEmail(emailData);
+    expect(result).toBe(true);
   });
 
   // ========================================
@@ -303,14 +313,14 @@ describe('📧 Email Service - Unit Tests', () => {
   test('⚠️ Debe manejar límite de rate en provider', async () => {
     mockSendMail.mockRejectedValue(new Error('Rate limit exceeded'));
 
-    await expect(
-      mockTransporter.sendMail({
-        from: 'noreply@inmova.app',
-        to: 'user@example.com',
-        subject: 'Test',
-        text: 'Test',
-      })
-    ).rejects.toThrow('Rate limit exceeded');
+    const result = await sendEmail({
+      from: 'noreply@inmova.app',
+      to: 'user@example.com',
+      subject: 'Test',
+      html: '<p>Test</p>',
+    });
+
+    expect(result).toBe(false);
   });
 
   // ========================================

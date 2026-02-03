@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
@@ -39,17 +40,14 @@ export async function POST(request: NextRequest) {
 
     logger.info(`Booking created: ${booking.id} for service ${serviceId}`);
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: 'Reserva creada correctamente',
       bookingId: booking.id,
     });
   } catch (error) {
     logger.error('Error creating marketplace booking:', error);
-    return NextResponse.json(
-      { error: 'Error al crear reserva' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear reserva' }, { status: 500 });
   }
 }
 
@@ -90,16 +88,15 @@ export async function GET(request: NextRequest) {
       serviceName: booking.service?.nombre || 'Servicio',
       providerName: booking.service?.provider?.nombre || 'Proveedor',
       status: booking.estado,
-      date: booking.fechaSolicitada?.toISOString().split('T')[0] || booking.createdAt.toISOString().split('T')[0],
+      date:
+        booking.fechaSolicitada?.toISOString().split('T')[0] ||
+        booking.createdAt.toISOString().split('T')[0],
       amount: booking.precio || 0,
     }));
 
     return NextResponse.json(formattedBookings);
   } catch (error) {
     logger.error('Error fetching bookings:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener reservas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener reservas' }, { status: 500 });
   }
 }

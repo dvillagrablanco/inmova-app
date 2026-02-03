@@ -120,6 +120,57 @@ export default function NuevoSeguroPage() {
   const [loadingQuotes, setLoadingQuotes] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState<InsuranceQuote | null>(null);
 
+  const toInputDate = (value: unknown) => {
+    if (!value) return null;
+    const raw = String(value).trim();
+    if (!raw) return null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+    if (/^\d{2}[/-]\d{2}[/-]\d{4}$/.test(raw)) {
+      const parts = raw.split(/[/-]/);
+      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    const parsed = new Date(raw);
+    if (!isNaN(parsed.getTime())) {
+      return parsed.toISOString().split('T')[0];
+    }
+    return null;
+  };
+
+  const handleApplyPolicyData = (data: Record<string, any>) => {
+    const updates: Partial<typeof formData> = {};
+    const policyNumber = data.poliza || data.numeroPoliza || data.policyNumber;
+    if (policyNumber) updates.numeroPoliza = String(policyNumber);
+    if (data.aseguradora || data.provider) {
+      updates.aseguradora = String(data.aseguradora || data.provider);
+    }
+    const startDate = toInputDate(data.fechaInicio || data.startDate);
+    if (startDate) updates.fechaInicio = startDate;
+    const endDate = toInputDate(data.fechaVencimiento || data.endDate);
+    if (endDate) updates.fechaVencimiento = endDate;
+    if (data.prima || data.annualPremium || data.premium) {
+      updates.prima = String(data.prima || data.annualPremium || data.premium);
+    }
+    if (data.cobertura || data.coverage) {
+      updates.cobertura = String(data.cobertura || data.coverage);
+    }
+    if (data.franquicia || data.deductible) {
+      updates.franquicia = String(data.franquicia || data.deductible);
+    }
+    if (data.observaciones || data.notes) {
+      updates.observaciones = String(data.observaciones || data.notes);
+    }
+    if (data.tipo || data.tipoSeguro) {
+      const raw = String(data.tipo || data.tipoSeguro).toUpperCase();
+      const match = tiposSeguro.find((t) => t.value === raw);
+      if (match) updates.tipo = match.value;
+    }
+
+    if (Object.keys(updates).length > 0) {
+      setFormData((prev) => ({ ...prev, ...updates }));
+      toast.success('Datos de la póliza aplicados al formulario');
+    }
+  };
+
   useEffect(() => {
     fetchBuildings();
   }, []);
@@ -478,6 +529,12 @@ export default function NuevoSeguroPage() {
                   <CardDescription>Completa la información de la póliza</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  <AIDocumentAssistant
+                    context="seguros"
+                    variant="inline"
+                    position="bottom-right"
+                    onApplyData={handleApplyPolicyData}
+                  />
                   {/* Basic Info */}
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
@@ -677,20 +734,6 @@ export default function NuevoSeguroPage() {
           </TabsContent>
         </Tabs>
       </div>
-
-      {/* Asistente IA de Documentos - Para subir pólizas de seguros */}
-      <AIDocumentAssistant 
-        context="seguros"
-        variant="floating"
-        position="bottom-right"
-        onApplyData={(data) => {
-          // Aplicar datos extraídos de la póliza al formulario
-          if (data.poliza) setFormData(prev => ({ ...prev, numeroPoliza: data.poliza }));
-          if (data.aseguradora) setFormData(prev => ({ ...prev, aseguradora: data.aseguradora }));
-          if (data.prima) setFormData(prev => ({ ...prev, prima: data.prima }));
-          toast.success('Datos de la póliza aplicados al formulario');
-        }}
-      />
     </AuthenticatedLayout>
   );
 }

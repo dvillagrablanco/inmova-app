@@ -4,7 +4,7 @@
  * Incluye: Edge Cases, validaciones, casos límite
  */
 
-import { Prisma } from '@prisma/client';
+import { validateCoupon } from '@/lib/coupon-validation';
 
 // Tipos para el sistema de cupones
 interface Coupon {
@@ -18,86 +18,6 @@ interface Coupon {
   validUntil: Date | null;
   isActive: boolean;
   minPurchaseAmount: number | null;
-}
-
-interface CouponValidationResult {
-  isValid: boolean;
-  error?: string;
-  discountAmount?: number;
-  finalPrice?: number;
-}
-
-// ========================================
-// FUNCIÓN DE VALIDACIÓN DE CUPONES
-// ========================================
-
-function validateCoupon(
-  coupon: Coupon,
-  purchaseAmount: number,
-  currentDate: Date = new Date()
-): CouponValidationResult {
-  // 1. Validar que el cupón esté activo
-  if (!coupon.isActive) {
-    return { isValid: false, error: 'Cupón inactivo' };
-  }
-
-  // 2. Validar límite de uso
-  if (coupon.maxUsageCount !== null && coupon.currentUsageCount >= coupon.maxUsageCount) {
-    return { isValid: false, error: 'Cupón agotado' };
-  }
-
-  // 3. Validar fechas de vigencia
-  if (currentDate < coupon.validFrom) {
-    return { isValid: false, error: 'Cupón aún no válido' };
-  }
-
-  if (coupon.validUntil && currentDate > coupon.validUntil) {
-    return { isValid: false, error: 'Cupón expirado' };
-  }
-
-  // 4. Validar monto mínimo de compra
-  if (coupon.minPurchaseAmount !== null && purchaseAmount < coupon.minPurchaseAmount) {
-    return {
-      isValid: false,
-      error: `Compra mínima de €${coupon.minPurchaseAmount} requerida`,
-    };
-  }
-
-  // 5. Validar valores de descuento
-  if (coupon.discountValue <= 0 || !isFinite(coupon.discountValue)) {
-    return { isValid: false, error: 'Valor de descuento inválido' };
-  }
-
-  // 6. Validar monto de compra
-  if (purchaseAmount <= 0 || !isFinite(purchaseAmount)) {
-    return { isValid: false, error: 'Monto de compra inválido' };
-  }
-
-  // 7. Calcular descuento
-  let discountAmount = 0;
-
-  if (coupon.discountType === 'percentage') {
-    // Validar que el porcentaje esté en rango válido
-    if (coupon.discountValue > 100) {
-      return { isValid: false, error: 'Porcentaje inválido (>100%)' };
-    }
-    discountAmount = (purchaseAmount * coupon.discountValue) / 100;
-  } else if (coupon.discountType === 'fixed') {
-    discountAmount = coupon.discountValue;
-  }
-
-  // El descuento no puede ser mayor que el precio
-  if (discountAmount > purchaseAmount) {
-    discountAmount = purchaseAmount;
-  }
-
-  const finalPrice = Math.max(0, purchaseAmount - discountAmount);
-
-  return {
-    isValid: true,
-    discountAmount: parseFloat(discountAmount.toFixed(2)),
-    finalPrice: parseFloat(finalPrice.toFixed(2)),
-  };
 }
 
 describe('🧪 Coupon Validation - Casos Normales', () => {

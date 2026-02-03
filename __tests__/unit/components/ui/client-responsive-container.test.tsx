@@ -1,56 +1,33 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { ClientResponsiveContainer } from '@/components/ui/client-responsive-container';
 
+vi.mock('recharts', () => ({
+  ResponsiveContainer: ({ children }: { children?: ReactNode }) => (
+    <div data-testid="responsive-container">{children}</div>
+  ),
+}));
+
 describe('ClientResponsiveContainer', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<ClientResponsiveContainer {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  it('renderiza el contenedor y sus hijos', () => {
+    render(
+      <ClientResponsiveContainer width={320} height={200}>
+        <div>Grafica</div>
+      </ClientResponsiveContainer>
+    );
+
+    expect(screen.getByTestId('responsive-container')).toBeInTheDocument();
+    expect(screen.getByText('Grafica')).toBeInTheDocument();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<ClientResponsiveContainer {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
-  });
+  it('acepta dimensiones en porcentaje', () => {
+    render(
+      <ClientResponsiveContainer width="100%" height="50%">
+        <div>Contenido</div>
+      </ClientResponsiveContainer>
+    );
 
-  it('should handle user interactions', async () => {
-    render(<ClientResponsiveContainer />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
-  });
-
-  it('should execute side effects', async () => {
-    render(<ClientResponsiveContainer />);
-    
-    // TODO: Verificar efectos
-    await waitFor(() => {
-      // expect(something).toBe(true);
-    });
-  });
-
-  it('should be accessible', () => {
-    render(<ClientResponsiveContainer />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    expect(screen.getByText('Contenido')).toBeInTheDocument();
   });
 });

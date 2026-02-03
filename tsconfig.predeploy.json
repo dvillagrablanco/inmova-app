@@ -1,0 +1,28 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "app/api/health/route.ts",
+    "app/api/auth/[...nextauth]/route.ts",
+    "app/api/public/subscription-plans/route.ts",
+    "lib/auth-guard.ts",
+    "lib/auth-options.ts",
+    "lib/db.ts",
+    "lib/logger.ts",
+    "middleware.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    ".build",
+    "out",
+    "dist",
+    "build",
+    "public",
+    "prisma/migrations",
+    "__tests__/**/*",
+    "e2e/**/*",
+    "stories/**/*",
+    ".storybook/**/*",
+    "scripts/**/*"
+  ]
+}

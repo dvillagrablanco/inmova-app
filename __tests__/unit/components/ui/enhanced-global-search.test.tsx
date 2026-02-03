@@ -1,75 +1,47 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { EnhancedGlobalSearch } from '@/components/ui/enhanced-global-search';
 
+vi.mock('@/components/ui/command', () => ({
+  CommandDialog: ({ children, open }: any) => (open ? <div>{children}</div> : null),
+  CommandInput: ({ placeholder, value, onValueChange }: any) => (
+    <input
+      placeholder={placeholder}
+      value={value}
+      onChange={(e) => onValueChange?.(e.target.value)}
+    />
+  ),
+  CommandList: ({ children }: any) => <div>{children}</div>,
+  CommandGroup: ({ children, heading }: any) => (
+    <div>
+      {heading && <h3>{heading}</h3>}
+      {children}
+    </div>
+  ),
+  CommandItem: ({ children, onSelect }: any) => (
+    <button type="button" onClick={() => onSelect?.('')}>
+      {children}
+    </button>
+  ),
+  CommandSeparator: () => <hr />,
+  CommandEmpty: ({ children }: any) => <div>{children}</div>,
+}));
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+}));
+
 describe('EnhancedGlobalSearch', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<EnhancedGlobalSearch {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
-  });
-
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<EnhancedGlobalSearch {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
-  });
-
-  it('should handle user interactions', async () => {
+  it('renderiza el botón de búsqueda', () => {
     render(<EnhancedGlobalSearch />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
+
+    expect(screen.getByRole('button', { name: /buscar/i })).toBeInTheDocument();
   });
 
-  it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<EnhancedGlobalSearch onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
-  });
+  it('renderiza el input cuando está abierto', () => {
+    render(<EnhancedGlobalSearch open onOpenChange={vi.fn()} />);
 
-  it('should execute side effects', async () => {
-    render(<EnhancedGlobalSearch />);
-    
-    // TODO: Verificar efectos
-    await waitFor(() => {
-      // expect(something).toBe(true);
-    });
-  });
-
-  it('should be accessible', () => {
-    render(<EnhancedGlobalSearch />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    expect(screen.getByPlaceholderText(/buscar en inmova/i)).toBeInTheDocument();
+    expect(screen.getByText(/atajos de búsqueda/i)).toBeInTheDocument();
   });
 });

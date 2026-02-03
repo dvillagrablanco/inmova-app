@@ -1,44 +1,19 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import { LiveRegion } from '@/components/ui/live-region';
 
 describe('LiveRegion', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<LiveRegion {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  it('renderiza el mensaje con rol status', () => {
+    render(<LiveRegion message="Actualizado" />);
+
+    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.getByText('Actualizado')).toBeInTheDocument();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<LiveRegion {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
-  });
+  it('permite rol alert y aria-live assertive', () => {
+    render(<LiveRegion message="Error" role="alert" aria-live="assertive" />);
 
-  it('should execute side effects', async () => {
-    render(<LiveRegion />);
-    
-    // TODO: Verificar efectos
-    await waitFor(() => {
-      // expect(something).toBe(true);
-    });
-  });
-
-  it('should be accessible', () => {
-    render(<LiveRegion />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    const region = screen.getByRole('alert');
+    expect(region).toHaveAttribute('aria-live', 'assertive');
   });
 });

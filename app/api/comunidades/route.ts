@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Schema de validación para crear comunidad
 const createComunidadSchema = z.object({
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
 
     // Construir filtros
     const where: any = { companyId };
-    
+
     if (search) {
       where.OR = [
         { nombreComunidad: { contains: search, mode: 'insensitive' } },
@@ -92,7 +93,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Formatear respuesta
-    const formattedComunidades = comunidades.map(c => ({
+    const formattedComunidades = comunidades.map((c) => ({
       id: c.id,
       nombreComunidad: c.nombreComunidad,
       cif: c.cif,

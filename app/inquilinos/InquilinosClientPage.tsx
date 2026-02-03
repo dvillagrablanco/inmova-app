@@ -54,13 +54,9 @@ interface Tenant {
 
 interface InquilinosClientPageProps {
   initialTenants: Tenant[];
-  session: any;
 }
 
-export default function InquilinosClientPage({
-  initialTenants,
-  session,
-}: InquilinosClientPageProps) {
+export default function InquilinosClientPage({ initialTenants }: InquilinosClientPageProps) {
   const router = useRouter();
   const { canCreate, canDelete } = usePermissions();
   const [filteredTenants, setFilteredTenants] = useState<Tenant[]>(initialTenants);
@@ -133,29 +129,28 @@ export default function InquilinosClientPage({
     setDeleteDialogOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!tenantToDelete) return;
 
     setIsDeleting(true);
-    fetch(`/api/tenants/${tenantToDelete.id}`, {
-      method: 'DELETE',
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('No se pudo eliminar el inquilino');
-        }
-        toast.success('Inquilino eliminado correctamente');
-        setDeleteDialogOpen(false);
-        // Refresh the page
-        setTimeout(() => router.refresh(), 300);
-      })
-      .catch((error) => {
-        logger.error('Error deleting tenant:', error);
-        toast.error('Error al eliminar el inquilino');
-      })
-      .finally(() => {
-        setIsDeleting(false);
+    try {
+      const response = await fetch(`/api/tenants/${tenantToDelete.id}`, {
+        method: 'DELETE',
       });
+
+      if (!response.ok) {
+        throw new Error('delete_failed');
+      }
+
+      toast.success('Inquilino eliminado correctamente');
+      setDeleteDialogOpen(false);
+      setTimeout(() => router.refresh(), 300);
+    } catch (error) {
+      logger.error('Error deleting tenant:', error);
+      toast.error('Error de conexión');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const getInitials = (name: string) => {
@@ -481,6 +476,7 @@ export default function InquilinosClientPage({
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         onConfirm={handleDeleteConfirm}
+        isLoading={isDeleting}
         title="¿Eliminar inquilino?"
         description={`¿Estás seguro de que deseas eliminar a ${tenantToDelete?.nombreCompleto}? Esta acción no se puede deshacer.`}
       />

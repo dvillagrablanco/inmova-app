@@ -1,47 +1,52 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ContextualHelp } from '@/components/ui/contextual-help';
 
+vi.mock('@/components/ui/dialog', () => ({
+  Dialog: ({ children }: any) => <div>{children}</div>,
+  DialogTrigger: ({ children }: any) => <div>{children}</div>,
+  DialogContent: ({ children }: any) => <div>{children}</div>,
+  DialogHeader: ({ children }: any) => <div>{children}</div>,
+  DialogTitle: ({ children }: any) => <h2>{children}</h2>,
+  DialogDescription: ({ children }: any) => <p>{children}</p>,
+}));
+
 describe('ContextualHelp', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<ContextualHelp {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  const sections = [
+    { title: 'Introducción', content: 'Contenido inicial' },
+    { title: 'Siguiente paso', content: 'Contenido adicional', tips: ['Tip 1'] },
+  ];
+
+  it('renderiza título, descripción y secciones', () => {
+    render(
+      <ContextualHelp
+        module="Propiedades"
+        title="Ayuda de Propiedades"
+        description="Guía rápida"
+        sections={sections}
+      />
+    );
+
+    expect(screen.getByText('Ayuda de Propiedades')).toBeInTheDocument();
+    expect(screen.getByText('Guía rápida')).toBeInTheDocument();
+    expect(screen.getByText('Introducción')).toBeInTheDocument();
+    expect(screen.getByText('Contenido inicial')).toBeInTheDocument();
+    expect(screen.getByText('Tip 1')).toBeInTheDocument();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<ContextualHelp {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
-  });
+  it('ejecuta una acción rápida', () => {
+    const action = vi.fn();
+    render(
+      <ContextualHelp
+        module="Contratos"
+        title="Ayuda de Contratos"
+        description="Guía"
+        sections={sections}
+        quickActions={[{ label: 'Crear', action }]}
+      />
+    );
 
-  it('should handle user interactions', async () => {
-    render(<ContextualHelp />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
-  });
-
-  it('should be accessible', () => {
-    render(<ContextualHelp />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    fireEvent.click(screen.getByRole('button', { name: /crear/i }));
+    expect(action).toHaveBeenCalled();
   });
 });

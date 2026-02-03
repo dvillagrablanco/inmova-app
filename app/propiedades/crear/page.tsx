@@ -44,6 +44,7 @@ import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PhotoUploader } from '@/components/property/PhotoUploader';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
+import { z } from 'zod';
 
 interface Building {
   id: string;
@@ -51,6 +52,26 @@ interface Building {
   direccion: string;
   ciudad: string;
 }
+
+const propertyFormSchema = z.object({
+  numero: z.string().min(1, 'Numero requerido'),
+  buildingId: z.string().min(1, 'Edificio requerido'),
+  tipo: z.string().min(1, 'Tipo requerido'),
+  estado: z.string().min(1, 'Estado requerido'),
+  superficie: z.number().positive('Superficie requerida'),
+  rentaMensual: z.number().positive('Renta requerida'),
+  superficieUtil: z.number().positive().nullable().optional(),
+  habitaciones: z.number().int().nonnegative().nullable().optional(),
+  banos: z.number().int().nonnegative().nullable().optional(),
+  planta: z.number().int().nullable().optional(),
+  orientacion: z.string().nullable().optional(),
+  aireAcondicionado: z.boolean(),
+  calefaccion: z.boolean(),
+  terraza: z.boolean(),
+  balcon: z.boolean(),
+  amueblado: z.boolean(),
+  tourVirtual: z.string().nullable().optional(),
+});
 
 export default function CrearPropiedadPage() {
   const router = useRouter();
@@ -73,14 +94,14 @@ export default function CrearPropiedadPage() {
     planta: '',
     orientacion: '',
     rentaMensual: '',
-    
+
     // Características
     aireAcondicionado: false,
     calefaccion: false,
     terraza: false,
     balcon: false,
     amueblado: false,
-    
+
     // Opcional
     descripcion: '',
     tourVirtual: '',
@@ -104,7 +125,7 @@ export default function CrearPropiedadPage() {
           const data = await response.json();
           setBuildings(data);
         } else {
-          toast.error('Error al cargar edificios');
+          toast.error('Error de conexión');
         }
       } catch (error) {
         console.error('Error fetching buildings:', error);
@@ -117,7 +138,7 @@ export default function CrearPropiedadPage() {
     fetchBuildings();
   }, [status]);
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -125,30 +146,8 @@ export default function CrearPropiedadPage() {
     setFormData((prev) => ({ ...prev, [field]: checked }));
   };
 
-  const validateForm = () => {
-    if (!formData.numero.trim()) {
-      toast.error('El número de unidad es obligatorio');
-      return false;
-    }
-    if (!formData.buildingId) {
-      toast.error('Debes seleccionar un edificio');
-      return false;
-    }
-    if (!formData.superficie || parseFloat(formData.superficie) <= 0) {
-      toast.error('La superficie debe ser mayor a 0');
-      return false;
-    }
-    if (!formData.rentaMensual || parseFloat(formData.rentaMensual) <= 0) {
-      toast.error('La renta mensual debe ser mayor a 0');
-      return false;
-    }
-    return true;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) return;
 
     setIsLoading(true);
 
@@ -173,10 +172,17 @@ export default function CrearPropiedadPage() {
         tourVirtual: formData.tourVirtual.trim() || null,
       };
 
+      const parsed = propertyFormSchema.safeParse(payload);
+      if (!parsed.success) {
+        toast.error(parsed.error.errors[0]?.message || 'Datos invalidos');
+        setIsLoading(false);
+        return;
+      }
+
       const response = await fetch('/api/units', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(parsed.data),
       });
 
       if (response.ok) {
@@ -184,8 +190,7 @@ export default function CrearPropiedadPage() {
         toast.success('¡Propiedad creada exitosamente!');
         router.push(`/propiedades/${data.id}`);
       } else {
-        const error = await response.json();
-        toast.error(error.error || 'Error al crear la propiedad');
+        toast.error('Error de conexión');
       }
     } catch (error) {
       console.error('Error creating property:', error);
@@ -259,6 +264,50 @@ export default function CrearPropiedadPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          <AIDocumentAssistant
+            context="propiedades"
+            variant="inline"
+            position="bottom-right"
+            onApplyData={(data) => {
+              if (data.numero) {
+                setFormData((prev) => ({ ...prev, numero: String(data.numero) }));
+              }
+              if (data.superficie || data.metrosCuadrados) {
+                setFormData((prev) => ({
+                  ...prev,
+                  superficie: String(data.superficie || data.metrosCuadrados),
+                }));
+              }
+              if (data.superficieUtil || data.metrosUtiles) {
+                setFormData((prev) => ({
+                  ...prev,
+                  superficieUtil: String(data.superficieUtil || data.metrosUtiles),
+                }));
+              }
+              if (data.habitaciones) {
+                setFormData((prev) => ({ ...prev, habitaciones: String(data.habitaciones) }));
+              }
+              if (data.banos || data.baños) {
+                setFormData((prev) => ({ ...prev, banos: String(data.banos || data.baños) }));
+              }
+              if (data.planta) {
+                setFormData((prev) => ({ ...prev, planta: String(data.planta) }));
+              }
+              if (data.orientacion) {
+                setFormData((prev) => ({ ...prev, orientacion: String(data.orientacion) }));
+              }
+              if (data.rentaMensual || data.precio || data.alquiler) {
+                setFormData((prev) => ({
+                  ...prev,
+                  rentaMensual: String(data.rentaMensual || data.precio || data.alquiler),
+                }));
+              }
+              if (data.descripcion) {
+                setFormData((prev) => ({ ...prev, descripcion: String(data.descripcion) }));
+              }
+              toast.success('Datos del documento aplicados al formulario');
+            }}
+          />
           {/* Información Básica */}
           <Card>
             <CardHeader>
@@ -266,9 +315,7 @@ export default function CrearPropiedadPage() {
                 <Building2 className="h-5 w-5" />
                 Información Básica
               </CardTitle>
-              <CardDescription>
-                Datos principales de la propiedad
-              </CardDescription>
+              <CardDescription>Datos principales de la propiedad</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
@@ -612,11 +659,7 @@ export default function CrearPropiedadPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <PhotoUploader
-                existingPhotos={photos}
-                onPhotosChange={setPhotos}
-                maxPhotos={10}
-              />
+              <PhotoUploader existingPhotos={photos} onPhotosChange={setPhotos} maxPhotos={10} />
             </CardContent>
           </Card>
 
@@ -646,20 +689,6 @@ export default function CrearPropiedadPage() {
           </div>
         </form>
       </div>
-
-      {/* Asistente IA de Documentos - Para escrituras, certificados, etc. */}
-      <AIDocumentAssistant 
-        context="propiedades"
-        variant="floating"
-        position="bottom-right"
-        onApplyData={(data) => {
-          // Aplicar datos extraídos del documento al formulario
-          if (data.superficie) setFormData(prev => ({ ...prev, superficie: data.superficie }));
-          if (data.habitaciones) setFormData(prev => ({ ...prev, habitaciones: data.habitaciones }));
-          if (data.banos) setFormData(prev => ({ ...prev, banos: data.banos }));
-          toast.success('Datos del documento aplicados al formulario');
-        }}
-      />
     </AuthenticatedLayout>
   );
 }

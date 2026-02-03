@@ -2,6 +2,14 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
+const testBaseUrl = process.env.TEST_BASE_URL;
+const hasTestBaseUrl = Boolean(
+  testBaseUrl && testBaseUrl !== 'undefined' && testBaseUrl !== 'false'
+);
+const integrationExcludes = hasTestBaseUrl
+  ? []
+  : ['**/__tests__/integration/**/*.test.{ts,tsx}', 'tests/integration/**/*.test.{ts,tsx}'];
+
 /**
  * Configuración de Vitest para COBERTURA 100%
  * Todos los thresholds en 100% - production-ready
@@ -112,14 +120,19 @@ export default defineConfig({
     // Bail early on errors (para CI/CD)
     bail: 1,
 
+    // Test inclusions
+    include: ['**/__tests__/**/*.test.{ts,tsx}', 'tests/integration/**/*.test.{ts,tsx}'],
+
     // Test exclusions
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
       '**/.next/**',
       '**/e2e/**', // Excluir tests E2E de Playwright
+      '**/tests/**/*.spec.{ts,tsx}', // Excluir specs Playwright en /tests
       '**/playwright-report/**',
       '**/*.e2e.{ts,tsx}',
+      ...integrationExcludes,
     ],
 
     // Watch mode exclusions

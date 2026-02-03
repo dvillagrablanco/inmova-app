@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
     // Generar sugerencias basadas en datos reales
     const suggestions = listings.map((listing) => {
       const currentPrice = listing.precioActual || listing.precioBase;
-      
+
       // Calcular sugerencia basada en reglas activas
       let suggestedPrice = currentPrice;
       const factors: Array<{
@@ -101,7 +102,8 @@ export async function GET(request: NextRequest) {
 
       return {
         listingId: listing.id,
-        listingName: `${listing.titulo} - ${listing.unit?.building?.nombre || ''} ${listing.unit?.numero || ''}`.trim(),
+        listingName:
+          `${listing.titulo} - ${listing.unit?.building?.nombre || ''} ${listing.unit?.numero || ''}`.trim(),
         currentPrice,
         suggestedPrice: Math.round(suggestedPrice * 100) / 100,
         change: Math.round(change * 100) / 100,
@@ -115,9 +117,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(suggestions);
   } catch (error) {
     logger.error('Error fetching pricing suggestions:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener sugerencias' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener sugerencias' }, { status: 500 });
   }
 }

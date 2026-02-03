@@ -1,66 +1,36 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MultiFileUpload } from '@/components/ui/multi-file-upload';
 
 describe('MultiFileUpload', () => {
+  const baseProps = {
+    onFilesSelect: vi.fn(),
+  };
+
   it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<MultiFileUpload {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+    render(<MultiFileUpload {...baseProps} />);
+
+    expect(
+      screen.getByText('Arrastra archivos aquí o haz clic para seleccionar')
+    ).toBeInTheDocument();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<MultiFileUpload {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+  it('should call onFilesSelect when files are chosen', () => {
+    const onFilesSelect = vi.fn();
+    const { container } = render(<MultiFileUpload onFilesSelect={onFilesSelect} />);
+
+    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+    expect(input).toBeTruthy();
+
+    const file = new File(['contenido'], 'contrato.pdf', { type: 'application/pdf' });
+    fireEvent.change(input, { target: { files: [file] } });
+
+    expect(onFilesSelect).toHaveBeenCalledWith([file]);
   });
 
-  it('should handle user interactions', async () => {
-    render(<MultiFileUpload />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
-  });
+  it('should show accepted file types when provided', () => {
+    render(<MultiFileUpload acceptedFileTypes={['.pdf']} />);
 
-  it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<MultiFileUpload onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
-  });
-
-  it('should be accessible', () => {
-    render(<MultiFileUpload />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    expect(screen.getByText(/Tipos permitidos: \.pdf/i)).toBeInTheDocument();
   });
 });

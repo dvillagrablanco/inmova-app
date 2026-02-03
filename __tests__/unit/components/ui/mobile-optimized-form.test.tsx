@@ -1,54 +1,51 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MobileOptimizedForm } from '@/components/ui/mobile-optimized-form';
 
+vi.mock('@/lib/hooks/useMediaQuery', () => ({
+  useIsMobile: () => false,
+}));
+
 describe('MobileOptimizedForm', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<MobileOptimizedForm {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  it('renderiza titulo, descripción y contenido', () => {
+    render(
+      <MobileOptimizedForm
+        title="Nuevo inmueble"
+        description="Completa los datos"
+        onSubmit={vi.fn()}
+      >
+        <div>Campos</div>
+      </MobileOptimizedForm>
+    );
+
+    expect(screen.getByText('Nuevo inmueble')).toBeInTheDocument();
+    expect(screen.getByText('Completa los datos')).toBeInTheDocument();
+    expect(screen.getByText('Campos')).toBeInTheDocument();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<MobileOptimizedForm {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+  it('ejecuta onSubmit al enviar', () => {
+    const onSubmit = vi.fn((event) => event.preventDefault());
+    const { container } = render(
+      <MobileOptimizedForm onSubmit={onSubmit}>
+        <div>Campos</div>
+      </MobileOptimizedForm>
+    );
+
+    const form = container.querySelector('form');
+    expect(form).toBeTruthy();
+    fireEvent.submit(form as HTMLFormElement);
+    expect(onSubmit).toHaveBeenCalled();
   });
 
-  it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<MobileOptimizedForm onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
-  });
+  it('ejecuta onCancel cuando existe', () => {
+    const onCancel = vi.fn();
+    render(
+      <MobileOptimizedForm onSubmit={vi.fn()} onCancel={onCancel}>
+        <div>Campos</div>
+      </MobileOptimizedForm>
+    );
 
-  it('should be accessible', () => {
-    render(<MobileOptimizedForm />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    fireEvent.click(screen.getByRole('button', { name: /cancelar/i }));
+    expect(onCancel).toHaveBeenCalled();
   });
 });

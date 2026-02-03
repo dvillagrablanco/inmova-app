@@ -11,21 +11,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import {
-  Search,
-  Filter,
-  X,
-  SlidersHorizontal,
-  Calendar,
-  DollarSign,
-} from 'lucide-react';
+import { Search, Filter, X, SlidersHorizontal, Calendar, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface FilterOption {
@@ -53,9 +42,9 @@ interface AdvancedFiltersProps {
 }
 
 export function AdvancedFilters({
-  filters,
-  values,
-  onChange,
+  filters = [],
+  values = {},
+  onChange = () => {},
   onReset,
   className,
   showActiveCount = true,
@@ -142,9 +131,7 @@ export function AdvancedFilters({
       case 'price-range':
         return (
           <div key={filter.id} className="w-full">
-            <Label className="text-sm font-medium mb-2 block">
-              {filter.label}
-            </Label>
+            <Label className="text-sm font-medium mb-2 block">{filter.label}</Label>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <Label htmlFor={`${filter.id}-min`} className="text-xs text-muted-foreground">
@@ -160,9 +147,7 @@ export function AdvancedFilters({
                     max={filter.max}
                     step={filter.step || 100}
                     value={values[`${filter.id}_min`] || ''}
-                    onChange={(e) =>
-                      handleFilterChange(`${filter.id}_min`, e.target.value)
-                    }
+                    onChange={(e) => handleFilterChange(`${filter.id}_min`, e.target.value)}
                     className="pl-7"
                   />
                 </div>
@@ -181,9 +166,7 @@ export function AdvancedFilters({
                     max={filter.max}
                     step={filter.step || 100}
                     value={values[`${filter.id}_max`] || ''}
-                    onChange={(e) =>
-                      handleFilterChange(`${filter.id}_max`, e.target.value)
-                    }
+                    onChange={(e) => handleFilterChange(`${filter.id}_max`, e.target.value)}
                     className="pl-7"
                   />
                 </div>
@@ -195,9 +178,7 @@ export function AdvancedFilters({
       case 'date-range':
         return (
           <div key={filter.id} className="w-full">
-            <Label className="text-sm font-medium mb-2 block">
-              {filter.label}
-            </Label>
+            <Label className="text-sm font-medium mb-2 block">{filter.label}</Label>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <Label htmlFor={`${filter.id}-from`} className="text-xs text-muted-foreground">
@@ -209,9 +190,7 @@ export function AdvancedFilters({
                     id={`${filter.id}-from`}
                     type="date"
                     value={values[`${filter.id}_from`] || ''}
-                    onChange={(e) =>
-                      handleFilterChange(`${filter.id}_from`, e.target.value)
-                    }
+                    onChange={(e) => handleFilterChange(`${filter.id}_from`, e.target.value)}
                     className="pl-7"
                   />
                 </div>
@@ -226,9 +205,7 @@ export function AdvancedFilters({
                     id={`${filter.id}-to`}
                     type="date"
                     value={values[`${filter.id}_to`] || ''}
-                    onChange={(e) =>
-                      handleFilterChange(`${filter.id}_to`, e.target.value)
-                    }
+                    onChange={(e) => handleFilterChange(`${filter.id}_to`, e.target.value)}
                     className="pl-7"
                   />
                 </div>
@@ -240,9 +217,7 @@ export function AdvancedFilters({
       case 'range':
         return (
           <div key={filter.id} className="w-full">
-            <Label className="text-sm font-medium mb-2 block">
-              {filter.label}
-            </Label>
+            <Label className="text-sm font-medium mb-2 block">{filter.label}</Label>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <Label htmlFor={`${filter.id}-min`} className="text-xs text-muted-foreground">
@@ -256,9 +231,7 @@ export function AdvancedFilters({
                   max={filter.max}
                   step={filter.step || 1}
                   value={values[`${filter.id}_min`] || ''}
-                  onChange={(e) =>
-                    handleFilterChange(`${filter.id}_min`, e.target.value)
-                  }
+                  onChange={(e) => handleFilterChange(`${filter.id}_min`, e.target.value)}
                 />
               </div>
               <div>
@@ -273,9 +246,7 @@ export function AdvancedFilters({
                   max={filter.max}
                   step={filter.step || 1}
                   value={values[`${filter.id}_max`] || ''}
-                  onChange={(e) =>
-                    handleFilterChange(`${filter.id}_max`, e.target.value)
-                  }
+                  onChange={(e) => handleFilterChange(`${filter.id}_max`, e.target.value)}
                 />
               </div>
             </div>
@@ -294,11 +265,7 @@ export function AdvancedFilters({
   return (
     <div className={cn('space-y-4', className)}>
       {/* Barra de búsqueda principal */}
-      {searchFilter && (
-        <div className="w-full">
-          {renderFilterInput(searchFilter)}
-        </div>
-      )}
+      {searchFilter && <div className="w-full">{renderFilterInput(searchFilter)}</div>}
 
       {/* Filtros avanzados en popover */}
       {otherFilters.length > 0 && (
@@ -344,12 +311,7 @@ export function AdvancedFilters({
 
           {/* Botón para limpiar todos los filtros */}
           {activeFiltersCount > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleReset}
-              className="h-9"
-            >
+            <Button variant="ghost" size="sm" onClick={handleReset} className="h-9">
               <X className="h-4 w-4 mr-2" />
               Limpiar filtros
             </Button>
@@ -370,11 +332,7 @@ export function AdvancedFilters({
                 }
 
                 return (
-                  <Badge
-                    key={key}
-                    variant="secondary"
-                    className="flex items-center gap-1"
-                  >
+                  <Badge key={key} variant="secondary" className="flex items-center gap-1">
                     {displayValue}
                     <X
                       className="h-3 w-3 cursor-pointer hover:text-destructive"

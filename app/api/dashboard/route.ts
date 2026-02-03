@@ -11,11 +11,14 @@ export async function GET() {
   try {
     const user = await requireAuth();
     const companyId = user.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
+    }
 
     // Obtener información de la empresa
     const company = await prisma.company.findUnique({
       where: { id: companyId },
-      select: { esEmpresaPrueba: true }
+      select: { esEmpresaPrueba: true },
     });
 
     const currentMonth = new Date();
@@ -34,17 +37,17 @@ export async function GET() {
       contractsExpiring,
       maintenanceActive,
       availableUnits,
-      unitsByType
+      unitsByType,
     ] = await Promise.all([
       // Total de edificios
       prisma.building.count({ where: { companyId } }),
-      
+
       // Total de unidades
       prisma.unit.count({ where: { building: { companyId } } }),
-      
+
       // Total de inquilinos
       prisma.tenant.count({ where: { companyId } }),
-      
+
       // Contratos activos
       prisma.contract.count({
         where: {
@@ -52,7 +55,7 @@ export async function GET() {
           estado: 'activo',
         },
       }),
-      
+
       // Ingresos del mes (pagos pagados)
       prisma.payment.aggregate({
         where: {
@@ -62,7 +65,7 @@ export async function GET() {
         },
         _sum: { monto: true },
       }),
-      
+
       // Pagos pendientes (con detalles)
       prisma.payment.findMany({
         where: {
@@ -80,7 +83,7 @@ export async function GET() {
         orderBy: { fechaVencimiento: 'asc' },
         take: 10,
       }),
-      
+
       // Gastos del mes
       prisma.expense.aggregate({
         where: {
@@ -89,7 +92,7 @@ export async function GET() {
         },
         _sum: { monto: true },
       }),
-      
+
       // Contratos por vencer (próximos 30 días)
       prisma.contract.findMany({
         where: {
@@ -102,17 +105,17 @@ export async function GET() {
         },
         include: {
           tenant: { select: { nombreCompleto: true } },
-          unit: { 
-            select: { 
-              numero: true, 
-              building: { select: { nombre: true } } 
-            } 
+          unit: {
+            select: {
+              numero: true,
+              building: { select: { nombre: true } },
+            },
           },
         },
         orderBy: { fechaFin: 'asc' },
         take: 5,
       }),
-      
+
       // Solicitudes de mantenimiento activas
       prisma.maintenanceRequest.findMany({
         where: {
@@ -120,17 +123,17 @@ export async function GET() {
           estado: { in: ['pendiente', 'en_progreso'] },
         },
         include: {
-          unit: { 
-            select: { 
-              numero: true, 
-              building: { select: { nombre: true } } 
-            } 
+          unit: {
+            select: {
+              numero: true,
+              building: { select: { nombre: true } },
+            },
           },
         },
         orderBy: { fechaSolicitud: 'desc' },
         take: 5,
       }),
-      
+
       // Unidades disponibles
       prisma.unit.findMany({
         where: {
@@ -143,7 +146,7 @@ export async function GET() {
         orderBy: { rentaMensual: 'asc' },
         take: 5,
       }),
-      
+
       // Unidades agrupadas por tipo (para gráfico de ocupación)
       prisma.unit.groupBy({
         by: ['tipo'],
@@ -155,15 +158,15 @@ export async function GET() {
     // Calcular ocupación por tipo de unidad
     const occupiedByType = await prisma.unit.groupBy({
       by: ['tipo'],
-      where: { 
+      where: {
         building: { companyId },
         estado: 'ocupada',
       },
       _count: true,
     });
 
-    const occupancyChartData = unitsByType.map(type => {
-      const occupied = occupiedByType.find(o => o.tipo === type.tipo)?._count || 0;
+    const occupancyChartData = unitsByType.map((type) => {
+      const occupied = occupiedByType.find((o) => o.tipo === type.tipo)?._count || 0;
       return {
         name: type.tipo || 'Sin tipo',
         ocupadas: occupied,
@@ -182,7 +185,7 @@ export async function GET() {
       _sum: { monto: true },
     });
 
-    const expensesChartData = expensesByCategory.map(cat => ({
+    const expensesChartData = expensesByCategory.map((cat) => ({
       name: cat.categoria || 'Otros',
       value: Number(cat._sum.monto) || 0,
     }));
@@ -213,11 +216,10 @@ export async function GET() {
     const ingresosTotalesMensuales = Number(paymentsCurrentMonth._sum.monto) || 0;
     const gastosTotales = Number(expensesCurrentMonth._sum.monto) || 0;
     const ingresosNetos = ingresosTotalesMensuales - gastosTotales;
-    const margenNeto = ingresosTotalesMensuales > 0 
-      ? ((ingresosNetos / ingresosTotalesMensuales) * 100) 
-      : 0;
+    const margenNeto =
+      ingresosTotalesMensuales > 0 ? (ingresosNetos / ingresosTotalesMensuales) * 100 : 0;
     const tasaOcupacion = totalUnits > 0 ? (activeContracts / totalUnits) * 100 : 0;
-    
+
     // Calcular morosidad (pagos vencidos no pagados)
     const overduePayments = await prisma.payment.count({
       where: {
@@ -232,19 +234,21 @@ export async function GET() {
         fechaVencimiento: { gte: subMonths(currentMonth, 3), lte: endDate },
       },
     });
-    const tasaMorosidad = totalExpectedPayments > 0 
-      ? (overduePayments / totalExpectedPayments) * 100 
-      : 0;
+    const tasaMorosidad =
+      totalExpectedPayments > 0 ? (overduePayments / totalExpectedPayments) * 100 : 0;
 
     // Formatear pagos pendientes con nivel de riesgo
-    const pagosPendientes = pendingPaymentsData.map(pago => {
-      const diasVencido = Math.max(0, Math.ceil(
-        (new Date().getTime() - new Date(pago.fechaVencimiento).getTime()) / (1000 * 60 * 60 * 24)
-      ));
+    const pagosPendientes = pendingPaymentsData.map((pago) => {
+      const diasVencido = Math.max(
+        0,
+        Math.ceil(
+          (new Date().getTime() - new Date(pago.fechaVencimiento).getTime()) / (1000 * 60 * 60 * 24)
+        )
+      );
       let nivelRiesgo = 'bajo';
       if (diasVencido > 30) nivelRiesgo = 'alto';
       else if (diasVencido > 15) nivelRiesgo = 'medio';
-      
+
       return {
         id: pago.id,
         periodo: pago.periodo,
@@ -279,7 +283,7 @@ export async function GET() {
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
-    
+
     logger.error('Error fetching dashboard data:', error);
     return NextResponse.json({ error: 'Error al obtener datos del dashboard' }, { status: 500 });
   }

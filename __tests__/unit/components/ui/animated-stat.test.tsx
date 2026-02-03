@@ -1,63 +1,50 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { AnimatedStat } from '@/components/ui/animated-stat';
 
+vi.mock('framer-motion', () => {
+  const React = require('react');
+
+  return {
+    motion: {
+      div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+      span: ({ children, ...props }: any) => <span {...props}>{children}</span>,
+    },
+    useMotionValue: (initial = 0) => {
+      let value = initial;
+      return {
+        get: () => value,
+        set: (next: number) => {
+          value = next;
+        },
+      };
+    },
+    useTransform: (motionValue: any, transformer: (value: number) => string) => {
+      const current = motionValue?.get ? motionValue.get() : 0;
+      return transformer(current);
+    },
+    animate: (motionValue: any, to: number) => {
+      if (motionValue?.set) {
+        motionValue.set(to);
+      }
+      return { stop: vi.fn() };
+    },
+  };
+});
+
 describe('AnimatedStat', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<AnimatedStat {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  it('renderiza titulo, prefijo/sufijo y tendencia', () => {
+    render(<AnimatedStat title="Ingresos" value={1200} prefix="€" suffix="k" trend={12} />);
+
+    expect(screen.getByText('Ingresos')).toBeInTheDocument();
+    expect(screen.getByText(/€/)).toBeInTheDocument();
+    expect(screen.getByText(/k/)).toBeInTheDocument();
+    expect(screen.getByText(/12%/)).toBeInTheDocument();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<AnimatedStat {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
-  });
+  it('oculta la tendencia cuando no se proporciona', () => {
+    render(<AnimatedStat title="Ocupación" value={0} />);
 
-  it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<AnimatedStat onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
-  });
-
-  it('should execute side effects', async () => {
-    render(<AnimatedStat />);
-    
-    // TODO: Verificar efectos
-    await waitFor(() => {
-      // expect(something).toBe(true);
-    });
-  });
-
-  it('should be accessible', () => {
-    render(<AnimatedStat />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    expect(screen.queryByText(/%/)).not.toBeInTheDocument();
   });
 });

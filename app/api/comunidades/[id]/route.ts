@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const updateComunidadSchema = z.object({
   nombreComunidad: z.string().min(1).optional(),
@@ -20,10 +21,7 @@ const updateComunidadSchema = z.object({
 });
 
 // GET - Obtener comunidad por ID
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -84,33 +82,34 @@ export async function GET(
     }
 
     // Obtener estadísticas adicionales
-    const [cuotasPendientes, votacionesActivas, reunionesProgramadas, incidenciasAbiertas] = await Promise.all([
-      prisma.communityFee.count({
-        where: {
-          buildingId: comunidad.buildingId,
-          estado: 'pendiente',
-        },
-      }),
-      prisma.communityVote.count({
-        where: {
-          buildingId: comunidad.buildingId,
-          estado: 'activa',
-        },
-      }),
-      prisma.communityMeeting.count({
-        where: {
-          buildingId: comunidad.buildingId,
-          estado: 'programada',
-          fechaReunion: { gte: new Date() },
-        },
-      }),
-      prisma.communityIncident.count({
-        where: {
-          buildingId: comunidad.buildingId,
-          estado: 'abierta',
-        },
-      }),
-    ]);
+    const [cuotasPendientes, votacionesActivas, reunionesProgramadas, incidenciasAbiertas] =
+      await Promise.all([
+        prisma.communityFee.count({
+          where: {
+            buildingId: comunidad.buildingId,
+            estado: 'pendiente',
+          },
+        }),
+        prisma.communityVote.count({
+          where: {
+            buildingId: comunidad.buildingId,
+            estado: 'activa',
+          },
+        }),
+        prisma.communityMeeting.count({
+          where: {
+            buildingId: comunidad.buildingId,
+            estado: 'programada',
+            fechaReunion: { gte: new Date() },
+          },
+        }),
+        prisma.communityIncident.count({
+          where: {
+            buildingId: comunidad.buildingId,
+            estado: 'abierta',
+          },
+        }),
+      ]);
 
     // Obtener fondos
     const fondos = await prisma.communityFund.findMany({
@@ -143,10 +142,7 @@ export async function GET(
 }
 
 // PUT - Actualizar comunidad
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -197,10 +193,7 @@ export async function PUT(
 }
 
 // DELETE - Eliminar/Desactivar comunidad
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

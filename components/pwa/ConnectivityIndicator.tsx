@@ -17,7 +17,7 @@ export function ConnectivityIndicator() {
   useEffect(() => {
     // ✅ FIX: Guard SSR - solo ejecutar en browser
     if (typeof window === 'undefined' || typeof navigator === 'undefined') return;
-    
+
     // Set initial state
     setIsOnline(navigator.onLine);
 
@@ -28,7 +28,7 @@ export function ConnectivityIndicator() {
         description: 'Ya est\u00e1s conectado a internet',
         icon: <Wifi className="h-4 w-4" />,
       });
-      
+
       // Hide indicator after 3 seconds
       setTimeout(() => setShowIndicator(false), 3000);
     };
@@ -55,9 +55,9 @@ export function ConnectivityIndicator() {
   const handleRetry = async () => {
     setIsRetrying(true);
     try {
-      const response = await fetch('/api/health', { 
+      const response = await fetch('/api/health', {
         method: 'HEAD',
-        cache: 'no-cache'
+        cache: 'no-cache',
       });
       if (response.ok) {
         setIsOnline(true);
@@ -78,12 +78,10 @@ export function ConnectivityIndicator() {
       {/* Floating indicator */}
       <div
         className={cn(
-          "fixed bottom-4 right-4 z-50",
-          "flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg",
-          "transition-all duration-300",
-          isOnline 
-            ? "bg-green-500 text-white" 
-            : "bg-red-500 text-white"
+          'fixed bottom-24 right-4 z-50 md:bottom-4',
+          'flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg',
+          'transition-all duration-300',
+          isOnline ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
         )}
         role="status"
         aria-live="polite"
@@ -104,11 +102,8 @@ export function ConnectivityIndicator() {
               className="ml-2 p-1 rounded hover:bg-white/20 transition-colors"
               aria-label="Reintentar conexi\u00f3n"
             >
-              <RefreshCw 
-                className={cn(
-                  "h-4 w-4",
-                  isRetrying && "animate-spin"
-                )} 
+              <RefreshCw
+                className={cn('h-4 w-4', isRetrying && 'animate-spin')}
                 aria-hidden="true"
               />
             </button>
@@ -118,7 +113,7 @@ export function ConnectivityIndicator() {
 
       {/* Persistent banner when offline */}
       {!isOnline && (
-        <div 
+        <div
           className="fixed top-0 left-0 right-0 z-40 bg-yellow-500 text-black px-4 py-2 text-center font-medium"
           role="alert"
           aria-live="assertive"

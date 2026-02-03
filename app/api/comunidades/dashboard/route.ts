@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // GET - Dashboard de comunidades
 export async function GET(request: NextRequest) {
@@ -192,7 +193,7 @@ export async function GET(request: NextRequest) {
         actasPendientes,
       },
       calendario: {
-        reunionesProximas: reunionesProximas.map(r => ({
+        reunionesProximas: reunionesProximas.map((r) => ({
           id: r.id,
           titulo: r.titulo,
           tipo: r.tipo,
@@ -203,17 +204,19 @@ export async function GET(request: NextRequest) {
       },
       graficos: {
         evolucionRecaudacion,
-        incidenciasPorTipo: incidenciasPorTipo.map(i => ({
+        incidenciasPorTipo: incidenciasPorTipo.map((i) => ({
           tipo: i.tipo,
           cantidad: i._count.id,
         })),
       },
-      comunidad: comunidad ? {
-        id: comunidad.id,
-        nombre: comunidad.nombreComunidad,
-        edificio: comunidad.building?.name,
-        direccion: comunidad.direccion,
-      } : null,
+      comunidad: comunidad
+        ? {
+            id: comunidad.id,
+            nombre: comunidad.nombreComunidad,
+            edificio: comunidad.building?.name,
+            direccion: comunidad.direccion,
+          }
+        : null,
     });
   } catch (error: any) {
     logger.error('[Dashboard Comunidades Error]:', error);

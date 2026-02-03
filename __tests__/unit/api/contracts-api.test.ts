@@ -17,6 +17,9 @@ vi.mock('@/lib/db', () => ({
       update: vi.fn(),
       delete: vi.fn(),
     },
+    unit: {
+      update: vi.fn(),
+    },
   },
 }));
 
@@ -62,11 +65,11 @@ describe('📝 Contracts API - GET Endpoint', () => {
   const mockContracts = [
     {
       id: 'contract-1',
-      tenantId: 'tenant-1',
-      unitId: 'unit-1',
+      tenantId: '11111111-1111-4111-8111-111111111111',
+      unitId: '33333333-3333-4333-8333-333333333333',
       fechaInicio: new Date('2026-01-01'),
       fechaFin: new Date('2027-01-01'),
-      renta: 1200,
+      rentaMensual: 1200,
       deposito: 2400,
       estado: 'activo',
       companyId: 'company-123',
@@ -74,11 +77,11 @@ describe('📝 Contracts API - GET Endpoint', () => {
     },
     {
       id: 'contract-2',
-      tenantId: 'tenant-2',
-      unitId: 'unit-2',
+      tenantId: '22222222-2222-4222-8222-222222222222',
+      unitId: '44444444-4444-4444-8444-444444444444',
       fechaInicio: new Date('2025-06-01'),
       fechaFin: new Date('2026-06-01'),
-      renta: 950,
+      rentaMensual: 950,
       deposito: 950,
       estado: 'activo',
       companyId: 'company-123',
@@ -122,15 +125,21 @@ describe('📝 Contracts API - GET Endpoint', () => {
   });
 
   test('✅ Debe filtrar por tenantId', async () => {
-    const tenantContracts = mockContracts.filter((c) => c.tenantId === 'tenant-1');
+    const tenantContracts = mockContracts.filter(
+      (c) => c.tenantId === '11111111-1111-4111-8111-111111111111'
+    );
     (prisma.contract.findMany as ReturnType<typeof vi.fn>).mockResolvedValue(tenantContracts);
 
-    const req = new NextRequest('http://localhost:3000/api/contracts?tenantId=tenant-1');
+    const req = new NextRequest(
+      'http://localhost:3000/api/contracts?tenantId=11111111-1111-4111-8111-111111111111'
+    );
     const response = await GET(req);
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.every((c: any) => c.tenantId === 'tenant-1')).toBe(true);
+    expect(data.every((c: any) => c.tenantId === '11111111-1111-4111-8111-111111111111')).toBe(
+      true
+    );
   });
 
   test('✅ Debe retornar contratos con paginación', async () => {
@@ -163,9 +172,7 @@ describe('📝 Contracts API - GET Endpoint', () => {
   });
 
   test('❌ Debe manejar error de base de datos', async () => {
-    (prisma.contract.findMany as ReturnType<typeof vi.fn>).mockRejectedValue(
-      new Error('Database error')
-    );
+    (cachedContracts as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Database error'));
 
     const req = new NextRequest('http://localhost:3000/api/contracts');
     const response = await GET(req);
@@ -192,7 +199,7 @@ describe('📝 Contracts API - GET Endpoint', () => {
     (prisma.contract.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([mockContracts[0]]);
 
     const req = new NextRequest(
-      'http://localhost:3000/api/contracts?estado=activo&tenantId=tenant-1'
+      'http://localhost:3000/api/contracts?estado=activo&tenantId=11111111-1111-4111-8111-111111111111'
     );
     const response = await GET(req);
 
@@ -217,11 +224,12 @@ describe('📝 Contracts API - POST Endpoint', () => {
   };
 
   const validContractData = {
-    tenantId: 'tenant-1',
-    unitId: 'unit-1',
-    fechaInicio: '2026-02-01',
-    fechaFin: '2027-02-01',
-    renta: 1200,
+    tenantId: '11111111-1111-4111-8111-111111111111',
+    unitId: '33333333-3333-4333-8333-333333333333',
+    fechaInicio: '2026-02-01T00:00:00.000Z',
+    fechaFin: '2027-02-01T00:00:00.000Z',
+    rentaMensual: 1200,
+    diaCobranza: 1,
     deposito: 2400,
     estado: 'activo',
   };
@@ -230,6 +238,9 @@ describe('📝 Contracts API - POST Endpoint', () => {
     vi.clearAllMocks();
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockUser,
+    });
+    (prisma.unit.update as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: validContractData.unitId,
     });
   });
 
@@ -260,15 +271,14 @@ describe('📝 Contracts API - POST Endpoint', () => {
     expect([200, 201]).toContain(response.status);
     if (response.status === 201) {
       expect(data.id).toBe('contract-new');
-      expect(data.renta).toBe(1200);
+      expect(data.rentaMensual).toBe(1200);
     }
   });
 
-  test('✅ Debe asignar companyId del usuario', async () => {
+  test('✅ Debe mapear datos del contrato correctamente', async () => {
     (prisma.contract.create as ReturnType<typeof vi.fn>).mockResolvedValue({
       id: 'contract-new',
       ...validContractData,
-      companyId: mockUser.companyId,
     });
 
     const req = new NextRequest('http://localhost:3000/api/contracts', {
@@ -282,7 +292,10 @@ describe('📝 Contracts API - POST Endpoint', () => {
       expect(prisma.contract.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            companyId: mockUser.companyId,
+            unitId: validContractData.unitId,
+            tenantId: validContractData.tenantId,
+            rentaMensual: validContractData.rentaMensual,
+            diaPago: validContractData.diaCobranza,
           }),
         })
       );
@@ -313,7 +326,7 @@ describe('📝 Contracts API - POST Endpoint', () => {
   test('❌ Debe rechazar renta negativa', async () => {
     const invalidRent = {
       ...validContractData,
-      renta: -1000,
+      rentaMensual: -1000,
     };
 
     const req = new NextRequest('http://localhost:3000/api/contracts', {
@@ -329,7 +342,7 @@ describe('📝 Contracts API - POST Endpoint', () => {
   test('❌ Debe rechazar renta = 0', async () => {
     const zeroRent = {
       ...validContractData,
-      renta: 0,
+      rentaMensual: 0,
     };
 
     const req = new NextRequest('http://localhost:3000/api/contracts', {
@@ -440,7 +453,7 @@ describe('📝 Contracts API - POST Endpoint', () => {
   test('⚠️ Debe manejar renta con decimales', async () => {
     const decimalRent = {
       ...validContractData,
-      renta: 1234.56,
+      rentaMensual: 1234.56,
     };
 
     (prisma.contract.create as ReturnType<typeof vi.fn>).mockResolvedValue({
@@ -472,8 +485,8 @@ describe('📝 Contracts API - POST Endpoint', () => {
 
   test('⚠️ Debe manejar campos faltantes', async () => {
     const incompleteData = {
-      tenantId: 'tenant-1',
-      renta: 1200,
+      tenantId: '11111111-1111-4111-8111-111111111111',
+      rentaMensual: 1200,
     };
 
     const req = new NextRequest('http://localhost:3000/api/contracts', {

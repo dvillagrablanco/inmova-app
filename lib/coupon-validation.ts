@@ -26,26 +26,61 @@ interface ValidationResult {
 /**
  * Valida un cupón y calcula el descuento
  */
-export function validateCoupon(coupon: Coupon, purchaseAmount: number): ValidationResult {
+export function validateCoupon(
+  coupon: Coupon,
+  purchaseAmount: number,
+  now: Date = new Date()
+): ValidationResult {
+  const roundToTwo = (value: number) => Math.round(value * 100) / 100;
+
+  // Validación: monto de compra
+  if (!Number.isFinite(purchaseAmount) || purchaseAmount <= 0) {
+    return {
+      isValid: false,
+      discountAmount: 0,
+      finalPrice: purchaseAmount,
+      error: 'Monto de compra inválido',
+    };
+  }
+
+  // Validación: valor de descuento
+  if (!Number.isFinite(coupon.discountValue) || coupon.discountValue <= 0) {
+    return {
+      isValid: false,
+      discountAmount: 0,
+      finalPrice: purchaseAmount,
+      error: 'Valor de descuento inválido',
+    };
+  }
+
+  // Validación: porcentaje máximo
+  if (coupon.discountType === 'percentage' && coupon.discountValue > 100) {
+    return {
+      isValid: false,
+      discountAmount: 0,
+      finalPrice: purchaseAmount,
+      error: 'Porcentaje inválido',
+    };
+  }
+
   // Validación: cupón activo
   if (!coupon.isActive) {
     return {
       isValid: false,
       discountAmount: 0,
       finalPrice: purchaseAmount,
-      error: 'El cupón no está activo',
+      error: 'Cupón inactivo',
     };
   }
 
   // Validación: fecha de inicio
-  const now = new Date();
   const validFrom = new Date(coupon.validFrom);
   if (now < validFrom) {
     return {
       isValid: false,
       discountAmount: 0,
       finalPrice: purchaseAmount,
-      error: 'El cupón aún no es válido',
+      error: 'Cupón aún no válido',
     };
   }
 
@@ -57,7 +92,7 @@ export function validateCoupon(coupon: Coupon, purchaseAmount: number): Validati
         isValid: false,
         discountAmount: 0,
         finalPrice: purchaseAmount,
-        error: 'El cupón ha expirado',
+        error: 'Cupón expirado',
       };
     }
   }
@@ -68,7 +103,7 @@ export function validateCoupon(coupon: Coupon, purchaseAmount: number): Validati
       isValid: false,
       discountAmount: 0,
       finalPrice: purchaseAmount,
-      error: 'El cupón ha alcanzado el límite de usos',
+      error: 'Cupón agotado',
     };
   }
 
@@ -95,7 +130,8 @@ export function validateCoupon(coupon: Coupon, purchaseAmount: number): Validati
     discountAmount = purchaseAmount;
   }
 
-  const finalPrice = purchaseAmount - discountAmount;
+  discountAmount = roundToTwo(discountAmount);
+  const finalPrice = roundToTwo(purchaseAmount - discountAmount);
 
   return {
     isValid: true,

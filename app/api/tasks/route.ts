@@ -1,6 +1,6 @@
 /**
  * Endpoints API para Tareas
- * 
+ *
  * Implementa operaciones CRUD con validación Zod, manejo de errores
  * y códigos de estado HTTP correctos.
  */
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
   try {
     const user = await requireAuth();
     const { searchParams } = new URL(req.url);
-    
+
     const estado = searchParams.get('estado');
     const prioridad = searchParams.get('prioridad');
     const asignadoA = searchParams.get('asignadoA');
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     const offset = searchParams.get('offset');
 
     const where: any = { companyId: user.companyId };
-    
+
     if (estado) where.estado = estado;
     if (prioridad) where.prioridad = prioridad;
     if (asignadoA) where.asignadoA = asignadoA;
@@ -51,10 +51,7 @@ export async function GET(req: NextRequest) {
             select: { id: true, name: true, email: true },
           },
         },
-        orderBy: [
-          { prioridad: 'desc' },
-          { fechaLimite: 'asc' },
-        ],
+        orderBy: [{ prioridad: 'desc' }, { fechaLimite: 'asc' }],
         take,
         skip,
       }),
@@ -62,26 +59,28 @@ export async function GET(req: NextRequest) {
     ]);
 
     logger.info(`Tareas obtenidas: ${tasks.length} de ${total}`, { userId: user.id });
-    
-    return NextResponse.json({
-      data: tasks,
-      meta: {
-        total,
-        limit: take,
-        offset: skip,
+
+    return NextResponse.json(
+      {
+        data: tasks,
+        meta: {
+          total,
+          limit: take,
+          offset: skip,
+        },
       },
-    }, { status: 200 });
-    
+      { status: 200 }
+    );
   } catch (error: any) {
     logger.error('Error fetching tasks:', error);
-    
+
     if (error.message === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },
         { status: 401 }
       );
     }
-    
+
     return NextResponse.json(
       { error: 'Error interno del servidor', message: 'Error al obtener tareas' },
       { status: 500 }
@@ -99,7 +98,23 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     // Validación con Zod
-    const validatedData = taskCreateSchema.parse(body);
+    const validationResult = taskCreateSchema.safeParse(body);
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map((err) => ({
+        field: err.path.join('.'),
+        message: err.message,
+      }));
+      return NextResponse.json(
+        {
+          error: 'Datos inválidos',
+          message: 'Los datos proporcionados no son válidos',
+          details: errors,
+        },
+        { status: 400 }
+      );
+    }
+
+    const validatedData = validationResult.data;
 
     // Verificar que el usuario asignado pertenece a la compañía
     if (validatedData.asignadoA) {
@@ -150,7 +165,6 @@ export async function POST(req: NextRequest) {
 
     logger.info(`Tarea creada: ${task.id}`, { userId: user.id, taskId: task.id });
     return NextResponse.json(task, { status: 201 });
-    
   } catch (error: any) {
     logger.error('Error creating task:', error);
 
@@ -165,14 +179,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (error.message?.includes('permiso')) {
+    const normalizedMessage = String(error.message || '').toLowerCase();
+    if (normalizedMessage.includes('permiso') || normalizedMessage.includes('forbidden')) {
       return NextResponse.json(
-        { error: 'Prohibido', message: error.message },
+        { error: 'Prohibido', message: error.message || 'Acceso denegado' },
         { status: 403 }
       );
     }
-    
-    if (error.message === 'No autenticado') {
+
+    if (normalizedMessage.includes('no autenticado')) {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },
         { status: 401 }

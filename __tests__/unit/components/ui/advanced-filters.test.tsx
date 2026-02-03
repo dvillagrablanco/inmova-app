@@ -1,75 +1,94 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { AdvancedFilters } from '@/components/ui/advanced-filters';
+import {
+  AdvancedFilters,
+  type FilterOption,
+  type FilterValues,
+} from '@/components/ui/advanced-filters';
 
 describe('AdvancedFilters', () => {
+  const filters: FilterOption[] = [
+    {
+      id: 'search',
+      label: 'Buscar',
+      type: 'search',
+      placeholder: 'Buscar...',
+    },
+    {
+      id: 'status',
+      label: 'Estado',
+      type: 'select',
+      options: [
+        { value: 'active', label: 'Activo' },
+        { value: 'inactive', label: 'Inactivo' },
+      ],
+    },
+  ];
+
+  const baseValues: FilterValues = {
+    search: '',
+    status: 'all',
+  };
+
   it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<AdvancedFilters {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+    render(<AdvancedFilters filters={filters} values={baseValues} onChange={vi.fn()} />);
+
+    expect(screen.getByLabelText('Buscar')).toBeInTheDocument();
   });
 
   it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<AdvancedFilters {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+    render(<AdvancedFilters filters={filters} values={baseValues} onChange={vi.fn()} />);
+
+    expect(screen.getByRole('button', { name: /Filtros/i })).toBeInTheDocument();
   });
 
   it('should handle user interactions', async () => {
-    render(<AdvancedFilters />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
+    vi.useFakeTimers();
+    const onChange = vi.fn();
+    render(<AdvancedFilters filters={filters} values={baseValues} onChange={onChange} />);
+
+    fireEvent.change(screen.getByLabelText('Buscar'), { target: { value: 'casa' } });
+    vi.runAllTimers();
+
+    expect(onChange).toHaveBeenCalledWith({ ...baseValues, search: 'casa' });
+
+    vi.useRealTimers();
   });
 
   it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<AdvancedFilters onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
-  });
+    const onChange = vi.fn();
+    const onReset = vi.fn();
+    const valuesWithFilters = { search: 'casa', status: 'active' };
 
-  it('should execute side effects', async () => {
-    render(<AdvancedFilters />);
-    
-    // TODO: Verificar efectos
+    render(
+      <AdvancedFilters
+        filters={filters}
+        values={valuesWithFilters}
+        onChange={onChange}
+        onReset={onReset}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Limpiar filtros/i }));
+
     await waitFor(() => {
-      // expect(something).toBe(true);
+      expect(onChange).toHaveBeenCalledWith({ search: '', status: 'all' });
+      expect(onReset).toHaveBeenCalled();
     });
   });
 
+  it('should execute side effects', async () => {
+    const onChange = vi.fn();
+    const valuesWithFilters = { search: 'casa', status: 'active' };
+    render(<AdvancedFilters filters={filters} values={valuesWithFilters} onChange={onChange} />);
+
+    expect(screen.getByText('2')).toBeInTheDocument();
+  });
+
   it('should be accessible', () => {
-    render(<AdvancedFilters />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    render(<AdvancedFilters filters={filters} values={baseValues} onChange={vi.fn()} />);
+
+    expect(screen.getByRole('button', { name: /Filtros/i })).toBeInTheDocument();
+    expect(screen.getByLabelText('Buscar')).toBeInTheDocument();
   });
 });

@@ -1,7 +1,14 @@
 'use client';
 
 import { useState, useEffect, ReactNode } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
@@ -24,7 +31,7 @@ interface MobileFormWizardProps {
 }
 
 export function MobileFormWizard({
-  steps,
+  steps = [],
   currentStep: externalCurrentStep,
   onStepChange,
   onComplete,
@@ -63,8 +70,6 @@ export function MobileFormWizard({
     }
   };
 
-  const progress = ((currentStep + 1) / steps.length) * 100;
-
   // Si no está en móvil o no está habilitado para móvil, renderizar todos los pasos
   if (!enableOnMobile || !isMobile) {
     return (
@@ -85,14 +90,12 @@ export function MobileFormWizard({
 
   // Vista de wizard para móvil
   // Validación: asegurar que currentStep esté en rango
-  if (!steps || steps.length === 0 || currentStep >= steps.length || currentStep < 0) {
-    return (
-      <div className="p-4 text-center text-muted-foreground">
-        No hay pasos disponibles
-      </div>
-    );
+  if (steps.length === 0 || currentStep >= steps.length || currentStep < 0) {
+    return <div className="p-4 text-center text-muted-foreground">No hay pasos disponibles</div>;
   }
-  
+
+  const totalSteps = steps.length;
+  const progress = totalSteps > 0 ? ((currentStep + 1) / totalSteps) * 100 : 0;
   const step = steps[currentStep];
 
   return (
@@ -101,7 +104,7 @@ export function MobileFormWizard({
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">
-            Paso {currentStep + 1} de {steps.length}
+            Paso {currentStep + 1} de {totalSteps}
           </span>
           <span className="font-medium">{Math.round(progress)}%</span>
         </div>
@@ -118,8 +121,8 @@ export function MobileFormWizard({
               index === currentStep
                 ? 'w-8 bg-primary'
                 : index < currentStep
-                ? 'w-2 bg-primary/50'
-                : 'w-2 bg-gray-300'
+                  ? 'w-2 bg-primary/50'
+                  : 'w-2 bg-gray-300'
             }`}
             aria-label={`Ir al paso ${index + 1}`}
           />

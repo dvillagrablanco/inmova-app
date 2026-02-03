@@ -1,22 +1,37 @@
 /**
  * Servicio de Envío de Emails
- * 
+ *
  * Gestiona el envío de correos electrónicos transaccionales y de marketing
  */
 
 import nodemailer from 'nodemailer';
 
 import logger from '@/lib/logger';
-// Configuración del transporter (ajustar según el proveedor)
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_SECURE === 'true',
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-});
+
+type MailTransporter = ReturnType<typeof nodemailer.createTransport>;
+
+let transporter: MailTransporter | null = null;
+
+const buildTransporter = () =>
+  nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: process.env.SMTP_SECURE === 'true',
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASSWORD,
+    },
+  });
+
+const getTransporter = () => {
+  if (process.env.NODE_ENV === 'test') {
+    return buildTransporter();
+  }
+  if (!transporter) {
+    transporter = buildTransporter();
+  }
+  return transporter;
+};
 
 export interface EmailOptions {
   to: string | string[];
@@ -42,7 +57,16 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
       console.log('[EMAIL] (DEMO) Asunto:', options.subject);
       return true;
     }
-    
+
+    if (
+      !options.to ||
+      (Array.isArray(options.to) && options.to.length === 0) ||
+      (typeof options.to === 'string' && options.to.trim() === '')
+    ) {
+      logger.warn('[EMAIL] Destinatario vacío, email no enviado');
+      return false;
+    }
+
     const mailOptions = {
       from: options.from || `"INMOVA" <${process.env.SMTP_USER}>`,
       to: Array.isArray(options.to) ? options.to.join(', ') : options.to,
@@ -51,8 +75,15 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
       replyTo: options.replyTo,
       attachments: options.attachments,
     };
-    
-    await transporter.sendMail(mailOptions);
+
+    const mailer = getTransporter();
+    const result = await mailer.sendMail(mailOptions);
+
+    if (Array.isArray(result?.rejected) && result.rejected.length > 0) {
+      logger.warn('[EMAIL] Destinatarios rechazados:', result.rejected);
+      return false;
+    }
+
     console.log('[EMAIL] Email enviado exitosamente a:', options.to);
     return true;
   } catch (error) {
@@ -79,7 +110,7 @@ export async function sendWelcomeEmail(to: string, nombre: string) {
       </p>
     </div>
   `;
-  
+
   return await sendEmail({
     to,
     subject: '¡Bienvenido a INMOVA!',

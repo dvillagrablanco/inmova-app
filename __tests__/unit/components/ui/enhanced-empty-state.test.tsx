@@ -1,35 +1,24 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state';
 
 describe('EnhancedEmptyState', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<EnhancedEmptyState {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  it('renderiza preset por defecto', () => {
+    render(<EnhancedEmptyState preset="noData" />);
+
+    expect(screen.getByText('No hay datos disponibles')).toBeInTheDocument();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<EnhancedEmptyState {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
-  });
+  it('permite sobrescribir título y descripción', () => {
+    render(
+      <EnhancedEmptyState
+        preset="noData"
+        customTitle="Sin registros"
+        customDescription="Agrega nuevos elementos"
+      />
+    );
 
-  it('should be accessible', () => {
-    render(<EnhancedEmptyState />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    expect(screen.getByText('Sin registros')).toBeInTheDocument();
+    expect(screen.getByText('Agrega nuevos elementos')).toBeInTheDocument();
   });
 });

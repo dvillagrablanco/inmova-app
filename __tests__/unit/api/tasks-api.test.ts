@@ -16,6 +16,9 @@ vi.mock('@/lib/db', () => ({
       update: vi.fn(),
       delete: vi.fn(),
     },
+    user: {
+      findUnique: vi.fn(),
+    },
   },
 }));
 
@@ -200,6 +203,10 @@ describe('✅ Tasks API - POST', () => {
     (taskCreateSchema.safeParse as ReturnType<typeof vi.fn>).mockReturnValue({
       success: true,
       data: validTaskData,
+    });
+    (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: validTaskData.asignadoA,
+      companyId: mockUser.companyId,
     });
   });
 

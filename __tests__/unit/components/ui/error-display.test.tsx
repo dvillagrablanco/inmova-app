@@ -1,47 +1,27 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ErrorDisplay } from '@/components/ui/error-display';
 
 describe('ErrorDisplay', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<ErrorDisplay {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
-  });
-
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<ErrorDisplay {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
-  });
-
-  it('should handle user interactions', async () => {
+  it('renderiza título y mensaje por defecto', () => {
     render(<ErrorDisplay />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
+
+    expect(screen.getByText('Ha ocurrido un error')).toBeInTheDocument();
+    expect(screen.getByText(/algo salió mal/i)).toBeInTheDocument();
   });
 
-  it('should be accessible', () => {
-    render(<ErrorDisplay />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+  it('renderiza título y mensaje personalizados', () => {
+    render(<ErrorDisplay title="Error de carga" message="No se pudo cargar la información" />);
+
+    expect(screen.getByText('Error de carga')).toBeInTheDocument();
+    expect(screen.getByText(/no se pudo cargar/i)).toBeInTheDocument();
+  });
+
+  it('ejecuta retry cuando está disponible', () => {
+    const retry = vi.fn();
+    render(<ErrorDisplay retry={retry} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /reintentar/i }));
+    expect(retry).toHaveBeenCalled();
   });
 });

@@ -6,8 +6,12 @@
 import { MetadataRoute } from 'next';
 
 import logger from '@/lib/logger';
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+export const revalidate = 3600;
 // Lazy import de prisma para evitar errores en build-time
 let prisma: any = null;
+let lastGoodRoutes: MetadataRoute.Sitemap | null = null;
 
 async function getPrisma() {
   if (!prisma) {
@@ -24,6 +28,7 @@ async function getPrisma() {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://inmova.app';
+  const enableDynamicSitemap = process.env.ENABLE_DYNAMIC_SITEMAP !== 'false';
 
   // URLs estáticas (páginas públicas)
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -109,60 +114,66 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const prismaClient = await getPrisma();
-    
-    // Si Prisma no está disponible (build-time), retornar solo rutas estáticas
-    if (!prismaClient) {
+
+    // Si Prisma no está disponible (build-time) o se desactiva, retornar solo rutas estáticas
+    if (!enableDynamicSitemap || !prismaClient) {
       console.log('Sitemap: Using static routes only (Prisma not available)');
       return staticRoutes;
     }
 
-    // URLs dinámicas de propiedades (solo disponibles y activas)
-    // Solo incluir propiedades de la primera compañía para el sitemap público
-    const units = await prismaClient.unit.findMany({
-      where: {
-        estado: 'disponible',
-      },
-      select: {
-        id: true,
-        updatedAt: true,
-      },
-      take: 1000, // Limitar a 1000 propiedades para el sitemap
-      orderBy: {
-        updatedAt: 'desc',
-      },
-    });
+    const [unitsResult, buildingsResult] = await Promise.allSettled([
+      prismaClient.unit.findMany({
+        where: {
+          estado: 'disponible',
+        },
+        select: {
+          id: true,
+          updatedAt: true,
+        },
+        take: 1000, // Limitar a 1000 propiedades para el sitemap
+        orderBy: {
+          updatedAt: 'desc',
+        },
+      }),
+      prismaClient.building.findMany({
+        where: {},
+        select: {
+          id: true,
+          updatedAt: true,
+        },
+        take: 500,
+        orderBy: {
+          updatedAt: 'desc',
+        },
+      }),
+    ]);
 
-    const propertyRoutes: MetadataRoute.Sitemap = units.map((unit) => ({
-      url: `${baseUrl}/unidades/${unit.id}`,
-      lastModified: unit.updatedAt,
-      changeFrequency: 'weekly' as const,
-      priority: 0.7,
-    }));
+    const propertyRoutes: MetadataRoute.Sitemap =
+      unitsResult.status === 'fulfilled'
+        ? unitsResult.value.map((unit: { id: string; updatedAt: Date }) => ({
+            url: `${baseUrl}/unidades/${unit.id}`,
+            lastModified: unit.updatedAt,
+            changeFrequency: 'weekly' as const,
+            priority: 0.7,
+          }))
+        : [];
 
-    // URLs dinámicas de edificios (solo activos)
-    const buildings = await prismaClient.building.findMany({
-      where: {},
-      select: {
-        id: true,
-        updatedAt: true,
-      },
-      take: 500,
-      orderBy: {
-        updatedAt: 'desc',
-      },
-    });
+    const buildingRoutes: MetadataRoute.Sitemap =
+      buildingsResult.status === 'fulfilled'
+        ? buildingsResult.value.map((building: { id: string; updatedAt: Date }) => ({
+            url: `${baseUrl}/edificios/${building.id}`,
+            lastModified: building.updatedAt,
+            changeFrequency: 'monthly' as const,
+            priority: 0.6,
+          }))
+        : [];
 
-    const buildingRoutes: MetadataRoute.Sitemap = buildings.map((building) => ({
-      url: `${baseUrl}/edificios/${building.id}`,
-      lastModified: building.updatedAt,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    }));
-
-    return [...staticRoutes, ...propertyRoutes, ...buildingRoutes];
+    const routes = [...staticRoutes, ...propertyRoutes, ...buildingRoutes];
+    lastGoodRoutes = routes;
+    return routes;
   } catch (error) {
     logger.error('Error generating sitemap:', error);
     // En caso de error, retornar solo las rutas estáticas
-    return staticRoutes;
+    return lastGoodRoutes || staticRoutes;
   }
 }

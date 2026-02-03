@@ -87,7 +87,7 @@ export default function TenantDetailPage() {
       setTenant(data);
     } catch (error) {
       console.error('Error fetching tenant:', error);
-      toast.error('Error al cargar inquilino');
+      toast.error('Error de conexión');
       router.push('/inquilinos');
     } finally {
       setIsLoading(false);

@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const createCuotaSchema = z.object({
   buildingId: z.string().min(1),
@@ -77,8 +78,10 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Calcular estadísticas
-    const statsWhere = targetBuildingId ? { companyId, buildingId: targetBuildingId } : { companyId };
-    
+    const statsWhere = targetBuildingId
+      ? { companyId, buildingId: targetBuildingId }
+      : { companyId };
+
     const [totalPendiente, totalCobrado, morosos] = await Promise.all([
       prisma.communityFee.aggregate({
         where: { ...statsWhere, estado: 'pendiente' },
@@ -99,7 +102,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     return NextResponse.json({
-      cuotas: cuotas.map(c => ({
+      cuotas: cuotas.map((c) => ({
         ...c,
         importeTotal: c.importeBase * c.coeficiente,
       })),
@@ -153,8 +156,9 @@ export async function POST(request: NextRequest) {
       // Calcular coeficiente basado en metros cuadrados
       const totalM2 = unidades.reduce((sum, u) => sum + (u.squareMeters || 0), 0);
 
-      const cuotasData = unidades.map(unidad => {
-        const coeficiente = totalM2 > 0 ? (unidad.squareMeters || 0) / totalM2 : 1 / unidades.length;
+      const cuotasData = unidades.map((unidad) => {
+        const coeficiente =
+          totalM2 > 0 ? (unidad.squareMeters || 0) / totalM2 : 1 / unidades.length;
         return {
           companyId,
           buildingId,
@@ -174,10 +178,13 @@ export async function POST(request: NextRequest) {
         data: cuotasData,
       });
 
-      return NextResponse.json({
-        message: `${result.count} cuotas generadas correctamente`,
-        count: result.count,
-      }, { status: 201 });
+      return NextResponse.json(
+        {
+          message: `${result.count} cuotas generadas correctamente`,
+          count: result.count,
+        },
+        { status: 201 }
+      );
     } else {
       // Crear cuota individual
       const validated = createCuotaSchema.parse(body);

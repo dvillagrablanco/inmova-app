@@ -5,10 +5,10 @@ import logger from './logger';
  * Detectar si estamos en build-time
  * Durante el build de Next.js, evitamos inicializar Prisma
  */
+const allowTestDb = process.env.ALLOW_TEST_DB === 'true';
 const isBuildTime =
   process.env.NEXT_PHASE === 'phase-production-build' ||
-  process.env.NODE_ENV === 'test' ||
-  typeof window !== 'undefined';
+  (!allowTestDb && (process.env.NODE_ENV === 'test' || typeof window !== 'undefined'));
 
 /**
  * Configuración del cliente Prisma
@@ -69,11 +69,12 @@ function createPrismaClient(): PrismaClient {
   }
 
   // Event listeners para logging
-  client.$on('warn' as any, (e: any) => {
+  const clientAny = client as any;
+  clientAny.$on('warn', (e: any) => {
     logger.warn('Prisma warning:', e);
   });
 
-  client.$on('error' as any, (e: any) => {
+  clientAny.$on('error', (e: any) => {
     logger.error('Prisma error:', e);
   });
 
@@ -110,13 +111,13 @@ export function getPrismaClient(): PrismaClient {
   if (globalForPrisma.prisma) {
     return globalForPrisma.prisma;
   }
-  
+
   // Crear nueva instancia si no existe
   const client = createPrismaClient();
   if (process.env.NODE_ENV !== 'production') {
     globalForPrisma.prisma = client;
   }
-  
+
   return client;
 }
 

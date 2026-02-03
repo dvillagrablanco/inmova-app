@@ -22,6 +22,8 @@ vi.mock('@/lib/db', () => ({
         payment: {
           create: vi.fn(),
           createMany: vi.fn(),
+          findUnique: vi.fn(),
+          update: vi.fn(),
         },
         notification: {
           create: vi.fn(),
@@ -43,6 +45,8 @@ vi.mock('@/lib/db', () => ({
     payment: {
       create: vi.fn(),
       createMany: vi.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn(),
     },
     notification: {
       create: vi.fn(),
@@ -93,13 +97,12 @@ describe('🔄 FLOW: Creación Completa de Contrato', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    (prisma.tenant.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockTenant);
+    (prisma.unit.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockUnit);
   });
 
   test('✅ FLOW: Crear contrato → Actualizar unidad → Generar pagos → Notificar', async () => {
     // PASO 1: Verificar que tenant y unit existen
-    (prisma.tenant.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockTenant);
-    (prisma.unit.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockUnit);
-
     const tenantExists = await prisma.tenant.findUnique({ where: { id: mockTenant.id } });
     const unitExists = await prisma.unit.findUnique({ where: { id: mockUnit.id } });
 
@@ -234,16 +237,18 @@ describe('🔄 FLOW: Creación Completa de Contrato', () => {
 
   test('❌ FLOW: Rechazar contrato si unidad ya está ocupada', async () => {
     // Unidad ya ocupada
-    (prisma.unit.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
+    (prisma.unit.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ...mockUnit,
       estado: 'ocupada',
     });
 
     const unit = await prisma.unit.findUnique({ where: { id: mockUnit.id } });
+    expect(unit).toBeTruthy();
 
     if (unit?.estado === 'ocupada') {
       // No crear contrato
       expect(unit.estado).toBe('ocupada');
+      expect(prisma.contract.create).not.toHaveBeenCalled();
     } else {
       // Crear contrato normalmente
       throw new Error('La unidad debería estar ocupada');

@@ -38,8 +38,9 @@ export async function GET(request: NextRequest) {
     // Añadir información adicional según tier
     const planesConFeatures = planes.map(plan => {
       let features: string[] = [];
+      const tier = String(plan.tier);
 
-      switch (plan.tier) {
+      switch (tier) {
         case 'basico':
           features = [
             'Dashboard básico',

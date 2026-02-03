@@ -39,17 +39,12 @@ export function MobileOptimizedForm({
   const isMobile = useIsMobile();
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className={cn('flex flex-col', isMobile ? 'h-full' : '', className)}
-    >
+    <form onSubmit={onSubmit} className={cn('flex flex-col', isMobile ? 'h-full' : '', className)}>
       {/* Header (si hay título) */}
       {title && (
         <div className={cn('mb-6', isMobile && 'px-4 pt-4')}>
           <h2 className="text-2xl font-bold">{title}</h2>
-          {description && (
-            <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-          )}
+          {description && <p className="mt-2 text-sm text-muted-foreground">{description}</p>}
         </div>
       )}
 
@@ -75,7 +70,7 @@ export function MobileOptimizedForm({
         className={cn(
           'flex gap-3',
           isMobile
-            ? 'fixed bottom-0 left-0 right-0 border-t bg-background p-4 shadow-lg'
+            ? 'fixed bottom-16 left-0 right-0 border-t bg-background p-4 shadow-lg'
             : 'mt-6 justify-end'
         )}
       >
@@ -120,23 +115,14 @@ interface FormSectionProps {
   className?: string;
 }
 
-export function FormSection({
-  title,
-  description,
-  children,
-  className,
-}: FormSectionProps) {
+export function FormSection({ title, description, children, className }: FormSectionProps) {
   const isMobile = useIsMobile();
 
   return (
     <div className={cn('space-y-4', className)}>
       <div className={cn('border-b pb-3', isMobile && 'border-muted')}>
-        <h3 className={cn('font-semibold', isMobile ? 'text-base' : 'text-lg')}>
-          {title}
-        </h3>
-        {description && (
-          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-        )}
+        <h3 className={cn('font-semibold', isMobile ? 'text-base' : 'text-lg')}>{title}</h3>
+        {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
       </div>
       <div className={cn('space-y-4', isMobile && 'space-y-3')}>{children}</div>
     </div>
@@ -155,14 +141,7 @@ interface FormFieldProps {
   className?: string;
 }
 
-export function FormField({
-  label,
-  required,
-  error,
-  hint,
-  children,
-  className,
-}: FormFieldProps) {
+export function FormField({ label, required, error, hint, children, className }: FormFieldProps) {
   const isMobile = useIsMobile();
 
   return (
@@ -178,9 +157,7 @@ export function FormField({
         {required && <span className="ml-1 text-destructive">*</span>}
       </label>
       {children}
-      {hint && !error && (
-        <p className="text-xs text-muted-foreground">{hint}</p>
-      )}
+      {hint && !error && <p className="text-xs text-muted-foreground">{hint}</p>}
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );

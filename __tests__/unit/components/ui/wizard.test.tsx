@@ -1,75 +1,90 @@
-import { describe, it, expect, vi } from 'vitest';
+import React from 'react';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Wizard } from '@/components/ui/wizard';
 
+vi.mock('framer-motion', () => ({
+  motion: {
+    div: (props: React.HTMLAttributes<HTMLDivElement>) => <div {...props} />,
+  },
+  AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 describe('Wizard', () => {
+  beforeAll(() => {
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: vi.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+  });
+  const steps = [
+    {
+      id: 'step-1',
+      title: 'Paso 1',
+      description: 'Datos básicos',
+      fields: <div>Contenido 1</div>,
+    },
+    {
+      id: 'step-2',
+      title: 'Paso 2',
+      description: 'Confirmación',
+      fields: <div>Contenido 2</div>,
+    },
+  ];
+
   it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<Wizard {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+    render(<Wizard steps={steps} onComplete={vi.fn().mockResolvedValue(undefined)} />);
+
+    expect(screen.getByText('Paso 1')).toBeInTheDocument();
+    expect(screen.getByText('Contenido 1')).toBeInTheDocument();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<Wizard {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+  it('should render title and description', () => {
+    render(
+      <Wizard
+        steps={steps}
+        title="Asistente"
+        description="Completa los pasos"
+        onComplete={vi.fn().mockResolvedValue(undefined)}
+      />
+    );
+
+    expect(screen.getByText('Asistente')).toBeInTheDocument();
+    expect(screen.getByText('Completa los pasos')).toBeInTheDocument();
   });
 
-  it('should handle user interactions', async () => {
-    render(<Wizard />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
-  });
+  it('should advance to next step', async () => {
+    render(<Wizard steps={steps} onComplete={vi.fn().mockResolvedValue(undefined)} />);
 
-  it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<Wizard onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
-  });
+    fireEvent.click(screen.getByRole('button', { name: /siguiente/i }));
 
-  it('should execute side effects', async () => {
-    render(<Wizard />);
-    
-    // TODO: Verificar efectos
     await waitFor(() => {
-      // expect(something).toBe(true);
+      expect(screen.getByText('Paso 2')).toBeInTheDocument();
+      expect(screen.getByText('Contenido 2')).toBeInTheDocument();
     });
   });
 
-  it('should be accessible', () => {
-    render(<Wizard />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+  it('should call onComplete on last step', async () => {
+    const onComplete = vi.fn().mockResolvedValue(undefined);
+    render(<Wizard steps={steps} onComplete={onComplete} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Paso 2')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /finalizar/i }));
+
+    await waitFor(() => expect(onComplete).toHaveBeenCalled());
   });
 });

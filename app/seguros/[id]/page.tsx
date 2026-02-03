@@ -56,6 +56,7 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Insurance {
   id: string;
@@ -644,6 +645,23 @@ export default function InsuranceDetailPage() {
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreateClaim} className="space-y-4">
+              <AIDocumentAssistant
+                context="seguros"
+                variant="inline"
+                position="bottom-right"
+                onApplyData={(data) => {
+                  if (data.tipoSiniestro || data.tipo) {
+                    setClaimType(String(data.tipoSiniestro || data.tipo));
+                  }
+                  if (data.descripcion || data.detalle || data.motivo) {
+                    setClaimDescription(String(data.descripcion || data.detalle || data.motivo));
+                  }
+                  if (data.monto || data.importe || data.amount) {
+                    setClaimAmount(String(data.monto || data.importe || data.amount));
+                  }
+                  toast.success('Datos del siniestro aplicados al formulario');
+                }}
+              />
               <div className="space-y-2">
                 <Label>Tipo de Siniestro *</Label>
                 <Select value={claimType} onValueChange={setClaimType} required>
@@ -705,6 +723,14 @@ export default function InsuranceDetailPage() {
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleUploadDocument} className="space-y-4">
+              <AIDocumentAssistant
+                context="seguros"
+                variant="inline"
+                position="bottom-right"
+                onAnalysisComplete={(analysis, file) => {
+                  toast.success(`Documento "${file.name}" analizado correctamente`);
+                }}
+              />
               <div className="space-y-2">
                 <Label>Archivo *</Label>
                 <Input

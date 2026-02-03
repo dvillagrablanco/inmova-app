@@ -1,11 +1,11 @@
 /**
  * Signaturit Service - Firma Digital de Contratos
- * 
+ *
  * Signaturit es un proveedor certificado de firma electrónica que cumple con:
  * - eIDAS (Reglamento UE de identificación electrónica)
  * - Ley 6/2020 de Servicios Electrónicos de Confianza
  * - Validez legal en toda la UE
- * 
+ *
  * Features:
  * - Firma electrónica simple
  * - Firma electrónica avanzada
@@ -14,7 +14,7 @@
  * - Workflow personalizado
  * - Certificados de firma
  * - Archivo legal durante 10 años
- * 
+ *
  * @module lib/signaturit-service
  */
 
@@ -37,8 +37,8 @@ const BASE_URL =
  * Tipo de firma
  */
 export enum SignatureType {
-  SIMPLE = 'simple',       // Firma simple (OTP por email/SMS)
-  ADVANCED = 'advanced',   // Firma avanzada (certificado digital)
+  SIMPLE = 'simple', // Firma simple (OTP por email/SMS)
+  ADVANCED = 'advanced', // Firma avanzada (certificado digital)
   QUALIFIED = 'qualified', // Firma cualificada (máximo nivel legal)
 }
 
@@ -46,11 +46,11 @@ export enum SignatureType {
  * Estado de la firma
  */
 export enum SignatureStatus {
-  READY = 'ready',           // Listo para firmar
-  COMPLETED = 'completed',   // Firmado por todos
-  DECLINED = 'declined',     // Rechazado
-  EXPIRED = 'expired',       // Expirado
-  CANCELED = 'canceled',     // Cancelado
+  READY = 'ready', // Listo para firmar
+  COMPLETED = 'completed', // Firmado por todos
+  DECLINED = 'declined', // Rechazado
+  EXPIRED = 'expired', // Expirado
+  CANCELED = 'canceled', // Cancelado
 }
 
 /**
@@ -231,6 +231,13 @@ class SignaturitClient {
   }
 
   /**
+   * Envía un recordatorio de firma
+   */
+  async sendReminder(signatureId: string): Promise<any> {
+    return await this.request('POST', `/signatures/${signatureId}/reminder.json`);
+  }
+
+  /**
    * Descarga el documento firmado
    */
   async downloadSignedDocument(signatureId: string, documentId: string): Promise<Buffer> {
@@ -276,7 +283,7 @@ const signaturitClient = new SignaturitClient(SIGNATURIT_API_KEY, BASE_URL);
 
 /**
  * Crea una solicitud de firma
- * 
+ *
  * @param pdfBuffer - Buffer del PDF a firmar
  * @param fileName - Nombre del archivo
  * @param signers - Array de firmantes
@@ -298,7 +305,7 @@ export async function createSignature(
 
 /**
  * Obtiene el estado de una firma
- * 
+ *
  * @param signatureId - ID de la firma
  * @returns Estado de la firma
  */
@@ -308,7 +315,7 @@ export async function getSignature(signatureId: string): Promise<any> {
 
 /**
  * Cancela una firma pendiente
- * 
+ *
  * @param signatureId - ID de la firma
  * @returns Resultado de la cancelación
  */
@@ -317,19 +324,31 @@ export async function cancelSignature(signatureId: string): Promise<any> {
 }
 
 /**
+ * Envía recordatorio de firma
+ *
+ * @param signatureId - ID de la firma
+ */
+export async function sendReminder(signatureId: string): Promise<any> {
+  return await signaturitClient.sendReminder(signatureId);
+}
+
+/**
  * Descarga el documento firmado
- * 
+ *
  * @param signatureId - ID de la firma
  * @param documentId - ID del documento
  * @returns Buffer del PDF firmado
  */
-export async function downloadSignedDocument(signatureId: string, documentId: string): Promise<Buffer> {
+export async function downloadSignedDocument(
+  signatureId: string,
+  documentId: string
+): Promise<Buffer> {
   return await signaturitClient.downloadSignedDocument(signatureId, documentId);
 }
 
 /**
  * Descarga el certificado de la firma
- * 
+ *
  * @param signatureId - ID de la firma
  * @returns Buffer del certificado
  */
@@ -339,7 +358,7 @@ export async function downloadCertificate(signatureId: string): Promise<Buffer> 
 
 /**
  * Verifica la firma de un webhook de Signaturit
- * 
+ *
  * @param bodyText - Texto del body del request
  * @param signature - Firma del header X-Signaturit-Signature
  * @returns true si la firma es válida

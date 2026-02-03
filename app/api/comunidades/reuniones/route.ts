@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const createReunionSchema = z.object({
   buildingId: z.string().min(1),
@@ -20,22 +21,32 @@ const createReunionSchema = z.object({
 const updateReunionSchema = z.object({
   estado: z.enum(['programada', 'realizada', 'cancelada']).optional(),
   acta: z.string().optional(),
-  acuerdos: z.array(z.object({
-    numero: z.number(),
-    descripcion: z.string(),
-    votacion: z.object({
-      aFavor: z.number(),
-      enContra: z.number(),
-      abstenciones: z.number(),
-    }).optional(),
-    aprobado: z.boolean(),
-  })).optional(),
-  asistentes: z.array(z.object({
-    id: z.string(),
-    nombre: z.string(),
-    unidad: z.string().optional(),
-    representado: z.boolean().default(false),
-  })).optional(),
+  acuerdos: z
+    .array(
+      z.object({
+        numero: z.number(),
+        descripcion: z.string(),
+        votacion: z
+          .object({
+            aFavor: z.number(),
+            enContra: z.number(),
+            abstenciones: z.number(),
+          })
+          .optional(),
+        aprobado: z.boolean(),
+      })
+    )
+    .optional(),
+  asistentes: z
+    .array(
+      z.object({
+        id: z.string(),
+        nombre: z.string(),
+        unidad: z.string().optional(),
+        representado: z.boolean().default(false),
+      })
+    )
+    .optional(),
 });
 
 // GET - Listar reuniones
@@ -121,10 +132,10 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({
-      reuniones: reuniones.map(r => ({
+      reuniones: reuniones.map((r) => ({
         ...r,
-        acuerdos: r.acuerdos as any[] || [],
-        asistentes: r.asistentes as any[] || [],
+        acuerdos: (r.acuerdos as any[]) || [],
+        asistentes: (r.asistentes as any[]) || [],
       })),
       pagination: {
         page,

@@ -6,31 +6,42 @@ import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const createActaSchema = z.object({
   buildingId: z.string().min(1),
   fecha: z.string().datetime(),
   convocatoria: z.string().min(1),
-  asistentes: z.array(z.object({
-    nombre: z.string(),
-    unidad: z.string().optional(),
-    representado: z.boolean().default(false),
-  })),
-  ordenDia: z.array(z.object({
-    numero: z.number(),
-    titulo: z.string(),
-    descripcion: z.string().optional(),
-  })),
-  acuerdos: z.array(z.object({
-    numero: z.number(),
-    descripcion: z.string(),
-    votacion: z.object({
-      aFavor: z.number().default(0),
-      enContra: z.number().default(0),
-      abstenciones: z.number().default(0),
-    }).optional(),
-    aprobado: z.boolean(),
-  })).optional(),
+  asistentes: z.array(
+    z.object({
+      nombre: z.string(),
+      unidad: z.string().optional(),
+      representado: z.boolean().default(false),
+    })
+  ),
+  ordenDia: z.array(
+    z.object({
+      numero: z.number(),
+      titulo: z.string(),
+      descripcion: z.string().optional(),
+    })
+  ),
+  acuerdos: z
+    .array(
+      z.object({
+        numero: z.number(),
+        descripcion: z.string(),
+        votacion: z
+          .object({
+            aFavor: z.number().default(0),
+            enContra: z.number().default(0),
+            abstenciones: z.number().default(0),
+          })
+          .optional(),
+        aprobado: z.boolean(),
+      })
+    )
+    .optional(),
   observaciones: z.string().optional(),
 });
 
@@ -102,7 +113,7 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json({
-      actas: actas.map(a => ({
+      actas: actas.map((a) => ({
         ...a,
         asistentes: a.asistentes as any[],
         ordenDia: a.ordenDia as any[],

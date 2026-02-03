@@ -1,36 +1,58 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
- 
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export function formatDuration(seconds: number): string {
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const remainingSeconds = seconds % 60
+  if (seconds < 0) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.abs(seconds % 60);
 
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
+    return `00:${minutes.toString().padStart(2, '0')}:${remainingSeconds
+      .toString()
+      .padStart(2, '0')}`;
+  }
+
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-export function formatCurrency(amount: number, currency: string = 'EUR', locale: string = 'es-ES'): string {
-  return new Intl.NumberFormat(locale, {
+export function formatCurrency(
+  amount: number,
+  currency: string = 'EUR',
+  locale: string = 'es-ES'
+): string {
+  const formatted = new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    useGrouping: true,
   }).format(amount);
+
+  return formatted.replace(/\u00a0/g, ' ');
 }
 
-export function formatDate(date: Date | string, format: 'short' | 'long' | 'full' = 'short', locale: string = 'es-ES'): string {
+export function formatDate(
+  date: Date | string,
+  format: 'short' | 'long' | 'full' = 'short',
+  locale: string = 'es-ES'
+): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  
+
   const optionsMap: Record<string, Intl.DateTimeFormatOptions> = {
     short: { year: 'numeric', month: '2-digit', day: '2-digit' },
     long: { year: 'numeric', month: 'long', day: 'numeric' },
-    full: { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+    full: { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
   };
-  
+
   const options = optionsMap[format];
-  
+
   return new Intl.DateTimeFormat(locale, options).format(dateObj);
 }
 
@@ -38,11 +60,17 @@ export function formatNumber(num: number, decimals: number = 0, locale: string =
   return new Intl.NumberFormat(locale, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
+    useGrouping: true,
   }).format(num);
 }
 
-export function formatPercentage(value: number, decimals: number = 1): string {
-  return `${formatNumber(value, decimals)}%`;
+export function formatPercentage(
+  value: number,
+  decimals: number = 2,
+  locale: string = 'es-ES'
+): string {
+  const normalizedValue = Number.isFinite(value) && Math.abs(value) <= 1 ? value * 100 : value;
+  return `${formatNumber(normalizedValue, decimals, locale)}%`;
 }
 
 export function truncateText(text: string, maxLength: number): string {
@@ -55,7 +83,7 @@ export function debounce<T extends (...args: any[]) => any>(
   wait: number
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout | null = null;
-  
+
   return (...args: Parameters<T>) => {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
@@ -67,7 +95,7 @@ export function throttle<T extends (...args: any[]) => any>(
   limit: number
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean = false;
-  
+
   return (...args: Parameters<T>) => {
     if (!inThrottle) {
       func(...args);
@@ -82,7 +110,7 @@ export function generateId(): string {
 }
 
 export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function isValidEmail(email: string): boolean {
@@ -91,8 +119,13 @@ export function isValidEmail(email: string): boolean {
 }
 
 export function isValidPhone(phone: string): boolean {
-  const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/;
-  return phoneRegex.test(phone);
+  if (!phone) return false;
+
+  const allowedChars = /^[+\d\s().-]+$/;
+  if (!allowedChars.test(phone)) return false;
+
+  const digitsOnly = phone.replace(/[^\d]/g, '');
+  return digitsOnly.length >= 7 && digitsOnly.length <= 15;
 }
 
 export function getInitials(name: string): string {
@@ -100,17 +133,20 @@ export function getInitials(name: string): string {
   if (parts.length === 1) {
     return parts[0].substring(0, 2).toUpperCase();
   }
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  const lastPart = parts[parts.length - 1];
+  const lastChar = lastPart.length <= 2 ? lastPart[lastPart.length - 1] : lastPart[0];
+  return (parts[0][0] + lastChar).toUpperCase();
 }
 
 export function pluralize(count: number, singular: string, plural?: string): string {
-  if (count === 1) return singular;
+  if (Math.abs(count) === 1) return singular;
   return plural || `${singular}s`;
 }
 
 export function copyToClipboard(text: string): Promise<boolean> {
   if (navigator.clipboard && window.isSecureContext) {
-    return navigator.clipboard.writeText(text)
+    return navigator.clipboard
+      .writeText(text)
       .then(() => true)
       .catch(() => false);
   } else {
@@ -133,7 +169,11 @@ export function copyToClipboard(text: string): Promise<boolean> {
   }
 }
 
-export function downloadFile(data: Blob | string, filename: string, mimeType: string = 'text/plain'): void {
+export function downloadFile(
+  data: Blob | string,
+  filename: string,
+  mimeType: string = 'text/plain'
+): void {
   const blob = typeof data === 'string' ? new Blob([data], { type: mimeType }) : data;
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -162,9 +202,9 @@ export function getRelativeTime(date: Date | string, locale: string = 'es-ES'): 
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - dateObj.getTime()) / 1000);
-  
+
   const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
-  
+
   if (diffInSeconds < 60) {
     return rtf.format(-diffInSeconds, 'second');
   } else if (diffInSeconds < 3600) {

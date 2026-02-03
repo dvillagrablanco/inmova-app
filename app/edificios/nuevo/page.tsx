@@ -145,6 +145,35 @@ export default function NuevoEdificioPage() {
                 description: 'Identifica el edificio y su ubicación',
                 fields: (
                   <div className="space-y-4">
+                    <AIDocumentAssistant
+                      context="propiedades"
+                      variant="inline"
+                      position="bottom-right"
+                      onApplyData={(data) => {
+                        if (data.direccion) {
+                          setFormData((prev) => ({ ...prev, direccion: data.direccion }));
+                        }
+                        if (data.nombreEdificio || data.nombre) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            nombre: data.nombreEdificio || data.nombre,
+                          }));
+                        }
+                        if (data.anoConstruction || data.anoConstruccion) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            anoConstructor: data.anoConstruction || data.anoConstruccion,
+                          }));
+                        }
+                        if (data.numeroUnidades || data.unidades) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            numeroUnidades: data.numeroUnidades || data.unidades,
+                          }));
+                        }
+                        toast.success('Datos aplicados al edificio');
+                      }}
+                    />
                     {/* Nombre */}
                     <div className="space-y-2">
                       <Label htmlFor="nombre">Nombre del Edificio *</Label>
@@ -288,38 +317,6 @@ export default function NuevoEdificioPage() {
             }
           />
         </form>
-
-        {/* Asistente IA de Documentos para escrituras, licencias, etc. */}
-        <AIDocumentAssistant
-          context="propiedades"
-          variant="floating"
-          position="bottom-right"
-          onApplyData={(data) => {
-            // Aplicar datos extraídos del documento al formulario
-            if (data.direccion) {
-              setFormData((prev) => ({ ...prev, direccion: data.direccion }));
-            }
-            if (data.nombreEdificio || data.nombre) {
-              setFormData((prev) => ({ ...prev, nombre: data.nombreEdificio || data.nombre }));
-            }
-            if (data.anoConstruction || data.anoConstruccion) {
-              setFormData((prev) => ({
-                ...prev,
-                anoConstructor: data.anoConstruction || data.anoConstruccion,
-              }));
-            }
-            if (data.tipoEdificio || data.tipo) {
-              const tipo = (data.tipoEdificio || data.tipo).toLowerCase();
-              if (['residencial', 'comercial', 'mixto', 'industrial'].includes(tipo)) {
-                setFormData((prev) => ({ ...prev, tipo }));
-              }
-            }
-            if (data.numeroUnidades) {
-              setFormData((prev) => ({ ...prev, numeroUnidades: data.numeroUnidades }));
-            }
-            toast.success('Datos del documento aplicados al formulario');
-          }}
-        />
       </div>
     </AuthenticatedLayout>
   );
