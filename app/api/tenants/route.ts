@@ -180,6 +180,11 @@ export async function POST(req: NextRequest) {
     if (error.message?.includes('permiso')) {
       return forbiddenResponse(error.message);
     }
+    if (error?.code === 'P2002' && Array.isArray(error?.meta?.target)) {
+      if (error.meta.target.includes('email')) {
+        return NextResponse.json({ error: 'Email duplicado' }, { status: 409 });
+      }
+    }
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
