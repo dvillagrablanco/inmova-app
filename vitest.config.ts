@@ -2,10 +2,13 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
-const hasTestBaseUrl = Boolean(process.env.TEST_BASE_URL);
+const testBaseUrl = process.env.TEST_BASE_URL;
+const hasTestBaseUrl = Boolean(
+  testBaseUrl && testBaseUrl !== 'undefined' && testBaseUrl !== 'false'
+);
 const integrationExcludes = hasTestBaseUrl
   ? []
-  : ['**/__tests__/integration/**', 'tests/integration/**'];
+  : ['**/__tests__/integration/**/*.test.{ts,tsx}', 'tests/integration/**/*.test.{ts,tsx}'];
 
 /**
  * Configuración de Vitest para COBERTURA 100%
