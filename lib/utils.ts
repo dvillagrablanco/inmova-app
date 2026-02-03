@@ -60,6 +60,7 @@ export function formatNumber(num: number, decimals: number = 0, locale: string =
   return new Intl.NumberFormat(locale, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
+    useGrouping: true,
   }).format(num);
 }
 
