@@ -114,14 +114,14 @@ describe('Utils', () => {
 
   describe('getColorByStatus', () => {
     it('returns correct color for each status', () => {
-      expect(getColorByStatus('pendiente')).toBe('yellow');
-      expect(getColorByStatus('completado')).toBe('green');
-      expect(getColorByStatus('activo')).toBe('green');
-      expect(getColorByStatus('cancelado')).toBe('red');
+      expect(getColorByStatus('pending')).toBe('bg-yellow-500');
+      expect(getColorByStatus('success')).toBe('bg-green-500');
+      expect(getColorByStatus('active')).toBe('bg-green-500');
+      expect(getColorByStatus('error')).toBe('bg-red-500');
     });
 
     it('returns default color for unknown status', () => {
-      expect(getColorByStatus('unknown')).toBe('gray');
+      expect(getColorByStatus('unknown')).toBe('bg-gray-500');
     });
   });
 });
