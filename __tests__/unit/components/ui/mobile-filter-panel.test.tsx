@@ -29,7 +29,8 @@ describe('MobileFilterPanel', () => {
   it('renderiza título y filtros', () => {
     render(<MobileFilterPanel filters={filters} activeFilters={[]} onFilterChange={vi.fn()} />);
 
-    expect(screen.getByText('Filtros')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /filtros/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /filtros/i })).toBeInTheDocument();
     expect(screen.getByText('Estado')).toBeInTheDocument();
   });
 
@@ -40,7 +41,7 @@ describe('MobileFilterPanel', () => {
     );
 
     fireEvent.click(screen.getByText('Estado'));
-    fireEvent.click(screen.getByRole('button', { name: /activo/i }));
+    fireEvent.click(screen.getAllByRole('button', { name: /activo/i })[0]);
     expect(onFilterChange).toHaveBeenCalledWith('status', 'active');
   });
 });
