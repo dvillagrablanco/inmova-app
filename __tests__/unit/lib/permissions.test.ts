@@ -210,9 +210,9 @@ describe('🔐 Permissions - Edge Cases', () => {
       activo: true,
     } as any);
 
-    const user = await requirePermission('invalid' as any);
-
-    expect(user).toBeDefined();
+    await expect(requirePermission('invalid' as any)).rejects.toThrow(
+      'No tienes permiso para: invalid'
+    );
   });
 
   test('⚠️ Debe manejar usuario sin companyId', async () => {
