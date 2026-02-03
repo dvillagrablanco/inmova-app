@@ -29,7 +29,7 @@ describe('MobileFilterPanel', () => {
   it('renderiza título y filtros', () => {
     render(<MobileFilterPanel filters={filters} activeFilters={[]} onFilterChange={vi.fn()} />);
 
-    expect(screen.getByRole('button', { name: /filtros/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^filtros$/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /filtros/i })).toBeInTheDocument();
     expect(screen.getByText('Estado')).toBeInTheDocument();
   });
