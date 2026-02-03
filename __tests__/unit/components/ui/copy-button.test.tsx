@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CopyButton } from '@/components/ui/copy-button';
 import { copyToClipboard } from '@/lib/utils';
 
@@ -39,7 +39,9 @@ describe('CopyButton', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /copiar/i }));
 
-    expect(copyToClipboard).toHaveBeenCalledWith('ABC123');
-    expect(toastSuccess).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(copyToClipboard).toHaveBeenCalledWith('ABC123');
+      expect(toastSuccess).toHaveBeenCalled();
+    });
   });
 });
