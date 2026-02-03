@@ -31,7 +31,7 @@ describe('MobileFilterPanel', () => {
 
     expect(screen.getByRole('button', { name: /^filtros$/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /filtros/i })).toBeInTheDocument();
-    expect(screen.getByText('Estado')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /estado/i })).toBeInTheDocument();
   });
 
   it('ejecuta onFilterChange al seleccionar opción', () => {
