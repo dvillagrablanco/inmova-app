@@ -1,54 +1,57 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+
+const push = vi.fn();
+const back = vi.fn();
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push,
+    back,
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    pathname: '/',
+    query: {},
+    asPath: '/',
+  }),
+  useSearchParams: () => ({
+    get: vi.fn(),
+  }),
+  usePathname: () => '/',
+}));
+
 import { BackButton } from '@/components/ui/back-button';
 
 describe('BackButton', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<BackButton {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  beforeEach(() => {
+    push.mockClear();
+    back.mockClear();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<BackButton {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
-  });
-
-  it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<BackButton onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
-  });
-
-  it('should be accessible', () => {
+  it('renderiza el texto por defecto', () => {
     render(<BackButton />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+
+    expect(screen.getByRole('button', { name: /atrás/i })).toBeInTheDocument();
+  });
+
+  it('ejecuta router.back cuando no hay href', () => {
+    render(<BackButton />);
+
+    fireEvent.click(screen.getByRole('button', { name: /atrás/i }));
+    expect(back).toHaveBeenCalled();
+  });
+
+  it('ejecuta router.push cuando hay href', () => {
+    render(<BackButton href="/dashboard" label="Volver" />);
+
+    fireEvent.click(screen.getByRole('button', { name: /volver/i }));
+    expect(push).toHaveBeenCalledWith('/dashboard');
+  });
+
+  it('renderiza solo icono cuando iconOnly=true', () => {
+    render(<BackButton iconOnly label="Volver atrás" />);
+
+    expect(screen.getByRole('button', { name: /volver atrás/i })).toBeInTheDocument();
+    expect(screen.queryByText(/volver atrás/i)).not.toBeInTheDocument();
   });
 });
