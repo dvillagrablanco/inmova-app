@@ -40,7 +40,7 @@ describe('MobileFilterPanel', () => {
       <MobileFilterPanel filters={filters} activeFilters={[]} onFilterChange={onFilterChange} />
     );
 
-    fireEvent.click(screen.getByText('Estado'));
+    fireEvent.click(screen.getByRole('button', { name: /estado/i }));
     fireEvent.click(screen.getAllByRole('button', { name: /activo/i })[0]);
     expect(onFilterChange).toHaveBeenCalledWith('status', 'active');
   });
