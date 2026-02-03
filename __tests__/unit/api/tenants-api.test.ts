@@ -51,7 +51,7 @@ describe('🏠 Tenants API - GET Endpoint', () => {
   const mockUser = {
     id: 'user-123',
     companyId: 'company-123',
-    role: 'ADMIN',
+    role: 'administrador',
   };
 
   const mockTenants = [
@@ -234,7 +234,7 @@ describe('🏠 Tenants API - POST Endpoint', () => {
   const mockUser = {
     id: 'user-123',
     companyId: 'company-123',
-    role: 'ADMIN',
+    role: 'administrador',
   };
 
   const validTenantData = {

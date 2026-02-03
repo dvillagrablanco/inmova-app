@@ -12,6 +12,18 @@ import { tenantCreateSchema } from '@/lib/validations';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const normalizeMessage = (message: unknown) => String(message || '').toLowerCase();
+const isAuthError = (message: string) => {
+  const normalized = normalizeMessage(message);
+  return (
+    normalized.includes('no autenticado') ||
+    normalized.includes('unauthorized') ||
+    normalized.includes('not authenticated') ||
+    normalized.includes('token inválido') ||
+    normalized.includes('token invalido')
+  );
+};
+
 export async function GET(req: NextRequest) {
   try {
     let user;
@@ -19,9 +31,12 @@ export async function GET(req: NextRequest) {
       user = await requireAuth();
     } catch (error: any) {
       const message = error?.message || 'No autenticado';
-      const normalized = String(message).toLowerCase();
+      const normalized = normalizeMessage(message);
       if (normalized.includes('usuario inactivo')) {
         return NextResponse.json({ error: message }, { status: 403 });
+      }
+      if (isAuthError(message)) {
+        return NextResponse.json({ error: message }, { status: 401 });
       }
       return NextResponse.json({ error: message }, { status: 401 });
     }
@@ -113,8 +128,8 @@ export async function GET(req: NextRequest) {
       stack: errorStack.slice(0, 500),
     });
 
-    const normalizedMessage = errorMessage.toLowerCase();
-    if (normalizedMessage.includes('no autenticado')) {
+    const normalizedMessage = normalizeMessage(errorMessage);
+    if (isAuthError(errorMessage)) {
       return NextResponse.json({ error: errorMessage }, { status: 401 });
     }
     if (normalizedMessage.includes('usuario inactivo')) {
@@ -134,12 +149,12 @@ export async function POST(req: NextRequest) {
       user = await requirePermission('create');
     } catch (error: any) {
       const message = error?.message || 'No autenticado';
-      const normalized = String(message).toLowerCase();
-      if (normalized.includes('permiso')) {
-        return forbiddenResponse(message);
-      }
-      if (normalized.includes('no autenticado')) {
+      const normalized = normalizeMessage(message);
+      if (isAuthError(message)) {
         return NextResponse.json({ error: message }, { status: 401 });
+      }
+      if (normalized.includes('permiso') || normalized.includes('forbidden')) {
+        return forbiddenResponse(message);
       }
       return forbiddenResponse(message);
     }
@@ -207,15 +222,18 @@ export async function POST(req: NextRequest) {
     if (error?.code === 'P2002') {
       const target = error?.meta?.target;
       const targets = Array.isArray(target) ? target : target ? [target] : [];
-      if (targets.map((t: any) => String(t).toLowerCase()).includes('email')) {
-        return NextResponse.json({ error: 'email duplicado' }, { status: 409 });
-      }
+      const targetText = targets.map((t: any) => String(t).toLowerCase()).join(' ');
+      const messageText = normalizeMessage(error?.message);
+      const isEmailDuplicate =
+        targetText.includes('email') ||
+        messageText.includes('email') ||
+        messageText.includes('correo');
+      return NextResponse.json(
+        { error: isEmailDuplicate ? 'email duplicado' : 'registro duplicado' },
+        { status: 409 }
+      );
     }
-    if (
-      String(error.message || '')
-        .toLowerCase()
-        .includes('no autenticado')
-    ) {
+    if (isAuthError(error?.message)) {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
     return NextResponse.json({ error: 'Error al crear inquilino' }, { status: 500 });
