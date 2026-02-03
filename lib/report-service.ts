@@ -206,7 +206,11 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
       });
     }
   } else if (reportData.tipo === 'mantenimiento') {
-    const { totalSolicitudes, pendientes, enProgreso, completadas, costoTotal } = reportData.datos;
+    const totalSolicitudes = reportData.datos?.totalSolicitudes ?? 0;
+    const pendientes = reportData.datos?.pendientes ?? 0;
+    const enProgreso = reportData.datos?.enProgreso ?? 0;
+    const completadas = reportData.datos?.completadas ?? 0;
+    const costoTotal = reportData.datos?.costoTotal ?? 0;
 
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
@@ -225,7 +229,7 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     yPos += 8;
     doc.text(`Completadas: ${completadas}`, 15, yPos);
     yPos += 8;
-    doc.text(`Costo total: ${costoTotal.toFixed(2)} €`, 15, yPos);
+    doc.text(`Costo total: ${Number(costoTotal).toFixed(2)} €`, 15, yPos);
     yPos += 12;
 
     // Tabla de solicitudes recientes
