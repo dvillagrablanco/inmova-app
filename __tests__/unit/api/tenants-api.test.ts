@@ -44,7 +44,7 @@ vi.mock('@/lib/validations', () => ({
 }));
 
 import { prisma } from '@/lib/db';
-import { requireAuth } from '@/lib/permissions';
+import { requireAuth, requirePermission } from '@/lib/permissions';
 import { GET, POST } from '@/app/api/tenants/route';
 
 describe('🏠 Tenants API - GET Endpoint', () => {
@@ -80,6 +80,7 @@ describe('🏠 Tenants API - GET Endpoint', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (requireAuth as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
+    (requirePermission as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
   });
 
   // ========================================
