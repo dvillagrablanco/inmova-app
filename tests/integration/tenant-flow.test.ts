@@ -11,7 +11,10 @@ type ActionsModule = typeof import('@/app/actions/tenant-flow-actions');
 let prisma: PrismaClient;
 let actions: ActionsModule;
 
-describe('Modulo Critico 1: Flujo de Inquilinos y Propiedades', () => {
+const hasDatabase = Boolean(process.env.TEST_DATABASE_URL || process.env.DATABASE_URL);
+const describeIf = hasDatabase ? describe : describe.skip;
+
+describeIf('Modulo Critico 1: Flujo de Inquilinos y Propiedades', () => {
   const companyId = crypto.randomUUID();
   const buildingId = crypto.randomUUID();
   const suffix = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
