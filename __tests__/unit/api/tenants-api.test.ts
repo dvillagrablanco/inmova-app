@@ -247,6 +247,7 @@ describe('🏠 Tenants API - POST Endpoint', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (requireAuth as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
+    (requirePermission as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
   });
 
   // ========================================
