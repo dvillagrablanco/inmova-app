@@ -1,42 +1,34 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { PreloadLink } from '@/components/ui/preload-link';
 
+vi.mock('next/link', () => ({
+  default: ({ href, children, ...props }: any) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
+vi.mock('@/lib/hooks/useRoutePreloader', () => ({
+  useHoverPreload: () => ({}),
+}));
+
 describe('PreloadLink', () => {
-  it('should render without crashing', () => {
-    
-    
-    render(<PreloadLink  />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  it('renderiza el enlace con href', () => {
+    render(<PreloadLink href="/dashboard">Ir al Dashboard</PreloadLink>);
+
+    const link = screen.getByRole('link', { name: /ir al dashboard/i });
+    expect(link).toHaveAttribute('href', '/dashboard');
   });
 
-  it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<PreloadLink onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
-  });
+  it('renderiza un span cuando está deshabilitado', () => {
+    render(
+      <PreloadLink href="/dashboard" disabled>
+        Ir al Dashboard
+      </PreloadLink>
+    );
 
-  it('should be accessible', () => {
-    render(<PreloadLink />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    expect(screen.getByText('Ir al Dashboard').tagName).toBe('SPAN');
   });
 });
