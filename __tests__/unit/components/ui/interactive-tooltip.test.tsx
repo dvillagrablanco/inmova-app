@@ -1,47 +1,35 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { InteractiveTooltip } from '@/components/ui/interactive-tooltip';
 
+vi.mock('@/components/ui/tooltip', () => ({
+  TooltipProvider: ({ children }: any) => <div>{children}</div>,
+  Tooltip: ({ children }: any) => <div>{children}</div>,
+  TooltipTrigger: ({ children }: any) => <div>{children}</div>,
+  TooltipContent: ({ children }: any) => <div>{children}</div>,
+}));
+
 describe('InteractiveTooltip', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<InteractiveTooltip {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+  it('renderiza título y descripción', () => {
+    render(
+      <InteractiveTooltip title="Ayuda" description="Detalle">
+        <button>Trigger</button>
+      </InteractiveTooltip>
+    );
+
+    expect(screen.getByText('Ayuda')).toBeInTheDocument();
+    expect(screen.getByText('Detalle')).toBeInTheDocument();
   });
 
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<InteractiveTooltip {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
-  });
+  it('ejecuta acción cuando se pulsa el botón', () => {
+    const onClick = vi.fn();
+    render(
+      <InteractiveTooltip description="Detalle" action={{ label: 'Aplicar', onClick }}>
+        <button>Trigger</button>
+      </InteractiveTooltip>
+    );
 
-  it('should handle user interactions', async () => {
-    render(<InteractiveTooltip />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
-  });
-
-  it('should be accessible', () => {
-    render(<InteractiveTooltip />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    fireEvent.click(screen.getByRole('button', { name: /aplicar/i }));
+    expect(onClick).toHaveBeenCalled();
   });
 });
