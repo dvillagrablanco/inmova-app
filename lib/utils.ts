@@ -58,8 +58,12 @@ export function formatNumber(num: number, decimals: number = 0, locale: string =
   }).format(num);
 }
 
-export function formatPercentage(value: number, decimals: number = 1): string {
-  return `${formatNumber(value, decimals)}%`;
+export function formatPercentage(
+  value: number,
+  decimals: number = 1,
+  locale: string = 'en-US'
+): string {
+  return `${formatNumber(value, decimals, locale)}%`;
 }
 
 export function truncateText(text: string, maxLength: number): string {
