@@ -38,7 +38,7 @@ describe('🔐 Permissions - requireAuth()', () => {
   const mockUser = {
     id: 'user-123',
     companyId: 'company-123',
-    role: 'ADMIN',
+    role: 'administrador',
     email: 'user@example.com',
     activo: true,
   };
@@ -93,7 +93,7 @@ describe('🔐 Permissions - requirePermission()', () => {
   const mockAdmin = {
     id: 'admin-123',
     companyId: 'company-123',
-    role: 'ADMIN',
+    role: 'administrador',
     email: 'admin@example.com',
     activo: true,
   };
@@ -101,7 +101,7 @@ describe('🔐 Permissions - requirePermission()', () => {
   const mockUser = {
     id: 'user-456',
     companyId: 'company-123',
-    role: 'USER',
+    role: 'tenant',
     email: 'user@example.com',
     activo: true,
   };
@@ -161,7 +161,7 @@ describe('🔐 Permissions - requirePermission()', () => {
   });
 
   test('⚠️ SuperAdmin tiene todos los permisos', async () => {
-    const superAdmin = { ...mockAdmin, role: 'SUPERADMIN' };
+    const superAdmin = { ...mockAdmin, role: 'super_admin' };
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: superAdmin,
     });
@@ -169,7 +169,7 @@ describe('🔐 Permissions - requirePermission()', () => {
 
     const user = await requirePermission('create');
 
-    expect(user.role).toBe('SUPERADMIN');
+    expect(user.role).toBe('super_admin');
   });
 });
 
@@ -195,11 +195,16 @@ describe('🔐 Permissions - Edge Cases', () => {
 
   test('⚠️ Debe manejar permisos inválidos', async () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
-      user: { id: 'admin-1', role: 'ADMIN', companyId: 'company-1', email: 'admin@example.com' },
+      user: {
+        id: 'admin-1',
+        role: 'administrador',
+        companyId: 'company-1',
+        email: 'admin@example.com',
+      },
     });
     vi.mocked(prisma.user.findUnique).mockResolvedValue({
       id: 'admin-1',
-      role: 'ADMIN',
+      role: 'administrador',
       companyId: 'company-1',
       email: 'admin@example.com',
       activo: true,
@@ -212,11 +217,11 @@ describe('🔐 Permissions - Edge Cases', () => {
 
   test('⚠️ Debe manejar usuario sin companyId', async () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
-      user: { id: 'user-1', role: 'ADMIN', email: 'user@example.com' }, // Sin companyId
+      user: { id: 'user-1', role: 'administrador', email: 'user@example.com' }, // Sin companyId
     });
     vi.mocked(prisma.user.findUnique).mockResolvedValue({
       id: 'user-1',
-      role: 'ADMIN',
+      role: 'administrador',
       email: 'user@example.com',
       activo: true,
     } as any);
@@ -228,11 +233,16 @@ describe('🔐 Permissions - Edge Cases', () => {
 
   test('⚠️ Debe manejar múltiples llamadas concurrentes', async () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
-      user: { id: 'user-1', role: 'ADMIN', companyId: 'company-1', email: 'user@example.com' },
+      user: {
+        id: 'user-1',
+        role: 'administrador',
+        companyId: 'company-1',
+        email: 'user@example.com',
+      },
     });
     vi.mocked(prisma.user.findUnique).mockResolvedValue({
       id: 'user-1',
-      role: 'ADMIN',
+      role: 'administrador',
       companyId: 'company-1',
       email: 'user@example.com',
       activo: true,
