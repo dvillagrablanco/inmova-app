@@ -22,8 +22,17 @@ vi.mock('next/server', () => ({
   },
 }));
 
+vi.mock('@/lib/db', () => ({
+  prisma: {
+    user: {
+      findUnique: vi.fn(),
+    },
+  },
+}));
+
 import { getServerSession } from 'next-auth';
 import { requireAuth, requirePermission } from '@/lib/permissions';
+import { prisma } from '@/lib/db';
 
 describe('🔐 Permissions - requireAuth()', () => {
   const mockUser = {
@@ -31,16 +40,19 @@ describe('🔐 Permissions - requireAuth()', () => {
     companyId: 'company-123',
     role: 'ADMIN',
     email: 'user@example.com',
+    activo: true,
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
   });
 
   test('✅ Debe retornar usuario autenticado', async () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockUser,
     });
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
 
     const user = await requireAuth();
 
@@ -49,20 +61,27 @@ describe('🔐 Permissions - requireAuth()', () => {
 
   test('❌ Debe lanzar error si no hay sesión', async () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(null as any);
 
     await expect(requireAuth()).rejects.toThrow('No autenticado');
   });
 
   test('❌ Debe lanzar error si sesión sin usuario', async () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({});
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(null as any);
 
     await expect(requireAuth()).rejects.toThrow('No autenticado');
   });
 
   test('⚠️ Debe manejar sesión con usuario parcial', async () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
-      user: { id: 'user-123' }, // Sin companyId
+      user: { id: 'user-123', email: 'user@example.com' }, // Sin companyId
     });
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({
+      id: 'user-123',
+      email: 'user@example.com',
+      activo: true,
+    } as any);
 
     const user = await requireAuth();
 
@@ -76,6 +95,7 @@ describe('🔐 Permissions - requirePermission()', () => {
     companyId: 'company-123',
     role: 'ADMIN',
     email: 'admin@example.com',
+    activo: true,
   };
 
   const mockUser = {
@@ -83,16 +103,19 @@ describe('🔐 Permissions - requirePermission()', () => {
     companyId: 'company-123',
     role: 'USER',
     email: 'user@example.com',
+    activo: true,
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockAdmin as any);
   });
 
   test('✅ Admin puede crear recursos', async () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockAdmin,
     });
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockAdmin as any);
 
     const user = await requirePermission('create');
 
@@ -103,6 +126,7 @@ describe('🔐 Permissions - requirePermission()', () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockAdmin,
     });
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockAdmin as any);
 
     const user = await requirePermission('update');
 
@@ -113,6 +137,7 @@ describe('🔐 Permissions - requirePermission()', () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockAdmin,
     });
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockAdmin as any);
 
     const user = await requirePermission('delete');
 
@@ -123,12 +148,14 @@ describe('🔐 Permissions - requirePermission()', () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockUser,
     });
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
 
     await expect(requirePermission('create')).rejects.toThrow();
   });
 
   test('❌ Sin sesión no tiene permisos', async () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(null as any);
 
     await expect(requirePermission('create')).rejects.toThrow('No autenticado');
   });
@@ -138,6 +165,7 @@ describe('🔐 Permissions - requirePermission()', () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: superAdmin,
     });
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(superAdmin as any);
 
     const user = await requirePermission('create');
 
@@ -152,16 +180,30 @@ describe('🔐 Permissions - Edge Cases', () => {
 
   test('⚠️ Debe manejar roles desconocidos', async () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
-      user: { id: 'user-1', role: 'UNKNOWN', companyId: 'company-1' },
+      user: { id: 'user-1', role: 'UNKNOWN', companyId: 'company-1', email: 'user@example.com' },
     });
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({
+      id: 'user-1',
+      role: 'UNKNOWN',
+      companyId: 'company-1',
+      email: 'user@example.com',
+      activo: true,
+    } as any);
 
     await expect(requirePermission('create')).rejects.toThrow();
   });
 
   test('⚠️ Debe manejar permisos inválidos', async () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
-      user: { id: 'admin-1', role: 'ADMIN', companyId: 'company-1' },
+      user: { id: 'admin-1', role: 'ADMIN', companyId: 'company-1', email: 'admin@example.com' },
     });
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({
+      id: 'admin-1',
+      role: 'ADMIN',
+      companyId: 'company-1',
+      email: 'admin@example.com',
+      activo: true,
+    } as any);
 
     const user = await requirePermission('invalid' as any);
 
@@ -170,8 +212,14 @@ describe('🔐 Permissions - Edge Cases', () => {
 
   test('⚠️ Debe manejar usuario sin companyId', async () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
-      user: { id: 'user-1', role: 'ADMIN' }, // Sin companyId
+      user: { id: 'user-1', role: 'ADMIN', email: 'user@example.com' }, // Sin companyId
     });
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({
+      id: 'user-1',
+      role: 'ADMIN',
+      email: 'user@example.com',
+      activo: true,
+    } as any);
 
     const user = await requireAuth();
 
@@ -180,8 +228,15 @@ describe('🔐 Permissions - Edge Cases', () => {
 
   test('⚠️ Debe manejar múltiples llamadas concurrentes', async () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
-      user: { id: 'user-1', role: 'ADMIN', companyId: 'company-1' },
+      user: { id: 'user-1', role: 'ADMIN', companyId: 'company-1', email: 'user@example.com' },
     });
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({
+      id: 'user-1',
+      role: 'ADMIN',
+      companyId: 'company-1',
+      email: 'user@example.com',
+      activo: true,
+    } as any);
 
     const promises = Array.from({ length: 10 }, () => requireAuth());
     const results = await Promise.all(promises);
