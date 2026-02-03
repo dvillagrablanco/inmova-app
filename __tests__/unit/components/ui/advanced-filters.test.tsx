@@ -48,11 +48,9 @@ describe('AdvancedFilters', () => {
     render(<AdvancedFilters filters={filters} values={baseValues} onChange={onChange} />);
 
     fireEvent.change(screen.getByLabelText('Buscar'), { target: { value: 'casa' } });
-    vi.advanceTimersByTime(300);
+    vi.runAllTimers();
 
-    await waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith({ ...baseValues, search: 'casa' });
-    });
+    expect(onChange).toHaveBeenCalledWith({ ...baseValues, search: 'casa' });
 
     vi.useRealTimers();
   });
