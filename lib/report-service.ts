@@ -32,7 +32,7 @@ interface ReportData {
 export const generateReportPDF = async (reportData: ReportData): Promise<Buffer> => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
-  
+
   // Colores corporativos
   const primaryColor: [number, number, number] = [0, 0, 0];
   const secondaryColor: [number, number, number] = [100, 100, 100];
@@ -44,20 +44,15 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...primaryColor);
   doc.text(reportData.companyInfo.nombre || 'INMOVA', 15, 25);
-  
+
   // Título del reporte
   doc.setFontSize(18);
   doc.text(`REPORTE DE ${reportData.tipo.toUpperCase()}`, pageWidth / 2, 40, { align: 'center' });
-  
+
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...secondaryColor);
-  doc.text(
-    `Periodo: ${reportData.periodo}`,
-    pageWidth / 2,
-    48,
-    { align: 'center' }
-  );
+  doc.text(`Periodo: ${reportData.periodo}`, pageWidth / 2, 48, { align: 'center' });
   doc.text(
     `Fecha de generación: ${format(reportData.fechaGeneracion, 'dd/MM/yyyy HH:mm', { locale: es })}`,
     pageWidth / 2,
@@ -70,16 +65,16 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
   // ============================================
   // CONTENIDO BASADO EN TIPO DE REPORTE
   // ============================================
-  
+
   if (reportData.tipo === 'morosidad') {
     const { pagosPendientes, totalMorosidad, inquilinos } = reportData.datos;
-    
+
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...primaryColor);
     doc.text('RESUMEN DE MOROSIDAD', 15, yPos);
     yPos += 10;
-    
+
     // KPIs
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
@@ -87,7 +82,7 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     yPos += 8;
     doc.text(`Importe total adeudado: ${totalMorosidad.toFixed(2)} €`, 15, yPos);
     yPos += 12;
-    
+
     // Tabla de inquilinos morosos
     if (inquilinos && inquilinos.length > 0) {
       autoTable(doc, {
@@ -109,14 +104,21 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
       });
     }
   } else if (reportData.tipo === 'ocupacion') {
-    const { totalUnidades, unidadesOcupadas, tasaOcupacion, unidadesDisponibles } = reportData.datos;
-    
+    const totalUnidades = reportData.datos.totalUnidades ?? 0;
+    const unidadesOcupadas = reportData.datos.unidadesOcupadas ?? 0;
+    const unidadesDisponibles =
+      reportData.datos.unidadesDisponibles ?? Math.max(totalUnidades - unidadesOcupadas, 0);
+    const tasaOcupacion =
+      reportData.datos.tasaOcupacion ??
+      reportData.datos.porcentajeOcupacion ??
+      (totalUnidades > 0 ? (unidadesOcupadas / totalUnidades) * 100 : 0);
+
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...primaryColor);
     doc.text('REPORTE DE OCUPACIÓN', 15, yPos);
     yPos += 10;
-    
+
     // KPIs
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
@@ -128,19 +130,26 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     yPos += 8;
     doc.text(`Tasa de ocupación: ${tasaOcupacion.toFixed(1)}%`, 15, yPos);
     yPos += 12;
-    
+
     // Tabla de edificios
     if (reportData.datos.edificios && reportData.datos.edificios.length > 0) {
       autoTable(doc, {
         startY: yPos,
         head: [['Edificio', 'Total', 'Ocupadas', 'Disponibles', 'Ocupación']],
-        body: reportData.datos.edificios.map((ed: any) => [
-          ed.nombre,
-          ed.total.toString(),
-          ed.ocupadas.toString(),
-          ed.disponibles.toString(),
-          `${ed.tasaOcupacion.toFixed(1)}%`,
-        ]),
+        body: reportData.datos.edificios.map((ed: any) => {
+          const total = ed.total ?? 0;
+          const ocupadas = ed.ocupadas ?? ed.unidadesOcupadas ?? 0;
+          const disponibles = ed.disponibles ?? ed.unidadesDisponibles ?? 0;
+          const ocupacion = ed.tasaOcupacion ?? ed.ocupacion ?? 0;
+
+          return [
+            ed.nombre,
+            total.toString(),
+            ocupadas.toString(),
+            disponibles.toString(),
+            `${Number(ocupacion).toFixed(1)}%`,
+          ];
+        }),
         theme: 'striped',
         headStyles: {
           fillColor: [0, 0, 0],
@@ -152,13 +161,13 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     }
   } else if (reportData.tipo === 'ingresos') {
     const { ingresosBrutos, gastos, ingresosNetos, rentabilidad } = reportData.datos;
-    
+
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...primaryColor);
     doc.text('REPORTE DE INGRESOS', 15, yPos);
     yPos += 10;
-    
+
     // KPIs
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
@@ -170,7 +179,7 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     yPos += 8;
     doc.text(`Rentabilidad: ${rentabilidad.toFixed(1)}%`, 15, yPos);
     yPos += 12;
-    
+
     // Desglose mensual si existe
     if (reportData.datos.desgloseMensual && reportData.datos.desgloseMensual.length > 0) {
       autoTable(doc, {
@@ -193,13 +202,13 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     }
   } else if (reportData.tipo === 'mantenimiento') {
     const { totalSolicitudes, pendientes, enProgreso, completadas, costoTotal } = reportData.datos;
-    
+
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...primaryColor);
     doc.text('REPORTE DE MANTENIMIENTO', 15, yPos);
     yPos += 10;
-    
+
     // KPIs
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
@@ -213,7 +222,7 @@ export const generateReportPDF = async (reportData: ReportData): Promise<Buffer>
     yPos += 8;
     doc.text(`Costo total: ${costoTotal.toFixed(2)} €`, 15, yPos);
     yPos += 12;
-    
+
     // Tabla de solicitudes recientes
     if (reportData.datos.solicitudesRecientes && reportData.datos.solicitudesRecientes.length > 0) {
       autoTable(doc, {
@@ -338,9 +347,11 @@ const generateMorosidadData = async (companyId: string, periodo: number) => {
   });
 
   const totalMorosidad = pagosPendientes.reduce((sum, p) => sum + p.monto, 0);
-  
-  const inquilinos = pagosPendientes.map(pago => {
-    const diasAtraso = Math.floor((now.getTime() - new Date(pago.fechaVencimiento).getTime()) / (1000 * 60 * 60 * 24));
+
+  const inquilinos = pagosPendientes.map((pago) => {
+    const diasAtraso = Math.floor(
+      (now.getTime() - new Date(pago.fechaVencimiento).getTime()) / (1000 * 60 * 60 * 24)
+    );
     return {
       nombreCompleto: pago.contract.tenant.nombreCompleto,
       unidad: `${pago.contract.unit.building.nombre} - ${pago.contract.unit.numero}`,
@@ -368,16 +379,19 @@ const generateOcupacionData = async (companyId: string) => {
   });
 
   const totalUnidades = buildings.reduce((sum, b) => sum + b.units.length, 0);
-  const unidadesOcupadas = buildings.reduce((sum, b) => sum + b.units.filter(u => u.estado === 'ocupada').length, 0);
+  const unidadesOcupadas = buildings.reduce(
+    (sum, b) => sum + b.units.filter((u) => u.estado === 'ocupada').length,
+    0
+  );
   const unidadesDisponibles = totalUnidades - unidadesOcupadas;
   const tasaOcupacion = totalUnidades > 0 ? (unidadesOcupadas / totalUnidades) * 100 : 0;
 
-  const edificios = buildings.map(b => {
+  const edificios = buildings.map((b) => {
     const total = b.units.length;
-    const ocupadas = b.units.filter(u => u.estado === 'ocupada').length;
+    const ocupadas = b.units.filter((u) => u.estado === 'ocupada').length;
     const disponibles = total - ocupadas;
     const tasaOcupacion = total > 0 ? (ocupadas / total) * 100 : 0;
-    
+
     return {
       nombre: b.nombre,
       total,
@@ -436,10 +450,10 @@ const generateIngresosData = async (companyId: string, periodo: number) => {
   });
 
   let ingresosBrutos = 0;
-  buildings.forEach(building => {
-    building.units.forEach(unit => {
-      unit.contracts.forEach(contract => {
-        contract.payments.forEach(payment => {
+  buildings.forEach((building) => {
+    building.units.forEach((unit) => {
+      unit.contracts.forEach((contract) => {
+        contract.payments.forEach((payment) => {
           ingresosBrutos += payment.monto;
         });
       });
@@ -451,7 +465,8 @@ const generateIngresosData = async (companyId: string, periodo: number) => {
   const rentabilidad = ingresosBrutos > 0 ? (ingresosNetos / ingresosBrutos) * 100 : 0;
 
   // Desglose mensual
-  const desgloseMensual: Array<{ mes: string; ingresos: number; gastos: number; neto: number }> = [];
+  const desgloseMensual: Array<{ mes: string; ingresos: number; gastos: number; neto: number }> =
+    [];
   for (let i = periodo - 1; i >= 0; i--) {
     const mes = new Date(now);
     mes.setMonth(mes.getMonth() - i);
@@ -459,10 +474,10 @@ const generateIngresosData = async (companyId: string, periodo: number) => {
     const mesFin = new Date(mes.getFullYear(), mes.getMonth() + 1, 0);
 
     let ingresos = 0;
-    buildings.forEach(building => {
-      building.units.forEach(unit => {
-        unit.contracts.forEach(contract => {
-          contract.payments.forEach(payment => {
+    buildings.forEach((building) => {
+      building.units.forEach((unit) => {
+        unit.contracts.forEach((contract) => {
+          contract.payments.forEach((payment) => {
             const paymentDate = new Date(payment.fechaVencimiento);
             if (paymentDate >= mesInicio && paymentDate <= mesFin) {
               ingresos += payment.monto;
@@ -473,8 +488,8 @@ const generateIngresosData = async (companyId: string, periodo: number) => {
     });
 
     let gastosMes = 0;
-    buildings.forEach(building => {
-      building.expenses.forEach(expense => {
+    buildings.forEach((building) => {
+      building.expenses.forEach((expense) => {
         const expenseDate = new Date(expense.fecha);
         if (expenseDate >= mesInicio && expenseDate <= mesFin) {
           gastosMes += expense.monto;
@@ -533,12 +548,12 @@ const generateMantenimientoData = async (companyId: string, periodo: number) => 
   });
 
   const totalSolicitudes = solicitudes.length;
-  const pendientes = solicitudes.filter(s => s.estado === 'pendiente').length;
-  const enProgreso = solicitudes.filter(s => s.estado === 'en_progreso').length;
-  const completadas = solicitudes.filter(s => s.estado === 'completado').length;
+  const pendientes = solicitudes.filter((s) => s.estado === 'pendiente').length;
+  const enProgreso = solicitudes.filter((s) => s.estado === 'en_progreso').length;
+  const completadas = solicitudes.filter((s) => s.estado === 'completado').length;
   const costoTotal = solicitudes.reduce((sum, s) => sum + (s.costoReal || s.costoEstimado || 0), 0);
 
-  const solicitudesRecientes = solicitudes.slice(0, 20).map(sol => ({
+  const solicitudesRecientes = solicitudes.slice(0, 20).map((sol) => ({
     titulo: sol.titulo,
     unidad: `${sol.unit.building.nombre} - ${sol.unit.numero}`,
     estado: sol.estado,
@@ -685,7 +700,7 @@ export const sendScheduledReport = async (reportId: string) => {
   }
 
   // Enviar emails a todos los destinatarios
-  const emailPromises = report.destinatarios.map(email =>
+  const emailPromises = report.destinatarios.map((email) =>
     sendEmail({
       to: email,
       subject: `Reporte Programado: ${report.nombre}`,
@@ -736,5 +751,7 @@ export const sendScheduledReport = async (reportId: string) => {
     },
   });
 
-  logger.info(`Reporte ${report.nombre} enviado correctamente a ${report.destinatarios.length} destinatarios`);
+  logger.info(
+    `Reporte ${report.nombre} enviado correctamente a ${report.destinatarios.length} destinatarios`
+  );
 };
