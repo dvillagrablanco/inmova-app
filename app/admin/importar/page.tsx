@@ -56,6 +56,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 type ImportStep = 'select' | 'validate' | 'preview' | 'import' | 'results';
 
@@ -137,6 +138,28 @@ export default function ImportarPage() {
   const [importing, setImporting] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
+
+  const applyImportHints = (data: Record<string, any>) => {
+    const source = data.sourceSystem || data.sistemaOrigen || data.origen;
+    if (source) {
+      const normalized = String(source).toLowerCase();
+      const matchKey = Object.keys(SYSTEM_INFO).find((key) => normalized.includes(key));
+      if (matchKey) {
+        setSourceSystem(matchKey);
+      } else if (normalized.includes('csv') || normalized.includes('generic')) {
+        setSourceSystem('generic_csv');
+      }
+    }
+
+    const entity = data.entityType || data.tipoDatos || data.entidad;
+    if (entity) {
+      const normalized = String(entity).toLowerCase();
+      const matchKey = Object.keys(ENTITY_LABELS).find((key) => normalized.includes(key));
+      if (matchKey) {
+        setEntityType(matchKey);
+      }
+    }
+  };
 
   useEffect(() => {
     if (entityType === 'units') {
@@ -335,6 +358,14 @@ export default function ImportarPage() {
           <CardDescription>Selecciona el sistema desde el que estás migrando</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-4">
+            <AIDocumentAssistant
+              context="documentos"
+              variant="inline"
+              position="bottom-right"
+              onApplyData={applyImportHints}
+            />
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Object.entries(SYSTEM_INFO).map(([key, info]) => (
               <Card
@@ -779,8 +810,7 @@ export default function ImportarPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold gradient-text mb-2">Migración desde Otros Sistemas</h1>
           <p className="text-muted-foreground">
-            Importa tus datos desde Excel, CSV o cualquier sistema de gestión existente de
-            gestión
+            Importa tus datos desde Excel, CSV o cualquier sistema de gestión existente de gestión
           </p>
         </div>
 
