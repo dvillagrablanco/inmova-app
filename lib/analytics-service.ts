@@ -1,8 +1,8 @@
 /**
  * Servicio de Analytics Avanzado
- * 
+ *
  * Recopila y analiza métricas de uso, performance y costos de IA.
- * 
+ *
  * @module AnalyticsService
  */
 
@@ -126,7 +126,6 @@ export async function trackAPIRequest(
       responseTime,
       { ttl: 86400 } // 24 horas
     );
-
   } catch (error) {
     // No fallar si analytics falla
     logger.warn('Failed to track API request:', error);
@@ -162,7 +161,6 @@ export async function trackAIUsage(
     const costKey = { type: 'ai_cost', feature, date: dateKey };
     const currentCost = (await cache.get<number>(costKey)) || 0;
     await cache.set(costKey, currentCost + cost, { ttl: 86400 });
-
   } catch (error) {
     logger.warn('Failed to track AI usage:', error);
   }
@@ -171,10 +169,7 @@ export async function trackAIUsage(
 /**
  * Registra cache hit/miss
  */
-export async function trackCacheAccess(
-  hit: boolean,
-  latency: number
-): Promise<void> {
+export async function trackCacheAccess(hit: boolean, latency: number): Promise<void> {
   try {
     const date = new Date();
     const dateKey = date.toISOString().split('T')[0];
@@ -184,7 +179,6 @@ export async function trackCacheAccess(
     } else {
       await cache.increment({ type: 'cache_miss', date: dateKey });
     }
-
   } catch (error) {
     logger.warn('Failed to track cache access:', error);
   }
@@ -268,7 +262,6 @@ export async function getUsageMetrics(
         availableProperties,
       },
     };
-
   } catch (error: any) {
     logger.error('Error getting usage metrics:', error);
     throw error;
@@ -290,7 +283,7 @@ export async function getAIMetrics(
     let totalRequests = 0;
     let totalTokens = 0;
     let totalCost = 0;
-    
+
     const requestsByFeature = {
       valuations: 0,
       matching: 0,
@@ -307,16 +300,18 @@ export async function getAIMetrics(
 
     for (const date of dates) {
       const dateKey = date.toISOString().split('T')[0];
-      
+
       for (const feature of ['valuations', 'matching', 'incidents', 'marketing'] as const) {
-        const requests = (await cache.get<number>({ type: 'ai_request', feature, date: dateKey })) || 0;
-        const tokens = (await cache.get<number>({ type: 'ai_tokens', feature, date: dateKey })) || 0;
+        const requests =
+          (await cache.get<number>({ type: 'ai_request', feature, date: dateKey })) || 0;
+        const tokens =
+          (await cache.get<number>({ type: 'ai_tokens', feature, date: dateKey })) || 0;
         const cost = (await cache.get<number>({ type: 'ai_cost', feature, date: dateKey })) || 0;
 
         totalRequests += requests;
         totalTokens += tokens;
         totalCost += cost;
-        
+
         requestsByFeature[feature] += requests;
         costsByFeature[feature] += cost;
       }
@@ -339,7 +334,8 @@ export async function getAIMetrics(
           incidents: Math.round(costsByFeature.incidents * 100) / 100,
           marketing: Math.round(costsByFeature.marketing * 100) / 100,
         },
-        avgCostPerRequest: totalRequests > 0 ? Math.round((totalCost / totalRequests) * 1000) / 1000 : 0,
+        avgCostPerRequest:
+          totalRequests > 0 ? Math.round((totalCost / totalRequests) * 1000) / 1000 : 0,
       },
       performance: {
         avgLatency: 0, // TODO: calcular desde cache
@@ -347,7 +343,6 @@ export async function getAIMetrics(
         errorRate: 0,
       },
     };
-
   } catch (error: any) {
     logger.error('Error getting AI metrics:', error);
     throw error;
@@ -369,7 +364,7 @@ export async function getPerformanceMetrics(
 
     for (const date of dates) {
       const dateKey = date.toISOString().split('T')[0];
-      
+
       const hits = (await cache.get<number>({ type: 'cache_hit', date: dateKey })) || 0;
       const misses = (await cache.get<number>({ type: 'cache_miss', date: dateKey })) || 0;
 
@@ -403,7 +398,6 @@ export async function getPerformanceMetrics(
         avgResponseTime: 300,
       },
     };
-
   } catch (error: any) {
     logger.error('Error getting performance metrics:', error);
     throw error;
@@ -459,7 +453,20 @@ export async function getAnalyticsTrends(
   try {
     const now = new Date();
     const trends: any[] = [];
-    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const monthNames = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ];
 
     // Filtro para excluir datos demo
     const excludeDemoFilter = {
@@ -559,7 +566,7 @@ export async function generateBuildingMetrics(buildingId: string) {
     }
 
     const totalUnits = building.units.length;
-    const occupiedUnits = building.units.filter(u => u.contracts.length > 0).length;
+    const occupiedUnits = building.units.filter((u) => u.contracts.length > 0).length;
     const occupancyRate = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
 
     const metrics = {
@@ -649,8 +656,8 @@ export async function analyzeTenantBehavior(tenantId: string) {
       throw new Error('Tenant not found');
     }
 
-    const allPayments = tenant.contracts.flatMap(c => c.payments);
-    const latePayments = allPayments.filter(p => {
+    const allPayments = tenant.contracts.flatMap((c) => c.payments);
+    const latePayments = allPayments.filter((p) => {
       if (!p.fechaPago || !p.fechaVencimiento) return false;
       return new Date(p.fechaPago) > new Date(p.fechaVencimiento);
     });
@@ -659,11 +666,17 @@ export async function analyzeTenantBehavior(tenantId: string) {
       tenantId,
       totalPayments: allPayments.length,
       latePayments: latePayments.length,
-      paymentRate: allPayments.length > 0 
-        ? Math.round(((allPayments.length - latePayments.length) / allPayments.length) * 100) 
-        : 100,
+      paymentRate:
+        allPayments.length > 0
+          ? Math.round(((allPayments.length - latePayments.length) / allPayments.length) * 100)
+          : 100,
       contractsCount: tenant.contracts.length,
-      behavior: latePayments.length === 0 ? 'excellent' : latePayments.length < 3 ? 'good' : 'needs_attention',
+      behavior:
+        latePayments.length === 0
+          ? 'excellent'
+          : latePayments.length < 3
+            ? 'good'
+            : 'needs_attention',
     };
   } catch (error: any) {
     logger.error('Error analyzing tenant behavior:', error);
@@ -676,14 +689,24 @@ export async function analyzeTenantBehavior(tenantId: string) {
  */
 export async function trackEvent(
   eventName: string,
-  data: Record<string, any>,
+  data?: Record<string, any>,
   userId?: string,
   companyId?: string
 ) {
+  if (typeof window !== 'undefined') {
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', eventName, data);
+      console.log('[Analytics] Event sent:', eventName);
+      return { success: true, event: eventName };
+    }
+    console.warn('[Analytics] gtag not available');
+    return { success: false, error: 'gtag not available' };
+  }
+
   try {
     logger.info(`[Analytics Event] ${eventName}`, {
       event: eventName,
-      data,
+      data: data ?? {},
       userId,
       companyId,
       timestamp: new Date().toISOString(),
@@ -694,7 +717,7 @@ export async function trackEvent(
       await prisma.analyticsEvent.create({
         data: {
           eventName,
-          eventData: data,
+          eventData: data ?? {},
           userId,
           companyId,
           timestamp: new Date(),
@@ -711,6 +734,55 @@ export async function trackEvent(
   }
 }
 
+export function trackPageView(url: string, title?: string) {
+  if (typeof window === 'undefined') return;
+  if (typeof window.gtag !== 'function') {
+    console.warn('[Analytics] gtag not available');
+    return;
+  }
+
+  const pageTitle = title ?? (typeof document !== 'undefined' ? document.title : undefined);
+  window.gtag('event', 'page_view', {
+    page_path: url,
+    page_title: pageTitle,
+  });
+}
+
+export function trackOnboardingStart(userId: string, vertical?: string, experienceLevel?: string) {
+  void trackEvent('onboarding_start', {
+    user_id: userId,
+    vertical,
+    experience_level: experienceLevel,
+  });
+}
+
+export function trackOnboardingTaskComplete(taskId: string, taskName: string, progress: number) {
+  void trackEvent('onboarding_task_complete', {
+    task_id: taskId,
+    task_name: taskName,
+    progress,
+  });
+}
+
+export function trackOnboardingTaskSkip(taskId: string, reason?: string) {
+  void trackEvent('onboarding_task_skip', {
+    task_id: taskId,
+    reason,
+  });
+}
+
+export function trackOnboardingComplete(
+  userId: string,
+  timeSpent?: number,
+  tasksCompleted?: number
+) {
+  void trackEvent('onboarding_complete', {
+    user_id: userId,
+    time_spent: timeSpent,
+    tasks_completed: tasksCompleted,
+  });
+}
+
 export default {
   trackAPIRequest,
   trackAIUsage,
@@ -723,4 +795,9 @@ export default {
   generateAnalyticsSnapshot,
   analyzeTenantBehavior,
   trackEvent,
+  trackPageView,
+  trackOnboardingStart,
+  trackOnboardingTaskComplete,
+  trackOnboardingTaskSkip,
+  trackOnboardingComplete,
 };
