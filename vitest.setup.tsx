@@ -1,13 +1,28 @@
-import { expect, afterEach, vi } from 'vitest';
+import { expect, afterEach, beforeEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
 
 // Extend Vitest's expect with jest-dom matchers
 expect.extend(matchers);
 
+beforeEach(() => {
+  if (typeof document !== 'undefined') {
+    const existingMain = document.querySelector('main[data-testid="test-root"]');
+    if (!existingMain) {
+      const main = document.createElement('main');
+      main.setAttribute('data-testid', 'test-root');
+      document.body.appendChild(main);
+    }
+  }
+});
+
 // Cleanup after each test
 afterEach(() => {
   if (typeof document !== 'undefined') {
+    const existingMain = document.querySelector('main[data-testid="test-root"]');
+    if (existingMain) {
+      existingMain.remove();
+    }
     cleanup();
   }
 });
