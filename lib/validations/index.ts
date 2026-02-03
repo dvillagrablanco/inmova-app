@@ -205,7 +205,7 @@ export const paymentCreateSchema = z.object({
   contractId: z.string().uuid('ID de contrato inválido'),
   monto: z
     .number()
-    .positive('El monto debe ser mayor a 0')
+    .positive('El monto debe ser positivo')
     .max(10000000, 'El monto no puede exceder 10,000,000'),
   fechaVencimiento: dateOrDateTimeString('Fecha de vencimiento inválida').or(z.date()),
   concepto: z
