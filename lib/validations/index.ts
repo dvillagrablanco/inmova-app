@@ -148,11 +148,15 @@ export const tenantUpdateSchema = tenantCreateSchema.partial();
 // CONTRATOS (CONTRACTS)
 // ====================================
 
+const dateOnlyRegex = /^\d{4}-\d{2}-\d{2}$/;
+const dateOrDateTimeString = (message: string) =>
+  z.string().datetime({ message }).or(z.string().regex(dateOnlyRegex, message));
+
 const contractBaseSchema = z.object({
   unitId: z.string().uuid('ID de unidad inválido'),
   tenantId: z.string().uuid('ID de inquilino inválido'),
-  fechaInicio: z.string().datetime({ message: 'Fecha de inicio inválida' }).or(z.date()),
-  fechaFin: z.string().datetime({ message: 'Fecha de fin inválida' }).or(z.date()),
+  fechaInicio: dateOrDateTimeString('Fecha de inicio inválida').or(z.date()),
+  fechaFin: dateOrDateTimeString('Fecha de fin inválida').or(z.date()),
   rentaMensual: z
     .number()
     .positive('La renta mensual debe ser mayor a 0')
@@ -196,10 +200,6 @@ export const contractUpdateSchema = contractBaseSchema
 // ====================================
 // PAGOS (PAYMENTS)
 // ====================================
-
-const dateOnlyRegex = /^\d{4}-\d{2}-\d{2}$/;
-const dateOrDateTimeString = (message: string) =>
-  z.string().datetime({ message }).or(z.string().regex(dateOnlyRegex, message));
 
 export const paymentCreateSchema = z.object({
   contractId: z.string().uuid('ID de contrato inválido'),
