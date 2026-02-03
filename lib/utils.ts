@@ -66,10 +66,11 @@ export function formatNumber(num: number, decimals: number = 0, locale: string =
 
 export function formatPercentage(
   value: number,
-  decimals: number = 1,
-  locale: string = 'en-US'
+  decimals: number = 2,
+  locale: string = 'es-ES'
 ): string {
-  return `${formatNumber(value, decimals, locale)}%`;
+  const normalizedValue = Number.isFinite(value) && Math.abs(value) <= 1 ? value * 100 : value;
+  return `${formatNumber(normalizedValue, decimals, locale)}%`;
 }
 
 export function truncateText(text: string, maxLength: number): string {

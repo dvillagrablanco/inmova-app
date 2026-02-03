@@ -67,10 +67,10 @@ describe('🛠️ Utils - Formatting Functions', () => {
   });
 
   test('✅ formatPercentage() debe formatear porcentajes', () => {
-    expect(formatPercentage(50)).toBe('50.0%');
-    expect(formatPercentage(75.5, 2)).toBe('75.50%');
-    expect(formatPercentage(0)).toBe('0.0%');
-    expect(formatPercentage(100)).toBe('100.0%');
+    expect(formatPercentage(50)).toBe('50,00%');
+    expect(formatPercentage(75.5, 2)).toBe('75,50%');
+    expect(formatPercentage(0)).toBe('0,00%');
+    expect(formatPercentage(100)).toBe('100,00%');
   });
 
   test('✅ truncateText() debe truncar texto', () => {
