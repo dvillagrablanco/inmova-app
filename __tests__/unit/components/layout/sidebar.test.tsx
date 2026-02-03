@@ -1,75 +1,77 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Sidebar } from '@/components/layout/sidebar';
 
 describe('Sidebar', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<Sidebar {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
-  });
-
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
+  const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+    const url = typeof input === 'string' ? input : input.toString();
+    if (url.includes('/api/company/vertical')) {
+      return {
+        ok: true,
+        json: async () => ({ vertical: null }),
+      };
+    }
+    if (url.includes('/api/modules/active')) {
+      return {
+        ok: true,
+        json: async () => ({ activeModules: [] }),
+      };
+    }
+    return {
+      ok: true,
+      json: async () => ({}),
     };
-    
-    render(<Sidebar {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
   });
 
-  it('should handle user interactions', async () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubGlobal('fetch', fetchMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('should render without crashing', async () => {
     render(<Sidebar />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
+
+    expect(
+      screen.getByRole('complementary', { name: /navegación principal/i })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /toggle mobile menu/i })).toBeInTheDocument();
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
   });
 
-  it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<Sidebar onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
-  });
-
-  it('should execute side effects', async () => {
+  it('should allow searching in sidebar', async () => {
     render(<Sidebar />);
-    
-    // TODO: Verificar efectos
-    await waitFor(() => {
-      // expect(something).toBe(true);
-    });
+
+    const searchInput = screen.getByPlaceholderText('Buscar página...');
+    fireEvent.change(searchInput, { target: { value: 'contratos' } });
+
+    expect(searchInput).toHaveValue('contratos');
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+  });
+
+  it('should toggle mobile menu visibility', async () => {
+    render(<Sidebar />);
+
+    const toggleButton = screen.getByRole('button', { name: /toggle mobile menu/i });
+    const sidebar = screen.getByRole('complementary', { name: /navegación principal/i });
+
+    expect(sidebar.className).toContain('-translate-x-full');
+    fireEvent.click(toggleButton);
+
+    expect(sidebar.className).not.toContain('-translate-x-full');
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
   });
 
   it('should be accessible', () => {
     render(<Sidebar />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+
+    expect(
+      screen.getByRole('complementary', { name: /navegación principal/i })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /toggle mobile menu/i })).toBeInTheDocument();
   });
 });
