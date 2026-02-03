@@ -1,4 +1,4 @@
-import React from 'react';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -13,13 +13,13 @@ describe('EmptyState', () => {
         description="Start by creating your first building"
       />
     );
-    
+
     expect(screen.getByText('No buildings found')).toBeInTheDocument();
     expect(screen.getByText('Start by creating your first building')).toBeInTheDocument();
   });
 
   it('renders action button when provided', () => {
-    const mockAction = jest.fn();
+    const mockAction = vi.fn();
     render(
       <EmptyState
         icon={<Building2 className="h-16 w-16" />}
@@ -31,14 +31,14 @@ describe('EmptyState', () => {
         }}
       />
     );
-    
+
     const button = screen.getByRole('button', { name: /create building/i });
     expect(button).toBeInTheDocument();
   });
 
   it('calls action onClick when button is clicked', async () => {
     const user = userEvent.setup();
-    const mockAction = jest.fn();
+    const mockAction = vi.fn();
     render(
       <EmptyState
         icon={<Building2 className="h-16 w-16" />}
@@ -50,7 +50,7 @@ describe('EmptyState', () => {
         }}
       />
     );
-    
+
     const button = screen.getByRole('button', { name: /create building/i });
     await user.click(button);
     expect(mockAction).toHaveBeenCalledTimes(1);
