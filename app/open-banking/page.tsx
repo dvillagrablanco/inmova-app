@@ -68,6 +68,25 @@ interface BankIntegration {
   pricing?: string;
 }
 
+interface BankConnection {
+  id: string;
+  proveedor: string;
+  nombreBanco?: string | null;
+  tipoCuenta?: string | null;
+  ultimosDigitos?: string | null;
+  moneda?: string | null;
+  estado?: string | null;
+  ultimaSync?: string | null;
+  consentValidUntil?: string | null;
+  transactions?: Array<{
+    id: string;
+    fecha: string;
+    descripcion: string;
+    monto: number;
+    moneda: string;
+  }>;
+}
+
 const bankIntegrations: BankIntegration[] = [
   {
     id: 'openbanking-psd2',
@@ -181,20 +200,16 @@ const bankIntegrations: BankIntegration[] = [
   },
 ];
 
-// Estadísticas simuladas
-const stats = {
-  cuentasConectadas: 0,
-  transaccionesSincronizadas: 0,
-  ultimaSincronizacion: null as Date | null,
-  conciliacionesPendientes: 0,
-};
-
 export default function OpenBankingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [selectedIntegration, setSelectedIntegration] = useState<BankIntegration | null>(null);
   const [configValues, setConfigValues] = useState<Record<string, string>>({});
   const [connectedBanks, setConnectedBanks] = useState<string[]>([]);
+  const [connections, setConnections] = useState<BankConnection[]>([]);
+  const [loadingConnections, setLoadingConnections] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [syncingConnectionId, setSyncingConnectionId] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
@@ -203,23 +218,145 @@ export default function OpenBankingPage() {
     }
   }, [status, router]);
 
+  useEffect(() => {
+    if (status === 'authenticated') {
+      fetchConnections();
+    }
+  }, [status]);
+
+  const fetchConnections = async () => {
+    try {
+      setLoadingConnections(true);
+      const response = await fetch('/api/open-banking/connections');
+      if (!response.ok) {
+        throw new Error('Error cargando conexiones');
+      }
+      const data = await response.json();
+      const normalized = Array.isArray(data) ? data : [];
+      setConnections(normalized);
+      setConnectedBanks(
+        normalized
+          .map((connection: BankConnection) => connection.nombreBanco || 'Banco')
+          .filter(Boolean)
+      );
+    } catch (error) {
+      toast.error('No se pudieron cargar las conexiones bancarias');
+    } finally {
+      setLoadingConnections(false);
+    }
+  };
+
+  const handleConnectIntegration = async (integration: BankIntegration) => {
+    try {
+      setIsConnecting(true);
+
+      if (integration.id === 'openbanking-psd2') {
+        const response = await fetch('/api/open-banking/bankinter/connect', {
+          method: 'POST',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data?.authUrl) {
+            toast.success('Redirigiendo a autenticación bancaria...');
+            window.location.href = data.authUrl;
+            return;
+          }
+        }
+
+        // Fallback a modo demo si la integración real no está configurada
+        const fallback = await fetch('/api/open-banking/connections', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombreBanco: 'Bankinter (Demo)',
+            tipoCuenta: 'corriente',
+          }),
+        });
+
+        if (!fallback.ok) {
+          throw new Error('No se pudo crear la conexión demo');
+        }
+
+        toast.info('Bankinter no está configurado. Se creó una conexión demo.');
+        await fetchConnections();
+        return;
+      }
+
+      const response = await fetch('/api/open-banking/connections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombreBanco: integration.name,
+          tipoCuenta: 'corriente',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error conectando banco');
+      }
+
+      toast.success(`Cuenta ${integration.name} conectada correctamente`);
+      await fetchConnections();
+    } catch (error) {
+      toast.error('No se pudo conectar la cuenta bancaria');
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  const handleSyncConnection = async (connectionId: string) => {
+    try {
+      setSyncingConnectionId(connectionId);
+      const response = await fetch('/api/open-banking/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ connectionId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error sincronizando transacciones');
+      }
+
+      const data = await response.json();
+      toast.success(data?.message || 'Sincronización completada');
+      await fetchConnections();
+    } catch (error) {
+      toast.error('No se pudo sincronizar la cuenta seleccionada');
+    } finally {
+      setSyncingConnectionId(null);
+    }
+  };
+
+  const handleSyncAll = async () => {
+    if (connections.length === 0) {
+      toast.info('No hay cuentas conectadas para sincronizar');
+      return;
+    }
+
+    setIsSyncing(true);
+    try {
+      for (const connection of connections) {
+        await handleSyncConnection(connection.id);
+      }
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const handleSaveConfig = async () => {
-    toast.success('Configuración guardada correctamente.');
+    if (selectedIntegration) {
+      await handleConnectIntegration(selectedIntegration);
+    }
+    toast.success('Configuración guardada localmente. Para producción usa Integraciones.');
     setSelectedIntegration(null);
     setConfigValues({});
   };
 
   const handleConnectBank = () => {
-    toast.info('Iniciando conexión bancaria...');
-    // OAuth flow simulation
-  };
-
-  const handleSync = () => {
-    setIsSyncing(true);
-    setTimeout(() => {
-      setIsSyncing(false);
-      toast.success('Sincronización completada');
-    }, 2000);
+    if (selectedIntegration) {
+      handleConnectIntegration(selectedIntegration);
+    }
   };
 
   if (status === 'loading') {
@@ -278,7 +415,7 @@ export default function OpenBankingPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={handleSync} disabled={isSyncing}>
+            <Button variant="outline" onClick={handleSyncAll} disabled={isSyncing || loadingConnections}>
               <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
               Sincronizar
             </Button>
@@ -304,47 +441,61 @@ export default function OpenBankingPage() {
 
         {/* Stats Dashboard */}
         <div className="grid gap-4 md:grid-cols-4">
-          <Card>
+            <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Cuentas Conectadas</CardTitle>
               <Wallet className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.cuentasConectadas}</div>
-              <p className="text-xs text-muted-foreground">De múltiples bancos</p>
+              <div className="text-2xl font-bold">{connections.length}</div>
+              <p className="text-xs text-muted-foreground">
+                {connections.length > 0 ? 'De múltiples bancos' : 'Conecta tu primera cuenta'}
+              </p>
             </CardContent>
           </Card>
 
-          <Card>
+            <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Transacciones Sync</CardTitle>
               <ArrowRightLeft className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.transaccionesSincronizadas}</div>
-              <p className="text-xs text-muted-foreground">Últimos 30 días</p>
+              <div className="text-2xl font-bold">
+                {connections.reduce((total, connection) => total + (connection.transactions?.length || 0), 0)}
+              </div>
+              <p className="text-xs text-muted-foreground">Últimas 5 transacciones</p>
             </CardContent>
           </Card>
 
-          <Card>
+            <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Conciliaciones</CardTitle>
               <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.conciliacionesPendientes}</div>
+              <div className="text-2xl font-bold">0</div>
               <p className="text-xs text-muted-foreground">Pendientes de revisar</p>
             </CardContent>
           </Card>
 
-          <Card>
+            <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Última Sync</CardTitle>
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">-</div>
-              <p className="text-xs text-muted-foreground">Conecta una cuenta</p>
+              <div className="text-2xl font-bold">
+                {connections
+                  .map((connection) => connection.ultimaSync)
+                  .filter(Boolean)
+                  .sort()
+                  .reverse()[0]
+                  ? 'Reciente'
+                  : '-'}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {connections.length > 0 ? 'Última sincronización' : 'Conecta una cuenta'}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -478,10 +629,11 @@ export default function OpenBankingPage() {
                       </ul>
                     </CardContent>
                     <CardFooter>
-                      <Button 
-                        className="w-full" 
+                      <Button
+                        className="w-full"
                         variant={integration.status === 'connected' ? 'outline' : 'default'}
                         onClick={() => setSelectedIntegration(integration)}
+                        disabled={isConnecting}
                       >
                         {integration.status === 'connected' ? (
                           <>
@@ -491,7 +643,7 @@ export default function OpenBankingPage() {
                         ) : (
                           <>
                             <LinkIcon className="mr-2 h-4 w-4" />
-                            Conectar
+                            {isConnecting ? 'Conectando...' : 'Conectar'}
                           </>
                         )}
                       </Button>
@@ -524,8 +676,36 @@ export default function OpenBankingPage() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {/* Lista de cuentas conectadas */}
+                  <div className="space-y-3">
+                    {connections.map((connection) => (
+                      <Card key={connection.id} className="border-dashed">
+                        <CardContent className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between py-4">
+                          <div>
+                            <p className="font-semibold">{connection.nombreBanco || 'Banco'}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {connection.tipoCuenta || 'Cuenta'} ••••{connection.ultimosDigitos || '0000'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Estado: {connection.estado || 'conectado'}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant="secondary">
+                              {connection.moneda || 'EUR'}
+                            </Badge>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={syncingConnectionId === connection.id}
+                              onClick={() => handleSyncConnection(connection.id)}
+                            >
+                              <RefreshCw className={`mr-2 h-4 w-4 ${syncingConnectionId === connection.id ? 'animate-spin' : ''}`} />
+                              {syncingConnectionId === connection.id ? 'Sincronizando...' : 'Sincronizar'}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
                 )}
               </CardContent>
@@ -664,10 +844,10 @@ export default function OpenBankingPage() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => router.push('/admin/integraciones-banca')}>
                   Ver documentación
                 </Button>
-                <Button>
+                <Button onClick={() => router.push('/soporte')}>
                   Contactar soporte
                 </Button>
               </div>

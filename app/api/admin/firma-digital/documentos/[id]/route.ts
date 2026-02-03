@@ -8,6 +8,55 @@ import { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+  }
+
+  try {
+    const { id } = params;
+
+    const documento = await prisma.documentoFirma.findFirst({
+      where: {
+        id,
+        companyId: session.user.companyId,
+      },
+      include: {
+        firmantes: {
+          orderBy: {
+            orden: 'asc',
+          },
+        },
+        tenant: true,
+        contract: {
+          include: {
+            unit: {
+              include: {
+                building: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!documento) {
+      return NextResponse.json({ error: 'Documento no encontrado' }, { status: 404 });
+    }
+
+    return NextResponse.json({ documento });
+  } catch (error) {
+    logError(new Error(error instanceof Error ? error.message : 'Error fetching document'), {
+      context: 'GET /api/admin/firma-digital/documentos/[id]',
+      documentId: params?.id,
+      companyId: session?.user?.companyId,
+    });
+    return NextResponse.json({ error: 'Error al obtener documento' }, { status: 500 });
+  }
+}
+
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
 
