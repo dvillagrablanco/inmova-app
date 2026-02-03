@@ -1,75 +1,96 @@
+import type { ComponentProps } from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MobileFormWizard } from '@/components/ui/mobile-form-wizard';
+import { MobileFormWizard, type FormStep } from '@/components/ui/mobile-form-wizard';
 
 describe('MobileFormWizard', () => {
+  const steps: FormStep[] = [
+    {
+      id: 'step-1',
+      title: 'Paso 1',
+      description: 'Descripción 1',
+      fields: <div>Contenido 1</div>,
+    },
+    {
+      id: 'step-2',
+      title: 'Paso 2',
+      description: 'Descripción 2',
+      fields: <div>Contenido 2</div>,
+    },
+  ];
+
+  const renderMobileWizard = (props: Partial<ComponentProps<typeof MobileFormWizard>> = {}) =>
+    render(<MobileFormWizard steps={steps} enableOnMobile mobileBreakpoint={10000} {...props} />);
+
   it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<MobileFormWizard {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+    render(<MobileFormWizard steps={steps} enableOnMobile={false} />);
+
+    expect(screen.getByText('Paso 1')).toBeInTheDocument();
+    expect(screen.getByText('Paso 2')).toBeInTheDocument();
   });
 
   it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<MobileFormWizard {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
+    render(
+      <MobileFormWizard
+        steps={steps}
+        enableOnMobile={false}
+        submitButton={<button type="submit">Enviar</button>}
+      />
+    );
+
+    expect(screen.getByText('Descripción 1')).toBeInTheDocument();
+    expect(screen.getByText('Enviar')).toBeInTheDocument();
   });
 
   it('should handle user interactions', async () => {
-    render(<MobileFormWizard />);
-    
-    // TODO: Simular interacción
-    // const button = screen.getByRole('button');
-    // fireEvent.click(button);
-    
-    // await waitFor(() => {
-    //   expect(screen.getByText(/expected text/i)).toBeInTheDocument();
-    // });
+    renderMobileWizard();
+
+    await waitFor(() => {
+      expect(screen.getByText('Paso 1')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    expect(screen.getByText('Paso 2')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /anterior/i }));
+    expect(screen.getByText('Paso 1')).toBeInTheDocument();
   });
 
   it('should handle form submission', async () => {
-    const onSubmit = vi.fn();
-    
-    render(<MobileFormWizard onSubmit={onSubmit} />);
-    
-    // TODO: Llenar formulario
-    // const input = screen.getByLabelText(/name/i);
-    // fireEvent.change(input, { target: { value: 'Test Name' } });
-    
-    // const submitButton = screen.getByRole('button', { name: /submit/i });
-    // fireEvent.click(submitButton);
-    
-    // await waitFor(() => {
-    //   expect(onSubmit).toHaveBeenCalledWith({
-    //     name: 'Test Name',
-    //   });
-    // });
-  });
+    const onComplete = vi.fn();
 
-  it('should execute side effects', async () => {
-    render(<MobileFormWizard />);
-    
-    // TODO: Verificar efectos
+    renderMobileWizard({ onComplete });
+
     await waitFor(() => {
-      // expect(something).toBe(true);
+      expect(screen.getByText('Paso 1')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+    fireEvent.click(screen.getByRole('button', { name: /finalizar/i }));
+
+    await waitFor(() => {
+      expect(onComplete).toHaveBeenCalled();
     });
   });
 
+  it('should execute side effects', async () => {
+    const onStepChange = vi.fn();
+    renderMobileWizard({ onStepChange });
+
+    await waitFor(() => {
+      expect(screen.getByText('Paso 1')).toBeInTheDocument();
+    });
+
+    const stepButtons = screen.getAllByLabelText(/Ir al paso/i);
+    fireEvent.click(stepButtons[1]);
+    expect(onStepChange).toHaveBeenCalledWith(1);
+  });
+
   it('should be accessible', () => {
-    render(<MobileFormWizard />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+    renderMobileWizard();
+
+    const stepButtons = screen.getAllByLabelText(/Ir al paso/i);
+    expect(stepButtons.length).toBeGreaterThan(0);
+    expect(screen.getByRole('button', { name: /siguiente/i })).toBeInTheDocument();
   });
 });
