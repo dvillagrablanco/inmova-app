@@ -2,6 +2,11 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
+const hasTestBaseUrl = Boolean(process.env.TEST_BASE_URL);
+const integrationExcludes = hasTestBaseUrl
+  ? []
+  : ['**/__tests__/integration/**', 'tests/integration/**'];
+
 /**
  * Configuración de Vitest para COBERTURA 100%
  * Todos los thresholds en 100% - production-ready
@@ -124,6 +129,7 @@ export default defineConfig({
       '**/tests/**/*.spec.{ts,tsx}', // Excluir specs Playwright en /tests
       '**/playwright-report/**',
       '**/*.e2e.{ts,tsx}',
+      ...integrationExcludes,
     ],
 
     // Watch mode exclusions
