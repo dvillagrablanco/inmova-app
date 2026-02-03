@@ -127,7 +127,7 @@ export const tenantCreateSchema = z.object({
     .trim()
     .optional()
     .or(z.literal('')),
-  fechaNacimiento: z.string().datetime({ message: 'Fecha inválida' }).or(z.date()).optional(),
+  fechaNacimiento: dateOrDateTimeString('Fecha inválida').or(z.date()).optional(),
   nacionalidad: z.string().max(100, 'La nacionalidad no puede exceder 100 caracteres').optional(),
   estado: z.enum(['activo', 'inactivo', 'moroso', 'pendiente']).optional().default('activo'),
   ocupacion: z.string().max(200, 'La ocupación no puede exceder 200 caracteres').optional(),
