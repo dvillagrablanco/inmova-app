@@ -179,11 +179,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (error.message?.includes('permiso')) {
-      return NextResponse.json({ error: 'Prohibido', message: error.message }, { status: 403 });
+    const normalizedMessage = String(error.message || '').toLowerCase();
+    if (normalizedMessage.includes('permiso') || normalizedMessage.includes('forbidden')) {
+      return NextResponse.json(
+        { error: 'Prohibido', message: error.message || 'Acceso denegado' },
+        { status: 403 }
+      );
     }
 
-    if (error.message === 'No autenticado') {
+    if (normalizedMessage.includes('no autenticado')) {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },
         { status: 401 }
