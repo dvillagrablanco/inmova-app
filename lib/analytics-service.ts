@@ -756,18 +756,19 @@ export function trackOnboardingStart(userId: string, vertical?: string, experien
   });
 }
 
-export function trackOnboardingTaskComplete(taskId: string, taskName: string, progress: number) {
+export function trackOnboardingTaskComplete(taskId: string, taskTitle: string, progress: number) {
   void trackEvent('onboarding_task_complete', {
     task_id: taskId,
-    task_name: taskName,
-    progress,
+    task_title: taskTitle,
+    progress_percentage: progress,
   });
 }
 
-export function trackOnboardingTaskSkip(taskId: string, reason?: string) {
+export function trackOnboardingTaskSkip(taskId: string, taskTitle?: string, progress?: number) {
   void trackEvent('onboarding_task_skip', {
     task_id: taskId,
-    reason,
+    task_title: taskTitle,
+    progress_percentage: progress,
   });
 }
 
