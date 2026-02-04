@@ -213,7 +213,7 @@ test.describe('Flujo Completo DNI → Formulario', () => {
           fullPage: true,
         });
 
-        const saveErrorToast = page.locator(/hubo un problema guardando el documento/i);
+        const saveErrorToast = page.locator('text=/hubo un problema guardando el documento/i');
         await expect(saveErrorToast).toBeHidden({ timeout: 5000 });
 
         // El diálogo debería cerrarse
