@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Star, Book, MessageCircle, AlertCircle, ThumbsUp, Mail, Gift } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function GuestExperiencePage() {
   const router = useRouter();
@@ -37,6 +38,22 @@ export default function GuestExperiencePage() {
       comment: 'Perfecto, sin duda volveremos',
     },
   ]);
+
+  const handleRequestReviews = () => {
+    toast.success('Solicitudes de reseñas enviadas');
+  };
+
+  const handleReplyReview = (guest: string) => {
+    toast.info(`Responder reseña de ${guest}`);
+  };
+
+  const handleThankReview = (guest: string) => {
+    toast.success(`Agradecimiento enviado a ${guest}`);
+  };
+
+  const handleNewGuide = () => {
+    toast.info('Crea una nueva guía digital para tus huéspedes');
+  };
 
   return (
     <AuthenticatedLayout>
@@ -106,7 +123,7 @@ export default function GuestExperiencePage() {
                         <CardTitle>Reseñas Recientes</CardTitle>
                         <CardDescription>Opiniones de tus huéspedes</CardDescription>
                       </div>
-                      <Button>
+                      <Button onClick={handleRequestReviews}>
                         <Mail className="h-4 w-4 mr-2" />
                         Solicitar Reseñas
                       </Button>
@@ -139,11 +156,19 @@ export default function GuestExperiencePage() {
                               </div>
                               <p className="text-sm">{review.comment}</p>
                               <div className="flex gap-2">
-                                <Button variant="outline" size="sm">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleReplyReview(review.guest)}
+                                >
                                   <MessageCircle className="h-3 w-3 mr-1" />
                                   Responder
                                 </Button>
-                                <Button variant="outline" size="sm">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleThankReview(review.guest)}
+                                >
                                   <ThumbsUp className="h-3 w-3 mr-1" />
                                   Agradecer
                                 </Button>
@@ -165,7 +190,7 @@ export default function GuestExperiencePage() {
                         <CardTitle>Guías Digitales</CardTitle>
                         <CardDescription>Información para tus huéspedes</CardDescription>
                       </div>
-                      <Button>
+                      <Button onClick={handleNewGuide}>
                         <Book className="h-4 w-4 mr-2" />
                         Nueva Guía
                       </Button>

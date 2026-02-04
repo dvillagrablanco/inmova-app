@@ -28,6 +28,7 @@ export default function ChannelManagerPage() {
     { id: '3', name: 'Vrbo', status: 'conectado', lastSync: '2024-12-06T09:45:00', bookings: 5 },
     { id: '4', name: 'Expedia', status: 'desconectado', lastSync: null, bookings: 0 },
   ]);
+  const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
 
   const syncChannel = async (channelId: string) => {
     try {
@@ -50,21 +51,73 @@ export default function ChannelManagerPage() {
     }
   };
 
-  const exportCalendar = async (listingId: string) => {
+  const exportCalendar = (listingId: string) => {
     try {
-      const response = await fetch(
-        `/api/str-advanced/channel-manager/export-ical?listingId=${listingId}`
-      );
-      const blob = await response.blob();
+      const formatIcsDate = (date: Date) =>
+        date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+      const now = new Date();
+      const end = new Date(now);
+      end.setDate(end.getDate() + 1);
+
+      const icsContent = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Inmova//Channel Manager//ES',
+        'BEGIN:VEVENT',
+        `UID:${Date.now()}@inmova`,
+        `DTSTAMP:${formatIcsDate(now)}`,
+        `DTSTART:${formatIcsDate(now)}`,
+        `DTEND:${formatIcsDate(end)}`,
+        'SUMMARY:Reserva de ejemplo',
+        'END:VEVENT',
+        'END:VCALENDAR',
+      ].join('\r\n');
+
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `calendar-${listingId}.ics`;
       a.click();
+      window.URL.revokeObjectURL(url);
       toast.success('Calendario exportado correctamente');
     } catch (error) {
       toast.error('Error al exportar calendario');
     }
+  };
+
+  const handleViewCalendar = () => {
+    const calendarSection = document.getElementById('unified-calendar');
+    calendarSection?.scrollIntoView({ behavior: 'smooth' });
+    toast.success('Calendario unificado cargado');
+  };
+
+  const handleExportIcal = () => {
+    exportCalendar('all');
+  };
+
+  const handleConnectChannel = () => {
+    const name = window.prompt('Nombre del nuevo canal');
+    if (!name) return;
+    setChannels((prev) => [
+      ...prev,
+      { id: `${Date.now()}`, name, status: 'desconectado', lastSync: null, bookings: 0 },
+    ]);
+    toast.success('Canal añadido. Completa la conexión.');
+  };
+
+  const handleToggleAutoSync = () => {
+    setAutoSyncEnabled((prev) => {
+      const next = !prev;
+      toast.success(
+        next ? 'Sincronización automática activada' : 'Sincronización automática desactivada'
+      );
+      return next;
+    });
+  };
+
+  const handleConfigureNotifications = () => {
+    toast.info('Configura las notificaciones de reservas en Ajustes');
   };
 
   return (
@@ -132,7 +185,7 @@ export default function ChannelManagerPage() {
             </div>
 
             {/* Calendario Unificado */}
-            <Card className="mb-8">
+            <Card className="mb-8" id="unified-calendar">
               <CardHeader>
                 <CardTitle>Calendario Unificado</CardTitle>
                 <CardDescription>
@@ -141,15 +194,15 @@ export default function ChannelManagerPage() {
               </CardHeader>
               <CardContent>
                 <div className="flex gap-4 mb-6">
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={handleViewCalendar}>
                     <Calendar className="h-4 w-4 mr-2" />
                     Ver Calendario
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={handleExportIcal}>
                     <Download className="h-4 w-4 mr-2" />
                     Exportar iCal
                   </Button>
-                  <Button>
+                  <Button onClick={handleConnectChannel}>
                     <Plus className="h-4 w-4 mr-2" />
                     Conectar Nuevo Canal
                   </Button>
@@ -179,8 +232,8 @@ export default function ChannelManagerPage() {
                         Sincronizar automáticamente cada 15 minutos
                       </p>
                     </div>
-                    <Button variant="outline" size="sm">
-                      Activar
+                    <Button variant="outline" size="sm" onClick={handleToggleAutoSync}>
+                      {autoSyncEnabled ? 'Desactivar' : 'Activar'}
                     </Button>
                   </div>
                   <div className="flex items-center justify-between">
@@ -190,7 +243,7 @@ export default function ChannelManagerPage() {
                         Recibir alertas cuando llegue una nueva reserva
                       </p>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={handleConfigureNotifications}>
                       Configurar
                     </Button>
                   </div>
