@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { isIgnorableFetchError } from '@/lib/fetch-error';
 
 interface Notification {
   id: string;
@@ -64,7 +65,9 @@ export default function NotificationItem({
         onRead(notification.id);
       }
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      if (!isIgnorableFetchError(error)) {
+        console.error('Error marking notification as read:', error);
+      }
     } finally {
       setIsMarking(false);
     }

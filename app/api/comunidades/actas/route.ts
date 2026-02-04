@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
         {
           actas: [],
           pagination: { page: 1, limit: 20, total: 0, pages: 0 },
-          stats: { total: 0, borradores: 0, aprobadas: 0, pendientesAprobacion: 0 },
+          stats: { total: 0, borradores: 0, aprobadas: 0, rechazadas: 0 },
         },
         { status: 200 }
       );
@@ -109,7 +109,9 @@ export async function GET(request: NextRequest) {
       aprobadas: await prisma.communityMinute.count({
         where: { ...where, estado: 'aprobada' },
       }),
-      pendientesAprobacion: 0,
+      rechazadas: await prisma.communityMinute.count({
+        where: { ...where, estado: 'rechazada' },
+      }),
     };
 
     return NextResponse.json({
@@ -134,7 +136,7 @@ export async function GET(request: NextRequest) {
         {
           actas: [],
           pagination: { page: 1, limit: 20, total: 0, pages: 0 },
-          stats: { total: 0, borradores: 0, aprobadas: 0, pendientesAprobacion: 0 },
+          stats: { total: 0, borradores: 0, aprobadas: 0, rechazadas: 0 },
         },
         { status: 200 }
       );

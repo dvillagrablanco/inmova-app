@@ -16,6 +16,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Link from 'next/link';
 import logger, { logError } from '@/lib/logger';
+import { isIgnorableFetchError } from '@/lib/fetch-error';
 
 export interface Notification {
   id: string;
@@ -52,12 +53,16 @@ export function NotificationCenter() {
   const fetchNotifications = async () => {
     try {
       const response = await fetch('/api/notifications');
-      if (response.ok) {
-        const data = await response.json();
-        setNotifications(data);
+      if (!response.ok) {
+        setNotifications([]);
+        return;
       }
+      const data = await response.json();
+      setNotifications(data);
     } catch (error) {
-      logger.error('Error fetching notifications:', error);
+      if (!isIgnorableFetchError(error)) {
+        logger.error('Error fetching notifications:', error);
+      }
     }
   };
 
@@ -67,13 +72,16 @@ export function NotificationCenter() {
         method: 'PATCH',
       });
       
-      if (response.ok) {
-        setNotifications(prev =>
-          prev.map(n => (n.id === id ? { ...n, read: true } : n))
-        );
+      if (!response.ok) {
+        return;
       }
+      setNotifications(prev =>
+        prev.map(n => (n.id === id ? { ...n, read: true } : n))
+      );
     } catch (error) {
-      logger.error('Error marking notification as read:', error);
+      if (!isIgnorableFetchError(error)) {
+        logger.error('Error marking notification as read:', error);
+      }
     }
   };
 
@@ -83,11 +91,14 @@ export function NotificationCenter() {
         method: 'PATCH',
       });
       
-      if (response.ok) {
-        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      if (!response.ok) {
+        return;
       }
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     } catch (error) {
-      logger.error('Error marking all as read:', error);
+      if (!isIgnorableFetchError(error)) {
+        logger.error('Error marking all as read:', error);
+      }
     }
   };
 
@@ -97,11 +108,14 @@ export function NotificationCenter() {
         method: 'DELETE',
       });
       
-      if (response.ok) {
-        setNotifications(prev => prev.filter(n => n.id !== id));
+      if (!response.ok) {
+        return;
       }
+      setNotifications(prev => prev.filter(n => n.id !== id));
     } catch (error) {
-      logger.error('Error deleting notification:', error);
+      if (!isIgnorableFetchError(error)) {
+        logger.error('Error deleting notification:', error);
+      }
     }
   };
 
@@ -111,11 +125,14 @@ export function NotificationCenter() {
         method: 'DELETE',
       });
       
-      if (response.ok) {
-        setNotifications(prev => prev.filter(n => !n.read));
+      if (!response.ok) {
+        return;
       }
+      setNotifications(prev => prev.filter(n => !n.read));
     } catch (error) {
-      logger.error('Error deleting read notifications:', error);
+      if (!isIgnorableFetchError(error)) {
+        logger.error('Error deleting read notifications:', error);
+      }
     }
   };
 

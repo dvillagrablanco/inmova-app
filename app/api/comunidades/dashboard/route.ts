@@ -125,9 +125,9 @@ export async function GET(request: NextRequest) {
         _sum: { saldoActual: true },
         _count: { id: true },
       }),
-      // Actas pendientes de aprobación
+      // Actas en borrador
       prisma.communityMinute.count({
-        where: { ...baseWhere, estado: { in: ['borrador', 'pendiente_aprobacion'] } },
+        where: { ...baseWhere, estado: 'borrador' },
       }),
     ]);
 

@@ -43,6 +43,7 @@ import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { VerticalSpecificWidgets } from '@/components/dashboard/VerticalSpecificWidgets';
 import DemoDataGenerator from '@/components/automation/DemoDataGenerator';
 import logger, { logError } from '@/lib/logger';
+import { isIgnorableFetchError } from '@/lib/fetch-error';
 import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 
@@ -88,34 +89,60 @@ function DashboardPageContent() {
   }, [status, router]);
 
   useEffect(() => {
+    if (status !== 'authenticated') {
+      return;
+    }
+
+    const controller = new AbortController();
+    let isMounted = true;
+
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/dashboard');
-        if (response.ok) {
-          const dashboardData = await response.json();
+        const response = await fetch('/api/dashboard', { signal: controller.signal });
+        if (!response.ok) {
+          if (isMounted) {
+            setData(null);
+          }
+          return;
+        }
 
-          // Fetch analytics data
-          const analyticsResponse = await fetch('/api/dashboard/analytics');
-          if (analyticsResponse.ok) {
-            const analytics = await analyticsResponse.json();
+        const dashboardData = await response.json();
+
+        // Fetch analytics data
+        const analyticsResponse = await fetch('/api/dashboard/analytics', {
+          signal: controller.signal,
+        });
+        if (analyticsResponse.ok) {
+          const analytics = await analyticsResponse.json();
+          if (isMounted) {
             setAnalyticsData(analytics);
           }
+        }
+
+        if (isMounted) {
           setData(dashboardData);
         }
       } catch (error: any) {
-        logger.error('Error fetching dashboard data:', {
-          message: error?.message || 'Unknown error',
-          name: error?.name,
-          stack: error?.stack?.substring(0, 200),
-        });
+        if (!isIgnorableFetchError(error)) {
+          logger.error('Error fetching dashboard data:', {
+            message: error?.message || 'Unknown error',
+            name: error?.name,
+            stack: error?.stack?.substring(0, 200),
+          });
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
-    if (status === 'authenticated') {
-      fetchData();
-    }
+    fetchData();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [status]);
 
   if (status === 'loading' || isLoading) {

@@ -43,7 +43,7 @@ import {
   Eye,
   Download,
   CheckCircle,
-  Clock,
+  AlertTriangle,
   Edit,
   Users,
 } from 'lucide-react';
@@ -67,13 +67,8 @@ interface Acta {
 
 const ESTADOS_ACTA = [
   { value: 'borrador', label: 'Borrador', color: 'bg-gray-100 text-gray-800' },
-  {
-    value: 'pendiente_aprobacion',
-    label: 'Pendiente Aprobación',
-    color: 'bg-yellow-100 text-yellow-800',
-  },
+  { value: 'rechazada', label: 'Rechazada', color: 'bg-red-100 text-red-800' },
   { value: 'aprobada', label: 'Aprobada', color: 'bg-green-100 text-green-800' },
-  { value: 'firmada', label: 'Firmada', color: 'bg-blue-100 text-blue-800' },
 ];
 
 export default function ActasPage() {
@@ -88,7 +83,7 @@ export default function ActasPage() {
     total: 0,
     borradores: 0,
     aprobadas: 0,
-    pendientesAprobacion: 0,
+    rechazadas: 0,
   });
 
   const comunidadId = searchParams.get('comunidadId');
@@ -126,7 +121,7 @@ export default function ActasPage() {
             total: 0,
             borradores: 0,
             aprobadas: 0,
-            pendientesAprobacion: 0,
+            rechazadas: 0,
           }
         );
       }
@@ -309,11 +304,11 @@ export default function ActasPage() {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Pendientes</CardTitle>
-              <Clock className="w-4 h-4 text-yellow-500" />
+              <CardTitle className="text-sm font-medium">Rechazadas</CardTitle>
+              <AlertTriangle className="w-4 h-4 text-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">{stats.pendientesAprobacion}</div>
+              <div className="text-2xl font-bold text-red-600">{stats.rechazadas}</div>
             </CardContent>
           </Card>
           <Card>
