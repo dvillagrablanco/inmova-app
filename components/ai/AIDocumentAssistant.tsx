@@ -394,6 +394,8 @@ export function AIDocumentAssistant({
   const handleFileSelect = (files: FileList | null) => {
     if (!files) return;
 
+    setIsOpen(true);
+
     const newFiles: UploadedFile[] = Array.from(files).map((file) => ({
       file,
       status: 'pending',
@@ -827,6 +829,7 @@ export function AIDocumentAssistant({
           variant="outline"
           className="w-full gap-2 border-violet-300 dark:border-violet-700 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 hover:from-violet-100 hover:to-purple-100 dark:hover:from-violet-900/40 dark:hover:to-purple-900/40 text-violet-700 dark:text-violet-300"
           onClick={() => setIsOpen(true)}
+          data-testid="ai-assistant-trigger"
         >
           <Brain className="h-4 w-4 text-violet-600" />
           <span className="font-medium">Escanear DNI/Documento con IA</span>
@@ -863,7 +866,10 @@ export function AIDocumentAssistant({
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>{renderTrigger()}</SheetTrigger>
 
-      <SheetContent className="w-full sm:max-w-xl bg-white dark:bg-gray-950 border-l shadow-xl">
+      <SheetContent
+        className="w-full sm:max-w-xl bg-white dark:bg-gray-950 border-l shadow-xl"
+        data-testid="ai-assistant-panel"
+      >
         <SheetHeader className="space-y-3">
           <SheetTitle className="flex items-center gap-3">
             <div className="h-10 w-10 shrink-0 rounded-lg bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-500 flex items-center justify-center">
@@ -940,6 +946,7 @@ export function AIDocumentAssistant({
               accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.txt"
               className="hidden"
               onChange={(e) => handleFileSelect(e.target.files)}
+              data-testid="ai-file-upload"
             />
           </div>
 

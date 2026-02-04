@@ -85,15 +85,22 @@ test.describe('Flujo Completo DNI → Formulario', () => {
     const documentsSection = page.locator('text=Documentos del Inquilino').first();
     await documentsSection.scrollIntoViewIfNeeded();
 
-    const inlineTrigger = page.getByRole('button', { name: /Escanear DNI/i }).first();
+    const inlineTrigger = page.getByTestId('ai-assistant-trigger').first();
     try {
       await inlineTrigger.scrollIntoViewIfNeeded({ timeout: 5000 });
       await inlineTrigger.click({ force: true });
     } catch {
-      // Ignorar y dejar que el fallback a flotante se encargue
+      // Fallback a selector por texto si el testId no está disponible
+      const inlineTriggerByText = page.getByRole('button', { name: /Escanear DNI/i }).first();
+      try {
+        await inlineTriggerByText.scrollIntoViewIfNeeded({ timeout: 5000 });
+        await inlineTriggerByText.click({ force: true });
+      } catch {
+        // Ignorar y dejar que el fallback a flotante se encargue
+      }
     }
 
-    const openPanel = page.locator('[data-state="open"]').filter({ hasText: 'Asistente IA' }).first();
+    const openPanel = page.getByTestId('ai-assistant-panel').first();
     try {
       await openPanel.waitFor({ state: 'visible', timeout: 8000 });
     } catch {
@@ -129,7 +136,8 @@ test.describe('Flujo Completo DNI → Formulario', () => {
     );
 
     // Subir archivo directamente al input del asistente
-    const fileInput = openPanel.locator('input#file-upload');
+    const fileInput = page.getByTestId('ai-file-upload').first();
+    await expect(fileInput).toBeAttached({ timeout: 10000 });
     await fileInput.setInputFiles(PDF_PATH);
 
     console.log('📤 Archivo seleccionado, esperando procesamiento...');
