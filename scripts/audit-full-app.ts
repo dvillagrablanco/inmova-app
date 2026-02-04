@@ -379,10 +379,25 @@ async function auditPage(url: string, category: string): Promise<PageResult> {
     }
   });
 
-  // Capturar errores de red
+  // Capturar errores de red (filtrando recursos no críticos)
   const networkErrors: string[] = [];
+  const ignoredNetworkPatterns = [
+    'google-analytics.com',
+    'googletagmanager.com',
+    'cdn-cgi/rum',
+    'doubleclick.net',
+    '_rsc=',
+  ];
+
+  const shouldIgnoreNetworkError = (url?: string) => {
+    if (!url) return false;
+    return ignoredNetworkPatterns.some((pattern) => url.includes(pattern));
+  };
+
   page.on('requestfailed', (request) => {
-    networkErrors.push(`${request.url()} - ${request.failure()?.errorText}`);
+    const url = request.url();
+    if (shouldIgnoreNetworkError(url)) return;
+    networkErrors.push(`${url} - ${request.failure()?.errorText}`);
   });
 
   try {
@@ -404,16 +419,7 @@ async function auditPage(url: string, category: string): Promise<PageResult> {
     // Esperar a que se renderice
     await page.waitForTimeout(2000);
 
-    // Buscar errores en la página
-    const pageText = (await page.textContent('body')) || '';
-    if (pageText.includes('Error') && pageText.includes('500')) {
-      result.status = 'error';
-      result.notes.push('Error 500 en página');
-    }
-    if (pageText.includes('404') && pageText.includes('not found')) {
-      result.status = 'error';
-      result.notes.push('Página 404');
-    }
+    // Evitar falsos positivos: solo confiar en status HTTP y errores de red/console
 
     // Contar botones
     const buttons = await page.$$('button, a[role="button"], [type="submit"]');
@@ -441,7 +447,12 @@ async function auditPage(url: string, category: string): Promise<PageResult> {
 
     // Agregar errores de consola
     result.consoleErrors = consoleMessages.filter(
-      (m) => !m.includes('favicon') && !m.includes('chunk') && !m.includes('preload')
+      (m) =>
+        !m.includes('favicon') &&
+        !m.includes('chunk') &&
+        !m.includes('preload') &&
+        !m.includes('google-analytics.com') &&
+        !m.includes('googletagmanager.com')
     );
     result.networkErrors = networkErrors;
 

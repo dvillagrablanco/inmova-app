@@ -54,6 +54,7 @@ export default function NuevaReservaSTRPage() {
   const [loading, setLoading] = useState(false);
   const [listings, setListings] = useState<Listing[]>([]);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   const [form, setForm] = useState({
     listingId: '',
@@ -73,6 +74,10 @@ export default function NuevaReservaSTRPage() {
       router.push('/login');
     }
   }, [status, router]);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -159,7 +164,7 @@ export default function NuevaReservaSTRPage() {
       ? differenceInDays(new Date(form.fechaSalida), new Date(form.fechaEntrada))
       : 0;
 
-  if (status === 'loading') {
+  if (!isMounted || status === 'loading') {
     return (
       <AuthenticatedLayout>
         <div className="flex items-center justify-center min-h-[400px]">

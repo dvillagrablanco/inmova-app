@@ -5,7 +5,17 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Mail, Lock, AlertCircle, ArrowLeft, Building2, Loader2, Home, Eye, EyeOff } from 'lucide-react';
+import {
+  Mail,
+  Lock,
+  AlertCircle,
+  ArrowLeft,
+  Building2,
+  Loader2,
+  Home,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { loginSchema, type LoginFormData } from '@/lib/form-schemas';
 import { AccessibleInputField } from '@/components/forms/AccessibleFormField';
@@ -58,8 +68,8 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
       {/* Background decorativo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-indigo-500/10 to-transparent rounded-full blur-3xl" />
-        <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-purple-500/10 to-transparent rounded-full blur-3xl" />
+        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-indigo-500/10 to-transparent rounded-full blur-3xl" />
+        <div className="absolute inset-0 w-full h-full bg-gradient-to-tl from-purple-500/10 to-transparent rounded-full blur-3xl" />
       </div>
 
       {/* Header minimalista */}
@@ -75,7 +85,10 @@ export default function LoginPage() {
               aria-label="Ir a la página de inicio de INMOVA"
             >
               <div className="relative">
-                <Home className="h-6 w-6 text-indigo-400 group-hover:text-indigo-300 transition-colors" aria-hidden="true" />
+                <Home
+                  className="h-6 w-6 text-indigo-400 group-hover:text-indigo-300 transition-colors"
+                  aria-hidden="true"
+                />
                 <div className="absolute inset-0 bg-indigo-400/20 rounded-full blur-lg group-hover:bg-indigo-300/30 transition-all" />
               </div>
               <span className="text-lg font-semibold text-white/90 group-hover:text-white transition-colors">
@@ -111,12 +124,10 @@ export default function LoginPage() {
           <div className="relative group animate-fade-in">
             {/* Glow effect */}
             <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-300" />
-            
+
             {/* Formulario */}
             <div className="relative bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20">
-              <h2 className="text-2xl font-bold text-white mb-6">
-                Iniciar Sesión
-              </h2>
+              <h2 className="text-2xl font-bold text-white mb-6">Iniciar Sesión</h2>
 
               {error && (
                 <div
@@ -134,8 +145,8 @@ export default function LoginPage() {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
                 {/* Email field con mejor visibilidad */}
                 <div>
-                  <label 
-                    htmlFor="email" 
+                  <label
+                    htmlFor="email"
                     className="block text-sm font-semibold mb-2"
                     style={{ color: '#ffffff' }}
                   >
@@ -152,7 +163,7 @@ export default function LoginPage() {
                       value={email}
                       onChange={(e) => setValue('email', e.target.value)}
                       className="w-full pl-10 pr-4 py-3 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all"
-                      style={{ 
+                      style={{
                         backgroundColor: 'rgba(30, 41, 59, 0.9)',
                         border: '2px solid rgba(129, 140, 248, 0.5)',
                       }}
@@ -167,8 +178,8 @@ export default function LoginPage() {
 
                 {/* Password field con mejor visibilidad */}
                 <div>
-                  <label 
-                    htmlFor="password" 
+                  <label
+                    htmlFor="password"
                     className="block text-sm font-semibold mb-2"
                     style={{ color: '#ffffff' }}
                   >
@@ -185,7 +196,7 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => setValue('password', e.target.value)}
                       className="w-full pl-10 pr-12 py-3 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all"
-                      style={{ 
+                      style={{
                         backgroundColor: 'rgba(30, 41, 59, 0.9)',
                         border: '2px solid rgba(129, 140, 248, 0.5)',
                       }}
@@ -212,8 +223,8 @@ export default function LoginPage() {
 
                 {/* Enlace olvidaste contraseña */}
                 <div className="text-right">
-                  <Link 
-                    href="/forgot-password" 
+                  <Link
+                    href="/forgot-password"
                     className="text-sm text-indigo-300 hover:text-white transition-colors underline decoration-indigo-400/30 hover:decoration-white/50"
                   >
                     ¿Olvidaste tu contraseña?
@@ -229,10 +240,13 @@ export default function LoginPage() {
                   aria-live="polite"
                 >
                   {isLoading && (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin inline-block" aria-hidden="true" />
+                    <Loader2
+                      className="mr-2 h-5 w-5 animate-spin inline-block"
+                      aria-hidden="true"
+                    />
                   )}
                   {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-                  
+
                   {!isLoading && (
                     <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   )}
@@ -243,8 +257,8 @@ export default function LoginPage() {
               <div className="mt-6 pt-6 border-t border-white/10">
                 <p className="text-center text-sm text-indigo-200/70">
                   ¿No tienes cuenta?{' '}
-                  <Link 
-                    href="/register" 
+                  <Link
+                    href="/register"
                     className="font-semibold text-indigo-300 hover:text-white transition-colors underline decoration-indigo-400/30 hover:decoration-white/50"
                   >
                     Regístrate aquí
@@ -277,9 +291,16 @@ export default function LoginPage() {
         }
 
         @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          75% { transform: translateX(5px); }
+          0%,
+          100% {
+            transform: translateX(0);
+          }
+          25% {
+            transform: translateX(-5px);
+          }
+          75% {
+            transform: translateX(5px);
+          }
         }
 
         .animate-fade-in {

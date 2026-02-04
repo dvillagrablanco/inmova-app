@@ -69,6 +69,7 @@ export default function NuevoAnuncioSTRPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [properties, setProperties] = useState<Property[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
 
   const [form, setForm] = useState({
     titulo: '',
@@ -95,6 +96,10 @@ export default function NuevoAnuncioSTRPage() {
       router.push('/login');
     }
   }, [status, router]);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -154,7 +159,7 @@ export default function NuevoAnuncioSTRPage() {
     }
   };
 
-  if (status === 'loading') {
+  if (!isMounted || status === 'loading') {
     return (
       <AuthenticatedLayout>
         <div className="flex items-center justify-center min-h-[400px]">
