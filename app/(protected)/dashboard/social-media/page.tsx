@@ -133,6 +133,11 @@ export default function SocialMediaDashboard() {
     }
   };
 
+  const handleSaveConfig = () => {
+    setConfigured(true);
+    loadData();
+  };
+
   const connectPlatform = async (platform: string) => {
     try {
       const res = await fetch('/api/pomelli/profiles/connect', {
@@ -257,7 +262,7 @@ export default function SocialMediaDashboard() {
                 <Label>API Secret</Label>
                 <Input type="password" placeholder="Tu API Secret de Pomelli" />
               </div>
-              <Button>Guardar Configuración</Button>
+              <Button onClick={handleSaveConfig}>Guardar Configuración</Button>
             </div>
           </CardContent>
         </Card>

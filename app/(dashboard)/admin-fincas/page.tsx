@@ -182,9 +182,9 @@ export default function AdminFincasPage() {
                         </p>
                       </div>
                     </div>
-                    <Link href="/admin-fincas/informes">
-                      <Button variant="outline">Ver Informes</Button>
-                    </Link>
+                    <Button variant="outline" asChild>
+                      <Link href="/admin-fincas/informes">Ver Informes</Link>
+                    </Button>
                   </div>
 
                   <div className="w-full bg-gray-200 rounded-full h-2.5">

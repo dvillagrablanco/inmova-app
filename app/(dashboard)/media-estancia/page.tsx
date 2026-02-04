@@ -140,14 +140,19 @@ function QuickActions() {
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {actions.map((action) => (
-            <Link key={action.label} href={action.href}>
-              <Button variant="outline" className="w-full h-auto py-4 flex flex-col gap-2">
+            <Button
+              key={action.label}
+              asChild
+              variant="outline"
+              className="w-full h-auto py-4 flex flex-col gap-2"
+            >
+              <Link href={action.href}>
                 <div className={`p-2 rounded-lg ${action.color}`}>
                   <action.icon className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-sm">{action.label}</span>
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           ))}
         </div>
       </CardContent>
@@ -173,12 +178,12 @@ function ContractsList({ contracts }: { contracts: ContractSummary[] }) {
           <CardTitle className="text-lg">Contratos Activos</CardTitle>
           <CardDescription>Contratos de media estancia en curso</CardDescription>
         </div>
-        <Link href="/contratos/media-estancia">
-          <Button variant="outline" size="sm">
+        <Button asChild variant="outline" size="sm">
+          <Link href="/contratos/media-estancia">
             Ver todos
             <ArrowUpRight className="h-4 w-4 ml-1" />
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -212,12 +217,12 @@ function ContractsList({ contracts }: { contracts: ContractSummary[] }) {
             <div className="text-center py-8 text-muted-foreground">
               <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No hay contratos activos</p>
-              <Link href="/contratos/media-estancia/nuevo">
-                <Button variant="outline" className="mt-4">
+              <Button asChild variant="outline" className="mt-4">
+                <Link href="/contratos/media-estancia/nuevo">
                   <Plus className="h-4 w-4 mr-2" />
                   Crear primer contrato
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           )}
         </div>
@@ -395,12 +400,12 @@ export default function MediaEstanciaPage() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Link href="/contratos/media-estancia/nuevo">
-            <Button>
+          <Button asChild>
+            <Link href="/contratos/media-estancia/nuevo">
               <Plus className="h-4 w-4 mr-2" />
               Nuevo Contrato
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
 

@@ -237,12 +237,12 @@ export default function TraditionalRentalDashboard() {
           </div>
           <div className="flex gap-2">
             {quickActions.slice(0, 2).map((action) => (
-              <Link key={action.href} href={action.href}>
-                <Button variant="outline" size="sm" className="gap-2">
+              <Button key={action.href} asChild variant="outline" size="sm" className="gap-2">
+                <Link href={action.href}>
                   <action.icon className="h-4 w-4" />
                   {action.label}
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             ))}
           </div>
         </div>
@@ -347,11 +347,9 @@ export default function TraditionalRentalDashboard() {
                         <p className="text-xs text-orange-600">Requieren acción inmediata</p>
                       </div>
                     </div>
-                    <Link href="/contratos?filter=expiring">
-                      <Button size="sm" variant="outline">
-                        Ver
-                      </Button>
-                    </Link>
+                    <Button size="sm" variant="outline" asChild>
+                      <Link href="/contratos?filter=expiring">Ver</Link>
+                    </Button>
                   </div>
                   <p className="text-xs text-gray-500">
                     Gestiona las renovaciones con anticipación para mantener la ocupación
@@ -392,11 +390,9 @@ export default function TraditionalRentalDashboard() {
                       Importe total: {formatCurrency(stats.importeImpagos)}
                     </p>
                   </div>
-                  <Link href="/pagos?filter=pending">
-                    <Button size="sm" variant="outline">
-                      Gestionar
-                    </Button>
-                  </Link>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link href="/pagos?filter=pending">Gestionar</Link>
+                  </Button>
                 </div>
               )}
               {stats.contratosProximosVencer > 0 && (
@@ -408,11 +404,9 @@ export default function TraditionalRentalDashboard() {
                     </p>
                     <p className="text-xs text-yellow-600">Vencen en los próximos 30 días</p>
                   </div>
-                  <Link href="/contratos?filter=expiring">
-                    <Button size="sm" variant="outline">
-                      Ver
-                    </Button>
-                  </Link>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link href="/contratos?filter=expiring">Ver</Link>
+                  </Button>
                 </div>
               )}
               {stats.propiedadesDisponibles > 0 && (
@@ -424,11 +418,9 @@ export default function TraditionalRentalDashboard() {
                     </p>
                     <p className="text-xs text-blue-600">Listas para nuevos inquilinos</p>
                   </div>
-                  <Link href="/propiedades?filter=available">
-                    <Button size="sm" variant="outline">
-                      Ver
-                    </Button>
-                  </Link>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link href="/propiedades?filter=available">Ver</Link>
+                  </Button>
                 </div>
               )}
               {stats.impagos === 0 && stats.contratosProximosVencer === 0 && (
@@ -454,15 +446,17 @@ export default function TraditionalRentalDashboard() {
             <CardContent>
               <div className="grid grid-cols-2 gap-3">
                 {quickActions.map((action) => (
-                  <Link key={action.href} href={action.href}>
-                    <Button
-                      variant="outline"
-                      className="w-full h-auto py-4 flex flex-col items-center gap-2 hover:bg-indigo-50 hover:border-indigo-200"
-                    >
+                  <Button
+                    key={action.href}
+                    asChild
+                    variant="outline"
+                    className="w-full h-auto py-4 flex flex-col items-center gap-2 hover:bg-indigo-50 hover:border-indigo-200"
+                  >
+                    <Link href={action.href}>
                       <action.icon className="h-5 w-5 text-indigo-600" />
                       <span className="text-sm">{action.label}</span>
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 ))}
               </div>
             </CardContent>
