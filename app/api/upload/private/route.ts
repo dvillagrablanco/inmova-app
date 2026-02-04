@@ -26,16 +26,32 @@ const BUCKET_NAME = process.env.AWS_BUCKET_PRIVATE || process.env.AWS_BUCKET || 
 // Verificar si S3 está configurado
 const isS3Configured = !!(AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY);
 
+const createS3Client = (regionOverride?: string) =>
+  new S3Client({
+    region: regionOverride || AWS_REGION,
+    credentials: {
+      accessKeyId: AWS_ACCESS_KEY_ID,
+      secretAccessKey: AWS_SECRET_ACCESS_KEY,
+    },
+    endpoint: process.env.AWS_S3_ENDPOINT || process.env.AWS_ENDPOINT,
+    forcePathStyle: process.env.AWS_S3_FORCE_PATH_STYLE === 'true',
+  });
+
+const extractBucketRegion = (error: any): string | undefined => {
+  const headerRegion =
+    error?.$metadata?.httpHeaders?.['x-amz-bucket-region'] ||
+    error?.$response?.headers?.['x-amz-bucket-region'];
+  return (
+    headerRegion ||
+    error?.BucketRegion ||
+    error?.bucketRegion ||
+    error?.Region ||
+    error?.region
+  );
+};
+
 // Configurar S3 Client (solo si está configurado)
-const s3Client = isS3Configured
-  ? new S3Client({
-      region: AWS_REGION,
-      credentials: {
-        accessKeyId: AWS_ACCESS_KEY_ID,
-        secretAccessKey: AWS_SECRET_ACCESS_KEY,
-      },
-    })
-  : null;
+const s3Client = isS3Configured ? createS3Client() : null;
 
 // Determinar modo de almacenamiento
 type StorageMode = 's3' | 'local';
@@ -210,7 +226,23 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      await s3Client.send(command);
+      try {
+        await s3Client.send(command);
+      } catch (error: any) {
+        const bucketRegion = extractBucketRegion(error);
+        if (bucketRegion && bucketRegion !== AWS_REGION) {
+          logger.warn('[Upload Private] Reintentando con region del bucket', {
+            bucketRegion,
+            awsRegion: AWS_REGION,
+            bucket: BUCKET_NAME,
+          });
+          const retryClient = createS3Client(bucketRegion);
+          await retryClient.send(command);
+        } else {
+          throw error;
+        }
+      }
+
       uploadResult = { success: true, path: fileName };
       logger.info(`[Upload Private] Archivo subido a S3: ${fileName}`);
     } else {
