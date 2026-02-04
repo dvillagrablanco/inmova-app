@@ -114,7 +114,8 @@ export default function ActasPage() {
       const params = new URLSearchParams();
       if (comunidadId) params.append('comunidadId', comunidadId);
       if (buildingId) params.append('buildingId', buildingId);
-      if (filtroEstado) params.append('estado', filtroEstado);
+      const normalizedEstado = filtroEstado === 'todos' ? '' : filtroEstado;
+      if (normalizedEstado) params.append('estado', normalizedEstado);
 
       const res = await fetch(`/api/comunidades/actas?${params}`);
       if (res.ok) {
@@ -328,12 +329,15 @@ export default function ActasPage() {
 
         {/* Filters */}
         <div className="flex items-center gap-4">
-          <Select value={filtroEstado} onValueChange={setFiltroEstado}>
+          <Select
+            value={filtroEstado || 'todos'}
+            onValueChange={(value) => setFiltroEstado(value === 'todos' ? '' : value)}
+          >
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Filtrar por estado" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos los estados</SelectItem>
+              <SelectItem value="todos">Todos los estados</SelectItem>
               {ESTADOS_ACTA.map((e) => (
                 <SelectItem key={e.value} value={e.value}>
                   {e.label}

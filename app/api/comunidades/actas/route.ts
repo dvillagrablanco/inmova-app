@@ -128,6 +128,17 @@ export async function GET(request: NextRequest) {
       stats,
     });
   } catch (error: any) {
+    if (error?.name === 'PrismaClientValidationError') {
+      logger.warn('[Actas GET Warning]:', { name: error?.name, message: error?.message });
+      return NextResponse.json(
+        {
+          actas: [],
+          pagination: { page: 1, limit: 20, total: 0, pages: 0 },
+          stats: { total: 0, borradores: 0, aprobadas: 0, pendientesAprobacion: 0 },
+        },
+        { status: 200 }
+      );
+    }
     logger.error('[Actas GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo actas', details: error.message },
