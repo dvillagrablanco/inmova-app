@@ -345,6 +345,9 @@ export function AIDocumentAssistant({
   autoSaveDocument = true,
 }: AIDocumentAssistantProps) {
   const router = useRouter();
+  // Simplificar la UI: desactivar botones flotantes por defecto
+  const floatingWidgetsEnabled = false;
+  const resolvedVariant = !floatingWidgetsEnabled && variant === 'floating' ? 'inline' : variant;
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null);
@@ -388,25 +391,22 @@ export function AIDocumentAssistant({
   };
 
   // Manejar selección de archivos
-  const handleFileSelect = useCallback(
-    (files: FileList | null) => {
-      if (!files) return;
+  const handleFileSelect = (files: FileList | null) => {
+    if (!files) return;
 
-      const newFiles: UploadedFile[] = Array.from(files).map((file) => ({
-        file,
-        status: 'pending',
-        progress: 0,
-      }));
+    const newFiles: UploadedFile[] = Array.from(files).map((file) => ({
+      file,
+      status: 'pending',
+      progress: 0,
+    }));
 
-      setUploadedFiles((prev) => [...prev, ...newFiles]);
+    setUploadedFiles((prev) => [...prev, ...newFiles]);
 
-      // Procesar cada archivo
-      newFiles.forEach((uploadedFile) => {
-        processFile(uploadedFile);
-      });
-    },
-    [context]
-  );
+    // Procesar cada archivo
+    newFiles.forEach((uploadedFile) => {
+      processFile(uploadedFile);
+    });
+  };
 
   // Procesar un archivo con timeout largo y reintentos
   const processFile = async (uploadedFile: UploadedFile) => {
@@ -803,7 +803,7 @@ export function AIDocumentAssistant({
 
   // Botón trigger según variante
   const renderTrigger = () => {
-    if (variant === 'minimal') {
+    if (resolvedVariant === 'minimal') {
       return (
         <TooltipProvider>
           <Tooltip>
@@ -820,7 +820,7 @@ export function AIDocumentAssistant({
       );
     }
 
-    if (variant === 'inline') {
+    if (resolvedVariant === 'inline') {
       return (
         <Button
           type="button"
