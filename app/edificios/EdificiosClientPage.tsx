@@ -173,12 +173,12 @@ export function EdificiosClientPage({ initialBuildings }: EdificiosClientPagePro
               </div>
               <div className="flex items-center gap-2">
                 {canCreate && (
-                  <Link href="/edificios/nuevo">
-                    <Button className="gap-2">
+                  <Button className="gap-2" asChild>
+                    <Link href="/edificios/nuevo">
                       <Plus className="h-4 w-4" />
                       Nuevo Edificio
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 )}
               </div>
             </div>
@@ -268,8 +268,13 @@ export function EdificiosClientPage({ initialBuildings }: EdificiosClientPagePro
                           <CardTitle className="text-lg">{building.nombre}</CardTitle>
                         </div>
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={() => undefined}
+                          >
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -345,11 +350,11 @@ export function EdificiosClientPage({ initialBuildings }: EdificiosClientPagePro
                         )}
 
                         <div className="pt-3">
-                          <Link href={`/edificios/${building.id}`}>
-                            <Button variant="outline" size="sm" className="w-full">
+                          <Button variant="outline" size="sm" className="w-full" asChild>
+                            <Link href={`/edificios/${building.id}`}>
                               Ver Detalles
-                            </Button>
-                          </Link>
+                            </Link>
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -408,17 +413,17 @@ export function EdificiosClientPage({ initialBuildings }: EdificiosClientPagePro
                           )}
 
                           <div className="flex items-center gap-2">
-                            <Link href={`/edificios/${building.id}`}>
-                              <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" asChild>
+                              <Link href={`/edificios/${building.id}`}>
                                 Ver
-                              </Button>
-                            </Link>
-                            {canUpdate && (
-                              <Link href={`/edificios/${building.id}/editar`}>
-                                <Button variant="outline" size="sm">
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
                               </Link>
+                            </Button>
+                            {canUpdate && (
+                              <Button variant="outline" size="sm" asChild>
+                                <Link href={`/edificios/${building.id}/editar`}>
+                                  <Pencil className="h-4 w-4" />
+                                </Link>
+                              </Button>
                             )}
                             {canDelete && (
                               <Button
