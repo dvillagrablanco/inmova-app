@@ -82,15 +82,17 @@ test.describe('Flujo Completo DNI → Formulario', () => {
     console.log('📍 PASO 3: Abriendo asistente IA...');
 
     let assistantMode: 'inline' | 'floating' = 'inline';
-    const inlineTrigger = page.locator('button:has-text("Escanear DNI")').first();
+    const documentsSection = page.locator('text=Documentos del Inquilino').first();
+    await documentsSection.scrollIntoViewIfNeeded();
 
+    const inlineTrigger = page.getByRole('button', { name: /Escanear DNI/i }).first();
     if (await inlineTrigger.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await inlineTrigger.scrollIntoViewIfNeeded();
-      await inlineTrigger.click();
+      await inlineTrigger.click({ force: true });
     }
 
+    const dropzoneText = page.locator('text=Arrastra documentos aquí').first();
     try {
-      await page.waitForSelector('input#file-upload', { state: 'attached', timeout: 8000 });
+      await dropzoneText.waitFor({ state: 'visible', timeout: 8000 });
     } catch {
       assistantMode = 'floating';
       console.log('ℹ️ Asistente inline no respondió, intentando flotante...');
@@ -104,7 +106,7 @@ test.describe('Flujo Completo DNI → Formulario', () => {
 
       await aiButton.waitFor({ state: 'visible', timeout: 10000 });
       await aiButton.click({ force: true });
-      await page.waitForSelector('input#file-upload', { state: 'attached', timeout: 10000 });
+      await dropzoneText.waitFor({ state: 'visible', timeout: 10000 });
     }
     await page.screenshot({
       path: 'test-results/flow-02-asistente-localizado.png',
