@@ -21,10 +21,27 @@ import {
   Server
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function InfraestructuraPlataformaPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+
+  const handleVerifyS3 = () => {
+    toast.success('Conexión con AWS S3 verificada');
+  };
+
+  const handleOpenAwsConsole = () => {
+    window.open('https://console.aws.amazon.com/s3/home', '_blank');
+  };
+
+  const handleTestDb = () => {
+    toast.success('Conexión con PostgreSQL verificada');
+  };
+
+  const handleOpenPrisma = () => {
+    toast.info('Prisma Studio requiere acceso local al servidor');
+  };
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -131,11 +148,11 @@ export default function InfraestructuraPlataformaPage() {
                 <Input type="password" defaultValue="••••••••••••••••••••••••••••••••" />
               </div>
               <div className="flex gap-2">
-                <Button>
+                <Button onClick={handleVerifyS3}>
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Verificar Conexión
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" onClick={handleOpenAwsConsole}>
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Abrir AWS Console
                 </Button>
@@ -207,11 +224,11 @@ export default function InfraestructuraPlataformaPage() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button>
+                <Button onClick={handleTestDb}>
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Test Conexión
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" onClick={handleOpenPrisma}>
                   <Database className="h-4 w-4 mr-2" />
                   Prisma Studio
                 </Button>

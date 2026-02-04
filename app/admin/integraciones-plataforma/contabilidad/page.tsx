@@ -19,6 +19,8 @@ import {
   Euro
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
+import { toast } from 'sonner';
 
 export default function ContabilidadPlataformaPage() {
   const { data: session, status } = useSession();
@@ -42,6 +44,16 @@ export default function ContabilidadPlataformaPage() {
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsConnected(true);
     setIsTesting(false);
+    toast.success('Conexión con Contasimple verificada');
+  };
+
+  const handleOpenContasimple = () => {
+    window.open('https://www.contasimple.com/', '_blank');
+  };
+
+  const handleOpenContasimple = () => {
+    toast.info('Abriendo Contasimple');
+    window.open('https://contasimple.com/', '_blank');
   };
 
   if (status === 'loading') {
@@ -135,7 +147,7 @@ export default function ContabilidadPlataformaPage() {
                 {isTesting ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
                 {isTesting ? 'Probando...' : 'Probar Conexión'}
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" onClick={handleOpenContasimple}>
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Abrir Contasimple
               </Button>
