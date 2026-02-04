@@ -72,6 +72,10 @@ export default function HuertosUrbanosPage() {
     months: 6,
   });
 
+  const handleManagePlot = (plotNumber: number) => {
+    toast.info(`Gestionar parcela ${plotNumber}`);
+  };
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
@@ -248,7 +252,12 @@ export default function HuertosUrbanosPage() {
                       </div>
                     </div>
 
-                    <Button variant="outline" className="w-full" size="sm">
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      size="sm"
+                      onClick={() => handleManagePlot(plot.plotNumber)}
+                    >
                       Gestionar Parcela
                     </Button>
                   </div>

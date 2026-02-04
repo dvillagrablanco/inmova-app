@@ -99,14 +99,12 @@ export default function ComplianceLandingPage() {
               </span>
             </Link>
             <div className="flex gap-4">
-              <Link href="/ewoorker/landing">
-                <Button variant="ghost">Inicio</Button>
-              </Link>
-              <Link href="/ewoorker/login">
-                <Button className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600">
-                  Acceder
-                </Button>
-              </Link>
+              <Button variant="ghost" asChild>
+                <Link href="/ewoorker/landing">Inicio</Link>
+              </Button>
+              <Button className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600" asChild>
+                <Link href="/ewoorker/login">Acceder</Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -221,12 +219,12 @@ export default function ComplianceLandingPage() {
             </div>
           </div>
           
-          <Link href="/ewoorker/registro">
-            <Button size="lg" className="bg-white text-orange-600 hover:bg-gray-100 font-bold">
+          <Button size="lg" className="bg-white text-orange-600 hover:bg-gray-100 font-bold" asChild>
+            <Link href="/ewoorker/registro">
               Empezar Ahora
               <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
 
@@ -241,16 +239,16 @@ export default function ComplianceLandingPage() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/ewoorker/registro">
-              <Button size="lg" className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold">
-                Crear Cuenta Gratis
-              </Button>
-            </Link>
-            <Link href="/landing/contacto">
-              <Button size="lg" variant="outline" className="border-2">
-                Solicitar Demo
-              </Button>
-            </Link>
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold"
+              asChild
+            >
+              <Link href="/ewoorker/registro">Crear Cuenta Gratis</Link>
+            </Button>
+            <Button size="lg" variant="outline" className="border-2" asChild>
+              <Link href="/landing/contacto">Solicitar Demo</Link>
+            </Button>
           </div>
         </div>
       </section>

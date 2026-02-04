@@ -64,11 +64,9 @@ export default function EwoorkerLoginPage() {
               <p className="text-xs text-gray-600">by Inmova</p>
             </div>
           </Link>
-          <Link href="/ewoorker/registro">
-            <Button variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-50">
-              Registrarse
-            </Button>
-          </Link>
+          <Button variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-50" asChild>
+            <Link href="/ewoorker/registro">Registrarse</Link>
+          </Button>
         </div>
       </nav>
 
