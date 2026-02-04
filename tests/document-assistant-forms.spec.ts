@@ -52,8 +52,8 @@ test.describe('IA documental - validación de aplicación en formularios', () =>
 
     for (const route of ROUTES) {
       console.log(`\n📍 Validando ${route.name} -> ${route.path}`);
-      await page.goto(`${BASE_URL}${route.path}`);
-      await page.waitForLoadState('networkidle');
+      await page.goto(`${BASE_URL}${route.path}`, { waitUntil: 'domcontentloaded' });
+      await page.waitForTimeout(1000);
       await closeCookiesIfNeeded();
 
       const inlineTrigger = page.getByTestId('ai-assistant-trigger').first();
