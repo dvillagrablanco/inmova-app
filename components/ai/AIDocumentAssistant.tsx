@@ -863,8 +863,18 @@ export function AIDocumentAssistant({
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>{renderTrigger()}</SheetTrigger>
+    <>
+      <input
+        id="file-upload"
+        type="file"
+        multiple
+        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.txt"
+        className="hidden"
+        onChange={(e) => handleFileSelect(e.target.files)}
+        data-testid="ai-file-upload"
+      />
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <SheetTrigger asChild>{renderTrigger()}</SheetTrigger>
 
       <SheetContent
         className="w-full sm:max-w-xl bg-white dark:bg-gray-950 border-l shadow-xl"
@@ -939,15 +949,6 @@ export function AIDocumentAssistant({
                 </span>
               </Button>
             </label>
-            <input
-              id="file-upload"
-              type="file"
-              multiple
-              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.txt"
-              className="hidden"
-              onChange={(e) => handleFileSelect(e.target.files)}
-              data-testid="ai-file-upload"
-            />
           </div>
 
           {/* Tipos de documentos sugeridos */}
@@ -1239,6 +1240,7 @@ export function AIDocumentAssistant({
         />
       )}
     </Sheet>
+    </>
   );
 }
 
