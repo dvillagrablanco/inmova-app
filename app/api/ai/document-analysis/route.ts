@@ -18,6 +18,7 @@ import {
   DocumentAnalysisInput,
 } from '@/lib/ai-document-agent-service';
 import logger from '@/lib/logger';
+import mammoth from 'mammoth';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -55,6 +56,20 @@ function isPDFFile(file: File): boolean {
   }
   const fileName = (file.name || '').toLowerCase();
   return fileName.endsWith('.pdf');
+}
+
+/**
+ * Verifica si el archivo es un documento Word
+ */
+function isWordFile(file: File): boolean {
+  if (
+    file.type === 'application/msword' ||
+    file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  ) {
+    return true;
+  }
+  const fileName = (file.name || '').toLowerCase();
+  return fileName.endsWith('.doc') || fileName.endsWith('.docx');
 }
 
 /**
@@ -780,6 +795,24 @@ Tipo MIME: ${file.type}
 Tamaño: ${(file.size / 1024).toFixed(2)} KB
 Fecha de carga: ${new Date().toISOString()}
   `.trim();
+
+  // Para documentos Word, extraer texto real con mammoth
+  if (isWordFile(file)) {
+    try {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const result = await mammoth.extractRawText({ buffer });
+      const text = result.value?.trim();
+
+      if (text && text.length > 0) {
+        return basicInfo + '\n\nTexto extraído:\n' + text;
+      }
+    } catch (error) {
+      logger.warn('[AI Document Analysis] Error extrayendo DOC/DOCX, usando fallback', {
+        fileName: file.name,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
 
   // Si el archivo es un PDF o documento, intentar leer como texto
   try {

@@ -923,7 +923,7 @@ export function AIDocumentAssistant({
             <Upload className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
             <p className="text-sm font-medium mb-1">Arrastra documentos aquí</p>
             <p className="text-xs text-muted-foreground mb-3">
-              PDF, imágenes (JPG, PNG) o documentos de texto
+              PDF, imágenes (JPG, PNG), Word (DOC/DOCX) o documentos de texto
             </p>
             <label htmlFor="file-upload">
               <Button variant="outline" size="sm" asChild>
