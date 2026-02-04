@@ -51,6 +51,16 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
 
     const companyId = (session.user as any).companyId;
+    if (!companyId) {
+      return NextResponse.json(
+        {
+          actas: [],
+          pagination: { page: 1, limit: 20, total: 0, pages: 0 },
+          stats: { total: 0, borradores: 0, aprobadas: 0, pendientesAprobacion: 0 },
+        },
+        { status: 200 }
+      );
+    }
 
     // Obtener buildingId si se proporciona comunidadId
     let targetBuildingId = buildingId;
