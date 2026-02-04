@@ -19,6 +19,10 @@ export default function ReportesFinancierosPage() {
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('month');
 
+  const handleExport = () => {
+    toast.success('Reporte financiero exportado');
+  };
+
   useEffect(() => {
     if (status === 'authenticated') setLoading(false);
     else if (status === 'unauthenticated') router.push('/login');
@@ -67,7 +71,10 @@ export default function ReportesFinancierosPage() {
                 <SelectItem value="year">Año</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline"><Download className="h-4 w-4 mr-2" />Exportar</Button>
+            <Button variant="outline" onClick={handleExport}>
+              <Download className="h-4 w-4 mr-2" />
+              Exportar
+            </Button>
           </div>
         </div>
 
