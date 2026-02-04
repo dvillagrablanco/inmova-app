@@ -368,7 +368,7 @@ export default function CRMPage() {
               }}
             >
               <DialogTrigger asChild>
-                <Button className="gradient-primary">
+                <Button className="gradient-primary" onClick={() => setOpenDialog(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Nuevo Lead
                 </Button>
