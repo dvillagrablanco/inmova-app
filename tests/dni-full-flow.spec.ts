@@ -213,13 +213,20 @@ test.describe('Flujo Completo DNI → Formulario', () => {
           fullPage: true,
         });
 
+        const saveErrorToast = page.locator(/hubo un problema guardando el documento/i);
+        await expect(saveErrorToast).toBeHidden({ timeout: 5000 });
+
         // El diálogo debería cerrarse
         // Cerrar el panel del asistente
         const closeSheetButton = page
           .locator('button[aria-label="Close"], button:has(svg.lucide-x)')
           .first();
         if (await closeSheetButton.isVisible({ timeout: 2000 }).catch(() => false)) {
-          await closeSheetButton.click();
+          try {
+            await closeSheetButton.click({ force: true, timeout: 5000 });
+          } catch {
+            await page.keyboard.press('Escape').catch(() => {});
+          }
           await page.waitForTimeout(500);
         }
 
