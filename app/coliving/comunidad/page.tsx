@@ -39,7 +39,6 @@ import {
   Trophy,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { toast } from 'sonner';
 
 interface Resident {
   id: string;
