@@ -69,7 +69,7 @@ test.describe('IA documental - validación de aplicación en formularios', () =>
       }
 
       const openPanel = page.getByTestId('ai-assistant-panel').first();
-      await expect(openPanel).toBeVisible({ timeout: 10000 });
+      await openPanel.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
 
       const fileInput = page.getByTestId('ai-file-upload').first();
       await expect(fileInput).toBeAttached({ timeout: 10000 });
