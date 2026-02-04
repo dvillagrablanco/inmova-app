@@ -75,7 +75,10 @@ export async function GET(request: NextRequest) {
     // Construir filtros
     const where: any = { companyId };
     if (targetBuildingId) where.buildingId = targetBuildingId;
-    if (estado) where.estado = estado;
+    const allowedEstados = ['borrador', 'aprobada', 'rechazada'] as const;
+    if (estado && allowedEstados.includes(estado as (typeof allowedEstados)[number])) {
+      where.estado = estado;
+    }
     if (year) {
       const startDate = new Date(`${year}-01-01`);
       const endDate = new Date(`${year}-12-31`);
@@ -106,9 +109,7 @@ export async function GET(request: NextRequest) {
       aprobadas: await prisma.communityMinute.count({
         where: { ...where, estado: 'aprobada' },
       }),
-      pendientesAprobacion: await prisma.communityMinute.count({
-        where: { ...where, estado: 'pendiente_aprobacion' },
-      }),
+      pendientesAprobacion: 0,
     };
 
     return NextResponse.json({
