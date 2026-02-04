@@ -48,6 +48,14 @@ interface DashboardData {
 
 export default function FinanzasPage() {
   const router = useRouter();
+
+  const handleInformeMorosos = () => {
+    toast.info('Informe de morosos en preparación');
+  };
+
+  const handleExportarBalance = () => {
+    toast.success('Balance exportado');
+  };
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
   const [data, setData] = useState<DashboardData | null>(null);
@@ -334,11 +342,11 @@ export default function FinanzasPage() {
               <Wallet className="w-4 h-4 mr-2" />
               Ver Fondos
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleInformeMorosos}>
               <TrendingDown className="w-4 h-4 mr-2" />
               Informe de Morosos
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleExportarBalance}>
               <BarChart3 className="w-4 h-4 mr-2" />
               Exportar Balance
             </Button>

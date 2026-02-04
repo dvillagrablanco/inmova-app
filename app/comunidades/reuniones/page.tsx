@@ -84,6 +84,10 @@ export default function ReunionesPage() {
     canceladas: 0,
   });
 
+  const handleViewConvocatoria = () => {
+    toast.info('Convocatoria disponible en el módulo de actas');
+  };
+
   const comunidadId = searchParams.get('comunidadId');
   const buildingId = searchParams.get('buildingId');
 
@@ -221,7 +225,7 @@ export default function ReunionesPage() {
           </div>
           <Dialog open={showDialog} onOpenChange={setShowDialog}>
             <DialogTrigger asChild>
-              <Button>
+              <Button onClick={() => setShowDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Programar Reunión
               </Button>
@@ -370,7 +374,7 @@ export default function ReunionesPage() {
                   <Badge className="mt-2 capitalize">{proximaReunion.tipo}</Badge>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={handleViewConvocatoria}>
                     <FileText className="w-4 h-4 mr-2" />
                     Ver Convocatoria
                   </Button>

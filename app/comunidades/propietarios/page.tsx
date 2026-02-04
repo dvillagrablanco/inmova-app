@@ -206,7 +206,7 @@ export default function PropietariosPage() {
           </div>
           <Dialog open={showDialog} onOpenChange={setShowDialog}>
             <DialogTrigger asChild>
-              <Button>
+              <Button onClick={() => setShowDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Nuevo Propietario
               </Button>

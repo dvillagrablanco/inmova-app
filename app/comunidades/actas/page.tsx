@@ -222,7 +222,7 @@ export default function ActasPage() {
           </div>
           <Dialog open={showDialog} onOpenChange={setShowDialog}>
             <DialogTrigger asChild>
-              <Button>
+              <Button onClick={() => setShowDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Nueva Acta
               </Button>
@@ -383,10 +383,18 @@ export default function ActasPage() {
                       <TableCell>{getEstadoBadge(acta.estado)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => toast.info(`Detalle del acta #${acta.numeroActa}`)}
+                          >
                             <Eye className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => toast.success(`Descarga de acta #${acta.numeroActa}`)}
+                          >
                             <Download className="w-4 h-4" />
                           </Button>
                         </div>

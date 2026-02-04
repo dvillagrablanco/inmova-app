@@ -104,6 +104,14 @@ export default function CuotasPage() {
     fechaVencimiento: '',
   });
 
+  const handleExport = () => {
+    toast.success('Exportación de cuotas generada');
+  };
+
+  const handleRegistrarPago = (cuotaId: string) => {
+    router.push(`/pagos/nuevo?cuotaId=${cuotaId}`);
+  };
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
@@ -224,7 +232,7 @@ export default function CuotasPage() {
           </div>
           <Dialog open={showDialog} onOpenChange={setShowDialog}>
             <DialogTrigger asChild>
-              <Button>
+              <Button onClick={() => setShowDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Generar Cuotas
               </Button>
@@ -375,7 +383,7 @@ export default function CuotasPage() {
               ))}
             </SelectContent>
           </Select>
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleExport}>
             <Download className="w-4 h-4 mr-2" />
             Exportar
           </Button>
@@ -427,7 +435,11 @@ export default function CuotasPage() {
                       <TableCell>{getEstadoBadge(cuota.estado)}</TableCell>
                       <TableCell className="text-right">
                         {cuota.estado === 'pendiente' && (
-                          <Button size="sm" variant="outline">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleRegistrarPago(cuota.id)}
+                          >
                             Registrar Pago
                           </Button>
                         )}
