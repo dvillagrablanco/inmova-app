@@ -446,8 +446,19 @@ export default function NuevoContratoPage() {
                               }
                               
                               // Renta mensual
-                              if (data.rentaMensual || data.monthlyRent || data.precio) {
-                                const renta = data.rentaMensual || data.monthlyRent || data.precio;
+                              if (
+                                data.rentaMensual ||
+                                data.monthlyRent ||
+                                data.precio ||
+                                data.precioAlquiler ||
+                                data.renta
+                              ) {
+                                const renta =
+                                  data.rentaMensual ||
+                                  data.monthlyRent ||
+                                  data.precio ||
+                                  data.precioAlquiler ||
+                                  data.renta;
                                 const rentaNum = parseFloat(String(renta).replace(/[^0-9,.]/g, '').replace(',', '.'));
                                 if (!isNaN(rentaNum)) {
                                   updates.rentaMensual = rentaNum;

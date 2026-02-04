@@ -47,6 +47,12 @@ interface DataReviewDialogProps {
   documentName: string;
   documentType: string;
   onConfirm: (selectedFields: Record<string, string>) => void;
+  confirmLabel?: (selectedCount: number) => string;
+  successMessage?: (selectedCount: number) => string | null;
+  successAction?: {
+    label: string;
+    onClick: () => void;
+  };
 }
 
 // Mapeo de campos a nombres legibles en español
@@ -135,6 +141,9 @@ export function DataReviewDialog({
   documentName,
   documentType,
   onConfirm,
+  confirmLabel,
+  successMessage,
+  successAction,
 }: DataReviewDialogProps) {
   // Estado para los campos editables
   const [editableFields, setEditableFields] = useState<Record<string, string>>({});
@@ -201,9 +210,16 @@ export function DataReviewDialog({
       return;
     }
 
+    const appliedCount = Object.keys(dataToApply).length;
+    const message =
+      successMessage?.(appliedCount) ?? `${appliedCount} campos aplicados al formulario`;
+
     onConfirm(dataToApply);
     onClose();
-    toast.success(`${Object.keys(dataToApply).length} campos aplicados al formulario`);
+
+    if (message) {
+      toast.success(message, successAction ? { action: successAction } : undefined);
+    }
   };
 
   // Contar campos seleccionados
@@ -371,7 +387,7 @@ export function DataReviewDialog({
             className="flex-1 sm:flex-none h-9 sm:h-10 text-xs sm:text-sm bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
           >
             <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            Aplicar {selectedCount} campos
+            {confirmLabel ? confirmLabel(selectedCount) : `Aplicar ${selectedCount} campos`}
           </Button>
         </DialogFooter>
       </DialogContent>
