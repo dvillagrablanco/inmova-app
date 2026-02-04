@@ -40,21 +40,32 @@ test.describe('IA documental - validación de aplicación en formularios', () =>
     await page.waitForURL(/\/(dashboard|admin|inquilinos|propiedades)/, { timeout: 30000 });
     console.log('✅ Login OK');
 
+    const closeCookiesIfNeeded = async () => {
+      const cookieButton = page.locator(
+        'button:has-text("Aceptar todas"), button:has-text("Aceptar"), button:has-text("Solo necesarias"), button:has-text("Accept")'
+      );
+      if (await cookieButton.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await cookieButton.click();
+        await page.waitForTimeout(500);
+      }
+    };
+
     for (const route of ROUTES) {
       console.log(`\n📍 Validando ${route.name} -> ${route.path}`);
       await page.goto(`${BASE_URL}${route.path}`);
       await page.waitForLoadState('networkidle');
+      await closeCookiesIfNeeded();
 
       const inlineTrigger = page.getByTestId('ai-assistant-trigger').first();
-      if (await inlineTrigger.isVisible({ timeout: 5000 }).catch(() => false)) {
-        await inlineTrigger.scrollIntoViewIfNeeded();
-        await inlineTrigger.click({ force: true });
-      } else {
+      try {
+        await inlineTrigger.scrollIntoViewIfNeeded({ timeout: 10000 });
+        await inlineTrigger.click({ force: true, timeout: 5000 });
+      } catch {
         const fallbackTrigger = page
           .getByRole('button', { name: /Escanear DNI|Documento con IA/i })
           .first();
-        await fallbackTrigger.scrollIntoViewIfNeeded();
-        await fallbackTrigger.click({ force: true });
+        await fallbackTrigger.scrollIntoViewIfNeeded({ timeout: 10000 });
+        await fallbackTrigger.click({ force: true, timeout: 5000 });
       }
 
       const openPanel = page.getByTestId('ai-assistant-panel').first();
