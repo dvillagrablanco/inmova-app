@@ -25,6 +25,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -520,7 +521,7 @@ export default function CandidatosPage() {
                           </Button>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => undefined}>
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -531,7 +532,11 @@ export default function CandidatosPage() {
                                 <Eye className="h-4 w-4 mr-2" />
                                 Ver Detalles
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  toast.success(`Visita programada para ${candidate.nombre}`)
+                                }
+                              >
                                 <CalendarClock className="h-4 w-4 mr-2" />
                                 Programar Visita
                               </DropdownMenuItem>
