@@ -345,6 +345,64 @@ export default function AnalyticsPage() {
     fetchAnalytics();
   };
 
+  const downloadCsv = (filename: string, rows: Array<Array<string | number>>) => {
+    const csv = rows
+      .map((row) =>
+        row
+          .map((value) => `"${String(value).replace(/"/g, '""')}"`)
+          .join(';')
+      )
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExport = () => {
+    const rows: Array<Array<string | number>> = [
+      ['Seccion', 'Metric', 'Valor', 'Extra'],
+      ['KPIs', 'Ingresos totales', kpis.totalRevenue, '€'],
+      ['KPIs', 'Ocupación media', kpis.avgOccupancy, '%'],
+      ['KPIs', 'Inquilinos activos', kpis.activeTenants, ''],
+      ['KPIs', 'Renta media', kpis.avgRent, '€'],
+      ['Metricas', 'Estancia media', metrics.avgStayMonths, 'meses'],
+      ['Metricas', 'Renovación', metrics.renewalRate, '%'],
+      ['Metricas', 'Repetición', metrics.repeatTenantRate, '%'],
+    ];
+
+    revenueData.forEach((item) => {
+      rows.push(['Ingresos', item.period, item.value, '€']);
+    });
+
+    occupancyData.forEach((item) => {
+      rows.push(['Ocupación', item.period, item.value, '%']);
+    });
+
+    propertyPerformance.forEach((property) => {
+      rows.push([
+        'Propiedades',
+        property.name,
+        property.occupancy,
+        `€${property.revenue}`,
+      ]);
+    });
+
+    tenantsByPurpose.forEach((item) => {
+      rows.push(['Inquilinos por motivo', item.category, item.percentage, '%']);
+    });
+
+    tenantsByNationality.forEach((item) => {
+      rows.push(['Inquilinos por nacionalidad', item.category, item.percentage, '%']);
+    });
+
+    downloadCsv(`analytics_media_estancia_${period}.csv`, rows);
+    toast.success('Exportación generada');
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto p-6 space-y-6">
@@ -387,7 +445,7 @@ export default function AnalyticsPage() {
             <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
             Actualizar
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleExport}>
             <Download className="h-4 w-4 mr-2" />
             Exportar
           </Button>

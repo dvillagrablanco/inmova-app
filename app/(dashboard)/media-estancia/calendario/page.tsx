@@ -1,11 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { 
   ChevronLeft, 
@@ -183,6 +194,7 @@ function LoadingSkeleton() {
 // ==========================================
 
 export default function CalendarioPage() {
+  const router = useRouter();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedProperty, setSelectedProperty] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'month' | 'quarter'>('month');
@@ -197,6 +209,10 @@ export default function CalendarioPage() {
   });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
+  const [blockStartDate, setBlockStartDate] = useState('');
+  const [blockEndDate, setBlockEndDate] = useState('');
+  const [blockPropertyId, setBlockPropertyId] = useState<string>('all');
 
   const fetchCalendarData = async () => {
     try {
@@ -245,6 +261,120 @@ export default function CalendarioPage() {
     fetchCalendarData();
   };
 
+  const handleSyncIcal = () => {
+    router.push('/media-estancia/configuracion');
+    toast.info('Configura la sincronización iCal desde Portales');
+  };
+
+  const downloadCsv = (filename: string, rows: Array<Array<string | number>>) => {
+    const csv = rows
+      .map((row) =>
+        row
+          .map((value) => `"${String(value).replace(/"/g, '""')}"`)
+          .join(';')
+      )
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExport = () => {
+    if (!properties.length) {
+      toast.error('No hay datos para exportar');
+      return;
+    }
+
+    const rows: Array<Array<string | number>> = [
+      ['Propiedad', 'Direccion', 'Ocupados', 'Disponibles', 'Reservados', 'Bloqueados', 'Ocupacion %'],
+    ];
+
+    properties.forEach((property) => {
+      const occupied = property.days.filter((day) => day.status === 'occupied').length;
+      const available = property.days.filter((day) => day.status === 'available').length;
+      const reserved = property.days.filter((day) => day.status === 'reserved').length;
+      const blocked = property.days.filter((day) => day.status === 'blocked').length;
+      const total = property.days.length || 1;
+      const occupancyRate = Math.round((occupied / total) * 100);
+
+      rows.push([
+        property.propertyName,
+        property.address,
+        occupied,
+        available,
+        reserved,
+        blocked,
+        occupancyRate,
+      ]);
+    });
+
+    downloadCsv(
+      `calendario_media_estancia_${format(currentMonth, 'yyyy_MM')}.csv`,
+      rows
+    );
+    toast.success('Exportación generada');
+  };
+
+  const handleOpenBlockDialog = () => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    setBlockStartDate((prev) => prev || today);
+    setBlockEndDate((prev) => prev || today);
+    setBlockDialogOpen(true);
+  };
+
+  const handleBlockDates = () => {
+    if (!blockStartDate || !blockEndDate) {
+      toast.error('Selecciona un rango de fechas');
+      return;
+    }
+
+    const start = parseISO(blockStartDate);
+    const end = parseISO(blockEndDate);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      toast.error('Fechas inválidas');
+      return;
+    }
+
+    if (end < start) {
+      toast.error('La fecha fin debe ser posterior a la fecha inicio');
+      return;
+    }
+
+    const daysToBlock = eachDayOfInterval({ start, end }).map((day) =>
+      format(day, 'yyyy-MM-dd')
+    );
+    const daysToBlockSet = new Set(daysToBlock);
+
+    setProperties((prev) =>
+      prev.map((property) => {
+        if (blockPropertyId !== 'all' && property.propertyId !== blockPropertyId) {
+          return property;
+        }
+
+        const existingDates = new Set(property.days.map((day) => day.date));
+        const updatedDays = property.days.map((day) =>
+          daysToBlockSet.has(day.date) ? { ...day, status: 'blocked' as DayStatus } : day
+        );
+        const newDays = daysToBlock
+          .filter((date) => !existingDates.has(date))
+          .map((date) => ({ date, status: 'blocked' as DayStatus }));
+
+        return {
+          ...property,
+          days: [...updatedDays, ...newDays],
+        };
+      })
+    );
+
+    toast.success('Fechas bloqueadas');
+    setBlockDialogOpen(false);
+  };
+
   const filteredProperties = selectedProperty === 'all' 
     ? properties 
     : properties.filter(p => p.propertyId === selectedProperty);
@@ -285,15 +415,15 @@ export default function CalendarioPage() {
             <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
             Actualizar
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleSyncIcal}>
             <LinkIcon className="h-4 w-4 mr-2" />
             Sincronizar iCal
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleExport}>
             <Download className="h-4 w-4 mr-2" />
             Exportar
           </Button>
-          <Button>
+          <Button onClick={handleOpenBlockDialog}>
             <Plus className="h-4 w-4 mr-2" />
             Bloquear Fechas
           </Button>
@@ -459,6 +589,59 @@ export default function CalendarioPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={blockDialogOpen} onOpenChange={setBlockDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Bloquear fechas</DialogTitle>
+            <DialogDescription>
+              Marca un rango como bloqueado para evitar nuevas reservas.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-2">
+            <div className="grid gap-2">
+              <Label>Propiedad</Label>
+              <Select value={blockPropertyId} onValueChange={setBlockPropertyId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todas las propiedades" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las propiedades</SelectItem>
+                  {properties.map((property) => (
+                    <SelectItem key={property.propertyId} value={property.propertyId}>
+                      {property.propertyName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label>Fecha inicio</Label>
+                <Input
+                  type="date"
+                  value={blockStartDate}
+                  onChange={(event) => setBlockStartDate(event.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label>Fecha fin</Label>
+                <Input
+                  type="date"
+                  value={blockEndDate}
+                  onChange={(event) => setBlockEndDate(event.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBlockDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleBlockDates}>Bloquear</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

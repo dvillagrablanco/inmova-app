@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -371,6 +372,7 @@ function LoadingSkeleton() {
 // ==========================================
 
 export default function ScoringPage() {
+  const router = useRouter();
   const [tenants, setTenants] = useState<TenantScore[]>([]);
   const [stats, setStats] = useState<Stats>({ total: 0, approved: 0, pending: 0, rejected: 0, avgScore: 0 });
   const [selectedTenant, setSelectedTenant] = useState<TenantScore | null>(null);
@@ -415,6 +417,10 @@ export default function ScoringPage() {
   const handleRefresh = () => {
     setRefreshing(true);
     fetchData();
+  };
+
+  const handleNewEvaluation = () => {
+    router.push('/inquilinos/nuevo');
   };
 
   const handleAction = async (action: 'approve' | 'reject') => {
@@ -487,7 +493,7 @@ export default function ScoringPage() {
             <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
             Actualizar
           </Button>
-          <Button>
+          <Button onClick={handleNewEvaluation}>
             <Plus className="h-4 w-4 mr-2" />
             Nueva Evaluacion
           </Button>

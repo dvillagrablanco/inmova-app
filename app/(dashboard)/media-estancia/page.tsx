@@ -173,7 +173,7 @@ function ContractsList({ contracts }: { contracts: ContractSummary[] }) {
           <CardTitle className="text-lg">Contratos Activos</CardTitle>
           <CardDescription>Contratos de media estancia en curso</CardDescription>
         </div>
-        <Link href="/media-estancia/contratos">
+        <Link href="/contratos/media-estancia">
           <Button variant="outline" size="sm">
             Ver todos
             <ArrowUpRight className="h-4 w-4 ml-1" />
@@ -212,7 +212,7 @@ function ContractsList({ contracts }: { contracts: ContractSummary[] }) {
             <div className="text-center py-8 text-muted-foreground">
               <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No hay contratos activos</p>
-              <Link href="/media-estancia/contratos/nuevo">
+              <Link href="/contratos/media-estancia/nuevo">
                 <Button variant="outline" className="mt-4">
                   <Plus className="h-4 w-4 mr-2" />
                   Crear primer contrato
@@ -228,10 +228,30 @@ function ContractsList({ contracts }: { contracts: ContractSummary[] }) {
 
 function AlertsPanel() {
   const alerts = [
-    { type: 'warning', message: '3 contratos vencen en los próximos 7 días', action: 'Ver contratos' },
-    { type: 'info', message: '2 firmas digitales pendientes', action: 'Ver firmas' },
-    { type: 'success', message: 'Check-in programado para mañana', action: 'Ver detalles' },
-    { type: 'error', message: '1 pago retrasado más de 15 días', action: 'Gestionar' },
+    {
+      type: 'warning',
+      message: '3 contratos vencen en los próximos 7 días',
+      action: 'Ver contratos',
+      href: '/contratos/media-estancia',
+    },
+    {
+      type: 'info',
+      message: '2 firmas digitales pendientes',
+      action: 'Ver firmas',
+      href: '/firma-digital',
+    },
+    {
+      type: 'success',
+      message: 'Check-in programado para mañana',
+      action: 'Ver detalles',
+      href: '/media-estancia/calendario',
+    },
+    {
+      type: 'error',
+      message: '1 pago retrasado más de 15 días',
+      action: 'Gestionar',
+      href: '/pagos',
+    },
   ];
 
   const getAlertStyle = (type: string) => {
@@ -270,8 +290,8 @@ function AlertsPanel() {
                 {getAlertIcon(alert.type)}
                 <span className="text-sm font-medium">{alert.message}</span>
               </div>
-              <Button variant="ghost" size="sm">
-                {alert.action}
+              <Button variant="ghost" size="sm" asChild>
+                <Link href={alert.href}>{alert.action}</Link>
               </Button>
             </div>
           ))}
@@ -375,7 +395,7 @@ export default function MediaEstanciaPage() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Link href="/media-estancia/contratos/nuevo">
+          <Link href="/contratos/media-estancia/nuevo">
             <Button>
               <Plus className="h-4 w-4 mr-2" />
               Nuevo Contrato
