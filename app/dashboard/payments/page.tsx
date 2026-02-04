@@ -45,6 +45,10 @@ interface Payment {
   description?: string;
   dueDate?: string;
   paidAt?: string;
+  estado?: string;
+  monto?: number;
+  fechaVencimiento?: string;
+  fechaPago?: string;
   contractId?: string;
   tenantId?: string;
   contract?: {
@@ -69,13 +73,36 @@ export default function PaymentsPage() {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterMonth, setFilterMonth] = useState<string>('all');
 
+  const normalizeStatus = (status?: string, estado?: string) => {
+    if (status) return status;
+    switch (estado) {
+      case 'pagado':
+        return 'paid';
+      case 'pendiente':
+        return 'pending';
+      case 'atrasado':
+        return 'overdue';
+      default:
+        return estado || 'pending';
+    }
+  };
+
+  const normalizePayment = (payment: Payment) => ({
+    ...payment,
+    amount: payment.amount ?? payment.monto ?? 0,
+    status: normalizeStatus(payment.status, payment.estado),
+    dueDate: payment.dueDate ?? payment.fechaVencimiento,
+    paidAt: payment.paidAt ?? payment.fechaPago,
+  });
+
   const fetchPayments = async () => {
     setLoading(true);
     try {
       const response = await fetch('/api/payments');
       if (response.ok) {
         const data = await response.json();
-        setPayments(Array.isArray(data) ? data : data.data || []);
+        const raw = Array.isArray(data) ? data : data.data || [];
+        setPayments(raw.map((payment: Payment) => normalizePayment(payment)));
       }
     } catch (error) {
       console.error('Error fetching payments:', error);
@@ -111,6 +138,33 @@ export default function PaymentsPage() {
   const totalOverdue = payments
     .filter(p => p.status === 'overdue' || p.status === 'failed')
     .reduce((sum, p) => sum + (p.amount || 0), 0);
+
+  const handleMarkAsPaid = async (paymentId: string) => {
+    try {
+      const response = await fetch(`/api/payments/${paymentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado: 'pagado' }),
+      });
+      if (!response.ok) {
+        throw new Error('No se pudo actualizar el pago');
+      }
+      const updated = await response.json();
+      setPayments((prev) =>
+        prev.map((payment) =>
+          payment.id === paymentId ? normalizePayment(updated) : payment
+        )
+      );
+      toast.success('Pago marcado como pagado');
+    } catch (error) {
+      console.error('Error updating payment:', error);
+      toast.error('No se pudo actualizar el pago');
+    }
+  };
+
+  const handleDownloadReceipt = (paymentId: string) => {
+    window.open(`/api/payments/${paymentId}/receipt`, '_blank');
+  };
 
   const statusBadgeVariant = (status: string) => {
     switch (status) {
@@ -172,12 +226,12 @@ export default function PaymentsPage() {
             <RefreshCw className="h-4 w-4 mr-2" />
             Actualizar
           </Button>
-          <Link href="/pagos/nuevo">
-            <Button size="sm">
+          <Button size="sm" asChild>
+            <Link href="/pagos/nuevo">
               <Plus className="h-4 w-4 mr-2" />
               Registrar Pago
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -266,12 +320,12 @@ export default function PaymentsPage() {
                   ? 'No se encontraron pagos con ese criterio' 
                   : 'Los pagos de los contratos aparecerán aquí'}
               </p>
-              <Link href="/pagos/nuevo">
-                <Button>
+              <Button asChild>
+                <Link href="/pagos/nuevo">
                   <Plus className="h-4 w-4 mr-2" />
                   Registrar Pago
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           ) : (
             <div className="divide-y">
@@ -324,8 +378,8 @@ export default function PaymentsPage() {
                     </p>
                     
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" onClick={() => undefined}>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -333,10 +387,12 @@ export default function PaymentsPage() {
                         <DropdownMenuItem asChild>
                           <Link href={`/pagos/${payment.id}`}>Ver detalles</Link>
                         </DropdownMenuItem>
-                        {payment.status === 'pending' && (
-                          <DropdownMenuItem>Marcar como pagado</DropdownMenuItem>
+                      {payment.status === 'pending' && (
+                        <DropdownMenuItem onClick={() => handleMarkAsPaid(payment.id)}>
+                          Marcar como pagado
+                        </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDownloadReceipt(payment.id)}>
                           <Download className="h-4 w-4 mr-2" />
                           Descargar recibo
                         </DropdownMenuItem>

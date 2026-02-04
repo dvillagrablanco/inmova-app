@@ -172,7 +172,7 @@ export default function TenantsPage() {
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="sm">
+              <Button size="sm" onClick={() => setIsDialogOpen(true)}>
                 <UserPlus className="h-4 w-4 mr-2" />
                 Nuevo Inquilino
               </Button>
@@ -335,8 +335,8 @@ export default function TenantsPage() {
                       )}
                     </div>
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" onClick={() => undefined}>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>

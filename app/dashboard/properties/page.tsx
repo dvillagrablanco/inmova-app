@@ -181,12 +181,12 @@ export default function PropertiesPage() {
             <RefreshCw className="h-4 w-4 mr-2" />
             Actualizar
           </Button>
-          <Link href="/edificios/nuevo">
-            <Button size="sm">
+          <Button size="sm" asChild>
+            <Link href="/edificios/nuevo">
               <Plus className="h-4 w-4 mr-2" />
               Nuevo Edificio
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -288,12 +288,12 @@ export default function PropertiesPage() {
               <p className="text-gray-500 mb-4">
                 {searchTerm ? 'No se encontraron edificios con ese criterio' : 'Comienza agregando tu primer edificio'}
               </p>
-              <Link href="/edificios/nuevo">
-                <Button>
+              <Button asChild>
+                <Link href="/edificios/nuevo">
                   <Plus className="h-4 w-4 mr-2" />
                   Agregar Edificio
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           ) : (
             filteredBuildings.map((building) => (
@@ -309,7 +309,7 @@ export default function PropertiesPage() {
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => undefined}>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -378,7 +378,7 @@ export default function PropertiesPage() {
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => undefined}>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>

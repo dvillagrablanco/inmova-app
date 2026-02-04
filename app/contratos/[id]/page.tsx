@@ -160,6 +160,14 @@ export default function ContractDetailPage() {
     }
   };
 
+  const handleGenerateContractPdf = () => {
+    if (!contract?.id) {
+      toast.error('Contrato no disponible');
+      return;
+    }
+    window.open(`/api/v1/reports/contract/${contract.id}`, '_blank');
+  };
+
   const getStatusBadge = (estado: string) => {
     switch (estado?.toLowerCase()) {
       case 'activo':
@@ -290,7 +298,7 @@ export default function ContractDetailPage() {
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" disabled={deleting}>
+                  <Button variant="destructive" disabled={deleting} onClick={() => undefined}>
                     {deleting ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     ) : (
@@ -549,7 +557,7 @@ export default function ContractDetailPage() {
                 <div className="text-center py-8 text-muted-foreground">
                   <FileText className="h-12 w-12 mx-auto mb-4 opacity-20" />
                   <p>No hay documentos adjuntos</p>
-                  <Button variant="outline" className="mt-4">
+                  <Button variant="outline" className="mt-4" onClick={handleGenerateContractPdf}>
                     <Download className="h-4 w-4 mr-2" />
                     Generar Contrato PDF
                   </Button>

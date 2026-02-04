@@ -169,12 +169,12 @@ export default function ContractsPage() {
             <RefreshCw className="h-4 w-4 mr-2" />
             Actualizar
           </Button>
-          <Link href="/contratos/nuevo">
-            <Button size="sm">
+          <Button size="sm" asChild>
+            <Link href="/contratos/nuevo">
               <Plus className="h-4 w-4 mr-2" />
               Nuevo Contrato
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -262,12 +262,12 @@ export default function ContractsPage() {
                 ? 'No se encontraron contratos con ese criterio' 
                 : 'Comienza creando tu primer contrato'}
             </p>
-            <Link href="/contratos/nuevo">
-              <Button>
+            <Button asChild>
+              <Link href="/contratos/nuevo">
                 <Plus className="h-4 w-4 mr-2" />
                 Crear Contrato
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         ) : (
           filteredContracts.map((contract) => {
@@ -358,8 +358,8 @@ export default function ContractsPage() {
                       </div>
                       
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" onClick={() => undefined}>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>

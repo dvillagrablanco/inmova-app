@@ -374,7 +374,7 @@ export default function ContratosClientPage({
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" onClick={() => undefined}>
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
