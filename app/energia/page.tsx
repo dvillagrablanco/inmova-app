@@ -446,7 +446,7 @@ export default function EnergiaPage() {
                 {canCreate && (
                   <Dialog open={openReadingDialog} onOpenChange={setOpenReadingDialog}>
                     <DialogTrigger asChild>
-                      <Button className="gap-2">
+                      <Button className="gap-2" onClick={() => setOpenReadingDialog(true)}>
                         <Plus className="h-4 w-4" />
                         Registrar Lectura
                       </Button>

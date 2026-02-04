@@ -165,18 +165,18 @@ export default function EspaciosCoworkingPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Link href="/workspace/booking">
-              <Button>
+            <Button asChild>
+              <Link href="/workspace/booking">
                 <Calendar className="h-4 w-4 mr-2" />
                 Reservar
-              </Button>
-            </Link>
-            <Link href="/workspace/members">
-              <Button variant="outline">
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/workspace/members">
                 <Users className="h-4 w-4 mr-2" />
                 Miembros
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
 
@@ -326,9 +326,9 @@ export default function EspaciosCoworkingPage() {
                         </span>
                       )}
                     </div>
-                    <Link href={`/workspace/booking?spaceId=${space.id}`}>
-                      <Button size="sm">Reservar</Button>
-                    </Link>
+                    <Button size="sm" asChild>
+                      <Link href={`/workspace/booking?spaceId=${space.id}`}>Reservar</Link>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -369,9 +369,9 @@ export default function EspaciosCoworkingPage() {
               </div>
               {members.length > 8 && (
                 <div className="mt-4 text-center">
-                  <Link href="/workspace/members">
-                    <Button variant="outline">Ver todos los miembros</Button>
-                  </Link>
+                  <Button variant="outline" asChild>
+                    <Link href="/workspace/members">Ver todos los miembros</Link>
+                  </Button>
                 </div>
               )}
             </CardContent>
