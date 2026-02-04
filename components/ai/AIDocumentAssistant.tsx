@@ -826,6 +826,7 @@ export function AIDocumentAssistant({
           type="button"
           variant="outline"
           className="w-full gap-2 border-violet-300 dark:border-violet-700 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 hover:from-violet-100 hover:to-purple-100 dark:hover:from-violet-900/40 dark:hover:to-purple-900/40 text-violet-700 dark:text-violet-300"
+          onClick={() => setIsOpen(true)}
         >
           <Brain className="h-4 w-4 text-violet-600" />
           <span className="font-medium">Escanear DNI/Documento con IA</span>
