@@ -175,10 +175,8 @@ const categoryToContext: Record<string, AIDocumentAssistantProps['context']> = {
 const buildPendingKey = (context: AIDocumentAssistantProps['context']) =>
   `${PENDING_APPLY_STORAGE_PREFIX}:${context}`;
 
-const resolveTargetContext = (
-  context: AIDocumentAssistantProps['context'],
-  category?: string
-) => categoryToContext[category || ''] || context;
+const resolveTargetContext = (context: AIDocumentAssistantProps['context'], category?: string) =>
+  categoryToContext[category || ''] || context;
 
 const resolveTargetRoute = (context: AIDocumentAssistantProps['context']) =>
   contextRoutes[context] || null;
@@ -373,14 +371,11 @@ export function AIDocumentAssistant({
     onApplyData(pending.data);
     clearPendingApplyData(context);
 
-    toast.success(
-      `Datos aplicados desde ${pending.fileName || 'documento'}`,
-      {
-        description: pending.documentType
-          ? `Formulario actualizado con ${pending.documentType}`
-          : 'Formulario actualizado con datos extraídos',
-      }
-    );
+    toast.success(`Datos aplicados desde ${pending.fileName || 'documento'}`, {
+      description: pending.documentType
+        ? `Formulario actualizado con ${pending.documentType}`
+        : 'Formulario actualizado con datos extraídos',
+    });
   }, [context, onApplyData]);
 
   const resolveReviewTarget = (analysis?: DocumentAnalysis) => {
@@ -409,7 +404,6 @@ export function AIDocumentAssistant({
       newFiles.forEach((uploadedFile) => {
         processFile(uploadedFile);
       });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
     [context]
   );
@@ -814,7 +808,7 @@ export function AIDocumentAssistant({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button size="icon" variant="ghost">
+              <Button size="icon" variant="ghost" type="button">
                 <Brain className="h-5 w-5" />
               </Button>
             </TooltipTrigger>
@@ -828,8 +822,9 @@ export function AIDocumentAssistant({
 
     if (variant === 'inline') {
       return (
-        <Button 
-          variant="outline" 
+        <Button
+          type="button"
+          variant="outline"
           className="w-full gap-2 border-violet-300 dark:border-violet-700 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 hover:from-violet-100 hover:to-purple-100 dark:hover:from-violet-900/40 dark:hover:to-purple-900/40 text-violet-700 dark:text-violet-300"
         >
           <Brain className="h-4 w-4 text-violet-600" />
@@ -848,6 +843,7 @@ export function AIDocumentAssistant({
     return (
       <div className={`${positionClasses[position]} z-[60] hidden md:block`}>
         <Button
+          type="button"
           size="lg"
           className="h-14 w-14 rounded-full shadow-xl bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-500 hover:shadow-2xl hover:scale-105 transition-all animate-pulse-slow"
         >
@@ -1210,11 +1206,7 @@ export function AIDocumentAssistant({
             categoryNames[pendingReviewFile.analysis.classification.category] || 'Documento'
           }
           onConfirm={handleConfirmData}
-          confirmLabel={
-            onApplyData
-              ? undefined
-              : (count) => `Guardar ${count} campos`
-          }
+          confirmLabel={onApplyData ? undefined : (count) => `Guardar ${count} campos`}
           successMessage={
             onApplyData
               ? undefined
