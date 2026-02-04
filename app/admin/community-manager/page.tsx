@@ -345,6 +345,40 @@ export default function CommunityManagerPage() {
     }
   };
 
+  const handleDisconnectAccount = (platform: string) => {
+    setAccounts((prev) =>
+      prev.map((account) =>
+        account.platform === platform ? { ...account, connected: false } : account
+      )
+    );
+    toast.success(`Cuenta ${platform} desconectada`);
+  };
+
+  const handleConnectAccount = (platform: string) => {
+    toast.info(`Conecta tu cuenta de ${platform} para continuar`);
+  };
+
+  const handleEditScheduledPost = (postId: string) => {
+    toast.info(`Editar publicación ${postId}`);
+  };
+
+  const handleDeleteScheduledPost = (postId: string) => {
+    setScheduledPosts((prev) => prev.filter((post) => post.id !== postId));
+    toast.success('Publicación eliminada');
+  };
+
+  const handleCreateBlogPost = () => {
+    toast.info('Editor de blog en desarrollo');
+  };
+
+  const handleEditBlogPost = (postId: string) => {
+    toast.info(`Editar artículo ${postId}`);
+  };
+
+  const handleViewBlogPost = (postId: string) => {
+    toast.info(`Vista previa del artículo ${postId}`);
+  };
+
   // Estadísticas calculadas
   const stats = {
     totalAccounts: accounts.length,
@@ -674,12 +708,20 @@ export default function CommunityManagerPage() {
                             <span className="text-sm text-muted-foreground">
                               {account.followers.toLocaleString()} seguidores
                             </span>
-                            <Button variant="outline" size="sm">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDisconnectAccount(platform)}
+                            >
                               Desconectar
                             </Button>
                           </div>
                         ) : (
-                          <Button className="w-full" variant="outline">
+                          <Button
+                            className="w-full"
+                            variant="outline"
+                            onClick={() => handleConnectAccount(platform)}
+                          >
                             <Link2 className="h-4 w-4 mr-2" />
                             Conectar {platform.charAt(0).toUpperCase() + platform.slice(1)}
                           </Button>
@@ -751,10 +793,18 @@ export default function CommunityManagerPage() {
                               )}
                             </div>
                             <div className="flex gap-1">
-                              <Button variant="ghost" size="icon">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEditScheduledPost(post.id)}
+                              >
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="icon">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteScheduledPost(post.id)}
+                              >
                                 <Trash2 className="h-4 w-4 text-destructive" />
                               </Button>
                             </div>
@@ -788,7 +838,7 @@ export default function CommunityManagerPage() {
                       </CardTitle>
                       <CardDescription>Artículos y contenido del blog de Inmova</CardDescription>
                     </div>
-                    <Button>
+                    <Button onClick={handleCreateBlogPost}>
                       <Plus className="h-4 w-4 mr-2" />
                       Nuevo Artículo
                     </Button>
@@ -820,10 +870,18 @@ export default function CommunityManagerPage() {
                             )}
                           </div>
                           <div className="flex gap-1">
-                            <Button variant="ghost" size="icon">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditBlogPost(post.id)}
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleViewBlogPost(post.id)}
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
                           </div>

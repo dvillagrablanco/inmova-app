@@ -874,6 +874,7 @@ export default function PersonalizacionPage() {
                               borderRadius: formData.borderRadius,
                               backgroundColor: formData.primaryColor,
                             }}
+                            onClick={() => toast.info('Vista previa del botón principal')}
                           >
                             Botón Principal
                           </Button>
@@ -884,6 +885,7 @@ export default function PersonalizacionPage() {
                               borderColor: formData.primaryColor,
                               color: formData.primaryColor,
                             }}
+                            onClick={() => toast.info('Vista previa del botón secundario')}
                           >
                             Botón Secundario
                           </Button>

@@ -212,6 +212,15 @@ export default function ImpuestosPage() {
   
   const [showCalculadoraDialog, setShowCalculadoraDialog] = useState(false);
   const [showNuevoImpuestoDialog, setShowNuevoImpuestoDialog] = useState(false);
+
+  const handleViewObligacion = (modelo: string) => {
+    toast.info(`Detalle de modelo ${modelo}`);
+  };
+
+  const handleAddInmueble = () => {
+    router.push('/propiedades/nuevo');
+    toast.info('Añade el inmueble para calcular el IBI');
+  };
   
   // Calculadora
   const [calcIngresos, setCalcIngresos] = useState('');
@@ -647,7 +656,11 @@ export default function ImpuestosPage() {
                               <span className="font-semibold">{formatCurrency(obligacion.importe)}</span>
                             )}
                             {getEstadoBadge(obligacion.estado, obligacion.fechaLimite)}
-                            <Button variant="ghost" size="icon">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleViewObligacion(obligacion.modelo)}
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
                           </div>
@@ -679,7 +692,7 @@ export default function ImpuestosPage() {
                       </CardTitle>
                       <CardDescription>Control del IBI de tus propiedades</CardDescription>
                     </div>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={handleAddInmueble}>
                       <Plus className="h-4 w-4 mr-2" />
                       Añadir Inmueble
                     </Button>
