@@ -8,6 +8,7 @@ import { Phone, MessageCircle, Mail, Clock, Bot, Headphones } from 'lucide-react
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Ayuda y Contacto | Inmova',
@@ -173,9 +174,11 @@ export default function AyudaPage() {
                     <Clock className="mr-1 h-3 w-3" />
                     {agent.available}
                   </Badge>
-                  <Button size="sm" variant="ghost" className="gap-1">
-                    <Bot className="h-4 w-4" />
-                    Hablar
+                  <Button size="sm" variant="ghost" className="gap-1" asChild>
+                    <Link href={`/asistente-ia?agent=${agent.type}`}>
+                      <Bot className="h-4 w-4" />
+                      Hablar
+                    </Link>
                   </Button>
                 </div>
               </CardContent>
@@ -241,8 +244,8 @@ export default function AyudaPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" className="w-full">
-              Iniciar chat
+            <Button variant="outline" className="w-full" asChild>
+              <Link href="/chat">Iniciar chat</Link>
             </Button>
           </CardContent>
         </Card>

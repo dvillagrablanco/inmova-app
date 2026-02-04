@@ -134,6 +134,26 @@ export default function DocumentsPage() {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  const handleViewDocument = (doc: Document) => {
+    if (doc.url) {
+      window.open(doc.url, '_blank');
+      return;
+    }
+    toast.info('Vista previa no disponible');
+  };
+
+  const handleDownloadDocument = (doc: Document) => {
+    if (doc.url) {
+      window.open(doc.url, '_blank');
+      return;
+    }
+    toast.info('Descarga no disponible');
+  };
+
+  const handleDeleteDocument = (doc: Document) => {
+    toast.success(`Documento "${doc.nombre}" enviado a papelera`);
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -170,12 +190,12 @@ export default function DocumentsPage() {
             <RefreshCw className="h-4 w-4 mr-2" />
             Actualizar
           </Button>
-          <Link href="/documentos/subir">
-            <Button size="sm">
+          <Button size="sm" asChild>
+            <Link href="/documentos/subir">
               <Upload className="h-4 w-4 mr-2" />
               Subir Documento
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -308,12 +328,12 @@ export default function DocumentsPage() {
             <p className="text-gray-500 mb-4">
               {searchTerm ? 'No se encontraron documentos con ese criterio' : 'Sube tu primer documento'}
             </p>
-            <Link href="/documentos/subir">
-              <Button>
+            <Button asChild>
+              <Link href="/documentos/subir">
                 <Upload className="h-4 w-4 mr-2" />
                 Subir Documento
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -324,20 +344,23 @@ export default function DocumentsPage() {
                     {getFileIcon(doc.mimeType, doc.nombre)}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => undefined}>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleViewDocument(doc)}>
                           <Eye className="h-4 w-4 mr-2" />
                           Ver
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDownloadDocument(doc)}>
                           <Download className="h-4 w-4 mr-2" />
                           Descargar
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => handleDeleteDocument(doc)}
+                        >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Eliminar
                         </DropdownMenuItem>

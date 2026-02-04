@@ -66,6 +66,21 @@ export default function MessagesPage() {
     contenido: '',
   });
 
+  const handleOpenCompose = () => {
+    setIsComposeOpen(true);
+  };
+
+  const handleReply = () => {
+    if (!selectedMessage) return;
+    setNewMessage({
+      destinatario: selectedMessage.remitente?.email || '',
+      asunto: selectedMessage.asunto ? `Re: ${selectedMessage.asunto}` : '',
+      contenido: '',
+    });
+    setSelectedMessage(null);
+    setIsComposeOpen(true);
+  };
+
   const fetchMessages = async () => {
     setLoading(true);
     try {
@@ -152,7 +167,7 @@ export default function MessagesPage() {
           </Button>
           <Dialog open={isComposeOpen} onOpenChange={setIsComposeOpen}>
             <DialogTrigger asChild>
-              <Button size="sm">
+                <Button size="sm" onClick={handleOpenCompose}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nuevo Mensaje
               </Button>
@@ -350,7 +365,7 @@ export default function MessagesPage() {
               <Button variant="outline" onClick={() => setSelectedMessage(null)}>
                 Cerrar
               </Button>
-              <Button>
+              <Button onClick={handleReply}>
                 <Send className="h-4 w-4 mr-2" />
                 Responder
               </Button>

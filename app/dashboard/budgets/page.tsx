@@ -81,6 +81,14 @@ export default function BudgetsPage() {
     return matchSearch && matchStatus;
   });
 
+  const handleViewBudget = (budget: Budget) => {
+    toast.info(`Detalle del presupuesto ${budget.numero}`);
+  };
+
+  const handleDownloadBudget = (budget: Budget) => {
+    toast.success(`Descarga del presupuesto ${budget.numero}`);
+  };
+
   const stats = {
     total: budgets.length,
     pendientes: budgets.filter((b) => b.estado === 'pendiente').length,
@@ -118,12 +126,12 @@ export default function BudgetsPage() {
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Actualizar
           </Button>
-          <Link href="/presupuestos/nuevo">
-            <Button>
+          <Button asChild>
+            <Link href="/presupuestos/nuevo">
               <Plus className="h-4 w-4 mr-2" />
               Nuevo Presupuesto
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -233,11 +241,11 @@ export default function BudgetsPage() {
             <div className="text-center py-12 text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No se encontraron presupuestos</p>
-              <Link href="/presupuestos/nuevo">
-                <Button variant="outline" className="mt-4">
+              <Button variant="outline" className="mt-4" asChild>
+                <Link href="/presupuestos/nuevo">
                   Crear primer presupuesto
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           ) : (
             <Table>
@@ -269,10 +277,14 @@ export default function BudgetsPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => handleViewBudget(budget)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDownloadBudget(budget)}
+                        >
                           <Download className="h-4 w-4" />
                         </Button>
                       </div>

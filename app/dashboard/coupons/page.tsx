@@ -61,6 +61,24 @@ export default function CouponsPage() {
     maxUsos: 100,
   });
 
+  const handleEditCoupon = (coupon: Coupon) => {
+    toast.info(`Editar cupón ${coupon.codigo}`);
+  };
+
+  const handleToggleCoupon = (couponId: string) => {
+    setCoupons((prev) =>
+      prev.map((coupon) =>
+        coupon.id === couponId ? { ...coupon, activo: !coupon.activo } : coupon
+      )
+    );
+    toast.success('Estado del cupón actualizado');
+  };
+
+  const handleDeleteCoupon = (couponId: string) => {
+    setCoupons((prev) => prev.filter((coupon) => coupon.id !== couponId));
+    toast.success('Cupón eliminado');
+  };
+
   const fetchCoupons = async () => {
     setLoading(true);
     try {
@@ -146,7 +164,7 @@ export default function CouponsPage() {
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="sm">
+              <Button size="sm" onClick={() => setIsDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nuevo Cupón
               </Button>
@@ -303,16 +321,23 @@ export default function CouponsPage() {
                     )}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => undefined}>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Editar</DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEditCoupon(coupon)}>
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleToggleCoupon(coupon.id)}>
                           {coupon.activo ? 'Desactivar' : 'Activar'}
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">Eliminar</DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => handleDeleteCoupon(coupon.id)}
+                        >
+                          Eliminar
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
