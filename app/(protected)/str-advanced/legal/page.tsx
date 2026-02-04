@@ -16,6 +16,7 @@ import {
   DollarSign,
   Users,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function LegalCompliancePage() {
   const router = useRouter();
@@ -45,6 +46,35 @@ export default function LegalCompliancePage() {
       daysUntilExpiry: null,
     },
   ]);
+
+  const goToDocuments = (tipo: string, message: string) => {
+    router.push(`/documentos?tipo=${tipo}`);
+    toast.info(message);
+  };
+
+  const handleNewLicense = () => {
+    goToDocuments('licencia_turistica', 'Crea la licencia desde Documentos');
+  };
+
+  const handleViewLicenseDocs = (property: string) => {
+    goToDocuments('licencia_turistica', `Documentación de ${property}`);
+  };
+
+  const handleRenewLicense = (property: string) => {
+    goToDocuments('licencia_turistica', `Renovación iniciada para ${property}`);
+  };
+
+  const handleApplyLicense = (property: string) => {
+    goToDocuments('licencia_turistica', `Tramitación iniciada para ${property}`);
+  };
+
+  const handleGenerateParte = () => {
+    toast.success('Parte de entrada generado');
+  };
+
+  const handleCalculateTax = () => {
+    toast.success('Tasa turística calculada');
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -129,7 +159,7 @@ export default function LegalCompliancePage() {
                         <CardTitle>Licencias Turísticas</CardTitle>
                         <CardDescription>Estado de licencias por propiedad</CardDescription>
                       </div>
-                      <Button>
+                      <Button onClick={handleNewLicense}>
                         <FileText className="h-4 w-4 mr-2" />
                         Nueva Licencia
                       </Button>
@@ -195,16 +225,26 @@ export default function LegalCompliancePage() {
                                 )}
                               </div>
                               <div className="flex gap-2 ml-4">
-                                <Button variant="outline" size="sm">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleViewLicenseDocs(license.property)}
+                                >
                                   Ver Documentación
                                 </Button>
                                 {license.status === 'proximo_vencimiento' && (
-                                  <Button size="sm" variant="destructive">
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => handleRenewLicense(license.property)}
+                                  >
                                     Renovar
                                   </Button>
                                 )}
                                 {license.status === 'sin_licencia' && (
-                                  <Button size="sm">Tramitar</Button>
+                                  <Button size="sm" onClick={() => handleApplyLicense(license.property)}>
+                                    Tramitar
+                                  </Button>
                                 )}
                               </div>
                             </div>
@@ -224,7 +264,7 @@ export default function LegalCompliancePage() {
                         <CardTitle>Partes de Entrada</CardTitle>
                         <CardDescription>Registro de viajeros ante las autoridades</CardDescription>
                       </div>
-                      <Button>
+                      <Button onClick={handleGenerateParte}>
                         <Users className="h-4 w-4 mr-2" />
                         Generar Parte
                       </Button>
@@ -250,7 +290,7 @@ export default function LegalCompliancePage() {
                         <CardTitle>Tasas Turísticas</CardTitle>
                         <CardDescription>Cálculo y gestión de impuestos turísticos</CardDescription>
                       </div>
-                      <Button>
+                      <Button onClick={handleCalculateTax}>
                         <DollarSign className="h-4 w-4 mr-2" />
                         Calcular Tasa
                       </Button>

@@ -24,7 +24,9 @@ interface RedisConfig {
 function createRedisClient(): Redis | null {
   // Si no hay URL de Redis configurada, retornar null (usar fallback in-memory)
   if (!process.env.REDIS_URL) {
-    logger.warn('⚠️  REDIS_URL not configured - using in-memory cache fallback');
+    if (process.env.NODE_ENV !== 'production') {
+      logger.warn('⚠️  REDIS_URL not configured - using in-memory cache fallback');
+    }
     return null;
   }
 

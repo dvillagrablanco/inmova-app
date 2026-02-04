@@ -38,6 +38,7 @@ import Link from 'next/link';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { cn } from '@/lib/utils';
 import logger, { logError } from '@/lib/logger';
+import { isIgnorableFetchError } from '@/lib/fetch-error';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -98,7 +99,9 @@ export default function NotificacionesPage() {
         setNotifications([]);
       }
     } catch (error) {
-      logger.error('Error fetching notifications:', error);
+      if (!isIgnorableFetchError(error)) {
+        logger.error('Error fetching notifications:', error);
+      }
       toast.error('Error al cargar notificaciones');
       setNotifications([]);
     } finally {
@@ -141,7 +144,9 @@ export default function NotificacionesPage() {
         toast.success('Notificación marcada como leída');
       }
     } catch (error) {
-      logger.error('Error marking notification as read:', error);
+      if (!isIgnorableFetchError(error)) {
+        logger.error('Error marking notification as read:', error);
+      }
       toast.error('Error al marcar como leída');
     }
   };
@@ -157,7 +162,9 @@ export default function NotificacionesPage() {
         toast.success('Todas las notificaciones marcadas como leídas');
       }
     } catch (error) {
-      logger.error('Error marking all as read:', error);
+      if (!isIgnorableFetchError(error)) {
+        logger.error('Error marking all as read:', error);
+      }
       toast.error('Error al marcar todas como leídas');
     }
   };
@@ -173,7 +180,9 @@ export default function NotificacionesPage() {
         toast.success('Notificación eliminada');
       }
     } catch (error) {
-      logger.error('Error deleting notification:', error);
+      if (!isIgnorableFetchError(error)) {
+        logger.error('Error deleting notification:', error);
+      }
       toast.error('Error al eliminar notificación');
     }
   };

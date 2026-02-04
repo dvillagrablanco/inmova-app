@@ -15,6 +15,11 @@ import { cn } from '@/lib/utils';
 export function FloatingTourButton() {
   const [isMinimized, setIsMinimized] = useState(false);
   const router = useRouter();
+  // Widget flotante deshabilitado para simplificar la UI
+  const isDisabled = true;
+  if (isDisabled) {
+    return null;
+  }
 
   const handleClick = () => {
     router.push('/configuracion?tab=tours');

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
 import {
   HardHat,
   FileText,
@@ -117,11 +118,9 @@ export default function EwoorkerContratosPage() {
                 <p className="text-orange-100">Gestiona tus contratos de subcontratación</p>
               </div>
             </div>
-            <Link href="/ewoorker/dashboard">
-              <Button variant="secondary" className="bg-white text-orange-600 hover:bg-gray-100">
-                Volver al Dashboard
-              </Button>
-            </Link>
+            <Button variant="secondary" className="bg-white text-orange-600 hover:bg-gray-100" asChild>
+              <Link href="/ewoorker/dashboard">Volver al Dashboard</Link>
+            </Button>
           </div>
         </div>
       </div>
@@ -158,12 +157,12 @@ export default function EwoorkerContratosPage() {
                 Aún no tienes contratos. Publica una obra o envía ofertas para comenzar.
               </p>
               <div className="flex justify-center gap-4">
-                <Link href="/ewoorker/obras">
-                  <Button className="bg-orange-600 hover:bg-orange-700">
+                <Button className="bg-orange-600 hover:bg-orange-700" asChild>
+                  <Link href="/ewoorker/obras">
                     <Plus className="w-4 h-4 mr-2" />
                     Ver Obras
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -216,7 +215,11 @@ export default function EwoorkerContratosPage() {
                       <Badge className={estadoColors[contrato.estado] || 'bg-gray-100'}>
                         {contrato.estado.replace(/_/g, ' ')}
                       </Badge>
-                      <Button variant="outline" size="sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => toast.info(`Detalle del contrato ${contrato.id}`)}
+                      >
                         Ver Detalles
                       </Button>
                     </div>

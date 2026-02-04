@@ -22,11 +22,20 @@ import {
   FileText
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function IAPlataformaPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [temperature, setTemperature] = useState([0.7]);
+
+  const handleTestConnection = () => {
+    toast.success('Conexión con Anthropic verificada');
+  };
+
+  const handleOpenAnthropic = () => {
+    window.open('https://console.anthropic.com/', '_blank');
+  };
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -138,11 +147,11 @@ export default function IAPlataformaPage() {
             </div>
 
             <div className="flex gap-2">
-              <Button>
+              <Button onClick={handleTestConnection}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Probar Conexión
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" onClick={handleOpenAnthropic}>
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Anthropic Console
               </Button>

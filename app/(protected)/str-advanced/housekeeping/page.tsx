@@ -16,6 +16,7 @@ import {
   User,
   Home,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function HousekeepingPage() {
   const router = useRouter();
@@ -77,6 +78,22 @@ export default function HousekeepingPage() {
       default:
         return 'secondary';
     }
+  };
+
+  const handleViewChecklist = (taskId: string) => {
+    const task = tasks.find((item) => item.id === taskId);
+    toast.info(`Checklist de ${task?.property || 'la tarea'}`);
+  };
+
+  const handleStartTask = (taskId: string) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === taskId
+          ? { ...task, status: 'en_progreso', progress: task.progress ?? 0 }
+          : task
+      )
+    );
+    toast.success('Tarea iniciada');
   };
 
   return (
@@ -194,10 +211,18 @@ export default function HousekeepingPage() {
                                 )}
                               </div>
                               <div className="flex gap-2 ml-4">
-                                <Button variant="outline" size="sm">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleViewChecklist(task.id)}
+                                >
                                   Ver Checklist
                                 </Button>
-                                {task.status === 'pendiente' && <Button size="sm">Iniciar</Button>}
+                                {task.status === 'pendiente' && (
+                                  <Button size="sm" onClick={() => handleStartTask(task.id)}>
+                                    Iniciar
+                                  </Button>
+                                )}
                               </div>
                             </div>
                           </CardContent>

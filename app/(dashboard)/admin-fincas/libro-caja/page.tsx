@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import logger from '@/lib/logger';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,11 @@ import { Button } from '@/components/ui/button';
 import { Euro, Plus, TrendingUp, TrendingDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
 import {
   Select,
   SelectContent,
@@ -36,11 +41,22 @@ interface Community {
 export default function LibroCajaPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [entries, setEntries] = useState<CashBookEntry[]>([]);
   const [communities, setCommunities] = useState<Community[]>([]);
   const [selectedCommunity, setSelectedCommunity] = useState<string>('');
   const [saldoActual, setSaldoActual] = useState(0);
+  const [showNewEntryDialog, setShowNewEntryDialog] = useState(false);
+  const [savingEntry, setSavingEntry] = useState(false);
+  const [formState, setFormState] = useState({
+    fecha: '',
+    tipo: 'ingreso',
+    concepto: '',
+    descripcion: '',
+    importe: '',
+    categoria: 'otros',
+  });
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -63,7 +79,11 @@ export default function LibroCajaPage() {
         const data = await res.json();
         setCommunities(data);
         if (data.length > 0) {
-          setSelectedCommunity(data[0].id);
+          const paramCommunityId = searchParams.get('communityId');
+          const exists = paramCommunityId
+            ? data.some((community: Community) => community.id === paramCommunityId)
+            : false;
+          setSelectedCommunity(exists ? (paramCommunityId as string) : data[0].id);
         }
       }
     } catch (error) {
@@ -84,6 +104,65 @@ export default function LibroCajaPage() {
       }
     } catch (error) {
       logger.error('Error fetching cash book entries:', error);
+    }
+  };
+
+  const openNewEntryDialog = () => {
+    if (!selectedCommunity) {
+      toast.error('Selecciona una comunidad primero');
+      return;
+    }
+    setShowNewEntryDialog(true);
+  };
+
+  const handleCreateEntry = async () => {
+    if (!selectedCommunity) {
+      toast.error('Selecciona una comunidad');
+      return;
+    }
+    if (!formState.concepto.trim() || !formState.importe) {
+      toast.error('Completa concepto e importe');
+      return;
+    }
+
+    try {
+      setSavingEntry(true);
+      const response = await fetch('/api/admin-fincas/cash-book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          communityId: selectedCommunity,
+          fecha: formState.fecha || undefined,
+          tipo: formState.tipo,
+          concepto: formState.concepto.trim(),
+          descripcion: formState.descripcion.trim() || undefined,
+          importe: parseFloat(formState.importe),
+          categoria: formState.categoria.trim() || 'otros',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error creando movimiento');
+      }
+
+      const entry = await response.json();
+      setEntries((prev) => [entry, ...prev]);
+      setSaldoActual(entry.saldoActual);
+      toast.success('Movimiento registrado correctamente');
+      setShowNewEntryDialog(false);
+      setFormState({
+        fecha: '',
+        tipo: 'ingreso',
+        concepto: '',
+        descripcion: '',
+        importe: '',
+        categoria: 'otros',
+      });
+    } catch (error) {
+      logger.error('Error creating cash book entry:', error);
+      toast.error('No se pudo registrar el movimiento');
+    } finally {
+      setSavingEntry(false);
     }
   };
 
@@ -108,7 +187,7 @@ export default function LibroCajaPage() {
                   Registro de ingresos y gastos por comunidad
                 </p>
               </div>
-              <Button disabled={!selectedCommunity}>
+              <Button disabled={!selectedCommunity} onClick={openNewEntryDialog}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nuevo Movimiento
               </Button>
@@ -164,6 +243,10 @@ export default function LibroCajaPage() {
                       <p className="text-muted-foreground mb-4">
                         Comienza registrando el primer movimiento
                       </p>
+                      <Button onClick={openNewEntryDialog}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Nuevo Movimiento
+                      </Button>
                     </div>
                   ) : (
                     <div className="overflow-x-auto">
@@ -223,6 +306,107 @@ export default function LibroCajaPage() {
               </Card>
             )}
           </div>
+
+          <Dialog open={showNewEntryDialog} onOpenChange={setShowNewEntryDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Nuevo Movimiento</DialogTitle>
+              <DialogDescription>
+                Registra un ingreso o gasto para la comunidad seleccionada.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Tipo</Label>
+                <Select
+                  value={formState.tipo}
+                  onValueChange={(value) =>
+                    setFormState((prev) => ({ ...prev, tipo: value }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ingreso">Ingreso</SelectItem>
+                    <SelectItem value="gasto">Gasto</SelectItem>
+                    <SelectItem value="traspaso">Traspaso</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="fecha">Fecha</Label>
+                <Input
+                  id="fecha"
+                  type="date"
+                  value={formState.fecha}
+                  onChange={(event) =>
+                    setFormState((prev) => ({ ...prev, fecha: event.target.value }))
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="concepto">Concepto</Label>
+                <Input
+                  id="concepto"
+                  placeholder="Ej: Pago de cuota"
+                  value={formState.concepto}
+                  onChange={(event) =>
+                    setFormState((prev) => ({ ...prev, concepto: event.target.value }))
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="categoria">Categoría</Label>
+                <Input
+                  id="categoria"
+                  placeholder="Ej: mantenimiento"
+                  value={formState.categoria}
+                  onChange={(event) =>
+                    setFormState((prev) => ({ ...prev, categoria: event.target.value }))
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="importe">Importe (€)</Label>
+                <Input
+                  id="importe"
+                  type="number"
+                  value={formState.importe}
+                  onChange={(event) =>
+                    setFormState((prev) => ({ ...prev, importe: event.target.value }))
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="descripcion">Descripción</Label>
+                <Textarea
+                  id="descripcion"
+                  placeholder="Opcional"
+                  value={formState.descripcion}
+                  onChange={(event) =>
+                    setFormState((prev) => ({ ...prev, descripcion: event.target.value }))
+                  }
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 sm:justify-end">
+              <Button variant="outline" onClick={() => setShowNewEntryDialog(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleCreateEntry} disabled={savingEntry}>
+                {savingEntry ? 'Guardando...' : 'Registrar movimiento'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         </AuthenticatedLayout>
   );
 }

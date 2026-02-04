@@ -152,6 +152,18 @@ export default function MarketplaceCircularPage() {
     return matchesSearch && matchesCategory;
   });
 
+  const handleFavorite = (title: string) => {
+    toast.success(`Favorito: ${title}`);
+  };
+
+  const handleContact = (title: string) => {
+    toast.info(`Contacto enviado por ${title}`);
+  };
+
+  const handleInterested = (title: string) => {
+    toast.success(`Interes registrado: ${title}`);
+  };
+
   if (status === 'loading' || loading) {
     return (
       <AuthenticatedLayout>
@@ -294,7 +306,11 @@ export default function MarketplaceCircularPage() {
                       <CardTitle className="text-lg">{item.title}</CardTitle>
                       <CardDescription className="mt-1">{item.description}</CardDescription>
                     </div>
-                    <Button variant="ghost" size="icon">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleFavorite(item.title)}
+                    >
                       <Heart className="h-4 w-4" />
                     </Button>
                   </div>
@@ -317,11 +333,20 @@ export default function MarketplaceCircularPage() {
                   </div>
 
                   <div className="flex gap-2 pt-2 border-t">
-                    <Button variant="outline" className="flex-1" size="sm">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      size="sm"
+                      onClick={() => handleContact(item.title)}
+                    >
                       <MessageCircle className="h-4 w-4 mr-1" />
                       Contactar
                     </Button>
-                    <Button className="flex-1" size="sm">
+                    <Button
+                      className="flex-1"
+                      size="sm"
+                      onClick={() => handleInterested(item.title)}
+                    >
                       Me interesa
                     </Button>
                   </div>

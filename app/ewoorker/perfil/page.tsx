@@ -116,6 +116,10 @@ export default function EwoorkerPerfilPage() {
     }
   };
 
+  const handleUploadDocs = () => {
+    toast.info('Subida de documentos en desarrollo');
+  };
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -134,11 +138,9 @@ export default function EwoorkerPerfilPage() {
             <p className="text-gray-500 mb-6">
               Necesitas crear un perfil de empresa para usar eWoorker
             </p>
-            <Link href="/ewoorker/registro">
-              <Button className="bg-orange-600 hover:bg-orange-700">
-                Crear Perfil
-              </Button>
-            </Link>
+            <Button className="bg-orange-600 hover:bg-orange-700" asChild>
+              <Link href="/ewoorker/registro">Crear Perfil</Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -187,11 +189,9 @@ export default function EwoorkerPerfilPage() {
                     <Edit2 className="w-4 h-4 mr-2" />
                     Editar
                   </Button>
-                  <Link href="/ewoorker/dashboard">
-                    <Button variant="secondary" className="bg-white text-orange-600 hover:bg-gray-100">
-                      Volver al Dashboard
-                    </Button>
-                  </Link>
+                  <Button variant="secondary" className="bg-white text-orange-600 hover:bg-gray-100" asChild>
+                    <Link href="/ewoorker/dashboard">Volver al Dashboard</Link>
+                  </Button>
                 </>
               )}
             </div>
@@ -285,7 +285,7 @@ export default function EwoorkerPerfilPage() {
                     {perfil.estadoSeguro.replace(/_/g, ' ')}
                   </Badge>
                 </div>
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={handleUploadDocs}>
                   <Upload className="w-4 h-4 mr-2" />
                   Subir Documentos
                 </Button>

@@ -10,6 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCheck, X, Loader2 } from 'lucide-react';
 import NotificationItem from './NotificationItem';
+import { isIgnorableFetchError } from '@/lib/fetch-error';
 
 interface Notification {
   id: string;
@@ -47,12 +48,17 @@ export default function NotificationPanel({
       setIsLoading(true);
       const response = await fetch('/api/notifications?limit=20');
 
-      if (response.ok) {
-        const data = await response.json();
-        setNotifications(data.notifications || []);
+      if (!response.ok) {
+        setNotifications([]);
+        return;
       }
+
+      const data = await response.json();
+      setNotifications(data.notifications || []);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      if (!isIgnorableFetchError(error)) {
+        console.error('Error fetching notifications:', error);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -65,15 +71,19 @@ export default function NotificationPanel({
         method: 'PATCH',
       });
 
-      if (response.ok) {
-        // Actualizar todas las notificaciones a read: true
-        setNotifications((prev) =>
-          prev.map((n) => ({ ...n, read: true }))
-        );
-        onMarkAllRead();
+      if (!response.ok) {
+        return;
       }
+
+      // Actualizar todas las notificaciones a read: true
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, read: true }))
+      );
+      onMarkAllRead();
     } catch (error) {
-      console.error('Error marking all as read:', error);
+      if (!isIgnorableFetchError(error)) {
+        console.error('Error marking all as read:', error);
+      }
     } finally {
       setIsMarkingAllRead(false);
     }

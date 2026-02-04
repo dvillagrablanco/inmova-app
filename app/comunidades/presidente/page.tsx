@@ -136,7 +136,7 @@ export default function PresidentePage() {
     alertas.push({ tipo: 'warning', mensaje: `${finanzas.unidadesMorosas} unidades morosas` });
   }
   if (operativo.actasPendientes > 0) {
-    alertas.push({ tipo: 'info', mensaje: `${operativo.actasPendientes} actas pendientes de aprobar` });
+    alertas.push({ tipo: 'info', mensaje: `${operativo.actasPendientes} actas en borrador` });
   }
 
   return (

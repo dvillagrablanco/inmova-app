@@ -18,6 +18,10 @@ export default function ReportesOperacionalesPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
 
+  const handleExport = () => {
+    toast.success('Reporte operacional exportado');
+  };
+
   useEffect(() => {
     if (status === 'authenticated') setLoading(false);
     else if (status === 'unauthenticated') router.push('/login');
@@ -52,7 +56,10 @@ export default function ReportesOperacionalesPage() {
             <div className="p-3 bg-blue-100 rounded-xl"><Settings className="h-8 w-8 text-blue-600" /></div>
             <div><h1 className="text-2xl sm:text-3xl font-bold">Reportes Operacionales</h1><p className="text-muted-foreground">Estado de propiedades, contratos e incidencias</p></div>
           </div>
-          <Button variant="outline"><Download className="h-4 w-4 mr-2" />Exportar</Button>
+          <Button variant="outline" onClick={handleExport}>
+            <Download className="h-4 w-4 mr-2" />
+            Exportar
+          </Button>
         </div>
 
         {/* KPIs */}

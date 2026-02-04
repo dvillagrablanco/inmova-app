@@ -115,6 +115,10 @@ export default function BlockchainPage() {
     }
   };
 
+  const handleViewContract = (name: string) => {
+    toast.info(`Contrato: ${name}`);
+  };
+
   // Smart contracts (por ahora estáticos hasta tener modelo en BD)
   const smartContracts = [
     {
@@ -414,7 +418,11 @@ export default function BlockchainPage() {
                               )}
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewContract(contract.name)}
+                          >
                             <LinkIcon className="h-3 w-3 mr-1" />
                             Ver Contrato
                           </Button>

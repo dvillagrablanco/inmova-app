@@ -36,6 +36,7 @@ import {
   Pie,
   Cell,
 } from '@/components/ui/lazy-charts-extended';
+import { toast } from 'sonner';
 
 const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6'];
 
@@ -99,6 +100,10 @@ export default function GestionResiduosPage() {
     monthlyData: [],
     wasteByType: [],
     buildingRanking: [],
+  };
+
+  const handleRedeem = (label: string) => {
+    toast.success(`Canje solicitado: ${label}`);
   };
 
   return (
@@ -485,6 +490,7 @@ export default function GestionResiduosPage() {
                       className="w-full mt-3"
                       size="sm"
                       disabled={userPoints < 500}
+                      onClick={() => handleRedeem('5€ descuento')}
                     >
                       Canjear
                     </Button>
@@ -502,6 +508,7 @@ export default function GestionResiduosPage() {
                       className="w-full mt-3"
                       size="sm"
                       disabled={userPoints < 1000}
+                      onClick={() => handleRedeem('Planta un árbol')}
                     >
                       Canjear
                     </Button>
@@ -519,6 +526,7 @@ export default function GestionResiduosPage() {
                       className="w-full mt-3"
                       size="sm"
                       disabled={userPoints < 2000}
+                      onClick={() => handleRedeem('Mes de huerto gratis')}
                     >
                       Canjear
                     </Button>

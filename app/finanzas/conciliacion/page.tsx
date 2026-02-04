@@ -204,6 +204,47 @@ export default function ConciliacionBancariaPage() {
     return matchesSearch && matchesAccount && matchesStatus;
   });
 
+  const downloadCsv = (filename: string, content: string) => {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportTransactions = () => {
+    if (filteredTransactions.length === 0) {
+      toast.info('No hay movimientos para exportar');
+      return;
+    }
+
+    const header = ['fecha', 'descripcion', 'referencia', 'tipo', 'estado', 'importe'];
+    const rows = filteredTransactions.map((tx) => ({
+      fecha: format(parseISO(tx.date), 'yyyy-MM-dd'),
+      descripcion: tx.description,
+      referencia: tx.reference || '',
+      tipo: tx.type === 'income' ? 'Ingreso' : 'Gasto',
+      estado: tx.reconciliationStatus,
+      importe: tx.amount.toFixed(2),
+    }));
+
+    const csv = [
+      header.join(','),
+      ...rows.map((row) =>
+        header
+          .map((key) => `"${String(row[key as keyof typeof row]).replace(/"/g, '""')}"`)
+          .join(',')
+      ),
+    ].join('\n');
+
+    downloadCsv(`movimientos-conciliacion-${new Date().toISOString().slice(0, 10)}.csv`, csv);
+    toast.success('Exportación de movimientos generada');
+  };
+
   // Estadísticas
   const stats = {
     pendingCount: transactions.filter(t => t.reconciliationStatus === 'pending').length,
@@ -547,7 +588,7 @@ export default function ConciliacionBancariaPage() {
                       <SelectItem value="ignored">Ignorados</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" onClick={handleExportTransactions}>
                     <Download className="h-4 w-4" />
                   </Button>
                 </div>
@@ -657,7 +698,7 @@ export default function ConciliacionBancariaPage() {
                           <TableCell>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
+                                <Button variant="ghost" size="icon" onClick={() => undefined}>
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>

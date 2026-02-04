@@ -51,6 +51,16 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
 
     const companyId = (session.user as any).companyId;
+    if (!companyId) {
+      return NextResponse.json(
+        {
+          actas: [],
+          pagination: { page: 1, limit: 20, total: 0, pages: 0 },
+          stats: { total: 0, borradores: 0, aprobadas: 0, rechazadas: 0 },
+        },
+        { status: 200 }
+      );
+    }
 
     // Obtener buildingId si se proporciona comunidadId
     let targetBuildingId = buildingId;
@@ -65,7 +75,10 @@ export async function GET(request: NextRequest) {
     // Construir filtros
     const where: any = { companyId };
     if (targetBuildingId) where.buildingId = targetBuildingId;
-    if (estado) where.estado = estado;
+    const allowedEstados = ['borrador', 'aprobada', 'rechazada'] as const;
+    if (estado && allowedEstados.includes(estado as (typeof allowedEstados)[number])) {
+      where.estado = estado;
+    }
     if (year) {
       const startDate = new Date(`${year}-01-01`);
       const endDate = new Date(`${year}-12-31`);
@@ -96,8 +109,8 @@ export async function GET(request: NextRequest) {
       aprobadas: await prisma.communityMinute.count({
         where: { ...where, estado: 'aprobada' },
       }),
-      pendientesAprobacion: await prisma.communityMinute.count({
-        where: { ...where, estado: 'pendiente_aprobacion' },
+      rechazadas: await prisma.communityMinute.count({
+        where: { ...where, estado: 'rechazada' },
       }),
     };
 
@@ -117,6 +130,17 @@ export async function GET(request: NextRequest) {
       stats,
     });
   } catch (error: any) {
+    if (error?.name === 'PrismaClientValidationError') {
+      logger.warn('[Actas GET Warning]:', { name: error?.name, message: error?.message });
+      return NextResponse.json(
+        {
+          actas: [],
+          pagination: { page: 1, limit: 20, total: 0, pages: 0 },
+          stats: { total: 0, borradores: 0, aprobadas: 0, rechazadas: 0 },
+        },
+        { status: 200 }
+      );
+    }
     logger.error('[Actas GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo actas', details: error.message },

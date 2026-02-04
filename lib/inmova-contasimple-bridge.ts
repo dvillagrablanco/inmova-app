@@ -64,7 +64,9 @@ export class InmovaContasimpleBridge {
     this.contasimple = new ContaSimpleIntegrationService();
     
     if (!INMOVA_CONTASIMPLE_CONFIG.authKey) {
-      logger.warn('[Inmova-Contasimple] ⚠️ No hay credenciales de Contasimple configuradas para Inmova');
+      if (process.env.NODE_ENV !== 'production') {
+        logger.warn('[Inmova-Contasimple] ⚠️ No hay credenciales de Contasimple configuradas para Inmova');
+      }
     } else {
       logger.info('[Inmova-Contasimple] ✅ Servicio inicializado');
     }

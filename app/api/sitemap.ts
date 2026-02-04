@@ -161,7 +161,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     return [...staticRoutes, ...propertyRoutes, ...buildingRoutes];
   } catch (error) {
-    logger.error('Error generating sitemap:', error);
+    if (process.env.NODE_ENV !== 'production') {
+      logger.warn('Sitemap: error al generar rutas dinámicas, usando fallback', error);
+    }
     // En caso de error, retornar solo las rutas estáticas
     return staticRoutes;
   }

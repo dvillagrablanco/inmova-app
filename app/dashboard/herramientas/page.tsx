@@ -226,36 +226,36 @@ export default function HerramientasPage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-3">
-            <Link href="/edificios/nuevo">
-              <Button variant="outline">
+            <Button variant="outline" asChild>
+              <Link href="/edificios/nuevo">
                 <FileText className="h-4 w-4 mr-2" />
                 Nuevo Edificio
-              </Button>
-            </Link>
-            <Link href="/contratos/nuevo">
-              <Button variant="outline">
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/contratos/nuevo">
                 <FileText className="h-4 w-4 mr-2" />
                 Nuevo Contrato
-              </Button>
-            </Link>
-            <Link href="/inquilinos/nuevo">
-              <Button variant="outline">
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/inquilinos/nuevo">
                 <FileText className="h-4 w-4 mr-2" />
                 Nuevo Inquilino
-              </Button>
-            </Link>
-            <Link href="/pagos/nuevo">
-              <Button variant="outline">
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/pagos/nuevo">
                 <FileText className="h-4 w-4 mr-2" />
                 Registrar Pago
-              </Button>
-            </Link>
-            <Link href="/documentos/subir">
-              <Button variant="outline">
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/documentos/subir">
                 <Download className="h-4 w-4 mr-2" />
                 Subir Documento
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </CardContent>
       </Card>

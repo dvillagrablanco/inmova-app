@@ -83,6 +83,14 @@ export default function MarketplaceProveedoresPage() {
     descripcion: '',
   });
 
+  const handleViewProvider = (name: string) => {
+    toast.info(`Detalle del proveedor: ${name}`);
+  };
+
+  const handleEditProvider = (name: string) => {
+    toast.info(`Editar proveedor: ${name}`);
+  };
+
   useEffect(() => {
     loadData();
   }, []);
@@ -250,7 +258,7 @@ export default function MarketplaceProveedoresPage() {
           </div>
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button onClick={() => setCreateDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Nuevo Proveedor
               </Button>
@@ -501,10 +509,20 @@ export default function MarketplaceProveedoresPage() {
                       <TableCell>{getStatusBadge(provider.estado)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="sm" title="Ver detalles">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            title="Ver detalles"
+                            onClick={() => handleViewProvider(provider.nombre)}
+                          >
                             <Eye className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" title="Editar">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            title="Editar"
+                            onClick={() => handleEditProvider(provider.nombre)}
+                          >
                             <Pencil className="w-4 h-4" />
                           </Button>
                           {provider.estado === 'pending' && (

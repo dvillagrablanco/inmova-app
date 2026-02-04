@@ -233,7 +233,7 @@ function RecordatoriosPage() {
 
             <Dialog open={openDialog} onOpenChange={setOpenDialog}>
               <DialogTrigger asChild>
-                <Button className="gap-2">
+                <Button className="gap-2" onClick={() => setOpenDialog(true)}>
                   <Plus className="h-4 w-4" />
                   Nuevo Recordatorio
                 </Button>

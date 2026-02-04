@@ -53,23 +53,28 @@ test.describe('Asistente Documental IA - DNI', () => {
       console.log('✅ Cookies cerradas');
     }
 
-    // 4. Buscar el botón flotante del asistente IA (círculo violeta en esquina inferior derecha)
-    console.log('📍 Paso 4: Buscando botón flotante del asistente IA...');
+    // 4. Abrir el asistente IA (inline o flotante)
+    console.log('📍 Paso 4: Abriendo asistente IA...');
 
-    // El botón tiene title="Asistente IA para formulario" y está en un div fixed
-    const assistantTrigger = page
-      .locator(
-        '[title*="Asistente IA"], button[title*="IA"], div[data-state="closed"] button.rounded-full'
-      )
-      .first();
-
-    if (await assistantTrigger.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await assistantTrigger.click({ force: true });
-      await page.waitForTimeout(2000);
-      console.log('✅ Asistente abierto');
+    const inlineTrigger = page.locator('button:has-text("Escanear DNI")').first();
+    if (await inlineTrigger.isVisible({ timeout: 5000 }).catch(() => false)) {
+      await inlineTrigger.scrollIntoViewIfNeeded();
+      await inlineTrigger.click();
     } else {
-      console.log('⚠️ Botón del asistente no encontrado');
+      const assistantTrigger = page
+        .locator(
+          '[title*="Asistente IA"], button[title*="IA"], div[data-state="closed"] button.rounded-full'
+        )
+        .first();
+      await expect(assistantTrigger).toBeVisible({ timeout: 10000 });
+      await assistantTrigger.click({ force: true });
     }
+
+    await page.waitForTimeout(1000);
+    const sheetPanel = page.locator('[role="dialog"], [data-state="open"]').first();
+    await expect(sheetPanel).toBeVisible({ timeout: 5000 });
+    await page.waitForSelector('input#file-upload', { state: 'attached', timeout: 10000 });
+    console.log('✅ Asistente abierto');
 
     // 5. Esperar a que aparezca el panel del asistente
     console.log('📍 Paso 5: Verificando panel del asistente...');
@@ -78,66 +83,50 @@ test.describe('Asistente Documental IA - DNI', () => {
     // Capturar screenshot del estado actual
     await page.screenshot({ path: 'test-results/dni-before-upload.png', fullPage: true });
 
-    // 6. Subir el PDF usando el botón "Seleccionar archivos" y el file chooser
+    // 6. Subir el PDF usando el input oculto (más robusto)
     console.log('📍 Paso 6: Subiendo PDF del DNI...');
 
-    // Buscar el botón "Seleccionar archivos" en el panel del asistente
-    const selectFilesButton = page
-      .locator('button:has-text("Seleccionar archivos"), span:has-text("Seleccionar archivos")')
-      .first();
+    const fileInput = page.locator('input#file-upload').first();
+    await expect(fileInput).toBeAttached({ timeout: 5000 });
 
-    if (await selectFilesButton.isVisible({ timeout: 5000 }).catch(() => false)) {
-      console.log('   Botón "Seleccionar archivos" encontrado');
+    // Configurar interceptor para capturar la respuesta del API
+    const responsePromise = page.waitForResponse(
+      (response) => response.url().includes('/api/ai/document-analysis'),
+      { timeout: 90000 }
+    );
 
-      // Configurar interceptor para capturar la respuesta del API
-      const responsePromise = page.waitForResponse(
-        (response) => response.url().includes('/api/ai/document-analysis'),
-        { timeout: 90000 }
-      );
+    await fileInput.setInputFiles(PDF_PATH);
+    console.log('✅ PDF seleccionado, esperando procesamiento...');
 
-      // Usar el file chooser que se abre al hacer clic en el botón
-      const [fileChooser] = await Promise.all([
-        page.waitForEvent('filechooser'),
-        selectFilesButton.click(),
-      ]);
+    // 7. Esperar procesamiento (hasta 90 segundos)
+    console.log('📍 Paso 7: Esperando respuesta del API...');
 
-      // Subir el archivo a través del file chooser
-      await fileChooser.setFiles(PDF_PATH);
-      console.log('✅ PDF seleccionado, esperando procesamiento...');
+    try {
+      const response = await responsePromise;
+      console.log(`📋 API respondió con status: ${response.status()}`);
 
-      // 7. Esperar procesamiento (hasta 90 segundos)
-      console.log('📍 Paso 7: Esperando respuesta del API...');
-
-      try {
-        const response = await responsePromise;
-        console.log(`📋 API respondió con status: ${response.status()}`);
-
-        if (response.ok()) {
-          const data = await response.json();
-          console.log(`✅ Campos extraídos: ${data.extractedFields?.length || 0}`);
-          if (data.extractedFields && data.extractedFields.length > 0) {
-            console.log('📋 Campos encontrados:');
-            data.extractedFields.forEach((f: any) => {
-              console.log(`   - ${f.targetField}: ${f.fieldValue}`);
-            });
-          }
-
-          // Test exitoso si hay campos extraídos
-          expect(data.extractedFields.length).toBeGreaterThan(0);
-          console.log('✅ Test EXITOSO - DNI procesado correctamente');
-        } else {
-          console.log('❌ Error en respuesta del API');
+      if (response.ok()) {
+        const data = await response.json();
+        console.log(`✅ Campos extraídos: ${data.extractedFields?.length || 0}`);
+        if (data.extractedFields && data.extractedFields.length > 0) {
+          console.log('📋 Campos encontrados:');
+          data.extractedFields.forEach((f: any) => {
+            console.log(`   - ${f.targetField}: ${f.fieldValue}`);
+          });
         }
-      } catch (e: any) {
-        console.log('⚠️ Timeout esperando respuesta:', e.message);
-      }
 
-      // Esperar un poco más para que el UI se actualice
-      await page.waitForTimeout(5000);
-    } else {
-      console.log('❌ No se encontró el botón "Seleccionar archivos"');
-      await page.screenshot({ path: 'test-results/dni-no-select-button.png', fullPage: true });
+        // Test exitoso si hay campos extraídos
+        expect(data.extractedFields.length).toBeGreaterThan(0);
+        console.log('✅ Test EXITOSO - DNI procesado correctamente');
+      } else {
+        console.log('❌ Error en respuesta del API');
+      }
+    } catch (e: any) {
+      console.log('⚠️ Timeout esperando respuesta:', e.message);
     }
+
+    // Esperar un poco más para que el UI se actualice
+    await page.waitForTimeout(5000);
 
     // 8. Verificar resultados visuales
     console.log('📍 Paso 8: Verificando resultados visuales...');

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
-import { FileText, Home, ArrowLeft, Save, Upload, X, Loader2, Brain, Sparkles } from 'lucide-react';
+import { FileText, Home, ArrowLeft, Save, Upload, X, Loader2 } from 'lucide-react';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 import { Button } from '@/components/ui/button';
 import { ButtonWithLoading } from '@/components/ui/button-with-loading';
@@ -34,15 +34,22 @@ import { BackButton } from '@/components/ui/back-button';
 import { MobileFormWizard, FormStep } from '@/components/ui/mobile-form-wizard';
 import { Badge } from '@/components/ui/badge';
 
+interface Building {
+  id: string;
+  nombre: string;
+}
+
 interface Unit {
   id: string;
   numero: string;
+  estado?: string;
   building: { nombre: string };
 }
 
 interface Tenant {
   id: string;
-  nombre: string;
+  nombreCompleto?: string;
+  nombre?: string;
   email: string;
 }
 
@@ -59,10 +66,12 @@ export default function NuevoContratoPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const [isLoading, setIsLoading] = useState(false);
+  const [buildings, setBuildings] = useState<Building[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [documents, setDocuments] = useState<UploadedDocument[]>([]);
   const [formData, setFormData] = useState({
+    buildingId: '',
     unitId: '',
     tenantId: '',
     fechaInicio: '',
@@ -136,14 +145,14 @@ export default function NuevoContratoPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [unitsRes, tenantsRes] = await Promise.all([
-          fetch('/api/units?estado=disponible'),
+        const [buildingsRes, tenantsRes] = await Promise.all([
+          fetch('/api/buildings'),
           fetch('/api/tenants'),
         ]);
 
-        if (unitsRes.ok) {
-          const unitsData = await unitsRes.json();
-          setUnits(unitsData);
+        if (buildingsRes.ok) {
+          const buildingsData = await buildingsRes.json();
+          setBuildings(buildingsData);
         }
 
         if (tenantsRes.ok) {
@@ -159,6 +168,48 @@ export default function NuevoContratoPage() {
       fetchData();
     }
   }, [status]);
+
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+
+    const fetchUnits = async () => {
+      if (!formData.buildingId) {
+        setUnits([]);
+        return;
+      }
+
+      try {
+        const unitsRes = await fetch(`/api/units?buildingId=${formData.buildingId}`);
+        if (unitsRes.ok) {
+          const unitsData = await unitsRes.json();
+          setUnits(unitsData);
+        }
+      } catch (error) {
+        logger.error('Error fetching units:', error);
+      }
+    };
+
+    fetchUnits();
+  }, [formData.buildingId, status]);
+
+  const getTenantDisplayName = (tenant: Tenant) =>
+    tenant.nombreCompleto || tenant.nombre || tenant.email;
+
+  const getUnitStatusLabel = (estado?: string) => {
+    if (!estado) return '';
+    switch (estado) {
+      case 'disponible':
+        return 'Disponible';
+      case 'ocupada':
+        return 'Ocupada';
+      case 'mantenimiento':
+        return 'Mantenimiento';
+      case 'reservada':
+        return 'Reservada';
+      default:
+        return estado.charAt(0).toUpperCase() + estado.slice(1);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -264,22 +315,60 @@ export default function NuevoContratoPage() {
                     description: 'Selecciona la unidad, inquilino y tipo de contrato',
                     fields: (
                       <div className="space-y-4">
+                        {/* Edificio */}
+                        <div className="space-y-2">
+                          <Label htmlFor="buildingId">Edificio *</Label>
+                          <Select
+                            value={formData.buildingId}
+                            onValueChange={(value) =>
+                              setFormData({ ...formData, buildingId: value, unitId: '' })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona un edificio" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {buildings.map((building) => (
+                                <SelectItem key={building.id} value={building.id}>
+                                  {building.nombre}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
                         {/* Unidad */}
                         <div className="space-y-2">
                           <Label htmlFor="unitId">Unidad *</Label>
                           <Select
                             value={formData.unitId}
                             onValueChange={(value) => setFormData({ ...formData, unitId: value })}
+                            disabled={!formData.buildingId}
                           >
                             <SelectTrigger>
-                              <SelectValue placeholder="Selecciona una unidad" />
+                              <SelectValue
+                                placeholder={
+                                  formData.buildingId
+                                    ? 'Selecciona una unidad'
+                                    : 'Selecciona un edificio primero'
+                                }
+                              />
                             </SelectTrigger>
                             <SelectContent>
-                              {units.map((unit) => (
-                                <SelectItem key={unit.id} value={unit.id}>
-                                  {unit.building.nombre} - {unit.numero}
+                              {units.length === 0 && (
+                                <SelectItem value="no-units" disabled>
+                                  No hay unidades para este edificio
                                 </SelectItem>
-                              ))}
+                              )}
+                              {units.map((unit) => {
+                                const statusLabel = getUnitStatusLabel(unit.estado);
+                                return (
+                                  <SelectItem key={unit.id} value={unit.id}>
+                                    {unit.numero}
+                                    {statusLabel ? ` · ${statusLabel}` : ''}
+                                  </SelectItem>
+                                );
+                              })}
                             </SelectContent>
                           </Select>
                         </div>
@@ -297,7 +386,7 @@ export default function NuevoContratoPage() {
                             <SelectContent>
                               {tenants.map((tenant) => (
                                 <SelectItem key={tenant.id} value={tenant.id}>
-                                  {tenant.nombre} - {tenant.email}
+                                  {getTenantDisplayName(tenant)}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -446,8 +535,19 @@ export default function NuevoContratoPage() {
                               }
                               
                               // Renta mensual
-                              if (data.rentaMensual || data.monthlyRent || data.precio) {
-                                const renta = data.rentaMensual || data.monthlyRent || data.precio;
+                              if (
+                                data.rentaMensual ||
+                                data.monthlyRent ||
+                                data.precio ||
+                                data.precioAlquiler ||
+                                data.renta
+                              ) {
+                                const renta =
+                                  data.rentaMensual ||
+                                  data.monthlyRent ||
+                                  data.precio ||
+                                  data.precioAlquiler ||
+                                  data.renta;
                                 const rentaNum = parseFloat(String(renta).replace(/[^0-9,.]/g, '').replace(',', '.'));
                                 if (!isNaN(rentaNum)) {
                                   updates.rentaMensual = rentaNum;
@@ -535,14 +635,24 @@ export default function NuevoContratoPage() {
                           <div className="mt-4 p-4 bg-muted/50 rounded-lg space-y-2">
                             <h4 className="font-medium text-sm">Resumen del Contrato</h4>
                             <div className="text-sm space-y-1">
+                              {formData.buildingId && (
+                                <p>
+                                  <span className="text-muted-foreground">Edificio:</span>{' '}
+                                  {buildings.find((b) => b.id === formData.buildingId)?.nombre}
+                                </p>
+                              )}
                               <p>
                                 <span className="text-muted-foreground">Unidad:</span>{' '}
-                                {units.find((u) => u.id === formData.unitId)?.building.nombre} -{' '}
                                 {units.find((u) => u.id === formData.unitId)?.numero}
                               </p>
                               <p>
                                 <span className="text-muted-foreground">Inquilino:</span>{' '}
-                                {tenants.find((t) => t.id === formData.tenantId)?.nombre}
+                                {getTenantDisplayName(
+                                  tenants.find((t) => t.id === formData.tenantId) || {
+                                    id: '',
+                                    email: '',
+                                  }
+                                )}
                               </p>
                               <p>
                                 <span className="text-muted-foreground">Tipo:</span> {formData.tipo}

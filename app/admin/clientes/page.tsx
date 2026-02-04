@@ -503,7 +503,7 @@ export default function ClientesAdminPage() {
             </div>
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
               <DialogTrigger asChild>
-                <Button className="gap-2">
+                <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
                   <Plus className="h-4 w-4" />
                   Nueva Empresa
                 </Button>

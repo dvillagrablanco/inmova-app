@@ -43,7 +43,7 @@ import {
   Eye,
   Download,
   CheckCircle,
-  Clock,
+  AlertTriangle,
   Edit,
   Users,
 } from 'lucide-react';
@@ -67,13 +67,8 @@ interface Acta {
 
 const ESTADOS_ACTA = [
   { value: 'borrador', label: 'Borrador', color: 'bg-gray-100 text-gray-800' },
-  {
-    value: 'pendiente_aprobacion',
-    label: 'Pendiente Aprobación',
-    color: 'bg-yellow-100 text-yellow-800',
-  },
+  { value: 'rechazada', label: 'Rechazada', color: 'bg-red-100 text-red-800' },
   { value: 'aprobada', label: 'Aprobada', color: 'bg-green-100 text-green-800' },
-  { value: 'firmada', label: 'Firmada', color: 'bg-blue-100 text-blue-800' },
 ];
 
 export default function ActasPage() {
@@ -88,7 +83,7 @@ export default function ActasPage() {
     total: 0,
     borradores: 0,
     aprobadas: 0,
-    pendientesAprobacion: 0,
+    rechazadas: 0,
   });
 
   const comunidadId = searchParams.get('comunidadId');
@@ -114,7 +109,8 @@ export default function ActasPage() {
       const params = new URLSearchParams();
       if (comunidadId) params.append('comunidadId', comunidadId);
       if (buildingId) params.append('buildingId', buildingId);
-      if (filtroEstado) params.append('estado', filtroEstado);
+      const normalizedEstado = filtroEstado === 'todos' ? '' : filtroEstado;
+      if (normalizedEstado) params.append('estado', normalizedEstado);
 
       const res = await fetch(`/api/comunidades/actas?${params}`);
       if (res.ok) {
@@ -125,7 +121,7 @@ export default function ActasPage() {
             total: 0,
             borradores: 0,
             aprobadas: 0,
-            pendientesAprobacion: 0,
+            rechazadas: 0,
           }
         );
       }
@@ -222,7 +218,7 @@ export default function ActasPage() {
           </div>
           <Dialog open={showDialog} onOpenChange={setShowDialog}>
             <DialogTrigger asChild>
-              <Button>
+              <Button onClick={() => setShowDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Nueva Acta
               </Button>
@@ -308,11 +304,11 @@ export default function ActasPage() {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Pendientes</CardTitle>
-              <Clock className="w-4 h-4 text-yellow-500" />
+              <CardTitle className="text-sm font-medium">Rechazadas</CardTitle>
+              <AlertTriangle className="w-4 h-4 text-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">{stats.pendientesAprobacion}</div>
+              <div className="text-2xl font-bold text-red-600">{stats.rechazadas}</div>
             </CardContent>
           </Card>
           <Card>
@@ -328,12 +324,15 @@ export default function ActasPage() {
 
         {/* Filters */}
         <div className="flex items-center gap-4">
-          <Select value={filtroEstado} onValueChange={setFiltroEstado}>
+          <Select
+            value={filtroEstado || 'todos'}
+            onValueChange={(value) => setFiltroEstado(value === 'todos' ? '' : value)}
+          >
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Filtrar por estado" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos los estados</SelectItem>
+              <SelectItem value="todos">Todos los estados</SelectItem>
               {ESTADOS_ACTA.map((e) => (
                 <SelectItem key={e.value} value={e.value}>
                   {e.label}
@@ -370,7 +369,13 @@ export default function ActasPage() {
                     <TableRow key={acta.id}>
                       <TableCell className="font-medium">#{acta.numeroActa}</TableCell>
                       <TableCell>
-                        {format(new Date(acta.fecha), 'd MMM yyyy, HH:mm', { locale: es })}
+                        {(() => {
+                          const fechaActa = new Date(acta.fecha);
+                          if (Number.isNaN(fechaActa.getTime())) {
+                            return 'Sin fecha';
+                          }
+                          return format(fechaActa, 'd MMM yyyy, HH:mm', { locale: es });
+                        })()}
                       </TableCell>
                       <TableCell>{acta.convocatoria}</TableCell>
                       <TableCell>
@@ -383,10 +388,18 @@ export default function ActasPage() {
                       <TableCell>{getEstadoBadge(acta.estado)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => toast.info(`Detalle del acta #${acta.numeroActa}`)}
+                          >
                             <Eye className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => toast.success(`Descarga de acta #${acta.numeroActa}`)}
+                          >
                             <Download className="w-4 h-4" />
                           </Button>
                         </div>

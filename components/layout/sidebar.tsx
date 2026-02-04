@@ -81,6 +81,7 @@ import { Button } from '@/components/ui/button';
 import logger, { logError } from '@/lib/logger';
 import { safeLocalStorage } from '@/lib/safe-storage';
 import { toggleMobileMenu, closeMobileMenu } from '@/lib/mobile-menu';
+import { isIgnorableFetchError } from '@/lib/fetch-error';
 import {
   getInitialExpandedSections,
   getSectionName,
@@ -1623,6 +1624,7 @@ interface SubItem {
   name: string;
   href: string;
   icon?: any; // Icono opcional para subItems
+  prefetch?: boolean;
 }
 
 interface SidebarItem {
@@ -1633,6 +1635,7 @@ interface SidebarItem {
   badge?: string;
   subItems?: SubItem[];
   dataTour?: string;
+  prefetch?: boolean;
 }
 
 // =====================================================
@@ -1667,6 +1670,7 @@ const superAdminPlatformItems: SidebarItem[] = [
     href: '/admin/dashboard',
     icon: LayoutDashboard,
     roles: ['super_admin'],
+    prefetch: false,
   },
 
   // ========== 2. CLIENTES (Gestión de Empresas B2B) ==========
@@ -1924,25 +1928,35 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   useEffect(() => {
     async function loadActiveModules() {
       try {
-        const res = await fetch('/api/modules/active');
-        if (res.ok) {
-          const data = await res.json();
-          // Asegurar que siempre sea un array
-          const modules = Array.isArray(data.activeModules) 
-            ? data.activeModules 
-            : Array.isArray(data) 
-              ? data 
-              : [];
-          setActiveModules(modules);
+        if (sessionStatus !== 'authenticated') {
+          setActiveModules([]);
+          return;
         }
+
+        const res = await fetch('/api/modules/active');
+        if (!res.ok) {
+          setActiveModules([]);
+          return;
+        }
+
+        const data = await res.json();
+        // Asegurar que siempre sea un array
+        const modules = Array.isArray(data.activeModules)
+          ? data.activeModules
+          : Array.isArray(data)
+            ? data
+            : [];
+        setActiveModules(modules);
       } catch (error) {
-        logger.error('Error loading active modules:', error);
+        if (!isIgnorableFetchError(error)) {
+          logger.error('Error loading active modules:', error);
+        }
       } finally {
         setModulesLoaded(true);
       }
     }
     loadActiveModules();
-  }, []);
+  }, [sessionStatus]);
 
   // Cargar módulos de la empresa seleccionada (Solo para Super Admin)
   useEffect(() => {
@@ -2217,7 +2231,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
       <div className="relative group">
         <Link
           href={item.href}
-          prefetch={true}
+          prefetch={item.prefetch ?? true}
           onClick={() => {
             // Cerrar el menú móvil
             setIsMobileMenuOpen(false);
@@ -2312,7 +2326,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 <Link
                   key={subItem.href}
                   href={subItemHref}
-                  prefetch={true}
+                  prefetch={subItem.prefetch ?? true}
                   onClick={() => {
                     setIsMobileMenuOpen(false);
                     onNavigate?.();
@@ -3193,6 +3207,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {/* User Profile Card */}
                 <Link
                   href="/perfil"
+                  prefetch={false}
                   className="block px-4 py-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors group"
                   data-testid="user-menu"
                 >
@@ -3232,6 +3247,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {/* Settings Link */}
                 <Link
                   href="/configuracion"
+                  prefetch={false}
                   data-tour="configuracion-link"
                   className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-all duration-200"
                 >

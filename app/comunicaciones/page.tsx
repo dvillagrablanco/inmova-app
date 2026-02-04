@@ -125,6 +125,19 @@ export default function ComunicacionesPage() {
     }
   };
 
+  const handleNewTemplate = () => {
+    toast.success('Editor de plantillas abierto');
+  };
+
+  const handleEditTemplate = (name: string) => {
+    toast.info(`Editar plantilla: ${name}`);
+  };
+
+  const handleUseTemplate = (name: string) => {
+    setActiveTab('mensajes');
+    toast.success(`Plantilla "${name}" lista para usar`);
+  };
+
   const getStatusBadge = (estado: string) => {
     switch (estado) {
       case 'enviado':
@@ -339,7 +352,7 @@ export default function ComunicacionesPage() {
 
           <TabsContent value="plantillas" className="space-y-4">
             <div className="flex justify-end">
-              <Button variant="outline">
+              <Button variant="outline" onClick={handleNewTemplate}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nueva Plantilla
               </Button>
@@ -369,10 +382,19 @@ export default function ComunicacionesPage() {
                       ))}
                     </div>
                     <div className="flex gap-2 mt-4">
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => handleEditTemplate(template.nombre)}
+                      >
                         Editar
                       </Button>
-                      <Button size="sm" className="flex-1">
+                      <Button
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => handleUseTemplate(template.nombre)}
+                      >
                         Usar
                       </Button>
                     </div>

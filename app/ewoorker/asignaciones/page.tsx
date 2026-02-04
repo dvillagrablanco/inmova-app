@@ -135,6 +135,18 @@ export default function EwoorkerAsignacionesPage() {
       ? Math.round((stats.completadas / stats.totalAsignaciones) * 100)
       : 0;
 
+  const handleFilter = () => {
+    toast.info('Filtros avanzados en desarrollo');
+  };
+
+  const handleNewAssignment = () => {
+    toast.success('Creacion de asignacion iniciada');
+  };
+
+  const handleViewDetails = (nombre: string) => {
+    toast.info(`Detalle de asignacion: ${nombre}`);
+  };
+
   if (loading || status === 'loading') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50">
@@ -206,11 +218,11 @@ export default function EwoorkerAsignacionesPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleFilter}>
               <Filter className="mr-2 h-4 w-4" />
               Filtrar
             </Button>
-            <Button className="bg-orange-600 hover:bg-orange-700">
+            <Button className="bg-orange-600 hover:bg-orange-700" onClick={handleNewAssignment}>
               <Plus className="mr-2 h-4 w-4" />
               Nueva Asignación
             </Button>
@@ -287,7 +299,7 @@ export default function EwoorkerAsignacionesPage() {
                       <p className="text-muted-foreground mb-4">
                         Aún no tienes asignaciones de trabajadores a obras
                       </p>
-                      <Button className="bg-orange-600 hover:bg-orange-700">
+                      <Button className="bg-orange-600 hover:bg-orange-700" onClick={handleNewAssignment}>
                         <Plus className="mr-2 h-4 w-4" />
                         Nueva Asignación
                       </Button>
@@ -382,7 +394,11 @@ export default function EwoorkerAsignacionesPage() {
                                 {estadoInfo.label}
                               </Badge>
 
-                              <Button variant="outline" size="sm">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewDetails(asignacion.trabajadorNombre)}
+                              >
                                 Ver Detalles
                               </Button>
                             </div>

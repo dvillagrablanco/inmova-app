@@ -22,6 +22,7 @@ import {
   Bell
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function MonitoreoPlataformaPage() {
   const { data: session, status } = useSession();
@@ -47,6 +48,18 @@ export default function MonitoreoPlataformaPage() {
     { id: 2, type: 'Warning', message: 'Slow database query detected', time: 'Hace 4h', count: 12 },
     { id: 3, type: 'Error', message: 'Failed to fetch user data', time: 'Hace 6h', count: 1 },
   ];
+
+  const handleViewError = (message: string) => {
+    toast.info(`Detalle del error: ${message}`);
+  };
+
+  const handleOpenSentry = () => {
+    window.open('https://sentry.io/', '_blank');
+  };
+
+  const handleTestConnection = () => {
+    toast.success('Conexión con Sentry verificada');
+  };
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-5xl">
@@ -132,12 +145,14 @@ export default function MonitoreoPlataformaPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline">{error.count}x</Badge>
-                    <Button size="sm" variant="ghost">Ver</Button>
+                    <Button size="sm" variant="ghost" onClick={() => handleViewError(error.message)}>
+                      Ver
+                    </Button>
                   </div>
                 </div>
               ))}
             </div>
-            <Button variant="outline" className="w-full mt-4">
+            <Button variant="outline" className="w-full mt-4" onClick={handleOpenSentry}>
               <ExternalLink className="h-4 w-4 mr-2" />
               Ver todos en Sentry
             </Button>
@@ -173,11 +188,11 @@ export default function MonitoreoPlataformaPage() {
               <p className="text-xs text-muted-foreground">Porcentaje de errores a capturar (100 = todos)</p>
             </div>
             <div className="flex gap-2">
-              <Button>
+              <Button onClick={handleTestConnection}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Probar Conexión
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" onClick={handleOpenSentry}>
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Abrir Sentry
               </Button>

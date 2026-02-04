@@ -351,7 +351,7 @@ export default function DocumentosPage() {
       {canCreate && (
         <Dialog open={openUploadDialog} onOpenChange={setOpenUploadDialog}>
         <DialogTrigger asChild>
-        <Button>
+        <Button onClick={() => setOpenUploadDialog(true)}>
         <Upload className="mr-2 h-4 w-4" />
         Subir Documento
         </Button>

@@ -26,16 +26,32 @@ const BUCKET_NAME = process.env.AWS_BUCKET_PRIVATE || process.env.AWS_BUCKET || 
 // Verificar si S3 está configurado
 const isS3Configured = !!(AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY);
 
+const createS3Client = (regionOverride?: string) =>
+  new S3Client({
+    region: regionOverride || AWS_REGION,
+    credentials: {
+      accessKeyId: AWS_ACCESS_KEY_ID,
+      secretAccessKey: AWS_SECRET_ACCESS_KEY,
+    },
+    endpoint: process.env.AWS_S3_ENDPOINT || process.env.AWS_ENDPOINT,
+    forcePathStyle: process.env.AWS_S3_FORCE_PATH_STYLE === 'true',
+  });
+
+const extractBucketRegion = (error: any): string | undefined => {
+  const headerRegion =
+    error?.$metadata?.httpHeaders?.['x-amz-bucket-region'] ||
+    error?.$response?.headers?.['x-amz-bucket-region'];
+  return (
+    headerRegion ||
+    error?.BucketRegion ||
+    error?.bucketRegion ||
+    error?.Region ||
+    error?.region
+  );
+};
+
 // Configurar S3 Client (solo si está configurado)
-const s3Client = isS3Configured
-  ? new S3Client({
-      region: AWS_REGION,
-      credentials: {
-        accessKeyId: AWS_ACCESS_KEY_ID,
-        secretAccessKey: AWS_SECRET_ACCESS_KEY,
-      },
-    })
-  : null;
+const s3Client = isS3Configured ? createS3Client() : null;
 
 // Determinar modo de almacenamiento
 type StorageMode = 's3' | 'local';
@@ -45,24 +61,25 @@ const getStorageMode = (): StorageMode => {
   return 'local'; // Intentar local de todas formas
 };
 
+const ALLOWED_FOLDERS = [
+  'contratos',
+  'dni',
+  'documentos',
+  'facturas',
+  'tenants',
+  'inquilinos',
+  'seguros',
+  'propiedades',
+  'proveedores',
+  'general',
+] as const;
+
+const ALLOWED_ENTITY_TYPES = ['property', 'contract', 'tenant', 'user'] as const;
+
 // Validación
 const uploadSchema = z.object({
-  folder: z
-    .enum([
-      'contratos',
-      'dni',
-      'documentos',
-      'facturas',
-      'tenants',
-      'inquilinos',
-      'seguros',
-      'propiedades',
-      'proveedores',
-      'general',
-    ])
-    .optional()
-    .default('documentos'),
-  entityType: z.enum(['property', 'contract', 'tenant', 'user']).optional(),
+  folder: z.enum(ALLOWED_FOLDERS).optional().default('documentos'),
+  entityType: z.enum(ALLOWED_ENTITY_TYPES).optional(),
   entityId: z.string().optional(),
 });
 
@@ -74,6 +91,7 @@ const ALLOWED_MIME_TYPES = [
   'image/png',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'text/plain',
 ];
 
 export async function POST(req: NextRequest) {
@@ -106,22 +124,58 @@ export async function POST(req: NextRequest) {
     // 2. Parsear FormData
     const formData = await req.formData();
     const file = formData.get('file') as File;
-    const folder = (formData.get('folder') as string) || 'documentos';
-    const entityType = formData.get('entityType') as string;
-    const entityId = formData.get('entityId') as string;
+    const folderInput = (formData.get('folder') as string) || 'documentos';
+    const entityTypeInput = formData.get('entityType') as string | null;
+    const entityIdInput = formData.get('entityId') as string | null;
+    const entityTypeInputValue = entityTypeInput || undefined;
+    const entityIdInputValue = entityIdInput || undefined;
 
     if (!file) {
       return NextResponse.json({ error: 'No se proporcionó archivo' }, { status: 400 });
     }
 
     // 3. Validaciones
-    const validation = uploadSchema.safeParse({ folder, entityType, entityId });
+    const normalizedFolder = ALLOWED_FOLDERS.includes(folderInput as typeof ALLOWED_FOLDERS[number])
+      ? folderInput
+      : 'documentos';
+    const normalizedEntityType = ALLOWED_ENTITY_TYPES.includes(
+      entityTypeInputValue as typeof ALLOWED_ENTITY_TYPES[number]
+    )
+      ? entityTypeInputValue
+      : undefined;
+    const normalizedEntityId =
+      entityIdInputValue && !['undefined', 'null'].includes(entityIdInputValue)
+        ? entityIdInputValue
+        : undefined;
+
+    if (
+      normalizedFolder !== folderInput ||
+      normalizedEntityType !== entityTypeInputValue ||
+      normalizedEntityId !== entityIdInputValue
+    ) {
+      logger.warn('[Upload Private] Parámetros normalizados', {
+        folderInput,
+        normalizedFolder,
+        entityTypeInput: entityTypeInputValue,
+        normalizedEntityType,
+        entityIdInput: entityIdInputValue,
+        normalizedEntityId,
+      });
+    }
+
+    const validation = uploadSchema.safeParse({
+      folder: normalizedFolder,
+      entityType: normalizedEntityType,
+      entityId: normalizedEntityId,
+    });
     if (!validation.success) {
       return NextResponse.json(
         { error: 'Parámetros inválidos', details: validation.error },
         { status: 400 }
       );
     }
+
+    const { folder, entityType, entityId } = validation.data;
 
     // Validar tipo MIME
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
@@ -172,7 +226,23 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      await s3Client.send(command);
+      try {
+        await s3Client.send(command);
+      } catch (error: any) {
+        const bucketRegion = extractBucketRegion(error);
+        if (bucketRegion && bucketRegion !== AWS_REGION) {
+          logger.warn('[Upload Private] Reintentando con region del bucket', {
+            bucketRegion,
+            awsRegion: AWS_REGION,
+            bucket: BUCKET_NAME,
+          });
+          const retryClient = createS3Client(bucketRegion);
+          await retryClient.send(command);
+        } else {
+          throw error;
+        }
+      }
+
       uploadResult = { success: true, path: fileName };
       logger.info(`[Upload Private] Archivo subido a S3: ${fileName}`);
     } else {

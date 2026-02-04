@@ -15,6 +15,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 import logger from '@/lib/logger';
+import { isIgnorableFetchError } from '@/lib/fetch-error';
 interface Notification {
   id: string;
   type: string;
@@ -52,7 +53,9 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
         setError('Error al cargar notificaciones');
       }
     } catch (err) {
-      logger.error('Error fetching notifications:', err);
+      if (!isIgnorableFetchError(err)) {
+        logger.error('Error fetching notifications:', err);
+      }
       setError('Error al cargar notificaciones');
     } finally {
       setIsLoading(false);
@@ -68,7 +71,9 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
         setUnreadCount(data.count || 0);
       }
     } catch (err) {
-      logger.error('Error fetching unread count:', err);
+      if (!isIgnorableFetchError(err)) {
+        logger.error('Error fetching unread count:', err);
+      }
     }
   }, []);
 
@@ -95,7 +100,9 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
         }
         return false;
       } catch (err) {
-        logger.error('Error marking notification as read:', err);
+        if (!isIgnorableFetchError(err)) {
+          logger.error('Error marking notification as read:', err);
+        }
         return false;
       }
     },
@@ -119,7 +126,9 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       }
       return false;
     } catch (err) {
-      logger.error('Error marking all as read:', err);
+      if (!isIgnorableFetchError(err)) {
+        logger.error('Error marking all as read:', err);
+      }
       return false;
     }
   }, []);

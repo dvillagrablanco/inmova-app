@@ -1,14 +1,76 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileCheck, Building, FileText, Calendar } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function CompliancePage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('certificates');
+
+  const downloadCsv = (filename: string, rows: Array<Array<string | number>>) => {
+    const csv = rows
+      .map((row) =>
+        row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(';')
+      )
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const openDocumentos = (tipo: string, message: string) => {
+    router.push(`/documentos?tipo=${tipo}`);
+    toast.info(message);
+  };
+
+  const handleRegistrarCertificado = () => {
+    openDocumentos('certificado_energetico', 'Sube el certificado en Documentos');
+  };
+
+  const handleRenovarCertificado = () => {
+    openDocumentos('certificado_energetico', 'Actualiza el certificado en Documentos');
+  };
+
+  const handleProgramarITE = () => {
+    openDocumentos('ite', 'Programa la ITE desde Documentos');
+  };
+
+  const handleVerITE = (building: string) => {
+    openDocumentos('ite', `Revisa la documentación de ${building}`);
+  };
+
+  const handleGenerateModelo347 = (year: string, mode: 'view' | 'export') => {
+    const rows = [
+      ['Ejercicio', year],
+      ['Operaciones', 47],
+      ['Total Ingresos (€)', 185000],
+      ['Total Gastos (€)', 42000],
+    ];
+    downloadCsv(`modelo_347_${year}.csv`, rows);
+    toast.success(mode === 'view' ? 'Declaración generada' : 'Exportación completada');
+  };
+
+  const handleGenerateModelo180 = () => {
+    const rows = [
+      ['Trimestre', 'Importe (€)', 'Retención'],
+      ['T1 2024', 850, '24%'],
+      ['T2 2024', 920, '24%'],
+      ['T3 2024', 1100, '24%'],
+      ['T4 2024', 980, '24%'],
+    ];
+    downloadCsv('modelo_180_2024.csv', rows);
+    toast.success('Modelo 180 generado');
+  };
 
   return (
     <AuthenticatedLayout>
@@ -39,7 +101,7 @@ export default function CompliancePage() {
                 <Card className="p-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold">Certificados Próximos a Vencer</h3>
-                    <Button>Registrar Nuevo</Button>
+                    <Button onClick={handleRegistrarCertificado}>Registrar Nuevo</Button>
                   </div>
                   <div className="space-y-3">
                     {[1, 2, 3, 4].map((i) => (
@@ -54,7 +116,7 @@ export default function CompliancePage() {
                             {60 + i * 5} días
                           </span>
                         </div>
-                        <Button size="sm" className="mt-3" variant="outline">
+                        <Button size="sm" className="mt-3" variant="outline" onClick={handleRenovarCertificado}>
                           Renovar
                         </Button>
                       </div>
@@ -68,7 +130,7 @@ export default function CompliancePage() {
                 <Card className="p-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold">Calendario de ITEs</h3>
-                    <Button>Programar ITE</Button>
+                    <Button onClick={handleProgramarITE}>Programar ITE</Button>
                   </div>
                   <div className="space-y-3">
                     {[
@@ -110,7 +172,12 @@ export default function CompliancePage() {
                             Urgencia {item.urgency}
                           </span>
                         </div>
-                        <Button size="sm" className="mt-3" variant="outline">
+                        <Button
+                          size="sm"
+                          className="mt-3"
+                          variant="outline"
+                          onClick={() => handleVerITE(item.building)}
+                        >
                           Ver Detalles
                         </Button>
                       </div>
@@ -126,7 +193,9 @@ export default function CompliancePage() {
                     <h3 className="text-lg font-semibold">
                       Declaración Anual Operaciones (Modelo 347)
                     </h3>
-                    <Button>Generar Ejercicio 2024</Button>
+                    <Button onClick={() => handleGenerateModelo347('2024', 'export')}>
+                      Generar Ejercicio 2024
+                    </Button>
                   </div>
                   <div className="grid grid-cols-3 gap-4 mb-6">
                     <div className="bg-blue-50 p-4 rounded-lg">
@@ -147,10 +216,10 @@ export default function CompliancePage() {
                       <div key={year} className="flex justify-between items-center border-b py-3">
                         <span className="font-medium">Ejercicio {year}</span>
                         <div className="flex gap-2">
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleGenerateModelo347(year, 'view')}>
                             Ver Declaración
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleGenerateModelo347(year, 'export')}>
                             Exportar
                           </Button>
                         </div>
@@ -167,7 +236,7 @@ export default function CompliancePage() {
                     <h3 className="text-lg font-semibold">
                       Retenciones No Residentes (Modelo 180)
                     </h3>
-                    <Button>Generar Trimestre</Button>
+                    <Button onClick={handleGenerateModelo180}>Generar Trimestre</Button>
                   </div>
                   <div className="grid grid-cols-4 gap-3 mb-6">
                     {['T1', 'T2', 'T3', 'T4'].map((t, i) => (

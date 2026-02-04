@@ -564,7 +564,11 @@ function EdificiosPageContent() {
                         </div>
         </>
         )}
-        <Button variant="ghost" size="icon">
+        <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => router.push(`/edificios/${building.id}`)}
+        >
         <Eye className="h-4 w-4" />
         </Button>
         </div>

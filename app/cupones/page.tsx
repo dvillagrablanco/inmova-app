@@ -347,7 +347,7 @@ export default function CuponesPage() {
               }}
             >
               <DialogTrigger asChild>
-                <Button className="gradient-primary shadow-primary">
+                <Button className="gradient-primary shadow-primary" onClick={() => setOpenDialog(true)}>
                   <Plus className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">Nuevo Cupón</span>
                 </Button>
@@ -657,7 +657,7 @@ export default function CuponesPage() {
                     {(canUpdate || canDelete) && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => undefined}>
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>

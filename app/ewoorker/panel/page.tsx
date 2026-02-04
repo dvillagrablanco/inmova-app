@@ -24,6 +24,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function EwoorkerPanelPage() {
   const { data: session, status } = useSession();
@@ -129,6 +130,26 @@ export default function EwoorkerPanelPage() {
     }
   };
 
+  const handleNotifications = () => {
+    toast.info('Notificaciones en desarrollo');
+  };
+
+  const handleSettings = () => {
+    toast.info('Configuracion de cuenta');
+  };
+
+  const handleNewObra = () => {
+    toast.success('Formulario de obra abierto');
+  };
+
+  const handleViewAll = () => {
+    toast.info('Mostrando todas las oportunidades');
+  };
+
+  const handleSendOffer = () => {
+    toast.success('Oferta enviada');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-orange-100">
       {/* Header */}
@@ -140,7 +161,7 @@ export default function EwoorkerPanelPage() {
               <span className="text-xl font-bold text-orange-600">eWoorker</span>
             </Link>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" onClick={handleNotifications}>
                 <Bell className="h-5 w-5 text-gray-600" />
               </Button>
               <div className="flex items-center space-x-2">
@@ -170,7 +191,11 @@ export default function EwoorkerPanelPage() {
                   <p className="text-white/80">Bienvenido, {userName}</p>
                 </div>
               </div>
-              <Button variant="secondary" className="bg-white text-orange-600 hover:bg-white/90">
+              <Button
+                variant="secondary"
+                className="bg-white text-orange-600 hover:bg-white/90"
+                onClick={handleSettings}
+              >
                 <Settings className="h-4 w-4 mr-2" />
                 Configuración
               </Button>
@@ -222,7 +247,7 @@ export default function EwoorkerPanelPage() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Publicar Nueva Obra</span>
-                <Button className="bg-orange-600 hover:bg-orange-700">
+                <Button className="bg-orange-600 hover:bg-orange-700" onClick={handleNewObra}>
                   <Plus className="h-4 w-4 mr-2" />
                   Nueva Obra
                 </Button>
@@ -239,9 +264,9 @@ export default function EwoorkerPanelPage() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Obras Disponibles</span>
-                <Link href="/ewoorker/obras">
-                  <Button variant="outline">Ver todas</Button>
-                </Link>
+                <Button variant="outline" asChild>
+                  <Link href="/ewoorker/obras">Ver todas</Link>
+                </Button>
               </CardTitle>
               <CardDescription>
                 Obras que coinciden con tus especialidades
@@ -251,11 +276,9 @@ export default function EwoorkerPanelPage() {
               <div className="text-center py-8 text-gray-500">
                 <Search className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                 <p>Explora las obras disponibles en tu zona</p>
-                <Link href="/ewoorker/obras">
-                  <Button className="mt-4 bg-orange-600 hover:bg-orange-700">
-                    Buscar Obras
-                  </Button>
-                </Link>
+                <Button className="mt-4 bg-orange-600 hover:bg-orange-700" asChild>
+                  <Link href="/ewoorker/obras">Buscar Obras</Link>
+                </Button>
               </div>
             </CardContent>
           </Card>

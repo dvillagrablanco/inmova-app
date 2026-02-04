@@ -153,7 +153,7 @@ export default function AutomatizacionResumenPage() {
             Métricas y estado de todas las automatizaciones
           </p>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" onClick={() => toast.info('Abrir configuración de automatizaciones')}>
           <Settings className="h-4 w-4 mr-2" />
           Configurar
         </Button>

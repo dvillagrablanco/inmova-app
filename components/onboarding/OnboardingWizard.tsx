@@ -6,6 +6,7 @@
  */
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -18,7 +19,7 @@ interface OnboardingWizardProps {
   onComplete: () => void;
 }
 
-const STEPS = [
+const getSteps = (router: ReturnType<typeof useRouter>) => [
   {
     id: 'welcome',
     title: '¡Bienvenido a INMOVA!',
@@ -86,7 +87,7 @@ const STEPS = [
           </p>
         </div>
         
-        <Button className="w-full" size="lg">
+        <Button className="w-full" size="lg" onClick={() => router.push('/edificios')}>
           <Building2 className="h-5 w-5 mr-2" />
           Crear mi primer edificio
         </Button>
@@ -126,7 +127,7 @@ const STEPS = [
           </div>
         </div>
         
-        <Button className="w-full" size="lg">
+        <Button className="w-full" size="lg" onClick={() => router.push('/unidades')}>
           <Home className="h-5 w-5 mr-2" />
           Agregar unidad al edificio
         </Button>
@@ -167,7 +168,7 @@ const STEPS = [
           </ul>
         </div>
         
-        <Button className="w-full" size="lg">
+        <Button className="w-full" size="lg" onClick={() => router.push('/inquilinos')}>
           <UserPlus className="h-5 w-5 mr-2" />
           Registrar inquilino
         </Button>
@@ -219,7 +220,7 @@ const STEPS = [
           </div>
         </div>
         
-        <Button className="w-full" size="lg">
+        <Button className="w-full" size="lg" onClick={() => router.push('/contratos/nuevo')}>
           <FileText className="h-5 w-5 mr-2" />
           Crear contrato
         </Button>
@@ -282,14 +283,16 @@ const STEPS = [
 ];
 
 export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizardProps) {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
 
-  const step = STEPS[currentStep];
-  const progress = ((currentStep + 1) / STEPS.length) * 100;
+  const steps = getSteps(router);
+  const step = steps[currentStep];
+  const progress = ((currentStep + 1) / steps.length) * 100;
   const Icon = step.icon;
 
   const handleNext = () => {
-    if (currentStep < STEPS.length - 1) {
+    if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
       onComplete();
@@ -315,13 +318,13 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
             <div className="flex items-center gap-3">
               <div className={cn(
                 "h-12 w-12 rounded-full flex items-center justify-center",
-                currentStep === STEPS.length - 1
+              currentStep === steps.length - 1
                   ? "bg-green-100"
                   : "bg-blue-100"
               )}>
                 <Icon className={cn(
                   "h-6 w-6",
-                  currentStep === STEPS.length - 1
+                  currentStep === steps.length - 1
                     ? "text-green-600"
                     : "text-blue-600"
                 )} />
@@ -345,7 +348,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
           <div className="space-y-2">
             <Progress value={progress} className="h-2" />
             <div className="flex justify-between text-xs text-gray-500">
-              <span>Paso {currentStep + 1} de {STEPS.length}</span>
+              <span>Paso {currentStep + 1} de {steps.length}</span>
               <span>{Math.round(progress)}% completado</span>
             </div>
           </div>
@@ -372,13 +375,13 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
               "bg-green-600 hover:bg-green-700"
             )}
           >
-            {currentStep === STEPS.length - 1 ? '¡Empezar!' : 'Siguiente'}
+            {currentStep === steps.length - 1 ? '¡Empezar!' : 'Siguiente'}
           </Button>
         </div>
 
         {/* Step indicators */}
         <div className="flex justify-center gap-2 pt-2">
-          {STEPS.map((_, index) => (
+          {steps.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentStep(index)}

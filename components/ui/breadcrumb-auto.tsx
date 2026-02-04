@@ -128,7 +128,7 @@ export function BreadcrumbAuto({
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href={homeHref} className="flex items-center gap-1">
+            <Link href={homeHref} prefetch={!isAdminRoute} className="flex items-center gap-1">
               <Home className="h-4 w-4" />
               <span className="hidden sm:inline ml-1">{homeDisplay}</span>
             </Link>

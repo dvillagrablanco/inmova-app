@@ -48,6 +48,31 @@ export default function RevenueManagementPage() {
     { id: '3', name: 'Early Bird', type: 'early_bird', active: false, listings: 5, avgIncrease: 5 },
   ]);
 
+  const handleNewStrategy = () => {
+    toast.success('Nueva estrategia creada');
+  };
+
+  const handleEditStrategy = (name: string) => {
+    toast.info(`Editando estrategia: ${name}`);
+  };
+
+  const handleToggleStrategy = (id: string) => {
+    setStrategies((prev) =>
+      prev.map((strategy) =>
+        strategy.id === id ? { ...strategy, active: !strategy.active } : strategy
+      )
+    );
+    toast.success('Estrategia actualizada');
+  };
+
+  const handleConfigureSeasons = () => {
+    toast.info('Configura temporadas para ajustar precios');
+  };
+
+  const handleViewCompetition = () => {
+    toast.info('Consulta el análisis de competencia');
+  };
+
   return (
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto">
@@ -138,7 +163,7 @@ export default function RevenueManagementPage() {
                         <CardTitle>Estrategias de Pricing</CardTitle>
                         <CardDescription>Reglas automáticas de ajuste de precios</CardDescription>
                       </div>
-                      <Button>
+                      <Button onClick={handleNewStrategy}>
                         <Zap className="h-4 w-4 mr-2" />
                         Nueva Estrategia
                       </Button>
@@ -180,12 +205,17 @@ export default function RevenueManagementPage() {
                                 </div>
                               </div>
                               <div className="flex gap-2">
-                                <Button variant="outline" size="sm">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleEditStrategy(strategy.name)}
+                                >
                                   Editar
                                 </Button>
                                 <Button
                                   variant={strategy.active ? 'destructive' : 'default'}
                                   size="sm"
+                                  onClick={() => handleToggleStrategy(strategy.id)}
                                 >
                                   {strategy.active ? 'Desactivar' : 'Activar'}
                                 </Button>
@@ -216,11 +246,11 @@ export default function RevenueManagementPage() {
                       </p>
                     </div>
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={handleConfigureSeasons}>
                         <Calendar className="h-4 w-4 mr-2" />
                         Configurar Temporadas
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={handleViewCompetition}>
                         <TrendingUp className="h-4 w-4 mr-2" />
                         Ver Análisis Competencia
                       </Button>

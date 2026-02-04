@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 import {
   HardHat,
   Search,
@@ -99,11 +100,9 @@ export default function EwoorkerEmpresasPage() {
                 <p className="text-orange-100">Encuentra subcontratistas verificados</p>
               </div>
             </div>
-            <Link href="/ewoorker/dashboard">
-              <Button variant="secondary" className="bg-white text-orange-600 hover:bg-gray-100">
-                Volver al Dashboard
-              </Button>
-            </Link>
+            <Button variant="secondary" className="bg-white text-orange-600 hover:bg-gray-100" asChild>
+              <Link href="/ewoorker/dashboard">Volver al Dashboard</Link>
+            </Button>
           </div>
         </div>
       </div>
@@ -219,10 +218,19 @@ export default function EwoorkerEmpresasPage() {
                   </div>
 
                   <div className="flex gap-2 mt-4">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => toast.info(`Perfil de ${empresa.nombreEmpresa}`)}
+                    >
                       Ver Perfil
                     </Button>
-                    <Button size="sm" className="flex-1 bg-orange-600 hover:bg-orange-700">
+                    <Button
+                      size="sm"
+                      className="flex-1 bg-orange-600 hover:bg-orange-700"
+                      onClick={() => toast.success(`Solicitud enviada a ${empresa.nombreEmpresa}`)}
+                    >
                       Contactar
                     </Button>
                   </div>

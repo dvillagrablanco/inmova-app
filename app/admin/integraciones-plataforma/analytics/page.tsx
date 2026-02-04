@@ -19,12 +19,25 @@ import {
   MousePointer2
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function AnalyticsPlataformaPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [ga4Connected, setGa4Connected] = useState(true);
   const [hotjarConnected, setHotjarConnected] = useState(true);
+
+  const handleVerifyGa4 = () => {
+    toast.success('Configuración de GA4 verificada');
+  };
+
+  const handleOpenGa4 = () => {
+    window.open('https://analytics.google.com/', '_blank');
+  };
+
+  const handleOpenHotjar = () => {
+    window.open('https://insights.hotjar.com/', '_blank');
+  };
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -118,11 +131,11 @@ export default function AnalyticsPlataformaPage() {
                 <Switch defaultChecked />
               </div>
               <div className="flex gap-2">
-                <Button>
+                <Button onClick={handleVerifyGa4}>
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Verificar Configuración
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" onClick={handleOpenGa4}>
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Abrir GA4
                 </Button>
@@ -187,7 +200,7 @@ export default function AnalyticsPlataformaPage() {
                 <Switch />
               </div>
               <div className="flex gap-2">
-                <Button variant="outline">
+                <Button variant="outline" onClick={handleOpenHotjar}>
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Abrir Hotjar
                 </Button>

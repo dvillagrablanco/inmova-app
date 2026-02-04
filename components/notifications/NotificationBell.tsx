@@ -10,6 +10,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationPanel from './NotificationPanel';
+import { isIgnorableFetchError } from '@/lib/fetch-error';
 
 export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
@@ -49,12 +50,16 @@ export default function NotificationBell() {
   async function fetchUnreadCount() {
     try {
       const response = await fetch('/api/notifications/unread-count');
-      if (response.ok) {
-        const data = await response.json();
-        setUnreadCount(data.count || 0);
+      if (!response.ok) {
+        setUnreadCount(0);
+        return;
       }
+      const data = await response.json();
+      setUnreadCount(data.count || 0);
     } catch (error) {
-      console.error('Error fetching unread count:', error);
+      if (!isIgnorableFetchError(error)) {
+        console.error('Error fetching unread count:', error);
+      }
     }
   }
 

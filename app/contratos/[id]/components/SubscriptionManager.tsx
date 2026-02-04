@@ -232,7 +232,12 @@ export default function SubscriptionManager({
             <div className="flex gap-2">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="outline" className="flex-1" disabled={loading}>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    disabled={loading}
+                    onClick={() => undefined}
+                  >
                     Cancelar al Final del Período
                   </Button>
                 </AlertDialogTrigger>
@@ -259,7 +264,12 @@ export default function SubscriptionManager({
 
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" className="flex-1" disabled={loading}>
+                  <Button
+                    variant="destructive"
+                    className="flex-1"
+                    disabled={loading}
+                    onClick={() => undefined}
+                  >
                     Cancelar Inmediatamente
                   </Button>
                 </AlertDialogTrigger>

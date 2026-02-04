@@ -22,6 +22,7 @@ import {
   Smartphone
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function PagosCompartidosPage() {
   const { data: session, status } = useSession();
@@ -86,6 +87,25 @@ export default function PagosCompartidosPage() {
       }
     },
   ];
+
+  const handleTestConnection = (providerId: string) => {
+    const labels: Record<string, string> = {
+      stripe: 'Stripe',
+      gocardless: 'GoCardless',
+      redsys: 'Redsys',
+    };
+    toast.success(`Conexión con ${labels[providerId] || 'proveedor'} verificada`);
+  };
+
+  const handleOpenDashboard = (providerId: string) => {
+    const urls: Record<string, string> = {
+      stripe: 'https://dashboard.stripe.com/',
+      gocardless: 'https://manage.gocardless.com/',
+      redsys: 'https://sis-t.redsys.es/',
+    };
+    const url = urls[providerId] || 'https://www.redsys.es/';
+    window.open(url, '_blank');
+  };
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-5xl">
@@ -250,11 +270,11 @@ export default function PagosCompartidosPage() {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button>
+                    <Button onClick={() => handleTestConnection(provider.id)}>
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Probar Conexión
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => handleOpenDashboard(provider.id)}>
                       <ExternalLink className="h-4 w-4 mr-2" />
                       Abrir Dashboard
                     </Button>

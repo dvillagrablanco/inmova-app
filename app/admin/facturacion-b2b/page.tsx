@@ -444,7 +444,7 @@ export default function B2BBillingDashboard() {
                 </Button>
                 <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                   <DialogTrigger asChild>
-                    <Button>
+                    <Button onClick={() => setShowCreateDialog(true)}>
                       <Plus className="w-4 h-4 mr-2" />
                       Nueva Factura
                     </Button>
@@ -736,7 +736,7 @@ export default function B2BBillingDashboard() {
                             <TableCell className="text-right">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
+                                  <Button variant="ghost" size="sm" onClick={() => undefined}>
                                     <MoreVertical className="w-4 h-4" />
                                   </Button>
                                 </DropdownMenuTrigger>

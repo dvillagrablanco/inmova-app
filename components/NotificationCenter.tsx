@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { isIgnorableFetchError } from '@/lib/fetch-error';
 
 interface Notification {
   id: string;
@@ -77,6 +78,14 @@ export default function NotificationCenter({ className = '' }: NotificationCente
     try {
       setLoading(true);
       const response = await fetch(`/api/notifications?limit=10&offset=${offset}`);
+      if (!response.ok) {
+        if (offset === 0) {
+          setNotifications([]);
+          setUnreadCount(0);
+          setHasMore(false);
+        }
+        return;
+      }
       const data = await response.json();
 
       if (offset === 0) {
@@ -88,7 +97,9 @@ export default function NotificationCenter({ className = '' }: NotificationCente
       setUnreadCount(data.unreadCount || 0);
       setHasMore(data.hasMore || false);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      if (!isIgnorableFetchError(error)) {
+        console.error('Error fetching notifications:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -98,21 +109,30 @@ export default function NotificationCenter({ className = '' }: NotificationCente
   const fetchUnreadCount = useCallback(async () => {
     try {
       const response = await fetch('/api/notifications/unread-count');
+      if (!response.ok) {
+        setUnreadCount(0);
+        return;
+      }
       const data = await response.json();
       setUnreadCount(data.count || 0);
     } catch (error) {
-      console.error('Error fetching unread count:', error);
+      if (!isIgnorableFetchError(error)) {
+        console.error('Error fetching unread count:', error);
+      }
     }
   }, []);
 
   // Mark notification as read
   const markAsRead = useCallback(async (notificationId: string) => {
     try {
-      await fetch('/api/notifications/mark-read', {
+      const response = await fetch('/api/notifications/mark-read', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ notificationId }),
       });
+      if (!response.ok) {
+        return;
+      }
 
       // Update local state
       setNotifications(prev =>
@@ -120,24 +140,31 @@ export default function NotificationCenter({ className = '' }: NotificationCente
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      if (!isIgnorableFetchError(error)) {
+        console.error('Error marking notification as read:', error);
+      }
     }
   }, []);
 
   // Mark all as read
   const markAllAsRead = useCallback(async () => {
     try {
-      await fetch('/api/notifications/mark-read', {
+      const response = await fetch('/api/notifications/mark-read', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ markAll: true }),
       });
+      if (!response.ok) {
+        return;
+      }
 
       // Update local state
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+      if (!isIgnorableFetchError(error)) {
+        console.error('Error marking all notifications as read:', error);
+      }
     }
   }, []);
 

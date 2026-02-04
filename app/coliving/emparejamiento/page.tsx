@@ -765,7 +765,11 @@ export default function ColivingEmparejamientoPage() {
                   </div>
                 </div>
 
-                <Button variant="outline" className="w-full">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => router.push('/perfil')}
+                >
                   Editar Perfil
                 </Button>
               </CardContent>

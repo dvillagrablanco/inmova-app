@@ -18,6 +18,7 @@ import {
   DocumentAnalysisInput,
 } from '@/lib/ai-document-agent-service';
 import logger from '@/lib/logger';
+import mammoth from 'mammoth';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -55,6 +56,20 @@ function isPDFFile(file: File): boolean {
   }
   const fileName = (file.name || '').toLowerCase();
   return fileName.endsWith('.pdf');
+}
+
+/**
+ * Verifica si el archivo es un documento Word
+ */
+function isWordFile(file: File): boolean {
+  if (
+    file.type === 'application/msword' ||
+    file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  ) {
+    return true;
+  }
+  const fileName = (file.name || '').toLowerCase();
+  return fileName.endsWith('.doc') || fileName.endsWith('.docx');
 }
 
 /**
@@ -781,6 +796,24 @@ Tamaño: ${(file.size / 1024).toFixed(2)} KB
 Fecha de carga: ${new Date().toISOString()}
   `.trim();
 
+  // Para documentos Word, extraer texto real con mammoth
+  if (isWordFile(file)) {
+    try {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const result = await mammoth.extractRawText({ buffer });
+      const text = result.value?.trim();
+
+      if (text && text.length > 0) {
+        return basicInfo + '\n\nTexto extraído:\n' + text;
+      }
+    } catch (error) {
+      logger.warn('[AI Document Analysis] Error extrayendo DOC/DOCX, usando fallback', {
+        fileName: file.name,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
   // Si el archivo es un PDF o documento, intentar leer como texto
   try {
     const arrayBuffer = await file.arrayBuffer();
@@ -1011,25 +1044,92 @@ export async function POST(request: NextRequest) {
       context,
     });
 
-    // Si es imagen o PDF, usar Claude Vision
+    // Si es imagen o PDF, usar Claude Vision con fallback
     if (useVision) {
-      logger.info('[AI Document Analysis] 🖼️ USANDO CLAUDE VISION', { 
+      logger.info('[AI Document Analysis] 🖼️ USANDO CLAUDE VISION', {
         context,
         filename: file.name,
         fileType: file.type,
         isPDF,
         isImage,
       });
-      const visionAnalysis = await analyzeDocumentWithVision(file, companyInfo, context);
-      
-      logger.info('[AI Document Analysis] Análisis de visión completado', {
-        filename: file.name,
-        context,
-        category: visionAnalysis.classification?.category,
-        fieldsExtracted: visionAnalysis.extractedFields?.length || 0,
-      });
-      
-      return NextResponse.json(visionAnalysis);
+      try {
+        const visionAnalysis = await analyzeDocumentWithVision(file, companyInfo, context);
+
+        logger.info('[AI Document Analysis] Análisis de visión completado', {
+          filename: file.name,
+          context,
+          category: visionAnalysis.classification?.category,
+          fieldsExtracted: visionAnalysis.extractedFields?.length || 0,
+        });
+
+        const lowConfidence = (visionAnalysis.classification?.confidence || 0) < 0.2;
+        const noFields = (visionAnalysis.extractedFields?.length || 0) === 0;
+
+        if (isPDF && (lowConfidence || noFields)) {
+          logger.warn('[AI Document Analysis] Vision con baja señal, intentando fallback de texto', {
+            filename: file.name,
+            lowConfidence,
+            noFields,
+          });
+
+          try {
+            const textAnalysis = await analyzeDocument({
+              text: extractedText,
+              filename: file.name,
+              mimeType: file.type,
+              companyInfo,
+            });
+
+            textAnalysis.warnings = [
+              ...(textAnalysis.warnings || []),
+              'Se utilizó extracción de texto como respaldo al análisis visual.',
+            ];
+
+            return NextResponse.json(textAnalysis);
+          } catch (textError: any) {
+            logger.error('[AI Document Analysis] Fallback de texto falló', {
+              filename: file.name,
+              error: textError?.message || textError?.toString(),
+            });
+          }
+        }
+
+        return NextResponse.json(visionAnalysis);
+      } catch (visionError: any) {
+        logger.error('[AI Document Analysis] Error en análisis de visión', {
+          filename: file.name,
+          context,
+          error: visionError?.message || visionError?.toString(),
+        });
+
+        if (isPDF) {
+          try {
+            const textAnalysis = await analyzeDocument({
+              text: extractedText,
+              filename: file.name,
+              mimeType: file.type,
+              companyInfo,
+            });
+
+            textAnalysis.warnings = [
+              ...(textAnalysis.warnings || []),
+              'El análisis visual falló, se utilizó extracción de texto.',
+            ];
+
+            return NextResponse.json(textAnalysis);
+          } catch (textError: any) {
+            logger.error('[AI Document Analysis] Fallback de texto falló', {
+              filename: file.name,
+              error: textError?.message || textError?.toString(),
+            });
+          }
+        }
+
+        const basicResult = basicAnalysis(file.name, file.type);
+        basicResult.warnings.push('No se pudo procesar el documento con IA visual.');
+        return NextResponse.json(basicResult);
+      }
     }
 
     // Para documentos de texto/PDF, usar el análisis tradicional

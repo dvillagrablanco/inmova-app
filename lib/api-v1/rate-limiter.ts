@@ -7,18 +7,36 @@ import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 
 import logger from '@/lib/logger';
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL || 'http://localhost:6379',
-  token: process.env.UPSTASH_REDIS_REST_TOKEN || '',
-});
+
+const isUpstashConfigured = Boolean(
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+);
+
+const redis = isUpstashConfigured
+  ? new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL!,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    })
+  : null;
+
+const fallbackLimiter = {
+  limit: async () => ({
+    success: true,
+    limit: 1000,
+    remaining: 1000,
+    reset: Date.now() + 60000,
+  }),
+};
 
 // Rate limiter global (1000 req/min por defecto)
-export const apiV1RateLimiter = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(1000, '1 m'),
-  prefix: 'api:v1',
-  analytics: true,
-});
+export const apiV1RateLimiter = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(1000, '1 m'),
+      prefix: 'api:v1',
+      analytics: true,
+    })
+  : fallbackLimiter;
 
 /**
  * Verificar rate limit para una empresa
@@ -34,7 +52,7 @@ export async function checkRateLimit(
 }> {
   try {
     // Si hay un límite custom (de la API key), crear rate limiter específico
-    if (customLimit && customLimit !== 1000) {
+    if (customLimit && customLimit !== 1000 && redis) {
       const customLimiter = new Ratelimit({
         redis,
         limiter: Ratelimit.slidingWindow(customLimit, '1 m'),
@@ -43,6 +61,15 @@ export async function checkRateLimit(
 
       const result = await customLimiter.limit(companyId);
       return result;
+    }
+
+    if (!redis) {
+      return {
+        success: true,
+        limit: customLimit || 1000,
+        remaining: customLimit || 1000,
+        reset: Date.now() + 60000,
+      };
     }
 
     // Usar rate limiter global

@@ -14,7 +14,9 @@ let redisClient: Redis | null = null;
 export function getRedisClient(): Redis | null {
   // Si Redis no está configurado, retornar null (modo fallback sin caché)
   if (!process.env.REDIS_URL && !process.env.REDIS_HOST) {
-    console.log('[Redis] No configurado - funcionando sin caché');
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[Redis] No configurado - funcionando sin caché');
+    }
     return null;
   }
 
@@ -41,7 +43,9 @@ export function getRedisClient(): Redis | null {
 
     // Event listeners para debugging
     redisClient.on('connect', () => {
-      console.log('[Redis] Conectado exitosamente');
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[Redis] Conectado exitosamente');
+      }
     });
 
     redisClient.on('error', (error) => {
@@ -49,7 +53,9 @@ export function getRedisClient(): Redis | null {
     });
 
     redisClient.on('ready', () => {
-      console.log('[Redis] Listo para usar');
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[Redis] Listo para usar');
+      }
     });
 
     // Conectar
@@ -73,7 +79,9 @@ export async function closeRedisClient(): Promise<void> {
   if (redisClient) {
     await redisClient.quit();
     redisClient = null;
-    console.log('[Redis] Conexión cerrada');
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[Redis] Conexión cerrada');
+    }
   }
 }
 

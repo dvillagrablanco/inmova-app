@@ -22,6 +22,7 @@ import {
   Twitter
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function SocialPlataformaPage() {
   const { data: session, status } = useSession();
@@ -84,6 +85,24 @@ export default function SocialPlataformaPage() {
       engagement: '0%'
     },
   ];
+
+  const handleConfigureNetwork = (id: string) => {
+    toast.info(`Configuración avanzada para ${id}`);
+  };
+
+  const handleOpenNetwork = (id: string) => {
+    const urls: Record<string, string> = {
+      facebook: 'https://business.facebook.com/',
+      instagram: 'https://www.instagram.com/',
+      linkedin: 'https://www.linkedin.com/company/',
+      twitter: 'https://x.com/',
+    };
+    window.open(urls[id] || 'https://www.facebook.com/', '_blank');
+  };
+
+  const handleConnectNetwork = (id: string) => {
+    toast.success(`Solicitud de conexión enviada a ${id}`);
+  };
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-5xl">
@@ -176,16 +195,21 @@ export default function SocialPlataformaPage() {
               <div className="flex gap-2">
                 {network.connected ? (
                   <>
-                    <Button size="sm" variant="outline" className="flex-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => handleConfigureNetwork(network.id)}
+                    >
                       <Settings className="h-4 w-4 mr-1" />
                       Configurar
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="outline" onClick={() => handleOpenNetwork(network.id)}>
                       <ExternalLink className="h-4 w-4" />
                     </Button>
                   </>
                 ) : (
-                  <Button size="sm" className="w-full">
+                  <Button size="sm" className="w-full" onClick={() => handleConnectNetwork(network.id)}>
                     Conectar Cuenta
                   </Button>
                 )}

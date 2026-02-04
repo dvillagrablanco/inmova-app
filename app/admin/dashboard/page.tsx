@@ -665,7 +665,11 @@ export default function SuperAdminDashboardPage() {
                             </div>
                           </div>
                         </div>
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => router.push(`/admin/clientes/${company.id}`)}
+                        >
                           Ver detalles
                         </Button>
                       </div>

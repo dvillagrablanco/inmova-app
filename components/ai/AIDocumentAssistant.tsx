@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -32,7 +33,6 @@ import {
   Zap,
   RefreshCw,
   Download,
-  Eye,
   ExternalLink,
   Info,
 } from 'lucide-react';
@@ -120,6 +120,106 @@ interface AIDocumentAssistantProps {
   /** Guardar documento automáticamente al aplicar datos */
   autoSaveDocument?: boolean;
 }
+
+interface PendingApplyData {
+  data: Record<string, any>;
+  sourceContext: AIDocumentAssistantProps['context'];
+  targetContext: AIDocumentAssistantProps['context'];
+  createdAt: number;
+  fileName?: string;
+  documentType?: string;
+  category?: string;
+}
+
+const PENDING_APPLY_STORAGE_PREFIX = 'ai-document-assistant:pending';
+const PENDING_APPLY_TTL_MS = 12 * 60 * 60 * 1000;
+
+const contextRoutes: Record<AIDocumentAssistantProps['context'], string | null> = {
+  inquilinos: '/inquilinos/nuevo',
+  contratos: '/contratos/nuevo',
+  seguros: '/seguros/nuevo',
+  propiedades: '/propiedades/crear',
+  facturas: '/pagos/nuevo',
+  proveedores: '/proveedores',
+  documentos: null,
+  general: null,
+};
+
+const contextLabels: Record<AIDocumentAssistantProps['context'], string> = {
+  inquilinos: 'Inquilinos',
+  contratos: 'Contratos',
+  seguros: 'Seguros',
+  propiedades: 'Propiedades',
+  facturas: 'Pagos',
+  proveedores: 'Proveedores',
+  documentos: 'Documentos',
+  general: 'Formularios',
+};
+
+const categoryToContext: Record<string, AIDocumentAssistantProps['context']> = {
+  dni_nie: 'inquilinos',
+  contrato_alquiler: 'contratos',
+  contrato_compraventa: 'contratos',
+  recibo_pago: 'facturas',
+  factura: 'facturas',
+  seguro: 'seguros',
+  escritura_propiedad: 'propiedades',
+  nota_simple: 'propiedades',
+  certificado_energetico: 'propiedades',
+  ite_iee: 'propiedades',
+  licencia: 'propiedades',
+  fianza: 'contratos',
+  inventario: 'contratos',
+};
+
+const buildPendingKey = (context: AIDocumentAssistantProps['context']) =>
+  `${PENDING_APPLY_STORAGE_PREFIX}:${context}`;
+
+const resolveTargetContext = (context: AIDocumentAssistantProps['context'], category?: string) =>
+  categoryToContext[category || ''] || context;
+
+const resolveTargetRoute = (context: AIDocumentAssistantProps['context']) =>
+  contextRoutes[context] || null;
+
+const loadPendingApplyData = (
+  context: AIDocumentAssistantProps['context']
+): PendingApplyData | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(buildPendingKey(context));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as PendingApplyData;
+    if (!parsed?.createdAt) {
+      window.localStorage.removeItem(buildPendingKey(context));
+      return null;
+    }
+    if (Date.now() - parsed.createdAt > PENDING_APPLY_TTL_MS) {
+      window.localStorage.removeItem(buildPendingKey(context));
+      return null;
+    }
+    return parsed;
+  } catch (error) {
+    return null;
+  }
+};
+
+const savePendingApplyData = (payload: PendingApplyData) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(buildPendingKey(payload.targetContext), JSON.stringify(payload));
+  } catch (error) {
+    console.error('[AIDocumentAssistant] No se pudo guardar datos pendientes', error);
+  }
+};
+
+const clearPendingApplyData = (context: AIDocumentAssistantProps['context']) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(buildPendingKey(context));
+  } catch (error) {
+    console.error('[AIDocumentAssistant] No se pudo limpiar datos pendientes', error);
+  }
+};
 
 // Mapeo de contexto a categorías de documentos relevantes
 const contextCategories: Record<string, string[]> = {
@@ -244,6 +344,10 @@ export function AIDocumentAssistant({
   entityType,
   autoSaveDocument = true,
 }: AIDocumentAssistantProps) {
+  const router = useRouter();
+  // Simplificar la UI: desactivar botones flotantes por defecto
+  const floatingWidgetsEnabled = false;
+  const resolvedVariant = !floatingWidgetsEnabled && variant === 'floating' ? 'inline' : variant;
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null);
@@ -262,27 +366,49 @@ export function AIDocumentAssistant({
   // Referencia para el panel de resultados (para scroll automático)
   const resultsRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (!onApplyData) return;
+    const pending = loadPendingApplyData(context);
+    if (!pending?.data) return;
+
+    onApplyData(pending.data);
+    clearPendingApplyData(context);
+
+    toast.success(`Datos aplicados desde ${pending.fileName || 'documento'}`, {
+      description: pending.documentType
+        ? `Formulario actualizado con ${pending.documentType}`
+        : 'Formulario actualizado con datos extraídos',
+    });
+  }, [context, onApplyData]);
+
+  const resolveReviewTarget = (analysis?: DocumentAnalysis) => {
+    const targetContext = resolveTargetContext(context, analysis?.classification?.category);
+    return {
+      targetContext,
+      targetRoute: resolveTargetRoute(targetContext),
+      targetLabel: contextLabels[targetContext] || 'formulario',
+    };
+  };
+
   // Manejar selección de archivos
-  const handleFileSelect = useCallback(
-    (files: FileList | null) => {
-      if (!files) return;
+  const handleFileSelect = (files: FileList | null) => {
+    if (!files) return;
 
-      const newFiles: UploadedFile[] = Array.from(files).map((file) => ({
-        file,
-        status: 'pending',
-        progress: 0,
-      }));
+    setIsOpen(true);
 
-      setUploadedFiles((prev) => [...prev, ...newFiles]);
+    const newFiles: UploadedFile[] = Array.from(files).map((file) => ({
+      file,
+      status: 'pending',
+      progress: 0,
+    }));
 
-      // Procesar cada archivo
-      newFiles.forEach((uploadedFile) => {
-        processFile(uploadedFile);
-      });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    },
-    [context]
-  );
+    setUploadedFiles((prev) => [...prev, ...newFiles]);
+
+    // Procesar cada archivo
+    newFiles.forEach((uploadedFile) => {
+      processFile(uploadedFile);
+    });
+  };
 
   // Procesar un archivo con timeout largo y reintentos
   const processFile = async (uploadedFile: UploadedFile) => {
@@ -370,21 +496,29 @@ export function AIDocumentAssistant({
         // Cerrar toast de carga
         toast.dismiss(toastId);
 
-        // Notificar éxito
         const categoryName = categoryNames[analysis.classification.category] || 'Documento';
         const fieldsCount = analysis.extractedFields.length;
+        const canReview = fieldsCount > 0;
+
+        const updatedFile = {
+          ...uploadedFile,
+          status: 'completed' as const,
+          progress: 100,
+          analysis,
+        };
 
         // Toast con botón de acción para abrir el diálogo
         toast.success(`${categoryName} analizado correctamente`, {
           description: `Se extrajeron ${fieldsCount} campos.`,
           duration: 8000,
-          action: onApplyData && fieldsCount > 0 ? {
-            label: 'Aplicar datos',
-            onClick: () => {
-              setPendingReviewFile(updatedFile);
-              setReviewDialogOpen(true);
-            },
-          } : undefined,
+          action: canReview
+            ? {
+                label: onApplyData ? 'Revisar y aplicar' : 'Revisar datos',
+                onClick: () => {
+                  openDataReview(updatedFile);
+                },
+              }
+            : undefined,
         });
 
         // Callback
@@ -393,24 +527,15 @@ export function AIDocumentAssistant({
         }
 
         // Seleccionar automáticamente el archivo recién procesado
-        const updatedFile = {
-          ...uploadedFile,
-          status: 'completed' as const,
-          progress: 100,
-          analysis,
-        };
         setSelectedFile(updatedFile);
 
-        // CRÍTICO: Abrir diálogo de revisión automáticamente para mejor UX
-        // Se abre inmediatamente para que el usuario vea los datos extraídos
-        if (onApplyData && analysis.extractedFields.length > 0) {
-          // Usar setTimeout corto para asegurar que el estado se ha actualizado
+        // Abrir diálogo de revisión automáticamente para mejor UX
+        if (canReview) {
           setTimeout(() => {
-            setPendingReviewFile(updatedFile);
-            setReviewDialogOpen(true);
+            openDataReview(updatedFile);
           }, 100);
         } else {
-          // Si no hay onApplyData, hacer scroll al panel de resultados
+          // Si no hay datos, hacer scroll al panel de resultados
           setTimeout(() => {
             resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }, 500);
@@ -507,8 +632,8 @@ export function AIDocumentAssistant({
       return;
     }
 
-    if (!onApplyData) {
-      toast.info('La función de aplicar datos no está configurada en este contexto');
+    if (!uploadedFile.analysis.extractedFields?.length) {
+      toast.info('No se detectaron campos extraídos en este documento');
       return;
     }
 
@@ -565,12 +690,23 @@ export function AIDocumentAssistant({
 
   // Aplicar datos confirmados del diálogo de revisión
   const handleConfirmData = async (selectedFields: Record<string, string>) => {
-    if (!onApplyData) {
-      return;
-    }
+    const analysis = pendingReviewFile?.analysis;
+    const targetContext = resolveTargetContext(context, analysis?.classification?.category);
 
-    // Aplicar datos al formulario
-    onApplyData(selectedFields);
+    if (onApplyData) {
+      // Aplicar datos al formulario
+      onApplyData(selectedFields);
+    } else {
+      savePendingApplyData({
+        data: selectedFields,
+        sourceContext: context,
+        targetContext,
+        createdAt: Date.now(),
+        fileName: pendingReviewFile?.file?.name,
+        documentType: analysis?.classification?.specificType,
+        category: analysis?.classification?.category,
+      });
+    }
 
     // Si autoSaveDocument está activado, guardar el documento
     if (autoSaveDocument && pendingReviewFile) {
@@ -604,11 +740,6 @@ export function AIDocumentAssistant({
 
   // Aplicar datos extraídos directamente (sin revisión - para casos especiales)
   const applyExtractedDataDirect = (analysis: DocumentAnalysis) => {
-    if (!onApplyData) {
-      toast.info('Función de aplicar datos no configurada');
-      return;
-    }
-
     // Convertir campos extraídos a objeto
     const data: Record<string, any> = {};
     analysis.extractedFields.forEach((field) => {
@@ -619,8 +750,33 @@ export function AIDocumentAssistant({
       }
     });
 
-    onApplyData(data);
-    toast.success('Datos aplicados al formulario');
+    if (onApplyData) {
+      onApplyData(data);
+      toast.success('Datos aplicados al formulario');
+      return;
+    }
+
+    const targetContext = resolveTargetContext(context, analysis.classification?.category);
+    const targetRoute = resolveTargetRoute(targetContext);
+
+    savePendingApplyData({
+      data,
+      sourceContext: context,
+      targetContext,
+      createdAt: Date.now(),
+      documentType: analysis.classification?.specificType,
+      category: analysis.classification?.category,
+    });
+
+    toast.success(`Datos preparados para ${contextLabels[targetContext]}`, {
+      description: 'Abre el formulario para aplicar los campos',
+      action: targetRoute
+        ? {
+            label: 'Abrir formulario',
+            onClick: () => router.push(targetRoute),
+          }
+        : undefined,
+    });
   };
 
   // Renderizar estadísticas de archivos
@@ -649,12 +805,12 @@ export function AIDocumentAssistant({
 
   // Botón trigger según variante
   const renderTrigger = () => {
-    if (variant === 'minimal') {
+    if (resolvedVariant === 'minimal') {
       return (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button size="icon" variant="ghost">
+              <Button size="icon" variant="ghost" type="button">
                 <Brain className="h-5 w-5" />
               </Button>
             </TooltipTrigger>
@@ -666,11 +822,14 @@ export function AIDocumentAssistant({
       );
     }
 
-    if (variant === 'inline') {
+    if (resolvedVariant === 'inline') {
       return (
-        <Button 
-          variant="outline" 
+        <Button
+          type="button"
+          variant="outline"
           className="w-full gap-2 border-violet-300 dark:border-violet-700 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 hover:from-violet-100 hover:to-purple-100 dark:hover:from-violet-900/40 dark:hover:to-purple-900/40 text-violet-700 dark:text-violet-300"
+          onClick={() => setIsOpen(true)}
+          data-testid="ai-assistant-trigger"
         >
           <Brain className="h-4 w-4 text-violet-600" />
           <span className="font-medium">Escanear DNI/Documento con IA</span>
@@ -688,6 +847,7 @@ export function AIDocumentAssistant({
     return (
       <div className={`${positionClasses[position]} z-[60] hidden md:block`}>
         <Button
+          type="button"
           size="lg"
           className="h-14 w-14 rounded-full shadow-xl bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-500 hover:shadow-2xl hover:scale-105 transition-all animate-pulse-slow"
         >
@@ -703,10 +863,23 @@ export function AIDocumentAssistant({
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>{renderTrigger()}</SheetTrigger>
+    <>
+      <input
+        id="file-upload"
+        type="file"
+        multiple
+        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.txt"
+        className="hidden"
+        onChange={(e) => handleFileSelect(e.target.files)}
+        data-testid="ai-file-upload"
+      />
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <SheetTrigger asChild>{renderTrigger()}</SheetTrigger>
 
-      <SheetContent className="w-full sm:max-w-xl bg-white dark:bg-gray-950 border-l shadow-xl">
+      <SheetContent
+        className="w-full sm:max-w-xl bg-white dark:bg-gray-950 border-l shadow-xl"
+        data-testid="ai-assistant-panel"
+      >
         <SheetHeader className="space-y-3">
           <SheetTitle className="flex items-center gap-3">
             <div className="h-10 w-10 shrink-0 rounded-lg bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-500 flex items-center justify-center">
@@ -766,7 +939,7 @@ export function AIDocumentAssistant({
             <Upload className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
             <p className="text-sm font-medium mb-1">Arrastra documentos aquí</p>
             <p className="text-xs text-muted-foreground mb-3">
-              PDF, imágenes (JPG, PNG) o documentos de texto
+              PDF, imágenes (JPG, PNG), Word (DOC/DOCX) o documentos de texto
             </p>
             <label htmlFor="file-upload">
               <Button variant="outline" size="sm" asChild>
@@ -776,14 +949,6 @@ export function AIDocumentAssistant({
                 </span>
               </Button>
             </label>
-            <input
-              id="file-upload"
-              type="file"
-              multiple
-              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.txt"
-              className="hidden"
-              onChange={(e) => handleFileSelect(e.target.files)}
-            />
           </div>
 
           {/* Tipos de documentos sugeridos */}
@@ -909,8 +1074,7 @@ export function AIDocumentAssistant({
                         {/* Botón de aplicar datos - visible directamente en cada documento analizado */}
                         {uploadedFile.status === 'completed' &&
                           uploadedFile.analysis &&
-                          uploadedFile.analysis.extractedFields.length > 0 &&
-                          onApplyData && (
+                          uploadedFile.analysis.extractedFields.length > 0 && (
                             <Button
                               size="sm"
                               className="w-full mt-2 bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
@@ -920,7 +1084,9 @@ export function AIDocumentAssistant({
                               }}
                             >
                               <Sparkles className="h-4 w-4 mr-1" />
-                              Revisar y aplicar {uploadedFile.analysis.extractedFields.length} campos
+                              {onApplyData
+                                ? `Revisar y aplicar ${uploadedFile.analysis.extractedFields.length} campos`
+                                : `Revisar ${uploadedFile.analysis.extractedFields.length} campos`}
                             </Button>
                           )}
                       </CardContent>
@@ -1006,20 +1172,14 @@ export function AIDocumentAssistant({
 
                 {/* Acciones */}
                 <div className="flex gap-2">
-                  {onApplyData && selectedFile.analysis.extractedFields.length > 0 && (
+                  {selectedFile.analysis.extractedFields.length > 0 && (
                     <Button
                       size="sm"
                       className="flex-1 bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
                       onClick={() => openDataReview(selectedFile)}
                     >
                       <CheckCircle2 className="h-4 w-4 mr-1" />
-                      Revisar y aplicar datos
-                    </Button>
-                  )}
-                  {!onApplyData && selectedFile.analysis.extractedFields.length > 0 && (
-                    <Button size="sm" variant="outline" className="flex-1">
-                      <Eye className="h-4 w-4 mr-1" />
-                      Ver datos extraídos
+                      {onApplyData ? 'Revisar y aplicar datos' : 'Revisar datos extraídos'}
                     </Button>
                   )}
                 </div>
@@ -1055,9 +1215,32 @@ export function AIDocumentAssistant({
             categoryNames[pendingReviewFile.analysis.classification.category] || 'Documento'
           }
           onConfirm={handleConfirmData}
+          confirmLabel={onApplyData ? undefined : (count) => `Guardar ${count} campos`}
+          successMessage={
+            onApplyData
+              ? undefined
+              : (count) => {
+                  const { targetLabel } = resolveReviewTarget(pendingReviewFile.analysis);
+                  return `Datos preparados para ${targetLabel} (${count} campos)`;
+                }
+          }
+          successAction={
+            !onApplyData
+              ? (() => {
+                  const { targetRoute } = resolveReviewTarget(pendingReviewFile.analysis);
+                  return targetRoute
+                    ? {
+                        label: 'Abrir formulario',
+                        onClick: () => router.push(targetRoute),
+                      }
+                    : undefined;
+                })()
+              : undefined
+          }
         />
       )}
     </Sheet>
+    </>
   );
 }
 

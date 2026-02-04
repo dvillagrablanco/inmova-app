@@ -94,6 +94,28 @@ interface DocumentoFirma {
   };
 }
 
+const SIGNATURE_STATUS_MAP: Record<string, string> = {
+  PENDING: 'pendiente',
+  SIGNED: 'firmado',
+  DECLINED: 'rechazado',
+  EXPIRED: 'expirado',
+  CANCELLED: 'cancelado',
+};
+
+const normalizeSignatureStatus = (status: string) =>
+  SIGNATURE_STATUS_MAP[status] || status?.toLowerCase() || 'pendiente';
+
+const normalizeSignerStatus = (status: string) => status?.toLowerCase() || 'pendiente';
+
+const normalizeDocumentoFirma = (documento: DocumentoFirma): DocumentoFirma => ({
+  ...documento,
+  estado: normalizeSignatureStatus(documento.estado),
+  firmantes: documento.firmantes.map((firmante) => ({
+    ...firmante,
+    estado: normalizeSignerStatus(firmante.estado),
+  })),
+});
+
 export default function FirmaDigitalPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
@@ -130,11 +152,12 @@ export default function FirmaDigitalPage() {
   const cargarDocumentos = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/digital-signature');
+      const response = await fetch('/api/admin/firma-digital/documentos');
       if (!response.ok) throw new Error('Error cargando documentos');
 
       const data = await response.json();
-      setDocumentos(data);
+      const normalized = Array.isArray(data) ? data.map(normalizeDocumentoFirma) : [];
+      setDocumentos(normalized);
     } catch (error) {
       logger.error('Error:', error);
       toast.error('Error al cargar los documentos');
@@ -172,11 +195,11 @@ export default function FirmaDigitalPage() {
 
   const verDetalle = async (documentoId: string) => {
     try {
-      const response = await fetch(`/api/digital-signature/${documentoId}`);
+      const response = await fetch(`/api/admin/firma-digital/documentos/${documentoId}`);
       if (!response.ok) throw new Error('Error cargando detalle');
 
       const data = await response.json();
-      setDocumentoSeleccionado(data.documento);
+      setDocumentoSeleccionado(normalizeDocumentoFirma(data.documento));
       setMostrarDialogoDetalle(true);
     } catch (error) {
       logger.error('Error:', error);
@@ -186,7 +209,7 @@ export default function FirmaDigitalPage() {
 
   const enviarRecordatorio = async (documentoId: string) => {
     try {
-      const response = await fetch(`/api/digital-signature/${documentoId}/reminder`, {
+      const response = await fetch(`/api/admin/firma-digital/documentos/${documentoId}/reminder`, {
         method: 'POST',
       });
 
@@ -205,7 +228,7 @@ export default function FirmaDigitalPage() {
     }
 
     try {
-      const response = await fetch(`/api/digital-signature/${documentoId}/cancel`, {
+      const response = await fetch(`/api/admin/firma-digital/documentos/${documentoId}/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ motivo: 'Cancelado por el usuario' }),
@@ -227,14 +250,20 @@ export default function FirmaDigitalPage() {
       { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
     > = {
       pendiente: { label: 'Pendiente', variant: 'secondary' },
+      pending: { label: 'Pendiente', variant: 'secondary' },
       enviado: { label: 'Enviado', variant: 'default' },
       firmado: { label: 'Completado', variant: 'default' },
+      signed: { label: 'Completado', variant: 'default' },
       rechazado: { label: 'Rechazado', variant: 'destructive' },
+      declined: { label: 'Rechazado', variant: 'destructive' },
       cancelado: { label: 'Cancelado', variant: 'outline' },
+      cancelled: { label: 'Cancelado', variant: 'outline' },
       expirado: { label: 'Expirado', variant: 'destructive' },
+      expired: { label: 'Expirado', variant: 'destructive' },
     };
 
-    const config = estados[estado] || { label: estado, variant: 'outline' };
+    const normalized = estado?.toLowerCase() || 'pendiente';
+    const config = estados[normalized] || { label: estado, variant: 'outline' };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 

@@ -159,10 +159,13 @@ export class BankinterIntegrationService {
     ];
 
     const missing = requiredVars.filter(varName => !process.env[varName]);
+    const hasAnyConfig = requiredVars.some(varName => !!process.env[varName]);
     
     if (missing.length > 0) {
-      logger.warn(`⚠️ Bankinter Integration: Faltan variables de entorno: ${missing.join(', ')}`);
-      logger.warn('🔧 El servicio funcionará en MODO DEMO');
+      if (hasAnyConfig && process.env.NODE_ENV !== 'production') {
+        logger.warn(`⚠️ Bankinter Integration: Faltan variables de entorno: ${missing.join(', ')}`);
+        logger.warn('🔧 El servicio funcionará en MODO DEMO');
+      }
       return false;
     }
 

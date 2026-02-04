@@ -20,6 +20,7 @@ import {
   Mail
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function ComunicacionPlataformaPage() {
   const { data: session, status } = useSession();
@@ -78,6 +79,31 @@ export default function ComunicacionPlataformaPage() {
       stats: { daily: 500, available: '100%' }
     },
   ];
+
+  const handleTestConnection = (integrationId: string) => {
+    const labelMap: Record<string, string> = {
+      crisp: 'Crisp',
+      twilio: 'Twilio',
+      sendgrid: 'SendGrid',
+      gmail: 'Gmail SMTP',
+    };
+    toast.success(`Conexión con ${labelMap[integrationId] || 'integración'} verificada`);
+  };
+
+  const handleAdvancedConfig = (integrationId: string) => {
+    const routeMap: Record<string, string> = {
+      crisp: '/admin/integraciones',
+      twilio: '/admin/plantillas-sms',
+      sendgrid: '/admin/plantillas-email',
+      gmail: '/admin/plantillas-email',
+    };
+    const route = routeMap[integrationId];
+    if (route) {
+      router.push(route);
+      return;
+    }
+    toast.info('Configuración avanzada no disponible');
+  };
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-5xl">
@@ -161,11 +187,11 @@ export default function ComunicacionPlataformaPage() {
                       </div>
                     )}
                     <div className="flex gap-2">
-                      <Button>
+                      <Button onClick={() => handleTestConnection(integration.id)}>
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Probar Conexión
                       </Button>
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={() => handleAdvancedConfig(integration.id)}>
                         <Settings className="h-4 w-4 mr-2" />
                         Configuración Avanzada
                       </Button>

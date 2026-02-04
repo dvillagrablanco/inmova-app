@@ -63,6 +63,11 @@ export default function MatchingPanel() {
     }
   };
 
+  const handleReject = (profileId: string) => {
+    setMatches((prev) => prev.filter((item) => item.profile.id !== profileId));
+    toast.info('Sugerencia descartada');
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-12">
@@ -160,7 +165,7 @@ export default function MatchingPanel() {
                     <Check className="h-4 w-4 mr-2" />
                     Conectar
                   </Button>
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" onClick={() => handleReject(match.profile.id)}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>

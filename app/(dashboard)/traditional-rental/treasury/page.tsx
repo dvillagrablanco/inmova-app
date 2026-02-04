@@ -4,8 +4,50 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, TrendingDown, AlertCircle, CheckCircle } from 'lucide-react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export default function TreasuryPage() {
+  const router = useRouter();
+
+  const downloadCsv = (filename: string, rows: Array<Array<string | number>>) => {
+    const csv = rows
+      .map((row) =>
+        row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(';')
+      )
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleGenerateForecast = () => {
+    const rows = [
+      ['Mes', 'Previsión (€)'],
+      ['Ene', 5200],
+      ['Feb', 4800],
+      ['Mar', -1200],
+      ['Abr', 3500],
+      ['May', 6100],
+      ['Jun', 4900],
+    ];
+    downloadCsv('prevision_cash_flow.csv', rows);
+    toast.success('Previsión generada');
+  };
+
+  const handleReviewCashflow = () => {
+    router.push('/pagos');
+    toast.info('Revisa cobros y gastos desde Pagos');
+  };
+
+  const handleViewOverdue = () => {
+    router.push('/pagos?filter=pending');
+    toast.info('Accede a los pagos vencidos');
+  };
   return (
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto">
@@ -40,7 +82,9 @@ export default function TreasuryPage() {
                   );
                 })}
               </div>
-              <Button className="mt-4">Generar Nueva Previsión</Button>
+              <Button className="mt-4" onClick={handleGenerateForecast}>
+                Generar Nueva Previsión
+              </Button>
             </Card>
 
             {/* Depósitos y Provisiones */}
@@ -93,7 +137,7 @@ export default function TreasuryPage() {
                     <p className="font-medium">Cash flow negativo en Marzo</p>
                     <p className="text-sm text-gray-600">Déficit proyectado: €1,200</p>
                   </div>
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" onClick={handleReviewCashflow}>
                     Revisar
                   </Button>
                 </div>
@@ -103,7 +147,7 @@ export default function TreasuryPage() {
                     <p className="font-medium">5 pagos vencidos de más de 30 días</p>
                     <p className="text-sm text-gray-600">Total: €1,850</p>
                   </div>
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" onClick={handleViewOverdue}>
                     Ver
                   </Button>
                 </div>

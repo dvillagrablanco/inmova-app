@@ -153,6 +153,27 @@ export default function MaintenancePage() {
   const completedCount = requests.filter(r => r.estado === 'completado').length;
   const urgentCount = requests.filter(r => r.prioridad === 'urgente' && r.estado !== 'completado').length;
 
+  const handleViewRequest = (req: MaintenanceRequest) => {
+    toast.info(`Detalle de la solicitud: ${req.titulo}`);
+  };
+
+  const handleEditRequest = (req: MaintenanceRequest) => {
+    toast.info(`Editar solicitud: ${req.titulo}`);
+  };
+
+  const handleAssignTechnician = (req: MaintenanceRequest) => {
+    toast.success(`Técnico asignado a: ${req.titulo}`);
+  };
+
+  const handleCompleteRequest = (reqId: string) => {
+    setRequests((prev) =>
+      prev.map((request) =>
+        request.id === reqId ? { ...request, estado: 'completado' } : request
+      )
+    );
+    toast.success('Solicitud marcada como completada');
+  };
+
   const estadoBadge = (estado: string) => {
     switch (estado) {
       case 'pendiente': return 'bg-yellow-100 text-yellow-800';
@@ -202,7 +223,7 @@ export default function MaintenancePage() {
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="sm">
+              <Button size="sm" onClick={() => setIsDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nueva Solicitud
               </Button>
@@ -414,15 +435,23 @@ export default function MaintenancePage() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => undefined}>
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Ver detalles</DropdownMenuItem>
-                      <DropdownMenuItem>Editar</DropdownMenuItem>
-                      <DropdownMenuItem>Asignar técnico</DropdownMenuItem>
-                      <DropdownMenuItem>Marcar como completado</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleViewRequest(req)}>
+                        Ver detalles
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleEditRequest(req)}>
+                        Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleAssignTechnician(req)}>
+                        Asignar técnico
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleCompleteRequest(req.id)}>
+                        Marcar como completado
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>

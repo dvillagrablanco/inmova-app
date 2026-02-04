@@ -38,6 +38,14 @@ interface Inspection {
 
 export default function QualityControlPage() {
   const router = useRouter();
+
+  const handleViewPhotos = (phase: string) => {
+    toast.info(`Fotos de inspección: ${phase}`);
+  };
+
+  const handleDownloadReport = (phase: string) => {
+    toast.success(`Informe descargado: ${phase}`);
+  };
   const [inspections] = useState<Inspection[]>([
     {
       id: 'i1',
@@ -238,11 +246,19 @@ export default function QualityControlPage() {
                           <span>{inspection.photos} fotografías adjuntas</span>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewPhotos(inspection.phase)}
+                          >
                             <Camera className="h-4 w-4 mr-2" />
                             Ver Fotos
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDownloadReport(inspection.phase)}
+                          >
                             <FileText className="h-4 w-4 mr-2" />
                             Descargar Informe
                           </Button>

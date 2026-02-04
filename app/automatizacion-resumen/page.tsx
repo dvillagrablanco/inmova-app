@@ -224,11 +224,11 @@ export default function AutomationSummaryPage() {
                     </div>
                   </div>
                   {feature.link && (
-                    <Link href={feature.link}>
-                      <Button size="sm">
+                    <Button size="sm" asChild>
+                      <Link href={feature.link}>
                         Ver <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   )}
                 </div>
               </CardHeader>

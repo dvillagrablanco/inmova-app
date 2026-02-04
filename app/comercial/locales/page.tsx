@@ -114,6 +114,14 @@ export default function LocalesPage() {
     return matchesSearch && matchesEstado;
   });
 
+  const handleMoreFilters = () => {
+    toast.info('Filtros avanzados en desarrollo');
+  };
+
+  const handleAction = (label: string) => {
+    toast.success(label);
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto p-6 space-y-6">
@@ -219,7 +227,7 @@ export default function LocalesPage() {
                 <SelectItem value="reservada">Reservados</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleMoreFilters}>
               <Filter className="h-4 w-4 mr-2" />
               Más filtros
             </Button>
@@ -271,25 +279,25 @@ export default function LocalesPage() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => undefined}>
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleAction('Detalle de local abierto')}>
                         <Eye className="h-4 w-4 mr-2" />
                         Ver detalles
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleAction('Edición de local')}>
                         <Edit className="h-4 w-4 mr-2" />
                         Editar
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleAction('Ver contrato')}>
                         <FileText className="h-4 w-4 mr-2" />
                         Ver contrato
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleAction('Visita programada')}>
                         <Calendar className="h-4 w-4 mr-2" />
                         Programar visita
                       </DropdownMenuItem>

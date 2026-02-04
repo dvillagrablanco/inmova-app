@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
+import { isIgnorableFetchError } from '@/lib/fetch-error';
 
 export interface Notification {
   id: string;
@@ -62,7 +63,9 @@ export function useNotifications(options?: {
       setNotifications(data.notifications || []);
       setUnreadCount(data.unreadCount || 0);
     } catch (err) {
-      console.error('Error al cargar notificaciones:', err);
+      if (!isIgnorableFetchError(err)) {
+        console.error('Error al cargar notificaciones:', err);
+      }
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
@@ -85,7 +88,9 @@ export function useNotifications(options?: {
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (err) {
-      console.error('Error al marcar notificación como leída:', err);
+      if (!isIgnorableFetchError(err)) {
+        console.error('Error al marcar notificación como leída:', err);
+      }
       throw err;
     }
   }, []);
@@ -104,7 +109,9 @@ export function useNotifications(options?: {
       setNotifications(prev => prev.map(n => ({ ...n, leida: true })));
       setUnreadCount(0);
     } catch (err) {
-      console.error('Error al marcar todas como leídas:', err);
+      if (!isIgnorableFetchError(err)) {
+        console.error('Error al marcar todas como leídas:', err);
+      }
       throw err;
     }
   }, []);
