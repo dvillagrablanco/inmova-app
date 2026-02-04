@@ -86,8 +86,11 @@ test.describe('Flujo Completo DNI → Formulario', () => {
     await documentsSection.scrollIntoViewIfNeeded();
 
     const inlineTrigger = page.getByRole('button', { name: /Escanear DNI/i }).first();
-    if (await inlineTrigger.isVisible({ timeout: 5000 }).catch(() => false)) {
+    try {
+      await inlineTrigger.scrollIntoViewIfNeeded({ timeout: 5000 });
       await inlineTrigger.click({ force: true });
+    } catch {
+      // Ignorar y dejar que el fallback a flotante se encargue
     }
 
     const dropzoneText = page.locator('text=Arrastra documentos aquí').first();
