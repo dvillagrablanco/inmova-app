@@ -241,7 +241,11 @@ export default function BIPage() {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">Rango de fechas</label>
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => toast.info('Selector de rango en desarrollo')}
+                  >
                     <Calendar className="h-4 w-4 mr-2" />
                     {format(new Date(), 'dd MMM yyyy', { locale: es })}
                   </Button>

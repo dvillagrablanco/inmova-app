@@ -204,6 +204,11 @@ export default function AutomatizacionPage() {
     }
   };
 
+  const handleUseTemplate = (template: AutomationTemplate) => {
+    setShowCreateDialog(true);
+    toast.success(`Plantilla "${template.nombre}" cargada`);
+  };
+
   const toggleAutomation = async (id: string, currentState: boolean) => {
     try {
       const res = await fetch(`/api/automations/${id}/toggle`, {
@@ -489,7 +494,7 @@ export default function AutomatizacionPage() {
         </CardDescription>
         </CardHeader>
         <CardContent>
-        <Button size="sm" className="w-full">
+        <Button size="sm" className="w-full" onClick={() => handleUseTemplate(template)}>
         Usar Plantilla
         </Button>
         </CardContent>

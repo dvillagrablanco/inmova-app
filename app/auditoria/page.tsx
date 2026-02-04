@@ -267,7 +267,7 @@ export default function AuditoriaPage() {
               </div>
               <Dialog open={openReportDialog} onOpenChange={setOpenReportDialog}>
                 <DialogTrigger asChild>
-                  <Button className="w-full sm:w-auto">
+                  <Button className="w-full sm:w-auto" onClick={() => setOpenReportDialog(true)}>
                     <FileText className="mr-2 h-4 w-4" />
                     Generar Reporte
                   </Button>
