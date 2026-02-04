@@ -370,7 +370,13 @@ export default function ActasPage() {
                     <TableRow key={acta.id}>
                       <TableCell className="font-medium">#{acta.numeroActa}</TableCell>
                       <TableCell>
-                        {format(new Date(acta.fecha), 'd MMM yyyy, HH:mm', { locale: es })}
+                        {(() => {
+                          const fechaActa = new Date(acta.fecha);
+                          if (Number.isNaN(fechaActa.getTime())) {
+                            return 'Sin fecha';
+                          }
+                          return format(fechaActa, 'd MMM yyyy, HH:mm', { locale: es });
+                        })()}
                       </TableCell>
                       <TableCell>{acta.convocatoria}</TableCell>
                       <TableCell>
