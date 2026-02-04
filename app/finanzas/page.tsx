@@ -402,7 +402,12 @@ export default function FinanzasPage() {
                     </div>
                   )}
                   {module.available && (
-                    <Button variant="ghost" className="w-full mt-2 justify-between" size="sm">
+                    <Button
+                      variant="ghost"
+                      className="w-full mt-2 justify-between"
+                      size="sm"
+                      onClick={() => router.push(module.href)}
+                    >
                       Acceder
                       <ArrowRight className="h-4 w-4" />
                     </Button>
