@@ -1,14 +1,66 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileText, Euro, Wallet, Vote, Plus } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function CommunitiesPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('minutes');
+
+  const goToDocuments = (tipo: string, message: string) => {
+    router.push(`/documentos?tipo=${tipo}`);
+    toast.info(message);
+  };
+
+  const handleNuevaActa = () => {
+    goToDocuments('acta_comunidad', 'Crea el acta desde Documentos');
+  };
+
+  const handleVerActa = () => {
+    goToDocuments('acta_comunidad', 'Revisa el acta en Documentos');
+  };
+
+  const handleFirmarActa = () => {
+    router.push('/firma-digital');
+    toast.info('Firma el acta desde Firma Digital');
+  };
+
+  const handleGenerarCuotas = () => {
+    router.push('/pagos/nuevo');
+    toast.info('Genera las cuotas desde Pagos');
+  };
+
+  const handleMarcarPagado = (unidad: number) => {
+    toast.success(`Cuota de la unidad ${unidad} marcada como pagada`);
+  };
+
+  const handleCrearFondo = () => {
+    router.push('/traditional-rental/treasury');
+    toast.info('Gestiona los fondos desde Tesorería');
+  };
+
+  const handleFondoMovimiento = (accion: string) => {
+    router.push('/traditional-rental/treasury');
+    toast.info(`Gestiona ${accion} desde Tesorería`);
+  };
+
+  const handleNuevaVotacion = () => {
+    toast.info('Crea una votación y comparte el enlace con los propietarios');
+  };
+
+  const handleVoto = (title: string, status: string) => {
+    if (status === 'cerrada') {
+      toast.info(`Resultados disponibles para "${title}"`);
+      return;
+    }
+    toast.success(`Voto registrado para "${title}"`);
+  };
 
   return (
     <AuthenticatedLayout>
@@ -45,7 +97,7 @@ export default function CommunitiesPage() {
                 <Card className="p-6">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-semibold">Actas de Junta</h3>
-                    <Button>
+                    <Button onClick={handleNuevaActa}>
                       <Plus className="h-4 w-4 mr-2" />
                       Nueva Acta
                     </Button>
@@ -66,10 +118,10 @@ export default function CommunitiesPage() {
                           </span>
                         </div>
                         <div className="mt-3 flex gap-2">
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={handleVerActa}>
                             Ver Acta
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={handleFirmarActa}>
                             Firmar
                           </Button>
                         </div>
@@ -84,7 +136,7 @@ export default function CommunitiesPage() {
                 <Card className="p-6">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-semibold">Cuotas de Comunidad</h3>
-                    <Button>
+                    <Button onClick={handleGenerarCuotas}>
                       <Plus className="h-4 w-4 mr-2" />
                       Generar Cuotas
                     </Button>
@@ -116,7 +168,9 @@ export default function CommunitiesPage() {
                               <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs">
                                 Pendiente
                               </span>
-                              <Button size="sm">Marcar Pagado</Button>
+                              <Button size="sm" onClick={() => handleMarcarPagado(i)}>
+                                Marcar Pagado
+                              </Button>
                             </>
                           ) : (
                             <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs">
@@ -135,7 +189,7 @@ export default function CommunitiesPage() {
                 <Card className="p-6">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-semibold">Fondos de Reserva</h3>
-                    <Button>
+                    <Button onClick={handleCrearFondo}>
                       <Plus className="h-4 w-4 mr-2" />
                       Crear Fondo
                     </Button>
@@ -178,13 +232,13 @@ export default function CommunitiesPage() {
                           />
                         </div>
                         <div className="flex gap-2">
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleFondoMovimiento('ingresos')}>
                             Añadir Ingreso
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleFondoMovimiento('gastos')}>
                             Registrar Gasto
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleFondoMovimiento('movimientos')}>
                             Ver Movimientos
                           </Button>
                         </div>
@@ -199,7 +253,7 @@ export default function CommunitiesPage() {
                 <Card className="p-6">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-semibold">Votaciones Telemáticas</h3>
-                    <Button>
+                    <Button onClick={handleNuevaVotacion}>
                       <Plus className="h-4 w-4 mr-2" />
                       Nueva Votación
                     </Button>
@@ -245,7 +299,7 @@ export default function CommunitiesPage() {
                             style={{ width: `${(vote.votes / vote.total) * 100}%` }}
                           />
                         </div>
-                        <Button size="sm" disabled={vote.status === 'cerrada'}>
+                        <Button size="sm" onClick={() => handleVoto(vote.title, vote.status)}>
                           {vote.status === 'activa' ? 'Emitir Voto' : 'Ver Resultados'}
                         </Button>
                       </div>

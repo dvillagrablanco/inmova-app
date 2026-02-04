@@ -4,8 +4,29 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, TrendingDown, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export default function RenewalsPage() {
+  const router = useRouter();
+
+  const handleGenerateRecommendations = () => {
+    toast.success('Recomendaciones generadas');
+  };
+
+  const handleGenerateProposal = (unit: string) => {
+    router.push(`/contratos?search=${encodeURIComponent(unit)}`);
+    toast.info('Genera la propuesta desde Contratos');
+  };
+
+  const handleViewHistory = (unit: string) => {
+    router.push(`/contratos?search=${encodeURIComponent(unit)}`);
+    toast.info('Historial disponible en Contratos');
+  };
+
+  const handleFullAnalysis = (unit: string) => {
+    toast.info(`Análisis completo para ${unit}`);
+  };
   return (
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto">
@@ -42,7 +63,7 @@ export default function RenewalsPage() {
             <Card className="p-6 mb-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-semibold">Análisis Predictivo de Renovaciones</h3>
-                <Button>Generar Recomendaciones</Button>
+                <Button onClick={handleGenerateRecommendations}>Generar Recomendaciones</Button>
               </div>
               <div className="space-y-4">
                 {[
@@ -170,13 +191,14 @@ export default function RenewalsPage() {
                       <Button
                         size="sm"
                         variant={contract.recommendation === 'renovar' ? 'default' : 'outline'}
+                        onClick={() => handleGenerateProposal(contract.unit)}
                       >
                         Generar Propuesta
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => handleViewHistory(contract.unit)}>
                         Ver Historial
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => handleFullAnalysis(contract.unit)}>
                         Análisis Completo
                       </Button>
                     </div>
