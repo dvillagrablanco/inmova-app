@@ -102,6 +102,14 @@ export default function FeedSocial() {
     }
   };
 
+  const handleComment = () => {
+    toast.info('Comentarios en desarrollo');
+  };
+
+  const handleShare = () => {
+    toast.success('Enlace compartido');
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-12">
@@ -208,11 +216,11 @@ export default function FeedSocial() {
                     />
                     <span>{post.likes?.length || 0}</span>
                   </Button>
-                  <Button variant="ghost" size="sm" className="gap-2">
+                  <Button variant="ghost" size="sm" className="gap-2" onClick={handleComment}>
                     <MessageCircle className="h-4 w-4" />
                     <span>{post.comentarios?.length || 0}</span>
                   </Button>
-                  <Button variant="ghost" size="sm" className="gap-2">
+                  <Button variant="ghost" size="sm" className="gap-2" onClick={handleShare}>
                     <Share2 className="h-4 w-4" />
                     Compartir
                   </Button>

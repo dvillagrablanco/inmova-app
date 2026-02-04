@@ -124,6 +124,14 @@ export default function CoworkingPage() {
     return matchesSearch && matchesTipo;
   });
 
+  const handleMoreFilters = () => {
+    toast.info('Filtros avanzados en desarrollo');
+  };
+
+  const handleAction = (label: string) => {
+    toast.success(label);
+  };
+
   // Calcular métricas adicionales
   const totalPuestos = espacios.reduce((acc, e) => acc + (e.capacidad || 0), 0);
   const ocupacion =
@@ -243,7 +251,7 @@ export default function CoworkingPage() {
                 <SelectItem value="coworking_office">Oficina Privada</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleMoreFilters}>
               <Filter className="h-4 w-4 mr-2" />
               Más filtros
             </Button>
@@ -292,25 +300,25 @@ export default function CoworkingPage() {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" onClick={() => undefined}>
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleAction('Detalle de espacio abierto')}>
                       <Eye className="h-4 w-4 mr-2" />
                       Ver detalles
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleAction('Edición de espacio')}>
                       <Edit className="h-4 w-4 mr-2" />
                       Editar
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleAction('Listado de miembros')}>
                       <Users className="h-4 w-4 mr-2" />
                       Ver miembros
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleAction('Solicitud de tour enviada')}>
                       <Calendar className="h-4 w-4 mr-2" />
                       Programar tour
                     </DropdownMenuItem>

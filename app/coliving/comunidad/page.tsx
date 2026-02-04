@@ -39,6 +39,7 @@ import {
   Trophy,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { toast } from 'sonner';
 
 interface Resident {
   id: string;
@@ -81,6 +82,18 @@ export default function ColivingComunidadPage() {
   const [residents, setResidents] = useState<Resident[]>([]);
   const [events, setEvents] = useState<CommunityEvent[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const handleMessageResident = (name: string) => {
+    toast.success(`Mensaje preparado para ${name}`);
+  };
+
+  const handleLikeResident = (name: string) => {
+    toast.info(`Favorito actualizado: ${name}`);
+  };
+
+  const handleJoinEvent = (title: string) => {
+    toast.success(`Inscripcion enviada: ${title}`);
+  };
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -310,11 +323,20 @@ export default function ColivingComunidadPage() {
                       </div>
 
                       <div className="flex gap-2 mt-4">
-                        <Button variant="outline" size="sm" className="flex-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => handleMessageResident(resident.name)}
+                        >
                           <MessageSquare className="h-4 w-4 mr-1" />
                           Mensaje
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleLikeResident(resident.name)}
+                        >
                           <Heart className="h-4 w-4" />
                         </Button>
                       </div>
@@ -364,7 +386,11 @@ export default function ColivingComunidadPage() {
                           <p className="text-xs text-muted-foreground">asistentes</p>
                         </div>
                       </div>
-                      <Button className="w-full mt-4" variant="outline">
+                      <Button
+                        className="w-full mt-4"
+                        variant="outline"
+                        onClick={() => handleJoinEvent(event.title)}
+                      >
                         Me Apunto
                       </Button>
                     </CardContent>

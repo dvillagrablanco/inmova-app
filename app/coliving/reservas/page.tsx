@@ -122,6 +122,10 @@ export default function ColivingReservationsPage() {
     .filter((r) => r.estado === 'confirmada' || r.estado === 'completada')
     .reduce((sum, r) => sum + (r.precioTotal || 0), 0);
 
+  const handleViewReservation = (name: string) => {
+    toast.info(`Detalle de reserva: ${name}`);
+  };
+
   if (status === 'loading' || loading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -321,7 +325,11 @@ export default function ColivingReservationsPage() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button size="sm" variant="ghost">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleViewReservation(reservation.huespedNombre)}
+                          >
                             Ver
                           </Button>
                         </TableCell>

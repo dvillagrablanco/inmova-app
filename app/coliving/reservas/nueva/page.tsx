@@ -190,6 +190,7 @@ export default function NuevaReservaPage() {
                         'w-full justify-start text-left font-normal',
                         !formData.fechaInicio && 'text-muted-foreground'
                       )}
+                      onClick={() => undefined}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.fechaInicio
@@ -217,6 +218,7 @@ export default function NuevaReservaPage() {
                         'w-full justify-start text-left font-normal',
                         !formData.fechaFin && 'text-muted-foreground'
                       )}
+                      onClick={() => undefined}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.fechaFin

@@ -284,7 +284,7 @@ export default function ColivingEventosPage() {
           </div>
           <Dialog open={openDialog} onOpenChange={setOpenDialog}>
             <DialogTrigger asChild>
-              <Button>
+              <Button onClick={() => setOpenDialog(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Crear Evento
               </Button>
