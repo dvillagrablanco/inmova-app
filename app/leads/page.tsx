@@ -76,6 +76,7 @@ export default function LeadsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -87,12 +88,25 @@ export default function LeadsPage() {
 
   const loadLeads = async () => {
     try {
-      // En una implementación real, esto llamaría a /api/leads
-      // Por ahora, mostramos un estado vacío para datos reales
-      const response = await fetch('/api/leads');
+      const response = await fetch('/api/crm/leads?limit=50');
       if (response.ok) {
         const data = await response.json();
-        setLeads(Array.isArray(data) ? data : data.data || []);
+        const leadsArray = Array.isArray(data) ? data : data.leads || data.data || [];
+        const mapped = leadsArray.map((lead: any) => ({
+          id: lead.id,
+          nombre: lead.name || `${lead.firstName || ''} ${lead.lastName || ''}`.trim() || lead.nombre,
+          email: lead.email,
+          telefono: lead.phone || lead.telefono,
+          empresa: lead.companyName || lead.empresa,
+          fuente: lead.source || lead.fuente || 'web',
+          estado: lead.status || lead.estado || 'nuevo',
+          interes: lead.interes,
+          presupuesto: lead.budget || lead.presupuesto,
+          notas: lead.notes || lead.notas,
+          createdAt: lead.createdAt,
+          asignadoA: lead.asignadoA || lead.ownerId,
+        }));
+        setLeads(mapped);
       } else {
         setLeads([]);
       }
@@ -101,6 +115,27 @@ export default function LeadsPage() {
       setLeads([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async (lead: Lead) => {
+    const confirmed = window.confirm(`¿Eliminar el lead ${lead.nombre}?`);
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(lead.id);
+      const response = await fetch(`/api/crm/leads/${lead.id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('No se pudo eliminar el lead');
+      }
+      setLeads((prev) => prev.filter((item) => item.id !== lead.id));
+      toast.success('Lead eliminado correctamente');
+    } catch (error) {
+      toast.error('Error al eliminar el lead');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -339,9 +374,13 @@ export default function LeadsPage() {
                             <Edit className="h-4 w-4 mr-2" />
                             Editar
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive">
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => handleDelete(lead)}
+                            disabled={deletingId === lead.id}
+                          >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            Eliminar
+                            {deletingId === lead.id ? 'Eliminando...' : 'Eliminar'}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
