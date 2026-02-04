@@ -40,7 +40,10 @@ class RedisCacheService {
     this.redisAvailable = await isRedisAvailable();
     
     if (!this.redisAvailable) {
-      logger.warn('⚠️  Redis not available - using in-memory cache fallback');
+      const redisConfigured = Boolean(process.env.REDIS_URL || process.env.REDIS_HOST);
+      if (redisConfigured && process.env.NODE_ENV !== 'production') {
+        logger.warn('⚠️  Redis not available - using in-memory cache fallback');
+      }
       this.startMemoryCleanup();
     } else {
       logger.info('✅ Redis cache service initialized');

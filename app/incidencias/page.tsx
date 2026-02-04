@@ -297,7 +297,10 @@ export default function IncidenciasPage() {
                 {canCreate && (
                   <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                   <DialogTrigger asChild>
-                    <Button className="gradient-primary hover:opacity-90 shadow-primary">
+                    <Button
+                      className="gradient-primary hover:opacity-90 shadow-primary"
+                      onClick={() => setOpenDialog(true)}
+                    >
                       <Plus className="w-4 h-4 mr-2" />
                       Nueva Incidencia
                     </Button>

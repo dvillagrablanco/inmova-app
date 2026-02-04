@@ -7,12 +7,13 @@ import { Redis } from '@upstash/redis';
 
 import logger from '@/lib/logger';
 // Cliente Redis (Upstash ya está configurado en el proyecto)
-const redis = process.env.UPSTASH_REDIS_REST_URL
-  ? new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL!,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-    })
-  : null;
+const redis =
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+    ? new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL!,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+      })
+    : null;
 
 interface CachedValuation {
   propertyId: string;
@@ -38,7 +39,6 @@ export class ValuationCacheService {
    */
   static async get(propertyId: string): Promise<CachedValuation | null> {
     if (!redis) {
-      logger.warn('⚠️ Redis not configured, cache disabled');
       return null;
     }
 
@@ -52,16 +52,22 @@ export class ValuationCacheService {
         const expiry = new Date(valuation.expiresAt);
         
         if (expiry > new Date()) {
-          console.log(`✅ Valuation cache HIT for property ${propertyId}`);
+          if (process.env.NODE_ENV !== 'production') {
+            console.log(`✅ Valuation cache HIT for property ${propertyId}`);
+          }
           return valuation;
         } else {
           // Expirado, eliminar
           await redis.del(key);
-          console.log(`🗑️ Valuation cache EXPIRED for property ${propertyId}`);
+          if (process.env.NODE_ENV !== 'production') {
+            console.log(`🗑️ Valuation cache EXPIRED for property ${propertyId}`);
+          }
         }
       }
 
-      console.log(`❌ Valuation cache MISS for property ${propertyId}`);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`❌ Valuation cache MISS for property ${propertyId}`);
+      }
       return null;
     } catch (error) {
       logger.error('❌ Valuation cache GET error:', error);
@@ -97,7 +103,9 @@ export class ValuationCacheService {
 
       await redis.setex(key, ttl, JSON.stringify(cachedValuation));
       
-      console.log(`✅ Valuation cached for property ${propertyId} (TTL: ${ttl}s)`);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`✅ Valuation cached for property ${propertyId} (TTL: ${ttl}s)`);
+      }
       return true;
     } catch (error) {
       logger.error('❌ Valuation cache SET error:', error);

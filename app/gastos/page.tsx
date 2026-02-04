@@ -383,7 +383,7 @@ export default function GastosPage() {
               {canCreate && (
                 <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                   <DialogTrigger asChild>
-                    <Button>
+                    <Button onClick={() => setOpenDialog(true)}>
                       <Plus className="mr-2 h-4 w-4" />
                       Registrar Gasto
                     </Button>

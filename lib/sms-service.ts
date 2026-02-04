@@ -528,6 +528,23 @@ async function enviarSMSConFallback(telefono: string, mensaje: string): Promise<
 }
 
 /**
+ * Envía un SMS directo (sin necesidad de plantilla o tenant)
+ * Usa fallback a simulación si Twilio no está configurado
+ */
+export async function enviarSMSDirecto(
+  telefono: string,
+  mensaje: string
+): Promise<{ exitoso: boolean; sid?: string }> {
+  const resultado = await enviarSMSConFallback(telefono, mensaje);
+
+  if (!resultado.exitoso) {
+    throw new Error(resultado.error || 'Error enviando SMS');
+  }
+
+  return { exitoso: true, sid: resultado.sid };
+}
+
+/**
  * GENERA SMS AUTOMÁTICOS BASADOS EN EVENTOS
  * 
  * Ejemplos de eventos:
