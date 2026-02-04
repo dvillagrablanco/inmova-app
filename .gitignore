@@ -60,6 +60,8 @@ Thumbs.db
 /test-results/
 /playwright-report/
 /playwright/.cache/
+/audit-results/
+/visual-audit-results/
 
 # Credentials (IMPORTANTE)
 scripts/deploy-ssh-paramiko.py

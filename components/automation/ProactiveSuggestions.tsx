@@ -11,22 +11,14 @@ import {
   AlertTriangle,
   CheckCircle,
   Sparkles,
-  ArrowRight
+  ArrowRight,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import type { AutomationSuggestion } from '@/lib/ai-automation-service';
 
-interface Suggestion {
-  id: string;
-  type: 'optimization' | 'warning' | 'opportunity';
-  title: string;
-  description: string;
-  action?: string;
-  actionLabel?: string;
-  priority: 'low' | 'medium' | 'high';
-  category: string;
-}
+type Suggestion = AutomationSuggestion;
 
 // Sugerencias se cargan desde la API, no hay datos mock
 
@@ -51,17 +43,21 @@ export default function ProactiveSuggestions() {
         }
       }
       setDismissed(dismissedIds);
-      
+
       // Check if widget was hidden
       const widgetHidden = localStorage.getItem('suggestions_widget_hidden');
       if (widgetHidden === 'true') {
         setIsWidgetVisible(false);
         return;
       }
-      
+
       try {
         // Cargar sugerencias reales desde la API
-        const response = await fetch('/api/ai/suggestions');
+        const response = await fetch('/api/ai/suggestions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ context: {} }),
+        });
         if (response.ok) {
           const data = await response.json();
           const apiSuggestions = data.suggestions || [];
@@ -78,7 +74,7 @@ export default function ProactiveSuggestions() {
         setSuggestions([]);
       }
     };
-    
+
     loadSuggestions();
   }, []);
 
@@ -86,7 +82,7 @@ export default function ProactiveSuggestions() {
     const newDismissed = [...dismissed, id];
     setDismissed(newDismissed);
     localStorage.setItem('dismissed_suggestions', JSON.stringify(newDismissed));
-    setSuggestions(prev => prev.filter(s => s.id !== id));
+    setSuggestions((prev) => prev.filter((s) => s.id !== id));
     toast.success('Sugerencia descartada');
   };
 
@@ -97,20 +93,28 @@ export default function ProactiveSuggestions() {
   };
 
   const handleAction = (suggestion: Suggestion) => {
-    if (suggestion.action) {
-      router.push(suggestion.action);
+    const action = suggestion.action;
+    if (!action) return;
+
+    if (action.route) {
+      router.push(action.route);
       handleDismiss(suggestion.id);
+      return;
     }
+
+    toast.info('Acción disponible próximamente.');
   };
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'opportunity':
-        return <Sparkles className="h-5 w-5 text-green-600" />;
       case 'warning':
         return <AlertTriangle className="h-5 w-5 text-orange-600" />;
-      case 'optimization':
+      case 'wizard':
+        return <Sparkles className="h-5 w-5 text-green-600" />;
+      case 'action':
         return <TrendingUp className="h-5 w-5 text-blue-600" />;
+      case 'tip':
+        return <Lightbulb className="h-5 w-5 text-yellow-600" />;
       default:
         return <Lightbulb className="h-5 w-5 text-yellow-600" />;
     }
@@ -146,9 +150,7 @@ export default function ProactiveSuggestions() {
               Recomendaciones personalizadas para optimizar tu gestión
             </CardDescription>
           </div>
-          <Badge variant="outline">
-            {suggestions.length} pendientes
-          </Badge>
+          <Badge variant="outline">{suggestions.length} pendientes</Badge>
           <Button
             variant="ghost"
             size="icon"
@@ -173,24 +175,31 @@ export default function ProactiveSuggestions() {
                 <Card className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 mt-0.5">
-                        {getIcon(suggestion.type)}
-                      </div>
+                      <div className="flex-shrink-0 mt-0.5">{getIcon(suggestion.type)}</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <h4 className="font-semibold text-sm">{suggestion.title}</h4>
                           <div className="flex items-center gap-1">
-                            <Badge variant={getPriorityColor(suggestion.priority) as any} className="text-xs">
-                              {suggestion.priority === 'high' ? 'Alta' : suggestion.priority === 'medium' ? 'Media' : 'Baja'}
-                            </Badge>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => handleDismiss(suggestion.id)}
+                            <Badge
+                              variant={getPriorityColor(suggestion.priority) as any}
+                              className="text-xs"
                             >
-                              <X className="h-3 w-3" />
-                            </Button>
+                              {suggestion.priority === 'high'
+                                ? 'Alta'
+                                : suggestion.priority === 'medium'
+                                  ? 'Media'
+                                  : 'Baja'}
+                            </Badge>
+                            {suggestion.dismissable !== false ? (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={() => handleDismiss(suggestion.id)}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            ) : null}
                           </div>
                         </div>
                         <p className="text-sm text-muted-foreground mb-3">
@@ -203,7 +212,7 @@ export default function ProactiveSuggestions() {
                             onClick={() => handleAction(suggestion)}
                             className="text-xs"
                           >
-                            {suggestion.actionLabel || 'Ver más'}
+                            {suggestion.action?.label || 'Ver más'}
                             <ArrowRight className="ml-2 h-3 w-3" />
                           </Button>
                         )}
