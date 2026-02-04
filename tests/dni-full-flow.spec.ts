@@ -93,9 +93,9 @@ test.describe('Flujo Completo DNI → Formulario', () => {
       // Ignorar y dejar que el fallback a flotante se encargue
     }
 
-    const dropzoneText = page.locator('text=Arrastra documentos aquí').first();
+    const openPanel = page.locator('[data-state="open"]').filter({ hasText: 'Asistente IA' }).first();
     try {
-      await dropzoneText.waitFor({ state: 'visible', timeout: 8000 });
+      await openPanel.waitFor({ state: 'visible', timeout: 8000 });
     } catch {
       assistantMode = 'floating';
       console.log('ℹ️ Asistente inline no respondió, intentando flotante...');
@@ -109,7 +109,7 @@ test.describe('Flujo Completo DNI → Formulario', () => {
 
       await aiButton.waitFor({ state: 'visible', timeout: 10000 });
       await aiButton.click({ force: true });
-      await dropzoneText.waitFor({ state: 'visible', timeout: 10000 });
+      await openPanel.waitFor({ state: 'visible', timeout: 10000 });
     }
     await page.screenshot({
       path: 'test-results/flow-02-asistente-localizado.png',
@@ -129,7 +129,7 @@ test.describe('Flujo Completo DNI → Formulario', () => {
     );
 
     // Subir archivo directamente al input del asistente
-    const fileInput = page.locator('input#file-upload').first();
+    const fileInput = openPanel.locator('input#file-upload');
     await fileInput.setInputFiles(PDF_PATH);
 
     console.log('📤 Archivo seleccionado, esperando procesamiento...');
