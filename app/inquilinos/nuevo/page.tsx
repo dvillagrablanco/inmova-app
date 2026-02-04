@@ -4,15 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
-import dynamic from 'next/dynamic';
 
-import { Users, Home, ArrowLeft, Save, Upload, FileText, X, Loader2, Brain, Sparkles } from 'lucide-react';
+import { Users, Home, ArrowLeft, Save, Upload, FileText, X, Loader2 } from 'lucide-react';
 
-// Cargar el asistente de IA de forma dinámica para evitar problemas de SSR
-const TenantFormAIAssistant = dynamic(
-  () => import('@/components/inquilinos/TenantFormAIAssistant'),
-  { ssr: false }
-);
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -639,10 +633,7 @@ export default function NuevoInquilinoPage() {
           />
         </form>
 
-        {/* Asistente IA para el formulario - Oculto en móvil para evitar solapamiento */}
-        <TenantFormAIAssistant formData={formData} />
-        
-        {/* Nota: AIDocumentAssistant ahora está integrado en la sección de Documentos del formulario (variant="inline") */}
+        {/* Nota: AIDocumentAssistant está integrado en la sección de Documentos del formulario */}
       </div>
     </AuthenticatedLayout>
   );
