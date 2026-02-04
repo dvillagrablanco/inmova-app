@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { toast } from 'sonner';
 
 export default function ContabilidadPlataformaPage() {
   const { data: session, status } = useSession();
@@ -48,12 +47,8 @@ export default function ContabilidadPlataformaPage() {
   };
 
   const handleOpenContasimple = () => {
-    window.open('https://www.contasimple.com/', '_blank');
-  };
-
-  const handleOpenContasimple = () => {
     toast.info('Abriendo Contasimple');
-    window.open('https://contasimple.com/', '_blank');
+    window.open('https://www.contasimple.com/', '_blank');
   };
 
   if (status === 'loading') {

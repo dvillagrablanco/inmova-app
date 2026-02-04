@@ -299,9 +299,8 @@ export default function InformesPage() {
               </CardContent>
             </Card>
           </div>
-        </AuthenticatedLayout>
 
-        <Dialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
+          <Dialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>Generar Informe</DialogTitle>
@@ -373,5 +372,6 @@ export default function InformesPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </AuthenticatedLayout>
   );
 }

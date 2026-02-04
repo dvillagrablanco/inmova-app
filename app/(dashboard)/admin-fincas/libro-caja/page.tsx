@@ -306,9 +306,8 @@ export default function LibroCajaPage() {
               </Card>
             )}
           </div>
-        </AuthenticatedLayout>
 
-        <Dialog open={showNewEntryDialog} onOpenChange={setShowNewEntryDialog}>
+          <Dialog open={showNewEntryDialog} onOpenChange={setShowNewEntryDialog}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>Nuevo Movimiento</DialogTitle>
@@ -408,5 +407,6 @@ export default function LibroCajaPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </AuthenticatedLayout>
   );
 }

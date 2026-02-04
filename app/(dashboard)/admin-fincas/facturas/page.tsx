@@ -262,9 +262,8 @@ export default function FacturasPage() {
               </CardContent>
             </Card>
           </div>
-        </AuthenticatedLayout>
 
-        <Dialog open={showNewInvoiceDialog} onOpenChange={setShowNewInvoiceDialog}>
+          <Dialog open={showNewInvoiceDialog} onOpenChange={setShowNewInvoiceDialog}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>Nueva Factura</DialogTitle>
@@ -356,5 +355,6 @@ export default function FacturasPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </AuthenticatedLayout>
   );
 }
