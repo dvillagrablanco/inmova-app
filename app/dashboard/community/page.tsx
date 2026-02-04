@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { redirect } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import { toast } from 'sonner';
 import {
   Calendar,
   MessageSquare,
@@ -35,6 +36,15 @@ export default function CommunityDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [metrics, setMetrics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  const handleOpenSettings = () => {
+    toast.info('Configuración de comunidad en desarrollo');
+  };
+
+  const handleNewEvent = () => {
+    setActiveTab('events');
+    toast.success('Crea un nuevo evento desde la pestaña de eventos');
+  };
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -108,11 +118,11 @@ export default function CommunityDashboard() {
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleOpenSettings}>
             <Settings className="h-4 w-4 mr-2" />
             Configuración
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={handleNewEvent}>
             <Plus className="h-4 w-4 mr-2" />
             Nuevo Evento
           </Button>

@@ -192,7 +192,7 @@ export default function CommunityEventsPanel() {
 
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogTrigger asChild>
-            <Button>
+            <Button onClick={() => setShowCreateDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Nuevo Evento
             </Button>
@@ -375,11 +375,20 @@ export default function CommunityEventsPanel() {
                 </div>
 
                 <div className="flex items-center gap-2 pt-2">
-                  <Button variant="outline" size="sm" className="flex-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => toast.info(`Detalle de evento: ${event.titulo}`)}
+                  >
                     <Eye className="h-4 w-4 mr-1" />
                     Ver
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toast.info(`Editar evento: ${event.titulo}`)}
+                  >
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button

@@ -96,6 +96,10 @@ export default function SocialFeedPanel() {
     }
   };
 
+  const handleReaction = (label: string) => {
+    toast.success(`Reacción enviada: ${label}`);
+  };
+
   useEffect(() => {
     fetchPosts();
   }, []);
@@ -196,7 +200,12 @@ export default function SocialFeedPanel() {
                     className="resize-none"
                   />
                   <div className="flex items-center gap-2 mt-3">
-                    <Button variant="outline" size="sm" disabled>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled
+                      onClick={() => toast.info('Subida de imágenes en desarrollo')}
+                    >
                       <ImageIcon className="h-4 w-4 mr-1" />
                       Imagen
                     </Button>
@@ -265,7 +274,7 @@ export default function SocialFeedPanel() {
                     {canModerateCommunity && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => undefined}>
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -328,15 +337,25 @@ export default function SocialFeedPanel() {
               </CardContent>
               <CardFooter className="border-t pt-3">
                 <div className="flex items-center justify-between w-full text-muted-foreground">
-                  <Button variant="ghost" size="sm" className="gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1"
+                    onClick={() => handleReaction('like')}
+                  >
                     <Heart className="h-4 w-4" />
                     <span className="text-xs">{post.likes}</span>
                   </Button>
-                  <Button variant="ghost" size="sm" className="gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1"
+                    onClick={() => handleReaction('comment')}
+                  >
                     <MessageSquare className="h-4 w-4" />
                     <span className="text-xs">{post.comentarios?.length || 0}</span>
                   </Button>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => handleReaction('share')}>
                     <Share2 className="h-4 w-4" />
                   </Button>
                 </div>
