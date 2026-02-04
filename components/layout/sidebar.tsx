@@ -1623,6 +1623,7 @@ interface SubItem {
   name: string;
   href: string;
   icon?: any; // Icono opcional para subItems
+  prefetch?: boolean;
 }
 
 interface SidebarItem {
@@ -1633,6 +1634,7 @@ interface SidebarItem {
   badge?: string;
   subItems?: SubItem[];
   dataTour?: string;
+  prefetch?: boolean;
 }
 
 // =====================================================
@@ -1667,6 +1669,7 @@ const superAdminPlatformItems: SidebarItem[] = [
     href: '/admin/dashboard',
     icon: LayoutDashboard,
     roles: ['super_admin'],
+    prefetch: false,
   },
 
   // ========== 2. CLIENTES (Gestión de Empresas B2B) ==========
@@ -2217,7 +2220,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
       <div className="relative group">
         <Link
           href={item.href}
-          prefetch={true}
+          prefetch={item.prefetch ?? true}
           onClick={() => {
             // Cerrar el menú móvil
             setIsMobileMenuOpen(false);
@@ -2312,7 +2315,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 <Link
                   key={subItem.href}
                   href={subItemHref}
-                  prefetch={true}
+                  prefetch={subItem.prefetch ?? true}
                   onClick={() => {
                     setIsMobileMenuOpen(false);
                     onNavigate?.();
