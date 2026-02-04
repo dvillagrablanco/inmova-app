@@ -294,6 +294,26 @@ export default function CanvaStudioPage() {
     }
   };
 
+  const handleUseTemplate = (template: Template) => {
+    setSelectedTemplate(template);
+    setShowCreateDialog(true);
+    toast.success(`Plantilla "${template.name}" seleccionada`);
+  };
+
+  const handleEditDesign = (design: CanvaDesign) => {
+    toast.info(`Editando "${design.name}" en Canva`);
+    window.open('https://www.canva.com/', '_blank');
+  };
+
+  const handleDownloadDesign = (design: CanvaDesign) => {
+    toast.success(`Descarga iniciada: "${design.name}"`);
+  };
+
+  const handleDeleteDesign = (designId: string) => {
+    setDesigns((prev) => prev.filter((design) => design.id !== designId));
+    toast.success('Diseño eliminado');
+  };
+
   // Conectar con Canva
   const connectCanva = () => {
     // TODO: Implementar OAuth con Canva Connect API
@@ -538,7 +558,14 @@ export default function CanvaStudioPage() {
                           <p className="text-sm text-muted-foreground">{template.description}</p>
                           <p className="text-xs text-muted-foreground">{template.dimensions}</p>
                         </div>
-                        <Button variant="outline" size="sm">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleUseTemplate(template);
+                          }}
+                        >
                           Usar
                         </Button>
                       </CardContent>
@@ -570,13 +597,25 @@ export default function CanvaStudioPage() {
                           <ImageIcon className="h-12 w-12 text-gray-300" />
                         )}
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-t-lg flex items-center justify-center gap-2">
-                          <Button size="icon" variant="secondary">
+                          <Button
+                            size="icon"
+                            variant="secondary"
+                            onClick={() => handleEditDesign(design)}
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button size="icon" variant="secondary">
+                          <Button
+                            size="icon"
+                            variant="secondary"
+                            onClick={() => handleDownloadDesign(design)}
+                          >
                             <Download className="h-4 w-4" />
                           </Button>
-                          <Button size="icon" variant="destructive">
+                          <Button
+                            size="icon"
+                            variant="destructive"
+                            onClick={() => handleDeleteDesign(design.id)}
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>

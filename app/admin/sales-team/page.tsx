@@ -187,6 +187,14 @@ export default function SalesTeamPage() {
 
   const activeReps = salesReps.filter((r) => r.estado === 'active');
 
+  const handleViewRep = (repName: string) => {
+    toast.info(`Detalle de ${repName}`);
+  };
+
+  const handleEditRep = (repName: string) => {
+    toast.info(`Editar vendedor: ${repName}`);
+  };
+
   return (
     <AuthenticatedLayout>
       <div className="space-y-6">
@@ -198,7 +206,7 @@ export default function SalesTeamPage() {
           </div>
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button onClick={() => setCreateDialogOpen(true)}>
                 <UserPlus className="w-4 h-4 mr-2" />
                 Nuevo Vendedor
               </Button>
@@ -469,10 +477,18 @@ export default function SalesTeamPage() {
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
-                                <Button variant="ghost" size="sm">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleViewRep(rep.nombre)}
+                                >
                                   <Eye className="w-4 h-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEditRep(rep.nombre)}
+                                >
                                   <Pencil className="w-4 h-4" />
                                 </Button>
                               </div>
