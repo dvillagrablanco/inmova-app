@@ -50,6 +50,15 @@ test.describe('IA documental - validación de aplicación en formularios', () =>
       }
     };
 
+    page.on('pageerror', (error) => {
+      console.log(`🧨 Page error: ${error.message}`);
+    });
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        console.log(`🛑 Console error: ${msg.text()}`);
+      }
+    });
+
     for (const route of ROUTES) {
       console.log(`\n📍 Validando ${route.name} -> ${route.path}`);
       await page.goto(`${BASE_URL}${route.path}`, { waitUntil: 'domcontentloaded' });
