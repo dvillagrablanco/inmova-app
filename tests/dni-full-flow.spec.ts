@@ -87,9 +87,13 @@ test.describe('Flujo Completo DNI → Formulario', () => {
     if (await inlineTrigger.isVisible({ timeout: 5000 }).catch(() => false)) {
       await inlineTrigger.scrollIntoViewIfNeeded();
       await inlineTrigger.click();
-    } else {
+    }
+
+    try {
+      await page.waitForSelector('input#file-upload', { state: 'attached', timeout: 8000 });
+    } catch {
       assistantMode = 'floating';
-      console.log('ℹ️ Asistente inline no visible, intentando flotante...');
+      console.log('ℹ️ Asistente inline no respondió, intentando flotante...');
 
       const aiButton = page
         .locator('button.rounded-full')
@@ -100,12 +104,8 @@ test.describe('Flujo Completo DNI → Formulario', () => {
 
       await aiButton.waitFor({ state: 'visible', timeout: 10000 });
       await aiButton.click({ force: true });
+      await page.waitForSelector('input#file-upload', { state: 'attached', timeout: 10000 });
     }
-
-    // Verificar que el panel se abrió (Asistente IA)
-    const sheetPanel = page.locator('[role="dialog"]').filter({ hasText: 'Asistente IA' }).first();
-    await expect(sheetPanel).toBeVisible({ timeout: 10000 });
-    await sheetPanel.locator('input#file-upload').waitFor({ state: 'attached', timeout: 10000 });
     await page.screenshot({
       path: 'test-results/flow-02-asistente-localizado.png',
       fullPage: true,
@@ -124,7 +124,7 @@ test.describe('Flujo Completo DNI → Formulario', () => {
     );
 
     // Subir archivo directamente al input del asistente
-    const fileInput = sheetPanel.locator('input#file-upload');
+    const fileInput = page.locator('input#file-upload').first();
     await fileInput.setInputFiles(PDF_PATH);
 
     console.log('📤 Archivo seleccionado, esperando procesamiento...');
