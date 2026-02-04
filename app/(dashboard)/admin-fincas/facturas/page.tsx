@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import logger from '@/lib/logger';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,6 +53,8 @@ const estadoBadgeVariant = (estado: string) => {
 export default function FacturasPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const communityIdParam = searchParams.get('communityId') || '';
   const [loading, setLoading] = useState(true);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [showNewInvoiceDialog, setShowNewInvoiceDialog] = useState(false);
@@ -73,11 +75,12 @@ export default function FacturasPage() {
     } else if (status === 'authenticated') {
       fetchInvoices();
     }
-  }, [status, router]);
+  }, [status, router, communityIdParam]);
 
   const fetchInvoices = async () => {
     try {
-      const res = await fetch('/api/admin-fincas/invoices');
+      const query = communityIdParam ? `?communityId=${communityIdParam}` : '';
+      const res = await fetch(`/api/admin-fincas/invoices${query}`);
       if (res.ok) {
         const data = await res.json();
         setInvoices(data);
@@ -116,6 +119,9 @@ export default function FacturasPage() {
     setShowNewInvoiceDialog(true);
     if (communities.length === 0 && !loadingCommunities) {
       fetchCommunities();
+    }
+    if (communityIdParam && !formState.communityId) {
+      setFormState((prev) => ({ ...prev, communityId: communityIdParam }));
     }
   };
 

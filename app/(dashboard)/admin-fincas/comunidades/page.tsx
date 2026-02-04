@@ -78,12 +78,12 @@ export default function ComunidadesPage() {
                   {communities.length === 1 ? 'comunidad activa' : 'comunidades activas'}
                 </p>
               </div>
-              <Link href="/admin-fincas/comunidades/nueva">
-                <Button>
+              <Button asChild>
+                <Link href="/admin-fincas/comunidades/nueva">
                   <Plus className="h-4 w-4 mr-2" />
                   Nueva Comunidad
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -134,12 +134,12 @@ export default function ComunidadesPage() {
                       </div>
                     </div>
 
-                    <Link href={`/admin-fincas/comunidades/${community.id}`}>
-                      <Button variant="outline" className="w-full mt-3">
+                    <Button asChild variant="outline" className="w-full mt-3">
+                      <Link href={`/admin-fincas/comunidades/${community.id}`}>
                         <Eye className="h-4 w-4 mr-2" />
                         Ver Detalles
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </CardContent>
                 </Card>
               ))}
@@ -153,12 +153,12 @@ export default function ComunidadesPage() {
                   <p className="text-muted-foreground mb-4">
                     Comienza añadiendo tu primera comunidad
                   </p>
-                  <Link href="/admin-fincas/comunidades/nueva">
-                    <Button>
+                  <Button asChild>
+                    <Link href="/admin-fincas/comunidades/nueva">
                       <Plus className="h-4 w-4 mr-2" />
                       Nueva Comunidad
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
             )}

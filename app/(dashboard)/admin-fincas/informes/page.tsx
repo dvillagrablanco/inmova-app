@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import logger from '@/lib/logger';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,6 +53,8 @@ const tipoBadgeVariant = (tipo: string) => {
 export default function InformesPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const communityIdParam = searchParams.get('communityId') || '';
   const [loading, setLoading] = useState(true);
   const [reports, setReports] = useState<Report[]>([]);
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
@@ -71,11 +73,12 @@ export default function InformesPage() {
     } else if (status === 'authenticated') {
       fetchReports();
     }
-  }, [status, router]);
+  }, [status, router, communityIdParam]);
 
   const fetchReports = async () => {
     try {
-      const res = await fetch('/api/admin-fincas/reports');
+      const query = communityIdParam ? `?communityId=${communityIdParam}` : '';
+      const res = await fetch(`/api/admin-fincas/reports${query}`);
       if (res.ok) {
         const data = await res.json();
         setReports(data);
@@ -114,6 +117,9 @@ export default function InformesPage() {
     setShowGenerateDialog(true);
     if (communities.length === 0 && !loadingCommunities) {
       fetchCommunities();
+    }
+    if (communityIdParam && !formState.communityId) {
+      setFormState((prev) => ({ ...prev, communityId: communityIdParam }));
     }
   };
 
