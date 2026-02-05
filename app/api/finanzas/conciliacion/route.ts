@@ -1,244 +1,184 @@
 /**
  * API de Conciliación Bancaria
- * 
- * Endpoints para gestión de cuentas bancarias, transacciones y facturas
+ * Datos reales: bank transactions + contabilidad + pagos/gastos
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { subDays } from 'date-fns';
+import { prisma } from '@/lib/db';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Tipos
-interface BankAccount {
-  id: string;
-  bankName: string;
-  accountNumber: string;
-  iban: string;
-  balance: number;
-  currency: string;
-  lastSync: string;
-  status: 'connected' | 'pending' | 'error';
-}
-
-interface BankTransaction {
-  id: string;
-  accountId: string;
-  date: string;
-  valueDate: string;
-  description: string;
-  reference?: string;
-  amount: number;
-  balance: number;
-  type: 'income' | 'expense';
-  category?: string;
-  reconciliationStatus: 'pending' | 'matched' | 'manual' | 'unmatched';
-  matchedDocumentId?: string;
-  matchedDocumentType?: 'invoice' | 'receipt' | 'payment';
-  matchConfidence?: number;
-}
-
-interface Invoice {
-  id: string;
-  number: string;
-  tenant: string;
-  property: string;
-  amount: number;
-  dueDate: string;
-  status: 'pending' | 'paid' | 'overdue';
-  reconciled: boolean;
-  matchedTransactionId?: string;
-}
-
-// Generar datos basados en la sesión del usuario
-function generateBankAccounts(): BankAccount[] {
-  return [
-    {
-      id: 'acc-1',
-      bankName: 'CaixaBank',
-      accountNumber: '****4521',
-      iban: 'ES12 2100 0418 4502 0005 4521',
-      balance: 45890.50,
-      currency: 'EUR',
-      lastSync: new Date().toISOString(),
-      status: 'connected',
-    },
-    {
-      id: 'acc-2',
-      bankName: 'BBVA',
-      accountNumber: '****7823',
-      iban: 'ES91 0182 2370 4200 0178 2354',
-      balance: 12450.00,
-      currency: 'EUR',
-      lastSync: subDays(new Date(), 1).toISOString(),
-      status: 'connected',
-    },
-    {
-      id: 'acc-3',
-      bankName: 'Santander',
-      accountNumber: '****9012',
-      iban: 'ES68 0049 5103 8920 1690 1234',
-      balance: 8320.75,
-      currency: 'EUR',
-      lastSync: subDays(new Date(), 2).toISOString(),
-      status: 'pending',
-    },
-  ];
-}
-
-function generateTransactions(): BankTransaction[] {
-  return [
-    {
-      id: 'tx-1',
-      accountId: 'acc-1',
-      date: new Date().toISOString(),
-      valueDate: new Date().toISOString(),
-      description: 'TRANSFERENCIA DE GARCIA MARTINEZ JUAN',
-      reference: 'ALQUILER ENERO 2026 - PISO 3A',
-      amount: 950.00,
-      balance: 45890.50,
-      type: 'income',
-      category: 'alquiler',
-      reconciliationStatus: 'pending',
-      matchConfidence: 95,
-    },
-    {
-      id: 'tx-2',
-      accountId: 'acc-1',
-      date: subDays(new Date(), 1).toISOString(),
-      valueDate: subDays(new Date(), 1).toISOString(),
-      description: 'RECIBO COMUNIDAD EDIFICIO SOL 15',
-      amount: -180.50,
-      balance: 44940.50,
-      type: 'expense',
-      category: 'comunidad',
-      reconciliationStatus: 'matched',
-      matchedDocumentId: 'inv-3',
-      matchedDocumentType: 'invoice',
-      matchConfidence: 100,
-    },
-    {
-      id: 'tx-3',
-      accountId: 'acc-1',
-      date: subDays(new Date(), 2).toISOString(),
-      valueDate: subDays(new Date(), 2).toISOString(),
-      description: 'BIZUM DE LOPEZ FERNANDEZ MARIA',
-      reference: 'Alquiler diciembre',
-      amount: 850.00,
-      balance: 45121.00,
-      type: 'income',
-      category: 'alquiler',
-      reconciliationStatus: 'matched',
-      matchedDocumentId: 'inv-2',
-      matchedDocumentType: 'invoice',
-      matchConfidence: 92,
-    },
-    {
-      id: 'tx-4',
-      accountId: 'acc-1',
-      date: subDays(new Date(), 3).toISOString(),
-      valueDate: subDays(new Date(), 3).toISOString(),
-      description: 'PAGO SEGURO HOGAR MAPFRE',
-      amount: -425.00,
-      balance: 44271.00,
-      type: 'expense',
-      category: 'seguros',
-      reconciliationStatus: 'manual',
-      matchedDocumentId: 'inv-5',
-      matchedDocumentType: 'receipt',
-    },
-    {
-      id: 'tx-5',
-      accountId: 'acc-1',
-      date: subDays(new Date(), 4).toISOString(),
-      valueDate: subDays(new Date(), 4).toISOString(),
-      description: 'TRANSFERENCIA SANCHEZ RODRIGUEZ PEDRO',
-      reference: 'Alquiler Local Comercial',
-      amount: 1200.00,
-      balance: 44696.00,
-      type: 'income',
-      category: 'alquiler',
-      reconciliationStatus: 'pending',
-      matchConfidence: 78,
-    },
-  ];
-}
-
-function generateInvoices(): Invoice[] {
-  return [
-    {
-      id: 'inv-1',
-      number: 'FAC-2026-001',
-      tenant: 'García Martínez, Juan',
-      property: 'Piso 3A - C/ Sol 15',
-      amount: 950.00,
-      dueDate: new Date().toISOString(),
-      status: 'pending',
-      reconciled: false,
-    },
-    {
-      id: 'inv-2',
-      number: 'FAC-2025-156',
-      tenant: 'López Fernández, María',
-      property: 'Piso 2B - C/ Luna 8',
-      amount: 850.00,
-      dueDate: subDays(new Date(), 5).toISOString(),
-      status: 'paid',
-      reconciled: true,
-      matchedTransactionId: 'tx-3',
-    },
-    {
-      id: 'inv-3',
-      number: 'FAC-2026-002',
-      tenant: 'Comunidad',
-      property: 'Edificio Sol 15',
-      amount: 180.50,
-      dueDate: subDays(new Date(), 1).toISOString(),
-      status: 'paid',
-      reconciled: true,
-      matchedTransactionId: 'tx-2',
-    },
-    {
-      id: 'inv-4',
-      number: 'FAC-2026-003',
-      tenant: 'Sánchez Rodríguez, Pedro',
-      property: 'Local Comercial B',
-      amount: 1200.00,
-      dueDate: subDays(new Date(), 3).toISOString(),
-      status: 'pending',
-      reconciled: false,
-    },
-    {
-      id: 'inv-5',
-      number: 'REC-2026-001',
-      tenant: 'Mapfre Seguros',
-      property: 'Póliza Hogar',
-      amount: 425.00,
-      dueDate: subDays(new Date(), 3).toISOString(),
-      status: 'paid',
-      reconciled: true,
-      matchedTransactionId: 'tx-4',
-    },
-  ];
-}
-
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+    if (!session?.user?.companyId) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const accounts = generateBankAccounts();
-    const transactions = generateTransactions();
-    const invoices = generateInvoices();
+    const companyId = session.user.companyId;
+
+    const [connections, bankTransactions, accountingTransactions] = await Promise.all([
+      prisma.bankConnection.findMany({
+        where: { companyId },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.bankTransaction.findMany({
+        where: { companyId },
+        orderBy: { fecha: 'desc' },
+        take: 200,
+      }),
+      prisma.accountingTransaction.findMany({
+        where: { companyId },
+        orderBy: { fecha: 'desc' },
+        take: 200,
+      }),
+    ]);
+
+    const buildingIds = Array.from(
+      new Set(accountingTransactions.map((tx) => tx.buildingId).filter(Boolean))
+    ) as string[];
+    const unitIds = Array.from(
+      new Set(accountingTransactions.map((tx) => tx.unitId).filter(Boolean))
+    ) as string[];
+
+    const [buildings, units] = await Promise.all([
+      prisma.building.findMany({
+        where: { id: { in: buildingIds } },
+        select: { id: true, nombre: true },
+      }),
+      prisma.unit.findMany({
+        where: { id: { in: unitIds } },
+        select: { id: true, numero: true, buildingId: true },
+      }),
+    ]);
+
+    const buildingMap = new Map(buildings.map((b) => [b.id, b]));
+    const unitMap = new Map(units.map((u) => [u.id, u]));
+
+    const paymentIds = accountingTransactions.map((tx) => tx.paymentId).filter(Boolean) as string[];
+    const expenseIds = accountingTransactions.map((tx) => tx.expenseId).filter(Boolean) as string[];
+
+    const [payments, expenses] = await Promise.all([
+      prisma.payment.findMany({
+        where: { id: { in: paymentIds } },
+        include: {
+          contract: {
+            include: {
+              tenant: { select: { nombreCompleto: true } },
+              unit: { select: { numero: true, building: { select: { nombre: true } } } },
+            },
+          },
+        },
+      }),
+      prisma.expense.findMany({
+        where: { id: { in: expenseIds } },
+        include: {
+          building: { select: { nombre: true } },
+          unit: { select: { numero: true, building: { select: { nombre: true } } } },
+        },
+      }),
+    ]);
+
+    const paymentMap = new Map(payments.map((p) => [p.id, p]));
+    const expenseMap = new Map(expenses.map((e) => [e.id, e]));
+
+    const accounts = connections.map((connection) => ({
+      id: connection.id,
+      bankName: connection.nombreBanco || connection.proveedor || 'Banco',
+      accountNumber: connection.ultimosDigitos ? `****${connection.ultimosDigitos}` : '',
+      iban: '',
+      balance: 0,
+      currency: connection.moneda || 'EUR',
+      lastSync: connection.ultimaSync?.toISOString() || connection.updatedAt.toISOString(),
+      status:
+        connection.estado === 'conectado'
+          ? 'connected'
+          : connection.estado === 'renovacion_requerida'
+            ? 'pending'
+            : connection.estado === 'error'
+              ? 'error'
+              : 'pending',
+    }));
+
+    const transactions = bankTransactions.map((tx) => ({
+      id: tx.id,
+      accountId: tx.connectionId,
+      date: tx.fecha.toISOString(),
+      valueDate: (tx.fechaContable || tx.fecha).toISOString(),
+      description: tx.descripcion,
+      reference: tx.referencia || undefined,
+      amount: tx.monto,
+      balance: 0,
+      type: tx.monto >= 0 ? 'income' : 'expense',
+      category: tx.categoria || undefined,
+      reconciliationStatus:
+        tx.estado === 'conciliado' ? 'matched' : tx.estado === 'descartado' ? 'ignored' : 'pending',
+      matchedDocumentId: tx.paymentId || tx.expenseId || undefined,
+      matchedDocumentType: tx.paymentId ? 'payment' : tx.expenseId ? 'receipt' : undefined,
+      matchConfidence: tx.matchScore || undefined,
+    }));
+
+    const invoices = accountingTransactions.map((tx) => {
+      const payment = tx.paymentId ? paymentMap.get(tx.paymentId) : null;
+      const expense = tx.expenseId ? expenseMap.get(tx.expenseId) : null;
+      const unit = tx.unitId ? unitMap.get(tx.unitId) : null;
+      const building = tx.buildingId ? buildingMap.get(tx.buildingId) : null;
+      const tenantName = payment?.contract?.tenant?.nombreCompleto || '';
+      const propertyLabel = payment?.contract?.unit
+        ? `${payment.contract.unit.building.nombre} - ${payment.contract.unit.numero}`
+        : expense?.unit
+          ? `${expense.unit.building?.nombre || ''} - ${expense.unit.numero}`
+          : expense?.building
+            ? expense.building.nombre
+            : building
+              ? building.nombre
+              : unit
+                ? unit.numero
+                : '';
+
+      return {
+        id: tx.id,
+        number: tx.referencia || `ACC-${tx.id.slice(-6)}`,
+        tenant: tenantName || 'N/D',
+        property: propertyLabel || 'N/D',
+        amount: Number(tx.monto || 0),
+        dueDate: tx.fecha.toISOString(),
+        status: tx.paymentId || tx.expenseId ? 'paid' : 'pending',
+        reconciled: Boolean(tx.paymentId || tx.expenseId),
+        matchedTransactionId: tx.paymentId || tx.expenseId || undefined,
+      };
+    });
+
+    const pendingTransactions = transactions.filter((t) => t.reconciliationStatus === 'pending');
+    const pendingInvoices = invoices.filter((i) => !i.reconciled);
+
+    const suggestions = pendingTransactions.flatMap((tx) => {
+      const matches = pendingInvoices
+        .filter((inv) => Math.abs(inv.amount - Math.abs(tx.amount)) <= 0.01)
+        .slice(0, 3);
+      return matches.map((inv) => ({
+        transactionId: tx.id,
+        documentId: inv.id,
+        documentType: 'invoice',
+        confidence: 80,
+        reason: 'Importe coincidente',
+      }));
+    });
+
+    const stats = {
+      totalTransactions: transactions.length,
+      pendingTransactions: pendingTransactions.length,
+      matchedTransactions: transactions.filter((t) => t.reconciliationStatus === 'matched').length,
+      unmatchedTransactions: transactions.filter((t) => t.reconciliationStatus === 'ignored')
+        .length,
+      totalInvoices: invoices.length,
+      reconciledInvoices: invoices.filter((i) => i.reconciled).length,
+      pendingInvoices: invoices.filter((i) => !i.reconciled).length,
+    };
 
     return NextResponse.json({
       success: true,
@@ -246,13 +186,12 @@ export async function GET(request: NextRequest) {
         accounts,
         transactions,
         invoices,
+        stats,
+        suggestions,
       },
     });
   } catch (error) {
-    console.error('[API Error] Conciliación:', error);
-    return NextResponse.json(
-      { error: 'Error obteniendo datos de conciliación' },
-      { status: 500 }
-    );
+    logger.error('Error en conciliación:', error);
+    return NextResponse.json({ error: 'Error al obtener datos de conciliación' }, { status: 500 });
   }
 }

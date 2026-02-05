@@ -103,101 +103,119 @@ export async function GET(request: NextRequest) {
     });
 
     // Pagos vencidos (pendientes con fecha pasada)
-    const overduePayments = pendingPayments.filter(
-      (p) => new Date(p.fechaVencimiento) < now
-    );
+    const overduePayments = pendingPayments.filter((p) => new Date(p.fechaVencimiento) < now);
 
-    // Calcular gastos del mes (si existe un modelo de Expense)
-    let monthlyExpenses = 0;
-    try {
-      // Intentar obtener gastos si el modelo existe
-      const expenses = await (prisma as any).expense?.findMany({
-        where: {
+    // Gastos del mes (modelo Expense)
+    const expenses = await prisma.expense.findMany({
+      where: {
+        building: {
           companyId,
-          fecha: {
-            gte: monthStart,
-            lte: monthEnd,
-          },
         },
-        select: {
-          monto: true,
+        fecha: {
+          gte: monthStart,
+          lte: monthEnd,
         },
-      });
-      if (expenses) {
-        monthlyExpenses = expenses.reduce((sum: number, e: any) => sum + (e.monto || 0), 0);
-      }
-    } catch {
-      // El modelo Expense no existe, usar 0
-    }
+        isDemo: false,
+      },
+      select: { monto: true },
+    });
+    const monthlyExpenses = expenses.reduce((sum, e) => sum + (e.monto || 0), 0);
+
+    // Contabilidad importada (solo no vinculada a pago/gasto)
+    const accountingTransactions = await prisma.accountingTransaction.findMany({
+      where: {
+        companyId,
+        fecha: { gte: monthStart, lte: monthEnd },
+        paymentId: null,
+        expenseId: null,
+      },
+      select: {
+        tipo: true,
+        monto: true,
+      },
+    });
+
+    const accountingIncome = accountingTransactions
+      .filter((tx) => tx.tipo === 'ingreso')
+      .reduce((sum, tx) => sum + (tx.monto || 0), 0);
+    const accountingExpenses = accountingTransactions
+      .filter((tx) => tx.tipo === 'gasto')
+      .reduce((sum, tx) => sum + (tx.monto || 0), 0);
+
+    const lastMonthAccounting = await prisma.accountingTransaction.findMany({
+      where: {
+        companyId,
+        fecha: { gte: lastMonthStart, lte: lastMonthEnd },
+        paymentId: null,
+        expenseId: null,
+      },
+      select: { tipo: true, monto: true },
+    });
+    const lastMonthAccountingIncome = lastMonthAccounting
+      .filter((tx) => tx.tipo === 'ingreso')
+      .reduce((sum, tx) => sum + (tx.monto || 0), 0);
 
     // Calcular estadísticas
     const monthlyIncome = currentMonthPayments
       .filter((p) => p.estado === 'pagado')
       .reduce((sum, p) => sum + p.monto, 0);
 
-    const lastMonthIncome = lastMonthPayments.reduce((sum, p) => sum + p.monto, 0);
+    const lastMonthIncome =
+      lastMonthPayments.reduce((sum, p) => sum + p.monto, 0) + lastMonthAccountingIncome;
 
     const totalPendingAmount = pendingPayments.reduce((sum, p) => sum + p.monto, 0);
     const totalOverdueAmount = overduePayments.reduce((sum, p) => sum + p.monto, 0);
+
+    const totalMonthlyIncome = monthlyIncome + accountingIncome;
+    const totalMonthlyExpenses = monthlyExpenses + accountingExpenses;
 
     // Calcular saldo total estimado (rentas esperadas de contratos activos)
     const expectedMonthlyRent = activeContracts.reduce((sum, c) => sum + c.rentaMensual, 0);
 
     // Tasa de conciliación (pagos recibidos vs esperados)
-    const reconciliationRate = expectedMonthlyRent > 0
-      ? Math.round((monthlyIncome / expectedMonthlyRent) * 100)
-      : 0;
+    const reconciliationRate =
+      expectedMonthlyRent > 0 ? Math.round((totalMonthlyIncome / expectedMonthlyRent) * 100) : 0;
 
     // Contar integraciones bancarias conectadas
-    const bankConnections = await prisma.bankConnection.count({
-      where: {
-        tenant: {
+    const bankConnections = await prisma.bankConnection
+      .count({
+        where: {
           companyId,
+          estado: 'conectado',
         },
-        estado: 'connected',
-      },
-    }).catch(() => 0);
+      })
+      .catch(() => 0);
 
     // Contar facturas del mes
-    const monthlyInvoices = await (prisma as any).invoice?.count({
-      where: {
-        companyId,
-        fechaEmision: {
-          gte: monthStart,
-          lte: monthEnd,
+    const monthlyInvoices = await (prisma as any).invoice
+      ?.count({
+        where: {
+          companyId,
+          fechaEmision: {
+            gte: monthStart,
+            lte: monthEnd,
+          },
         },
-      },
-    }).catch(() => 0);
+      })
+      .catch(() => 0);
 
     // Calcular rentabilidad (si hay datos de propiedades)
-    let rentabilidad = 0;
-    try {
-      const properties = await prisma.unit.findMany({
-        where: {
-          building: {
-            companyId,
-            isDemo: false,
-          },
-          isDemo: false,
-        },
-        select: {
-          rentaMensual: true,
-        },
-      });
-      const totalRent = properties.reduce((sum, p) => sum + p.rentaMensual, 0);
-      if (totalRent > 0) {
-        // Rentabilidad anualizada aproximada (usando ingresos anuales estimados)
-        rentabilidad = 6 + Math.random() * 2; // Placeholder - calcular con datos reales de valoración
-      }
-    } catch {
-      // Ignorar errores
-    }
+    const rentabilidad =
+      totalMonthlyIncome > 0
+        ? ((totalMonthlyIncome - totalMonthlyExpenses) / totalMonthlyIncome) * 100
+        : 0;
+
+    const accountingIntegrations = await prisma.integrationConfig
+      .count({
+        where: { companyId, category: 'accounting', enabled: true },
+      })
+      .catch(() => 0);
 
     return NextResponse.json({
       summary: {
-        totalBalance: monthlyIncome - monthlyExpenses,
-        monthlyIncome,
-        monthlyExpenses,
+        totalBalance: totalMonthlyIncome - totalMonthlyExpenses,
+        monthlyIncome: totalMonthlyIncome,
+        monthlyExpenses: totalMonthlyExpenses,
         pendingPayments: totalPendingAmount,
         overduePayments: totalOverdueAmount,
         reconciliationRate: Math.min(reconciliationRate, 100),
@@ -207,13 +225,14 @@ export async function GET(request: NextRequest) {
         bankConnections,
         pendingCollections: totalPendingAmount,
         monthlyInvoices: monthlyInvoices || 0,
-        accountingIntegrations: 1, // Placeholder
+        accountingIntegrations,
         rentabilidad: rentabilidad.toFixed(1),
       },
       comparison: {
-        incomeChange: lastMonthIncome > 0
-          ? Math.round(((monthlyIncome - lastMonthIncome) / lastMonthIncome) * 100)
-          : 0,
+        incomeChange:
+          lastMonthIncome > 0
+            ? Math.round(((totalMonthlyIncome - lastMonthIncome) / lastMonthIncome) * 100)
+            : 0,
       },
     });
   } catch (error) {

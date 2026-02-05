@@ -1,10 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -145,7 +152,6 @@ interface ReconciliationSuggestion {
 
 // Datos cargados desde API /api/finanzas/conciliacion
 
-
 // ============================================
 // COMPONENTE PRINCIPAL
 // ============================================
@@ -153,7 +159,7 @@ interface ReconciliationSuggestion {
 export default function ConciliacionBancariaPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  
+
   const [activeTab, setActiveTab] = useState('movimientos');
   const [selectedAccount, setSelectedAccount] = useState<string>('all');
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
@@ -167,6 +173,8 @@ export default function ConciliacionBancariaPage() {
   const [transactionToMatch, setTransactionToMatch] = useState<BankTransaction | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isAutoMatching, setIsAutoMatching] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Cargar datos desde API
   const fetchData = async () => {
@@ -194,9 +202,37 @@ export default function ConciliacionBancariaPage() {
     }
   }, [status, router]);
 
+  const handleImportAccounting = async (file: File) => {
+    setIsImporting(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const response = await fetch('/api/contabilidad/import', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Error importando contabilidad');
+      }
+      const result = await response.json();
+      toast.success('Contabilidad importada', {
+        description: `Creados: ${result.created} · Omitidos: ${result.skipped}`,
+      });
+      fetchData();
+    } catch (error: any) {
+      toast.error('Error en importación', {
+        description: error.message || 'No se pudo importar el archivo',
+      });
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   // Filtrar transacciones
-  const filteredTransactions = transactions.filter(tx => {
-    const matchesSearch = searchTerm === '' || 
+  const filteredTransactions = transactions.filter((tx) => {
+    const matchesSearch =
+      searchTerm === '' ||
       tx.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tx.reference?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesAccount = selectedAccount === 'all' || tx.accountId === selectedAccount;
@@ -206,20 +242,26 @@ export default function ConciliacionBancariaPage() {
 
   // Estadísticas
   const stats = {
-    pendingCount: transactions.filter(t => t.reconciliationStatus === 'pending').length,
-    matchedCount: transactions.filter(t => t.reconciliationStatus === 'matched' || t.reconciliationStatus === 'manual').length,
-    totalIncome: transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0),
-    totalExpense: transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0),
+    pendingCount: transactions.filter((t) => t.reconciliationStatus === 'pending').length,
+    matchedCount: transactions.filter(
+      (t) => t.reconciliationStatus === 'matched' || t.reconciliationStatus === 'manual'
+    ).length,
+    totalIncome: transactions
+      .filter((t) => t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0),
+    totalExpense: transactions
+      .filter((t) => t.type === 'expense')
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0),
   };
 
   // Sincronizar bancos
   const handleSyncBanks = async () => {
     setIsSyncing(true);
     toast.loading('Sincronizando con bancos...');
-    
+
     // Simular sincronización
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
     setIsSyncing(false);
     toast.dismiss();
     toast.success('Sincronización completada', {
@@ -231,44 +273,48 @@ export default function ConciliacionBancariaPage() {
   const handleAutoMatch = async () => {
     setIsAutoMatching(true);
     toast.loading('Analizando movimientos con IA...');
-    
+
     // Simular análisis IA
-    await new Promise(resolve => setTimeout(resolve, 2500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+
     // Actualizar algunas transacciones como matched
-    setTransactions(prev => prev.map(tx => {
-      if (tx.id === 'tx-1' && tx.reconciliationStatus === 'pending') {
-        return {
-          ...tx,
-          reconciliationStatus: 'matched',
-          matchedDocumentId: 'inv-1',
-          matchedDocumentType: 'invoice',
-          matchConfidence: 95,
-        };
-      }
-      if (tx.id === 'tx-5' && tx.reconciliationStatus === 'pending') {
-        return {
-          ...tx,
-          reconciliationStatus: 'matched',
-          matchedDocumentId: 'inv-4',
-          matchedDocumentType: 'invoice',
-          matchConfidence: 88,
-        };
-      }
-      return tx;
-    }));
+    setTransactions((prev) =>
+      prev.map((tx) => {
+        if (tx.id === 'tx-1' && tx.reconciliationStatus === 'pending') {
+          return {
+            ...tx,
+            reconciliationStatus: 'matched',
+            matchedDocumentId: 'inv-1',
+            matchedDocumentType: 'invoice',
+            matchConfidence: 95,
+          };
+        }
+        if (tx.id === 'tx-5' && tx.reconciliationStatus === 'pending') {
+          return {
+            ...tx,
+            reconciliationStatus: 'matched',
+            matchedDocumentId: 'inv-4',
+            matchedDocumentType: 'invoice',
+            matchConfidence: 88,
+          };
+        }
+        return tx;
+      })
+    );
 
     // Actualizar facturas
-    setInvoices(prev => prev.map(inv => {
-      if (inv.id === 'inv-1') {
-        return { ...inv, status: 'paid', reconciled: true, matchedTransactionId: 'tx-1' };
-      }
-      if (inv.id === 'inv-4') {
-        return { ...inv, status: 'paid', reconciled: true, matchedTransactionId: 'tx-5' };
-      }
-      return inv;
-    }));
-    
+    setInvoices((prev) =>
+      prev.map((inv) => {
+        if (inv.id === 'inv-1') {
+          return { ...inv, status: 'paid', reconciled: true, matchedTransactionId: 'tx-1' };
+        }
+        if (inv.id === 'inv-4') {
+          return { ...inv, status: 'paid', reconciled: true, matchedTransactionId: 'tx-5' };
+        }
+        return inv;
+      })
+    );
+
     setIsAutoMatching(false);
     toast.dismiss();
     toast.success('Conciliación automática completada', {
@@ -278,24 +324,28 @@ export default function ConciliacionBancariaPage() {
 
   // Vincular manualmente
   const handleManualMatch = (transactionId: string, invoiceId: string) => {
-    setTransactions(prev => prev.map(tx => {
-      if (tx.id === transactionId) {
-        return {
-          ...tx,
-          reconciliationStatus: 'manual',
-          matchedDocumentId: invoiceId,
-          matchedDocumentType: 'invoice',
-        };
-      }
-      return tx;
-    }));
+    setTransactions((prev) =>
+      prev.map((tx) => {
+        if (tx.id === transactionId) {
+          return {
+            ...tx,
+            reconciliationStatus: 'manual',
+            matchedDocumentId: invoiceId,
+            matchedDocumentType: 'invoice',
+          };
+        }
+        return tx;
+      })
+    );
 
-    setInvoices(prev => prev.map(inv => {
-      if (inv.id === invoiceId) {
-        return { ...inv, reconciled: true, matchedTransactionId: transactionId, status: 'paid' };
-      }
-      return inv;
-    }));
+    setInvoices((prev) =>
+      prev.map((inv) => {
+        if (inv.id === invoiceId) {
+          return { ...inv, reconciled: true, matchedTransactionId: transactionId, status: 'paid' };
+        }
+        return inv;
+      })
+    );
 
     setIsMatchDialogOpen(false);
     setTransactionToMatch(null);
@@ -304,29 +354,38 @@ export default function ConciliacionBancariaPage() {
 
   // Desvincular
   const handleUnlink = (transactionId: string) => {
-    const tx = transactions.find(t => t.id === transactionId);
+    const tx = transactions.find((t) => t.id === transactionId);
     if (!tx) return;
 
-    setTransactions(prev => prev.map(t => {
-      if (t.id === transactionId) {
-        return {
-          ...t,
-          reconciliationStatus: 'pending',
-          matchedDocumentId: undefined,
-          matchedDocumentType: undefined,
-          matchConfidence: undefined,
-        };
-      }
-      return t;
-    }));
+    setTransactions((prev) =>
+      prev.map((t) => {
+        if (t.id === transactionId) {
+          return {
+            ...t,
+            reconciliationStatus: 'pending',
+            matchedDocumentId: undefined,
+            matchedDocumentType: undefined,
+            matchConfidence: undefined,
+          };
+        }
+        return t;
+      })
+    );
 
     if (tx.matchedDocumentId) {
-      setInvoices(prev => prev.map(inv => {
-        if (inv.id === tx.matchedDocumentId) {
-          return { ...inv, reconciled: false, matchedTransactionId: undefined, status: 'pending' };
-        }
-        return inv;
-      }));
+      setInvoices((prev) =>
+        prev.map((inv) => {
+          if (inv.id === tx.matchedDocumentId) {
+            return {
+              ...inv,
+              reconciled: false,
+              matchedTransactionId: undefined,
+              status: 'pending',
+            };
+          }
+          return inv;
+        })
+      );
     }
 
     toast.success('Vinculación eliminada');
@@ -334,12 +393,14 @@ export default function ConciliacionBancariaPage() {
 
   // Ignorar movimiento
   const handleIgnore = (transactionId: string) => {
-    setTransactions(prev => prev.map(tx => {
-      if (tx.id === transactionId) {
-        return { ...tx, reconciliationStatus: 'ignored' };
-      }
-      return tx;
-    }));
+    setTransactions((prev) =>
+      prev.map((tx) => {
+        if (tx.id === transactionId) {
+          return { ...tx, reconciliationStatus: 'ignored' };
+        }
+        return tx;
+      })
+    );
     toast.success('Movimiento marcado como ignorado');
   };
 
@@ -353,7 +414,7 @@ export default function ConciliacionBancariaPage() {
     );
   }
 
-  const pendingInvoices = invoices.filter(inv => !inv.reconciled && inv.status !== 'paid');
+  const pendingInvoices = invoices.filter((inv) => !inv.reconciled && inv.status !== 'paid');
 
   return (
     <AuthenticatedLayout>
@@ -391,11 +452,37 @@ export default function ConciliacionBancariaPage() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls,.csv"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) {
+                  handleImportAccounting(file);
+                }
+                event.target.value = '';
+              }}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isImporting}
+            >
+              <Upload className={`h-4 w-4 mr-2 ${isImporting ? 'animate-pulse' : ''}`} />
+              Importar contabilidad
+            </Button>
             <Button variant="outline" size="sm" onClick={() => router.push('/open-banking')}>
               <Building className="h-4 w-4 mr-2" />
               Open Banking
             </Button>
-            <Button variant="outline" size="sm" onClick={() => router.push('/contabilidad/integraciones')}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/contabilidad/integraciones')}
+            >
               <FileText className="h-4 w-4 mr-2" />
               Contabilidad
             </Button>
@@ -445,7 +532,9 @@ export default function ConciliacionBancariaPage() {
                   <ArrowDownLeft className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">+{stats.totalIncome.toLocaleString('es-ES')}€</p>
+                  <p className="text-2xl font-bold">
+                    +{stats.totalIncome.toLocaleString('es-ES')}€
+                  </p>
                   <p className="text-xs text-muted-foreground">Ingresos</p>
                 </div>
               </div>
@@ -458,7 +547,9 @@ export default function ConciliacionBancariaPage() {
                   <ArrowUpRight className="h-5 w-5 text-red-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">-{stats.totalExpense.toLocaleString('es-ES')}€</p>
+                  <p className="text-2xl font-bold">
+                    -{stats.totalExpense.toLocaleString('es-ES')}€
+                  </p>
                   <p className="text-xs text-muted-foreground">Gastos</p>
                 </div>
               </div>
@@ -482,27 +573,39 @@ export default function ConciliacionBancariaPage() {
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-3 gap-4">
-              {accounts.map(account => (
+              {accounts.map((account) => (
                 <div
                   key={account.id}
                   className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                    selectedAccount === account.id ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
+                    selectedAccount === account.id
+                      ? 'border-primary bg-primary/5'
+                      : 'hover:border-primary/50'
                   }`}
-                  onClick={() => setSelectedAccount(selectedAccount === account.id ? 'all' : account.id)}
+                  onClick={() =>
+                    setSelectedAccount(selectedAccount === account.id ? 'all' : account.id)
+                  }
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <Building className="h-5 w-5 text-muted-foreground" />
                       <span className="font-medium">{account.bankName}</span>
                     </div>
-                    <Badge variant={account.status === 'connected' ? 'default' : 'secondary'} className={account.status === 'connected' ? 'bg-green-500' : ''}>
+                    <Badge
+                      variant={account.status === 'connected' ? 'default' : 'secondary'}
+                      className={account.status === 'connected' ? 'bg-green-500' : ''}
+                    >
                       {account.status === 'connected' ? 'Conectado' : 'Pendiente'}
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mb-1">{account.iban}</p>
-                  <p className="text-xl font-bold">{account.balance.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}</p>
+                  <p className="text-xl font-bold">
+                    {account.balance.toLocaleString('es-ES', {
+                      style: 'currency',
+                      currency: 'EUR',
+                    })}
+                  </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Última sync: {format(parseISO(account.lastSync), "d MMM HH:mm", { locale: es })}
+                    Última sync: {format(parseISO(account.lastSync), 'd MMM HH:mm', { locale: es })}
                   </p>
                 </div>
               ))}
@@ -570,17 +673,22 @@ export default function ConciliacionBancariaPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredTransactions.map(tx => {
-                      const linkedInvoice = tx.matchedDocumentId 
-                        ? invoices.find(inv => inv.id === tx.matchedDocumentId)
+                    {filteredTransactions.map((tx) => {
+                      const linkedInvoice = tx.matchedDocumentId
+                        ? invoices.find((inv) => inv.id === tx.matchedDocumentId)
                         : null;
-                      
+
                       return (
-                        <TableRow key={tx.id} className={tx.reconciliationStatus === 'ignored' ? 'opacity-50' : ''}>
+                        <TableRow
+                          key={tx.id}
+                          className={tx.reconciliationStatus === 'ignored' ? 'opacity-50' : ''}
+                        >
                           <TableCell>
-                            <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                              tx.type === 'income' ? 'bg-green-100' : 'bg-red-100'
-                            }`}>
+                            <div
+                              className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                                tx.type === 'income' ? 'bg-green-100' : 'bg-red-100'
+                              }`}
+                            >
                               {tx.type === 'income' ? (
                                 <ArrowDownLeft className="h-4 w-4 text-green-600" />
                               ) : (
@@ -590,7 +698,7 @@ export default function ConciliacionBancariaPage() {
                           </TableCell>
                           <TableCell>
                             <div className="text-sm">
-                              {format(parseISO(tx.date), "d MMM yyyy", { locale: es })}
+                              {format(parseISO(tx.date), 'd MMM yyyy', { locale: es })}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -602,8 +710,14 @@ export default function ConciliacionBancariaPage() {
                             </div>
                           </TableCell>
                           <TableCell className="text-right">
-                            <span className={`font-semibold ${tx.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                              {tx.type === 'income' ? '+' : ''}{tx.amount.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                            <span
+                              className={`font-semibold ${tx.type === 'income' ? 'text-green-600' : 'text-red-600'}`}
+                            >
+                              {tx.type === 'income' ? '+' : ''}
+                              {tx.amount.toLocaleString('es-ES', {
+                                style: 'currency',
+                                currency: 'EUR',
+                              })}
                             </span>
                           </TableCell>
                           <TableCell>
@@ -662,14 +776,17 @@ export default function ConciliacionBancariaPage() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => {
-                                  setTransactionToMatch(tx);
-                                  setIsMatchDialogOpen(true);
-                                }}>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setTransactionToMatch(tx);
+                                    setIsMatchDialogOpen(true);
+                                  }}
+                                >
                                   <Link2 className="h-4 w-4 mr-2" />
                                   Vincular manualmente
                                 </DropdownMenuItem>
-                                {(tx.reconciliationStatus === 'matched' || tx.reconciliationStatus === 'manual') && (
+                                {(tx.reconciliationStatus === 'matched' ||
+                                  tx.reconciliationStatus === 'manual') && (
                                   <DropdownMenuItem onClick={() => handleUnlink(tx.id)}>
                                     <Unlink className="h-4 w-4 mr-2" />
                                     Desvincular
@@ -716,18 +833,35 @@ export default function ConciliacionBancariaPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {invoices.map(inv => (
+                    {invoices.map((inv) => (
                       <TableRow key={inv.id}>
                         <TableCell className="font-medium">{inv.number}</TableCell>
-                        <TableCell>{format(parseISO(inv.date), "d MMM yyyy", { locale: es })}</TableCell>
+                        <TableCell>
+                          {format(parseISO(inv.date), 'd MMM yyyy', { locale: es })}
+                        </TableCell>
                         <TableCell>{inv.concept}</TableCell>
                         <TableCell>{inv.tenant || '-'}</TableCell>
                         <TableCell className="text-right font-semibold">
-                          {inv.amount.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                          {inv.amount.toLocaleString('es-ES', {
+                            style: 'currency',
+                            currency: 'EUR',
+                          })}
                         </TableCell>
                         <TableCell>
-                          <Badge variant={inv.status === 'paid' ? 'default' : inv.status === 'overdue' ? 'destructive' : 'outline'}>
-                            {inv.status === 'paid' ? 'Pagada' : inv.status === 'overdue' ? 'Vencida' : 'Pendiente'}
+                          <Badge
+                            variant={
+                              inv.status === 'paid'
+                                ? 'default'
+                                : inv.status === 'overdue'
+                                  ? 'destructive'
+                                  : 'outline'
+                            }
+                          >
+                            {inv.status === 'paid'
+                              ? 'Pagada'
+                              : inv.status === 'overdue'
+                                ? 'Vencida'
+                                : 'Pendiente'}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -750,8 +884,9 @@ export default function ConciliacionBancariaPage() {
             <Alert className="border-purple-200 bg-purple-50 dark:bg-purple-950">
               <Sparkles className="h-4 w-4 text-purple-600" />
               <AlertDescription className="text-purple-800 dark:text-purple-200">
-                <strong>Conciliación Inteligente:</strong> La IA analiza descripciones, importes y fechas para sugerir 
-                vinculaciones automáticas entre movimientos bancarios y facturas.
+                <strong>Conciliación Inteligente:</strong> La IA analiza descripciones, importes y
+                fechas para sugerir vinculaciones automáticas entre movimientos bancarios y
+                facturas.
               </AlertDescription>
             </Alert>
 
@@ -768,14 +903,13 @@ export default function ConciliacionBancariaPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {transactions
-                    .filter(tx => tx.reconciliationStatus === 'pending')
-                    .map(tx => {
+                    .filter((tx) => tx.reconciliationStatus === 'pending')
+                    .map((tx) => {
                       // Buscar posible match
-                      const possibleMatch = invoices.find(inv => 
-                        !inv.reconciled && 
-                        Math.abs(inv.amount - Math.abs(tx.amount)) < 1
+                      const possibleMatch = invoices.find(
+                        (inv) => !inv.reconciled && Math.abs(inv.amount - Math.abs(tx.amount)) < 1
                       );
-                      
+
                       if (!possibleMatch) return null;
 
                       return (
@@ -784,9 +918,17 @@ export default function ConciliacionBancariaPage() {
                             <div>
                               <p className="font-medium">{tx.description}</p>
                               <p className="text-sm text-muted-foreground">
-                                {format(parseISO(tx.date), "d MMMM yyyy", { locale: es })} • 
-                                <span className={tx.type === 'income' ? 'text-green-600' : 'text-red-600'}>
-                                  {' '}{tx.amount.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                                {format(parseISO(tx.date), 'd MMMM yyyy', { locale: es })} •
+                                <span
+                                  className={
+                                    tx.type === 'income' ? 'text-green-600' : 'text-red-600'
+                                  }
+                                >
+                                  {' '}
+                                  {tx.amount.toLocaleString('es-ES', {
+                                    style: 'currency',
+                                    currency: 'EUR',
+                                  })}
                                 </span>
                               </p>
                             </div>
@@ -795,25 +937,30 @@ export default function ConciliacionBancariaPage() {
                               95% coincidencia
                             </Badge>
                           </div>
-                          
+
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <ArrowRightLeft className="h-4 w-4" />
                             Posible coincidencia:
                           </div>
-                          
+
                           <div className="p-3 bg-muted rounded-lg flex items-center justify-between">
                             <div>
                               <p className="font-medium">{possibleMatch.number}</p>
-                              <p className="text-sm text-muted-foreground">{possibleMatch.concept}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {possibleMatch.concept}
+                              </p>
                             </div>
                             <p className="font-semibold">
-                              {possibleMatch.amount.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                              {possibleMatch.amount.toLocaleString('es-ES', {
+                                style: 'currency',
+                                currency: 'EUR',
+                              })}
                             </p>
                           </div>
-                          
+
                           <div className="flex gap-2">
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               onClick={() => handleManualMatch(tx.id, possibleMatch.id)}
                             >
                               <Check className="h-4 w-4 mr-1" />
@@ -852,26 +999,33 @@ export default function ConciliacionBancariaPage() {
                 Selecciona la factura o recibo que corresponde a este movimiento bancario
               </DialogDescription>
             </DialogHeader>
-            
+
             {transactionToMatch && (
               <div className="space-y-4">
                 <div className="p-4 bg-muted rounded-lg">
                   <p className="font-medium">{transactionToMatch.description}</p>
                   <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                    <span>{format(parseISO(transactionToMatch.date), "d MMM yyyy", { locale: es })}</span>
-                    <span className={`font-semibold ${transactionToMatch.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                      {transactionToMatch.amount.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                    <span>
+                      {format(parseISO(transactionToMatch.date), 'd MMM yyyy', { locale: es })}
+                    </span>
+                    <span
+                      className={`font-semibold ${transactionToMatch.type === 'income' ? 'text-green-600' : 'text-red-600'}`}
+                    >
+                      {transactionToMatch.amount.toLocaleString('es-ES', {
+                        style: 'currency',
+                        currency: 'EUR',
+                      })}
                     </span>
                   </div>
                 </div>
-                
+
                 <Separator />
-                
+
                 <div>
                   <Label className="mb-2 block">Facturas disponibles</Label>
                   <ScrollArea className="h-[300px]">
                     <div className="space-y-2">
-                      {pendingInvoices.map(inv => (
+                      {pendingInvoices.map((inv) => (
                         <div
                           key={inv.id}
                           className="p-3 border rounded-lg hover:border-primary cursor-pointer transition-all"
@@ -887,10 +1041,13 @@ export default function ConciliacionBancariaPage() {
                             </div>
                             <div className="text-right">
                               <p className="font-semibold">
-                                {inv.amount.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                                {inv.amount.toLocaleString('es-ES', {
+                                  style: 'currency',
+                                  currency: 'EUR',
+                                })}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {format(parseISO(inv.date), "d MMM yyyy", { locale: es })}
+                                {format(parseISO(inv.date), 'd MMM yyyy', { locale: es })}
                               </p>
                             </div>
                           </div>
@@ -906,7 +1063,7 @@ export default function ConciliacionBancariaPage() {
                 </div>
               </div>
             )}
-            
+
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsMatchDialogOpen(false)}>
                 Cancelar
