@@ -188,23 +188,13 @@ export default function NuevoContratoPage() {
 
       try {
         setIsUnitsLoading(true);
-        const unitsRes = await fetch(
-          `/api/units?estado=disponible&buildingId=${selectedBuildingId}`
-        );
-        let unitsData: Unit[] = [];
+        const unitsRes = await fetch(`/api/units?buildingId=${selectedBuildingId}`);
         if (unitsRes.ok) {
-          unitsData = normalizeList<Unit>(await unitsRes.json());
+          const unitsData = normalizeList<Unit>(await unitsRes.json());
+          setUnits(unitsData);
+        } else {
+          setUnits([]);
         }
-
-        // Si no hay unidades disponibles, permitir seleccionar cualquier unidad del edificio
-        if (unitsData.length === 0) {
-          const fallbackRes = await fetch(`/api/units?buildingId=${selectedBuildingId}`);
-          if (fallbackRes.ok) {
-            unitsData = normalizeList<Unit>(await fallbackRes.json());
-          }
-        }
-
-        setUnits(unitsData);
       } catch (error) {
         logger.error('Error fetching units:', error);
         setUnits([]);
