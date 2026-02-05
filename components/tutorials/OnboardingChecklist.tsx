@@ -153,8 +153,8 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
 
   if (isMinimized) {
     return (
-      // Posicionado en la izquierda para no solapar con chatbot
-      <div className="fixed bottom-4 left-4 z-40 lg:bottom-6 lg:left-6">
+      // Posicionado fuera del sidebar en desktop
+      <div className="fixed bottom-4 left-4 z-40 lg:bottom-6 lg:left-72">
         <Button
           onClick={() => setIsMinimized(false)}
           className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-xl hover:shadow-2xl transition-all"
@@ -174,8 +174,8 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
         initial={{ opacity: 0, y: 20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 20, scale: 0.95 }}
-        // Posicionado en la izquierda para no solapar con chatbot
-        className="fixed bottom-4 left-4 z-40 w-80 lg:w-96 lg:bottom-6 lg:left-6 max-h-[80vh]"
+        // Posicionado fuera del sidebar en desktop
+        className="fixed bottom-4 left-4 z-40 w-[calc(100vw-2rem)] sm:w-80 lg:w-96 lg:bottom-6 lg:left-72 max-h-[80vh]"
       >
         <Card className="bg-white shadow-2xl border-2 border-indigo-200">
           {/* Header */}
