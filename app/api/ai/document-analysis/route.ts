@@ -1020,16 +1020,24 @@ export async function POST(request: NextRequest) {
         isPDF,
         isImage,
       });
-      const visionAnalysis = await analyzeDocumentWithVision(file, companyInfo, context);
-      
-      logger.info('[AI Document Analysis] Análisis de visión completado', {
-        filename: file.name,
-        context,
-        category: visionAnalysis.classification?.category,
-        fieldsExtracted: visionAnalysis.extractedFields?.length || 0,
-      });
-      
-      return NextResponse.json(visionAnalysis);
+      try {
+        const visionAnalysis = await analyzeDocumentWithVision(file, companyInfo, context);
+        
+        logger.info('[AI Document Analysis] Análisis de visión completado', {
+          filename: file.name,
+          context,
+          category: visionAnalysis.classification?.category,
+          fieldsExtracted: visionAnalysis.extractedFields?.length || 0,
+        });
+        
+        return NextResponse.json(visionAnalysis);
+      } catch (visionError: any) {
+        logger.warn('[AI Document Analysis] Falló visión, fallback a texto', {
+          filename: file.name,
+          error: visionError?.message,
+        });
+        // Continuar con análisis de texto usando extractedText ya calculado
+      }
     }
 
     // Para documentos de texto/PDF, usar el análisis tradicional
