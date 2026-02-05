@@ -29,7 +29,6 @@
       "@/*": ["./*"]
     },
     "typeRoots": ["./node_modules/@types", "./types"],
-    "strict": true,
     "strictNullChecks": true,
     "noImplicitAny": true
   },
