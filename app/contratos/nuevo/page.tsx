@@ -47,7 +47,9 @@ interface Building {
 
 interface Tenant {
   id: string;
-  nombre: string;
+  nombre?: string;
+  nombreCompleto?: string;
+  name?: string;
   email: string;
 }
 
@@ -397,11 +399,14 @@ export default function NuevoContratoPage() {
                               <SelectValue placeholder="Selecciona un inquilino" />
                             </SelectTrigger>
                             <SelectContent>
-                              {tenants.map((tenant) => (
+                              {tenants.map((tenant) => {
+                                const displayName =
+                                  tenant.nombreCompleto || tenant.nombre || tenant.name || 'Inquilino';
+                                return (
                                 <SelectItem key={tenant.id} value={tenant.id}>
-                                  {tenant.nombre} - {tenant.email}
+                                  {displayName} - {tenant.email}
                                 </SelectItem>
-                              ))}
+                              )})}
                             </SelectContent>
                           </Select>
                         </div>
