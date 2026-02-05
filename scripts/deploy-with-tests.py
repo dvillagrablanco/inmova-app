@@ -413,7 +413,7 @@ Umbrales de Calidad:
             if success and generated_secret:
                 exec_cmd(
                     ssh,
-                    f\"echo 'NEXTAUTH_SECRET={generated_secret.strip()}' >> {APP_PATH}/.env.production\",
+                    f"echo 'NEXTAUTH_SECRET={generated_secret.strip()}' >> {APP_PATH}/.env.production",
                     "Set NEXTAUTH_SECRET",
                     ignore_errors=True
                 )
