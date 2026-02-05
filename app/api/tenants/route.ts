@@ -127,6 +127,16 @@ export async function POST(req: NextRequest) {
     
     // Preparar datos: convertir nombre completo a nombre/apellidos si es necesario
     let dataToValidate = { ...body };
+
+    // Mapear documento de identidad al campo dni si viene con otro nombre
+    const rawDni =
+      body.dni ||
+      body.documentoIdentidad ||
+      body.numeroDocumento ||
+      body.documentNumber;
+    if (rawDni) {
+      dataToValidate.dni = rawDni;
+    }
     
     // Si viene nombreCompleto o nombre contiene espacios y no hay apellidos
     const nombreCompleto = body.nombreCompleto || body.nombre;
@@ -159,6 +169,13 @@ export async function POST(req: NextRequest) {
     }
 
     const validatedData = validationResult.data;
+
+    if (!validatedData.dni) {
+      return NextResponse.json(
+        { error: 'El DNI/NIE es requerido' },
+        { status: 400 }
+      );
+    }
     
     // Combinar nombre y apellidos de vuelta a nombreCompleto para la BD
     const nombreCompletoFinal = `${validatedData.nombre} ${validatedData.apellidos}`.trim();
@@ -167,7 +184,7 @@ export async function POST(req: NextRequest) {
       data: {
         companyId: user.companyId,
         nombreCompleto: nombreCompletoFinal,
-        dni: validatedData.dni || '',
+        dni: validatedData.dni,
         email: validatedData.email,
         telefono: validatedData.telefono,
         fechaNacimiento: validatedData.fechaNacimiento ? new Date(validatedData.fechaNacimiento) : new Date(),
