@@ -16,6 +16,8 @@ export async function GET(req: NextRequest) {
   const contractId = searchParams.get('contractId');
   const folderId = searchParams.get('folderId');
   const tipo = searchParams.get('tipo');
+  const tag = searchParams.get('tag');
+  const tagsParam = searchParams.get('tags');
   const unlinked = searchParams.get('unlinked') === 'true';
   const query = searchParams.get('q');
 
@@ -40,6 +42,13 @@ export async function GET(req: NextRequest) {
     }
     if (query) {
       where.nombre = { contains: query, mode: 'insensitive' };
+    }
+    const tags = [
+      ...(tag ? [tag] : []),
+      ...(tagsParam ? tagsParam.split(',').map((t) => t.trim()).filter(Boolean) : []),
+    ];
+    if (tags.length > 0) {
+      where.tags = { hasSome: tags };
     }
 
     const documents = await prisma.document.findMany({

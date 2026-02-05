@@ -140,15 +140,29 @@ export async function GET(request: NextRequest) {
                 ? unit.numero
                 : '';
 
+      const isReconciled = Boolean(tx.paymentId || tx.expenseId);
+      const isOverdue = !isReconciled && tx.fecha < new Date();
+
       return {
         id: tx.id,
         number: tx.referencia || `ACC-${tx.id.slice(-6)}`,
+        date: tx.fecha.toISOString(),
+        dueDate: tx.fecha.toISOString(),
+        concept: tx.concepto,
         tenant: tenantName || 'N/D',
         property: propertyLabel || 'N/D',
+        tenantId: payment?.contract?.tenantId || null,
+        unitId: payment?.contract?.unitId || expense?.unitId || unit?.id || null,
+        buildingId:
+          payment?.contract?.unit?.building?.id ||
+          expense?.buildingId ||
+          expense?.unit?.building?.id ||
+          building?.id ||
+          null,
+        contractId: payment?.contractId || null,
         amount: Number(tx.monto || 0),
-        dueDate: tx.fecha.toISOString(),
-        status: tx.paymentId || tx.expenseId ? 'paid' : 'pending',
-        reconciled: Boolean(tx.paymentId || tx.expenseId),
+        status: isReconciled ? 'paid' : isOverdue ? 'overdue' : 'pending',
+        reconciled: isReconciled,
         matchedTransactionId: tx.paymentId || tx.expenseId || undefined,
       };
     });

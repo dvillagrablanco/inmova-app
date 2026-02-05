@@ -135,11 +135,16 @@ interface Invoice {
   date: string;
   dueDate: string;
   tenant?: string;
+  property?: string;
   concept: string;
   amount: number;
   status: 'pending' | 'paid' | 'partial' | 'overdue';
   reconciled: boolean;
   matchedTransactionId?: string;
+  tenantId?: string | null;
+  unitId?: string | null;
+  buildingId?: string | null;
+  contractId?: string | null;
 }
 
 interface ReconciliationSuggestion {
@@ -827,6 +832,7 @@ export default function ConciliacionBancariaPage() {
                       <TableHead>Fecha</TableHead>
                       <TableHead>Concepto</TableHead>
                       <TableHead>Inquilino</TableHead>
+                      <TableHead>Inmueble</TableHead>
                       <TableHead className="text-right">Importe</TableHead>
                       <TableHead>Estado</TableHead>
                       <TableHead>Conciliado</TableHead>
@@ -839,8 +845,54 @@ export default function ConciliacionBancariaPage() {
                         <TableCell>
                           {format(parseISO(inv.date), 'd MMM yyyy', { locale: es })}
                         </TableCell>
-                        <TableCell>{inv.concept}</TableCell>
-                        <TableCell>{inv.tenant || '-'}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span>{inv.concept}</span>
+                            {inv.contractId && (
+                              <Button
+                                variant="link"
+                                className="p-0 h-auto text-xs justify-start"
+                                onClick={() => router.push(`/contratos/${inv.contractId}`)}
+                              >
+                                Ver contrato
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {inv.tenantId ? (
+                            <Button
+                              variant="link"
+                              className="p-0 h-auto text-left"
+                              onClick={() => router.push(`/inquilinos/${inv.tenantId}`)}
+                            >
+                              {inv.tenant || 'Ver inquilino'}
+                            </Button>
+                          ) : (
+                            inv.tenant || '-'
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {inv.unitId ? (
+                            <Button
+                              variant="link"
+                              className="p-0 h-auto text-left"
+                              onClick={() => router.push(`/unidades/${inv.unitId}`)}
+                            >
+                              {inv.property || 'Ver unidad'}
+                            </Button>
+                          ) : inv.buildingId ? (
+                            <Button
+                              variant="link"
+                              className="p-0 h-auto text-left"
+                              onClick={() => router.push(`/edificios/${inv.buildingId}`)}
+                            >
+                              {inv.property || 'Ver edificio'}
+                            </Button>
+                          ) : (
+                            inv.property || '-'
+                          )}
+                        </TableCell>
                         <TableCell className="text-right font-semibold">
                           {inv.amount.toLocaleString('es-ES', {
                             style: 'currency',

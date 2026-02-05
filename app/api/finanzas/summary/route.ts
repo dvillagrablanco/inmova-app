@@ -186,6 +186,15 @@ export async function GET(request: NextRequest) {
       })
       .catch(() => 0);
 
+    const pendingReconciliation = await prisma.bankTransaction
+      .count({
+        where: {
+          companyId,
+          estado: 'pendiente_revision',
+        },
+      })
+      .catch(() => 0);
+
     // Contar facturas del mes
     const monthlyInvoices = await (prisma as any).invoice
       ?.count({
@@ -221,7 +230,7 @@ export async function GET(request: NextRequest) {
         reconciliationRate: Math.min(reconciliationRate, 100),
       },
       moduleStats: {
-        pendingReconciliation: pendingPayments.length,
+        pendingReconciliation,
         bankConnections,
         pendingCollections: totalPendingAmount,
         monthlyInvoices: monthlyInvoices || 0,

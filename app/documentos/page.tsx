@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 import { Button } from '@/components/ui/button';
@@ -74,6 +74,8 @@ interface Document {
 export default function DocumentosPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tagParam = searchParams?.get('tag') || '';
   const { canCreate } = usePermissions();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
@@ -105,11 +107,15 @@ export default function DocumentosPage() {
     if (session) {
       fetchDocuments();
     }
-  }, [session]);
+  }, [session, tagParam]);
 
   const fetchDocuments = async () => {
     try {
-      const res = await fetch('/api/documents');
+      const params = new URLSearchParams();
+      if (tagParam) {
+        params.set('tag', tagParam);
+      }
+      const res = await fetch(`/api/documents${params.toString() ? `?${params.toString()}` : ''}`);
       if (res.ok) {
         const data = await res.json();
         setDocuments(data);
@@ -250,21 +256,27 @@ export default function DocumentosPage() {
       };
       filters.push({ id: 'tipo', label: 'Tipo', value: tipoLabels[filterTipo] || filterTipo });
     }
+    if (tagParam) {
+      filters.push({ id: 'tag', label: 'Tag', value: tagParam });
+    }
 
     setActiveFilters(filters);
-  }, [searchTerm, filterTipo]);
+  }, [searchTerm, filterTipo, tagParam]);
 
   const clearFilter = (id: string) => {
     if (id === 'search') {
       setSearchTerm('');
     } else if (id === 'tipo') {
       setFilterTipo('all');
+    } else if (id === 'tag') {
+      router.replace('/documentos');
     }
   };
 
   const clearAllFilters = () => {
     setSearchTerm('');
     setFilterTipo('all');
+    router.replace('/documentos');
   };
 
   // Filtrado de documentos
