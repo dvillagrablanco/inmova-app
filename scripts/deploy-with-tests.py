@@ -374,19 +374,51 @@ Umbrales de Calidad:
             "NEXTAUTH_URL check",
             ignore_errors=True
         )
-        
-        if success and nextauth_url:
-            nextauth_url = nextauth_url.strip()
-            
-            # Validar formato
-            if nextauth_url == 'https://' or len(nextauth_url) < 10 or not nextauth_url.startswith('https://'):
-                error(f"NEXTAUTH_URL mal configurado: '{nextauth_url}'\n"
-                      f"   Debe ser https://{DOMAIN}\n"
-                      f"   Deployment ABORTADO para prevenir problemas de login")
-            
-            log(f"✅ NEXTAUTH_URL: {nextauth_url}", Colors.GREEN)
-        else:
-            error("No se pudo leer NEXTAUTH_URL de .env.production")
+
+        if not success or not nextauth_url:
+            warning("NEXTAUTH_URL no encontrado. Configurando automáticamente...")
+            exec_cmd(
+                ssh,
+                f"echo 'NEXTAUTH_URL=https://{DOMAIN}' >> {APP_PATH}/.env.production",
+                "Set NEXTAUTH_URL",
+                ignore_errors=True
+            )
+            nextauth_url = f"https://{DOMAIN}"
+
+        nextauth_url = nextauth_url.strip()
+        if nextauth_url == 'https://' or len(nextauth_url) < 10 or not nextauth_url.startswith('https://'):
+            error(f"NEXTAUTH_URL mal configurado: '{nextauth_url}'\n"
+                  f"   Debe ser https://{DOMAIN}\n"
+                  f"   Deployment ABORTADO para prevenir problemas de login")
+
+        log(f"✅ NEXTAUTH_URL: {nextauth_url}", Colors.GREEN)
+
+        # VERIFICAR NEXTAUTH_SECRET (CRÍTICO)
+        log("🔐 Verificando NEXTAUTH_SECRET...", Colors.BLUE)
+        success, nextauth_secret = exec_cmd(
+            ssh,
+            f"cat {APP_PATH}/.env.production | grep '^NEXTAUTH_SECRET=' | cut -d= -f2",
+            "NEXTAUTH_SECRET check",
+            ignore_errors=True
+        )
+
+        if not success or not nextauth_secret:
+            warning("NEXTAUTH_SECRET no encontrado. Generando automáticamente...")
+            success, generated_secret = exec_cmd(
+                ssh,
+                "openssl rand -base64 32",
+                "Generate NEXTAUTH_SECRET",
+                ignore_errors=True
+            )
+            if success and generated_secret:
+                exec_cmd(
+                    ssh,
+                    f\"echo 'NEXTAUTH_SECRET={generated_secret.strip()}' >> {APP_PATH}/.env.production\",
+                    "Set NEXTAUTH_SECRET",
+                    ignore_errors=True
+                )
+            else:
+                error("No se pudo generar NEXTAUTH_SECRET")
         
         # GIT PULL
         log("📥 Actualizando código...", Colors.BLUE)
