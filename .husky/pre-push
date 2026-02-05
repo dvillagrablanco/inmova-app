@@ -3,9 +3,9 @@
 
 echo "🚀 Running pre-push checks..."
 
-# Run all tests
+# Run CI test suite (no watch)
 echo "🧪 Running all tests..."
-npm test -- --run || {
+npm run test:ci || {
   echo "❌ Tests failed. Push aborted."
   exit 1
 }
