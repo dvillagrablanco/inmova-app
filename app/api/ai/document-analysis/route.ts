@@ -271,11 +271,11 @@ function getDataTypeFromCategory(category: string): string {
 }
 
 /**
- * Convierte un PDF a imagen PNG usando pdftoppm
+ * Convierte un PDF a imágenes PNG usando pdftoppm
  */
-async function convertPDFToImage(file: File): Promise<string> {
+async function convertPDFToImages(file: File, maxPages: number = 3): Promise<string[]> {
   const { spawn } = await import('child_process');
-  const { writeFile, readFile, unlink } = await import('fs/promises');
+  const { writeFile, readFile, unlink, readdir } = await import('fs/promises');
   const { join } = await import('path');
   const os = await import('os');
   
@@ -294,7 +294,17 @@ async function convertPDFToImage(file: File): Promise<string> {
     logger.info('[PDF to Image] Convirtiendo PDF...', { filename: file.name });
     
     await new Promise<void>((resolve, reject) => {
-      const proc = spawn('pdftoppm', ['-png', '-f', '1', '-l', '1', '-r', '150', pdfPath, outputPrefix]);
+      const proc = spawn('pdftoppm', [
+        '-png',
+        '-f',
+        '1',
+        '-l',
+        String(maxPages),
+        '-r',
+        '150',
+        pdfPath,
+        outputPrefix,
+      ]);
       let stderr = '';
       proc.stderr.on('data', (data) => { stderr += data.toString(); });
       proc.on('close', (code) => {
@@ -304,29 +314,33 @@ async function convertPDFToImage(file: File): Promise<string> {
       proc.on('error', (err) => reject(err));
     });
     
-    const { readdir } = await import('fs/promises');
     const files = await readdir(tmpDir);
-    const outputFile = files.find((name) => name.startsWith(prefixName) && name.endsWith('.png'));
-    if (!outputFile) {
-      throw new Error('pdftoppm no generó imagen de salida');
+    const outputFiles = files
+      .filter((name) => name.startsWith(prefixName) && name.endsWith('.png'))
+      .sort();
+    if (outputFiles.length === 0) {
+      throw new Error('pdftoppm no generó imágenes de salida');
     }
-    const outputPath = join(tmpDir, outputFile);
-    const imageBuffer = await readFile(outputPath);
-    const base64 = imageBuffer.toString('base64');
+    const selectedFiles = outputFiles.slice(0, maxPages);
+    const base64Images = [];
+    for (const outputFile of selectedFiles) {
+      const outputPath = join(tmpDir, outputFile);
+      const imageBuffer = await readFile(outputPath);
+      base64Images.push(imageBuffer.toString('base64'));
+      await unlink(outputPath).catch(() => {});
+    }
     
     logger.info('[PDF to Image] Conversión exitosa', { filename: file.name });
     
     await unlink(pdfPath).catch(() => {});
-    await unlink(outputPath).catch(() => {});
     
-    return base64;
+    return base64Images;
   } catch (error: any) {
     await unlink(pdfPath).catch(() => {});
     try {
-      const { readdir, unlink: unlinkFile } = await import('fs/promises');
       const files = await readdir(tmpDir);
       const matches = files.filter((name) => name.startsWith(prefixName) && name.endsWith('.png'));
-      await Promise.all(matches.map((name) => unlinkFile(join(tmpDir, name)).catch(() => {})));
+      await Promise.all(matches.map((name) => unlink(join(tmpDir, name)).catch(() => {})));
     } catch {
       // noop
     }
@@ -353,13 +367,13 @@ async function analyzeDocumentWithVision(
   
   // Para PDFs: convertir a imagen primero (más compatible con todos los modelos)
   // Para imágenes: usar directamente
-  let base64Data: string;
+  let base64Images: string[] = [];
   let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/png';
   
   if (isPDF) {
     console.error('[Vision Analysis] 📄 PDF detectado - convirtiendo a imagen:', file.name);
     try {
-      base64Data = await convertPDFToImage(file);
+      base64Images = await convertPDFToImages(file, 3);
       console.error('[Vision Analysis] ✅ PDF convertido exitosamente');
     } catch (convError: any) {
       console.error('[Vision Analysis] ❌ Error convirtiendo PDF:', convError.message);
@@ -367,20 +381,20 @@ async function analyzeDocumentWithVision(
     }
     mediaType = 'image/png';
   } else {
-    base64Data = await fileToBase64(file);
+    base64Images = [await fileToBase64(file)];
     if (file.type === 'image/jpeg' || file.type === 'image/jpg') mediaType = 'image/jpeg';
     else if (file.type === 'image/gif') mediaType = 'image/gif';
     else if (file.type === 'image/webp') mediaType = 'image/webp';
   }
   
-  const contentBlock = {
+  const contentBlocks = base64Images.map((data) => ({
     type: 'image',
     source: {
       type: 'base64',
       media_type: mediaType,
-      data: base64Data,
+      data,
     },
-  };
+  }));
   
   console.error('[Vision Analysis] 📤 Enviando a Claude Vision:', file.name, 'isPDF:', isPDF);
   
@@ -397,7 +411,7 @@ async function analyzeDocumentWithVision(
       {
         role: 'user',
         content: [
-          contentBlock,
+          ...contentBlocks,
           {
             type: 'text',
             text: prompt,
