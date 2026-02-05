@@ -281,9 +281,10 @@ async function convertPDFToImage(file: File): Promise<string> {
   
   const tmpDir = os.tmpdir();
   const timestamp = Date.now();
-  const pdfPath = join(tmpDir, `pdf_${timestamp}.pdf`);
-  const outputPrefix = join(tmpDir, `img_${timestamp}`);
-  const outputPath = `${outputPrefix}-1.png`;
+  const nonce = Math.random().toString(36).slice(2, 8);
+  const prefixName = `img_${timestamp}_${nonce}`;
+  const pdfPath = join(tmpDir, `pdf_${timestamp}_${nonce}.pdf`);
+  const outputPrefix = join(tmpDir, prefixName);
   
   try {
     const arrayBuffer = await file.arrayBuffer();
@@ -303,6 +304,13 @@ async function convertPDFToImage(file: File): Promise<string> {
       proc.on('error', (err) => reject(err));
     });
     
+    const { readdir } = await import('fs/promises');
+    const files = await readdir(tmpDir);
+    const outputFile = files.find((name) => name.startsWith(prefixName) && name.endsWith('.png'));
+    if (!outputFile) {
+      throw new Error('pdftoppm no generó imagen de salida');
+    }
+    const outputPath = join(tmpDir, outputFile);
     const imageBuffer = await readFile(outputPath);
     const base64 = imageBuffer.toString('base64');
     
@@ -314,7 +322,14 @@ async function convertPDFToImage(file: File): Promise<string> {
     return base64;
   } catch (error: any) {
     await unlink(pdfPath).catch(() => {});
-    await unlink(outputPath).catch(() => {});
+    try {
+      const { readdir, unlink: unlinkFile } = await import('fs/promises');
+      const files = await readdir(tmpDir);
+      const matches = files.filter((name) => name.startsWith(prefixName) && name.endsWith('.png'));
+      await Promise.all(matches.map((name) => unlinkFile(join(tmpDir, name)).catch(() => {})));
+    } catch {
+      // noop
+    }
     throw error;
   }
 }
