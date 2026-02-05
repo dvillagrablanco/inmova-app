@@ -172,9 +172,28 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      await s3Client.send(command);
-      uploadResult = { success: true, path: fileName };
-      logger.info(`[Upload Private] Archivo subido a S3: ${fileName}`);
+      try {
+        await s3Client.send(command);
+        uploadResult = { success: true, path: fileName };
+        logger.info(`[Upload Private] Archivo subido a S3: ${fileName}`);
+      } catch (s3Error: any) {
+        logger.error('[Upload Private] Error subiendo a S3, fallback local', {
+          message: s3Error?.message || s3Error,
+        });
+
+        if (!LocalStorage.isLocalStorageAvailable()) {
+          throw s3Error;
+        }
+
+        uploadResult = await LocalStorage.saveFile(buffer, fileName, {
+          uploadedBy: session.user.id,
+          originalName: file.name,
+          contentType: file.type,
+          entityType: entityType || 'none',
+          entityId: entityId || 'none',
+        });
+        logger.info(`[Upload Private] Archivo guardado localmente (fallback): ${fileName}`);
+      }
     } else {
       // Almacenamiento local
       uploadResult = await LocalStorage.saveFile(buffer, fileName, {
