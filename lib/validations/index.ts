@@ -119,7 +119,7 @@ export const tenantCreateSchema = z.object({
     .regex(/^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/, 'Teléfono inválido')
     .trim(),
   dni: z.string()
-    .regex(/^[0-9]{8}[A-Z]$/, 'DNI/NIE inválido (formato: 12345678A)')
+    .regex(/^(?:[0-9]{8}|[XYZ][0-9]{7})[A-Z]$/, 'DNI/NIE inválido (formato: 12345678A o X1234567A)')
     .toUpperCase()
     .trim()
     .optional()
