@@ -22,6 +22,7 @@ USER = os.environ.get('SSH_USER', 'root')
 PASS = os.environ.get('SSH_PASSWORD', 'hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo=')
 APP_PATH = '/opt/inmova-app'
 DOMAIN = 'inmovaapp.com'
+DEPLOY_BRANCH = os.environ.get('DEPLOY_BRANCH') or os.popen('git rev-parse --abbrev-ref HEAD').read().strip()
 
 # Umbrales de calidad
 MIN_TEST_PASS_RATE = 95  # 95% de tests deben pasar
@@ -323,6 +324,7 @@ def main():
 Servidor: {HOST}
 Dominio: {DOMAIN}
 Path: {APP_PATH}
+Branch: {DEPLOY_BRANCH}
 Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
 Umbrales de Calidad:
@@ -423,7 +425,14 @@ Umbrales de Calidad:
         # GIT PULL
         log("📥 Actualizando código...", Colors.BLUE)
         exec_cmd(ssh, f"cd {APP_PATH} && git stash", "Git stash", ignore_errors=True)
-        success, output = exec_cmd(ssh, f"cd {APP_PATH} && git pull origin main", "Git pull")
+        exec_cmd(ssh, f"cd {APP_PATH} && git fetch origin {DEPLOY_BRANCH}", "Git fetch branch", ignore_errors=True)
+        exec_cmd(
+            ssh,
+            f"cd {APP_PATH} && git checkout {DEPLOY_BRANCH} || git checkout -b {DEPLOY_BRANCH} origin/{DEPLOY_BRANCH}",
+            "Git checkout branch",
+            ignore_errors=True
+        )
+        success, output = exec_cmd(ssh, f"cd {APP_PATH} && git pull origin {DEPLOY_BRANCH}", "Git pull")
         
         if "Already up to date" in output:
             log("ℹ️  Código ya actualizado")
