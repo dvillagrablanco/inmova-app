@@ -1,4 +1,14 @@
 import { chromium, Browser, Page } from '@playwright/test';
+import * as dotenv from 'dotenv';
+
+dotenv.config({ path: '.env.production' });
+dotenv.config({ path: '.env' });
+
+const BASE_URL = process.env.BASE_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+const LOGIN_EMAIL = process.env.TEST_USER_EMAIL || process.env.ADMIN_EMAIL || 'admin@inmova.app';
+const LOGIN_PASSWORD = process.env.TEST_USER_PASSWORD || process.env.ADMIN_PASSWORD || 'Admin123!';
+
+const normalizedBaseUrl = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
 
 async function runVisualTest() {
   console.log('\nINICIANDO PRUEBA VISUAL CON PLAYWRIGHT\n');
@@ -22,8 +32,8 @@ async function runVisualTest() {
     console.log('   OK - Navegador lanzado\n');
 
     // 2. Ir a la landing pública
-    console.log('2. Navegando a https://inmovaapp.com...');
-    await page.goto('https://inmovaapp.com', {
+    console.log(`2. Navegando a ${normalizedBaseUrl}...`);
+    await page.goto(normalizedBaseUrl, {
       waitUntil: 'networkidle',
       timeout: 30000,
     });
@@ -78,7 +88,7 @@ async function runVisualTest() {
       console.log(
         '   WARNING - No se encontro boton de login, navegando directamente a /login...\n'
       );
-      await page.goto('https://inmovaapp.com/login', {
+      await page.goto(`${normalizedBaseUrl}/login`, {
         waitUntil: 'networkidle',
       });
     }
@@ -101,7 +111,7 @@ async function runVisualTest() {
 
     // 8. Intentar login
     console.log('8. Intentando login...');
-    console.log('   Credenciales: admin@example.com / password123\n');
+    console.log(`   Credenciales: ${LOGIN_EMAIL} / ${LOGIN_PASSWORD}\n`);
 
     try {
       const emailField = await page
@@ -112,7 +122,7 @@ async function runVisualTest() {
 
       if (await emailField.isVisible()) {
         console.log('   OK - Campo email encontrado');
-        await emailField.fill('admin@example.com');
+        await emailField.fill(LOGIN_EMAIL);
         await page.waitForTimeout(500);
       }
 
@@ -122,7 +132,7 @@ async function runVisualTest() {
 
       if (await passwordField.isVisible()) {
         console.log('   OK - Campo password encontrado');
-        await passwordField.fill('password123');
+        await passwordField.fill(LOGIN_PASSWORD);
         await page.waitForTimeout(500);
       }
 
