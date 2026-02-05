@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import {
@@ -52,11 +53,14 @@ interface Contract {
   estado: string;
   tipo: string;
   tenant: {
+    id: string;
     nombreCompleto: string;
   };
   unit: {
+    id: string;
     numero: string;
     building: {
+      id: string;
       nombre: string;
     };
   };
@@ -343,7 +347,13 @@ export default function ContratosClientPage({
                       <div className="flex items-center gap-4 flex-1">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <p className="font-medium">{contract.tenant.nombreCompleto}</p>
+                            <Link
+                              href={`/inquilinos/${contract.tenant.id}`}
+                              className="font-medium text-primary hover:underline"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              {contract.tenant.nombreCompleto}
+                            </Link>
                             <Badge variant={getEstadoBadgeVariant(contract.estado)}>
                               {contract.estado}
                             </Badge>
@@ -358,7 +368,21 @@ export default function ContratosClientPage({
                               )}
                           </div>
                           <p className="text-sm text-muted-foreground">
-                            {contract.unit.building.nombre} - Unidad {contract.unit.numero}
+                            <Link
+                              href={`/edificios/${contract.unit.building.id}`}
+                              className="text-primary hover:underline"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              {contract.unit.building.nombre}
+                            </Link>{' '}
+                            -{' '}
+                            <Link
+                              href={`/unidades/${contract.unit.id}`}
+                              className="text-primary hover:underline"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              Unidad {contract.unit.numero}
+                            </Link>
                           </p>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">

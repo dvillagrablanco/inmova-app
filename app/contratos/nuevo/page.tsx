@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
@@ -64,6 +64,7 @@ interface UploadedDocument {
 
 export default function NuevoContratoPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession() || {};
   const [isLoading, setIsLoading] = useState(false);
   const [units, setUnits] = useState<Unit[]>([]);
@@ -148,6 +149,42 @@ export default function NuevoContratoPage() {
   const removeDocument = (docId: string) => {
     setDocuments(prev => prev.filter(d => d.id !== docId));
   };
+
+  useEffect(() => {
+    const prefillFromQuery = async () => {
+      if (status !== 'authenticated') return;
+
+      const unitIdParam = searchParams?.get('unitId');
+      const buildingIdParam = searchParams?.get('buildingId');
+      const tenantIdParam = searchParams?.get('tenantId');
+
+      if (tenantIdParam) {
+        setFormData((prev) => (prev.tenantId ? prev : { ...prev, tenantId: tenantIdParam }));
+      }
+
+      if (unitIdParam) {
+        setFormData((prev) => (prev.unitId ? prev : { ...prev, unitId: unitIdParam }));
+        try {
+          const unitRes = await fetch(`/api/units/${unitIdParam}`);
+          if (unitRes.ok) {
+            const unitData = await unitRes.json();
+            if (unitData?.building?.id) {
+              setSelectedBuildingId(unitData.building.id);
+            }
+          }
+        } catch (error) {
+          logger.warn('No se pudo preseleccionar la unidad', error);
+        }
+        return;
+      }
+
+      if (buildingIdParam && !selectedBuildingId) {
+        setSelectedBuildingId(buildingIdParam);
+      }
+    };
+
+    prefillFromQuery();
+  }, [searchParams, status, selectedBuildingId]);
 
   useEffect(() => {
     const fetchData = async () => {

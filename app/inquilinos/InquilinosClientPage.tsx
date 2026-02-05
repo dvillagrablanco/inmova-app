@@ -42,8 +42,10 @@ interface Tenant {
   estado?: string;
   fechaIngreso?: string;
   units?: Array<{
+    id: string;
     numero: string;
     building: {
+      id: string;
       nombre: string;
     };
   }>;
@@ -376,9 +378,12 @@ export default function InquilinosClientPage({
                       {tenant.units && tenant.units.length > 0 && (
                         <div className="pt-3 border-t">
                           <p className="text-sm text-muted-foreground mb-1">Unidad</p>
-                          <p className="font-medium">
+                          <Link
+                            href={`/unidades/${tenant.units[0].id}`}
+                            className="font-medium text-primary hover:underline"
+                          >
                             {tenant.units[0].building.nombre} - {tenant.units[0].numero}
-                          </p>
+                          </Link>
                         </div>
                       )}
                     </div>
@@ -422,9 +427,13 @@ export default function InquilinosClientPage({
                             </span>
                           </div>
                           {tenant.units && tenant.units.length > 0 && (
-                            <p className="text-sm text-muted-foreground">
+                            <Link
+                              href={`/unidades/${tenant.units[0].id}`}
+                              className="text-sm text-muted-foreground hover:underline"
+                              onClick={(event) => event.stopPropagation()}
+                            >
                               {tenant.units[0].building.nombre} - {tenant.units[0].numero}
-                            </p>
+                            </Link>
                           )}
                         </div>
                       </div>

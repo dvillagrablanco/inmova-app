@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 
 import {
@@ -64,11 +65,14 @@ interface Contract {
   estado: string;
   tipo: string;
   tenant: {
+    id: string;
     nombreCompleto: string;
   };
   unit: {
+    id: string;
     numero: string;
     building: {
+      id: string;
       nombre: string;
     };
   };
@@ -408,7 +412,12 @@ function ContratosPageContent() {
         <div className="space-y-2 min-w-0 flex-1">
         <div className="flex items-center gap-2 flex-wrap">
         <h3 className="text-base sm:text-lg font-semibold break-words">
-        {contract.tenant.nombreCompleto}
+        <Link
+          href={`/inquilinos/${contract.tenant.id}`}
+          className="text-primary hover:underline"
+        >
+          {contract.tenant.nombreCompleto}
+        </Link>
         </h3>
         <Badge
         variant={estadoBadge.variant}
@@ -422,7 +431,19 @@ function ContratosPageContent() {
         <div className="flex items-start gap-2 text-sm bg-muted/50 p-2 rounded-md">
         <Home className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
         <span className="break-words">
-        {contract.unit.building.nombre} - Unidad {contract.unit.numero}
+        <Link
+          href={`/edificios/${contract.unit.building.id}`}
+          className="text-primary hover:underline"
+        >
+          {contract.unit.building.nombre}
+        </Link>{' '}
+        -{' '}
+        <Link
+          href={`/unidades/${contract.unit.id}`}
+          className="text-primary hover:underline"
+        >
+          Unidad {contract.unit.numero}
+        </Link>
         </span>
         </div>
         </div>

@@ -94,7 +94,7 @@ export default function HomeMobilePage() {
       id: 'unit',
       label: 'Nueva Unidad',
       icon: <Home className="h-6 w-6" />,
-      href: '/unidades/nueva',
+      href: '/unidades/nuevo',
       color: 'bg-green-500',
     },
     {

@@ -66,8 +66,10 @@ interface Tenant {
   estado?: string;
   fechaIngreso?: string;
   units?: Array<{
+    id: string;
     numero: string;
     building: {
+      id: string;
       nombre: string;
     };
   }>;
@@ -406,9 +408,12 @@ function InquilinosPageContent() {
                             <div className="border-t pt-3">
                               <div className="flex items-center gap-2 text-sm">
                                 <Home className="h-4 w-4 text-muted-foreground" />
-                                <span className="font-medium">
+                                <Link
+                                  href={`/unidades/${primeraUnidad.id}`}
+                                  className="font-medium text-primary hover:underline"
+                                >
                                   {primeraUnidad.building.nombre} - {primeraUnidad.numero}
-                                </span>
+                                </Link>
                               </div>
                             </div>
                           )}
@@ -490,9 +495,12 @@ function InquilinosPageContent() {
                                 <Home className="h-5 w-5 text-muted-foreground" />
                                 <div>
                                   <p className="text-sm text-muted-foreground">Unidad actual</p>
-                                  <p className="font-medium">
+                                  <Link
+                                    href={`/unidades/${primeraUnidad.id}`}
+                                    className="font-medium text-primary hover:underline"
+                                  >
                                     {primeraUnidad.building.nombre} - Unidad {primeraUnidad.numero}
-                                  </p>
+                                  </Link>
                                 </div>
                               </div>
                             )}
@@ -558,9 +566,13 @@ function InquilinosPageContent() {
                             {primeraUnidad && (
                               <div className="text-center max-w-[200px]">
                                 <p className="text-muted-foreground">Unidad</p>
-                                <p className="font-semibold truncate">
+                                <Link
+                                  href={`/unidades/${primeraUnidad.id}`}
+                                  className="font-semibold truncate text-primary hover:underline"
+                                  onClick={(event) => event.stopPropagation()}
+                                >
                                   {primeraUnidad.building.nombre} - {primeraUnidad.numero}
-                                </p>
+                                </Link>
                               </div>
                             )}
                             <Button variant="ghost" size="icon">

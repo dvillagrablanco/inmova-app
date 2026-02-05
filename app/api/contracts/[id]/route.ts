@@ -29,8 +29,8 @@ const contractUpdateSchema = z.object({
     .union([z.string(), z.number()])
     .optional()
     .transform((val) => (typeof val === 'string' ? parseFloat(val) : val))
-    .refine((val) => val === undefined || val > 0, {
-      message: 'La renta mensual debe ser positiva',
+    .refine((val) => val === undefined || val >= 0, {
+      message: 'La renta mensual no puede ser negativa',
     }),
   deposito: z
     .union([z.string(), z.number()])

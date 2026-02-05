@@ -59,7 +59,7 @@ export const buildingUpdateSchema = buildingCreateSchema.partial();
 
 export const unitCreateSchema = z.object({
   buildingId: z.string()
-    .uuid('ID de edificio inválido'),
+    .cuid('ID de edificio inválido'),
   numero: z.string()
     .min(1, 'El número de unidad es requerido')
     .max(50, 'El número no puede exceder 50 caracteres')

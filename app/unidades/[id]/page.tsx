@@ -190,6 +190,7 @@ export default function UnitDetailPage() {
       case 'disponible':
         return 'bg-blue-100 text-blue-800';
       case 'mantenimiento':
+      case 'en_mantenimiento':
         return 'bg-yellow-100 text-yellow-800';
       case 'reservado':
         return 'bg-purple-100 text-purple-800';
@@ -613,7 +614,7 @@ export default function UnitDetailPage() {
                     {unit.contracts.map((contract) => (
                       <div
                         key={contract.id}
-                        className="flex items-center justify-between p-4 border rounded-lg"
+                        className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg"
                       >
                         <div>
                           <p className="font-medium">
@@ -624,7 +625,16 @@ export default function UnitDetailPage() {
                             {formatCurrency(contract.rentaMensual)}/mes
                           </p>
                         </div>
-                        <Badge>{contract.estado}</Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge>{contract.estado}</Badge>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => router.push(`/contratos/${contract.id}`)}
+                          >
+                            Ver contrato
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>

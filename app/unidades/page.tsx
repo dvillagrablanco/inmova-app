@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
@@ -62,9 +63,11 @@ interface Unit {
   banos?: number;
   rentaMensual: number;
   building: {
+    id: string;
     nombre: string;
   };
   tenant?: {
+    id: string;
     nombreCompleto: string;
   };
 }
@@ -164,7 +167,7 @@ export default function UnidadesPage() {
       const estadoLabels: Record<string, string> = {
         disponible: 'Disponible',
         ocupada: 'Ocupada',
-        mantenimiento: 'En Mantenimiento',
+        en_mantenimiento: 'En Mantenimiento',
       };
       filters.push({
         id: 'estado',
@@ -412,8 +415,22 @@ export default function UnidadesPage() {
                       <CardHeader>
                         <div className="flex items-start justify-between">
                           <div className="space-y-1 flex-1">
-                            <CardTitle className="text-lg">Unidad {unit.numero}</CardTitle>
-                            <p className="text-sm text-muted-foreground">{unit.building.nombre}</p>
+                            <CardTitle className="text-lg">
+                              <Link
+                                href={`/unidades/${unit.id}`}
+                                className="text-primary hover:underline"
+                              >
+                                Unidad {unit.numero}
+                              </Link>
+                            </CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                              <Link
+                                href={`/edificios/${unit.building.id}`}
+                                className="hover:underline"
+                              >
+                                {unit.building.nombre}
+                              </Link>
+                            </p>
                           </div>
                           <Badge variant={estadoBadge.variant}>{estadoBadge.label}</Badge>
                         </div>
@@ -438,7 +455,12 @@ export default function UnidadesPage() {
                             <div className="border-t pt-3">
                               <div className="flex items-center gap-2 text-sm">
                                 <User className="h-4 w-4 text-muted-foreground" />
-                                <span className="truncate">{unit.tenant.nombreCompleto}</span>
+                                <Link
+                                  href={`/inquilinos/${unit.tenant.id}`}
+                                  className="truncate text-primary hover:underline"
+                                >
+                                  {unit.tenant.nombreCompleto}
+                                </Link>
                               </div>
                             </div>
                           )}
@@ -478,7 +500,19 @@ export default function UnidadesPage() {
                             <div className="flex items-start justify-between">
                               <div>
                                 <h3 className="text-xl font-bold">
-                                  {unit.building.nombre} - Unidad {unit.numero}
+                                  <Link
+                                    href={`/edificios/${unit.building.id}`}
+                                    className="text-primary hover:underline"
+                                  >
+                                    {unit.building.nombre}
+                                  </Link>{' '}
+                                  -{' '}
+                                  <Link
+                                    href={`/unidades/${unit.id}`}
+                                    className="text-primary hover:underline"
+                                  >
+                                    Unidad {unit.numero}
+                                  </Link>
                                 </h3>
                                 <p className="text-muted-foreground mt-1">
                                   {getTipoLabel(unit.tipo)}

@@ -62,9 +62,11 @@ interface Unit {
   banos?: number;
   rentaMensual: number;
   building: {
+    id: string;
     nombre: string;
   };
   tenant?: {
+    id: string;
     nombreCompleto: string;
   };
 }
@@ -143,7 +145,7 @@ export default function UnidadesClientPage({ initialUnits, session }: UnidadesCl
       const estadoLabels: Record<string, string> = {
         disponible: 'Disponible',
         ocupada: 'Ocupada',
-        mantenimiento: 'En Mantenimiento',
+        en_mantenimiento: 'En Mantenimiento',
       };
       filters.push({
         id: 'estado',
@@ -191,7 +193,8 @@ export default function UnidadesClientPage({ initialUnits, session }: UnidadesCl
         return 'default';
       case 'ocupada':
         return 'secondary';
-      case 'mantenimiento':
+    case 'mantenimiento':
+    case 'en_mantenimiento':
         return 'destructive';
       default:
         return 'default';
@@ -279,7 +282,7 @@ export default function UnidadesClientPage({ initialUnits, session }: UnidadesCl
               <p className="text-muted-foreground mt-2">Gestiona todas las unidades de alquiler</p>
             </div>
             {canCreate && (
-              <Button onClick={() => router.push('/unidades/nueva')}>
+              <Button onClick={() => router.push('/unidades/nuevo')}>
                 <Plus className="mr-2 h-4 w-4" />
                 Nueva Unidad
               </Button>
@@ -354,7 +357,7 @@ export default function UnidadesClientPage({ initialUnits, session }: UnidadesCl
                       <SelectItem value="all">Todos los estados</SelectItem>
                       <SelectItem value="disponible">Disponible</SelectItem>
                       <SelectItem value="ocupada">Ocupada</SelectItem>
-                      <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
+                      <SelectItem value="en_mantenimiento">Mantenimiento</SelectItem>
                     </SelectContent>
                   </Select>
                   <Select value={tipoFilter} onValueChange={setTipoFilter}>
@@ -406,7 +409,7 @@ export default function UnidadesClientPage({ initialUnits, session }: UnidadesCl
                     ? [
                         {
                           label: 'Crear Unidad',
-                          onClick: () => router.push('/unidades/nueva'),
+                          onClick: () => router.push('/unidades/nuevo'),
                           variant: 'default' as const,
                         },
                       ]
@@ -425,7 +428,16 @@ export default function UnidadesClientPage({ initialUnits, session }: UnidadesCl
                     <div className="flex items-start justify-between">
                       <div className="space-y-1">
                         <CardTitle className="text-lg">Unidad {unit.numero}</CardTitle>
-                        <p className="text-sm text-muted-foreground">{unit.building.nombre}</p>
+                        <button
+                          type="button"
+                          className="text-sm text-muted-foreground hover:underline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/edificios/${unit.building.id}`);
+                          }}
+                        >
+                          {unit.building.nombre}
+                        </button>
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
@@ -498,7 +510,16 @@ export default function UnidadesClientPage({ initialUnits, session }: UnidadesCl
                       {unit.tenant && (
                         <div className="pt-3 border-t">
                           <p className="text-sm text-muted-foreground">Inquilino</p>
-                          <p className="font-medium">{String(unit.tenant?.nombreCompleto || '')}</p>
+                          <button
+                            type="button"
+                            className="font-medium text-primary hover:underline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/inquilinos/${unit.tenant?.id}`);
+                            }}
+                          >
+                            {String(unit.tenant?.nombreCompleto || '')}
+                          </button>
                         </div>
                       )}
                     </div>
@@ -525,13 +546,27 @@ export default function UnidadesClientPage({ initialUnits, session }: UnidadesCl
                             </Badge>
                             <Badge variant={getTipoBadgeVariant(unit.tipo)}>{unit.tipo}</Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground">
+                          <button
+                            type="button"
+                            className="text-sm text-muted-foreground hover:underline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/edificios/${unit.building.id}`);
+                            }}
+                          >
                             {String(unit.building?.nombre || '')}
-                          </p>
+                          </button>
                           {unit.tenant && (
-                            <p className="text-sm text-muted-foreground">
+                            <button
+                              type="button"
+                              className="text-sm text-muted-foreground hover:underline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/inquilinos/${unit.tenant?.id}`);
+                              }}
+                            >
                               Inquilino: {String(unit.tenant?.nombreCompleto || '')}
-                            </p>
+                            </button>
                           )}
                         </div>
                       </div>

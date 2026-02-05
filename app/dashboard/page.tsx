@@ -334,7 +334,7 @@ function DashboardPageContent() {
             icon={TrendingUp}
           />
           <KPICard
-            title="Total Propiedades"
+            title="Total Edificios"
             value={Number(data.kpis.numeroPropiedades || 0)}
             icon={Building2}
           />

@@ -48,7 +48,7 @@ const unitUpdateSchema = z.object({
     .refine((val) => val === undefined || val >= 0, {
       message: 'La renta mensual no puede ser negativa',
     }),
-  tenantId: z.string().uuid().optional().nullable(),
+  tenantId: z.string().cuid().optional().nullable(),
 });
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
