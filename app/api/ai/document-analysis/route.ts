@@ -1020,16 +1020,45 @@ export async function POST(request: NextRequest) {
         isPDF,
         isImage,
       });
-      const visionAnalysis = await analyzeDocumentWithVision(file, companyInfo, context);
-      
-      logger.info('[AI Document Analysis] Análisis de visión completado', {
-        filename: file.name,
-        context,
-        category: visionAnalysis.classification?.category,
-        fieldsExtracted: visionAnalysis.extractedFields?.length || 0,
-      });
-      
-      return NextResponse.json(visionAnalysis);
+      try {
+        const visionAnalysis = await analyzeDocumentWithVision(file, companyInfo, context);
+        
+        logger.info('[AI Document Analysis] Análisis de visión completado', {
+          filename: file.name,
+          context,
+          category: visionAnalysis.classification?.category,
+          fieldsExtracted: visionAnalysis.extractedFields?.length || 0,
+        });
+        
+        return NextResponse.json(visionAnalysis);
+      } catch (visionError: any) {
+        const visionMessage = visionError?.message || visionError?.toString() || 'Error desconocido';
+        logger.warn('[AI Document Analysis] Vision falló, intentando fallback a texto', {
+          filename: file.name,
+          context,
+          isPDF,
+          isImage,
+          error: visionMessage,
+        });
+
+        if (extractedText && extractedText.trim().length > 0) {
+          const analysis = await analyzeDocument({
+            text: extractedText,
+            filename: file.name,
+            mimeType: file.type,
+            companyInfo,
+          });
+
+          analysis.warnings = [
+            ...(analysis.warnings || []),
+            `Visión no disponible (${visionMessage}). Se usó análisis por texto.`,
+          ];
+
+          return NextResponse.json(analysis);
+        }
+
+        throw visionError;
+      }
     }
 
     // Para documentos de texto/PDF, usar el análisis tradicional

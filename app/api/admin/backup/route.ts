@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = "force-dynamic";
+export const runtime = 'nodejs';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { isSuperAdmin } from '@/lib/admin-roles';
@@ -7,6 +8,15 @@ import logger from '@/lib/logger';
 import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs/promises';
+import os from 'os';
+
+function getBackupDir(): string {
+  const configuredDir = process.env.BACKUP_DIR;
+  if (configuredDir) {
+    return path.resolve(configuredDir);
+  }
+  return path.join(os.tmpdir(), 'inmova-backups');
+}
 
 /**
  * Ejecuta pg_dump de forma segura usando .pgpass o variables de entorno
@@ -128,7 +138,7 @@ export async function POST(req: NextRequest) {
     const { type = 'full', companyId } = await req.json();
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const backupDir = path.join(process.cwd(), 'backups');
+    const backupDir = getBackupDir();
     
     // Crear directorio de backups si no existe
     await fs.mkdir(backupDir, { recursive: true }).catch(() => {});
@@ -217,7 +227,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const backupDir = path.join(process.cwd(), 'backups');
+    const backupDir = getBackupDir();
 
     try {
       const files = await fs.readdir(backupDir);
@@ -283,7 +293,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const backupDir = path.join(process.cwd(), 'backups');
+    const backupDir = getBackupDir();
     const backupFile = path.join(backupDir, filename);
 
     // Verificar que el archivo existe
