@@ -107,8 +107,10 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get('file') as File;
     const folder = (formData.get('folder') as string) || 'documentos';
-    const entityType = formData.get('entityType') as string;
-    const entityId = formData.get('entityId') as string;
+    const entityTypeRaw = formData.get('entityType');
+    const entityIdRaw = formData.get('entityId');
+    const entityType = entityTypeRaw ? String(entityTypeRaw) : undefined;
+    const entityId = entityIdRaw ? String(entityIdRaw) : undefined;
 
     if (!file) {
       return NextResponse.json({ error: 'No se proporcionó archivo' }, { status: 400 });
