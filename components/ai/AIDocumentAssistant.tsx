@@ -353,11 +353,34 @@ export function AIDocumentAssistant({
           throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
         }
 
-        const analysis: DocumentAnalysis = await response.json();
+        const analysis: DocumentAnalysis & { error?: boolean; errorMessage?: string } =
+          await response.json();
 
         // Verificar que la respuesta sea válida
         if (!analysis || !analysis.extractedFields) {
           throw new Error('Respuesta de análisis inválida');
+        }
+
+        const analysisErrorMessage =
+          analysis.error || analysis.classification?.specificType === 'Error en análisis'
+            ? analysis.errorMessage || analysis.summary || 'Error al analizar el documento'
+            : null;
+
+        if (analysisErrorMessage) {
+          setUploadedFiles((prev) =>
+            prev.map((f) =>
+              f.file === file ? { ...f, status: 'error', error: analysisErrorMessage, progress: 0 } : f
+            )
+          );
+          toast.dismiss(toastId);
+          toast.error('Error al analizar documento', {
+            description: analysisErrorMessage,
+            action: {
+              label: 'Reintentar',
+              onClick: () => retryFile(file),
+            },
+          });
+          return;
         }
 
         // Actualizar archivo con éxito

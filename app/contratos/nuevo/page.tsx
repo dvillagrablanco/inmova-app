@@ -40,6 +40,11 @@ interface Unit {
   building: { nombre: string };
 }
 
+interface Building {
+  id: string;
+  nombre: string;
+}
+
 interface Tenant {
   id: string;
   nombre: string;
@@ -60,8 +65,11 @@ export default function NuevoContratoPage() {
   const { data: session, status } = useSession() || {};
   const [isLoading, setIsLoading] = useState(false);
   const [units, setUnits] = useState<Unit[]>([]);
+  const [buildings, setBuildings] = useState<Building[]>([]);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [documents, setDocuments] = useState<UploadedDocument[]>([]);
+  const [selectedBuildingId, setSelectedBuildingId] = useState('');
+  const [isUnitsLoading, setIsUnitsLoading] = useState(false);
   const [formData, setFormData] = useState({
     unitId: '',
     tenantId: '',
@@ -71,6 +79,12 @@ export default function NuevoContratoPage() {
     deposito: '0',
     tipo: 'residencial',
   });
+
+  const normalizeList = <T,>(data: any): T[] => {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.data)) return data.data;
+    return [];
+  };
 
   const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -136,18 +150,21 @@ export default function NuevoContratoPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [unitsRes, tenantsRes] = await Promise.all([
-          fetch('/api/units?estado=disponible'),
+        const [buildingsRes, tenantsRes] = await Promise.all([
+          fetch('/api/buildings'),
           fetch('/api/tenants'),
         ]);
 
-        if (unitsRes.ok) {
-          const unitsData = await unitsRes.json();
-          setUnits(unitsData);
+        if (buildingsRes.ok) {
+          const buildingsData = normalizeList<Building>(await buildingsRes.json());
+          setBuildings(buildingsData);
+          if (buildingsData.length === 1) {
+            setSelectedBuildingId(buildingsData[0].id);
+          }
         }
 
         if (tenantsRes.ok) {
-          const tenantsData = await tenantsRes.json();
+          const tenantsData = normalizeList<Tenant>(await tenantsRes.json());
           setTenants(tenantsData);
         }
       } catch (error) {
@@ -159,6 +176,37 @@ export default function NuevoContratoPage() {
       fetchData();
     }
   }, [status]);
+
+  useEffect(() => {
+    const fetchUnits = async () => {
+      if (!selectedBuildingId) {
+        setUnits([]);
+        return;
+      }
+
+      try {
+        setIsUnitsLoading(true);
+        const unitsRes = await fetch(
+          `/api/units?estado=disponible&buildingId=${selectedBuildingId}`
+        );
+        if (unitsRes.ok) {
+          const unitsData = normalizeList<Unit>(await unitsRes.json());
+          setUnits(unitsData);
+        } else {
+          setUnits([]);
+        }
+      } catch (error) {
+        logger.error('Error fetching units:', error);
+        setUnits([]);
+      } finally {
+        setIsUnitsLoading(false);
+      }
+    };
+
+    if (status === 'authenticated') {
+      fetchUnits();
+    }
+  }, [selectedBuildingId, status]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -266,20 +314,66 @@ export default function NuevoContratoPage() {
                       <div className="space-y-4">
                         {/* Unidad */}
                         <div className="space-y-2">
+                          <Label htmlFor="buildingId">Edificio *</Label>
+                          <Select
+                            value={selectedBuildingId}
+                            onValueChange={(value) => {
+                              setSelectedBuildingId(value);
+                              setFormData({ ...formData, unitId: '' });
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona un edificio" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {buildings.length === 0 ? (
+                                <SelectItem value="no-buildings" disabled>
+                                  No hay edificios disponibles
+                                </SelectItem>
+                              ) : (
+                                buildings.map((building) => (
+                                  <SelectItem key={building.id} value={building.id}>
+                                    {building.nombre}
+                                  </SelectItem>
+                                ))
+                              )}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Unidad */}
+                        <div className="space-y-2">
                           <Label htmlFor="unitId">Unidad *</Label>
                           <Select
                             value={formData.unitId}
                             onValueChange={(value) => setFormData({ ...formData, unitId: value })}
+                            disabled={!selectedBuildingId || isUnitsLoading}
                           >
                             <SelectTrigger>
-                              <SelectValue placeholder="Selecciona una unidad" />
+                              <SelectValue
+                                placeholder={
+                                  !selectedBuildingId
+                                    ? 'Selecciona un edificio primero'
+                                    : isUnitsLoading
+                                      ? 'Cargando unidades...'
+                                      : 'Selecciona una unidad'
+                                }
+                              />
                             </SelectTrigger>
                             <SelectContent>
-                              {units.map((unit) => (
-                                <SelectItem key={unit.id} value={unit.id}>
-                                  {unit.building.nombre} - {unit.numero}
+                              {units.length === 0 ? (
+                                <SelectItem value="no-units" disabled>
+                                  {selectedBuildingId
+                                    ? 'No hay unidades disponibles'
+                                    : 'Selecciona un edificio primero'}
                                 </SelectItem>
-                              ))}
+                              ) : (
+                                units.map((unit) => (
+                                  <SelectItem key={unit.id} value={unit.id}>
+                                    {unit.numero}
+                                  </SelectItem>
+                                ))
+                              )}
                             </SelectContent>
                           </Select>
                         </div>
@@ -537,7 +631,7 @@ export default function NuevoContratoPage() {
                             <div className="text-sm space-y-1">
                               <p>
                                 <span className="text-muted-foreground">Unidad:</span>{' '}
-                                {units.find((u) => u.id === formData.unitId)?.building.nombre} -{' '}
+                                {buildings.find((b) => b.id === selectedBuildingId)?.nombre} -{' '}
                                 {units.find((u) => u.id === formData.unitId)?.numero}
                               </p>
                               <p>
