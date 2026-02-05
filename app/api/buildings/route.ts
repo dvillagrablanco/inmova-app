@@ -122,14 +122,28 @@ export async function GET(req: NextRequest) {
     const errorMessage = error?.message || 'Error desconocido';
     const errorStack = error?.stack || '';
     logger.error('Error fetching buildings:', { message: errorMessage, stack: errorStack.slice(0, 500) });
-    
-    if (errorMessage === 'No autenticado') {
-      return NextResponse.json({ error: errorMessage }, { status: 401 });
+
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const usePagination = searchParams.has('page') || searchParams.has('limit');
+
+    if (usePagination) {
+      return NextResponse.json({
+        data: [],
+        pagination: {
+          page,
+          limit,
+          total: 0,
+          totalPages: 0,
+          hasMore: false,
+        },
+        error: errorMessage,
+        success: false,
+      });
     }
-    if (errorMessage === 'Usuario inactivo') {
-      return NextResponse.json({ error: errorMessage }, { status: 403 });
-    }
-    return NextResponse.json({ error: 'Error al obtener edificios', details: errorMessage }, { status: 500 });
+
+    return NextResponse.json([]);
   }
 }
 

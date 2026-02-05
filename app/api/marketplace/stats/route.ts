@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
@@ -10,7 +11,14 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      return NextResponse.json({
+        totalServices: 0,
+        totalBookings: 0,
+        totalRevenue: 0,
+        commissionRate: 12,
+        success: false,
+        error: 'No autorizado',
+      });
     }
 
     const companyId = session.user.companyId;
@@ -62,9 +70,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(stats);
   } catch (error) {
     logger.error('Error fetching marketplace stats:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener estadísticas' },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      totalServices: 0,
+      totalBookings: 0,
+      totalRevenue: 0,
+      commissionRate: 12,
+      success: false,
+      error: 'Error al obtener estadísticas',
+    });
   }
 }

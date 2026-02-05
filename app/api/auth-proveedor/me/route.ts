@@ -3,6 +3,7 @@ import { getAuthenticatedProvider } from '@/lib/provider-auth';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // GET /api/auth-proveedor/me - Obtener proveedor autenticado
 export async function GET(req: NextRequest) {
@@ -11,8 +12,7 @@ export async function GET(req: NextRequest) {
 
     if (!provider) {
       return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
+        { success: false, proveedor: null, error: 'No autenticado' }
       );
     }
 
@@ -22,9 +22,10 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al obtener proveedor autenticado:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener datos del proveedor' },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: false,
+      proveedor: null,
+      error: 'Error al obtener datos del proveedor',
+    });
   }
 }

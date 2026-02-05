@@ -23,7 +23,21 @@ export async function GET(request: Request) {
     const session = await getServerSession(authTenantOptions);
     
     if (!session?.user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      return NextResponse.json({
+        tenant: null,
+        contracts: [],
+        payments: [],
+        maintenanceRequests: [],
+        stats: {
+          contractsCount: 0,
+          paymentsCount: 0,
+          maintenanceCount: 0,
+          totalPagado: 0,
+          totalPendiente: 0,
+        },
+        success: false,
+        error: 'No autorizado',
+      });
     }
 
     const tenantId = (session.user as any).id;
@@ -164,7 +178,21 @@ export async function GET(request: Request) {
     ]);
 
     if (!tenant) {
-      return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
+      return NextResponse.json({
+        tenant: null,
+        contracts: [],
+        payments: [],
+        maintenanceRequests: [],
+        stats: {
+          contractsCount: 0,
+          paymentsCount: 0,
+          maintenanceCount: 0,
+          totalPagado: 0,
+          totalPendiente: 0,
+        },
+        success: false,
+        error: 'Inquilino no encontrado',
+      });
     }
 
     // Extraer estadísticas calculadas en DB
@@ -187,9 +215,20 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     logger.error('Error al obtener dashboard:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener dashboard' },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      tenant: null,
+      contracts: [],
+      payments: [],
+      maintenanceRequests: [],
+      stats: {
+        contractsCount: 0,
+        paymentsCount: 0,
+        maintenanceCount: 0,
+        totalPagado: 0,
+        totalPendiente: 0,
+      },
+      success: false,
+      error: 'Error al obtener dashboard',
+    });
   }
 }

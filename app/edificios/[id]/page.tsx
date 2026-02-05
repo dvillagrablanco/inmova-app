@@ -453,7 +453,7 @@ export default function EdificioDetallesPage() {
                     {building.units?.length || 0} unidades registradas
                   </CardDescription>
                 </div>
-                <Button onClick={() => router.push(`/propiedades/crear?buildingId=${building.id}`)}>
+                <Button onClick={() => router.push(`/unidades/nuevo?buildingId=${building.id}`)}>
                   <Plus className="mr-2 h-4 w-4" />
                   Nueva Unidad
                 </Button>
@@ -477,7 +477,14 @@ export default function EdificioDetallesPage() {
                         const estadoBadge = getEstadoUnidadBadge(unit.estado);
                         return (
                           <TableRow key={unit.id}>
-                            <TableCell className="font-medium">{unit.numero}</TableCell>
+                            <TableCell className="font-medium">
+                              <Link
+                                href={`/unidades/${unit.id}`}
+                                className="text-primary hover:underline"
+                              >
+                                {unit.numero}
+                              </Link>
+                            </TableCell>
                             <TableCell className="capitalize">{unit.tipo}</TableCell>
                             <TableCell>
                               <Badge variant={estadoBadge.variant}>{estadoBadge.label}</Badge>
@@ -505,13 +512,13 @@ export default function EdificioDetallesPage() {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem
-                                    onClick={() => router.push(`/propiedades/${unit.id}`)}
+                                    onClick={() => router.push(`/unidades/${unit.id}`)}
                                   >
                                     <Eye className="mr-2 h-4 w-4" />
                                     Ver detalles
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
-                                    onClick={() => router.push(`/propiedades/${unit.id}/editar`)}
+                                    onClick={() => router.push(`/unidades/${unit.id}/editar`)}
                                   >
                                     <Edit className="mr-2 h-4 w-4" />
                                     Editar
@@ -531,7 +538,7 @@ export default function EdificioDetallesPage() {
                     <p className="text-sm">Crea la primera unidad de este edificio</p>
                     <Button 
                       className="mt-4"
-                      onClick={() => router.push(`/propiedades/crear?buildingId=${building.id}`)}
+                      onClick={() => router.push(`/unidades/nuevo?buildingId=${building.id}`)}
                     >
                       <Plus className="mr-2 h-4 w-4" />
                       Crear Unidad

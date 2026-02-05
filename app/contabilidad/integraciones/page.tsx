@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
@@ -25,6 +25,8 @@ import {
   CheckCircle2,
   AlertCircle,
   ExternalLink,
+  Upload,
+  Calendar,
   Save,
   RefreshCw,
   Calculator,
@@ -83,6 +85,11 @@ export default function ContabilidadIntegracionesPage() {
   const [saving, setSaving] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
   const [providers, setProviders] = useState(accountingProviders);
+  const [recentImports, setRecentImports] = useState<
+    Array<{ id: string; nombre: string; fechaSubida: string }>
+  >([]);
+  const [isImporting, setIsImporting] = useState(false);
+  const importInputRef = useRef<HTMLInputElement | null>(null);
   
   // Config para Contasimple
   const [contasimpleConfig, setContasimpleConfig] = useState({
@@ -127,6 +134,51 @@ export default function ContabilidadIntegracionesPage() {
       loadStatus();
     }
   }, [status]);
+
+  const loadImports = async () => {
+    try {
+      const response = await fetch('/api/documents?tag=contabilidad');
+      if (response.ok) {
+        const data = await response.json();
+        setRecentImports(data.slice(0, 5));
+      }
+    } catch (error) {
+      console.error('Error loading accounting imports:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      loadImports();
+    }
+  }, [status]);
+
+  const handleImport = async (file: File) => {
+    setIsImporting(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const response = await fetch('/api/contabilidad/import', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Error importando contabilidad');
+      }
+      const result = await response.json();
+      toast.success('Contabilidad importada', {
+        description: `Creados: ${result.created} · Omitidos: ${result.skipped}`,
+      });
+      loadImports();
+    } catch (error: any) {
+      toast.error('Error al importar contabilidad', {
+        description: error.message || 'No se pudo importar el archivo',
+      });
+    } finally {
+      setIsImporting(false);
+    }
+  };
 
   const handleSaveContasimple = async () => {
     if (!contasimpleConfig.apiKey || !contasimpleConfig.companyId) {
@@ -236,6 +288,71 @@ export default function ContabilidadIntegracionesPage() {
             gastos de mantenimiento y otros movimientos financieros.
           </AlertDescription>
         </Alert>
+
+        {/* Importación contable */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Importación de contabilidad</CardTitle>
+            <CardDescription>
+              Carga archivos XLSX/CSV para generar movimientos contables y vincularlos a inmuebles
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".xlsx,.xls,.csv"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) {
+                  handleImport(file);
+                }
+                event.target.value = '';
+              }}
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                onClick={() => importInputRef.current?.click()}
+                disabled={isImporting}
+              >
+                <Upload className={`h-4 w-4 mr-2 ${isImporting ? 'animate-pulse' : ''}`} />
+                Importar archivo contable
+              </Button>
+              <Button variant="ghost" onClick={() => router.push('/documentos?tag=contabilidad')}>
+                <FileText className="h-4 w-4 mr-2" />
+                Ver documentos contables
+              </Button>
+            </div>
+            {recentImports.length > 0 ? (
+              <div className="space-y-2">
+                <Label>Importaciones recientes</Label>
+                <div className="space-y-2">
+                  {recentImports.map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">{doc.nombre}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        {new Date(doc.fechaSubida).toLocaleDateString('es-ES')}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <Alert variant="default">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Aún no hay importaciones contables registradas.
+                </AlertDescription>
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Tabs por proveedor */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>

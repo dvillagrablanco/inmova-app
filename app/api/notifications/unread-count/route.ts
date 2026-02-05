@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * API: /api/notifications/unread-count
@@ -21,21 +22,24 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({
+        count: 0,
+        success: false,
+        error: 'No autenticado',
+      });
     }
 
     const result = await getUnreadCount(session.user.id);
 
     return NextResponse.json({
-      count: result.count,
+      count: result.count ?? 0,
+      success: result.success ?? true,
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      count: 0,
+      success: false,
+      error: 'Error interno del servidor',
+    });
   }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
@@ -40,9 +40,16 @@ interface Unit {
   building: { nombre: string };
 }
 
-interface Tenant {
+interface Building {
   id: string;
   nombre: string;
+}
+
+interface Tenant {
+  id: string;
+  nombre?: string;
+  nombreCompleto?: string;
+  name?: string;
   email: string;
 }
 
@@ -57,11 +64,15 @@ interface UploadedDocument {
 
 export default function NuevoContratoPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession() || {};
   const [isLoading, setIsLoading] = useState(false);
   const [units, setUnits] = useState<Unit[]>([]);
+  const [buildings, setBuildings] = useState<Building[]>([]);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [documents, setDocuments] = useState<UploadedDocument[]>([]);
+  const [selectedBuildingId, setSelectedBuildingId] = useState('');
+  const [isUnitsLoading, setIsUnitsLoading] = useState(false);
   const [formData, setFormData] = useState({
     unitId: '',
     tenantId: '',
@@ -71,6 +82,12 @@ export default function NuevoContratoPage() {
     deposito: '0',
     tipo: 'residencial',
   });
+
+  const normalizeList = <T,>(data: any): T[] => {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.data)) return data.data;
+    return [];
+  };
 
   const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -96,7 +113,7 @@ export default function NuevoContratoPage() {
       try {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('folder', 'contracts');
+        formData.append('folder', 'contratos');
         formData.append('entityType', 'contract');
 
         const progressInterval = setInterval(() => {
@@ -134,20 +151,59 @@ export default function NuevoContratoPage() {
   };
 
   useEffect(() => {
+    const prefillFromQuery = async () => {
+      if (status !== 'authenticated') return;
+
+      const unitIdParam = searchParams?.get('unitId');
+      const buildingIdParam = searchParams?.get('buildingId');
+      const tenantIdParam = searchParams?.get('tenantId');
+
+      if (tenantIdParam) {
+        setFormData((prev) => (prev.tenantId ? prev : { ...prev, tenantId: tenantIdParam }));
+      }
+
+      if (unitIdParam) {
+        setFormData((prev) => (prev.unitId ? prev : { ...prev, unitId: unitIdParam }));
+        try {
+          const unitRes = await fetch(`/api/units/${unitIdParam}`);
+          if (unitRes.ok) {
+            const unitData = await unitRes.json();
+            if (unitData?.building?.id) {
+              setSelectedBuildingId(unitData.building.id);
+            }
+          }
+        } catch (error) {
+          logger.warn('No se pudo preseleccionar la unidad', error);
+        }
+        return;
+      }
+
+      if (buildingIdParam && !selectedBuildingId) {
+        setSelectedBuildingId(buildingIdParam);
+      }
+    };
+
+    prefillFromQuery();
+  }, [searchParams, status, selectedBuildingId]);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
-        const [unitsRes, tenantsRes] = await Promise.all([
-          fetch('/api/units?estado=disponible'),
+        const [buildingsRes, tenantsRes] = await Promise.all([
+          fetch('/api/buildings'),
           fetch('/api/tenants'),
         ]);
 
-        if (unitsRes.ok) {
-          const unitsData = await unitsRes.json();
-          setUnits(unitsData);
+        if (buildingsRes.ok) {
+          const buildingsData = normalizeList<Building>(await buildingsRes.json());
+          setBuildings(buildingsData);
+          if (buildingsData.length === 1) {
+            setSelectedBuildingId(buildingsData[0].id);
+          }
         }
 
         if (tenantsRes.ok) {
-          const tenantsData = await tenantsRes.json();
+          const tenantsData = normalizeList<Tenant>(await tenantsRes.json());
           setTenants(tenantsData);
         }
       } catch (error) {
@@ -160,6 +216,35 @@ export default function NuevoContratoPage() {
     }
   }, [status]);
 
+  useEffect(() => {
+    const fetchUnits = async () => {
+      if (!selectedBuildingId) {
+        setUnits([]);
+        return;
+      }
+
+      try {
+        setIsUnitsLoading(true);
+        const unitsRes = await fetch(`/api/units?buildingId=${selectedBuildingId}`);
+        if (unitsRes.ok) {
+          const unitsData = normalizeList<Unit>(await unitsRes.json());
+          setUnits(unitsData);
+        } else {
+          setUnits([]);
+        }
+      } catch (error) {
+        logger.error('Error fetching units:', error);
+        setUnits([]);
+      } finally {
+        setIsUnitsLoading(false);
+      }
+    };
+
+    if (status === 'authenticated') {
+      fetchUnits();
+    }
+  }, [selectedBuildingId, status]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -171,21 +256,38 @@ export default function NuevoContratoPage() {
         body: JSON.stringify({
           unitId: formData.unitId,
           tenantId: formData.tenantId,
-          fechaInicio: new Date(formData.fechaInicio).toISOString(),
-          fechaFin: new Date(formData.fechaFin).toISOString(),
-          rentaMensual: parseFloat(formData.rentaMensual),
-          deposito: parseFloat(formData.deposito),
+          fechaInicio: formData.fechaInicio
+            ? new Date(formData.fechaInicio).toISOString()
+            : undefined,
+          fechaFin: formData.fechaFin ? new Date(formData.fechaFin).toISOString() : undefined,
+          rentaMensual: formData.rentaMensual ? parseFloat(formData.rentaMensual) : undefined,
+          deposito: formData.deposito ? parseFloat(formData.deposito) : undefined,
           tipo: formData.tipo,
           estado: 'activo',
         }),
       });
 
+      const data = await response.json().catch(() => ({}));
+
       if (response.ok) {
+        const missingFields = Array.isArray(data?.missingFields) ? data.missingFields : [];
+        if (missingFields.length > 0) {
+          const fieldLabels: Record<string, string> = {
+            fechaInicio: 'Fecha de inicio',
+            fechaFin: 'Fecha de fin',
+            rentaMensual: 'Renta mensual',
+            deposito: 'Depósito',
+          };
+          const labels = missingFields.map((field) => fieldLabels[field] || field).join(', ');
+          toast.warning('Contrato creado con campos pendientes', {
+            description: `Completar: ${labels}`,
+            duration: 10000,
+          });
+        }
         toast.success('Contrato creado correctamente');
         router.push('/contratos');
       } else {
-        const error = await response.json();
-        toast.error(error.error || 'Error al crear el contrato');
+        toast.error(data.error || 'Error al crear el contrato');
       }
     } catch (error) {
       logger.error('Error:', error);
@@ -266,20 +368,66 @@ export default function NuevoContratoPage() {
                       <div className="space-y-4">
                         {/* Unidad */}
                         <div className="space-y-2">
+                          <Label htmlFor="buildingId">Edificio *</Label>
+                          <Select
+                            value={selectedBuildingId}
+                            onValueChange={(value) => {
+                              setSelectedBuildingId(value);
+                              setFormData({ ...formData, unitId: '' });
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona un edificio" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {buildings.length === 0 ? (
+                                <SelectItem value="no-buildings" disabled>
+                                  No hay edificios disponibles
+                                </SelectItem>
+                              ) : (
+                                buildings.map((building) => (
+                                  <SelectItem key={building.id} value={building.id}>
+                                    {building.nombre}
+                                  </SelectItem>
+                                ))
+                              )}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Unidad */}
+                        <div className="space-y-2">
                           <Label htmlFor="unitId">Unidad *</Label>
                           <Select
                             value={formData.unitId}
                             onValueChange={(value) => setFormData({ ...formData, unitId: value })}
+                            disabled={!selectedBuildingId || isUnitsLoading}
                           >
                             <SelectTrigger>
-                              <SelectValue placeholder="Selecciona una unidad" />
+                              <SelectValue
+                                placeholder={
+                                  !selectedBuildingId
+                                    ? 'Selecciona un edificio primero'
+                                    : isUnitsLoading
+                                      ? 'Cargando unidades...'
+                                      : 'Selecciona una unidad'
+                                }
+                              />
                             </SelectTrigger>
                             <SelectContent>
-                              {units.map((unit) => (
-                                <SelectItem key={unit.id} value={unit.id}>
-                                  {unit.building.nombre} - {unit.numero}
+                              {units.length === 0 ? (
+                                <SelectItem value="no-units" disabled>
+                                  {selectedBuildingId
+                                    ? 'No hay unidades disponibles'
+                                    : 'Selecciona un edificio primero'}
                                 </SelectItem>
-                              ))}
+                              ) : (
+                                units.map((unit) => (
+                                  <SelectItem key={unit.id} value={unit.id}>
+                                    {unit.numero}
+                                  </SelectItem>
+                                ))
+                              )}
                             </SelectContent>
                           </Select>
                         </div>
@@ -295,11 +443,14 @@ export default function NuevoContratoPage() {
                               <SelectValue placeholder="Selecciona un inquilino" />
                             </SelectTrigger>
                             <SelectContent>
-                              {tenants.map((tenant) => (
+                              {tenants.map((tenant) => {
+                                const displayName =
+                                  tenant.nombreCompleto || tenant.nombre || tenant.name || 'Inquilino';
+                                return (
                                 <SelectItem key={tenant.id} value={tenant.id}>
-                                  {tenant.nombre} - {tenant.email}
+                                  {displayName} - {tenant.email}
                                 </SelectItem>
-                              ))}
+                              )})}
                             </SelectContent>
                           </Select>
                         </div>
@@ -343,7 +494,6 @@ export default function NuevoContratoPage() {
                             step="0.01"
                             value={formData.rentaMensual}
                             onChange={handleChange}
-                            required
                             min="0"
                             placeholder="Ej: 850.00"
                           />
@@ -362,7 +512,6 @@ export default function NuevoContratoPage() {
                             step="0.01"
                             value={formData.deposito}
                             onChange={handleChange}
-                            required
                             min="0"
                             placeholder="Ej: 1700.00"
                           />
@@ -385,7 +534,6 @@ export default function NuevoContratoPage() {
                             type="date"
                             value={formData.fechaInicio}
                             onChange={handleChange}
-                            required
                           />
                         </div>
 
@@ -398,7 +546,6 @@ export default function NuevoContratoPage() {
                             type="date"
                             value={formData.fechaFin}
                             onChange={handleChange}
-                            required
                           />
                         </div>
 
@@ -537,7 +684,7 @@ export default function NuevoContratoPage() {
                             <div className="text-sm space-y-1">
                               <p>
                                 <span className="text-muted-foreground">Unidad:</span>{' '}
-                                {units.find((u) => u.id === formData.unitId)?.building.nombre} -{' '}
+                                {buildings.find((b) => b.id === selectedBuildingId)?.nombre} -{' '}
                                 {units.find((u) => u.id === formData.unitId)?.numero}
                               </p>
                               <p>

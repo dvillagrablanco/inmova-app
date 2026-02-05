@@ -12,10 +12,21 @@ export async function GET(req: NextRequest) {
     const providerId = searchParams.get('providerId');
 
     if (!providerId) {
-      return NextResponse.json(
-        { error: 'Provider ID requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({
+        proveedor: null,
+        kpis: {
+          totalOrdenes: 0,
+          ordenesPendientes: 0,
+          ordenesEnProgreso: 0,
+          ordenesCompletadas: 0,
+          ingresosTotales: 0,
+          ingresosMes: 0,
+          ratingPromedio: 0,
+        },
+        ordenesRecientes: [],
+        success: false,
+        error: 'Provider ID requerido',
+      });
     }
 
     // Verificar que el proveedor existe
@@ -24,10 +35,21 @@ export async function GET(req: NextRequest) {
     });
 
     if (!proveedor) {
-      return NextResponse.json(
-        { error: 'Proveedor no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({
+        proveedor: null,
+        kpis: {
+          totalOrdenes: 0,
+          ordenesPendientes: 0,
+          ordenesEnProgreso: 0,
+          ordenesCompletadas: 0,
+          ingresosTotales: 0,
+          ingresosMes: 0,
+          ratingPromedio: 0,
+        },
+        ordenesRecientes: [],
+        success: false,
+        error: 'Proveedor no encontrado',
+      });
     }
 
     // Obtener estadísticas de órdenes de trabajo
@@ -113,9 +135,20 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al obtener dashboard de proveedor:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener dashboard' },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      proveedor: null,
+      kpis: {
+        totalOrdenes: 0,
+        ordenesPendientes: 0,
+        ordenesEnProgreso: 0,
+        ordenesCompletadas: 0,
+        ingresosTotales: 0,
+        ingresosMes: 0,
+        ratingPromedio: 0,
+      },
+      ordenesRecientes: [],
+      success: false,
+      error: 'Error al obtener dashboard',
+    });
   }
 }

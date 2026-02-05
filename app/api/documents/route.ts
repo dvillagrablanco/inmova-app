@@ -9,11 +9,6 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-  }
-
   const { searchParams } = new URL(req.url);
   const tenantId = searchParams.get('tenantId');
   const unitId = searchParams.get('unitId');
@@ -21,8 +16,17 @@ export async function GET(req: NextRequest) {
   const contractId = searchParams.get('contractId');
   const folderId = searchParams.get('folderId');
   const tipo = searchParams.get('tipo');
+  const tag = searchParams.get('tag');
+  const tagsParam = searchParams.get('tags');
+  const unlinked = searchParams.get('unlinked') === 'true';
+  const query = searchParams.get('q');
 
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json([]);
+    }
+
     const where: any = {};
     if (tenantId) where.tenantId = tenantId;
     if (unitId) where.unitId = unitId;
@@ -30,6 +34,22 @@ export async function GET(req: NextRequest) {
     if (contractId) where.contractId = contractId;
     if (folderId) where.folderId = folderId;
     if (tipo) where.tipo = tipo;
+    if (unlinked) {
+      where.tenantId = null;
+      where.unitId = null;
+      where.buildingId = null;
+      where.contractId = null;
+    }
+    if (query) {
+      where.nombre = { contains: query, mode: 'insensitive' };
+    }
+    const tags = [
+      ...(tag ? [tag] : []),
+      ...(tagsParam ? tagsParam.split(',').map((t) => t.trim()).filter(Boolean) : []),
+    ];
+    if (tags.length > 0) {
+      where.tags = { hasSome: tags };
+    }
 
     const documents = await prisma.document.findMany({
       where,
@@ -52,7 +72,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(documents);
   } catch (error) {
     logger.error('Error fetching documents:', error);
-    return NextResponse.json({ error: 'Error al obtener documentos' }, { status: 500 });
+    return NextResponse.json([]);
   }
 }
 

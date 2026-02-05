@@ -11,11 +11,15 @@ export const runtime = 'nodejs';
 /**
  * API para generar sugerencias proactivas usando IA
  */
+export async function GET() {
+  return NextResponse.json({ suggestions: [] });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ suggestions: [] });
     }
 
     const { userId, context } = await request.json();

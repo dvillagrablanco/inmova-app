@@ -25,7 +25,6 @@ import logger, { logError } from '@/lib/logger';
 
 // Solo inicializar Stripe si la key está configurada
 const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
 interface Payment {
   id: string;
@@ -55,6 +54,7 @@ export default function TenantPaymentsPage() {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [processingPayment, setProcessingPayment] = useState(false);
+  const [stripePromise, setStripePromise] = useState<ReturnType<typeof loadStripe> | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -68,22 +68,52 @@ export default function TenantPaymentsPage() {
     }
   }, [session]);
 
+  useEffect(() => {
+    if (clientSecret && stripeKey && !stripePromise) {
+      setStripePromise(loadStripe(stripeKey));
+    }
+  }, [clientSecret, stripeKey, stripePromise]);
+
   const fetchPayments = async () => {
     try {
       const response = await fetch('/api/portal-inquilino/payments');
       if (!response.ok) throw new Error('Error al cargar pagos');
       const data = await response.json();
-      setPayments(data.payments || []);
+      const rawPayments = Array.isArray(data) ? data : data?.payments ?? [];
+      const normalizedPayments = rawPayments.map((payment: any) => {
+        const contractUnit = payment?.contract?.unit;
+        const buildingName =
+          contractUnit?.building?.nombre ?? payment?.propiedad?.nombre ?? 'Propiedad';
+        const unitNumber = contractUnit?.numero ?? payment?.propiedad?.unidad ?? 'N/A';
+
+        return {
+          ...payment,
+          monto: typeof payment.monto === 'number' ? payment.monto : Number(payment.monto ?? 0),
+          contract: {
+            ...(payment.contract ?? {}),
+            unit: {
+              ...(contractUnit ?? {}),
+              numero: unitNumber,
+              building: {
+                ...(contractUnit?.building ?? {}),
+                nombre: buildingName,
+              },
+            },
+          },
+        };
+      });
+      setPayments(normalizedPayments);
     } catch (error) {
       logger.error('Error fetching payments:', error);
       toast.error('Error al cargar los pagos');
+      setPayments([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handlePayNow = async (payment: Payment) => {
-    if (!stripePromise) {
+    if (!stripeKey) {
       toast.error('Stripe no está configurado. Contacte con el administrador.');
       return;
     }
@@ -260,21 +290,28 @@ export default function TenantPaymentsPage() {
               </div>
             </div>
 
-            {stripePromise ? (
-              <Elements
-                stripe={stripePromise}
-                options={{
-                  clientSecret,
-                  appearance: {
-                    theme: 'stripe',
-                    variables: {
-                      colorPrimary: '#000000',
+            {stripeKey ? (
+              stripePromise ? (
+                <Elements
+                  stripe={stripePromise}
+                  options={{
+                    clientSecret,
+                    appearance: {
+                      theme: 'stripe',
+                      variables: {
+                        colorPrimary: '#000000',
+                      },
                     },
-                  },
-                }}
-              >
-                <StripePaymentForm onSuccess={handlePaymentSuccess} onCancel={handlePaymentCancel} />
-              </Elements>
+                  }}
+                >
+                  <StripePaymentForm onSuccess={handlePaymentSuccess} onCancel={handlePaymentCancel} />
+                </Elements>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Preparando pago...</p>
+                </div>
+              )
             ) : (
               <div className="text-center py-8">
                 <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />

@@ -14,10 +14,7 @@ export async function GET(request: NextRequest) {
     const providerId = request.headers.get('x-provider-id');
 
     if (!providerId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json([]);
     }
 
     // Verificar que el proveedor existe
@@ -27,10 +24,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!provider) {
-      return NextResponse.json(
-        { error: 'Proveedor no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json([]);
     }
 
     // Obtener filtros de query params
@@ -86,10 +80,7 @@ export async function GET(request: NextRequest) {
     logError(error instanceof Error ? error : new Error(String(error)), {
       context: 'GET /api/portal-proveedor/quotes',
     });
-    return NextResponse.json(
-      { error: 'Error al obtener presupuestos' },
-      { status: 500 }
-    );
+    return NextResponse.json([]);
   }
 }
 

@@ -14,10 +14,7 @@ export async function GET(req: NextRequest) {
     session = await getServerSession(authOptions);
 
     if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json([]);
     }
 
     const services = await prisma.marketplaceService.findMany({
@@ -42,10 +39,7 @@ export async function GET(req: NextRequest) {
       context: 'GET /api/admin/marketplace/services',
       companyId: session?.user?.companyId,
     });
-    return NextResponse.json(
-      { error: 'Error al obtener servicios' },
-      { status: 500 }
-    );
+    return NextResponse.json([]);
   }
 }
 

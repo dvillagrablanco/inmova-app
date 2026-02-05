@@ -210,14 +210,17 @@ export function AuthenticatedLayout({
         <FirstTimeSetupWizard onComplete={handleCompleteSetup} onSkip={handleSkipSetup} />
       )}
 
-      {/* Onboarding Checklist - Hasta completar (NO para superadmin) */}
-      {showChecklist && session?.user?.id && session?.user?.role !== 'super_admin' && (
-        <OnboardingChecklist
-          userId={session.user.id}
-          isNewUser={isNewUser}
-          onDismiss={handleDismissChecklist}
-        />
-      )}
+      {/* Onboarding Checklist - Solo en dashboard (NO para superadmin) */}
+      {showChecklist &&
+        session?.user?.id &&
+        session?.user?.role !== 'super_admin' &&
+        (pathname === '/dashboard' || pathname?.startsWith('/dashboard/')) && (
+          <OnboardingChecklist
+            userId={session.user.id}
+            isNewUser={isNewUser}
+            onDismiss={handleDismissChecklist}
+          />
+        )}
 
       {/* Command Palette - Navegación rápida con Cmd+K */}
       <CommandPalette />

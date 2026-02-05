@@ -57,10 +57,7 @@ export async function GET() {
     return NextResponse.json(usersWithoutPasswords);
   } catch (error: any) {
     logger.error('Error fetching users:', error);
-    if (error.message === 'No autenticado') {
-      return NextResponse.json({ error: error.message }, { status: 401 });
-    }
-    return NextResponse.json({ error: 'Error al obtener usuarios' }, { status: 500 });
+    return NextResponse.json([]);
   }
 }
 

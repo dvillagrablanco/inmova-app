@@ -1516,7 +1516,7 @@
     },
     {
       "name": "Portal Proveedor - Reseñas",
-      "url": "/portal-proveedor/reseñas",
+      "url": "/portal-proveedor/resenas",
       "requiresAuth": false,
       "requiresSuperAdmin": false,
       "category": "portal_proveedor",

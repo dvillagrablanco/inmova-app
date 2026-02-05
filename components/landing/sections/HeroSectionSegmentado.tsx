@@ -288,7 +288,7 @@ export function HeroSectionSegmentado() {
                     </div>
 
                     {/* CTAs */}
-                    <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                    <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 pt-4">
                       <Link href={currentContent.cta.primary.href}>
                         <Button
                           size="lg"
@@ -306,6 +306,16 @@ export function HeroSectionSegmentado() {
                         >
                           <Play className="mr-2 h-5 w-5" />
                           {currentContent.cta.secondary.text}
+                        </Button>
+                      </Link>
+                      <Link href="/register?trial=30">
+                        <Button
+                          size="lg"
+                          variant="secondary"
+                          className="w-full sm:w-auto px-8 py-6 text-lg font-semibold"
+                        >
+                          <Sparkles className="mr-2 h-5 w-5" />
+                          Probar Gratis
                         </Button>
                       </Link>
                     </div>

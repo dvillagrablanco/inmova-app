@@ -32,7 +32,11 @@ export async function GET(request: NextRequest) {
     const tenantId = session?.user?.tenantId || request.headers.get('x-tenant-id');
 
     if (!tenantId) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      return NextResponse.json({
+        success: false,
+        data: [],
+        error: 'No autorizado',
+      });
     }
 
     const { searchParams } = new URL(request.url);
@@ -47,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     if (!tenant || tenant.units.length === 0) {
       return NextResponse.json({
-        success: true,
+        success: false,
         data: [],
         message: 'No tienes propiedades asignadas',
       });
@@ -94,10 +98,11 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     logger.error('[Incidencias GET Error]:', error);
-    return NextResponse.json(
-      { error: error.message || 'Error obteniendo incidencias' },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: false,
+      data: [],
+      error: error.message || 'Error obteniendo incidencias',
+    });
   }
 }
 

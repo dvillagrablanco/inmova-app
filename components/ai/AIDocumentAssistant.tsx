@@ -353,11 +353,34 @@ export function AIDocumentAssistant({
           throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
         }
 
-        const analysis: DocumentAnalysis = await response.json();
+        const analysis: DocumentAnalysis & { error?: boolean; errorMessage?: string } =
+          await response.json();
 
         // Verificar que la respuesta sea válida
         if (!analysis || !analysis.extractedFields) {
           throw new Error('Respuesta de análisis inválida');
+        }
+
+        const analysisErrorMessage =
+          analysis.error || analysis.classification?.specificType === 'Error en análisis'
+            ? analysis.errorMessage || analysis.summary || 'Error al analizar el documento'
+            : null;
+
+        if (analysisErrorMessage) {
+          setUploadedFiles((prev) =>
+            prev.map((f) =>
+              f.file === file ? { ...f, status: 'error', error: analysisErrorMessage, progress: 0 } : f
+            )
+          );
+          toast.dismiss(toastId);
+          toast.error('Error al analizar documento', {
+            description: analysisErrorMessage,
+            action: {
+              label: 'Reintentar',
+              onClick: () => retryFile(file),
+            },
+          });
+          return;
         }
 
         // Actualizar archivo con éxito
@@ -400,6 +423,27 @@ export function AIDocumentAssistant({
           analysis,
         };
         setSelectedFile(updatedFile);
+
+        // Auto-guardar documento si no hay datos para aplicar o no hay callback
+        const shouldAutoSave =
+          autoSaveDocument && (!onApplyData || analysis.extractedFields.length === 0);
+        if (shouldAutoSave) {
+          setIsSavingDocument(true);
+          try {
+            const documentId = await saveDocumentToStorage(file);
+            if (documentId && onDocumentSaved) {
+              onDocumentSaved(documentId, file);
+            }
+            toast.success('Documento guardado correctamente');
+          } catch (error: any) {
+            console.error('[AIDocumentAssistant] Error guardando documento:', error);
+            toast.warning('Documento analizado, pero no se pudo guardar', {
+              description: error.message || 'Puedes intentar subirlo manualmente',
+            });
+          } finally {
+            setIsSavingDocument(false);
+          }
+        }
 
         // CRÍTICO: Abrir diálogo de revisión automáticamente para mejor UX
         // Se abre inmediatamente para que el usuario vea los datos extraídos

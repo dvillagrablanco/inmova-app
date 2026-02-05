@@ -59,7 +59,7 @@ export const buildingUpdateSchema = buildingCreateSchema.partial();
 
 export const unitCreateSchema = z.object({
   buildingId: z.string()
-    .uuid('ID de edificio inválido'),
+    .cuid('ID de edificio inválido'),
   numero: z.string()
     .min(1, 'El número de unidad es requerido')
     .max(50, 'El número no puede exceder 50 caracteres')
@@ -119,7 +119,10 @@ export const tenantCreateSchema = z.object({
     .regex(/^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/, 'Teléfono inválido')
     .trim(),
   dni: z.string()
-    .regex(/^[0-9]{8}[A-Z]$/, 'DNI/NIE inválido (formato: 12345678A)')
+    .regex(
+      /^(?:(?:[0-9]{8}|[XYZ][0-9]{7})[A-Z]|PASSPORT[A-Z0-9]{5,12}|DOC[A-Z0-9]{6,20}|PENDING[A-Z0-9]{6,20})$/,
+      'DNI/NIE inválido (formato: 12345678A o X1234567A)'
+    )
     .toUpperCase()
     .trim()
     .optional()
@@ -154,9 +157,9 @@ export const tenantUpdateSchema = tenantCreateSchema.partial();
 
 const contractBaseSchema = z.object({
   unitId: z.string()
-    .uuid('ID de unidad inválido'),
+    .cuid('ID de unidad inválido'),
   tenantId: z.string()
-    .uuid('ID de inquilino inválido'),
+    .cuid('ID de inquilino inválido'),
   fechaInicio: z.string()
     .datetime({ message: 'Fecha de inicio inválida' })
     .or(z.date()),
@@ -164,7 +167,7 @@ const contractBaseSchema = z.object({
     .datetime({ message: 'Fecha de fin inválida' })
     .or(z.date()),
   rentaMensual: z.number()
-    .positive('La renta mensual debe ser mayor a 0')
+    .nonnegative('La renta mensual debe ser cero o mayor')
     .max(1000000, 'La renta mensual no puede exceder 1,000,000'),
   diaCobranza: z.number()
     .int('Debe ser un número entero')

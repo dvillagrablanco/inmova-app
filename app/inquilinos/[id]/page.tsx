@@ -57,6 +57,14 @@ interface Tenant {
     fechaFin: string;
     rentaMensual: number;
     estado: string;
+    unit?: {
+      id: string;
+      numero: string;
+      building?: {
+        id: string;
+        nombre: string;
+      };
+    };
   }>;
   payments?: Array<{
     id: string;
@@ -242,8 +250,14 @@ export default function TenantDetailPage() {
           {/* Contracts Tab */}
           <TabsContent value="contracts">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Contratos</CardTitle>
+                <Button
+                  variant="outline"
+                  onClick={() => router.push(`/contratos/nuevo?tenantId=${tenant.id}`)}
+                >
+                  Nuevo contrato
+                </Button>
               </CardHeader>
               <CardContent>
                 {!tenant.contracts || tenant.contracts.length === 0 ? (
@@ -255,7 +269,7 @@ export default function TenantDetailPage() {
                     {tenant.contracts.map((contract) => (
                       <div
                         key={contract.id}
-                        className="flex items-center justify-between rounded-lg border p-3"
+                        className="flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div>
                           <div className="font-medium">
@@ -269,8 +283,42 @@ export default function TenantDetailPage() {
                             }).format(contract.rentaMensual)}{' '}
                             /mes
                           </div>
+                          {contract.unit && (
+                            <div className="text-xs text-muted-foreground">
+                              Unidad:{' '}
+                              <button
+                                className="text-primary hover:underline"
+                                onClick={() => router.push(`/unidades/${contract.unit?.id}`)}
+                              >
+                                {contract.unit?.numero}
+                              </button>
+                              {contract.unit?.building?.nombre && (
+                                <>
+                                  {' '}
+                                  ·{' '}
+                                  <button
+                                    className="text-primary hover:underline"
+                                    onClick={() =>
+                                      router.push(`/edificios/${contract.unit?.building?.id}`)
+                                    }
+                                  >
+                                    {contract.unit?.building?.nombre}
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          )}
                         </div>
-                        <Badge>{contract.estado}</Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge>{contract.estado}</Badge>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => router.push(`/contratos/${contract.id}`)}
+                          >
+                            Ver contrato
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
@@ -38,6 +38,7 @@ interface Building {
 
 export default function NuevaUnidadPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession() || {};
   const [isLoading, setIsLoading] = useState(false);
   const [buildings, setBuildings] = useState<Building[]>([]);
@@ -50,6 +51,20 @@ export default function NuevaUnidadPage() {
     banos: '1',
     precio: '0',
   });
+
+  useEffect(() => {
+    const buildingIdFromQuery = searchParams?.get('buildingId');
+    if (buildingIdFromQuery) {
+      setFormData((prev) =>
+        prev.edificioId
+          ? prev
+          : {
+              ...prev,
+              edificioId: buildingIdFromQuery,
+            }
+      );
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchBuildings = async () => {

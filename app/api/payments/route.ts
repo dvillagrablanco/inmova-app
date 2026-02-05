@@ -13,26 +13,52 @@ export const runtime = 'nodejs';
 export async function GET(req: NextRequest) {
   return withPaymentRateLimit(req, async () => {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
-
-    const companyId = session.user?.companyId;
-    if (!companyId) {
-      return NextResponse.json({ error: 'CompanyId no encontrado' }, { status: 400 });
-    }
-
     const { searchParams } = new URL(req.url);
     const estado = searchParams.get('estado');
     const contractId = searchParams.get('contractId');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
-
-    // Si hay filtros o paginación, no usar caché
     const hasFilters = estado || contractId;
     const usePagination = searchParams.has('page') || searchParams.has('limit');
+
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      if (usePagination) {
+        return NextResponse.json({
+          data: [],
+          pagination: {
+            page,
+            limit,
+            total: 0,
+            totalPages: 0,
+            hasMore: false,
+          },
+          success: false,
+          error: 'No autorizado',
+        });
+      }
+      return NextResponse.json([]);
+    }
+
+    const companyId = session.user?.companyId;
+    if (!companyId) {
+      if (usePagination) {
+        return NextResponse.json({
+          data: [],
+          pagination: {
+            page,
+            limit,
+            total: 0,
+            totalPages: 0,
+            hasMore: false,
+          },
+          success: false,
+          error: 'CompanyId no encontrado',
+        });
+      }
+      return NextResponse.json([]);
+    }
 
     if (hasFilters || usePagination) {
       const where: any = {
@@ -117,7 +143,27 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(payments);
   } catch (error) {
     logger.error('Error fetching payments:', error);
-    return NextResponse.json({ error: 'Error al obtener pagos' }, { status: 500 });
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const usePagination = searchParams.has('page') || searchParams.has('limit');
+    const hasFilters = searchParams.get('estado') || searchParams.get('contractId');
+
+    if (usePagination || hasFilters) {
+      return NextResponse.json({
+        data: [],
+        pagination: {
+          page,
+          limit,
+          total: 0,
+          totalPages: 0,
+          hasMore: false,
+        },
+        success: false,
+        error: 'Error al obtener pagos',
+      });
+    }
+    return NextResponse.json([]);
   }
   });
 }

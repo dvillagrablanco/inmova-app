@@ -181,12 +181,28 @@ export default function NuevoInquilinoPage() {
         }),
       });
 
+      const data = await response.json().catch(() => ({}));
+
       if (response.ok) {
+        const missingFields = Array.isArray(data?.missingFields) ? data.missingFields : [];
+        if (missingFields.length > 0) {
+          const fieldLabels: Record<string, string> = {
+            nombre: 'Nombre completo',
+            email: 'Correo electrónico',
+            telefono: 'Teléfono',
+            documentoIdentidad: 'Documento de identidad',
+            fechaNacimiento: 'Fecha de nacimiento',
+          };
+          const labels = missingFields.map((field) => fieldLabels[field] || field).join(', ');
+          toast.warning('Inquilino creado con campos pendientes', {
+            description: `Completar: ${labels}`,
+            duration: 10000,
+          });
+        }
         toast.success('Inquilino creado correctamente');
         router.push('/inquilinos');
       } else {
-        const error = await response.json();
-        toast.error(error.error || 'Error al crear el inquilino');
+        toast.error(data.error || 'Error al crear el inquilino');
       }
     } catch (error) {
       logger.error('Error:', error);
@@ -273,7 +289,6 @@ export default function NuevoInquilinoPage() {
                         name="nombre"
                         value={formData.nombre}
                         onChange={handleChange}
-                        required
                         placeholder="Juan Pérez García"
                       />
                     </div>
@@ -287,7 +302,6 @@ export default function NuevoInquilinoPage() {
                         type="email"
                         value={formData.email}
                         onChange={handleChange}
-                        required
                         placeholder="juan.perez@email.com"
                       />
                     </div>
@@ -300,7 +314,6 @@ export default function NuevoInquilinoPage() {
                         name="telefono"
                         value={formData.telefono}
                         onChange={handleChange}
-                        required
                         placeholder="+34 600 123 456"
                       />
                     </div>
@@ -341,7 +354,6 @@ export default function NuevoInquilinoPage() {
                         name="documentoIdentidad"
                         value={formData.documentoIdentidad}
                         onChange={handleChange}
-                        required
                         placeholder="12345678A"
                       />
                     </div>

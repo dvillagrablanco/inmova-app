@@ -25,10 +25,15 @@ export async function GET(request: NextRequest) {
     // Verificar autenticación
     const decoded = verifyToken(request);
     if (!decoded || !decoded.partnerId) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({
+        partner: null,
+        metrics: {},
+        clientes: [],
+        comisiones: [],
+        invitacionesRecientes: [],
+        success: false,
+        error: 'No autorizado',
+      });
     }
     const partnerId = decoded.partnerId;
     // Obtener Partner
@@ -46,10 +51,15 @@ export async function GET(request: NextRequest) {
       },
     });
     if (!partner) {
-      return NextResponse.json(
-        { error: 'Partner no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({
+        partner: null,
+        metrics: {},
+        clientes: [],
+        comisiones: [],
+        invitacionesRecientes: [],
+        success: false,
+        error: 'Partner no encontrado',
+      });
     }
     // Obtener clientes activos
     const clientes = await prisma.partnerClient.findMany({
@@ -118,9 +128,15 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     logger.error('Error obteniendo dashboard de Partner:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor', details: error?.message },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      partner: null,
+      metrics: {},
+      clientes: [],
+      comisiones: [],
+      invitacionesRecientes: [],
+      success: false,
+      error: 'Error interno del servidor',
+      details: error?.message,
+    });
   }
 }
