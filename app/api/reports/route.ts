@@ -251,12 +251,27 @@ export async function GET(request: Request) {
     });
   } catch (error: any) {
     logger.error('Error al generar reportes:', error);
-    if (error.message === 'No autenticado') {
-      return NextResponse.json({ error: error.message }, { status: 401 });
-    }
-    if (error.message?.includes('permiso')) {
-      return forbiddenResponse(error.message);
-    }
-    return NextResponse.json({ error: 'Error al generar reportes' }, { status: 500 });
+    const { searchParams } = new URL(request.url);
+    const periodoFallback = parseInt(searchParams.get('periodo') || '12', 10);
+
+    return NextResponse.json({
+      global: {
+        ingresosBrutos: 0,
+        gastos: 0,
+        ingresosNetos: 0,
+        rentabilidadBruta: 0,
+        rentabilidadNeta: 0,
+        roi: 0,
+        unidades: 0,
+        unidadesOcupadas: 0,
+        tasaOcupacion: 0,
+      },
+      reportes: [],
+      flujoCaja: [],
+      periodo: periodoFallback,
+      success: false,
+      error: 'Error al generar reportes',
+      details: error?.message,
+    });
   }
 }

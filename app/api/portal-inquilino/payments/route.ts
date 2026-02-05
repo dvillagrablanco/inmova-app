@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+      return NextResponse.json({ success: false, payments: [], error: 'No autenticado' });
     }
 
     // Buscar el tenant asociado al usuario
@@ -30,10 +30,11 @@ export async function GET(request: NextRequest) {
     });
 
     if (!tenant) {
-      return NextResponse.json(
-        { error: 'No se encontró información de inquilino' },
-        { status: 404 }
-      );
+      return NextResponse.json({
+        success: false,
+        payments: [],
+        error: 'No se encontró información de inquilino',
+      });
     }
 
     // Buscar contratos del inquilino
@@ -100,9 +101,11 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     logger.error('[API Error]:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor', details: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: false,
+      payments: [],
+      error: 'Error interno del servidor',
+      details: error.message,
+    });
   }
 }
