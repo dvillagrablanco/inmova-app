@@ -13,9 +13,26 @@ export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const usePagination = searchParams.get('paginate') === 'true';
+
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      if (usePagination) {
+        return NextResponse.json({
+          data: [],
+          pagination: {
+            page: 1,
+            limit: 10,
+            total: 0,
+            totalPages: 0,
+            hasMore: false,
+          },
+          success: false,
+          error: 'No autorizado',
+        });
+      }
+      return NextResponse.json([]);
     }
 
     const companyId = session.user?.companyId;
@@ -27,12 +44,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json([]);
     }
 
-    const { searchParams } = new URL(req.url);
     const buildingId = searchParams.get('buildingId');
     const estado = searchParams.get('estado');
     const tipo = searchParams.get('tipo');
     const filterCompanyId = searchParams.get('companyId');
-    const usePagination = searchParams.get('paginate') === 'true';
 
     // Determinar el filtro de empresa
     const whereCompanyId = isSuperAdmin 

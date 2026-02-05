@@ -16,9 +16,30 @@ export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '15');
+    const skip = (page - 1) * limit;
+    const filterCompanyId = searchParams.get('companyId');
+    const usePagination = searchParams.has('page') || searchParams.has('limit');
+
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      if (usePagination) {
+        return NextResponse.json({
+          data: [],
+          pagination: {
+            page,
+            limit,
+            total: 0,
+            totalPages: 0,
+            hasMore: false,
+          },
+          success: false,
+          error: 'No autorizado',
+        });
+      }
+      return NextResponse.json([]);
     }
 
     const companyId = session.user?.companyId;
@@ -29,13 +50,6 @@ export async function GET(req: NextRequest) {
     if (!isSuperAdmin && !companyId) {
       return NextResponse.json([]);
     }
-
-    // Obtener parámetros de paginación
-    const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '15');
-    const skip = (page - 1) * limit;
-    const filterCompanyId = searchParams.get('companyId');
 
     // Determinar el filtro de empresa
     const whereCompanyId = isSuperAdmin 
@@ -52,8 +66,6 @@ export async function GET(req: NextRequest) {
     } : {};
 
     // Si no hay paginación solicitada, usar cache si tiene companyId
-    const usePagination = searchParams.has('page') || searchParams.has('limit');
-
     if (!usePagination && whereCompanyId) {
       // Usar datos cacheados
       const contractsWithExpiration = await cachedContracts(whereCompanyId);
@@ -130,7 +142,26 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error fetching contracts:', error);
-    return NextResponse.json({ error: 'Error al obtener contratos' }, { status: 500 });
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '15');
+    const usePagination = searchParams.has('page') || searchParams.has('limit');
+
+    if (usePagination) {
+      return NextResponse.json({
+        data: [],
+        pagination: {
+          page,
+          limit,
+          total: 0,
+          totalPages: 0,
+          hasMore: false,
+        },
+        success: false,
+        error: 'Error al obtener contratos',
+      });
+    }
+    return NextResponse.json([]);
   }
 }
 

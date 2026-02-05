@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      return NextResponse.json([]);
     }
 
     const companyId = session.user.companyId;
@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(transformedVisits);
   } catch (error) {
     logger.error('Error fetching visits:', error);
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+    return NextResponse.json([]);
   }
 }
 

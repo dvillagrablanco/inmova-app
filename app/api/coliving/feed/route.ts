@@ -5,32 +5,27 @@ import { authOptions } from '@/lib/auth-options';
 import * as socialService from '@/lib/services/coliving-social-service';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+      return NextResponse.json([]);
     }
     const { searchParams } = new URL(request.url);
     const companyId = searchParams.get('companyId');
     const buildingId = searchParams.get('buildingId') || undefined;
     if (!companyId) {
-      return NextResponse.json(
-        { error: 'companyId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json([]);
     }
     const result = await socialService.getFeed(companyId, buildingId);
     if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
+      return NextResponse.json([]);
     }
     return NextResponse.json(result.posts);
   } catch (error) {
     logger.error('Error en GET /api/coliving/feed:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener feed' },
-      { status: 500 }
-    );
+    return NextResponse.json([]);
   }
 }
 export async function POST(request: NextRequest) {

@@ -16,10 +16,12 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({
+        vertical: null,
+        allVerticals: [],
+        success: false,
+        error: 'No autenticado',
+      });
     }
     
     const company = await prisma.company.findUnique({
@@ -31,10 +33,12 @@ export async function GET(req: NextRequest) {
     });
 
     if (!company) {
-      return NextResponse.json(
-        { error: 'Empresa no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({
+        vertical: null,
+        allVerticals: [],
+        success: false,
+        error: 'Empresa no encontrada',
+      });
     }
 
     // Si es mixto, retornar el primer vertical o el más usado
@@ -48,12 +52,15 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       vertical: primaryVertical,
       allVerticals: company.verticals || [company.businessVertical],
+      success: true,
     });
   } catch (error: any) {
     logger.error('[API Error]:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      vertical: null,
+      allVerticals: [],
+      success: false,
+      error: 'Error interno del servidor',
+    });
   }
 }

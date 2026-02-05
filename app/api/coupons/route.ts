@@ -9,12 +9,13 @@ import {
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      return NextResponse.json([]);
     }
 
     const { searchParams } = new URL(request.url);
@@ -30,10 +31,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(coupons);
   } catch (error) {
     logger.error('Error al obtener cupones:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener cupones' },
-      { status: 500 }
-    );
+    return NextResponse.json([]);
   }
 }
 

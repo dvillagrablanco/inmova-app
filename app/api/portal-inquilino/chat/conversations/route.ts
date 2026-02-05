@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      return NextResponse.json({ conversations: [], success: false, error: 'No autorizado' });
     }
 
     // Get tenant
@@ -20,10 +20,11 @@ export async function GET(request: NextRequest) {
     });
 
     if (!tenant) {
-      return NextResponse.json(
-        { error: 'Inquilino no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({
+        conversations: [],
+        success: false,
+        error: 'Inquilino no encontrado',
+      });
     }
 
     // Get conversations
@@ -68,10 +69,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ conversations: enrichedConversations });
   } catch (error: any) {
     logger.error('Error fetching tenant conversations:', error);
-    return NextResponse.json(
-      { error: error.message || 'Error al cargar conversaciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      conversations: [],
+      success: false,
+      error: error.message || 'Error al cargar conversaciones',
+    });
   }
 }
 

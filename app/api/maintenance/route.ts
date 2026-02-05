@@ -9,22 +9,51 @@ export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
-
-    const companyId = session.user?.companyId;
-    if (!companyId) {
-      return NextResponse.json({ error: 'CompanyId no encontrado' }, { status: 400 });
-    }
-
     const { searchParams } = new URL(req.url);
     const estado = searchParams.get('estado');
     const prioridad = searchParams.get('prioridad');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '15');
     const skip = (page - 1) * limit;
+    const usePagination = searchParams.has('page') || searchParams.has('limit');
+
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      if (usePagination) {
+        return NextResponse.json({
+          data: [],
+          pagination: {
+            page,
+            limit,
+            total: 0,
+            totalPages: 0,
+            hasMore: false,
+          },
+          success: false,
+          error: 'No autorizado',
+        });
+      }
+      return NextResponse.json([]);
+    }
+
+    const companyId = session.user?.companyId;
+    if (!companyId) {
+      if (usePagination) {
+        return NextResponse.json({
+          data: [],
+          pagination: {
+            page,
+            limit,
+            total: 0,
+            totalPages: 0,
+            hasMore: false,
+          },
+          success: false,
+          error: 'CompanyId no encontrado',
+        });
+      }
+      return NextResponse.json([]);
+    }
 
     const where: any = {
       unit: {
@@ -35,9 +64,6 @@ export async function GET(req: NextRequest) {
     };
     if (estado) where.estado = estado;
     if (prioridad) where.prioridad = prioridad;
-
-    // Verificar si se está usando paginación
-    const usePagination = searchParams.has('page') || searchParams.has('limit');
 
     if (usePagination) {
       const [maintenanceRequests, total] = await Promise.all([
@@ -87,7 +113,26 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(maintenanceRequests);
   } catch (error) {
     logger.error('Error fetching maintenance requests:', error);
-    return NextResponse.json({ error: 'Error al obtener solicitudes de mantenimiento' }, { status: 500 });
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '15');
+    const usePagination = searchParams.has('page') || searchParams.has('limit');
+
+    if (usePagination) {
+      return NextResponse.json({
+        data: [],
+        pagination: {
+          page,
+          limit,
+          total: 0,
+          totalPages: 0,
+          hasMore: false,
+        },
+        success: false,
+        error: 'Error al obtener solicitudes de mantenimiento',
+      });
+    }
+    return NextResponse.json([]);
   }
 }
 

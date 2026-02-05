@@ -11,7 +11,21 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+      return NextResponse.json({
+        budgets: [],
+        total: 0,
+        stats: {
+          borradores: 0,
+          enviados: 0,
+          aprobados: 0,
+          rechazados: 0,
+          facturados: 0,
+          valorTotal: 0,
+          valorAprobado: 0,
+        },
+        success: false,
+        error: 'No autenticado',
+      });
     }
 
     const { searchParams } = new URL(request.url);
@@ -56,10 +70,21 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('[API Error] GET /api/budgets:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener presupuestos' },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      budgets: [],
+      total: 0,
+      stats: {
+        borradores: 0,
+        enviados: 0,
+        aprobados: 0,
+        rechazados: 0,
+        facturados: 0,
+        valorTotal: 0,
+        valorAprobado: 0,
+      },
+      success: false,
+      error: 'Error al obtener presupuestos',
+    });
   }
 }
 

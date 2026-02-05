@@ -9,15 +9,16 @@ export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await requireAuth();
-    const isSuperAdmin = user.role === 'super_admin' || user.role === 'soporte';
-
     // Obtener parámetros de paginación
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
     const filterCompanyId = searchParams.get('companyId');
+    const usePagination = searchParams.has('page') || searchParams.has('limit');
+
+    const user = await requireAuth();
+    const isSuperAdmin = user.role === 'super_admin' || user.role === 'soporte';
 
     // Determinar el filtro de empresa
     const whereCompanyId = isSuperAdmin 
@@ -30,9 +31,6 @@ export async function GET(req: NextRequest) {
     }
 
     const whereClause = whereCompanyId ? { companyId: whereCompanyId } : {};
-
-    // Si no hay paginación solicitada, devolver todos (compatibilidad)
-    const usePagination = searchParams.has('page') || searchParams.has('limit');
 
     if (!usePagination) {
       const tenants = await prisma.tenant.findMany({
@@ -96,14 +94,28 @@ export async function GET(req: NextRequest) {
     const errorMessage = error?.message || 'Error desconocido';
     const errorStack = error?.stack || '';
     logger.error('Error fetching tenants:', { message: errorMessage, stack: errorStack.slice(0, 500) });
-    
-    if (errorMessage === 'No autenticado') {
-      return NextResponse.json({ error: errorMessage }, { status: 401 });
+
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const usePagination = searchParams.has('page') || searchParams.has('limit');
+
+    if (usePagination) {
+      return NextResponse.json({
+        data: [],
+        pagination: {
+          page,
+          limit,
+          total: 0,
+          totalPages: 0,
+          hasMore: false,
+        },
+        error: errorMessage,
+        success: false,
+      });
     }
-    if (errorMessage === 'Usuario inactivo') {
-      return NextResponse.json({ error: errorMessage }, { status: 403 });
-    }
-    return NextResponse.json({ error: 'Error al obtener inquilinos', details: errorMessage }, { status: 500 });
+
+    return NextResponse.json([]);
   }
 }
 

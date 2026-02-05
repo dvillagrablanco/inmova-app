@@ -9,11 +9,6 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-  }
-
   const { searchParams } = new URL(req.url);
   const tenantId = searchParams.get('tenantId');
   const unitId = searchParams.get('unitId');
@@ -23,6 +18,11 @@ export async function GET(req: NextRequest) {
   const tipo = searchParams.get('tipo');
 
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json([]);
+    }
+
     const where: any = {};
     if (tenantId) where.tenantId = tenantId;
     if (unitId) where.unitId = unitId;
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(documents);
   } catch (error) {
     logger.error('Error fetching documents:', error);
-    return NextResponse.json({ error: 'Error al obtener documentos' }, { status: 500 });
+    return NextResponse.json([]);
   }
 }
 
