@@ -39,14 +39,16 @@ export default function PortalProveedorPage() {
       const response = await fetch('/api/portal-proveedor/dashboard');
       if (response.ok) {
         const data = await response.json();
-        setStats(data.data || {
-          ordenesPendientes: 0,
-          ordenesCompletadas: 0,
-          presupuestosPendientes: 0,
-          facturasPendientes: 0,
-          ingresosMes: 0,
-          calificacionPromedio: 0,
-        });
+        setStats(
+          data.data || {
+            ordenesPendientes: 0,
+            ordenesCompletadas: 0,
+            presupuestosPendientes: 0,
+            facturasPendientes: 0,
+            ingresosMes: 0,
+            calificacionPromedio: 0,
+          }
+        );
       }
     } catch (error) {
       console.error('Error fetching dashboard:', error);
@@ -97,7 +99,7 @@ export default function PortalProveedorPage() {
       title: 'Reseñas',
       description: 'Ver valoraciones',
       icon: Star,
-      href: '/portal-proveedor/reseñas',
+      href: '/portal-proveedor/resenas',
       color: 'text-yellow-600',
       bgColor: 'bg-yellow-50',
     },
@@ -108,9 +110,7 @@ export default function PortalProveedorPage() {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Portal de Proveedores</h1>
-          <p className="text-gray-600 mt-2">
-            Gestión de servicios y órdenes de trabajo
-          </p>
+          <p className="text-gray-600 mt-2">Gestión de servicios y órdenes de trabajo</p>
         </div>
         <Button variant="outline" onClick={fetchDashboard} disabled={loading}>
           <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
@@ -192,7 +192,9 @@ export default function PortalProveedorPage() {
                 {loading ? (
                   <Skeleton className="h-6 w-12" />
                 ) : (
-                  <p className="text-2xl font-bold">{(stats?.ingresosMes || 0).toLocaleString()}€</p>
+                  <p className="text-2xl font-bold">
+                    {(stats?.ingresosMes || 0).toLocaleString()}€
+                  </p>
                 )}
                 <p className="text-xs text-muted-foreground">Ingresos Mes</p>
               </div>
@@ -208,7 +210,9 @@ export default function PortalProveedorPage() {
                 {loading ? (
                   <Skeleton className="h-6 w-8" />
                 ) : (
-                  <p className="text-2xl font-bold">{(stats?.calificacionPromedio || 0).toFixed(1)}</p>
+                  <p className="text-2xl font-bold">
+                    {(stats?.calificacionPromedio || 0).toFixed(1)}
+                  </p>
                 )}
                 <p className="text-xs text-muted-foreground">Calificación</p>
               </div>
@@ -223,7 +227,9 @@ export default function PortalProveedorPage() {
           <Link key={card.href} href={card.href}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
               <CardHeader>
-                <div className={`w-12 h-12 ${card.bgColor} rounded-lg flex items-center justify-center mb-2`}>
+                <div
+                  className={`w-12 h-12 ${card.bgColor} rounded-lg flex items-center justify-center mb-2`}
+                >
                   <card.icon className={`h-6 w-6 ${card.color}`} />
                 </div>
                 <CardTitle>{card.title}</CardTitle>
