@@ -424,6 +424,27 @@ export function AIDocumentAssistant({
         };
         setSelectedFile(updatedFile);
 
+        // Auto-guardar documento si no hay datos para aplicar o no hay callback
+        const shouldAutoSave =
+          autoSaveDocument && (!onApplyData || analysis.extractedFields.length === 0);
+        if (shouldAutoSave) {
+          setIsSavingDocument(true);
+          try {
+            const documentId = await saveDocumentToStorage(file);
+            if (documentId && onDocumentSaved) {
+              onDocumentSaved(documentId, file);
+            }
+            toast.success('Documento guardado correctamente');
+          } catch (error: any) {
+            console.error('[AIDocumentAssistant] Error guardando documento:', error);
+            toast.warning('Documento analizado, pero no se pudo guardar', {
+              description: error.message || 'Puedes intentar subirlo manualmente',
+            });
+          } finally {
+            setIsSavingDocument(false);
+          }
+        }
+
         // CRÍTICO: Abrir diálogo de revisión automáticamente para mejor UX
         // Se abre inmediatamente para que el usuario vea los datos extraídos
         if (onApplyData && analysis.extractedFields.length > 0) {
