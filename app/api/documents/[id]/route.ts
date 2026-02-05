@@ -71,3 +71,54 @@ export async function DELETE(
     return NextResponse.json({ error: 'Error al eliminar documento' }, { status: 500 });
   }
 }
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+  }
+
+  try {
+    const body = await req.json();
+    const normalize = (value?: string | null) => {
+      if (value === undefined || value === null) return undefined;
+      const trimmed = String(value).trim();
+      return trimmed.length === 0 ? null : trimmed;
+    };
+
+    const data: any = {};
+    if ('tenantId' in body) data.tenantId = normalize(body.tenantId);
+    if ('unitId' in body) data.unitId = normalize(body.unitId);
+    if ('buildingId' in body) data.buildingId = normalize(body.buildingId);
+    if ('contractId' in body) data.contractId = normalize(body.contractId);
+    if ('folderId' in body) data.folderId = normalize(body.folderId);
+    if ('descripcion' in body) data.descripcion = normalize(body.descripcion);
+    if ('nombre' in body) data.nombre = normalize(body.nombre);
+    if ('tipo' in body && body.tipo) data.tipo = body.tipo;
+    if ('fechaVencimiento' in body) {
+      data.fechaVencimiento = body.fechaVencimiento ? new Date(body.fechaVencimiento) : null;
+    }
+    if ('tags' in body && Array.isArray(body.tags)) {
+      data.tags = body.tags;
+    }
+
+    const document = await prisma.document.update({
+      where: { id: params.id },
+      data,
+      include: {
+        tenant: { select: { nombreCompleto: true } },
+        unit: { select: { numero: true } },
+        building: { select: { nombre: true } },
+        contract: { select: { id: true } },
+      },
+    });
+
+    return NextResponse.json(document);
+  } catch (error) {
+    logger.error('Error updating document:', error);
+    return NextResponse.json({ error: 'Error al actualizar documento' }, { status: 500 });
+  }
+}

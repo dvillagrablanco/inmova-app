@@ -348,15 +348,30 @@ export default function DocumentosPage() {
         <h1 className="text-3xl font-bold tracking-tight">Documentos</h1>
         <p className="text-muted-foreground">Gestiona todos los documentos del sistema</p>
       </div>
-      {canCreate && (
-        <Dialog open={openUploadDialog} onOpenChange={setOpenUploadDialog}>
-        <DialogTrigger asChild>
-        <Button>
-        <Upload className="mr-2 h-4 w-4" />
-        Subir Documento
-        </Button>
-        </DialogTrigger>
-        <DialogContent>
+        {canCreate && (
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => router.push('/documentos/importar')}
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Carga masiva
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => router.push('/documentos/sin-vincular')}
+            >
+              <AlertTriangle className="mr-2 h-4 w-4" />
+              Sin vincular
+            </Button>
+            <Dialog open={openUploadDialog} onOpenChange={setOpenUploadDialog}>
+            <DialogTrigger asChild>
+            <Button>
+            <Upload className="mr-2 h-4 w-4" />
+            Subir Documento
+            </Button>
+            </DialogTrigger>
+            <DialogContent>
         <DialogHeader>
         <DialogTitle>Subir Nuevo Documento</DialogTitle>
         </DialogHeader>
@@ -429,8 +444,9 @@ export default function DocumentosPage() {
         </Button>
         </div>
         </form>
-        </DialogContent>
-        </Dialog>
+            </DialogContent>
+            </Dialog>
+          </div>
         )}
         </div>
 

@@ -186,11 +186,20 @@ export async function POST(request: NextRequest) {
                 zipFile.buffer
               );
 
-              results.push({
-                originalFilename: zipFile.originalFilename,
-                documentImportId: docImport.id,
-                status: 'success',
-              });
+              if (docImport.duplicate) {
+                results.push({
+                  originalFilename: zipFile.originalFilename,
+                  documentImportId: docImport.id,
+                  status: 'error',
+                  error: 'Documento duplicado',
+                });
+              } else {
+                results.push({
+                  originalFilename: zipFile.originalFilename,
+                  documentImportId: docImport.id,
+                  status: 'success',
+                });
+              }
             } catch (err: any) {
               results.push({
                 originalFilename: zipFile.originalFilename,
@@ -224,11 +233,20 @@ export async function POST(request: NextRequest) {
             buffer
           );
 
-          results.push({
-            originalFilename: file.name,
-            documentImportId: docImport.id,
-            status: 'success',
-          });
+          if (docImport.duplicate) {
+            results.push({
+              originalFilename: file.name,
+              documentImportId: docImport.id,
+              status: 'error',
+              error: 'Documento duplicado',
+            });
+          } else {
+            results.push({
+              originalFilename: file.name,
+              documentImportId: docImport.id,
+              status: 'success',
+            });
+          }
         }
       } catch (err: any) {
         logger.error('Error procesando archivo:', { filename: file.name, error: err.message });
@@ -318,7 +336,15 @@ async function createDocumentImport(
   size: number,
   checksum: string,
   buffer: Buffer
-): Promise<{ id: string; s3Key: string }> {
+): Promise<{ id: string; s3Key: string; duplicate?: boolean }> {
+  const existing = await prisma.documentImport.findFirst({
+    where: { companyId, checksum },
+    select: { id: true, s3Key: true },
+  });
+
+  if (existing) {
+    return { id: existing.id, s3Key: existing.s3Key, duplicate: true };
+  }
   // Generar S3 key
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(7);

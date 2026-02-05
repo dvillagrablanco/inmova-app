@@ -16,6 +16,8 @@ export async function GET(req: NextRequest) {
   const contractId = searchParams.get('contractId');
   const folderId = searchParams.get('folderId');
   const tipo = searchParams.get('tipo');
+  const unlinked = searchParams.get('unlinked') === 'true';
+  const query = searchParams.get('q');
 
   try {
     const session = await getServerSession(authOptions);
@@ -30,6 +32,15 @@ export async function GET(req: NextRequest) {
     if (contractId) where.contractId = contractId;
     if (folderId) where.folderId = folderId;
     if (tipo) where.tipo = tipo;
+    if (unlinked) {
+      where.tenantId = null;
+      where.unitId = null;
+      where.buildingId = null;
+      where.contractId = null;
+    }
+    if (query) {
+      where.nombre = { contains: query, mode: 'insensitive' };
+    }
 
     const documents = await prisma.document.findMany({
       where,
