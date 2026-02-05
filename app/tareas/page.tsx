@@ -133,10 +133,12 @@ export default function TareasPage() {
       const response = await fetch('/api/tasks');
       if (!response.ok) throw new Error();
       const data = await response.json();
-      setTasks(data);
+      const taskList = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      setTasks(taskList);
     } catch (error) {
       console.error('Error fetching tasks:', error);
       toast.error('Error al cargar tareas');
+      setTasks([]);
     } finally {
       setIsLoading(false);
     }

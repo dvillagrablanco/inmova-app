@@ -60,6 +60,46 @@ export default function PortalInquilinoComunicacionPage() {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const mapSenderType = (senderType?: string): Message['emisorTipo'] => {
+    if (senderType === 'tenant') return 'inquilino';
+    if (senderType === 'user') return 'gestor';
+    if (senderType === 'owner') return 'propietario';
+    return 'gestor';
+  };
+
+  const normalizeConversation = (conv: any): Conversation => {
+    const lastMessage = Array.isArray(conv?.messages) ? conv.messages[0] : null;
+
+    return {
+      id: conv.id,
+      asunto: conv.asunto ?? 'Sin asunto',
+      ultimoMensaje: conv.ultimoMensaje ?? lastMessage?.mensaje ?? '',
+      ultimaFecha:
+        conv.ultimaFecha ??
+        conv.ultimoMensajeFecha ??
+        lastMessage?.createdAt ??
+        conv.createdAt ??
+        new Date().toISOString(),
+      sinLeer: typeof conv.sinLeer === 'number' ? conv.sinLeer : conv.unreadCount ?? 0,
+      participante: conv.participante ?? {
+        nombre: conv.participanteNombre ?? 'Administración',
+        rol: conv.participanteRol ?? 'Gestor',
+      },
+    };
+  };
+
+  const normalizeMessage = (message: any): Message => ({
+    id: message.id,
+    contenido: message.contenido ?? message.mensaje ?? '',
+    emisorTipo: message.emisorTipo ?? mapSenderType(message.senderType),
+    emisorNombre:
+      message.emisorNombre ??
+      (message.senderType === 'tenant' ? 'Tú' : 'Administración'),
+    leido: Boolean(message.leido),
+    createdAt: message.createdAt ?? new Date().toISOString(),
+    adjuntos: Array.isArray(message.adjuntos) ? message.adjuntos : [],
+  });
+
   useEffect(() => {
     loadConversations();
   }, []);
@@ -92,11 +132,17 @@ export default function PortalInquilinoComunicacionPage() {
       }
 
       const data = await response.json();
-      setConversations(data);
+      const conversationList = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.conversations)
+          ? data.conversations
+          : [];
+      const normalizedConversations = conversationList.map(normalizeConversation);
+      setConversations(normalizedConversations);
       
       // Seleccionar primera conversación si existe
-      if (data.length > 0 && !selectedConversation) {
-        setSelectedConversation(data[0]);
+      if (normalizedConversations.length > 0 && !selectedConversation) {
+        setSelectedConversation(normalizedConversations[0]);
       }
     } catch (error) {
       toast.error('Error al cargar conversaciones');
@@ -115,7 +161,12 @@ export default function PortalInquilinoComunicacionPage() {
       }
 
       const data = await response.json();
-      setMessages(data);
+      const messageList = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.messages)
+          ? data.messages
+          : [];
+      setMessages(messageList.map(normalizeMessage));
     } catch (error) {
       toast.error('Error al cargar mensajes');
       setMessages([]);
