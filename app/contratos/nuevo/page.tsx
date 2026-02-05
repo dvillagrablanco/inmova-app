@@ -229,21 +229,38 @@ export default function NuevoContratoPage() {
         body: JSON.stringify({
           unitId: formData.unitId,
           tenantId: formData.tenantId,
-          fechaInicio: new Date(formData.fechaInicio).toISOString(),
-          fechaFin: new Date(formData.fechaFin).toISOString(),
-          rentaMensual: parseFloat(formData.rentaMensual),
-          deposito: parseFloat(formData.deposito),
+          fechaInicio: formData.fechaInicio
+            ? new Date(formData.fechaInicio).toISOString()
+            : undefined,
+          fechaFin: formData.fechaFin ? new Date(formData.fechaFin).toISOString() : undefined,
+          rentaMensual: formData.rentaMensual ? parseFloat(formData.rentaMensual) : undefined,
+          deposito: formData.deposito ? parseFloat(formData.deposito) : undefined,
           tipo: formData.tipo,
           estado: 'activo',
         }),
       });
 
+      const data = await response.json().catch(() => ({}));
+
       if (response.ok) {
+        const missingFields = Array.isArray(data?.missingFields) ? data.missingFields : [];
+        if (missingFields.length > 0) {
+          const fieldLabels: Record<string, string> = {
+            fechaInicio: 'Fecha de inicio',
+            fechaFin: 'Fecha de fin',
+            rentaMensual: 'Renta mensual',
+            deposito: 'Depósito',
+          };
+          const labels = missingFields.map((field) => fieldLabels[field] || field).join(', ');
+          toast.warning('Contrato creado con campos pendientes', {
+            description: `Completar: ${labels}`,
+            duration: 10000,
+          });
+        }
         toast.success('Contrato creado correctamente');
         router.push('/contratos');
       } else {
-        const error = await response.json();
-        toast.error(error.error || 'Error al crear el contrato');
+        toast.error(data.error || 'Error al crear el contrato');
       }
     } catch (error) {
       logger.error('Error:', error);
@@ -450,7 +467,6 @@ export default function NuevoContratoPage() {
                             step="0.01"
                             value={formData.rentaMensual}
                             onChange={handleChange}
-                            required
                             min="0"
                             placeholder="Ej: 850.00"
                           />
@@ -469,7 +485,6 @@ export default function NuevoContratoPage() {
                             step="0.01"
                             value={formData.deposito}
                             onChange={handleChange}
-                            required
                             min="0"
                             placeholder="Ej: 1700.00"
                           />
@@ -492,7 +507,6 @@ export default function NuevoContratoPage() {
                             type="date"
                             value={formData.fechaInicio}
                             onChange={handleChange}
-                            required
                           />
                         </div>
 
@@ -505,7 +519,6 @@ export default function NuevoContratoPage() {
                             type="date"
                             value={formData.fechaFin}
                             onChange={handleChange}
-                            required
                           />
                         </div>
 

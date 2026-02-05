@@ -124,7 +124,14 @@ export async function POST(req: NextRequest) {
     const user = await requirePermission('create');
 
     const body = await req.json();
-    
+    const missingFields: string[] = [];
+    const isBlank = (value: unknown) =>
+      value === null ||
+      value === undefined ||
+      (typeof value === 'string' && value.trim() === '');
+
+    const token = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`.toUpperCase();
+
     // Preparar datos: convertir nombre completo a nombre/apellidos si es necesario
     let dataToValidate = { ...body };
 
@@ -134,23 +141,47 @@ export async function POST(req: NextRequest) {
       body.documentoIdentidad ||
       body.numeroDocumento ||
       body.documentNumber;
-    if (rawDni) {
+    if (!isBlank(rawDni)) {
       dataToValidate.dni = rawDni;
+    } else {
+      missingFields.push('documentoIdentidad');
+      dataToValidate.dni = `PENDING${token}`;
     }
     
     // Si viene nombreCompleto o nombre contiene espacios y no hay apellidos
     const nombreCompleto = body.nombreCompleto || body.nombre;
-    if (nombreCompleto && !body.apellidos) {
-      const partes = nombreCompleto.trim().split(' ');
-      if (partes.length >= 2) {
-        // Si hay 2 o más palabras, la primera es nombre y el resto apellidos
-        dataToValidate.nombre = partes[0];
-        dataToValidate.apellidos = partes.slice(1).join(' ');
-      } else {
-        // Si solo hay una palabra, usarla para ambos
-        dataToValidate.nombre = nombreCompleto;
-        dataToValidate.apellidos = nombreCompleto;
+    if (!isBlank(nombreCompleto)) {
+      if (!body.apellidos) {
+        const partes = String(nombreCompleto).trim().split(' ');
+        if (partes.length >= 2) {
+          // Si hay 2 o más palabras, la primera es nombre y el resto apellidos
+          dataToValidate.nombre = partes[0];
+          dataToValidate.apellidos = partes.slice(1).join(' ');
+        } else {
+          // Si solo hay una palabra, usarla para ambos
+          dataToValidate.nombre = nombreCompleto;
+          dataToValidate.apellidos = nombreCompleto;
+        }
       }
+    } else {
+      missingFields.push('nombre');
+      dataToValidate.nombre = 'Pendiente';
+      dataToValidate.apellidos = 'Completar';
+    }
+
+    if (isBlank(body.email)) {
+      missingFields.push('email');
+      dataToValidate.email = `pendiente-${token.toLowerCase()}@inmova.app`;
+    }
+
+    if (isBlank(body.telefono)) {
+      missingFields.push('telefono');
+      dataToValidate.telefono = '000000000';
+    }
+
+    if (isBlank(body.fechaNacimiento)) {
+      missingFields.push('fechaNacimiento');
+      dataToValidate.fechaNacimiento = new Date('1970-01-01').toISOString();
     }
     
     // Validación con Zod
@@ -170,15 +201,13 @@ export async function POST(req: NextRequest) {
 
     const validatedData = validationResult.data;
 
-    if (!validatedData.dni) {
-      return NextResponse.json(
-        { error: 'El DNI/NIE es requerido' },
-        { status: 400 }
-      );
-    }
-    
     // Combinar nombre y apellidos de vuelta a nombreCompleto para la BD
     const nombreCompletoFinal = `${validatedData.nombre} ${validatedData.apellidos}`.trim();
+    const uniqueMissingFields = Array.from(new Set(missingFields));
+    const missingNote = uniqueMissingFields.length
+      ? `Campos pendientes por completar: ${uniqueMissingFields.join(', ')}`
+      : '';
+    const notas = [validatedData.notasInternas, missingNote].filter(Boolean).join('\n');
 
     const tenant = await prisma.tenant.create({
       data: {
@@ -188,11 +217,11 @@ export async function POST(req: NextRequest) {
         email: validatedData.email,
         telefono: validatedData.telefono,
         fechaNacimiento: validatedData.fechaNacimiento ? new Date(validatedData.fechaNacimiento) : new Date(),
-        notas: validatedData.notasInternas || '',
+        notas,
       },
     });
 
-    return NextResponse.json(tenant, { status: 201 });
+    return NextResponse.json({ ...tenant, missingFields: uniqueMissingFields }, { status: 201 });
   } catch (error: any) {
     logger.error('Error creating tenant:', error);
     if (error.message?.includes('permiso')) {

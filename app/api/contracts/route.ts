@@ -173,9 +173,63 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+    const missingFields: string[] = [];
+    const isBlank = (value: unknown) =>
+      value === null ||
+      value === undefined ||
+      (typeof value === 'string' && value.trim() === '');
+
+    const normalizeNumber = (value: unknown, field: string, fallback: number) => {
+      if (isBlank(value)) {
+        missingFields.push(field);
+        return fallback;
+      }
+      const num = Number(value);
+      if (Number.isNaN(num)) {
+        missingFields.push(field);
+        return fallback;
+      }
+      return num;
+    };
+
+    const normalizeDate = (value: unknown, field: string, fallback: Date) => {
+      if (isBlank(value)) {
+        missingFields.push(field);
+        return fallback.toISOString();
+      }
+      const date = new Date(String(value));
+      if (Number.isNaN(date.getTime())) {
+        missingFields.push(field);
+        return fallback.toISOString();
+      }
+      return date.toISOString();
+    };
+
+    const now = new Date();
+    const defaultStart = new Date(now);
+    const defaultEnd = new Date(now);
+    defaultEnd.setMonth(defaultEnd.getMonth() + 1);
+
+    const dataToValidate = {
+      ...body,
+      fechaInicio: normalizeDate(body.fechaInicio, 'fechaInicio', defaultStart),
+      fechaFin: normalizeDate(body.fechaFin, 'fechaFin', defaultEnd),
+      rentaMensual: normalizeNumber(body.rentaMensual, 'rentaMensual', 0),
+      deposito: normalizeNumber(body.deposito, 'deposito', 0),
+    };
+
+    const startDate = new Date(dataToValidate.fechaInicio);
+    const endDate = new Date(dataToValidate.fechaFin);
+    if (endDate <= startDate) {
+      missingFields.push('fechaFin');
+      const fallbackEnd = new Date(startDate);
+      fallbackEnd.setMonth(fallbackEnd.getMonth() + 1);
+      dataToValidate.fechaFin = fallbackEnd.toISOString();
+    }
     
     // Validación con Zod
-    const validationResult = contractCreateSchema.safeParse(body);
+    const uniqueMissingFields = Array.from(new Set(missingFields));
+    const validationResult = contractCreateSchema.safeParse(dataToValidate);
     
     if (!validationResult.success) {
       const errors = validationResult.error.errors.map(err => ({
@@ -224,7 +278,7 @@ export async function POST(req: NextRequest) {
     }
 
     logger.info('Contract created successfully', { contractId: contract.id });
-    return NextResponse.json(contract, { status: 201 });
+    return NextResponse.json({ ...contract, missingFields: uniqueMissingFields }, { status: 201 });
   } catch (error: any) {
     logError(error, { context: 'Error creating contract' });
     return NextResponse.json({ error: 'Error al crear contrato' }, { status: 500 });

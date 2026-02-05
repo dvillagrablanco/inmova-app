@@ -120,7 +120,7 @@ export const tenantCreateSchema = z.object({
     .trim(),
   dni: z.string()
     .regex(
-      /^(?:[0-9]{8}|[XYZ][0-9]{7})[A-Z]|PASSPORT[A-Z0-9]{5,12}|DOC[A-Z0-9]{6,20}$/,
+      /^(?:(?:[0-9]{8}|[XYZ][0-9]{7})[A-Z]|PASSPORT[A-Z0-9]{5,12}|DOC[A-Z0-9]{6,20}|PENDING[A-Z0-9]{6,20})$/,
       'DNI/NIE inválido (formato: 12345678A o X1234567A)'
     )
     .toUpperCase()
@@ -167,7 +167,7 @@ const contractBaseSchema = z.object({
     .datetime({ message: 'Fecha de fin inválida' })
     .or(z.date()),
   rentaMensual: z.number()
-    .positive('La renta mensual debe ser mayor a 0')
+    .nonnegative('La renta mensual debe ser cero o mayor')
     .max(1000000, 'La renta mensual no puede exceder 1,000,000'),
   diaCobranza: z.number()
     .int('Debe ser un número entero')
