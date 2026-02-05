@@ -15,7 +15,10 @@ function getBackupDir(): string {
   if (configuredDir) {
     return path.resolve(configuredDir);
   }
-  return path.join(os.tmpdir(), 'inmova-backups');
+  if (process.env.VERCEL) {
+    return path.join(os.tmpdir(), 'inmova-backups');
+  }
+  return path.join(process.cwd(), 'backups');
 }
 
 /**
@@ -141,7 +144,15 @@ export async function POST(req: NextRequest) {
     const backupDir = getBackupDir();
     
     // Crear directorio de backups si no existe
-    await fs.mkdir(backupDir, { recursive: true }).catch(() => {});
+    try {
+      await fs.mkdir(backupDir, { recursive: true });
+    } catch (error) {
+      logger.error('No se pudo crear directorio de backups:', error);
+      return NextResponse.json(
+        { error: 'No se pudo crear el directorio de backups' },
+        { status: 500 }
+      );
+    }
 
     const backupFile = path.join(
       backupDir,
@@ -253,7 +264,14 @@ export async function GET(req: NextRequest) {
       });
     } catch (error) {
       // Directorio no existe
-      return NextResponse.json({ backups: [] });
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+        return NextResponse.json({ backups: [] });
+      }
+      logger.error('Error accediendo a directorio de backups:', error);
+      return NextResponse.json(
+        { error: 'No se pudo acceder al directorio de backups' },
+        { status: 500 }
+      );
     }
   } catch (error) {
     logger.error('Error al listar backups:', error);
