@@ -20,6 +20,7 @@ const customJestConfig = {
     '<rootDir>/e2e/',
     '<rootDir>/__tests__/e2e/',
     '<rootDir>/playwright/',
+    '<rootDir>/tests/',
   ],
   coveragePathIgnorePatterns: [
     '/node_modules/',
