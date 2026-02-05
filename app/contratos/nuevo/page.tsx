@@ -110,7 +110,7 @@ export default function NuevoContratoPage() {
       try {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('folder', 'contracts');
+        formData.append('folder', 'contratos');
         formData.append('entityType', 'contract');
 
         const progressInterval = setInterval(() => {
