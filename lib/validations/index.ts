@@ -154,9 +154,9 @@ export const tenantUpdateSchema = tenantCreateSchema.partial();
 
 const contractBaseSchema = z.object({
   unitId: z.string()
-    .uuid('ID de unidad inválido'),
+    .cuid('ID de unidad inválido'),
   tenantId: z.string()
-    .uuid('ID de inquilino inválido'),
+    .cuid('ID de inquilino inválido'),
   fechaInicio: z.string()
     .datetime({ message: 'Fecha de inicio inválida' })
     .or(z.date()),
