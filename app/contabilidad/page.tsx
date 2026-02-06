@@ -19,6 +19,7 @@ import {
   Receipt,
   BarChart3,
   RefreshCw,
+  Upload,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -67,6 +68,13 @@ export default function ContabilidadPage() {
   const [holdedStatus, setHoldedStatus] = useState<any>(null);
   const [a3Status, setA3Status] = useState<any>(null);
   const [alegraStatus, setAlegraStatus] = useState<any>(null);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importType, setImportType] = useState<'auto' | 'ingreso' | 'gasto'>('auto');
+  const [importing, setImporting] = useState(false);
+  const [importSummary, setImportSummary] = useState<{
+    imported: number;
+    failed: number;
+  } | null>(null);
 
   useEffect(() => {
     if (session?.user?.companyId) {
@@ -195,6 +203,43 @@ export default function ContabilidadPage() {
       toast.error('Error al cargar datos financieros');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImportAccounting = async () => {
+    if (!importFile) {
+      toast.error('Selecciona un archivo XLSX o CSV');
+      return;
+    }
+
+    try {
+      setImporting(true);
+      setImportSummary(null);
+
+      const formData = new FormData();
+      formData.append('file', importFile);
+      if (importType !== 'auto') {
+        formData.append('tipo', importType);
+      }
+
+      const res = await fetch('/api/accounting/import', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || 'Error al importar contabilidad');
+      }
+
+      setImportSummary({ imported: data.imported || 0, failed: data.failed || 0 });
+      toast.success(`Importados ${data.imported || 0} movimientos`);
+      await loadFinancialData();
+    } catch (error: any) {
+      logger.error('Error importando contabilidad:', error);
+      toast.error(error?.message || 'Error al importar contabilidad');
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -432,6 +477,51 @@ export default function ContabilidadPage() {
               />
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Importar movimientos contables</CardTitle>
+          <CardDescription>
+            Sube un XLSX o CSV con fecha, importe y concepto para cargar ingresos y gastos.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Archivo</label>
+              <input
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                className="border rounded-md px-3 py-2 w-full"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Tipo (opcional)</label>
+              <select
+                value={importType}
+                onChange={(e) => setImportType(e.target.value as 'auto' | 'ingreso' | 'gasto')}
+                className="border rounded-md px-3 py-2 w-full"
+              >
+                <option value="auto">Detectar automáticamente</option>
+                <option value="ingreso">Ingreso</option>
+                <option value="gasto">Gasto</option>
+              </select>
+            </div>
+            <div className="flex items-end">
+              <Button onClick={handleImportAccounting} disabled={importing || loading}>
+                <Upload className="h-4 w-4 mr-2" />
+                {importing ? 'Importando...' : 'Importar'}
+              </Button>
+            </div>
+          </div>
+          {importSummary && (
+            <div className="text-sm text-muted-foreground">
+              Importados: {importSummary.imported} · Filas con error: {importSummary.failed}
+            </div>
+          )}
         </CardContent>
       </Card>
 

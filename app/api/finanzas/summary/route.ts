@@ -103,9 +103,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Pagos vencidos (pendientes con fecha pasada)
-    const overduePayments = pendingPayments.filter(
-      (p) => new Date(p.fechaVencimiento) < now
-    );
+    const overduePayments = pendingPayments.filter((p) => new Date(p.fechaVencimiento) < now);
 
     // Calcular gastos del mes (si existe un modelo de Expense)
     let monthlyExpenses = 0;
@@ -113,7 +111,7 @@ export async function GET(request: NextRequest) {
       // Intentar obtener gastos si el modelo existe
       const expenses = await (prisma as any).expense?.findMany({
         where: {
-          companyId,
+          building: { companyId },
           fecha: {
             gte: monthStart,
             lte: monthEnd,
@@ -130,10 +128,39 @@ export async function GET(request: NextRequest) {
       // El modelo Expense no existe, usar 0
     }
 
+    // Contabilidad agregada del mes (fallback)
+    const accountingTransactions = await prisma.accountingTransaction.findMany({
+      where: {
+        companyId,
+        fecha: { gte: monthStart, lte: monthEnd },
+      },
+      select: {
+        tipo: true,
+        monto: true,
+      },
+    });
+
+    const accountingTotals = accountingTransactions.reduce(
+      (acc, transaction) => {
+        if (transaction.tipo === 'ingreso') acc.ingresos += transaction.monto;
+        else acc.gastos += transaction.monto;
+        return acc;
+      },
+      { ingresos: 0, gastos: 0 }
+    );
+
     // Calcular estadísticas
-    const monthlyIncome = currentMonthPayments
+    let monthlyIncome = currentMonthPayments
       .filter((p) => p.estado === 'pagado')
       .reduce((sum, p) => sum + p.monto, 0);
+
+    if (monthlyIncome === 0 && accountingTotals.ingresos > 0) {
+      monthlyIncome = accountingTotals.ingresos;
+    }
+
+    if (monthlyExpenses === 0 && accountingTotals.gastos > 0) {
+      monthlyExpenses = accountingTotals.gastos;
+    }
 
     const lastMonthIncome = lastMonthPayments.reduce((sum, p) => sum + p.monto, 0);
 
@@ -144,30 +171,33 @@ export async function GET(request: NextRequest) {
     const expectedMonthlyRent = activeContracts.reduce((sum, c) => sum + c.rentaMensual, 0);
 
     // Tasa de conciliación (pagos recibidos vs esperados)
-    const reconciliationRate = expectedMonthlyRent > 0
-      ? Math.round((monthlyIncome / expectedMonthlyRent) * 100)
-      : 0;
+    const reconciliationRate =
+      expectedMonthlyRent > 0 ? Math.round((monthlyIncome / expectedMonthlyRent) * 100) : 0;
 
     // Contar integraciones bancarias conectadas
-    const bankConnections = await prisma.bankConnection.count({
-      where: {
-        tenant: {
-          companyId,
+    const bankConnections = await prisma.bankConnection
+      .count({
+        where: {
+          tenant: {
+            companyId,
+          },
+          estado: 'connected',
         },
-        estado: 'connected',
-      },
-    }).catch(() => 0);
+      })
+      .catch(() => 0);
 
     // Contar facturas del mes
-    const monthlyInvoices = await (prisma as any).invoice?.count({
-      where: {
-        companyId,
-        fechaEmision: {
-          gte: monthStart,
-          lte: monthEnd,
+    const monthlyInvoices = await (prisma as any).invoice
+      ?.count({
+        where: {
+          companyId,
+          fechaEmision: {
+            gte: monthStart,
+            lte: monthEnd,
+          },
         },
-      },
-    }).catch(() => 0);
+      })
+      .catch(() => 0);
 
     // Calcular rentabilidad (si hay datos de propiedades)
     let rentabilidad = 0;
@@ -211,9 +241,10 @@ export async function GET(request: NextRequest) {
         rentabilidad: rentabilidad.toFixed(1),
       },
       comparison: {
-        incomeChange: lastMonthIncome > 0
-          ? Math.round(((monthlyIncome - lastMonthIncome) / lastMonthIncome) * 100)
-          : 0,
+        incomeChange:
+          lastMonthIncome > 0
+            ? Math.round(((monthlyIncome - lastMonthIncome) / lastMonthIncome) * 100)
+            : 0,
       },
     });
   } catch (error) {
