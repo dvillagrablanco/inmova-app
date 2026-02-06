@@ -62,6 +62,8 @@ export default function ContabilidadPage() {
   const [taxData, setTaxData] = useState<any>(null);
   const [profitLossData, setProfitLossData] = useState<any>(null);
   const [ratiosData, setRatiosData] = useState<any>(null);
+  const [latestPeriod, setLatestPeriod] = useState<any>(null);
+  const [latestProfitLoss, setLatestProfitLoss] = useState<any>(null);
   const [zucchettiStatus, setZucchettiStatus] = useState<any>(null);
   const [contaSimpleStatus, setContaSimpleStatus] = useState<any>(null);
   const [sageStatus, setSageStatus] = useState<any>(null);
@@ -197,6 +199,30 @@ export default function ContabilidadPage() {
       if (ratiosRes.ok) {
         const data = await ratiosRes.json();
         setRatiosData(data.data);
+      }
+
+      // Último período con datos contables
+      const latestRes = await fetch('/api/accounting/latest-period');
+      if (latestRes.ok) {
+        const data = await latestRes.json();
+        setLatestPeriod(data.data || null);
+
+        if (data.data?.periodo && data.data.periodo !== periodo) {
+          const latestPLRes = await fetch(
+            `/api/accounting/profit-loss?periodo=${data.data.periodo}`
+          );
+          if (latestPLRes.ok) {
+            const latestData = await latestPLRes.json();
+            setLatestProfitLoss(latestData.data);
+          } else {
+            setLatestProfitLoss(null);
+          }
+        } else {
+          setLatestProfitLoss(null);
+        }
+      } else {
+        setLatestPeriod(null);
+        setLatestProfitLoss(null);
       }
     } catch (error) {
       logger.error('Error al cargar datos financieros:', error);
@@ -537,6 +563,12 @@ export default function ContabilidadPage() {
               {formatCurrency(profitLossData?.ingresos.total || 0)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">Período {periodo}</p>
+            {latestPeriod?.periodo && latestPeriod.periodo !== periodo && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Último con datos ({latestPeriod.periodo}):{' '}
+                {formatCurrency(latestProfitLoss?.ingresos.total ?? latestPeriod.ingresos || 0)}
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -550,6 +582,12 @@ export default function ContabilidadPage() {
               {formatCurrency(profitLossData?.gastos.total || 0)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">Período {periodo}</p>
+            {latestPeriod?.periodo && latestPeriod.periodo !== periodo && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Último con datos ({latestPeriod.periodo}):{' '}
+                {formatCurrency(latestProfitLoss?.gastos.total ?? latestPeriod.gastos || 0)}
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -565,6 +603,15 @@ export default function ContabilidadPage() {
             <p className="text-xs text-muted-foreground mt-1">
               Margen: {formatPercentage(profitLossData?.margenes.neto || 0)}
             </p>
+            {latestPeriod?.periodo && latestPeriod.periodo !== periodo && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Último con datos ({latestPeriod.periodo}):{' '}
+                {formatCurrency(
+                  latestProfitLoss?.beneficioNeto ??
+                    (latestPeriod.ingresos || 0) - (latestPeriod.gastos || 0)
+                )}
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -578,6 +625,15 @@ export default function ContabilidadPage() {
             <p className="text-xs text-muted-foreground mt-1">
               Margen Operativo: {formatPercentage(profitLossData?.margenes.operativo || 0)}
             </p>
+            {latestPeriod?.periodo && latestPeriod.periodo !== periodo && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Último con datos ({latestPeriod.periodo}):{' '}
+                {formatCurrency(
+                  latestProfitLoss?.ebitda ??
+                    (latestPeriod.ingresos || 0) - (latestPeriod.gastos || 0)
+                )}
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>

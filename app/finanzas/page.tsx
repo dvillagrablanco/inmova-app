@@ -67,6 +67,14 @@ interface ModuleStats {
   rentabilidad: string;
 }
 
+interface LatestPeriodSummary {
+  periodo: string;
+  ingresos: number;
+  gastos: number;
+  flujoNeto: number;
+  totalMovimientos: number;
+}
+
 const financeModules: FinanceModule[] = [
   {
     id: 'conciliacion',
@@ -191,6 +199,8 @@ export default function FinanzasPage() {
     accountingIntegrations: 0,
     rentabilidad: '0',
   });
+  const [latestPeriod, setLatestPeriod] = useState<LatestPeriodSummary | null>(null);
+  const currentPeriodLabel = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
 
   const fetchFinancialData = async () => {
     try {
@@ -199,6 +209,7 @@ export default function FinanzasPage() {
         const data = await response.json();
         setFinancialSummary(data.summary || financialSummary);
         setModuleStats(data.moduleStats || moduleStats);
+        setLatestPeriod(data.latestPeriod || null);
       }
     } catch (error) {
       console.error('Error fetching financial data:', error);
@@ -313,6 +324,12 @@ export default function FinanzasPage() {
                 <p className="text-xl font-bold text-green-600">
                   +{financialSummary.monthlyIncome.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
                 </p>
+                {latestPeriod && latestPeriod.periodo !== currentPeriodLabel && (
+                  <p className="text-xs text-muted-foreground">
+                    Último con datos ({latestPeriod.periodo}):{' '}
+                    +{latestPeriod.ingresos.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                  </p>
+                )}
               </CardContent>
             </Card>
             <Card>
@@ -324,6 +341,12 @@ export default function FinanzasPage() {
                 <p className="text-xl font-bold text-red-600">
                   -{financialSummary.monthlyExpenses.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
                 </p>
+                {latestPeriod && latestPeriod.periodo !== currentPeriodLabel && (
+                  <p className="text-xs text-muted-foreground">
+                    Último con datos ({latestPeriod.periodo}):{' '}
+                    -{latestPeriod.gastos.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                  </p>
+                )}
               </CardContent>
             </Card>
             <Card>

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -223,6 +223,44 @@ export async function GET(request: NextRequest) {
       // Ignorar errores
     }
 
+    // Último período con datos contables
+    let latestPeriod = null;
+    try {
+      const latest = await prisma.accountingTransaction.findFirst({
+        where: { companyId },
+        orderBy: { fecha: 'desc' },
+        select: { fecha: true },
+      });
+
+      if (latest?.fecha) {
+        const latestStart = startOfMonth(latest.fecha);
+        const latestEnd = endOfMonth(latest.fecha);
+        const latestTransactions = await prisma.accountingTransaction.findMany({
+          where: { companyId, fecha: { gte: latestStart, lte: latestEnd } },
+          select: { tipo: true, monto: true },
+        });
+
+        const latestTotals = latestTransactions.reduce(
+          (acc, transaction) => {
+            if (transaction.tipo === 'ingreso') acc.ingresos += transaction.monto;
+            else acc.gastos += transaction.monto;
+            return acc;
+          },
+          { ingresos: 0, gastos: 0 }
+        );
+
+        latestPeriod = {
+          periodo: format(latestStart, 'yyyy-MM'),
+          ingresos: latestTotals.ingresos,
+          gastos: latestTotals.gastos,
+          flujoNeto: latestTotals.ingresos - latestTotals.gastos,
+          totalMovimientos: latestTransactions.length,
+        };
+      }
+    } catch {
+      latestPeriod = null;
+    }
+
     return NextResponse.json({
       summary: {
         totalBalance: monthlyIncome - monthlyExpenses,
@@ -240,6 +278,7 @@ export async function GET(request: NextRequest) {
         accountingIntegrations: 1, // Placeholder
         rentabilidad: rentabilidad.toFixed(1),
       },
+      latestPeriod,
       comparison: {
         incomeChange:
           lastMonthIncome > 0
