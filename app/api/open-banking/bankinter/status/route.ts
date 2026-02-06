@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { bankinterService, isBankinterConfigured } from '@/lib/bankinter-integration-service';
+import { getBankinterService, isBankinterConfigured } from '@/lib/bankinter-integration-service';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -57,6 +57,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const bankinterService = getBankinterService();
     // Obtener estado del consentimiento
     const consentStatus = await bankinterService.getConsentStatus(consentId);
 

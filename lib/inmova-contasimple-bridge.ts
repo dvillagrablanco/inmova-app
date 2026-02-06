@@ -22,6 +22,8 @@ import logger from './logger';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+let contasimpleConfigLogged = false;
+let contasimpleConfiguredLogged = false;
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURACIÓN
 // ═══════════════════════════════════════════════════════════════
@@ -64,9 +66,15 @@ export class InmovaContasimpleBridge {
     this.contasimple = new ContaSimpleIntegrationService();
     
     if (!INMOVA_CONTASIMPLE_CONFIG.authKey) {
-      logger.warn('[Inmova-Contasimple] ⚠️ No hay credenciales de Contasimple configuradas para Inmova');
+      if (!contasimpleConfigLogged) {
+        logger.warn('[Inmova-Contasimple] ⚠️ No hay credenciales de Contasimple configuradas para Inmova');
+        contasimpleConfigLogged = true;
+      }
     } else {
-      logger.info('[Inmova-Contasimple] ✅ Servicio inicializado');
+      if (!contasimpleConfiguredLogged) {
+        logger.info('[Inmova-Contasimple] ✅ Servicio inicializado');
+        contasimpleConfiguredLogged = true;
+      }
     }
   }
 
@@ -362,4 +370,11 @@ export class InmovaContasimpleBridge {
 // SINGLETON EXPORT
 // ═══════════════════════════════════════════════════════════════
 
-export const inmovaContasimpleBridge = new InmovaContasimpleBridge();
+let inmovaContasimpleBridgeInstance: InmovaContasimpleBridge | null = null;
+
+export function getInmovaContasimpleBridge(): InmovaContasimpleBridge {
+  if (!inmovaContasimpleBridgeInstance) {
+    inmovaContasimpleBridgeInstance = new InmovaContasimpleBridge();
+  }
+  return inmovaContasimpleBridgeInstance;
+}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { bankinterService, isBankinterConfigured } from '@/lib/bankinter-integration-service';
+import { getBankinterService, isBankinterConfigured } from '@/lib/bankinter-integration-service';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
     const forwarded = request.headers.get('x-forwarded-for');
     const psuIpAddress = forwarded ? forwarded.split(',')[0] : '127.0.0.1';
 
+    const bankinterService = getBankinterService();
     // Iniciar conexión
     const result = await bankinterService.conectarCuentaBankinter(
       session.user.companyId,

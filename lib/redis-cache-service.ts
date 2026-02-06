@@ -3,7 +3,7 @@
  * Con fallback automático a caché in-memory si Redis no está disponible
  */
 
-import { redis, isRedisAvailable } from './redis-config';
+import { getRedisConfigClient, isRedisAvailable } from './redis-config';
 import logger from './logger';
 
 // Tipo para las entradas de caché (in-memory fallback)
@@ -97,6 +97,7 @@ class RedisCacheService {
     const fullKey = this.getKey(key);
 
     // Intentar Redis primero si está disponible
+    const redis = getRedisConfigClient();
     if (this.redisAvailable && redis) {
       try {
         const value = await redis.get(fullKey);
@@ -142,6 +143,7 @@ class RedisCacheService {
     const fullKey = this.getKey(key);
 
     // Intentar Redis primero si está disponible
+    const redis = getRedisConfigClient();
     if (this.redisAvailable && redis) {
       try {
         const serialized = JSON.stringify(data);
@@ -176,6 +178,7 @@ class RedisCacheService {
     let deleted = false;
 
     // Eliminar de Redis si está disponible
+    const redis = getRedisConfigClient();
     if (this.redisAvailable && redis) {
       try {
         const result = await redis.del(fullKey);

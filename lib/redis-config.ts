@@ -6,6 +6,17 @@
 import Redis from 'ioredis';
 import logger from './logger';
 
+const isBuildTime =
+  process.env.NEXT_PHASE === 'phase-production-build' ||
+  process.env.NODE_ENV === 'test' ||
+  typeof window !== 'undefined';
+
+let redisClient: Redis | null = null;
+let initialized = false;
+let warnedMissingConfig = false;
+let warnedError = false;
+let warnedClose = false;
+
 // Tipo para opciones de configuración
 interface RedisConfig {
   host: string;
@@ -22,12 +33,6 @@ interface RedisConfig {
  * Crea una instancia de Redis con configuración según el entorno
  */
 function createRedisClient(): Redis | null {
-  // Si no hay URL de Redis configurada, retornar null (usar fallback in-memory)
-  if (!process.env.REDIS_URL) {
-    logger.warn('⚠️  REDIS_URL not configured - using in-memory cache fallback');
-    return null;
-  }
-
   try {
     const redisUrl = process.env.REDIS_URL;
     
@@ -86,31 +91,61 @@ function createRedisClient(): Redis | null {
     });
 
     client.on('error', (err) => {
-      logger.error('❌ Redis error:', err);
+      if (!warnedError) {
+        logger.warn('❌ Redis error:', err);
+        warnedError = true;
+      }
     });
 
     client.on('close', () => {
-      logger.warn('⚠️  Redis connection closed');
+      if (!warnedClose) {
+        logger.warn('⚠️  Redis connection closed');
+        warnedClose = true;
+      }
     });
 
     return client;
   } catch (error) {
-    logger.error('❌ Failed to create Redis client:', error);
+    if (!warnedError) {
+      logger.warn('❌ Failed to create Redis client:', error);
+      warnedError = true;
+    }
     return null;
   }
 }
 
-// Instancia singleton de Redis
-export const redis = createRedisClient();
+/**
+ * Devuelve instancia singleton de Redis (lazy)
+ */
+export function getRedisConfigClient(): Redis | null {
+  if (isBuildTime) return null;
+  if (initialized) return redisClient;
+  initialized = true;
+
+  if (!process.env.REDIS_URL) {
+    if (!warnedMissingConfig) {
+      logger.info('⚠️  REDIS_URL not configured - using in-memory cache fallback');
+      warnedMissingConfig = true;
+    }
+    return null;
+  }
+
+  redisClient = createRedisClient();
+  return redisClient;
+}
+
+// Instancia singleton de Redis (compatibilidad)
+export const redis = getRedisConfigClient();
 
 /**
  * Verifica si Redis está disponible y conectado
  */
 export async function isRedisAvailable(): Promise<boolean> {
-  if (!redis) return false;
+  const client = getRedisConfigClient();
+  if (!client) return false;
   
   try {
-    await redis.ping();
+    await client.ping();
     return true;
   } catch (error) {
     logger.warn('Redis ping failed:', error);
@@ -122,11 +157,12 @@ export async function isRedisAvailable(): Promise<boolean> {
  * Obtiene estadísticas de Redis
  */
 export async function getRedisStats(): Promise<any> {
-  if (!redis) return null;
+  const client = getRedisConfigClient();
+  if (!client) return null;
   
   try {
-    const info = await redis.info('stats');
-    const dbSize = await redis.dbsize();
+    const info = await client.info('stats');
+    const dbSize = await client.dbsize();
     
     return {
       connected: true,

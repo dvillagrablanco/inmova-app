@@ -19,6 +19,14 @@ import { prisma } from './db';
 import logger, { logError } from '@/lib/logger';
 import { v4 as uuidv4 } from 'uuid';
 
+const isBuildTime =
+  process.env.NEXT_PHASE === 'phase-production-build' ||
+  process.env.NODE_ENV === 'test' ||
+  typeof window !== 'undefined';
+
+let bankinterConfigLogged = false;
+let bankinterCertLogged = false;
+let bankinterConfiguredLogged = false;
 // ============================================================================
 // CONFIGURACIÓN
 // ============================================================================
@@ -150,6 +158,9 @@ export class BankinterIntegrationService {
    * Verifica si el servicio está configurado correctamente
    */
   private checkConfiguration(): boolean {
+    if (isBuildTime) {
+      return false;
+    }
     const requiredVars = [
       'REDSYS_API_URL',
       'REDSYS_CLIENT_ID',
@@ -161,27 +172,42 @@ export class BankinterIntegrationService {
     const missing = requiredVars.filter(varName => !process.env[varName]);
     
     if (missing.length > 0) {
-      logger.warn(`⚠️ Bankinter Integration: Faltan variables de entorno: ${missing.join(', ')}`);
-      logger.warn('🔧 El servicio funcionará en MODO DEMO');
+      if (!bankinterConfigLogged) {
+        logger.warn(`⚠️ Bankinter Integration: Faltan variables de entorno: ${missing.join(', ')}`);
+        logger.warn('🔧 El servicio funcionará en MODO DEMO');
+        bankinterConfigLogged = true;
+      }
       return false;
     }
 
     // Verificar que los archivos de certificados existan
     try {
       if (REDSYS_CONFIG.certificates.qwac.cert && !fs.existsSync(REDSYS_CONFIG.certificates.qwac.cert)) {
-        logger.warn(`⚠️ Certificado QWAC no encontrado en: ${REDSYS_CONFIG.certificates.qwac.cert}`);
+        if (!bankinterCertLogged) {
+          logger.warn(`⚠️ Certificado QWAC no encontrado en: ${REDSYS_CONFIG.certificates.qwac.cert}`);
+          bankinterCertLogged = true;
+        }
         return false;
       }
       if (REDSYS_CONFIG.certificates.qwac.key && !fs.existsSync(REDSYS_CONFIG.certificates.qwac.key)) {
-        logger.warn(`⚠️ Clave QWAC no encontrada en: ${REDSYS_CONFIG.certificates.qwac.key}`);
+        if (!bankinterCertLogged) {
+          logger.warn(`⚠️ Clave QWAC no encontrada en: ${REDSYS_CONFIG.certificates.qwac.key}`);
+          bankinterCertLogged = true;
+        }
         return false;
       }
     } catch (error) {
-      logger.warn('⚠️ Error verificando certificados:', error);
+      if (!bankinterCertLogged) {
+        logger.warn('⚠️ Error verificando certificados:', error);
+        bankinterCertLogged = true;
+      }
       return false;
     }
 
-    logger.info('✅ Bankinter Integration: Configuración completa');
+    if (!bankinterConfiguredLogged) {
+      logger.info('✅ Bankinter Integration: Configuración completa');
+      bankinterConfiguredLogged = true;
+    }
     return true;
   }
 
@@ -935,7 +961,14 @@ export class BankinterIntegrationService {
 // INSTANCIA SINGLETON
 // ============================================================================
 
-export const bankinterService = new BankinterIntegrationService();
+let bankinterServiceInstance: BankinterIntegrationService | null = null;
+
+export function getBankinterService(): BankinterIntegrationService {
+  if (!bankinterServiceInstance) {
+    bankinterServiceInstance = new BankinterIntegrationService();
+  }
+  return bankinterServiceInstance;
+}
 
 // ============================================================================
 // FUNCIÓN DE VERIFICACIÓN
@@ -945,5 +978,13 @@ export const bankinterService = new BankinterIntegrationService();
  * Verifica si el servicio de Bankinter está configurado y listo para usar
  */
 export function isBankinterConfigured(): boolean {
-  return bankinterService['isConfigured'];
+  const requiredVars = [
+    'REDSYS_API_URL',
+    'REDSYS_CLIENT_ID',
+    'REDSYS_CLIENT_SECRET',
+    'REDSYS_CERTIFICATE_PATH',
+    'REDSYS_CERTIFICATE_KEY_PATH',
+  ];
+
+  return requiredVars.every((key) => !!process.env[key]);
 }

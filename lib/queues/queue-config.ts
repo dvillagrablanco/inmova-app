@@ -4,8 +4,10 @@
  */
 
 import { Queue, Worker, QueueOptions, WorkerOptions } from 'bullmq';
-import { redis } from '../redis-config';
+import { getRedisConfigClient } from '../redis-config';
 import logger from '../logger';
+
+const redis = getRedisConfigClient();
 
 /**
  * Opciones base para las colas

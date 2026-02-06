@@ -1,6 +1,6 @@
 import { prisma } from './db';
 import logger, { logError } from '@/lib/logger';
-import { bankinterService, isBankinterConfigured } from './bankinter-integration-service';
+import { getBankinterService, isBankinterConfigured } from './bankinter-integration-service';
 
 /**
  * Servicio de Open Banking
@@ -19,6 +19,7 @@ export async function conectarCuentaBancaria(params: any) {
   // Si Bankinter está configurado y es el banco seleccionado, usar integración real
   if (isBankinterConfigured() && nombreBanco?.toLowerCase().includes('bankinter')) {
     try {
+      const bankinterService = getBankinterService();
       const { consentId, authUrl } = await bankinterService.conectarCuentaBankinter(
         companyId,
         userId,
@@ -80,6 +81,7 @@ export async function sincronizarTransacciones(connectionId: string, diasAtras?:
   // Si es conexión de Bankinter real, usar integración
   if (connection.proveedor === 'bankinter_redsys' && isBankinterConfigured()) {
     try {
+      const bankinterService = getBankinterService();
       const resultado = await bankinterService.sincronizarTransaccionesBankinter(
         connectionId,
         diasAtras || 90
@@ -131,6 +133,7 @@ export async function verificarIngresos(tenantId: string, mesesAnalisis?: number
   // Si tiene Bankinter configurado, usar integración real
   if (tenant?.bankConnections?.length && isBankinterConfigured()) {
     try {
+      const bankinterService = getBankinterService();
       const informe = await bankinterService.verificarIngresosBankinter(
         tenantId,
         mesesAnalisis || 3
@@ -187,6 +190,7 @@ export async function conciliarPagos(companyId: string, mesesAtras?: number) {
   // Si tiene Bankinter configurado, usar integración real
   if (connections.length > 0 && isBankinterConfigured()) {
     try {
+      const bankinterService = getBankinterService();
       const resultado = await bankinterService.conciliarPagosBankinter(
         companyId,
         mesesAtras || 1

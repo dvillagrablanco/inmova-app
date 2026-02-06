@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { bankinterService, isBankinterConfigured } from '@/lib/bankinter-integration-service';
+import { getBankinterService, isBankinterConfigured } from '@/lib/bankinter-integration-service';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
 
     const { mesesAtras } = await request.json();
 
+    const bankinterService = getBankinterService();
     // Conciliar pagos
     const resultado = await bankinterService.conciliarPagosBankinter(
       session.user.companyId,

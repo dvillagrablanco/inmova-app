@@ -17,7 +17,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { prisma } from '@/lib/db';
-import { inmovaContasimpleBridge } from '@/lib/inmova-contasimple-bridge';
+import { getInmovaContasimpleBridge } from '@/lib/inmova-contasimple-bridge';
 import { handleEwoorkerStripeWebhook } from '@/lib/ewoorker-stripe-service';
 import logger from '@/lib/logger';
 
@@ -263,6 +263,7 @@ async function handleB2BInvoiceCreated(stripeInvoice: Stripe.Invoice) {
       return;
     }
 
+    const inmovaContasimpleBridge = getInmovaContasimpleBridge();
     // Sincronizar con Contasimple si está configurado
     if (inmovaContasimpleBridge.isConfigured()) {
       await inmovaContasimpleBridge.syncB2BInvoiceToContasimple(b2bInvoice.id);
@@ -317,6 +318,7 @@ async function handleB2BInvoicePaymentSucceeded(stripeInvoice: Stripe.Invoice) {
       },
     });
 
+    const inmovaContasimpleBridge = getInmovaContasimpleBridge();
     // Sincronizar pago con Contasimple
     if (inmovaContasimpleBridge.isConfigured()) {
       await inmovaContasimpleBridge.syncPaymentToContasimple(b2bInvoice.id, {

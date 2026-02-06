@@ -25,7 +25,8 @@ export async function POST() {
 
     // Import the bridge service dynamically
     try {
-      const { inmovaContasimpleBridge } = await import('@/lib/inmova-contasimple-bridge');
+      const { getInmovaContasimpleBridge } = await import('@/lib/inmova-contasimple-bridge');
+      const inmovaContasimpleBridge = getInmovaContasimpleBridge();
       
       if (!inmovaContasimpleBridge.isConfigured()) {
         return NextResponse.json({
