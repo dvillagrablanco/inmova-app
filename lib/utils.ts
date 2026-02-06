@@ -17,6 +17,9 @@ export function formatCurrency(amount: number, currency: string = 'EUR', locale:
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    useGrouping: true,
   }).format(amount);
 }
 
@@ -38,11 +41,13 @@ export function formatNumber(num: number, decimals: number = 0, locale: string =
   return new Intl.NumberFormat(locale, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
+    useGrouping: true,
   }).format(num);
 }
 
 export function formatPercentage(value: number, decimals: number = 1): string {
-  return `${formatNumber(value, decimals)}%`;
+  const normalized = Math.abs(value) <= 1 ? value * 100 : value;
+  return `${formatNumber(normalized, decimals)}%`;
 }
 
 export function truncateText(text: string, maxLength: number): string {
@@ -91,6 +96,10 @@ export function isValidEmail(email: string): boolean {
 }
 
 export function isValidPhone(phone: string): boolean {
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length < 7 || digits.length > 15) {
+    return false;
+  }
   const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/;
   return phoneRegex.test(phone);
 }
@@ -98,14 +107,14 @@ export function isValidPhone(phone: string): boolean {
 export function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/);
   if (parts.length === 1) {
-    return parts[0].substring(0, 2).toUpperCase();
+    return parts[0].substring(0, 1).toUpperCase();
   }
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
 export function pluralize(count: number, singular: string, plural?: string): string {
-  if (count === 1) return singular;
-  return plural || `${singular}s`;
+  const word = count === 1 ? singular : plural || `${singular}s`;
+  return `${count} ${word}`;
 }
 
 export function copyToClipboard(text: string): Promise<boolean> {
@@ -148,8 +157,15 @@ export function downloadFile(data: Blob | string, filename: string, mimeType: st
 export function getColorByStatus(status: string): string {
   const statusColors: Record<string, string> = {
     active: 'bg-green-500',
+    activo: 'bg-green-500',
+    completed: 'bg-green-500',
+    completado: 'bg-green-500',
     pending: 'bg-yellow-500',
+    pendiente: 'bg-yellow-500',
     inactive: 'bg-gray-500',
+    inactivo: 'bg-gray-500',
+    cancelled: 'bg-red-500',
+    cancelado: 'bg-red-500',
     error: 'bg-red-500',
     warning: 'bg-orange-500',
     success: 'bg-green-500',

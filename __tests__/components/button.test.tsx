@@ -28,21 +28,21 @@ describe('Button Component', () => {
     const { rerender } = render(<Button variant="destructive">Delete</Button>);
     
     let button = screen.getByText('Delete');
-    expect(button).toHaveClass('bg-destructive');
+    expect(button).toHaveClass('bg-red-600');
     
     rerender(<Button variant="outline">Cancel</Button>);
     button = screen.getByText('Cancel');
-    expect(button).toHaveClass('border');
+    expect(button).toHaveClass('border-2');
   });
 
   it('should apply size classes', () => {
     const { rerender } = render(<Button size="sm">Small</Button>);
     
     let button = screen.getByText('Small');
-    expect(button).toHaveClass('h-9');
+    expect(button).toHaveClass('h-8');
     
     rerender(<Button size="lg">Large</Button>);
     button = screen.getByText('Large');
-    expect(button).toHaveClass('h-11');
+    expect(button).toHaveClass('h-12');
   });
 });

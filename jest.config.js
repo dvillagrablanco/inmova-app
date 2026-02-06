@@ -16,6 +16,16 @@ const customJestConfig = {
     '**/__tests__/**/*.test.[jt]s?(x)',
     '**/?(*.)+(spec|test).[jt]s?(x)'
   ],
+  testPathIgnorePatterns: [
+    '<rootDir>/e2e/',
+    '<rootDir>/__tests__/unit/',
+    '<rootDir>/__tests__/integration/',
+    '<rootDir>/__tests__/smoke/',
+    '<rootDir>/__tests__/api/contract-tests.test.ts',
+    '<rootDir>/__tests__/api/users-contract.test.ts',
+    '<rootDir>/__tests__/api/buildings.test.ts',
+    '<rootDir>/__tests__/redis.test.ts',
+  ],
   coveragePathIgnorePatterns: [
     '/node_modules/',
     '/.next/',

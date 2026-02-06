@@ -1,3 +1,4 @@
+/** @jest-environment node */
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/health/route';
 
