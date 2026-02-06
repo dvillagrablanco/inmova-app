@@ -54,6 +54,17 @@ export const FILE_TYPE_CONFIGS: Record<string, FileTypeConfig> = {
     maxSize: 50 * 1024 * 1024, // 50MB
     extensions: ['.csv', '.txt'],
   },
+  archive: {
+    mimeTypes: [
+      'application/zip',
+      'application/x-zip-compressed',
+      'multipart/x-zip',
+      'application/octet-stream',
+    ],
+    maxSize: 200 * 1024 * 1024, // 200MB
+    extensions: ['.zip'],
+    magicNumbers: [Buffer.from([0x50, 0x4b, 0x03, 0x04])], // ZIP
+  },
   video: {
     mimeTypes: ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'],
     maxSize: 100 * 1024 * 1024, // 100MB

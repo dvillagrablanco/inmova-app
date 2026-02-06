@@ -72,12 +72,14 @@ interface Building {
 }
 
 const tiposSeguro = [
-  { value: 'EDIFICIO', label: 'Edificio Completo' },
-  { value: 'RESPONSABILIDAD_CIVIL', label: 'Responsabilidad Civil' },
-  { value: 'HOGAR', label: 'Hogar/Vivienda' },
-  { value: 'ALQUILER', label: 'Impago de Alquiler' },
-  { value: 'VIDA', label: 'Vida' },
-  { value: 'ACCIDENTES', label: 'Accidentes' },
+  { value: 'comunidad', label: 'Comunidad/Edificio' },
+  { value: 'responsabilidad_civil', label: 'Responsabilidad Civil' },
+  { value: 'hogar', label: 'Hogar/Vivienda' },
+  { value: 'impago_alquiler', label: 'Impago de Alquiler' },
+  { value: 'vida', label: 'Vida' },
+  { value: 'incendio', label: 'Incendio' },
+  { value: 'robo', label: 'Robo' },
+  { value: 'otro', label: 'Otro' },
 ];
 
 const aseguradoras = [
@@ -107,10 +109,11 @@ export default function NuevoSeguroPage() {
     unitId: '',
     aseguradora: '',
     numeroPoliza: '',
+    nombreAsegurado: '',
     fechaInicio: '',
     fechaVencimiento: '',
-    prima: '',
-    cobertura: '',
+    primaAnual: '',
+    sumaAsegurada: '',
     franquicia: '',
     observaciones: '',
   });
@@ -145,7 +148,7 @@ export default function NuevoSeguroPage() {
       return;
     }
 
-    if (!formData.cobertura) {
+    if (!formData.sumaAsegurada) {
       toast.error('Indica el valor de cobertura');
       return;
     }
@@ -156,8 +159,8 @@ export default function NuevoSeguroPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          propertyType: formData.tipo === 'EDIFICIO' ? 'EDIFICIO' : 'VIVIENDA',
-          propertyValue: parseFloat(formData.cobertura),
+          propertyType: formData.tipo === 'comunidad' ? 'EDIFICIO' : 'VIVIENDA',
+          propertyValue: parseFloat(formData.sumaAsegurada),
           propertyAddress: building.direccion,
           postalCode: building.codigoPostal || '',
           city: building.ciudad || '',
@@ -185,8 +188,8 @@ export default function NuevoSeguroPage() {
     setFormData({
       ...formData,
       aseguradora: quote.provider,
-      prima: quote.annualPremium.toString(),
-      cobertura: quote.coverage.toString(),
+      primaAnual: quote.annualPremium.toString(),
+      sumaAsegurada: quote.coverage.toString(),
       franquicia: quote.deductible.toString(),
     });
     setActiveTab('manual');
@@ -197,7 +200,7 @@ export default function NuevoSeguroPage() {
     e.preventDefault();
 
     // Validation
-    if (!formData.tipo || !formData.buildingId || !formData.aseguradora) {
+    if (!formData.tipo || !formData.buildingId || !formData.aseguradora || !formData.nombreAsegurado) {
       toast.error('Completa los campos obligatorios');
       return;
     }
@@ -213,14 +216,13 @@ export default function NuevoSeguroPage() {
           unitId: formData.unitId || null,
           aseguradora: formData.aseguradora,
           numeroPoliza: formData.numeroPoliza || `POL-${Date.now()}`,
-          poliza: formData.numeroPoliza || `POL-${Date.now()}`,
+          nombreAsegurado: formData.nombreAsegurado,
           fechaInicio: formData.fechaInicio || new Date().toISOString(),
           fechaVencimiento: formData.fechaVencimiento,
-          prima: parseFloat(formData.prima) || 0,
-          cobertura: parseFloat(formData.cobertura) || 0,
-          franquicia: parseFloat(formData.franquicia) || 0,
-          observaciones: formData.observaciones,
-          estado: 'ACTIVO',
+          primaAnual: formData.primaAnual ? parseFloat(formData.primaAnual) : null,
+          sumaAsegurada: formData.sumaAsegurada ? parseFloat(formData.sumaAsegurada) : null,
+          franquicia: formData.franquicia ? parseFloat(formData.franquicia) : null,
+          notas: formData.observaciones || null,
         }),
       });
 
@@ -347,8 +349,10 @@ export default function NuevoSeguroPage() {
                     <Label>Valor de Cobertura (€) *</Label>
                     <Input
                       type="number"
-                      value={formData.cobertura}
-                      onChange={(e) => setFormData({ ...formData, cobertura: e.target.value })}
+                    value={formData.sumaAsegurada}
+                    onChange={(e) =>
+                      setFormData({ ...formData, sumaAsegurada: e.target.value })
+                    }
                       placeholder="500000"
                     />
                   </div>
@@ -357,7 +361,10 @@ export default function NuevoSeguroPage() {
                 <Button
                   onClick={handleGetQuotes}
                   disabled={
-                    !formData.tipo || !formData.buildingId || !formData.cobertura || loadingQuotes
+                    !formData.tipo ||
+                    !formData.buildingId ||
+                    !formData.sumaAsegurada ||
+                    loadingQuotes
                   }
                   className="w-full"
                   size="lg"
@@ -521,6 +528,21 @@ export default function NuevoSeguroPage() {
                     </div>
 
                     <div className="space-y-2">
+                      <Label>Nombre del Asegurado *</Label>
+                      <Input
+                        value={formData.nombreAsegurado}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            nombreAsegurado: e.target.value,
+                          })
+                        }
+                        placeholder="Viroda Inversiones S.L."
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
                       <Label>Edificio *</Label>
                       <Select
                         value={formData.buildingId}
@@ -593,22 +615,22 @@ export default function NuevoSeguroPage() {
                       <Label>Prima Anual (€) *</Label>
                       <Input
                         type="number"
-                        value={formData.prima}
-                        onChange={(e) => setFormData({ ...formData, prima: e.target.value })}
+                        value={formData.primaAnual}
+                        onChange={(e) => setFormData({ ...formData, primaAnual: e.target.value })}
                         placeholder="1200"
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Cobertura (€) *</Label>
+                      <Label>Suma Asegurada (€) *</Label>
                       <Input
                         type="number"
-                        value={formData.cobertura}
+                        value={formData.sumaAsegurada}
                         onChange={(e) =>
                           setFormData({
                             ...formData,
-                            cobertura: e.target.value,
+                            sumaAsegurada: e.target.value,
                           })
                         }
                         placeholder="500000"
@@ -687,7 +709,9 @@ export default function NuevoSeguroPage() {
           // Aplicar datos extraídos de la póliza al formulario
           if (data.poliza) setFormData(prev => ({ ...prev, numeroPoliza: data.poliza }));
           if (data.aseguradora) setFormData(prev => ({ ...prev, aseguradora: data.aseguradora }));
-          if (data.prima) setFormData(prev => ({ ...prev, prima: data.prima }));
+          if (data.prima) setFormData(prev => ({ ...prev, primaAnual: data.prima }));
+          if (data.cobertura) setFormData(prev => ({ ...prev, sumaAsegurada: data.cobertura }));
+          if (data.asegurado) setFormData(prev => ({ ...prev, nombreAsegurado: data.asegurado }));
           toast.success('Datos de la póliza aplicados al formulario');
         }}
       />

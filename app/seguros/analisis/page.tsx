@@ -30,6 +30,7 @@ interface InsuranceData {
   tipo: string;
   estado: string;
   primaAnual: number;
+  primaMensual?: number;
   fechaVencimiento: string;
   building?: { nombre: string; direccion: string };
   _count?: { claims: number };
@@ -41,19 +42,26 @@ export default function InsuranceAnalysisPage() {
   const [insurances, setInsurances] = useState<InsuranceData[]>([]);
 
   // Calcular estadísticas desde datos reales
+  const getAnnualPremium = (insurance: InsuranceData) =>
+    insurance.primaAnual || (insurance.primaMensual ? insurance.primaMensual * 12 : 0);
+
   const stats = {
     totalPolicies: insurances.length,
-    activePolicies: insurances.filter(i => i.estado === 'activo').length,
+    activePolicies: insurances.filter((i) => {
+      const estado = (i.estado || '').toLowerCase();
+      return estado === 'activa' || estado === 'activo';
+    }).length,
     totalClaims: insurances.reduce((sum, i) => sum + (i._count?.claims || 0), 0),
-    totalPaid: insurances.reduce((sum, i) => sum + (i.primaAnual || 0), 0),
+    totalPaid: insurances.reduce((sum, i) => sum + getAnnualPremium(i), 0),
     avgClaimAmount: insurances.length > 0 
-      ? Math.round(insurances.reduce((sum, i) => sum + (i.primaAnual || 0), 0) / insurances.length) 
+      ? Math.round(insurances.reduce((sum, i) => sum + getAnnualPremium(i), 0) / insurances.length) 
       : 0,
     claimRate: insurances.length > 0 
       ? Math.round((insurances.filter(i => (i._count?.claims || 0) > 0).length / insurances.length) * 100 * 10) / 10
       : 0,
     lossRatio: 42.5, // Calculado de claims reales
-    pendingClaims: insurances.filter(i => i.estado === 'pendiente').length,
+    pendingClaims: insurances.filter((i) => (i.estado || '').toLowerCase().includes('pendiente'))
+      .length,
   };
 
   // Agrupar por tipo de seguro
@@ -64,7 +72,7 @@ export default function InsuranceAnalysisPage() {
         acc[type] = { count: 0, amount: 0 };
       }
       acc[type].count += ins._count?.claims || 0;
-      acc[type].amount += ins.primaAnual || 0;
+      acc[type].amount += getAnnualPremium(ins);
       return acc;
     }, {});
 
@@ -76,6 +84,9 @@ export default function InsuranceAnalysisPage() {
       responsabilidad_civil: 'Responsabilidad Civil',
       impago_alquiler: 'Impago Alquiler',
       vida: 'Vida',
+      incendio: 'Incendio',
+      robo: 'Robo',
+      otro: 'Otros',
       otros: 'Otros',
     };
 
@@ -111,7 +122,7 @@ export default function InsuranceAnalysisPage() {
     .map(i => ({
       address: i.building?.direccion || i.building?.nombre || 'Sin dirección',
       claims: i._count?.claims || 0,
-      amount: i.primaAnual || 0,
+      amount: getAnnualPremium(i),
     }));
 
   useEffect(() => {

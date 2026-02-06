@@ -27,6 +27,7 @@ import {
   Clock,
   AlertCircle,
   Home,
+  Upload,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -86,12 +87,15 @@ import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 interface Insurance {
   id: string;
   tipo: string;
-  poliza: string;
+  poliza?: string;
   aseguradora: string;
   fechaInicio: string;
   fechaVencimiento: string;
-  prima: number;
-  cobertura: number;
+  prima?: number;
+  primaAnual?: number;
+  primaMensual?: number;
+  sumaAsegurada?: number;
+  cobertura?: number | string;
   estado: string;
   numeroPoliza?: string;
   building?: {
@@ -118,11 +122,14 @@ interface InsuranceStats {
 }
 
 const tiposSeguro = [
-  { value: 'EDIFICIO', label: 'Edificio', icon: Building2 },
-  { value: 'RESPONSABILIDAD_CIVIL', label: 'Responsabilidad Civil', icon: Shield },
-  { value: 'HOGAR', label: 'Hogar', icon: Shield },
-  { value: 'ALQUILER', label: 'Impago de Alquiler', icon: Euro },
-  { value: 'VIDA', label: 'Vida', icon: Shield },
+  { value: 'hogar', label: 'Hogar', icon: Shield },
+  { value: 'comunidad', label: 'Comunidad/Edificio', icon: Building2 },
+  { value: 'responsabilidad_civil', label: 'Responsabilidad Civil', icon: Shield },
+  { value: 'impago_alquiler', label: 'Impago de Alquiler', icon: Euro },
+  { value: 'incendio', label: 'Incendio', icon: AlertTriangle },
+  { value: 'robo', label: 'Robo', icon: Shield },
+  { value: 'vida', label: 'Vida', icon: Shield },
+  { value: 'otro', label: 'Otro', icon: FileText },
 ];
 
 const aseguradoras = [
@@ -156,6 +163,12 @@ export default function SegurosPage() {
     totalPrimas: 0,
     totalCobertura: 0,
   });
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importSummary, setImportSummary] = useState<{
+    imported: number;
+    failed: number;
+  } | null>(null);
 
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
@@ -180,6 +193,18 @@ export default function SegurosPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, tipoFilter, estadoFilter, aseguradoraFilter, seguros]);
 
+  const normalizeStatus = (estado?: string) => (estado || '').toLowerCase();
+
+  const getPrimaValue = (seguro: Insurance) =>
+    Number(seguro.primaAnual ?? seguro.primaMensual ?? seguro.prima ?? 0);
+
+  const getCoberturaValue = (seguro: Insurance) => {
+    if (typeof seguro.sumaAsegurada === 'number') return seguro.sumaAsegurada;
+    if (typeof seguro.cobertura === 'number') return seguro.cobertura;
+    const parsed = Number(String(seguro.cobertura || '').replace(/[€$]/g, '').replace(',', '.'));
+    return Number.isNaN(parsed) ? 0 : parsed;
+  };
+
   const fetchSeguros = async () => {
     try {
       setIsLoading(true);
@@ -200,7 +225,10 @@ export default function SegurosPage() {
       setSeguros(segurosConDias);
 
       // Calcular stats
-      const totalActivos = segurosConDias.filter((s: Insurance) => s.estado === 'ACTIVO').length;
+      const totalActivos = segurosConDias.filter((s: Insurance) => {
+        const status = normalizeStatus(s.estado);
+        return status === 'activa' || status === 'activo';
+      }).length;
       const totalPorVencer = segurosConDias.filter(
         (s: Insurance) => s.diasHastaVencimiento! > 0 && s.diasHastaVencimiento! <= 30
       ).length;
@@ -208,11 +236,11 @@ export default function SegurosPage() {
         (s: Insurance) => s.diasHastaVencimiento! <= 0
       ).length;
       const totalPrimas = segurosConDias.reduce(
-        (sum: number, s: Insurance) => sum + (s.prima || 0),
+        (sum: number, s: Insurance) => sum + getPrimaValue(s),
         0
       );
       const totalCobertura = segurosConDias.reduce(
-        (sum: number, s: Insurance) => sum + (s.cobertura || 0),
+        (sum: number, s: Insurance) => sum + getCoberturaValue(s),
         0
       );
       const totalSiniestros = segurosConDias.reduce(
@@ -254,12 +282,14 @@ export default function SegurosPage() {
 
     // Tipo
     if (tipoFilter && tipoFilter !== 'all') {
-      filtered = filtered.filter((s) => s.tipo === tipoFilter);
+      filtered = filtered.filter((s) => s.tipo?.toLowerCase() === tipoFilter);
     }
 
     // Estado
     if (estadoFilter && estadoFilter !== 'all') {
-      filtered = filtered.filter((s) => s.estado === estadoFilter);
+      filtered = filtered.filter(
+        (s) => normalizeStatus(s.estado) === normalizeStatus(estadoFilter)
+      );
     }
 
     // Aseguradora
@@ -268,6 +298,40 @@ export default function SegurosPage() {
     }
 
     setFilteredSeguros(filtered);
+  };
+
+  const handleImportSeguros = async () => {
+    if (!importFile) {
+      toast.error('Selecciona un archivo ZIP, XLSX o CSV');
+      return;
+    }
+
+    try {
+      setImporting(true);
+      setImportSummary(null);
+
+      const formData = new FormData();
+      formData.append('file', importFile);
+
+      const response = await fetch('/api/seguros/import', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error || 'Error al importar seguros');
+      }
+
+      setImportSummary({ imported: data.imported || 0, failed: data.failed || 0 });
+      toast.success(`Importados ${data.imported || 0} seguros`);
+      await fetchSeguros();
+    } catch (error: any) {
+      console.error('Error importando seguros:', error);
+      toast.error(error?.message || 'Error al importar seguros');
+    } finally {
+      setImporting(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -319,7 +383,8 @@ export default function SegurosPage() {
   };
 
   const getTipoBadge = (tipo: string) => {
-    const tipoInfo = tiposSeguro.find((t) => t.value === tipo);
+    const tipoNormalizado = tipo?.toLowerCase();
+    const tipoInfo = tiposSeguro.find((t) => t.value === tipoNormalizado);
     return (
       <Badge variant="outline" className="gap-1">
         {tipoInfo?.icon && <tipoInfo.icon className="h-3 w-3" />}
@@ -383,6 +448,44 @@ export default function SegurosPage() {
             </Button>
           </div>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Importar seguros</CardTitle>
+            <CardDescription>
+              Sube un ZIP, XLSX o CSV con columnas de póliza, fechas, aseguradora y edificio/unidad.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Archivo</label>
+                <input
+                  type="file"
+                  accept=".zip,.xlsx,.xls,.csv"
+                  onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                  className="border rounded-md px-3 py-2 w-full"
+                />
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Incluye columnas como <strong>numero_poliza</strong>, <strong>aseguradora</strong>,
+                <strong> fecha_inicio</strong>, <strong>fecha_vencimiento</strong>,{' '}
+                <strong>edificio</strong> y <strong>unidad</strong>.
+              </div>
+              <div className="flex items-end">
+                <Button onClick={handleImportSeguros} disabled={importing}>
+                  <Upload className="mr-2 h-4 w-4" />
+                  {importing ? 'Importando...' : 'Importar'}
+                </Button>
+              </div>
+            </div>
+            {importSummary && (
+              <div className="text-sm text-muted-foreground">
+                Importados: {importSummary.imported} · Filas con error: {importSummary.failed}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -492,9 +595,10 @@ export default function SegurosPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="ACTIVO">Activos</SelectItem>
-                  <SelectItem value="VENCIDO">Vencidos</SelectItem>
-                  <SelectItem value="CANCELADO">Cancelados</SelectItem>
+                <SelectItem value="activa">Activos</SelectItem>
+                <SelectItem value="vencida">Vencidos</SelectItem>
+                <SelectItem value="cancelada">Cancelados</SelectItem>
+                <SelectItem value="pendiente_renovacion">Pendiente renovación</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -605,7 +709,7 @@ export default function SegurosPage() {
                           {new Intl.NumberFormat('es-ES', {
                             style: 'currency',
                             currency: 'EUR',
-                          }).format(seguro.prima)}
+                          }).format(getPrimaValue(seguro))}
                         </TableCell>
                         <TableCell>{getEstadoBadge(seguro)}</TableCell>
                         <TableCell className="text-right">
