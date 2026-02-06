@@ -12,7 +12,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
-import crypto from 'crypto';
+import { decryptZucchettiToken, encryptZucchettiToken } from '@/lib/zucchetti-token-crypto';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -28,41 +28,9 @@ const ZUCCHETTI_CONFIG = {
   apiUrl: process.env.ZUCCHETTI_API_URL || 'https://api.zucchetti.it/v1',
 };
 
-// Clave de encriptación para tokens
-const ENCRYPTION_KEY =
-  process.env.ZUCCHETTI_ENCRYPTION_KEY ||
-  process.env.NEXTAUTH_SECRET ||
-  'zucchetti-encryption-key-32bytes!';
-const ALGORITHM = 'aes-256-cbc';
-
 // ═══════════════════════════════════════════════════════════════
-// ENCRIPTACIÓN DE TOKENS
+// ENCRIPTACIÓN DE TOKENS (helpers compartidos)
 // ═══════════════════════════════════════════════════════════════
-
-function encrypt(text: string): string {
-  const iv = crypto.randomBytes(16);
-  const key = Buffer.from(ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32));
-  const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
-  let encrypted = cipher.update(text, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-  return iv.toString('hex') + ':' + encrypted;
-}
-
-function decrypt(text: string): string {
-  try {
-    const parts = text.split(':');
-    if (parts.length !== 2) return text;
-    const iv = Buffer.from(parts[0], 'hex');
-    const encrypted = parts[1];
-    const key = Buffer.from(ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32));
-    const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-    return decrypted;
-  } catch {
-    return text;
-  }
-}
 
 // ═══════════════════════════════════════════════════════════════
 // INTERCAMBIO DE CÓDIGO POR TOKENS
@@ -244,8 +212,8 @@ export async function GET(request: NextRequest) {
       where: { id: company.id },
       data: {
         zucchettiEnabled: true,
-        zucchettiAccessToken: encrypt(tokens.access_token),
-        zucchettiRefreshToken: encrypt(tokens.refresh_token),
+        zucchettiAccessToken: encryptZucchettiToken(tokens.access_token),
+        zucchettiRefreshToken: encryptZucchettiToken(tokens.refresh_token),
         zucchettiTokenExpiry: tokenExpiry,
         zucchettiCompanyId: zucchettiInfo.companyId,
         zucchettiLastSync: new Date(),
@@ -331,8 +299,10 @@ export async function getZucchettiTokens(companyId: string): Promise<{
     }
 
     return {
-      accessToken: decrypt(company.zucchettiAccessToken),
-      refreshToken: company.zucchettiRefreshToken ? decrypt(company.zucchettiRefreshToken) : '',
+      accessToken: decryptZucchettiToken(company.zucchettiAccessToken),
+      refreshToken: company.zucchettiRefreshToken
+        ? decryptZucchettiToken(company.zucchettiRefreshToken)
+        : '',
       expiry: company.zucchettiTokenExpiry || new Date(),
       companyId: company.zucchettiCompanyId || '',
     };
@@ -367,7 +337,7 @@ export async function refreshZucchettiToken(companyId: string): Promise<boolean>
       return true; // Token aún válido
     }
 
-    const refreshToken = decrypt(company.zucchettiRefreshToken);
+    const refreshToken = decryptZucchettiToken(company.zucchettiRefreshToken);
 
     // Solicitar nuevo token
     const body = new URLSearchParams({
@@ -398,8 +368,8 @@ export async function refreshZucchettiToken(companyId: string): Promise<boolean>
     await prisma.company.update({
       where: { id: companyId },
       data: {
-        zucchettiAccessToken: encrypt(tokens.access_token),
-        zucchettiRefreshToken: encrypt(tokens.refresh_token),
+        zucchettiAccessToken: encryptZucchettiToken(tokens.access_token),
+        zucchettiRefreshToken: encryptZucchettiToken(tokens.refresh_token),
         zucchettiTokenExpiry: tokenExpiry,
       },
     });

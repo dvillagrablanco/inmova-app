@@ -18,6 +18,36 @@ Esta guía describe cómo configurar la integración entre INMOVA y Zucchetti (E
 | `ZUCCHETTI_API_URL`       | URL base del API          | `https://api.zucchetti.it/v1`     |
 | `ZUCCHETTI_OAUTH_URL`     | URL del servicio OAuth    | `https://auth.zucchetti.it/oauth` |
 
+---
+
+### 🧾 Modo Altai (Login + Bearer Token)
+
+Si el cliente usa **Altai (Zucchetti Contabilidad)** con autenticación por login,
+configura estas variables y activa el modo Altai:
+
+```bash
+# Activar modo Altai
+ZUCCHETTI_AUTH_MODE=altai
+
+# URL base Altai
+ZUCCHETTI_ALTAI_API_URL=https://wsaltaifacturas.altai.es/api
+ZUCCHETTI_ALTAI_AUTH_PATH=/login/authenticate
+
+# Credenciales Altai
+ZUCCHETTI_ALTAI_LOGIN=tu_login
+ZUCCHETTI_ALTAI_PASSWORD=tu_password
+ZUCCHETTI_ALTAI_COMPANY_CODE=tu_empresa
+
+# Endpoint de asientos (obligatorio para sincronizar)
+ZUCCHETTI_ALTAI_ENTRIES_URL=https://wsaltaifacturas.altai.es/api/accounting/entries
+
+# Opcional: token para ingesta externa de movimientos
+ZUCCHETTI_ALTAI_INGEST_TOKEN=token_seguro
+```
+
+> Nota: Si no se conoce el endpoint de asientos, configura
+> `ZUCCHETTI_ALTAI_ENTRIES_URL` cuando el técnico lo confirme.
+
 ### Configuración adicional (generada por INMOVA):
 
 | Variable                   | Descripción                            | Valor                                 |
@@ -98,6 +128,18 @@ Deberías ver:
 | `POST` | `/api/integrations/zucchetti/test` | Test de conexión         |
 | `GET`  | `/api/integrations/zucchetti/sync` | Estado de sincronización |
 | `POST` | `/api/integrations/zucchetti/sync` | Ejecutar sincronización  |
+
+### Ingesta Altai (movimientos externos)
+
+| Método | Endpoint                                   | Descripción                    |
+| ------ | ------------------------------------------ | ------------------------------ |
+| `POST` | `/api/integrations/zucchetti/altai/ingest` | Ingesta de asientos para Altai |
+
+**Auth**:
+
+- Sesión de admin (NextAuth), o
+- Header `Authorization: Bearer <ZUCCHETTI_ALTAI_INGEST_TOKEN>`  
+  (o `x-altai-ingest-token`)
 
 ---
 

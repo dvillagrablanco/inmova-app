@@ -18,6 +18,11 @@ import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import logger from '@/lib/logger';
 import { getZucchettiTokens, refreshZucchettiToken } from '../callback/route';
+import {
+  getZucchettiAuthMode,
+  isAltaiConfigured,
+  sendAltaiEntry,
+} from '@/lib/zucchetti-altai-service';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -362,6 +367,219 @@ async function syncExpenses(
   return result;
 }
 
+/**
+ * Sincroniza inquilinos a Altai (no soportado actualmente)
+ */
+async function syncCustomersAltai(): Promise<SyncResult> {
+  return {
+    type: 'customers',
+    synced: 0,
+    failed: 0,
+    errors: ['Altai no soporta sincronización de clientes en este endpoint'],
+    details: [],
+  };
+}
+
+/**
+ * Sincroniza pagos de INMOVA a Altai como asientos contables
+ */
+async function syncPaymentsAltai(
+  companyId: string,
+  options: { ids?: string[]; dateFrom?: string; dateTo?: string; dryRun?: boolean }
+): Promise<SyncResult> {
+  const result: SyncResult = {
+    type: 'payments',
+    synced: 0,
+    failed: 0,
+    errors: [],
+    details: [],
+  };
+
+  try {
+    const payments = await prisma.payment.findMany({
+      where: {
+        contract: {
+          unit: {
+            building: {
+              companyId,
+            },
+          },
+        },
+        status: 'pagado',
+        ...(options.ids && { id: { in: options.ids } }),
+        ...(options.dateFrom && { fechaPago: { gte: new Date(options.dateFrom) } }),
+        ...(options.dateTo && { fechaPago: { lte: new Date(options.dateTo) } }),
+      },
+      include: {
+        contract: {
+          include: {
+            tenant: true,
+            unit: {
+              include: {
+                building: true,
+              },
+            },
+          },
+        },
+      },
+      take: 100,
+    });
+
+    for (const payment of payments) {
+      try {
+        const entryData = {
+          entry_date:
+            payment.fechaPago?.toISOString().split('T')[0] ||
+            new Date().toISOString().split('T')[0],
+          description: `Cobro renta - ${payment.contract?.unit?.building?.nombre || 'Propiedad'} - ${payment.contract?.tenant?.nombreCompleto || 'Inquilino'}`,
+          reference: `PAYMENT_${payment.id}`,
+          lines: [
+            {
+              account_code: '570001',
+              account_name: 'Caja/Bancos',
+              debit: payment.monto,
+              credit: 0,
+              cost_center: payment.contract?.unit?.building?.id || '',
+            },
+            {
+              account_code: '705001',
+              account_name: 'Ingresos por Arrendamientos',
+              debit: 0,
+              credit: payment.monto,
+              cost_center: payment.contract?.unit?.building?.id || '',
+            },
+          ],
+        };
+
+        if (options.dryRun) {
+          result.details.push({ payment: payment.id, data: entryData, status: 'dry_run' });
+          result.synced++;
+          continue;
+        }
+
+        const response = await sendAltaiEntry(companyId, entryData);
+        if (response.ok) {
+          result.synced++;
+          result.details.push({
+            payment: payment.id,
+            altaiResponse: response.data,
+            status: 'synced',
+          });
+        } else {
+          result.failed++;
+          result.errors.push(`Payment ${payment.id}: ${response.error || response.status}`);
+        }
+      } catch (paymentError: any) {
+        result.failed++;
+        result.errors.push(`Payment ${payment.id}: ${paymentError.message}`);
+      }
+    }
+  } catch (error: any) {
+    result.errors.push(`Error general: ${error.message}`);
+  }
+
+  return result;
+}
+
+/**
+ * Sincroniza gastos de INMOVA a Altai como asientos contables
+ */
+async function syncExpensesAltai(
+  companyId: string,
+  options: { ids?: string[]; dateFrom?: string; dateTo?: string; dryRun?: boolean }
+): Promise<SyncResult> {
+  const result: SyncResult = {
+    type: 'expenses',
+    synced: 0,
+    failed: 0,
+    errors: [],
+    details: [],
+  };
+
+  try {
+    const expenses = await prisma.expense.findMany({
+      where: {
+        building: {
+          companyId,
+        },
+        ...(options.ids && { id: { in: options.ids } }),
+        ...(options.dateFrom && { fecha: { gte: new Date(options.dateFrom) } }),
+        ...(options.dateTo && { fecha: { lte: new Date(options.dateTo) } }),
+      },
+      include: {
+        building: true,
+      },
+      take: 100,
+    });
+
+    for (const expense of expenses) {
+      try {
+        const entryData = {
+          entry_date:
+            expense.fecha?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
+          description: `Gasto - ${expense.concepto || 'Gasto'} - ${expense.building?.nombre || 'Propiedad'}`,
+          reference: `EXPENSE_${expense.id}`,
+          lines: [
+            {
+              account_code: '629001',
+              account_name: 'Gastos Mantenimiento y Reparaciones',
+              debit: expense.monto,
+              credit: 0,
+              cost_center: expense.building?.id || '',
+            },
+            {
+              account_code: '410001',
+              account_name: 'Acreedores por servicios',
+              debit: 0,
+              credit: expense.monto,
+              cost_center: expense.building?.id || '',
+            },
+          ],
+        };
+
+        if (options.dryRun) {
+          result.details.push({ expense: expense.id, data: entryData, status: 'dry_run' });
+          result.synced++;
+          continue;
+        }
+
+        const response = await sendAltaiEntry(companyId, entryData);
+        if (response.ok) {
+          result.synced++;
+          result.details.push({
+            expense: expense.id,
+            altaiResponse: response.data,
+            status: 'synced',
+          });
+        } else {
+          result.failed++;
+          result.errors.push(`Expense ${expense.id}: ${response.error || response.status}`);
+        }
+      } catch (expenseError: any) {
+        result.failed++;
+        result.errors.push(`Expense ${expense.id}: ${expenseError.message}`);
+      }
+    }
+  } catch (error: any) {
+    result.errors.push(`Error general: ${error.message}`);
+  }
+
+  return result;
+}
+
+/**
+ * Sincroniza facturas a Altai (pendiente de especificación)
+ */
+async function syncInvoicesAltai(): Promise<SyncResult> {
+  return {
+    type: 'invoices',
+    synced: 0,
+    failed: 0,
+    errors: ['Altai no tiene endpoint de facturas configurado'],
+    details: [],
+  };
+}
+
 // ═══════════════════════════════════════════════════════════════
 // POST - Ejecutar sincronización
 // ═══════════════════════════════════════════════════════════════
@@ -375,6 +593,7 @@ export async function POST(req: NextRequest) {
     }
 
     const companyId = session.user.companyId;
+    const authMode = getZucchettiAuthMode();
 
     // Validar request
     const body = await req.json();
@@ -389,30 +608,47 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    if (!company?.zucchettiEnabled || !company.zucchettiAccessToken) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Zucchetti no está conectado',
-        },
-        { status: 400 }
-      );
-    }
+    let zucchettiAccessToken: string | null = null;
 
-    // Refrescar token si es necesario
-    await refreshZucchettiToken(companyId);
+    if (authMode === 'altai') {
+      if (!isAltaiConfigured()) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'Altai no está configurado',
+          },
+          { status: 400 }
+        );
+      }
+    } else {
+      if (!company?.zucchettiEnabled || !company.zucchettiAccessToken) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'Zucchetti no está conectado',
+          },
+          { status: 400 }
+        );
+      }
 
-    // Obtener tokens actualizados
-    const tokens = await getZucchettiTokens(companyId);
+      // Refrescar token si es necesario
+      await refreshZucchettiToken(companyId);
 
-    if (!tokens) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Error obteniendo tokens de Zucchetti',
-        },
-        { status: 500 }
-      );
+      // Obtener tokens actualizados
+      const tokens = await getZucchettiTokens(companyId);
+
+      if (!tokens) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'Error obteniendo tokens de Zucchetti',
+          },
+          { status: 500 }
+        );
+      }
+
+      // Guardar token en variable para uso posterior
+      zucchettiAccessToken = tokens.accessToken;
     }
 
     // Ejecutar sincronizaciones
@@ -424,16 +660,44 @@ export async function POST(req: NextRequest) {
       dryRun: validated.dryRun,
     };
 
-    if (validated.type === 'customers' || validated.type === 'all') {
-      results.push(await syncCustomers(companyId, tokens.accessToken, syncOptions));
-    }
+    if (authMode === 'altai') {
+      if (validated.type === 'customers' || validated.type === 'all') {
+        results.push(await syncCustomersAltai());
+      }
 
-    if (validated.type === 'payments' || validated.type === 'all') {
-      results.push(await syncPayments(companyId, tokens.accessToken, syncOptions));
-    }
+      if (validated.type === 'payments' || validated.type === 'all') {
+        results.push(await syncPaymentsAltai(companyId, syncOptions));
+      }
 
-    if (validated.type === 'expenses' || validated.type === 'all') {
-      results.push(await syncExpenses(companyId, tokens.accessToken, syncOptions));
+      if (validated.type === 'expenses' || validated.type === 'all') {
+        results.push(await syncExpensesAltai(companyId, syncOptions));
+      }
+
+      if (validated.type === 'invoices' || validated.type === 'all') {
+        results.push(await syncInvoicesAltai());
+      }
+    } else {
+      if (!zucchettiAccessToken) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'Token de Zucchetti no disponible',
+          },
+          { status: 500 }
+        );
+      }
+
+      if (validated.type === 'customers' || validated.type === 'all') {
+        results.push(await syncCustomers(companyId, zucchettiAccessToken, syncOptions));
+      }
+
+      if (validated.type === 'payments' || validated.type === 'all') {
+        results.push(await syncPayments(companyId, zucchettiAccessToken, syncOptions));
+      }
+
+      if (validated.type === 'expenses' || validated.type === 'all') {
+        results.push(await syncExpenses(companyId, zucchettiAccessToken, syncOptions));
+      }
     }
 
     // Actualizar última sincronización
@@ -456,11 +720,13 @@ export async function POST(req: NextRequest) {
       synced: totalSynced,
       failed: totalFailed,
       dryRun: validated.dryRun,
+      authMode,
     });
 
     return NextResponse.json({
       success: totalFailed === 0,
       dryRun: validated.dryRun,
+      authMode,
       summary: {
         totalSynced,
         totalFailed,
@@ -525,6 +791,7 @@ export async function GET(req: NextRequest) {
         lastSync: company.zucchettiLastSync?.toISOString() || null,
         syncErrors: company.zucchettiSyncErrors,
         zucchettiCompanyId: company.zucchettiCompanyId,
+        authMode: getZucchettiAuthMode(),
       },
     });
   } catch (error: any) {

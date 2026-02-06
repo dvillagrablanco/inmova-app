@@ -10,6 +10,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
+import {
+  getAltaiConfig,
+  getZucchettiAuthMode,
+  isAltaiConfigured,
+} from '@/lib/zucchetti-altai-service';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -47,16 +52,22 @@ export async function GET(req: NextRequest) {
       ? company.zucchettiTokenExpiry < new Date()
       : false;
 
-    // Verificar si las credenciales del servidor están configuradas
-    const serverConfigured = !!(
+    const authMode = getZucchettiAuthMode();
+    const oauthConfigured = !!(
       process.env.ZUCCHETTI_CLIENT_ID && process.env.ZUCCHETTI_CLIENT_SECRET
     );
+    const altaiConfigured = isAltaiConfigured();
+    const serverConfigured = authMode === 'altai' ? altaiConfigured : oauthConfigured;
+    const altaiConfig = getAltaiConfig();
 
     return NextResponse.json({
       success: true,
       data: {
         // Estado de configuración del servidor
         serverConfigured,
+        authMode,
+        oauthConfigured,
+        altaiConfigured,
 
         // Estado de la integración de la empresa
         enabled: company.zucchettiEnabled,
@@ -72,12 +83,15 @@ export async function GET(req: NextRequest) {
         syncErrors: company.zucchettiSyncErrors,
 
         // URLs para OAuth
-        authorizeUrl: serverConfigured ? '/api/integrations/zucchetti/authorize' : null,
+        authorizeUrl:
+          serverConfigured && authMode === 'oauth' ? '/api/integrations/zucchetti/authorize' : null,
 
         // Documentación
         docs: {
           apiUrl: process.env.ZUCCHETTI_API_URL || 'https://api.zucchetti.it/v1',
           oauthUrl: process.env.ZUCCHETTI_OAUTH_URL || 'https://auth.zucchetti.it/oauth',
+          altaiApiUrl: altaiConfig.apiUrl,
+          altaiAuthUrl: altaiConfig.authUrl || `${altaiConfig.apiUrl}${altaiConfig.authPath || ''}`,
         },
       },
     });

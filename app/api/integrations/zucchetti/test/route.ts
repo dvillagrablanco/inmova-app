@@ -11,6 +11,11 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 import { getZucchettiTokens, refreshZucchettiToken } from '../callback/route';
+import {
+  getZucchettiAuthMode,
+  isAltaiConfigured,
+  testAltaiConnection,
+} from '@/lib/zucchetti-altai-service';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -30,6 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     const companyId = session.user.companyId;
+    const authMode = getZucchettiAuthMode();
 
     // Verificar si la integración está habilitada
     const company = await prisma.company.findUnique({
@@ -40,6 +46,50 @@ export async function POST(req: NextRequest) {
         zucchettiCompanyId: true,
       },
     });
+
+    if (authMode === 'altai') {
+      if (!isAltaiConfigured()) {
+        return NextResponse.json({
+          success: false,
+          connected: false,
+          message: 'Altai no está configurado. Configura las credenciales del servidor.',
+          tests: {
+            configured: false,
+            authenticated: false,
+            apiReachable: false,
+            canReadData: false,
+          },
+          authMode,
+        });
+      }
+
+      const altaiTest = await testAltaiConnection(companyId);
+      const tests = {
+        configured: true,
+        authenticated: altaiTest.authenticated,
+        apiReachable: altaiTest.apiReachable,
+        canReadData: altaiTest.canReadData,
+      };
+
+      await prisma.company.update({
+        where: { id: companyId },
+        data: {
+          zucchettiSyncErrors: tests.authenticated ? 0 : company?.zucchettiCompanyId ? 1 : 0,
+        },
+      });
+
+      return NextResponse.json({
+        success: tests.configured && tests.authenticated,
+        connected: tests.authenticated,
+        message: tests.authenticated
+          ? 'Conexión con Altai verificada correctamente'
+          : 'No se pudo autenticar con Altai',
+        tests,
+        errorDetails: altaiTest.errorDetails,
+        zucchettiCompanyId: company?.zucchettiCompanyId || null,
+        authMode,
+      });
+    }
 
     if (!company?.zucchettiEnabled || !company.zucchettiAccessToken) {
       return NextResponse.json({
@@ -199,6 +249,7 @@ export async function POST(req: NextRequest) {
       errorDetails,
       zucchettiCompanyId: company.zucchettiCompanyId,
       apiUrl: ZUCCHETTI_API_URL,
+      authMode,
     });
   } catch (error: any) {
     logger.error('[Zucchetti Test] Error:', error);

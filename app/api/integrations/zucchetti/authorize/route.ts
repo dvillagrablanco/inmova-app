@@ -11,6 +11,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 import crypto from 'crypto';
+import { getZucchettiAuthMode } from '@/lib/zucchetti-altai-service';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -47,6 +48,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         { error: 'Solo administradores pueden configurar integraciones' },
         { status: 403 }
+      );
+    }
+
+    const authMode = getZucchettiAuthMode();
+    if (authMode === 'altai') {
+      return NextResponse.json(
+        {
+          error: 'Zucchetti est? configurado en modo Altai',
+          message: 'El flujo OAuth no aplica para Altai. Usa el test de conexi?n.',
+        },
+        { status: 400 }
       );
     }
 
