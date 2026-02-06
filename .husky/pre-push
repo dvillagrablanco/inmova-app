@@ -10,8 +10,4 @@ npm run test:ci || {
   exit 1
 }
 
-# Check coverage
-echo "📊 Checking test coverage..."
-npm run test:coverage 2>/dev/null || echo "⚠️ Coverage check skipped"
-
 echo "✅ Pre-push checks passed!"

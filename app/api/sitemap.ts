@@ -8,6 +8,26 @@ import { MetadataRoute } from 'next';
 import logger from '@/lib/logger';
 // Lazy import de prisma para evitar errores en build-time
 let prisma: any = null;
+let sitemapWarned = false;
+
+const isBuildTime =
+  process.env.NEXT_PHASE === 'phase-production-build' ||
+  process.env.NODE_ENV === 'test' ||
+  typeof window !== 'undefined';
+
+function shouldSkipDynamicRoutes(): boolean {
+  if (isBuildTime) {
+    return true;
+  }
+  const databaseUrl = process.env.DATABASE_URL || '';
+  if (!databaseUrl) {
+    return true;
+  }
+  if (databaseUrl.includes('dummy-build-host') || databaseUrl.includes('placeholder')) {
+    return true;
+  }
+  return false;
+}
 
 async function getPrisma() {
   if (!prisma) {
@@ -15,7 +35,10 @@ async function getPrisma() {
       const { prisma: prismaClient } = await import('@/lib/db');
       prisma = prismaClient;
     } catch (error) {
-      logger.warn('Prisma not available during build, using static routes only');
+      if (!sitemapWarned) {
+        logger.warn('Prisma not available during build, using static routes only');
+        sitemapWarned = true;
+      }
       return null;
     }
   }
@@ -108,6 +131,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
+    if (shouldSkipDynamicRoutes()) {
+      return staticRoutes;
+    }
     const prismaClient = await getPrisma();
     
     // Si Prisma no está disponible (build-time), retornar solo rutas estáticas
@@ -161,7 +187,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     return [...staticRoutes, ...propertyRoutes, ...buildingRoutes];
   } catch (error) {
-    logger.warn('Error generating sitemap, using static routes:', error);
+    if (!sitemapWarned) {
+      logger.warn('Error generating sitemap, using static routes:', error);
+      sitemapWarned = true;
+    }
     // En caso de error, retornar solo las rutas estáticas
     return staticRoutes;
   }
