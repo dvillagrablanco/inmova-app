@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -14,34 +14,94 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
-    }
-
     const { searchParams } = new URL(req.url);
     const estado = searchParams.get('estado');
     const tipo = searchParams.get('tipo');
 
-    const where: any = {
-      companyId: user.companyId,
-    };
+    const companyId =
+      (session.user as any).companyId ||
+      (await prisma.user
+        .findUnique({ where: { email: session.user.email } })
+        .then((user) => user?.companyId));
 
-    if (estado) where.estado = estado;
-    if (tipo) where.tipo = tipo;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+    }
 
     const alerts = await prisma.complianceAlert.findMany({
-      where,
+      where: {
+        companyId,
+        ...(estado && { estado }),
+        ...(tipo && { tipo }),
+      },
       orderBy: [
         { completada: 'asc' },
         { fechaLimite: 'asc' },
       ],
     });
 
-    return NextResponse.json(alerts);
+    const now = new Date();
+    const warningMs = 30 * 24 * 60 * 60 * 1000;
+    const insurances = await prisma.insurance.findMany({
+      where: { companyId },
+      select: {
+        id: true,
+        numeroPoliza: true,
+        aseguradora: true,
+        fechaVencimiento: true,
+        estado: true,
+        building: { select: { nombre: true } },
+        unit: { select: { numero: true, building: { select: { nombre: true } } } },
+      },
+    });
+
+    const insuranceAlerts = insurances.flatMap((insurance) => {
+      const expiry = new Date(insurance.fechaVencimiento);
+      const msToExpire = expiry.getTime() - now.getTime();
+      const isExpired = msToExpire < 0 || insurance.estado === 'vencida';
+      const isCancelled = insurance.estado === 'cancelada';
+      const isPendingRenewal = insurance.estado === 'pendiente_renovacion';
+      const isExpiringSoon = msToExpire >= 0 && msToExpire <= warningMs;
+
+      if (!isExpired && !isCancelled && !isPendingRenewal && !isExpiringSoon) return [];
+
+      const location =
+        insurance.unit?.numero
+          ? `Unidad ${insurance.unit.numero}`
+          : insurance.building?.nombre || insurance.unit?.building?.nombre;
+      const titulo = `${isExpired || isCancelled ? 'Seguro vencido' : 'Seguro por vencer'}: ${insurance.numeroPoliza}`;
+      const descripcion = `${insurance.aseguradora}${location ? ` | ${location}` : ''}`;
+
+      return [
+        {
+          id: `insurance:${insurance.id}`,
+          tipo: 'seguro',
+          titulo,
+          descripcion,
+          fechaLimite: expiry,
+          estado: 'pendiente',
+          prioridad: isExpired || isCancelled ? 'alta' : 'media',
+          completada: false,
+        },
+      ];
+    });
+
+    let combined = [...alerts, ...insuranceAlerts];
+    if (estado) {
+      combined = combined.filter((alert) => alert.estado === estado);
+    }
+    if (tipo) {
+      combined = combined.filter((alert) => alert.tipo === tipo);
+    }
+
+    combined.sort((a, b) => {
+      if (a.completada !== b.completada) {
+        return a.completada ? 1 : -1;
+      }
+      return new Date(a.fechaLimite).getTime() - new Date(b.fechaLimite).getTime();
+    });
+
+    return NextResponse.json(combined);
   } catch (error) {
     logger.error('Error fetching compliance alerts:', error);
     return NextResponse.json(

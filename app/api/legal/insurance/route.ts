@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { addDays } from 'date-fns';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -15,31 +14,84 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
-    }
-
     const { searchParams } = new URL(req.url);
     const estado = searchParams.get('estado');
     const buildingId = searchParams.get('buildingId');
 
-    const where: any = {
-      companyId: user.companyId,
-    };
+    const companyId =
+      (session.user as any).companyId ||
+      (await prisma.user
+        .findUnique({ where: { email: session.user.email } })
+        .then((user) => user?.companyId));
 
-    if (estado) where.estado = estado;
-    if (buildingId) where.buildingId = buildingId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+    }
 
-    const policies = await prisma.insurancePolicy.findMany({
-      where,
-      orderBy: { fechaVencimiento: 'asc' },
-    });
+    const [policies, insurances] = await Promise.all([
+      prisma.insurancePolicy.findMany({
+        where: {
+          companyId,
+          ...(buildingId && { buildingId }),
+        },
+        orderBy: { fechaVencimiento: 'asc' },
+      }),
+      prisma.insurance.findMany({
+        where: {
+          companyId,
+          ...(buildingId && {
+            OR: [
+              { buildingId },
+              { unit: { buildingId } },
+            ],
+          }),
+        },
+        select: {
+          id: true,
+          tipo: true,
+          numeroPoliza: true,
+          aseguradora: true,
+          fechaVencimiento: true,
+          estado: true,
+          primaAnual: true,
+          primaMensual: true,
+        },
+        orderBy: { fechaVencimiento: 'asc' },
+      }),
+    ]);
 
-    return NextResponse.json(policies);
+    const normalizedPolicies = policies.map((policy) => ({
+      id: `policy:${policy.id}`,
+      tipoSeguro: policy.tipoSeguro,
+      numeroPoliza: policy.numeroPoliza,
+      aseguradora: policy.aseguradora,
+      fechaVencimiento: policy.fechaVencimiento,
+      estado: policy.estado,
+      primaAnual: policy.primaAnual,
+    }));
+
+    const normalizedInsurances = insurances.map((insurance) => ({
+      id: `insurance:${insurance.id}`,
+      tipoSeguro: String(insurance.tipo),
+      numeroPoliza: insurance.numeroPoliza,
+      aseguradora: insurance.aseguradora,
+      fechaVencimiento: insurance.fechaVencimiento,
+      estado: insurance.estado === 'pendiente_renovacion' ? 'por_renovar' : insurance.estado,
+      primaAnual:
+        insurance.primaAnual ??
+        (insurance.primaMensual ? insurance.primaMensual * 12 : 0),
+    }));
+
+    let combined = [...normalizedPolicies, ...normalizedInsurances];
+    if (estado) {
+      combined = combined.filter((item) => item.estado === estado);
+    }
+
+    combined.sort(
+      (a, b) => new Date(a.fechaVencimiento).getTime() - new Date(b.fechaVencimiento).getTime()
+    );
+
+    return NextResponse.json(combined);
   } catch (error) {
     logger.error('Error fetching insurance policies:', error);
     return NextResponse.json(

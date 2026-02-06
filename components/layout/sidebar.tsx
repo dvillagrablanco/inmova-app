@@ -211,7 +211,6 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/screening': 'screening',
   '/galerias': 'galerias',
   '/certificaciones': 'certificaciones',
-  '/seguros': 'documentos',
   '/inspecciones': 'inspecciones',
   '/visitas': 'visitas',
   '/ordenes-trabajo': 'ordenes_trabajo',
