@@ -91,6 +91,55 @@ function parseExcelDate(value: any): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
+function parseSheetWithHeaderDetection(buffer: Buffer, sheetName?: string): any[] {
+  const workbook = XLSX.read(buffer, { type: 'buffer', cellDates: true });
+  const targetSheetName = sheetName || workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[targetSheetName];
+  if (!worksheet) return [];
+
+  const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' }) as any[][];
+  const headerHints = [
+    'fecha',
+    'concepto',
+    'debe',
+    'haber',
+    'importe',
+    'monto',
+    'documento',
+    'asiento',
+    'referencia',
+  ];
+
+  let headerRowIndex = -1;
+  for (let i = 0; i < Math.min(rows.length, 30); i++) {
+    const normalized = rows[i].map((cell) => normalizeKey(String(cell || '')));
+    const matches = headerHints.filter((hint) => normalized.includes(hint));
+    if (matches.length >= 3) {
+      headerRowIndex = i;
+      break;
+    }
+  }
+
+  if (headerRowIndex === -1) {
+    return XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+  }
+
+  const headers = rows[headerRowIndex].map((cell) => String(cell || '').trim());
+  const dataRows = rows.slice(headerRowIndex + 1).filter((row) =>
+    row.some((cell) => String(cell || '').trim() !== '')
+  );
+
+  return dataRows.map((row) => {
+    const record: Record<string, any> = {};
+    headers.forEach((header, index) => {
+      if (header) {
+        record[header] = row[index];
+      }
+    });
+    return record;
+  });
+}
+
 function inferTransactionType(
   rawType: any,
   amount: number | null,
@@ -220,13 +269,10 @@ export async function POST(request: NextRequest) {
     if (isCsv) {
       rows = await parseCSV(fileBuffer.toString('utf-8'));
     } else {
-      const workbook = XLSX.read(fileBuffer, { type: 'buffer', cellDates: true });
-      const targetSheetName = sheetName || workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[targetSheetName];
-      if (!worksheet) {
+      rows = parseSheetWithHeaderDetection(fileBuffer, sheetName);
+      if (!rows.length) {
         return NextResponse.json({ error: 'Hoja no encontrada en el archivo' }, { status: 400 });
       }
-      rows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
     }
 
     if (!rows.length) {
