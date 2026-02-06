@@ -619,6 +619,16 @@ class VisualInspector {
   }
 
   private setupPageListeners(page: Page, routePath: string, viewport: 'desktop' | 'mobile') {
+    const ignoredHosts = [
+      'google-analytics.com',
+      'region1.google-analytics.com',
+      'www.googletagmanager.com',
+      'googletagmanager.com',
+      'static.hotjar.com',
+      'www.clarity.ms',
+      'client.crisp.chat',
+    ];
+    const shouldIgnoreUrl = (url: string) => ignoredHosts.some((host) => url.includes(host));
     // Capturar errores de consola
     page.on('console', (msg: ConsoleMessage) => {
       const type = msg.type();
@@ -656,6 +666,9 @@ class VisualInspector {
 
     // Capturar errores de red (404, 500, etc.)
     page.on('response', (response: Response) => {
+      if (shouldIgnoreUrl(response.url())) {
+        return;
+      }
       if (response.status() >= 400) {
         // Ignorar favicons y assets no críticos
         if (response.url().includes('favicon') || response.url().includes('.map')) {
@@ -677,13 +690,20 @@ class VisualInspector {
 
     // Capturar requests fallidos
     page.on('requestfailed', (request: Request) => {
+      if (shouldIgnoreUrl(request.url())) {
+        return;
+      }
+      const failure = request.failure();
+      if (failure?.errorText?.includes('net::ERR_ABORTED') || failure?.errorText?.includes('NS_ERROR_ABORTED')) {
+        return;
+      }
       this.errorCollector.addError({
         route: routePath,
         viewport,
         type: 'network-error',
         severity: 'high',
         message: `Request failed: ${request.url()}`,
-        details: request.failure()?.errorText,
+        details: failure?.errorText,
         timestamp: new Date().toISOString(),
       });
     });
@@ -697,8 +717,28 @@ class VisualInspector {
         const viewportWidth = window.innerWidth;
         const overflowing: string[] = [];
 
+        const hasScrollableAncestor = (el: Element): boolean => {
+          let current: Element | null = el;
+          while (current) {
+            const style = window.getComputedStyle(current);
+            const overflowX = style.overflowX || style.overflow;
+            if (overflowX && ['auto', 'scroll', 'hidden', 'clip'].includes(overflowX)) {
+              return true;
+            }
+            current = current.parentElement;
+          }
+          return false;
+        };
+
         elements.forEach((el) => {
           const rect = el.getBoundingClientRect();
+          const style = window.getComputedStyle(el);
+          if (style.position === 'fixed' || style.position === 'absolute') {
+            return;
+          }
+          if (hasScrollableAncestor(el)) {
+            return;
+          }
 
           // Detectar si el elemento se sale del viewport horizontalmente
           if (rect.right > viewportWidth + 10) {

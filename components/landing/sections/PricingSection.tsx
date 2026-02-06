@@ -378,29 +378,31 @@ export function PricingSection() {
               ¿Por qué elegir INMOVA?
             </h3>
           </div>
-          <div className="bg-white rounded-b-xl shadow-lg overflow-hidden border border-t-0">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-indigo-100">
-                  <th className="px-4 py-3 text-left text-sm font-bold text-indigo-900">Característica</th>
-                  <th className="px-4 py-3 text-center text-sm font-bold text-indigo-900">INMOVA</th>
-                  <th className="px-4 py-3 text-center text-sm font-bold text-gray-700">Otras plataformas</th>
-                </tr>
-              </thead>
-              <tbody>
-                {featureComparison.map((row, i) => (
-                  <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-700">{row.feature}</td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="text-sm font-semibold text-green-600">{row.inmova}</span>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="text-sm text-gray-500">{row.others}</span>
-                    </td>
+          <div className="bg-white rounded-b-xl shadow-lg border border-t-0">
+            <div className="overflow-x-auto">
+              <table className="min-w-[640px] w-full">
+                <thead>
+                  <tr className="bg-indigo-100">
+                    <th className="px-4 py-3 text-left text-sm font-bold text-indigo-900">Característica</th>
+                    <th className="px-4 py-3 text-center text-sm font-bold text-indigo-900">INMOVA</th>
+                    <th className="px-4 py-3 text-center text-sm font-bold text-gray-700">Otras plataformas</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {featureComparison.map((row, i) => (
+                    <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                      <td className="px-4 py-3 text-sm font-medium text-gray-700">{row.feature}</td>
+                      <td className="px-4 py-3 text-center">
+                        <span className="text-sm font-semibold text-green-600">{row.inmova}</span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className="text-sm text-gray-500">{row.others}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 

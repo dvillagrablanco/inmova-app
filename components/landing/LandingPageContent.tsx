@@ -29,7 +29,7 @@ export function LandingPageContent() {
     <>
       <StructuredData />
       <h1 className="sr-only">INMOVA - Plataforma PropTech Multi-Vertical para Gestión Inmobiliaria</h1>
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <main className="min-h-screen overflow-x-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         {/* Navigation */}
         <Navigation />
 
