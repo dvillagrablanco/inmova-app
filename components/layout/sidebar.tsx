@@ -1611,12 +1611,6 @@ const administradorEmpresaItems = [
     icon: Scan,
     roles: ['administrador', 'super_admin'],
   },
-  {
-    name: 'Seguros',
-    href: '/admin/seguros',
-    icon: Shield,
-    roles: ['administrador', 'super_admin'],
-  },
   // === GESTIÓN FISCAL ===
   {
     name: 'Impuestos',
