@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { uploadFile, deleteFile } from '@/lib/s3';
-import logger, { logError } from '@/lib/logger';
+import { uploadFile } from '@/lib/s3';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -15,6 +15,16 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url);
+  const queryCompanyId = searchParams.get('companyId');
+  const userRole = (session.user as any).role;
+  const sessionCompanyId = session.user.companyId;
+  const companyId =
+    queryCompanyId && (userRole === 'super_admin' || userRole === 'soporte')
+      ? queryCompanyId
+      : sessionCompanyId;
+  if (!companyId) {
+    return NextResponse.json({ error: 'Empresa no válida' }, { status: 400 });
+  }
   const tenantId = searchParams.get('tenantId');
   const unitId = searchParams.get('unitId');
   const buildingId = searchParams.get('buildingId');
@@ -23,13 +33,28 @@ export async function GET(req: NextRequest) {
   const tipo = searchParams.get('tipo');
 
   try {
-    const where: any = {};
-    if (tenantId) where.tenantId = tenantId;
-    if (unitId) where.unitId = unitId;
-    if (buildingId) where.buildingId = buildingId;
-    if (contractId) where.contractId = contractId;
-    if (folderId) where.folderId = folderId;
-    if (tipo) where.tipo = tipo;
+    const whereFilters: any = {};
+    if (tenantId) whereFilters.tenantId = tenantId;
+    if (unitId) whereFilters.unitId = unitId;
+    if (buildingId) whereFilters.buildingId = buildingId;
+    if (contractId) whereFilters.contractId = contractId;
+    if (folderId) whereFilters.folderId = folderId;
+    if (tipo) whereFilters.tipo = tipo;
+
+    const companyScope = {
+      OR: [
+        { building: { companyId } },
+        { unit: { building: { companyId } } },
+        { tenant: { companyId } },
+        { contract: { unit: { building: { companyId } } } },
+        { folder: { companyId } },
+      ],
+    };
+
+    const where =
+      Object.keys(whereFilters).length > 0
+        ? { AND: [companyScope, whereFilters] }
+        : companyScope;
 
     const documents = await prisma.document.findMany({
       where,
@@ -63,6 +88,17 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const { searchParams } = new URL(req.url);
+    const queryCompanyId = searchParams.get('companyId');
+    const userRole = (session.user as any).role;
+    const sessionCompanyId = session.user.companyId;
+    const companyId =
+      queryCompanyId && (userRole === 'super_admin' || userRole === 'soporte')
+        ? queryCompanyId
+        : sessionCompanyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Empresa no válida' }, { status: 400 });
+    }
     const formData = await req.formData();
     const file = formData.get('file') as File;
     const nombre = formData.get('nombre') as string;
@@ -78,6 +114,68 @@ export async function POST(req: NextRequest) {
 
     if (!file || !nombre || !tipo) {
       return NextResponse.json({ error: 'Campos requeridos faltantes' }, { status: 400 });
+    }
+
+    const [tenant, unit, building, contract, folder] = await Promise.all([
+      tenantId
+        ? prisma.tenant.findFirst({ where: { id: tenantId, companyId } })
+        : Promise.resolve(null),
+      unitId
+        ? prisma.unit.findFirst({ where: { id: unitId, building: { companyId } } })
+        : Promise.resolve(null),
+      buildingId
+        ? prisma.building.findFirst({ where: { id: buildingId, companyId } })
+        : Promise.resolve(null),
+      contractId
+        ? prisma.contract.findFirst({
+            where: { id: contractId, unit: { building: { companyId } } },
+          })
+        : Promise.resolve(null),
+      folderId
+        ? prisma.documentFolder.findFirst({ where: { id: folderId, companyId } })
+        : Promise.resolve(null),
+    ]);
+
+    if (tenantId && !tenant) {
+      return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
+    }
+    if (unitId && !unit) {
+      return NextResponse.json({ error: 'Unidad no encontrada' }, { status: 404 });
+    }
+    if (buildingId && !building) {
+      return NextResponse.json({ error: 'Edificio no encontrado' }, { status: 404 });
+    }
+    if (contractId && !contract) {
+      return NextResponse.json({ error: 'Contrato no encontrado' }, { status: 404 });
+    }
+    if (folderId && !folder) {
+      return NextResponse.json({ error: 'Carpeta no encontrada' }, { status: 404 });
+    }
+
+    let resolvedFolderId = folderId || undefined;
+    const hasRelation = tenantId || unitId || buildingId || contractId || folderId;
+
+    if (!hasRelation) {
+      const defaultFolder =
+        folder ||
+        (await prisma.documentFolder.findFirst({
+          where: { companyId, nombre: 'General', parentFolderId: null },
+        }));
+
+      if (defaultFolder) {
+        resolvedFolderId = defaultFolder.id;
+      } else {
+        const createdFolder = await prisma.documentFolder.create({
+          data: {
+            companyId,
+            nombre: 'General',
+            descripcion: 'Documentos generales',
+            color: '#111827',
+            icono: 'Folder',
+          },
+        });
+        resolvedFolderId = createdFolder.id;
+      }
     }
 
     // Upload file to S3
@@ -98,7 +196,7 @@ export async function POST(req: NextRequest) {
         unitId: unitId || undefined,
         buildingId: buildingId || undefined,
         contractId: contractId || undefined,
-        folderId: folderId || undefined,
+        folderId: resolvedFolderId,
         descripcion: descripcion || undefined,
         tags: tagsArray,
         fechaVencimiento: fechaVencimiento ? new Date(fechaVencimiento) : undefined,

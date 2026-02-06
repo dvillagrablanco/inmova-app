@@ -113,7 +113,8 @@ export default function DocumentosPage() {
 
   const fetchDocuments = async () => {
     try {
-      const res = await fetch('/api/documents');
+      const query = companyId ? `?companyId=${encodeURIComponent(companyId)}` : '';
+      const res = await fetch(`/api/documents${query}`);
       if (res.ok) {
         const data = await res.json();
         setDocuments(data);
@@ -135,6 +136,7 @@ export default function DocumentosPage() {
 
     setUploading(true);
     try {
+      const query = companyId ? `?companyId=${encodeURIComponent(companyId)}` : '';
       const formData = new FormData();
       formData.append('file', uploadForm.file);
       formData.append('nombre', uploadForm.nombre);
@@ -143,7 +145,7 @@ export default function DocumentosPage() {
         formData.append('fechaVencimiento', uploadForm.fechaVencimiento);
       }
 
-      const res = await fetch('/api/documents', {
+      const res = await fetch(`/api/documents${query}`, {
         method: 'POST',
         body: formData,
       });
@@ -166,7 +168,8 @@ export default function DocumentosPage() {
 
   const handleDownload = async (documentId: string) => {
     try {
-      const res = await fetch(`/api/documents/${documentId}/download`);
+      const query = companyId ? `?companyId=${encodeURIComponent(companyId)}` : '';
+      const res = await fetch(`/api/documents/${documentId}/download${query}`);
       if (res.ok) {
         const data = await res.json();
         const link = document.createElement('a');
@@ -190,7 +193,8 @@ export default function DocumentosPage() {
     }
 
     try {
-      const res = await fetch(`/api/documents/${documentId}`, {
+      const query = companyId ? `?companyId=${encodeURIComponent(companyId)}` : '';
+      const res = await fetch(`/api/documents/${documentId}${query}`, {
         method: 'DELETE',
       });
 

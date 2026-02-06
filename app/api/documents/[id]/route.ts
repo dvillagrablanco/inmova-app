@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { deleteFile, downloadFile } from '@/lib/s3';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -18,8 +17,30 @@ export async function GET(
   }
 
   try {
-    const document = await prisma.document.findUnique({
-      where: { id: params.id },
+    const { searchParams } = new URL(req.url);
+    const queryCompanyId = searchParams.get('companyId');
+    const userRole = (session.user as any).role;
+    const sessionCompanyId = session.user.companyId;
+    const companyId =
+      queryCompanyId && (userRole === 'super_admin' || userRole === 'soporte')
+        ? queryCompanyId
+        : sessionCompanyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Empresa no válida' }, { status: 400 });
+    }
+
+    const companyScope = {
+      OR: [
+        { building: { companyId } },
+        { unit: { building: { companyId } } },
+        { tenant: { companyId } },
+        { contract: { unit: { building: { companyId } } } },
+        { folder: { companyId } },
+      ],
+    };
+
+    const document = await prisma.document.findFirst({
+      where: { AND: [{ id: params.id }, companyScope] },
       include: {
         tenant: { select: { nombreCompleto: true } },
         unit: { select: { numero: true } },
@@ -49,8 +70,30 @@ export async function DELETE(
   }
 
   try {
-    const document = await prisma.document.findUnique({
-      where: { id: params.id },
+    const { searchParams } = new URL(req.url);
+    const queryCompanyId = searchParams.get('companyId');
+    const userRole = (session.user as any).role;
+    const sessionCompanyId = session.user.companyId;
+    const companyId =
+      queryCompanyId && (userRole === 'super_admin' || userRole === 'soporte')
+        ? queryCompanyId
+        : sessionCompanyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Empresa no válida' }, { status: 400 });
+    }
+
+    const companyScope = {
+      OR: [
+        { building: { companyId } },
+        { unit: { building: { companyId } } },
+        { tenant: { companyId } },
+        { contract: { unit: { building: { companyId } } } },
+        { folder: { companyId } },
+      ],
+    };
+
+    const document = await prisma.document.findFirst({
+      where: { AND: [{ id: params.id }, companyScope] },
     });
 
     if (!document) {

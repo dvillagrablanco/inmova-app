@@ -29,16 +29,34 @@ export async function GET(
       );
     }
 
+    const { searchParams } = new URL(req.url);
+    const queryCompanyId = searchParams.get('companyId');
+    const userRole = (session.user as any).role;
+    const sessionCompanyId = session.user.companyId;
+    const companyId =
+      queryCompanyId && (userRole === 'super_admin' || userRole === 'soporte')
+        ? queryCompanyId
+        : sessionCompanyId;
+    if (!companyId) {
+      return NextResponse.json(
+        { error: 'Empresa no válida' },
+        { status: 400 }
+      );
+    }
+
+    const companyScope = {
+      OR: [
+        { building: { companyId } },
+        { unit: { building: { companyId } } },
+        { tenant: { companyId } },
+        { contract: { unit: { building: { companyId } } } },
+        { folder: { companyId } },
+      ],
+    };
+
     // 2. Obtener documento de BD
-    const document = await prisma.document.findUnique({
-      where: { id: params.id },
-      include: {
-        tenant: {
-          select: {
-            id: true,
-          },
-        },
-      },
+    const document = await prisma.document.findFirst({
+      where: { AND: [{ id: params.id }, companyScope] },
     });
 
     if (!document) {
@@ -46,15 +64,6 @@ export async function GET(
         { error: 'Documento no encontrado' },
         { status: 404 }
       );
-    }
-
-    // 3. Verificar permisos (por ahora permitir acceso con autenticación)
-    // TODO: Implementar lógica de permisos más granular
-    const canAccess = session.user.role === 'super_admin' || session.user.role === 'administrador';
-
-    if (!canAccess && document.tenantId !== session.user.id) {
-      // Verificar si tiene acceso por contrato o propiedad
-      // Por ahora, permitir si está autenticado
     }
 
     const storagePath = document.cloudStoragePath;
