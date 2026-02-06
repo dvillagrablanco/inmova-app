@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import {
@@ -150,6 +150,7 @@ const aseguradoras = [
 
 export default function SegurosPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session, status } = useSession();
   const [seguros, setSeguros] = useState<Insurance[]>([]);
   const [filteredSeguros, setFilteredSeguros] = useState<Insurance[]>([]);
@@ -193,6 +194,7 @@ export default function SegurosPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, tipoFilter, estadoFilter, aseguradoraFilter, seguros]);
 
+  const dashboardHref = pathname?.startsWith('/admin') ? '/admin/dashboard' : '/dashboard';
   const normalizeStatus = (estado?: string) => (estado || '').toLowerCase();
 
   const getPrimaValue = (seguro: Insurance) =>
@@ -201,7 +203,11 @@ export default function SegurosPage() {
   const getCoberturaValue = (seguro: Insurance) => {
     if (typeof seguro.sumaAsegurada === 'number') return seguro.sumaAsegurada;
     if (typeof seguro.cobertura === 'number') return seguro.cobertura;
-    const parsed = Number(String(seguro.cobertura || '').replace(/[€$]/g, '').replace(',', '.'));
+    const parsed = Number(
+      String(seguro.cobertura || '')
+        .replace(/[€$]/g, '')
+        .replace(',', '.')
+    );
     return Number.isNaN(parsed) ? 0 : parsed;
   };
 
@@ -418,7 +424,7 @@ export default function SegurosPage() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/dashboard">
+                  <BreadcrumbLink href={dashboardHref}>
                     <Home className="h-4 w-4" />
                   </BreadcrumbLink>
                 </BreadcrumbItem>
@@ -595,10 +601,10 @@ export default function SegurosPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="activa">Activos</SelectItem>
-                <SelectItem value="vencida">Vencidos</SelectItem>
-                <SelectItem value="cancelada">Cancelados</SelectItem>
-                <SelectItem value="pendiente_renovacion">Pendiente renovación</SelectItem>
+                  <SelectItem value="activa">Activos</SelectItem>
+                  <SelectItem value="vencida">Vencidos</SelectItem>
+                  <SelectItem value="cancelada">Cancelados</SelectItem>
+                  <SelectItem value="pendiente_renovacion">Pendiente renovación</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -787,11 +793,7 @@ export default function SegurosPage() {
         </Dialog>
 
         {/* Asistente IA de Documentos */}
-        <AIDocumentAssistant 
-          context="seguros"
-          variant="floating"
-          position="bottom-right"
-        />
+        <AIDocumentAssistant context="seguros" variant="floating" position="bottom-right" />
       </div>
     </AuthenticatedLayout>
   );

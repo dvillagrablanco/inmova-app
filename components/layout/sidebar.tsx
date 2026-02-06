@@ -1242,9 +1242,21 @@ const herramientasInversionNavItems = [
     roles: ['super_admin', 'administrador', 'gestor', 'propietario'],
     badge: 'Nuevo',
     subItems: [
-      { name: 'Calculadora Rentabilidad', href: '/dashboard/herramientas?tool=rental-yield', icon: Calculator },
-      { name: 'Calculadora Hipoteca', href: '/dashboard/herramientas?tool=mortgage', icon: Building2 },
-      { name: 'Gastos Compraventa', href: '/dashboard/herramientas?tool=transaction-costs', icon: DollarSign },
+      {
+        name: 'Calculadora Rentabilidad',
+        href: '/dashboard/herramientas?tool=rental-yield',
+        icon: Calculator,
+      },
+      {
+        name: 'Calculadora Hipoteca',
+        href: '/dashboard/herramientas?tool=mortgage',
+        icon: Building2,
+      },
+      {
+        name: 'Gastos Compraventa',
+        href: '/dashboard/herramientas?tool=transaction-costs',
+        icon: DollarSign,
+      },
     ],
   },
 ];
@@ -1573,7 +1585,11 @@ const administradorEmpresaItems = [
     roles: ['administrador', 'super_admin'],
     subItems: [
       { name: 'Mis Integraciones', href: '/admin/herramientas-empresa?tab=propias', icon: Wrench },
-      { name: 'Servicios Inmova', href: '/admin/herramientas-empresa?tab=compartidas', icon: Share2 },
+      {
+        name: 'Servicios Inmova',
+        href: '/admin/herramientas-empresa?tab=compartidas',
+        icon: Share2,
+      },
     ],
   },
   // === HERRAMIENTAS ===
@@ -1593,6 +1609,12 @@ const administradorEmpresaItems = [
     name: 'OCR Import',
     href: '/admin/ocr-import',
     icon: Scan,
+    roles: ['administrador', 'super_admin'],
+  },
+  {
+    name: 'Seguros',
+    href: '/admin/seguros',
+    icon: Shield,
     roles: ['administrador', 'super_admin'],
   },
   // === GESTIÓN FISCAL ===
@@ -1928,10 +1950,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
         if (res.ok) {
           const data = await res.json();
           // Asegurar que siempre sea un array
-          const modules = Array.isArray(data.activeModules) 
-            ? data.activeModules 
-            : Array.isArray(data) 
-              ? data 
+          const modules = Array.isArray(data.activeModules)
+            ? data.activeModules
+            : Array.isArray(data)
+              ? data
               : [];
           setActiveModules(modules);
         }
@@ -2039,7 +2061,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
 
   // Filtrar items según rol y módulos activos
   // skipModuleCheck: true para items de plataforma que no dependen de módulos de empresa
-  const filterItems = (items: any[], useSelectedCompanyModules: boolean = false, skipModuleCheck: boolean = false) => {
+  const filterItems = (
+    items: any[],
+    useSelectedCompanyModules: boolean = false,
+    skipModuleCheck: boolean = false
+  ) => {
     // Validación: Si no hay rol, retornar vacío
     if (!role) return [];
 
@@ -2060,7 +2086,9 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
       Array.isArray(selectedCompanyModules) &&
       selectedCompanyModules.length > 0
         ? selectedCompanyModules
-        : Array.isArray(activeModules) ? activeModules : [];
+        : Array.isArray(activeModules)
+          ? activeModules
+          : [];
 
     let filtered = items.filter((item) => {
       // Validación: item debe tener roles
@@ -2112,9 +2140,15 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const filteredAlquilerComercialItems = filterItems(alquilerComercialNavItems, useCompanyModules);
   const filteredAdminFincasItems = filterItems(adminFincasItems, useCompanyModules);
   const filteredStudentHousingItems = filterItems(studentHousingNavItems, useCompanyModules);
-  const filteredViajesCorporativosItems = filterItems(viajesCorporativosNavItems, useCompanyModules);
+  const filteredViajesCorporativosItems = filterItems(
+    viajesCorporativosNavItems,
+    useCompanyModules
+  );
   const filteredViviendaSocialItems = filterItems(viviendaSocialNavItems, useCompanyModules);
-  const filteredRealEstateDeveloperItems = filterItems(realEstateDeveloperNavItems, useCompanyModules);
+  const filteredRealEstateDeveloperItems = filterItems(
+    realEstateDeveloperNavItems,
+    useCompanyModules
+  );
   const filteredWorkspaceItems = filterItems(workspaceNavItems, useCompanyModules);
   const filteredWarehouseItems = filterItems(warehouseNavItems, useCompanyModules);
 
@@ -2122,7 +2156,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const filteredFinanzasItems = filterItems(finanzasNavItems, useCompanyModules);
   const filteredAnalyticsItems = filterItems(analyticsNavItems, useCompanyModules);
   const filteredOperacionesItems = filterItems(operacionesNavItems, useCompanyModules);
-  const filteredHerramientasInversionItems = filterItems(herramientasInversionNavItems, useCompanyModules);
+  const filteredHerramientasInversionItems = filterItems(
+    herramientasInversionNavItems,
+    useCompanyModules
+  );
   const filteredComunicacionesItems = filterItems(comunicacionesNavItems, useCompanyModules);
   const filteredDocumentosLegalItems = filterItems(documentosLegalNavItems, useCompanyModules);
   const filteredCrmMarketingItems = filterItems(crmMarketingNavItems, useCompanyModules);
@@ -2256,15 +2293,9 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
 
   // Componente para nav items con submenús (Super Admin)
   // Ahora acepta companyId opcional para parametrizar URLs
-  const NavItemWithSubs = ({ 
-    item, 
-    companyId 
-  }: { 
-    item: SidebarItem; 
-    companyId?: string;
-  }) => {
+  const NavItemWithSubs = ({ item, companyId }: { item: SidebarItem; companyId?: string }) => {
     const [isExpanded, setIsExpanded] = useState(false);
-    
+
     // Función para añadir companyId a URLs
     const appendCompanyId = (href: string): string => {
       if (!companyId) return href;
@@ -2272,7 +2303,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
         ? `${href}&companyId=${companyId}`
         : `${href}?companyId=${companyId}`;
     };
-    
+
     const itemHref = appendCompanyId(item.href);
     const isActive = pathname?.startsWith(item.href) ?? false;
     const hasSubItems = item.subItems && item.subItems.length > 0;
@@ -2613,7 +2644,9 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               )}
 
             {/* 1. LIVING RESIDENCIAL (Alquiler + Coliving + Student Housing) */}
-            {(filteredAlquilerResidencialItems.length > 0 || filteredCoLivingItems.length > 0 || filteredStudentHousingItems.length > 0) && (
+            {(filteredAlquilerResidencialItems.length > 0 ||
+              filteredCoLivingItems.length > 0 ||
+              filteredStudentHousingItems.length > 0) && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('alquilerResidencial')}
@@ -2634,14 +2667,18 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     ))}
                     {/* Coliving / Habitaciones */}
                     {filteredCoLivingItems.length > 0 && (
-                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">Coliving</div>
+                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
+                        Coliving
+                      </div>
                     )}
                     {filteredCoLivingItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {/* Student Housing */}
                     {filteredStudentHousingItems.length > 0 && (
-                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">Student Housing</div>
+                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
+                        Student Housing
+                      </div>
                     )}
                     {filteredStudentHousingItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
@@ -2674,7 +2711,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             {/* Coliving y Student Housing en Living Residencial, Workspace en Comercial */}
 
             {/* 4. CONSTRUCCIÓN / PROMOCIÓN */}
-            {(filteredBuildToRentItems.length > 0 || filteredFlippingItems.length > 0 || filteredConstruccionItems.length > 0 || filteredEwoorkerItems.length > 0 || filteredRealEstateDeveloperItems.length > 0) && (
+            {(filteredBuildToRentItems.length > 0 ||
+              filteredFlippingItems.length > 0 ||
+              filteredConstruccionItems.length > 0 ||
+              filteredEwoorkerItems.length > 0 ||
+              filteredRealEstateDeveloperItems.length > 0) && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('construccion')}
@@ -2691,7 +2732,9 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   <div className="space-y-1 mt-1">
                     {/* Proyectos de Obra */}
                     {filteredConstruccionItems.length > 0 && (
-                      <div className="ml-2 mt-1 mb-1 text-[9px] text-gray-500 uppercase">Obra Nueva / Reformas</div>
+                      <div className="ml-2 mt-1 mb-1 text-[9px] text-gray-500 uppercase">
+                        Obra Nueva / Reformas
+                      </div>
                     )}
                     {filteredConstruccionItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
@@ -2701,21 +2744,27 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     ))}
                     {/* Flipping */}
                     {filteredFlippingItems.length > 0 && (
-                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">House Flipping</div>
+                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
+                        House Flipping
+                      </div>
                     )}
                     {filteredFlippingItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {/* Promociones Inmobiliarias */}
                     {filteredRealEstateDeveloperItems.length > 0 && (
-                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">Promociones</div>
+                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
+                        Promociones
+                      </div>
                     )}
                     {filteredRealEstateDeveloperItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {/* eWoorker - Marketplace B2B */}
                     {filteredEwoorkerItems.length > 0 && (
-                      <div className="ml-2 mt-2 mb-1 text-[9px] text-amber-500 uppercase">🔧 eWoorker (B2B)</div>
+                      <div className="ml-2 mt-2 mb-1 text-[9px] text-amber-500 uppercase">
+                        🔧 eWoorker (B2B)
+                      </div>
                     )}
                     {filteredEwoorkerItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
@@ -2726,7 +2775,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             )}
 
             {/* 3. INMUEBLES COMERCIALES (Oficinas + Locales + Naves/Logística + Workspace) */}
-            {(filteredComercialItems.length > 0 || filteredAlquilerComercialItems.length > 0 || filteredWarehouseItems.length > 0 || filteredWorkspaceItems.length > 0) && (
+            {(filteredComercialItems.length > 0 ||
+              filteredAlquilerComercialItems.length > 0 ||
+              filteredWarehouseItems.length > 0 ||
+              filteredWorkspaceItems.length > 0) && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('comercial')}
@@ -2751,14 +2803,18 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     ))}
                     {/* Naves y Logística */}
                     {filteredWarehouseItems.length > 0 && (
-                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">Logística / Almacenes</div>
+                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
+                        Logística / Almacenes
+                      </div>
                     )}
                     {filteredWarehouseItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {/* Workspace / Coworking */}
                     {filteredWorkspaceItems.length > 0 && (
-                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">Workspace</div>
+                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
+                        Workspace
+                      </div>
                     )}
                     {filteredWorkspaceItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
@@ -3135,35 +3191,36 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
 
             {/* ADMINISTRACIÓN DE EMPRESA (Solo para Administrador - NO Super Admin) */}
             {/* Gestión de Empresa - Visible para administrador y super_admin */}
-            {filteredAdministradorEmpresaItems.length > 0 && (role === 'administrador' || role === 'super_admin') && (
-              <>
-                <div className="px-2 py-3 mb-2 border-t border-gray-800">
-                  <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                    ⚙️ Configuración de Mi Empresa
-                  </h3>
-                </div>
-                <div className="mb-4">
-                  <button
-                    onClick={() => toggleSection('administradorEmpresa')}
-                    className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                  >
-                    <span>🏢 Gestión de Empresa</span>
-                    {expandedSections.administradorEmpresa ? (
-                      <ChevronDown size={16} />
-                    ) : (
-                      <ChevronRight size={16} />
+            {filteredAdministradorEmpresaItems.length > 0 &&
+              (role === 'administrador' || role === 'super_admin') && (
+                <>
+                  <div className="px-2 py-3 mb-2 border-t border-gray-800">
+                    <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                      ⚙️ Configuración de Mi Empresa
+                    </h3>
+                  </div>
+                  <div className="mb-4">
+                    <button
+                      onClick={() => toggleSection('administradorEmpresa')}
+                      className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                    >
+                      <span>🏢 Gestión de Empresa</span>
+                      {expandedSections.administradorEmpresa ? (
+                        <ChevronDown size={16} />
+                      ) : (
+                        <ChevronRight size={16} />
+                      )}
+                    </button>
+                    {expandedSections.administradorEmpresa && (
+                      <div className="space-y-1 mt-1">
+                        {filteredAdministradorEmpresaItems.map((item) => (
+                          <NavItemWithSubs key={item.href} item={item as SidebarItem} />
+                        ))}
+                      </div>
                     )}
-                  </button>
-                  {expandedSections.administradorEmpresa && (
-                    <div className="space-y-1 mt-1">
-                      {filteredAdministradorEmpresaItems.map((item) => (
-                        <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
+                  </div>
+                </>
+              )}
 
             {/* No results message */}
             {searchQuery && favoriteItems.length === 0 && (
