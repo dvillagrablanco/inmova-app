@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 import { withRateLimit } from '@/lib/rate-limiting';
+import { getRedisClient } from '@/lib/redis';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -12,6 +13,38 @@ const SUGGESTIONS_RATE_LIMIT = {
   interval: 60 * 1000,
   uniqueTokenPerInterval: 30,
 };
+const SUGGESTIONS_CACHE_TTL_SECONDS = 60;
+const SUGGESTIONS_CACHE_PREFIX = 'ai:suggestions:';
+const SUGGESTIONS_TIMEOUT_MS = 12000;
+
+function getCacheKey(userId: string) {
+  return `${SUGGESTIONS_CACHE_PREFIX}${userId}`;
+}
+
+async function getCachedSuggestions(userId: string) {
+  try {
+    const redis = getRedisClient();
+    if (!redis) return null;
+    const cached = await redis.get(getCacheKey(userId));
+    return cached ? JSON.parse(cached) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function setCachedSuggestions(userId: string, payload: unknown) {
+  try {
+    const redis = getRedisClient();
+    if (!redis) return;
+    await redis.setex(
+      getCacheKey(userId),
+      SUGGESTIONS_CACHE_TTL_SECONDS,
+      JSON.stringify(payload)
+    );
+  } catch (error) {
+    logger.warn('[AI Suggestions] Error setting cache:', error);
+  }
+}
 
 function isSuggestionsAIConfigured() {
   return !!process.env.ABACUSAI_API_KEY;
@@ -90,26 +123,56 @@ Genera sugerencias relevantes para ayudar al usuario.`;
     { role: 'user', content: userMessage },
   ];
 
-  const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.ABACUSAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4.1-mini',
-      messages,
-      response_format: { type: 'json_object' },
-      temperature: 0.5,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error('Error calling LLM API');
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), SUGGESTIONS_TIMEOUT_MS);
+  let response: Response;
+  try {
+    response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.ABACUSAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4.1-mini',
+        messages,
+        response_format: { type: 'json_object' },
+        temperature: 0.5,
+      }),
+      signal: controller.signal,
+    });
+  } catch (error: any) {
+    if (error?.name === 'AbortError') {
+      throw new Error('Timeout al llamar al proveedor de IA');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
 
-  const data = await response.json();
-  const result = JSON.parse(data.choices[0].message.content);
+  if (!response.ok) {
+    const errorBody = await response.text().catch(() => '');
+    throw new Error(`Error calling LLM API (${response.status}): ${errorBody}`);
+  }
+
+  let data: any;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error('Respuesta inválida del proveedor de IA');
+  }
+
+  const content = data?.choices?.[0]?.message?.content;
+  if (!content) {
+    throw new Error('Respuesta incompleta del proveedor de IA');
+  }
+
+  let result: any;
+  try {
+    result = JSON.parse(content);
+  } catch {
+    throw new Error('Respuesta JSON inválida del proveedor de IA');
+  }
   return { result };
 }
 
@@ -131,6 +194,16 @@ export async function GET(request: NextRequest) {
           return NextResponse.json({ suggestions: [] }, { status: 200 });
         }
 
+        const { searchParams } = new URL(request.url);
+        const skipCache = searchParams.get('fresh') === 'true';
+
+        if (!skipCache) {
+          const cached = await getCachedSuggestions(session.user.id);
+          if (cached) {
+            return NextResponse.json(cached);
+          }
+        }
+
         const { result, error, status } = await generateSuggestions({
           userId: session.user.id,
         });
@@ -139,6 +212,7 @@ export async function GET(request: NextRequest) {
           return NextResponse.json({ error }, { status });
         }
 
+        await setCachedSuggestions(session.user.id, result);
         return NextResponse.json(result);
       } catch (error) {
         logger.error('Error generating suggestions (GET):', error);

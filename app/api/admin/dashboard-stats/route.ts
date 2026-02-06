@@ -7,6 +7,7 @@ import { es } from 'date-fns/locale';
 import { isSuperAdmin } from '@/lib/admin-roles';
 import { getRedisClient } from '@/lib/redis';
 import logger from '@/lib/logger';
+import { withRateLimit } from '@/lib/rate-limiting';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -21,6 +22,10 @@ const CACHE_TTL = {
   OVERVIEW: 60, // 1 minuto para métricas en tiempo real
   HISTORICAL: 3600, // 1 hora para datos históricos (cambian poco)
   FINANCIAL: 300, // 5 minutos para datos financieros
+};
+const DASHBOARD_STATS_RATE_LIMIT = {
+  interval: 60 * 1000,
+  uniqueTokenPerInterval: 120,
 };
 
 // Helper para cache
@@ -46,7 +51,10 @@ async function setCache(key: string, data: any, ttl: number): Promise<void> {
 }
 
 export async function GET(request: NextRequest) {
-  try {
+  return withRateLimit(
+    request,
+    async () => {
+      try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
@@ -366,4 +374,7 @@ export async function GET(request: NextRequest) {
       _cache: { overview: false, financial: false, historical: false },
     });
   }
+    },
+    DASHBOARD_STATS_RATE_LIMIT
+  );
 }

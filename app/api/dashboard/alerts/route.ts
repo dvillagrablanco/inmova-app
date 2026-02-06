@@ -10,6 +10,7 @@ import { prisma } from '@/lib/db';
 import { addDays, differenceInDays, startOfDay } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
 import { getRedisClient } from '@/lib/redis';
+import { withRateLimit } from '@/lib/rate-limiting';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -40,6 +41,10 @@ interface AlertsResponse {
 
 const CACHE_TTL_SECONDS = 60;
 const CACHE_KEY_PREFIX = 'dashboard:alerts:';
+const ALERTS_RATE_LIMIT = {
+  interval: 60 * 1000,
+  uniqueTokenPerInterval: 90,
+};
 
 function getCacheKey(companyId: string) {
   return `${CACHE_KEY_PREFIX}${companyId}`;
@@ -67,7 +72,10 @@ async function setCachedAlerts(key: string, payload: AlertsResponse): Promise<vo
 }
 
 export async function GET(request: NextRequest) {
-  try {
+  return withRateLimit(
+    request,
+    async () => {
+      try {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
@@ -313,10 +321,16 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    await setCachedAlerts(cacheKey, responsePayload);
-    return NextResponse.json(responsePayload);
-  } catch (error) {
-    logger.error('Error obteniendo alertas:', error);
-    return NextResponse.json({ error: 'Error al obtener alertas' }, { status: 500 });
-  }
+        await setCachedAlerts(cacheKey, responsePayload);
+        return NextResponse.json(responsePayload);
+      } catch (error) {
+        logger.error('Error obteniendo alertas:', error);
+        return NextResponse.json(
+          { error: 'Error al obtener alertas' },
+          { status: 500 }
+        );
+      }
+    },
+    ALERTS_RATE_LIMIT
+  );
 }
