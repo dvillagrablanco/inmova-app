@@ -161,7 +161,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     return [...staticRoutes, ...propertyRoutes, ...buildingRoutes];
   } catch (error) {
-    logger.error('Error generating sitemap:', error);
+    logger.warn('Error generating sitemap, using static routes:', error);
     // En caso de error, retornar solo las rutas estáticas
     return staticRoutes;
   }

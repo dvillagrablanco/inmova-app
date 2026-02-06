@@ -113,7 +113,7 @@ export async function isRedisAvailable(): Promise<boolean> {
     await redis.ping();
     return true;
   } catch (error) {
-    logger.error('Redis ping failed:', error);
+    logger.warn('Redis ping failed:', error);
     return false;
   }
 }

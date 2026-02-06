@@ -528,6 +528,17 @@ async function enviarSMSConFallback(telefono: string, mensaje: string): Promise<
 }
 
 /**
+ * Envía un SMS directo (sin logs internos) con fallback automático
+ * Útil para notificaciones rápidas fuera del flujo de plantillas.
+ */
+export async function enviarSMSDirecto(
+  telefono: string,
+  mensaje: string
+): Promise<{ exitoso: boolean; sid?: string; error?: string }> {
+  return enviarSMSConFallback(telefono, mensaje);
+}
+
+/**
  * GENERA SMS AUTOMÁTICOS BASADOS EN EVENTOS
  * 
  * Ejemplos de eventos:

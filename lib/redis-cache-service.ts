@@ -25,12 +25,13 @@ class RedisCacheService {
   private memoryCache: Map<string, CacheEntry<any>>;
   private cleanupInterval: NodeJS.Timeout | null;
   private redisAvailable: boolean;
+  private initialized: boolean;
 
   constructor() {
     this.memoryCache = new Map();
     this.cleanupInterval = null;
     this.redisAvailable = false;
-    this.initialize();
+    this.initialized = false;
   }
 
   /**
@@ -45,6 +46,12 @@ class RedisCacheService {
     } else {
       logger.info('✅ Redis cache service initialized');
     }
+  }
+
+  private async ensureInitialized(): Promise<void> {
+    if (this.initialized) return;
+    this.initialized = true;
+    await this.initialize();
   }
 
   /**
@@ -86,6 +93,7 @@ class RedisCacheService {
    * Obtiene un valor del caché (Redis o memoria)
    */
   async get<T>(key: string): Promise<T | undefined> {
+    await this.ensureInitialized();
     const fullKey = this.getKey(key);
 
     // Intentar Redis primero si está disponible
@@ -130,6 +138,7 @@ class RedisCacheService {
    * Almacena un valor en el caché (Redis o memoria)
    */
   async set<T>(key: string, data: T, ttl: number = DEFAULT_TTL): Promise<void> {
+    await this.ensureInitialized();
     const fullKey = this.getKey(key);
 
     // Intentar Redis primero si está disponible
@@ -162,6 +171,7 @@ class RedisCacheService {
    * Elimina una entrada específica del caché
    */
   async delete(key: string): Promise<boolean> {
+    await this.ensureInitialized();
     const fullKey = this.getKey(key);
     let deleted = false;
 
@@ -192,6 +202,7 @@ class RedisCacheService {
    * Invalida múltiples entradas que coincidan con un patrón
    */
   async invalidateByPattern(pattern: string): Promise<number> {
+    await this.ensureInitialized();
     let invalidated = 0;
 
     // Redis: usar SCAN para encontrar claves

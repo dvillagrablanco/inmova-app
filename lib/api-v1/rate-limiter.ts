@@ -7,18 +7,35 @@ import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 
 import logger from '@/lib/logger';
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL || 'http://localhost:6379',
-  token: process.env.UPSTASH_REDIS_REST_TOKEN || '',
-});
+
+const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
+const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+const redis = upstashUrl && upstashToken
+  ? new Redis({
+      url: upstashUrl,
+      token: upstashToken,
+    })
+  : null;
 
 // Rate limiter global (1000 req/min por defecto)
-export const apiV1RateLimiter = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(1000, '1 m'),
-  prefix: 'api:v1',
-  analytics: true,
-});
+export const apiV1RateLimiter = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(1000, '1 m'),
+      prefix: 'api:v1',
+      analytics: true,
+    })
+  : null;
+
+function fallbackRateLimit(limit: number) {
+  return {
+    success: true,
+    limit,
+    remaining: limit - 1,
+    reset: Date.now() + 60000,
+  };
+}
 
 /**
  * Verificar rate limit para una empresa
@@ -34,6 +51,10 @@ export async function checkRateLimit(
 }> {
   try {
     // Si hay un límite custom (de la API key), crear rate limiter específico
+    if (!redis || !apiV1RateLimiter) {
+      return fallbackRateLimit(customLimit || 1000);
+    }
+
     if (customLimit && customLimit !== 1000) {
       const customLimiter = new Ratelimit({
         redis,
@@ -52,12 +73,7 @@ export async function checkRateLimit(
     logger.error('[Rate Limiter Error]:', error);
 
     // En caso de error de Redis, permitir el request (fail-open)
-    return {
-      success: true,
-      limit: customLimit || 1000,
-      remaining: 999,
-      reset: Date.now() + 60000,
-    };
+    return fallbackRateLimit(customLimit || 1000);
   }
 }
 
