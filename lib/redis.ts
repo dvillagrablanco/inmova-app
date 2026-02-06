@@ -45,7 +45,7 @@ export function getRedisClient(): Redis | null {
     });
 
     redisClient.on('error', (error) => {
-      logger.error('[Redis] Error:', error);
+      logger.warn('[Redis] Error:', error);
     });
 
     redisClient.on('ready', () => {
@@ -54,13 +54,13 @@ export function getRedisClient(): Redis | null {
 
     // Conectar
     redisClient.connect().catch((error) => {
-      logger.error('[Redis] Error al conectar:', error);
+      logger.warn('[Redis] Error al conectar:', error);
       redisClient = null;
     });
 
     return redisClient;
   } catch (error) {
-    logger.error('[Redis] Error al inicializar:', error);
+    logger.warn('[Redis] Error al inicializar:', error);
     return null;
   }
 }

@@ -41,8 +41,8 @@ const nextConfig = {
     typedRoutes: true, // Type-safe routing
     turbo: {
       // Turbopack optimizations
-      loaders: {
-        '.svg': ['@svgr/webpack'],
+      rules: {
+        '*.svg': ['@svgr/webpack'],
       },
     },
   },
