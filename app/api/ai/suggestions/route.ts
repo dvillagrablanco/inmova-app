@@ -7,38 +7,34 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+function isSuggestionsAIConfigured() {
+  return !!process.env.ABACUSAI_API_KEY;
+}
 
-/**
- * API para generar sugerencias proactivas usando IA
- */
-export async function POST(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+async function generateSuggestions({
+  userId,
+  context,
+}: {
+  userId: string;
+  context?: Record<string, unknown>;
+}) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
 
-    const { userId, context } = await request.json();
+  if (!user) {
+    return { error: 'User not found', status: 404 as const };
+  }
 
-    // Obtener datos del usuario para contexto
-    const user = await prisma.user.findUnique({
-      where: { id: userId || session.user.id },
-    });
+  const userContext = {
+    buildingsCount: 0,
+    tenantsCount: 0,
+    contractsCount: 0,
+    hasCompletedSetup: !!(user.name && user.email),
+    ...context,
+  };
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
-    // Construir contexto del usuario (simplificado)
-    const userContext = {
-      buildingsCount: 0,
-      tenantsCount: 0,
-      contractsCount: 0,
-      hasCompletedSetup: !!(user.name && user.email),
-      ...context,
-    };
-
-    const systemPrompt = `Eres un asistente experto en gestión inmobiliaria que genera sugerencias proactivas para mejorar la productividad del usuario.
+  const systemPrompt = `Eres un asistente experto en gestión inmobiliaria que genera sugerencias proactivas para mejorar la productividad del usuario.
 
 Basándote en el contexto del usuario, genera hasta 3 sugerencias relevantes y accionables.
 
@@ -75,7 +71,7 @@ Responde en JSON con la siguiente estructura:
 
 Respond with raw JSON only. Do not include code blocks, markdown, or any other formatting.`;
 
-    const userMessage = `Contexto del usuario:
+  const userMessage = `Contexto del usuario:
 - Edificios registrados: ${userContext.buildingsCount}
 - Inquilinos registrados: ${userContext.tenantsCount}
 - Contratos activos: ${userContext.contractsCount}
@@ -83,32 +79,86 @@ Respond with raw JSON only. Do not include code blocks, markdown, or any other f
 
 Genera sugerencias relevantes para ayudar al usuario.`;
 
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userMessage },
-    ];
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userMessage },
+  ];
 
-    // Llamada al LLM API
-    const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.ABACUSAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4.1-mini',
-        messages,
-        response_format: { type: 'json_object' },
-        temperature: 0.5,
-      }),
-    });
+  const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.ABACUSAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: 'gpt-4.1-mini',
+      messages,
+      response_format: { type: 'json_object' },
+      temperature: 0.5,
+    }),
+  });
 
-    if (!response.ok) {
-      throw new Error('Error calling LLM API');
+  if (!response.ok) {
+    throw new Error('Error calling LLM API');
+  }
+
+  const data = await response.json();
+  const result = JSON.parse(data.choices[0].message.content);
+  return { result };
+}
+
+/**
+ * API para generar sugerencias proactivas usando IA
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const data = await response.json();
-    const result = JSON.parse(data.choices[0].message.content);
+    if (!isSuggestionsAIConfigured()) {
+      logger.warn('[AI Suggestions] ABACUSAI_API_KEY no configurada');
+      return NextResponse.json({ suggestions: [] }, { status: 200 });
+    }
+
+    const { result, error, status } = await generateSuggestions({
+      userId: session.user.id,
+    });
+
+    if (error) {
+      return NextResponse.json({ error }, { status });
+    }
+
+    return NextResponse.json(result);
+  } catch (error) {
+    logger.error('Error generating suggestions (GET):', error);
+    return NextResponse.json({ suggestions: [] }, { status: 200 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!isSuggestionsAIConfigured()) {
+      logger.warn('[AI Suggestions] ABACUSAI_API_KEY no configurada');
+      return NextResponse.json({ suggestions: [] }, { status: 200 });
+    }
+
+    const { userId, context } = await request.json();
+
+    const { result, error, status } = await generateSuggestions({
+      userId: userId || session.user.id,
+      context,
+    });
+
+    if (error) {
+      return NextResponse.json({ error }, { status });
+    }
 
     return NextResponse.json(result);
   } catch (error) {
