@@ -70,23 +70,25 @@ export default function TraditionalRentalDashboard() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const [propertiesRes, contractsRes, paymentsRes, tenantsRes] = await Promise.all([
-          fetch('/api/properties').then((r) => (r.ok ? r.json() : [])),
+        const [unitsRes, contractsRes, paymentsRes, tenantsRes] = await Promise.all([
+          fetch('/api/units').then((r) => (r.ok ? r.json() : [])),
           fetch('/api/contracts').then((r) => (r.ok ? r.json() : [])),
           fetch('/api/payments').then((r) => (r.ok ? r.json() : [])),
           fetch('/api/tenants').then((r) => (r.ok ? r.json() : [])),
         ]);
 
-        const properties = Array.isArray(propertiesRes) ? propertiesRes : propertiesRes.data || [];
+        const units = Array.isArray(unitsRes) ? unitsRes : unitsRes.data || [];
         const contracts = Array.isArray(contractsRes) ? contractsRes : contractsRes.data || [];
         const payments = Array.isArray(paymentsRes) ? paymentsRes : paymentsRes.data || [];
         const tenants = Array.isArray(tenantsRes) ? tenantsRes : tenantsRes.data || [];
 
         // Calcular KPIs
         const activeContracts = contracts.filter((c: any) => c.estado?.toLowerCase() === 'activo');
-        const occupiedProperties = activeContracts.length;
-        const totalProperties = properties.length || 1;
-        const occupancyRate = (occupiedProperties / totalProperties) * 100;
+        const occupiedUnits = units.filter((u: any) => u.estado?.toLowerCase() === 'ocupada').length;
+        const availableUnits = units.filter((u: any) => u.estado?.toLowerCase() === 'disponible')
+          .length;
+        const totalUnits = units.length;
+        const occupancyRate = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
 
         const monthlyIncome = activeContracts.reduce(
           (acc: number, c: any) => acc + (Number(c.rentaMensual) || 0),
@@ -119,9 +121,9 @@ export default function TraditionalRentalDashboard() {
             : 0;
 
         setStats({
-          totalPropiedades: totalProperties,
-          propiedadesOcupadas: occupiedProperties,
-          propiedadesDisponibles: totalProperties - occupiedProperties,
+          totalPropiedades: totalUnits,
+          propiedadesOcupadas: occupiedUnits,
+          propiedadesDisponibles: availableUnits,
           tasaOcupacion: occupancyRate,
           ingresosMensuales: monthlyIncome,
           ingresosProyectados: monthlyIncome * 12,
