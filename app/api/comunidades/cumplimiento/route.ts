@@ -30,8 +30,12 @@ export async function GET(request: NextRequest) {
     const buildingId = searchParams.get('buildingId');
     const comunidadId = searchParams.get('comunidadId');
     const tipo = searchParams.get('tipo');
+    const queryCompanyId = searchParams.get('companyId');
+    const userRole = (session.user as any).role;
 
-    const companyId = (session.user as any).companyId;
+    const sessionCompanyId = (session.user as any).companyId;
+    const companyId =
+      queryCompanyId && userRole === 'super_admin' ? queryCompanyId : sessionCompanyId;
 
     // Obtener buildingId si se proporciona comunidadId
     let targetBuildingId = buildingId;

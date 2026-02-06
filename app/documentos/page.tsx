@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 import { Button } from '@/components/ui/button';
@@ -48,6 +48,7 @@ import {
   User,
   Search,
   Eye,
+  Shield,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePermissions } from '@/lib/hooks/usePermissions';
@@ -74,6 +75,9 @@ interface Document {
 export default function DocumentosPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const companyId = searchParams.get('companyId');
+  const segurosHref = companyId ? `/seguros?companyId=${companyId}` : '/seguros';
   const { canCreate } = usePermissions();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
@@ -348,19 +352,24 @@ export default function DocumentosPage() {
         <h1 className="text-3xl font-bold tracking-tight">Documentos</h1>
         <p className="text-muted-foreground">Gestiona todos los documentos del sistema</p>
       </div>
-      {canCreate && (
-        <Dialog open={openUploadDialog} onOpenChange={setOpenUploadDialog}>
-        <DialogTrigger asChild>
-        <Button>
-        <Upload className="mr-2 h-4 w-4" />
-        Subir Documento
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" onClick={() => router.push(segurosHref)}>
+          <Shield className="mr-2 h-4 w-4" />
+          Seguros
         </Button>
-        </DialogTrigger>
-        <DialogContent>
-        <DialogHeader>
-        <DialogTitle>Subir Nuevo Documento</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleUpload} className="space-y-4">
+        {canCreate && (
+          <Dialog open={openUploadDialog} onOpenChange={setOpenUploadDialog}>
+          <DialogTrigger asChild>
+          <Button>
+          <Upload className="mr-2 h-4 w-4" />
+          Subir Documento
+          </Button>
+          </DialogTrigger>
+          <DialogContent>
+          <DialogHeader>
+          <DialogTitle>Subir Nuevo Documento</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleUpload} className="space-y-4">
         <div>
         <Label htmlFor="file">Archivo *</Label>
         <Input

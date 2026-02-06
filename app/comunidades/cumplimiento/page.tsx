@@ -85,6 +85,7 @@ export default function CumplimientoPage() {
 
   const comunidadId = searchParams.get('comunidadId');
   const buildingId = searchParams.get('buildingId');
+  const companyId = searchParams.get('companyId');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -100,13 +101,14 @@ export default function CumplimientoPage() {
     } else if (status === 'authenticated') {
       fetchCumplimiento();
     }
-  }, [status, router, comunidadId, buildingId]);
+  }, [status, router, comunidadId, buildingId, companyId]);
 
   const fetchCumplimiento = async () => {
     try {
       const params = new URLSearchParams();
       if (comunidadId) params.append('comunidadId', comunidadId);
       if (buildingId) params.append('buildingId', buildingId);
+      if (companyId) params.append('companyId', companyId);
 
       const res = await fetch(`/api/comunidades/cumplimiento?${params}`);
       if (res.ok) {

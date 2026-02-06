@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import {
@@ -151,6 +151,8 @@ const aseguradoras = [
 export default function SegurosPage() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const companyId = searchParams.get('companyId');
   const { data: session, status } = useSession();
   const [seguros, setSeguros] = useState<Insurance[]>([]);
   const [filteredSeguros, setFilteredSeguros] = useState<Insurance[]>([]);
@@ -214,7 +216,8 @@ export default function SegurosPage() {
   const fetchSeguros = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/seguros');
+      const query = companyId ? `?companyId=${companyId}` : '';
+      const response = await fetch(`/api/seguros${query}`);
       if (!response.ok) throw new Error('Error al obtener seguros');
 
       const data = await response.json();

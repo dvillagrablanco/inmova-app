@@ -18,10 +18,16 @@ export async function GET(request: NextRequest) {
     const buildingId = searchParams.get('buildingId');
     const tipo = searchParams.get('tipo');
     const estado = searchParams.get('estado');
+    const queryCompanyId = searchParams.get('companyId');
+    const userRole = (session.user as any).role;
+
+    const sessionCompanyId = (session.user as any).companyId;
+    const companyId =
+      queryCompanyId && userRole === 'super_admin' ? queryCompanyId : sessionCompanyId;
 
     const seguros = await prisma.insurance.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId,
         ...(buildingId && { buildingId }),
         ...(tipo && { tipo: tipo as any }),
         ...(estado && { estado: estado as any }),

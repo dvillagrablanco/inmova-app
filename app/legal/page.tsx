@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -80,6 +80,8 @@ const POLICY_STATUS_COLORS: Record<string, string> = {
 export default function LegalPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const companyId = searchParams.get('companyId');
   const [templates, setTemplates] = useState<Template[]>([]);
   const [inspections, setInspections] = useState<Inspection[]>([]);
   const [insurances, setInsurances] = useState<Insurance[]>([]);
@@ -89,16 +91,17 @@ export default function LegalPage() {
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login');
     if (status === 'authenticated') fetchData();
-  }, [status, router]);
+  }, [status, router, companyId]);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
+      const query = companyId ? `?companyId=${companyId}` : '';
       const [templatesRes, inspectionsRes, insurancesRes, complianceRes] = await Promise.all([
-        fetch('/api/legal/templates'),
-        fetch('/api/legal/inspections'),
-        fetch('/api/legal/insurance'),
-        fetch('/api/legal/compliance'),
+        fetch(`/api/legal/templates${query}`),
+        fetch(`/api/legal/inspections${query}`),
+        fetch(`/api/legal/insurance${query}`),
+        fetch(`/api/legal/compliance${query}`),
       ]);
 
       if (templatesRes.ok) setTemplates(await templatesRes.json());

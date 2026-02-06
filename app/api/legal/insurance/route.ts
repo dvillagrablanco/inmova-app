@@ -17,28 +17,33 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const estado = searchParams.get('estado');
     const buildingId = searchParams.get('buildingId');
+    const queryCompanyId = searchParams.get('companyId');
+    const userRole = (session.user as any).role;
 
-    const companyId =
-      (session.user as any).companyId ||
-      (await prisma.user
-        .findUnique({ where: { email: session.user.email } })
-        .then((user) => user?.companyId));
+    const sessionCompanyId = (session.user as any).companyId;
+    const resolvedCompanyId =
+      queryCompanyId && userRole === 'super_admin'
+        ? queryCompanyId
+        : sessionCompanyId ||
+          (await prisma.user
+            .findUnique({ where: { email: session.user.email } })
+            .then((user) => user?.companyId));
 
-    if (!companyId) {
+    if (!resolvedCompanyId) {
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     const [policies, insurances] = await Promise.all([
       prisma.insurancePolicy.findMany({
         where: {
-          companyId,
+          companyId: resolvedCompanyId,
           ...(buildingId && { buildingId }),
         },
         orderBy: { fechaVencimiento: 'asc' },
       }),
       prisma.insurance.findMany({
         where: {
-          companyId,
+          companyId: resolvedCompanyId,
           ...(buildingId && {
             OR: [
               { buildingId },

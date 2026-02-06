@@ -17,20 +17,25 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const estado = searchParams.get('estado');
     const tipo = searchParams.get('tipo');
+    const queryCompanyId = searchParams.get('companyId');
+    const userRole = (session.user as any).role;
 
-    const companyId =
-      (session.user as any).companyId ||
-      (await prisma.user
-        .findUnique({ where: { email: session.user.email } })
-        .then((user) => user?.companyId));
+    const sessionCompanyId = (session.user as any).companyId;
+    const resolvedCompanyId =
+      queryCompanyId && userRole === 'super_admin'
+        ? queryCompanyId
+        : sessionCompanyId ||
+          (await prisma.user
+            .findUnique({ where: { email: session.user.email } })
+            .then((user) => user?.companyId));
 
-    if (!companyId) {
+    if (!resolvedCompanyId) {
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     const alerts = await prisma.complianceAlert.findMany({
       where: {
-        companyId,
+        companyId: resolvedCompanyId,
         ...(estado && { estado }),
         ...(tipo && { tipo }),
       },
@@ -43,7 +48,7 @@ export async function GET(req: NextRequest) {
     const now = new Date();
     const warningMs = 30 * 24 * 60 * 60 * 1000;
     const insurances = await prisma.insurance.findMany({
-      where: { companyId },
+      where: { companyId: resolvedCompanyId },
       select: {
         id: true,
         numeroPoliza: true,

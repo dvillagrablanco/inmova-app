@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -14,22 +14,29 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
-    }
-
     const { searchParams } = new URL(req.url);
     const tipo = searchParams.get('tipo');
     const estado = searchParams.get('estado');
     const buildingId = searchParams.get('buildingId');
     const unitId = searchParams.get('unitId');
+    const queryCompanyId = searchParams.get('companyId');
+    const userRole = (session.user as any).role;
+
+    const sessionCompanyId = (session.user as any).companyId;
+    const resolvedCompanyId =
+      queryCompanyId && userRole === 'super_admin'
+        ? queryCompanyId
+        : sessionCompanyId ||
+          (await prisma.user
+            .findUnique({ where: { email: session.user.email } })
+            .then((user) => user?.companyId));
+
+    if (!resolvedCompanyId) {
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+    }
 
     const where: any = {
-      companyId: user.companyId,
+      companyId: resolvedCompanyId,
     };
 
     if (tipo) where.tipo = tipo;
