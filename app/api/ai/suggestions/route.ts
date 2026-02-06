@@ -3,9 +3,15 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
+import { withRateLimit } from '@/lib/rate-limiting';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const SUGGESTIONS_RATE_LIMIT = {
+  interval: 60 * 1000,
+  uniqueTokenPerInterval: 30,
+};
 
 function isSuggestionsAIConfigured() {
   return !!process.env.ABACUSAI_API_KEY;
@@ -111,58 +117,70 @@ Genera sugerencias relevantes para ayudar al usuario.`;
  * API para generar sugerencias proactivas usando IA
  */
 export async function GET(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  return withRateLimit(
+    request,
+    async () => {
+      try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) {
+          return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
 
-    if (!isSuggestionsAIConfigured()) {
-      logger.warn('[AI Suggestions] ABACUSAI_API_KEY no configurada');
-      return NextResponse.json({ suggestions: [] }, { status: 200 });
-    }
+        if (!isSuggestionsAIConfigured()) {
+          logger.warn('[AI Suggestions] ABACUSAI_API_KEY no configurada');
+          return NextResponse.json({ suggestions: [] }, { status: 200 });
+        }
 
-    const { result, error, status } = await generateSuggestions({
-      userId: session.user.id,
-    });
+        const { result, error, status } = await generateSuggestions({
+          userId: session.user.id,
+        });
 
-    if (error) {
-      return NextResponse.json({ error }, { status });
-    }
+        if (error) {
+          return NextResponse.json({ error }, { status });
+        }
 
-    return NextResponse.json(result);
-  } catch (error) {
-    logger.error('Error generating suggestions (GET):', error);
-    return NextResponse.json({ suggestions: [] }, { status: 200 });
-  }
+        return NextResponse.json(result);
+      } catch (error) {
+        logger.error('Error generating suggestions (GET):', error);
+        return NextResponse.json({ suggestions: [] }, { status: 200 });
+      }
+    },
+    SUGGESTIONS_RATE_LIMIT
+  );
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  return withRateLimit(
+    request,
+    async () => {
+      try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) {
+          return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
 
-    if (!isSuggestionsAIConfigured()) {
-      logger.warn('[AI Suggestions] ABACUSAI_API_KEY no configurada');
-      return NextResponse.json({ suggestions: [] }, { status: 200 });
-    }
+        if (!isSuggestionsAIConfigured()) {
+          logger.warn('[AI Suggestions] ABACUSAI_API_KEY no configurada');
+          return NextResponse.json({ suggestions: [] }, { status: 200 });
+        }
 
-    const { userId, context } = await request.json();
+        const { userId, context } = await request.json();
 
-    const { result, error, status } = await generateSuggestions({
-      userId: userId || session.user.id,
-      context,
-    });
+        const { result, error, status } = await generateSuggestions({
+          userId: userId || session.user.id,
+          context,
+        });
 
-    if (error) {
-      return NextResponse.json({ error }, { status });
-    }
+        if (error) {
+          return NextResponse.json({ error }, { status });
+        }
 
-    return NextResponse.json(result);
-  } catch (error) {
-    logger.error('Error generating suggestions:', error);
-    return NextResponse.json({ suggestions: [] }, { status: 200 });
-  }
+        return NextResponse.json(result);
+      } catch (error) {
+        logger.error('Error generating suggestions:', error);
+        return NextResponse.json({ suggestions: [] }, { status: 200 });
+      }
+    },
+    SUGGESTIONS_RATE_LIMIT
+  );
 }

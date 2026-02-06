@@ -1,9 +1,9 @@
 /**
  * API Route: Análisis de Documentos con IA
- * 
+ *
  * Endpoint para analizar documentos usando el AI Document Agent Service.
  * Soporta subida de archivos y análisis de texto.
- * 
+ *
  * Usa el servicio real de Anthropic Claude cuando ANTHROPIC_API_KEY está configurado,
  * con fallback a análisis básico si no está disponible.
  */
@@ -12,15 +12,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { 
-  analyzeDocument, 
+import {
+  analyzeDocument,
   isAIConfigured,
   DocumentAnalysisInput,
 } from '@/lib/ai-document-agent-service';
 import logger from '@/lib/logger';
+import { withRateLimit } from '@/lib/rate-limiting';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const DOCUMENT_ANALYSIS_RATE_LIMIT = {
+  interval: 60 * 1000,
+  uniqueTokenPerInterval: 20,
+};
 
 /**
  * Verifica si el archivo es una imagen
@@ -30,19 +36,29 @@ function isImageFile(file: File): boolean {
   if (file.type && file.type.startsWith('image/')) {
     return true;
   }
-  
+
   // Verificar por extensión del nombre del archivo (fallback importante)
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff', '.heic', '.heif'];
+  const imageExtensions = [
+    '.jpg',
+    '.jpeg',
+    '.png',
+    '.gif',
+    '.webp',
+    '.bmp',
+    '.tiff',
+    '.heic',
+    '.heif',
+  ];
   const fileName = (file.name || '').toLowerCase();
-  if (imageExtensions.some(ext => fileName.endsWith(ext))) {
+  if (imageExtensions.some((ext) => fileName.endsWith(ext))) {
     return true;
   }
-  
+
   // Si el tipo MIME incluye 'image' en cualquier parte
   if (file.type && file.type.includes('image')) {
     return true;
   }
-  
+
   return false;
 }
 
@@ -71,33 +87,41 @@ async function isImageByMagicBytes(file: File): Promise<boolean> {
   try {
     const buffer = await file.slice(0, 12).arrayBuffer();
     const bytes = new Uint8Array(buffer);
-    
+
     // JPEG: FF D8 FF
-    if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) {
+    if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
       return true;
     }
-    
+
     // PNG: 89 50 4E 47 0D 0A 1A 0A
-    if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) {
+    if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) {
       return true;
     }
-    
+
     // GIF: 47 49 46 38
     if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38) {
       return true;
     }
-    
+
     // WebP: 52 49 46 46 ... 57 45 42 50
-    if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
-        bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) {
+    if (
+      bytes[0] === 0x52 &&
+      bytes[1] === 0x49 &&
+      bytes[2] === 0x46 &&
+      bytes[3] === 0x46 &&
+      bytes[8] === 0x57 &&
+      bytes[9] === 0x45 &&
+      bytes[10] === 0x42 &&
+      bytes[11] === 0x50
+    ) {
       return true;
     }
-    
+
     // BMP: 42 4D
-    if (bytes[0] === 0x42 && bytes[1] === 0x4D) {
+    if (bytes[0] === 0x42 && bytes[1] === 0x4d) {
       return true;
     }
-    
+
     return false;
   } catch {
     return false;
@@ -192,7 +216,10 @@ INSTRUCCIONES:
 
   const specificInstructions = contextInstructions[context] || contextInstructions.general;
 
-  return basePrompt + specificInstructions + `
+  return (
+    basePrompt +
+    specificInstructions +
+    `
 
 CATEGORÍAS DE DOCUMENTO:
 - dni_nie: Documentos de identidad (DNI, NIE, Pasaporte)
@@ -227,7 +254,8 @@ RESPONDE EN FORMATO JSON:
   "summary": "resumen breve del documento y su contenido principal",
   "warnings": ["advertencias si hay datos ilegibles, incompletos o sospechosos"],
   "suggestedEntity": "Tenant|Property|Contract|Insurance|Provider|Invoice"
-}`;
+}`
+  );
 }
 
 /**
@@ -278,39 +306,51 @@ async function convertPDFToImage(file: File): Promise<string> {
   const { writeFile, readFile, unlink } = await import('fs/promises');
   const { join } = await import('path');
   const os = await import('os');
-  
+
   const tmpDir = os.tmpdir();
   const timestamp = Date.now();
   const pdfPath = join(tmpDir, `pdf_${timestamp}.pdf`);
   const outputPrefix = join(tmpDir, `img_${timestamp}`);
   const outputPath = `${outputPrefix}-1.png`;
-  
+
   try {
     const arrayBuffer = await file.arrayBuffer();
     const pdfBuffer = Buffer.from(arrayBuffer);
     await writeFile(pdfPath, pdfBuffer);
-    
+
     logger.info('[PDF to Image] Convirtiendo PDF...', { filename: file.name });
-    
+
     await new Promise<void>((resolve, reject) => {
-      const proc = spawn('pdftoppm', ['-png', '-f', '1', '-l', '1', '-r', '150', pdfPath, outputPrefix]);
+      const proc = spawn('pdftoppm', [
+        '-png',
+        '-f',
+        '1',
+        '-l',
+        '1',
+        '-r',
+        '150',
+        pdfPath,
+        outputPrefix,
+      ]);
       let stderr = '';
-      proc.stderr.on('data', (data) => { stderr += data.toString(); });
+      proc.stderr.on('data', (data) => {
+        stderr += data.toString();
+      });
       proc.on('close', (code) => {
         if (code === 0) resolve();
         else reject(new Error(`pdftoppm falló: ${stderr}`));
       });
       proc.on('error', (err) => reject(err));
     });
-    
+
     const imageBuffer = await readFile(outputPath);
     const base64 = imageBuffer.toString('base64');
-    
+
     logger.info('[PDF to Image] Conversión exitosa', { filename: file.name });
-    
+
     await unlink(pdfPath).catch(() => {});
     await unlink(outputPath).catch(() => {});
-    
+
     return base64;
   } catch (error: any) {
     await unlink(pdfPath).catch(() => {});
@@ -328,19 +368,19 @@ async function analyzeDocumentWithVision(
   context: string = 'general'
 ): Promise<any> {
   const Anthropic = (await import('@anthropic-ai/sdk')).default;
-  
+
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error('ANTHROPIC_API_KEY no configurada');
   }
-  
+
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const isPDF = isPDFFile(file);
-  
+
   // Para PDFs: convertir a imagen primero (más compatible con todos los modelos)
   // Para imágenes: usar directamente
   let base64Data: string;
   let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/png';
-  
+
   if (isPDF) {
     console.error('[Vision Analysis] 📄 PDF detectado - convirtiendo a imagen:', file.name);
     try {
@@ -357,7 +397,7 @@ async function analyzeDocumentWithVision(
     else if (file.type === 'image/gif') mediaType = 'image/gif';
     else if (file.type === 'image/webp') mediaType = 'image/webp';
   }
-  
+
   const contentBlock = {
     type: 'image',
     source: {
@@ -366,13 +406,13 @@ async function analyzeDocumentWithVision(
       data: base64Data,
     },
   };
-  
+
   console.error('[Vision Analysis] 📤 Enviando a Claude Vision:', file.name, 'isPDF:', isPDF);
-  
+
   const prompt = getVisionPromptForContext(context, companyInfo);
 
   const startTime = Date.now();
-  
+
   // Usar claude-3-haiku para imágenes (rápido y confiable)
   console.error('[Vision Analysis] 🤖 Llamando a Claude API...');
   const response = await client.messages.create({
@@ -394,9 +434,9 @@ async function analyzeDocumentWithVision(
 
   const processingTimeMs = Date.now() - startTime;
   console.error('[Vision Analysis] ✅ Claude respondió en', processingTimeMs, 'ms');
-  
+
   const content = response.content[0];
-  
+
   if (content.type === 'text') {
     console.error('[Vision Analysis] 📝 Procesando respuesta de texto...');
     // Extraer JSON de la respuesta
@@ -407,25 +447,26 @@ async function analyzeDocumentWithVision(
       const category = result.classification?.category || 'otro';
       const targetEntity = result.suggestedEntity || getTargetEntityFromCategory(category);
       const dataType = getDataTypeFromCategory(category);
-      
+
       logger.info('[Vision Analysis] Análisis completado', {
         documentType: result.documentType,
         category,
         fieldsExtracted: result.extractedFields?.length || 0,
         processingTimeMs,
       });
-      
+
       // Detectar si tiene datos sensibles
       const sensitiveCategories = ['dni_nie', 'nomina', 'contrato_alquiler'];
       const hasSensitive = sensitiveCategories.includes(category);
       const sensitiveTypes: string[] = [];
       if (category === 'dni_nie') sensitiveTypes.push('documento_identidad');
       if (category === 'nomina') sensitiveTypes.push('datos_financieros', 'datos_laborales');
-      if (category === 'contrato_alquiler') sensitiveTypes.push('datos_personales', 'datos_financieros');
-      
+      if (category === 'contrato_alquiler')
+        sensitiveTypes.push('datos_personales', 'datos_financieros');
+
       // Mapear campos extraídos - manejar tanto array como objeto
       let rawFields = result.extractedFields || [];
-      
+
       // Si extractedFields es un objeto (no array), convertirlo a array
       if (!Array.isArray(rawFields) && typeof rawFields === 'object') {
         console.error('[Vision Analysis] 🔄 Convirtiendo extractedFields de objeto a array');
@@ -435,7 +476,7 @@ async function analyzeDocumentWithVision(
           confidence: 0.9,
         }));
       }
-      
+
       const extractedFields = rawFields.map((f: any) => ({
         fieldName: f.fieldName,
         fieldValue: f.fieldValue,
@@ -444,12 +485,12 @@ async function analyzeDocumentWithVision(
         targetEntity,
         targetField: mapFieldNameToTarget(f.fieldName, category),
       }));
-      
+
       console.error('[Vision Analysis] ✅ Campos extraídos:', extractedFields.length);
-      
+
       // Generar acciones sugeridas basadas en los campos extraídos
       const suggestedActions = generateSuggestedActions(extractedFields, category, targetEntity);
-      
+
       return {
         classification: {
           category,
@@ -482,7 +523,7 @@ async function analyzeDocumentWithVision(
       };
     }
   }
-  
+
   throw new Error('No se pudo procesar la respuesta de visión');
 }
 
@@ -491,9 +532,10 @@ async function analyzeDocumentWithVision(
  */
 function extractCIF(fields: any[]): string | null {
   if (!fields) return null;
-  const cifField = fields.find((f: any) => 
-    f.fieldName?.toLowerCase().includes('cif') || 
-    f.fieldName?.toLowerCase().includes('nif_empresa')
+  const cifField = fields.find(
+    (f: any) =>
+      f.fieldName?.toLowerCase().includes('cif') ||
+      f.fieldName?.toLowerCase().includes('nif_empresa')
   );
   return cifField?.fieldValue || null;
 }
@@ -503,10 +545,11 @@ function extractCIF(fields: any[]): string | null {
  */
 function extractCompanyName(fields: any[]): string | null {
   if (!fields) return null;
-  const nameField = fields.find((f: any) => 
-    f.fieldName?.toLowerCase().includes('empresa') || 
-    f.fieldName?.toLowerCase().includes('razon_social') ||
-    f.fieldName?.toLowerCase().includes('emisor')
+  const nameField = fields.find(
+    (f: any) =>
+      f.fieldName?.toLowerCase().includes('empresa') ||
+      f.fieldName?.toLowerCase().includes('razon_social') ||
+      f.fieldName?.toLowerCase().includes('emisor')
   );
   return nameField?.fieldValue || null;
 }
@@ -527,17 +570,17 @@ function generateSuggestedActions(
   requiresReview: boolean;
 }> {
   const actions: any[] = [];
-  
+
   if (fields.length === 0) return actions;
-  
+
   // Construir datos del objeto
   const data: Record<string, any> = {};
-  fields.forEach(f => {
+  fields.forEach((f) => {
     if (f.targetField && f.fieldValue) {
       data[f.targetField] = f.fieldValue;
     }
   });
-  
+
   if (Object.keys(data).length > 0) {
     actions.push({
       action: 'create',
@@ -548,7 +591,7 @@ function generateSuggestedActions(
       requiresReview: true,
     });
   }
-  
+
   return actions;
 }
 
@@ -559,201 +602,201 @@ function mapFieldNameToTarget(fieldName: string, category: string = 'general'): 
   // Mapeo base para todos los documentos
   const baseMapping: Record<string, string> = {
     // Datos personales - español
-    'nombre_completo': 'nombreCompleto',
-    'nombre': 'nombre',
-    'apellidos': 'apellidos',
-    'primer_apellido': 'primerApellido',
-    'segundo_apellido': 'segundoApellido',
-    'dni': 'dni',
-    'nie': 'dni',
-    'numero_documento': 'dni',
-    'pasaporte': 'dni',
-    'fecha_nacimiento': 'fechaNacimiento',
-    'nacionalidad': 'nacionalidad',
-    'email': 'email',
-    'correo': 'email',
-    'telefono': 'telefono',
-    'movil': 'telefono',
-    'direccion': 'direccion',
-    'domicilio': 'direccion',
-    'sexo': 'sexo',
-    'genero': 'sexo',
-    'estado_civil': 'estadoCivil',
-    'profesion': 'profesion',
-    'ocupacion': 'profesion',
-    
+    nombre_completo: 'nombreCompleto',
+    nombre: 'nombre',
+    apellidos: 'apellidos',
+    primer_apellido: 'primerApellido',
+    segundo_apellido: 'segundoApellido',
+    dni: 'dni',
+    nie: 'dni',
+    numero_documento: 'dni',
+    pasaporte: 'dni',
+    fecha_nacimiento: 'fechaNacimiento',
+    nacionalidad: 'nacionalidad',
+    email: 'email',
+    correo: 'email',
+    telefono: 'telefono',
+    movil: 'telefono',
+    direccion: 'direccion',
+    domicilio: 'direccion',
+    sexo: 'sexo',
+    genero: 'sexo',
+    estado_civil: 'estadoCivil',
+    profesion: 'profesion',
+    ocupacion: 'profesion',
+
     // Datos personales - inglés (como devuelve Claude a veces)
-    'name': 'nombre',
-    'fullName': 'nombre',
-    'full_name': 'nombre',
-    'firstName': 'nombre',
-    'lastName': 'apellidos',
-    'surname': 'apellidos',
-    'documentNumber': 'dni',
-    'document_number': 'dni',
-    'idNumber': 'dni',
-    'id_number': 'dni',
-    'birthDate': 'fechaNacimiento',
-    'birth_date': 'fechaNacimiento',
-    'dateOfBirth': 'fechaNacimiento',
-    'nationality': 'nacionalidad',
-    'sex': 'sexo',
-    'gender': 'sexo',
-    'address': 'direccion',
-    'issueDate': 'fechaExpedicion',
-    'issue_date': 'fechaExpedicion',
-    'expirationDate': 'fechaCaducidad',
-    'expiration_date': 'fechaCaducidad',
-    'expiryDate': 'fechaCaducidad',
-    'expiry_date': 'fechaCaducidad',
-    
+    name: 'nombre',
+    fullName: 'nombre',
+    full_name: 'nombre',
+    firstName: 'nombre',
+    lastName: 'apellidos',
+    surname: 'apellidos',
+    documentNumber: 'dni',
+    document_number: 'dni',
+    idNumber: 'dni',
+    id_number: 'dni',
+    birthDate: 'fechaNacimiento',
+    birth_date: 'fechaNacimiento',
+    dateOfBirth: 'fechaNacimiento',
+    nationality: 'nacionalidad',
+    sex: 'sexo',
+    gender: 'sexo',
+    address: 'direccion',
+    issueDate: 'fechaExpedicion',
+    issue_date: 'fechaExpedicion',
+    expirationDate: 'fechaCaducidad',
+    expiration_date: 'fechaCaducidad',
+    expiryDate: 'fechaCaducidad',
+    expiry_date: 'fechaCaducidad',
+
     // Datos financieros
-    'salario': 'ingresosMensuales',
-    'salario_bruto': 'salarioBruto',
-    'salario_neto': 'salarioNeto',
-    'ingresos': 'ingresosMensuales',
-    'ingresos_mensuales': 'ingresosMensuales',
-    'iban': 'iban',
-    'cuenta_bancaria': 'cuentaBancaria',
-    'banco': 'banco',
-    
+    salario: 'ingresosMensuales',
+    salario_bruto: 'salarioBruto',
+    salario_neto: 'salarioNeto',
+    ingresos: 'ingresosMensuales',
+    ingresos_mensuales: 'ingresosMensuales',
+    iban: 'iban',
+    cuenta_bancaria: 'cuentaBancaria',
+    banco: 'banco',
+
     // Datos de empresa
-    'cif': 'cif',
-    'nif_empresa': 'cif',
-    'razon_social': 'razonSocial',
-    'nombre_empresa': 'nombreEmpresa',
-    'empresa': 'empresa',
+    cif: 'cif',
+    nif_empresa: 'cif',
+    razon_social: 'razonSocial',
+    nombre_empresa: 'nombreEmpresa',
+    empresa: 'empresa',
   };
-  
+
   // Mapeos específicos por categoría
   const categoryMappings: Record<string, Record<string, string>> = {
     contrato_alquiler: {
-      'direccion_inmueble': 'direccionInmueble',
-      'direccion_vivienda': 'direccionInmueble',
-      'fecha_inicio': 'fechaInicio',
-      'fecha_fin': 'fechaFin',
-      'fecha_vencimiento': 'fechaFin',
-      'renta': 'precioAlquiler',
-      'renta_mensual': 'precioAlquiler',
-      'precio_alquiler': 'precioAlquiler',
-      'fianza': 'fianza',
-      'deposito': 'deposito',
-      'arrendador': 'arrendador',
-      'propietario': 'propietario',
-      'arrendatario': 'arrendatario',
-      'inquilino': 'inquilino',
-      'dni_arrendador': 'dniArrendador',
-      'dni_arrendatario': 'dniArrendatario',
-      'duracion': 'duracion',
-      'prorroga': 'prorroga',
+      direccion_inmueble: 'direccionInmueble',
+      direccion_vivienda: 'direccionInmueble',
+      fecha_inicio: 'fechaInicio',
+      fecha_fin: 'fechaFin',
+      fecha_vencimiento: 'fechaFin',
+      renta: 'precioAlquiler',
+      renta_mensual: 'precioAlquiler',
+      precio_alquiler: 'precioAlquiler',
+      fianza: 'fianza',
+      deposito: 'deposito',
+      arrendador: 'arrendador',
+      propietario: 'propietario',
+      arrendatario: 'arrendatario',
+      inquilino: 'inquilino',
+      dni_arrendador: 'dniArrendador',
+      dni_arrendatario: 'dniArrendatario',
+      duracion: 'duracion',
+      prorroga: 'prorroga',
     },
     escritura_propiedad: {
-      'referencia_catastral': 'referenciaCatastral',
-      'superficie': 'superficie',
-      'metros_cuadrados': 'superficie',
-      'm2': 'superficie',
-      'superficie_construida': 'superficieConstruida',
-      'superficie_util': 'superficieUtil',
-      'fecha_escritura': 'fechaEscritura',
-      'notario': 'notario',
-      'protocolo': 'numeroProtocolo',
-      'precio_compra': 'precioCompra',
-      'valor_escritura': 'valorEscritura',
+      referencia_catastral: 'referenciaCatastral',
+      superficie: 'superficie',
+      metros_cuadrados: 'superficie',
+      m2: 'superficie',
+      superficie_construida: 'superficieConstruida',
+      superficie_util: 'superficieUtil',
+      fecha_escritura: 'fechaEscritura',
+      notario: 'notario',
+      protocolo: 'numeroProtocolo',
+      precio_compra: 'precioCompra',
+      valor_escritura: 'valorEscritura',
     },
     nota_simple: {
-      'finca': 'numeroFinca',
-      'numero_finca': 'numeroFinca',
-      'titular': 'titular',
-      'propietario': 'propietario',
-      'cargas': 'cargas',
-      'hipoteca': 'hipoteca',
+      finca: 'numeroFinca',
+      numero_finca: 'numeroFinca',
+      titular: 'titular',
+      propietario: 'propietario',
+      cargas: 'cargas',
+      hipoteca: 'hipoteca',
     },
     certificado_energetico: {
-      'calificacion': 'calificacionEnergetica',
-      'calificacion_energetica': 'calificacionEnergetica',
-      'consumo': 'consumoEnergetico',
-      'emisiones': 'emisiones',
-      'fecha_emision': 'fechaEmision',
-      'fecha_validez': 'fechaValidez',
+      calificacion: 'calificacionEnergetica',
+      calificacion_energetica: 'calificacionEnergetica',
+      consumo: 'consumoEnergetico',
+      emisiones: 'emisiones',
+      fecha_emision: 'fechaEmision',
+      fecha_validez: 'fechaValidez',
     },
     factura: {
-      'numero_factura': 'numeroFactura',
-      'fecha_factura': 'fechaFactura',
-      'fecha_emision': 'fechaEmision',
-      'emisor': 'emisor',
-      'receptor': 'receptor',
-      'concepto': 'concepto',
-      'descripcion': 'descripcion',
-      'base_imponible': 'baseImponible',
-      'iva': 'iva',
-      'tipo_iva': 'tipoIva',
-      'total': 'total',
-      'importe_total': 'importeTotal',
+      numero_factura: 'numeroFactura',
+      fecha_factura: 'fechaFactura',
+      fecha_emision: 'fechaEmision',
+      emisor: 'emisor',
+      receptor: 'receptor',
+      concepto: 'concepto',
+      descripcion: 'descripcion',
+      base_imponible: 'baseImponible',
+      iva: 'iva',
+      tipo_iva: 'tipoIva',
+      total: 'total',
+      importe_total: 'importeTotal',
     },
     seguro: {
-      'numero_poliza': 'numeroPoliza',
-      'aseguradora': 'aseguradora',
-      'compania': 'aseguradora',
-      'tomador': 'tomador',
-      'asegurado': 'asegurado',
-      'direccion_asegurada': 'direccionAsegurada',
-      'cobertura': 'cobertura',
-      'coberturas': 'coberturas',
-      'prima': 'prima',
-      'prima_anual': 'primaAnual',
-      'fecha_efecto': 'fechaEfecto',
-      'fecha_vencimiento': 'fechaVencimiento',
-      'capital_asegurado': 'capitalAsegurado',
+      numero_poliza: 'numeroPoliza',
+      aseguradora: 'aseguradora',
+      compania: 'aseguradora',
+      tomador: 'tomador',
+      asegurado: 'asegurado',
+      direccion_asegurada: 'direccionAsegurada',
+      cobertura: 'cobertura',
+      coberturas: 'coberturas',
+      prima: 'prima',
+      prima_anual: 'primaAnual',
+      fecha_efecto: 'fechaEfecto',
+      fecha_vencimiento: 'fechaVencimiento',
+      capital_asegurado: 'capitalAsegurado',
     },
     nomina: {
-      'periodo': 'periodo',
-      'mes': 'mes',
-      'año': 'año',
-      'salario_base': 'salarioBase',
-      'complementos': 'complementos',
-      'retenciones': 'retenciones',
-      'irpf': 'irpf',
-      'seguridad_social': 'seguridadSocial',
-      'liquido': 'liquido',
-      'neto_a_percibir': 'netoPercibir',
-      'categoria': 'categoria',
-      'puesto': 'puesto',
-      'antiguedad': 'antiguedad',
+      periodo: 'periodo',
+      mes: 'mes',
+      año: 'año',
+      salario_base: 'salarioBase',
+      complementos: 'complementos',
+      retenciones: 'retenciones',
+      irpf: 'irpf',
+      seguridad_social: 'seguridadSocial',
+      liquido: 'liquido',
+      neto_a_percibir: 'netoPercibir',
+      categoria: 'categoria',
+      puesto: 'puesto',
+      antiguedad: 'antiguedad',
     },
     catastro: {
-      'referencia_catastral': 'referenciaCatastral',
-      'valor_catastral': 'valorCatastral',
-      'uso': 'uso',
-      'clase': 'clase',
-      'superficie_suelo': 'superficieSuelo',
-      'superficie_construida': 'superficieConstruida',
-      'año_construccion': 'añoConstruccion',
+      referencia_catastral: 'referenciaCatastral',
+      valor_catastral: 'valorCatastral',
+      uso: 'uso',
+      clase: 'clase',
+      superficie_suelo: 'superficieSuelo',
+      superficie_construida: 'superficieConstruida',
+      año_construccion: 'añoConstruccion',
     },
     presupuesto: {
-      'numero_presupuesto': 'numeroPresupuesto',
-      'fecha_presupuesto': 'fechaPresupuesto',
-      'proveedor': 'proveedor',
-      'concepto': 'concepto',
-      'descripcion_trabajos': 'descripcionTrabajos',
-      'materiales': 'materiales',
-      'mano_obra': 'manoObra',
-      'total': 'total',
-      'validez': 'validez',
+      numero_presupuesto: 'numeroPresupuesto',
+      fecha_presupuesto: 'fechaPresupuesto',
+      proveedor: 'proveedor',
+      concepto: 'concepto',
+      descripcion_trabajos: 'descripcionTrabajos',
+      materiales: 'materiales',
+      mano_obra: 'manoObra',
+      total: 'total',
+      validez: 'validez',
     },
   };
-  
+
   const lowerName = fieldName.toLowerCase().replace(/\s+/g, '_');
-  
+
   // Primero buscar en mapeo específico de categoría
   if (categoryMappings[category] && categoryMappings[category][lowerName]) {
     return categoryMappings[category][lowerName];
   }
-  
+
   // Luego buscar en mapeo base
   if (baseMapping[lowerName]) {
     return baseMapping[lowerName];
   }
-  
+
   // Si no se encuentra, convertir a camelCase
   return lowerName.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
 }
@@ -785,10 +828,10 @@ Fecha de carga: ${new Date().toISOString()}
   try {
     const arrayBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
-    
+
     let extractedText = '';
     let textChars: number[] = [];
-    
+
     for (let i = 0; i < uint8Array.length && extractedText.length < 50000; i++) {
       const byte = uint8Array[i];
       if ((byte >= 32 && byte <= 126) || byte === 10 || byte === 13) {
@@ -803,7 +846,7 @@ Fecha de carga: ${new Date().toISOString()}
         textChars = [];
       }
     }
-    
+
     if (extractedText.trim().length > 50) {
       return basicInfo + '\n\nTexto extraído:\n' + extractedText.trim();
     }
@@ -819,10 +862,10 @@ Fecha de carga: ${new Date().toISOString()}
  */
 function basicAnalysis(filename: string, fileType: string) {
   const lowerName = filename.toLowerCase();
-  
+
   let category = 'otro';
   let specificType = 'Documento general';
-  
+
   if (lowerName.includes('contrato') || lowerName.includes('alquiler')) {
     category = 'contrato_alquiler';
     specificType = 'Contrato de arrendamiento';
@@ -876,256 +919,257 @@ function basicAnalysis(filename: string, fileType: string) {
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    // Verificar autenticación
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
-    }
-
-    // Obtener el archivo del FormData
-    const formData = await request.formData();
-    const file = formData.get('file') as File | null;
-    const context = formData.get('context') as string || 'general';
-
-    if (!file) {
-      return NextResponse.json(
-        { error: 'No se proporcionó ningún archivo' },
-        { status: 400 }
-      );
-    }
-
-    // LOG DETALLADO DEL ARCHIVO RECIBIDO
-    logger.info('[AI Document Analysis] 📥 Archivo recibido', {
-      fileName: file.name,
-      fileType: file.type,
-      fileSize: file.size,
-      context,
-      isImageByType: file.type.startsWith('image/'),
-      isImageByExtension: ['.jpg', '.jpeg', '.png', '.gif', '.webp'].some(ext => 
-        file.name.toLowerCase().endsWith(ext)
-      ),
-    });
-
-    // Verificar tipo de archivo
-    const allowedTypes = [
-      'application/pdf',
-      'image/jpeg',
-      'image/png',
-      'image/jpg',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain',
-    ];
-
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: 'Tipo de archivo no permitido' },
-        { status: 400 }
-      );
-    }
-
-    // Verificar tamaño (máximo 10MB)
-    const maxSize = 10 * 1024 * 1024;
-    if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: 'El archivo excede el tamaño máximo de 10MB' },
-        { status: 400 }
-      );
-    }
-
-    // Verificar si IA está configurada
-    if (!isAIConfigured()) {
-      logger.warn('[AI Document Analysis] ANTHROPIC_API_KEY no configurado, usando análisis básico');
-      const basicResult = basicAnalysis(file.name, file.type);
-      basicResult.warnings.push(
-        '⚠️ IA no configurada: Para análisis inteligente de documentos, configure ANTHROPIC_API_KEY en el servidor.'
-      );
-      basicResult.summary = 'Análisis básico (sin IA). Configure ANTHROPIC_API_KEY para extracción automática de datos.';
-      return NextResponse.json(basicResult);
-    }
-
-    // Extraer texto del archivo
-    const extractedText = await extractTextFromFile(file);
-
-    // Obtener información de la empresa del usuario
-    let companyInfo: DocumentAnalysisInput['companyInfo'] = {
-      cif: null,
-      nombre: session.user.name || 'Usuario',
-      direccion: null,
-    };
-
-    // Intentar obtener info de la empresa del usuario
-    if (session.user.companyId) {
+  return withRateLimit(
+    request,
+    async () => {
       try {
-        const company = await prisma.company.findUnique({
-          where: { id: session.user.companyId },
-          select: {
-            cif: true,
-            nombre: true,
-            direccion: true,
-          },
-        });
-        if (company) {
-          companyInfo = {
-            cif: company.cif || null,
-            nombre: company.nombre,
-            direccion: company.direccion || null,
-          };
+        // Verificar autenticación
+        const session = await getServerSession(authOptions);
+        if (!session?.user) {
+          return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
         }
-      } catch (e) {
-        logger.warn('[AI Document Analysis] No se pudo obtener info de empresa');
-      }
-    }
 
-    // Analizar documento con IA real
-    // Determinar si usar Vision (para imágenes y PDFs)
-    const isPDF = isPDFFile(file);
-    let isImage = isImageFile(file);
-    
-    // Si no se detectó como imagen por tipo/extensión, verificar por magic bytes
-    if (!isImage && !isPDF) {
-      isImage = await isImageByMagicBytes(file);
-      if (isImage) {
-        logger.info('[AI Document Analysis] 🔍 Imagen detectada por magic bytes', {
-          filename: file.name,
-          declaredType: file.type,
-        });
-      }
-    }
-    
-    // Usar Vision para imágenes y PDFs
-    const useVision = isImage || isPDF;
-    
-    logger.info('[AI Document Analysis] Iniciando análisis con IA', {
-      filename: file.name,
-      fileType: file.type,
-      fileSize: file.size,
-      userId: session.user.id,
-      isImage,
-      isPDF,
-      useVision,
-      context,
-    });
+        // Obtener el archivo del FormData
+        const formData = await request.formData();
+        const file = formData.get('file') as File | null;
+        const context = (formData.get('context') as string) || 'general';
 
-    // Si es imagen o PDF, usar Claude Vision
-    if (useVision) {
-      logger.info('[AI Document Analysis] 🖼️ USANDO CLAUDE VISION', { 
-        context,
-        filename: file.name,
-        fileType: file.type,
-        isPDF,
-        isImage,
-      });
-      try {
-        const visionAnalysis = await analyzeDocumentWithVision(file, companyInfo, context);
-        
-        logger.info('[AI Document Analysis] Análisis de visión completado', {
-          filename: file.name,
+        if (!file) {
+          return NextResponse.json({ error: 'No se proporcionó ningún archivo' }, { status: 400 });
+        }
+
+        // LOG DETALLADO DEL ARCHIVO RECIBIDO
+        logger.info('[AI Document Analysis] 📥 Archivo recibido', {
+          fileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
           context,
-          category: visionAnalysis.classification?.category,
-          fieldsExtracted: visionAnalysis.extractedFields?.length || 0,
+          isImageByType: file.type.startsWith('image/'),
+          isImageByExtension: ['.jpg', '.jpeg', '.png', '.gif', '.webp'].some((ext) =>
+            file.name.toLowerCase().endsWith(ext)
+          ),
         });
-        
-        return NextResponse.json(visionAnalysis);
-      } catch (visionError: any) {
-        const visionMessage = visionError?.message || visionError?.toString() || 'Error desconocido';
-        logger.warn('[AI Document Analysis] Vision falló, intentando fallback a texto', {
+
+        // Verificar tipo de archivo
+        const allowedTypes = [
+          'application/pdf',
+          'image/jpeg',
+          'image/png',
+          'image/jpg',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'text/plain',
+        ];
+
+        if (!allowedTypes.includes(file.type)) {
+          return NextResponse.json({ error: 'Tipo de archivo no permitido' }, { status: 400 });
+        }
+
+        // Verificar tamaño (máximo 10MB)
+        const maxSize = 10 * 1024 * 1024;
+        if (file.size > maxSize) {
+          return NextResponse.json(
+            { error: 'El archivo excede el tamaño máximo de 10MB' },
+            { status: 400 }
+          );
+        }
+
+        // Verificar si IA está configurada
+        if (!isAIConfigured()) {
+          logger.warn(
+            '[AI Document Analysis] ANTHROPIC_API_KEY no configurado, usando análisis básico'
+          );
+          const basicResult = basicAnalysis(file.name, file.type);
+          basicResult.warnings.push(
+            '⚠️ IA no configurada: Para análisis inteligente de documentos, configure ANTHROPIC_API_KEY en el servidor.'
+          );
+          basicResult.summary =
+            'Análisis básico (sin IA). Configure ANTHROPIC_API_KEY para extracción automática de datos.';
+          return NextResponse.json(basicResult);
+        }
+
+        // Extraer texto del archivo
+        const extractedText = await extractTextFromFile(file);
+
+        // Obtener información de la empresa del usuario
+        let companyInfo: DocumentAnalysisInput['companyInfo'] = {
+          cif: null,
+          nombre: session.user.name || 'Usuario',
+          direccion: null,
+        };
+
+        // Intentar obtener info de la empresa del usuario
+        if (session.user.companyId) {
+          try {
+            const company = await prisma.company.findUnique({
+              where: { id: session.user.companyId },
+              select: {
+                cif: true,
+                nombre: true,
+                direccion: true,
+              },
+            });
+            if (company) {
+              companyInfo = {
+                cif: company.cif || null,
+                nombre: company.nombre,
+                direccion: company.direccion || null,
+              };
+            }
+          } catch (e) {
+            logger.warn('[AI Document Analysis] No se pudo obtener info de empresa');
+          }
+        }
+
+        // Analizar documento con IA real
+        // Determinar si usar Vision (para imágenes y PDFs)
+        const isPDF = isPDFFile(file);
+        let isImage = isImageFile(file);
+
+        // Si no se detectó como imagen por tipo/extensión, verificar por magic bytes
+        if (!isImage && !isPDF) {
+          isImage = await isImageByMagicBytes(file);
+          if (isImage) {
+            logger.info('[AI Document Analysis] 🔍 Imagen detectada por magic bytes', {
+              filename: file.name,
+              declaredType: file.type,
+            });
+          }
+        }
+
+        // Usar Vision para imágenes y PDFs
+        const useVision = isImage || isPDF;
+
+        logger.info('[AI Document Analysis] Iniciando análisis con IA', {
           filename: file.name,
-          context,
-          isPDF,
+          fileType: file.type,
+          fileSize: file.size,
+          userId: session.user.id,
           isImage,
-          error: visionMessage,
+          isPDF,
+          useVision,
+          context,
         });
 
-        if (extractedText && extractedText.trim().length > 0) {
-          const analysis = await analyzeDocument({
-            text: extractedText,
+        // Si es imagen o PDF, usar Claude Vision
+        if (useVision) {
+          logger.info('[AI Document Analysis] 🖼️ USANDO CLAUDE VISION', {
+            context,
             filename: file.name,
-            mimeType: file.type,
-            companyInfo,
+            fileType: file.type,
+            isPDF,
+            isImage,
           });
+          try {
+            const visionAnalysis = await analyzeDocumentWithVision(file, companyInfo, context);
 
-          analysis.warnings = [
-            ...(analysis.warnings || []),
-            `Visión no disponible (${visionMessage}). Se usó análisis por texto.`,
-          ];
+            logger.info('[AI Document Analysis] Análisis de visión completado', {
+              filename: file.name,
+              context,
+              category: visionAnalysis.classification?.category,
+              fieldsExtracted: visionAnalysis.extractedFields?.length || 0,
+            });
 
-          return NextResponse.json(analysis);
+            return NextResponse.json(visionAnalysis);
+          } catch (visionError: any) {
+            const visionMessage =
+              visionError?.message || visionError?.toString() || 'Error desconocido';
+            logger.warn('[AI Document Analysis] Vision falló, intentando fallback a texto', {
+              filename: file.name,
+              context,
+              isPDF,
+              isImage,
+              error: visionMessage,
+            });
+
+            if (extractedText && extractedText.trim().length > 0) {
+              const analysis = await analyzeDocument({
+                text: extractedText,
+                filename: file.name,
+                mimeType: file.type,
+                companyInfo,
+              });
+
+              analysis.warnings = [
+                ...(analysis.warnings || []),
+                `Visión no disponible (${visionMessage}). Se usó análisis por texto.`,
+              ];
+
+              return NextResponse.json(analysis);
+            }
+
+            throw visionError;
+          }
         }
 
-        throw visionError;
+        // Para documentos de texto/PDF, usar el análisis tradicional
+        logger.info('[AI Document Analysis] 📄 Usando análisis de TEXTO (no Vision)', {
+          filename: file.name,
+          fileType: file.type,
+          textLength: extractedText.length,
+        });
+
+        const analysis = await analyzeDocument({
+          text: extractedText,
+          filename: file.name,
+          mimeType: file.type,
+          companyInfo,
+        });
+
+        logger.info('[AI Document Analysis] Análisis completado', {
+          filename: file.name,
+          category: analysis.classification.category,
+          confidence: analysis.classification.confidence,
+          processingTimeMs: analysis.processingMetadata.processingTimeMs,
+        });
+
+        return NextResponse.json(analysis);
+      } catch (error: any) {
+        const errorMessage = error?.message || error?.toString() || 'Error desconocido';
+        const errorDetails = {
+          message: errorMessage,
+          name: error?.name,
+          status: error?.status,
+          code: error?.code,
+          stack: error?.stack?.substring(0, 500),
+        };
+
+        // Log crítico usando console.error para PM2
+        console.error('[AI Document Analysis] ❌ ERROR CRÍTICO:', JSON.stringify(errorDetails));
+        logger.error('[AI Document Analysis] Error:', errorDetails);
+
+        // Retornar análisis básico como fallback con mensaje de error claro
+        return NextResponse.json({
+          classification: {
+            category: 'otro',
+            confidence: 0,
+            specificType: 'Error en análisis',
+            reasoning: `No se pudo analizar el documento: ${errorMessage}`,
+          },
+          ownershipValidation: {
+            isOwned: false,
+            detectedCIF: null,
+            detectedCompanyName: null,
+            matchesCIF: false,
+            matchesName: false,
+            confidence: 0,
+            notes: 'Error en el análisis',
+          },
+          extractedFields: [],
+          summary: `Error: ${errorMessage}`,
+          warnings: [`Error en análisis de IA: ${errorMessage}`],
+          suggestedActions: [],
+          sensitiveData: { hasSensitive: false, types: [] },
+          processingMetadata: {
+            tokensUsed: 0,
+            processingTimeMs: 0,
+            modelUsed: 'error-fallback',
+          },
+          error: true,
+          errorMessage,
+        });
       }
-    }
-
-    // Para documentos de texto/PDF, usar el análisis tradicional
-    logger.info('[AI Document Analysis] 📄 Usando análisis de TEXTO (no Vision)', {
-      filename: file.name,
-      fileType: file.type,
-      textLength: extractedText.length,
-    });
-    
-    const analysis = await analyzeDocument({
-      text: extractedText,
-      filename: file.name,
-      mimeType: file.type,
-      companyInfo,
-    });
-
-    logger.info('[AI Document Analysis] Análisis completado', {
-      filename: file.name,
-      category: analysis.classification.category,
-      confidence: analysis.classification.confidence,
-      processingTimeMs: analysis.processingMetadata.processingTimeMs,
-    });
-
-    return NextResponse.json(analysis);
-  } catch (error: any) {
-    const errorMessage = error?.message || error?.toString() || 'Error desconocido';
-    const errorDetails = {
-      message: errorMessage,
-      name: error?.name,
-      status: error?.status,
-      code: error?.code,
-      stack: error?.stack?.substring(0, 500),
-    };
-    
-    // Log crítico usando console.error para PM2
-    console.error('[AI Document Analysis] ❌ ERROR CRÍTICO:', JSON.stringify(errorDetails));
-    logger.error('[AI Document Analysis] Error:', errorDetails);
-    
-    // Retornar análisis básico como fallback con mensaje de error claro
-    return NextResponse.json({
-      classification: {
-        category: 'otro',
-        confidence: 0,
-        specificType: 'Error en análisis',
-        reasoning: `No se pudo analizar el documento: ${errorMessage}`,
-      },
-      ownershipValidation: {
-        isOwned: false,
-        detectedCIF: null,
-        detectedCompanyName: null,
-        matchesCIF: false,
-        matchesName: false,
-        confidence: 0,
-        notes: 'Error en el análisis',
-      },
-      extractedFields: [],
-      summary: `Error: ${errorMessage}`,
-      warnings: [`Error en análisis de IA: ${errorMessage}`],
-      suggestedActions: [],
-      sensitiveData: { hasSensitive: false, types: [] },
-      processingMetadata: {
-        tokensUsed: 0,
-        processingTimeMs: 0,
-        modelUsed: 'error-fallback',
-      },
-      error: true,
-      errorMessage,
-    });
-  }
+    },
+    DOCUMENT_ANALYSIS_RATE_LIMIT
+  );
 }

@@ -3,12 +3,13 @@
  * Proporciona alertas priorizadas para mostrar en el dashboard
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { addDays, differenceInDays, startOfDay } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
+import { getRedisClient } from '@/lib/redis';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -25,7 +26,47 @@ interface Alert {
   entityType: string;
 }
 
-export async function GET() {
+interface AlertsSummary {
+  total: number;
+  high: number;
+  medium: number;
+  low: number;
+}
+
+interface AlertsResponse {
+  alerts: Alert[];
+  summary: AlertsSummary;
+}
+
+const CACHE_TTL_SECONDS = 60;
+const CACHE_KEY_PREFIX = 'dashboard:alerts:';
+
+function getCacheKey(companyId: string) {
+  return `${CACHE_KEY_PREFIX}${companyId}`;
+}
+
+async function getCachedAlerts(key: string): Promise<AlertsResponse | null> {
+  try {
+    const redis = getRedisClient();
+    if (!redis) return null;
+    const cached = await redis.get(key);
+    return cached ? (JSON.parse(cached) as AlertsResponse) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function setCachedAlerts(key: string, payload: AlertsResponse): Promise<void> {
+  try {
+    const redis = getRedisClient();
+    if (!redis) return;
+    await redis.setex(key, CACHE_TTL_SECONDS, JSON.stringify(payload));
+  } catch (error) {
+    logger.warn('[Dashboard Alerts] Error setting cache:', error);
+  }
+}
+
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -34,8 +75,21 @@ export async function GET() {
     }
 
     const companyId = session?.user?.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Empresa no encontrada' }, { status: 400 });
+    }
+    const { searchParams } = new URL(request.url);
+    const skipCache = searchParams.get('fresh') === 'true';
     const today = startOfDay(new Date());
     const alerts: Alert[] = [];
+    const cacheKey = getCacheKey(companyId);
+
+    if (!skipCache) {
+      const cached = await getCachedAlerts(cacheKey);
+      if (cached) {
+        return NextResponse.json(cached);
+      }
+    }
 
     // ============================================
     // ALERTAS DE PAGOS PENDIENTES
@@ -249,7 +303,7 @@ export async function GET() {
       return 0;
     });
 
-    return NextResponse.json({
+    const responsePayload: AlertsResponse = {
       alerts,
       summary: {
         total: alerts.length,
@@ -257,12 +311,12 @@ export async function GET() {
         medium: alerts.filter((a) => a.priority === 'medio').length,
         low: alerts.filter((a) => a.priority === 'bajo').length,
       },
-    });
+    };
+
+    await setCachedAlerts(cacheKey, responsePayload);
+    return NextResponse.json(responsePayload);
   } catch (error) {
     logger.error('Error obteniendo alertas:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener alertas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener alertas' }, { status: 500 });
   }
 }
