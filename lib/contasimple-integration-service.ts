@@ -24,6 +24,10 @@
 import axios, { AxiosInstance } from 'axios';
 import logger, { logError } from '@/lib/logger';
 
+const CONTASIMPLE_TIMEOUT_MS = 15000;
+let contasimpleInitLogged = false;
+let contasimpleMissingLogged = false;
+
 /**
  * TIPOS DE DATOS CONTASIMPLE
  */
@@ -122,9 +126,18 @@ export class ContaSimpleIntegrationService {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
+      timeout: CONTASIMPLE_TIMEOUT_MS,
     });
 
-    logger.info('✅ ContaSimple Integration Service: Inicializado correctamente');
+    if (this.config.authKey) {
+      if (!contasimpleInitLogged) {
+        logger.info('✅ ContaSimple Integration Service: Inicializado correctamente');
+        contasimpleInitLogged = true;
+      }
+    } else if (!contasimpleMissingLogged) {
+      logger.warn('⚠️ ContaSimple Integration Service: credenciales no configuradas');
+      contasimpleMissingLogged = true;
+    }
   }
 
   /**
@@ -148,6 +161,7 @@ export class ContaSimpleIntegrationService {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
+          timeout: CONTASIMPLE_TIMEOUT_MS,
         }
       );
 

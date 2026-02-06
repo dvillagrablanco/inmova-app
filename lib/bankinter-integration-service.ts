@@ -986,5 +986,22 @@ export function isBankinterConfigured(): boolean {
     'REDSYS_CERTIFICATE_KEY_PATH',
   ];
 
-  return requiredVars.every((key) => !!process.env[key]);
+  if (!requiredVars.every((key) => !!process.env[key])) {
+    return false;
+  }
+
+  try {
+    const certPath = process.env.REDSYS_CERTIFICATE_PATH;
+    const keyPath = process.env.REDSYS_CERTIFICATE_KEY_PATH;
+    if (certPath && !fs.existsSync(certPath)) {
+      return false;
+    }
+    if (keyPath && !fs.existsSync(keyPath)) {
+      return false;
+    }
+  } catch {
+    return false;
+  }
+
+  return true;
 }
