@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from '@/lib/auth-options';
 import prisma from "@/lib/prisma";
 import { put } from "@vercel/blob";
+import { processDocument, type OCRResult } from '@/lib/ocr-service';
 
 import logger from '@/lib/logger';
 export async function POST(request: NextRequest) {
@@ -72,8 +73,39 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // TODO: Aquí iría la llamada al servicio OCR (AWS Textract)
-    // Por ahora, simplemente guardamos el documento como "pendiente"
+    let ocrResult: OCRResult | null = null;
+    let ocrErrorMessage: string | null = null;
+
+    try {
+      ocrResult = await processDocument(file, file.type);
+    } catch (error) {
+      ocrErrorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      logger.error("[EWOORKER_OCR]", error);
+    }
+
+    const requiereRevisionManual =
+      !ocrResult || (typeof ocrResult.confidence === 'number' && ocrResult.confidence < 70);
+
+    await prisma.ewoorkerDocumento.update({
+      where: { id: documento.id },
+      data: {
+        datosExtraidos: ocrResult
+          ? {
+              text: ocrResult.text,
+              lines: ocrResult.lines,
+              language: ocrResult.language,
+              processingTime: ocrResult.processingTime,
+              fileType: ocrResult.fileType,
+              pageCount: ocrResult.pageCount,
+            }
+          : null,
+        confianzaOCR: ocrResult?.confidence ?? null,
+        requiereRevisionManual,
+        observaciones: ocrErrorMessage
+          ? `OCR falló: ${ocrErrorMessage}`
+          : null,
+      },
+    });
 
     return NextResponse.json({
       success: true,
@@ -81,11 +113,13 @@ export async function POST(request: NextRequest) {
         id: documento.id,
         nombreArchivo: documento.nombreArchivo,
         url: documento.urlArchivo,
-        estado: documento.estado
+        estado: documento.estado,
+        ocrConfidence: ocrResult?.confidence ?? null,
+        requiereRevisionManual
       }
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error("[EWOORKER_UPLOAD_DOC]", error);
     return NextResponse.json(
       { error: "Error al subir documento" },
