@@ -7,13 +7,17 @@ const prisma = new PrismaClient();
 
 async function checkData() {
   try {
+    const companyIds = [
+      'vidaro-inversiones',
+      'rovida-sl',
+      'rovida-gestion',
+      'viroda-inversiones',
+      'viroda-gestion',
+    ];
+
     const companies = await prisma.company.findMany({
       where: {
-        OR: [
-          { id: 'vidaro-inversiones' },
-          { id: 'rovida-gestion' },
-          { id: 'viroda-gestion' }
-        ]
+        id: { in: companyIds }
       },
       select: {
         id: true,
@@ -46,7 +50,7 @@ async function checkData() {
     
     const buildings = await prisma.building.findMany({
       where: {
-        companyId: { in: ['vidaro-inversiones', 'rovida-gestion', 'viroda-gestion'] }
+        companyId: { in: companyIds }
       },
       select: {
         nombre: true,

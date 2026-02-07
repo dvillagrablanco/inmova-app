@@ -7,17 +7,25 @@ async function main() {
   console.log('🚀 Configurando usuarios multi-empresa para Grupo Vidaro...\n');
 
   // 1. Obtener las empresas del Grupo Vidaro
-  const grupoVidaro = await prisma.company.findFirst({
-    where: { nombre: 'Grupo Vidaro Inversiones' }
-  });
+  const grupoVidaro =
+    (await prisma.company.findUnique({ where: { id: 'vidaro-inversiones' } })) ||
+    (await prisma.company.findFirst({
+      where: { nombre: { contains: 'Vidaro', mode: 'insensitive' } },
+    }));
 
-  const rovida = await prisma.company.findFirst({
-    where: { nombre: 'Rovida Gestión S.L.' }
-  });
+  const rovida =
+    (await prisma.company.findUnique({ where: { id: 'rovida-sl' } })) ||
+    (await prisma.company.findUnique({ where: { id: 'rovida-gestion' } })) ||
+    (await prisma.company.findFirst({
+      where: { nombre: { contains: 'Rovida', mode: 'insensitive' } },
+    }));
 
-  const viroda = await prisma.company.findFirst({
-    where: { nombre: 'Viroda Gestión S.L.' }
-  });
+  const viroda =
+    (await prisma.company.findUnique({ where: { id: 'viroda-inversiones' } })) ||
+    (await prisma.company.findUnique({ where: { id: 'viroda-gestion' } })) ||
+    (await prisma.company.findFirst({
+      where: { nombre: { contains: 'Viroda', mode: 'insensitive' } },
+    }));
 
   if (!grupoVidaro || !rovida || !viroda) {
     console.error('❌ No se encontraron todas las empresas del Grupo Vidaro');

@@ -50,11 +50,11 @@ async function main() {
     console.log(`  ✓ Rovida Gestión S.L. (ID: ${rovida.id})`);
 
     const viroda = await prisma.company.upsert({
-      where: { id: 'viroda-gestion' },
+      where: { id: 'viroda-inversiones' },
       update: {},
       create: {
-        id: 'viroda-gestion',
-        nombre: 'Viroda Gestión S.L.',
+        id: 'viroda-inversiones',
+        nombre: 'VIRODA INVERSIONES S.L.U.',
         cif: 'B-XXXXXXXX',
         direccion: 'Madrid, España',
         ciudad: 'Madrid',
@@ -64,7 +64,7 @@ async function main() {
         activo: true
       }
     });
-    console.log(`  ✓ Viroda Gestión S.L. (ID: ${viroda.id})\n`);
+    console.log(`  ✓ VIRODA INVERSIONES S.L.U. (ID: ${viroda.id})\n`);
 
     // ================================================================================
     // 2. CREAR EDIFICIOS - ROVIDA
