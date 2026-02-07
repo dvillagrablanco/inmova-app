@@ -12,9 +12,9 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { VapiAssistantButton, AgentType } from './VapiAssistantButton';
 
-// Número de teléfono de USA (Twilio)
-const USA_PHONE_NUMBER = process.env.NEXT_PUBLIC_VAPI_PHONE_NUMBER || '+1 (XXX) XXX-XXXX';
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+34600000000';
+// Número de teléfono configurable por entorno
+const USA_PHONE_NUMBER = (process.env.NEXT_PUBLIC_VAPI_PHONE_NUMBER ?? '').trim();
+const WHATSAPP_NUMBER = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '').trim();
 
 // Mapeo de rutas a agentes
 const ROUTE_TO_AGENT: Record<string, AgentType> = {
@@ -53,6 +53,8 @@ export function GlobalContactWidget({ className }: GlobalContactWidgetProps) {
   const pathname = usePathname();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPhoneTooltip, setShowPhoneTooltip] = useState(false);
+  const hasPhoneNumber = USA_PHONE_NUMBER.length > 0;
+  const hasWhatsappNumber = WHATSAPP_NUMBER.length > 0;
 
   // Determinar el agente apropiado según la ruta
   const getAgentForPath = (): AgentType => {
@@ -77,18 +79,20 @@ export function GlobalContactWidget({ className }: GlobalContactWidgetProps) {
 
   // Mostrar tooltip del teléfono brevemente al cargar
   useEffect(() => {
+    if (!hasPhoneNumber) return;
+
     const timer = setTimeout(() => {
       setShowPhoneTooltip(true);
       setTimeout(() => setShowPhoneTooltip(false), 5000);
     }, 3000);
-    
+
     return () => clearTimeout(timer);
-  }, []);
+  }, [hasPhoneNumber]);
 
   return (
     <div className={cn('fixed bottom-6 right-6 z-50', className)}>
       {/* Tooltip del teléfono */}
-      {showPhoneTooltip && !isExpanded && (
+      {showPhoneTooltip && !isExpanded && hasPhoneNumber && (
         <div className="absolute bottom-full right-0 mb-2 animate-fade-in">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 border">
             <p className="text-sm font-medium">¿Necesitas ayuda?</p>
@@ -138,12 +142,19 @@ export function GlobalContactWidget({ className }: GlobalContactWidgetProps) {
             <Button
               variant="outline"
               className="w-full justify-start gap-3"
-              onClick={() => window.open(`tel:${USA_PHONE_NUMBER}`, '_self')}
+              onClick={() => {
+                if (hasPhoneNumber) {
+                  window.open(`tel:${USA_PHONE_NUMBER}`, '_self');
+                }
+              }}
+              disabled={!hasPhoneNumber}
             >
               <Phone className="h-5 w-5 text-green-500" />
               <div className="text-left">
                 <p className="text-sm font-medium">Llamar</p>
-                <p className="text-xs text-muted-foreground font-mono">{USA_PHONE_NUMBER}</p>
+                <p className="text-xs text-muted-foreground font-mono">
+                  {hasPhoneNumber ? USA_PHONE_NUMBER : 'Teléfono no configurado'}
+                </p>
               </div>
             </Button>
 
@@ -151,12 +162,19 @@ export function GlobalContactWidget({ className }: GlobalContactWidgetProps) {
             <Button
               variant="outline"
               className="w-full justify-start gap-3"
-              onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}`, '_blank')}
+              onClick={() => {
+                if (hasWhatsappNumber) {
+                  window.open(`https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}`, '_blank');
+                }
+              }}
+              disabled={!hasWhatsappNumber}
             >
               <MessageCircle className="h-5 w-5 text-green-500" />
               <div className="text-left">
                 <p className="text-sm font-medium">WhatsApp</p>
-                <p className="text-xs text-muted-foreground">Escríbenos</p>
+                <p className="text-xs text-muted-foreground">
+                  {hasWhatsappNumber ? 'Escríbenos' : 'WhatsApp no configurado'}
+                </p>
               </div>
             </Button>
           </div>

@@ -401,7 +401,7 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     website: 'https://analytics.google.com',
     status: 'active',
     credentialFields: [
-      { key: 'measurementId', label: 'Measurement ID', type: 'text', required: true, placeholder: 'G-XXXXXXXXXX' },
+      { key: 'measurementId', label: 'Measurement ID', type: 'text', required: true, placeholder: 'Measurement ID' },
       { key: 'apiSecret', label: 'API Secret', type: 'password', required: false },
     ],
   },

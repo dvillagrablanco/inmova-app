@@ -104,8 +104,8 @@ const AGENT_INFO: Record<AgentType, {
   },
 };
 
-// Número de teléfono de contacto (se actualizará con el de Twilio)
-const CONTACT_PHONE = process.env.NEXT_PUBLIC_VAPI_PHONE_NUMBER || '+1 (XXX) XXX-XXXX';
+// Número de teléfono de contacto (configurable por entorno)
+const CONTACT_PHONE = (process.env.NEXT_PUBLIC_VAPI_PHONE_NUMBER ?? '').trim();
 
 interface VapiAssistantButtonProps {
   agentType: AgentType;
@@ -129,6 +129,7 @@ export function VapiAssistantButton({
   const [callStatus, setCallStatus] = useState<string>('');
 
   const agent = AGENT_INFO[agentType];
+  const hasContactPhone = CONTACT_PHONE.length > 0;
 
   // Iniciar llamada web con Vapi
   const startWebCall = useCallback(async () => {
@@ -379,10 +380,15 @@ function AssistantDialog({
                   size="lg"
                   variant="outline"
                   className="gap-2"
-                  onClick={() => window.open(`tel:${CONTACT_PHONE}`, '_self')}
+                  onClick={() => {
+                    if (hasContactPhone) {
+                      window.open(`tel:${CONTACT_PHONE}`, '_self');
+                    }
+                  }}
+                  disabled={!hasContactPhone}
                 >
                   <Phone className="h-5 w-5" />
-                  Llamar
+                  {hasContactPhone ? 'Llamar' : 'Teléfono no configurado'}
                 </Button>
               </>
             ) : (
@@ -418,7 +424,9 @@ function AssistantDialog({
           {!isConnected && !isConnecting && (
             <div className="text-center text-xs text-muted-foreground">
               <p>También puedes llamar directamente al:</p>
-              <p className="font-mono font-medium">{CONTACT_PHONE}</p>
+              <p className="font-mono font-medium">
+                {hasContactPhone ? CONTACT_PHONE : 'Teléfono no configurado'}
+              </p>
             </div>
           )}
         </div>
