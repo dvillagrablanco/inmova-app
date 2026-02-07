@@ -799,6 +799,8 @@ export default function DocumentosPage() {
         </Dialog>
       )}
 
+      </div>
+
       {/* Asistente IA de Documentos */}
       <AIDocumentAssistant 
         context="documentos"
