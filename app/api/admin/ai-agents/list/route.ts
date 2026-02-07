@@ -1,10 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const PROVIDER = 'ai_agents';
+
+const configSchema = z.object({
+  model: z.string(),
+  temperature: z.number().min(0).max(1),
+  maxTokens: z.number().int().positive(),
+  autoEscalate: z.boolean(),
+});
+
+const updateSchema = z.object({
+  agentId: z.string().min(1),
+  config: configSchema.partial().optional(),
+  enabled: z.boolean().optional(),
+});
+
+type AgentConfig = z.infer<typeof configSchema>;
+
+const toObjectRecord = (value: unknown): Record<string, unknown> => {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  return {};
+};
+
+const parseAgentConfig = (value: unknown): Partial<AgentConfig> => {
+  const parsed = configSchema.partial().safeParse(value);
+  return parsed.success ? parsed.data : {};
+};
+
+const getCompanyContext = async (
+  userId: string,
+  role?: string | null,
+  companyId?: string | null
+) => {
+  if (companyId) {
+    return { role, companyId };
+  }
+
+  const { getPrismaClient } = await import('@/lib/db');
+  const prisma = getPrismaClient();
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true, companyId: true },
+  });
+
+  return {
+    role: role ?? user?.role ?? null,
+    companyId: companyId ?? user?.companyId ?? null,
+  };
+};
 
 // Definición de agentes de IA del sistema
 // Estos son los agentes disponibles en la plataforma
@@ -199,8 +251,11 @@ const SYSTEM_AGENTS = [
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
+    const sessionUser = session?.user as
+      | { id?: string; role?: string | null; companyId?: string | null }
+      | undefined;
+
+    if (!sessionUser?.id) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
@@ -210,28 +265,61 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const includeMetrics = searchParams.get('metrics') === 'true';
 
-    // Devolver agentes con métricas vacías (datos reales cuando se implementen)
-    const agentsWithData = SYSTEM_AGENTS.map(agent => ({
-      ...agent,
-      metrics: includeMetrics ? {
-        // Métricas reales - inicialmente vacías/cero
-        totalInteractions: 0,
-        successRate: 0,
-        avgResponseTime: 0,
-        lastActive: null,
-        // TODO: Obtener métricas reales de la base de datos
-      } : undefined,
-    }));
+    const { companyId } = await getCompanyContext(
+      sessionUser.id,
+      sessionUser.role,
+      sessionUser.companyId
+    );
+
+    if (!companyId) {
+      return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
+    }
+
+    const { getPrismaClient } = await import('@/lib/db');
+    const prisma = getPrismaClient();
+    const integration = await prisma.integrationConfig.findUnique({
+      where: { companyId_provider: { companyId, provider: PROVIDER } },
+      select: { settings: true },
+    });
+
+    const settings = toObjectRecord(integration?.settings);
+    const agentsSettings = toObjectRecord(settings.agents);
+
+    const agentsWithData = SYSTEM_AGENTS.map((agent) => {
+      const storedAgent = toObjectRecord(agentsSettings[agent.id]);
+      const storedConfig = parseAgentConfig(storedAgent.config);
+      const storedEnabled =
+        typeof storedAgent.enabled === 'boolean' ? storedAgent.enabled : undefined;
+
+      return {
+        ...agent,
+        enabled: storedEnabled ?? agent.enabled,
+        defaultConfig: {
+          ...agent.defaultConfig,
+          ...storedConfig,
+        },
+        metrics: includeMetrics
+          ? {
+              totalInteractions: 0,
+              successRate: 0,
+              avgResponseTime: 0,
+              lastActive: null,
+            }
+          : undefined,
+      };
+    });
 
     return NextResponse.json({
       success: true,
       agents: agentsWithData,
       total: agentsWithData.length,
       timestamp: new Date().toISOString(),
-      message: 'Los agentes están disponibles. Las métricas se actualizarán cuando los agentes procesen interacciones.',
+      message:
+        'Los agentes están disponibles. Las métricas aparecerán cuando exista tracking por agente.',
     });
-  } catch (error: any) {
-    logger.error('[AI Agents List Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[AI Agents List Error]:', { message });
     return NextResponse.json(
       { error: 'Error al obtener lista de agentes' },
       { status: 500 }
@@ -246,37 +334,106 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
+    const sessionUser = session?.user as
+      | { id?: string; role?: string | null; companyId?: string | null }
+      | undefined;
+
+    if (!sessionUser?.id) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const userRole = (session.user as any).role;
-    if (!['super_admin'].includes(userRole)) {
+    const userRole = sessionUser.role ?? null;
+    if (userRole !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
-    const body = await request.json();
+    const { companyId } = await getCompanyContext(
+      sessionUser.id,
+      sessionUser.role,
+      sessionUser.companyId
+    );
+
+    if (!companyId) {
+      return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
+    }
+
+    const body = updateSchema.parse(await request.json());
     const { agentId, config, enabled } = body;
 
-    if (!agentId) {
+    const agent = SYSTEM_AGENTS.find((item) => item.id === agentId);
+    if (!agent) {
       return NextResponse.json(
-        { error: 'ID del agente es requerido' },
-        { status: 400 }
+        { error: 'Agente no encontrado' },
+        { status: 404 }
       );
     }
 
-    // TODO: Guardar configuración en base de datos
-    
+    const { getPrismaClient } = await import('@/lib/db');
+    const prisma = getPrismaClient();
+    const integration = await prisma.integrationConfig.findUnique({
+      where: { companyId_provider: { companyId, provider: PROVIDER } },
+      select: { credentials: true, settings: true },
+    });
+
+    const baseSettings = toObjectRecord(integration?.settings);
+    const agentsSettings = toObjectRecord(baseSettings.agents);
+    const currentAgent = toObjectRecord(agentsSettings[agentId]);
+    const currentConfig = parseAgentConfig(currentAgent.config);
+    const currentEnabled =
+      typeof currentAgent.enabled === 'boolean' ? currentAgent.enabled : undefined;
+
+    const nextConfig = {
+      ...agent.defaultConfig,
+      ...currentConfig,
+      ...config,
+    };
+
+    const nextAgentSettings = {
+      enabled: enabled ?? currentEnabled ?? agent.enabled,
+      config: nextConfig,
+    };
+
+    const nextSettings = {
+      ...baseSettings,
+      agents: {
+        ...agentsSettings,
+        [agentId]: nextAgentSettings,
+      },
+    };
+
+    const now = new Date();
+    await prisma.integrationConfig.upsert({
+      where: { companyId_provider: { companyId, provider: PROVIDER } },
+      create: {
+        companyId,
+        provider: PROVIDER,
+        name: 'AI Agents',
+        category: 'ai',
+        credentials: integration?.credentials ?? {},
+        settings: nextSettings,
+        enabled: true,
+        isConfigured: true,
+        createdBy: sessionUser.id,
+        lastSyncAt: now,
+      },
+      update: {
+        settings: nextSettings,
+        enabled: true,
+        isConfigured: true,
+        lastSyncAt: now,
+      },
+    });
+
     return NextResponse.json({
       success: true,
       message: 'Configuración del agente actualizada',
       agentId,
-      config,
-      enabled,
+      config: nextConfig,
+      enabled: nextAgentSettings.enabled,
     });
-  } catch (error: any) {
-    logger.error('[AI Agents Update Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[AI Agents Update Error]:', { message });
     return NextResponse.json(
       { error: 'Error al actualizar agente' },
       { status: 500 }

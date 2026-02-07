@@ -33,12 +33,13 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       success: true,
       data: plan,
     });
-  } catch (error: any) {
-    logger.error('[eWoorker Plan GET Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[eWoorker Plan GET Error]:', { message });
     return NextResponse.json(
       {
         error: 'Error al obtener plan',
-        message: error.message,
+        message,
       },
       { status: 500 }
     );
@@ -139,8 +140,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       data: plan,
       message: 'Plan actualizado exitosamente',
     });
-  } catch (error: any) {
-    logger.error('[eWoorker Plan PUT Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[eWoorker Plan PUT Error]:', { message });
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -155,7 +157,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     return NextResponse.json(
       {
         error: 'Error actualizando plan',
-        message: error.message,
+        message,
       },
       { status: 500 }
     );
@@ -185,7 +187,45 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       return NextResponse.json({ error: 'Plan no encontrado' }, { status: 404 });
     }
 
-    // TODO: Verificar si hay empresas suscritas a este plan
+    const planActualMap: Record<
+      string,
+      'OBRERO_FREE' | 'CAPATAZ_PRO' | 'CONSTRUCTOR_ENTERPRISE'
+    > = {
+      OBRERO: 'OBRERO_FREE',
+      CAPATAZ: 'CAPATAZ_PRO',
+      CONSTRUCTOR: 'CONSTRUCTOR_ENTERPRISE',
+    };
+
+    const planActual = planActualMap[existing.codigo];
+
+    const [activeSubscriptions, activeProfiles] = await Promise.all([
+      prisma.ewoorkerSuscripcion.count({
+        where: {
+          plan: existing.codigo,
+          estado: {
+            in: ['ACTIVA', 'PENDIENTE', 'PAUSADA'],
+          },
+        },
+      }),
+      planActual
+        ? prisma.ewoorkerPerfilEmpresa.count({
+            where: { planActual },
+          })
+        : Promise.resolve(0),
+    ]);
+
+    if (activeSubscriptions > 0 || activeProfiles > 0) {
+      return NextResponse.json(
+        {
+          error: 'No se puede eliminar el plan',
+          message:
+            'Existen empresas suscritas o perfiles activos asociados a este plan.',
+          activeSubscriptions,
+          activeProfiles,
+        },
+        { status: 409 }
+      );
+    }
 
     // Eliminar plan
     await prisma.ewoorkerPlan.delete({
@@ -225,12 +265,13 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       success: true,
       message: 'Plan eliminado exitosamente',
     });
-  } catch (error: any) {
-    logger.error('[eWoorker Plan DELETE Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[eWoorker Plan DELETE Error]:', { message });
     return NextResponse.json(
       {
         error: 'Error eliminando plan',
-        message: error.message,
+        message,
       },
       { status: 500 }
     );

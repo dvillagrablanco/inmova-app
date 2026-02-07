@@ -12,8 +12,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import crypto from 'crypto';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -29,11 +29,49 @@ const signRequestSchema = z.object({
   expirationDays: z.number().optional().default(30),
 });
 
+type SignatoryInput = z.infer<typeof signRequestSchema>['signatories'][number];
+
+const getCompanyContext = async (
+  userId: string,
+  role?: string | null,
+  companyId?: string | null
+) => {
+  if (companyId) {
+    return { role, companyId };
+  }
+
+  const { getPrismaClient } = await import('@/lib/db');
+  const prisma = getPrismaClient();
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true, companyId: true },
+  });
+
+  return {
+    role: role ?? user?.role ?? null,
+    companyId: companyId ?? user?.companyId ?? null,
+  };
+};
+
+const resolvePdfBuffer = async (pdfPath: string): Promise<Buffer> => {
+  if (pdfPath.startsWith('http://') || pdfPath.startsWith('https://')) {
+    const response = await fetch(pdfPath);
+    if (!response.ok) {
+      throw new Error('No se pudo descargar el PDF del contrato');
+    }
+    const arrayBuffer = await response.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  }
+
+  const { downloadFile } = await import('@/lib/s3');
+  return await downloadFile(pdfPath);
+};
+
 // Detectar proveedor configurado
-const getActiveProvider = (): 'signaturit' | 'docusign' | 'demo' => {
+const getActiveProvider = (): 'signaturit' | 'docusign' | null => {
   if (process.env.SIGNATURIT_API_KEY) return 'signaturit';
   if (process.env.DOCUSIGN_INTEGRATION_KEY) return 'docusign';
-  return 'demo';
+  return null;
 };
 
 export async function POST(
@@ -43,19 +81,39 @@ export async function POST(
   try {
     // 1. Autenticación
     const session = await getServerSession(authOptions);
-    if (!session) {
+    const sessionUser = session?.user as
+      | { id?: string; role?: string | null; companyId?: string | null }
+      | undefined;
+
+    if (!sessionUser?.id) {
       return NextResponse.json(
         { error: 'No autenticado' },
         { status: 401 }
       );
     }
 
+    const { getPrismaClient } = await import('@/lib/db');
+    const prisma = getPrismaClient();
+
     // 2. Obtener contrato
     const contract = await prisma.contract.findUnique({
       where: { id: params.id },
       include: {
-        property: true,
-        tenant: true,
+        unit: {
+          include: {
+            building: {
+              select: {
+                companyId: true,
+              },
+            },
+          },
+        },
+        tenant: {
+          select: {
+            email: true,
+            nombre: true,
+          },
+        },
       },
     });
 
@@ -66,8 +124,25 @@ export async function POST(
       );
     }
 
+    const contractCompanyId = contract.unit?.building?.companyId ?? null;
+
+    if (!contractCompanyId) {
+      return NextResponse.json(
+        { error: 'No se pudo determinar la empresa del contrato' },
+        { status: 400 }
+      );
+    }
+
+    const { role, companyId } = await getCompanyContext(
+      sessionUser.id,
+      sessionUser.role,
+      sessionUser.companyId
+    );
+
     // 3. Verificar permisos
-    if (contract.ownerId !== session.user.id && session.user.role !== 'super_admin') {
+    const isAllowed =
+      role === 'super_admin' || (companyId && companyId === contractCompanyId);
+    if (!isAllowed) {
       return NextResponse.json(
         { error: 'No tienes permiso para firmar este contrato' },
         { status: 403 }
@@ -75,79 +150,120 @@ export async function POST(
     }
 
     // 4. Parsear y validar body
-    const body = await req.json();
-    const validation = signRequestSchema.safeParse(body);
-
-    if (!validation.success) {
-      return NextResponse.json(
-        { error: 'Datos inválidos', details: validation.error },
-        { status: 400 }
-      );
-    }
-
-    const { signatories, expirationDays } = validation.data;
+    const body = signRequestSchema.parse(await req.json());
+    const { signatories, expirationDays } = body;
 
     // 5. Determinar proveedor activo
     const provider = getActiveProvider();
+    if (!provider) {
+      return NextResponse.json(
+        {
+          error: 'Firma digital no configurada',
+          message: 'Configura SIGNATURIT_API_KEY para habilitar la firma digital.',
+        },
+        { status: 503 }
+      );
+    }
+
+    if (provider === 'docusign') {
+      return NextResponse.json(
+        { error: 'DocuSign no está disponible actualmente' },
+        { status: 501 }
+      );
+    }
+
+    const existingSignature = await prisma.contractSignature.findFirst({
+      where: {
+        contractId: contract.id,
+        status: 'PENDING',
+      },
+    });
+
+    if (existingSignature) {
+      return NextResponse.json(
+        { error: 'Ya existe una solicitud de firma pendiente' },
+        { status: 409 }
+      );
+    }
 
     // 6. Obtener metadata
     const ipAddress = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || undefined;
     const userAgent = req.headers.get('user-agent') || undefined;
 
-    // 7. Enviar documento según proveedor
-    let signatureData;
-
-    switch (provider) {
-      case 'signaturit':
-        signatureData = await sendToSignaturit(
-          contract,
-          signatories,
-          expirationDays,
-          session.user.companyId,
-          session.user.id,
-          ipAddress,
-          userAgent
-        );
-        break;
-
-      case 'docusign':
-        signatureData = await sendToDocuSign(contract, signatories, expirationDays);
-        break;
-
-      case 'demo':
-        signatureData = await sendToDemo(contract, signatories);
-        break;
+    if (!contract.contractPdfPath) {
+      return NextResponse.json(
+        { error: 'El contrato no tiene PDF asociado' },
+        { status: 400 }
+      );
     }
 
-    // 7. Actualizar contrato en BD
-    await prisma.contract.update({
-      where: { id: contract.id },
+    const pdfBuffer = await resolvePdfBuffer(contract.contractPdfPath);
+    const documentHash = crypto
+      .createHash('sha256')
+      .update(pdfBuffer)
+      .digest('hex');
+
+    const signatureData = await sendToSignaturit({
+      contractId: contract.id,
+      unitNumero: contract.unit?.numero ?? null,
+      documentName: `contrato-${contract.id}.pdf`,
+      pdfBuffer,
+      signatories,
+      expirationDays,
+    });
+
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + expirationDays * 24 * 60 * 60 * 1000);
+
+    const signatureRecord = await prisma.contractSignature.create({
       data: {
-        status: 'PENDING_SIGNATURE',
-        signatureProvider: provider.toUpperCase(),
-        signatureId: signatureData.id,
-        signatureData: signatureData,
+        companyId: contractCompanyId,
+        contractId: contract.id,
+        provider: 'SIGNATURIT',
+        externalId: signatureData.externalId ?? signatureData.id,
+        documentUrl: contract.contractPdfPath,
+        documentName: signatureData.documentName,
+        documentHash,
+        signatories: signatories.map((signatory) => ({
+          ...signatory,
+          status: 'PENDING',
+        })),
+        status: 'PENDING',
+        signingUrl: signatureData.url ?? undefined,
+        emailSubject: signatureData.emailSubject,
+        emailMessage: signatureData.emailMessage,
+        sentAt: now,
+        expiresAt,
+        ipAddress,
+        userAgent,
+        requestedBy: sessionUser.id,
       },
     });
 
     // 8. Respuesta
     return NextResponse.json({
       success: true,
-      provider,
-      signatureId: signatureData.id,
-      signatureUrl: signatureData.url,
-      message: provider === 'demo' 
-        ? '⚠️ Modo DEMO - Configura credenciales para producción'
-        : 'Documento enviado para firma',
+      provider: 'signaturit',
+      signatureId: signatureRecord.id,
+      signatureUrl: signatureRecord.signingUrl,
+      message: 'Documento enviado para firma',
     });
 
-  } catch (error: any) {
-    logger.error('[Contract Sign Error]:', error);
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: error.errors },
+        { status: 400 }
+      );
+    }
+
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Contract Sign Error]:', { message });
     
     return NextResponse.json(
       {
         error: 'Error enviando documento para firma',
-        message: error.message,
+        message,
       },
       { status: 500 }
     );
@@ -162,91 +278,68 @@ export async function POST(
  * Signaturit (RECOMENDADO - eIDAS UE)
  * Documentación: https://docs.signaturit.com/
  */
-async function sendToSignaturit(
-  contract: any,
-  signatories: any[],
-  expirationDays: number,
-  companyId: string,
-  userId: string,
-  ipAddress?: string,
-  userAgent?: string
-) {
-  const { SignaturitService } = await import('@/lib/signaturit-service');
+async function sendToSignaturit({
+  contractId,
+  unitNumero,
+  documentName,
+  pdfBuffer,
+  signatories,
+  expirationDays,
+}: {
+  contractId: string;
+  unitNumero: string | null;
+  documentName: string;
+  pdfBuffer: Buffer;
+  signatories: SignatoryInput[];
+  expirationDays: number;
+}): Promise<{
+  id: string;
+  externalId: string | null;
+  url: string | null;
+  documentName: string;
+  emailSubject: string;
+  emailMessage: string;
+}> {
+  const {
+    createSignature,
+    isSignaturitConfigured,
+    SignatureType,
+  } = await import('@/lib/signaturit-service');
 
-  if (!SignaturitService.isConfigured()) {
+  if (!isSignaturitConfigured()) {
     throw new Error('SIGNATURIT_API_KEY no configurada');
   }
 
-  // Generar URL del documento (en producción, generar PDF del contrato)
-  // Por ahora, usar URL placeholder
-  const documentUrl = `${process.env.NEXTAUTH_URL}/api/contracts/${contract.id}/pdf`;
-  const documentName = `contrato-${contract.id}.pdf`;
+  const emailSubject = `Firma de contrato - ${unitNumero ?? 'Unidad'}`;
+  const emailMessage =
+    'Por favor, revisa y firma el contrato de arrendamiento adjunto.';
 
-  const signature = await SignaturitService.createSignature({
-    contractId: contract.id,
-    documentUrl,
+  const result = await createSignature(
+    pdfBuffer,
     documentName,
-    signatories,
-    expirationDays,
-    emailSubject: `Firma de contrato - ${contract.unit?.numero || 'Unidad'}`,
-    emailMessage: 'Por favor, revisa y firma el contrato de arrendamiento adjunto.',
-    companyId,
-    userId,
-    ipAddress,
-    userAgent,
-  });
-
-  return {
-    id: signature.id,
-    externalId: signature.externalId,
-    url: signature.signingUrl,
-    provider: 'signaturit',
-  };
-}
-
-/**
- * DocuSign
- * Documentación: https://developers.docusign.com/
- */
-async function sendToDocuSign(
-  contract: any,
-  signatories: any[],
-  expirationDays: number
-) {
-  const INTEGRATION_KEY = process.env.DOCUSIGN_INTEGRATION_KEY;
-  const USER_ID = process.env.DOCUSIGN_USER_ID;
-
-  if (!INTEGRATION_KEY || !USER_ID) {
-    throw new Error('Credenciales de DocuSign no configuradas');
-  }
-
-  // TODO: Implementar cuando se tengan credenciales
-  console.log('[DocuSign] Credenciales configuradas pero implementación pendiente');
-
-  return {
-    id: `env_demo_${Date.now()}`,
-    url: `https://demo.docusign.net/signing/${Date.now()}`,
-    provider: 'docusign',
-    demo: true,
-  };
-}
-
-/**
- * MODO DEMO (sin credenciales)
- */
-async function sendToDemo(contract: any, signatories: any[]) {
-  console.log('[Demo Mode] Simulating signature request');
-  console.log('Contract:', contract.id);
-  console.log('Signatories:', signatories.map(s => s.email));
-
-  return {
-    id: `demo_${Date.now()}`,
-    url: `https://demo.firma-digital.com/${Date.now()}`,
-    provider: 'demo',
-    demo: true,
-    signatories: signatories.map(s => ({
-      email: s.email,
-      status: 'PENDING',
+    signatories.map((signatory) => ({
+      email: signatory.email,
+      name: signatory.name,
     })),
+    {
+      type: SignatureType.SIMPLE,
+      subject: emailSubject,
+      body: emailMessage,
+      expireDays: expirationDays,
+      deliveryType: 'url',
+      sequentialSignature: true,
+      callbackUrl: `${process.env.NEXTAUTH_URL}/api/webhooks/signaturit`,
+    }
+  );
+
+  const signingUrl = result.signers?.[0]?.signUrl ?? null;
+
+  return {
+    id: result.id,
+    externalId: result.id,
+    url: signingUrl,
+    documentName,
+    emailSubject,
+    emailMessage,
   };
 }

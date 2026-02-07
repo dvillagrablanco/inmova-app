@@ -16,7 +16,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { prisma } from '@/lib/db';
 import { getInmovaContasimpleBridge } from '@/lib/inmova-contasimple-bridge';
 import { handleEwoorkerStripeWebhook } from '@/lib/ewoorker-stripe-service';
 import logger from '@/lib/logger';
@@ -42,6 +41,11 @@ function getStripe(): Stripe {
 // Webhook secret (obtener de Stripe Dashboard)
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 
+const getPrisma = async () => {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+};
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.text();
@@ -65,8 +69,9 @@ export async function POST(req: NextRequest) {
         logger.warn('[Stripe Webhook] No webhook secret configured');
         event = JSON.parse(body);
       }
-    } catch (err: any) {
-      logger.error('[Stripe Webhook] Signature verification failed:', err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      logger.error('[Stripe Webhook] Signature verification failed:', { message });
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 400 }
@@ -74,7 +79,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Manejar eventos
-    console.log(`[Stripe Webhook] Received event: ${event.type}`);
+    logger.info(`[Stripe Webhook] Received event: ${event.type}`);
 
     // ══════════════════════════════════════════════════════════════════
     // PASO 1: Verificar si es un evento de eWoorker
@@ -84,7 +89,7 @@ export async function POST(req: NextRequest) {
     
     const ewoorkerResult = await handleEwoorkerStripeWebhook(event);
     if (ewoorkerResult.handled) {
-      console.log(`[Stripe Webhook] Evento manejado por eWoorker: ${ewoorkerResult.message}`);
+      logger.info(`[Stripe Webhook] Evento manejado por eWoorker: ${ewoorkerResult.message}`);
       return NextResponse.json({ 
         received: true, 
         platform: 'ewoorker',
@@ -134,15 +139,16 @@ export async function POST(req: NextRequest) {
         break;
 
       default:
-        console.log(`[Stripe Webhook] Unhandled event type: ${event.type}`);
+        logger.info(`[Stripe Webhook] Unhandled event type: ${event.type}`);
     }
 
     return NextResponse.json({ received: true, platform: 'inmova' });
 
-  } catch (error: any) {
-    logger.error('[Stripe Webhook Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Stripe Webhook Error]:', { message });
     return NextResponse.json(
-      { error: 'Webhook error', message: error.message },
+      { error: 'Webhook error', message },
       { status: 500 }
     );
   }
@@ -151,7 +157,9 @@ export async function POST(req: NextRequest) {
 // Handlers
 
 async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-  console.log('[Stripe] Payment succeeded:', paymentIntent.id);
+  logger.info(`[Stripe] Payment succeeded: ${paymentIntent.id}`);
+
+  const prisma = await getPrisma();
 
   // Actualizar payment en BD
   const payment = await prisma.payment.findFirst({
@@ -162,18 +170,42 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
     await prisma.payment.update({
       where: { id: payment.id },
       data: {
-        status: 'PAID',
-        paidAt: new Date(),
-        stripeChargeId: paymentIntent.latest_charge as string,
+        estado: 'pagado',
+        fechaPago: new Date(),
+        stripePaymentStatus: 'succeeded',
       },
     });
 
-    console.log(`[Stripe] Payment ${payment.id} marked as PAID`);
+    logger.info(`[Stripe] Payment ${payment.id} marcado como pagado`);
 
     // Si está asociado a un contrato, actualizar
     if (payment.contractId) {
-      // TODO: Lógica específica de contrato
-      // Ej: Marcar mes como pagado, generar recibo, etc.
+      const contract = await prisma.contract.findUnique({
+        where: { id: payment.contractId },
+        select: {
+          unit: {
+            select: {
+              building: {
+                select: { companyId: true },
+              },
+            },
+          },
+        },
+      });
+
+      const companyId = contract?.unit?.building?.companyId;
+      if (companyId) {
+        await prisma.notification.create({
+          data: {
+            companyId,
+            tipo: 'info',
+            titulo: 'Pago recibido',
+            mensaje: `Se recibió el pago asociado al contrato ${payment.contractId}.`,
+            entityId: payment.id,
+            entityType: 'PAYMENT',
+          },
+        });
+      }
     }
   } else {
     logger.warn(`[Stripe] Payment not found for PI: ${paymentIntent.id}`);
@@ -181,7 +213,9 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
 }
 
 async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
-  console.log('[Stripe] Payment failed:', paymentIntent.id);
+  logger.warn(`[Stripe] Payment failed: ${paymentIntent.id}`);
+
+  const prisma = await getPrisma();
 
   const payment = await prisma.payment.findFirst({
     where: { stripePaymentIntentId: paymentIntent.id },
@@ -191,19 +225,48 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
     await prisma.payment.update({
       where: { id: payment.id },
       data: {
-        status: 'FAILED',
-        failureReason: paymentIntent.last_payment_error?.message || 'Payment failed',
+        estado: 'atrasado',
+        stripePaymentStatus: 'failed',
       },
     });
 
-    console.log(`[Stripe] Payment ${payment.id} marked as FAILED`);
+    logger.warn(`[Stripe] Payment ${payment.id} marcado como fallido`);
 
-    // TODO: Notificar al usuario del fallo
+    const contract = await prisma.contract.findUnique({
+      where: { id: payment.contractId },
+      select: {
+        unit: {
+          select: {
+            building: {
+              select: { companyId: true },
+            },
+          },
+        },
+      },
+    });
+
+    const companyId = contract?.unit?.building?.companyId;
+    if (companyId) {
+      await prisma.notification.create({
+        data: {
+          companyId,
+          tipo: 'pago_atrasado',
+          titulo: 'Pago fallido',
+          mensaje:
+            `El pago asociado al contrato ${payment.contractId} falló. ` +
+            'Revisa la información de cobro.',
+          entityId: payment.id,
+          entityType: 'PAYMENT',
+        },
+      });
+    }
   }
 }
 
 async function handlePaymentCanceled(paymentIntent: Stripe.PaymentIntent) {
-  console.log('[Stripe] Payment canceled:', paymentIntent.id);
+  logger.warn(`[Stripe] Payment canceled: ${paymentIntent.id}`);
+
+  const prisma = await getPrisma();
 
   const payment = await prisma.payment.findFirst({
     where: { stripePaymentIntentId: paymentIntent.id },
@@ -213,32 +276,38 @@ async function handlePaymentCanceled(paymentIntent: Stripe.PaymentIntent) {
     await prisma.payment.update({
       where: { id: payment.id },
       data: {
-        status: 'CANCELLED',
+        estado: 'pendiente',
+        stripePaymentStatus: 'canceled',
       },
     });
 
-    console.log(`[Stripe] Payment ${payment.id} marked as CANCELLED`);
+    logger.warn(`[Stripe] Payment ${payment.id} marcado como cancelado`);
   }
 }
 
 async function handleChargeRefunded(charge: Stripe.Charge) {
-  console.log('[Stripe] Charge refunded:', charge.id);
+  logger.warn(`[Stripe] Charge refunded: ${charge.id}`);
 
-  const payment = await prisma.payment.findFirst({
-    where: { stripeChargeId: charge.id },
-  });
+  const prisma = await getPrisma();
+  const paymentIntentId =
+    typeof charge.payment_intent === 'string' ? charge.payment_intent : null;
+  const payment = paymentIntentId
+    ? await prisma.payment.findFirst({
+        where: { stripePaymentIntentId: paymentIntentId },
+      })
+    : null;
 
   if (payment) {
     await prisma.payment.update({
       where: { id: payment.id },
       data: {
-        status: 'REFUNDED',
-        refundedAt: new Date(),
-        refundAmount: charge.amount_refunded / 100,
+        estado: 'pendiente',
+        fechaPago: null,
+        stripePaymentStatus: 'refunded',
       },
     });
 
-    console.log(`[Stripe] Payment ${payment.id} marked as REFUNDED`);
+    logger.warn(`[Stripe] Payment ${payment.id} marcado como reembolsado`);
   }
 }
 
@@ -251,6 +320,8 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
  */
 async function handleB2BInvoiceCreated(stripeInvoice: Stripe.Invoice) {
   logger.info(`[Stripe Webhook] Factura B2B creada: ${stripeInvoice.id}`);
+
+  const prisma = await getPrisma();
 
   try {
     // Buscar factura en BD por stripeInvoiceId
@@ -269,8 +340,9 @@ async function handleB2BInvoiceCreated(stripeInvoice: Stripe.Invoice) {
       await inmovaContasimpleBridge.syncB2BInvoiceToContasimple(b2bInvoice.id);
       logger.info(`[Stripe Webhook] ✅ Factura ${b2bInvoice.numeroFactura} sincronizada con Contasimple`);
     }
-  } catch (error: any) {
-    logger.error('[Stripe Webhook] Error sincronizando factura con Contasimple:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Stripe Webhook] Error sincronizando factura con Contasimple:', { message });
     // No lanzar error para no fallar el webhook
   }
 }
@@ -280,6 +352,8 @@ async function handleB2BInvoiceCreated(stripeInvoice: Stripe.Invoice) {
  */
 async function handleB2BInvoicePaymentSucceeded(stripeInvoice: Stripe.Invoice) {
   logger.info(`[Stripe Webhook] Pago de factura B2B exitoso: ${stripeInvoice.id}`);
+
+  const prisma = await getPrisma();
 
   try {
     // Buscar factura en BD
@@ -310,11 +384,14 @@ async function handleB2BInvoicePaymentSucceeded(stripeInvoice: Stripe.Invoice) {
       data: {
         companyId: b2bInvoice.companyId,
         invoiceId: b2bInvoice.id,
-        amount: stripeInvoice.amount_paid / 100,
-        date: new Date(),
-        method: 'stripe',
-        status: 'completed',
-        stripePaymentIntentId: stripeInvoice.payment_intent as string || null,
+        monto: stripeInvoice.amount_paid / 100,
+        metodoPago: 'stripe',
+        fechaPago: new Date(),
+        estado: 'completado',
+        stripePaymentId:
+          typeof stripeInvoice.payment_intent === 'string'
+            ? stripeInvoice.payment_intent
+            : null,
       },
     });
 
@@ -330,8 +407,9 @@ async function handleB2BInvoicePaymentSucceeded(stripeInvoice: Stripe.Invoice) {
 
       logger.info(`[Stripe Webhook] ✅ Pago sincronizado con Contasimple`);
     }
-  } catch (error: any) {
-    logger.error('[Stripe Webhook] Error procesando pago de factura B2B:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Stripe Webhook] Error procesando pago de factura B2B:', { message });
   }
 }
 
@@ -340,6 +418,8 @@ async function handleB2BInvoicePaymentSucceeded(stripeInvoice: Stripe.Invoice) {
  */
 async function handleB2BInvoicePaymentFailed(stripeInvoice: Stripe.Invoice) {
   logger.warn(`[Stripe Webhook] Pago de factura B2B falló: ${stripeInvoice.id}`);
+
+  const prisma = await getPrisma();
 
   try {
     const b2bInvoice = await prisma.b2BInvoice.findFirst({
@@ -358,11 +438,21 @@ async function handleB2BInvoicePaymentFailed(stripeInvoice: Stripe.Invoice) {
       },
     });
 
-    // TODO: Enviar notificación al cliente sobre pago fallido
+    await prisma.notification.create({
+      data: {
+        companyId: b2bInvoice.companyId,
+        tipo: 'alerta_sistema',
+        titulo: 'Pago de factura fallido',
+        mensaje: `El pago de la factura ${b2bInvoice.numeroFactura} falló en Stripe.`,
+        entityId: b2bInvoice.id,
+        entityType: 'B2B_INVOICE',
+      },
+    });
 
     logger.info(`[Stripe Webhook] Factura ${b2bInvoice.numeroFactura} marcada como VENCIDA`);
-  } catch (error: any) {
-    logger.error('[Stripe Webhook] Error procesando fallo de pago:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Stripe Webhook] Error procesando fallo de pago:', { message });
   }
 }
 
@@ -376,6 +466,7 @@ async function handleB2BInvoicePaymentFailed(stripeInvoice: Stripe.Invoice) {
  */
 async function handleSubscriptionEvent(event: Stripe.Event) {
   const subscription = event.data.object as Stripe.Subscription;
+  const prisma = await getPrisma();
   
   // Verificar que NO sea una suscripción de eWoorker
   if (subscription.metadata?.platform === 'ewoorker') {
@@ -416,7 +507,7 @@ async function handleSubscriptionEvent(event: Stripe.Event) {
     switch (event.type) {
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
-        await prisma.subscription.updateMany({
+        await prisma.stripeSubscription.updateMany({
           where: { stripeSubscriptionId: subscription.id },
           data: {
             status: subscription.status,
@@ -427,7 +518,7 @@ async function handleSubscriptionEvent(event: Stripe.Event) {
         break;
 
       case 'customer.subscription.deleted':
-        await prisma.subscription.updateMany({
+        await prisma.stripeSubscription.updateMany({
           where: { stripeSubscriptionId: subscription.id },
           data: { status: 'canceled' },
         });
@@ -435,8 +526,9 @@ async function handleSubscriptionEvent(event: Stripe.Event) {
     }
 
     logger.info(`[Stripe Webhook] ✅ Suscripción Inmova actualizada: ${subscription.id}`);
-  } catch (error: any) {
-    logger.error('[Stripe Webhook] Error actualizando suscripción Inmova:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Stripe Webhook] Error actualizando suscripción Inmova:', { message });
   }
 }
 
@@ -451,6 +543,8 @@ async function handleAddOnSubscription(event: Stripe.Event, subscription: Stripe
     logger.warn('[Stripe Webhook] Add-on subscription sin metadata requerida');
     return;
   }
+
+  const prisma = await getPrisma();
 
   try {
     switch (event.type) {
@@ -499,8 +593,9 @@ async function handleAddOnSubscription(event: Stripe.Event, subscription: Stripe
         logger.info(`[Stripe Webhook] ✅ Add-on cancelado para empresa ${companyId}`);
         break;
     }
-  } catch (error: any) {
-    logger.error('[Stripe Webhook] Error procesando add-on subscription:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Stripe Webhook] Error procesando add-on subscription:', { message });
   }
 }
 
@@ -515,6 +610,8 @@ async function handlePlanSubscription(event: Stripe.Event, subscription: Stripe.
     logger.warn('[Stripe Webhook] Plan subscription sin metadata requerida');
     return;
   }
+
+  const prisma = await getPrisma();
 
   try {
     switch (event.type) {
@@ -531,16 +628,12 @@ async function handlePlanSubscription(event: Stripe.Event, subscription: Stripe.
         });
 
         // Registrar cambio de suscripción
-        await prisma.subscriptionChange.create({
+        await prisma.b2BSubscriptionHistory.create({
           data: {
             companyId,
             accion: event.type === 'customer.subscription.created' ? 'nueva' : 'actualizacion',
             planNuevoId: planId,
-            detalles: {
-              stripeSubscriptionId: subscription.id,
-              status: subscription.status,
-              currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
-            },
+            razon: `Stripe subscription ${subscription.id}`,
           },
         });
 
@@ -557,22 +650,20 @@ async function handlePlanSubscription(event: Stripe.Event, subscription: Stripe.
           },
         });
 
-        await prisma.subscriptionChange.create({
+        await prisma.b2BSubscriptionHistory.create({
           data: {
             companyId,
             accion: 'cancelacion',
             planAnteriorId: planId,
-            detalles: {
-              stripeSubscriptionId: subscription.id,
-              canceledAt: new Date().toISOString(),
-            },
+            razon: `Stripe subscription ${subscription.id}`,
           },
         });
 
         logger.info(`[Stripe Webhook] ✅ Suscripción cancelada para empresa ${companyId}`);
         break;
     }
-  } catch (error: any) {
-    logger.error('[Stripe Webhook] Error procesando plan subscription:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Stripe Webhook] Error procesando plan subscription:', { message });
   }
 }
