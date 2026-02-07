@@ -22,6 +22,15 @@ export async function POST(
 
     const invoice = await prisma.providerInvoice.findUnique({
       where: { id: params.id },
+      include: {
+        workOrder: {
+          select: {
+            id: true,
+            asignadoPor: true,
+            titulo: true,
+          },
+        },
+      },
     });
 
     if (!invoice) {
@@ -54,17 +63,29 @@ export async function POST(
       `Factura ${invoice.numeroFactura} enviada por proveedor ${auth.provider.nombre}`
     );
 
-    // TODO: Enviar notificación al gestor/administrador
+    const notificationData = {
+      companyId: invoice.companyId,
+      tipo: 'info',
+      titulo: 'Factura de proveedor enviada',
+      mensaje: invoice.workOrder
+        ? `El proveedor ${auth.provider.nombre} envió la factura ${invoice.numeroFactura} para la orden "${invoice.workOrder.titulo}".`
+        : `El proveedor ${auth.provider.nombre} envió la factura ${invoice.numeroFactura}.`,
+      entityId: invoice.id,
+      entityType: 'provider_invoice',
+      ...(invoice.workOrder?.asignadoPor ? { userId: invoice.workOrder.asignadoPor } : {}),
+    };
+    await prisma.notification.create({ data: notificationData });
 
     return NextResponse.json({
       success: true,
       message: 'Factura enviada exitosamente',
       invoice: updatedInvoice,
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('Error al enviar factura:', error);
     return NextResponse.json(
-      { error: 'Error al enviar factura' },
+      { error: 'Error al enviar factura', details: message },
       { status: 500 }
     );
   }
