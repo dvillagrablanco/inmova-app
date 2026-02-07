@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { stripe, formatAmountForStripe } from '@/lib/stripe-config';
+import { getStripe, formatAmountForStripe } from '@/lib/stripe-config';
 import { getOrCreateStripeCustomer } from '@/lib/stripe-customer';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -18,6 +18,7 @@ const createPaymentIntentSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     // Check if Stripe is configured
+    const stripe = getStripe();
     if (!stripe) {
       return NextResponse.json(
         { error: 'Stripe no está configurado en este momento' },
@@ -126,10 +127,12 @@ export async function POST(request: NextRequest) {
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating payment intent:', error);
+    const message =
+      error instanceof Error ? error.message : 'Error al crear intención de pago';
     return NextResponse.json(
-      { error: error.message || 'Error al crear intención de pago' },
+      { error: message },
       { status: 500 }
     );
   }
