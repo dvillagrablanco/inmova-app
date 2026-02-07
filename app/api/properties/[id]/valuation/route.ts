@@ -60,12 +60,20 @@ export async function GET(
       );
     }
 
+    const address = property.building.direccion || '';
+    const cityGuess = address
+      .split(',')
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .pop();
+    const city = cityGuess || 'Madrid';
+
     // Preparar datos para valoración
     const propertyData = {
-      address: property.building.direccion,
-      city: property.building.ciudad,
-      neighborhood: property.building.barrio || undefined,
-      postalCode: property.building.codigoPostal || undefined,
+      address,
+      city,
+      neighborhood: undefined,
+      postalCode: undefined,
       squareMeters: property.superficie,
       rooms: property.habitaciones || undefined,
       bathrooms: property.banos || undefined,
@@ -79,9 +87,9 @@ export async function GET(
 
     // Obtener datos del mercado
     const marketData = await AIValuationService.getMarketData(
-      property.building.ciudad,
-      property.building.barrio || undefined,
-      property.building.codigoPostal || undefined
+      city,
+      undefined,
+      undefined
     );
 
     // Buscar propiedades similares en la BD
@@ -89,9 +97,7 @@ export async function GET(
       where: {
         companyId: session.user.companyId,
         id: { not: propertyId },
-        building: {
-          ciudad: property.building.ciudad,
-        },
+        buildingId: property.buildingId,
         superficie: {
           gte: property.superficie * 0.8,
           lte: property.superficie * 1.2,
@@ -114,7 +120,7 @@ export async function GET(
 
     // Agregar comparables al marketData
     marketData.similarProperties = similarProperties.map((prop) => ({
-      address: `${prop.building.direccion}, Unidad ${prop.numero}`,
+        address: `${prop.building?.direccion || address}, Unidad ${prop.numero}`,
       price: prop.rentaMensual * 12 * 15, // Estimación valor = renta anual * 15
       squareMeters: prop.superficie,
     }));

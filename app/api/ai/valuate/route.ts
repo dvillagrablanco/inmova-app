@@ -332,47 +332,6 @@ export async function POST(request: NextRequest) {
 
     // 4. Si hay unitId, enriquecer con datos comparables de BD
     let comparables: any[] = [];
-    if (validated.unitId) {
-      // Buscar propiedades similares en la misma ciudad
-      const similarUnits = await prisma.unit.findMany({
-        where: {
-          building: {
-            ciudad: validated.city,
-          },
-          superficieConstruida: {
-            gte: validated.squareMeters * 0.8,
-            lte: validated.squareMeters * 1.2,
-          },
-          numHabitaciones: validated.rooms,
-          NOT: {
-            id: validated.unitId,
-          },
-        },
-        select: {
-          id: true,
-          building: {
-            select: {
-              direccion: true,
-              ciudad: true,
-            },
-          },
-          superficieConstruida: true,
-          precioAlquiler: true,
-        },
-        take: 5,
-        orderBy: {
-          createdAt: 'desc',
-        },
-      });
-
-      comparables = similarUnits
-        .filter((u) => u.precioAlquiler)
-        .map((u) => ({
-          address: `${u.building?.direccion}, ${u.building?.ciudad}`,
-          price: u.precioAlquiler!,
-          squareMeters: u.superficieConstruida || validated.squareMeters,
-        }));
-    }
 
     // 5. Preparar datos para IA - mapear nuevos campos al formato esperado
     const superficie = validated.superficie || validated.squareMeters || 80;
@@ -380,6 +339,58 @@ export async function POST(request: NextRequest) {
     const banos = validated.banos || validated.bathrooms || 1;
     const ciudad = validated.ciudad || validated.city || 'Madrid';
     const direccion = validated.direccion || validated.address || 'Centro';
+
+    if (validated.unitId) {
+      const selectedUnit = await prisma.unit.findFirst({
+        where: {
+          id: validated.unitId,
+          building: { companyId: session.user.companyId },
+        },
+        select: {
+          buildingId: true,
+          building: { select: { direccion: true } },
+        },
+      });
+
+      if (selectedUnit?.buildingId) {
+        const similarUnits = await prisma.unit.findMany({
+          where: {
+            buildingId: selectedUnit.buildingId,
+            superficie: {
+              gte: superficie * 0.8,
+              lte: superficie * 1.2,
+            },
+            ...(habitaciones ? { habitaciones } : {}),
+            NOT: {
+              id: validated.unitId,
+            },
+          },
+          select: {
+            id: true,
+            numero: true,
+            superficie: true,
+            rentaMensual: true,
+            building: {
+              select: {
+                direccion: true,
+              },
+            },
+          },
+          take: 5,
+          orderBy: {
+            createdAt: 'desc',
+          },
+        });
+
+        comparables = similarUnits
+          .filter((u) => u.rentaMensual)
+          .map((u) => ({
+            address: `${u.building?.direccion || selectedUnit.building?.direccion || ''} - Unidad ${u.numero}`,
+            price: (u.rentaMensual || 0) * 12 * 15,
+            squareMeters: u.superficie || superficie,
+          }));
+      }
+    }
     
     const propertyData: PropertyData = {
       address: direccion,
@@ -390,7 +401,11 @@ export async function POST(request: NextRequest) {
       bathrooms: banos,
       floor: validated.planta || validated.floor || 0,
       hasElevator: validated.caracteristicas?.includes('ascensor') || validated.hasElevator || false,
-      hasParking: validated.caracteristicas?.includes('garaje') || validated.hasParking || false,
+      hasParking:
+        validated.caracteristicas?.includes('garaje') ||
+        validated.caracteristicas?.includes('parking') ||
+        validated.hasParking ||
+        false,
       hasGarden: validated.caracteristicas?.includes('jardin') || validated.hasGarden || false,
       hasPool: validated.caracteristicas?.includes('piscina') || validated.hasPool || false,
       condition: mapCondition(validated.estadoConservacion || validated.condition),
@@ -406,44 +421,82 @@ export async function POST(request: NextRequest) {
       comparables,
     });
 
-    // 7. Guardar valoración en BD
+    // 7. Normalizar resultados de IA
+    const normalizedValuation = {
+      estimatedValue: valuation.valorEstimado ?? valuation.estimatedValue ?? 0,
+      minValue: valuation.valorMinimo ?? valuation.minValue ?? 0,
+      maxValue: valuation.valorMaximo ?? valuation.maxValue ?? 0,
+      confidenceScore: valuation.confianza ?? valuation.confidenceScore ?? 60,
+      pricePerM2: valuation.precioM2 ?? valuation.pricePerM2 ?? undefined,
+      reasoning: valuation.analisisMercado ?? valuation.reasoning ?? undefined,
+      keyFactors: [
+        ...(valuation.factoresPositivos || []),
+        ...(valuation.factoresNegativos || []),
+      ].filter(Boolean),
+      recommendations: valuation.recomendaciones ?? valuation.recommendations ?? [],
+      estimatedRent: valuation.alquilerEstimado ?? valuation.estimatedRent ?? undefined,
+      estimatedROI: valuation.rentabilidadAlquiler ?? valuation.estimatedROI ?? undefined,
+      capRate: valuation.capRate ?? undefined,
+    };
+
+    const normalizedTrend = valuation.tendenciaMercado ?? valuation.marketTrend;
+    const marketTrend =
+      normalizedTrend === 'alcista'
+        ? 'UP'
+        : normalizedTrend === 'bajista'
+          ? 'DOWN'
+          : normalizedTrend === 'estable'
+            ? 'STABLE'
+            : validated.marketTrend;
+
+    // 8. Guardar valoración en BD
     if (validated.unitId) {
       await prisma.propertyValuation.create({
         data: {
           companyId: session.user.companyId,
           unitId: validated.unitId,
-          address: validated.address,
-          postalCode: validated.postalCode,
-          city: validated.city,
+          requestedBy: session.user.id,
+          ipAddress: request.headers.get('x-forwarded-for') || undefined,
+          userAgent: request.headers.get('user-agent') || undefined,
+          address: direccion,
+          postalCode: validated.codigoPostal || validated.postalCode || '',
+          city: ciudad,
           province: validated.province,
           neighborhood: validated.neighborhood,
-          squareMeters: validated.squareMeters,
-          rooms: validated.rooms,
-          bathrooms: validated.bathrooms,
-          floor: validated.floor,
-          hasElevator: validated.hasElevator || false,
-          hasParking: validated.hasParking || false,
-          hasGarden: validated.hasGarden || false,
-          hasPool: validated.hasPool || false,
-          hasTerrace: validated.hasTerrace || false,
-          condition: validated.condition || 'GOOD',
+          squareMeters: superficie,
+          rooms: habitaciones,
+          bathrooms: banos,
+          floor: validated.planta || validated.floor || 0,
+          hasElevator: propertyData.hasElevator || false,
+          hasParking: propertyData.hasParking || false,
+          hasGarden: propertyData.hasGarden || false,
+          hasPool: propertyData.hasPool || false,
+          hasTerrace:
+            validated.hasTerrace || validated.caracteristicas?.includes('terraza') || false,
+          hasGarage:
+            validated.hasGarage || validated.caracteristicas?.includes('garaje') || false,
+          condition: mapCondition(validated.estadoConservacion || validated.condition),
           yearBuilt: validated.yearBuilt,
-          avgPricePerM2: validated.avgPricePerM2,
-          marketTrend: validated.marketTrend,
+          avgPricePerM2: validated.avgPricePerM2 ?? normalizedValuation.pricePerM2,
+          marketTrend: marketTrend,
           comparables: comparables,
-          estimatedValue: valuation.estimatedValue,
-          minValue: valuation.minValue,
-          maxValue: valuation.maxValue,
-          confidenceScore: valuation.confidenceScore,
-          reasoning: valuation.reasoning,
-          keyFactors: valuation.keyFactors,
-          recommendations: valuation.recommendations,
-          model: 'claude-3-5-sonnet',
+          estimatedValue: normalizedValuation.estimatedValue,
+          minValue: normalizedValuation.minValue,
+          maxValue: normalizedValuation.maxValue,
+          confidenceScore: normalizedValuation.confidenceScore,
+          pricePerM2: normalizedValuation.pricePerM2,
+          reasoning: normalizedValuation.reasoning,
+          keyFactors: normalizedValuation.keyFactors,
+          recommendations: normalizedValuation.recommendations,
+          estimatedRent: normalizedValuation.estimatedRent,
+          estimatedROI: normalizedValuation.estimatedROI,
+          capRate: normalizedValuation.capRate,
+          model: process.env.ANTHROPIC_MODEL || 'claude-3-haiku-20240307',
         },
       });
     }
 
-    // 8. Log de auditoría
+    // 9. Log de auditoría
     try {
       await prisma.auditLog.create({
         data: {
@@ -453,9 +506,9 @@ export async function POST(request: NextRequest) {
           entityType: 'UNIT',
           entityId: validated.unitId || null,
           changes: JSON.stringify({
-            address: validated.address,
-            city: validated.city,
-            estimatedValue: valuation.estimatedValue,
+            address: direccion,
+            city: ciudad,
+            estimatedValue: normalizedValuation.estimatedValue,
           }),
         },
       });
@@ -464,7 +517,7 @@ export async function POST(request: NextRequest) {
       logger.warn('[AI Valuate] Error en audit log:', auditError);
     }
 
-    // 9. Tracking de uso (Control de costos)
+    // 10. Tracking de uso (Control de costos)
     await trackUsage({
       companyId: session.user.companyId,
       service: 'claude',
@@ -473,12 +526,12 @@ export async function POST(request: NextRequest) {
       metadata: {
         action: 'valuation',
         unitId: validated.unitId,
-        address: validated.address,
-        estimatedValue: valuation.estimatedValue,
+        address: direccion,
+        estimatedValue: normalizedValuation.estimatedValue,
       },
     });
 
-    // 10. Respuesta exitosa - devolver todos los datos para la UI
+    // 11. Respuesta exitosa - devolver todos los datos para la UI
     return NextResponse.json({
       success: true,
       ...valuation,
