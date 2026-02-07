@@ -252,6 +252,18 @@ export const MODULOS_CATALOGO = [
     orden: 41
   },
   {
+    codigo: 'seguros',
+    nombre: 'Seguros',
+    descripcion: 'Gestión de pólizas, renovaciones y siniestros',
+    categoria: 'avanzado',
+    icono: 'Shield',
+    ruta: '/seguros',
+    requiereModulos: ['documentos'],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: true,
+    orden: 41.1
+  },
+  {
     codigo: 'marketplace',
     nombre: 'Marketplace',
     descripcion: 'Mercado de servicios y proveedores',
