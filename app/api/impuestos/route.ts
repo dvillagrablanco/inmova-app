@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
+import { z } from 'zod';
+
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const PROVIDER = 'impuestos';
 
 interface TaxObligation {
   id: string;
@@ -12,135 +16,338 @@ interface TaxObligation {
   tipo: 'iva' | 'irpf' | 'ibi' | 'otros';
   periodo: string;
   vence: string;
-  estado: 'pendiente' | 'presentado' | 'pagado';
-  importe: number;
+  estado: 'pendiente' | 'presentado' | 'pagado' | 'vencido';
+  importe: number | null;
   propertyId?: string;
   propertyName?: string;
 }
+
+interface TaxProperty {
+  id: string;
+  nombre: string;
+  valorCatastral: number;
+  ibi: number;
+  ingresos: number;
+  gastos: number;
+}
+
+const querySchema = z.object({
+  year: z.coerce.number().int().min(2000).max(2100),
+  status: z.enum(['pendiente', 'presentado', 'pagado', 'all']).optional(),
+});
+
+const updateSchema = z.object({
+  obligationId: z.string().min(1),
+  action: z.enum(['present', 'pay', 'reset']),
+  documentUrl: z.string().url().optional(),
+});
+
+const storedObligationSchema = z.object({
+  id: z.string(),
+  modelo: z.string(),
+  nombre: z.string(),
+  periodicidad: z.string(),
+  fechaLimite: z.string(),
+  estado: z.enum(['pendiente', 'presentado', 'pagado', 'vencido']),
+  importe: z.number().nullable(),
+  observaciones: z.string().optional(),
+  ejercicio: z.number().int().optional(),
+  tipoPersona: z.enum(['fisica', 'juridica', 'ambos']).optional(),
+  createdAt: z.string().optional(),
+  createdBy: z.string().optional(),
+  documentUrl: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+
+type StoredObligation = z.infer<typeof storedObligationSchema>;
+
+const toObjectRecord = (value: unknown): Record<string, unknown> => {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  return {};
+};
+
+const extractObligations = (settings: unknown): StoredObligation[] => {
+  const settingsObject = toObjectRecord(settings);
+  const obligacionesValue = settingsObject.obligaciones;
+
+  if (!Array.isArray(obligacionesValue)) {
+    return [];
+  }
+
+  return obligacionesValue
+    .map((item) => storedObligationSchema.safeParse(item))
+    .filter((result) => result.success)
+    .map((result) => result.data);
+};
+
+const getCompanyContext = async (
+  userId: string,
+  role?: string | null,
+  companyId?: string | null
+) => {
+  if (companyId) {
+    return { role, companyId };
+  }
+
+  const { getPrismaClient } = await import('@/lib/db');
+  const prisma = getPrismaClient();
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true, companyId: true },
+  });
+
+  return {
+    role: role ?? user?.role ?? null,
+    companyId: companyId ?? user?.companyId ?? null,
+  };
+};
+
+const mapTipo = (obligacion: StoredObligation): TaxObligation['tipo'] => {
+  const candidate = `${obligacion.modelo} ${obligacion.nombre}`.toLowerCase();
+  if (candidate.includes('ibi')) return 'ibi';
+  if (candidate.includes('iva') || candidate.includes('303') || candidate.includes('390')) {
+    return 'iva';
+  }
+  if (candidate.includes('irpf') || candidate.includes('115') || candidate.includes('100')) {
+    return 'irpf';
+  }
+  return 'otros';
+};
 
 // GET - Obtener obligaciones fiscales
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const sessionUser = session?.user as
+      | { id?: string; role?: string | null; companyId?: string | null }
+      | undefined;
+
+    if (!sessionUser?.id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const { companyId } = await getCompanyContext(
+      sessionUser.id,
+      sessionUser.role,
+      sessionUser.companyId
+    );
+
+    if (!companyId) {
+      return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
+    }
+
     const { searchParams } = new URL(request.url);
-    const year = searchParams.get('year') || new Date().getFullYear().toString();
-    const status = searchParams.get('status');
+    const parsedQuery = querySchema.parse({
+      year: searchParams.get('year') ?? `${new Date().getFullYear()}`,
+      status: searchParams.get('status') ?? 'all',
+    });
 
-    let obligations: TaxObligation[] = [];
-    let properties: any[] = [];
+    const { getPrismaClient } = await import('@/lib/db');
+    const prisma = getPrismaClient();
 
-    try {
-      // Obtener propiedades para calcular IBI
-      properties = await prisma.property.findMany({
+    const integration = await prisma.integrationConfig.findUnique({
+      where: { companyId_provider: { companyId, provider: PROVIDER } },
+      select: { settings: true },
+    });
+
+    const storedObligations = extractObligations(integration?.settings);
+    let obligations = storedObligations.filter((obligacion) => {
+      const matchesYear = obligacion.ejercicio
+        ? obligacion.ejercicio === parsedQuery.year
+        : true;
+      return matchesYear;
+    });
+
+    if (parsedQuery.status && parsedQuery.status !== 'all') {
+      obligations = obligations.filter(
+        (obligacion) => obligacion.estado === parsedQuery.status
+      );
+    }
+
+    const startDate = new Date(parsedQuery.year, 0, 1);
+    const endDate = new Date(parsedQuery.year + 1, 0, 1);
+
+    const [payments, expenses, buildings] = await Promise.all([
+      prisma.payment.findMany({
         where: {
-          companyId: session.user.companyId,
+          estado: 'pagado',
+          isDemo: false,
+          contract: {
+            isDemo: false,
+            unit: {
+              building: {
+                companyId,
+                isDemo: false,
+              },
+            },
+          },
+          OR: [
+            {
+              fechaPago: {
+                gte: startDate,
+                lt: endDate,
+              },
+            },
+            {
+              fechaPago: null,
+              fechaVencimiento: {
+                gte: startDate,
+                lt: endDate,
+              },
+            },
+          ],
+        },
+        select: {
+          monto: true,
+          contract: {
+            select: {
+              unit: {
+                select: {
+                  buildingId: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      prisma.expense.findMany({
+        where: {
+          fecha: {
+            gte: startDate,
+            lt: endDate,
+          },
+          isDemo: false,
+          OR: [
+            {
+              building: {
+                companyId,
+                isDemo: false,
+              },
+            },
+            {
+              unit: {
+                building: {
+                  companyId,
+                  isDemo: false,
+                },
+              },
+            },
+          ],
+        },
+        select: {
+          monto: true,
+          categoria: true,
+          buildingId: true,
+          unit: { select: { buildingId: true } },
+        },
+      }),
+      prisma.building.findMany({
+        where: {
+          companyId,
+          isDemo: false,
         },
         select: {
           id: true,
-          name: true,
-          address: true,
-          cadastralValue: true,
+          nombre: true,
+          direccion: true,
+          ibiAnual: true,
         },
-      });
+      }),
+    ]);
 
-      // Generar obligaciones basadas en propiedades
-      obligations = [
-        {
-          id: 'o1',
-          nombre: 'Modelo 303 - IVA',
-          tipo: 'iva',
-          periodo: '4T ' + (parseInt(year) - 1),
-          vence: `${year}-01-30`,
-          estado: 'pendiente',
-          importe: 3250,
-        },
-        {
-          id: 'o2',
-          nombre: 'Modelo 115 - Retenciones',
-          tipo: 'irpf',
-          periodo: '4T ' + (parseInt(year) - 1),
-          vence: `${year}-01-20`,
-          estado: 'presentado',
-          importe: 1850,
-        },
-        {
-          id: 'o3',
-          nombre: 'Modelo 100 - IRPF Anual',
-          tipo: 'irpf',
-          periodo: (parseInt(year) - 1).toString(),
-          vence: `${year}-06-30`,
-          estado: 'pendiente',
-          importe: 7222,
-        },
-        ...properties.map((prop, idx) => ({
-          id: `ibi-${prop.id}`,
-          nombre: `IBI ${prop.name || prop.address}`,
-          tipo: 'ibi' as const,
-          periodo: year,
-          vence: `${year}-03-15`,
-          estado: 'pendiente' as const,
-          importe: Math.round((prop.cadastralValue || 100000) * 0.006), // ~0.6% del valor catastral
-          propertyId: prop.id,
-          propertyName: prop.name || prop.address,
-        })),
-      ];
-    } catch (dbError) {
-      console.warn('[API Impuestos] Error BD, usando datos mock:', dbError);
-      obligations = [
-        { id: '1', nombre: 'Modelo 303 - IVA', tipo: 'iva', periodo: '4T 2024', vence: '2025-01-30', estado: 'pendiente', importe: 3250 },
-        { id: '2', nombre: 'Modelo 115 - Retenciones', tipo: 'irpf', periodo: '4T 2024', vence: '2025-01-20', estado: 'presentado', importe: 1850 },
-        { id: '3', nombre: 'Modelo 100 - IRPF', tipo: 'irpf', periodo: '2024', vence: '2025-06-30', estado: 'pendiente', importe: 7222 },
-        { id: '4', nombre: 'IBI Edificio Centro', tipo: 'ibi', periodo: '2025', vence: '2025-03-15', estado: 'pendiente', importe: 2400 },
-        { id: '5', nombre: 'IBI Residencial Playa', tipo: 'ibi', periodo: '2025', vence: '2025-03-15', estado: 'pendiente', importe: 1800 },
-      ];
-      properties = [
-        { id: 'p1', nombre: 'Edificio Centro', valorCatastral: 450000, ibi: 2400, ingresos: 85000, gastos: 18000 },
-        { id: 'p2', nombre: 'Residencial Playa', valorCatastral: 320000, ibi: 1800, ingresos: 42000, gastos: 12500 },
-        { id: 'p3', nombre: 'Apartamentos Norte', valorCatastral: 280000, ibi: 1500, ingresos: 18680, gastos: 8000 },
-      ];
-    }
+    const ingresosTotales = payments.reduce((sum, payment) => sum + payment.monto, 0);
+    const gastosTotales = expenses.reduce((sum, expense) => sum + expense.monto, 0);
 
-    // Filtrar por estado si se proporciona
-    if (status && status !== 'all') {
-      obligations = obligations.filter(o => o.estado === status);
-    }
+    const ingresosByBuilding = new Map<string, number>();
+    payments.forEach((payment) => {
+      const buildingId = payment.contract?.unit?.buildingId;
+      if (!buildingId) {
+        return;
+      }
+      ingresosByBuilding.set(
+        buildingId,
+        (ingresosByBuilding.get(buildingId) ?? 0) + payment.monto
+      );
+    });
 
-    // Calcular resumen fiscal
+    const gastosByBuilding = new Map<string, number>();
+    const taxByBuilding = new Map<string, number>();
+    expenses.forEach((expense) => {
+      const buildingId = expense.buildingId ?? expense.unit?.buildingId;
+      if (!buildingId) {
+        return;
+      }
+      gastosByBuilding.set(
+        buildingId,
+        (gastosByBuilding.get(buildingId) ?? 0) + expense.monto
+      );
+      if (expense.categoria === 'impuestos') {
+        taxByBuilding.set(
+          buildingId,
+          (taxByBuilding.get(buildingId) ?? 0) + expense.monto
+        );
+      }
+    });
+
+    const impuestoEstimado = obligations.reduce(
+      (sum, obligation) => sum + (obligation.importe ?? 0),
+      0
+    );
+    const retencionesAplicadas = 0;
     const resumenAnual = {
-      ingresosBrutos: 145680,
-      gastosDeducibles: 38500,
-      baseImponible: 107180,
-      impuestoEstimado: 25722,
-      retencionesAplicadas: 18500,
-      aPagar: 7222,
+      ingresosBrutos: ingresosTotales,
+      gastosDeducibles: gastosTotales,
+      baseImponible: ingresosTotales - gastosTotales,
+      impuestoEstimado,
+      retencionesAplicadas,
+      aPagar: impuestoEstimado - retencionesAplicadas,
     };
 
-    // Estadísticas
+    const properties: TaxProperty[] = buildings.map((building) => ({
+      id: building.id,
+      nombre: building.nombre || building.direccion,
+      valorCatastral: 0,
+      ibi: building.ibiAnual ?? (taxByBuilding.get(building.id) ?? 0),
+      ingresos: ingresosByBuilding.get(building.id) ?? 0,
+      gastos: gastosByBuilding.get(building.id) ?? 0,
+    }));
+
+    const obligationsResponse: TaxObligation[] = obligations.map((obligacion) => ({
+      id: obligacion.id,
+      nombre: obligacion.nombre,
+      tipo: mapTipo(obligacion),
+      periodo: obligacion.periodicidad || `${obligacion.ejercicio ?? parsedQuery.year}`,
+      vence: obligacion.fechaLimite,
+      estado: obligacion.estado,
+      importe: obligacion.importe ?? null,
+    }));
+
     const stats = {
-      total: obligations.length,
-      pendientes: obligations.filter(o => o.estado === 'pendiente').length,
-      presentados: obligations.filter(o => o.estado === 'presentado').length,
-      pagados: obligations.filter(o => o.estado === 'pagado').length,
-      importePendiente: obligations.filter(o => o.estado === 'pendiente').reduce((sum, o) => sum + o.importe, 0),
+      total: obligationsResponse.length,
+      pendientes: obligationsResponse.filter((o) => o.estado === 'pendiente').length,
+      presentados: obligationsResponse.filter((o) => o.estado === 'presentado').length,
+      pagados: obligationsResponse.filter((o) => o.estado === 'pagado').length,
+      importePendiente: obligationsResponse
+        .filter((o) => o.estado === 'pendiente')
+        .reduce((sum, o) => sum + (o.importe ?? 0), 0),
     };
 
     return NextResponse.json({
       success: true,
       data: {
-        obligations,
+        obligations: obligationsResponse,
         properties,
         resumenAnual,
       },
       stats,
     });
-  } catch (error: any) {
-    console.error('[API Impuestos] Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[API Impuestos] Error:', { message });
     return NextResponse.json(
-      { error: 'Error al obtener datos fiscales', details: error.message },
+      { error: 'Error al obtener datos fiscales' },
       { status: 500 }
     );
   }
@@ -150,36 +357,105 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const sessionUser = session?.user as
+      | { id?: string; role?: string | null; companyId?: string | null }
+      | undefined;
+
+    if (!sessionUser?.id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { obligationId, action, documentUrl } = body;
+    const { companyId } = await getCompanyContext(
+      sessionUser.id,
+      sessionUser.role,
+      sessionUser.companyId
+    );
 
-    if (!obligationId || !action) {
+    if (!companyId) {
+      return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
+    }
+
+    const body = updateSchema.parse(await request.json());
+    const newStatus =
+      body.action === 'present'
+        ? 'presentado'
+        : body.action === 'pay'
+          ? 'pagado'
+          : 'pendiente';
+
+    const { getPrismaClient } = await import('@/lib/db');
+    const prisma = getPrismaClient();
+    const integration = await prisma.integrationConfig.findUnique({
+      where: { companyId_provider: { companyId, provider: PROVIDER } },
+      select: { credentials: true, settings: true },
+    });
+
+    const existingObligations = extractObligations(integration?.settings);
+    const targetIndex = existingObligations.findIndex(
+      (obligacion) => obligacion.id === body.obligationId
+    );
+
+    if (targetIndex === -1) {
       return NextResponse.json(
-        { error: 'Faltan campos requeridos: obligationId, action' },
-        { status: 400 }
+        { error: 'Obligación no encontrada' },
+        { status: 404 }
       );
     }
 
-    // Simular actualización
-    const newStatus = action === 'present' ? 'presentado' : action === 'pay' ? 'pagado' : 'pendiente';
+    const now = new Date();
+    const updatedObligations = existingObligations.map((obligacion) =>
+      obligacion.id === body.obligationId
+        ? {
+            ...obligacion,
+            estado: newStatus,
+            documentUrl: body.documentUrl ?? obligacion.documentUrl,
+            updatedAt: now.toISOString(),
+          }
+        : obligacion
+    );
+
+    const baseSettings = toObjectRecord(integration?.settings);
+    const nextSettings = { ...baseSettings, obligaciones: updatedObligations };
+
+    await prisma.integrationConfig.upsert({
+      where: { companyId_provider: { companyId, provider: PROVIDER } },
+      create: {
+        companyId,
+        provider: PROVIDER,
+        name: 'Impuestos',
+        category: 'accounting',
+        credentials: integration?.credentials ?? {},
+        settings: nextSettings,
+        enabled: true,
+        isConfigured: true,
+        createdBy: sessionUser.id,
+        lastSyncAt: now,
+      },
+      update: {
+        settings: nextSettings,
+        lastSyncAt: now,
+      },
+    });
 
     return NextResponse.json({
       success: true,
       data: {
-        id: obligationId,
+        id: body.obligationId,
         status: newStatus,
-        updatedAt: new Date().toISOString(),
+        updatedAt: now.toISOString(),
       },
-      message: `Obligación ${action === 'present' ? 'presentada' : 'pagada'} correctamente`,
+      message:
+        body.action === 'present'
+          ? 'Obligación presentada correctamente'
+          : body.action === 'pay'
+            ? 'Obligación pagada correctamente'
+            : 'Obligación actualizada correctamente',
     });
-  } catch (error: any) {
-    console.error('[API Impuestos] Error POST:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[API Impuestos] Error POST:', { message });
     return NextResponse.json(
-      { error: 'Error al actualizar obligación', details: error.message },
+      { error: 'Error al actualizar obligación' },
       { status: 500 }
     );
   }
