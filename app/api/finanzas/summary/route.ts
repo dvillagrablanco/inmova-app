@@ -178,26 +178,40 @@ export async function GET(request: NextRequest) {
     const bankConnections = await prisma.bankConnection
       .count({
         where: {
-          tenant: {
-            companyId,
-          },
-          estado: 'connected',
+          AND: [
+            {
+              OR: [
+                { companyId },
+                { tenant: { companyId } },
+                { user: { companyId } },
+              ],
+            },
+            {
+              OR: [
+                { estado: 'conectado' },
+                { status: 'connected' },
+              ],
+            },
+          ],
         },
       })
       .catch(() => 0);
 
     // Contar facturas del mes
-    const monthlyInvoices = await (prisma as any).invoice
-      ?.count({
-        where: {
-          companyId,
-          fechaEmision: {
-            gte: monthStart,
-            lte: monthEnd,
-          },
-        },
-      })
-      .catch(() => 0);
+    const invoiceModel = (prisma as any).invoice;
+    const monthlyInvoices = invoiceModel?.count
+      ? await invoiceModel
+          .count({
+            where: {
+              companyId,
+              fechaEmision: {
+                gte: monthStart,
+                lte: monthEnd,
+              },
+            },
+          })
+          .catch(() => 0)
+      : 0;
 
     // Calcular rentabilidad (si hay datos de propiedades)
     let rentabilidad = 0;
