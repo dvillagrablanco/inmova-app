@@ -78,6 +78,7 @@ export default function SoportePage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const crispWebsiteId = process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID;
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -89,9 +90,12 @@ export default function SoportePage() {
     // Abrir el chat de Crisp
     if (typeof window !== 'undefined' && (window as any).$crisp) {
       (window as any).$crisp.push(['do', 'chat:open']);
-    } else {
+    } else if (crispWebsiteId) {
       // Fallback si Crisp no está cargado
-      window.open('https://go.crisp.chat/chat/embed/?website_id=YOUR_CRISP_ID', '_blank');
+      window.open(
+        `https://go.crisp.chat/chat/embed/?website_id=${crispWebsiteId}`,
+        '_blank'
+      );
     }
   };
 

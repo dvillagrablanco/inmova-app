@@ -219,7 +219,7 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
                   ...setupData,
                   company: { ...setupData.company, phone: e.target.value }
                 })}
-                placeholder="+34 XXX XXX XXX"
+                placeholder="Tu teléfono"
               />
             </div>
           </div>

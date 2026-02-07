@@ -18,6 +18,7 @@ interface EmailTemplateData {
 }
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://inmova.app';
+const SUPPORT_PHONE = process.env.NEXT_PUBLIC_VAPI_PHONE_NUMBER || '';
 const BRAND_COLOR = '#4F46E5'; // Indigo-600
 const BRAND_COLOR_DARK = '#4338CA'; // Indigo-700
 
@@ -414,7 +415,7 @@ export function getOnboardingCompletedTemplate(data: EmailTemplateData): { subje
 
       <p class="text" style="text-align: center;">
         <strong>Si necesitas ayuda, estamos aquí:</strong><br>
-        💬 Chat en vivo | 📧 soporte@inmova.com | 📞 +34 XXX XXX XXX
+        💬 Chat en vivo | 📧 soporte@inmova.com${SUPPORT_PHONE ? ` | 📞 ${SUPPORT_PHONE}` : ''}
       </p>
     </div>
   `;

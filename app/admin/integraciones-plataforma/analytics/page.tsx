@@ -104,11 +104,11 @@ export default function AnalyticsPlataformaPage() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Measurement ID</Label>
-                <Input defaultValue="G-XXXXXXXXXX" />
+                <Input placeholder="Measurement ID" />
               </div>
               <div className="space-y-2">
                 <Label>Stream ID</Label>
-                <Input type="password" defaultValue="••••••••••••" />
+                <Input type="password" placeholder="Stream ID" />
               </div>
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
@@ -170,7 +170,7 @@ export default function AnalyticsPlataformaPage() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Site ID</Label>
-                <Input defaultValue="3456789" />
+                <Input placeholder="Site ID" />
               </div>
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div>

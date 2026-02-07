@@ -347,8 +347,55 @@ export default function PortalPropietarioPage() {
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
 
   const handleExportReport = () => {
-    toast.info('Generando reporte personalizado...');
-    // TODO: Implementar generación de reporte
+    const rows: string[][] = [
+      ['Métrica', 'Valor'],
+      ['Propiedades', totalPropiedades.toString()],
+      ['Unidades', totalUnidades.toString()],
+      ['Unidades ocupadas', unidadesOcupadas.toString()],
+      ['Tasa ocupación (%)', tasaOcupacion.toFixed(1)],
+      ['Contratos activos', contratosActivos.toString()],
+      ['Contratos por vencer (60 días)', contratosPorVencer.toString()],
+      ['Ingresos mes actual', ingresosMensual.toString()],
+      ['Gastos mes actual', gastosMensual.toString()],
+      ['Beneficio neto', beneficioNeto.toString()],
+      ['Margen beneficio (%)', margenBeneficio.toFixed(1)],
+      [],
+      ['Ingresos históricos (últimos 6 meses)', 'Ingresos', 'Gastos'],
+      ...ingresosHistoricos.map((item) => [
+        item.mes,
+        item.ingresos.toString(),
+        item.gastos.toString(),
+      ]),
+      [],
+      ['Ocupación por propiedad', 'Ocupación (%)'],
+      ...ocupacionPorPropiedad.map((item) => [
+        item.nombre,
+        item.ocupacion.toString(),
+      ]),
+      [],
+      ['Distribución de ingresos', 'Importe'],
+      ...distribucionIngresos.map((item) => [
+        item.nombre,
+        item.valor.toString(),
+      ]),
+    ];
+
+    const csvContent = rows
+      .map((row) =>
+        row
+          .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
+          .join(',')
+      )
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `reporte-propietario-${selectedPeriod}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success('Reporte descargado');
   };
 
   const getInitials = (name: string) => {

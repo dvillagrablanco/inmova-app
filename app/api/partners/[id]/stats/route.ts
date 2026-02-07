@@ -7,6 +7,37 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const LEVEL_THRESHOLDS = [
+  { name: 'BRONZE', clients: 10 },
+  { name: 'SILVER', clients: 25 },
+  { name: 'GOLD', clients: 50 },
+  { name: 'PLATINUM', clients: 100 },
+] as const;
+
+function getPartnerLevel(clientCount: number): string {
+  if (clientCount >= 100) return 'PLATINUM';
+  if (clientCount >= 50) return 'GOLD';
+  if (clientCount >= 25) return 'SILVER';
+  if (clientCount >= 10) return 'BRONZE';
+  return 'BRONZE';
+}
+
+function getNextLevelClients(clientCount: number): number {
+  const next = LEVEL_THRESHOLDS.find((level) => clientCount < level.clients);
+  return next ? next.clients - clientCount : 0;
+}
+
+function formatPeriod(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return 'Error desconocido';
+}
+
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
@@ -14,32 +45,14 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    // Using global prisma instance
-
     // Obtener partner
     const partner = await prisma.partner.findUnique({
       where: { id: params.id },
-      include: {
-        referredClients: {
-          where: { status: 'ACTIVE' },
-          include: {
-            company: {
-              select: {
-                id: true,
-                nombre: true,
-              },
-            },
-          },
-        },
-        commissions: {
-          where: {
-            status: 'PAID',
-          },
-          select: {
-            amount: true,
-            createdAt: true,
-          },
-        },
+      select: {
+        id: true,
+        email: true,
+        comisionPorcentaje: true,
+        slug: true,
       },
     });
 
@@ -48,88 +61,89 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     // Verificar que sea el partner correcto (o admin)
-    if (session.user.role !== 'super_admin' && partner.userId !== session.user.id) {
+    const isAdmin = session.user.role === 'super_admin' || session.user.role === 'administrador';
+    if (!isAdmin && session.user.email !== partner.email) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
-    // Calcular estadísticas
-    const activeClients = partner.referredClients.length;
+    const [activeClients, totalReferrals] = await prisma.$transaction([
+      prisma.partnerClient.count({
+        where: { partnerId: partner.id, estado: 'activo' },
+      }),
+      prisma.partnerInvitation.count({
+        where: { partnerId: partner.id },
+      }),
+    ]);
 
-    // Calcular ingresos mensuales (comisiones recurrentes)
-    // Asumiendo plan Professional promedio (€149) con comisión actual
-    const avgMonthlyValue = 149;
-    const monthlyRevenue = activeClients * avgMonthlyValue * (partner.commissionRate / 100);
+    const now = new Date();
+    const currentPeriod = formatPeriod(now);
+    const previousPeriod = formatPeriod(new Date(now.getFullYear(), now.getMonth() - 1, 1));
 
-    // Total ganado (suma de comisiones pagadas)
-    const totalEarned = partner.commissions.reduce((sum, c) => sum + c.amount, 0);
+    const [currentPeriodSum, previousPeriodSum, totalEarnedSum, pendingSum] =
+      await prisma.$transaction([
+        prisma.commission.aggregate({
+          where: {
+            partnerId: partner.id,
+            periodo: currentPeriod,
+            estado: { in: ['PENDING', 'APPROVED', 'PAID'] },
+          },
+          _sum: { montoComision: true },
+        }),
+        prisma.commission.aggregate({
+          where: {
+            partnerId: partner.id,
+            periodo: previousPeriod,
+            estado: { in: ['PENDING', 'APPROVED', 'PAID'] },
+          },
+          _sum: { montoComision: true },
+        }),
+        prisma.commission.aggregate({
+          where: {
+            partnerId: partner.id,
+            estado: 'PAID',
+          },
+          _sum: { montoComision: true },
+        }),
+        prisma.commission.aggregate({
+          where: {
+            partnerId: partner.id,
+            estado: { in: ['PENDING', 'APPROVED'] },
+          },
+          _sum: { montoComision: true },
+        }),
+      ]);
 
-    // Comisiones pendientes
-    const pendingCommissions = await prisma.commission.findMany({
-      where: {
-        partnerId: partner.id,
-        status: { in: ['PENDING', 'APPROVED'] },
-      },
-    });
-
-    const pendingPayment = pendingCommissions.reduce((sum, c) => sum + c.amount, 0);
-
-    // Calcular conversión rate (clientes activos / total referidos)
-    const totalReferrals = await prisma.referral.count({
-      where: { partnerId: partner.id },
-    });
+    const monthlyRevenue = currentPeriodSum._sum.montoComision ?? 0;
+    const previousRevenue = previousPeriodSum._sum.montoComision ?? 0;
+    const totalEarned = totalEarnedSum._sum.montoComision ?? 0;
+    const pendingPayment = pendingSum._sum.montoComision ?? 0;
 
     const conversionRate = totalReferrals > 0 ? (activeClients / totalReferrals) * 100 : 0;
-
-    // Determinar cuántos clientes faltan para siguiente nivel
-    const levels = [
-      { name: 'BRONZE', clients: 10, commission: 20 },
-      { name: 'SILVER', clients: 25, commission: 25 },
-      { name: 'GOLD', clients: 50, commission: 30 },
-      { name: 'PLATINUM', clients: 100, commission: 35 },
-      { name: 'DIAMOND', clients: 999, commission: 40 },
-    ];
-
-    const currentLevelIndex = levels.findIndex((l) => l.name === partner.level);
-    const nextLevel = levels[currentLevelIndex + 1];
-    const nextLevelClients = nextLevel ? nextLevel.clients - activeClients : 0;
-
-    // Crecimiento mensual (últimos 2 meses)
-    const twoMonthsAgo = new Date();
-    twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
-
-    const recentCommissions = await prisma.commission.groupBy({
-      by: ['createdAt'],
-      where: {
-        partnerId: partner.id,
-        status: 'PAID',
-        createdAt: { gte: twoMonthsAgo },
-      },
-      _sum: {
-        amount: true,
-      },
-    });
-
-    // Calcular % de crecimiento (simplificado)
-    const monthlyGrowth = 12.5; // TODO: Calcular real
+    const monthlyGrowth =
+      previousRevenue > 0 ? ((monthlyRevenue - previousRevenue) / previousRevenue) * 100 : 0;
+    const level = getPartnerLevel(activeClients);
+    const nextLevelClients = getNextLevelClients(activeClients);
+    const referralCode = partner.slug ?? partner.id;
+    const referralLink = `https://inmovaapp.com/partners/register?ref=${encodeURIComponent(referralCode)}`;
 
     return NextResponse.json({
       success: true,
       data: {
-        level: partner.level,
+        level,
         activeClients,
         monthlyRevenue: Math.round(monthlyRevenue * 100) / 100,
         totalEarned: Math.round(totalEarned * 100) / 100,
         pendingPayment: Math.round(pendingPayment * 100) / 100,
         conversionRate: Math.round(conversionRate * 10) / 10,
-        referralLink: `https://inmovaapp.com/r/${partner.referralCode}`,
+        referralLink,
         nextLevelClients,
-        monthlyGrowth,
-        commissionRate: partner.commissionRate,
-        earlyAdopterBonus: partner.earlyAdopterBonus,
+        monthlyGrowth: Math.round(monthlyGrowth * 10) / 10,
+        commissionRate: partner.comisionPorcentaje,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = getErrorMessage(error);
     logger.error('[Partner Stats Error]:', error);
-    return NextResponse.json({ error: 'Error obteniendo estadísticas' }, { status: 500 });
+    return NextResponse.json({ error: 'Error obteniendo estadísticas', details: message }, { status: 500 });
   }
 }

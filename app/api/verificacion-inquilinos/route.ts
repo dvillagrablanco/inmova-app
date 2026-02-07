@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import { randomUUID } from 'crypto';
+import { z } from 'zod';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
+import { getPrismaClient } from '@/lib/db';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -26,163 +29,149 @@ interface VerificationRequest {
   notes?: string;
 }
 
+const PROVIDER = 'verificacion_inquilinos';
+
+const storedRequestSchema = z.object({
+  id: z.string(),
+  tenantName: z.string(),
+  tenantEmail: z.string(),
+  tenantPhone: z.string(),
+  propertyName: z.string(),
+  requestDate: z.string(),
+  status: z.enum(['pending', 'in_progress', 'completed', 'rejected']),
+  score: z.number().optional(),
+  checks: z.object({
+    identity: z.enum(['pending', 'verified', 'failed']),
+    credit: z.enum(['pending', 'verified', 'warning', 'failed']),
+    employment: z.enum(['pending', 'verified', 'failed']),
+    references: z.enum(['pending', 'verified', 'failed']),
+    background: z.enum(['pending', 'clear', 'issues']),
+  }),
+  documents: z.array(z.string()),
+  notes: z.string().optional(),
+});
+
+const createSchema = z.object({
+  tenantName: z.string().min(1),
+  tenantEmail: z.string().email(),
+  tenantPhone: z.string().optional(),
+  propertyId: z.string().optional(),
+});
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : 'Error desconocido';
+}
+
 // GET - Obtener verificaciones de inquilinos
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
 
-    let verifications: VerificationRequest[] = [];
+    const prisma = getPrismaClient();
+    const companyId = session.user.companyId;
 
-    try {
-      // Obtener inquilinos de la base de datos
-      const tenants = await prisma.tenant.findMany({
-        where: {
-          companyId: session.user.companyId,
-          isDemo: false, // Excluir datos de demo
-        },
-        select: {
-          id: true,
-          nombreCompleto: true,
-          email: true,
-          telefono: true,
-          dni: true,
-          scoring: true,
-          nivelRiesgo: true,
-          createdAt: true,
-          contracts: {
-            select: {
-              unit: {
-                select: {
-                  numero: true,
-                  building: {
-                    select: { nombre: true }
-                  }
-                }
-              }
+    const config = await prisma.integrationConfig.findUnique({
+      where: {
+        companyId_provider: { companyId, provider: PROVIDER },
+      },
+      select: { settings: true },
+    });
+
+    const storedRequestsResult = z.array(storedRequestSchema).safeParse(config?.settings?.requests ?? []);
+    const storedRequests = storedRequestsResult.success ? storedRequestsResult.data : [];
+
+    const tenants = await prisma.tenant.findMany({
+      where: {
+        companyId,
+        isDemo: false,
+      },
+      select: {
+        id: true,
+        nombreCompleto: true,
+        email: true,
+        telefono: true,
+        dni: true,
+        scoring: true,
+        nivelRiesgo: true,
+        createdAt: true,
+        contracts: {
+          select: {
+            unit: {
+              select: {
+                numero: true,
+                building: {
+                  select: { nombre: true },
+                },
+              },
             },
-            take: 1,
-          }
+          },
+          take: 1,
         },
-        take: 50,
-        orderBy: { createdAt: 'desc' },
-      });
+      },
+      take: 50,
+      orderBy: { createdAt: 'desc' },
+    });
 
-      verifications = tenants.map(tenant => {
-        const contract = tenant.contracts?.[0];
-        const propertyName = contract 
-          ? `${contract.unit?.building?.nombre || 'Edificio'} - ${contract.unit?.numero || 'Unidad'}`
-          : 'Sin asignar';
-        
-        // Determinar estado basado en scoring y datos
-        let verificationStatus: 'pending' | 'in_progress' | 'completed' | 'rejected' = 'pending';
-        if (tenant.scoring >= 70) {
-          verificationStatus = 'completed';
-        } else if (tenant.scoring >= 40) {
-          verificationStatus = 'in_progress';
-        } else if (tenant.dni) {
-          verificationStatus = 'in_progress';
-        }
+    const tenantRequests: VerificationRequest[] = tenants.map((tenant) => {
+      const contract = tenant.contracts?.[0];
+      const propertyName = contract
+        ? `${contract.unit?.building?.nombre || 'Edificio'} - ${contract.unit?.numero || 'Unidad'}`
+        : 'Sin asignar';
 
-        return {
-          id: tenant.id,
-          tenantName: tenant.nombreCompleto || 'Sin nombre',
-          tenantEmail: tenant.email || '',
-          tenantPhone: tenant.telefono || '',
-          propertyName,
-          requestDate: tenant.createdAt?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
-          status: verificationStatus,
-          score: tenant.scoring || undefined,
-          checks: {
-            identity: tenant.dni ? 'verified' : 'pending',
-            credit: tenant.scoring >= 60 ? 'verified' : (tenant.scoring >= 40 ? 'warning' : 'pending'),
-            employment: tenant.scoring >= 50 ? 'verified' : 'pending',
-            references: tenant.scoring >= 70 ? 'verified' : 'pending',
-            background: tenant.nivelRiesgo === 'bajo' ? 'clear' : (tenant.nivelRiesgo === 'alto' ? 'issues' : 'pending'),
-          },
-          documents: tenant.dni ? ['DNI'] : [],
-        };
-      });
-    } catch (dbError) {
-      console.warn('[API Verificación] Error BD, usando datos mock:', dbError);
-      // Datos mock
-      verifications = [
-        {
-          id: 'v1',
-          tenantName: 'María García López',
-          tenantEmail: 'maria.garcia@email.com',
-          tenantPhone: '+34 612 345 678',
-          propertyName: 'Piso C/ Mayor 45, 3ºA',
-          requestDate: '2025-01-20',
-          status: 'completed',
-          score: 85,
-          checks: {
-            identity: 'verified',
-            credit: 'verified',
-            employment: 'verified',
-            references: 'verified',
-            background: 'clear',
-          },
-          documents: ['DNI', 'Nóminas', 'Contrato laboral'],
+      let verificationStatus: VerificationRequest['status'] = 'pending';
+      if (tenant.scoring >= 70) {
+        verificationStatus = 'completed';
+      } else if (tenant.scoring >= 40 || tenant.dni) {
+        verificationStatus = 'in_progress';
+      }
+
+      return {
+        id: tenant.id,
+        tenantName: tenant.nombreCompleto || 'Sin nombre',
+        tenantEmail: tenant.email || '',
+        tenantPhone: tenant.telefono || '',
+        propertyName,
+        requestDate: tenant.createdAt.toISOString().split('T')[0],
+        status: verificationStatus,
+        score: tenant.scoring || undefined,
+        checks: {
+          identity: tenant.dni ? 'verified' : 'pending',
+          credit: tenant.scoring >= 60 ? 'verified' : tenant.scoring >= 40 ? 'warning' : 'pending',
+          employment: tenant.scoring >= 50 ? 'verified' : 'pending',
+          references: tenant.scoring >= 70 ? 'verified' : 'pending',
+          background:
+            tenant.nivelRiesgo === 'bajo'
+              ? 'clear'
+              : tenant.nivelRiesgo === 'alto' || tenant.nivelRiesgo === 'critico'
+                ? 'issues'
+                : 'pending',
         },
-        {
-          id: 'v2',
-          tenantName: 'Juan Martínez',
-          tenantEmail: 'juan.martinez@email.com',
-          tenantPhone: '+34 623 456 789',
-          propertyName: 'Apartamento Playa Bloque 2',
-          requestDate: '2025-01-22',
-          status: 'in_progress',
-          score: 72,
-          checks: {
-            identity: 'verified',
-            credit: 'warning',
-            employment: 'verified',
-            references: 'pending',
-            background: 'clear',
-          },
-          documents: ['DNI', 'Declaración IRPF'],
-          notes: 'Pendiente referencias del anterior arrendador',
-        },
-        {
-          id: 'v3',
-          tenantName: 'Ana Rodríguez',
-          tenantEmail: 'ana.r@email.com',
-          tenantPhone: '+34 634 567 890',
-          propertyName: 'Estudio Centro 1ºB',
-          requestDate: '2025-01-23',
-          status: 'pending',
-          checks: {
-            identity: 'pending',
-            credit: 'pending',
-            employment: 'pending',
-            references: 'pending',
-            background: 'pending',
-          },
-          documents: [],
-        },
-      ];
-    }
+        documents: tenant.dni ? ['DNI'] : [],
+      };
+    });
+
+    let verifications: VerificationRequest[] = [...storedRequests, ...tenantRequests];
 
     // Filtrar por estado si se proporciona
     if (status && status !== 'all') {
-      verifications = verifications.filter(v => v.status === status);
+      verifications = verifications.filter((verification) => verification.status === status);
     }
 
     // Calcular estadísticas
     const stats = {
       total: verifications.length,
-      pending: verifications.filter(v => v.status === 'pending').length,
-      inProgress: verifications.filter(v => v.status === 'in_progress').length,
-      completed: verifications.filter(v => v.status === 'completed').length,
+      pending: verifications.filter((verification) => verification.status === 'pending').length,
+      inProgress: verifications.filter((verification) => verification.status === 'in_progress').length,
+      completed: verifications.filter((verification) => verification.status === 'completed').length,
       avgScore: Math.round(
-        verifications.filter(v => v.score).reduce((sum, v) => sum + (v.score || 0), 0) /
-        (verifications.filter(v => v.score).length || 1)
+        verifications.filter((verification) => verification.score).reduce((sum, verification) => sum + (verification.score || 0), 0) /
+        (verifications.filter((verification) => verification.score).length || 1)
       ),
     };
 
@@ -191,10 +180,10 @@ export async function GET(request: NextRequest) {
       data: verifications,
       stats,
     });
-  } catch (error: any) {
-    console.error('[API Verificación] Error:', error);
+  } catch (error: unknown) {
+    logger.error('[API Verificación] Error:', error);
     return NextResponse.json(
-      { error: 'Error al obtener verificaciones', details: error.message },
+      { error: 'Error al obtener verificaciones', details: getErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -204,26 +193,30 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { tenantName, tenantEmail, tenantPhone, propertyId } = body;
+    const prisma = getPrismaClient();
+    const data = createSchema.parse(await request.json());
 
-    if (!tenantName || !tenantEmail) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos: tenantName, tenantEmail' },
-        { status: 400 }
-      );
+    let propertyName = 'Por asignar';
+    if (data.propertyId) {
+      const building = await prisma.building.findFirst({
+        where: { id: data.propertyId, companyId: session.user.companyId },
+        select: { nombre: true, direccion: true },
+      });
+      if (building) {
+        propertyName = building.nombre || building.direccion || propertyName;
+      }
     }
 
     const newVerification: VerificationRequest = {
-      id: `v-${Date.now()}`,
-      tenantName,
-      tenantEmail,
-      tenantPhone: tenantPhone || '',
-      propertyName: 'Por asignar',
+      id: randomUUID(),
+      tenantName: data.tenantName,
+      tenantEmail: data.tenantEmail,
+      tenantPhone: data.tenantPhone || '',
+      propertyName,
       requestDate: new Date().toISOString().split('T')[0],
       status: 'pending',
       checks: {
@@ -236,15 +229,48 @@ export async function POST(request: NextRequest) {
       documents: [],
     };
 
-    return NextResponse.json({
-      success: true,
-      data: newVerification,
-      message: 'Verificación solicitada correctamente',
-    }, { status: 201 });
-  } catch (error: any) {
-    console.error('[API Verificación] Error POST:', error);
+    const config = await prisma.integrationConfig.findUnique({
+      where: {
+        companyId_provider: { companyId: session.user.companyId, provider: PROVIDER },
+      },
+      select: { id: true, settings: true },
+    });
+
+    const storedRequestsResult = z.array(storedRequestSchema).safeParse(config?.settings?.requests ?? []);
+    const storedRequests = storedRequestsResult.success ? storedRequestsResult.data : [];
+    const updatedRequests = [...storedRequests, newVerification];
+
+    await prisma.integrationConfig.upsert({
+      where: {
+        companyId_provider: { companyId: session.user.companyId, provider: PROVIDER },
+      },
+      create: {
+        companyId: session.user.companyId,
+        provider: PROVIDER,
+        name: 'Verificación de inquilinos',
+        category: 'screening',
+        credentials: {},
+        settings: { requests: updatedRequests },
+        isConfigured: true,
+      },
+      update: {
+        settings: { requests: updatedRequests },
+        isConfigured: true,
+      },
+    });
+
     return NextResponse.json(
-      { error: 'Error al crear verificación', details: error.message },
+      {
+        success: true,
+        data: newVerification,
+        message: 'Verificación solicitada correctamente',
+      },
+      { status: 201 }
+    );
+  } catch (error: unknown) {
+    logger.error('[API Verificación] Error POST:', error);
+    return NextResponse.json(
+      { error: 'Error al crear verificación', details: getErrorMessage(error) },
       { status: 500 }
     );
   }

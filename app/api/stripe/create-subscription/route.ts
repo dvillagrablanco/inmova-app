@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { stripe, formatAmountForStripe } from '@/lib/stripe-config';
+import { getStripe, formatAmountForStripe } from '@/lib/stripe-config';
 import { getOrCreateStripeCustomer } from '@/lib/stripe-customer';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -18,6 +18,7 @@ const createSubscriptionSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     // Check if Stripe is configured
+    const stripe = getStripe();
     if (!stripe) {
       return NextResponse.json(
         { error: 'Stripe no está configurado en este momento' },
@@ -129,9 +130,9 @@ export async function POST(request: NextRequest) {
         stripeCustomerId: stripeCustomerId,
         stripePriceId: price.id,
         status: subscription.status,
-        currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
-        currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
-        cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
+        currentPeriodStart: new Date(subscription.current_period_start * 1000),
+        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
       },
     });
 
@@ -139,12 +140,14 @@ export async function POST(request: NextRequest) {
       success: true,
       subscriptionId: subscription.id,
       status: subscription.status,
-      nextBillingDate: new Date((subscription as any).current_period_end * 1000),
+      nextBillingDate: new Date(subscription.current_period_end * 1000),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating subscription:', error);
+    const message =
+      error instanceof Error ? error.message : 'Error al crear suscripción';
     return NextResponse.json(
-      { error: error.message || 'Error al crear suscripción' },
+      { error: message },
       { status: 500 }
     );
   }

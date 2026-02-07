@@ -25,8 +25,15 @@ export async function GET(request: NextRequest) {
   try {
     // Verificar cron secret (seguridad)
     const authHeader = request.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET || 'dev-secret';
-    
+    const cronSecret = process.env.CRON_SECRET;
+
+    if (!cronSecret) {
+      return NextResponse.json(
+        { error: 'CRON_SECRET no configurado' },
+        { status: 500 }
+      );
+    }
+
     if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -34,25 +41,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log('[Cron] Starting usage alerts check...');
+    logger.info('[Cron] Starting usage alerts check...');
     
     await checkUsageLimitsForAllCompanies();
     
-    console.log('[Cron] Usage alerts check completed');
+    logger.info('[Cron] Usage alerts check completed');
     
     return NextResponse.json({
       success: true,
       message: 'Usage alerts checked successfully',
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Cron] Error checking usage alerts:', error);
-    
+
     return NextResponse.json(
-      {
-        error: 'Internal server error',
-        message: error.message,
-      },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

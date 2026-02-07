@@ -57,6 +57,7 @@ interface Visit {
   id: string;
   propertyAddress: string;
   propertyId: string;
+  candidateId?: string;
   visitorName: string;
   visitorPhone: string;
   visitorEmail: string;
@@ -69,9 +70,23 @@ interface Visit {
   createdAt: string;
 }
 
+interface CandidateOption {
+  id: string;
+  nombreCompleto: string;
+  email: string;
+  telefono: string;
+  unit?: {
+    numero: string;
+    building?: {
+      direccion?: string | null;
+    } | null;
+  } | null;
+}
+
 export default function VisitasPage() {
   const [visits, setVisits] = useState<Visit[]>([]);
   const [loading, setLoading] = useState(true);
+  const [candidates, setCandidates] = useState<CandidateOption[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -93,6 +108,7 @@ export default function VisitasPage() {
 
   useEffect(() => {
     loadVisits();
+    loadCandidates();
   }, []);
 
   const loadVisits = async () => {
@@ -114,27 +130,59 @@ export default function VisitasPage() {
     }
   };
 
+  const loadCandidates = async () => {
+    try {
+      const response = await fetch('/api/candidates');
+      if (!response.ok) {
+        setCandidates([]);
+        return;
+      }
+      const data = await response.json();
+      setCandidates(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error loading candidates:', error);
+      setCandidates([]);
+    }
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      // TODO: Call API
-      const newVisit: Visit = {
-        id: Date.now().toString(),
-        propertyAddress: formData.propertyAddress,
-        propertyId: 'temp_id',
-        visitorName: formData.visitorName,
-        visitorPhone: formData.visitorPhone,
-        visitorEmail: formData.visitorEmail,
-        scheduledDate: formData.scheduledDate,
-        scheduledTime: formData.scheduledTime,
-        status: 'scheduled',
-        notes: formData.notes,
-        agentName: formData.agentName,
-        createdAt: new Date().toISOString(),
-      };
+      const candidate = candidates.find(
+        (item) => item.email.toLowerCase() === formData.visitorEmail.toLowerCase()
+      );
 
-      setVisits([newVisit, ...visits]);
+      if (!candidate) {
+        toast.error('Candidato no encontrado. Registra el candidato antes de programar la visita.');
+        return;
+      }
+
+      const fechaVisita = new Date(
+        `${formData.scheduledDate}T${formData.scheduledTime || '00:00'}:00`
+      );
+      if (Number.isNaN(fechaVisita.getTime())) {
+        toast.error('Fecha u hora inválida');
+        return;
+      }
+
+      const response = await fetch('/api/visits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidateId: candidate.id,
+          fechaVisita,
+          confirmada: false,
+          feedback: formData.notes || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || 'Error al crear visita');
+      }
+
+      await loadVisits();
       toast.success('Visita programada correctamente');
       setCreateDialogOpen(false);
       resetForm();
@@ -150,23 +198,30 @@ export default function VisitasPage() {
     if (!editingVisit) return;
 
     try {
-      const updated = visits.map((v) =>
-        v.id === editingVisit.id
-          ? {
-              ...v,
-              propertyAddress: formData.propertyAddress,
-              visitorName: formData.visitorName,
-              visitorPhone: formData.visitorPhone,
-              visitorEmail: formData.visitorEmail,
-              scheduledDate: formData.scheduledDate,
-              scheduledTime: formData.scheduledTime,
-              notes: formData.notes,
-              agentName: formData.agentName,
-            }
-          : v
+      const fechaVisita = new Date(
+        `${formData.scheduledDate}T${formData.scheduledTime || '00:00'}:00`
       );
+      if (Number.isNaN(fechaVisita.getTime())) {
+        toast.error('Fecha u hora inválida');
+        return;
+      }
 
-      setVisits(updated);
+      const response = await fetch('/api/visits', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editingVisit.id,
+          fechaVisita,
+          feedback: formData.notes || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || 'Error al actualizar visita');
+      }
+
+      await loadVisits();
       toast.success('Visita actualizada correctamente');
       setEditingVisit(null);
       resetForm();
@@ -180,6 +235,14 @@ export default function VisitasPage() {
     if (!visitToDelete) return;
 
     try {
+      const response = await fetch(`/api/visits/${visitToDelete}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || 'Error al eliminar visita');
+      }
+
       setVisits(visits.filter((v) => v.id !== visitToDelete));
       toast.success('Visita eliminada correctamente');
       setDeleteDialogOpen(false);

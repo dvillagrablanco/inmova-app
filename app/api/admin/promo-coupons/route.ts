@@ -10,7 +10,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
+import { endOfDay, startOfDay } from 'date-fns';
 
+import { getStripe, formatAmountForStripe } from '@/lib/stripe-config';
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -34,7 +36,8 @@ const createCouponSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || session.user.role !== 'super_admin') {
+    const sessionUser = session?.user as { role?: string | null } | undefined;
+    if (!session?.user || sessionUser?.role !== 'super_admin') {
       // Retornar datos vacíos en lugar de error para mejor UX
       return NextResponse.json({
         success: true,
@@ -51,9 +54,14 @@ export async function GET(request: NextRequest) {
     const { getPrismaClient } = await import('@/lib/db');
     const prisma = getPrismaClient();
 
+    const allowedStatuses = ['DRAFT', 'ACTIVE', 'PAUSED', 'EXPIRED', 'EXHAUSTED'] as const;
+    const estadoFiltro = allowedStatuses.includes(estado as (typeof allowedStatuses)[number])
+      ? (estado as (typeof allowedStatuses)[number])
+      : null;
+
     const coupons = await prisma.promoCoupon.findMany({
       where: {
-        ...(estado && { estado: estado as any }),
+        ...(estadoFiltro && { estado: estadoFiltro }),
         ...(activo !== null && { activo: activo === 'true' }),
       },
       include: {
@@ -64,6 +72,17 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
 
+    const hoyInicio = startOfDay(new Date());
+    const hoyFin = endOfDay(new Date());
+    const usosHoy = await prisma.promoCouponUsage.count({
+      where: {
+        aplicadoEn: {
+          gte: hoyInicio,
+          lte: hoyFin,
+        },
+      },
+    });
+
     // Calcular estadísticas
     const stats = {
       total: coupons.length,
@@ -72,7 +91,7 @@ export async function GET(request: NextRequest) {
         const diasRestantes = Math.ceil((new Date(c.fechaExpiracion).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
         return diasRestantes <= 7 && diasRestantes > 0 && c.estado === 'ACTIVE';
       }).length,
-      usosHoy: 0, // TODO: Calcular
+      usosHoy,
     };
 
     return NextResponse.json({
@@ -84,7 +103,7 @@ export async function GET(request: NextRequest) {
       })),
       stats,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[PromoCoupons GET Error]:', error);
     // Retornar lista vacía en lugar de error para mejor UX
     return NextResponse.json({
@@ -99,7 +118,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || session.user.role !== 'super_admin') {
+    const sessionUser = session?.user as { role?: string | null; id?: string | null } | undefined;
+    if (!session?.user || sessionUser?.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -127,7 +147,7 @@ export async function POST(request: NextRequest) {
         codigo: validated.codigo,
         nombre: validated.nombre,
         descripcion: validated.descripcion,
-        tipo: validated.tipo as any,
+        tipo: validated.tipo,
         valor: validated.valor,
         fechaInicio: new Date(validated.fechaInicio),
         fechaExpiracion: new Date(validated.fechaExpiracion),
@@ -137,19 +157,43 @@ export async function POST(request: NextRequest) {
         planesPermitidos: validated.planesPermitidos,
         destacado: validated.destacado,
         notas: validated.notas,
-        creadoPor: session.user.id,
+        creadoPor: sessionUser?.id || undefined,
         estado: 'ACTIVE',
         activo: true,
       },
     });
 
-    // TODO: Sincronizar con Stripe si es necesario
+    const stripe = getStripe();
+    if (stripe && (validated.tipo === 'PERCENTAGE' || validated.tipo === 'FIXED_AMOUNT')) {
+      try {
+        const stripeCoupon = await stripe.coupons.create({
+          duration: validated.duracionMeses > 1 ? 'repeating' : 'once',
+          duration_in_months: validated.duracionMeses > 1 ? validated.duracionMeses : undefined,
+          percent_off: validated.tipo === 'PERCENTAGE' ? validated.valor : undefined,
+          amount_off:
+            validated.tipo === 'FIXED_AMOUNT' ? formatAmountForStripe(validated.valor) : undefined,
+          currency: validated.tipo === 'FIXED_AMOUNT' ? 'eur' : undefined,
+          name: validated.nombre,
+          metadata: {
+            promoCouponId: coupon.id,
+            codigo: coupon.codigo,
+          },
+        });
+
+        await prisma.promoCoupon.update({
+          where: { id: coupon.id },
+          data: { stripeCouponId: stripeCoupon.id },
+        });
+      } catch (stripeError) {
+        logger.warn('[PromoCoupons] Error sincronizando con Stripe:', stripeError);
+      }
+    }
 
     return NextResponse.json({
       success: true,
       data: coupon,
     }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[PromoCoupons POST Error]:', error);
 
     if (error instanceof z.ZodError) {

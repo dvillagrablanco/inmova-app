@@ -51,8 +51,8 @@ export async function GET(request: NextRequest) {
     // Obtener lecturas de energía
     const energyReadings = await prisma.energyReading.findMany({
       where: {
-        building: { companyId },
-        fecha: {
+        companyId,
+        fechaLectura: {
           gte: startDate,
           lte: endDate,
         },
@@ -74,8 +74,8 @@ export async function GET(request: NextRequest) {
     // Obtener métricas de reciclaje
     const recyclingMetrics = await prisma.recyclingMetric.findMany({
       where: {
-        building: { companyId },
-        fecha: {
+        companyId,
+        createdAt: {
           gte: startDate,
           lte: endDate,
         },
@@ -83,14 +83,17 @@ export async function GET(request: NextRequest) {
     });
 
     // Calcular métricas agregadas
-    const totalEnergy = energyReadings.reduce((sum, r) => sum + (r.consumo || 0), 0);
-    const totalRenewable = energyReadings
-      .filter(r => r.tipoEnergia === 'renovable' || r.tipoEnergia === 'solar')
+    const totalEnergy = energyReadings
+      .filter(r => r.tipo !== 'agua')
       .reduce((sum, r) => sum + (r.consumo || 0), 0);
+    const waterConsumption = energyReadings
+      .filter(r => r.tipo === 'agua')
+      .reduce((sum, r) => sum + (r.consumo || 0), 0);
+    const totalRenewable = 0;
     
     const renewableRate = totalEnergy > 0 ? (totalRenewable / totalEnergy) * 100 : 0;
 
-    const totalWaste = recyclingMetrics.reduce((sum, r) => sum + (r.residuosTotales || 0), 0);
+    const totalWaste = recyclingMetrics.reduce((sum, r) => sum + (r.residuosGenerados || 0), 0);
     const totalRecycled = recyclingMetrics.reduce((sum, r) => sum + (r.residuosReciclados || 0), 0);
     const recyclingRate = totalWaste > 0 ? (totalRecycled / totalWaste) * 100 : 0;
 
@@ -108,7 +111,7 @@ export async function GET(request: NextRequest) {
     const metrics = {
       carbonFootprint,
       energyConsumption: totalEnergy,
-      waterConsumption: 0, // TODO: Agregar modelo de consumo de agua
+      waterConsumption,
       wasteGenerated: totalWaste,
       recyclingRate: Math.round(recyclingRate * 10) / 10,
       renewableEnergyRate: Math.round(renewableRate * 10) / 10,
@@ -121,10 +124,11 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json(metrics);
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('Error fetching ESG metrics:', error);
     return NextResponse.json(
-      { error: 'Error al obtener métricas ESG' },
+      { error: 'Error al obtener métricas ESG', details: message },
       { status: 500 }
     );
   }

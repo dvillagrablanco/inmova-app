@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { uploadFile } from '@/lib/s3';
+import { deleteFile, uploadFile } from '@/lib/s3';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -160,17 +160,21 @@ export async function DELETE(
       },
     });
 
-    // TODO: Eliminar archivo de S3 (opcional)
-    // await deleteFile(photoUrl);
+    try {
+      await deleteFile(photoUrl);
+    } catch (error) {
+      logger.error('Error eliminando archivo de S3:', error);
+    }
 
     return NextResponse.json({
       success: true,
       maintenance: updatedMaintenance,
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('Error eliminando foto de mantenimiento:', error);
     return NextResponse.json(
-      { error: 'Error al eliminar foto' },
+      { error: 'Error al eliminar foto', details: message },
       { status: 500 }
     );
   }

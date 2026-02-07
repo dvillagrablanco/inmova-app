@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import { sendEmail } from '@/lib/email-service';
+import type { Prisma } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -55,7 +57,8 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
 
     // Obtener buildingId si se proporciona comunidadId
     let targetBuildingId = buildingId;
@@ -68,7 +71,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Construir filtros
-    const where: any = { companyId };
+    const where: Prisma.CommunityMeetingWhereInput = { companyId };
     if (targetBuildingId) where.buildingId = targetBuildingId;
     if (estado) where.estado = estado;
     if (tipo) where.tipo = tipo;
@@ -121,10 +124,10 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({
-      reuniones: reuniones.map(r => ({
-        ...r,
-        acuerdos: r.acuerdos as any[] || [],
-        asistentes: r.asistentes as any[] || [],
+      reuniones: reuniones.map((reunion) => ({
+        ...reunion,
+        acuerdos: Array.isArray(reunion.acuerdos) ? reunion.acuerdos : [],
+        asistentes: Array.isArray(reunion.asistentes) ? reunion.asistentes : [],
       })),
       pagination: {
         page,
@@ -140,10 +143,11 @@ export async function GET(request: NextRequest) {
       },
       proximaReunion,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Reuniones GET Error]:', error);
     return NextResponse.json(
-      { error: 'Error obteniendo reuniones', details: error.message },
+      { error: 'Error obteniendo reuniones', details: message },
       { status: 500 }
     );
   }
@@ -157,9 +161,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
-    const userId = (session.user as any).id;
-    const body = await request.json();
+    const sessionUser = session.user as { companyId?: string | null; id?: string | null };
+    const companyId = sessionUser.companyId;
+    const userId = sessionUser.id;
+    if (!companyId || !userId) {
+      return NextResponse.json({ error: 'Empresa no válida' }, { status: 400 });
+    }
+    const body: unknown = await request.json();
     const validated = createReunionSchema.parse(body);
 
     // Verificar que el edificio existe
@@ -171,13 +179,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Edificio no encontrado' }, { status: 404 });
     }
 
+    const meetingDate = new Date(validated.fechaReunion);
     const reunion = await prisma.communityMeeting.create({
       data: {
         companyId,
         buildingId: validated.buildingId,
         titulo: validated.titulo,
         tipo: validated.tipo,
-        fechaReunion: new Date(validated.fechaReunion),
+        fechaReunion: meetingDate,
         ubicacion: validated.ubicacion,
         ordenDel: validated.ordenDia,
         estado: 'programada',
@@ -188,19 +197,88 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // TODO: Si enviarConvocatoria es true, enviar emails a propietarios
+    if (validated.enviarConvocatoria) {
+      const owners = await prisma.ownerBuilding.findMany({
+        where: {
+          companyId,
+          buildingId: validated.buildingId,
+        },
+        select: {
+          owner: {
+            select: {
+              id: true,
+              email: true,
+              nombreCompleto: true,
+            },
+          },
+        },
+      });
+
+      const uniqueOwners = new Map<string, { id: string; email: string; nombre: string }>();
+      owners.forEach((record) => {
+        if (record.owner?.email) {
+          uniqueOwners.set(record.owner.id, {
+            id: record.owner.id,
+            email: record.owner.email,
+            nombre: record.owner.nombreCompleto,
+          });
+        }
+      });
+
+      const emailResults = await Promise.allSettled(
+        Array.from(uniqueOwners.values()).map((owner) =>
+          sendEmail({
+            to: owner.email,
+            subject: `Convocatoria de reunión: ${validated.titulo}`,
+            html: `
+              <p>Hola ${owner.nombre},</p>
+              <p>Se ha programado una nueva reunión de comunidad.</p>
+              <ul>
+                <li><strong>Título:</strong> ${validated.titulo}</li>
+                <li><strong>Fecha:</strong> ${meetingDate.toLocaleString()}</li>
+                <li><strong>Ubicación:</strong> ${validated.ubicacion || 'Por definir'}</li>
+              </ul>
+              <p>Orden del día:</p>
+              <p>${validated.ordenDia}</p>
+            `,
+          })
+        )
+      );
+
+      const failedEmails = emailResults.filter((result) => result.status === 'rejected').length;
+      if (failedEmails > 0) {
+        logger.warn('Fallaron algunas convocatorias de reunión', {
+          reunionId: reunion.id,
+          failedEmails,
+        });
+      }
+
+      const notifications = Array.from(uniqueOwners.values()).map((owner) => ({
+        ownerId: owner.id,
+        companyId,
+        titulo: 'Convocatoria de reunión',
+        mensaje: `Se ha convocado la reunión "${validated.titulo}" para el ${meetingDate.toLocaleString()}.`,
+        tipo: 'info',
+        buildingId: validated.buildingId,
+      }));
+
+      if (notifications.length > 0) {
+        await prisma.ownerNotification.createMany({ data: notifications });
+      }
+    }
 
     return NextResponse.json({ reunion }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
+    const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Reuniones POST Error]:', error);
     return NextResponse.json(
-      { error: 'Error creando reunión', details: error.message },
+      { error: 'Error creando reunión', details: message },
       { status: 500 }
     );
   }
@@ -214,7 +292,11 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Empresa no válida' }, { status: 400 });
+    }
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -222,7 +304,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'ID de reunión requerido' }, { status: 400 });
     }
 
-    const body = await request.json();
+    const body: unknown = await request.json();
     const validated = updateReunionSchema.parse(body);
 
     const existing = await prisma.communityMeeting.findFirst({
@@ -242,16 +324,17 @@ export async function PATCH(request: NextRequest) {
     });
 
     return NextResponse.json({ reunion });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
+    const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Reuniones PATCH Error]:', error);
     return NextResponse.json(
-      { error: 'Error actualizando reunión', details: error.message },
+      { error: 'Error actualizando reunión', details: message },
       { status: 500 }
     );
   }

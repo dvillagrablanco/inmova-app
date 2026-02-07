@@ -9,7 +9,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
+import crypto from 'crypto';
 
+import { sendEmail } from '@/lib/email-service';
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -20,58 +22,90 @@ const createInvitationSchema = z.object({
   empresa: z.string().optional(),
   mensaje: z.string().optional(),
   comisionOfrecida: z.number().min(0).max(100).default(15),
+  partnerId: z.string().optional(),
 });
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || session.user.role !== 'super_admin') {
+    const sessionUser = session?.user as { role?: string | null } | undefined;
+    if (!session?.user || sessionUser?.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const { getPrismaClient } = await import('@/lib/db');
     const prisma = getPrismaClient();
 
-    // Buscar invitaciones en PartnerInvitation si existe, o en Partner con estado PENDING
-    const invitations = await prisma.partner.findMany({
-      where: {
-        status: 'PENDING',
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    const [invitations, statusCounts] = await prisma.$transaction([
+      prisma.partnerInvitation.findMany({
+        include: {
+          partner: {
+            select: { nombre: true, comisionPorcentaje: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.partnerInvitation.groupBy({
+        by: ['estado'],
+        _count: { _all: true },
+      }),
+    ]);
 
-    // Calcular estadísticas
-    const allPartners = await prisma.partner.findMany();
+    const total = statusCounts.reduce((sum, item) => sum + item._count._all, 0);
+    const pendientes = statusCounts.find((item) => item.estado === 'PENDING')?._count._all || 0;
+    const aceptadas = statusCounts.find((item) => item.estado === 'ACCEPTED')?._count._all || 0;
+    const expiradas = statusCounts.find((item) => item.estado === 'EXPIRED')?._count._all || 0;
+
     const stats = {
-      total: allPartners.length,
-      pendientes: allPartners.filter(p => p.status === 'PENDING').length,
-      aceptadas: allPartners.filter(p => p.status === 'ACTIVE').length,
-      expiradas: 0,
-      tasaConversion: allPartners.length > 0 
-        ? Math.round((allPartners.filter(p => p.status === 'ACTIVE').length / allPartners.length) * 100)
-        : 0,
+      total,
+      pendientes,
+      aceptadas,
+      expiradas,
+      tasaConversion: total > 0 ? Math.round((aceptadas / total) * 100) : 0,
     };
 
-    // Formatear invitaciones
-    const formattedInvitations = invitations.map(inv => ({
-      id: inv.id,
-      email: inv.email,
-      nombre: inv.contactName || inv.companyName,
-      empresa: inv.companyName,
-      estado: inv.status === 'PENDING' ? 'pending' : inv.status === 'ACTIVE' ? 'accepted' : 'expired',
-      tokenExpira: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 días
-      invitationLink: `https://inmovaapp.com/partners/join?token=${inv.id}`,
-      enviadoPor: 'Admin',
-      creadoEn: inv.createdAt.toISOString(),
-      comisionOfrecida: inv.commissionRate || 15,
-    }));
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.NEXTAUTH_URL ||
+      'https://inmovaapp.com';
+
+    const formattedInvitations = invitations.map((inv) => {
+      const metadata = (inv.metadata ?? {}) as {
+        empresa?: string;
+        comisionOfrecida?: number;
+        enviadoPor?: string;
+      };
+      return {
+        id: inv.id,
+        email: inv.email,
+        nombre: inv.nombre || undefined,
+        empresa: metadata.empresa || undefined,
+        estado:
+          inv.estado === 'PENDING'
+            ? 'pending'
+            : inv.estado === 'ACCEPTED'
+            ? 'accepted'
+            : inv.estado === 'EXPIRED'
+            ? 'expired'
+            : 'rejected',
+        tokenExpira: inv.expiraFecha.toISOString(),
+        invitationLink: `${baseUrl}/partners/accept/${inv.token}`,
+        enviadoPor: metadata.enviadoPor || inv.partner?.nombre || 'Admin',
+        creadoEn: inv.createdAt.toISOString(),
+        aceptadoEn: inv.aceptadoFecha?.toISOString(),
+        comisionOfrecida:
+          typeof metadata.comisionOfrecida === 'number'
+            ? metadata.comisionOfrecida
+            : inv.partner?.comisionPorcentaje || 0,
+      };
+    });
 
     return NextResponse.json({
       success: true,
       data: formattedInvitations,
       stats,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Partner Invitations GET Error]:', error);
     return NextResponse.json({ error: 'Error obteniendo invitaciones' }, { status: 500 });
   }
@@ -80,7 +114,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || session.user.role !== 'super_admin') {
+    const sessionUser = session?.user as { role?: string | null; id?: string | null } | undefined;
+    if (!session?.user || sessionUser?.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -90,44 +125,105 @@ export async function POST(request: NextRequest) {
     const { getPrismaClient } = await import('@/lib/db');
     const prisma = getPrismaClient();
 
-    // Verificar si ya existe un partner con ese email
-    const existing = await prisma.partner.findFirst({
-      where: { email: validated.email },
-    });
+    const partnerIdFromBody = validated.partnerId?.trim();
+    const defaultPartnerId = process.env.DEFAULT_PARTNER_ID;
 
-    if (existing) {
+    const partner =
+      (partnerIdFromBody
+        ? await prisma.partner.findUnique({
+            where: { id: partnerIdFromBody },
+            select: { id: true, nombre: true },
+          })
+        : null) ||
+      (defaultPartnerId
+        ? await prisma.partner.findUnique({
+            where: { id: defaultPartnerId },
+            select: { id: true, nombre: true },
+          })
+        : null) ||
+      (await prisma.partner.findFirst({
+        orderBy: { createdAt: 'asc' },
+        select: { id: true, nombre: true },
+      }));
+
+    if (!partner) {
       return NextResponse.json(
-        { error: 'Ya existe una invitación o partner con ese email' },
+        { error: 'Debe existir al menos un partner para crear invitaciones' },
         { status: 400 }
       );
     }
 
-    // Crear partner en estado PENDING (invitación)
-    const partner = await prisma.partner.create({
-      data: {
+    const existing = await prisma.partnerInvitation.findFirst({
+      where: {
+        partnerId: partner.id,
         email: validated.email,
-        companyName: validated.empresa || validated.email.split('@')[0],
-        contactName: validated.nombre,
-        phone: '',
-        type: 'RESELLER',
-        status: 'PENDING',
-        commissionRate: validated.comisionOfrecida,
+        estado: 'PENDING',
       },
     });
 
-    // TODO: Enviar email de invitación
+    if (existing) {
+      return NextResponse.json(
+        { error: 'Ya existe una invitación pendiente para ese email' },
+        { status: 409 }
+      );
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiraFecha = new Date();
+    expiraFecha.setDate(expiraFecha.getDate() + 30);
+
+    const invitation = await prisma.partnerInvitation.create({
+      data: {
+        partnerId: partner.id,
+        email: validated.email,
+        nombre: validated.nombre,
+        token,
+        mensaje: validated.mensaje,
+        expiraFecha,
+        metadata: {
+          empresa: validated.empresa,
+          comisionOfrecida: validated.comisionOfrecida,
+          enviadoPor: sessionUser?.id || 'admin',
+        },
+      },
+    });
+
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.NEXTAUTH_URL ||
+      'https://inmovaapp.com';
+    const invitationLink = `${baseUrl}/partners/accept/${token}`;
+
+    const emailSent = await sendEmail({
+      to: validated.email,
+      subject: `Invitación para unirte al Programa de Partners de Inmova`,
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
+          <h2>Has recibido una invitación para el programa de partners</h2>
+          <p>Hola${validated.nombre ? ` ${validated.nombre}` : ''},</p>
+          <p>Te invitamos a unirte al programa de partners de Inmova.</p>
+          ${validated.empresa ? `<p><strong>Empresa:</strong> ${validated.empresa}</p>` : ''}
+          ${validated.mensaje ? `<p><strong>Mensaje:</strong> ${validated.mensaje}</p>` : ''}
+          <p>Para aceptar la invitación, accede al siguiente enlace:</p>
+          <p>
+            <a href="${invitationLink}" style="color: #2563eb;">${invitationLink}</a>
+          </p>
+          <p>La invitación expira el ${expiraFecha.toLocaleDateString('es-ES')}.</p>
+        </div>
+      `,
+    });
 
     return NextResponse.json({
       success: true,
       data: {
-        id: partner.id,
-        email: partner.email,
+        id: invitation.id,
+        email: invitation.email,
         estado: 'pending',
-        invitationLink: `https://inmovaapp.com/partners/join?token=${partner.id}`,
+        invitationLink,
       },
-      message: 'Invitación creada exitosamente',
+      message: emailSent ? 'Invitación enviada exitosamente' : 'Invitación creada, pero el email no pudo enviarse',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Partner Invitations POST Error]:', error);
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Datos inválidos', details: error.errors }, { status: 400 });

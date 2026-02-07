@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import { stripe, formatAmountFromStripe, STRIPE_WEBHOOK_SECRET } from '@/lib/stripe-config';
+import { getStripe, formatAmountFromStripe, STRIPE_WEBHOOK_SECRET } from '@/lib/stripe-config';
 import { prisma } from '@/lib/db';
 import Stripe from 'stripe';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   // Check if Stripe is configured
+  const stripe = getStripe();
   if (!stripe) {
     return NextResponse.json(
       { error: 'Stripe no está configurado en este momento' },
@@ -31,15 +32,13 @@ export async function POST(request: NextRequest) {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      STRIPE_WEBHOOK_SECRET
-    );
-  } catch (err: any) {
-    logger.error('Webhook signature verification failed:', err.message);
+    event = stripe.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET);
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Error verificando firma del webhook';
+    logger.error('Webhook signature verification failed:', message);
     return NextResponse.json(
-      { error: `Webhook Error: ${err.message}` },
+      { error: `Webhook Error: ${message}` },
       { status: 400 }
     );
   }
@@ -62,7 +61,10 @@ export async function POST(request: NextRequest) {
   try {
     switch (event.type) {
       case 'payment_intent.succeeded':
-        await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent);
+        await handlePaymentIntentSucceeded(
+          stripe,
+          event.data.object as Stripe.PaymentIntent
+        );
         break;
 
       case 'payment_intent.payment_failed':
@@ -104,14 +106,16 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ received: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error processing webhook:', error);
+    const message =
+      error instanceof Error ? error.message : 'Error procesando webhook';
 
     // Log processing error
     await prisma.stripeWebhookEvent.updateMany({
       where: { stripeEventId: event.id },
       data: {
-        processingError: error.message,
+        processingError: message,
       },
     });
 
@@ -122,7 +126,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
+async function handlePaymentIntentSucceeded(
+  stripe: Stripe,
+  paymentIntent: Stripe.PaymentIntent
+) {
   const paymentId = paymentIntent.metadata.paymentId;
 
   if (!paymentId) {
@@ -146,12 +153,15 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   });
 
   const charge = charges.data[0];
-  const stripeFee = charge?.balance_transaction
-    ? formatAmountFromStripe(
-        (await stripe.balanceTransactions.retrieve(
-          charge.balance_transaction as string
-        )).fee
-      )
+  const balanceTransactionId =
+    typeof charge?.balance_transaction === 'string'
+      ? charge.balance_transaction
+      : charge?.balance_transaction?.id;
+  const balanceTransaction = balanceTransactionId
+    ? await stripe.balanceTransactions.retrieve(balanceTransactionId)
+    : null;
+  const stripeFee = balanceTransaction
+    ? formatAmountFromStripe(balanceTransaction.fee)
     : 0;
 
   const netAmount = formatAmountFromStripe(paymentIntent.amount) - stripeFee;
@@ -216,8 +226,6 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
     return;
   }
 
-  const subData = subscription as any;
-
   // Upsert subscription
   await prisma.stripeSubscription.upsert({
     where: { stripeSubscriptionId: subscription.id },
@@ -227,20 +235,20 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
       stripeCustomerId: subscription.customer as string,
       stripePriceId: subscription.items.data[0]?.price.id,
       status: subscription.status,
-      currentPeriodStart: new Date(subData.current_period_start * 1000),
-      currentPeriodEnd: new Date(subData.current_period_end * 1000),
-      cancelAtPeriodEnd: subData.cancel_at_period_end,
-      canceledAt: subData.canceled_at
-        ? new Date(subData.canceled_at * 1000)
+      currentPeriodStart: new Date(subscription.current_period_start * 1000),
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      canceledAt: subscription.canceled_at
+        ? new Date(subscription.canceled_at * 1000)
         : null,
     },
     update: {
       status: subscription.status,
-      currentPeriodStart: new Date(subData.current_period_start * 1000),
-      currentPeriodEnd: new Date(subData.current_period_end * 1000),
-      cancelAtPeriodEnd: subData.cancel_at_period_end,
-      canceledAt: subData.canceled_at
-        ? new Date(subData.canceled_at * 1000)
+      currentPeriodStart: new Date(subscription.current_period_start * 1000),
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      canceledAt: subscription.canceled_at
+        ? new Date(subscription.canceled_at * 1000)
         : null,
     },
   });
@@ -260,9 +268,18 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   logger.info(`Subscription ${subscription.id} deleted`);
 }
 
+function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+  if (!invoice.subscription) {
+    return null;
+  }
+
+  return typeof invoice.subscription === 'string'
+    ? invoice.subscription
+    : invoice.subscription.id;
+}
+
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-  const invoiceData = invoice as any;
-  const subscriptionId = invoiceData.subscription as string;
+  const subscriptionId = getInvoiceSubscriptionId(invoice);
 
   if (!subscriptionId) {
     return;
@@ -281,17 +298,20 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   }
 
   // Create payment record for this invoice
-  const period = new Date(invoiceData.period_start * 1000).toLocaleDateString('es-ES', {
+  const periodStartTimestamp =
+    invoice.lines.data[0]?.period?.start ?? invoice.created;
+  const period = new Date(periodStartTimestamp * 1000).toLocaleDateString('es-ES', {
     month: 'long',
     year: 'numeric',
   });
+  const dueDateTimestamp = invoice.due_date ?? invoice.created;
 
   const payment = await prisma.payment.create({
     data: {
       contractId: subscription.contractId,
       periodo: period,
-      monto: formatAmountFromStripe(invoiceData.amount_paid),
-      fechaVencimiento: new Date(invoiceData.due_date ? invoiceData.due_date * 1000 : Date.now()),
+      monto: formatAmountFromStripe(invoice.amount_paid),
+      fechaVencimiento: new Date(dueDateTimestamp * 1000),
       fechaPago: new Date(),
       estado: 'pagado',
       metodoPago: 'Stripe (Suscripción)',
@@ -304,8 +324,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-  const invoiceData = invoice as any;
-  const subscriptionId = invoiceData.subscription as string;
+  const subscriptionId = getInvoiceSubscriptionId(invoice);
 
   if (!subscriptionId) {
     return;

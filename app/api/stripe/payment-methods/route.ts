@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { stripe } from '@/lib/stripe-config';
-import logger, { logError } from '@/lib/logger';
+import { getStripe } from '@/lib/stripe-config';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -11,6 +11,7 @@ export const runtime = 'nodejs';
 export async function GET(request: NextRequest) {
   try {
     // Check if Stripe is configured
+    const stripe = getStripe();
     if (!stripe) {
       return NextResponse.json(
         { error: 'Stripe no está configurado en este momento' },
@@ -57,10 +58,12 @@ export async function GET(request: NextRequest) {
         expYear: pm.card?.exp_year,
       })),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching payment methods:', error);
+    const message =
+      error instanceof Error ? error.message : 'Error al obtener métodos de pago';
     return NextResponse.json(
-      { error: error.message || 'Error al obtener métodos de pago' },
+      { error: message },
       { status: 500 }
     );
   }

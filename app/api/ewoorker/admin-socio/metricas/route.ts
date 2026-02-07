@@ -3,12 +3,31 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from '@/lib/auth-options';
-import prisma from "@/lib/prisma";
 
 import logger from '@/lib/logger';
 // IDs de usuarios autorizados (socio fundador)
-// TODO: Configurar en variables de entorno
 const SOCIO_FUNDADOR_IDS = process.env.EWOORKER_SOCIO_IDS?.split(",") || [];
+
+type EngagementMetricsRow = {
+  total_ofertas: number | string | bigint | null;
+  total_contratos: number | string | bigint | null;
+  dias_promedio: number | string | bigint | null;
+  rating_promedio: number | string | bigint | null;
+};
+
+type ComisionPorTipoRow = {
+  tipo: string;
+  _sum: {
+    montoComision: number | null;
+  };
+};
+
+const toNumber = (value: number | string | bigint | null | undefined): number => {
+  if (typeof value === 'number') return value;
+  if (typeof value === 'bigint') return Number(value);
+  if (typeof value === 'string') return Number(value);
+  return 0;
+};
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,6 +42,9 @@ export async function GET(request: NextRequest) {
 
     const userId = session.user.id;
 
+    const { getPrismaClient } = await import('@/lib/db');
+    const prisma = getPrismaClient();
+
     // Verificar si es el socio fundador o tiene rol autorizado
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -33,8 +55,9 @@ export async function GET(request: NextRequest) {
     });
 
     const allowedRoles = ['super_admin', 'administrador', 'socio_ewoorker'];
-    const isSocio = SOCIO_FUNDADOR_IDS.includes(userId) || 
-                    allowedRoles.includes(user?.role as string) ||
+    const userRole = user?.role ?? null;
+    const isSocio = SOCIO_FUNDADOR_IDS.includes(userId) ||
+                    (userRole ? allowedRoles.includes(userRole) : false) ||
                     user?.email?.includes("@socio-ewoorker.com") ||
                     user?.email?.includes("@ewoorker.com");
 
@@ -106,6 +129,7 @@ export async function GET(request: NextRequest) {
       contratosActivos,
       contratosCompletados,
       pagosData,
+      comisionesPorTipo,
       suscripcionesData,
       planesDistribucion,
       metricsEngagement
@@ -185,23 +209,33 @@ export async function GET(request: NextRequest) {
           montoBase: true,          // GMV total en céntimos
           montoComision: true,       // Comisiones totales
           beneficioEwoorker: true,   // 50% plataforma
-          beneficioSocio: true,      // 50% socio
-          comisionSuscripciones: true, // No existe este campo en el modelo, ajustar
-          comisionEscrow: true,      // No existe, ajustar
-          comisionUrgentes: true,    // No existe, ajustar
-          comisionOtros: true        // No existe, ajustar
+          beneficioSocio: true       // 50% socio
         }
       }),
 
-      // Datos de suscripciones
-      prisma.ewoorkerPerfilEmpresa.aggregate({
+      // Comisiones por tipo
+      prisma.ewoorkerPago.groupBy({
+        by: ["tipo"],
         where: {
-          planActual: {
-            not: "OBRERO_FREE"
+          fechaSolicitud: {
+            gte: fechaInicio
           }
+        },
+        _sum: {
+          montoComision: true
+        }
+      }),
+
+      // Datos de suscripciones activas (MRR real)
+      prisma.ewoorkerSuscripcion.aggregate({
+        where: {
+          estado: "ACTIVA"
         },
         _count: {
           id: true
+        },
+        _sum: {
+          precio: true
         }
       }),
 
@@ -214,7 +248,7 @@ export async function GET(request: NextRequest) {
       }),
 
       // Métricas de engagement
-      prisma.$queryRaw<any[]>`
+      prisma.$queryRaw<EngagementMetricsRow[]>`
         SELECT 
           COUNT(DISTINCT o.id) as total_ofertas,
           COUNT(DISTINCT c.id) as total_contratos,
@@ -229,7 +263,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Calcular planes
-    const planesMap = planesDistribucion.reduce((acc: any, item: any) => {
+    const planesMap = planesDistribucion.reduce<Record<string, number>>((acc, item) => {
       acc[item.planActual] = item._count.id;
       return acc;
     }, {});
@@ -238,20 +272,19 @@ export async function GET(request: NextRequest) {
     const usuariosCapataz = planesMap["CAPATAZ_PRO"] || 0;
     const usuariosConstructor = planesMap["CONSTRUCTOR_ENTERPRISE"] || 0;
 
-    // Calcular MRR (Monthly Recurring Revenue)
-    // Precios: Capataz €39, Constructor €119 (promedio)
-    const mrrSuscripciones = (usuariosCapataz * 3900) + (usuariosConstructor * 11900); // En céntimos
+    // Calcular MRR (Monthly Recurring Revenue) desde suscripciones activas
+    const mrrSuscripciones = suscripcionesData._sum.precio ?? 0;
 
     // Calcular tasa de conversión
-    const totalOfertas = metricsEngagement[0]?.total_ofertas || 0;
-    const totalContratos = metricsEngagement[0]?.total_contratos || 0;
+    const totalOfertas = toNumber(metricsEngagement[0]?.total_ofertas);
+    const totalContratos = toNumber(metricsEngagement[0]?.total_contratos);
     const tasaConversion = totalOfertas > 0 ? (totalContratos / totalOfertas) * 100 : 0;
 
     // Tiempo medio de adjudicación
-    const tiempoMedioAdjudicacion = metricsEngagement[0]?.dias_promedio || 0;
+    const tiempoMedioAdjudicacion = toNumber(metricsEngagement[0]?.dias_promedio);
 
     // Rating promedio
-    const valoracionMediaPlataforma = metricsEngagement[0]?.rating_promedio || 0;
+    const valoracionMediaPlataforma = toNumber(metricsEngagement[0]?.rating_promedio);
 
     // Datos financieros
     const gmvTotal = pagosData._sum.montoBase || 0;
@@ -259,12 +292,22 @@ export async function GET(request: NextRequest) {
     const beneficioSocio = pagosData._sum.beneficioSocio || 0;
     const beneficioPlataforma = pagosData._sum.beneficioEwoorker || 0;
 
-    // Desglose de comisiones (por ahora aproximado, necesita refinamiento)
-    // TODO: Implementar tracking granular por tipo de comisión
-    const comisionSuscripciones = mrrSuscripciones * (periodo === "mes" ? 1 : periodo === "trimestre" ? 3 : 12);
-    const comisionEscrow = Math.floor(comisionesGeneradas * 0.4); // ~40% de escrow
-    const comisionUrgentes = Math.floor(comisionesGeneradas * 0.2); // ~20% urgentes
-    const comisionOtros = comisionesGeneradas - comisionEscrow - comisionUrgentes;
+    // Desglose de comisiones por tipo
+    const comisionesMap = comisionesPorTipo.reduce<Record<string, number>>((acc, item) => {
+      acc[item.tipo] = item._sum.montoComision ?? 0;
+      return acc;
+    }, {});
+
+    const comisionSuscripciones = comisionesMap["SUSCRIPCION_MENSUAL"] ?? 0;
+    const comisionEscrow = comisionesMap["PAGO_SEGURO_ESCROW"] ?? 0;
+    const comisionUrgentes = comisionesMap["CONTRATACION_URGENTE"] ?? 0;
+    const comisionOtros = Object.entries(comisionesMap)
+      .filter(([tipo]) => ![
+        "SUSCRIPCION_MENSUAL",
+        "PAGO_SEGURO_ESCROW",
+        "CONTRATACION_URGENTE",
+      ].includes(tipo))
+      .reduce((sum, [, value]) => sum + value, 0);
 
     const metricas = {
       mes: now.getMonth() + 1,
@@ -289,7 +332,7 @@ export async function GET(request: NextRequest) {
       beneficioPlataforma,
       
       // Suscripciones
-      suscripcionesActivas: suscripcionesData._count.id,
+      suscripcionesActivas: suscripcionesData._count.id ?? 0,
       mrrSuscripciones,
       
       // Por plan
@@ -323,8 +366,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(metricas);
 
-  } catch (error) {
-    logger.error("[EWOORKER_ADMIN_SOCIO_METRICAS]", error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
+    logger.error("[EWOORKER_ADMIN_SOCIO_METRICAS]", { message });
     return NextResponse.json(
       { error: "Error al obtener métricas" },
       { status: 500 }

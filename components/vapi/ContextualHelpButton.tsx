@@ -32,7 +32,7 @@ const AGENT_INFO: Record<AgentType, { name: string; title: string; emoji: string
   communities: { name: 'Antonio', title: 'Comunidades', emoji: '👨‍⚖️', color: 'bg-amber-500' },
 };
 
-const PHONE_NUMBER = process.env.NEXT_PUBLIC_VAPI_PHONE_NUMBER || '+1 (XXX) XXX-XXXX';
+const PHONE_NUMBER = (process.env.NEXT_PUBLIC_VAPI_PHONE_NUMBER ?? '').trim();
 
 interface ContextualHelpButtonProps {
   agentType: AgentType;
@@ -49,6 +49,7 @@ export function ContextualHelpButton({
 }: ContextualHelpButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const agent = AGENT_INFO[agentType];
+  const hasPhoneNumber = PHONE_NUMBER.length > 0;
 
   const startCall = () => {
     // Iniciar llamada web con Vapi
@@ -111,10 +112,15 @@ export function ContextualHelpButton({
             <Button
               variant="outline"
               className="w-full gap-2"
-              onClick={() => window.open(`tel:${PHONE_NUMBER}`, '_self')}
+              onClick={() => {
+                if (hasPhoneNumber) {
+                  window.open(`tel:${PHONE_NUMBER}`, '_self');
+                }
+              }}
+              disabled={!hasPhoneNumber}
             >
               <Phone className="h-4 w-4" />
-              Llamar: {PHONE_NUMBER}
+              {hasPhoneNumber ? `Llamar: ${PHONE_NUMBER}` : 'Teléfono no configurado'}
             </Button>
           </div>
 

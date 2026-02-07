@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
 
     // Obtener inquilinos como clientes
-    const whereClause: any = {
+    const whereClause: { companyId: string } = {
       companyId: user.companyId,
     };
 
@@ -58,6 +58,31 @@ export async function GET(request: NextRequest) {
       orderBy: { nombreCompleto: 'asc' },
       skip: (page - 1) * limit,
       take: limit,
+    });
+
+    const contractIds = tenants.flatMap((tenant) =>
+      tenant.contracts.map((contract) => contract.id)
+    );
+
+    const payments = contractIds.length
+      ? await prisma.payment.findMany({
+          where: {
+            contractId: { in: contractIds },
+          },
+          select: {
+            contractId: true,
+            estado: true,
+            fechaVencimiento: true,
+          },
+          orderBy: { fechaVencimiento: 'asc' },
+        })
+      : [];
+
+    const paymentsByContract = new Map<string, typeof payments>();
+    payments.forEach((payment) => {
+      const existing = paymentsByContract.get(payment.contractId) || [];
+      existing.push(payment);
+      paymentsByContract.set(payment.contractId, existing);
     });
 
     const total = await prisma.tenant.count({ where: whereClause });
@@ -103,6 +128,17 @@ export async function GET(request: NextRequest) {
     const clients = tenants.map((tenant) => {
       const activeContract = tenant.contracts.find((c) => c.estado === 'activo');
       const latestContract = tenant.contracts[0];
+      const tenantPayments = tenant.contracts.flatMap(
+        (contract) => paymentsByContract.get(contract.id) || []
+      );
+      const now = new Date();
+      const pendingPayments = tenantPayments.filter((payment) =>
+        ['pendiente', 'vencido'].includes(payment.estado)
+      );
+      const overduePayment = pendingPayments.find(
+        (payment) => payment.estado === 'vencido' || payment.fechaVencimiento < now
+      );
+      const nextPayment = pendingPayments[0];
 
       return {
         id: tenant.id,
@@ -115,8 +151,12 @@ export async function GET(request: NextRequest) {
         monthlyRevenue: activeContract ? Number(activeContract.rentaMensual) : 0,
         contractStart: latestContract?.fechaInicio?.toISOString() || null,
         contractEnd: latestContract?.fechaFin?.toISOString() || null,
-        nextBilling: null, // TODO: Calcular próxima fecha de pago
-        paymentStatus: 'paid' as const, // TODO: Calcular estado real de pagos
+        nextBilling: nextPayment?.fechaVencimiento?.toISOString() || null,
+        paymentStatus: overduePayment
+          ? 'overdue'
+          : nextPayment
+            ? 'pending'
+            : 'paid',
         lastContact: tenant.updatedAt?.toISOString() || tenant.createdAt.toISOString(),
         tags: activeContract ? [latestContract?.unit?.building?.nombre || 'Sin edificio'] : [],
         unit: latestContract?.unit

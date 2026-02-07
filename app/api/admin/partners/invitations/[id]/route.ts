@@ -20,34 +20,55 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || session.user.role !== 'super_admin') {
+    const sessionUser = session?.user as { role?: string | null } | undefined;
+    if (!session?.user || sessionUser?.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const { getPrismaClient } = await import('@/lib/db');
     const prisma = getPrismaClient();
 
-    const invitation = await prisma.partner.findUnique({
+    const invitation = await prisma.partnerInvitation.findUnique({
       where: { id: params.id },
+      include: {
+        partner: {
+          select: { nombre: true, comisionPorcentaje: true },
+        },
+      },
     });
 
     if (!invitation) {
       return NextResponse.json({ error: 'Invitación no encontrada' }, { status: 404 });
     }
 
+    const metadata = (invitation.metadata ?? {}) as {
+      empresa?: string;
+      comisionOfrecida?: number;
+    };
+
     return NextResponse.json({
       success: true,
       data: {
         id: invitation.id,
         email: invitation.email,
-        nombre: invitation.contactName,
-        empresa: invitation.companyName,
-        estado: invitation.status === 'PENDING' ? 'pending' : invitation.status === 'ACTIVE' ? 'accepted' : 'expired',
-        comisionOfrecida: invitation.commissionRate || 15,
+        nombre: invitation.nombre || undefined,
+        empresa: metadata.empresa || undefined,
+        estado:
+          invitation.estado === 'PENDING'
+            ? 'pending'
+            : invitation.estado === 'ACCEPTED'
+            ? 'accepted'
+            : invitation.estado === 'EXPIRED'
+            ? 'expired'
+            : 'rejected',
+        comisionOfrecida:
+          typeof metadata.comisionOfrecida === 'number'
+            ? metadata.comisionOfrecida
+            : invitation.partner?.comisionPorcentaje || 0,
         creadoEn: invitation.createdAt.toISOString(),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Partner Invitation GET Error]:', error);
     return NextResponse.json({ error: 'Error obteniendo invitación' }, { status: 500 });
   }
@@ -59,7 +80,8 @@ export async function PUT(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || session.user.role !== 'super_admin') {
+    const sessionUser = session?.user as { role?: string | null } | undefined;
+    if (!session?.user || sessionUser?.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -67,7 +89,7 @@ export async function PUT(
     const { getPrismaClient } = await import('@/lib/db');
     const prisma = getPrismaClient();
 
-    const invitation = await prisma.partner.findUnique({
+    const invitation = await prisma.partnerInvitation.findUnique({
       where: { id: params.id },
     });
 
@@ -75,14 +97,25 @@ export async function PUT(
       return NextResponse.json({ error: 'Invitación no encontrada' }, { status: 404 });
     }
 
-    // Actualizar invitación (partner PENDING)
-    const updated = await prisma.partner.update({
+    const metadata = (invitation.metadata ?? {}) as {
+      empresa?: string;
+      comisionOfrecida?: number;
+    };
+
+    const updated = await prisma.partnerInvitation.update({
       where: { id: params.id },
       data: {
-        email: body.email || invitation.email,
-        contactName: body.nombre || invitation.contactName,
-        companyName: body.empresa || invitation.companyName,
-        commissionRate: body.comisionOfrecida || invitation.commissionRate,
+        email: typeof body.email === 'string' ? body.email : invitation.email,
+        nombre: typeof body.nombre === 'string' ? body.nombre : invitation.nombre,
+        mensaje: typeof body.mensaje === 'string' ? body.mensaje : invitation.mensaje,
+        metadata: {
+          ...metadata,
+          empresa: typeof body.empresa === 'string' ? body.empresa : metadata.empresa,
+          comisionOfrecida:
+            typeof body.comisionOfrecida === 'number'
+              ? body.comisionOfrecida
+              : metadata.comisionOfrecida,
+        },
       },
     });
 
@@ -91,7 +124,7 @@ export async function PUT(
       data: updated,
       message: 'Invitación actualizada',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Partner Invitation PUT Error]:', error);
     return NextResponse.json({ error: 'Error actualizando invitación' }, { status: 500 });
   }
@@ -103,14 +136,15 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || session.user.role !== 'super_admin') {
+    const sessionUser = session?.user as { role?: string | null } | undefined;
+    if (!session?.user || sessionUser?.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const { getPrismaClient } = await import('@/lib/db');
     const prisma = getPrismaClient();
 
-    const invitation = await prisma.partner.findUnique({
+    const invitation = await prisma.partnerInvitation.findUnique({
       where: { id: params.id },
     });
 
@@ -119,23 +153,23 @@ export async function DELETE(
     }
 
     // Solo permitir eliminar si está en estado PENDING
-    if (invitation.status !== 'PENDING') {
+    if (invitation.estado !== 'PENDING') {
       return NextResponse.json(
         { error: 'Solo se pueden eliminar invitaciones pendientes' },
         { status: 400 }
       );
     }
 
-    // Eliminar invitación (partner PENDING)
-    await prisma.partner.delete({
+    await prisma.partnerInvitation.update({
       where: { id: params.id },
+      data: { estado: 'CANCELLED' },
     });
 
     return NextResponse.json({
       success: true,
       message: 'Invitación eliminada correctamente',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Partner Invitation DELETE Error]:', error);
     return NextResponse.json({ error: 'Error eliminando invitación' }, { status: 500 });
   }

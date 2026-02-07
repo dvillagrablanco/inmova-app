@@ -40,21 +40,7 @@ export async function GET(
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
-    // TODO: Implementar modelo ReportHistory en el schema de Prisma
-    // Por ahora, devolvemos un historial simulado basado en ultimoEnvio
-    const history: any[] = [];
-
-    if (report.ultimoEnvio) {
-      history.push({
-        id: `${report.id}-${report.ultimoEnvio}`,
-        reportId: report.id,
-        fechaEnvio: report.ultimoEnvio,
-        destinatarios: report.destinatarios,
-        estado: 'exitoso',
-      });
-    }
-
-    return NextResponse.json(history);
+    return NextResponse.json([]);
   } catch (error) {
     logger.error('Error al obtener historial:', error);
     return NextResponse.json(

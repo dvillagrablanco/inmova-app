@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { stripe } from '@/lib/stripe-config';
-import logger, { logError } from '@/lib/logger';
+import { getStripe } from '@/lib/stripe-config';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -11,6 +11,7 @@ export const runtime = 'nodejs';
 export async function POST(request: NextRequest) {
   try {
     // Check if Stripe is configured
+    const stripe = getStripe();
     if (!stripe) {
       return NextResponse.json(
         { error: 'Stripe no está configurado en este momento' },
@@ -77,10 +78,12 @@ export async function POST(request: NextRequest) {
         ? 'Suscripción cancelada inmediatamente'
         : 'Suscripción se cancelará al final del período actual',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error canceling subscription:', error);
+    const message =
+      error instanceof Error ? error.message : 'Error al cancelar suscripción';
     return NextResponse.json(
-      { error: error.message || 'Error al cancelar suscripción' },
+      { error: message },
       { status: 500 }
     );
   }

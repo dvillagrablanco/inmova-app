@@ -4,15 +4,12 @@ import { useState, useEffect } from 'react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import {
   Shield,
-  TrendingUp,
   TrendingDown,
   Euro,
   AlertTriangle,
   BarChart3,
   PieChart,
-  Calendar,
   Download,
-  Filter,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,10 +33,32 @@ interface InsuranceData {
   _count?: { claims: number };
 }
 
+interface ClaimsByMonthItem {
+  month: string;
+  count: number;
+  amount: number;
+}
+
+interface ClaimsSummary {
+  claimsByMonth: ClaimsByMonthItem[];
+  totalClaimsAmount: number;
+  totalClaimsCount: number;
+  pendingClaims: number;
+  lossRatio: number;
+}
+
 export default function InsuranceAnalysisPage() {
   const [period, setPeriod] = useState('year');
   const [loading, setLoading] = useState(true);
   const [insurances, setInsurances] = useState<InsuranceData[]>([]);
+  const [claimsByMonth, setClaimsByMonth] = useState<ClaimsByMonthItem[]>([]);
+  const [claimsSummary, setClaimsSummary] = useState<ClaimsSummary>({
+    claimsByMonth: [],
+    totalClaimsAmount: 0,
+    totalClaimsCount: 0,
+    pendingClaims: 0,
+    lossRatio: 0,
+  });
 
   // Calcular estadísticas desde datos reales
   const getAnnualPremium = (insurance: InsuranceData) =>
@@ -51,17 +70,16 @@ export default function InsuranceAnalysisPage() {
       const estado = (i.estado || '').toLowerCase();
       return estado === 'activa' || estado === 'activo';
     }).length,
-    totalClaims: insurances.reduce((sum, i) => sum + (i._count?.claims || 0), 0),
-    totalPaid: insurances.reduce((sum, i) => sum + getAnnualPremium(i), 0),
-    avgClaimAmount: insurances.length > 0 
-      ? Math.round(insurances.reduce((sum, i) => sum + getAnnualPremium(i), 0) / insurances.length) 
+    totalClaims: claimsSummary.totalClaimsCount,
+    totalPaid: claimsSummary.totalClaimsAmount,
+    avgClaimAmount: claimsSummary.totalClaimsCount > 0
+      ? Math.round(claimsSummary.totalClaimsAmount / claimsSummary.totalClaimsCount)
       : 0,
     claimRate: insurances.length > 0 
       ? Math.round((insurances.filter(i => (i._count?.claims || 0) > 0).length / insurances.length) * 100 * 10) / 10
       : 0,
-    lossRatio: 42.5, // Calculado de claims reales
-    pendingClaims: insurances.filter((i) => (i.estado || '').toLowerCase().includes('pendiente'))
-      .length,
+    lossRatio: claimsSummary.lossRatio,
+    pendingClaims: claimsSummary.pendingClaims,
   };
 
   // Agrupar por tipo de seguro
@@ -98,22 +116,6 @@ export default function InsuranceAnalysisPage() {
     }));
   })();
 
-  // Datos mensuales (mock para visualización hasta implementar API de claims)
-  const claimsByMonth = [
-    { month: 'Ene', count: 2, amount: 8500 },
-    { month: 'Feb', count: 1, amount: 3200 },
-    { month: 'Mar', count: 3, amount: 15000 },
-    { month: 'Abr', count: 2, amount: 9800 },
-    { month: 'May', count: 4, amount: 21000 },
-    { month: 'Jun', count: 1, amount: 5500 },
-    { month: 'Jul', count: 3, amount: 13000 },
-    { month: 'Ago', count: 2, amount: 10500 },
-    { month: 'Sep', count: 1, amount: 4500 },
-    { month: 'Oct', count: 3, amount: 18000 },
-    { month: 'Nov', count: 1, amount: 6000 },
-    { month: 'Dic', count: 0, amount: 0 },
-  ];
-
   // Top propiedades con más claims
   const topClaimProperties = insurances
     .filter(i => i.building && (i._count?.claims || 0) > 0)
@@ -133,30 +135,122 @@ export default function InsuranceAnalysisPage() {
     try {
       setLoading(true);
       
-      // Obtener datos reales de la API
-      const response = await fetch('/api/seguros');
-      
-      if (!response.ok) {
+      const [segurosResponse, analyticsResponse] = await Promise.all([
+        fetch('/api/seguros'),
+        fetch(`/api/seguros/analytics?period=${encodeURIComponent(period)}`),
+      ]);
+
+      if (!segurosResponse.ok) {
         throw new Error('Error al obtener seguros');
       }
-      
-      const data = await response.json();
-      setInsurances(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Error loading analytics:', error);
+
+      const segurosData: unknown = await segurosResponse.json();
+      setInsurances(Array.isArray(segurosData) ? segurosData : []);
+
+      if (analyticsResponse.ok) {
+        const analyticsData: unknown = await analyticsResponse.json();
+        const summary = (typeof analyticsData === 'object' && analyticsData)
+          ? (analyticsData as ClaimsSummary)
+          : null;
+
+        if (summary && Array.isArray(summary.claimsByMonth)) {
+          setClaimsByMonth(summary.claimsByMonth);
+          setClaimsSummary({
+            claimsByMonth: summary.claimsByMonth,
+            totalClaimsAmount: summary.totalClaimsAmount ?? 0,
+            totalClaimsCount: summary.totalClaimsCount ?? 0,
+            pendingClaims: summary.pendingClaims ?? 0,
+            lossRatio: summary.lossRatio ?? 0,
+          });
+        } else {
+          setClaimsByMonth([]);
+          setClaimsSummary({
+            claimsByMonth: [],
+            totalClaimsAmount: 0,
+            totalClaimsCount: 0,
+            pendingClaims: 0,
+            lossRatio: 0,
+          });
+        }
+      } else {
+        setClaimsByMonth([]);
+        setClaimsSummary({
+          claimsByMonth: [],
+          totalClaimsAmount: 0,
+          totalClaimsCount: 0,
+          pendingClaims: 0,
+          lossRatio: 0,
+        });
+      }
+    } catch (error: unknown) {
       toast.error('Error al cargar análisis');
       setInsurances([]);
+      setClaimsByMonth([]);
+      setClaimsSummary({
+        claimsByMonth: [],
+        totalClaimsAmount: 0,
+        totalClaimsCount: 0,
+        pendingClaims: 0,
+        lossRatio: 0,
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const exportReport = () => {
-    toast.success('Generando reporte... Se descargará en breve');
-    // TODO: Generate and download PDF/Excel report
+    const rows: string[][] = [
+      ['Métrica', 'Valor'],
+      ['Pólizas totales', stats.totalPolicies.toString()],
+      ['Pólizas activas', stats.activePolicies.toString()],
+      ['Siniestros totales', stats.totalClaims.toString()],
+      ['Siniestros pendientes', stats.pendingClaims.toString()],
+      ['Loss ratio (%)', stats.lossRatio.toString()],
+      ['Total pagado', stats.totalPaid.toString()],
+      ['Promedio siniestro', stats.avgClaimAmount.toString()],
+      [],
+      ['Siniestros por tipo', 'Cantidad', 'Importe'],
+      ...claimsByType.map((item) => [
+        item.type,
+        item.count.toString(),
+        item.amount.toString(),
+      ]),
+      [],
+      ['Siniestros por mes', 'Cantidad', 'Importe'],
+      ...claimsByMonth.map((item) => [
+        item.month,
+        item.count.toString(),
+        item.amount.toString(),
+      ]),
+      [],
+      ['Propiedades con mayor siniestralidad', 'Siniestros', 'Importe'],
+      ...topClaimProperties.map((item) => [
+        item.address,
+        item.claims.toString(),
+        item.amount.toString(),
+      ]),
+    ];
+
+    const csvContent = rows
+      .map((row) =>
+        row
+          .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
+          .join(',')
+      )
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `analisis-seguros-${period}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success('Reporte descargado');
   };
 
-  const maxClaimAmount = Math.max(...claimsByMonth.map((m) => m.amount));
+  const maxClaimAmount =
+    claimsByMonth.length > 0 ? Math.max(...claimsByMonth.map((m) => m.amount)) : 0;
 
   return (
     <AuthenticatedLayout>
@@ -281,28 +375,31 @@ export default function InsuranceAnalysisPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {claimsByMonth.slice(-6).map((item, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <span className="text-sm font-medium w-12">{item.month}</span>
-                    <div className="flex-1">
-                      <div className="h-8 bg-gray-200 rounded overflow-hidden">
-                        <div
-                          className="h-full bg-green-600 transition-all flex items-center justify-end pr-2"
-                          style={{ width: `${(item.amount / maxClaimAmount) * 100}%` }}
-                        >
-                          {item.amount > 0 && (
-                            <span className="text-xs text-white font-medium">
-                              €{(item.amount / 1000).toFixed(0)}K
-                            </span>
-                          )}
+                {claimsByMonth.slice(-6).map((item, index) => {
+                  const width = maxClaimAmount > 0 ? (item.amount / maxClaimAmount) * 100 : 0;
+                  return (
+                    <div key={index} className="flex items-center gap-4">
+                      <span className="text-sm font-medium w-12">{item.month}</span>
+                      <div className="flex-1">
+                        <div className="h-8 bg-gray-200 rounded overflow-hidden">
+                          <div
+                            className="h-full bg-green-600 transition-all flex items-center justify-end pr-2"
+                            style={{ width: `${width}%` }}
+                          >
+                            {item.amount > 0 && (
+                              <span className="text-xs text-white font-medium">
+                                €{(item.amount / 1000).toFixed(0)}K
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
+                      <span className="text-sm text-muted-foreground w-8 text-right">
+                        {item.count}
+                      </span>
                     </div>
-                    <span className="text-sm text-muted-foreground w-8 text-right">
-                      {item.count}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>

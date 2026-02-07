@@ -67,3 +67,16 @@ scripts/deploy-ssh-paramiko.py
 *credentials*
 *password*
 *secret*
+
+# Permitir rutas de recuperación de contraseña
+!app/**/forgot-password/
+!app/**/reset-password/
+!app/**/forgot-password/**
+!app/**/reset-password/**
+!app/api/**/forgot-password/
+!app/api/**/reset-password/
+!app/api/**/forgot-password/**
+!app/api/**/reset-password/**
+!app/api/**/cambiar-password/
+!app/api/**/cambiar-password/**
+!lib/password-reset.ts

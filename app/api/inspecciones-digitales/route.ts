@@ -1,97 +1,141 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import { z } from 'zod';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
+import { getPrismaClient } from '@/lib/db';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+type InspeccionTipo = 'entrada' | 'salida' | 'periodica';
+type InspeccionEstado = 'programada' | 'en_proceso' | 'completada';
 
 interface Inspeccion {
   id: string;
   propiedad: string;
   unidad: string;
-  tipo: 'entrada' | 'salida' | 'periodica';
+  tipo: InspeccionTipo;
   fecha: string;
   inspector: string;
-  estado: 'programada' | 'en_proceso' | 'completada';
+  estado: InspeccionEstado;
   puntuacion?: number;
   fotos?: number;
   incidencias?: number;
+}
+
+const querySchema = z.object({
+  tipo: z.enum(['entrada', 'salida', 'periodica']).optional(),
+  estado: z.enum(['programada', 'en_proceso', 'completada']).optional(),
+});
+
+const createSchema = z.object({
+  buildingId: z.string().optional(),
+  unitId: z.string().optional(),
+  tipo: z.enum(['entrada', 'salida', 'periodica']),
+  fecha: z.string(),
+  inspectorName: z.string().min(1),
+  descripcion: z.string().optional(),
+});
+
+function normalizeTipo(tipo: string): InspeccionTipo {
+  if (tipo === 'entrada' || tipo === 'salida') return tipo;
+  return 'periodica';
+}
+
+function normalizeEstado(estado: string): InspeccionEstado {
+  if (estado === 'completada') return 'completada';
+  if (estado === 'programada') return 'programada';
+  return 'en_proceso';
+}
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : 'Error desconocido';
 }
 
 // GET - Obtener inspecciones digitales
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
-    const tipo = searchParams.get('tipo');
-    const estado = searchParams.get('estado');
+    const parsedQuery = querySchema.safeParse({
+      tipo: searchParams.get('tipo') === 'all' ? undefined : searchParams.get('tipo') ?? undefined,
+      estado: searchParams.get('estado') === 'all' ? undefined : searchParams.get('estado') ?? undefined,
+    });
 
-    let inspecciones: Inspeccion[] = [];
-
-    try {
-      // Intentar obtener de la BD
-      const inspectionsDb = await prisma.inspection?.findMany?.({
-        where: {
-          property: { companyId: session.user.companyId },
-        },
-        include: {
-          property: true,
-          unit: true,
-        },
-        take: 50,
-        orderBy: { scheduledDate: 'desc' },
-      });
-
-      if (inspectionsDb && inspectionsDb.length > 0) {
-        inspecciones = inspectionsDb.map((i: any) => ({
-          id: i.id,
-          propiedad: i.property?.name || i.property?.address || 'Sin propiedad',
-          unidad: i.unit?.unitNumber || '',
-          tipo: i.type || 'periodica',
-          fecha: i.scheduledDate?.toISOString().split('T')[0] || '',
-          inspector: i.inspectorName || 'Sin asignar',
-          estado: i.status || 'programada',
-          puntuacion: i.score,
-          fotos: i.photosCount || 0,
-          incidencias: i.issuesCount || 0,
-        }));
-      }
-    } catch (dbError) {
-      console.warn('[API Inspecciones] Error BD, usando datos mock:', dbError);
+    if (!parsedQuery.success) {
+      return NextResponse.json({ error: 'Parámetros inválidos' }, { status: 400 });
     }
 
-    // Si no hay datos de BD, usar mock
-    if (inspecciones.length === 0) {
-      inspecciones = [
-        { id: 'i1', propiedad: 'Edificio Centro', unidad: '3A', tipo: 'salida', fecha: '2025-01-20', inspector: 'Carlos García', estado: 'completada', puntuacion: 85, fotos: 24, incidencias: 3 },
-        { id: 'i2', propiedad: 'Residencial Playa', unidad: '2B', tipo: 'entrada', fecha: '2025-01-25', inspector: 'María López', estado: 'programada' },
-        { id: 'i3', propiedad: 'Apartamentos Norte', unidad: '1C', tipo: 'periodica', fecha: '2025-01-22', inspector: 'Juan Martínez', estado: 'en_proceso', fotos: 12 },
-        { id: 'i4', propiedad: 'Piso Centro', unidad: '4D', tipo: 'salida', fecha: '2025-01-18', inspector: 'Ana Ruiz', estado: 'completada', puntuacion: 92, fotos: 18, incidencias: 1 },
-      ];
-    }
+    const prisma = getPrismaClient();
+    const inspections = await prisma.inspection.findMany({
+      where: { companyId: session.user.companyId },
+      orderBy: { fechaProgramada: 'desc' },
+      take: 50,
+    });
 
-    // Filtrar
-    if (tipo && tipo !== 'all') {
-      inspecciones = inspecciones.filter(i => i.tipo === tipo);
+    const unitIds = inspections.map((inspection) => inspection.unitId).filter(Boolean) as string[];
+    const buildingIds = inspections
+      .map((inspection) => inspection.buildingId)
+      .filter(Boolean) as string[];
+
+    const [units, buildings] = await Promise.all([
+      unitIds.length
+        ? prisma.unit.findMany({
+            where: { id: { in: unitIds }, building: { companyId: session.user.companyId } },
+            select: { id: true, numero: true, building: { select: { id: true, nombre: true, direccion: true } } },
+          })
+        : Promise.resolve([]),
+      buildingIds.length
+        ? prisma.building.findMany({
+            where: { id: { in: buildingIds }, companyId: session.user.companyId },
+            select: { id: true, nombre: true, direccion: true },
+          })
+        : Promise.resolve([]),
+    ]);
+
+    const unitMap = new Map(units.map((unit) => [unit.id, unit]));
+    const buildingMap = new Map(buildings.map((building) => [building.id, building]));
+
+    let inspecciones: Inspeccion[] = inspections.map((inspection) => {
+      const unit = inspection.unitId ? unitMap.get(inspection.unitId) : undefined;
+      const building =
+        (inspection.buildingId ? buildingMap.get(inspection.buildingId) : undefined) ??
+        unit?.building;
+
+      return {
+        id: inspection.id,
+        propiedad: building?.nombre || building?.direccion || 'Sin propiedad',
+        unidad: unit?.numero || '',
+        tipo: normalizeTipo(inspection.tipo),
+        fecha: inspection.fechaProgramada.toISOString().split('T')[0],
+        inspector: inspection.inspector,
+        estado: normalizeEstado(inspection.estado),
+        fotos: inspection.fotos?.length ?? 0,
+        incidencias: 0,
+      };
+    });
+
+    if (parsedQuery.data.tipo) {
+      inspecciones = inspecciones.filter((inspection) => inspection.tipo === parsedQuery.data.tipo);
     }
-    if (estado && estado !== 'all') {
-      inspecciones = inspecciones.filter(i => i.estado === estado);
+    if (parsedQuery.data.estado) {
+      inspecciones = inspecciones.filter((inspection) => inspection.estado === parsedQuery.data.estado);
     }
 
     // Estadísticas
     const stats = {
       total: inspecciones.length,
-      programadas: inspecciones.filter(i => i.estado === 'programada').length,
-      enProceso: inspecciones.filter(i => i.estado === 'en_proceso').length,
-      completadas: inspecciones.filter(i => i.estado === 'completada').length,
+      programadas: inspecciones.filter((inspection) => inspection.estado === 'programada').length,
+      enProceso: inspecciones.filter((inspection) => inspection.estado === 'en_proceso').length,
+      completadas: inspecciones.filter((inspection) => inspection.estado === 'completada').length,
       puntuacionMedia: Math.round(
-        inspecciones.filter(i => i.puntuacion).reduce((sum, i) => sum + (i.puntuacion || 0), 0) /
-        (inspecciones.filter(i => i.puntuacion).length || 1)
+        inspecciones.filter((inspection) => inspection.puntuacion).reduce((sum, inspection) => sum + (inspection.puntuacion || 0), 0) /
+        (inspecciones.filter((inspection) => inspection.puntuacion).length || 1)
       ),
     };
 
@@ -100,10 +144,10 @@ export async function GET(request: NextRequest) {
       data: inspecciones,
       stats,
     });
-  } catch (error: any) {
-    console.error('[API Inspecciones] Error:', error);
+  } catch (error: unknown) {
+    logger.error('[API Inspecciones] Error:', error);
     return NextResponse.json(
-      { error: 'Error al obtener inspecciones', details: error.message },
+      { error: 'Error al obtener inspecciones', details: getErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -113,39 +157,86 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { propertyId, unitId, tipo, fecha, inspectorName } = body;
+    const prisma = getPrismaClient();
+    const data = createSchema.parse(await request.json());
 
-    if (!propertyId || !tipo || !fecha) {
+    if (!data.buildingId && !data.unitId) {
       return NextResponse.json(
-        { error: 'Faltan campos requeridos: propertyId, tipo, fecha' },
+        { error: 'Faltan campos requeridos: buildingId o unitId' },
         { status: 400 }
       );
     }
 
-    const newInspeccion: Inspeccion = {
-      id: `insp-${Date.now()}`,
-      propiedad: 'Propiedad',
-      unidad: unitId || '',
-      tipo,
-      fecha,
-      inspector: inspectorName || 'Por asignar',
-      estado: 'programada',
+    const fechaProgramada = new Date(data.fecha);
+    if (Number.isNaN(fechaProgramada.getTime())) {
+      return NextResponse.json({ error: 'Fecha inválida' }, { status: 400 });
+    }
+
+    let unit = null;
+    let building = null;
+
+    if (data.unitId) {
+      unit = await prisma.unit.findFirst({
+        where: { id: data.unitId, building: { companyId: session.user.companyId } },
+        select: { id: true, numero: true, building: { select: { id: true, nombre: true, direccion: true } } },
+      });
+      if (!unit) {
+        return NextResponse.json({ error: 'Unidad no encontrada' }, { status: 404 });
+      }
+      building = unit.building;
+    }
+
+    if (!building && data.buildingId) {
+      building = await prisma.building.findFirst({
+        where: { id: data.buildingId, companyId: session.user.companyId },
+        select: { id: true, nombre: true, direccion: true },
+      });
+      if (!building) {
+        return NextResponse.json({ error: 'Edificio no encontrado' }, { status: 404 });
+      }
+    }
+
+    const inspection = await prisma.inspection.create({
+      data: {
+        companyId: session.user.companyId,
+        unitId: unit?.id ?? null,
+        buildingId: building?.id ?? null,
+        tipo: data.tipo,
+        fechaProgramada,
+        inspector: data.inspectorName,
+        descripcion: data.descripcion ?? null,
+        estado: 'programada',
+      },
+    });
+
+    const response: Inspeccion = {
+      id: inspection.id,
+      propiedad: building?.nombre || building?.direccion || 'Sin propiedad',
+      unidad: unit?.numero || '',
+      tipo: normalizeTipo(inspection.tipo),
+      fecha: inspection.fechaProgramada.toISOString().split('T')[0],
+      inspector: inspection.inspector,
+      estado: normalizeEstado(inspection.estado),
+      fotos: inspection.fotos?.length ?? 0,
+      incidencias: 0,
     };
 
-    return NextResponse.json({
-      success: true,
-      data: newInspeccion,
-      message: 'Inspección programada correctamente',
-    }, { status: 201 });
-  } catch (error: any) {
-    console.error('[API Inspecciones] Error POST:', error);
     return NextResponse.json(
-      { error: 'Error al programar inspección', details: error.message },
+      {
+        success: true,
+        data: response,
+        message: 'Inspección programada correctamente',
+      },
+      { status: 201 }
+    );
+  } catch (error: unknown) {
+    logger.error('[API Inspecciones] Error POST:', error);
+    return NextResponse.json(
+      { error: 'Error al programar inspección', details: getErrorMessage(error) },
       { status: 500 }
     );
   }

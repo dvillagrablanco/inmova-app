@@ -5,10 +5,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-
+import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
+
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+type ReservationStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'disputed';
+
+const mapReservationStatus = (estado: string): ReservationStatus => {
+  switch (estado) {
+    case 'confirmada':
+      return 'confirmed';
+    case 'completada':
+      return 'completed';
+    case 'cancelada':
+    case 'rechazada':
+      return 'cancelled';
+    case 'disputada':
+      return 'disputed';
+    case 'pendiente':
+    default:
+      return 'pending';
+  }
+};
 
 export async function GET(
   request: NextRequest,
@@ -20,13 +40,52 @@ export async function GET(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // TODO: Conectar con modelo real
+    const reservation = await prisma.marketplaceBooking.findUnique({
+      where: { id: params.id },
+      include: {
+        service: {
+          select: {
+            id: true,
+            nombre: true,
+            categoria: true,
+            provider: { select: { id: true, nombre: true, email: true } },
+          },
+        },
+        tenant: { select: { nombreCompleto: true, email: true } },
+        unit: { include: { building: { select: { nombre: true } } } },
+        company: { select: { nombre: true } },
+      },
+    });
+
+    if (!reservation) {
+      return NextResponse.json(
+        { success: false, message: 'Reserva no encontrada' },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
-      data: null,
-      message: 'Reserva no encontrada',
-    }, { status: 404 });
-  } catch (error) {
+      data: {
+        id: reservation.id,
+        servicio: reservation.service.nombre,
+        categoria: reservation.service.categoria,
+        proveedor: reservation.service.provider?.nombre || 'Sin proveedor',
+        cliente: {
+          empresa: reservation.company.nombre || 'Empresa',
+          contacto: reservation.tenant.nombreCompleto,
+          email: reservation.tenant.email,
+        },
+        propiedad: reservation.unit?.building?.nombre || reservation.unit?.numero || null,
+        fechaSolicitud: reservation.fechaSolicitud.toISOString(),
+        fechaServicio: reservation.fechaServicio ? reservation.fechaServicio.toISOString() : null,
+        precio: reservation.precioTotal,
+        comision: reservation.comision,
+        estado: mapReservationStatus(reservation.estado),
+        notas: reservation.notasCliente || reservation.notasInternas || null,
+      },
+    });
+  } catch (error: unknown) {
     logger.error('[API Error] Get marketplace reservation:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
@@ -43,37 +102,40 @@ export async function PATCH(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { action } = body; // 'confirm' | 'cancel' | 'complete'
+    const body: unknown = await request.json();
+    const action = typeof body === 'object' && body !== null ? (body as { action?: string }).action : undefined; // 'confirm' | 'cancel' | 'complete'
 
     let message = '';
-    let newStatus = '';
+    let newStatus: string = '';
 
     switch (action) {
       case 'confirm':
-        newStatus = 'confirmed';
+        newStatus = 'confirmada';
         message = 'Reserva confirmada correctamente';
         break;
       case 'cancel':
-        newStatus = 'cancelled';
+        newStatus = 'cancelada';
         message = 'Reserva cancelada';
         break;
       case 'complete':
-        newStatus = 'completed';
+        newStatus = 'completada';
         message = 'Reserva marcada como completada';
         break;
       default:
         return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
     }
 
-    // TODO: Conectar con modelo real y actualizar en BD
+    const reservation = await prisma.marketplaceBooking.update({
+      where: { id: params.id },
+      data: { estado: newStatus },
+    });
 
     return NextResponse.json({
       success: true,
-      data: { id: params.id, estado: newStatus },
+      data: { id: reservation.id, estado: mapReservationStatus(reservation.estado) },
       message,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('[API Error] Patch marketplace reservation:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
@@ -89,13 +151,15 @@ export async function DELETE(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // TODO: Conectar con modelo real
+    await prisma.marketplaceBooking.delete({
+      where: { id: params.id },
+    });
 
     return NextResponse.json({
       success: true,
       message: 'Reserva eliminada correctamente',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('[API Error] Delete marketplace reservation:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }

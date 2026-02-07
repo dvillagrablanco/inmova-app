@@ -49,10 +49,10 @@ const nextConfig = {
 
   // Build configuration
   typescript: {
-    ignoreBuildErrors: true, // Deshabilitado temporalmente por errores legacy de enums
+    ignoreBuildErrors: false,
   },
   eslint: {
-    ignoreDuringBuilds: true, // Deshabilitado temporalmente
+    ignoreDuringBuilds: false,
   },
 
   // Image optimization - Optimizado para producción

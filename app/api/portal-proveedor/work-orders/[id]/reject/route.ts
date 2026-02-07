@@ -37,6 +37,15 @@ export async function POST(
     // Verificar que la orden existe y pertenece al proveedor
     const workOrder = await prisma.providerWorkOrder.findUnique({
       where: { id: workOrderId },
+      select: {
+        id: true,
+        providerId: true,
+        estado: true,
+        companyId: true,
+        asignadoPor: true,
+        titulo: true,
+        comentarios: true,
+      },
     });
 
     if (!workOrder) {
@@ -79,17 +88,27 @@ export async function POST(
       `Orden ${workOrderId} rechazada por proveedor ${auth.provider.nombre}. Motivo: ${motivo}`
     );
 
-    // TODO: Enviar notificación al gestor que asignó la orden
+    const notificationData = {
+      companyId: workOrder.companyId,
+      tipo: 'info',
+      titulo: 'Orden de trabajo rechazada',
+      mensaje: `El proveedor ${auth.provider.nombre} rechazó la orden "${workOrder.titulo}". Motivo: ${motivo}`,
+      entityId: workOrder.id,
+      entityType: 'work_order',
+      ...(workOrder.asignadoPor ? { userId: workOrder.asignadoPor } : {}),
+    };
+    await prisma.notification.create({ data: notificationData });
 
     return NextResponse.json({
       success: true,
       message: 'Orden rechazada exitosamente',
       workOrder: updatedWorkOrder,
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('Error al rechazar orden de trabajo:', error);
     return NextResponse.json(
-      { error: 'Error al rechazar orden de trabajo' },
+      { error: 'Error al rechazar orden de trabajo', details: message },
       { status: 500 }
     );
   }

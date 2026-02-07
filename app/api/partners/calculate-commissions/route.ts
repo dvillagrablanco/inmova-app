@@ -14,17 +14,42 @@ function getCommissionRate(clientCount: number): number {
   if (clientCount >= 11) return 30.0;
   return 20.0;
 }
+
+type CommissionResult = {
+  partnerId: string;
+  partnerName: string;
+  companyId: string;
+  companyName: string;
+  periodo: string;
+  montoBruto: number;
+  porcentaje: number;
+  montoComision: number;
+  commissionId: string;
+};
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return 'Error desconocido';
+}
+
 // POST /api/partners/calculate-commissions - Calcular comisiones mensuales (CRON)
 export async function POST(request: NextRequest) {
   try {
-    // TODO: Verificar que esta petición viene de un CRON job autorizado
-    // const authHeader = request.headers.get('authorization');
-    // if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    //   return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    // }
+    const authHeader = request.headers.get('authorization');
+    const cronSecret = process.env.CRON_SECRET;
+    if (cronSecret) {
+      if (!authHeader || authHeader !== `Bearer ${cronSecret}`) {
+        return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      }
+    } else {
+      logger.warn('CRON_SECRET no configurado. Ejecutando sin validación.');
+    }
+
     const now = new Date();
     const periodo = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    console.log(`Calculando comisiones para el periodo: ${periodo}`);
+    logger.info(`Calculando comisiones para el periodo: ${periodo}`);
     // Obtener todos los Partners activos
     const partners = await prisma.partner.findMany({
       where: {
@@ -42,11 +67,11 @@ export async function POST(request: NextRequest) {
         },
       },
     });
-    const results: any[] = [];
+    const results: CommissionResult[] = [];
     for (const partner of partners) {
       const clientesActivos = partner.clientes.length;
       if (clientesActivos === 0) {
-        console.log(`Partner ${partner.nombre} no tiene clientes activos.`);
+        logger.info(`Partner ${partner.nombre} no tiene clientes activos.`);
         continue;
       }
       // Calcular porcentaje según escala
@@ -66,7 +91,7 @@ export async function POST(request: NextRequest) {
           },
         });
         if (existingCommission) {
-          console.log(`Comisión ya existe para ${cliente.company.nombre} en ${periodo}`);
+          logger.info(`Comisión ya existe para ${cliente.company.nombre} en ${periodo}`);
           continue;
         }
         // Calcular comisión
@@ -98,8 +123,10 @@ export async function POST(request: NextRequest) {
           },
         });
         results.push({
-          partner: partner.nombre,
-          cliente: cliente.company.nombre,
+          partnerId: partner.id,
+          partnerName: partner.nombre,
+          companyId: cliente.companyId,
+          companyName: cliente.company.nombre,
           periodo,
           montoBruto,
           porcentaje: porcentajeComision,
@@ -113,10 +140,11 @@ export async function POST(request: NextRequest) {
       periodo,
       results,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = getErrorMessage(error);
     logger.error('Error calculando comisiones:', error);
     return NextResponse.json(
-      { error: 'Error interno del servidor', details: error?.message },
+      { error: 'Error interno del servidor', details: message },
       { status: 500 }
     );
   }
@@ -148,10 +176,11 @@ export async function GET(request: NextRequest) {
       montoTotal: totalComisiones.toFixed(2),
       comisiones: comisionesDelMes,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = getErrorMessage(error);
     logger.error('Error obteniendo información de comisiones:', error);
     return NextResponse.json(
-      { error: 'Error interno del servidor', details: error?.message },
+      { error: 'Error interno del servidor', details: message },
       { status: 500 }
     );
   }

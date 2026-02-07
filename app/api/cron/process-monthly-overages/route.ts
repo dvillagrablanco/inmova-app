@@ -25,8 +25,15 @@ export async function GET(request: NextRequest) {
   try {
     // Verificar cron secret (seguridad)
     const authHeader = request.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET || 'dev-secret';
-    
+    const cronSecret = process.env.CRON_SECRET;
+
+    if (!cronSecret) {
+      return NextResponse.json(
+        { error: 'CRON_SECRET no configurado' },
+        { status: 500 }
+      );
+    }
+
     if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -34,11 +41,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log('[Cron] Starting monthly overage processing...');
+    logger.info('[Cron] Starting monthly overage processing...');
     
     const result = await processMonthlyOverages();
     
-    console.log('[Cron] Monthly overage processing completed');
+    logger.info('[Cron] Monthly overage processing completed');
     
     return NextResponse.json({
       success: result.success,
@@ -47,14 +54,11 @@ export async function GET(request: NextRequest) {
       errors: result.errors,
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Cron] Error processing monthly overages:', error);
-    
+
     return NextResponse.json(
-      {
-        error: 'Internal server error',
-        message: error.message,
-      },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

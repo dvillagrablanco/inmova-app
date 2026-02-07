@@ -295,9 +295,25 @@ export default function CanvaStudioPage() {
   };
 
   // Conectar con Canva
-  const connectCanva = () => {
-    // TODO: Implementar OAuth con Canva Connect API
-    toast.info('La integración con Canva Connect API está en desarrollo. Por ahora puedes usar las plantillas locales.');
+  const connectCanva = async () => {
+    try {
+      const statusRes = await fetch('/api/admin/canva/status');
+      const statusData = await statusRes.json();
+
+      if (!statusRes.ok) {
+        toast.error(statusData?.error || 'Error al verificar estado de Canva');
+        return;
+      }
+
+      if (!statusData?.configured) {
+        toast.error(statusData?.message || 'Canva no está configurado');
+        return;
+      }
+
+      window.location.href = '/api/admin/canva/auth';
+    } catch (error) {
+      toast.error('Error al iniciar conexión con Canva');
+    }
   };
 
   // Estadísticas

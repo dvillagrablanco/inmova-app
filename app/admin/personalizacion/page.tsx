@@ -935,7 +935,7 @@ export default function PersonalizacionPage() {
                           <Input
                             value={formData.contactPhone}
                             onChange={(e) => handleInputChange('contactPhone', e.target.value)}
-                            placeholder="+34 XXX XXX XXX"
+                            placeholder="Teléfono de contacto"
                           />
                         </div>
 

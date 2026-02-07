@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { requireProviderAuth } from '@/lib/provider-auth';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -13,29 +12,62 @@ export const runtime = 'nodejs';
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session || !session.user) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
-    }
-
-    // Verificar que sea proveedor
-    if (session.user.role !== 'PROVIDER' && session.user.role !== 'PROVEEDOR') {
+    const auth = await requireProviderAuth(request);
+    if (!auth.authenticated || !auth.provider) {
       return NextResponse.json(
-        { error: 'Acceso denegado - Solo para proveedores' },
-        { status: 403 }
+        { error: auth.error || 'No autenticado' },
+        { status: auth.status || 401 }
       );
     }
 
-    // TODO: Implementar lógica real cuando exista modelo de Work Orders
-    // Por ahora retornar array vacío para evitar 404
+    const { searchParams } = new URL(request.url);
+    const estado = searchParams.get('estado');
+    const pageParam = Number(searchParams.get('page') || '1');
+    const limitParam = Number(searchParams.get('limit') || '20');
+    const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
+    const limit =
+      Number.isFinite(limitParam) && limitParam > 0 && limitParam <= 100 ? limitParam : 20;
+    const skip = (page - 1) * limit;
+
+    const [workOrders, total] = await prisma.$transaction([
+      prisma.providerWorkOrder.findMany({
+        where: {
+          providerId: auth.provider.id,
+          ...(estado ? { estado } : {}),
+        },
+        include: {
+          building: { select: { id: true, nombre: true } },
+          unit: { select: { id: true, numero: true } },
+          maintenance: { select: { id: true, titulo: true } },
+        },
+        orderBy: { fechaAsignacion: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.providerWorkOrder.count({
+        where: {
+          providerId: auth.provider.id,
+          ...(estado ? { estado } : {}),
+        },
+      }),
+    ]);
+
     return NextResponse.json({
       success: true,
-      workOrders: [],
-      message: 'Funcionalidad en desarrollo',
+      workOrders,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[API Error]:', error);
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error interno del servidor', details: message },
+      { status: 500 }
+    );
   }
 }

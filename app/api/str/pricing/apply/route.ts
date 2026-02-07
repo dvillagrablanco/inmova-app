@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
+import { z } from 'zod';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,12 +15,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { listingId, price } = body;
+    const schema = z.object({
+      listingId: z.string().min(1),
+      price: z.number().positive(),
+    });
 
-    // TODO: Implementar actualización real en base de datos
-    // TODO: Sincronizar con APIs de Airbnb, Booking, etc.
-    logger.info(`Applying price €${price} to listing ${listingId}`);
+    const body: unknown = await request.json();
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
+    }
+
+    const listing = await prisma.sTRListing.findFirst({
+      where: { id: parsed.data.listingId, companyId: session.user.companyId },
+    });
+
+    if (!listing) {
+      return NextResponse.json({ error: 'Listing no encontrado' }, { status: 404 });
+    }
+
+    await prisma.sTRListing.update({
+      where: { id: listing.id },
+      data: { precioPorNoche: parsed.data.price },
+    });
 
     return NextResponse.json({ 
       success: true, 

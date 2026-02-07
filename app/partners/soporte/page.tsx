@@ -52,6 +52,9 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+const SUPPORT_PHONE = process.env.NEXT_PUBLIC_VAPI_PHONE_NUMBER || '';
+const SUPPORT_PHONE_LABEL = SUPPORT_PHONE.length > 0 ? SUPPORT_PHONE : 'Teléfono no configurado';
+
 interface Ticket {
   id: string;
   asunto: string;
@@ -218,7 +221,7 @@ export default function PartnersSoportePage() {
               </div>
               <div>
                 <h3 className="font-semibold">Teléfono</h3>
-                <p className="text-sm text-muted-foreground">+34 91 XXX XX XX</p>
+                <p className="text-sm text-muted-foreground">{SUPPORT_PHONE_LABEL}</p>
               </div>
             </div>
           </CardContent>

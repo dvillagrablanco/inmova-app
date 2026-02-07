@@ -5,6 +5,11 @@
 
 import { AgentConfig, AgentFunction } from '../vapi-config';
 
+const SUPPORT_PHONE = process.env.NEXT_PUBLIC_VAPI_PHONE_NUMBER || '';
+const SUPPORT_PHONE_LINE = SUPPORT_PHONE
+  ? `- **Teléfono general**: ${SUPPORT_PHONE}`
+  : '- **Teléfono general**: consultar por email';
+
 // Funciones específicas del recepcionista
 const RECEPTIONIST_FUNCTIONS: AgentFunction[] = [
   {
@@ -197,7 +202,7 @@ Palabras clave: comunidad, vecinos, junta, derrama, presidente, acta
 
 ## INFORMACIÓN DE CONTACTO
 
-- **Teléfono general**: +1 (XXX) XXX-XXXX
+${SUPPORT_PHONE_LINE}
 - **Email**: info@inmovaapp.com
 - **Web**: https://inmovaapp.com
 - **WhatsApp**: Disponible

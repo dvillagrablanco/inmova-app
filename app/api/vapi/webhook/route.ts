@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const SUPPORT_PHONE = process.env.NEXT_PUBLIC_VAPI_PHONE_NUMBER || '';
+
 // Tipos de eventos de Vapi
 type VapiEventType = 
   | 'assistant-request'
@@ -210,13 +212,13 @@ async function handleFunctionCall(
           {
             city: 'Madrid',
             address: 'Calle Gran Vía 123, 28013 Madrid',
-            phone: '+34 91 XXX XX XX',
+            phone: SUPPORT_PHONE || undefined,
             hours: 'L-V 9:00-19:00',
           },
           {
             city: 'Barcelona',
             address: 'Passeig de Gràcia 45, 08007 Barcelona',
-            phone: '+34 93 XXX XX XX',
+            phone: SUPPORT_PHONE || undefined,
             hours: 'L-V 9:00-19:00',
           },
         ],

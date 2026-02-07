@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -20,13 +21,41 @@ export async function GET(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // TODO: Conectar con modelo real
+    const provider = await prisma.provider.findUnique({
+      where: { id: params.id },
+      include: {
+        marketplaceServices: {
+          select: { id: true, categoria: true },
+        },
+      },
+    });
+
+    if (!provider) {
+      return NextResponse.json(
+        { success: false, message: 'Proveedor no encontrado' },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
-      data: null,
-      message: 'Proveedor no encontrado',
-    }, { status: 404 });
-  } catch (error) {
+      data: {
+        id: provider.id,
+        nombre: provider.nombre,
+        email: provider.email || '',
+        telefono: provider.telefono,
+        website: null,
+        direccion: provider.direccion || null,
+        descripcion: provider.notas || null,
+        categoria: provider.marketplaceServices[0]?.categoria || provider.tipo || 'General',
+        serviciosCount: provider.marketplaceServices.length,
+        rating: provider.rating || 0,
+        transaccionesTotal: 0,
+        estado: provider.activo ? 'active' : 'suspended',
+        createdAt: provider.createdAt.toISOString(),
+      },
+    });
+  } catch (error: unknown) {
     logger.error('[API Error] Get marketplace provider:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
@@ -42,15 +71,41 @@ export async function PUT(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const body = await request.json();
-    
-    // Simular actualización exitosa
+    const body: unknown = await request.json();
+    const payload = typeof body === 'object' && body !== null ? body as Record<string, unknown> : {};
+
+    const provider = await prisma.provider.update({
+      where: { id: params.id },
+      data: {
+        nombre: typeof payload.nombre === 'string' ? payload.nombre : undefined,
+        email: typeof payload.email === 'string' ? payload.email : undefined,
+        telefono: typeof payload.telefono === 'string' ? payload.telefono : undefined,
+        direccion: typeof payload.direccion === 'string' ? payload.direccion : undefined,
+        tipo: typeof payload.categoria === 'string' ? payload.categoria : undefined,
+        notas: typeof payload.descripcion === 'string' ? payload.descripcion : undefined,
+      },
+    });
+
     return NextResponse.json({
       success: true,
-      data: { id: params.id, ...body, updatedAt: new Date().toISOString() },
+      data: {
+        id: provider.id,
+        nombre: provider.nombre,
+        email: provider.email || '',
+        telefono: provider.telefono,
+        website: null,
+        direccion: provider.direccion || null,
+        descripcion: provider.notas || null,
+        categoria: provider.tipo || 'General',
+        serviciosCount: 0,
+        rating: provider.rating || 0,
+        transaccionesTotal: 0,
+        estado: provider.activo ? 'active' : 'suspended',
+        updatedAt: provider.updatedAt.toISOString(),
+      },
       message: 'Proveedor actualizado correctamente',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('[API Error] Update marketplace provider:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
@@ -66,12 +121,16 @@ export async function DELETE(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // Simular eliminación exitosa
+    await prisma.provider.update({
+      where: { id: params.id },
+      data: { activo: false },
+    });
+
     return NextResponse.json({
       success: true,
       message: 'Proveedor eliminado correctamente',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('[API Error] Delete marketplace provider:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
@@ -88,8 +147,9 @@ export async function PATCH(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { action } = body; // 'approve' | 'suspend' | 'activate'
+    const body: unknown = await request.json();
+    const action =
+      typeof body === 'object' && body !== null ? (body as { action?: string }).action : undefined; // 'approve' | 'suspend' | 'activate'
 
     let message = '';
     let newStatus = '';
@@ -111,12 +171,17 @@ export async function PATCH(
         return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
     }
 
+    await prisma.provider.update({
+      where: { id: params.id },
+      data: { activo: newStatus === 'active' },
+    });
+
     return NextResponse.json({
       success: true,
       data: { id: params.id, estado: newStatus },
       message,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('[API Error] Patch marketplace provider:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }

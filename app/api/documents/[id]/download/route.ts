@@ -10,6 +10,7 @@ import { prisma } from '@/lib/db';
 import { getBucketConfig } from '@/lib/aws-config';
 import { getSignedDownloadUrl } from '@/lib/s3';
 import { getFileUrl, isLocalStorageAvailable } from '@/lib/local-storage';
+import type { AuditAction } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -31,8 +32,9 @@ export async function GET(
 
     const { searchParams } = new URL(req.url);
     const queryCompanyId = searchParams.get('companyId');
-    const userRole = (session.user as any).role;
-    const sessionCompanyId = session.user.companyId;
+    const sessionUser = session.user as { role?: string | null; companyId?: string | null };
+    const userRole = sessionUser.role;
+    const sessionCompanyId = sessionUser.companyId;
     const companyId =
       queryCompanyId && (userRole === 'super_admin' || userRole === 'soporte')
         ? queryCompanyId
@@ -120,21 +122,40 @@ export async function GET(
       });
     }
 
-    // 7. Log de acceso (auditoría) - Skip si la tabla no existe
-    // await prisma.documentAccess.create(...) // TODO: Implementar cuando exista la tabla
+    if (companyId && session.user?.id) {
+      try {
+        await prisma.auditLog.create({
+          data: {
+            companyId,
+            userId: session.user.id,
+            action: 'EXPORT' as AuditAction,
+            entityType: 'DOCUMENT',
+            entityId: document.id,
+            entityName: document.nombre,
+            ipAddress: req.headers.get('x-forwarded-for') || undefined,
+            userAgent: req.headers.get('user-agent') || undefined,
+          },
+        });
+      } catch (auditError) {
+        logger.warn('No se pudo registrar auditoría de descarga', {
+          documentId: document.id,
+        });
+      }
+    }
 
     return NextResponse.json(
       { error: 'No hay almacenamiento configurado para descargar' },
       { status: 500 }
     );
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Document Download Error]:', error);
-    
+
     return NextResponse.json(
       {
         error: 'Error generando URL de descarga',
-        message: error.message,
+        message,
       },
       { status: 500 }
     );

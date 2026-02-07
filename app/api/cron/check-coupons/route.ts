@@ -18,7 +18,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 // Verificar clave secreta para cron jobs
-const CRON_SECRET = process.env.CRON_SECRET || 'inmova-cron-secret';
+const CRON_SECRET = process.env.CRON_SECRET;
 
 interface AlertConfig {
   diasAntes: number;
@@ -65,6 +65,13 @@ export async function GET(request: NextRequest) {
   try {
     // Verificar autorización
     const authHeader = request.headers.get('authorization');
+    if (!CRON_SECRET) {
+      return NextResponse.json(
+        { error: 'CRON_SECRET no configurado' },
+        { status: 500 }
+      );
+    }
+
     if (authHeader !== `Bearer ${CRON_SECRET}`) {
       // También permitir desde Vercel Cron
       const vercelCron = request.headers.get('x-vercel-cron');
@@ -223,10 +230,10 @@ export async function GET(request: NextRequest) {
       alertasEnviadas,
       resultados,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Cron CheckCoupons Error]:', error);
     return NextResponse.json(
-      { error: 'Error verificando cupones', details: error.message },
+      { error: 'Error verificando cupones' },
       { status: 500 }
     );
   }

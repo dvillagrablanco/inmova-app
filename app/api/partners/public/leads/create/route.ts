@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { trackPartnerLandingLead } from '@/lib/partner-branding-service';
+import { sendEmail } from '@/lib/email-service';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -60,15 +61,38 @@ export async function POST(request: NextRequest) {
     // Trackear el lead
     await trackPartnerLandingLead(validatedData.partnerSlug);
 
-    // TODO: Enviar notificación al partner por email
-    // await sendPartnerLeadNotification(partner.email, lead);
+    const leadEmailSent = await sendEmail({
+      to: partner.email,
+      subject: `Nuevo lead recibido desde tu landing (${partner.nombre})`,
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
+          <h2>Nuevo lead recibido</h2>
+          <p>Has recibido un nuevo contacto desde tu landing de INMOVA.</p>
+          <ul>
+            <li><strong>Nombre:</strong> ${validatedData.nombre}</li>
+            <li><strong>Email:</strong> ${validatedData.email}</li>
+            ${validatedData.telefono ? `<li><strong>Teléfono:</strong> ${validatedData.telefono}</li>` : ''}
+            ${validatedData.mensaje ? `<li><strong>Mensaje:</strong> ${validatedData.mensaje}</li>` : ''}
+          </ul>
+          <p>ID del lead: ${lead.id}</p>
+        </div>
+      `,
+    });
+
+    if (!leadEmailSent) {
+      logger.warn('No se pudo enviar email de lead al partner', {
+        partnerId: partner.id,
+        leadId: lead.id,
+      });
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Información recibida correctamente',
       leadId: lead.id,
+      emailSent: leadEmailSent,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
@@ -76,7 +100,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[API Partners Lead Create] Error:', error);
-    return NextResponse.json({ error: 'Error procesando solicitud' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error procesando solicitud', details: message },
+      { status: 500 }
+    );
   }
 }
