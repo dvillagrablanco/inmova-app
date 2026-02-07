@@ -641,10 +641,10 @@ export function AIDocumentAssistant({
   // - bottom-[216px]: FloatingTourButton/ContextualHelp (solo desktop)
   // z-[60] para estar por encima de otros elementos flotantes
   const positionClasses: Record<string, string> = {
-    'bottom-right': 'fixed bottom-[88px] right-6',
-    'bottom-left': 'fixed bottom-[88px] left-6',
-    'top-right': 'fixed top-20 right-6',
-    'top-left': 'fixed top-20 left-6',
+    'bottom-right': 'fixed bottom-[168px] right-4 sm:bottom-[88px] sm:right-6',
+    'bottom-left': 'fixed bottom-[168px] left-4 sm:bottom-[88px] sm:left-6',
+    'top-right': 'fixed top-20 right-4 sm:right-6',
+    'top-left': 'fixed top-20 left-4 sm:left-6',
   };
 
   // Botón trigger según variante

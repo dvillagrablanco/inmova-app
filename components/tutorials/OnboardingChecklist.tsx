@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { safeLocalStorage } from '@/lib/safe-storage';
 
 interface ChecklistItem {
   id: string;
@@ -43,8 +44,24 @@ interface OnboardingChecklistProps {
   onDismiss?: () => void;
 }
 
+const DISMISS_KEY = 'onboarding_checklist_dismissed';
+const MINIMIZED_KEY = 'onboarding_checklist_minimized';
+
 export function OnboardingChecklist({ userId, isNewUser, onDismiss }: OnboardingChecklistProps) {
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(() => {
+    try {
+      return safeLocalStorage.getItem(DISMISS_KEY) === 'true';
+    } catch (error) {
+      return false;
+    }
+  });
+  const [isMinimized, setIsMinimized] = useState(() => {
+    try {
+      return safeLocalStorage.getItem(MINIMIZED_KEY) === 'true';
+    } catch (error) {
+      return false;
+    }
+  });
   const [checklist, setChecklist] = useState<ChecklistItem[]>([
     {
       id: 'complete-profile',
@@ -151,12 +168,26 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
   const progress = (completedCount / checklist.length) * 100;
   const isComplete = completedCount === checklist.length;
 
+  useEffect(() => {
+    if (isComplete && !isDismissed && !isMinimized) {
+      setIsMinimized(true);
+      safeLocalStorage.setItem(MINIMIZED_KEY, 'true');
+    }
+  }, [isComplete, isDismissed, isMinimized]);
+
+  if (isDismissed) {
+    return null;
+  }
+
   if (isMinimized) {
     return (
       // Posicionado en la izquierda para no solapar con chatbot
       <div className="fixed bottom-4 left-4 z-40 lg:bottom-6 lg:left-6">
         <Button
-          onClick={() => setIsMinimized(false)}
+          onClick={() => {
+            setIsMinimized(false);
+            safeLocalStorage.setItem(MINIMIZED_KEY, 'false');
+          }}
           className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-xl hover:shadow-2xl transition-all"
           size="default"
         >
@@ -204,7 +235,10 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setIsMinimized(true)}
+                  onClick={() => {
+                    setIsMinimized(true);
+                    safeLocalStorage.setItem(MINIMIZED_KEY, 'true');
+                  }}
                   className="text-white hover:bg-white/20"
                 >
                   <ChevronDown className="w-4 h-4" />
@@ -213,7 +247,11 @@ export function OnboardingChecklist({ userId, isNewUser, onDismiss }: Onboarding
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={onDismiss}
+                    onClick={() => {
+                      safeLocalStorage.setItem(DISMISS_KEY, 'true');
+                      setIsDismissed(true);
+                      onDismiss();
+                    }}
                     className="text-white hover:bg-white/20"
                   >
                     ✕
