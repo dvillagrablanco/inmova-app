@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import { sendWelcomeEmail } from '@/lib/email-service';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -101,14 +102,21 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // TODO: Enviar email de confirmación
+    const emailSent = await sendWelcomeEmail(data.email, data.nombreContacto);
+    if (!emailSent) {
+      logger.warn('No se pudo enviar email de confirmación eWoorker', {
+        email: data.email,
+        companyId: company.id,
+      });
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Registro exitoso',
+      emailSent,
     }, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[eWoorker Registro Error]:', error);
 
     if (error instanceof z.ZodError) {

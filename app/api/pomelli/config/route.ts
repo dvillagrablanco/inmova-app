@@ -10,10 +10,12 @@ export const runtime = 'nodejs';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import { z } from 'zod';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
 import { validatePomelliCredentials } from '@/lib/pomelli-integration';
+import { encryptField } from '@/lib/encryption';
 
 export async function GET(request: NextRequest) {
   try {
@@ -82,7 +84,7 @@ export async function GET(request: NextRequest) {
       profiles: config.profiles,
       hasWebhook: !!config.webhookUrl,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error getting Pomelli config:', error);
     return NextResponse.json(
       { error: 'Error al obtener configuración' },
@@ -121,8 +123,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
-    const { apiKey, apiSecret, webhookUrl, enabled } = body;
+    const schema = z.object({
+      apiKey: z.string().min(1),
+      apiSecret: z.string().min(1),
+      webhookUrl: z.string().url().optional().nullable().or(z.literal('')),
+      enabled: z.boolean().optional(),
+    });
+
+    const body: unknown = await request.json();
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: parsed.error.errors },
+        { status: 400 }
+      );
+    }
+
+    const { apiKey, apiSecret, webhookUrl, enabled } = parsed.data;
 
     if (!apiKey || !apiSecret) {
       return NextResponse.json(
@@ -142,19 +159,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Crear o actualizar configuración
+    const encryptedSecret = encryptField(apiSecret);
     const config = await prisma.pomelliConfig.upsert({
       where: { companyId: user.companyId },
       create: {
         companyId: user.companyId,
         apiKey,
-        apiSecret, // TODO: Encriptar en producción
+        apiSecret: encryptedSecret,
         webhookUrl: webhookUrl || null,
         enabled: enabled !== false,
         lastSyncAt: new Date(),
       },
       update: {
         apiKey,
-        apiSecret, // TODO: Encriptar en producción
+        apiSecret: encryptedSecret,
         webhookUrl: webhookUrl || null,
         enabled: enabled !== false,
         lastSyncAt: new Date(),
@@ -172,7 +190,7 @@ export async function POST(request: NextRequest) {
         lastSyncAt: config.lastSyncAt,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error saving Pomelli config:', error);
     return NextResponse.json(
       { error: 'Error al guardar configuración' },
@@ -222,7 +240,7 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: 'Configuración eliminada correctamente',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error deleting Pomelli config:', error);
     return NextResponse.json(
       { error: 'Error al eliminar configuración' },

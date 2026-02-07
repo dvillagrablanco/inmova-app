@@ -10,9 +10,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
+import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
+import { sendEmail } from '@/lib/email-service';
+import type { Prisma } from '@/types/prisma-types';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -59,9 +61,7 @@ export async function GET(req: NextRequest) {
 
     // Buscar órdenes de trabajo - licitaciones usan estado 'pendiente' como "abierta"
     // Estados posibles: pendiente, asignada, aceptada, en_progreso, pausada, completada, cancelada, rechazada
-    const where: any = { 
-      companyId,
-    };
+    const where: Prisma.ProviderWorkOrderWhereInput = { companyId };
 
     if (estado) {
       // Mapear estados de UI a estados del enum
@@ -148,7 +148,7 @@ export async function GET(req: NextRequest) {
       data: tendersWithQuotes,
       stats,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching tenders:', error);
     return NextResponse.json({ error: 'Error al obtener licitaciones' }, { status: 500 });
   }
@@ -170,7 +170,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
     }
 
-    const body = await req.json();
+    const body: unknown = await req.json();
     const validationResult = createTenderSchema.safeParse(body);
 
     if (!validationResult.success) {
@@ -207,7 +207,13 @@ export async function POST(req: NextRequest) {
         where: { companyId },
         select: { id: true },
       });
-      providerId = anyProvider?.id || '';
+      if (!anyProvider) {
+        return NextResponse.json(
+          { error: 'Debe existir al menos un proveedor para crear licitaciones' },
+          { status: 400 }
+        );
+      }
+      providerId = anyProvider.id;
     }
 
     // Crear la licitación como una orden de trabajo en estado 'pendiente' (abierta)
@@ -240,12 +246,51 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Notificar a proveedores invitados (TODO: implementar notificaciones)
-    if (data.proveedoresInvitados.length > 0) {
-      logger.info('Providers invited to tender', { 
-        tenderId: tender.id, 
-        providers: data.proveedoresInvitados 
+    const invitedProviderIds = Array.from(
+      new Set(data.proveedoresInvitados.filter((id) => Boolean(id)))
+    );
+
+    if (invitedProviderIds.length > 0) {
+      const invitedProviders = await prisma.provider.findMany({
+        where: {
+          companyId,
+          id: { in: invitedProviderIds },
+        },
+        select: {
+          id: true,
+          email: true,
+          nombre: true,
+        },
       });
+
+      const emailResults = await Promise.allSettled(
+        invitedProviders
+          .filter((provider) => provider.email)
+          .map((provider) =>
+            sendEmail({
+              to: provider.email as string,
+              subject: `Nueva licitación: ${tender.titulo}`,
+              html: `
+                <p>Hola ${provider.nombre},</p>
+                <p>Has sido invitado a una licitación:</p>
+                <ul>
+                  <li><strong>Título:</strong> ${tender.titulo}</li>
+                  <li><strong>Descripción:</strong> ${tender.descripcion}</li>
+                  <li><strong>Fecha límite:</strong> ${tender.fechaEstimada?.toLocaleDateString() || 'No definida'}</li>
+                </ul>
+                <p>Accede al portal de proveedores para enviar tu propuesta.</p>
+              `,
+            })
+          )
+      );
+
+      const failedEmails = emailResults.filter((result) => result.status === 'rejected').length;
+      if (failedEmails > 0) {
+        logger.warn('No se pudieron enviar algunas invitaciones de licitación', {
+          tenderId: tender.id,
+          failedEmails,
+        });
+      }
     }
 
     logger.info('Tender created', { tenderId: tender.id, companyId });
@@ -255,7 +300,7 @@ export async function POST(req: NextRequest) {
       data: tender,
       message: 'Licitación creada exitosamente',
     }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating tender:', error);
     return NextResponse.json({ error: 'Error al crear licitación' }, { status: 500 });
   }

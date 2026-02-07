@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -18,6 +19,58 @@ const DEFAULT_CONFIG = {
   temperature: 0.7,
 };
 
+const CONFIG_PROVIDER = 'community_manager';
+
+const configSchema = z.object({
+  autoPost: z.boolean(),
+  postFrequency: z.enum(['daily', 'weekly', 'custom']),
+  customDaysPerWeek: z.number().int().min(1).max(7),
+  bestTimeToPost: z.string(),
+  hashtagStrategy: z.enum(['auto', 'manual', 'mixed']),
+  contentStyle: z.enum(['professional', 'casual', 'mixed']),
+  aiModel: z.string(),
+  temperature: z.number().min(0).max(1),
+});
+
+const toObjectRecord = (value: unknown): Record<string, unknown> => {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  return {};
+};
+
+const getCompanyContext = async (
+  userId: string,
+  role?: string | null,
+  companyId?: string | null
+) => {
+  if (role && companyId) {
+    return { role, companyId };
+  }
+
+  const { getPrismaClient } = await import('@/lib/db');
+  const prisma = getPrismaClient();
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true, companyId: true },
+  });
+
+  return {
+    role: role ?? user?.role ?? null,
+    companyId: companyId ?? user?.companyId ?? null,
+  };
+};
+
+const extractConfig = (settings: unknown) => {
+  const settingsObject = toObjectRecord(settings);
+  const storedConfig = settingsObject.config;
+  const parsed = configSchema.safeParse(storedConfig);
+  if (parsed.success) {
+    return parsed.data;
+  }
+  return DEFAULT_CONFIG;
+};
+
 /**
  * GET /api/admin/community-manager/config
  * Obtiene la configuración del Community Manager
@@ -25,25 +78,44 @@ const DEFAULT_CONFIG = {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
+    const sessionUser = session?.user as
+      | { id?: string; role?: string | null; companyId?: string | null }
+      | undefined;
+
+    if (!sessionUser?.id) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const userRole = (session.user as any).role;
-    if (!['super_admin'].includes(userRole)) {
+    const { role, companyId } = await getCompanyContext(
+      sessionUser.id,
+      sessionUser.role,
+      sessionUser.companyId
+    );
+
+    if (!role || !['super_admin'].includes(role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
-    // TODO: Obtener configuración de la base de datos
-    // Por ahora, retornamos la configuración por defecto
-    
+    if (!companyId) {
+      return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
+    }
+
+    const { getPrismaClient } = await import('@/lib/db');
+    const prisma = getPrismaClient();
+    const integration = await prisma.integrationConfig.findUnique({
+      where: { companyId_provider: { companyId, provider: CONFIG_PROVIDER } },
+      select: { settings: true },
+    });
+
+    const config = extractConfig(integration?.settings);
+
     return NextResponse.json({
       success: true,
-      config: DEFAULT_CONFIG,
+      config,
     });
-  } catch (error: any) {
-    logger.error('[Community Manager Config Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Community Manager Config Error]:', { message });
     return NextResponse.json(
       { error: 'Error al obtener configuración' },
       { status: 500 }
@@ -58,14 +130,26 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
+    const sessionUser = session?.user as
+      | { id?: string; role?: string | null; companyId?: string | null }
+      | undefined;
+
+    if (!sessionUser?.id) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const userRole = (session.user as any).role;
-    if (!['super_admin'].includes(userRole)) {
+    const { role, companyId } = await getCompanyContext(
+      sessionUser.id,
+      sessionUser.role,
+      sessionUser.companyId
+    );
+
+    if (!role || !['super_admin'].includes(role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    }
+
+    if (!companyId) {
+      return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
 
     const body = await request.json();
@@ -78,16 +162,50 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // TODO: Guardar configuración en base de datos
-    // Por ahora, solo validamos y respondemos éxito
-    
+    const parsed = configSchema.partial().parse(config);
+    const nextConfig = { ...DEFAULT_CONFIG, ...parsed };
+
+    const { getPrismaClient } = await import('@/lib/db');
+    const prisma = getPrismaClient();
+    const integration = await prisma.integrationConfig.findUnique({
+      where: { companyId_provider: { companyId, provider: CONFIG_PROVIDER } },
+      select: { credentials: true, settings: true },
+    });
+
+    const baseSettings = toObjectRecord(integration?.settings);
+    const nextSettings = { ...baseSettings, config: nextConfig };
+    const now = new Date();
+
+    await prisma.integrationConfig.upsert({
+      where: { companyId_provider: { companyId, provider: CONFIG_PROVIDER } },
+      create: {
+        companyId,
+        provider: CONFIG_PROVIDER,
+        name: 'Community Manager',
+        category: 'community_manager',
+        credentials: integration?.credentials ?? {},
+        settings: nextSettings,
+        enabled: true,
+        isConfigured: true,
+        createdBy: sessionUser.id,
+        lastSyncAt: now,
+      },
+      update: {
+        settings: nextSettings,
+        enabled: true,
+        isConfigured: true,
+        lastSyncAt: now,
+      },
+    });
+
     return NextResponse.json({
       success: true,
-      config: { ...DEFAULT_CONFIG, ...config },
+      config: nextConfig,
       message: 'Configuración guardada correctamente',
     });
-  } catch (error: any) {
-    logger.error('[Community Manager Update Config Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Community Manager Update Config Error]:', { message });
     return NextResponse.json(
       { error: 'Error al guardar configuración' },
       { status: 500 }

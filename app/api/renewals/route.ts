@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -24,42 +25,35 @@ export async function GET(req: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
-
-    // TODO: Implement ContractRenewal model in Prisma schema first
-    return NextResponse.json({ 
-      error: 'ContractRenewal feature not yet implemented',
-      message: 'This endpoint requires the ContractRenewal model to be added to the Prisma schema'
-    }, { status: 501 });
-
-    /* Original code - to be uncommented after ContractRenewal model is added
     const searchParams = req.nextUrl.searchParams;
-    const companyId = searchParams.get('companyId');
     const estado = searchParams.get('estado');
+    const days = parseInt(searchParams.get('days') || '90', 10);
 
-    const where: any = {};
-    if (companyId) where.companyId = companyId;
-    if (estado) where.estadoRenovacion = estado;
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() + days);
 
-    const renewals = await prisma.contractRenewal.findMany({
+    const where = {
+      companyId: session.user.companyId,
+      ...(estado ? { estado } : {}),
+      fechaFin: { lte: cutoff },
+    };
+
+    const renewals = await prisma.contract.findMany({
       where,
       include: {
-        contract: {
-          include: {
-            tenant: true,
-            unit: {
-              include: { building: true },
-            },
-          },
+        tenant: true,
+        unit: {
+          include: { building: true },
         },
       },
-      orderBy: { fechaPropuesta: 'desc' },
+      orderBy: { fechaFin: 'asc' },
     });
 
     return NextResponse.json(renewals);
-    */
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error processing renewal request';
     return NextResponse.json(
-      { error: error.message || 'Error processing renewal request' },
+      { error: message },
       { status: 500 }
     );
   }
