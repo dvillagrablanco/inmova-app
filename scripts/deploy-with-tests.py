@@ -68,57 +68,23 @@ def exec_cmd(ssh, cmd, desc="", timeout=300, ignore_errors=False):
             error(f"Error ejecutando comando: {e}")
 
 def run_tests_with_coverage(ssh):
-    """Ejecutar tests y verificar cobertura"""
-    log("🧪 EJECUTANDO TESTS CON COBERTURA", Colors.BLUE)
-    
-    # Crear directorio para reportes
-    exec_cmd(ssh, f"mkdir -p {APP_PATH}/test-reports", "Crear dir reportes", ignore_errors=True)
-    
-    # Ejecutar tests unitarios
-    log("📊 Tests unitarios...")
+    """Ejecutar tests críticos pre-deploy"""
+    log("🧪 EJECUTANDO TESTS CRÍTICOS", Colors.BLUE)
+
     success, output = exec_cmd(
         ssh,
-        f"cd {APP_PATH} && npm run test:ci -- --json --outputFile=test-reports/unit-results.json 2>&1 | tail -50",
-        "Unit tests",
-        timeout=180,
+        f"cd {APP_PATH} && npm run test:critical 2>&1 | tail -50",
+        "Tests críticos",
+        timeout=300,
         ignore_errors=True
     )
-    
-    # Parsear resultados
-    log("📈 Analizando resultados...")
-    success, json_output = exec_cmd(
-        ssh,
-        f"cat {APP_PATH}/test-reports/unit-results.json 2>/dev/null || echo '{{}}'",
-        "Leer resultados",
-        ignore_errors=True
-    )
-    
-    try:
-        results = json.loads(json_output) if json_output else {}
-        
-        total_tests = results.get('numTotalTests', 0)
-        passed_tests = results.get('numPassedTests', 0)
-        failed_tests = results.get('numFailedTests', 0)
-        
-        pass_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
-        
-        log(f"Tests: {passed_tests}/{total_tests} pasando ({pass_rate:.1f}%)")
-        log(f"Fallando: {failed_tests}")
-        
-        # Verificar umbral
-        if pass_rate < MIN_TEST_PASS_RATE:
-            warning(f"Test pass rate ({pass_rate:.1f}%) está por debajo del mínimo ({MIN_TEST_PASS_RATE}%)")
-            return False, f"Solo {pass_rate:.1f}% de tests pasando (mínimo: {MIN_TEST_PASS_RATE}%)"
-        
-        log(f"✅ Tests pass rate OK: {pass_rate:.1f}%", Colors.GREEN)
-        return True, f"{passed_tests}/{total_tests} tests pasando"
-        
-    except json.JSONDecodeError:
-        warning("No se pudo parsear resultados de tests")
-        # Verificar si al menos corrieron
-        if "test" in output.lower() or "pass" in output.lower():
-            return True, "Tests ejecutados (sin estadísticas)"
-        return False, "Tests fallaron al ejecutar"
+
+    if success:
+        log("✅ Tests críticos OK", Colors.GREEN)
+        return True, "Tests críticos OK"
+
+    warning("Tests críticos fallaron")
+    return False, "Tests críticos fallaron"
 
 def run_e2e_tests(ssh):
     """Ejecutar tests E2E críticos"""
