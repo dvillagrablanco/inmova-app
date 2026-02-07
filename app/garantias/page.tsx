@@ -605,7 +605,7 @@ export default function GarantiasPage() {
                     <div className="space-y-2">
                       <Label>Número de Póliza</Label>
                       <Input
-                        placeholder="POL-2025-XXXXX"
+                        placeholder="Número de póliza"
                         value={newWarranty.policyNumber}
                         onChange={(e) => setNewWarranty({ ...newWarranty, policyNumber: e.target.value })}
                       />

@@ -15,9 +15,12 @@ export const metadata: Metadata = {
 };
 
 // Número de teléfono de USA
-const USA_PHONE = process.env.NEXT_PUBLIC_VAPI_PHONE_NUMBER || '+1 (XXX) XXX-XXXX';
-const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+34600000000';
+const USA_PHONE = process.env.NEXT_PUBLIC_VAPI_PHONE_NUMBER || '';
+const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '';
 const EMAIL = 'soporte@inmovaapp.com';
+const hasPhone = USA_PHONE.length > 0;
+const hasWhatsapp = WHATSAPP.length > 0;
+const whatsappLink = hasWhatsapp ? `https://wa.me/${WHATSAPP.replace(/\D/g, '')}` : '';
 
 // Agentes disponibles
 const AGENTS = [
@@ -118,29 +121,49 @@ export default function AyudaPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center space-y-4">
-          <a 
-            href={`tel:${USA_PHONE}`}
-            className="block text-4xl font-bold font-mono text-primary hover:underline"
-          >
-            {USA_PHONE}
-          </a>
+          {hasPhone ? (
+            <a 
+              href={`tel:${USA_PHONE}`}
+              className="block text-4xl font-bold font-mono text-primary hover:underline"
+            >
+              {USA_PHONE}
+            </a>
+          ) : (
+            <span className="block text-2xl font-semibold text-muted-foreground">
+              Teléfono no configurado
+            </span>
+          )}
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Clock className="h-4 w-4" />
             <span>Atención 24/7 con IA | Agentes humanos L-V 9-21h</span>
           </div>
           <div className="flex justify-center gap-4">
-            <Button size="lg" asChild>
-              <a href={`tel:${USA_PHONE}`}>
+            {hasPhone ? (
+              <Button size="lg" asChild>
+                <a href={`tel:${USA_PHONE}`}>
+                  <Phone className="mr-2 h-5 w-5" />
+                  Llamar ahora
+                </a>
+              </Button>
+            ) : (
+              <Button size="lg" disabled>
                 <Phone className="mr-2 h-5 w-5" />
                 Llamar ahora
-              </a>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <a href={`https://wa.me/${WHATSAPP.replace(/\D/g, '')}`} target="_blank" rel="noopener">
+              </Button>
+            )}
+            {hasWhatsapp ? (
+              <Button size="lg" variant="outline" asChild>
+                <a href={whatsappLink} target="_blank" rel="noopener">
+                  <MessageCircle className="mr-2 h-5 w-5" />
+                  WhatsApp
+                </a>
+              </Button>
+            ) : (
+              <Button size="lg" variant="outline" disabled>
                 <MessageCircle className="mr-2 h-5 w-5" />
                 WhatsApp
-              </a>
-            </Button>
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -199,11 +222,17 @@ export default function AyudaPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" className="w-full" asChild>
-              <a href={`https://wa.me/${WHATSAPP.replace(/\D/g, '')}`} target="_blank" rel="noopener">
-                Enviar mensaje
-              </a>
-            </Button>
+            {hasWhatsapp ? (
+              <Button variant="outline" className="w-full" asChild>
+                <a href={whatsappLink} target="_blank" rel="noopener">
+                  Enviar mensaje
+                </a>
+              </Button>
+            ) : (
+              <Button variant="outline" className="w-full" disabled>
+                WhatsApp no configurado
+              </Button>
+            )}
           </CardContent>
         </Card>
 
