@@ -19,6 +19,7 @@ const customJestConfig = {
   testPathIgnorePatterns: [
     '<rootDir>/e2e/',
     '<rootDir>/__tests__/e2e/',
+    '<rootDir>/tests/',
     '<rootDir>/__tests__/unit/',
     '<rootDir>/__tests__/integration/',
     '<rootDir>/__tests__/smoke/',
