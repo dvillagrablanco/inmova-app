@@ -211,6 +211,14 @@ export async function DELETE(
       );
     }
 
+    const documents = await prisma.documentImport.findMany({
+      where: { batchId },
+      select: { s3Key: true },
+    });
+    const s3Keys = documents
+      .map((doc) => doc.s3Key)
+      .filter((key): key is string => Boolean(key));
+
     // Eliminar todos los datos relacionados
     await prisma.$transaction([
       // Eliminar datos extraídos
@@ -239,7 +247,21 @@ export async function DELETE(
       }),
     ]);
 
-    // TODO: Eliminar archivos de S3
+    if (s3Keys.length > 0) {
+      const { deleteFromS3 } = await import('@/lib/aws-s3-service');
+      const deletionResults = await Promise.allSettled(
+        s3Keys.map((key) => deleteFromS3(key))
+      );
+      const failedDeletes = deletionResults.filter(
+        (result) => result.status === 'rejected' || (result.status === 'fulfilled' && !result.value)
+      );
+      if (failedDeletes.length > 0) {
+        logger.warn('No se pudieron eliminar algunos archivos de S3', {
+          batchId,
+          failed: failedDeletes.length,
+        });
+      }
+    }
 
     logger.info('🗑️ Batch cancelado y eliminado', { batchId });
 
@@ -248,10 +270,11 @@ export async function DELETE(
       message: 'Batch cancelado y eliminado correctamente',
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('Error cancelando batch:', error);
     return NextResponse.json(
-      { error: 'Error al cancelar el batch' },
+      { error: 'Error al cancelar el batch', details: message },
       { status: 500 }
     );
   }
