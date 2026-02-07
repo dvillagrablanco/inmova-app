@@ -297,6 +297,7 @@ const CORE_MODULES = [
   'calendario',
   'chat',
   'notificaciones',
+  'seguros',
   // Administración - Siempre visible para roles admin
   'configuracion',
   'usuarios',
