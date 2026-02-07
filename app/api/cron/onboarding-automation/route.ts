@@ -28,8 +28,15 @@ export async function GET(request: NextRequest) {
   try {
     // Verificar autorización
     const authHeader = request.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET || process.env.API_SECRET_KEY;
-    
+    const cronSecret = process.env.CRON_SECRET;
+
+    if (!cronSecret) {
+      return NextResponse.json(
+        { error: 'CRON_SECRET no configurado' },
+        { status: 500 }
+      );
+    }
+
     if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -48,7 +55,11 @@ export async function GET(request: NextRequest) {
     // Verificar resultados
     const errors = results
       .filter(r => r.status === 'rejected')
-      .map((r: any) => r.reason?.message || 'Unknown error');
+      .map((r) =>
+        r.status === 'rejected'
+          ? (r.reason instanceof Error ? r.reason.message : 'Unknown error')
+          : 'Unknown error'
+      );
     
     if (errors.length > 0) {
       logger.error('[CRON_ONBOARDING] Some tasks failed:', errors);
@@ -66,13 +77,10 @@ export async function GET(request: NextRequest) {
       message: 'Onboarding automation completed',
       timestamp: new Date().toISOString()
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[CRON_ONBOARDING] Fatal error:', error);
     return NextResponse.json(
-      {
-        error: 'Internal server error',
-        message: error.message
-      },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

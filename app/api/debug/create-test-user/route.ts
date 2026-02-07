@@ -26,11 +26,22 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { secret } = await request.json();
+    const expectedSecret = process.env.DEBUG_SECRET;
+    if (!expectedSecret) {
+      return NextResponse.json(
+        { error: 'DEBUG_SECRET no configurado' },
+        { status: 500 }
+      );
+    }
 
-    // Protección con variable de entorno
-    const expectedSecret = process.env.DEBUG_SECRET || 'create-test-user-2025';
-    if (secret !== expectedSecret) {
+    const body: unknown = await request.json();
+    const providedSecret =
+      (body && typeof body === 'object' && 'secret' in body
+        ? String((body as { secret?: string }).secret)
+        : undefined) ||
+      request.headers.get('x-debug-secret');
+
+    if (!providedSecret || providedSecret !== expectedSecret) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -94,25 +105,17 @@ export async function POST(request: Request) {
       success: true,
       message: 'Usuario de prueba creado exitosamente',
       user,
-      credentials: {
-        email: 'admin@inmova.app',
-        password: 'demo123',
-      },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[CreateTestUser] Error:', error);
     return NextResponse.json(
-      {
-        error: 'Error creando usuario',
-        details: error.message,
-        stack: error.stack,
-      },
+      { error: 'Error creando usuario' },
       { status: 500 }
     );
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   // 🔒 PROTECCIÓN: Solo disponible en desarrollo
   if (process.env.NODE_ENV === 'production') {
     return NextResponse.json(
@@ -122,6 +125,22 @@ export async function GET() {
   }
 
   try {
+    const expectedSecret = process.env.DEBUG_SECRET;
+    if (!expectedSecret) {
+      return NextResponse.json(
+        { error: 'DEBUG_SECRET no configurado' },
+        { status: 500 }
+      );
+    }
+
+    const providedSecret =
+      request.headers.get('x-debug-secret') ||
+      new URL(request.url).searchParams.get('secret');
+
+    if (!providedSecret || providedSecret !== expectedSecret) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     // Usar instancia global de Prisma
     await prisma.$connect();
 
@@ -144,13 +163,10 @@ export async function GET() {
       companyCount,
       users,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    logger.error('[CreateTestUser] Error:', error);
     return NextResponse.json(
-      {
-        error: 'Error obteniendo información',
-        details: error.message,
-        stack: error.stack,
-      },
+      { error: 'Error obteniendo información' },
       { status: 500 }
     );
   }

@@ -7,11 +7,20 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'fallback-secret-key';
+const JWT_SECRET = process.env.NEXTAUTH_SECRET;
 
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
+
+    const jwtSecret = JWT_SECRET;
+    if (!jwtSecret) {
+      logger.error('NEXTAUTH_SECRET no configurado');
+      return NextResponse.json(
+        { error: 'Configuración del servidor inválida' },
+        { status: 500 }
+      );
+    }
 
     if (!email || !password) {
       return NextResponse.json(
@@ -49,7 +58,7 @@ export async function POST(request: Request) {
         email: tenant.email,
         nombre: tenant.nombreCompleto,
       },
-      JWT_SECRET,
+      jwtSecret,
       { expiresIn: '7d' }
     );
 

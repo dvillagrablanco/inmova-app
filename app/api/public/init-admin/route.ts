@@ -16,7 +16,7 @@ if (!process.env.DATABASE_URL) {
   throw new Error('[INIT-ADMIN] DATABASE_URL no configurada');
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   // 🔒 PROTECCIÓN: Solo disponible en desarrollo
   if (process.env.NODE_ENV === 'production') {
     return NextResponse.json(
@@ -26,11 +26,21 @@ export async function GET() {
   }
 
   try {
-    console.log('[InitAdmin] Iniciando creación de usuario administrador...');
+    const expectedSecret = process.env.DEBUG_SECRET;
+    if (!expectedSecret) {
+      return NextResponse.json(
+        { error: 'DEBUG_SECRET no configurado' },
+        { status: 500 }
+      );
+    }
+
+    const providedSecret = new URL(request.url).searchParams.get('secret');
+    if (!providedSecret || providedSecret !== expectedSecret) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     // Usar instancia global de Prisma
     await prisma.$connect();
-    console.log('[InitAdmin] Conectado a la base de datos');
 
     // Verificar si ya existe el usuario
     const existingUser = await prisma.user.findUnique({
@@ -38,19 +48,12 @@ export async function GET() {
     });
 
     if (existingUser) {
-      console.log('[InitAdmin] Usuario ya existe');
       return NextResponse.json({
         success: true,
         message: 'Usuario administrador ya existe',
-        credentials: {
-          email: 'admin@inmova.app',
-          password: 'demo123',
-        },
         instructions: 'Puedes hacer login en /login',
       });
     }
-
-    console.log('[InitAdmin] Usuario no existe, creando...');
 
     // 1. Verificar/Crear empresa
     let company = await prisma.company.findFirst({
@@ -58,7 +61,6 @@ export async function GET() {
     });
 
     if (!company) {
-      console.log('[InitAdmin] Creando empresa demo...');
       company = await prisma.company.create({
         data: {
           nombre: 'Inmova Demo',
@@ -67,11 +69,9 @@ export async function GET() {
           activo: true,
         },
       });
-      console.log(`[InitAdmin] Empresa creada: ${company.id}`);
     }
 
     // 2. Crear usuario administrador
-    console.log('[InitAdmin] Creando usuario administrador...');
     const hashedPassword = await bcrypt.hash('demo123', 10);
 
     const user = await prisma.user.create({
@@ -92,8 +92,6 @@ export async function GET() {
       },
     });
 
-    console.log(`[InitAdmin] Usuario creado exitosamente: ${user.email}`);
-
     return NextResponse.json({
       success: true,
       message: '✅ Usuario administrador creado exitosamente',
@@ -102,21 +100,13 @@ export async function GET() {
         name: user.name,
         role: user.role,
       },
-      credentials: {
-        email: 'admin@inmova.app',
-        password: 'demo123',
-      },
       instructions: 'Ve a https://inmovaapp.com/login e ingresa las credenciales de arriba',
       nextStep: 'Este endpoint se auto-deshabilitará en el próximo deployment',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[InitAdmin] Error:', error);
     return NextResponse.json(
-      {
-        error: 'Error creando usuario administrador',
-        details: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
-      },
+      { error: 'Error creando usuario administrador' },
       { status: 500 }
     );
   }

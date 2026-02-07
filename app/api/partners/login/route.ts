@@ -7,11 +7,20 @@ import jwt from 'jsonwebtoken';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key-partners';
+const JWT_SECRET = process.env.NEXTAUTH_SECRET;
 // POST /api/partners/login - Login de Partner
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
+
+    const jwtSecret = JWT_SECRET;
+    if (!jwtSecret) {
+      logger.error('NEXTAUTH_SECRET no configurado');
+      return NextResponse.json(
+        { error: 'Configuración del servidor inválida' },
+        { status: 500 }
+      );
+    }
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email y contraseña requeridos' },
@@ -51,7 +60,7 @@ export async function POST(request: NextRequest) {
         nombre: partner.nombre,
         tipo: partner.tipo,
       },
-      JWT_SECRET,
+      jwtSecret,
       { expiresIn: '7d' }
     );
     // No devolver el password
@@ -61,10 +70,10 @@ export async function POST(request: NextRequest) {
       token,
       partner: partnerWithoutPassword,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error en login de Partner:', error);
     return NextResponse.json(
-      { error: 'Error interno del servidor', details: error?.message },
+      { error: 'Error interno del servidor' },
       { status: 500 }
     );
   }

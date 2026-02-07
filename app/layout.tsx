@@ -60,6 +60,8 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const crispWebsiteId = process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID;
+
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
@@ -144,19 +146,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         */}
 
         {/* Crisp Chat - Live Support */}
-        <Script id="crisp-chat" strategy="afterInteractive">
-          {`
-            window.$crisp=[];
-            window.CRISP_WEBSITE_ID="1f115549-e9ef-49e5-8fd7-174e6d896a7e";
-            (function(){
-              var d=document;
-              var s=d.createElement("script");
-              s.src="https://client.crisp.chat/l.js";
-              s.async=1;
-              d.getElementsByTagName("head")[0].appendChild(s);
-            })();
-          `}
-        </Script>
+        {crispWebsiteId && (
+          <Script id="crisp-chat" strategy="afterInteractive">
+            {`
+              window.$crisp=[];
+              window.CRISP_WEBSITE_ID="${crispWebsiteId}";
+              (function(){
+                var d=document;
+                var s=d.createElement("script");
+                s.src="https://client.crisp.chat/l.js";
+                s.async=1;
+                d.getElementsByTagName("head")[0].appendChild(s);
+              })();
+            `}
+          </Script>
+        )}
       </head>
       <body className={inter.className}>
         <Providers>

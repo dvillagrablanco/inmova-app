@@ -8,7 +8,7 @@ import { sendEmail } from '@/lib/email-service';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key-partners';
+const JWT_SECRET = process.env.NEXTAUTH_SECRET;
 // Función para verificar el token
 type PartnerTokenPayload = {
   partnerId: string;
@@ -16,6 +16,9 @@ type PartnerTokenPayload = {
 };
 
 function verifyToken(request: NextRequest) {
+  if (!JWT_SECRET) {
+    return null;
+  }
   const authHeader = request.headers.get('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return null;
@@ -31,6 +34,14 @@ function verifyToken(request: NextRequest) {
 // POST /api/partners/invitations - Crear invitación
 export async function POST(request: NextRequest) {
   try {
+    if (!JWT_SECRET) {
+      logger.error('NEXTAUTH_SECRET no configurado');
+      return NextResponse.json(
+        { error: 'Configuración del servidor inválida' },
+        { status: 500 }
+      );
+    }
+
     // Verificar autenticación
     const decoded = verifyToken(request);
     if (!decoded || !decoded.partnerId) {
@@ -130,12 +141,21 @@ export async function POST(request: NextRequest) {
 // GET /api/partners/invitations - Listar invitaciones del Partner
 export async function GET(request: NextRequest) {
   try {
+    const jwtSecret = JWT_SECRET;
+    if (!jwtSecret) {
+      logger.error('NEXTAUTH_SECRET no configurado');
+      return NextResponse.json(
+        { error: 'Configuración del servidor inválida' },
+        { status: 500 }
+      );
+    }
+
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, JWT_SECRET) as PartnerTokenPayload;
+    const decoded = jwt.verify(token, jwtSecret) as PartnerTokenPayload;
     if (!decoded?.partnerId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }

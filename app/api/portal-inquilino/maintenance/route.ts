@@ -6,9 +6,12 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'fallback-secret-key';
+const JWT_SECRET = process.env.NEXTAUTH_SECRET;
 
 function verifyToken(request: Request) {
+  if (!JWT_SECRET) {
+    return null;
+  }
   const authHeader = request.headers.get('authorization');
   if (!authHeader?.startsWith('Bearer ')) {
     return null;
@@ -24,6 +27,14 @@ function verifyToken(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    if (!JWT_SECRET) {
+      logger.error('NEXTAUTH_SECRET no configurado');
+      return NextResponse.json(
+        { error: 'Configuración del servidor inválida' },
+        { status: 500 }
+      );
+    }
+
     const payload = verifyToken(request);
     if (!payload) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
