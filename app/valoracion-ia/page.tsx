@@ -75,22 +75,13 @@ import logger from '@/lib/logger';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 // Tipos para la valoración
-interface Property {
+interface Building {
   id: string;
+  nombre?: string;
   direccion?: string;
   ciudad?: string;
   codigoPostal?: string;
-  superficie?: number;
-  habitaciones?: number;
-  banos?: number;
-  tipo?: string;
-  estado?: string;
-  building?: {
-    id: string;
-    nombre: string;
-    direccion?: string;
-    ciudad?: string;
-  };
+  numeroUnidades?: number;
 }
 
 interface Unit {
@@ -153,9 +144,9 @@ export default function ValoracionIAPage() {
   const [loading, setLoading] = useState(true);
   const [valorando, setValorando] = useState(false);
   const [units, setUnits] = useState<Unit[]>([]);
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [buildings, setBuildings] = useState<Building[]>([]);
   const [selectedAsset, setSelectedAsset] = useState<string>('manual');
-  const [assetType, setAssetType] = useState<'unit' | 'property'>('unit');
+  const [assetType, setAssetType] = useState<'unit' | 'building'>('unit');
   const [resultado, setResultado] = useState<ValoracionResult | null>(null);
   
   // Datos del formulario
@@ -183,9 +174,9 @@ export default function ValoracionIAPage() {
 
   const fetchAssets = async () => {
     try {
-      const [unitsRes, propsRes] = await Promise.all([
+      const [unitsRes, buildingsRes] = await Promise.all([
         fetch('/api/units'),
-        fetch('/api/properties'),
+        fetch('/api/buildings'),
       ]);
       
       if (unitsRes.ok) {
@@ -193,9 +184,14 @@ export default function ValoracionIAPage() {
         setUnits(Array.isArray(unitsData) ? unitsData : []);
       }
       
-      if (propsRes.ok) {
-        const propsData = await propsRes.json();
-        setProperties(Array.isArray(propsData) ? propsData : []);
+      if (buildingsRes.ok) {
+        const buildingsData = await buildingsRes.json();
+        const normalizedBuildings = Array.isArray(buildingsData)
+          ? buildingsData
+          : Array.isArray(buildingsData?.data)
+            ? buildingsData.data
+            : [];
+        setBuildings(normalizedBuildings);
       }
     } catch (error) {
       logger.error('Error fetching assets:', error);
@@ -222,16 +218,6 @@ export default function ValoracionIAPage() {
           superficie: unit.superficie?.toString() || '',
           habitaciones: unit.habitaciones?.toString() || '',
           banos: unit.banos?.toString() || '',
-        }));
-      }
-    } else {
-      const prop = properties.find(p => p.id === assetId);
-      if (prop) {
-        setFormData(prev => ({
-          ...prev,
-          superficie: prop.superficie?.toString() || '',
-          habitaciones: prop.habitaciones?.toString() || '',
-          banos: prop.banos?.toString() || '',
         }));
       }
     }
@@ -266,10 +252,10 @@ export default function ValoracionIAPage() {
         const unit = units.find(u => u.id === selectedAsset);
         direccion = unit?.building?.direccion || '';
         ciudad = unit?.building?.ciudad || 'Madrid';
-      } else if (selectedAsset && selectedAsset !== 'manual' && assetType === 'property') {
-        const prop = properties.find(p => p.id === selectedAsset);
-        direccion = prop?.direccion || '';
-        ciudad = prop?.ciudad || 'Madrid';
+      } else if (selectedAsset && selectedAsset !== 'manual' && assetType === 'building') {
+        const building = buildings.find(b => b.id === selectedAsset);
+        direccion = building?.direccion || '';
+        ciudad = building?.ciudad || 'Madrid';
       }
 
       const response = await fetch('/api/ai/valuate', {
@@ -286,7 +272,6 @@ export default function ValoracionIAPage() {
           ciudad,
           codigoPostal: '',
           unitId: assetType === 'unit' && selectedAsset !== 'manual' ? selectedAsset : undefined,
-          propertyId: assetType === 'property' && selectedAsset !== 'manual' ? selectedAsset : undefined,
         }),
       });
 
@@ -420,9 +405,9 @@ export default function ValoracionIAPage() {
                   <Label>Tipo de Activo</Label>
                   <Select 
                     value={assetType} 
-                    onValueChange={(v: 'unit' | 'property') => {
+                    onValueChange={(v: 'unit' | 'building') => {
                       setAssetType(v);
-                      setSelectedAsset('');
+                      setSelectedAsset('manual');
                     }}
                   >
                     <SelectTrigger>
@@ -430,7 +415,7 @@ export default function ValoracionIAPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="unit">Unidades / Viviendas</SelectItem>
-                      <SelectItem value="property">Propiedades / Edificios</SelectItem>
+                      <SelectItem value="building">Edificios</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -452,10 +437,12 @@ export default function ValoracionIAPage() {
                           </SelectItem>
                         ))
                       ) : (
-                        properties.map((prop) => (
-                          <SelectItem key={prop.id} value={prop.id}>
-                            {prop.direccion || 'Sin dirección'}
-                            {prop.superficie && ` (${prop.superficie}m²)`}
+                        buildings.map((building) => (
+                          <SelectItem key={building.id} value={building.id}>
+                            {building.nombre || building.direccion || 'Sin dirección'}
+                            {building.numeroUnidades
+                              ? ` (${building.numeroUnidades} unidades)`
+                              : ''}
                           </SelectItem>
                         ))
                       )}
