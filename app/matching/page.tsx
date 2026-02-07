@@ -122,6 +122,25 @@ interface PropertyMatch {
   };
 }
 
+type MatchStatus = 'SUGGESTED' | 'VIEWED' | 'CONTACTED' | 'RENTED' | 'REJECTED';
+
+interface UnitSummary {
+  id: string;
+  numero: string;
+  superficie: number;
+  habitaciones: number;
+  banos: number;
+  rentaMensual: number;
+  amueblado: boolean;
+  imagenes?: string[];
+  building?: {
+    id: string;
+    nombre: string;
+    direccion: string;
+    ciudad?: string;
+  };
+}
+
 interface MatchResult {
   tenantId: string;
   tenantName: string;
@@ -240,16 +259,19 @@ export default function MatchingPage() {
         });
         toast.info('No se encontraron propiedades compatibles');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al buscar matches';
       console.error('Error searching matches:', error);
-      toast.error(error.message || 'Error al buscar matches');
+      toast.error(message);
     } finally {
       setSearching(false);
     }
   };
 
   // Enriquecer matches con datos de unidades
-  const enrichMatchesWithUnitData = async (matches: any[]): Promise<PropertyMatch[]> => {
+  const enrichMatchesWithUnitData = async (
+    matches: PropertyMatch[]
+  ): Promise<PropertyMatch[]> => {
     try {
       const unitIds = matches.map(m => m.unitId);
       if (unitIds.length === 0) return [];
@@ -261,12 +283,12 @@ export default function MatchingPage() {
         body: JSON.stringify({ ids: unitIds }),
       });
 
-      let unitsMap: Record<string, any> = {};
+      let unitsMap: Record<string, UnitSummary> = {};
       
       if (response.ok) {
         const result = await response.json();
-        const units = result.data || result || [];
-        unitsMap = units.reduce((acc: any, unit: any) => {
+        const units = (result.data || result || []) as UnitSummary[];
+        unitsMap = units.reduce<Record<string, UnitSummary>>((acc, unit) => {
           acc[unit.id] = unit;
           return acc;
         }, {});
@@ -274,7 +296,7 @@ export default function MatchingPage() {
 
       return matches.map(match => ({
         ...match,
-        unit: unitsMap[match.unitId] || null,
+        unit: unitsMap[match.unitId],
       }));
     } catch (error) {
       console.error('Error enriching matches:', error);
@@ -296,12 +318,32 @@ export default function MatchingPage() {
   };
 
   // Actualizar estado de match
-  const handleUpdateMatchStatus = async (matchId: string, status: string) => {
+  const handleUpdateMatchStatus = async (unitId: string, status: MatchStatus) => {
     try {
-      // TODO: Implementar actualización de estado en API
+      if (!selectedTenant) {
+        toast.error('Selecciona un inquilino primero');
+        return;
+      }
+
+      const response = await fetch('/api/matching', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tenantId: selectedTenant.id,
+          unitId,
+          status,
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result?.error || 'Error al actualizar estado');
+      }
+
       toast.success(`Estado actualizado a: ${status}`);
-    } catch (error) {
-      toast.error('Error al actualizar estado');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al actualizar estado';
+      toast.error(message);
     }
   };
 
