@@ -1,7 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
+import { getPrismaClient } from '@/lib/db';
+import logger from '@/lib/logger';
+
+interface ContractExpiryDetail {
+  id: string;
+  inquilino: string;
+  propiedad: string;
+  vence: Date;
+  diasRestantes: number;
+}
+
+interface OperationalReport {
+  propiedades: number;
+  unidades: number;
+  inquilinosActivos: number;
+  contratosActivos: number;
+  contratosPorVencer: number;
+  incidenciasAbiertas: number;
+  incidenciasResueltas: number;
+  tiempoMedioResolucion: string;
+  ocupacionMedia: number;
+  detalleContratosPorVencer: ContractExpiryDetail[];
+}
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : 'Error desconocido';
+}
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -10,101 +36,151 @@ export const runtime = 'nodejs';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    let operationalData: any = {};
+    const prisma = getPrismaClient();
+    const companyId = session.user.companyId;
 
-    try {
-      // Obtener datos reales
-      const [properties, units, tenants, contracts] = await Promise.all([
-        prisma.property.count({ where: { companyId: session.user.companyId } }),
-        prisma.unit.count({ where: { property: { companyId: session.user.companyId } } }),
-        prisma.tenant.count({ where: { companyId: session.user.companyId, status: 'active' } }),
-        prisma.contract.findMany({
-          where: {
-            companyId: session.user.companyId,
-            status: 'active',
+    const now = new Date();
+    const in90Days = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    const [
+      propiedades,
+      unidades,
+      unidadesOcupadas,
+      contratosActivos,
+      contratosPorVencer,
+      tenantsActivosRaw,
+      incidenciasAbiertas,
+      incidenciasResueltas,
+      incidenciasCompletadas,
+    ] = await Promise.all([
+      prisma.building.count({
+        where: { companyId, isDemo: false },
+      }),
+      prisma.unit.count({
+        where: { building: { companyId, isDemo: false }, isDemo: false },
+      }),
+      prisma.unit.count({
+        where: { building: { companyId, isDemo: false }, isDemo: false, estado: 'ocupada' },
+      }),
+      prisma.contract.count({
+        where: {
+          estado: 'activo',
+          isDemo: false,
+          unit: { building: { companyId, isDemo: false }, isDemo: false },
+        },
+      }),
+      prisma.contract.findMany({
+        where: {
+          estado: 'activo',
+          isDemo: false,
+          fechaFin: { gte: now, lte: in90Days },
+          unit: { building: { companyId, isDemo: false }, isDemo: false },
+        },
+        select: {
+          id: true,
+          fechaFin: true,
+          tenant: { select: { nombreCompleto: true } },
+          unit: {
+            select: {
+              numero: true,
+              building: { select: { nombre: true, direccion: true } },
+            },
           },
-          select: {
-            id: true,
-            endDate: true,
-            tenant: {
-              select: {
-                firstName: true,
-                lastName: true,
-              },
-            },
-            property: {
-              select: {
-                name: true,
-                address: true,
-              },
-            },
-            unit: {
-              select: {
-                unitNumber: true,
-              },
-            },
-          },
-        }),
-      ]);
+        },
+        orderBy: { fechaFin: 'asc' },
+      }),
+      prisma.contract.findMany({
+        where: {
+          estado: 'activo',
+          isDemo: false,
+          unit: { building: { companyId, isDemo: false }, isDemo: false },
+        },
+        select: { tenantId: true },
+        distinct: ['tenantId'],
+      }),
+      prisma.maintenanceRequest.count({
+        where: {
+          isDemo: false,
+          estado: { in: ['pendiente', 'en_progreso', 'programado'] },
+          unit: { building: { companyId, isDemo: false }, isDemo: false },
+        },
+      }),
+      prisma.maintenanceRequest.count({
+        where: {
+          isDemo: false,
+          estado: 'completado',
+          fechaCompletada: { gte: startOfYear },
+          unit: { building: { companyId, isDemo: false }, isDemo: false },
+        },
+      }),
+      prisma.maintenanceRequest.findMany({
+        where: {
+          isDemo: false,
+          estado: 'completado',
+          fechaCompletada: { gte: startOfYear },
+          unit: { building: { companyId, isDemo: false }, isDemo: false },
+        },
+        select: {
+          fechaSolicitud: true,
+          fechaCompletada: true,
+        },
+      }),
+    ]);
 
-      // Calcular contratos por vencer (próximos 90 días)
-      const now = new Date();
-      const in90Days = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
-      const contratosPorVencer = contracts.filter(c => {
-        const endDate = new Date(c.endDate);
-        return endDate >= now && endDate <= in90Days;
-      });
+    const detalleContratosPorVencer: ContractExpiryDetail[] = contratosPorVencer.map((contract) => {
+      const fechaFin = contract.fechaFin;
+      const diasRestantes = Math.ceil((fechaFin.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+      const buildingLabel = contract.unit?.building?.nombre || contract.unit?.building?.direccion || 'N/A';
+      const unidadLabel = contract.unit?.numero ? ` ${contract.unit.numero}` : '';
 
-      operationalData = {
-        propiedades: properties || 12,
-        unidades: units || 48,
-        inquilinosActivos: tenants || 42,
-        contratosActivos: contracts.length || 42,
-        contratosPorVencer: contratosPorVencer.length || 5,
-        incidenciasAbiertas: 8,
-        incidenciasResueltas: 156,
-        tiempoMedioResolucion: '2.3 días',
-        ocupacionMedia: units > 0 ? Math.round((tenants / units) * 100) : 87.5,
-        detalleContratosPorVencer: contratosPorVencer.map(c => ({
-          id: c.id,
-          inquilino: c.tenant ? `${c.tenant.firstName} ${c.tenant.lastName}` : 'N/A',
-          propiedad: `${c.property?.name || c.property?.address || 'N/A'} ${c.unit?.unitNumber || ''}`,
-          vence: c.endDate,
-          diasRestantes: Math.ceil((new Date(c.endDate).getTime() - now.getTime()) / (24 * 60 * 60 * 1000)),
-        })),
+      return {
+        id: contract.id,
+        inquilino: contract.tenant?.nombreCompleto || 'N/A',
+        propiedad: `${buildingLabel}${unidadLabel}`,
+        vence: fechaFin,
+        diasRestantes,
       };
-    } catch (dbError) {
-      console.warn('[API Reportes Operacionales] Error BD, usando datos mock:', dbError);
-      operationalData = {
-        propiedades: 12,
-        unidades: 48,
-        inquilinosActivos: 42,
-        contratosActivos: 42,
-        contratosPorVencer: 5,
-        incidenciasAbiertas: 8,
-        incidenciasResueltas: 156,
-        tiempoMedioResolucion: '2.3 días',
-        ocupacionMedia: 87.5,
-        detalleContratosPorVencer: [
-          { inquilino: 'María García', propiedad: 'Edificio Centro 3A', vence: '2025-02-15', diasRestantes: 23 },
-          { inquilino: 'Juan Martínez', propiedad: 'Residencial Playa 2B', vence: '2025-02-28', diasRestantes: 36 },
-          { inquilino: 'Ana López', propiedad: 'Apartamentos Norte 1C', vence: '2025-03-10', diasRestantes: 46 },
-        ],
-      };
-    }
+    });
+
+    const totalResolucionDias = incidenciasCompletadas.reduce((sum, incidencia) => {
+      if (!incidencia.fechaCompletada) return sum;
+      const diffMs = incidencia.fechaCompletada.getTime() - incidencia.fechaSolicitud.getTime();
+      return sum + diffMs / (24 * 60 * 60 * 1000);
+    }, 0);
+    const tiempoMedioResolucion =
+      incidenciasCompletadas.length > 0
+        ? `${(totalResolucionDias / incidenciasCompletadas.length).toFixed(1)} días`
+        : '0 días';
+
+    const inquilinosActivos = tenantsActivosRaw.length;
+    const ocupacionMedia = unidades > 0 ? Math.round((unidadesOcupadas / unidades) * 1000) / 10 : 0;
+
+    const operationalData: OperationalReport = {
+      propiedades,
+      unidades,
+      inquilinosActivos,
+      contratosActivos,
+      contratosPorVencer: detalleContratosPorVencer.length,
+      incidenciasAbiertas,
+      incidenciasResueltas,
+      tiempoMedioResolucion,
+      ocupacionMedia,
+      detalleContratosPorVencer,
+    };
 
     return NextResponse.json({
       success: true,
       data: operationalData,
     });
-  } catch (error: any) {
-    console.error('[API Reportes Operacionales] Error:', error);
+  } catch (error: unknown) {
+    logger.error('[API Reportes Operacionales] Error:', error);
     return NextResponse.json(
-      { error: 'Error al obtener reporte operacional', details: error.message },
+      { error: 'Error al obtener reporte operacional', details: getErrorMessage(error) },
       { status: 500 }
     );
   }
