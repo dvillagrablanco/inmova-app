@@ -3,9 +3,42 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const CREATE_ALLOWED_ROLES = new Set(['administrador', 'gestor', 'super_admin']);
+
+const createCompanySchema = z.object({
+  nombre: z.string().min(2).optional(),
+  cif: z.string().optional().nullable(),
+  email: z.string().email().optional().nullable(),
+  telefono: z.string().optional().nullable(),
+  ciudad: z.string().optional().nullable(),
+  parentCompanyId: z.string().optional().nullable(),
+  tipo: z.enum(['empresa', 'holding', 'personal']).default('empresa'),
+});
+
+async function userHasCompanyAccess(userId: string, companyId: string) {
+  const access = await prisma.userCompanyAccess.findUnique({
+    where: {
+      userId_companyId: {
+        userId,
+        companyId,
+      },
+    },
+  });
+
+  if (access?.activo) return true;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { companyId: true },
+  });
+
+  return user?.companyId === companyId;
+}
 
 /**
  * GET /api/user/companies
@@ -34,6 +67,14 @@ export async function GET(request: NextRequest) {
             estadoCliente: true,
             activo: true,
             dominioPersonalizado: true,
+            tags: true,
+            parentCompanyId: true,
+            parentCompany: {
+              select: { id: true, nombre: true },
+            },
+            _count: {
+              select: { childCompanies: true },
+            },
           },
         },
       },
@@ -54,6 +95,14 @@ export async function GET(request: NextRequest) {
             estadoCliente: true,
             activo: true,
             dominioPersonalizado: true,
+            tags: true,
+            parentCompanyId: true,
+            parentCompany: {
+              select: { id: true, nombre: true },
+            },
+            _count: {
+              select: { childCompanies: true },
+            },
           },
         },
       },
@@ -90,6 +139,155 @@ export async function GET(request: NextRequest) {
     logger.error('Error fetching user companies:', error);
     return NextResponse.json(
       { error: 'Error al obtener las empresas' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * POST /api/user/companies
+ * Crea una nueva empresa para el usuario actual
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    if (!CREATE_ALLOWED_ROLES.has(session.user.role)) {
+      return NextResponse.json(
+        { error: 'No tienes permisos para crear empresas' },
+        { status: 403 }
+      );
+    }
+
+    const body = await request.json();
+    const parsed = createCompanySchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: parsed.error.errors },
+        { status: 400 }
+      );
+    }
+
+    const {
+      nombre,
+      cif,
+      email,
+      telefono,
+      ciudad,
+      parentCompanyId,
+      tipo,
+    } = parsed.data;
+
+    const displayName =
+      nombre ||
+      (tipo === 'personal'
+        ? `Personal - ${session.user.name || session.user.email || 'Usuario'}`
+        : undefined);
+
+    if (!displayName) {
+      return NextResponse.json(
+        { error: 'El nombre de la empresa es requerido' },
+        { status: 400 }
+      );
+    }
+
+    if (parentCompanyId && parentCompanyId === 'null') {
+      return NextResponse.json(
+        { error: 'Holding inválida' },
+        { status: 400 }
+      );
+    }
+
+    if (parentCompanyId) {
+      const parentExists = await prisma.company.findUnique({
+        where: { id: parentCompanyId },
+        select: { id: true },
+      });
+
+      if (!parentExists) {
+        return NextResponse.json(
+          { error: 'La holding seleccionada no existe' },
+          { status: 404 }
+        );
+      }
+
+      if (session.user.role !== 'super_admin') {
+        const hasParentAccess = await userHasCompanyAccess(
+          session.user.id,
+          parentCompanyId
+        );
+        if (!hasParentAccess) {
+          return NextResponse.json(
+            { error: 'No tienes acceso a la holding seleccionada' },
+            { status: 403 }
+          );
+        }
+      }
+    }
+
+    const tags = new Set<string>();
+    if (tipo === 'personal') tags.add('personal');
+    if (tipo === 'holding') tags.add('holding');
+
+    const company = await prisma.company.create({
+      data: {
+        nombre: displayName,
+        cif: cif || null,
+        email: email || null,
+        telefono: telefono || null,
+        ciudad: ciudad || null,
+        estadoCliente: 'activo',
+        tags: Array.from(tags),
+        parentCompanyId: tipo === 'holding' ? null : parentCompanyId || null,
+      },
+      select: {
+        id: true,
+        nombre: true,
+        logoUrl: true,
+        estadoCliente: true,
+        activo: true,
+        dominioPersonalizado: true,
+        tags: true,
+        parentCompanyId: true,
+        parentCompany: {
+          select: { id: true, nombre: true },
+        },
+        _count: {
+          select: { childCompanies: true },
+        },
+      },
+    });
+
+    await prisma.userCompanyAccess.upsert({
+      where: {
+        userId_companyId: {
+          userId: session.user.id,
+          companyId: company.id,
+        },
+      },
+      create: {
+        userId: session.user.id,
+        companyId: company.id,
+        roleInCompany: session.user.role,
+        grantedBy: session.user.id,
+        activo: true,
+      },
+      update: {
+        activo: true,
+        roleInCompany: session.user.role,
+      },
+    });
+
+    return NextResponse.json({ success: true, company }, { status: 201 });
+  } catch (error) {
+    logger.error('Error creating user company:', error);
+    return NextResponse.json(
+      { error: 'Error al crear la empresa' },
       { status: 500 }
     );
   }

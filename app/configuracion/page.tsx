@@ -88,6 +88,13 @@ const configSections: ConfigSection[] = [
     href: '/empresa/configuracion',
   },
   {
+    id: 'empresas-holding',
+    title: 'Empresas y Holding',
+    description: 'Gestiona empresas del grupo y consolidación',
+    icon: <Building2 className="h-5 w-5" />,
+    href: '/configuracion/empresas',
+  },
+  {
     id: 'apariencia',
     title: 'Apariencia',
     description: 'Tema y personalización visual',
