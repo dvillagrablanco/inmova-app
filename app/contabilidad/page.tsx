@@ -26,6 +26,14 @@ import { toast } from 'sonner';
 import { Line, Bar, Pie } from 'react-chartjs-2';
 import logger, { logError } from '@/lib/logger';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
@@ -277,8 +285,36 @@ export default function ContabilidadPage() {
   };
 
   const formatPercentage = (value: number) => {
-    return `${value.toFixed(2)}%`;
+    const normalized = Math.abs(value) <= 1 ? value * 100 : value;
+    return `${normalized.toFixed(2)}%`;
   };
+
+  const formatCategoryLabel = (value: string) => {
+    return value
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
+  const ingresosEntries = Object.entries(profitLossData?.ingresos?.categorias || {}).filter(
+    ([, total]) => total !== 0
+  );
+  const gastosEntries = Object.entries(profitLossData?.gastos?.categorias || {}).filter(
+    ([, total]) => total !== 0
+  );
+  const analyticsSummary = analyticsData?.resumen;
+  const dailyRows =
+    analyticsData?.serieDiaria?.labels?.map((label: string, index: number) => ({
+      label,
+      ingresos: analyticsData?.serieDiaria?.ingresos?.[index] || 0,
+      gastos: analyticsData?.serieDiaria?.gastos?.[index] || 0,
+    })) || [];
+  const recentDailyRows = dailyRows.slice(-7);
+  const taxIngresosEntries = Object.entries(taxData?.detalleIngresos || {}).filter(
+    ([, total]) => total !== 0
+  );
+  const taxGastosEntries = Object.entries(taxData?.detalleGastos || {}).filter(
+    ([, total]) => total !== 0
+  );
 
   const handleSyncZucchetti = async () => {
     try {
@@ -1177,25 +1213,379 @@ export default function ContabilidadPage() {
 
         {/* Cuenta de Pérdidas y Ganancias */}
         <TabsContent value="pyg" className="space-y-4">
-          <p className="text-muted-foreground">
-            Aquí se mostrará la cuenta de pérdidas y ganancias
-          </p>
+          <Card>
+            <CardHeader>
+              <CardTitle>Cuenta de Pérdidas y Ganancias</CardTitle>
+              <CardDescription>Período {periodo}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {!profitLossData ? (
+                <p className="text-sm text-muted-foreground">
+                  No hay movimientos contables para este período.
+                </p>
+              ) : (
+                <>
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold">Ingresos por categoría</p>
+                      {ingresosEntries.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">Sin ingresos registrados.</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {ingresosEntries.map(([categoria, total]) => (
+                            <div
+                              key={categoria}
+                              className="flex items-center justify-between text-sm"
+                            >
+                              <span className="text-muted-foreground">
+                                {formatCategoryLabel(categoria)}
+                              </span>
+                              <span className="font-medium">{formatCurrency(Number(total))}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold">Gastos por categoría</p>
+                      {gastosEntries.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">Sin gastos registrados.</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {gastosEntries.map(([categoria, total]) => (
+                            <div
+                              key={categoria}
+                              className="flex items-center justify-between text-sm"
+                            >
+                              <span className="text-muted-foreground">
+                                {formatCategoryLabel(categoria)}
+                              </span>
+                              <span className="font-medium">{formatCurrency(Number(total))}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="rounded-lg border p-4">
+                      <p className="text-sm text-muted-foreground">Ingresos Totales</p>
+                      <p className="text-xl font-semibold">
+                        {formatCurrency(profitLossData?.ingresos?.total || 0)}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border p-4">
+                      <p className="text-sm text-muted-foreground">Gastos Totales</p>
+                      <p className="text-xl font-semibold">
+                        {formatCurrency(profitLossData?.gastos?.total || 0)}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border p-4">
+                      <p className="text-sm text-muted-foreground">Beneficio Neto</p>
+                      <p className="text-xl font-semibold">
+                        {formatCurrency(profitLossData?.beneficioNeto || 0)}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="analitica" className="space-y-4">
-          <p className="text-muted-foreground">Aquí se mostrará la contabilidad analítica</p>
+          <Card>
+            <CardHeader>
+              <CardTitle>Resumen Analítico</CardTitle>
+              <CardDescription>Movimientos del período seleccionado</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!analyticsSummary ? (
+                <p className="text-sm text-muted-foreground">
+                  Sin movimientos contables para este período.
+                </p>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-4">
+                  <div className="rounded-lg border p-4">
+                    <p className="text-sm text-muted-foreground">Ingresos</p>
+                    <p className="text-lg font-semibold">
+                      {formatCurrency(analyticsSummary.ingresos || 0)}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border p-4">
+                    <p className="text-sm text-muted-foreground">Gastos</p>
+                    <p className="text-lg font-semibold">
+                      {formatCurrency(analyticsSummary.gastos || 0)}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border p-4">
+                    <p className="text-sm text-muted-foreground">Flujo Neto</p>
+                    <p className="text-lg font-semibold">
+                      {formatCurrency(analyticsSummary.flujoNeto || 0)}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border p-4">
+                    <p className="text-sm text-muted-foreground">Movimientos</p>
+                    <p className="text-lg font-semibold">
+                      {analyticsSummary.totalMovimientos || 0}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Movimientos Recientes</CardTitle>
+              <CardDescription>Últimos movimientos cargados</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {analyticsData?.movimientos?.length ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Fecha</TableHead>
+                      <TableHead>Concepto</TableHead>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead>Categoría</TableHead>
+                      <TableHead className="text-right">Importe</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {analyticsData.movimientos.map((movimiento: any) => (
+                      <TableRow key={movimiento.id}>
+                        <TableCell>
+                          {format(new Date(movimiento.fecha), 'dd/MM/yyyy')}
+                        </TableCell>
+                        <TableCell>{movimiento.concepto}</TableCell>
+                        <TableCell>
+                          <Badge variant={movimiento.tipo === 'ingreso' ? 'default' : 'secondary'}>
+                            {movimiento.tipo === 'ingreso' ? 'Ingreso' : 'Gasto'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{formatCategoryLabel(movimiento.categoria)}</TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(Number(movimiento.monto) || 0)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No hay movimientos recientes para mostrar.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Tendencia diaria (últimos 7 días)</CardTitle>
+              <CardDescription>Ingresos y gastos por día</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {recentDailyRows.length ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Día</TableHead>
+                      <TableHead>Ingresos</TableHead>
+                      <TableHead>Gastos</TableHead>
+                      <TableHead className="text-right">Flujo Neto</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recentDailyRows.map((row) => (
+                      <TableRow key={row.label}>
+                        <TableCell>{row.label}</TableCell>
+                        <TableCell>{formatCurrency(row.ingresos)}</TableCell>
+                        <TableCell>{formatCurrency(row.gastos)}</TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(row.ingresos - row.gastos)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No hay suficientes datos para mostrar la tendencia diaria.
+                </p>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="centros" className="space-y-4">
-          <p className="text-muted-foreground">Aquí se mostrarán los centros de coste</p>
+          <Card>
+            <CardHeader>
+              <CardTitle>Centros de Coste</CardTitle>
+              <CardDescription>Detalle por edificio</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {costCentersData.length ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Centro</TableHead>
+                      <TableHead>Ingresos</TableHead>
+                      <TableHead>Gastos</TableHead>
+                      <TableHead>Flujo Neto</TableHead>
+                      <TableHead className="text-right">Movimientos</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {costCentersData.map((center) => (
+                      <TableRow key={center.id}>
+                        <TableCell className="font-medium">{center.nombre}</TableCell>
+                        <TableCell>{formatCurrency(center.ingresos || 0)}</TableCell>
+                        <TableCell>{formatCurrency(center.gastos || 0)}</TableCell>
+                        <TableCell>{formatCurrency(center.flujoNeto || 0)}</TableCell>
+                        <TableCell className="text-right">{center.movimientos || 0}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No hay centros de coste con movimientos en este período.
+                </p>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="fiscal" className="space-y-4">
-          <p className="text-muted-foreground">Aquí se mostrará la información fiscal</p>
+          <Card>
+            <CardHeader>
+              <CardTitle>Resumen Fiscal</CardTitle>
+              <CardDescription>Ingresos y gastos con impacto fiscal</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {!taxData ? (
+                <p className="text-sm text-muted-foreground">
+                  No hay información fiscal para este período.
+                </p>
+              ) : (
+                <>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="rounded-lg border p-4">
+                      <p className="text-sm text-muted-foreground">Ingresos</p>
+                      <p className="text-lg font-semibold">
+                        {formatCurrency(taxData.ingresos || 0)}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border p-4">
+                      <p className="text-sm text-muted-foreground">Gastos</p>
+                      <p className="text-lg font-semibold">
+                        {formatCurrency(taxData.gastos || 0)}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border p-4">
+                      <p className="text-sm text-muted-foreground">Resultado</p>
+                      <p className="text-lg font-semibold">
+                        {formatCurrency(taxData.resultadoAntesImpuestos || 0)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold">Ingresos por categoría</p>
+                      {taxIngresosEntries.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">Sin ingresos registrados.</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {taxIngresosEntries.map(([categoria, total]) => (
+                            <div
+                              key={categoria}
+                              className="flex items-center justify-between text-sm"
+                            >
+                              <span className="text-muted-foreground">
+                                {formatCategoryLabel(categoria)}
+                              </span>
+                              <span className="font-medium">{formatCurrency(Number(total))}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold">Gastos por categoría</p>
+                      {taxGastosEntries.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">Sin gastos registrados.</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {taxGastosEntries.map(([categoria, total]) => (
+                            <div
+                              key={categoria}
+                              className="flex items-center justify-between text-sm"
+                            >
+                              <span className="text-muted-foreground">
+                                {formatCategoryLabel(categoria)}
+                              </span>
+                              <span className="font-medium">{formatCurrency(Number(total))}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border p-4">
+                    <p className="text-sm text-muted-foreground">Impuestos pagados</p>
+                    <p className="text-lg font-semibold">
+                      {formatCurrency(taxData.impuestosPagados || 0)}
+                    </p>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="ratios" className="space-y-4">
-          <p className="text-muted-foreground">Aquí se mostrarán los ratios financieros</p>
+          <Card>
+            <CardHeader>
+              <CardTitle>Ratios Financieros</CardTitle>
+              <CardDescription>Indicadores clave del período</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!ratiosData ? (
+                <p className="text-sm text-muted-foreground">
+                  No hay datos suficientes para calcular ratios.
+                </p>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  <div className="rounded-lg border p-4">
+                    <p className="text-sm text-muted-foreground">Margen Neto</p>
+                    <p className="text-lg font-semibold">
+                      {formatPercentage(ratiosData.margenNeto || 0)}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border p-4">
+                    <p className="text-sm text-muted-foreground">Ratio de Gastos</p>
+                    <p className="text-lg font-semibold">
+                      {formatPercentage(ratiosData.ratioGastos || 0)}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border p-4">
+                    <p className="text-sm text-muted-foreground">Cobertura de Gastos</p>
+                    <p className="text-lg font-semibold">
+                      {(ratiosData.coberturaGastos || 0).toFixed(2)}x
+                    </p>
+                  </div>
+                  <div className="rounded-lg border p-4">
+                    <p className="text-sm text-muted-foreground">Flujo Neto</p>
+                    <p className="text-lg font-semibold">
+                      {formatCurrency(ratiosData.flujoNeto || 0)}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
