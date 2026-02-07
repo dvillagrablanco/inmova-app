@@ -77,4 +77,6 @@ scripts/deploy-ssh-paramiko.py
 !app/api/**/reset-password/
 !app/api/**/forgot-password/**
 !app/api/**/reset-password/**
+!app/api/**/cambiar-password/
+!app/api/**/cambiar-password/**
 !lib/password-reset.ts
