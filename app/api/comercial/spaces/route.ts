@@ -14,12 +14,12 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 // Mapeo de tipos para cada categoría
-const TIPO_MAPPING: Record<string, string[]> = {
+const TIPO_MAPPING = {
   oficinas: ['oficina_privada', 'oficina_abierta', 'coworking_office'],
   locales: ['local_comercial', 'local_centro_comercial', 'showroom'],
   naves: ['nave_industrial', 'almacen', 'taller'],
   coworking: ['coworking_hot_desk', 'coworking_dedicated', 'coworking_office', 'sala_reuniones'],
-};
+} as const;
 
 export async function GET(request: NextRequest) {
   try {
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     let tipoFilter: CommercialSpaceTypeValue[] = [];
     if (categoria && TIPO_MAPPING[categoria]) {
-      tipoFilter = TIPO_MAPPING[categoria] as CommercialSpaceTypeValue[];
+      tipoFilter = [...TIPO_MAPPING[categoria]];
     }
 
     const normalizedEstado = estado ? estado.toLowerCase() : null;
