@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       userName: user.name || 'Usuario',
       vertical: user.vertical,
       experienceLevel: user.experienceLevel,
-      onboardingProgress: onboardingData?.progress || 0,
+      onboardingProgress: onboardingData?.percentage ?? onboardingData?.percentageComplete ?? 0,
       pendingTasks: onboardingData?.tasks?.filter((t: any) => t.status === 'PENDING') || [],
       completedTasks: onboardingData?.tasks?.filter((t: any) => t.status === 'COMPLETED') || [],
     };
