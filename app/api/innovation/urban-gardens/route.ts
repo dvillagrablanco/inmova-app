@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import type { Prisma } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -154,6 +155,9 @@ export async function POST(request: NextRequest) {
       ...reglasExtras,
     };
 
+    const reglasPayload: Prisma.InputJsonValue | undefined =
+      Object.keys(reglasMerged).length > 0 ? (reglasMerged as Prisma.InputJsonValue) : undefined;
+
     const fotosValue = Array.isArray(fotos) ? fotos.filter((item) => typeof item === 'string') : [];
 
     // Crear huerto
@@ -166,7 +170,7 @@ export async function POST(request: NextRequest) {
         metrosCuadrados: Number(superficie),
         tipoCultivo: pickOptionalString(tipoCultivo) || undefined,
         descripcion,
-        reglas: Object.keys(reglasMerged).length > 0 ? reglasMerged : undefined,
+        reglas: reglasPayload,
         fotos: fotosValue,
         activo: typeof activo === 'boolean' ? activo : undefined,
       },
