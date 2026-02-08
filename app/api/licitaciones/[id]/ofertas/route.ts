@@ -10,9 +10,12 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 import logger from '@/lib/logger';
+import type { WorkOrderStatus } from '@/types/prisma-types';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const OPEN_TENDER_STATUSES: WorkOrderStatus[] = ['pendiente'];
 
 const createQuoteSchema = z.object({
   providerId: z.string(),
@@ -94,7 +97,7 @@ export async function GET(
       tenderId: params.id,
       tenderTitulo: tender.titulo,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching tender quotes:', error);
     return NextResponse.json({ error: 'Error al obtener ofertas' }, { status: 500 });
   }
@@ -115,7 +118,7 @@ export async function POST(
       return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
     }
 
-    const body = await req.json();
+    const body: unknown = await req.json();
     const validationResult = createQuoteSchema.safeParse(body);
 
     if (!validationResult.success) {
@@ -138,7 +141,7 @@ export async function POST(
     }
 
     // Verificar que la licitación está abierta
-    if (tender.estado !== 'presupuesto_solicitado') {
+    if (!OPEN_TENDER_STATUSES.includes(tender.estado)) {
       return NextResponse.json({ 
         error: 'La licitación ya no acepta ofertas' 
       }, { status: 400 });
@@ -192,7 +195,7 @@ export async function POST(
       data: quote,
       message: 'Oferta enviada correctamente',
     }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error submitting quote:', error);
     return NextResponse.json({ error: 'Error al enviar oferta' }, { status: 500 });
   }
