@@ -55,12 +55,14 @@ export async function POST(request: NextRequest) {
     // Crear la company primero
     const company = await prisma.company.create({
       data: {
-        name: data.nombreEmpresa,
+        nombre: data.nombreEmpresa,
         email: data.email,
-        phone: data.telefono,
-        vertical: 'EWOORKER',
-        sector: 'CONSTRUCCION',
-        taxId: data.cif,
+        telefono: data.telefono,
+        cif: data.cif,
+        businessVertical: 'construccion',
+        contactoPrincipal: data.nombreContacto,
+        emailContacto: data.email,
+        telefonoContacto: data.telefono,
       },
     });
 
@@ -79,13 +81,10 @@ export async function POST(request: NextRequest) {
     // Crear perfil de empresa eWoorker
     await prisma.ewoorkerPerfilEmpresa.create({
       data: {
-        userId: user.id,
-        nombreEmpresa: data.nombreEmpresa,
+        companyId: company.id,
         cif: data.cif,
         tipoEmpresa: data.tipoEmpresa,
-        emailContacto: data.email,
         telefono: data.telefono,
-        nombreResponsable: data.nombreContacto,
         // Valores por defecto
         especialidades: [],
         subespecialidades: [],
@@ -93,12 +92,6 @@ export async function POST(request: NextRequest) {
         radioOperacionKm: 50,
         numeroTrabajadores: 0,
         experienciaAnios: 0,
-        valoracionMedia: 0,
-        totalReviews: 0,
-        verificado: false,
-        disponible: true,
-        estadoREA: 'NO_REGISTRADO',
-        estadoSeguro: 'NO_REGISTRADO',
       },
     });
 
