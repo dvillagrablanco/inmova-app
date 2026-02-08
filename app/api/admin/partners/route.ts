@@ -8,6 +8,32 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+type PartnerStatusValue = 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'CANCELLED';
+type PartnerTypeValue =
+  | 'BANCO'
+  | 'MULTIFAMILY_OFFICE'
+  | 'PLATAFORMA_MEMBRESIA'
+  | 'ASOCIACION'
+  | 'CONSULTORA'
+  | 'INMOBILIARIA'
+  | 'OTRO';
+
+const normalizeEnumValue = (value: string) => value.trim().toUpperCase();
+
+const isPartnerStatus = (value: string): value is PartnerStatusValue =>
+  ['PENDING', 'ACTIVE', 'SUSPENDED', 'CANCELLED'].includes(value);
+
+const isPartnerType = (value: string): value is PartnerTypeValue =>
+  [
+    'BANCO',
+    'MULTIFAMILY_OFFICE',
+    'PLATAFORMA_MEMBRESIA',
+    'ASOCIACION',
+    'CONSULTORA',
+    'INMOBILIARIA',
+    'OTRO',
+  ].includes(value);
+
 /**
  * GET /api/admin/partners
  * Lista todos los partners
@@ -34,10 +60,16 @@ export async function GET(request: NextRequest) {
 
     const where: Prisma.PartnerWhereInput = {};
     if (status && status !== 'all') {
-      where.estado = status;
+      const normalizedStatus = normalizeEnumValue(status);
+      if (isPartnerStatus(normalizedStatus)) {
+        where.estado = normalizedStatus;
+      }
     }
     if (tipo && tipo !== 'all') {
-      where.tipo = tipo;
+      const normalizedType = normalizeEnumValue(tipo);
+      if (isPartnerType(normalizedType)) {
+        where.tipo = normalizedType;
+      }
     }
 
     const partners = await prisma.partner.findMany({
