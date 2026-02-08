@@ -61,7 +61,7 @@ const mapPostToResponse = (
     comentarios: number;
     compartidos: number;
   },
-  platform: SocialMediaPlatform | null
+  platform: string | null
 ) => {
   const platformValue = platform ? platform.toLowerCase() : 'unknown';
   const scheduledDate = post.fechaProgramada ?? post.fechaPublicacion ?? post.createdAt;
