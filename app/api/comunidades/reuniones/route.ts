@@ -59,6 +59,9 @@ export async function GET(request: NextRequest) {
 
     const sessionUser = session.user as { companyId?: string | null };
     const companyId = sessionUser.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Empresa no válida' }, { status: 400 });
+    }
 
     // Obtener buildingId si se proporciona comunidadId
     let targetBuildingId = buildingId;
@@ -85,7 +88,7 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           building: {
-            select: { id: true, name: true },
+            select: { id: true, nombre: true },
           },
         },
         orderBy: { fechaReunion: proximas ? 'asc' : 'desc' },
@@ -119,7 +122,7 @@ export async function GET(request: NextRequest) {
       },
       orderBy: { fechaReunion: 'asc' },
       include: {
-        building: { select: { id: true, name: true } },
+        building: { select: { id: true, nombre: true } },
       },
     });
 
@@ -128,6 +131,9 @@ export async function GET(request: NextRequest) {
         ...reunion,
         acuerdos: Array.isArray(reunion.acuerdos) ? reunion.acuerdos : [],
         asistentes: Array.isArray(reunion.asistentes) ? reunion.asistentes : [],
+        building: reunion.building
+          ? { id: reunion.building.id, name: reunion.building.nombre }
+          : null,
       })),
       pagination: {
         page,
@@ -141,11 +147,18 @@ export async function GET(request: NextRequest) {
         realizadas,
         canceladas,
       },
-      proximaReunion,
+      proximaReunion: proximaReunion
+        ? {
+            ...proximaReunion,
+            building: proximaReunion.building
+              ? { id: proximaReunion.building.id, name: proximaReunion.building.nombre }
+              : null,
+          }
+        : null,
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
-    logger.error('[Reuniones GET Error]:', error);
+    logger.error('[Reuniones GET Error]:', { message });
     return NextResponse.json(
       { error: 'Error obteniendo reuniones', details: message },
       { status: 500 }
@@ -193,7 +206,7 @@ export async function POST(request: NextRequest) {
         organizadoPor: userId,
       },
       include: {
-        building: { select: { id: true, name: true } },
+        building: { select: { id: true, nombre: true } },
       },
     });
 
@@ -267,7 +280,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ reunion }, { status: 201 });
+    return NextResponse.json(
+      {
+        reunion: {
+          ...reunion,
+          building: reunion.building
+            ? { id: reunion.building.id, name: reunion.building.nombre }
+            : null,
+        },
+      },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -276,7 +299,7 @@ export async function POST(request: NextRequest) {
       );
     }
     const message = error instanceof Error ? error.message : 'Error desconocido';
-    logger.error('[Reuniones POST Error]:', error);
+    logger.error('[Reuniones POST Error]:', { message });
     return NextResponse.json(
       { error: 'Error creando reunión', details: message },
       { status: 500 }
@@ -319,11 +342,18 @@ export async function PATCH(request: NextRequest) {
       where: { id },
       data: validated,
       include: {
-        building: { select: { id: true, name: true } },
+        building: { select: { id: true, nombre: true } },
       },
     });
 
-    return NextResponse.json({ reunion });
+    return NextResponse.json({
+      reunion: {
+        ...reunion,
+        building: reunion.building
+          ? { id: reunion.building.id, name: reunion.building.nombre }
+          : null,
+      },
+    });
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -332,7 +362,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
     const message = error instanceof Error ? error.message : 'Error desconocido';
-    logger.error('[Reuniones PATCH Error]:', error);
+    logger.error('[Reuniones PATCH Error]:', { message });
     return NextResponse.json(
       { error: 'Error actualizando reunión', details: message },
       { status: 500 }
