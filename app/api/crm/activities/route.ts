@@ -4,16 +4,30 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 import { z } from 'zod';
+import type { Prisma } from '@/types/prisma-types';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const ACTIVITY_TYPE_MAP = {
+  llamada: 'llamada',
+  email: 'email',
+  reunion: 'reunion',
+  visita: 'visita',
+  nota: 'nota',
+  tarea: 'seguimiento',
+  seguimiento: 'seguimiento',
+} as const;
+
+type ActivityTypeInput = keyof typeof ACTIVITY_TYPE_MAP;
+const activityTypeSchema = z.enum(
+  Object.keys(ACTIVITY_TYPE_MAP) as [ActivityTypeInput, ...ActivityTypeInput[]]
+);
+
 // Schema de validación para actividad CRM
 const createCRMActivitySchema = z.object({
   leadId: z.string().uuid({ message: 'ID de lead inválido' }),
-  tipo: z.enum(['llamada', 'email', 'reunion', 'visita', 'tarea', 'nota'], {
-    message: 'Tipo de actividad inválido',
-  }),
+  tipo: activityTypeSchema,
   asunto: z.string().min(1, { message: 'El asunto es requerido' }),
   descripcion: z.string().optional(),
   fecha: z
@@ -41,7 +55,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const leadId = searchParams.get('leadId');
 
-    const where: any = {};
+    const where: Prisma.CrmActivityWhereInput = {};
 
     if (leadId) {
       where.leadId = leadId;
@@ -121,7 +135,7 @@ export async function POST(request: NextRequest) {
     const activity = await prisma.crmActivity.create({
       data: {
         leadId,
-        tipo,
+        tipo: ACTIVITY_TYPE_MAP[tipo],
         asunto,
         descripcion,
         fecha: new Date(fecha),
