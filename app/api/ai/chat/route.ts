@@ -96,10 +96,21 @@ Company: ${session.user.companyId}`;
       ? `${userContext}\n\n${validated.context}`
       : userContext;
 
+    const historyText = validated.conversationHistory
+      ? validated.conversationHistory
+          .map((entry) =>
+            `${entry.role === 'user' ? 'Usuario' : 'Asistente'}: ${entry.content}`
+          )
+          .join('\n')
+      : '';
+
+    const composedMessage = historyText
+      ? `${historyText}\n\nUsuario: ${validated.message}`
+      : validated.message;
+
     // 5. Llamar a Claude AI
-    const response = await ClaudeAIService.chat(validated.message, {
-      conversationHistory: validated.conversationHistory,
-      context: fullContext,
+    const response = await ClaudeAIService.chat(composedMessage, {
+      systemPrompt: fullContext,
     });
 
     // 6. Tracking de uso (Control de costos)
@@ -120,8 +131,9 @@ Company: ${session.user.companyId}`;
       success: true,
       response,
     });
-  } catch (error: any) {
-    logger.error('[API AI Chat] Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[API AI Chat] Error:', { message });
 
     // Error de validación
     if (error instanceof z.ZodError) {
@@ -138,11 +150,11 @@ Company: ${session.user.companyId}`;
     }
 
     // Error de IA
-    if (error.message?.includes('IA') || error.message?.includes('chatbot')) {
+    if (message.includes('IA') || message.includes('chatbot')) {
       return NextResponse.json(
         {
           error: 'Error en chatbot',
-          message: error.message,
+          message,
         },
         { status: 500 }
       );
