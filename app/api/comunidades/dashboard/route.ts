@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
       }),
       // Actas pendientes de aprobación
       prisma.communityMinute.count({
-        where: { ...baseWhere, estado: { in: ['borrador', 'pendiente_aprobacion'] } },
+        where: { ...baseWhere, estado: 'borrador' },
       }),
     ]);
 
