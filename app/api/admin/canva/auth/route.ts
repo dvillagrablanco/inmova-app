@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
 
     // Generar state para seguridad CSRF
     const state = Buffer.from(JSON.stringify({
-      userId: session.user.id,
+      userId: sessionUser.id,
       timestamp: Date.now(),
     })).toString('base64');
 
