@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import type { Prisma } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
     const categoria = searchParams.get('categoria');
     const activo = searchParams.get('activo');
 
-    const where: any = {};
+    const where: Prisma.LegalTemplateWhereInput = {};
     
     if (categoria && categoria !== 'all') {
       where.categoria = categoria;
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json(templates);
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error fetching legal templates:', error);
     return NextResponse.json(
       { error: 'Error al obtener las plantillas' },
@@ -64,7 +65,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
+    const body: {
+      nombre?: string;
+      categoria?: string;
+      descripcion?: string;
+      contenido?: string;
+      variables?: string[];
+      jurisdiccion?: string;
+      aplicableA?: string[];
+      activo?: boolean;
+    } = await request.json();
     const {
       nombre,
       categoria,
@@ -83,8 +93,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const companyId = session.user.companyId;
+    if (!companyId) {
+      return NextResponse.json(
+        { error: 'Empresa requerida para crear plantilla' },
+        { status: 400 }
+      );
+    }
+
     const template = await prisma.legalTemplate.create({
       data: {
+        companyId,
         nombre,
         categoria,
         descripcion,
@@ -98,7 +117,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(template, { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error creating legal template:', error);
     return NextResponse.json(
       { error: 'Error al crear la plantilla' },
