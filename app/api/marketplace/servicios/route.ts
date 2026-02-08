@@ -86,10 +86,10 @@ export async function GET(request: NextRequest) {
         categories: categories.map((c) => c.categoria),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Marketplace Services GET Error]:', error);
     return NextResponse.json(
-      { error: error.message || 'Error obteniendo servicios' },
+      { error: 'Error obteniendo servicios' },
       { status: 500 }
     );
   }
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
 const bookingSchema = z.object({
   serviceId: z.string().min(1),
   unitId: z.string().optional(),
-  fechaSolicitada: z.string().optional(),
+  fechaSolicitada: z.string().min(1),
   notas: z.string().optional(),
 });
 
@@ -112,8 +112,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const validated = bookingSchema.parse(body);
+    const body: unknown = await request.json();
+    const validatedResult = bookingSchema.safeParse(body);
+    if (!validatedResult.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: validatedResult.error.errors },
+        { status: 400 }
+      );
+    }
+    const validated = validatedResult.data;
 
     // Verificar que el servicio existe
     const service = await prisma.marketplaceService.findUnique({
@@ -137,6 +144,17 @@ export async function POST(request: NextRequest) {
 
     const unitId = validated.unitId || tenant.units[0]?.id;
 
+    if (service.precio == null) {
+      return NextResponse.json(
+        { error: 'Servicio sin precio configurado' },
+        { status: 400 }
+      );
+    }
+
+    const precioBase = service.precio;
+    const comision = (precioBase * (service.comisionPorcentaje || 0)) / 100;
+    const precioTotal = precioBase + comision;
+
     // Crear booking
     const booking = await prisma.marketplaceBooking.create({
       data: {
@@ -145,9 +163,11 @@ export async function POST(request: NextRequest) {
         unitId,
         companyId: tenant.companyId,
         estado: 'pendiente',
-        precio: service.precioBase,
-        notas: validated.notas,
-        fechaSolicitada: validated.fechaSolicitada ? new Date(validated.fechaSolicitada) : null,
+        precioBase,
+        comision,
+        precioTotal,
+        fechaServicio: new Date(validated.fechaSolicitada),
+        notasCliente: validated.notas,
       },
       include: {
         service: true,
@@ -159,18 +179,10 @@ export async function POST(request: NextRequest) {
       data: booking,
       message: '¡Solicitud enviada! El proveedor te contactará pronto.',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Marketplace Booking POST Error]:', error);
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Datos inválidos', details: error.errors },
-        { status: 400 }
-      );
-    }
-
     return NextResponse.json(
-      { error: error.message || 'Error creando solicitud' },
+      { error: 'Error creando solicitud' },
       { status: 500 }
     );
   }
