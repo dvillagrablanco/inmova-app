@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           building: {
-            select: { id: true, name: true },
+            select: { id: true, nombre: true },
           },
         },
         orderBy: { fechaReunion: proximas ? 'asc' : 'desc' },
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
       },
       orderBy: { fechaReunion: 'asc' },
       include: {
-        building: { select: { id: true, name: true } },
+        building: { select: { id: true, nombre: true } },
       },
     });
 
@@ -193,7 +193,7 @@ export async function POST(request: NextRequest) {
         organizadoPor: userId,
       },
       include: {
-        building: { select: { id: true, name: true } },
+        building: { select: { id: true, nombre: true } },
       },
     });
 
@@ -319,7 +319,7 @@ export async function PATCH(request: NextRequest) {
       where: { id },
       data: validated,
       include: {
-        building: { select: { id: true, name: true } },
+        building: { select: { id: true, nombre: true } },
       },
     });
 

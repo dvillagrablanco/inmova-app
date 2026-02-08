@@ -68,16 +68,16 @@ export async function GET(request: NextRequest) {
       },
       include: {
         building: {
-          select: { id: true, name: true },
+          select: { id: true, nombre: true },
         },
         contracts: {
-          where: { status: 'activo' },
+          where: { estado: 'activo' },
           include: {
             tenant: true,
           },
         },
       },
-      orderBy: { unitNumber: 'asc' },
+      orderBy: { numero: 'asc' },
     });
 
     // También buscar en la tabla Owner si existe
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
       include: {
         buildings: {
           where: { id: targetBuildingId },
-          select: { id: true, name: true },
+          select: { id: true, nombre: true },
         },
       },
     });
@@ -123,10 +123,10 @@ export async function GET(request: NextRequest) {
       propietarios,
       unidades: unidades.map(u => ({
         id: u.id,
-        unitNumber: u.unitNumber,
-        type: u.type,
-        status: u.status,
-        squareMeters: u.squareMeters,
+        unitNumber: u.numero,
+        type: u.tipo,
+        status: u.estado,
+        squareMeters: u.superficie,
         tieneInquilino: u.contracts && u.contracts.length > 0,
         inquilino: u.contracts?.[0]?.tenant || null,
       })),
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
       },
       include: {
         buildings: {
-          select: { id: true, name: true },
+          select: { id: true, nombre: true },
         },
       },
     });

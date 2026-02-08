@@ -62,8 +62,8 @@ export async function GET(request: NextRequest) {
           building: {
             select: {
               id: true,
-              name: true,
-              address: true,
+              nombre: true,
+              direccion: true,
               units: {
                 select: { id: true },
               },
@@ -195,8 +195,8 @@ export async function POST(request: NextRequest) {
         building: {
           select: {
             id: true,
-            name: true,
-            address: true,
+            nombre: true,
+            direccion: true,
           },
         },
       },
