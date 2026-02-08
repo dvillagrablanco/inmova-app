@@ -194,7 +194,7 @@ export async function DELETE(request: NextRequest) {
 
     // 8. Eliminar módulos de empresa
     try {
-      const deletedModules = await prisma.moduleCompany.deleteMany({
+      const deletedModules = await prisma.companyModule.deleteMany({
         where: {
           companyId: { in: companiesToDelete },
         },
