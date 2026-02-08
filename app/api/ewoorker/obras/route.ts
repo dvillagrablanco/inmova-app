@@ -111,8 +111,50 @@ export async function POST(request: NextRequest) {
       presupuestoMinimo,
       presupuestoMaximo,
       fechaInicioDeseada,
-      duracionEstimadaDias
+      duracionEstimadaDias,
+      unidadesObra,
+      tipoContrato,
+      formaPago
     } = body;
+
+    if (!titulo || !descripcion || !provincia || !municipio || !direccion || !categoria) {
+      return NextResponse.json(
+        { error: "Faltan campos obligatorios de la obra" },
+        { status: 400 }
+      );
+    }
+
+    if (!unidadesObra || !tipoContrato || !formaPago || !fechaInicioDeseada || !duracionEstimadaDias) {
+      return NextResponse.json(
+        { error: "Faltan datos obligatorios para creación" },
+        { status: 400 }
+      );
+    }
+
+    const duracionDias = Number(duracionEstimadaDias);
+    if (!Number.isFinite(duracionDias) || duracionDias <= 0) {
+      return NextResponse.json(
+        { error: "Duración estimada inválida" },
+        { status: 400 }
+      );
+    }
+
+    const fechaInicioParsed = new Date(fechaInicioDeseada);
+    if (Number.isNaN(fechaInicioParsed.getTime())) {
+      return NextResponse.json(
+        { error: "Fecha de inicio inválida" },
+        { status: 400 }
+      );
+    }
+
+    const presupuestoMin =
+      presupuestoMinimo !== undefined && presupuestoMinimo !== null
+        ? Number(presupuestoMinimo)
+        : null;
+    const presupuestoMax =
+      presupuestoMaximo !== undefined && presupuestoMaximo !== null
+        ? Number(presupuestoMaximo)
+        : null;
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -153,10 +195,13 @@ export async function POST(request: NextRequest) {
         provincia,
         municipio,
         direccion,
-        presupuestoMinimo: parseFloat(presupuestoMinimo),
-        presupuestoMaximo: parseFloat(presupuestoMaximo),
-        fechaInicioDeseada: new Date(fechaInicioDeseada),
-        duracionEstimadaDias: parseInt(duracionEstimadaDias),
+        presupuestoMinimo: presupuestoMin,
+        presupuestoMaximo: presupuestoMax,
+        fechaInicioDeseada: fechaInicioParsed,
+        duracionEstimadaDias: duracionDias,
+        unidadesObra,
+        tipoContrato,
+        formaPago,
         estado: "BORRADOR"
       }
     });
