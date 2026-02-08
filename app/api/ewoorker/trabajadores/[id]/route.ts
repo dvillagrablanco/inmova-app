@@ -44,7 +44,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         perfilEmpresa: {
           select: {
             id: true,
-            nombreEmpresa: true,
+            company: {
+              select: {
+                nombre: true,
+              },
+            },
             verificado: true,
             valoracionMedia: true,
             zonasOperacion: true,
@@ -96,7 +100,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       trabajador,
       esMiTrabajador,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[EWOORKER_TRABAJADOR_GET]', error);
     return NextResponse.json({ error: 'Error al obtener trabajador' }, { status: 500 });
   }
