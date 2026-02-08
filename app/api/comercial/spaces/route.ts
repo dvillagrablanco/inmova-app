@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import type { UnitStatus } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -46,14 +47,22 @@ export async function GET(request: NextRequest) {
     }
 
     const normalizedEstado = estado ? estado.toLowerCase() : null;
-    const allowedEstados = new Set(['ocupada', 'disponible', 'en_mantenimiento']);
+    const allowedEstados = new Set<UnitStatus>([
+      'ocupada',
+      'disponible',
+      'en_mantenimiento',
+    ]);
+    const isUnitStatus = (value: string): value is UnitStatus =>
+      allowedEstados.has(value as UnitStatus);
+    const estadoValue =
+      normalizedEstado && isUnitStatus(normalizedEstado) ? normalizedEstado : null;
 
     const spaces = await prisma.commercialSpace.findMany({
       where: {
         companyId: session.user.companyId,
         ...(tipoFilter.length > 0 && { tipo: { in: tipoFilter } }),
-        ...(normalizedEstado && allowedEstados.has(normalizedEstado) && {
-          estado: normalizedEstado,
+        ...(estadoValue && {
+          estado: estadoValue,
         }),
       },
       include: {
