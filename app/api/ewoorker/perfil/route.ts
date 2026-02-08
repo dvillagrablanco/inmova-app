@@ -23,8 +23,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
+    if (!user.companyId) {
+      return NextResponse.json({ error: 'Usuario sin empresa' }, { status: 400 });
+    }
+
     const perfil = await prisma.ewoorkerPerfilEmpresa.findUnique({
-      where: { userId: user.id },
+      where: { companyId: user.companyId },
     });
 
     if (!perfil) {
@@ -33,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ perfil });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[eWoorker Perfil GET Error]:', error);
     return NextResponse.json(
       { error: 'Error al cargar perfil' },
@@ -68,11 +72,15 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
+    if (!user.companyId) {
+      return NextResponse.json({ error: 'Usuario sin empresa' }, { status: 400 });
+    }
+
     const body = await request.json();
     const data = updatePerfilSchema.parse(body);
 
     const perfil = await prisma.ewoorkerPerfilEmpresa.update({
-      where: { userId: user.id },
+      where: { companyId: user.companyId },
       data: {
         ...data,
         web: data.web || null,
@@ -84,7 +92,7 @@ export async function PUT(request: NextRequest) {
       perfil,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[eWoorker Perfil PUT Error]:', error);
 
     if (error instanceof z.ZodError) {
