@@ -160,9 +160,17 @@ function ContractsList({ contracts }: { contracts: ContractSummary[] }) {
     if (daysRemaining <= 7) {
       return <Badge variant="destructive">Vence en {daysRemaining}d</Badge>;
     } else if (daysRemaining <= 30) {
-      return <Badge variant="warning" className="bg-orange-100 text-orange-800">Vence en {daysRemaining}d</Badge>;
+      return (
+        <Badge variant="outline" className="bg-orange-100 text-orange-800">
+          Vence en {daysRemaining}d
+        </Badge>
+      );
     } else {
-      return <Badge variant="secondary" className="bg-green-100 text-green-800">Activo</Badge>;
+      return (
+        <Badge variant="secondary" className="bg-green-100 text-green-800">
+          Activo
+        </Badge>
+      );
     }
   };
 
