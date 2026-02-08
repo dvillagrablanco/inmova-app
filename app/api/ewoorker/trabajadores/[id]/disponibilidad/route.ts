@@ -145,7 +145,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         motivoNoDisponible: true,
         perfilEmpresa: {
           select: {
-            nombreEmpresa: true,
+            company: {
+              select: {
+                nombre: true,
+              },
+            },
             verificado: true,
             disponible: true,
           },
@@ -179,10 +183,10 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       disponibleDesde: trabajador.disponibleDesde,
       disponibleHasta: trabajador.disponibleHasta,
       motivoNoDisponible: trabajador.motivoNoDisponible,
-      empresa: trabajador.perfilEmpresa.nombreEmpresa,
+      empresa: trabajador.perfilEmpresa.company?.nombre || 'Empresa',
       empresaVerificada: trabajador.perfilEmpresa.verificado,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[EWOORKER_TRABAJADOR_DISPONIBILIDAD_GET]', error);
     return NextResponse.json({ error: 'Error al obtener disponibilidad' }, { status: 500 });
   }
