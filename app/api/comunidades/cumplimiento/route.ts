@@ -55,10 +55,10 @@ export async function GET(request: NextRequest) {
       },
       select: {
         id: true,
-        name: true,
-        address: true,
-        yearBuilt: true,
-        totalUnits: true,
+        nombre: true,
+        direccion: true,
+        anoConstructor: true,
+        numeroUnidades: true,
       },
     });
 
@@ -153,8 +153,8 @@ export async function GET(request: NextRequest) {
 
     // Calcular estado de cumplimiento por edificio
     const cumplimiento = buildings.map((building) => {
-      const añoConstruccion = building.yearBuilt || 2000;
-      const antiguedad = new Date().getFullYear() - añoConstruccion;
+      const anoConstruccion = building.anoConstructor || 2000;
+      const antiguedad = new Date().getFullYear() - anoConstruccion;
       
       // ITE obligatoria para edificios >50 años
       const requiereITE = antiguedad >= 50;
@@ -266,7 +266,7 @@ export async function POST(request: NextRequest) {
       documento: {
         id: `doc_${Date.now()}`,
         ...validated,
-        buildingName: building.name,
+        buildingName: building.nombre,
       },
     }, { status: 201 });
   } catch (error: any) {
