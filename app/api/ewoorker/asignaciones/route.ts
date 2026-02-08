@@ -253,16 +253,17 @@ export async function POST(request: NextRequest) {
         contrato: {
           include: {
             obra: true,
+            constructor: false,
           },
         },
       },
     });
 
     return NextResponse.json({ asignacion }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[EWOORKER_ASIGNACIONES_POST]', error);
 
-    if (error.name === 'ZodError') {
+    if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
