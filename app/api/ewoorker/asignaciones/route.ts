@@ -82,6 +82,7 @@ export async function GET(request: NextRequest) {
             obraId: true,
             presupuestoTotal: true,
             estado: true,
+            constructor: false,
             obra: {
               select: {
                 id: true,
