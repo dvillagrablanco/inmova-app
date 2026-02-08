@@ -64,6 +64,7 @@ export async function GET(request: NextRequest) {
       }),
       prisma.marketplaceBooking.groupBy({
         by: ['estado'],
+        orderBy: { estado: 'asc' },
         _count: { _all: true },
       }),
       prisma.marketplaceBooking.aggregate({
