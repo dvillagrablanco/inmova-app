@@ -230,7 +230,9 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.revenue - a.revenue);
 
     // Calcular estancia media y tasa de renovación
-    const completedContracts = contracts.filter((c) => c.estado === 'finalizado' || new Date(c.fechaFin) < now);
+    const completedContracts = contracts.filter(
+      (c) => c.estado === 'vencido' || c.estado === 'cancelado' || new Date(c.fechaFin) < now
+    );
     const avgStayMonths = completedContracts.length > 0
       ? Math.round(
           completedContracts.reduce((sum, c) => {
