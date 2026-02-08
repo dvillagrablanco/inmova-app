@@ -59,6 +59,9 @@ export async function GET(request: NextRequest) {
 
     const sessionUser = session.user as { companyId?: string | null };
     const companyId = sessionUser.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Empresa no válida' }, { status: 400 });
+    }
 
     // Obtener buildingId si se proporciona comunidadId
     let targetBuildingId = buildingId;
