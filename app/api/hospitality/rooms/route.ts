@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
     const unit = await prisma.unit.findFirst({
       where: {
         id: data.unitId,
-        companyId,
+        building: { companyId },
       },
       select: {
         id: true,
