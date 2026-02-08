@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const categoria = searchParams.get('categoria'); // oficinas, locales, naves, coworking
-    const estado = searchParams.get('estado');
+    const estado = searchParams.get('estado')?.toLowerCase() || null;
 
     // Construir filtro de tipos
     let tipoFilter: string[] = [];
@@ -38,11 +38,16 @@ export async function GET(request: NextRequest) {
       tipoFilter = TIPO_MAPPING[categoria];
     }
 
+    const estadoFilter =
+      estado && ['ocupada', 'disponible', 'en_mantenimiento'].includes(estado)
+        ? (estado as 'ocupada' | 'disponible' | 'en_mantenimiento')
+        : undefined;
+
     const spaces = await prisma.commercialSpace.findMany({
       where: {
         companyId: session.user.companyId,
         ...(tipoFilter.length > 0 && { tipo: { in: tipoFilter as any } }),
-        ...(estado && { estado }),
+        ...(estadoFilter && { estado: estadoFilter }),
       },
       include: {
         commercialLeases: {
