@@ -8,6 +8,27 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const LEGAL_TEMPLATE_CATEGORIES = [
+  'contrato_arrendamiento',
+  'anexo_contrato',
+  'notificacion_inquilino',
+  'reclamacion',
+  'finalizacion_contrato',
+  'inspeccion',
+  'certificado',
+  'otro',
+] as const;
+
+type LegalTemplateCategoryValue = (typeof LEGAL_TEMPLATE_CATEGORIES)[number];
+
+const parseCategoria = (value?: string | null): LegalTemplateCategoryValue | null => {
+  if (!value) return null;
+  const match = LEGAL_TEMPLATE_CATEGORIES.find(
+    (item): item is LegalTemplateCategoryValue => item === value
+  );
+  return match ?? null;
+};
+
 // GET - Obtener plantillas legales (accesible para todos los usuarios autenticados)
 export async function GET(request: NextRequest) {
   try {
@@ -23,7 +44,14 @@ export async function GET(request: NextRequest) {
     const where: Prisma.LegalTemplateWhereInput = {};
     
     if (categoria && categoria !== 'all') {
-      where.categoria = categoria;
+      const categoriaValue = parseCategoria(categoria);
+      if (!categoriaValue) {
+        return NextResponse.json(
+          { error: 'Categoría inválida' },
+          { status: 400 }
+        );
+      }
+      where.categoria = categoriaValue;
     }
     
     // Por defecto solo mostrar activas a usuarios normales
@@ -86,7 +114,9 @@ export async function POST(request: NextRequest) {
       activo,
     } = body;
 
-    if (!nombre || !categoria || !contenido) {
+    const categoriaValue = parseCategoria(categoria);
+
+    if (!nombre || !categoriaValue || !contenido) {
       return NextResponse.json(
         { error: 'Nombre, categoría y contenido son requeridos' },
         { status: 400 }
@@ -105,7 +135,7 @@ export async function POST(request: NextRequest) {
       data: {
         companyId,
         nombre,
-        categoria,
+        categoria: categoriaValue,
         descripcion,
         contenido,
         variables: variables || [],
