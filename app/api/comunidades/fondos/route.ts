@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         building: {
-          select: { id: true, name: true },
+          select: { id: true, nombre: true },
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
           activo: true,
         },
         include: {
-          building: { select: { id: true, name: true } },
+          building: { select: { id: true, nombre: true } },
         },
       });
 
