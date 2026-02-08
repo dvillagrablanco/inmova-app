@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
           data: {
             companyId: user.companyId,
             userId: session.user.id,
-            action: 'PLATFORM_SETTINGS_UPDATED',
+            action: 'CREATE',
             entityType: 'EWOORKER_PLAN',
             entityId: plan.id,
             entityName: plan.nombre,
@@ -168,8 +168,9 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
-    logger.error('[eWoorker Planes POST Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[eWoorker Planes POST Error]:', { message });
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -184,7 +185,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: 'Error creando plan',
-        message: error.message,
+        message,
       },
       { status: 500 }
     );
