@@ -64,6 +64,7 @@ export async function GET(request: NextRequest) {
       }),
       prisma.marketplaceBooking.groupBy({
         by: ['estado'],
+        orderBy: { estado: 'asc' },
         _count: { _all: true },
       }),
       prisma.marketplaceBooking.aggregate({
@@ -81,7 +82,8 @@ export async function GET(request: NextRequest) {
     ]);
 
     const countsByEstado = statusCounts.reduce<Record<string, number>>((acc, item) => {
-      acc[item.estado] = item._count._all;
+      const count = item._count !== true ? item._count._all ?? 0 : 0;
+      acc[item.estado] = count;
       return acc;
     }, {});
 
