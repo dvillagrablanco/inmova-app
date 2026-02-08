@@ -11,7 +11,16 @@ const createVotacionSchema = z.object({
   buildingId: z.string().min(1),
   titulo: z.string().min(1),
   descripcion: z.string().min(1),
-  tipo: z.enum(['ordinaria', 'extraordinaria', 'urgente']),
+  tipo: z.enum([
+    'ordinaria',
+    'extraordinaria',
+    'urgente',
+    'decision_comunidad',
+    'mejora',
+    'gasto',
+    'normativa',
+    'otro',
+  ]),
   opciones: z.array(z.object({
     id: z.string(),
     texto: z.string(),
@@ -181,6 +190,15 @@ export async function POST(request: NextRequest) {
     } else {
       // Crear nueva votación
       const validated = createVotacionSchema.parse(body);
+      const normalizedTipo = (
+        validated.tipo === 'ordinaria'
+          ? 'decision_comunidad'
+          : validated.tipo === 'extraordinaria'
+            ? 'gasto'
+            : validated.tipo === 'urgente'
+              ? 'normativa'
+              : validated.tipo
+      ) as 'decision_comunidad' | 'mejora' | 'gasto' | 'normativa' | 'otro';
 
       // Verificar que el edificio existe
       const building = await prisma.building.findFirst({
@@ -198,7 +216,7 @@ export async function POST(request: NextRequest) {
           buildingId: validated.buildingId,
           titulo: validated.titulo,
           descripcion: validated.descripcion,
-          tipo: validated.tipo,
+          tipo: normalizedTipo,
           opciones: validated.opciones,
           requiereQuorum: validated.requiereQuorum,
           quorumRequerido: validated.quorumRequerido,
