@@ -120,7 +120,11 @@ export async function GET(request: NextRequest) {
           perfilEmpresa: {
             select: {
               id: true,
-              nombreEmpresa: true,
+              company: {
+                select: {
+                  nombre: true,
+                },
+              },
               verificado: true,
               valoracionMedia: true,
               zonasOperacion: true,
@@ -134,12 +138,20 @@ export async function GET(request: NextRequest) {
 
       const total = await prisma.ewoorkerTrabajador.count({ where });
 
+      const trabajadoresFormateados = trabajadores.map((trabajador) => ({
+        ...trabajador,
+        perfilEmpresa: {
+          ...trabajador.perfilEmpresa,
+          nombreEmpresa: trabajador.perfilEmpresa.company?.nombre || 'Empresa',
+        },
+      }));
+
       return NextResponse.json({
-        trabajadores,
+        trabajadores: trabajadoresFormateados,
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[EWOORKER_TRABAJADORES_GET]', error);
     return NextResponse.json({ error: 'Error al obtener trabajadores' }, { status: 500 });
   }
