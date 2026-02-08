@@ -20,6 +20,13 @@ const registroSchema = z.object({
   aceptaPrivacidad: z.boolean().refine(val => val === true),
 });
 
+const TIPO_EMPRESA_MAP = {
+  CONSTRUCTORA: 'CONTRATISTA_PRINCIPAL',
+  SUBCONTRATISTA: 'SUBCONTRATISTA_N1',
+  PROMOTORA: 'CONTRATISTA_PRINCIPAL',
+  AUTONOMO: 'AUTONOMO',
+} as const;
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -83,7 +90,7 @@ export async function POST(request: NextRequest) {
       data: {
         companyId: company.id,
         cif: data.cif,
-        tipoEmpresa: data.tipoEmpresa,
+        tipoEmpresa: TIPO_EMPRESA_MAP[data.tipoEmpresa],
         telefono: data.telefono,
         // Valores por defecto
         especialidades: [],
