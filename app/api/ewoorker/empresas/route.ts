@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 
     if (search) {
       where.OR = [
-        { nombreEmpresa: { contains: search, mode: 'insensitive' } },
+        { company: { nombre: { contains: search, mode: 'insensitive' } } },
         { especialidades: { hasSome: [search] } },
       ];
     }
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
         where,
         select: {
           id: true,
-          nombreEmpresa: true,
+          company: { select: { nombre: true } },
           tipoEmpresa: true,
           especialidades: true,
           zonasOperacion: true,
@@ -74,8 +74,13 @@ export async function GET(request: NextRequest) {
       prisma.ewoorkerPerfilEmpresa.count({ where }),
     ]);
 
+    const empresasFormateadas = empresas.map((empresa) => ({
+      ...empresa,
+      nombreEmpresa: empresa.company?.nombre ?? 'Empresa',
+    }));
+
     return NextResponse.json({
-      empresas,
+      empresas: empresasFormateadas,
       pagination: {
         page,
         limit,
@@ -84,7 +89,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[eWoorker Empresas Error]:', error);
     return NextResponse.json(
       { error: 'Error al cargar empresas' },
