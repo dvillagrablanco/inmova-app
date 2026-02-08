@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import type { Prisma } from '@/types/prisma-types';
 import {
   contratoMediaEstanciaSchema,
   calcularFianzaRequerida,
@@ -30,6 +31,24 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const CONTRACT_STATUSES = ['activo', 'vencido', 'cancelado'] as const;
+type ContractStatusValue = (typeof CONTRACT_STATUSES)[number];
+const isContractStatus = (value: string): value is ContractStatusValue =>
+  CONTRACT_STATUSES.includes(value as ContractStatusValue);
+
+const MOTIVOS_TEMPORALIDAD = [
+  'trabajo',
+  'estudios',
+  'tratamiento_medico',
+  'proyecto_profesional',
+  'transicion',
+  'turismo_extendido',
+  'otro',
+] as const;
+type MotivoTemporalidadValue = (typeof MOTIVOS_TEMPORALIDAD)[number];
+const isMotivoTemporalidad = (value: string): value is MotivoTemporalidadValue =>
+  MOTIVOS_TEMPORALIDAD.includes(value as MotivoTemporalidadValue);
+
 /**
  * GET: Listar contratos de media estancia
  */
@@ -47,16 +66,16 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
 
     // Construir filtros
-    const where: any = {
+    const where: Prisma.ContractWhereInput = {
       unit: { building: { companyId: session.user.companyId } },
       tipoArrendamiento: 'temporada',
     };
 
-    if (estado) {
+    if (estado && isContractStatus(estado)) {
       where.estado = estado;
     }
 
-    if (motivo) {
+    if (motivo && isMotivoTemporalidad(motivo)) {
       where.motivoTemporalidad = motivo;
     }
 
@@ -71,7 +90,7 @@ export async function GET(request: NextRequest) {
           tenant: {
             select: {
               id: true,
-              nombre: true,
+            nombreCompleto: true,
               email: true,
               telefono: true,
             },
@@ -98,8 +117,9 @@ export async function GET(request: NextRequest) {
         pages: Math.ceil(total / limit),
       },
     });
-  } catch (error: any) {
-    logger.error('[API Error] GET /api/contracts/medium-term:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[API Error] GET /api/contracts/medium-term:', { message });
     return NextResponse.json(
       { error: 'Error obteniendo contratos de media estancia' },
       { status: 500 }
@@ -171,7 +191,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           error: 'La unidad tiene contratos activos que se solapan con las fechas seleccionadas',
-          contratosExistentes: contratosExistentes.map(c => ({
+          contratosExistentes: contratosExistentes.map((c) => ({
             id: c.id,
             fechaInicio: c.fechaInicio,
             fechaFin: c.fechaFin,
@@ -209,12 +229,12 @@ export async function POST(request: NextRequest) {
       message: 'Contrato de media estancia creado correctamente',
     }, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
           error: 'Datos de contrato inválidos',
-          detalles: error.errors.map(e => ({
+          detalles: error.errors.map((e) => ({
             campo: e.path.join('.'),
             mensaje: e.message,
           })),
@@ -223,9 +243,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.error('[API Error] POST /api/contracts/medium-term:', error);
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[API Error] POST /api/contracts/medium-term:', { message });
     return NextResponse.json(
-      { error: error.message || 'Error creando contrato de media estancia' },
+      { error: message || 'Error creando contrato de media estancia' },
       { status: 500 }
     );
   }
