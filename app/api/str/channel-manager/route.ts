@@ -4,6 +4,12 @@ export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
+import { addDays } from 'date-fns';
+import {
+  syncCalendar,
+  importBookings,
+  updateChannelPrices,
+} from '@/lib/str-channel-integration-service';
 
 // GET - Obtener configuración de canales con métricas
 export async function GET(request: NextRequest) {
@@ -92,6 +98,17 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
     
     const { channelId, tipoEvento } = data;
+
+    const channelSync = await prisma.sTRChannelSync.findUnique({
+      where: { id: channelId },
+    });
+
+    if (!channelSync) {
+      return NextResponse.json({ error: 'Canal no encontrado' }, { status: 404 });
+    }
+    if (!channelSync.activo) {
+      return NextResponse.json({ error: 'Canal inactivo' }, { status: 400 });
+    }
     
     // Registrar intento de sincronización
     const syncHistory = await prisma.sTRSyncHistory.create({
@@ -114,25 +131,60 @@ export async function POST(request: NextRequest) {
         estadoSync: 'sincronizando',
       }
     });
-    
-    // Simular proceso de sincronización
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+
+    const startTime = Date.now();
+    let result;
+
+    switch (tipoEvento) {
+      case 'availability_update':
+      case 'calendar':
+        result = await syncCalendar(
+          channelSync.listingId,
+          channelSync.canal as any,
+          new Date(),
+          addDays(new Date(), 90)
+        );
+        break;
+      case 'bookings':
+        result = await importBookings(
+          user.companyId,
+          channelSync.listingId,
+          channelSync.canal as any
+        );
+        break;
+      case 'pricing':
+        if (!data?.priceUpdates) {
+          return NextResponse.json(
+            { error: 'priceUpdates requerido para pricing' },
+            { status: 400 }
+          );
+        }
+        result = await updateChannelPrices(
+          channelSync.listingId,
+          channelSync.canal as any,
+          data.priceUpdates
+        );
+        break;
+      default:
+        return NextResponse.json(
+          { error: 'Tipo de sincronización no válido' },
+          { status: 400 }
+        );
+    }
+
     const endTime = Date.now();
-    const exitoso = Math.random() > 0.1; // 90% éxito simulado
-    
-    // Actualizar historial
+    const exitoso = Boolean(result?.success);
+
     await prisma.sTRSyncHistory.update({
       where: { id: syncHistory.id },
       data: {
         exitoso,
         finalizadoEn: new Date(),
         duracionMs: endTime - startTime,
-        mensajeError: exitoso ? null : 'Error de conexión con el canal',
+        mensajeError: exitoso ? null : (result?.errors || ['Error de sincronización'])[0],
       }
     });
-    
-    // Actualizar estado final del canal
+
     await prisma.sTRChannelSync.update({
       where: { id: channelId },
       data: {
@@ -140,11 +192,12 @@ export async function POST(request: NextRequest) {
         erroresSync: exitoso ? 0 : { increment: 1 },
       }
     });
-    
+
     return NextResponse.json({
       success: exitoso,
       syncId: syncHistory.id,
       message: exitoso ? 'Sincronización completada' : 'Error durante la sincronización',
+      result,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });

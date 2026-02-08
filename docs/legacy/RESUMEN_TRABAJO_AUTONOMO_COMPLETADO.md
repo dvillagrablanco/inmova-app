@@ -119,7 +119,7 @@ He creado **3 formas** de hacerlo:
 - ✅ Script Python desde local
 - ✅ Comandos copy-paste
 
-**Elige una y ejecútala con tu secret**: `whsec_Es6lxyUSGHKvt84Kjr0vKhYVJUVK73pe`
+**Elige una y ejecútala con tu secret**: `whsec_REDACTED`
 
 ---
 

@@ -2,9 +2,10 @@ export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
+import { executeCronJob, executeAllCronJobs, cronJobs } from '@/lib/cron-service';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { executeCronJob, executeAllCronJobs, cronJobs } from '@/lib/cron-service';
+import { authorizeCronRequest } from '@/lib/cron-auth';
 
 /**
  * API Route: Ejecutar trabajos cron manualmente
@@ -14,18 +15,22 @@ import { executeCronJob, executeAllCronJobs, cronJobs } from '@/lib/cron-service
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const authResult = await authorizeCronRequest(request, {
+      allowSession: true,
+      requireSuperAdmin: true,
+    });
+    if (!authResult.authorized) {
       return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
+        { error: authResult.error || 'No autorizado' },
+        { status: authResult.status }
       );
     }
+
     const body = await request.json().catch(() => ({}));
     const { jobId, all } = body;
+    const session = await getServerSession(authOptions);
     const companyId = body.companyId || session?.user?.companyId;
     if (all) {
-      console.log(`[API] Ejecutando todos los trabajos cron para empresa: ${companyId}`);
       const results = await executeAllCronJobs(companyId);
       
       return NextResponse.json({
@@ -34,7 +39,6 @@ export async function POST(request: NextRequest) {
         data: results
       });
     } else if (jobId) {
-      console.log(`[API] Ejecutando trabajo cron: ${jobId} para empresa: ${companyId}`);
       const result = await executeCronJob(jobId, companyId);
       return NextResponse.json({
         success: result.success,
@@ -64,8 +68,18 @@ export async function POST(request: NextRequest) {
  * GET /api/cron/execute
  * Obtiene lista de trabajos cron disponibles
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const authResult = await authorizeCronRequest(request, {
+      allowSession: true,
+      requireSuperAdmin: true,
+    });
+    if (!authResult.authorized) {
+      return NextResponse.json(
+        { error: authResult.error || 'No autorizado' },
+        { status: authResult.status }
+      );
+    }
     return NextResponse.json({
       success: true,
       jobs: cronJobs

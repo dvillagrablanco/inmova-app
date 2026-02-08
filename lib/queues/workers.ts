@@ -12,6 +12,7 @@ import {
   NotificationJobData,
 } from './queue-types';
 import logger from '../logger';
+import { sendEmail as sendTransactionalEmail } from '@/lib/email-service';
 
 /**
  * Procesador de trabajos de email
@@ -21,21 +22,22 @@ async function processEmailJob(job: Job<EmailJobData>): Promise<void> {
   const { to, subject, html, from, cc, bcc, attachments } = job.data;
 
   try {
-    // Aquí iría la lógica real de envío de email
-    // Por ejemplo, usando Nodemailer, SendGrid, AWS SES, etc.
-    
-    // Simulación:
-    logger.info(`✉️  Sending email to: ${to}`);
-    logger.info(`   Subject: ${subject}`);
-    
-    // Simular delay de envío
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // TODO: Implementar envío real de email
-    // Ejemplo con Nodemailer:
-    // const transporter = nodemailer.createTransport({ ... });
-    // await transporter.sendMail({ to, subject, html, from, cc, bcc, attachments });
-    
+    const ok = await sendTransactionalEmail({
+      to,
+      subject,
+      html,
+      from,
+      attachments: attachments?.map((attachment) => ({
+        filename: attachment.filename,
+        content: attachment.content,
+        path: attachment.path,
+      })),
+    });
+
+    if (!ok) {
+      throw new Error('Error enviando email');
+    }
+
     logger.info(`✅ Email sent successfully to: ${to}`);
   } catch (error) {
     logger.error(`❌ Failed to send email to ${to}:`, error);

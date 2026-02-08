@@ -24,6 +24,7 @@ interface SyncLog {
 
 // Shared logs storage
 const syncLogs: SyncLog[] = [];
+const ALLOW_IN_MEMORY = process.env.NODE_ENV !== 'production';
 
 export async function POST(
   request: NextRequest,
@@ -33,6 +34,12 @@ export async function POST(
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+    if (!ALLOW_IN_MEMORY) {
+      return NextResponse.json(
+        { error: 'Sincronizaciones no disponibles en producción' },
+        { status: 501 }
+      );
     }
 
     const { id } = await params;

@@ -77,19 +77,16 @@ export async function GET(request: NextRequest) {
     const avgMarketPrice = latestMarketData?.precioPromedio || avgUserPrice || 100;
     const occupancy = latestMarketData?.tasaOcupacion || 70;
 
-    // Generar datos históricos basados en los datos disponibles
+    // Generar datos históricos basados en los datos disponibles (sin aleatoriedad)
     const marketData = Array.from({ length: period }, (_, i) => {
       const date = new Date();
       date.setDate(date.getDate() - (period - i - 1));
-      
-      // Variación natural de ±5% sobre el precio base
-      const variation = 0.95 + Math.random() * 0.1;
-      
+
       return {
         date: date.toISOString().split('T')[0],
-        myPrice: avgUserPrice > 0 ? avgUserPrice * variation : null,
-        avgMarketPrice: avgMarketPrice * variation,
-        occupancy: Math.max(40, Math.min(95, occupancy + (Math.random() - 0.5) * 20)),
+        myPrice: avgUserPrice > 0 ? avgUserPrice : null,
+        avgMarketPrice: avgMarketPrice,
+        occupancy: Math.max(40, Math.min(95, occupancy)),
       };
     });
 

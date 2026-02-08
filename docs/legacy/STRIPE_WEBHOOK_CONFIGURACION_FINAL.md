@@ -3,7 +3,7 @@
 ## ✅ Completado
 
 1. **✅ Stripe Webhook Secret Configurado**
-   - `STRIPE_WEBHOOK_SECRET=whsec_Es6lxyUSGHKvt84Kjr0vKhYVJUVK73pe`
+   - `STRIPE_WEBHOOK_SECRET=whsec_REDACTED`
    - Añadido a `/opt/inmova-app/.env.production`
 
 2. **✅ Git Configurado en Servidor**
@@ -124,7 +124,7 @@ npm run build
 |----------|-------|-----------|--------|
 | `STRIPE_SECRET_KEY` | `sk_test_51QGc5Q...` | `.env.production` | ✅ Añadida |
 | `STRIPE_PUBLISHABLE_KEY` | `pk_test_51QGc5Q...` | `.env.production` | ✅ Añadida |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_Es6lxyUSG...` | `.env.production` | ✅ Añadida |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_REDACTED` | `.env.production` | ✅ Añadida |
 | `NEXTAUTH_URL` | `https://inmovaapp.com` | `.env.production` | ✅ Añadida |
 
 **Problema**: Next.js dev mode NO lee `.env.production`.

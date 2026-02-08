@@ -420,7 +420,6 @@ export default function NuevoContratoPage() {
                             entityType="contract"
                             autoSaveDocument={true}
                             onApplyData={(data) => {
-                              console.log('[Contrato] Datos recibidos:', JSON.stringify(data, null, 2));
                               const updates: Partial<typeof formData> = {};
                               
                               // Fecha de inicio

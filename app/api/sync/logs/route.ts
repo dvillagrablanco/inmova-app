@@ -26,12 +26,19 @@ interface SyncLog {
 
 // Almacenamiento en memoria (se resetea cuando el servidor reinicia)
 const syncLogs: SyncLog[] = [];
+const ALLOW_IN_MEMORY = process.env.NODE_ENV !== 'production';
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+    if (!ALLOW_IN_MEMORY) {
+      return NextResponse.json(
+        { error: 'Logs de sincronización no disponibles en producción' },
+        { status: 501 }
+      );
     }
 
     const { searchParams } = new URL(request.url);
@@ -62,6 +69,9 @@ export async function GET(request: NextRequest) {
 
 // Función para añadir logs (usado internamente)
 export function addSyncLog(log: Omit<SyncLog, 'id' | 'ejecutadoEn'>) {
+  if (!ALLOW_IN_MEMORY) {
+    throw new Error('Logs de sincronización no disponibles en producción');
+  }
   const newLog: SyncLog = {
     ...log,
     id: `log-${Date.now()}`,

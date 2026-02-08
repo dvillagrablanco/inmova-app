@@ -8,23 +8,23 @@ export const dynamic = 'force-dynamic';
  * Expresión cron: (asterisco)/10 * * * * (cada 10 minutos)
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { processScheduledEmails } from '@/lib/email-triggers-service';
 
 import logger from '@/lib/logger';
-export async function GET() {
-  try {
-    console.log('[CRON process-email-triggers] Starting...');
+import { authorizeCronRequest } from '@/lib/cron-auth';
 
-    // Validar que viene desde un cron job (opcional: usar token secreto)
-    // const authHeader = process.env.CRON_SECRET;
-    // if (request.headers.get('authorization') !== `Bearer ${authHeader}`) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
+export async function GET(request: NextRequest) {
+  try {
+    const authResult = await authorizeCronRequest(request, { allowSession: false });
+    if (!authResult.authorized) {
+      return NextResponse.json(
+        { error: authResult.error || 'No autorizado' },
+        { status: authResult.status }
+      );
+    }
 
     const result = await processScheduledEmails();
-
-    console.log('[CRON process-email-triggers] Completed:', result);
 
     return NextResponse.json({
       success: true,

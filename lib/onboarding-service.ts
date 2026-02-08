@@ -713,15 +713,13 @@ async function triggerOnboardingCompleteEvent(userId: string, companyId: string)
     // 4. Crear evento webhook
     await createWebhookEvent({
       companyId,
-      event: 'user.onboarding_completed',
+      event: 'USER_ONBOARDING_COMPLETED',
       payload: {
         userId,
         companyId,
         timestamp: new Date().toISOString()
       }
     });
-
-    console.log(`Eventos de onboarding completado creados para usuario ${userId}`);
   } catch (error) {
     logger.error('Error creando eventos de onboarding completado:', error);
   }

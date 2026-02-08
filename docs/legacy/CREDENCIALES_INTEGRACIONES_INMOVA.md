@@ -243,8 +243,8 @@ grep TWILIO /opt/inmova-app/.env.production
 
 | Variable | Valor |
 |----------|-------|
-| VAPI_API_KEY | `d79a1bac-c0bd-4dc4-8ddd-2b5e55a3210c` |
-| VAPI_PRIVATE_KEY | `7e045d23-d354-409f-a5b3-0bdc8096a079` |
+| VAPI_API_KEY | `REDACTED` |
+| VAPI_PRIVATE_KEY | `REDACTED` |
 | VAPI_WEBHOOK_SECRET | Configurado |
 
 **Webhook URL**: `https://inmovaapp.com/api/vapi/webhook`

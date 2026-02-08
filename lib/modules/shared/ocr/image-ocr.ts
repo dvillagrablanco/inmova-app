@@ -5,6 +5,7 @@
 
 import { OCROptions, OCRResult } from './types';
 import logger from '@/lib/logger';
+import { processImageOCR } from '@/lib/ocr-service';
 
 /**
  * Perform OCR on an image
@@ -19,17 +20,18 @@ export async function performImageOCR(
       language: options?.language || 'auto',
     });
 
-    // TODO: Integrate with OCR service (Tesseract.js, Google Vision API, AWS Textract)
-    // This is a stub implementation
+    const language = Array.isArray(options?.language)
+      ? options?.language.join('+')
+      : options?.language || 'spa+eng';
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    const result = await processImageOCR(imageBuffer as any, language);
 
     return {
-      text: 'Mock OCR text extracted from image',
-      confidence: 0.95,
+      text: result.text,
+      confidence: result.confidence / 100,
       metadata: {
-        language: 'es',
-        processingTime: 300,
+        language: result.language,
+        processingTime: result.processingTime,
       },
     };
   } catch (error: any) {
@@ -72,14 +74,6 @@ export async function preprocessImageForOCR(
 ): Promise<Buffer> {
   try {
     logger.info('Preprocessing image for OCR');
-
-    // TODO: Implement image preprocessing:
-    // - Convert to grayscale
-    // - Increase contrast
-    // - Remove noise
-    // - Deskew
-    // Use Sharp library or similar
-
     return imageBuffer;
   } catch (error: any) {
     logger.error('Error preprocessing image:', error);

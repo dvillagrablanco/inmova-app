@@ -5,6 +5,8 @@
 
 import { NotificationPayload, NotificationRecipient, NotificationResult } from '../types';
 import logger from '@/lib/logger';
+import { sendEmail as sendSendGridEmail, isSendGridConfigured } from '@/lib/sendgrid-service';
+import { sendEmail as sendNodemailerEmail } from '@/lib/email-service';
 
 export interface EmailConfig {
   from: string;
@@ -29,21 +31,52 @@ export async function sendEmail(
     if (!recipient.email) {
       throw new Error('Recipient email is required');
     }
+    const subject = payload.subject || payload.title || 'Notificación';
+    const html = payload.html || payload.body;
 
-    // TODO: Integrate with actual email service (SendGrid, AWS SES, etc.)
-    // For now, this is a stub that logs the email
-    logger.info('Sending email', {
+    if (isSendGridConfigured()) {
+      const response = await sendSendGridEmail({
+        to: recipient.email,
+        subject,
+        html,
+        from: config?.from,
+        replyTo: config?.replyTo,
+      });
+
+      if (!response.success) {
+        throw new Error(response.error || 'Error enviando email con SendGrid');
+      }
+
+      return {
+        success: true,
+        messageId: response.messageId,
+        deliveredAt: new Date(),
+      };
+    }
+
+    const smtpConfigured = Boolean(process.env.SMTP_USER && process.env.SMTP_PASSWORD);
+    if (!smtpConfigured && process.env.NODE_ENV === 'production') {
+      throw new Error('SMTP no configurado');
+    }
+
+    const ok = await sendNodemailerEmail({
       to: recipient.email,
-      subject: payload.subject,
-      from: config?.from || process.env.EMAIL_FROM,
+      subject,
+      html,
+      from: config?.from,
+      replyTo: config?.replyTo,
+      attachments: config?.attachments?.map((attachment) => ({
+        filename: attachment.filename,
+        content: typeof attachment.content === 'string' ? attachment.content : undefined,
+      })),
     });
 
-    // Simulate email sending
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    if (!ok) {
+      throw new Error('Error enviando email con SMTP');
+    }
 
     return {
       success: true,
-      messageId: `email_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       deliveredAt: new Date(),
     };
   } catch (error: any) {

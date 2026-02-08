@@ -5,7 +5,7 @@
 1. **Git Configurado** → Usuario y email configurados en servidor
 2. **Código Actualizado** → `git reset --hard origin/main` ejecutado
 3. **Archivo Webhook Existe** → `/opt/inmova-app/app/api/webhooks/stripe/route.ts` presente
-4. **STRIPE_WEBHOOK_SECRET Configurado** → `whsec_Es6lxyUSG...` en `.env.production`
+4. **STRIPE_WEBHOOK_SECRET Configurado** → `whsec_REDACTED` en `.env.production`
 5. **Dependencias Actualizadas** → `npm install` ejecutado
 6. **PM2 Reiniciado** → Aplicación corriendo
 

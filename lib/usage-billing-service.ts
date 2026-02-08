@@ -65,6 +65,21 @@ interface OverageInvoice {
   stripeInvoiceId?: string;
 }
 
+interface CompanyForOverage {
+  id: string;
+  nombre: string;
+  email?: string | null;
+  emailContacto?: string | null;
+  stripeCustomerId?: string | null;
+  subscriptionPlanId?: string | null;
+  subscriptionPlan?: {
+    extraSignaturePrice: number;
+    extraStorageGBPrice: number;
+    extraAITokensPrice: number;
+    extraSMSPrice: number;
+  } | null;
+}
+
 // ═══════════════════════════════════════════════════════════════
 // FACTURACIÓN MENSUAL (Ejecutar el día 1 de cada mes)
 // ═══════════════════════════════════════════════════════════════
@@ -84,7 +99,7 @@ export async function processMonthlyOverages(): Promise<{
   const lastMonth = subMonths(new Date(), 1);
   const period = startOfMonth(lastMonth);
   
-  const companies = await prisma.company.findMany({
+  const companies: CompanyForOverage[] = await prisma.company.findMany({
     where: {
       activo: true,
       subscriptionPlanId: { not: null },
@@ -135,7 +150,7 @@ export async function processMonthlyOverages(): Promise<{
  * Procesa excesos de una empresa específica
  */
 async function processCompanyOverage(
-  company: any,
+  company: CompanyForOverage,
   period: Date
 ): Promise<OverageInvoice | null> {
   const usage = await getMonthlyUsage(company.id, period);
@@ -211,7 +226,7 @@ async function processCompanyOverage(
  * Crea invoice en Stripe y lo cobra automáticamente
  */
 async function createStripeInvoice(
-  company: any,
+  company: CompanyForOverage,
   invoice: OverageInvoice
 ): Promise<void> {
   if (!company.stripeCustomerId) {
@@ -272,7 +287,7 @@ async function createStripeInvoice(
  * Envía email con detalle del invoice de excesos
  */
 async function sendOverageInvoiceEmail(
-  company: any,
+  company: CompanyForOverage,
   invoice: OverageInvoice
 ): Promise<void> {
   const contactEmail = company.emailContacto || company.email;

@@ -5,7 +5,7 @@
 El nuevo webhook secret de Stripe ha sido configurado:
 
 ```
-whsec_eLEtxGeyOnR5HT6qeH6D93yvksp3kOll
+whsec_REDACTED
 ```
 
 ### Cambios aplicados:
@@ -59,7 +59,7 @@ Esto significa que el webhook secret en Stripe Dashboard **no coincide** con el 
 
 **Solución**: Verificar que el secret en Stripe Dashboard sea exactamente:
 ```
-whsec_eLEtxGeyOnR5HT6qeH6D93yvksp3kOll
+whsec_REDACTED
 ```
 
 ### Error 404
@@ -88,7 +88,7 @@ pm2 logs inmova-app --lines 50 | grep -i error
 | Item | Valor | Status |
 |------|-------|--------|
 | Webhook URL | `https://inmovaapp.com/api/webhooks/stripe` | ✅ |
-| Webhook Secret | `whsec_eLEtxGeyOn...` | ✅ Actualizado |
+| Webhook Secret | `whsec_REDACTED` | ✅ Actualizado |
 | Stripe Secret Key | `sk_test_51QGc5Q...` | ✅ |
 | Endpoint Status | HTTP 400 (test manual) | ✅ Funcional |
 | PM2 Status | online | ✅ |

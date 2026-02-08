@@ -88,7 +88,7 @@ URL: https://inmovaapp.com/login
 ```
 Secret Key: rk_live_51Sf0V7... (configurada)
 Publishable Key: pk_live_515f0V7... (configurada)
-Webhook Secret: whsec_Es6lxyUSGHKvt84Kjr0vKhYVJUVK73pe
+Webhook Secret: whsec_REDACTED
 Webhook URL: https://inmovaapp.com/api/webhooks/stripe
 Status: ✅ 5/6 checks pasando
 ```

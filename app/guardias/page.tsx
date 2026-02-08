@@ -81,6 +81,7 @@ interface Guardia {
 export default function GuardiasPage() {
   const router = useRouter();
   const { data: session } = useSession();
+  const isDemoMode = process.env.NODE_ENV !== 'production';
   const [guardias, setGuardias] = useState<Guardia[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -100,14 +101,23 @@ export default function GuardiasPage() {
 
   useEffect(() => {
     if (session) {
+      if (!isDemoMode) {
+        setIsLoading(false);
+        setGuardias([]);
+        return;
+      }
       // Simular carga - en producción conectar con API
       setIsLoading(false);
       setGuardias([]);
     }
-  }, [session]);
+  }, [session, isDemoMode]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isDemoMode) {
+      toast.error('Funcionalidad no disponible en producción');
+      return;
+    }
     setIsSaving(true);
     try {
       // En producción: POST /api/guardias
@@ -139,6 +149,12 @@ export default function GuardiasPage() {
 
   const handleDelete = async () => {
     if (!guardiaToDelete) return;
+    if (!isDemoMode) {
+      toast.error('Funcionalidad no disponible en producción');
+      setDeleteDialogOpen(false);
+      setGuardiaToDelete(null);
+      return;
+    }
     setIsSaving(true);
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
@@ -176,11 +192,16 @@ export default function GuardiasPage() {
               <div>
                 <h1 className="text-3xl font-bold">Guardias</h1>
                 <p className="text-sm text-muted-foreground">Gestión de turnos de guardias</p>
+                {!isDemoMode && (
+                  <Badge variant="secondary" className="mt-2">
+                    Funcionalidad no disponible en producción
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
 
-          <Button onClick={() => setCreateDialogOpen(true)}>
+          <Button onClick={() => setCreateDialogOpen(true)} disabled={!isDemoMode}>
             <Plus className="mr-2 h-4 w-4" />
             Nueva Guardia
           </Button>

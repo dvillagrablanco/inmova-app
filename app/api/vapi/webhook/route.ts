@@ -4,11 +4,29 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 const SUPPORT_PHONE = process.env.NEXT_PUBLIC_VAPI_PHONE_NUMBER || '';
+const VAPI_WEBHOOK_SECRET = process.env.VAPI_WEBHOOK_SECRET || '';
+
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
+}
+
+function verifyVapiSignature(rawBody: string, signatureHeader: string, secret: string): boolean {
+  const trimmed = signatureHeader.trim();
+  if (safeEqual(trimmed, secret)) {
+    return true;
+  }
+  const signature = trimmed.replace(/^sha256=/i, '');
+  const expected = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
+  return safeEqual(signature, expected);
+}
 
 // Tipos de eventos de Vapi
 type VapiEventType = 
@@ -49,10 +67,31 @@ interface VapiWebhookPayload {
 
 export async function POST(request: NextRequest) {
   try {
-    const payload: VapiWebhookPayload = await request.json();
+    const rawBody = await request.text();
+    const signatureHeader =
+      request.headers.get('x-vapi-signature') ||
+      request.headers.get('x-vapi-secret') ||
+      request.headers.get('x-vapi-webhook-secret');
+
+    if (VAPI_WEBHOOK_SECRET) {
+      if (!signatureHeader || !verifyVapiSignature(rawBody, signatureHeader, VAPI_WEBHOOK_SECRET)) {
+        return NextResponse.json({ error: 'Firma de webhook inválida' }, { status: 401 });
+      }
+    } else if (process.env.NODE_ENV === 'production') {
+      return NextResponse.json(
+        { error: 'VAPI_WEBHOOK_SECRET no configurado' },
+        { status: 503 }
+      );
+    }
+
+    const payload: VapiWebhookPayload = JSON.parse(rawBody);
     const { message } = payload;
-    
-    console.log('[Vapi Webhook]', message.type, JSON.stringify(message, null, 2));
+
+    logger.info('[Vapi Webhook] Evento recibido', {
+      type: message.type,
+      callId: message.call?.id,
+      assistantId: message.call?.assistantId,
+    });
     
     switch (message.type) {
       // --------------------------------------------------------------------------
@@ -106,7 +145,7 @@ export async function POST(request: NextRequest) {
     }
     
   } catch (error: any) {
-    console.error('[Vapi Webhook Error]', error);
+    logger.error('[Vapi Webhook Error]', error);
     return NextResponse.json(
       { error: error.message },
       { status: 500 }
@@ -123,7 +162,10 @@ async function handleFunctionCall(
   parameters: Record<string, any>,
   call?: any
 ): Promise<any> {
-  console.log(`[Vapi Function] ${name}`, parameters);
+  logger.info('[Vapi Function] Ejecutando función', {
+    name,
+    callId: call?.id,
+  });
   
   switch (name) {
     // --------------------------------------------------------------------------
@@ -641,7 +683,7 @@ async function handleFunctionCall(
     // FUNCIÓN NO RECONOCIDA
     // --------------------------------------------------------------------------
     default:
-      console.warn(`[Vapi] Función no reconocida: ${name}`);
+      logger.warn('[Vapi] Función no reconocida', { name, callId: call?.id });
       return {
         success: false,
         error: `Función ${name} no implementada`,
@@ -654,14 +696,17 @@ async function handleFunctionCall(
 // ============================================================================
 
 async function handleStatusUpdate(call: any, status?: string): Promise<void> {
-  console.log(`[Vapi Status] Call ${call?.id}: ${status}`);
+  logger.info('[Vapi Status] Cambio de estado', {
+    callId: call?.id,
+    status,
+  });
   
   // Aquí podrías actualizar el estado en tu base de datos
   // Por ejemplo, marcar un lead como "en llamada" o "llamada completada"
 }
 
 async function handleEndOfCallReport(message: any): Promise<void> {
-  console.log('[Vapi End of Call Report]', {
+  logger.info('[Vapi End of Call Report]', {
     callId: message.call?.id,
     duration: message.call?.startedAt && message.call?.endedAt 
       ? (new Date(message.call.endedAt).getTime() - new Date(message.call.startedAt).getTime()) / 1000 
@@ -672,12 +717,10 @@ async function handleEndOfCallReport(message: any): Promise<void> {
   
   // Guardar resumen de la llamada
   if (message.summary) {
-    console.log('[Vapi Call Summary]', message.summary);
-  }
-  
-  // Guardar transcripción
-  if (message.messages) {
-    console.log('[Vapi Transcript]', message.messages);
+    logger.info('[Vapi Call Summary] Recibido', {
+      callId: message.call?.id,
+      length: message.summary.length,
+    });
   }
   
   // Aquí integrarías con tu sistema para:

@@ -46,6 +46,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!webhookSecret) {
+      return NextResponse.json(
+        { error: 'STRIPE_WEBHOOK_SECRET no configurado' },
+        { status: 503 }
+      );
+    }
+
     let event: Stripe.Event;
 
     try {

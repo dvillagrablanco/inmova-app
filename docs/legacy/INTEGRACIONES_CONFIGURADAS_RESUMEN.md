@@ -23,7 +23,7 @@
 |----------|--------|
 | `STRIPE_SECRET_KEY` | ✅ `sk_test_51QGc5Q...` |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | ✅ `pk_test_51QGc5Q...` |
-| `STRIPE_WEBHOOK_SECRET` | ✅ `whsec_Es6lxy...` |
+| `STRIPE_WEBHOOK_SECRET` | ✅ `whsec_REDACTED` |
 
 ### 4. 📧 Email (Gmail SMTP)
 | Variable | Estado |

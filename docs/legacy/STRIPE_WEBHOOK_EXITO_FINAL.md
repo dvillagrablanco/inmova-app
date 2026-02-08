@@ -78,7 +78,7 @@ Después de crear el endpoint, Stripe te mostrará el **"Signing secret"**:
 whsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-**Acción**: Ya tienes este secret configurado (`whsec_Es6lxyUSGHKvt84Kjr0vKhYVJUVK73pe`), pero si Stripe genera uno nuevo, actualízalo:
+**Acción**: Ya tienes este secret configurado (`whsec_REDACTED`), pero si Stripe genera uno nuevo, actualízalo:
 
 ```bash
 ssh root@157.180.119.236
@@ -176,7 +176,7 @@ cat .env.local | grep STRIPE
 ```
 STRIPE_SECRET_KEY=sk_test_51QGc5Q...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51QGc5Q...
-STRIPE_WEBHOOK_SECRET=whsec_Es6lxyUSG...
+STRIPE_WEBHOOK_SECRET=whsec_REDACTED
 ```
 
 ### Test de conectividad

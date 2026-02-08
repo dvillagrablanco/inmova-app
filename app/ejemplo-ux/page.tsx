@@ -50,6 +50,7 @@ interface Item {
 export default function EjemploUXPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const isDemoMode = process.env.NODE_ENV !== 'production'
   
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
@@ -57,6 +58,7 @@ export default function EjemploUXPage() {
   const [showForm, setShowForm] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<Item | null>(null)
+  const [itemToEdit, setItemToEdit] = useState<Item | null>(null)
   const [submitting, setSubmitting] = useState(false)
   
   // Form state
@@ -84,7 +86,14 @@ export default function EjemploUXPage() {
   const loadData = async () => {
     setLoading(true)
     setError(null)
-    
+
+    if (!isDemoMode) {
+      setItems([])
+      setError('Esta página es solo de demostración y no está disponible en producción.')
+      setLoading(false)
+      return
+    }
+
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500))
@@ -110,7 +119,6 @@ export default function EjemploUXPage() {
       setItems(mockData)
     } catch (err) {
       setError('No se pudieron cargar los datos. Por favor, inténtalo de nuevo más tarde.')
-      console.error('Error loading data:', err)
     } finally {
       setLoading(false)
     }
@@ -140,29 +148,51 @@ export default function EjemploUXPage() {
       toast.error('Por favor, corrige los errores en el formulario')
       return
     }
+
+    if (!isDemoMode) {
+      toast.error('Funcionalidad no disponible en producción')
+      return
+    }
     
     setSubmitting(true)
     
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      const newItem: Item = {
-        id: Date.now().toString(),
-        ...formData,
-        createdAt: new Date().toISOString()
+
+      if (itemToEdit) {
+        const updatedItem: Item = {
+          ...itemToEdit,
+          ...formData,
+        }
+
+        setItems(items.map((item) => (item.id === itemToEdit.id ? updatedItem : item)))
+        setItemToEdit(null)
+        setShowForm(false)
+        setFormData({ nombre: '', descripcion: '', estado: 'activo' })
+        setFormErrors({})
+
+        toast.success('Elemento actualizado correctamente', {
+          description: `"${formData.nombre}" se ha actualizado`
+        })
+      } else {
+        const newItem: Item = {
+          id: Date.now().toString(),
+          ...formData,
+          createdAt: new Date().toISOString()
+        }
+        
+        setItems([...items, newItem])
+        setShowForm(false)
+        setFormData({ nombre: '', descripcion: '', estado: 'activo' })
+        setFormErrors({})
+        
+        toast.success('Elemento creado correctamente', {
+          description: `"${formData.nombre}" se ha añadido a la lista`
+        })
       }
-      
-      setItems([...items, newItem])
-      setShowForm(false)
-      setFormData({ nombre: '', descripcion: '', estado: 'activo' })
-      setFormErrors({})
-      
-      toast.success('Elemento creado correctamente', {
-        description: `"${formData.nombre}" se ha añadido a la lista`
-      })
     } catch (err) {
-      toast.error('Error al crear el elemento', {
+      toast.error('Error al guardar el elemento', {
         description: 'Por favor, inténtalo de nuevo'
       })
     } finally {
@@ -174,6 +204,13 @@ export default function EjemploUXPage() {
     if (!itemToDelete) return
     
     try {
+      if (!isDemoMode) {
+        toast.error('Funcionalidad no disponible en producción')
+        setShowDeleteDialog(false)
+        setItemToDelete(null)
+        return
+      }
+
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500))
       
@@ -230,7 +267,19 @@ export default function EjemploUXPage() {
                 </div>
                 
                 <Button
-                  onClick={() => setShowForm(!showForm)}
+                  onClick={() => {
+                    if (!isDemoMode) {
+                      toast.error('Funcionalidad no disponible en producción')
+                      return
+                    }
+                    if (!showForm) {
+                      setItemToEdit(null)
+                      setFormErrors({})
+                      setFormData({ nombre: '', descripcion: '', estado: 'activo' })
+                    }
+                    setShowForm(!showForm)
+                  }}
+                  disabled={!isDemoMode}
                   className="gradient-primary shadow-primary"
                   aria-label="Crear nuevo elemento"
                 >
@@ -273,9 +322,11 @@ export default function EjemploUXPage() {
             {showForm && (
               <Card className="mb-6">
                 <CardHeader>
-                  <CardTitle>Crear Nuevo Elemento</CardTitle>
+                  <CardTitle>{itemToEdit ? 'Editar Elemento' : 'Crear Nuevo Elemento'}</CardTitle>
                   <CardDescription>
-                    Complete el formulario con datos válidos. Todos los campos son obligatorios.
+                    {itemToEdit
+                      ? 'Actualice los datos necesarios. Todos los campos son obligatorios.'
+                      : 'Complete el formulario con datos válidos. Todos los campos son obligatorios.'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -346,6 +397,7 @@ export default function EjemploUXPage() {
                           setShowForm(false)
                           setFormErrors({})
                           setFormData({ nombre: '', descripcion: '', estado: 'activo' })
+                          setItemToEdit(null)
                         }}
                         disabled={submitting}
                       >
@@ -385,7 +437,12 @@ export default function EjemploUXPage() {
                 actions={[
                   {
                     label: 'Crear Primer Elemento',
-                    onClick: () => setShowForm(true),
+                    onClick: () => {
+                      setItemToEdit(null)
+                      setFormData({ nombre: '', descripcion: '', estado: 'activo' })
+                      setFormErrors({})
+                      setShowForm(true)
+                    },
                     icon: <Plus className="h-4 w-4" aria-hidden="true" />
                   }
                 ]}
@@ -426,7 +483,20 @@ export default function EjemploUXPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => toast.info('Función de edición no implementada en este ejemplo')}
+                          onClick={() => {
+                            if (!isDemoMode) {
+                              toast.error('Funcionalidad no disponible en producción')
+                              return
+                            }
+                            setItemToEdit(item)
+                            setFormData({
+                              nombre: item.nombre,
+                              descripcion: item.descripcion,
+                              estado: item.estado,
+                            })
+                            setFormErrors({})
+                            setShowForm(true)
+                          }}
                           aria-label={`Editar ${item.nombre}`}
                         >
                           <Edit className="h-4 w-4 mr-1" aria-hidden="true" />

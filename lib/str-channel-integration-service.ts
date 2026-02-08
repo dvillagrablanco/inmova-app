@@ -15,6 +15,7 @@ import logger, { logError } from '@/lib/logger';
 // Definiciones de tipos inline (reemplaza imports de @prisma/client)
 type ChannelType = 'AIRBNB' | 'BOOKING' | 'VRBO' | 'HOMEAWAY' | 'WEB_PROPIA' | 'OTROS';
 type BookingStatus = 'PENDIENTE' | 'CONFIRMADA' | 'CHECK_IN' | 'CHECK_OUT' | 'CANCELADA' | 'NO_SHOW';
+const DEMO_MODE = process.env.NODE_ENV !== 'production';
 
 // ============================================
 // TIPOS E INTERFACES
@@ -194,6 +195,16 @@ export async function connectChannel(
   try {
     logger.info(`[STR] Conectando ${channel} para listing ${listingId}`);
 
+    if (!DEMO_MODE) {
+      return {
+        success: false,
+        syncedItems: 0,
+        errors: ['Integración STR no configurada en producción'],
+        warnings: [],
+        timestamp: new Date(),
+      };
+    }
+
     // En modo DEMO, validamos solo que exista el listing
     const listing = await prisma.sTRListing.findUnique({
       where: { id: listingId },
@@ -300,6 +311,16 @@ export async function syncCalendar(
   endDate: Date,
 ): Promise<SyncResult> {
   try {
+    if (!DEMO_MODE) {
+      return {
+        success: false,
+        syncedItems: 0,
+        errors: ['Integración STR no configurada en producción'],
+        warnings: [],
+        timestamp: new Date(),
+      };
+    }
+
     const channelSync = await prisma.sTRChannelSync.findUnique({
       where: { listingId_canal: { listingId, canal: channel } },
     });
@@ -390,6 +411,16 @@ export async function importBookings(
   channel: ChannelType,
 ): Promise<SyncResult> {
   try {
+    if (!DEMO_MODE) {
+      return {
+        success: false,
+        syncedItems: 0,
+        errors: ['Integración STR no configurada en producción'],
+        warnings: [],
+        timestamp: new Date(),
+      };
+    }
+
     const channelSync = await prisma.sTRChannelSync.findUnique({
       where: { listingId_canal: { listingId, canal: channel } },
     });
@@ -439,6 +470,16 @@ export async function updateChannelPrices(
   priceUpdates: PriceUpdate[],
 ): Promise<SyncResult> {
   try {
+    if (!DEMO_MODE) {
+      return {
+        success: false,
+        syncedItems: 0,
+        errors: ['Integración STR no configurada en producción'],
+        warnings: [],
+        timestamp: new Date(),
+      };
+    }
+
     const channelSync = await prisma.sTRChannelSync.findUnique({
       where: { listingId_canal: { listingId, canal: channel } },
     });
@@ -744,24 +785,19 @@ async function createBookingFromExternal(
  * Verifica si las credenciales de un canal están configuradas
  */
 export function isChannelConfigured(channel: ChannelType): boolean {
-  // En modo DEMO, todos los canales están "configurados"
-  // En producción, esto verificaría variables de entorno específicas
   const envVars: Record<ChannelType, string[]> = {
     AIRBNB: ['AIRBNB_CLIENT_ID', 'AIRBNB_CLIENT_SECRET'],
     BOOKING: ['BOOKING_API_KEY', 'BOOKING_HOTEL_ID'],
     VRBO: ['VRBO_API_KEY'],
     HOMEAWAY: ['HOMEAWAY_API_KEY'],
     WEB_PROPIA: [],
-    EXPEDIA: ['EXPEDIA_API_KEY'],
-    TRIPADVISOR: ['TRIPADVISOR_API_KEY'],
     OTROS: [],
   };
 
   const requiredVars = envVars[channel];
   if (requiredVars.length === 0) return true;
 
-  // En DEMO mode, simulamos que están configurados
-  return false; // Cambiar a true para simular que sí están configurados
+  return requiredVars.every((varName) => Boolean(process.env[varName]));
 }
 
 export default {
