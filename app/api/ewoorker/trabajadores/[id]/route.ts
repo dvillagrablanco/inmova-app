@@ -65,6 +65,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
                 id: true,
                 numeroContrato: true,
                 estado: true,
+                constructor: false,
                 obra: {
                   select: {
                     titulo: true,
