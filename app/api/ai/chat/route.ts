@@ -164,7 +164,7 @@ Company: ${session.user.companyId}`;
     return NextResponse.json(
       {
         error: 'Error procesando mensaje',
-        message: error.message || 'Error desconocido',
+        message,
       },
       { status: 500 }
     );
