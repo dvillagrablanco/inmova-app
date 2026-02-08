@@ -290,6 +290,10 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
   for (let i = 0; i < numIncidencias; i++) {
     const incidenciaData = DEMO_INCIDENCIAS[i];
     const unit = createdUnits[Math.floor(Math.random() * createdUnits.length)];
+    const prioridadNormalizada = (incidenciaData.prioridad || '').toLowerCase();
+    const prioridad = prioridadNormalizada === 'alta' || prioridadNormalizada === 'baja'
+      ? prioridadNormalizada
+      : 'media';
     
     try {
       const incidencia = await prisma.maintenanceRequest.create({
@@ -297,7 +301,7 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
           unitId: unit.id,
           titulo: incidenciaData.titulo,
           descripcion: incidenciaData.descripcion,
-          prioridad: incidenciaData.prioridad,
+          prioridad,
           estado: 'pendiente',
           isDemo: true,
         },
