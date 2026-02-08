@@ -19,6 +19,7 @@ import {
 } from '@/lib/onboarding-chatbot-service';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import type { Prisma } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 /**
@@ -136,13 +137,17 @@ export async function POST(request: NextRequest) {
 
     // Guardar interacción en base de datos (opcional, para analytics)
     try {
+      const contextJson = userContext as Prisma.InputJsonValue;
+      const suggestedActionsJson = response.suggestedActions as Prisma.InputJsonValue | undefined;
+
       await prisma.chatbotInteraction.create({
         data: {
           userId: session.user.id,
           companyId,
-          userMessage: message,
-          botResponse: response.message || '',
-          context: JSON.stringify(userContext),
+          message,
+          response: response.message || '',
+          context: contextJson,
+          ...(suggestedActionsJson ? { suggestedActions: suggestedActionsJson } : {}),
         },
       });
     } catch (dbError) {
