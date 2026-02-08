@@ -244,7 +244,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
           data: {
             companyId: user.companyId,
             userId: session.user.id,
-            action: 'PLATFORM_SETTINGS_UPDATED',
+            action: 'DELETE',
             entityType: 'EWOORKER_PLAN',
             entityId: params.id,
             entityName: existing.nombre,
