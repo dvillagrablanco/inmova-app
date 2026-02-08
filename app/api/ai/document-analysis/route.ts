@@ -399,13 +399,13 @@ async function analyzeDocumentWithVision(
   }
 
   const contentBlock = {
-    type: 'image',
+    type: 'image' as const,
     source: {
-      type: 'base64',
+      type: 'base64' as const,
       media_type: mediaType,
       data: base64Data,
     },
-  };
+  } as const;
 
   console.error('[Vision Analysis] 📤 Enviando a Claude Vision:', file.name, 'isPDF:', isPDF);
 
