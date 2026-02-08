@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
           tenant: {
             select: {
               id: true,
-              nombre: true,
+              nombreCompleto: true,
               email: true,
               telefono: true,
             },
