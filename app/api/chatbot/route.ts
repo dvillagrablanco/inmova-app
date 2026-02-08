@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       ? await getOnboardingProgress(user.id, user.companyId)
       : { progress: 0, tasks: [] };
     const conversationHistory = includeHistory
-      ? await getChatbotHistory(user.id, 5) // Últimos 5 mensajes
+      ? await getChatbotHistory(user.id, user.companyId || '')
       : [];
 
     const context = {
