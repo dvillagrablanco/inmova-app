@@ -409,7 +409,7 @@ async function syncPaymentsAltai(
             },
           },
         },
-        status: 'pagado',
+        estado: 'pagado',
         ...(options.ids && { id: { in: options.ids } }),
         ...(options.dateFrom && { fechaPago: { gte: new Date(options.dateFrom) } }),
         ...(options.dateTo && { fechaPago: { lte: new Date(options.dateTo) } }),
