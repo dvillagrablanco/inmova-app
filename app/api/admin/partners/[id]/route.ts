@@ -27,7 +27,7 @@ export async function GET(
     const partner = await prisma.partner.findUnique({
       where: { id: params.id },
       include: {
-        clients: {
+        clientes: {
           include: {
             company: {
               select: { id: true, nombre: true, email: true },
@@ -65,7 +65,7 @@ export async function GET(
         activo: partner.activo,
         fechaActivacion: partner.fechaActivacion,
         createdAt: partner.createdAt,
-        clients: partner.clients.map((c) => ({
+        clients: partner.clientes.map((c) => ({
           id: c.id,
           companyId: c.companyId,
           companyName: c.company.nombre,
@@ -86,10 +86,11 @@ export async function GET(
         landing: partner.landingContent,
       },
     });
-  } catch (error: any) {
-    logger.error('[Partner GET Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Partner GET Error]:', { message });
     return NextResponse.json(
-      { error: 'Error al obtener partner', message: error.message },
+      { error: 'Error al obtener partner', message },
       { status: 500 }
     );
   }
