@@ -59,8 +59,8 @@ export async function GET(req: NextRequest) {
       company.businessVertical ?? null;
     
     if (primaryVertical === 'mixto' && company.verticals && company.verticals.length > 0) {
-      const firstVertical = company.verticals.find((value) =>
-        isBusinessVertical(value)
+      const firstVertical = company.verticals.find(
+        (value): value is BusinessVerticalValue => isBusinessVertical(value)
       );
       if (firstVertical) {
         primaryVertical = firstVertical;
