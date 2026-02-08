@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
       prisma.commercialSpace.count({
         where: {
           companyId,
-          estado: 'OCUPADO',
+          estado: 'ocupada',
         },
       }),
 
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       prisma.commercialLease.findMany({
         where: {
           space: { companyId },
-          estado: 'ACTIVO',
+          estado: 'activo',
         },
         include: {
           space: {
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
       prisma.commercialLease.findMany({
         where: {
           space: { companyId },
-          estado: 'ACTIVO',
+          estado: 'activo',
           fechaFin: {
             gte: now,
             lte: addDays(now, 90),
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
         where: {
           space: { companyId },
           fecha: { gte: now },
-          estado: 'PROGRAMADA',
+          estado: 'programada',
         },
       }),
 
@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
       prisma.commercialPayment.aggregate({
         where: {
           lease: { space: { companyId } },
-          estado: 'PAGADO',
+          estado: 'pagado',
           fechaPago: {
             gte: startMonth,
             lte: endMonth,
@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
       prisma.commercialPayment.aggregate({
         where: {
           lease: { space: { companyId } },
-          estado: 'PENDIENTE',
+          estado: 'pendiente',
         },
         _sum: { monto: true },
       }),
@@ -156,9 +156,9 @@ export async function GET(request: NextRequest) {
     const recentActivity = ultimosContratos.map((c) => ({
       id: c.id,
       type: 'contrato',
-      text: `${c.estado === 'ACTIVO' ? 'Contrato activo' : 'Contrato'} - ${c.space?.nombre}`,
+      text: `${c.estado === 'activo' ? 'Contrato activo' : 'Contrato'} - ${c.space?.nombre}`,
       date: c.createdAt.toISOString(),
-      status: c.estado === 'ACTIVO' ? 'success' : 'info',
+      status: c.estado === 'activo' ? 'success' : 'info',
     }));
 
     // Próximos vencimientos
