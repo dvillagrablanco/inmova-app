@@ -42,7 +42,9 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Obtener contexto del usuario
-    const onboardingData = await getOnboardingProgress(user.id);
+    const onboardingData = user.companyId
+      ? await getOnboardingProgress(user.id, user.companyId)
+      : { progress: 0, tasks: [] };
     const conversationHistory = includeHistory
       ? await getChatbotHistory(user.id, 5) // Últimos 5 mensajes
       : [];
