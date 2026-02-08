@@ -135,6 +135,15 @@ const PLANES_DATA = [
   },
 ];
 
+const normalizeTier = (tier: string) => {
+  const normalized = tier.toLowerCase();
+  if (normalized === 'basico') return 'STARTER';
+  if (normalized === 'profesional') return 'PROFESSIONAL';
+  if (normalized === 'empresarial') return 'BUSINESS';
+  if (normalized === 'premium' || normalized === 'owner') return 'ENTERPRISE';
+  return 'STARTER';
+};
+
 export async function GET(request: NextRequest) {
   try {
     // 1. Verificar autenticación y permisos
@@ -168,11 +177,20 @@ export async function GET(request: NextRequest) {
 
     // 3. Crear solo los planes que no existen (verificar por nombre)
     for (const planData of PLANES_DATA) {
+      const tier = normalizeTier(planData.tier);
+      const maxUsuarios = planData.maxUsuarios ?? 9999;
+      const maxPropiedades = planData.maxPropiedades ?? 9999;
+      const planPayload = {
+        ...planData,
+        tier,
+        maxUsuarios,
+        maxPropiedades,
+      };
       if (existingNames.has(planData.nombre)) {
         skipped++;
         results.push({
           nombre: planData.nombre,
-          tier: planData.tier,
+          tier,
           status: 'skipped',
           message: 'Ya existe',
         });
@@ -181,7 +199,7 @@ export async function GET(request: NextRequest) {
 
       try {
         const plan = await prisma.subscriptionPlan.create({
-          data: planData,
+          data: planPayload,
         });
 
         created++;
@@ -194,7 +212,7 @@ export async function GET(request: NextRequest) {
       } catch (error: any) {
         results.push({
           nombre: planData.nombre,
-          tier: planData.tier,
+          tier,
           status: 'error',
           error: error.message,
         });
@@ -203,7 +221,7 @@ export async function GET(request: NextRequest) {
 
     // 4. Asignar plan básico a empresas sin plan
     const basicPlan = await prisma.subscriptionPlan.findFirst({
-      where: { tier: 'basico' },
+      where: { tier: 'STARTER' },
     });
 
     let companiesUpdated = 0;
