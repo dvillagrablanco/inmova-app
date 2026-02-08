@@ -31,6 +31,8 @@ type SubscriptionTierValue =
   | 'empresarial'
   | 'personalizado';
 
+type CouponTypeValue = 'PERCENTAGE' | 'FIXED';
+
 const mapSubscriptionTier = (tier: string): SubscriptionTierValue => {
   const normalized = tier.trim().toLowerCase();
 
@@ -57,6 +59,9 @@ const mapSubscriptionTier = (tier: string): SubscriptionTierValue => {
       throw new Error(`Tier inválido: ${tier}`);
   }
 };
+
+const mapCouponType = (discountType: string): CouponTypeValue =>
+  discountType === 'percentage' ? 'PERCENTAGE' : 'FIXED';
 
 async function initializePlans() {
   const results = [];
@@ -114,7 +119,7 @@ async function initializeCoupons() {
       const couponData = {
         companyId: MAIN_COMPANY_ID,
         codigo: campaign.code,
-        tipo: campaign.discountType === 'percentage' ? 'PERCENTAGE' : 'FIXED',
+        tipo: mapCouponType(campaign.discountType),
         valor: campaign.discountValue,
         descripcion: `${campaign.name} - ${campaign.description}\n\n${campaign.message}`,
         usosMaximos: campaign.maxUses || null,
