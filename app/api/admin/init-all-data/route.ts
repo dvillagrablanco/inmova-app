@@ -100,8 +100,8 @@ const INMOVA_PLANS = [
     descripcion: 'Para grandes empresas y SOCIMIs. Todo ilimitado con soporte premium 24/7.',
     tier: 'ENTERPRISE' as const,
     precioMensual: 299,
-    maxUsuarios: null,
-    maxPropiedades: null,
+    maxUsuarios: 100000,
+    maxPropiedades: 100000,
     modulosIncluidos: [
       'Todo de Business',
       'Propiedades ilimitadas',
