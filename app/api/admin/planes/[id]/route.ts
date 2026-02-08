@@ -163,7 +163,7 @@ export async function DELETE(
       include: {
         _count: { select: { companies: true } },
         companies: {
-          select: { id: true, name: true },
+          select: { id: true, nombre: true },
         },
       },
     });
