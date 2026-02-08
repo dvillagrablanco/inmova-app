@@ -405,7 +405,7 @@ async function analyzeDocumentWithVision(
       media_type: mediaType,
       data: base64Data,
     },
-  };
+  } as const;
 
   console.error('[Vision Analysis] 📤 Enviando a Claude Vision:', file.name, 'isPDF:', isPDF);
 
