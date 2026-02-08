@@ -42,14 +42,14 @@ export async function GET(request: NextRequest) {
         tenant: {
           select: {
             id: true,
-            nombre: true,
+            nombreCompleto: true,
             email: true,
           },
         },
       },
       orderBy: [
         { gardenId: 'asc' },
-        { numero: 'asc' },
+        { numeroParcela: 'asc' },
       ],
     });
 
@@ -58,20 +58,28 @@ export async function GET(request: NextRequest) {
       id: plot.id,
       gardenId: plot.gardenId,
       gardenName: plot.garden.nombre,
-      numero: plot.numero,
-      superficie: plot.superficie,
+      numero: plot.numeroParcela,
+      superficie: plot.metrosCuadrados,
       estado: plot.estado,
-      arrendatario: plot.tenant?.nombre,
+      arrendatario: plot.tenant?.nombreCompleto,
       arrendatarioEmail: plot.tenant?.email,
-      fechaInicio: plot.fechaInicio,
-      fechaFin: plot.fechaFin,
-      cultivoActual: plot.cultivoActual,
+      fechaInicio: plot.reservadaDesde,
+      fechaFin: plot.reservadaHasta,
+      cultivoActual:
+        typeof plot.cultivos === 'string'
+          ? plot.cultivos
+          : Array.isArray(plot.cultivos)
+            ? (plot.cultivos[0] as string | undefined)
+            : typeof plot.cultivos === 'object' && plot.cultivos && 'actual' in plot.cultivos
+              ? String((plot.cultivos as { actual?: string }).actual ?? '')
+              : undefined,
     }));
 
     return NextResponse.json(formattedPlots);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[GardenPlots GET] Error:', error);
-    return NextResponse.json({ error: 'Error al obtener parcelas', details: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    return NextResponse.json({ error: 'Error al obtener parcelas', details: message }, { status: 500 });
   }
 }
 
@@ -106,16 +114,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Crear parcela
+    const estadoValue = typeof estado === 'string' ? estado.toLowerCase() : undefined;
+    const cultivosValue = cultivoActual ? [cultivoActual] : undefined;
     const plot = await prisma.gardenPlot.create({
       data: {
         gardenId,
-        numero,
-        superficie: Number(superficie),
-        estado: estado || 'DISPONIBLE',
-        cultivoActual,
+        numeroParcela: numero,
+        metrosCuadrados: Number(superficie),
+        estado: estadoValue || 'disponible',
+        cultivos: cultivosValue,
         tenantId,
-        fechaInicio: fechaInicio ? new Date(fechaInicio) : null,
-        fechaFin: fechaFin ? new Date(fechaFin) : null,
+        reservadaDesde: fechaInicio ? new Date(fechaInicio) : null,
+        reservadaHasta: fechaFin ? new Date(fechaFin) : null,
       },
       include: {
         garden: {
@@ -133,8 +143,9 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[GardenPlots POST] Error:', error);
-    return NextResponse.json({ error: 'Error al crear parcela', details: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    return NextResponse.json({ error: 'Error al crear parcela', details: message }, { status: 500 });
   }
 }
