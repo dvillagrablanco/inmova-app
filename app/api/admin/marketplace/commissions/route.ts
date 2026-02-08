@@ -82,6 +82,11 @@ export async function GET(request: NextRequest) {
 
     const servicesData = services.map((service) => {
       const grouped = groupedByService.get(service.id);
+      const totalTransactions =
+        typeof grouped?._count === 'object' && grouped?._count
+          ? grouped._count._all ?? 0
+          : 0;
+
       return {
         id: service.id,
         serviceName: service.nombre,
@@ -90,7 +95,7 @@ export async function GET(request: NextRequest) {
         providerEmail: service.provider?.email || '',
         commissionType: 'percentage',
         commissionRate: service.comisionPorcentaje,
-        totalTransactions: grouped?._count?._all ?? 0,
+        totalTransactions,
         totalRevenue: grouped?._sum?.precioTotal ?? 0,
         totalCommissions: grouped?._sum?.comision ?? 0,
         status: service.activo ? 'active' : 'paused',
