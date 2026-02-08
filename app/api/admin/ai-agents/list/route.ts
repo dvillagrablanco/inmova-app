@@ -31,6 +31,8 @@ const toObjectRecord = (value: unknown): Record<string, unknown> => {
   return {};
 };
 
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+
 const parseAgentConfig = (value: unknown): Partial<AgentConfig> => {
   const parsed = configSchema.partial().safeParse(value);
   return parsed.success ? parsed.data : {};
@@ -393,13 +395,15 @@ export async function PUT(request: NextRequest) {
       config: nextConfig,
     };
 
-    const nextSettings = {
-      ...baseSettings,
-      agents: {
-        ...agentsSettings,
-        [agentId]: nextAgentSettings,
-      },
-    };
+    const nextSettings = JSON.parse(
+      JSON.stringify({
+        ...baseSettings,
+        agents: {
+          ...agentsSettings,
+          [agentId]: nextAgentSettings,
+        },
+      })
+    ) as JsonValue;
 
     const now = new Date();
     await prisma.integrationConfig.upsert({
