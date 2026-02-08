@@ -63,10 +63,10 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           building: {
-            select: { id: true, name: true },
+            select: { id: true, nombre: true },
           },
           unit: {
-            select: { id: true, unitNumber: true, type: true },
+            select: { id: true, numero: true, tipo: true },
           },
         },
         orderBy: [{ fechaVencimiento: 'desc' }, { createdAt: 'desc' }],
@@ -147,14 +147,14 @@ export async function POST(request: NextRequest) {
           buildingId,
           building: { companyId },
         },
-        select: { id: true, squareMeters: true },
+        select: { id: true, superficie: true },
       });
 
       // Calcular coeficiente basado en metros cuadrados
-      const totalM2 = unidades.reduce((sum, u) => sum + (u.squareMeters || 0), 0);
+      const totalM2 = unidades.reduce((sum, u) => sum + (u.superficie || 0), 0);
 
       const cuotasData = unidades.map(unidad => {
-        const coeficiente = totalM2 > 0 ? (unidad.squareMeters || 0) / totalM2 : 1 / unidades.length;
+        const coeficiente = totalM2 > 0 ? (unidad.superficie || 0) / totalM2 : 1 / unidades.length;
         return {
           companyId,
           buildingId,
@@ -203,8 +203,8 @@ export async function POST(request: NextRequest) {
           estado: 'pendiente',
         },
         include: {
-          unit: { select: { id: true, unitNumber: true } },
-          building: { select: { id: true, name: true } },
+          unit: { select: { id: true, numero: true } },
+          building: { select: { id: true, nombre: true } },
         },
       });
 
