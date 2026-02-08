@@ -3,15 +3,39 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import type { Prisma } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+
+const VOTE_TYPE_MAP = {
+  ordinaria: 'decision_comunidad',
+  extraordinaria: 'gasto',
+  urgente: 'normativa',
+  decision_comunidad: 'decision_comunidad',
+  mejora: 'mejora',
+  gasto: 'gasto',
+  normativa: 'normativa',
+  otro: 'otro',
+} as const;
+
+type VoteTypeInput = keyof typeof VOTE_TYPE_MAP;
+const voteTypeSchema = z.enum(Object.keys(VOTE_TYPE_MAP) as [VoteTypeInput, ...VoteTypeInput[]]);
+const isVoteTypeInput = (value: string): value is VoteTypeInput =>
+  Object.prototype.hasOwnProperty.call(VOTE_TYPE_MAP, value);
+
+const VOTE_STATUSES = ['activa', 'cerrada', 'cancelada'] as const;
+type VoteStatusValue = (typeof VOTE_STATUSES)[number];
+const isVoteStatus = (value: string): value is VoteStatusValue =>
+  VOTE_STATUSES.includes(value as VoteStatusValue);
+
+type VoteOption = { id: string; texto: string; votos: number };
 
 const createVotacionSchema = z.object({
   buildingId: z.string().min(1),
   titulo: z.string().min(1),
   descripcion: z.string().min(1),
-  tipo: z.enum(['ordinaria', 'extraordinaria', 'urgente']),
+  tipo: voteTypeSchema,
   opciones: z.array(z.object({
     id: z.string(),
     texto: z.string(),
@@ -44,7 +68,11 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Empresa no válida' }, { status: 400 });
+    }
 
     // Obtener buildingId si se proporciona comunidadId
     let targetBuildingId = buildingId;
@@ -57,16 +85,17 @@ export async function GET(request: NextRequest) {
     }
 
     // Construir filtros
-    const where: any = { companyId };
+    const where: Prisma.CommunityVoteWhereInput = { companyId };
     if (targetBuildingId) where.buildingId = targetBuildingId;
-    if (estado) where.estado = estado;
+    const estadoValue = estado && isVoteStatus(estado) ? estado : null;
+    if (estadoValue) where.estado = estadoValue;
 
     const [votaciones, total] = await Promise.all([
       prisma.communityVote.findMany({
         where,
         include: {
           building: {
-            select: { id: true, name: true },
+            select: { id: true, nombre: true },
           },
         },
         orderBy: { createdAt: 'desc' },
@@ -91,15 +120,16 @@ export async function GET(request: NextRequest) {
     ]);
 
     return NextResponse.json({
-      votaciones: votaciones.map(v => ({
+      votaciones: votaciones.map((v) => ({
         ...v,
-        opciones: v.opciones as any[],
+        opciones: Array.isArray(v.opciones) ? (v.opciones as VoteOption[]) : [],
         participacion: v.totalElegibles > 0 
           ? Math.round((v.totalVotos / v.totalElegibles) * 100) 
           : 0,
         quorumAlcanzado: v.totalElegibles > 0
           ? (v.totalVotos / v.totalElegibles) * 100 >= v.quorumRequerido
           : false,
+        building: v.building ? { id: v.building.id, name: v.building.nombre } : null,
       })),
       pagination: {
         page,
@@ -114,10 +144,11 @@ export async function GET(request: NextRequest) {
         pendientesCierre: pendientes,
       },
     });
-  } catch (error: any) {
-    logger.error('[Votaciones GET Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Votaciones GET Error]:', { message });
     return NextResponse.json(
-      { error: 'Error obteniendo votaciones', details: error.message },
+      { error: 'Error obteniendo votaciones', details: message },
       { status: 500 }
     );
   }
@@ -131,8 +162,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
-    const userId = (session.user as any).id;
+    const sessionUser = session.user as { companyId?: string | null; id?: string | null };
+    const companyId = sessionUser.companyId;
+    const userId = sessionUser.id;
+    if (!companyId || !userId) {
+      return NextResponse.json({ error: 'Empresa no válida' }, { status: 400 });
+    }
     const body = await request.json();
 
     // Verificar si es un voto o crear votación
@@ -157,8 +192,10 @@ export async function POST(request: NextRequest) {
       }
 
       // Actualizar votos
-      const opciones = votacion.opciones as any[];
-      const opcionIndex = opciones.findIndex(o => o.id === validated.opcionId);
+      const opciones = Array.isArray(votacion.opciones)
+        ? (votacion.opciones as VoteOption[])
+        : [];
+      const opcionIndex = opciones.findIndex((o) => o.id === validated.opcionId);
       
       if (opcionIndex === -1) {
         return NextResponse.json({ error: 'Opción no válida' }, { status: 400 });
@@ -174,7 +211,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      return NextResponse.json({ 
+      return NextResponse.json({
         votacion: updated,
         message: 'Voto registrado correctamente',
       });
@@ -198,7 +235,7 @@ export async function POST(request: NextRequest) {
           buildingId: validated.buildingId,
           titulo: validated.titulo,
           descripcion: validated.descripcion,
-          tipo: validated.tipo,
+          tipo: VOTE_TYPE_MAP[validated.tipo],
           opciones: validated.opciones,
           requiereQuorum: validated.requiereQuorum,
           quorumRequerido: validated.quorumRequerido,
@@ -208,22 +245,33 @@ export async function POST(request: NextRequest) {
           creadoPor: userId,
         },
         include: {
-          building: { select: { id: true, name: true } },
+          building: { select: { id: true, nombre: true } },
         },
       });
 
-      return NextResponse.json({ votacion }, { status: 201 });
+      return NextResponse.json(
+        {
+          votacion: {
+            ...votacion,
+            building: votacion.building
+              ? { id: votacion.building.id, name: votacion.building.nombre }
+              : null,
+          },
+        },
+        { status: 201 }
+      );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
-    logger.error('[Votaciones POST Error]:', error);
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Votaciones POST Error]:', { message });
     return NextResponse.json(
-      { error: 'Error procesando votación', details: error.message },
+      { error: 'Error procesando votación', details: message },
       { status: 500 }
     );
   }
