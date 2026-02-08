@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
           data: {
             companyId: user.companyId,
             userId: session.user.id,
-            action: 'PLATFORM_SETTINGS_UPDATED',
+            action: 'CREATE',
             entityType: 'EWOORKER_PLAN',
             entityId: plan.id,
             entityName: plan.nombre,
