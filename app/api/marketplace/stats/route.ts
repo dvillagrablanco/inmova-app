@@ -19,7 +19,8 @@ export async function GET(request: NextRequest) {
     const [
       totalServices,
       totalBookings,
-      bookingsWithRevenue,
+      revenueAggregate,
+      commissionAggregate,
     ] = await Promise.all([
       // Total de servicios activos
       prisma.marketplaceService.count({
@@ -35,32 +36,40 @@ export async function GET(request: NextRequest) {
         },
       }),
       // Reservas con ingresos para calcular revenue
-      prisma.marketplaceBooking.findMany({
+      prisma.marketplaceBooking.aggregate({
         where: {
           companyId,
           estado: 'completada',
         },
-        select: {
-          precio: true,
+        _sum: {
+          precioTotal: true,
+        },
+      }),
+      // Comisión promedio configurada en servicios
+      prisma.marketplaceService.aggregate({
+        where: {
+          companyId,
+          activo: true,
+        },
+        _avg: {
+          comisionPorcentaje: true,
         },
       }),
     ]);
 
     // Calcular ingresos totales
-    const totalRevenue = bookingsWithRevenue.reduce(
-      (sum, booking) => sum + (booking.precio || 0),
-      0
-    );
+    const totalRevenue = revenueAggregate._sum.precioTotal ?? 0;
+    const commissionRate = commissionAggregate._avg.comisionPorcentaje ?? 0;
 
     const stats = {
       totalServices,
       totalBookings,
       totalRevenue,
-      commissionRate: 12, // Porcentaje de comisión configurado
+      commissionRate,
     };
 
     return NextResponse.json(stats);
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error fetching marketplace stats:', error);
     return NextResponse.json(
       { error: 'Error al obtener estadísticas' },
