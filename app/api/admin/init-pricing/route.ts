@@ -73,10 +73,11 @@ async function initializeCoupons() {
         where: { codigo: campaign.code }
       });
 
+      const couponType = campaign.discountType === 'percentage' ? 'PERCENTAGE' : 'FIXED';
       const couponData = {
         companyId: MAIN_COMPANY_ID,
         codigo: campaign.code,
-        tipo: campaign.discountType === 'percentage' ? 'percentage' as const : 'fixed_amount' as const,
+        tipo: couponType,
         valor: campaign.discountValue,
         descripcion: `${campaign.name} - ${campaign.description}\n\n${campaign.message}`,
         usosMaximos: campaign.maxUses || null,
