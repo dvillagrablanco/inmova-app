@@ -22,8 +22,45 @@ import {
   getModulesByCategory
 } from '@/lib/modules-management-system';
 import { z } from 'zod';
+import type { BusinessVertical, UserRole } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
+
+const USER_ROLES: UserRole[] = [
+  'super_admin',
+  'administrador',
+  'gestor',
+  'operador',
+  'soporte',
+  'community_manager',
+  'socio_ewoorker',
+  'contratista_ewoorker',
+  'subcontratista_ewoorker',
+];
+
+const BUSINESS_VERTICALS: BusinessVertical[] = [
+  'alquiler_tradicional',
+  'str_vacacional',
+  'coliving',
+  'room_rental',
+  'construccion',
+  'flipping',
+  'servicios_profesionales',
+  'comunidades',
+  'mixto',
+  'alquiler_comercial',
+];
+
+const parseUserRole = (role: string): UserRole | null => {
+  return USER_ROLES.includes(role as UserRole) ? (role as UserRole) : null;
+};
+
+const parseVertical = (value?: string | null): BusinessVertical | null => {
+  if (!value) return null;
+  return BUSINESS_VERTICALS.includes(value as BusinessVertical)
+    ? (value as BusinessVertical)
+    : null;
+};
 // GET: Obtener información de módulos
 export async function GET(request: NextRequest) {
   try {
@@ -38,13 +75,24 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const view = searchParams.get('view') || 'all'; // all | active | available | recommended | suggested
 
+    const userRole = parseUserRole(session.user.role);
+    if (!userRole) {
+      return NextResponse.json(
+        { error: 'Rol no autorizado' },
+        { status: 403 }
+      );
+    }
+
+    const vertical =
+      parseVertical(session.user.businessVertical) || 'alquiler_tradicional';
+
     const prefs = await getUserPreferences(session.user.id);
     const activeModuleIds = prefs.activeModules;
 
     // Obtener datos de módulos activos
     const activeModules = activeModuleIds.map(id => MODULES[id]).filter(Boolean);
 
-    let response: any = {
+    const response: Record<string, unknown> = {
       success: true,
       activeModules,
       experienceLevel: prefs.experienceLevel
@@ -56,29 +104,17 @@ export async function GET(request: NextRequest) {
         break;
 
       case 'available':
-        const available = getAvailableModules(
-          session.user.role,
-          session.user.vertical || 'alquiler_tradicional',
-          activeModuleIds
-        );
+        const available = getAvailableModules(userRole, vertical, activeModuleIds);
         response.modules = available;
         break;
 
       case 'recommended':
-        const recommendedIds = getRecommendedModules(
-          session.user.role,
-          session.user.vertical || 'alquiler_tradicional',
-          prefs.experienceLevel
-        );
+        const recommendedIds = getRecommendedModules(userRole, vertical, prefs.experienceLevel);
         response.modules = recommendedIds.map(id => MODULES[id]).filter(Boolean);
         break;
 
       case 'suggested':
-        const suggested = getSuggestedModules(
-          activeModuleIds,
-          session.user.role,
-          session.user.vertical || 'alquiler_tradicional'
-        );
+        const suggested = getSuggestedModules(activeModuleIds, userRole, vertical);
         response.modules = suggested;
         response.message = suggested.length > 0 
           ? `Encontramos ${suggested.length} módulos que podrían interesarte`
@@ -105,10 +141,10 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(response);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error obteniendo módulos:', error);
     return NextResponse.json(
-      { error: 'Error interno del servidor', details: error.message },
+      { error: 'Error interno del servidor' },
       { status: 500 }
     );
   }
@@ -130,8 +166,15 @@ export async function POST(request: NextRequest) {
       moduleId: z.string().min(1)
     });
 
-    const body = await request.json();
-    const { action, moduleId } = schema.parse(body);
+    const body: unknown = await request.json();
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: parsed.error.errors },
+        { status: 400 }
+      );
+    }
+    const { action, moduleId } = parsed.data;
 
     let result;
     if (action === 'activate') {
