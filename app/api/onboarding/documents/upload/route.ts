@@ -44,6 +44,10 @@ const uploadOptionsSchema = z.object({
   autoApprove: z.boolean().optional().default(false),
   confidenceThreshold: z.number().min(0).max(1).optional().default(0.8),
 });
+type UploadOptions = z.infer<typeof uploadOptionsSchema>;
+
+const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : 'Error inesperado';
 
 // ============================================================================
 // POST - Subir documentos
@@ -88,7 +92,7 @@ export async function POST(request: NextRequest) {
     const files = formData.getAll('files') as File[];
     const optionsJson = formData.get('options') as string;
     
-    let options = { autoApprove: false, confidenceThreshold: 0.8 };
+    let options: UploadOptions = { autoApprove: false, confidenceThreshold: 0.8 };
     if (optionsJson) {
       try {
         const parsed = JSON.parse(optionsJson);
@@ -191,12 +195,13 @@ export async function POST(request: NextRequest) {
                 documentImportId: docImport.id,
                 status: 'success',
               });
-            } catch (err: any) {
+            } catch (err: unknown) {
+              const errorMessage = getErrorMessage(err);
               results.push({
                 originalFilename: zipFile.originalFilename,
                 documentImportId: '',
                 status: 'error',
-                error: err.message,
+                error: errorMessage,
               });
             }
           }
@@ -230,13 +235,14 @@ export async function POST(request: NextRequest) {
             status: 'success',
           });
         }
-      } catch (err: any) {
-        logger.error('Error procesando archivo:', { filename: file.name, error: err.message });
+      } catch (err: unknown) {
+        const errorMessage = getErrorMessage(err);
+        logger.error('Error procesando archivo:', { filename: file.name, error: errorMessage });
         results.push({
           originalFilename: file.name,
           documentImportId: '',
           status: 'error',
-          error: err.message,
+          error: errorMessage,
         });
       }
     }
@@ -291,12 +297,13 @@ export async function POST(request: NextRequest) {
         : 'No se pudieron procesar los archivos.',
     }, { status: successCount > 0 ? 200 : 400 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = getErrorMessage(error);
     logger.error('❌ Error en upload de documentos:', error);
     return NextResponse.json(
       { 
         error: 'Error al procesar la subida de documentos',
-        message: error.message,
+        message: errorMessage,
       },
       { status: 500 }
     );
@@ -559,17 +566,18 @@ async function processDocumentsAsync(
           },
         });
 
-      } catch (docError: any) {
+      } catch (docError: unknown) {
+        const docErrorMessage = getErrorMessage(docError);
         logger.error('Error procesando documento:', { 
           docId: doc.id, 
-          error: docError.message 
+          error: docErrorMessage 
         });
         
         await prisma.documentImport.update({
           where: { id: doc.id },
           data: {
             status: 'failed',
-            errorMessage: docError.message,
+            errorMessage: docErrorMessage,
             processedAt: new Date(),
           },
         });
@@ -592,14 +600,15 @@ async function processDocumentsAsync(
       total: documents.length,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = getErrorMessage(error);
     logger.error('❌ Error en procesamiento async:', error);
     
     await prisma.documentImportBatch.update({
       where: { id: batchId },
       data: {
         status: 'failed',
-        errors: { message: error.message },
+        errors: { message: errorMessage },
       },
     });
   }
