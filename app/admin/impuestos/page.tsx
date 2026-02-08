@@ -200,8 +200,9 @@ export default function ImpuestosPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const initialTab = searchParams?.get('tab') ?? 'resumen';
   
-  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'resumen');
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [tipoPersona, setTipoPersona] = useState<'fisica' | 'juridica'>('fisica');
   const [ejercicio, setEjercicio] = useState(new Date().getFullYear());
   
