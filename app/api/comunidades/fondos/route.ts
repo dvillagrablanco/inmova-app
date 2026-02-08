@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 const createFondoSchema = z.object({
   buildingId: z.string().min(1),
-  tipo: z.enum(['reserva', 'obras', 'mejoras', 'emergencia', 'otro']),
+  tipo: z.enum(['reserva', 'obras', 'contingencia', 'mejoras', 'emergencia', 'otro']),
   nombre: z.string().min(1),
   descripcion: z.string().optional(),
   saldoObjetivo: z.number().optional(),
@@ -176,6 +176,13 @@ export async function POST(request: NextRequest) {
     } else {
       // Crear nuevo fondo
       const validated = createFondoSchema.parse(body);
+      const normalizedTipo = (
+        validated.tipo === 'mejoras'
+          ? 'obras'
+          : validated.tipo === 'emergencia' || validated.tipo === 'otro'
+            ? 'contingencia'
+            : validated.tipo
+      ) as 'reserva' | 'obras' | 'contingencia';
 
       // Verificar que el edificio existe
       const building = await prisma.building.findFirst({
@@ -190,7 +197,7 @@ export async function POST(request: NextRequest) {
         data: {
           companyId,
           buildingId: validated.buildingId,
-          tipo: validated.tipo,
+          tipo: normalizedTipo,
           nombre: validated.nombre,
           descripcion: validated.descripcion,
           saldoObjetivo: validated.saldoObjetivo,
