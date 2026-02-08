@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { authenticateRequest } from '@/lib/api-v1/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -95,14 +96,21 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const resource = searchParams.get('resource');
 
-  // Check for sandbox API key
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader?.includes('sk_test_')) {
+  const authHeader = request.headers.get('authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  if (!token.startsWith('sk_test_')) {
     return NextResponse.json(
       {
         error: 'Sandbox endpoint requires test API key (sk_test_...)',
         hint: 'Get a test API key from dashboard',
       },
+      { status: 401 }
+    );
+  }
+  const authContext = await authenticateRequest(authHeader);
+  if (!authContext.valid || authContext.authMethod !== 'api_key') {
+    return NextResponse.json(
+      { error: 'Invalid API key' },
       { status: 401 }
     );
   }
@@ -112,6 +120,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: MOCK_PROPERTIES,
+        sandbox: true,
         pagination: {
           page: 1,
           limit: 20,
@@ -124,6 +133,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: MOCK_TENANTS,
+        sandbox: true,
         pagination: {
           page: 1,
           limit: 20,
@@ -136,6 +146,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: MOCK_CONTRACTS,
+        sandbox: true,
         pagination: {
           page: 1,
           limit: 20,
@@ -156,9 +167,14 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader?.includes('sk_test_')) {
+  const authHeader = request.headers.get('authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  if (!token.startsWith('sk_test_')) {
     return NextResponse.json({ error: 'Sandbox endpoint requires test API key' }, { status: 401 });
+  }
+  const authContext = await authenticateRequest(authHeader);
+  if (!authContext.valid || authContext.authMethod !== 'api_key') {
+    return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
   }
 
   const body = await request.json();
@@ -170,6 +186,7 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     success: true,
+    sandbox: true,
     data: {
       id: newId,
       ...body,

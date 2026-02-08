@@ -4,6 +4,8 @@
  * Usar en todas las APIs admin para consistencia
  */
 
+import type { Session } from 'next-auth';
+
 // Roles con acceso completo de super administrador
 export const SUPER_ADMIN_ROLES = ['super_admin', 'SUPERADMIN'] as const;
 
@@ -50,7 +52,7 @@ export function isManager(role: string | undefined | null): boolean {
  * if (!authorized) return response;
  */
 export function checkAdminAccess(
-  session: any,
+  session: Session | null | undefined,
   requiredLevel: 'super_admin' | 'admin' | 'manager' = 'admin'
 ) {
   if (!session?.user) {

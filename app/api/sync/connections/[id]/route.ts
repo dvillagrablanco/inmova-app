@@ -33,6 +33,7 @@ interface SyncConnection {
 
 // Almacenamiento en memoria compartido
 const syncConnections: SyncConnection[] = [];
+const ALLOW_IN_MEMORY = process.env.NODE_ENV !== 'production';
 
 export async function GET(
   request: NextRequest,
@@ -42,6 +43,12 @@ export async function GET(
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+    if (!ALLOW_IN_MEMORY) {
+      return NextResponse.json(
+        { error: 'Sincronizaciones no disponibles en producción' },
+        { status: 501 }
+      );
     }
 
     const { id } = await params;
@@ -66,6 +73,12 @@ export async function PUT(
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+    if (!ALLOW_IN_MEMORY) {
+      return NextResponse.json(
+        { error: 'Sincronizaciones no disponibles en producción' },
+        { status: 501 }
+      );
     }
 
     const { id } = await params;
@@ -101,6 +114,12 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+    if (!ALLOW_IN_MEMORY) {
+      return NextResponse.json(
+        { error: 'Sincronizaciones no disponibles en producción' },
+        { status: 501 }
+      );
     }
 
     const { id } = await params;

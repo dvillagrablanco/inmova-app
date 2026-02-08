@@ -1,6 +1,6 @@
 # ⚡ Configurar Stripe Webhook Secret - Manual
 
-**Tu Webhook Secret**: `whsec_Es6lxyUSGHKvt84Kjr0vKhYVJUVK73pe`
+**Tu Webhook Secret**: `whsec_REDACTED`
 
 ---
 
@@ -23,12 +23,12 @@ cp .env.production .env.production.backup-$(date +%Y%m%d_%H%M%S)
 # Verificar si ya existe
 if grep -q "STRIPE_WEBHOOK_SECRET" .env.production; then
   echo "Actualizando STRIPE_WEBHOOK_SECRET existente..."
-  sed -i 's|^STRIPE_WEBHOOK_SECRET=.*|STRIPE_WEBHOOK_SECRET=whsec_Es6lxyUSGHKvt84Kjr0vKhYVJUVK73pe|' .env.production
+  sed -i 's|^STRIPE_WEBHOOK_SECRET=.*|STRIPE_WEBHOOK_SECRET=whsec_REDACTED|' .env.production
 else
   echo "Añadiendo STRIPE_WEBHOOK_SECRET..."
   echo '' >> .env.production
   echo '# Stripe Webhook Secret' >> .env.production
-  echo 'STRIPE_WEBHOOK_SECRET=whsec_Es6lxyUSGHKvt84Kjr0vKhYVJUVK73pe' >> .env.production
+  echo 'STRIPE_WEBHOOK_SECRET=whsec_REDACTED' >> .env.production
 fi
 
 # Verificar

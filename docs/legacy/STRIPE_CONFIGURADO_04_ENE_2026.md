@@ -16,7 +16,7 @@
 ```bash
 ✅ STRIPE_SECRET_KEY (rk_live_51Sf0V7...)
 ✅ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (pk_live_515f0V7...)
-✅ STRIPE_WEBHOOK_SECRET (whsec_Es6lxyUSGHKvt84Kjr0vKhYVJUVK73pe)
+✅ STRIPE_WEBHOOK_SECRET (whsec_REDACTED)
 ```
 
 **Ubicación**: `/opt/inmova-app/.env.production`  
@@ -42,7 +42,7 @@ Total: 5/6 checks pasando
 ## 🔌 WEBHOOK CONFIGURADO
 
 **Endpoint**: https://inmovaapp.com/api/webhooks/stripe  
-**Signing Secret**: whsec_Es6lxyUSGHKvt84Kjr0vKhYVJUVK73pe  
+**Signing Secret**: whsec_REDACTED  
 **Eventos escuchados**:
 - ✅ `payment_intent.succeeded`
 - ✅ `payment_intent.payment_failed`

@@ -202,6 +202,7 @@ export default function PermisosPage() {
   const [permissions, setPermissions] = useState(DEFAULT_PERMISSIONS);
   const [hasChanges, setHasChanges] = useState(false);
   const [saving, setSaving] = useState(false);
+  const isDemoMode = process.env.NODE_ENV !== 'production';
 
   const currentRole = ROLES.find(r => r.id === selectedRole)!;
   const currentPermissions = permissions[selectedRole] || {};
@@ -246,6 +247,10 @@ export default function PermisosPage() {
 
   const handleSave = async () => {
     try {
+      if (!isDemoMode) {
+        toast.error('Funcionalidad no disponible en producción');
+        return;
+      }
       setSaving(true);
       // En producción, esto guardaría en la base de datos
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -274,15 +279,20 @@ export default function PermisosPage() {
           <p className="text-muted-foreground">
             Control de accesos y permisos por rol
           </p>
+          {!isDemoMode && (
+            <Badge variant="secondary" className="mt-2">
+              Funcionalidad no disponible en producción
+            </Badge>
+          )}
         </div>
         <div className="flex gap-2">
           {hasChanges && (
             <>
-              <Button variant="outline" onClick={handleReset} disabled={saving}>
+              <Button variant="outline" onClick={handleReset} disabled={saving || !isDemoMode}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Restaurar
               </Button>
-              <Button onClick={handleSave} disabled={saving}>
+              <Button onClick={handleSave} disabled={saving || !isDemoMode}>
                 <Save className="h-4 w-4 mr-2" />
                 {saving ? 'Guardando...' : 'Guardar Cambios'}
               </Button>

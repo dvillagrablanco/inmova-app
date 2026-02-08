@@ -26,7 +26,7 @@ Costo: €0
 
 ### 2. Stripe Webhook Configurado
 ```
-Webhook Secret: whsec_eLEtxGeyOnR5HT6qeH6D93yvksp3kOll
+Webhook Secret: whsec_REDACTED
 Endpoint: /api/webhooks/stripe
 Status: ✅ FUNCIONANDO
 ```

@@ -388,22 +388,18 @@ export default function NuevoInquilinoPage() {
                         entityType="tenant"
                         autoSaveDocument={true}
                         onApplyData={(data) => {
-                          console.log('[Inquilino] Datos recibidos para aplicar:', JSON.stringify(data, null, 2));
-                          
                           const updates: Partial<typeof formData> = {};
                           
                           // Nombre completo
                           const nombre = data.nombreCompleto || data.nombre || data.fullName || data.name;
                           if (nombre) {
                             updates.nombre = nombre;
-                            console.log('[Inquilino] Nombre:', nombre);
                           }
                           
                           // Documento de identidad
                           const docIdentidad = data.dni || data.nie || data.numeroDocumento || data.documentoIdentidad || data.documentNumber;
                           if (docIdentidad) {
                             updates.documentoIdentidad = docIdentidad;
-                            console.log('[Inquilino] DNI:', docIdentidad);
                           }
                           
                           // Fecha de nacimiento
@@ -423,7 +419,6 @@ export default function NuevoInquilinoPage() {
                               }
                             }
                             updates.fechaNacimiento = fechaFormateada;
-                            console.log('[Inquilino] Fecha:', fechaFormateada);
                           }
                           
                           // Nacionalidad
@@ -449,12 +444,9 @@ export default function NuevoInquilinoPage() {
                             updates.telefono = data.telefono || data.phone;
                           }
                           
-                          console.log('[Inquilino] Updates a aplicar:', JSON.stringify(updates, null, 2));
-                          
                           if (Object.keys(updates).length > 0) {
                             setFormData((prev) => {
                               const newData = { ...prev, ...updates };
-                              console.log('[Inquilino] FormData actualizado:', JSON.stringify(newData, null, 2));
                               return newData;
                             });
                             toast.success(`${Object.keys(updates).length} campos aplicados al formulario`);

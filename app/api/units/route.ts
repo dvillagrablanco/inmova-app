@@ -158,8 +158,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(units);
   } catch (error) {
     logger.error('Error fetching units:', error);
-    // Retornar lista vacía en lugar de error para mejor UX
-    return NextResponse.json([]);
+    return NextResponse.json(
+      { error: 'Error al obtener unidades' },
+      { status: 500 }
+    );
   }
 }
 

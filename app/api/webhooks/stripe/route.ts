@@ -62,12 +62,17 @@ export async function POST(req: NextRequest) {
     let event: Stripe.Event;
 
     try {
-      if (webhookSecret) {
-        event = getStripe().webhooks.constructEvent(body, signature, webhookSecret);
-      } else {
-        // En desarrollo sin webhook secret
-        logger.warn('[Stripe Webhook] No webhook secret configured');
+      if (!webhookSecret) {
+        if (process.env.NODE_ENV === 'production') {
+          return NextResponse.json(
+            { error: 'Webhook secret no configurado' },
+            { status: 503 }
+          );
+        }
+        logger.warn('[Stripe Webhook] No webhook secret configured (dev)');
         event = JSON.parse(body);
+      } else {
+        event = getStripe().webhooks.constructEvent(body, signature, webhookSecret);
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error desconocido';

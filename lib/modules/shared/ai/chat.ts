@@ -5,6 +5,13 @@
 
 import { AIMessage, AIConversation, AIChatOptions, AIChatResponse } from './types';
 import logger from '@/lib/logger';
+import { OpenAIService } from '@/lib/openai-service';
+
+function ensureOpenAIConfigured(): void {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY no configurado');
+  }
+}
 
 /**
  * Send a chat message and get AI response
@@ -15,22 +22,37 @@ export async function sendChatMessage(
   options?: AIChatOptions
 ): Promise<AIChatResponse> {
   try {
+    ensureOpenAIConfigured();
+
     logger.info('Sending chat message to AI', {
       messageLength: message.length,
       model: options?.model || 'default',
     });
 
-    // TODO: Integrate with AI service (OpenAI, Anthropic, Abacus.AI)
-    // This is a stub implementation
+    const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [];
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    if (options?.systemPrompt) {
+      messages.push({ role: 'system', content: options.systemPrompt });
+    }
+
+    if (conversation?.messages?.length) {
+      messages.push(
+        ...conversation.messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        }))
+      );
+    }
+
+    messages.push({ role: 'user', content: message });
+
+    const response = await OpenAIService.chatCompletion(messages);
 
     return {
-      message: 'Mock AI response to: ' + message.substring(0, 50),
-      usage: {
-        promptTokens: 10,
-        completionTokens: 20,
-        totalTokens: 30,
+      message: response || '',
+      metadata: {
+        provider: 'openai',
+        model: options?.model || 'default',
       },
     };
   } catch (error: any) {
@@ -87,15 +109,28 @@ export async function summarizeConversation(
   conversation: AIConversation
 ): Promise<string> {
   try {
+    ensureOpenAIConfigured();
+
     logger.info('Summarizing conversation', {
       messageCount: conversation.messages.length,
     });
 
-    // TODO: Use AI to generate summary
-    
-    return 'Conversation summary';
+    const transcript = conversation.messages
+      .map((m) => `${m.role.toUpperCase()}: ${m.content}`)
+      .join('\n');
+
+    const summary = await OpenAIService.chatCompletion([
+      {
+        role: 'system',
+        content:
+          'Resume la conversación de forma breve, en español, destacando acciones y decisiones.',
+      },
+      { role: 'user', content: transcript },
+    ]);
+
+    return summary || '';
   } catch (error: any) {
     logger.error('Error summarizing conversation:', error);
-    return '';
+    throw error;
   }
 }

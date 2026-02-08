@@ -27,6 +27,14 @@ interface UploadResult {
 }
 
 export class S3Service {
+  private static isConfigured(): boolean {
+    return Boolean(
+      process.env.AWS_ACCESS_KEY_ID &&
+        process.env.AWS_SECRET_ACCESS_KEY &&
+        BUCKET_NAME
+    );
+  }
+
   /**
    * Sube un archivo a S3
    * @param file - Buffer del archivo
@@ -41,9 +49,13 @@ export class S3Service {
   ): Promise<UploadResult> {
     try {
       // Validar que las credenciales estén configuradas
-      if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-        logger.warn('⚠️ AWS credentials not configured, using simulated upload');
-        return this.simulateUpload(filename, folder);
+      if (!this.isConfigured()) {
+        const errorMsg = 'AWS S3 no configurado';
+        logger.warn(`⚠️ ${errorMsg}`);
+        if (process.env.NODE_ENV !== 'production') {
+          return this.simulateUpload(filename, folder);
+        }
+        return { success: false, url: '', key: '', error: errorMsg };
       }
 
       // Generar key único con timestamp
@@ -78,9 +90,17 @@ export class S3Service {
       };
     } catch (error: any) {
       logger.error('❌ Error uploading to S3:', error);
-      
-      // Fallback a simulación en caso de error
-      return this.simulateUpload(filename, folder);
+
+      if (process.env.NODE_ENV !== 'production') {
+        return this.simulateUpload(filename, folder);
+      }
+
+      return {
+        success: false,
+        url: '',
+        key: '',
+        error: error?.message || 'Error subiendo archivo',
+      };
     }
   }
 
@@ -90,9 +110,9 @@ export class S3Service {
    */
   static async deleteFile(key: string): Promise<boolean> {
     try {
-      if (!process.env.AWS_ACCESS_KEY_ID) {
-        logger.warn('⚠️ AWS credentials not configured');
-        return true; // Simulación exitosa
+      if (!this.isConfigured()) {
+        logger.warn('⚠️ AWS S3 no configurado');
+        return process.env.NODE_ENV !== 'production';
       }
 
       const command = new DeleteObjectCommand({
@@ -115,8 +135,11 @@ export class S3Service {
    */
   static async getSignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
     try {
-      if (!process.env.AWS_ACCESS_KEY_ID) {
-        return `https://via.placeholder.com/800x600?text=${encodeURIComponent(key)}`;
+      if (!this.isConfigured()) {
+        if (process.env.NODE_ENV !== 'production') {
+          return `https://via.placeholder.com/800x600?text=${encodeURIComponent(key)}`;
+        }
+        throw new Error('AWS S3 no configurado');
       }
 
       const command = new GetObjectCommand({
@@ -127,7 +150,10 @@ export class S3Service {
       return await getSignedUrl(s3Client, command, { expiresIn });
     } catch (error: any) {
       logger.error('❌ Error generating signed URL:', error);
-      return '';
+      if (process.env.NODE_ENV !== 'production') {
+        return `https://via.placeholder.com/800x600?text=${encodeURIComponent(key)}`;
+      }
+      throw error;
     }
   }
 
@@ -144,7 +170,7 @@ export class S3Service {
       filename.substring(0, 20)
     )}`;
 
-    console.log('🔧 Simulated S3 upload:', { key, url });
+    logger.info('🔧 Simulated S3 upload', { key, url });
 
     return {
       success: true,

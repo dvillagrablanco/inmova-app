@@ -205,8 +205,6 @@ export async function unsubscribePushNotification(
  */
 export function generateVapidKeys() {
   const keys = webpush.generateVAPIDKeys();
-  console.log('VAPID Keys generadas:');
-  console.log('Public Key:', keys.publicKey);
-  console.log('Private Key:', keys.privateKey);
+  logger.info('VAPID keys generadas');
   return keys;
 }

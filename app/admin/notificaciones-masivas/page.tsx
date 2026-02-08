@@ -151,6 +151,7 @@ const STATUS_CONFIG = {
 export default function MassNotificationsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const isDemoMode = process.env.NODE_ENV !== 'production';
 
   const [loading, setLoading] = useState(true);
   const [campaigns, setCampaigns] = useState<NotificationCampaign[]>([]);
@@ -219,6 +220,10 @@ export default function MassNotificationsPage() {
       toast.error('Por favor completa todos los campos requeridos');
       return;
     }
+    if (!isDemoMode) {
+      toast.error('Funcionalidad no disponible en producción');
+      return;
+    }
 
     setSending(true);
     try {
@@ -281,13 +286,18 @@ export default function MassNotificationsPage() {
               Notificaciones Masivas
             </h1>
             <p className="text-muted-foreground mt-1">Envía comunicaciones a grupos de clientes</p>
+            {!isDemoMode && (
+              <Badge variant="secondary" className="mt-2">
+                Funcionalidad no disponible en producción
+              </Badge>
+            )}
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={loadData}>
               <RefreshCw className="mr-2 h-4 w-4" />
               Refrescar
             </Button>
-            <Button onClick={handleCreateCampaign}>
+            <Button onClick={handleCreateCampaign} disabled={!isDemoMode}>
               <Send className="mr-2 h-4 w-4" />
               Nueva Notificación
             </Button>

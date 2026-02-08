@@ -5,15 +5,23 @@
 
 import { prisma } from './db';
 import logger from './logger';
+import crypto from 'crypto';
 
-export type WebhookEventType = 
-  | 'user.created'
-  | 'user.onboarding_completed'
-  | 'building.created'
-  | 'contract.created'
-  | 'payment.received'
-  | 'task.completed'
-  | 'maintenance.created';
+export type WebhookEventType =
+  | 'USER_CREATED'
+  | 'USER_ONBOARDING_COMPLETED'
+  | 'PROPERTY_CREATED'
+  | 'PROPERTY_UPDATED'
+  | 'PROPERTY_DELETED'
+  | 'TENANT_CREATED'
+  | 'TENANT_UPDATED'
+  | 'CONTRACT_CREATED'
+  | 'CONTRACT_SIGNED'
+  | 'PAYMENT_CREATED'
+  | 'PAYMENT_RECEIVED'
+  | 'MAINTENANCE_CREATED'
+  | 'MAINTENANCE_RESOLVED'
+  | 'DOCUMENT_UPLOADED';
 
 interface CreateWebhookEventOptions {
   companyId: string;
@@ -211,7 +219,6 @@ async function sendWebhook(options: {
 
     // Agregar firma HMAC si hay secret
     if (secret) {
-      const crypto = require('crypto');
       const signature = crypto
         .createHmac('sha256', secret)
         .update(body)
@@ -262,29 +269,26 @@ async function getWebhookSubscriptions(
   companyId: string,
   event: WebhookEventType
 ): Promise<WebhookSubscription[]> {
-  // DEMO: Retornar suscripciones desde variables de entorno
-  const webhookUrl = process.env.WEBHOOK_URL;
-  const webhookSecret = process.env.WEBHOOK_SECRET;
-  const webhookEvents = process.env.WEBHOOK_EVENTS?.split(',') || [];
-
-  if (!webhookUrl) {
-    return [];
-  }
-
-  // Verificar si este evento está suscrito
-  const isSubscribed = webhookEvents.includes('*') || webhookEvents.includes(event);
-
-  if (!isSubscribed) {
-    return [];
-  }
-
-  return [
-    {
-      url: webhookUrl,
-      events: webhookEvents as WebhookEventType[],
-      secret: webhookSecret,
+  const subscriptions = await prisma.webhookSubscription.findMany({
+    where: {
+      companyId,
+      active: true,
+      events: {
+        has: event,
+      },
     },
-  ];
+    select: {
+      url: true,
+      events: true,
+      secret: true,
+    },
+  });
+
+  return subscriptions.map((subscription) => ({
+    url: subscription.url,
+    events: subscription.events as WebhookEventType[],
+    secret: subscription.secret,
+  }));
 }
 
 /**
@@ -292,14 +296,21 @@ async function getWebhookSubscriptions(
  */
 export async function registerWebhookSubscription(
   companyId: string,
+  createdBy: string,
   url: string,
   events: WebhookEventType[],
   secret?: string
-): Promise<void> {
-  // TODO: Implementar guardado en base de datos
-  // Por ahora, esta función es un placeholder
-  logger.info(`Suscripción webhook registrada: ${url}`, {
-    companyId,
-    events,
+): Promise<string> {
+  const webhookSecret = secret || crypto.randomBytes(32).toString('hex');
+  await prisma.webhookSubscription.create({
+    data: {
+      companyId,
+      url,
+      events: events as any,
+      secret: webhookSecret,
+      createdBy,
+    },
   });
+  logger.info(`Suscripción webhook registrada: ${url}`, { companyId, events });
+  return webhookSecret;
 }

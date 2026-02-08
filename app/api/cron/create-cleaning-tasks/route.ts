@@ -2,9 +2,10 @@ export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
+import { autoCreateCleaningTasks } from '@/lib/cron-service';
+import { authorizeCronRequest } from '@/lib/cron-auth';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { autoCreateCleaningTasks } from '@/lib/cron-service';
 
 /**
  * API Route: Creación automática de tareas de limpieza
@@ -12,16 +13,19 @@ import { autoCreateCleaningTasks } from '@/lib/cron-service';
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const authResult = await authorizeCronRequest(request, {
+      allowSession: true,
+      requireSuperAdmin: true,
+    });
+    if (!authResult.authorized) {
       return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
+        { error: authResult.error || 'No autorizado' },
+        { status: authResult.status }
       );
     }
     const body = await request.json().catch(() => ({}));
+    const session = await getServerSession(authOptions);
     const companyId = body.companyId || session?.user?.companyId;
-    console.log(`[API] Creando tareas de limpieza automáticas para empresa: ${companyId}`);
     const result = await autoCreateCleaningTasks(companyId);
     return NextResponse.json({
       success: result.success,

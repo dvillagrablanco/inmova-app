@@ -1,6 +1,6 @@
 # ⚡ COMANDOS PARA CONFIGURAR STRIPE WEBHOOK
 
-**Tu Webhook Secret**: `whsec_Es6lxyUSGHKvt84Kjr0vKhYVJUVK73pe`
+**Tu Webhook Secret**: `whsec_REDACTED`
 
 ---
 
@@ -47,12 +47,12 @@ cp .env.production .env.production.backup-$(date +%Y%m%d_%H%M%S)
 
 # Verificar si ya existe y actualizar/añadir
 if grep -q "STRIPE_WEBHOOK_SECRET" .env.production; then
-  sed -i 's|^STRIPE_WEBHOOK_SECRET=.*|STRIPE_WEBHOOK_SECRET=whsec_Es6lxyUSGHKvt84Kjr0vKhYVJUVK73pe|' .env.production
+  sed -i 's|^STRIPE_WEBHOOK_SECRET=.*|STRIPE_WEBHOOK_SECRET=whsec_REDACTED|' .env.production
   echo "✅ STRIPE_WEBHOOK_SECRET actualizado"
 else
   echo '' >> .env.production
   echo '# Stripe Webhook Secret' >> .env.production
-  echo 'STRIPE_WEBHOOK_SECRET=whsec_Es6lxyUSGHKvt84Kjr0vKhYVJUVK73pe' >> .env.production
+  echo 'STRIPE_WEBHOOK_SECRET=whsec_REDACTED' >> .env.production
   echo "✅ STRIPE_WEBHOOK_SECRET añadido"
 fi
 
@@ -147,7 +147,7 @@ Después de completar:
 grep STRIPE_WEBHOOK_SECRET /opt/inmova-app/.env.production
 
 # Debe mostrar:
-# STRIPE_WEBHOOK_SECRET=whsec_Es6lxyUSGHKvt84Kjr0vKhYVJUVK73pe
+# STRIPE_WEBHOOK_SECRET=whsec_REDACTED
 ```
 
 **PM2 no reinicia**:

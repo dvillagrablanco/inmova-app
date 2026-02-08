@@ -117,7 +117,20 @@ export class ZucchettiIntegrationService {
     //   },
     // });
 
-    logger.info('⚠️ Zucchetti Integration Service: Modo DEMO - Requiere credenciales reales');
+    if (!this.isConfigured()) {
+      logger.warn('Zucchetti Integration Service: credenciales incompletas');
+    }
+  }
+
+  private assertConfigured(): void {
+    const missing: string[] = [];
+    if (!this.config.clientId) missing.push('ZUCCHETTI_CLIENT_ID');
+    if (!this.config.clientSecret) missing.push('ZUCCHETTI_CLIENT_SECRET');
+    if (!this.config.apiUrl) missing.push('ZUCCHETTI_API_URL');
+    if (!this.config.oauthUrl) missing.push('ZUCCHETTI_OAUTH_URL');
+    if (missing.length > 0) {
+      throw new Error(`Zucchetti no configurado: faltan ${missing.join(', ')}`);
+    }
   }
 
   /**
@@ -362,37 +375,18 @@ export class ZucchettiIntegrationService {
    */
 
   async syncTenantToCustomerDemo(tenant: any): Promise<any> {
-    logger.info('🔄 [DEMO] Sincronizando inquilino con Zucchetti:', tenant.nombreCompleto);
-    return {
-      id: `zucchetti_customer_${Math.random().toString(36).substring(7)}`,
-      name: tenant.nombreCompleto,
-      taxId: tenant.dni,
-      email: tenant.email,
-      synced: true,
-      syncDate: new Date(),
-    };
+    this.assertConfigured();
+    throw new Error('syncTenantToCustomerDemo deshabilitado: integración real no implementada');
   }
 
   async createInvoiceDemo(contractData: any): Promise<any> {
-    logger.info('📄 [DEMO] Creando factura en Zucchetti para contrato:', contractData.id);
-    return {
-      id: `zucchetti_invoice_${Math.random().toString(36).substring(7)}`,
-      number: `INV-${contractData.id.substring(0, 8).toUpperCase()}`,
-      total: contractData.rentaMensual * 1.21,
-      status: 'draft',
-      created: true,
-      createdAt: new Date(),
-    };
+    this.assertConfigured();
+    throw new Error('createInvoiceDemo deshabilitado: integración real no implementada');
   }
 
   async syncPaymentDemo(payment: any): Promise<any> {
-    logger.info('💰 [DEMO] Registrando pago en Zucchetti:', payment.monto);
-    return {
-      id: `zucchetti_payment_${Math.random().toString(36).substring(7)}`,
-      amount: payment.monto,
-      registered: true,
-      registeredAt: new Date(),
-    };
+    this.assertConfigured();
+    throw new Error('syncPaymentDemo deshabilitado: integración real no implementada');
   }
 
   /**
@@ -400,7 +394,7 @@ export class ZucchettiIntegrationService {
    */
   async testConnection(): Promise<{ success: boolean; message: string }> {
     try {
-      if (!this.config.clientId || !this.config.clientSecret) {
+      if (!this.isConfigured()) {
         return {
           success: false,
           message:
@@ -408,10 +402,9 @@ export class ZucchettiIntegrationService {
         };
       }
 
-      // Modo demo por ahora
       return {
         success: true,
-        message: 'Conectado exitosamente a Zucchetti (Modo Demo)',
+        message: 'Configuración de Zucchetti válida. Falta verificación de conectividad.',
       };
     } catch (error: any) {
       return {
@@ -425,7 +418,7 @@ export class ZucchettiIntegrationService {
    * Verifica si está configurado
    */
   isConfigured(): boolean {
-    return !!(this.config.clientId && this.config.clientSecret);
+    return !!(this.config.clientId && this.config.clientSecret && this.config.apiUrl && this.config.oauthUrl);
   }
 }
 
@@ -440,7 +433,8 @@ export function isZucchettiConfigured(): boolean {
   return !!(
     process.env.ZUCCHETTI_CLIENT_ID &&
     process.env.ZUCCHETTI_CLIENT_SECRET &&
-    process.env.ZUCCHETTI_API_KEY
+    process.env.ZUCCHETTI_API_URL &&
+    process.env.ZUCCHETTI_OAUTH_URL
   );
 }
 

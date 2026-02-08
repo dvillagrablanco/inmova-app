@@ -24,12 +24,19 @@ const createTransactionSchema = z.object({
 // Almacenamiento temporal en memoria
 let transactionsStore: any[] = [];
 let walletsStore: Map<string, { balance: number; tenantId: string; companyId: string }> = new Map();
+const ALLOW_IN_MEMORY = process.env.NODE_ENV !== 'production';
 
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+    if (!ALLOW_IN_MEMORY) {
+      return NextResponse.json(
+        { error: 'Microtransacciones no disponibles en producción' },
+        { status: 501 }
+      );
     }
 
     const companyId = session.user.companyId;
@@ -84,6 +91,12 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+    if (!ALLOW_IN_MEMORY) {
+      return NextResponse.json(
+        { error: 'Microtransacciones no disponibles en producción' },
+        { status: 501 }
+      );
     }
 
     const companyId = session.user.companyId;

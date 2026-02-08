@@ -24,7 +24,7 @@ interface SubscribeRequest {
  * Body:
  * {
  *   url: 'https://example.com/webhooks',
- *   events: ['user.created', 'building.created'],
+ *   events: ['USER_CREATED', 'PROPERTY_CREATED'],
  *   secret: 'optional_hmac_secret'
  * }
  */
@@ -64,13 +64,20 @@ export async function POST(req: NextRequest) {
 
     // Validar eventos
     const validEvents: WebhookEventType[] = [
-      'user.created',
-      'user.onboarding_completed',
-      'building.created',
-      'contract.created',
-      'payment.received',
-      'task.completed',
-      'maintenance.created',
+      'USER_CREATED',
+      'USER_ONBOARDING_COMPLETED',
+      'PROPERTY_CREATED',
+      'PROPERTY_UPDATED',
+      'PROPERTY_DELETED',
+      'TENANT_CREATED',
+      'TENANT_UPDATED',
+      'CONTRACT_CREATED',
+      'CONTRACT_SIGNED',
+      'PAYMENT_CREATED',
+      'PAYMENT_RECEIVED',
+      'MAINTENANCE_CREATED',
+      'MAINTENANCE_RESOLVED',
+      'DOCUMENT_UPLOADED',
     ];
 
     const invalidEvents = events.filter((e) => !validEvents.includes(e));
@@ -85,7 +92,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Registrar suscripción
-    await registerWebhookSubscription(session.user.companyId, url, events, secret);
+    const generatedSecret = await registerWebhookSubscription(
+      session.user.companyId,
+      session.user.id,
+      url,
+      events,
+      secret
+    );
 
     logger.info(`Webhook suscrito para compañía ${session.user.companyId}`, {
       url,
@@ -98,7 +111,8 @@ export async function POST(req: NextRequest) {
       subscription: {
         url,
         events,
-        hasSecret: !!secret,
+        hasSecret: true,
+        secret: secret || generatedSecret,
       },
     });
   } catch (error: any) {
@@ -127,31 +141,27 @@ export async function GET(req: NextRequest) {
 
   const availableEvents = [
     {
-      event: 'user.created',
+      event: 'USER_CREATED',
       description: 'Se crea un nuevo usuario',
     },
     {
-      event: 'user.onboarding_completed',
+      event: 'USER_ONBOARDING_COMPLETED',
       description: 'Un usuario completa el onboarding',
     },
     {
-      event: 'building.created',
+      event: 'PROPERTY_CREATED',
       description: 'Se crea una nueva propiedad',
     },
     {
-      event: 'contract.created',
+      event: 'CONTRACT_CREATED',
       description: 'Se crea un nuevo contrato',
     },
     {
-      event: 'payment.received',
+      event: 'PAYMENT_RECEIVED',
       description: 'Se recibe un pago',
     },
     {
-      event: 'task.completed',
-      description: 'Se completa una tarea',
-    },
-    {
-      event: 'maintenance.created',
+      event: 'MAINTENANCE_CREATED',
       description: 'Se crea una orden de mantenimiento',
     },
   ];
