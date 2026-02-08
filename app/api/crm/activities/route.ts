@@ -11,7 +11,7 @@ export const runtime = 'nodejs';
 // Schema de validación para actividad CRM
 const createCRMActivitySchema = z.object({
   leadId: z.string().uuid({ message: 'ID de lead inválido' }),
-  tipo: z.enum(['llamada', 'email', 'reunion', 'visita', 'tarea', 'nota'], {
+  tipo: z.enum(['llamada', 'email', 'reunion', 'visita', 'seguimiento', 'tarea', 'nota'], {
     message: 'Tipo de actividad inválido',
   }),
   asunto: z.string().min(1, { message: 'El asunto es requerido' }),
@@ -106,6 +106,13 @@ export async function POST(request: NextRequest) {
       proximaAccion,
       completada,
     } = validationResult.data;
+    const normalizedTipo = (tipo === 'tarea' ? 'seguimiento' : tipo) as
+      | 'llamada'
+      | 'email'
+      | 'reunion'
+      | 'visita'
+      | 'seguimiento'
+      | 'nota';
 
     // Verificar que el lead existe
     const lead = await prisma.crmLead.findUnique({
@@ -121,7 +128,7 @@ export async function POST(request: NextRequest) {
     const activity = await prisma.crmActivity.create({
       data: {
         leadId,
-        tipo,
+        tipo: normalizedTipo,
         asunto,
         descripcion,
         fecha: new Date(fecha),
