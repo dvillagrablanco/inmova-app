@@ -60,7 +60,7 @@ export async function GET(
       where: { projectId: params.id },
       orderBy: [
         { fase: 'asc' },
-        { orden: 'asc' },
+        { fechaInicio: 'asc' },
       ],
     });
 
@@ -81,7 +81,7 @@ export async function GET(
       projectId: params.id,
       projectNombre: project.nombre,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching work orders:', error);
     return NextResponse.json({ error: 'Error al obtener órdenes' }, { status: 500 });
   }
@@ -102,7 +102,7 @@ export async function POST(
       return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
     }
 
-    const body = await req.json();
+    const body: unknown = await req.json();
     const validationResult = createWorkOrderSchema.safeParse(body);
 
     if (!validationResult.success) {
@@ -124,13 +124,6 @@ export async function POST(
       return NextResponse.json({ error: 'Obra no encontrada' }, { status: 404 });
     }
 
-    // Obtener el siguiente orden para esta fase
-    const lastOrder = await prisma.constructionWorkOrder.findFirst({
-      where: { projectId: params.id, fase: data.fase },
-      orderBy: { orden: 'desc' },
-      select: { orden: true },
-    });
-
     const workOrder = await prisma.constructionWorkOrder.create({
       data: {
         projectId: params.id,
@@ -144,8 +137,7 @@ export async function POST(
         fechaInicio: new Date(data.fechaInicio),
         fechaFin: new Date(data.fechaFin),
         estado: 'pendiente',
-        porcentajeAvance: data.porcentajeAvance || 0,
-        orden: (lastOrder?.orden || 0) + 1,
+        porcentajeAvance: data.porcentajeAvance ?? 0,
       },
     });
 
@@ -156,7 +148,7 @@ export async function POST(
       data: workOrder,
       message: 'Orden de trabajo creada',
     }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating work order:', error);
     return NextResponse.json({ error: 'Error al crear orden' }, { status: 500 });
   }
