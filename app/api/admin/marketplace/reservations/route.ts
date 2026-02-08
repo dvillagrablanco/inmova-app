@@ -82,7 +82,9 @@ export async function GET(request: NextRequest) {
     ]);
 
     const countsByEstado = statusCounts.reduce<Record<string, number>>((acc, item) => {
-      acc[item.estado] = item._count._all;
+      const count =
+        typeof item._count === 'object' && item._count ? item._count._all ?? 0 : 0;
+      acc[item.estado] = count;
       return acc;
     }, {});
 
