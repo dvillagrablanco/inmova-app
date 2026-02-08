@@ -74,7 +74,7 @@ async function syncCustomers(
     const tenants = await prisma.tenant.findMany({
       where: {
         companyId,
-        activo: true,
+        isDemo: false,
         ...(options.ids && { id: { in: options.ids } }),
       },
       select: {
