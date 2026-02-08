@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     const onboardingData = await getOnboardingProgress(user.id, user.companyId);
     const conversationHistory = includeHistory
-      ? await getChatbotHistory(user.id, 5) // Últimos 5 mensajes
+      ? (await getChatbotHistory(user.id, user.companyId)).slice(-5) // Últimos 5 mensajes
       : [];
 
     type OnboardingTask = {
@@ -79,23 +79,22 @@ export async function POST(request: NextRequest) {
         ) || [],
       completedTasks:
         onboardingData?.tasks?.filter((t: OnboardingTask) => t.status === 'completed') || [],
+      conversationHistory,
     };
 
     // 4. Generar respuesta del chatbot
-    const botResponse = await generateChatbotResponse(
-      context,
-      message,
-      conversationHistory
-    );
+    const botResponse = await generateChatbotResponse(message, context);
 
     // 5. Guardar la interacción en BD
-    await saveChatbotInteraction(user.id, message, botResponse, {
+    await saveChatbotInteraction(user.id, user.companyId, {
+      message,
+      response: botResponse,
       vertical: user.vertical,
       onboardingProgress: context.onboardingProgress,
     });
 
     // 6. Generar sugerencias proactivas
-    const suggestions = generateProactiveSuggestions(context);
+    const suggestions = await generateProactiveSuggestions(user.id, user.companyId);
 
     return NextResponse.json({
       response: botResponse,
