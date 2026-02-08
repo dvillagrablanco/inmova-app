@@ -78,7 +78,7 @@ const extractObligations = (settings: unknown): StoredObligation[] => {
 
   return obligacionesValue
     .map((item) => storedObligationSchema.safeParse(item))
-    .filter((result) => result.success)
+    .filter((result): result is z.SafeParseSuccess<StoredObligation> => result.success)
     .map((result) => result.data);
 };
 
