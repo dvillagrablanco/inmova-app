@@ -135,7 +135,7 @@ const PLANES_DATA = [
   },
 ];
 
-const normalizeTier = (tier: string) => {
+const normalizeTier = (tier: string): 'STARTER' | 'PROFESSIONAL' | 'BUSINESS' | 'ENTERPRISE' => {
   const normalized = tier.toLowerCase();
   if (normalized === 'basico') return 'STARTER';
   if (normalized === 'profesional') return 'PROFESSIONAL';
@@ -177,14 +177,13 @@ export async function GET(request: NextRequest) {
 
     // 3. Crear solo los planes que no existen (verificar por nombre)
     for (const planData of PLANES_DATA) {
-      const tier = normalizeTier(planData.tier);
-      const maxUsuarios = planData.maxUsuarios ?? 9999;
-      const maxPropiedades = planData.maxPropiedades ?? 9999;
+      const { tier: rawTier, maxUsuarios, maxPropiedades, ...rest } = planData;
+      const tier = normalizeTier(rawTier);
       const planPayload = {
-        ...planData,
+        ...rest,
         tier,
-        maxUsuarios,
-        maxPropiedades,
+        maxUsuarios: maxUsuarios ?? 9999,
+        maxPropiedades: maxPropiedades ?? 9999,
       };
       if (existingNames.has(planData.nombre)) {
         skipped++;
