@@ -129,7 +129,6 @@ export async function GET(request: NextRequest) {
     if (!sessionUser?.id) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
-    const userId = sessionUser.id;
     const { role, companyId } = await getCompanyContext(
       sessionUser.id,
       sessionUser.role,
@@ -192,6 +191,7 @@ export async function POST(request: NextRequest) {
     if (!sessionUser?.id) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
+    const userId = sessionUser.id;
 
     const { role, companyId } = await getCompanyContext(
       sessionUser.id,
