@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
             },
           },
           facturas: {
-            where: { estado: 'pendiente' },
+            where: { estado: { in: ['emitida', 'vencida'] } },
             select: { id: true, totalFactura: true },
           },
         },
