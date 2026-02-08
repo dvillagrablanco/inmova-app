@@ -9,6 +9,18 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+type AuditActionValue =
+  | 'CREATE'
+  | 'UPDATE'
+  | 'DELETE'
+  | 'LOGIN'
+  | 'LOGOUT'
+  | 'EXPORT'
+  | 'IMPORT';
+
+const isAuditAction = (value: string): value is AuditActionValue =>
+  ['CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT', 'EXPORT', 'IMPORT'].includes(value);
+
 /**
  * GET /api/admin/system-logs
  * Obtiene logs del sistema - Solo Super Admin
@@ -36,7 +48,10 @@ export async function GET(request: NextRequest) {
     const whereClause: Prisma.AuditLogWhereInput = {};
     
     if (level !== 'all') {
-      whereClause.action = { contains: level.toUpperCase() };
+      const actionFilter = level.toUpperCase();
+      if (isAuditAction(actionFilter)) {
+        whereClause.action = actionFilter;
+      }
     }
 
     // Obtener logs de auditoría reales
