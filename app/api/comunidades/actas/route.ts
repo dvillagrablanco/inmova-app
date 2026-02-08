@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           building: {
-            select: { id: true, name: true, address: true },
+            select: { id: true, nombre: true, direccion: true },
           },
         },
         orderBy: { fecha: 'desc' },
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
       },
       include: {
         building: {
-          select: { id: true, name: true },
+          select: { id: true, nombre: true },
         },
       },
     });
