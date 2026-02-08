@@ -10,12 +10,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 import logger from '@/lib/logger';
-import type { WorkOrderStatus } from '@/types/prisma-types';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-
-const OPEN_TENDER_STATUSES: WorkOrderStatus[] = ['pendiente'];
 
 const createQuoteSchema = z.object({
   providerId: z.string(),
@@ -141,7 +138,7 @@ export async function POST(
     }
 
     // Verificar que la licitación está abierta
-    if (!OPEN_TENDER_STATUSES.includes(tender.estado)) {
+    if (tender.estado !== 'pendiente') {
       return NextResponse.json({ 
         error: 'La licitación ya no acepta ofertas' 
       }, { status: 400 });
