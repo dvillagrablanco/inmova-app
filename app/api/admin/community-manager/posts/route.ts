@@ -15,7 +15,7 @@ const PLATFORM_MAP = {
 } as const;
 
 type PlatformInput = keyof typeof PLATFORM_MAP;
-type SocialMediaPlatform = (typeof PLATFORM_MAP)[PlatformInput];
+type SocialMediaPlatform = string;
 
 const STATUS_MAP = {
   draft: 'borrador',
