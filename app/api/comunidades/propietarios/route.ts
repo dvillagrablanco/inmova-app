@@ -39,13 +39,9 @@ export async function GET(request: NextRequest) {
     const comunidadId = searchParams.get('comunidadId');
 
     const sessionUser = session.user as { companyId?: string | null };
-    const userId = sessionUser.id;
     const companyId = sessionUser.companyId;
     if (!companyId) {
       return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
-    }
-    if (!userId) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     // Si se proporciona comunidadId, obtener el buildingId
