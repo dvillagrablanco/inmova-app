@@ -15,10 +15,10 @@ import {
 export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth();
-    
+
     const { searchParams } = new URL(request.url);
     const listingId = searchParams.get('listingId');
-    
+
     // Obtener sincronizaciones de canales
     const channels = await prisma.sTRChannelSync.findMany({
       where: {
@@ -32,16 +32,16 @@ export async function GET(request: NextRequest) {
             titulo: true,
             precioPorNoche: true,
             tasaOcupacion: true,
-          }
-        }
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
-    
+
     // Obtener métricas recientes por canal
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
+
     const metrics = await prisma.sTRChannelMetrics.groupBy({
       by: ['canal'],
       where: {
@@ -58,9 +58,9 @@ export async function GET(request: NextRequest) {
         tasaOcupacion: true,
         adr: true,
         ratingPromedio: true,
-      }
+      },
     });
-    
+
     // Historial de sincronizaciones recientes
     const recentSyncs = await prisma.sTRSyncHistory.findMany({
       where: {
@@ -69,17 +69,18 @@ export async function GET(request: NextRequest) {
       orderBy: { iniciadoEn: 'desc' },
       take: 50,
     });
-    
+
     // Calcular estadísticas de sincronización
     const syncStats = {
       total: recentSyncs.length,
-      exitosos: recentSyncs.filter(s => s.exitoso).length,
-      fallidos: recentSyncs.filter(s => !s.exitoso).length,
-      tasaExito: recentSyncs.length > 0 
-        ? (recentSyncs.filter(s => s.exitoso).length / recentSyncs.length * 100).toFixed(1)
-        : 100,
+      exitosos: recentSyncs.filter((s) => s.exitoso).length,
+      fallidos: recentSyncs.filter((s) => !s.exitoso).length,
+      tasaExito:
+        recentSyncs.length > 0
+          ? ((recentSyncs.filter((s) => s.exitoso).length / recentSyncs.length) * 100).toFixed(1)
+          : 100,
     };
-    
+
     return NextResponse.json({
       channels,
       metrics,
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth();
     const data = await request.json();
-    
+
     const { channelId, tipoEvento } = data;
 
     const channelSync = await prisma.sTRChannelSync.findUnique({
@@ -109,7 +110,7 @@ export async function POST(request: NextRequest) {
     if (!channelSync.activo) {
       return NextResponse.json({ error: 'Canal inactivo' }, { status: 400 });
     }
-    
+
     // Registrar intento de sincronización
     const syncHistory = await prisma.sTRSyncHistory.create({
       data: {
@@ -117,22 +118,20 @@ export async function POST(request: NextRequest) {
         tipoEvento: tipoEvento || 'availability_update',
         direccion: 'push',
         exitoso: false, // Se actualizará cuando termine
-      }
+      },
     });
-    
+
     // Simular sincronización (en producción esto llamaría a APIs reales)
     const startTime = Date.now();
-    
+
     // Actualizar estado del canal
     await prisma.sTRChannelSync.update({
       where: { id: channelId },
       data: {
         ultimaSync: new Date(),
         estadoSync: 'sincronizando',
-      }
+      },
     });
-
-    const startTime = Date.now();
     let result;
 
     switch (tipoEvento) {
@@ -166,10 +165,7 @@ export async function POST(request: NextRequest) {
         );
         break;
       default:
-        return NextResponse.json(
-          { error: 'Tipo de sincronización no válido' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Tipo de sincronización no válido' }, { status: 400 });
     }
 
     const endTime = Date.now();
@@ -182,7 +178,7 @@ export async function POST(request: NextRequest) {
         finalizadoEn: new Date(),
         duracionMs: endTime - startTime,
         mensajeError: exitoso ? null : (result?.errors || ['Error de sincronización'])[0],
-      }
+      },
     });
 
     await prisma.sTRChannelSync.update({
@@ -190,7 +186,7 @@ export async function POST(request: NextRequest) {
       data: {
         estadoSync: exitoso ? 'sincronizado' : 'error',
         erroresSync: exitoso ? 0 : { increment: 1 },
-      }
+      },
     });
 
     return NextResponse.json({
