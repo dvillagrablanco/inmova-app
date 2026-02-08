@@ -170,31 +170,32 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Comisión no encontrada' }, { status: 404 });
     }
 
-    let newEstado: string;
+    type CommissionStatusValue = 'PENDING' | 'APPROVED' | 'PAID' | 'CANCELLED';
+    let newEstado: CommissionStatusValue;
     let fechaPago: Date | null = null;
 
     switch (validated.action) {
       case 'approve':
-        if (commission.estado !== 'PENDIENTE') {
+        if (commission.estado !== 'PENDING') {
           return NextResponse.json(
             { error: 'Solo se pueden aprobar comisiones pendientes' },
             { status: 400 }
           );
         }
-        newEstado = 'APROBADA';
+        newEstado = 'APPROVED';
         break;
       case 'pay':
-        if (commission.estado !== 'APROBADA') {
+        if (commission.estado !== 'APPROVED') {
           return NextResponse.json(
             { error: 'Solo se pueden pagar comisiones aprobadas' },
             { status: 400 }
           );
         }
-        newEstado = 'PAGADA';
+        newEstado = 'PAID';
         fechaPago = new Date();
         break;
       case 'reject':
-        newEstado = 'RECHAZADA';
+        newEstado = 'CANCELLED';
         break;
       default:
         return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
@@ -217,8 +218,9 @@ export async function PUT(request: NextRequest) {
       },
       message: `Comisión ${validated.action === 'approve' ? 'aprobada' : validated.action === 'pay' ? 'marcada como pagada' : 'rechazada'}`,
     });
-  } catch (error: any) {
-    logger.error('[Commissions PUT Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Commissions PUT Error]:', { message });
 
     if (error instanceof z.ZodError) {
       return NextResponse.json({
@@ -228,7 +230,7 @@ export async function PUT(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Error al actualizar comisión', message: error.message },
+      { error: 'Error al actualizar comisión', message },
       { status: 500 }
     );
   }
