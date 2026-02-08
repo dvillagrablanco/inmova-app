@@ -21,6 +21,16 @@ const TIPO_MAPPING = {
   coworking: ['coworking_hot_desk', 'coworking_dedicated', 'coworking_office', 'sala_reuniones'],
 } as const;
 
+type CommercialSpaceTypeValue =
+  (typeof TIPO_MAPPING)[keyof typeof TIPO_MAPPING][number];
+const COMMERCIAL_TYPES = new Set<CommercialSpaceTypeValue>(
+  Object.values(TIPO_MAPPING).flat()
+);
+const isCommercialSpaceType = (
+  value: string
+): value is CommercialSpaceTypeValue =>
+  COMMERCIAL_TYPES.has(value as CommercialSpaceTypeValue);
+
 const isCategoriaComercial = (
   value: string
 ): value is keyof typeof TIPO_MAPPING => value in TIPO_MAPPING;
@@ -35,10 +45,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const categoria = searchParams.get('categoria'); // oficinas, locales, naves, coworking
     const estado = searchParams.get('estado');
-
-    // Construir filtro de tipos
-    type CommercialSpaceTypeValue =
-      (typeof TIPO_MAPPING)[keyof typeof TIPO_MAPPING][number];
 
     let tipoFilter: CommercialSpaceTypeValue[] = [];
     if (categoria && isCategoriaComercial(categoria)) {
@@ -162,7 +168,8 @@ export async function POST(request: NextRequest) {
     };
 
     const nombre = getString(body.nombre);
-    const tipo = getString(body.tipo);
+    const tipoRaw = getString(body.tipo);
+    const tipo = isCommercialSpaceType(tipoRaw) ? tipoRaw : null;
     const direccion = getString(body.direccion);
     const ciudad = getString(body.ciudad);
     const codigoPostal = getString(body.codigoPostal);
