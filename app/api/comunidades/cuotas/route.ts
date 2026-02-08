@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import type { Prisma } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -24,6 +25,11 @@ const createCuotaSchema = z.object({
   notas: z.string().optional(),
 });
 
+const PAYMENT_STATUSES = ['pendiente', 'pagado', 'atrasado'] as const;
+type PaymentStatusValue = (typeof PAYMENT_STATUSES)[number];
+const isPaymentStatus = (value: string): value is PaymentStatusValue =>
+  PAYMENT_STATUSES.includes(value as PaymentStatusValue);
+
 // GET - Listar cuotas
 export async function GET(request: NextRequest) {
   try {
@@ -40,7 +46,11 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '50');
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
 
     // Obtener buildingId si se proporciona comunidadId
     let targetBuildingId = buildingId;
@@ -53,9 +63,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Construir filtros
-    const where: any = { companyId };
+    const where: Prisma.CommunityFeeWhereInput = { companyId };
     if (targetBuildingId) where.buildingId = targetBuildingId;
-    if (estado) where.estado = estado;
+    const estadoValue = estado && isPaymentStatus(estado) ? estado : null;
+    if (estadoValue) where.estado = estadoValue;
     if (periodo) where.periodo = periodo;
 
     const [cuotas, total] = await Promise.all([
@@ -63,10 +74,10 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           building: {
-            select: { id: true, name: true },
+            select: { id: true, nombre: true },
           },
           unit: {
-            select: { id: true, unitNumber: true, type: true },
+            select: { id: true, numero: true, tipo: true },
           },
         },
         orderBy: [{ fechaVencimiento: 'desc' }, { createdAt: 'desc' }],
@@ -77,7 +88,9 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Calcular estadísticas
-    const statsWhere = targetBuildingId ? { companyId, buildingId: targetBuildingId } : { companyId };
+    const statsWhere: Prisma.CommunityFeeWhereInput = targetBuildingId
+      ? { companyId, buildingId: targetBuildingId }
+      : { companyId };
     
     const [totalPendiente, totalCobrado, morosos] = await Promise.all([
       prisma.communityFee.aggregate({
@@ -95,11 +108,12 @@ export async function GET(request: NextRequest) {
         where: { ...statsWhere, estado: 'pendiente' },
         _sum: { importeTotal: true },
         _count: { id: true },
+        orderBy: { unitId: 'asc' },
       }),
     ]);
 
     return NextResponse.json({
-      cuotas: cuotas.map(c => ({
+      cuotas: cuotas.map((c) => ({
         ...c,
         importeTotal: c.importeBase * c.coeficiente,
       })),
@@ -117,10 +131,11 @@ export async function GET(request: NextRequest) {
         unidadesMorosas: morosos.length,
       },
     });
-  } catch (error: any) {
-    logger.error('[Cuotas GET Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Cuotas GET Error]:', { message });
     return NextResponse.json(
-      { error: 'Error obteniendo cuotas', details: error.message },
+      { error: 'Error obteniendo cuotas', details: message },
       { status: 500 }
     );
   }
@@ -134,7 +149,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
     const body = await request.json();
 
     // Verificar si es generación masiva o individual
@@ -147,14 +166,14 @@ export async function POST(request: NextRequest) {
           buildingId,
           building: { companyId },
         },
-        select: { id: true, squareMeters: true },
+        select: { id: true, superficie: true },
       });
 
       // Calcular coeficiente basado en metros cuadrados
-      const totalM2 = unidades.reduce((sum, u) => sum + (u.squareMeters || 0), 0);
+      const totalM2 = unidades.reduce((sum, u) => sum + u.superficie, 0);
 
-      const cuotasData = unidades.map(unidad => {
-        const coeficiente = totalM2 > 0 ? (unidad.squareMeters || 0) / totalM2 : 1 / unidades.length;
+      const cuotasData = unidades.map((unidad) => {
+        const coeficiente = totalM2 > 0 ? unidad.superficie / totalM2 : 1 / unidades.length;
         return {
           companyId,
           buildingId,
@@ -203,23 +222,24 @@ export async function POST(request: NextRequest) {
           estado: 'pendiente',
         },
         include: {
-          unit: { select: { id: true, unitNumber: true } },
-          building: { select: { id: true, name: true } },
+          unit: { select: { id: true, numero: true } },
+          building: { select: { id: true, nombre: true } },
         },
       });
 
       return NextResponse.json({ cuota }, { status: 201 });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
-    logger.error('[Cuotas POST Error]:', error);
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Cuotas POST Error]:', { message });
     return NextResponse.json(
-      { error: 'Error creando cuota', details: error.message },
+      { error: 'Error creando cuota', details: message },
       { status: 500 }
     );
   }
