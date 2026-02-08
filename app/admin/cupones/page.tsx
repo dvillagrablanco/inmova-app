@@ -86,12 +86,15 @@ import {
 import { PROMO_CAMPAIGNS, type PromoCampaign as LandingPromoCampaign } from '@/lib/pricing-config';
 
 // Tipos
+const COUPON_TYPES = ['PERCENTAGE', 'FIXED_AMOUNT', 'FREE_MONTHS', 'TRIAL_EXTENSION'] as const;
+type CouponType = typeof COUPON_TYPES[number];
+
 interface PromoCoupon {
   id: string;
   codigo: string;
   nombre: string;
   descripcion: string | null;
-  tipo: 'PERCENTAGE' | 'FIXED_AMOUNT' | 'FREE_MONTHS' | 'TRIAL_EXTENSION';
+  tipo: CouponType;
   valor: number;
   fechaInicio: string;
   fechaExpiracion: string;
@@ -122,6 +125,25 @@ interface Stats {
   porExpirar: number;
   usosHoy: number;
 }
+
+interface CouponFormData {
+  codigo: string;
+  nombre: string;
+  descripcion: string;
+  tipo: CouponType;
+  valor: number;
+  fechaInicio: string;
+  fechaExpiracion: string;
+  usosMaximos: number | null;
+  usosPorUsuario: number;
+  duracionMeses: number;
+  planesPermitidos: string[];
+  destacado: boolean;
+  notas: string;
+}
+
+const isCouponType = (value: string): value is CouponType =>
+  COUPON_TYPES.includes(value as CouponType);
 
 // Constantes
 const tipoOptions = [
@@ -167,7 +189,7 @@ export default function AdminCuponesPage() {
   const [filterEstado, setFilterEstado] = useState<string>('all');
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CouponFormData>({
     codigo: '',
     nombre: '',
     descripcion: '',
@@ -496,7 +518,11 @@ export default function AdminCuponesPage() {
             <Label htmlFor="tipo">Tipo de Descuento *</Label>
             <Select
               value={formData.tipo}
-              onValueChange={(value: any) => setFormData({ ...formData, tipo: value })}
+              onValueChange={(value: string) => {
+                if (isCouponType(value)) {
+                  setFormData({ ...formData, tipo: value });
+                }
+              }}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar tipo" />
