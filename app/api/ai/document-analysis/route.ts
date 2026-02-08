@@ -1061,7 +1061,17 @@ export async function POST(request: NextRequest) {
             isImage,
           });
           try {
-            const visionAnalysis = await analyzeDocumentWithVision(file, companyInfo, context);
+            const visionCompanyInfo = {
+              cif: companyInfo.cif ?? null,
+              nombre: companyInfo.nombre,
+              direccion: companyInfo.direccion ?? null,
+            };
+
+            const visionAnalysis = await analyzeDocumentWithVision(
+              file,
+              visionCompanyInfo,
+              context
+            );
 
             logger.info('[AI Document Analysis] Análisis de visión completado', {
               filename: file.name,
