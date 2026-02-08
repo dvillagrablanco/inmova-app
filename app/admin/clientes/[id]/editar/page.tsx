@@ -56,9 +56,9 @@ interface Plan {
 
 export default function EditarClientePage() {
   const router = useRouter();
-  const params = useParams();
+  const params = useParams<{ id?: string }>();
   const { data: session, status } = useSession();
-  const companyId = params.id as string;
+  const companyId = typeof params?.id === 'string' ? params.id : '';
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -93,6 +93,11 @@ export default function EditarClientePage() {
     const fetchData = async () => {
       try {
         setLoading(true);
+
+        if (!companyId) {
+          toast.error('Cliente no válido');
+          return;
+        }
         
         // Fetch company
         const companyRes = await fetch(`/api/admin/companies/${companyId}`);
