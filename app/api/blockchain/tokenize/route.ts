@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     const existingToken = await prisma.propertyToken.findFirst({
       where: {
         unitId: validatedData.propertyId,
-        status: { in: ['active', 'pending'] },
+        estado: { in: ['active', 'pending'] },
       },
     });
 
