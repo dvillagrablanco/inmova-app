@@ -27,7 +27,7 @@ export async function GET(
     const partner = await prisma.partner.findUnique({
       where: { id: params.id },
       include: {
-        clients: {
+        clientes: {
           include: {
             company: {
               select: { id: true, nombre: true, email: true },
@@ -35,7 +35,7 @@ export async function GET(
           },
           orderBy: { createdAt: 'desc' },
         },
-        commissions: {
+        comisiones: {
           orderBy: { createdAt: 'desc' },
           take: 20,
         },
@@ -65,7 +65,7 @@ export async function GET(
         activo: partner.activo,
         fechaActivacion: partner.fechaActivacion,
         createdAt: partner.createdAt,
-        clients: partner.clients.map((c) => ({
+        clients: partner.clientes.map((c) => ({
           id: c.id,
           companyId: c.companyId,
           companyName: c.company.nombre,
@@ -73,7 +73,7 @@ export async function GET(
           fechaActivacion: c.fechaActivacion,
           totalComisionGenerada: c.totalComisionGenerada,
         })),
-        commissions: partner.commissions.map((c) => ({
+        commissions: partner.comisiones.map((c) => ({
           id: c.id,
           periodo: c.periodo,
           montoBruto: c.montoBruto,
