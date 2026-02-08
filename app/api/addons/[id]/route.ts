@@ -315,7 +315,7 @@ export async function DELETE(
             data: {
               companyId: user.companyId,
               userId: session.user.id,
-              action: 'PLATFORM_SETTINGS_UPDATED',
+              action: 'UPDATE',
               entityType: 'ADDON',
               entityId: addon.id,
               entityName: addon.nombre,
@@ -359,7 +359,7 @@ export async function DELETE(
           data: {
             companyId: user.companyId,
             userId: session.user.id,
-            action: 'PLATFORM_SETTINGS_UPDATED',
+            action: 'UPDATE',
             entityType: 'ADDON',
             entityId: id,
             entityName: addon.nombre,
