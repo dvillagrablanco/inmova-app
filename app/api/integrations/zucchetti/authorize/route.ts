@@ -40,8 +40,6 @@ export async function GET(request: NextRequest) {
 
     // Solo admins pueden configurar integraciones
     if (
-      session.user.role !== 'ADMIN' &&
-      session.user.role !== 'SUPERADMIN' &&
       session.user.role !== 'administrador' &&
       session.user.role !== 'super_admin'
     ) {
