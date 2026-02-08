@@ -61,8 +61,6 @@ export async function POST(req: NextRequest) {
     if (session?.user?.companyId) {
       const role = session.user.role;
       if (
-        role !== 'ADMIN' &&
-        role !== 'SUPERADMIN' &&
         role !== 'administrador' &&
         role !== 'super_admin'
       ) {
