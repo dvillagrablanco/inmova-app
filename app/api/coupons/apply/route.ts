@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
           subscription: {
             id: subscription.id,
             status: subscription.status,
-            discount: subscription.discount,
+            discounts: subscription.discounts,
           },
         });
       } catch (stripeError: any) {
