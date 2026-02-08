@@ -14,14 +14,14 @@ export const runtime = 'nodejs';
 
 const createRoomSchema = z.object({
   buildingId: z.string(),
-  unitId: z.string().optional(),
+  unitId: z.string(),
   numero: z.string(),
   tipo: z.string(), // suite, standard, deluxe, etc.
   capacidad: z.number().int().min(1),
   precioPorNoche: z.number().min(0),
   amenidades: z.array(z.string()).default([]),
   descripcion: z.string().optional(),
-  superficie: z.number().optional(),
+  superficie: z.number().min(0),
   vistas: z.string().optional(),
   piso: z.number().optional(),
   estado: z.enum(['disponible', 'ocupada', 'mantenimiento', 'reservada']).default('disponible'),
@@ -49,18 +49,24 @@ export async function GET(req: NextRequest) {
     const rooms = await prisma.room.findMany({
       where: {
         companyId,
-        ...(buildingId && { buildingId }),
+        ...(buildingId && { unit: { buildingId } }),
         ...(estado && { estado }),
       },
       include: {
-        building: {
-          select: { id: true, nombre: true, direccion: true },
-        },
         unit: {
-          select: { id: true, identificador: true },
+          select: {
+            id: true,
+            numero: true,
+            habitaciones: true,
+            rentaMensual: true,
+            buildingId: true,
+            building: {
+              select: { id: true, nombre: true, direccion: true },
+            },
+          },
         },
       },
-      orderBy: [{ buildingId: 'asc' }, { numero: 'asc' }],
+      orderBy: [{ unit: { buildingId: 'asc' } }, { numero: 'asc' }],
     });
 
     // Estadísticas
@@ -72,12 +78,35 @@ export async function GET(req: NextRequest) {
       reservadas: rooms.filter(r => r.estado === 'reservada').length,
     };
 
+    const roomsResponse = rooms.map(room => {
+      const amenidades: string[] = [];
+      if (room.tieneBalcon) amenidades.push('balcon');
+      if (room.aireAcondicionado) amenidades.push('aire');
+      if (room.calefaccion) amenidades.push('calefaccion');
+      if (room.banoPrivado) amenidades.push('bano_privado');
+
+      return {
+        id: room.id,
+        numero: room.numero,
+        tipo: room.tipoHabitacion,
+        capacidad: room.unit?.habitaciones ?? 0,
+        precioMensual: room.rentaMensual,
+        amenidades,
+        descripcion: room.descripcion || undefined,
+        superficie: room.superficie,
+        estado: room.estado,
+        building: room.unit?.building
+          ? { id: room.unit.building.id, nombre: room.unit.building.nombre, direccion: room.unit.building.direccion }
+          : undefined,
+      };
+    });
+
     return NextResponse.json({
       success: true,
-      data: rooms,
+      data: roomsResponse,
       stats,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching hospitality rooms:', error);
     return NextResponse.json({ error: 'Error al obtener habitaciones' }, { status: 500 });
   }
@@ -108,22 +137,47 @@ export async function POST(req: NextRequest) {
     const data = validationResult.data;
     const { prisma } = await import('@/lib/db');
 
+    const unit = await prisma.unit.findFirst({
+      where: {
+        id: data.unitId,
+        companyId,
+      },
+      select: {
+        id: true,
+        buildingId: true,
+      },
+    });
+
+    if (!unit) {
+      return NextResponse.json({ error: 'Unidad no encontrada' }, { status: 404 });
+    }
+
+    if (data.buildingId && unit.buildingId !== data.buildingId) {
+      return NextResponse.json({ error: 'La unidad no pertenece al edificio indicado' }, { status: 400 });
+    }
+
     const room = await prisma.room.create({
       data: {
         companyId,
-        buildingId: data.buildingId,
         unitId: data.unitId,
         numero: data.numero,
-        tipo: data.tipo,
-        capacidad: data.capacidad,
-        precioMensual: data.precioPorNoche, // Usamos precioMensual para precio por noche
-        amenidades: data.amenidades,
-        descripcion: data.descripcion,
+        nombre: data.numero,
+        tipoHabitacion: data.tipo,
         superficie: data.superficie,
+        rentaMensual: data.precioPorNoche, // Usamos rentaMensual como precio por noche
+        descripcion: data.descripcion,
+        aireAcondicionado: data.amenidades.includes('aire'),
+        tieneBalcon: data.amenidades.includes('balcon'),
+        calefaccion: data.amenidades.includes('calefaccion'),
+        banoPrivado: data.amenidades.includes('bano_privado'),
         estado: data.estado,
       },
       include: {
-        building: { select: { nombre: true } },
+        unit: {
+          select: {
+            building: { select: { id: true, nombre: true, direccion: true } },
+          },
+        },
       },
     });
 
@@ -131,10 +185,23 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: room,
+      data: {
+        id: room.id,
+        numero: room.numero,
+        tipo: room.tipoHabitacion,
+        capacidad: data.capacidad,
+        precioMensual: room.rentaMensual,
+        amenidades: data.amenidades,
+        descripcion: room.descripcion || undefined,
+        superficie: room.superficie,
+        estado: room.estado,
+        building: room.unit?.building
+          ? { id: room.unit.building.id, nombre: room.unit.building.nombre, direccion: room.unit.building.direccion }
+          : undefined,
+      },
       message: 'Habitación creada exitosamente',
     }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating hospitality room:', error);
     return NextResponse.json({ error: 'Error al crear habitación' }, { status: 500 });
   }

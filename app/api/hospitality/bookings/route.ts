@@ -23,6 +23,31 @@ const BOOKING_STATUS_MAP: Record<string, BookingStatusValue> = {
   no_show: 'NO_SHOW',
 };
 
+const CHANNEL_TYPES = ['AIRBNB', 'BOOKING', 'VRBO', 'HOMEAWAY', 'WEB_PROPIA', 'EXPEDIA', 'TRIPADVISOR', 'OTROS'] as const;
+type ChannelTypeValue = (typeof CHANNEL_TYPES)[number];
+const CHANNEL_MAP: Record<string, ChannelTypeValue> = {
+  directo: 'WEB_PROPIA',
+  web: 'WEB_PROPIA',
+  booking: 'BOOKING',
+  airbnb: 'AIRBNB',
+  vrbo: 'VRBO',
+  homeaway: 'HOMEAWAY',
+  expedia: 'EXPEDIA',
+  tripadvisor: 'TRIPADVISOR',
+  otros: 'OTROS',
+};
+const CHANNEL_REVERSE_MAP: Record<ChannelTypeValue, string> = {
+  WEB_PROPIA: 'directo',
+  BOOKING: 'booking',
+  AIRBNB: 'airbnb',
+  VRBO: 'vrbo',
+  HOMEAWAY: 'homeaway',
+  EXPEDIA: 'expedia',
+  TRIPADVISOR: 'tripadvisor',
+  OTROS: 'otros',
+};
+const DEFAULT_CHANNEL: ChannelTypeValue = 'WEB_PROPIA';
+
 const createBookingSchema = z.object({
   roomId: z.string(),
   buildingId: z.string(),
@@ -57,20 +82,22 @@ export async function GET(req: NextRequest) {
 
     const { prisma } = await import('@/lib/db');
 
+    const estadoNormalizado = estado?.toLowerCase();
     const estadoValue =
-      estado && (BOOKING_STATUS_MAP[estado] || (BOOKING_STATUSES.includes(estado as BookingStatusValue) ? (estado as BookingStatusValue) : undefined));
+      (estadoNormalizado && BOOKING_STATUS_MAP[estadoNormalizado]) ||
+      (estado && BOOKING_STATUSES.includes(estado as BookingStatusValue) ? (estado as BookingStatusValue) : undefined);
 
     // Obtener reservas
     const bookings = await prisma.sTRBooking.findMany({
       where: {
         companyId,
-        ...(buildingId && { buildingId }),
+        ...(buildingId && { listing: { unit: { buildingId } } }),
         ...(estadoValue && { estado: estadoValue }),
         ...(fechaDesde && {
-          checkIn: { gte: new Date(fechaDesde) },
+          checkInDate: { gte: new Date(fechaDesde) },
         }),
         ...(fechaHasta && {
-          checkOut: { lte: new Date(fechaHasta) },
+          checkOutDate: { lte: new Date(fechaHasta) },
         }),
       },
       include: {
@@ -78,7 +105,7 @@ export async function GET(req: NextRequest) {
           select: { titulo: true },
         },
       },
-      orderBy: { checkIn: 'desc' },
+      orderBy: { checkInDate: 'desc' },
       take: 100,
     });
 
@@ -91,27 +118,42 @@ export async function GET(req: NextRequest) {
       confirmadas: bookings.filter(b => b.estado === 'CONFIRMADA').length,
       pendientes: bookings.filter(b => b.estado === 'PENDIENTE').length,
       checkinHoy: bookings.filter(b => {
-        const checkIn = new Date(b.checkIn);
+        const checkIn = new Date(b.checkInDate);
         checkIn.setHours(0, 0, 0, 0);
         return checkIn.getTime() === today.getTime();
       }).length,
       checkoutHoy: bookings.filter(b => {
-        const checkOut = new Date(b.checkOut);
+        const checkOut = new Date(b.checkOutDate);
         checkOut.setHours(0, 0, 0, 0);
         return checkOut.getTime() === today.getTime();
       }).length,
       ingresosMes: bookings
         .filter(b => {
-          const checkIn = new Date(b.checkIn);
+          const checkIn = new Date(b.checkInDate);
           return checkIn.getMonth() === today.getMonth() && 
                  checkIn.getFullYear() === today.getFullYear();
         })
         .reduce((sum, b) => sum + (b.precioTotal || 0), 0),
     };
 
+    const bookingsResponse = bookings.map(booking => ({
+      id: booking.id,
+      guestName: booking.guestNombre,
+      guestEmail: booking.guestEmail,
+      guestPhone: booking.guestTelefono || undefined,
+      checkIn: booking.checkInDate.toISOString(),
+      checkOut: booking.checkOutDate.toISOString(),
+      numGuests: booking.numHuespedes,
+      precioTotal: booking.precioTotal,
+      estado: booking.estado,
+      notas: booking.notasEspeciales || undefined,
+      plataforma: CHANNEL_REVERSE_MAP[booking.canal] || 'directo',
+      listing: booking.listing ? { titulo: booking.listing.titulo } : undefined,
+    }));
+
     return NextResponse.json({
       success: true,
-      data: bookings,
+      data: bookingsResponse,
       stats,
     });
   } catch (error: unknown) {
@@ -145,17 +187,68 @@ export async function POST(req: NextRequest) {
     const data = validationResult.data;
     const { prisma } = await import('@/lib/db');
 
+    const checkInDate = new Date(data.checkIn);
+    const checkOutDate = new Date(data.checkOut);
+    if (Number.isNaN(checkInDate.getTime()) || Number.isNaN(checkOutDate.getTime())) {
+      return NextResponse.json({ error: 'Fechas inválidas' }, { status: 400 });
+    }
+    if (checkOutDate <= checkInDate) {
+      return NextResponse.json({ error: 'La fecha de salida debe ser posterior a la de entrada' }, { status: 400 });
+    }
+
+    const room = await prisma.room.findFirst({
+      where: {
+        id: data.roomId,
+        companyId,
+      },
+      select: {
+        id: true,
+        unitId: true,
+        unit: {
+          select: {
+            id: true,
+            buildingId: true,
+          },
+        },
+      },
+    });
+
+    if (!room) {
+      return NextResponse.json({ error: 'Habitación no encontrada' }, { status: 404 });
+    }
+
+    if (data.buildingId && room.unit?.buildingId !== data.buildingId) {
+      return NextResponse.json({ error: 'La habitación no pertenece al edificio indicado' }, { status: 400 });
+    }
+
+    const listing = await prisma.sTRListing.findFirst({
+      where: {
+        companyId,
+        unitId: room.unitId,
+      },
+    });
+
+    if (!listing) {
+      return NextResponse.json(
+        { error: 'No existe un listing STR para esta unidad. Configúralo antes de crear reservas.' },
+        { status: 400 }
+      );
+    }
+
+    const origenNormalizado = data.origen?.toLowerCase() || 'directo';
+    const canalValue = CHANNEL_MAP[origenNormalizado] || DEFAULT_CHANNEL;
+    const numNoches = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
+    const tarifaNocturna = numNoches > 0 ? data.precioTotal / numNoches : data.precioTotal;
+    const ingresoNeto = data.precioTotal;
+
     // Verificar que la habitación está disponible
     const existingBooking = await prisma.sTRBooking.findFirst({
       where: {
         companyId,
+        listingId: listing.id,
         estado: { in: ['CONFIRMADA', 'PENDIENTE'] },
-        OR: [
-          {
-            checkIn: { lte: new Date(data.checkOut) },
-            checkOut: { gte: new Date(data.checkIn) },
-          },
-        ],
+        checkInDate: { lte: checkOutDate },
+        checkOutDate: { gte: checkInDate },
       },
     });
 
@@ -165,43 +258,28 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    // Buscar o crear un listing para este edificio
-    let listing = await prisma.sTRListing.findFirst({
-      where: { companyId, buildingId: data.buildingId },
-    });
-
-    if (!listing) {
-      listing = await prisma.sTRListing.create({
-        data: {
-          companyId,
-          buildingId: data.buildingId,
-          titulo: 'Reserva Directa',
-          descripcion: 'Reservas directas del sistema',
-          tipo: 'hotel',
-          capacidad: 2,
-          habitaciones: 1,
-          banos: 1,
-          precioPorNoche: 0,
-          estado: 'activo',
-        },
-      });
-    }
-
     const booking = await prisma.sTRBooking.create({
       data: {
         companyId,
         listingId: listing.id,
-        buildingId: data.buildingId,
-        guestName: data.guestName,
+        canal: canalValue,
+        guestNombre: data.guestName,
         guestEmail: data.guestEmail,
-        guestPhone: data.guestPhone,
-        checkIn: new Date(data.checkIn),
-        checkOut: new Date(data.checkOut),
-        numGuests: data.numGuests,
+        guestTelefono: data.guestPhone,
+        checkInDate,
+        checkOutDate,
+        numHuespedes: data.numGuests,
+        numNoches,
         precioTotal: data.precioTotal,
-        notas: data.notas,
-        plataforma: data.origen,
+        tarifaNocturna,
+        ingresoNeto,
+        notasEspeciales: data.notas,
         estado: 'PENDIENTE',
+      },
+      include: {
+        listing: {
+          select: { titulo: true },
+        },
       },
     });
 
@@ -209,7 +287,20 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: booking,
+      data: {
+        id: booking.id,
+        guestName: booking.guestNombre,
+        guestEmail: booking.guestEmail,
+        guestPhone: booking.guestTelefono || undefined,
+        checkIn: booking.checkInDate.toISOString(),
+        checkOut: booking.checkOutDate.toISOString(),
+        numGuests: booking.numHuespedes,
+        precioTotal: booking.precioTotal,
+        estado: booking.estado,
+        notas: booking.notasEspeciales || undefined,
+        plataforma: CHANNEL_REVERSE_MAP[booking.canal] || 'directo',
+        listing: booking.listing ? { titulo: booking.listing.titulo } : undefined,
+      },
       message: 'Reserva creada exitosamente',
     }, { status: 201 });
   } catch (error: unknown) {
