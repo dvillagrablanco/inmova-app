@@ -19,6 +19,26 @@ import type { Prisma } from '@/types/prisma-types';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const WORK_ORDER_STATUSES = [
+  'pendiente',
+  'asignada',
+  'aceptada',
+  'en_progreso',
+  'pausada',
+  'completada',
+  'cancelada',
+  'rechazada',
+] as const;
+
+type WorkOrderStatusValue = (typeof WORK_ORDER_STATUSES)[number];
+
+const parseWorkOrderStatus = (value: string): WorkOrderStatusValue | null => {
+  const match = WORK_ORDER_STATUSES.find(
+    (item): item is WorkOrderStatusValue => item === value
+  );
+  return match ?? null;
+};
+
 // ============================================================================
 // VALIDACIÓN
 // ============================================================================
@@ -65,14 +85,27 @@ export async function GET(req: NextRequest) {
 
     if (estado) {
       // Mapear estados de UI a estados del enum
-      const estadoMap: Record<string, string[]> = {
+      const estadoMap: Record<string, WorkOrderStatusValue[]> = {
         'abierta': ['pendiente'],
         'cerrada': ['asignada'],
         'adjudicada': ['aceptada', 'en_progreso'],
         'completada': ['completada'],
         'cancelada': ['cancelada', 'rechazada'],
       };
-      where.estado = { in: estadoMap[estado] || [estado] };
+
+      const mapped = estadoMap[estado];
+      if (mapped) {
+        where.estado = { in: mapped };
+      } else {
+        const parsed = parseWorkOrderStatus(estado);
+        if (!parsed) {
+          return NextResponse.json(
+            { error: 'Estado inválido' },
+            { status: 400 }
+          );
+        }
+        where.estado = { in: [parsed] };
+      }
     }
 
     const tenders = await prisma.providerWorkOrder.findMany({
