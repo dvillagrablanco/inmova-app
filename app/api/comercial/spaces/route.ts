@@ -8,7 +8,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import type { Prisma } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -34,9 +33,12 @@ export async function GET(request: NextRequest) {
     const estado = searchParams.get('estado');
 
     // Construir filtro de tipos
-    let tipoFilter: Prisma.CommercialSpaceType[] = [];
+    type CommercialSpaceTypeValue =
+      (typeof TIPO_MAPPING)[keyof typeof TIPO_MAPPING][number];
+
+    let tipoFilter: CommercialSpaceTypeValue[] = [];
     if (categoria && TIPO_MAPPING[categoria]) {
-      tipoFilter = TIPO_MAPPING[categoria] as Prisma.CommercialSpaceType[];
+      tipoFilter = TIPO_MAPPING[categoria] as CommercialSpaceTypeValue[];
     }
 
     const normalizedEstado = estado ? estado.toLowerCase() : null;
