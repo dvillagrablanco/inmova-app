@@ -51,7 +51,7 @@ const extractBlogPosts = (settings: unknown): StoredBlogPost[] => {
 
   return postsValue
     .map((item) => storedBlogPostSchema.safeParse(item))
-    .filter((result) => result.success)
+    .filter((result): result is z.SafeParseSuccess<StoredBlogPost> => result.success)
     .map((result) => result.data);
 };
 
