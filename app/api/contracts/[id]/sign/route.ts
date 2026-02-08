@@ -111,7 +111,7 @@ export async function POST(
         tenant: {
           select: {
             email: true,
-            nombre: true,
+            nombreCompleto: true,
           },
         },
       },
