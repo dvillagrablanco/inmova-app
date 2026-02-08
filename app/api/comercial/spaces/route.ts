@@ -21,6 +21,10 @@ const TIPO_MAPPING = {
   coworking: ['coworking_hot_desk', 'coworking_dedicated', 'coworking_office', 'sala_reuniones'],
 } as const;
 
+const isCategoriaComercial = (
+  value: string
+): value is keyof typeof TIPO_MAPPING => value in TIPO_MAPPING;
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -37,7 +41,7 @@ export async function GET(request: NextRequest) {
       (typeof TIPO_MAPPING)[keyof typeof TIPO_MAPPING][number];
 
     let tipoFilter: CommercialSpaceTypeValue[] = [];
-    if (categoria && TIPO_MAPPING[categoria]) {
+    if (categoria && isCategoriaComercial(categoria)) {
       tipoFilter = [...TIPO_MAPPING[categoria]];
     }
 
@@ -123,7 +127,7 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[CommercialSpaces GET] Error:', { message });
-    return NextResponse.json({ error: 'Error al obtener espacios', details: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Error al obtener espacios', details: message }, { status: 500 });
   }
 }
 
@@ -134,33 +138,57 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const {
-      nombre,
-      tipo,
-      direccion,
-      ciudad,
-      codigoPostal,
-      provincia,
-      planta,
-      superficieConstruida,
-      superficieUtil,
-      precioAlquiler,
-      buildingId,
-      descripcion,
-      // Características
-      aireAcondicionado,
-      parking,
-      fibraOptica,
-      fachada,
-      muelleCarga,
-      plantaDiafana,
-    } = body;
+    const body = (await request.json()) as Record<string, unknown>;
+    const getString = (value: unknown) => (typeof value === 'string' ? value.trim() : '');
+    const getBoolean = (value: unknown) => value === true;
+    const getNumber = (value: unknown): number | null => {
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        return value;
+      }
+      if (typeof value === 'string' && value.trim() !== '') {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : null;
+      }
+      return null;
+    };
+
+    const nombre = getString(body.nombre);
+    const tipo = getString(body.tipo);
+    const direccion = getString(body.direccion);
+    const ciudad = getString(body.ciudad);
+    const codigoPostal = getString(body.codigoPostal);
+    const provincia = getString(body.provincia);
+    const planta = getNumber(body.planta);
+    const superficieConstruida = getNumber(body.superficieConstruida);
+    const superficieUtil = getNumber(body.superficieUtil);
+    const rentaMensualBase =
+      getNumber(body.rentaMensualBase) ?? getNumber(body.precioAlquiler);
+    const buildingId = getString(body.buildingId) || null;
+    const descripcion = getString(body.descripcion) || null;
+    const aireAcondicionado = getBoolean(body.aireAcondicionado);
+    const parking = getBoolean(body.parking);
+    const plazasParking = getNumber(body.plazasParking);
+    const fibraOptica = getBoolean(body.fibraOptica);
+    const fachada = getBoolean(body.fachada);
+    const muelleCarga = getBoolean(body.muelleCarga);
+    const plantaDiafana = getBoolean(body.plantaDiafana);
 
     // Validaciones básicas
-    if (!nombre || !tipo || !direccion || !ciudad || !superficieConstruida) {
+    if (
+      !nombre ||
+      !tipo ||
+      !direccion ||
+      !ciudad ||
+      !codigoPostal ||
+      !provincia ||
+      !superficieConstruida ||
+      rentaMensualBase === null
+    ) {
       return NextResponse.json(
-        { error: 'Campos requeridos: nombre, tipo, direccion, ciudad, superficieConstruida' },
+        {
+          error:
+            'Campos requeridos: nombre, tipo, direccion, ciudad, codigoPostal, provincia, superficieConstruida, rentaMensualBase',
+        },
         { status: 400 }
       );
     }
@@ -172,27 +200,29 @@ export async function POST(request: NextRequest) {
         tipo,
         direccion,
         ciudad,
-        codigoPostal: codigoPostal || '',
-        provincia: provincia || ciudad,
-        planta: planta ? Number(planta) : null,
-        superficieConstruida: Number(superficieConstruida),
-        superficieUtil: superficieUtil ? Number(superficieUtil) : Number(superficieConstruida) * 0.9,
-        precioAlquiler: precioAlquiler ? Number(precioAlquiler) : null,
+        codigoPostal,
+        provincia,
+        planta,
+        superficieConstruida,
+        superficieUtil:
+          superficieUtil ?? Math.round(superficieConstruida * 0.9 * 100) / 100,
+        rentaMensualBase,
         buildingId,
         descripcion,
-        aireAcondicionado: aireAcondicionado || false,
-        parking: parking || false,
-        fibraOptica: fibraOptica || false,
-        fachada: fachada || false,
-        muelleCarga: muelleCarga || false,
-        plantaDiafana: plantaDiafana || false,
-        estadoOcupacion: 'disponible',
+        aireAcondicionado,
+        plazasParking: plazasParking ?? (parking ? 1 : null),
+        fibraOptica,
+        fachada,
+        muelleCarga,
+        plantaDiafana,
+        estado: 'disponible',
       },
     });
 
     return NextResponse.json(space, { status: 201 });
-  } catch (error: any) {
-    logger.error('[CommercialSpaces POST] Error:', error);
-    return NextResponse.json({ error: 'Error al crear espacio', details: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[CommercialSpaces POST] Error:', { message });
+    return NextResponse.json({ error: 'Error al crear espacio', details: message }, { status: 500 });
   }
 }
