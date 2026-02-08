@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           building: {
-            select: { id: true, name: true },
+            select: { id: true, nombre: true },
           },
         },
         orderBy: [
@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
         estado: 'abierta',
       },
       include: {
-        building: { select: { id: true, name: true } },
+        building: { select: { id: true, nombre: true } },
       },
     });
 
@@ -233,7 +233,7 @@ export async function PATCH(request: NextRequest) {
       where: { id },
       data: updateData,
       include: {
-        building: { select: { id: true, name: true } },
+        building: { select: { id: true, nombre: true } },
       },
     });
 
