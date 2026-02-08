@@ -6,6 +6,7 @@ import {
   calculateLeadScoring,
   calculateProbabilidadCierre,
   determinarTemperatura,
+  type LeadScoringFactors,
 } from '@/lib/crm-service';
 import logger, { logError } from '@/lib/logger';
 import { z } from 'zod';
@@ -70,6 +71,8 @@ const leadUpdateSchema = z.object({
     .optional()
     .nullable(),
 });
+
+type LeadUpdateInput = z.infer<typeof leadUpdateSchema>;
 
 // GET - Obtener un lead específico
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
@@ -179,17 +182,55 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Lead no encontrado' }, { status: 404 });
     }
 
-    const validatedBody = validationResult.data;
+    const validatedBody: LeadUpdateInput = validationResult.data;
+
+    const email = validatedBody.email !== undefined ? validatedBody.email : existingLead.email;
+    const telefono = validatedBody.telefono !== undefined ? validatedBody.telefono : existingLead.telefono;
+    const empresa = validatedBody.empresa !== undefined ? validatedBody.empresa : existingLead.empresa;
+    const cargo = validatedBody.cargo !== undefined ? validatedBody.cargo : existingLead.cargo;
+    const ciudad = validatedBody.ciudad !== undefined ? validatedBody.ciudad : existingLead.ciudad;
+    const presupuestoMensual =
+      validatedBody.presupuestoMensual !== undefined
+        ? validatedBody.presupuestoMensual
+        : existingLead.presupuestoMensual;
+    const urgenciaValue =
+      validatedBody.urgencia !== undefined ? validatedBody.urgencia : existingLead.urgencia ?? undefined;
+    const contactosRealizados =
+      typeof existingLead.numeroContactos === 'number' ? existingLead.numeroContactos : 0;
+
+    const shouldRecalculateScoring =
+      validatedBody.email !== undefined ||
+      validatedBody.telefono !== undefined ||
+      validatedBody.empresa !== undefined ||
+      validatedBody.cargo !== undefined ||
+      validatedBody.ciudad !== undefined ||
+      validatedBody.presupuestoMensual !== undefined ||
+      validatedBody.urgencia !== undefined ||
+      validatedBody.verticalesInteres !== undefined;
+
+    const scoringFactors: LeadScoringFactors = {
+      hasEmail: typeof email === 'string' && email.length > 0,
+      hasTelefono: typeof telefono === 'string' && telefono.length > 0,
+      hasEmpresa: typeof empresa === 'string' && empresa.length > 0,
+      hasCargo: typeof cargo === 'string' && cargo.length > 0,
+      hasCiudad: typeof ciudad === 'string' && ciudad.length > 0,
+      hasPresupuesto: typeof presupuestoMensual === 'number' && presupuestoMensual > 0,
+      contactosRealizados,
+      urgencia: urgenciaValue,
+    };
 
     // Recalcular scoring si cambian datos relevantes
     const nuevaPuntuacion =
-      validatedBody.presupuestoMensual || validatedBody.urgencia || validatedBody.verticalesInteres
-        ? calculateLeadScoring(validatedBody)
+      shouldRecalculateScoring
+        ? calculateLeadScoring(scoringFactors)
         : existingLead.puntuacion;
 
+    const estadoParaProbabilidad =
+      validatedBody.estado !== undefined ? validatedBody.estado : existingLead.estado ?? undefined;
+
     const nuevaProbabilidad =
-      validatedBody.presupuestoMensual || validatedBody.urgencia
-        ? calculateProbabilidadCierre(validatedBody)
+      shouldRecalculateScoring
+        ? calculateProbabilidadCierre(nuevaPuntuacion, estadoParaProbabilidad)
         : existingLead.probabilidadCierre;
 
     const nuevaTemperatura = determinarTemperatura(nuevaPuntuacion);
