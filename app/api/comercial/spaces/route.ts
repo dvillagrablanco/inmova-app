@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
       total: formattedSpaces.length,
       ocupadas: formattedSpaces.filter((s) => s.estado === 'ocupada').length,
       disponibles: formattedSpaces.filter((s) => s.estado === 'disponible').length,
-      reservadas: formattedSpaces.filter((s) => s.estado === 'reservada').length,
+      reservadas: 0,
       superficieTotal: formattedSpaces.reduce((sum, s) => sum + (s.superficie || 0), 0),
       rentaMensualTotal: formattedSpaces
         .filter((s) => s.estado === 'ocupada')
