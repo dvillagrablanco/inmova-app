@@ -23,8 +23,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
+    if (!user.companyId) {
+      return NextResponse.json({ contratos: [] });
+    }
+
     const perfilEmpresa = await prisma.ewoorkerPerfilEmpresa.findUnique({
-      where: { userId: user.id },
+      where: { companyId: user.companyId },
     });
 
     if (!perfilEmpresa) {
@@ -44,19 +48,29 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             titulo: true,
-            ubicacion: true,
+            direccion: true,
+            municipio: true,
+            provincia: true,
           },
         },
         constructor: {
           select: {
             id: true,
-            nombreEmpresa: true,
+            company: {
+              select: {
+                nombre: true,
+              },
+            },
           },
         },
         subcontratista: {
           select: {
             id: true,
-            nombreEmpresa: true,
+            company: {
+              select: {
+                nombre: true,
+              },
+            },
           },
         },
       },
@@ -65,18 +79,20 @@ export async function GET(request: NextRequest) {
     });
 
     // Formatear respuesta
-    const contratosFormateados = contratos.map(c => ({
+    const contratosFormateados = contratos.map((c) => ({
       id: c.id,
       obraId: c.obraId,
       obra: {
         titulo: c.obra.titulo,
-        ubicacion: c.obra.ubicacion || 'Sin ubicación',
+        ubicacion:
+          [c.obra.direccion, c.obra.municipio, c.obra.provincia].filter(Boolean).join(', ') ||
+          'Sin ubicación',
       },
       constructor: {
-        nombreEmpresa: c.constructor.nombreEmpresa,
+        nombreEmpresa: c.constructor.company?.nombre || 'Empresa',
       },
       subcontratista: {
-        nombreEmpresa: c.subcontratista.nombreEmpresa,
+        nombreEmpresa: c.subcontratista.company?.nombre || 'Empresa',
       },
       estado: c.estado,
       presupuestoTotal: c.presupuestoTotal,
@@ -87,7 +103,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ contratos: contratosFormateados });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[eWoorker Contratos Error]:', error);
     return NextResponse.json(
       { error: 'Error al cargar contratos' },
