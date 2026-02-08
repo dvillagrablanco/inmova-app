@@ -564,6 +564,8 @@ export async function GET(request: NextRequest) {
       const existing = await prisma.subscriptionPlan.findFirst({
         where: { tier: planData.tier },
       });
+      const maxUsuarios = planData.maxUsuarios ?? 9999;
+      const maxPropiedades = planData.maxPropiedades ?? 9999;
 
       if (existing) {
         await prisma.subscriptionPlan.update({
@@ -572,8 +574,8 @@ export async function GET(request: NextRequest) {
             nombre: planData.nombre,
             descripcion: planData.descripcion,
             precioMensual: planData.precioMensual,
-            maxUsuarios: planData.maxUsuarios,
-            maxPropiedades: planData.maxPropiedades,
+            maxUsuarios,
+            maxPropiedades,
             modulosIncluidos: planData.modulosIncluidos,
             signaturesIncludedMonth: planData.signaturesIncludedMonth,
             storageIncludedGB: planData.storageIncludedGB,
@@ -590,8 +592,8 @@ export async function GET(request: NextRequest) {
             descripcion: planData.descripcion,
             tier: planData.tier,
             precioMensual: planData.precioMensual,
-            maxUsuarios: planData.maxUsuarios,
-            maxPropiedades: planData.maxPropiedades,
+            maxUsuarios,
+            maxPropiedades,
             modulosIncluidos: planData.modulosIncluidos,
             signaturesIncludedMonth: planData.signaturesIncludedMonth,
             storageIncludedGB: planData.storageIncludedGB,
