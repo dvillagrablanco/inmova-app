@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
+import type { Prisma } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
     const { getPrismaClient } = await import('@/lib/db');
     const prisma = getPrismaClient();
 
-    const where: any = {};
+    const where: Prisma.PartnerWhereInput = {};
     if (status && status !== 'all') {
       where.estado = status;
     }
@@ -44,12 +45,12 @@ export async function GET(request: NextRequest) {
       include: {
         _count: {
           select: {
-            clients: true,
-            commissions: true,
+            clientes: true,
+            comisiones: true,
           },
         },
-        commissions: {
-          where: { estado: 'PAGADA' },
+        comisiones: {
+          where: { estado: 'PAID' },
           select: { montoComision: true },
         },
       },
@@ -67,10 +68,10 @@ export async function GET(request: NextRequest) {
       type: partner.tipo,
       status: partner.estado,
       referralCode: partner.slug || partner.id.substring(0, 8).toUpperCase(),
-      totalClients: partner._count.clients,
-      totalEarned: partner.commissions.reduce((sum, c) => sum + c.montoComision, 0),
+      totalClients: partner._count.clientes,
+      totalEarned: partner.comisiones.reduce((sum, c) => sum + c.montoComision, 0),
       commissionRate: partner.comisionPorcentaje,
-      level: getPartnerLevel(partner._count.clients),
+      level: getPartnerLevel(partner._count.clientes),
       createdAt: partner.createdAt.toISOString(),
       activo: partner.activo,
     }));
@@ -80,9 +81,9 @@ export async function GET(request: NextRequest) {
       total: partners.length,
       pending: partners.filter((p) => p.estado === 'PENDING').length,
       active: partners.filter((p) => p.estado === 'ACTIVE').length,
-      totalClients: partners.reduce((sum, p) => sum + p._count.clients, 0),
+      totalClients: partners.reduce((sum, p) => sum + p._count.clientes, 0),
       totalEarned: partners.reduce(
-        (sum, p) => sum + p.commissions.reduce((s, c) => s + c.montoComision, 0),
+        (sum, p) => sum + p.comisiones.reduce((s, c) => s + c.montoComision, 0),
         0
       ),
     };
@@ -92,8 +93,9 @@ export async function GET(request: NextRequest) {
       partners: formattedPartners,
       stats,
     });
-  } catch (error: any) {
-    logger.error('[Partners API Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Partners API Error]:', { message });
     // Retornar lista vacía en lugar de error para mejor UX
     return NextResponse.json({
       success: true,
