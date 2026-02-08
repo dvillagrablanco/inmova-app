@@ -265,7 +265,7 @@ export default function OnboardingTrackerPage() {
       });
       if (response.ok) {
         toast.success('Agente asignado automáticamente');
-        loadCompanies();
+        loadData();
       } else {
         toast.error('Error al asignar agente');
       }
