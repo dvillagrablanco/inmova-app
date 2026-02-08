@@ -47,6 +47,7 @@ export async function GET(request: NextRequest) {
       }),
       prisma.marketplaceBooking.groupBy({
         by: ['serviceId'],
+        orderBy: { serviceId: 'asc' },
         _count: { _all: true },
         _sum: { precioTotal: true, comision: true },
       }),
