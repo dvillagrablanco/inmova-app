@@ -158,8 +158,11 @@ export async function POST(
       }, { status: 409 });
     }
 
-    // Calcular monto IVA
+    // Calcular monto IVA y fecha de vencimiento
     const montoIva = (data.subtotal * data.iva) / 100;
+    const fechaVencimiento = data.validezOferta
+      ? new Date(Date.now() + data.validezOferta * 24 * 60 * 60 * 1000)
+      : undefined;
 
     // Crear la oferta
     const quote = await prisma.providerQuote.create({
@@ -174,9 +177,10 @@ export async function POST(
         iva: data.iva,
         montoIva,
         total: data.total,
-        validezDias: data.validezOferta,
+        fechaVencimiento,
         notas: data.notas,
         estado: 'pendiente',
+        archivos: [],
       },
       include: {
         provider: {
