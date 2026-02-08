@@ -70,8 +70,12 @@ export async function GET(req: NextRequest) {
     }
 
     const companyId = session.user.companyId;
-    if (!companyId) {
-      return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
+    const userId = session.user.id;
+    if (!companyId || !userId) {
+      return NextResponse.json(
+        { error: 'Datos de sesión incompletos' },
+        { status: 400 }
+      );
     }
 
     const { searchParams } = new URL(req.url);
@@ -263,6 +267,7 @@ export async function POST(req: NextRequest) {
         prioridad: 'media',
         fechaEstimada: new Date(data.fechaLimiteOfertas),
         presupuestoInicial: data.presupuestoMaximo, // Campo correcto del modelo
+        asignadoPor: userId,
         // Guardar metadata adicional en comentarios
         comentarios: JSON.stringify({
           requisitos: data.requisitos,
