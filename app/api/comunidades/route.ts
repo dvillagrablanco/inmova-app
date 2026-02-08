@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import type { Prisma } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -34,13 +35,14 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || '';
     const activa = searchParams.get('activa');
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
     if (!companyId) {
       return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
     }
 
     // Construir filtros
-    const where: any = { companyId };
+    const where: Prisma.CommunityManagementWhereInput = { companyId };
     
     if (search) {
       where.OR = [
@@ -62,8 +64,8 @@ export async function GET(request: NextRequest) {
           building: {
             select: {
               id: true,
-              name: true,
-              address: true,
+              nombre: true,
+              direccion: true,
               units: {
                 select: { id: true },
               },
@@ -92,7 +94,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Formatear respuesta
-    const formattedComunidades = comunidades.map(c => ({
+    const formattedComunidades = comunidades.map((c) => ({
       id: c.id,
       nombreComunidad: c.nombreComunidad,
       cif: c.cif,
@@ -104,7 +106,13 @@ export async function GET(request: NextRequest) {
       fechaInicio: c.fechaInicio,
       honorariosFijos: c.honorariosFijos,
       honorariosPorcentaje: c.honorariosPorcentaje,
-      building: c.building,
+      building: c.building
+        ? {
+            id: c.building.id,
+            name: c.building.nombre,
+            address: c.building.direccion,
+          }
+        : null,
       totalUnidades: c.building?.units?.length || 0,
       facturasPendientes: c.facturas?.length || 0,
       importePendiente: c.facturas?.reduce((sum, f) => sum + f.totalFactura, 0) || 0,
@@ -124,10 +132,11 @@ export async function GET(request: NextRequest) {
         inactivas: stats._count.id - activas,
       },
     });
-  } catch (error: any) {
-    logger.error('[Comunidades GET Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Comunidades GET Error]:', { message });
     return NextResponse.json(
-      { error: 'Error obteniendo comunidades', details: error.message },
+      { error: 'Error obteniendo comunidades', details: message },
       { status: 500 }
     );
   }
@@ -141,7 +150,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
     if (!companyId) {
       return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
     }
@@ -195,24 +205,39 @@ export async function POST(request: NextRequest) {
         building: {
           select: {
             id: true,
-            name: true,
-            address: true,
+            nombre: true,
+            direccion: true,
           },
         },
       },
     });
 
-    return NextResponse.json({ comunidad }, { status: 201 });
-  } catch (error: any) {
+    return NextResponse.json(
+      {
+        comunidad: {
+          ...comunidad,
+          building: comunidad.building
+            ? {
+                id: comunidad.building.id,
+                name: comunidad.building.nombre,
+                address: comunidad.building.direccion,
+              }
+            : null,
+        },
+      },
+      { status: 201 }
+    );
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
-    logger.error('[Comunidades POST Error]:', error);
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Comunidades POST Error]:', { message });
     return NextResponse.json(
-      { error: 'Error creando comunidad', details: error.message },
+      { error: 'Error creando comunidad', details: message },
       { status: 500 }
     );
   }
