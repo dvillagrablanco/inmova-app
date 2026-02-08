@@ -47,12 +47,10 @@ export async function POST(request: Request) {
             { status: 400 }
           );
         }
-        result = await CRMLeadImporter.importFromLinkedInJob(
-          jobId,
-          session.user.companyId,
-          options || { source: 'linkedin' }
+        return NextResponse.json(
+          { error: 'Importación desde LinkedIn no disponible' },
+          { status: 501 }
         );
-        break;
 
       case 'csv':
       case 'manual':
@@ -76,10 +74,11 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(result, { status: 200 });
-  } catch (error: any) {
-    logger.error('Error importing leads:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('Error importing leads:', { message });
     return NextResponse.json(
-      { error: 'Error al importar leads', details: error.message },
+      { error: 'Error al importar leads', details: message },
       { status: 500 }
     );
   }
@@ -96,10 +95,11 @@ export async function GET(request: Request) {
     const queries = CRMLeadImporter.getINMOVALinkedInQueries();
 
     return NextResponse.json({ queries });
-  } catch (error: any) {
-    logger.error('Error getting import queries:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('Error getting import queries:', { message });
     return NextResponse.json(
-      { error: 'Error al obtener queries', details: error.message },
+      { error: 'Error al obtener queries', details: message },
       { status: 500 }
     );
   }
