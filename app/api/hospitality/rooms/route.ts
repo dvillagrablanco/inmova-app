@@ -12,6 +12,9 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const ROOM_STATUSES = ['disponible', 'ocupada', 'mantenimiento', 'reservada'] as const;
+type RoomStatusValue = (typeof ROOM_STATUSES)[number];
+
 const createRoomSchema = z.object({
   buildingId: z.string(),
   unitId: z.string(),
@@ -44,13 +47,16 @@ export async function GET(req: NextRequest) {
     const estado = searchParams.get('estado');
 
     const { prisma } = await import('@/lib/db');
+    const estadoValue = estado && ROOM_STATUSES.includes(estado as RoomStatusValue)
+      ? (estado as RoomStatusValue)
+      : undefined;
 
     // Obtener habitaciones (rooms) de edificios con tipo hospitality
     const rooms = await prisma.room.findMany({
       where: {
         companyId,
         ...(buildingId && { unit: { buildingId } }),
-        ...(estado && { estado }),
+        ...(estadoValue && { estado: estadoValue }),
       },
       include: {
         unit: {
