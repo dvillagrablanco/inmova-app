@@ -20,18 +20,57 @@ export const runtime = 'nodejs';
 const MAIN_COMPANY_ID = 'sistema';
 const CREATED_BY = 'sistema';
 
+type SubscriptionTierValue =
+  | 'FREE'
+  | 'STARTER'
+  | 'PROFESSIONAL'
+  | 'BUSINESS'
+  | 'ENTERPRISE'
+  | 'basico'
+  | 'profesional'
+  | 'empresarial'
+  | 'personalizado';
+
+const mapSubscriptionTier = (tier: string): SubscriptionTierValue => {
+  const normalized = tier.trim().toLowerCase();
+
+  switch (normalized) {
+    case 'free':
+      return 'FREE';
+    case 'starter':
+      return 'STARTER';
+    case 'professional':
+      return 'PROFESSIONAL';
+    case 'business':
+      return 'BUSINESS';
+    case 'enterprise':
+      return 'ENTERPRISE';
+    case 'basico':
+      return 'basico';
+    case 'profesional':
+      return 'profesional';
+    case 'empresarial':
+      return 'empresarial';
+    case 'personalizado':
+      return 'personalizado';
+    default:
+      throw new Error(`Tier inválido: ${tier}`);
+  }
+};
+
 async function initializePlans() {
   const results = [];
   
   for (const [key, plan] of Object.entries(PRICING_PLANS)) {
     try {
+      const tier = mapSubscriptionTier(plan.tier);
       const existingPlan = await prisma.subscriptionPlan.findFirst({
-        where: { tier: plan.tier }
+        where: { tier }
       });
 
       const planData = {
         nombre: plan.name,
-        tier: plan.tier,
+        tier,
         descripcion: plan.description,
         precioMensual: plan.monthlyPrice,
         maxUsuarios: typeof plan.maxUsers === 'number' ? plan.maxUsers : 999,
@@ -131,7 +170,7 @@ export async function POST(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') || 'all';
 
-    const response: any = {
+    const response: Record<string, unknown> = {
       success: true,
       timestamp: new Date().toISOString(),
     };
