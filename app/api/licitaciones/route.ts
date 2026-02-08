@@ -203,8 +203,12 @@ export async function POST(req: NextRequest) {
     }
 
     const companyId = session.user.companyId;
-    if (!companyId) {
-      return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
+    const userId = session.user.id;
+    if (!companyId || !userId) {
+      return NextResponse.json(
+        { error: 'Datos de sesión incompletos' },
+        { status: 400 }
+      );
     }
 
     const body: unknown = await req.json();
