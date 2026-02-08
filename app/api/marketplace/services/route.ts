@@ -37,27 +37,35 @@ export async function GET(request: NextRequest) {
     });
 
     // Transformar al formato esperado por el frontend
-    const formattedServices = services.map((service) => ({
-      id: service.id,
-      name: service.nombre,
-      category: service.categoria.toLowerCase(),
-      provider: service.provider ? {
-        id: service.provider.id,
-        name: service.provider.nombre,
-        verified: true,
-        rating: service.provider.rating || 0,
-        reviews: 0,
-      } : null,
-      description: service.descripcion,
-      price: service.precioBase || service.precio || 0,
-      priceType: service.tipoPrecio || 'fixed',
-      image: service.imagenUrl || null,
-      featured: service.destacado,
-      tags: [],
-    }));
+    const formattedServices = services.map((service) => {
+      const images = Array.isArray(service.imagenes) ? service.imagenes : [];
+      const image = typeof images[0] === 'string' ? images[0] : null;
+      const tags = [service.categoria, service.subcategoria].filter(
+        (tag): tag is string => Boolean(tag)
+      );
+
+      return {
+        id: service.id,
+        name: service.nombre,
+        category: service.categoria.toLowerCase(),
+        provider: service.provider ? {
+          id: service.provider.id,
+          name: service.provider.nombre,
+          verified: Boolean(service.provider.id),
+          rating: service.provider.rating ?? 0,
+          reviews: service.totalReviews,
+        } : null,
+        description: service.descripcion,
+        price: service.precio ?? 0,
+        priceType: service.tipoPrecio,
+        image,
+        featured: service.destacado,
+        tags,
+      };
+    });
 
     return NextResponse.json(formattedServices);
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error fetching marketplace services:', error);
     return NextResponse.json(
       { error: 'Error al obtener servicios' },
