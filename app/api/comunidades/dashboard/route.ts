@@ -18,7 +18,11 @@ export async function GET(request: NextRequest) {
     const buildingId = searchParams.get('buildingId');
     const comunidadId = searchParams.get('comunidadId');
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
 
     // Obtener buildingId si se proporciona comunidadId
     let targetBuildingId = buildingId;
@@ -30,7 +34,7 @@ export async function GET(request: NextRequest) {
         include: {
           building: {
             include: {
-              units: { select: { id: true, unitNumber: true, type: true, status: true } },
+              units: { select: { id: true, numero: true, tipo: true, estado: true } },
             },
           },
         },
@@ -116,7 +120,7 @@ export async function GET(request: NextRequest) {
         orderBy: { fechaReunion: 'asc' },
         take: 5,
         include: {
-          building: { select: { id: true, name: true } },
+          building: { select: { id: true, nombre: true } },
         },
       }),
       // Fondos activos
@@ -127,7 +131,7 @@ export async function GET(request: NextRequest) {
       }),
       // Actas pendientes de aprobación
       prisma.communityMinute.count({
-        where: { ...baseWhere, estado: { in: ['borrador', 'pendiente_aprobacion'] } },
+        where: { ...baseWhere, estado: { in: ['borrador'] } },
       }),
     ]);
 
@@ -137,6 +141,7 @@ export async function GET(request: NextRequest) {
       where: { ...baseWhere, estado: 'pendiente' },
       _sum: { importeTotal: true },
       _count: { id: true },
+      orderBy: { unitId: 'asc' },
     });
 
     // Evolución mensual de recaudación (últimos 6 meses)
@@ -168,6 +173,7 @@ export async function GET(request: NextRequest) {
       by: ['tipo'],
       where: baseWhere,
       _count: { id: true },
+      orderBy: { tipo: 'asc' },
     });
 
     return NextResponse.json({
@@ -192,18 +198,18 @@ export async function GET(request: NextRequest) {
         actasPendientes,
       },
       calendario: {
-        reunionesProximas: reunionesProximas.map(r => ({
+        reunionesProximas: reunionesProximas.map((r) => ({
           id: r.id,
           titulo: r.titulo,
           tipo: r.tipo,
           fecha: r.fechaReunion,
           ubicacion: r.ubicacion,
-          edificio: r.building?.name,
+          edificio: r.building?.nombre,
         })),
       },
       graficos: {
         evolucionRecaudacion,
-        incidenciasPorTipo: incidenciasPorTipo.map(i => ({
+        incidenciasPorTipo: incidenciasPorTipo.map((i) => ({
           tipo: i.tipo,
           cantidad: i._count.id,
         })),
@@ -211,14 +217,15 @@ export async function GET(request: NextRequest) {
       comunidad: comunidad ? {
         id: comunidad.id,
         nombre: comunidad.nombreComunidad,
-        edificio: comunidad.building?.name,
+        edificio: comunidad.building?.nombre,
         direccion: comunidad.direccion,
       } : null,
     });
-  } catch (error: any) {
-    logger.error('[Dashboard Comunidades Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Dashboard Comunidades Error]:', { message });
     return NextResponse.json(
-      { error: 'Error obteniendo dashboard', details: error.message },
+      { error: 'Error obteniendo dashboard', details: message },
       { status: 500 }
     );
   }
