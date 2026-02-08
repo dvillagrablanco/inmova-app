@@ -3,13 +3,41 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import type { Prisma } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
+const FONDO_TIPO_MAP = {
+  reserva: 'reserva',
+  obras: 'obras',
+  mejoras: 'obras',
+  emergencia: 'contingencia',
+  otro: 'contingencia',
+  contingencia: 'contingencia',
+} as const;
+
+type FondoTipoInput = keyof typeof FONDO_TIPO_MAP;
+const fondoTipoSchema = z.enum(
+  Object.keys(FONDO_TIPO_MAP) as [FondoTipoInput, ...FondoTipoInput[]]
+);
+const isFondoTipoInput = (value: string): value is FondoTipoInput =>
+  Object.prototype.hasOwnProperty.call(FONDO_TIPO_MAP, value);
+
+type FondoMovimiento = {
+  id: string;
+  tipo: 'aportacion' | 'gasto' | 'transferencia';
+  concepto: string;
+  importe: number;
+  fecha: string;
+  referencia?: string;
+  saldoAnterior: number;
+  saldoNuevo: number;
+};
+
 const createFondoSchema = z.object({
   buildingId: z.string().min(1),
-  tipo: z.enum(['reserva', 'obras', 'mejoras', 'emergencia', 'otro']),
+  tipo: fondoTipoSchema,
   nombre: z.string().min(1),
   descripcion: z.string().optional(),
   saldoObjetivo: z.number().optional(),
@@ -39,7 +67,11 @@ export async function GET(request: NextRequest) {
     const tipo = searchParams.get('tipo');
     const activo = searchParams.get('activo');
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
 
     // Obtener buildingId si se proporciona comunidadId
     let targetBuildingId = buildingId;
@@ -52,9 +84,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Construir filtros
-    const where: any = { companyId };
+    const where: Prisma.CommunityFundWhereInput = { companyId };
     if (targetBuildingId) where.buildingId = targetBuildingId;
-    if (tipo) where.tipo = tipo;
+    const mappedTipo = tipo && isFondoTipoInput(tipo) ? FONDO_TIPO_MAP[tipo] : null;
+    if (mappedTipo) where.tipo = mappedTipo;
     if (activo !== null && activo !== undefined) {
       where.activo = activo === 'true';
     }
@@ -63,7 +96,7 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         building: {
-          select: { id: true, name: true },
+          select: { id: true, nombre: true },
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -80,9 +113,11 @@ export async function GET(request: NextRequest) {
     );
 
     return NextResponse.json({
-      fondos: fondos.map(f => ({
+      fondos: fondos.map((f) => ({
         ...f,
-        movimientos: f.movimientos as any[],
+        movimientos: Array.isArray(f.movimientos)
+          ? (f.movimientos as FondoMovimiento[])
+          : [],
         porcentajeObjetivo: f.saldoObjetivo 
           ? Math.round((f.saldoActual / f.saldoObjetivo) * 100)
           : null,
@@ -95,10 +130,11 @@ export async function GET(request: NextRequest) {
           : 100,
       },
     });
-  } catch (error: any) {
-    logger.error('[Fondos GET Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Fondos GET Error]:', { message });
     return NextResponse.json(
-      { error: 'Error obteniendo fondos', details: error.message },
+      { error: 'Error obteniendo fondos', details: message },
       { status: 500 }
     );
   }
@@ -112,7 +148,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
     const body = await request.json();
 
     // Verificar si es un movimiento o crear fondo
@@ -143,7 +183,9 @@ export async function POST(request: NextRequest) {
       }
 
       // Agregar movimiento al historial
-      const movimientos = (fondo.movimientos as any[]) || [];
+      const movimientos = Array.isArray(fondo.movimientos)
+        ? (fondo.movimientos as FondoMovimiento[])
+        : [];
       movimientos.push({
         id: `mov_${Date.now()}`,
         tipo: validated.tipo,
@@ -190,7 +232,7 @@ export async function POST(request: NextRequest) {
         data: {
           companyId,
           buildingId: validated.buildingId,
-          tipo: validated.tipo,
+          tipo: FONDO_TIPO_MAP[validated.tipo],
           nombre: validated.nombre,
           descripcion: validated.descripcion,
           saldoObjetivo: validated.saldoObjetivo,
@@ -200,22 +242,23 @@ export async function POST(request: NextRequest) {
           activo: true,
         },
         include: {
-          building: { select: { id: true, name: true } },
+          building: { select: { id: true, nombre: true } },
         },
       });
 
       return NextResponse.json({ fondo }, { status: 201 });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
-    logger.error('[Fondos POST Error]:', error);
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Fondos POST Error]:', { message });
     return NextResponse.json(
-      { error: 'Error procesando fondo', details: error.message },
+      { error: 'Error procesando fondo', details: message },
       { status: 500 }
     );
   }
