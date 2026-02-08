@@ -7,6 +7,29 @@ import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const EXPENSE_CATEGORIES = [
+  'mantenimiento',
+  'impuestos',
+  'seguros',
+  'servicios',
+  'reparaciones',
+  'comunidad',
+  'otro',
+] as const;
+
+type ExpenseCategoryValue = (typeof EXPENSE_CATEGORIES)[number];
+
+const ACCOUNTING_EXPENSE_CATEGORY_MAP: Record<string, ExpenseCategoryValue> = {
+  gasto_mantenimiento: 'mantenimiento',
+  gasto_impuesto: 'impuestos',
+  gasto_seguro: 'seguros',
+  gasto_servicio: 'servicios',
+  gasto_reparacion: 'reparaciones',
+  gasto_comunidad: 'comunidad',
+  gasto_administracion: 'otro',
+  gasto_otro: 'otro',
+};
+
 export async function GET() {
   try {
     const user = await requireAuth();
@@ -213,10 +236,11 @@ export async function GET() {
       _sum: { monto: true },
     });
 
-    let expensesChartData = expensesByCategory.map((cat) => ({
-      name: cat.categoria || 'Otros',
-      value: Number(cat._sum.monto) || 0,
-    }));
+    let expensesChartData: Array<{ name: ExpenseCategoryValue; value: number }> =
+      expensesByCategory.map((cat) => ({
+        name: cat.categoria ?? 'otro',
+        value: Number(cat._sum.monto) || 0,
+      }));
 
     if (useAccountingExpenses) {
       const accountingExpensesByCategory = accountingTransactions.reduce(
@@ -226,16 +250,18 @@ export async function GET() {
             transaction.fecha >= subMonths(currentMonth, 3) &&
             transaction.fecha <= endDate
           ) {
-            acc[transaction.categoria] = (acc[transaction.categoria] || 0) + transaction.monto;
+            const mappedCategory =
+              ACCOUNTING_EXPENSE_CATEGORY_MAP[transaction.categoria] ?? 'otro';
+            acc[mappedCategory] = (acc[mappedCategory] || 0) + transaction.monto;
           }
           return acc;
         },
-        {} as Record<string, number>
+        {} as Record<ExpenseCategoryValue, number>
       );
 
-      expensesChartData = Object.entries(accountingExpensesByCategory).map(([key, value]) => ({
-        name: key,
-        value,
+      expensesChartData = EXPENSE_CATEGORIES.map((category) => ({
+        name: category,
+        value: accountingExpensesByCategory[category] || 0,
       }));
     }
 
@@ -345,9 +371,10 @@ export async function GET() {
       unidadesDisponibles: availableUnits,
       esEmpresaPrueba: company?.esEmpresaPrueba || false,
     });
-  } catch (error: any) {
-    if (error.message === 'No autenticado') {
-      return NextResponse.json({ error: error.message }, { status: 401 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    if (message === 'No autenticado') {
+      return NextResponse.json({ error: message }, { status: 401 });
     }
 
     logger.error('Error fetching dashboard data:', error);
