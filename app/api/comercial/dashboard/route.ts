@@ -48,21 +48,19 @@ export async function GET(request: NextRequest) {
       prisma.commercialSpace.groupBy({
         by: ['tipo'],
         where: { companyId },
+        orderBy: { tipo: 'asc' },
         _count: { id: true },
       }),
 
       // Contratos activos
       prisma.commercialLease.findMany({
         where: {
-          space: { companyId },
+          companyId,
           estado: 'activo',
         },
         include: {
-          space: {
+          commercialSpace: {
             select: { nombre: true, tipo: true },
-          },
-          tenant: {
-            select: { nombreCompleto: true },
           },
         },
       }),
@@ -70,7 +68,7 @@ export async function GET(request: NextRequest) {
       // Contratos por vencer en los próximos 90 días
       prisma.commercialLease.findMany({
         where: {
-          space: { companyId },
+          companyId,
           estado: 'activo',
           fechaFin: {
             gte: now,
@@ -78,11 +76,8 @@ export async function GET(request: NextRequest) {
           },
         },
         include: {
-          space: {
+          commercialSpace: {
             select: { nombre: true },
-          },
-          tenant: {
-            select: { nombreCompleto: true },
           },
         },
         orderBy: { fechaFin: 'asc' },
@@ -92,8 +87,8 @@ export async function GET(request: NextRequest) {
       // Visitas programadas
       prisma.commercialVisit.count({
         where: {
-          space: { companyId },
-          fecha: { gte: now },
+          companyId,
+          fechaHora: { gte: now },
           estado: 'programada',
         },
       }),
@@ -101,7 +96,7 @@ export async function GET(request: NextRequest) {
       // Pagos del mes actual
       prisma.commercialPayment.aggregate({
         where: {
-          lease: { space: { companyId } },
+          companyId,
           estado: 'pagado',
           fechaPago: {
             gte: startMonth,
@@ -114,7 +109,7 @@ export async function GET(request: NextRequest) {
       // Pagos pendientes
       prisma.commercialPayment.aggregate({
         where: {
-          lease: { space: { companyId } },
+          companyId,
           estado: 'pendiente',
         },
         _sum: { monto: true },
@@ -130,7 +125,8 @@ export async function GET(request: NextRequest) {
     // Mapear tipos de espacios
     const spaceTypes = espaciosPorTipo.map((grupo) => {
       const ocupados = contratosActivos.filter(
-        (c: any) => c.space?.tipo === grupo.tipo
+        (c: { commercialSpace?: { tipo: string } }) =>
+          c.commercialSpace?.tipo === grupo.tipo
       ).length;
 
       return {
@@ -144,10 +140,10 @@ export async function GET(request: NextRequest) {
     // Actividad reciente (últimos contratos y pagos)
     const ultimosContratos = await prisma.commercialLease.findMany({
       where: {
-        space: { companyId },
+        companyId,
       },
       include: {
-        space: { select: { nombre: true } },
+        commercialSpace: { select: { nombre: true } },
       },
       orderBy: { createdAt: 'desc' },
       take: 5,
@@ -156,16 +152,16 @@ export async function GET(request: NextRequest) {
     const recentActivity = ultimosContratos.map((c) => ({
       id: c.id,
       type: 'contrato',
-      text: `${c.estado === 'ACTIVO' ? 'Contrato activo' : 'Contrato'} - ${c.space?.nombre}`,
+      text: `${c.estado === 'activo' ? 'Contrato activo' : 'Contrato'} - ${c.commercialSpace?.nombre}`,
       date: c.createdAt.toISOString(),
-      status: c.estado === 'ACTIVO' ? 'success' : 'info',
+      status: c.estado === 'activo' ? 'success' : 'info',
     }));
 
     // Próximos vencimientos
-    const upcomingExpirations = contratosPorVencer.map((c: any) => ({
+    const upcomingExpirations = contratosPorVencer.map((c) => ({
       id: c.id,
-      space: c.space?.nombre || 'Espacio',
-      tenant: c.tenant?.nombreCompleto || 'Inquilino',
+      space: c.commercialSpace?.nombre || 'Espacio',
+      tenant: c.arrendatarioNombre || 'Inquilino',
       date: c.fechaFin.toISOString().split('T')[0],
       daysLeft: Math.ceil((c.fechaFin.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
     }));
