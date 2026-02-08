@@ -71,6 +71,42 @@ export class CRMLeadImporter {
   }
 
   /**
+   * Importar leads desde un job de LinkedIn.
+   * Retorna error controlado si la integración no está configurada.
+   */
+  static async importFromLinkedInJob(
+    jobId: string,
+    companyId: string,
+    options: ImportOptions
+  ): Promise<ImportResult> {
+    const message = 'Importación de LinkedIn no configurada';
+    return {
+      success: false,
+      totalProcessed: 0,
+      imported: 0,
+      skipped: 0,
+      errors: 1,
+      details: {
+        imported: [],
+        skipped: [],
+        errors: [
+          {
+            name: jobId || 'LinkedIn',
+            error: message,
+          },
+        ],
+      },
+    };
+  }
+
+  /**
+   * Queries predefinidas de LinkedIn para INMOVA.
+   */
+  static getINMOVALinkedInQueries(): string[] {
+    return [];
+  }
+
+  /**
    * Importar leads (método principal)
    */
   static async importLeads(
