@@ -23,11 +23,6 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     // Verificar que la obra existe y el usuario tiene acceso
     const obra = await prisma.ewoorkerObra.findUnique({
       where: { id: params.id },
-      include: {
-        perfilEmpresa: {
-          include: { company: true },
-        },
-      },
     });
 
     if (!obra) {
@@ -40,7 +35,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       include: { company: { include: { ewoorkerPerfil: true } } },
     });
 
-    const esPropietario = user?.company?.ewoorkerPerfil?.id === obra.perfilEmpresaId;
+    const esPropietario = user?.company?.ewoorkerPerfil?.id === obra.perfilConstructorId;
     const esAdmin = ['super_admin', 'administrador'].includes(session.user.role as string);
 
     if (!esPropietario && !esAdmin) {
@@ -53,16 +48,16 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     // Sugerencia de precio
     const priceSuggestion = await ewoorkerMatching.suggestCompetitivePrice(
       params.id,
-      obra.especialidad
+      obra.categoria
     );
 
     return NextResponse.json({
       obra: {
         id: obra.id,
         titulo: obra.titulo,
-        especialidad: obra.especialidad,
+        especialidad: obra.categoria,
         provincia: obra.provincia,
-        presupuestoEstimado: obra.presupuestoEstimado,
+        presupuestoEstimado: obra.presupuestoMaximo ?? obra.presupuestoMinimo ?? 0,
       },
       recommendations,
       priceSuggestion,
@@ -71,8 +66,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         trabajadores: recommendations.trabajadores.length,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[EWOORKER_MATCHING_OBRA_GET]', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
