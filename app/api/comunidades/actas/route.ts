@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import type { Prisma } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -34,6 +35,20 @@ const createActaSchema = z.object({
   observaciones: z.string().optional(),
 });
 
+const ACTA_ESTADOS = ['borrador', 'aprobada', 'rechazada'] as const;
+type ActaEstadoValue = (typeof ACTA_ESTADOS)[number];
+const isActaEstado = (value: string): value is ActaEstadoValue =>
+  ACTA_ESTADOS.includes(value as ActaEstadoValue);
+
+type ActaAsistente = { nombre: string; unidad?: string; representado?: boolean };
+type ActaOrdenDia = { numero: number; titulo: string; descripcion?: string };
+type ActaAcuerdo = {
+  numero: number;
+  descripcion: string;
+  aprobado: boolean;
+  votacion?: { aFavor: number; enContra: number; abstenciones: number };
+};
+
 // GET - Listar actas
 export async function GET(request: NextRequest) {
   try {
@@ -50,7 +65,11 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
 
     // Obtener buildingId si se proporciona comunidadId
     let targetBuildingId = buildingId;
@@ -63,9 +82,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Construir filtros
-    const where: any = { companyId };
+    const where: Prisma.CommunityMinuteWhereInput = { companyId };
     if (targetBuildingId) where.buildingId = targetBuildingId;
-    if (estado) where.estado = estado;
+    const estadoValue = estado && isActaEstado(estado) ? estado : null;
+    if (estadoValue) where.estado = estadoValue;
     if (year) {
       const startDate = new Date(`${year}-01-01`);
       const endDate = new Date(`${year}-12-31`);
@@ -77,7 +97,7 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           building: {
-            select: { id: true, name: true, address: true },
+            select: { id: true, nombre: true, direccion: true },
           },
         },
         orderBy: { fecha: 'desc' },
@@ -88,25 +108,38 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Estadísticas
-    const stats = {
-      total,
-      borradores: await prisma.communityMinute.count({
+    const [borradores, aprobadas, rechazadas] = await Promise.all([
+      prisma.communityMinute.count({
         where: { ...where, estado: 'borrador' },
       }),
-      aprobadas: await prisma.communityMinute.count({
+      prisma.communityMinute.count({
         where: { ...where, estado: 'aprobada' },
       }),
-      pendientesAprobacion: await prisma.communityMinute.count({
-        where: { ...where, estado: 'pendiente_aprobacion' },
+      prisma.communityMinute.count({
+        where: { ...where, estado: 'rechazada' },
       }),
+    ]);
+
+    const stats = {
+      total,
+      borradores,
+      aprobadas,
+      pendientesAprobacion: borradores,
+      rechazadas,
     };
 
     return NextResponse.json({
-      actas: actas.map(a => ({
+      actas: actas.map((a) => ({
         ...a,
-        asistentes: a.asistentes as any[],
-        ordenDia: a.ordenDia as any[],
-        acuerdos: a.acuerdos as any[],
+        asistentes: Array.isArray(a.asistentes)
+          ? (a.asistentes as ActaAsistente[])
+          : [],
+        ordenDia: Array.isArray(a.ordenDia)
+          ? (a.ordenDia as ActaOrdenDia[])
+          : [],
+        acuerdos: Array.isArray(a.acuerdos)
+          ? (a.acuerdos as ActaAcuerdo[])
+          : [],
       })),
       pagination: {
         page,
@@ -116,10 +149,11 @@ export async function GET(request: NextRequest) {
       },
       stats,
     });
-  } catch (error: any) {
-    logger.error('[Actas GET Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Actas GET Error]:', { message });
     return NextResponse.json(
-      { error: 'Error obteniendo actas', details: error.message },
+      { error: 'Error obteniendo actas', details: message },
       { status: 500 }
     );
   }
@@ -133,8 +167,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
-    const userId = (session.user as any).id;
+    const sessionUser = session.user as { companyId?: string | null; id?: string | null };
+    const companyId = sessionUser.companyId;
+    const userId = sessionUser.id;
+    if (!companyId || !userId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
     const body = await request.json();
     const validated = createActaSchema.parse(body);
 
@@ -172,22 +210,23 @@ export async function POST(request: NextRequest) {
       },
       include: {
         building: {
-          select: { id: true, name: true },
+          select: { id: true, nombre: true },
         },
       },
     });
 
     return NextResponse.json({ acta }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
-    logger.error('[Actas POST Error]:', error);
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Actas POST Error]:', { message });
     return NextResponse.json(
-      { error: 'Error creando acta', details: error.message },
+      { error: 'Error creando acta', details: message },
       { status: 500 }
     );
   }
