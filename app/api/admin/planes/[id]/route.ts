@@ -52,7 +52,7 @@ export async function GET(
         companies: {
           select: {
             id: true,
-            name: true,
+            nombre: true,
           },
           take: 10,
         },
@@ -68,8 +68,9 @@ export async function GET(
 
     return NextResponse.json({ plan });
 
-  } catch (error: any) {
-    logger.error('[Admin Plan GET Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Admin Plan GET Error]:', { message });
     return NextResponse.json({ error: 'Error al cargar plan' }, { status: 500 });
   }
 }
@@ -106,7 +107,7 @@ export async function PUT(
       where: { id: params.id },
       data: {
         ...data,
-        tier: data.tier as any,
+        tier: data.tier,
       },
     });
 
@@ -115,8 +116,9 @@ export async function PUT(
       plan: updatedPlan,
     });
 
-  } catch (error: any) {
-    logger.error('[Admin Plan PUT Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Admin Plan PUT Error]:', { message });
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
