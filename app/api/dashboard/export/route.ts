@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,22 +23,22 @@ export async function GET(request: NextRequest) {
     // Fetch data from various tables
     const [properties, tenants, contracts, payments] = await Promise.all([
       prisma.unit.findMany({
-        where: { companyId },
-        include: { building: true },
-        take: 100
+        where: { building: { companyId } },
+        include: { building: { select: { nombre: true } } },
+        take: 100,
       }),
       prisma.tenant.findMany({
         where: { companyId },
-        take: 100
+        take: 100,
       }),
       prisma.contract.findMany({
         where: { companyId },
-        take: 100
+        take: 100,
       }),
       prisma.payment.findMany({
         where: { companyId },
-        take: 100
-      })
+        take: 100,
+      }),
     ]);
 
     // Create CSV content
@@ -46,34 +47,34 @@ export async function GET(request: NextRequest) {
     csvContent += `Empresa ID: ${companyId}\n\n`;
 
     // Properties section
-    csvContent += '=== PROPIEDADES ===\n';
-    csvContent += 'ID,Nombre,Edificio,Estado,Renta\n';
-    properties.forEach(p => {
-      csvContent += `${p.id},"${p.name}","${p.building?.name || ''}",${p.status},${p.rentAmount || 0}\n`;
+    csvContent += '=== UNIDADES ===\n';
+    csvContent += 'ID,Unidad,Edificio,Estado,Renta\n';
+    properties.forEach((p) => {
+      csvContent += `${p.id},"${p.numero}","${p.building?.nombre || ''}",${p.estado},${p.rentaMensual || 0}\n`;
     });
     csvContent += '\n';
 
     // Tenants section
     csvContent += '=== INQUILINOS ===\n';
-    csvContent += 'ID,Nombre,Email,Estado\n';
-    tenants.forEach(t => {
-      csvContent += `${t.id},"${t.firstName} ${t.lastName}",${t.email},${t.status}\n`;
+    csvContent += 'ID,Nombre,Email,NivelRiesgo\n';
+    tenants.forEach((t) => {
+      csvContent += `${t.id},"${t.nombreCompleto}",${t.email},${t.nivelRiesgo}\n`;
     });
     csvContent += '\n';
 
     // Contracts section  
     csvContent += '=== CONTRATOS ===\n';
     csvContent += 'ID,Estado,Inicio,Fin,Renta\n';
-    contracts.forEach(c => {
-      csvContent += `${c.id},${c.status},${c.startDate?.toISOString().split('T')[0] || ''},${c.endDate?.toISOString().split('T')[0] || ''},${c.rent || 0}\n`;
+    contracts.forEach((c) => {
+      csvContent += `${c.id},${c.estado},${c.fechaInicio?.toISOString().split('T')[0] || ''},${c.fechaFin?.toISOString().split('T')[0] || ''},${c.rentaMensual || 0}\n`;
     });
     csvContent += '\n';
 
     // Payments section
     csvContent += '=== PAGOS ===\n';
-    csvContent += 'ID,Concepto,Monto,Estado,Fecha\n';
-    payments.forEach(p => {
-      csvContent += `${p.id},"${p.concept || ''}",${p.amount},${p.status},${p.paidDate?.toISOString().split('T')[0] || ''}\n`;
+    csvContent += 'ID,Periodo,Monto,Estado,FechaPago\n';
+    payments.forEach((p) => {
+      csvContent += `${p.id},"${p.periodo}",${p.monto},${p.estado},${p.fechaPago?.toISOString().split('T')[0] || ''}\n`;
     });
 
     // Summary
@@ -90,10 +91,11 @@ export async function GET(request: NextRequest) {
         'Content-Disposition': `attachment; filename="inmova-export-${new Date().toISOString().split('T')[0]}.csv"`,
       },
     });
-  } catch (error: any) {
-    console.error('[Dashboard Export Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Dashboard Export Error]:', error);
     return NextResponse.json(
-      { error: 'Error generando exportación', message: error.message },
+      { error: 'Error generando exportación', message },
       { status: 500 }
     );
   }
