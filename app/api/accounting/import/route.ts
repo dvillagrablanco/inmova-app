@@ -26,6 +26,7 @@ const ACCOUNTING_CATEGORIES = [
   'gasto_administracion',
   'gasto_otro',
 ] as const;
+type AccountingCategory = typeof ACCOUNTING_CATEGORIES[number];
 
 const KEY_ALIASES = {
   fecha: ['fecha', 'date', 'fechaoperacion', 'fechavalor', 'fecha_contable', 'fechamovimiento'],
@@ -163,10 +164,14 @@ function inferTransactionType(
   return null;
 }
 
-function normalizeCategory(tipo: TransactionType, rawCategory: any, rawConcept: any): string {
+function normalizeCategory(
+  tipo: TransactionType,
+  rawCategory: unknown,
+  rawConcept: unknown
+): AccountingCategory {
   const combined = `${rawCategory || ''} ${rawConcept || ''}`.toLowerCase();
-  if (ACCOUNTING_CATEGORIES.includes(rawCategory as any)) {
-    return rawCategory;
+  if (ACCOUNTING_CATEGORIES.includes(rawCategory as AccountingCategory)) {
+    return rawCategory as AccountingCategory;
   }
 
   if (tipo === 'ingreso') {
@@ -306,7 +311,7 @@ export async function POST(request: NextRequest) {
       buildingId?: string;
       unitId?: string;
       tipo: TransactionType;
-      categoria: string;
+      categoria: AccountingCategory;
       concepto: string;
       monto: number;
       fecha: Date;
