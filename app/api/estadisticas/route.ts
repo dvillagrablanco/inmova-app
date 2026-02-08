@@ -28,7 +28,7 @@ export async function GET() {
           select: {
             id: true,
             tipo: true,
-            precioRenta: true,
+            rentaMensual: true,
             estado: true,
           },
         },
@@ -37,26 +37,28 @@ export async function GET() {
 
     // Calcular estadísticas por tipo de propiedad
     const unitsByType = buildings.reduce((acc: Record<string, { count: number; occupied: number; income: number }>, building) => {
-      building.units.forEach(unit => {
+      building.units.forEach((unit) => {
         const tipo = unit.tipo || 'otros';
         if (!acc[tipo]) {
           acc[tipo] = { count: 0, occupied: 0, income: 0 };
         }
         acc[tipo].count++;
-        if (unit.estado === 'ocupado') {
+        if (unit.estado === 'ocupada') {
           acc[tipo].occupied++;
-          acc[tipo].income += unit.precioRenta || 0;
+          acc[tipo].income += unit.rentaMensual || 0;
         }
       });
       return acc;
     }, {});
 
     const tipoLabels: Record<string, string> = {
-      apartamento: 'Apartamentos',
-      estudio: 'Estudios',
+      vivienda: 'Viviendas',
       local: 'Locales',
+      garaje: 'Garajes',
+      trastero: 'Trasteros',
       oficina: 'Oficinas',
-      habitacion: 'Habitaciones',
+      nave_industrial: 'Naves industriales',
+      coworking_space: 'Coworking',
       otros: 'Otros',
     };
 
@@ -69,9 +71,9 @@ export async function GET() {
 
     // Top edificios por ingresos
     const topProperties = buildings
-      .map(b => {
-        const occupiedUnits = b.units.filter(u => u.estado === 'ocupado');
-        const totalIncome = occupiedUnits.reduce((sum, u) => sum + (u.precioRenta || 0), 0);
+      .map((b) => {
+        const occupiedUnits = b.units.filter((u) => u.estado === 'ocupada');
+        const totalIncome = occupiedUnits.reduce((sum, u) => sum + (u.rentaMensual || 0), 0);
         return {
           nombre: b.nombre,
           unidades: b.units.length,
@@ -88,7 +90,7 @@ export async function GET() {
 
     const payments = await prisma.payment.findMany({
       where: {
-        companyId,
+        contract: { unit: { building: { companyId } } },
         fechaPago: { gte: sixMonthsAgo },
         estado: 'pagado',
       },
@@ -102,7 +104,7 @@ export async function GET() {
     const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
     const monthlyPayments: Record<string, number> = {};
     
-    payments.forEach(p => {
+    payments.forEach((p) => {
       if (p.fechaPago) {
         const month = monthNames[p.fechaPago.getMonth()];
         monthlyPayments[month] = (monthlyPayments[month] || 0) + (p.monto || 0);
@@ -111,7 +113,10 @@ export async function GET() {
 
     // Generar datos de los últimos 6 meses
     const totalUnits = buildings.reduce((sum, b) => sum + b.units.length, 0);
-    const occupiedUnits = buildings.reduce((sum, b) => sum + b.units.filter(u => u.estado === 'ocupado').length, 0);
+    const occupiedUnits = buildings.reduce(
+      (sum, b) => sum + b.units.filter((u) => u.estado === 'ocupada').length,
+      0
+    );
     const baseOcupacion = totalUnits > 0 ? Math.round((occupiedUnits / totalUnits) * 100) : 0;
 
     const monthlyData: { mes: string; ingresos: number; ocupacion: number }[] = [];
