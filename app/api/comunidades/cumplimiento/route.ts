@@ -31,11 +31,17 @@ export async function GET(request: NextRequest) {
     const comunidadId = searchParams.get('comunidadId');
     const tipo = searchParams.get('tipo');
     const queryCompanyId = searchParams.get('companyId');
-    const userRole = (session.user as any).role;
-
-    const sessionCompanyId = (session.user as any).companyId;
+    const sessionUser = session.user as {
+      companyId?: string | null;
+      role?: string | null;
+    };
+    const userRole = typeof sessionUser.role === 'string' ? sessionUser.role.toLowerCase() : null;
+    const sessionCompanyId = sessionUser.companyId;
     const companyId =
       queryCompanyId && userRole === 'super_admin' ? queryCompanyId : sessionCompanyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
 
     // Obtener buildingId si se proporciona comunidadId
     let targetBuildingId = buildingId;
@@ -55,10 +61,10 @@ export async function GET(request: NextRequest) {
       },
       select: {
         id: true,
-        name: true,
-        address: true,
-        yearBuilt: true,
-        totalUnits: true,
+        nombre: true,
+        direccion: true,
+        anoConstructor: true,
+        numeroUnidades: true,
       },
     });
 
@@ -153,7 +159,7 @@ export async function GET(request: NextRequest) {
 
     // Calcular estado de cumplimiento por edificio
     const cumplimiento = buildings.map((building) => {
-      const añoConstruccion = building.yearBuilt || 2000;
+      const añoConstruccion = building.anoConstructor || 2000;
       const antiguedad = new Date().getFullYear() - añoConstruccion;
       
       // ITE obligatoria para edificios >50 años
@@ -168,7 +174,11 @@ export async function GET(request: NextRequest) {
         : { estado: 'pendiente', fechaVencimiento: null };
 
       return {
-        ...building,
+        id: building.id,
+        name: building.nombre,
+        address: building.direccion,
+        yearBuilt: building.anoConstructor,
+        totalUnits: building.numeroUnidades,
         antiguedad,
         documentos: {
           ite: {
@@ -229,10 +239,11 @@ export async function GET(request: NextRequest) {
       cumplimiento,
       stats,
     });
-  } catch (error: any) {
-    logger.error('[Cumplimiento GET Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Cumplimiento GET Error]:', { message });
     return NextResponse.json(
-      { error: 'Error obteniendo cumplimiento', details: error.message },
+      { error: 'Error obteniendo cumplimiento', details: message },
       { status: 500 }
     );
   }
@@ -246,7 +257,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
     const body = await request.json();
     const validated = createDocumentoSchema.parse(body);
 
@@ -261,24 +276,21 @@ export async function POST(request: NextRequest) {
 
     // Por ahora retornamos éxito (el modelo específico de documentos de cumplimiento
     // se puede crear cuando sea necesario)
-    return NextResponse.json({
-      message: 'Documento registrado correctamente',
-      documento: {
-        id: `doc_${Date.now()}`,
-        ...validated,
-        buildingName: building.name,
-      },
-    }, { status: 201 });
-  } catch (error: any) {
+    return NextResponse.json(
+      { error: 'Funcionalidad no disponible', details: 'Registro de documentos no implementado' },
+      { status: 501 }
+    );
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
-    logger.error('[Cumplimiento POST Error]:', error);
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Cumplimiento POST Error]:', { message });
     return NextResponse.json(
-      { error: 'Error registrando documento', details: error.message },
+      { error: 'Error registrando documento', details: message },
       { status: 500 }
     );
   }
