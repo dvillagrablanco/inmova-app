@@ -25,13 +25,14 @@ async function initializePlans() {
   
   for (const [key, plan] of Object.entries(PRICING_PLANS)) {
     try {
+      const tier = plan.tier.toUpperCase() as 'STARTER' | 'PROFESSIONAL' | 'BUSINESS' | 'ENTERPRISE';
       const existingPlan = await prisma.subscriptionPlan.findFirst({
-        where: { tier: plan.tier }
+        where: { tier }
       });
 
       const planData = {
         nombre: plan.name,
-        tier: plan.tier,
+        tier,
         descripcion: plan.description,
         precioMensual: plan.monthlyPrice,
         maxUsuarios: typeof plan.maxUsers === 'number' ? plan.maxUsers : 999,
