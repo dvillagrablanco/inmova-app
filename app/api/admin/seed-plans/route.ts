@@ -13,6 +13,48 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+type SubscriptionTierValue =
+  | 'FREE'
+  | 'STARTER'
+  | 'PROFESSIONAL'
+  | 'BUSINESS'
+  | 'ENTERPRISE'
+  | 'basico'
+  | 'profesional'
+  | 'empresarial'
+  | 'personalizado';
+
+const mapSubscriptionTier = (tier: string): SubscriptionTierValue => {
+  const normalized = tier.trim().toLowerCase();
+
+  switch (normalized) {
+    case 'free':
+      return 'FREE';
+    case 'starter':
+      return 'STARTER';
+    case 'professional':
+      return 'PROFESSIONAL';
+    case 'business':
+      return 'BUSINESS';
+    case 'enterprise':
+      return 'ENTERPRISE';
+    case 'basico':
+      return 'basico';
+    case 'profesional':
+      return 'profesional';
+    case 'empresarial':
+      return 'empresarial';
+    case 'personalizado':
+    case 'premium':
+      return 'personalizado';
+    default:
+      throw new Error(`Tier inválido: ${tier}`);
+  }
+};
+
+const normalizeLimit = (value: number | null | undefined, fallback: number) =>
+  typeof value === 'number' ? value : fallback;
+
 const PLANES_DATA = [
   // Plan interno gratuito para empresas del owner
   {
@@ -172,7 +214,7 @@ export async function GET(request: NextRequest) {
         skipped++;
         results.push({
           nombre: planData.nombre,
-          tier: planData.tier,
+        tier: mapSubscriptionTier(planData.tier),
           status: 'skipped',
           message: 'Ya existe',
         });
@@ -180,8 +222,19 @@ export async function GET(request: NextRequest) {
       }
 
       try {
+      const normalizedPlan = {
+        ...planData,
+        tier: mapSubscriptionTier(planData.tier),
+        maxUsuarios: normalizeLimit(planData.maxUsuarios, 100000),
+        maxPropiedades: normalizeLimit(planData.maxPropiedades, 100000),
+        signaturesIncludedMonth: normalizeLimit(planData.signaturesIncludedMonth, 100000),
+        storageIncludedGB: normalizeLimit(planData.storageIncludedGB, 0),
+        aiTokensIncludedMonth: normalizeLimit(planData.aiTokensIncludedMonth, 0),
+        smsIncludedMonth: normalizeLimit(planData.smsIncludedMonth, 0),
+      };
+
         const plan = await prisma.subscriptionPlan.create({
-          data: planData,
+        data: normalizedPlan,
         });
 
         created++;
@@ -191,19 +244,20 @@ export async function GET(request: NextRequest) {
           precio: plan.precioMensual,
           status: 'created',
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Error desconocido';
         results.push({
           nombre: planData.nombre,
-          tier: planData.tier,
+          tier: mapSubscriptionTier(planData.tier),
           status: 'error',
-          error: error.message,
+          error: message,
         });
       }
     }
 
     // 4. Asignar plan básico a empresas sin plan
     const basicPlan = await prisma.subscriptionPlan.findFirst({
-      where: { tier: 'basico' },
+      where: { tier: mapSubscriptionTier('basico') },
     });
 
     let companiesUpdated = 0;
