@@ -184,6 +184,10 @@ export async function GET(request: NextRequest) {
         tier,
         maxUsuarios: maxUsuarios ?? 9999,
         maxPropiedades: maxPropiedades ?? 9999,
+        signaturesIncludedMonth: planData.signaturesIncludedMonth ?? 0,
+        storageIncludedGB: planData.storageIncludedGB ?? 0,
+        aiTokensIncludedMonth: planData.aiTokensIncludedMonth ?? 0,
+        smsIncludedMonth: planData.smsIncludedMonth ?? 0,
       };
       if (existingNames.has(planData.nombre)) {
         skipped++;
