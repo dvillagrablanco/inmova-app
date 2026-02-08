@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     if (!result.success) {
       return NextResponse.json(
-        { error: result.error || 'Error al obtener celebraciones' },
+        { error: 'Error al obtener celebraciones' },
         { status: 500 }
       );
     }
@@ -45,8 +45,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       celebrations: result.celebrations,
     });
-  } catch (error) {
-    logger.error('[API] Error in GET /api/celebrations:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[API] Error in GET /api/celebrations:', { message });
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
@@ -104,8 +105,9 @@ export async function POST(request: NextRequest) {
       { celebration: result.celebration },
       { status: 201 }
     );
-  } catch (error) {
-    logger.error('[API] Error in POST /api/celebrations:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[API] Error in POST /api/celebrations:', { message });
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
