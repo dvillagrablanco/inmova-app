@@ -10,6 +10,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 import logger from '@/lib/logger';
+import type { Prisma } from '@/types/prisma-types';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -20,6 +21,14 @@ export const runtime = 'nodejs';
 
 // Fases del enum ConstructionPhase en Prisma
 const CONSTRUCTION_PHASES = ['PLANIFICACION', 'PERMISOS', 'CIMENTACION', 'ESTRUCTURA', 'CERRAMIENTOS', 'INSTALACIONES', 'ACABADOS', 'ENTREGA', 'GARANTIA'] as const;
+type ConstructionPhaseValue = (typeof CONSTRUCTION_PHASES)[number];
+
+const parseConstructionPhase = (value: string): ConstructionPhaseValue | null => {
+  const match = CONSTRUCTION_PHASES.find(
+    (phase): phase is ConstructionPhaseValue => phase === value
+  );
+  return match ?? null;
+};
 
 const createProjectSchema = z.object({
   nombre: z.string().min(3),
@@ -73,16 +82,26 @@ export async function GET(req: NextRequest) {
 
     const { prisma } = await import('@/lib/db');
 
-    const where: any = { companyId };
+    const where: Prisma.ConstructionProjectWhereInput = { companyId };
     if (fase) {
-      where.faseActual = fase;
+      const parsedPhase = parseConstructionPhase(fase);
+      if (!parsedPhase) {
+        return NextResponse.json(
+          { error: 'Fase inválida' },
+          { status: 400 }
+        );
+      }
+      where.faseActual = parsedPhase;
     }
 
     const projects = await prisma.constructionProject.findMany({
       where,
       include: {
         workOrders: {
-          orderBy: { orden: 'asc' },
+          orderBy: [
+            { fase: 'asc' },
+            { fechaInicio: 'asc' },
+          ],
         },
         building: {
           select: { id: true, nombre: true, direccion: true },
@@ -162,7 +181,7 @@ export async function GET(req: NextRequest) {
       data: projectsWithMetrics,
       stats,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching construction projects:', error);
     return NextResponse.json({ error: 'Error al obtener obras' }, { status: 500 });
   }
@@ -184,7 +203,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
     }
 
-    const body = await req.json();
+    const body: unknown = await req.json();
     const validationResult = createProjectSchema.safeParse(body);
 
     if (!validationResult.success) {
@@ -235,7 +254,7 @@ export async function POST(req: NextRequest) {
       data: project,
       message: 'Obra creada exitosamente',
     }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating construction project:', error);
     return NextResponse.json({ error: 'Error al crear obra' }, { status: 500 });
   }
