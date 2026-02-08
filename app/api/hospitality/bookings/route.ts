@@ -12,6 +12,17 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const BOOKING_STATUSES = ['PENDIENTE', 'CONFIRMADA', 'CHECK_IN', 'CHECK_OUT', 'CANCELADA', 'NO_SHOW'] as const;
+type BookingStatusValue = (typeof BOOKING_STATUSES)[number];
+const BOOKING_STATUS_MAP: Record<string, BookingStatusValue> = {
+  pendiente: 'PENDIENTE',
+  confirmada: 'CONFIRMADA',
+  check_in: 'CHECK_IN',
+  check_out: 'CHECK_OUT',
+  cancelada: 'CANCELADA',
+  no_show: 'NO_SHOW',
+};
+
 const createBookingSchema = z.object({
   roomId: z.string(),
   buildingId: z.string(),
@@ -46,12 +57,15 @@ export async function GET(req: NextRequest) {
 
     const { prisma } = await import('@/lib/db');
 
+    const estadoValue =
+      estado && (BOOKING_STATUS_MAP[estado] || (BOOKING_STATUSES.includes(estado as BookingStatusValue) ? (estado as BookingStatusValue) : undefined));
+
     // Obtener reservas
     const bookings = await prisma.sTRBooking.findMany({
       where: {
         companyId,
         ...(buildingId && { buildingId }),
-        ...(estado && { estado }),
+        ...(estadoValue && { estado: estadoValue }),
         ...(fechaDesde && {
           checkIn: { gte: new Date(fechaDesde) },
         }),
@@ -74,8 +88,8 @@ export async function GET(req: NextRequest) {
     
     const stats = {
       total: bookings.length,
-      confirmadas: bookings.filter(b => b.estado === 'confirmada').length,
-      pendientes: bookings.filter(b => b.estado === 'pendiente').length,
+      confirmadas: bookings.filter(b => b.estado === 'CONFIRMADA').length,
+      pendientes: bookings.filter(b => b.estado === 'PENDIENTE').length,
       checkinHoy: bookings.filter(b => {
         const checkIn = new Date(b.checkIn);
         checkIn.setHours(0, 0, 0, 0);
@@ -100,7 +114,7 @@ export async function GET(req: NextRequest) {
       data: bookings,
       stats,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching hospitality bookings:', error);
     return NextResponse.json({ error: 'Error al obtener reservas' }, { status: 500 });
   }
@@ -135,7 +149,7 @@ export async function POST(req: NextRequest) {
     const existingBooking = await prisma.sTRBooking.findFirst({
       where: {
         companyId,
-        estado: { in: ['confirmada', 'pendiente'] },
+        estado: { in: ['CONFIRMADA', 'PENDIENTE'] },
         OR: [
           {
             checkIn: { lte: new Date(data.checkOut) },
@@ -187,7 +201,7 @@ export async function POST(req: NextRequest) {
         precioTotal: data.precioTotal,
         notas: data.notas,
         plataforma: data.origen,
-        estado: 'pendiente',
+        estado: 'PENDIENTE',
       },
     });
 
@@ -198,7 +212,7 @@ export async function POST(req: NextRequest) {
       data: booking,
       message: 'Reserva creada exitosamente',
     }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating hospitality booking:', error);
     return NextResponse.json({ error: 'Error al crear reserva' }, { status: 500 });
   }
