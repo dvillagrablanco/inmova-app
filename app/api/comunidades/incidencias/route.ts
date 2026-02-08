@@ -11,7 +11,19 @@ const createIncidenciaSchema = z.object({
   buildingId: z.string().min(1),
   titulo: z.string().min(1),
   descripcion: z.string().min(1),
-  tipo: z.enum(['averia', 'mantenimiento', 'limpieza', 'seguridad', 'ruidos', 'otro']),
+  tipo: z.enum([
+    'averia',
+    'mantenimiento',
+    'limpieza',
+    'seguridad',
+    'ruidos',
+    'otro',
+    'ruido',
+    'averia_comun',
+    'convivencia',
+    'mascota',
+    'parking',
+  ]),
   prioridad: z.enum(['baja', 'media', 'alta', 'urgente']).default('media'),
   ubicacion: z.string().optional(),
   unitId: z.string().optional(),
@@ -149,6 +161,21 @@ export async function POST(request: NextRequest) {
     const userId = (session.user as any).id;
     const body = await request.json();
     const validated = createIncidenciaSchema.parse(body);
+    const normalizedTipo = (
+      validated.tipo === 'ruidos'
+        ? 'ruido'
+        : validated.tipo === 'averia' || validated.tipo === 'mantenimiento'
+          ? 'averia_comun'
+          : validated.tipo
+    ) as
+      | 'ruido'
+      | 'averia_comun'
+      | 'limpieza'
+      | 'seguridad'
+      | 'convivencia'
+      | 'mascota'
+      | 'parking'
+      | 'otro';
 
     // Verificar que el edificio existe
     const building = await prisma.building.findFirst({
@@ -167,7 +194,7 @@ export async function POST(request: NextRequest) {
         reporterType: 'user',
         titulo: validated.titulo,
         descripcion: validated.descripcion,
-        tipo: validated.tipo,
+        tipo: normalizedTipo,
         prioridad: validated.prioridad,
         ubicacion: validated.ubicacion,
         unitId: validated.unitId,
