@@ -15,7 +15,14 @@ const PLATFORM_MAP = {
 } as const;
 
 type PlatformInput = keyof typeof PLATFORM_MAP;
-type SocialMediaPlatform = string;
+type PrismaSocialMediaPlatform =
+  | 'FACEBOOK'
+  | 'INSTAGRAM'
+  | 'TWITTER'
+  | 'LINKEDIN'
+  | 'WHATSAPP_BUSINESS'
+  | 'TIKTOK';
+type SocialMediaPlatform = PrismaSocialMediaPlatform;
 
 const STATUS_MAP = {
   draft: 'borrador',
@@ -213,7 +220,7 @@ export async function POST(request: NextRequest) {
     const accounts = await prisma.socialMediaAccount.findMany({
       where: {
         companyId,
-        platform: { in: requestedPlatforms as SocialMediaPlatform[] },
+        platform: { in: requestedPlatforms },
         activo: true,
       },
     });
