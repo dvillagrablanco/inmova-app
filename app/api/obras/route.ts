@@ -55,7 +55,6 @@ const createProjectSchema = z.object({
   // Responsables
   arquitecto: z.string().optional(),
   aparejador: z.string().optional(),
-  constructor: z.string().optional(),
   
   // Fase actual - usa valores del enum Prisma
   faseActual: z.enum(CONSTRUCTION_PHASES).default('PLANIFICACION'),
@@ -242,7 +241,6 @@ export async function POST(req: NextRequest) {
         duracionMeses,
         arquitecto: data.arquitecto,
         aparejador: data.aparejador,
-        constructor: data.constructor,
         faseActual: data.faseActual,
       },
     });
