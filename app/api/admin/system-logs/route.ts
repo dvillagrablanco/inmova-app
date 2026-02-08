@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import type { Prisma } from '@/types/prisma-types';
 import { isSuperAdmin } from '@/lib/admin-roles';
 import logger from '@/lib/logger';
 
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
 
     // Obtener logs reales de la base de datos (audit logs)
-    const whereClause: any = {};
+    const whereClause: Prisma.AuditLogWhereInput = {};
     
     if (level !== 'all') {
       whereClause.action = { contains: level.toUpperCase() };
@@ -69,7 +70,17 @@ export async function GET(request: NextRequest) {
     const filteredLogs = logs.filter(log => !log.company?.esEmpresaPrueba);
 
     // Transformar a formato de LogEntry
-    const formattedLogs = filteredLogs.map((log) => ({
+    const formattedLogs = filteredLogs.map((log) => {
+      let metadata: Record<string, unknown> = {};
+      if (log.changes) {
+        try {
+          metadata = JSON.parse(log.changes);
+        } catch {
+          metadata = { raw: log.changes };
+        }
+      }
+
+      return {
       id: log.id,
       timestamp: log.createdAt.toISOString(),
       level: log.action?.includes('ERROR') ? 'error' : 
@@ -80,8 +91,9 @@ export async function GET(request: NextRequest) {
       userName: log.user?.name || log.user?.email || undefined,
       companyId: log.companyId || undefined,
       companyName: log.company?.nombre || undefined,
-      metadata: log.details || {},
-    }));
+      metadata,
+      };
+    });
 
     // Calcular estadísticas reales
     const allLogs = await prisma.auditLog.findMany({
@@ -119,8 +131,9 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(filteredLogs.length / limit),
       },
     });
-  } catch (error: any) {
-    logger.error('Error fetching system logs:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('Error fetching system logs:', { message });
     return NextResponse.json(
       { error: 'Error al obtener logs' },
       { status: 500 }
