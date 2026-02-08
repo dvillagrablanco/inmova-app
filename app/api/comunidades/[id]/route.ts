@@ -30,7 +30,11 @@ export async function GET(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
 
     const comunidad = await prisma.communityManagement.findFirst({
       where: {
@@ -43,12 +47,12 @@ export async function GET(
             units: {
               select: {
                 id: true,
-                unitNumber: true,
-                type: true,
-                status: true,
-                squareMeters: true,
+                numero: true,
+                tipo: true,
+                estado: true,
+                superficie: true,
                 contracts: {
-                  where: { status: 'activo' },
+                  where: { estado: 'activo' },
                   include: {
                     tenant: {
                       select: {
@@ -133,10 +137,11 @@ export async function GET(
         fondos,
       },
     });
-  } catch (error: any) {
-    logger.error('[Comunidad GET Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Comunidad GET Error]:', { message });
     return NextResponse.json(
-      { error: 'Error obteniendo comunidad', details: error.message },
+      { error: 'Error obteniendo comunidad', details: message },
       { status: 500 }
     );
   }
@@ -153,7 +158,11 @@ export async function PUT(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
     const body = await request.json();
     const validated = updateComunidadSchema.parse(body);
 
@@ -181,16 +190,17 @@ export async function PUT(
     });
 
     return NextResponse.json({ comunidad });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
-    logger.error('[Comunidad PUT Error]:', error);
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Comunidad PUT Error]:', { message });
     return NextResponse.json(
-      { error: 'Error actualizando comunidad', details: error.message },
+      { error: 'Error actualizando comunidad', details: message },
       { status: 500 }
     );
   }
@@ -207,7 +217,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
 
     // Verificar que existe y pertenece a la empresa
     const existing = await prisma.communityManagement.findFirst({
@@ -228,10 +242,11 @@ export async function DELETE(
     });
 
     return NextResponse.json({ message: 'Comunidad desactivada correctamente' });
-  } catch (error: any) {
-    logger.error('[Comunidad DELETE Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Comunidad DELETE Error]:', { message });
     return NextResponse.json(
-      { error: 'Error eliminando comunidad', details: error.message },
+      { error: 'Error eliminando comunidad', details: message },
       { status: 500 }
     );
   }
