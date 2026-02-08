@@ -181,7 +181,7 @@ export async function GET(request: NextRequest) {
           tenant: {
             companyId,
           },
-          estado: 'connected',
+          estado: 'conectado',
         },
       })
       .catch(() => 0);
