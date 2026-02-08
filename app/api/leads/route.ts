@@ -114,6 +114,13 @@ export async function POST(req: NextRequest) {
     }
 
     try {
+      const verticalesInteres = Array.isArray(body.verticalesInteres)
+        ? body.verticalesInteres
+        : body.interes
+          ? [body.interes]
+          : [];
+      const presupuestoMensual = body.presupuesto ? Number(body.presupuesto) : undefined;
+
       const lead = await prisma.lead.create({
         data: {
           companyId,
@@ -123,8 +130,9 @@ export async function POST(req: NextRequest) {
           empresa: body.empresa,
           fuente: body.fuente || 'web',
           estado: 'nuevo',
-          interes: body.interes,
-          presupuesto: body.presupuesto ? parseFloat(body.presupuesto) : null,
+          tipoNegocio: body.tipoNegocio || body.interes,
+          verticalesInteres,
+          presupuestoMensual: Number.isFinite(presupuestoMensual) ? presupuestoMensual : undefined,
           notas: body.notas,
         },
       });
