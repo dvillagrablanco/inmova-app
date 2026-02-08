@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -13,7 +15,7 @@ const createPropietarioSchema = z.object({
   nombre: z.string().min(1),
   apellidos: z.string().min(1),
   dni: z.string().optional(),
-  email: z.string().email().optional(),
+  email: z.string().email(),
   telefono: z.string().optional(),
   direccionCorrespondencia: z.string().optional(),
   coeficienteParticipacion: z.number().min(0).max(100).default(0),
@@ -84,32 +86,28 @@ export async function GET(request: NextRequest) {
     const owners = await prisma.owner.findMany({
       where: {
         companyId,
-        buildings: {
-          some: { id: targetBuildingId },
-        },
-      },
-      include: {
-        buildings: {
-          where: { id: targetBuildingId },
-          select: { id: true, nombre: true },
+        ownerBuildings: {
+          some: { buildingId: targetBuildingId },
         },
       },
     });
 
     // Formatear respuesta combinando datos
-    const propietarios = owners.map(owner => ({
+    const propietarios = owners.map(owner => {
+      const [nombre, ...resto] = owner.nombreCompleto.split(' ');
+      return {
       id: owner.id,
-      nombre: owner.nombre || '',
-      apellidos: owner.apellidos || '',
-      nombreCompleto: `${owner.nombre || ''} ${owner.apellidos || ''}`.trim(),
+      nombre: nombre || '',
+      apellidos: resto.join(' '),
+      nombreCompleto: owner.nombreCompleto,
       dni: owner.dni,
       email: owner.email,
       telefono: owner.telefono,
       direccion: owner.direccion,
-      tipo: owner.tipo,
       activo: owner.activo,
       createdAt: owner.createdAt,
-    }));
+      };
+    });
 
     // Calcular estadísticas
     const stats = {
@@ -167,29 +165,33 @@ export async function POST(request: NextRequest) {
     }
 
     // Crear o actualizar propietario en la tabla Owner
+    const nombreCompleto = `${validated.nombre} ${validated.apellidos}`.trim();
+    const tempPassword = crypto.randomBytes(12).toString('hex');
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
     const propietario = await prisma.owner.create({
       data: {
         companyId,
-        nombre: validated.nombre,
-        apellidos: validated.apellidos,
+        nombreCompleto,
         dni: validated.dni,
         email: validated.email,
         telefono: validated.telefono,
         direccion: validated.direccionCorrespondencia,
-        tipo: 'persona_fisica',
+        password: hashedPassword,
         activo: true,
-        buildings: {
-          connect: { id: validated.buildingId },
-        },
-      },
-      include: {
-        buildings: {
-          select: { id: true, nombre: true },
+        ownerBuildings: {
+          create: {
+            buildingId: validated.buildingId,
+            companyId,
+            porcentajePropiedad: validated.coeficienteParticipacion,
+            asignadoPor: (session.user as any).id,
+          },
         },
       },
     });
 
-    return NextResponse.json({ propietario }, { status: 201 });
+    const { password: _password, resetToken, resetTokenExpiry, ...ownerData } = propietario;
+    return NextResponse.json({ propietario: ownerData }, { status: 201 });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
