@@ -25,6 +25,7 @@ import {
 } from '@/lib/document-import-processor-service';
 import logger from '@/lib/logger';
 import { z } from 'zod';
+import type { Prisma } from '@/types/prisma-types';
 
 // ============================================================================
 // CONFIGURACIÓN
@@ -503,13 +504,14 @@ async function processDocumentsAsync(
         });
 
         // Guardar análisis
+        const keyEntities = analysis.extractedFields as Prisma.InputJsonValue;
         await prisma.aIDocumentAnalysis.create({
           data: {
             documentId: doc.id,
             aiModel: analysis.processingMetadata.modelUsed,
             summary: analysis.summary,
             documentType: analysis.classification.specificType,
-            keyEntities: analysis.extractedFields,
+            keyEntities,
             overallConfidence: analysis.classification.confidence,
             hasWarnings: analysis.warnings.length > 0,
             warnings: analysis.warnings,
