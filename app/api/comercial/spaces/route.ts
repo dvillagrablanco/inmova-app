@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import type { Prisma } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -33,28 +34,29 @@ export async function GET(request: NextRequest) {
     const estado = searchParams.get('estado');
 
     // Construir filtro de tipos
-    let tipoFilter: string[] = [];
+    let tipoFilter: Prisma.CommercialSpaceType[] = [];
     if (categoria && TIPO_MAPPING[categoria]) {
-      tipoFilter = TIPO_MAPPING[categoria];
+      tipoFilter = TIPO_MAPPING[categoria] as Prisma.CommercialSpaceType[];
     }
+
+    const normalizedEstado = estado ? estado.toLowerCase() : null;
+    const allowedEstados = new Set(['ocupada', 'disponible', 'en_mantenimiento']);
 
     const spaces = await prisma.commercialSpace.findMany({
       where: {
         companyId: session.user.companyId,
-        ...(tipoFilter.length > 0 && { tipo: { in: tipoFilter as any } }),
-        ...(estado && { estadoOcupacion: estado }),
+        ...(tipoFilter.length > 0 && { tipo: { in: tipoFilter } }),
+        ...(normalizedEstado && allowedEstados.has(normalizedEstado) && {
+          estado: normalizedEstado,
+        }),
       },
       include: {
-        leases: {
+        commercialLeases: {
           where: { estado: 'activo' },
-          include: {
-            tenant: {
-              select: {
-                id: true,
-                nombre: true,
-                email: true,
-              },
-            },
+          select: {
+            id: true,
+            arrendatarioNombre: true,
+            arrendatarioEmail: true,
           },
           take: 1,
         },
@@ -72,7 +74,7 @@ export async function GET(request: NextRequest) {
 
     // Formatear respuesta
     const formattedSpaces = spaces.map((space) => {
-      const activeLease = space.leases[0];
+      const activeLease = space.commercialLeases[0];
       return {
         id: space.id,
         nombre: space.nombre,
@@ -83,15 +85,15 @@ export async function GET(request: NextRequest) {
         planta: space.planta,
         superficie: space.superficieConstruida,
         superficieUtil: space.superficieUtil,
-        estado: space.estadoOcupacion || (activeLease ? 'ocupada' : 'disponible'),
-        rentaMensual: space.precioAlquiler,
-        arrendatario: activeLease?.tenant?.nombre || null,
-        arrendatarioId: activeLease?.tenant?.id || null,
+        estado: space.estado || (activeLease ? 'ocupada' : 'disponible'),
+        rentaMensual: space.rentaMensualBase,
+        arrendatario: activeLease?.arrendatarioNombre || null,
+        arrendatarioId: null,
         buildingId: space.buildingId,
         buildingName: space.building?.nombre,
         caracteristicas: [
           space.aireAcondicionado && 'climatizacion',
-          space.parking && 'parking',
+          space.plazasParking && space.plazasParking > 0 && 'parking',
           space.fibraOptica && 'fibra',
           space.fachada && 'fachada',
           space.muelleCarga && 'muelle_carga',
@@ -116,8 +118,9 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json({ spaces: formattedSpaces, stats });
-  } catch (error: any) {
-    logger.error('[CommercialSpaces GET] Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[CommercialSpaces GET] Error:', { message });
     return NextResponse.json({ error: 'Error al obtener espacios', details: error.message }, { status: 500 });
   }
 }
