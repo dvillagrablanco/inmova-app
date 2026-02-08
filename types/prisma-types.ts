@@ -15,6 +15,7 @@ export type {
 
   // Company types
   Company,
+  BusinessVertical,
 
   // Property types
   Property,
