@@ -18,6 +18,7 @@ import {
   ChatMessage,
 } from '@/lib/onboarding-chatbot-service';
 import { prisma } from '@/lib/db';
+import { z } from 'zod';
 
 import logger from '@/lib/logger';
 /**
@@ -35,8 +36,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
-    const { message, conversationHistory } = body;
+    const companyId = session.user.companyId;
+    if (!companyId) {
+      return NextResponse.json(
+        { error: 'Sin empresa asociada' },
+        { status: 403 }
+      );
+    }
+
+    const body: unknown = await request.json();
+    const schema = z.object({
+      message: z.string().min(1),
+      conversationHistory: z
+        .array(
+          z.object({
+            role: z.enum(['system', 'user', 'assistant']),
+            content: z.string(),
+          })
+        )
+        .optional(),
+    });
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: parsed.error.errors },
+        { status: 400 }
+      );
+    }
+
+    const { message, conversationHistory } = parsed.data;
 
     // Validaciones
     if (!message || typeof message !== 'string') {
@@ -55,7 +83,8 @@ export async function POST(request: NextRequest) {
         onboardingCompleted: true,
         company: {
           select: {
-            vertical: true,
+            businessVertical: true,
+            verticals: true,
           },
         },
       },
@@ -86,7 +115,7 @@ export async function POST(request: NextRequest) {
     // Contexto del usuario
     const userContext = {
       userName: user?.name || undefined,
-      vertical: user?.company?.vertical || undefined,
+      vertical: user?.company?.businessVertical || user?.company?.verticals?.[0],
       onboardingProgress,
       completedTasks,
     };
@@ -110,7 +139,7 @@ export async function POST(request: NextRequest) {
       await prisma.chatbotInteraction.create({
         data: {
           userId: session.user.id,
-          companyId: session.user.companyId || '',
+          companyId,
           userMessage: message,
           botResponse: response.message || '',
           context: JSON.stringify(userContext),
@@ -125,7 +154,7 @@ export async function POST(request: NextRequest) {
       message: response.message,
       suggestedActions: response.suggestedActions,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('[API] Error in POST /api/onboarding/chatbot:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
@@ -156,26 +185,26 @@ export async function GET(request: NextRequest) {
         name: true,
         company: {
           select: {
-            vertical: true,
+            businessVertical: true,
+            verticals: true,
           },
         },
       },
     });
 
+    const vertical = user?.company?.businessVertical || user?.company?.verticals?.[0];
     const welcomeMessage = getWelcomeMessage({
       userName: user?.name || undefined,
-      vertical: user?.company?.vertical || undefined,
+      vertical,
     });
 
-    const quickQuestions = getQuickQuestions(
-      user?.company?.vertical || undefined
-    );
+    const quickQuestions = getQuickQuestions(vertical);
 
     return NextResponse.json({
       welcomeMessage,
       quickQuestions,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('[API] Error in GET /api/onboarding/chatbot:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
