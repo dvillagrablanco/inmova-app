@@ -76,17 +76,29 @@ export async function POST(request: NextRequest) {
 
     for (const user of targetUsers) {
       try {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            onboardingCompleted: false,
+            hasCompletedOnboarding: false,
+            onboardingCompletedAt: null,
+            setupProgress: null,
+            preferredModules: [],
+            hiddenModules: [],
+          },
+        });
+
         // Crear o actualizar preferencias
         await prisma.userPreference.upsert({
           where: { userId: user.id },
           create: {
             userId: user.id,
-            onboardingCompleted: false, // Forzar onboarding
             theme: 'light',
             language: 'es',
           },
           update: {
-            onboardingCompleted: false, // Reset
+            theme: 'light',
+            language: 'es',
           },
         });
 
