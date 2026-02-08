@@ -3,17 +3,19 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const createPropietarioSchema = z.object({
   buildingId: z.string().min(1),
-  unitId: z.string().min(1),
+  unitId: z.string().optional(),
   nombre: z.string().min(1),
   apellidos: z.string().min(1),
   dni: z.string().optional(),
-  email: z.string().email().optional(),
+  email: z.string().email(),
   telefono: z.string().optional(),
   direccionCorrespondencia: z.string().optional(),
   coeficienteParticipacion: z.number().min(0).max(100).default(0),
@@ -37,9 +39,13 @@ export async function GET(request: NextRequest) {
     const comunidadId = searchParams.get('comunidadId');
 
     const sessionUser = session.user as { companyId?: string | null };
+    const userId = sessionUser.id;
     const companyId = sessionUser.companyId;
     if (!companyId) {
       return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
+    }
+    if (!userId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     // Si se proporciona comunidadId, obtener el buildingId
@@ -85,32 +91,40 @@ export async function GET(request: NextRequest) {
     const owners = await prisma.owner.findMany({
       where: {
         companyId,
-        buildings: {
-          some: { id: targetBuildingId },
+        ownerBuildings: {
+          some: { buildingId: targetBuildingId },
         },
       },
       include: {
-        buildings: {
-          where: { id: targetBuildingId },
-          select: { id: true, nombre: true },
+        ownerBuildings: {
+          where: { buildingId: targetBuildingId },
+          include: {
+            building: {
+              select: { id: true, nombre: true },
+            },
+          },
         },
       },
     });
 
     // Formatear respuesta combinando datos
-    const propietarios = owners.map(owner => ({
+    const propietarios = owners.map((owner) => {
+      const [nombre, ...apellidosParts] = owner.nombreCompleto.split(' ');
+      const apellidos = apellidosParts.join(' ').trim();
+      return {
       id: owner.id,
-      nombre: owner.nombre || '',
-      apellidos: owner.apellidos || '',
-      nombreCompleto: `${owner.nombre || ''} ${owner.apellidos || ''}`.trim(),
+      nombre: nombre || owner.nombreCompleto,
+      apellidos,
+      nombreCompleto: owner.nombreCompleto,
       dni: owner.dni,
       email: owner.email,
       telefono: owner.telefono,
       direccion: owner.direccion,
-      tipo: owner.tipo,
+      tipo: 'propietario',
       activo: owner.activo,
       createdAt: owner.createdAt,
-    }));
+      };
+    });
 
     // Calcular estadísticas
     const stats = {
@@ -151,10 +165,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const sessionUser = session.user as { companyId?: string | null };
+    const sessionUser = session.user as { companyId?: string | null; id?: string | null };
     const companyId = sessionUser.companyId;
+    const userId = sessionUser.id;
     if (!companyId) {
       return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
+    }
+    if (!userId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -169,26 +187,47 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Edificio no encontrado' }, { status: 404 });
     }
 
-    // Crear o actualizar propietario en la tabla Owner
+    const existingOwner = await prisma.owner.findUnique({
+      where: { email: validated.email },
+    });
+    if (existingOwner) {
+      return NextResponse.json({ error: 'El email ya está en uso' }, { status: 400 });
+    }
+
+    if (validated.dni) {
+      const existingDni = await prisma.owner.findUnique({
+        where: { dni: validated.dni },
+      });
+      if (existingDni) {
+        return NextResponse.json({ error: 'El DNI ya está en uso' }, { status: 400 });
+      }
+    }
+
+    const nombreCompleto = `${validated.nombre} ${validated.apellidos}`.trim();
+    const tempPassword = crypto.randomBytes(16).toString('hex');
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
     const propietario = await prisma.owner.create({
       data: {
         companyId,
-        nombre: validated.nombre,
-        apellidos: validated.apellidos,
+        nombreCompleto,
         dni: validated.dni,
         email: validated.email,
         telefono: validated.telefono,
         direccion: validated.direccionCorrespondencia,
-        tipo: 'persona_fisica',
+        password: hashedPassword,
         activo: true,
-        buildings: {
-          connect: { id: validated.buildingId },
-        },
+        createdBy: userId,
       },
-      include: {
-        buildings: {
-          select: { id: true, nombre: true },
-        },
+    });
+
+    await prisma.ownerBuilding.create({
+      data: {
+        ownerId: propietario.id,
+        buildingId: validated.buildingId,
+        companyId,
+        porcentajePropiedad: validated.coeficienteParticipacion,
+        asignadoPor: userId,
       },
     });
 
