@@ -266,12 +266,13 @@ export async function POST(request: NextRequest) {
         });
       }
 
+      const notificationType = 'info' as const;
       const notifications = Array.from(uniqueOwners.values()).map((owner) => ({
         ownerId: owner.id,
         companyId,
         titulo: 'Convocatoria de reunión',
         mensaje: `Se ha convocado la reunión "${validated.titulo}" para el ${meetingDate.toLocaleString()}.`,
-        tipo: 'info',
+        tipo: notificationType,
         buildingId: validated.buildingId,
       }));
 
