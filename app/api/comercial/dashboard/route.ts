@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
             lte: endMonth,
           },
         },
-        _sum: { monto: true },
+        _sum: { importeTotal: true },
       }),
 
       // Pagos pendientes
@@ -112,15 +112,15 @@ export async function GET(request: NextRequest) {
           companyId,
           estado: 'pendiente',
         },
-        _sum: { monto: true },
+        _sum: { importeTotal: true },
       }),
     ]);
 
     // Calcular estadísticas
     const espaciosDisponibles = totalEspacios - espaciosOcupados;
     const tasaOcupacion = totalEspacios > 0 ? (espaciosOcupados / totalEspacios) * 100 : 0;
-    const ingresosRecurrentes = pagosDelMes._sum.monto || 0;
-    const ingresosPendientes = pagosPendientes._sum.monto || 0;
+    const ingresosRecurrentes = pagosDelMes._sum.importeTotal || 0;
+    const ingresosPendientes = pagosPendientes._sum.importeTotal || 0;
 
     // Mapear tipos de espacios
     const spaceTypes = espaciosPorTipo.map((grupo) => {
