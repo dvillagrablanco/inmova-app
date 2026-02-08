@@ -288,7 +288,11 @@ async function syncExpenses(
     // Obtener gastos a sincronizar
     const expenses = await prisma.expense.findMany({
       where: {
-        companyId,
+        OR: [
+          { building: { companyId } },
+          { unit: { building: { companyId } } },
+        ],
+        isDemo: false,
         ...(options.ids && { id: { in: options.ids } }),
         ...(options.dateFrom && { fecha: { gte: new Date(options.dateFrom) } }),
         ...(options.dateTo && { fecha: { lte: new Date(options.dateTo) } }),
