@@ -268,6 +268,7 @@ const valuateSchema = z.object({
   hasGarden: z.boolean().optional(),
   hasPool: z.boolean().optional(),
   hasTerrace: z.boolean().optional(),
+  hasGarage: z.boolean().optional(),
   condition: z.enum(['NEW', 'GOOD', 'NEEDS_RENOVATION']).optional(),
   yearBuilt: z.number().int().min(1800).max(new Date().getFullYear()).optional(),
   avgPricePerM2: z.number().positive().optional(),
