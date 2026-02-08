@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { deleteFile } from '@/lib/s3';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -19,8 +20,9 @@ export async function GET(
   try {
     const { searchParams } = new URL(req.url);
     const queryCompanyId = searchParams.get('companyId');
-    const userRole = (session.user as any).role;
-    const sessionCompanyId = session.user.companyId;
+    const sessionUser = session.user as { role?: string | null; companyId?: string | null };
+    const userRole = sessionUser.role;
+    const sessionCompanyId = sessionUser.companyId;
     const companyId =
       queryCompanyId && (userRole === 'super_admin' || userRole === 'soporte')
         ? queryCompanyId
@@ -54,7 +56,7 @@ export async function GET(
     }
 
     return NextResponse.json(document);
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error fetching document:', error);
     return NextResponse.json({ error: 'Error al obtener documento' }, { status: 500 });
   }
@@ -72,8 +74,9 @@ export async function DELETE(
   try {
     const { searchParams } = new URL(req.url);
     const queryCompanyId = searchParams.get('companyId');
-    const userRole = (session.user as any).role;
-    const sessionCompanyId = session.user.companyId;
+    const sessionUser = session.user as { role?: string | null; companyId?: string | null };
+    const userRole = sessionUser.role;
+    const sessionCompanyId = sessionUser.companyId;
     const companyId =
       queryCompanyId && (userRole === 'super_admin' || userRole === 'soporte')
         ? queryCompanyId
@@ -109,7 +112,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ message: 'Documento eliminado exitosamente' });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error deleting document:', error);
     return NextResponse.json({ error: 'Error al eliminar documento' }, { status: 500 });
   }
