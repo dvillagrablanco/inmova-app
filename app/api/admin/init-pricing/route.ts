@@ -114,7 +114,7 @@ async function initializeCoupons() {
       const couponData = {
         companyId: MAIN_COMPANY_ID,
         codigo: campaign.code,
-        tipo: campaign.discountType === 'percentage' ? 'percentage' as const : 'fixed_amount' as const,
+        tipo: campaign.discountType === 'percentage' ? 'PERCENTAGE' : 'FIXED',
         valor: campaign.discountValue,
         descripcion: `${campaign.name} - ${campaign.description}\n\n${campaign.message}`,
         usosMaximos: campaign.maxUses || null,
