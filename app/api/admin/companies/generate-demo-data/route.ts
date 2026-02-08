@@ -142,17 +142,35 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
   let createdReservas = 0;
   let createdEventos = 0;
 
+  const mapBuildingType = (tipoPropiedad: string | undefined) => {
+    const normalized = (tipoPropiedad || '').toLowerCase();
+    if (normalized.includes('comercial')) return 'comercial';
+    if (normalized.includes('mixto')) return 'mixto';
+    return 'residencial';
+  };
+
+  const mapUnitType = (tipo: string) => {
+    const normalized = (tipo || '').toLowerCase();
+    if (normalized.includes('garaje')) return 'garaje';
+    if (normalized.includes('trastero')) return 'trastero';
+    if (normalized.includes('local') || normalized.includes('oficina') || normalized.includes('nave')) {
+      return 'local';
+    }
+    return 'vivienda';
+  };
+
   // 1. Crear edificios según el escenario
-  for (const edificioData of config.datos.edificios) {
+  for (let index = 0; index < config.datos.edificios.length; index++) {
+    const edificioData = config.datos.edificios[index];
     const building = await prisma.building.create({
       data: {
         companyId,
         nombre: edificioData.nombre,
-        direccion: edificioData.direccion,
-        ciudad: edificioData.ciudad,
-        codigoPostal: edificioData.codigoPostal,
-        tipoPropiedad: edificioData.tipoPropiedad,
-        activo: true,
+        direccion: `${edificioData.direccion}, ${edificioData.codigoPostal} ${edificioData.ciudad}`,
+        tipo: mapBuildingType(edificioData.tipoPropiedad),
+        anoConstructor: 2000 + (index % 20),
+        numeroUnidades: edificioData.unidades.length,
+        isDemo: true,
       },
     });
     createdBuildings.push(building);
@@ -169,17 +187,14 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
           numero: unidadData.tipo.includes('habitacion') 
             ? `H${String(i + 1).padStart(2, '0')}` 
             : `${floor}${letter}`,
-          tipo: unidadData.tipo,
+          tipo: mapUnitType(unidadData.tipo),
           planta: floor,
           superficie: unidadData.superficie,
           habitaciones: unidadData.habitaciones,
           banos: unidadData.banos,
-          precioAlquiler: unidadData.precioAlquiler,
+          rentaMensual: unidadData.precioAlquiler,
           estado: 'disponible',
-          activo: true,
-          caracteristicas: unidadData.caracteristicas 
-            ? JSON.stringify(unidadData.caracteristicas) 
-            : null,
+          isDemo: true,
         },
       });
       createdUnits.push(unit);
@@ -193,11 +208,12 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
     const tenant = await prisma.tenant.create({
       data: {
         companyId,
-        nombre: tenantData.nombre,
+        nombreCompleto: tenantData.nombre,
         email: `${tenantData.email}@demo.inmova.app`,
         telefono: `+34 6${String(Math.random()).slice(2, 10)}`,
         dni: tenantData.dni,
-        activo: true,
+        fechaNacimiento: new Date(1985 + (i % 20), i % 12, 1),
+        isDemo: true,
       },
     });
     createdTenants.push(tenant);
@@ -211,7 +227,7 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
   );
 
   // Filtrar unidades que no sean de comunidad (precio > 0)
-  const rentableUnits = createdUnits.filter(u => u.precioAlquiler > 0);
+  const rentableUnits = createdUnits.filter(u => u.rentaMensual > 0);
 
   for (let i = 0; i < numContratos && i < rentableUnits.length; i++) {
     const unit = rentableUnits[i];
@@ -225,15 +241,15 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
 
     const contract = await prisma.contract.create({
       data: {
-        companyId,
         unitId: unit.id,
         tenantId: tenant.id,
         fechaInicio: startDate,
         fechaFin: endDate,
-        rentaMensual: unit.precioAlquiler,
-        deposito: unit.precioAlquiler * 2,
+        rentaMensual: unit.rentaMensual,
+        deposito: unit.rentaMensual * 2,
         estado: 'activo',
-        tipo: config.id === 'alquiler_turistico' ? 'temporal' : 'alquiler',
+        tipo: config.id === 'comercial_oficinas' ? 'comercial' : 'residencial',
+        isDemo: true,
       },
     });
     createdContracts.push(contract);
@@ -254,10 +270,11 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
         data: {
           contractId: contract.id,
           monto: contract.rentaMensual,
+          periodo: paymentDate.toISOString().slice(0, 7),
           fechaVencimiento: paymentDate,
           fechaPago: paymentDate,
           estado: 'pagado',
-          concepto: `Alquiler mes ${paymentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}`,
+          isDemo: true,
         },
       });
       createdPayments.push(payment);
@@ -274,23 +291,15 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
     const incidenciaData = DEMO_INCIDENCIAS[i];
     const unit = createdUnits[Math.floor(Math.random() * createdUnits.length)];
     
-    // Buscar el edificio de esta unidad
-    const building = createdBuildings.find(b => 
-      createdUnits.find(u => u.id === unit.id && u.buildingId === b.id)
-    );
-
     try {
       const incidencia = await prisma.maintenanceRequest.create({
         data: {
-          companyId,
           unitId: unit.id,
-          buildingId: building?.id || createdBuildings[0].id,
           titulo: incidenciaData.titulo,
           descripcion: incidenciaData.descripcion,
-          categoria: incidenciaData.categoria,
           prioridad: incidenciaData.prioridad,
-          estado: 'abierta',
-          createdAt: new Date(),
+          estado: 'pendiente',
+          isDemo: true,
         },
       });
       createdIncidencias.push(incidencia);
