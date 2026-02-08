@@ -28,7 +28,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = session.user as any;
+    const user = session.user as {
+      id: string;
+      companyId?: string | null;
+      name?: string | null;
+      vertical?: string | null;
+      experienceLevel?: string | null;
+    };
 
     // 2. Obtener mensaje del usuario
     const body = await request.json();
@@ -42,19 +48,37 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Obtener contexto del usuario
-    const onboardingData = await getOnboardingProgress(user.id);
+    if (!user.companyId) {
+      return NextResponse.json(
+        { error: 'Usuario sin empresa asociada' },
+        { status: 400 }
+      );
+    }
+
+    const onboardingData = await getOnboardingProgress(user.id, user.companyId);
     const conversationHistory = includeHistory
       ? await getChatbotHistory(user.id, 5) // Últimos 5 mensajes
       : [];
+
+    type OnboardingTask = {
+      status: 'pending' | 'completed' | 'in_progress' | 'skipped';
+    };
 
     const context = {
       userId: user.id,
       userName: user.name || 'Usuario',
       vertical: user.vertical,
       experienceLevel: user.experienceLevel,
-      onboardingProgress: onboardingData?.progress || 0,
-      pendingTasks: onboardingData?.tasks?.filter((t: any) => t.status === 'PENDING') || [],
-      completedTasks: onboardingData?.tasks?.filter((t: any) => t.status === 'COMPLETED') || [],
+      onboardingProgress:
+        onboardingData?.percentage ??
+        onboardingData?.percentageComplete ??
+        0,
+      pendingTasks:
+        onboardingData?.tasks?.filter(
+          (t: OnboardingTask) => t.status === 'pending' || t.status === 'in_progress'
+        ) || [],
+      completedTasks:
+        onboardingData?.tasks?.filter((t: OnboardingTask) => t.status === 'completed') || [],
     };
 
     // 4. Generar respuesta del chatbot
@@ -81,8 +105,9 @@ export async function POST(request: NextRequest) {
         pendingTasks: context.pendingTasks.length,
       },
     });
-  } catch (error) {
-    logger.error('[API /chatbot] Error:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[API /chatbot] Error:', { message });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
