@@ -20,6 +20,7 @@ export type {
   Property,
   PropertyStatus,
   PropertyType,
+  UnitStatus,
 
   // Room types
   Room,
