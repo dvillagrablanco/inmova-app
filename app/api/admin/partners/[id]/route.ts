@@ -201,7 +201,7 @@ export async function DELETE(
       where: { id: params.id },
       include: {
         _count: {
-          select: { clients: true, commissions: true },
+          select: { clientes: true, comisiones: true },
         },
       },
     });
@@ -211,7 +211,7 @@ export async function DELETE(
     }
 
     // Si tiene clientes o comisiones, hacer soft delete
-    if (existing._count.clients > 0 || existing._count.commissions > 0) {
+    if (existing._count.clientes > 0 || existing._count.comisiones > 0) {
       await prisma.partner.update({
         where: { id: params.id },
         data: {
