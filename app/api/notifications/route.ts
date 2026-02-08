@@ -16,6 +16,7 @@ import {
   createNotification,
   CreateNotificationParams,
 } from '@/lib/notification-service';
+import { z } from 'zod';
 
 /**
  * GET /api/notifications
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
 
     if (!result.success) {
       return NextResponse.json(
-        { error: result.error || 'Error al obtener notificaciones' },
+        { error: 'Error al obtener notificaciones' },
         { status: 500 }
       );
     }
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       notifications: result.notifications,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
@@ -73,17 +74,42 @@ export async function POST(request: NextRequest) {
 
     // Verificar que el usuario sea admin o el sistema
     // (Para demo, permitimos a cualquier usuario crear notificaciones propias)
-    const body = await request.json();
+    const body: unknown = await request.json();
+    const schema = z.object({
+      userId: z.string().optional(),
+      companyId: z.string().optional(),
+      type: z.enum(['success', 'info', 'warning', 'action']).optional(),
+      title: z.string().min(1),
+      message: z.string().min(1),
+      icon: z.string().optional(),
+      actionLabel: z.string().optional(),
+      actionRoute: z.string().optional(),
+    });
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: parsed.error.errors },
+        { status: 400 }
+      );
+    }
+    const data = parsed.data;
+    const companyId = data.companyId ?? session.user.companyId;
+    if (!companyId) {
+      return NextResponse.json(
+        { error: 'companyId requerido' },
+        { status: 400 }
+      );
+    }
 
     const params: CreateNotificationParams = {
-      userId: body.userId || session.user.id,
-      companyId: body.companyId || session.user.companyId || '',
-      type: body.type || 'info',
-      title: body.title,
-      message: body.message,
-      icon: body.icon,
-      actionLabel: body.actionLabel,
-      actionRoute: body.actionRoute,
+      userId: data.userId || session.user.id,
+      companyId,
+      type: data.type || 'info',
+      title: data.title,
+      message: data.message,
+      icon: data.icon,
+      actionLabel: data.actionLabel,
+      actionRoute: data.actionRoute,
     };
 
     // Validaciones básicas
@@ -107,7 +133,7 @@ export async function POST(request: NextRequest) {
       { notification: result.notification },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
