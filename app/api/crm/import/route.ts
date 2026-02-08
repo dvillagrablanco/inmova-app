@@ -47,11 +47,22 @@ export async function POST(request: Request) {
             { status: 400 }
           );
         }
-        result = await CRMLeadImporter.importFromLinkedInJob(
+        {
+          const linkedInImporter = (CRMLeadImporter as any).importFromLinkedInJob as
+            | ((job: string, companyId: string, options: any) => Promise<any>)
+            | undefined;
+          if (!linkedInImporter) {
+            return NextResponse.json(
+              { error: 'Importación de LinkedIn no disponible' },
+              { status: 501 }
+            );
+          }
+          result = await linkedInImporter(
           jobId,
           session.user.companyId,
           options || { source: 'linkedin' }
         );
+        }
         break;
 
       case 'csv':
@@ -93,7 +104,9 @@ export async function GET(request: Request) {
     }
 
     // Retornar queries predefinidas de LinkedIn para INMOVA
-    const queries = CRMLeadImporter.getINMOVALinkedInQueries();
+    const queries =
+      ((CRMLeadImporter as any).getINMOVALinkedInQueries as (() => string[]) | undefined)?.() ||
+      [];
 
     return NextResponse.json({ queries });
   } catch (error: any) {
