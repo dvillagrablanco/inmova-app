@@ -118,7 +118,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
           data: {
             companyId: user.companyId,
             userId: session.user.id,
-            action: 'PLATFORM_SETTINGS_UPDATED',
+            action: 'UPDATE',
             entityType: 'EWOORKER_PLAN',
             entityId: plan.id,
             entityName: plan.nombre,
