@@ -197,7 +197,7 @@ export async function PUT(
           data: {
             companyId: user.companyId,
             userId: session.user.id,
-            action: 'PLATFORM_SETTINGS_UPDATED',
+            action: 'UPDATE',
             entityType: 'ADDON',
             entityId: addon.id,
             entityName: addon.nombre,
