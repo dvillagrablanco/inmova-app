@@ -73,7 +73,8 @@ async function initializeCoupons() {
         where: { codigo: campaign.code }
       });
 
-      const couponType = campaign.discountType === 'percentage' ? 'PERCENTAGE' : 'FIXED';
+      const couponType: 'PERCENTAGE' | 'FIXED' =
+        campaign.discountType === 'percentage' ? 'PERCENTAGE' : 'FIXED';
       const couponData = {
         companyId: MAIN_COMPANY_ID,
         codigo: campaign.code,
