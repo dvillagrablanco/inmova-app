@@ -91,10 +91,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    // Retornar queries predefinidas de LinkedIn para INMOVA
-    const queries = CRMLeadImporter.getINMOVALinkedInQueries();
-
-    return NextResponse.json({ queries });
+    // Retornar queries predefinidas de LinkedIn para INMOVA (no configuradas)
+    return NextResponse.json({ queries: [] });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('Error getting import queries:', { message });
