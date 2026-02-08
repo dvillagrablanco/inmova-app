@@ -261,7 +261,7 @@ export async function POST(request: NextRequest) {
         companyId,
         titulo: 'Convocatoria de reunión',
         mensaje: `Se ha convocado la reunión "${validated.titulo}" para el ${meetingDate.toLocaleString()}.`,
-        tipo: 'info',
+        tipo: 'info' as const,
         buildingId: validated.buildingId,
       }));
 
