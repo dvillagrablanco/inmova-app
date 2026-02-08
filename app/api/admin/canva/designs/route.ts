@@ -47,7 +47,7 @@ const extractDesigns = (settings: unknown): CanvaDesign[] => {
 
   return designsValue
     .map((item) => designSchema.safeParse(item))
-    .filter((result) => result.success)
+    .filter((result): result is z.SafeParseSuccess<CanvaDesign> => result.success)
     .map((result) => result.data);
 };
 
