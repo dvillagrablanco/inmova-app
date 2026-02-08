@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import prisma from '@/lib/db';
+import type { BusinessVertical } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -39,15 +40,35 @@ export async function GET(req: NextRequest) {
 
     // Si es mixto, retornar el primer vertical o el más usado
     let primaryVertical = company.businessVertical;
-    
+
+    const allowedVerticals: BusinessVertical[] = [
+      'alquiler_tradicional',
+      'str_vacacional',
+      'coliving',
+      'room_rental',
+      'construccion',
+      'flipping',
+      'servicios_profesionales',
+      'comunidades',
+      'mixto',
+      'alquiler_comercial',
+    ];
+
+    const isBusinessVertical = (value: string): value is BusinessVertical =>
+      allowedVerticals.includes(value as BusinessVertical);
+
     if (company.businessVertical === 'mixto' && company.verticals && company.verticals.length > 0) {
-      // Seleccionar el primer vertical como principal
-      primaryVertical = company.verticals[0];
+      const candidate = company.verticals.find(isBusinessVertical);
+      if (candidate) {
+        primaryVertical = candidate;
+      }
     }
 
     return NextResponse.json({
       vertical: primaryVertical,
-      allVerticals: company.verticals || [company.businessVertical],
+      allVerticals:
+        company.verticals?.filter(isBusinessVertical) ||
+        (company.businessVertical ? [company.businessVertical] : []),
     });
   } catch (error: any) {
     logger.error('[API Error]:', error);
