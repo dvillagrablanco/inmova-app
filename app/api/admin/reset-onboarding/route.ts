@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     for (const user of targetUsers) {
       try {
         // Crear o actualizar preferencias
-        await prisma.userPreferences.upsert({
+        await prisma.userPreference.upsert({
           where: { userId: user.id },
           create: {
             userId: user.id,
@@ -95,11 +95,12 @@ export async function POST(request: NextRequest) {
           email: user.email,
           status: 'updated',
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Error desconocido';
         results.push({
           email: user.email,
           status: 'error',
-          error: error.message,
+          error: message,
         });
       }
     }
@@ -113,10 +114,11 @@ export async function POST(request: NextRequest) {
       note: 'Los usuarios deben limpiar localStorage del navegador: localStorage.clear()',
     });
 
-  } catch (error: any) {
-    logger.error('[Reset Onboarding API Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Reset Onboarding API Error]:', { message });
     return NextResponse.json(
-      { error: 'Error reseteando onboarding', details: error.message },
+      { error: 'Error reseteando onboarding', details: message },
       { status: 500 }
     );
   }
