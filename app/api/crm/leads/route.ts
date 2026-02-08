@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { CRMService } from '@/lib/crm-service';
+import { CRMService, type LeadFilters } from '@/lib/crm-service';
 
 import logger from '@/lib/logger';
 export async function GET(request: Request) {
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
 
     // Filtros - mapear a campos del modelo Lead
-    const filters: any = {};
+    const filters: LeadFilters = {};
 
     // Estado (status en inglés → estado en español)
     const statusParam = searchParams.get('status') || searchParams.get('estado');
@@ -81,7 +81,7 @@ export async function GET(request: Request) {
     const result = await CRMService.listLeads(session.user.companyId, filters, page, limit);
 
     // Mapear respuesta a formato esperado por el frontend
-    const mappedLeads = result.leads.map((lead: any) => ({
+    const mappedLeads = result.leads.map((lead) => ({
       id: lead.id,
       // Campos en inglés para el frontend
       firstName: lead.nombre,
@@ -115,10 +115,11 @@ export async function GET(request: Request) {
       limit: result.limit,
       totalPages: result.totalPages,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('Error listing leads:', error);
     return NextResponse.json(
-      { error: 'Error al listar leads', details: error.message },
+      { error: 'Error al listar leads', details: message },
       { status: 500 }
     );
   }
@@ -178,7 +179,7 @@ export async function POST(request: Request) {
         null,
         'nota',
         'Lead creado',
-        `Lead creado manualmente por ${session.user.nombre || session.user.email}`,
+        `Lead creado manualmente por ${session.user.name || session.user.email}`,
         undefined,
         undefined,
         session.user.id
@@ -211,10 +212,11 @@ export async function POST(request: Request) {
     };
 
     return NextResponse.json(mappedLead, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('Error creating lead:', error);
     return NextResponse.json(
-      { error: 'Error al crear lead', details: error.message },
+      { error: 'Error al crear lead', details: message },
       { status: 500 }
     );
   }
