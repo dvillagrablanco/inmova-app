@@ -35,7 +35,7 @@ export async function GET(
           },
           orderBy: { createdAt: 'desc' },
         },
-        commissions: {
+        comisiones: {
           orderBy: { createdAt: 'desc' },
           take: 20,
         },
@@ -73,7 +73,7 @@ export async function GET(
           fechaActivacion: c.fechaActivacion,
           totalComisionGenerada: c.totalComisionGenerada,
         })),
-        commissions: partner.commissions.map((c) => ({
+        commissions: partner.comisiones.map((c) => ({
           id: c.id,
           periodo: c.periodo,
           montoBruto: c.montoBruto,
