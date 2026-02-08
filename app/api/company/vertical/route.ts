@@ -7,6 +7,23 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const BUSINESS_VERTICALS = [
+  'alquiler_tradicional',
+  'str_vacacional',
+  'coliving',
+  'room_rental',
+  'construccion',
+  'flipping',
+  'servicios_profesionales',
+  'comunidades',
+  'mixto',
+  'alquiler_comercial',
+] as const;
+
+type BusinessVerticalValue = (typeof BUSINESS_VERTICALS)[number];
+const isBusinessVertical = (value: string): value is BusinessVerticalValue =>
+  BUSINESS_VERTICALS.includes(value as BusinessVerticalValue);
+
 /**
  * GET /api/company/vertical
  * Obtiene la vertical de negocio principal de la empresa del usuario
@@ -37,20 +54,35 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Si es mixto, retornar el primer vertical o el más usado
-    let primaryVertical = company.businessVertical;
+    // Si es mixto, retornar el primer vertical válido
+    let primaryVertical: BusinessVerticalValue | null =
+      company.businessVertical ?? null;
     
-    if (company.businessVertical === 'mixto' && company.verticals && company.verticals.length > 0) {
-      // Seleccionar el primer vertical como principal
-      primaryVertical = company.verticals[0];
+    if (primaryVertical === 'mixto' && company.verticals && company.verticals.length > 0) {
+      const firstVertical = company.verticals.find((value) =>
+        isBusinessVertical(value)
+      );
+      if (firstVertical) {
+        primaryVertical = firstVertical;
+      }
     }
+
+    const allVerticals =
+      company.verticals && company.verticals.length > 0
+        ? company.verticals.filter((value): value is BusinessVerticalValue =>
+            isBusinessVertical(value)
+          )
+        : company.businessVertical
+        ? [company.businessVertical]
+        : [];
 
     return NextResponse.json({
       vertical: primaryVertical,
-      allVerticals: company.verticals || [company.businessVertical],
+      allVerticals,
     });
-  } catch (error: any) {
-    logger.error('[API Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[API Error]:', { message });
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
