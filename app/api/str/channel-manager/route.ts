@@ -120,9 +120,6 @@ export async function POST(request: NextRequest) {
       }
     });
     
-    // Simular sincronización (en producción esto llamaría a APIs reales)
-    const startTime = Date.now();
-    
     // Actualizar estado del canal
     await prisma.sTRChannelSync.update({
       where: { id: channelId },
