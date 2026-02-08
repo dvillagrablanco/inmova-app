@@ -130,6 +130,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
+    const userId = sessionUser.id;
+
     const { role, companyId } = await getCompanyContext(
       sessionUser.id,
       sessionUser.role,
@@ -253,7 +255,7 @@ export async function POST(request: NextRequest) {
       videoUrl: mediaUrl && isVideo ? mediaUrl : undefined,
       fechaProgramada: statusValue === 'scheduled' ? scheduledAt : null,
       fechaPublicacion: statusValue === 'published' ? new Date() : null,
-      creadoPor: sessionUser.id,
+      creadoPor: userId,
     }));
 
     const createdPosts = await prisma.$transaction(
