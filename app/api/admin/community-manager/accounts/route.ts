@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     const sessionUser = session.user as { role?: string | null; companyId?: string | null };
     const userRole = sessionUser?.role;
-    if (!['super_admin', 'administrador'].includes(userRole)) {
+    if (!userRole || !['super_admin', 'administrador'].includes(userRole)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
