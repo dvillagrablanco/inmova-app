@@ -16,7 +16,9 @@ export default async function AdminPage() {
   }
   
   // Verificar rol admin y redirigir al dashboard principal
-  if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPERADMIN' && session.user.role !== 'super_admin' && session.user.role !== 'administrador') {
+  const role = session.user.role?.toLowerCase();
+  const allowedRoles = ['super_admin', 'administrador'];
+  if (!role || !allowedRoles.includes(role)) {
     redirect('/unauthorized');
   }
 
