@@ -36,7 +36,14 @@ export async function POST(request: NextRequest) {
     }
 
     const contract = await prisma.contract.findFirst({
-      where: { id: parsed.data.contractId, companyId: user.companyId },
+      where: {
+        id: parsed.data.contractId,
+        unit: {
+          building: {
+            companyId: user.companyId,
+          },
+        },
+      },
       include: {
         tenant: { select: { email: true, nombreCompleto: true } },
         unit: {
@@ -83,7 +90,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error sending notification', error);
     return NextResponse.json(
       { error: 'Error al enviar notificación' },
