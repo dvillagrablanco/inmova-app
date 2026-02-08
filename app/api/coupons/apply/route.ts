@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
 
       try {
         const subscription = await stripeClient.subscriptions.update(subscriptionId, {
-          coupon: dbCoupon.stripeCouponId,
+          discounts: [{ coupon: dbCoupon.stripeCouponId }],
         });
 
         // Registrar uso
