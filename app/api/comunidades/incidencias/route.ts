@@ -3,24 +3,67 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import type { Prisma } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+
+const INCIDENT_TYPE_MAP = {
+  averia: 'averia_comun',
+  mantenimiento: 'averia_comun',
+  limpieza: 'limpieza',
+  seguridad: 'seguridad',
+  ruidos: 'ruido',
+  ruido: 'ruido',
+  convivencia: 'convivencia',
+  mascota: 'mascota',
+  parking: 'parking',
+  otro: 'otro',
+  averia_comun: 'averia_comun',
+} as const;
+
+type IncidentTypeInput = keyof typeof INCIDENT_TYPE_MAP;
+const incidentTypeSchema = z.enum(
+  Object.keys(INCIDENT_TYPE_MAP) as [IncidentTypeInput, ...IncidentTypeInput[]]
+);
+const isIncidentTypeInput = (value: string): value is IncidentTypeInput =>
+  Object.prototype.hasOwnProperty.call(INCIDENT_TYPE_MAP, value);
+
+const INCIDENT_STATUS_MAP = {
+  abierta: 'abierta',
+  en_proceso: 'en_proceso',
+  pendiente_respuesta: 'en_proceso',
+  resuelta: 'resuelta',
+  cerrada: 'cerrada',
+  rechazada: 'rechazada',
+} as const;
+
+type IncidentStatusInput = keyof typeof INCIDENT_STATUS_MAP;
+const incidentStatusSchema = z.enum(
+  Object.keys(INCIDENT_STATUS_MAP) as [IncidentStatusInput, ...IncidentStatusInput[]]
+);
+const isIncidentStatusInput = (value: string): value is IncidentStatusInput =>
+  Object.prototype.hasOwnProperty.call(INCIDENT_STATUS_MAP, value);
+
+const PRIORIDADES = ['baja', 'media', 'alta', 'urgente'] as const;
+type IncidentPriorityValue = (typeof PRIORIDADES)[number];
+const isIncidentPriority = (value: string): value is IncidentPriorityValue =>
+  PRIORIDADES.includes(value as IncidentPriorityValue);
 
 const createIncidenciaSchema = z.object({
   buildingId: z.string().min(1),
   titulo: z.string().min(1),
   descripcion: z.string().min(1),
-  tipo: z.enum(['averia', 'mantenimiento', 'limpieza', 'seguridad', 'ruidos', 'otro']),
-  prioridad: z.enum(['baja', 'media', 'alta', 'urgente']).default('media'),
+  tipo: incidentTypeSchema,
+  prioridad: z.enum(PRIORIDADES).default('media'),
   ubicacion: z.string().optional(),
   unitId: z.string().optional(),
   fotos: z.array(z.string()).default([]),
 });
 
 const updateIncidenciaSchema = z.object({
-  estado: z.enum(['abierta', 'en_proceso', 'pendiente_respuesta', 'resuelta', 'cerrada']).optional(),
-  prioridad: z.enum(['baja', 'media', 'alta', 'urgente']).optional(),
+  estado: incidentStatusSchema.optional(),
+  prioridad: z.enum(PRIORIDADES).optional(),
   asignadoA: z.string().optional(),
   solucion: z.string().optional(),
   costoEstimado: z.number().optional(),
@@ -44,7 +87,11 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
 
     // Obtener buildingId si se proporciona comunidadId
     let targetBuildingId = buildingId;
@@ -57,18 +104,21 @@ export async function GET(request: NextRequest) {
     }
 
     // Construir filtros
-    const where: any = { companyId };
+    const where: Prisma.CommunityIncidentWhereInput = { companyId };
     if (targetBuildingId) where.buildingId = targetBuildingId;
-    if (estado) where.estado = estado;
-    if (tipo) where.tipo = tipo;
-    if (prioridad) where.prioridad = prioridad;
+    const estadoValue = estado && isIncidentStatusInput(estado) ? INCIDENT_STATUS_MAP[estado] : null;
+    const tipoValue = tipo && isIncidentTypeInput(tipo) ? INCIDENT_TYPE_MAP[tipo] : null;
+    const prioridadValue = prioridad && isIncidentPriority(prioridad) ? prioridad : null;
+    if (estadoValue) where.estado = estadoValue;
+    if (tipoValue) where.tipo = tipoValue;
+    if (prioridadValue) where.prioridad = prioridadValue;
 
     const [incidencias, total] = await Promise.all([
       prisma.communityIncident.findMany({
         where,
         include: {
           building: {
-            select: { id: true, name: true },
+            select: { id: true, nombre: true },
           },
         },
         orderBy: [
@@ -112,7 +162,12 @@ export async function GET(request: NextRequest) {
       : 0;
 
     return NextResponse.json({
-      incidencias,
+      incidencias: incidencias.map((incidencia) => ({
+        ...incidencia,
+        building: incidencia.building
+          ? { id: incidencia.building.id, name: incidencia.building.nombre }
+          : null,
+      })),
       pagination: {
         page,
         limit,
@@ -128,10 +183,11 @@ export async function GET(request: NextRequest) {
         tiempoMedioResolucion,
       },
     });
-  } catch (error: any) {
-    logger.error('[Incidencias GET Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Incidencias GET Error]:', { message });
     return NextResponse.json(
-      { error: 'Error obteniendo incidencias', details: error.message },
+      { error: 'Error obteniendo incidencias', details: message },
       { status: 500 }
     );
   }
@@ -145,8 +201,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
-    const userId = (session.user as any).id;
+    const sessionUser = session.user as { companyId?: string | null; id?: string | null };
+    const companyId = sessionUser.companyId;
+    const userId = sessionUser.id;
+    if (!companyId || !userId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
     const body = await request.json();
     const validated = createIncidenciaSchema.parse(body);
 
@@ -167,7 +227,7 @@ export async function POST(request: NextRequest) {
         reporterType: 'user',
         titulo: validated.titulo,
         descripcion: validated.descripcion,
-        tipo: validated.tipo,
+        tipo: INCIDENT_TYPE_MAP[validated.tipo],
         prioridad: validated.prioridad,
         ubicacion: validated.ubicacion,
         unitId: validated.unitId,
@@ -175,21 +235,32 @@ export async function POST(request: NextRequest) {
         estado: 'abierta',
       },
       include: {
-        building: { select: { id: true, name: true } },
+        building: { select: { id: true, nombre: true } },
       },
     });
 
-    return NextResponse.json({ incidencia }, { status: 201 });
-  } catch (error: any) {
+    return NextResponse.json(
+      {
+        incidencia: {
+          ...incidencia,
+          building: incidencia.building
+            ? { id: incidencia.building.id, name: incidencia.building.nombre }
+            : null,
+        },
+      },
+      { status: 201 }
+    );
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
-    logger.error('[Incidencias POST Error]:', error);
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Incidencias POST Error]:', { message });
     return NextResponse.json(
-      { error: 'Error creando incidencia', details: error.message },
+      { error: 'Error creando incidencia', details: message },
       { status: 500 }
     );
   }
@@ -203,7 +274,11 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -222,7 +297,20 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Incidencia no encontrada' }, { status: 404 });
     }
 
-    const updateData: any = { ...validated };
+    const updateData: Prisma.CommunityIncidentUpdateInput = {
+      asignadoA: validated.asignadoA,
+      solucion: validated.solucion,
+      costoEstimado: validated.costoEstimado,
+      costoFinal: validated.costoFinal,
+    };
+
+    if (validated.estado) {
+      updateData.estado = INCIDENT_STATUS_MAP[validated.estado];
+    }
+
+    if (validated.prioridad) {
+      updateData.prioridad = validated.prioridad;
+    }
     
     // Si se marca como resuelta, registrar fecha
     if (validated.estado === 'resuelta' && existing.estado !== 'resuelta') {
@@ -233,21 +321,29 @@ export async function PATCH(request: NextRequest) {
       where: { id },
       data: updateData,
       include: {
-        building: { select: { id: true, name: true } },
+        building: { select: { id: true, nombre: true } },
       },
     });
 
-    return NextResponse.json({ incidencia });
-  } catch (error: any) {
+    return NextResponse.json({
+      incidencia: {
+        ...incidencia,
+        building: incidencia.building
+          ? { id: incidencia.building.id, name: incidencia.building.nombre }
+          : null,
+      },
+    });
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
-    logger.error('[Incidencias PATCH Error]:', error);
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Incidencias PATCH Error]:', { message });
     return NextResponse.json(
-      { error: 'Error actualizando incidencia', details: error.message },
+      { error: 'Error actualizando incidencia', details: message },
       { status: 500 }
     );
   }
