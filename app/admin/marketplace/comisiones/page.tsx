@@ -68,6 +68,21 @@ interface ServiceCommission {
   status: 'active' | 'paused' | 'pending';
 }
 
+type CommissionType = ServiceCommission['commissionType'];
+type CommissionStatus = ServiceCommission['status'];
+
+interface ConfigForm {
+  commissionType: CommissionType;
+  commissionRate: number;
+  status: CommissionStatus;
+}
+
+const isCommissionType = (value: string): value is CommissionType =>
+  value === 'fixed' || value === 'percentage';
+
+const isCommissionStatus = (value: string): value is CommissionStatus =>
+  value === 'active' || value === 'paused' || value === 'pending';
+
 interface CommissionTransaction {
   id: string;
   serviceName: string;
@@ -97,7 +112,7 @@ export default function MarketplaceComisionesPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedService, setSelectedService] = useState<ServiceCommission | null>(null);
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
-  const [configForm, setConfigForm] = useState({
+  const [configForm, setConfigForm] = useState<ConfigForm>({
     commissionType: 'percentage',
     commissionRate: 15,
     status: 'active',
@@ -521,7 +536,11 @@ export default function MarketplaceComisionesPage() {
                   <Label>Tipo de Comisión</Label>
                   <Select 
                     value={configForm.commissionType}
-                    onValueChange={(v) => setConfigForm({ ...configForm, commissionType: v })}
+                    onValueChange={(value: string) => {
+                      if (isCommissionType(value)) {
+                        setConfigForm({ ...configForm, commissionType: value });
+                      }
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -545,7 +564,11 @@ export default function MarketplaceComisionesPage() {
                   <Label>Estado</Label>
                   <Select 
                     value={configForm.status}
-                    onValueChange={(v) => setConfigForm({ ...configForm, status: v })}
+                    onValueChange={(value: string) => {
+                      if (isCommissionStatus(value)) {
+                        setConfigForm({ ...configForm, status: value });
+                      }
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue />
