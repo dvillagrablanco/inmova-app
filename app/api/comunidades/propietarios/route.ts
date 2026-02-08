@@ -36,7 +36,8 @@ export async function GET(request: NextRequest) {
     const buildingId = searchParams.get('buildingId');
     const comunidadId = searchParams.get('comunidadId');
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
     if (!companyId) {
       return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
     }
@@ -68,16 +69,16 @@ export async function GET(request: NextRequest) {
       },
       include: {
         building: {
-          select: { id: true, name: true },
+          select: { id: true, nombre: true },
         },
         contracts: {
-          where: { status: 'activo' },
+          where: { estado: 'activo' },
           include: {
             tenant: true,
           },
         },
       },
-      orderBy: { unitNumber: 'asc' },
+      orderBy: { numero: 'asc' },
     });
 
     // También buscar en la tabla Owner si existe
@@ -91,7 +92,7 @@ export async function GET(request: NextRequest) {
       include: {
         buildings: {
           where: { id: targetBuildingId },
-          select: { id: true, name: true },
+          select: { id: true, nombre: true },
         },
       },
     });
@@ -121,21 +122,22 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       propietarios,
-      unidades: unidades.map(u => ({
+      unidades: unidades.map((u) => ({
         id: u.id,
-        unitNumber: u.unitNumber,
-        type: u.type,
-        status: u.status,
-        squareMeters: u.squareMeters,
+        unitNumber: u.numero,
+        type: u.tipo,
+        status: u.estado,
+        squareMeters: u.superficie,
         tieneInquilino: u.contracts && u.contracts.length > 0,
         inquilino: u.contracts?.[0]?.tenant || null,
       })),
       stats,
     });
-  } catch (error: any) {
-    logger.error('[Propietarios GET Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Propietarios GET Error]:', { message });
     return NextResponse.json(
-      { error: 'Error obteniendo propietarios', details: error.message },
+      { error: 'Error obteniendo propietarios', details: message },
       { status: 500 }
     );
   }
@@ -149,7 +151,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
+    const sessionUser = session.user as { companyId?: string | null };
+    const companyId = sessionUser.companyId;
     if (!companyId) {
       return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
     }
@@ -184,22 +187,23 @@ export async function POST(request: NextRequest) {
       },
       include: {
         buildings: {
-          select: { id: true, name: true },
+          select: { id: true, nombre: true },
         },
       },
     });
 
     return NextResponse.json({ propietario }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
-    logger.error('[Propietarios POST Error]:', error);
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Propietarios POST Error]:', { message });
     return NextResponse.json(
-      { error: 'Error creando propietario', details: error.message },
+      { error: 'Error creando propietario', details: message },
       { status: 500 }
     );
   }
