@@ -95,13 +95,13 @@ export async function GET(request: NextRequest) {
     // Calcular estadísticas
     const stats = {
       totalPending: commissions
-        .filter((c) => c.estado === 'PENDIENTE')
+        .filter((c) => c.estado === 'PENDING')
         .reduce((sum, c) => sum + c.montoComision, 0),
       totalApproved: commissions
-        .filter((c) => c.estado === 'APROBADA')
+        .filter((c) => c.estado === 'APPROVED')
         .reduce((sum, c) => sum + c.montoComision, 0),
       totalPaid: commissions
-        .filter((c) => c.estado === 'PAGADA')
+        .filter((c) => c.estado === 'PAID')
         .reduce((sum, c) => sum + c.montoComision, 0),
       totalThisMonth: commissions
         .filter((c) => c.periodo === getCurrentPeriod())
@@ -118,8 +118,9 @@ export async function GET(request: NextRequest) {
       commissions: formattedCommissions,
       stats,
     });
-  } catch (error: any) {
-    logger.error('[Commissions API Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[Commissions API Error]:', { message });
     // Retornar lista vacía en lugar de error para mejor UX
     return NextResponse.json({
       success: true,
