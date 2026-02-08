@@ -36,7 +36,7 @@ export async function POST() {
         });
       }
 
-      const result = await inmovaContasimpleBridge.syncAllPendingInvoices();
+      const result = await inmovaContasimpleBridge.syncPendingInvoices();
       
       return NextResponse.json({
         success: true,
