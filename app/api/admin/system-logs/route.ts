@@ -68,6 +68,15 @@ export async function GET(request: NextRequest) {
     // Filtrar empresas de prueba de los logs
     const filteredLogs = logs.filter(log => !log.company?.esEmpresaPrueba);
 
+    const parseChanges = (changes: string | null | undefined) => {
+      if (!changes) return {};
+      try {
+        return JSON.parse(changes);
+      } catch {
+        return { raw: changes };
+      }
+    };
+
     // Transformar a formato de LogEntry
     const formattedLogs = filteredLogs.map((log) => ({
       id: log.id,
@@ -80,7 +89,7 @@ export async function GET(request: NextRequest) {
       userName: log.user?.name || log.user?.email || undefined,
       companyId: log.companyId || undefined,
       companyName: log.company?.nombre || undefined,
-      metadata: log.details || {},
+      metadata: parseChanges(log.changes),
     }));
 
     // Calcular estadísticas reales
