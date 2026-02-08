@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
+    const companyId = session.user.companyId;
     if (!companyId) {
       return NextResponse.json({ error: 'Sin empresa asociada' }, { status: 403 });
     }
@@ -93,7 +93,15 @@ export async function GET(request: NextRequest) {
     });
 
     // Calcular métricas por mes
-    const monthlyData = [];
+    type MonthlyMetric = {
+      period: string;
+      revenue: number;
+      revenueChange: number;
+      occupancy: number;
+      activeContracts: number;
+    };
+
+    const monthlyData: MonthlyMetric[] = [];
     for (let i = monthsBack - 1; i >= 0; i--) {
       const monthDate = subMonths(now, i);
       const monthStart = startOfMonth(monthDate);
@@ -113,7 +121,9 @@ export async function GET(request: NextRequest) {
       // Tasa de ocupación
       const occupancy = totalUnits > 0 ? Math.round((activeContracts.length / totalUnits) * 100) : 0;
 
-      const prevMonth = i < monthsBack - 1 ? monthlyData[monthlyData.length - 1] : null;
+      const prevMonth: MonthlyMetric | null = i < monthsBack - 1
+        ? monthlyData[monthlyData.length - 1]
+        : null;
       const revenueChange = prevMonth && prevMonth.revenue > 0 
         ? Math.round(((revenue - prevMonth.revenue) / prevMonth.revenue) * 100)
         : 0;
@@ -215,7 +225,7 @@ export async function GET(request: NextRequest) {
         revenue: p.revenue,
         occupancy: p.totalUnits > 0 ? Math.round((p.contracts / p.totalUnits) * 100) : 0,
         avgRent: p.contracts > 0 ? Math.round(p.revenue / p.contracts) : 0,
-        rating: 4.5 + Math.random() * 0.5, // Placeholder - idealmente de reviews reales
+        rating: 0,
       }))
       .sort((a, b) => b.revenue - a.revenue);
 
@@ -247,6 +257,26 @@ export async function GET(request: NextRequest) {
       ? currentMonthData.occupancy - prevMonthData.occupancy
       : 0;
 
+    const prevMonthAvgRent = prevMonthData && prevMonthData.activeContracts > 0
+      ? Math.round(prevMonthData.revenue / prevMonthData.activeContracts)
+      : 0;
+
+    const rentChange = prevMonthAvgRent > 0
+      ? Math.round(((avgRent - prevMonthAvgRent) / prevMonthAvgRent) * 100)
+      : 0;
+
+    const tenantContractCounts = new Map<string, number>();
+    contracts.forEach((c) => {
+      const tenantId = c.tenant?.id;
+      if (!tenantId) return;
+      tenantContractCounts.set(tenantId, (tenantContractCounts.get(tenantId) || 0) + 1);
+    });
+
+    const repeatTenants = Array.from(tenantContractCounts.values()).filter((count) => count > 1).length;
+    const repeatTenantRate = tenantContractCounts.size > 0
+      ? Math.round((repeatTenants / tenantContractCounts.size) * 100)
+      : 0;
+
     return NextResponse.json({
       kpis: {
         totalRevenue,
@@ -254,9 +284,9 @@ export async function GET(request: NextRequest) {
         avgOccupancy,
         occupancyChange,
         activeTenants: activeContractsNow.length,
-        tenantsChange: 0, // Placeholder
+        tenantsChange: prevMonthData ? currentMonthData.activeContracts - prevMonthData.activeContracts : 0,
         avgRent,
-        rentChange: 0, // Placeholder
+        rentChange,
       },
       revenueData: monthlyData.map((m) => ({
         period: m.period,
@@ -273,10 +303,10 @@ export async function GET(request: NextRequest) {
       metrics: {
         avgStayMonths,
         renewalRate,
-        repeatTenantRate: 0, // Placeholder - necesitaría tracking de inquilinos que regresan
+        repeatTenantRate,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Error fetching analytics:', error);
     return NextResponse.json({ error: 'Error al obtener analytics' }, { status: 500 });
   }
