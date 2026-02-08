@@ -2,11 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import prisma from '@/lib/db';
-import type { BusinessVertical } from '@/types/prisma-types';
-
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+type BusinessVertical =
+  | 'alquiler_tradicional'
+  | 'str_vacacional'
+  | 'coliving'
+  | 'room_rental'
+  | 'construccion'
+  | 'flipping'
+  | 'servicios_profesionales'
+  | 'comunidades'
+  | 'mixto'
+  | 'alquiler_comercial';
 
 /**
  * GET /api/company/vertical
