@@ -50,11 +50,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({
       ...garden,
       buildingName: garden.building?.nombre,
-      parcelasDisponibles: garden.parcelas.filter((p) => p.estado === 'DISPONIBLE').length,
+      parcelasDisponibles: garden.parcelas.filter((p) => p.estado === 'disponible').length,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[UrbanGarden GET] Error:', error);
-    return NextResponse.json({ error: 'Error al obtener huerto', details: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    return NextResponse.json({ error: 'Error al obtener huerto', details: message }, { status: 500 });
   }
 }
 
@@ -84,16 +85,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       nombre,
       ubicacion,
       superficie,
-      numeroParcelas,
-      tipoRiego,
-      estado,
-      fechaInauguracion,
-      horario,
-      precioMensual,
       buildingId,
       descripcion,
-      cultivosPermitidos,
-      servicios,
+      tipoCultivo,
+      reglas,
+      fotos,
+      activo,
     } = body;
 
     const garden = await prisma.urbanGarden.update({
@@ -101,24 +98,21 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       data: {
         nombre,
         ubicacion,
-        superficie: superficie ? Number(superficie) : undefined,
-        numeroParcelas: numeroParcelas ? Number(numeroParcelas) : undefined,
-        tipoRiego,
-        estado,
-        fechaInauguracion: fechaInauguracion ? new Date(fechaInauguracion) : undefined,
-        horario,
-        precioMensual: precioMensual ? Number(precioMensual) : undefined,
+        metrosCuadrados: superficie ? Number(superficie) : undefined,
+        tipoCultivo,
         buildingId,
         descripcion,
-        cultivosPermitidos,
-        servicios,
+        reglas,
+        fotos,
+        activo,
       },
     });
 
     return NextResponse.json(garden);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[UrbanGarden PUT] Error:', error);
-    return NextResponse.json({ error: 'Error al actualizar huerto', details: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    return NextResponse.json({ error: 'Error al actualizar huerto', details: message }, { status: 500 });
   }
 }
 
@@ -149,8 +143,9 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     });
 
     return NextResponse.json({ success: true, message: 'Huerto eliminado' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[UrbanGarden DELETE] Error:', error);
-    return NextResponse.json({ error: 'Error al eliminar huerto', details: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    return NextResponse.json({ error: 'Error al eliminar huerto', details: message }, { status: 500 });
   }
 }
