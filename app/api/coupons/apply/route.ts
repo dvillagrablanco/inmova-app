@@ -99,15 +99,28 @@ export async function POST(request: NextRequest) {
       }
 
       try {
+        const discounts = dbCoupon.stripePromotionCodeId
+          ? [{ promotion_code: dbCoupon.stripePromotionCodeId }]
+          : dbCoupon.stripeCouponId
+            ? [{ coupon: dbCoupon.stripeCouponId }]
+            : [];
+
+        if (discounts.length === 0) {
+          return NextResponse.json(
+            { success: false, error: 'Cupón no disponible en Stripe' },
+            { status: 400 }
+          );
+        }
+
         const subscription = await stripeClient.subscriptions.update(subscriptionId, {
-          coupon: dbCoupon.stripeCouponId,
+          discounts,
         });
 
         // Registrar uso
         await prisma.couponUsage.create({
           data: {
             couponId: dbCoupon.id,
-            usuarioId: session.user.id,
+            userId: session.user.id,
             montoOriginal: 0, // Se actualiza después
             montoDescuento: 0,
             montoFinal: 0,
@@ -129,9 +142,11 @@ export async function POST(request: NextRequest) {
             discount: subscription.discount,
           },
         });
-      } catch (stripeError: any) {
+      } catch (stripeError: unknown) {
+        const stripeMessage =
+          stripeError instanceof Error ? stripeError.message : 'Error desconocido';
         return NextResponse.json(
-          { success: false, error: stripeError.message },
+          { success: false, error: stripeMessage },
           { status: 400 }
         );
       }
@@ -161,17 +176,17 @@ export async function POST(request: NextRequest) {
             : null,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
-
-    logger.error('[API Apply Coupon] Error:', error);
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[API Apply Coupon] Error:', { message });
     return NextResponse.json(
-      { success: false, error: 'Error aplicando cupón' },
+      { success: false, error: message },
       { status: 500 }
     );
   }
