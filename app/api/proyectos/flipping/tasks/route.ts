@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
+import type { RenovationCategory } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -28,7 +29,7 @@ const createTaskSchema = z.object({
 
 const updateTaskSchema = createTaskSchema.partial();
 
-const RENOVATION_CATEGORIES = new Set([
+const RENOVATION_CATEGORIES = new Set<RenovationCategory>([
   'ESTRUCTURAL',
   'FONTANERIA',
   'ELECTRICIDAD',
@@ -47,12 +48,14 @@ function mapStatusToCompletion(status: string | undefined, progress: number): bo
   return progress >= 100;
 }
 
-function normalizeCategory(value: string | undefined): string {
+function normalizeCategory(value: string | undefined): RenovationCategory {
   if (!value) {
     return 'OTROS';
   }
   const upper = value.toUpperCase();
-  return RENOVATION_CATEGORIES.has(upper) ? upper : 'OTROS';
+  return RENOVATION_CATEGORIES.has(upper as RenovationCategory)
+    ? (upper as RenovationCategory)
+    : 'OTROS';
 }
 
 export async function POST(request: NextRequest) {
